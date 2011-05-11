@@ -34,4 +34,9 @@ public class AbstractPosition implements Position {
 		return getCentralAngleRad(p) / Math.PI * 180 * 60; // 60 minutes to the degree
 	}
 
+	@Override
+	public double distanceInMeters(Position p) {
+		return distanceInSeaMiles(p) / 1852.216;
+	}
+
 }

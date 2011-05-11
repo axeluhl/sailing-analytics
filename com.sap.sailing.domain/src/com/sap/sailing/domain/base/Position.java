@@ -11,4 +11,5 @@ public interface Position {
 	 */
 	double getCentralAngleRad(Position p);
 	double distanceInSeaMiles(Position p);
+	double distanceInMeters(Position p);
 }
