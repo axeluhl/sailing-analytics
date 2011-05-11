@@ -5,4 +5,10 @@ public interface Position {
 	double getLngRad();
 	double getLatDeg();
 	double getLngDeg();
+	
+	/**
+	 * Central angle between this position and the other position
+	 */
+	double getCentralAngleRad(Position p);
+	double distanceInSeaMiles(Position p);
 }
