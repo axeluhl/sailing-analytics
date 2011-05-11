@@ -5,3 +5,7 @@ Bundle-SymbolicName: com.sap.sailing.domain
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-ClassPath: .
+Export-Package: com.sap.sailing.domain.base,
+ com.sap.sailing.domain.standings,
+ com.sap.sailing.domain.tracking
