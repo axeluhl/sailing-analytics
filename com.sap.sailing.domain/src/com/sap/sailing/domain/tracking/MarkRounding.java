@@ -1,10 +1,10 @@
 package com.sap.sailing.domain.tracking;
 
 import com.sap.sailing.domain.base.Boat;
-import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Timed;
+import com.sap.sailing.domain.base.Waypoint;
 
 public interface MarkRounding extends Timed {
-	Mark getMark();
+	Waypoint getWaypoint();
 	Boat getBoat();
 }

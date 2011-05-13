@@ -2,22 +2,25 @@ package com.sap.sailing.domain.tractracadapter.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.WeakHashMap;
 
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.base.impl.BuoyGateImpl;
 import com.sap.sailing.domain.base.impl.BuoyImpl;
-import com.sap.sailing.domain.base.impl.BuoyMarkImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.DegreePosition;
+import com.sap.sailing.domain.base.impl.GateImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.tractrac.clientmodule.ControlPoint;
 import com.tractrac.clientmodule.data.RouteData;
 
 public class DomainFactoryImpl implements DomainFactory {
+    private final WeakHashMap<ControlPoint, com.sap.sailing.domain.base.ControlPoint> controlPointCache =
+        new WeakHashMap<ControlPoint, com.sap.sailing.domain.base.ControlPoint>();
 
     @Override
     public Position createPosition(
@@ -32,13 +35,20 @@ public class DomainFactoryImpl implements DomainFactory {
 
     @Override
     public Waypoint createWaypoint(ControlPoint controlPoint) {
-        if (controlPoint.getHasTwoPoints()) {
-            // it's a gate
-            return new BuoyGateImpl(new BuoyImpl(controlPoint.getName()+" (left)"),
-                    new BuoyImpl(controlPoint.getName()+" (right)"), controlPoint.getName());
-        } else {
-            return new BuoyMarkImpl(controlPoint.getName());
+        com.sap.sailing.domain.base.ControlPoint domainControlPoint = controlPointCache.get(controlPoint);
+        if (domainControlPoint == null) {
+            if (controlPoint.getHasTwoPoints()) {
+                // it's a gate
+                domainControlPoint = new GateImpl(new BuoyImpl(
+                        controlPoint.getName() + " (left)"), new BuoyImpl(
+                        controlPoint.getName() + " (right)"),
+                        controlPoint.getName());
+            } else {
+                domainControlPoint = new BuoyImpl(controlPoint.getName());
+            }
         }
+        controlPointCache.put(controlPoint, domainControlPoint);
+        return new WaypointImpl(domainControlPoint);
     }
     
     @Override
