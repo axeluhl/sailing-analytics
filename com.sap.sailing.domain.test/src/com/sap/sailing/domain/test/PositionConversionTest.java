@@ -12,9 +12,7 @@ import com.maptrack.client.io.TypeController;
 import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.tractrac.clientmodule.ControlPoint;
-import com.tractrac.clientmodule.Event;
 import com.tractrac.clientmodule.data.ControlPointPositionData;
-import com.tractrac.clientmodule.data.DataController;
 import com.tractrac.clientmodule.data.ICallbackData;
 
 public class PositionConversionTest extends AbstractTracTracLiveTest {
@@ -68,48 +66,6 @@ public class PositionConversionTest extends AbstractTracTracLiveTest {
         assertNotNull(pos);
         assertEquals(firstData[0].getLatitude(), pos.getLatDeg(), /* epsilon */ 0.00000001);
         assertEquals(firstData[0].getLongitude(), pos.getLngDeg(), /* epsilon */ 0.00000001);
-    }
-
-    @Override
-    public void liveDataConnected() {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void liveDataDisconnected() {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void stopped() {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void storedDataBegin() {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void storedDataEnd() {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void storedDataProgress(float arg0) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    protected void addSubscriptions(Event event, DataController controller) {
-        // TODO Auto-generated method stub
-
     }
 
 }

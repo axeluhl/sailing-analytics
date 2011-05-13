@@ -46,8 +46,6 @@ public abstract class AbstractTracTracLiveTest implements Listener {
         assertEquals("J80 Worlds", event.getName());
         // Initialize data controller using live and stored data sources
         controller = new DataController(liveUri, storedUri, this);
-        // Add data subscriptions and corresponding data handlers
-        addSubscriptions(event, controller); // subclasses to define this
         // Start live and stored data streams
         ioThread = new Thread(controller, "io");
         // test cases need to start the thread calling startController
@@ -65,8 +63,6 @@ public abstract class AbstractTracTracLiveTest implements Listener {
         ioThread.start();
     }
     
-    protected abstract void addSubscriptions(Event event, DataController controller);
-
     @After
     public void tearDown() throws MalformedURLException, IOException {
         killAllRunningSimulations();
@@ -107,6 +103,42 @@ public abstract class AbstractTracTracLiveTest implements Listener {
 
     protected DataController getController() {
         return controller;
+    }
+
+    @Override
+    public void liveDataConnected() {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void liveDataDisconnected() {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void stopped() {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void storedDataBegin() {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void storedDataEnd() {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void storedDataProgress(float arg0) {
+        // TODO Auto-generated method stub
+
     }
 
 }

@@ -1,4 +1,4 @@
 package com.sap.sailing.domain.base;
 
-public interface Buoy extends Positioned, Named {
+public interface Buoy extends Named {
 }
