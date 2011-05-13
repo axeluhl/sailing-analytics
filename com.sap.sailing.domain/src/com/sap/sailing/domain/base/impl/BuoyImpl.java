@@ -2,7 +2,6 @@ package com.sap.sailing.domain.base.impl;
 
 import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Position;
-import com.sap.sailing.domain.base.TimePoint;
 
 public class BuoyImpl implements Buoy {
 
@@ -11,7 +10,7 @@ public class BuoyImpl implements Buoy {
     }
 
     @Override
-    public Position getPosition(TimePoint when) {
+    public Position getPosition() {
         // TODO Auto-generated method stub
         return null;
     }

@@ -5,6 +5,12 @@ import java.util.Date;
 import com.sap.sailing.domain.base.TimePoint;
 
 public abstract class AbstractTimePoint implements TimePoint {
+    @Override
+    public int compareTo(TimePoint o) {
+        long nanoDiff = asNanos() - o.asNanos();
+        return nanoDiff<0 ?  -1 : nanoDiff == 0 ? 0 : 1;
+    }
+
     private Date date;
 
     @Override

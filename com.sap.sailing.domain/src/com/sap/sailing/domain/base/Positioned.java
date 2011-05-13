@@ -1,5 +1,5 @@
 package com.sap.sailing.domain.base;
 
 public interface Positioned {
-    Position getPosition(TimePoint when);
+    Position getPosition();
 }
