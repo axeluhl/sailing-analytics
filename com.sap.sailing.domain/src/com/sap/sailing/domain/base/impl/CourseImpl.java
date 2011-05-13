@@ -39,4 +39,20 @@ public class CourseImpl extends NamedImpl implements Course {
         return waypoints;
     }
 
+    @Override
+    public String toString() {
+        StringBuilder result = new StringBuilder(getName());
+        result.append(": ");
+        boolean first = true;
+        for (Waypoint waypoint : getWaypoints()) {
+            if (!first) {
+                result.append(" -> ");
+            } else {
+                first = false;
+            }
+            result.append(waypoint);
+        }
+        return result.toString();
+    }
+    
 }

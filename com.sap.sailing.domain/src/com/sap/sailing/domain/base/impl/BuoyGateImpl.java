@@ -30,4 +30,8 @@ public class BuoyGateImpl implements BuoyGate {
         return name;
     }
 
+    @Override
+    public String toString() {
+        return getName();
+    }
 }

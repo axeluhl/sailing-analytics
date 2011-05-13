@@ -22,4 +22,9 @@ public class LegImpl implements Leg {
     public Waypoint getTo() {
         return to;
     }
+    
+    @Override
+    public String toString() {
+        return from + " -> " + to;
+    }
 }

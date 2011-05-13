@@ -20,4 +20,8 @@ public class BuoyMarkImpl implements BuoyMark {
         return getBuoy().getName();
     }
 
+    @Override
+    public String toString() {
+        return getName();
+    }
 }
