@@ -9,6 +9,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.Boat;
+import com.sap.sailing.domain.base.Distance;
 import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
@@ -124,19 +125,13 @@ public class TrackTest {
             if (!first) {
                 TimePoint inBetweenTimePoint = new MillisecondsTimePoint((millis+lastMillis)/2);
                 Position interpolatedPosition = track.getEstimatedPosition(inBetweenTimePoint);
-                
-                assertEquals(lastFix, track.getLastFixBefore(inBetweenTimePoint));
-                assertEquals(lastFix, track.getLastFixAtOrBefore(inBetweenTimePoint));
-                assertEquals(fix, track.getFirstFixAfter(inBetweenTimePoint));
-                assertEquals(fix, track.getFirstFixAtOrAfter(inBetweenTimePoint));
-
-                assertEquals(lastFix, track.getLastFixAtOrBefore(lastFix.getTimePoint()));
-                assertEquals(fix, track.getFirstFixAtOrAfter(fix.getTimePoint()));
-
-                assertEquals(lastFix, track.getLastFixBefore(fix.getTimePoint()));
-                assertEquals(fix, track.getLastFixAtOrBefore(fix.getTimePoint()));
-                assertEquals(fix, track.getFirstFixAfter(lastFix.getTimePoint()));
-                assertEquals(lastFix, track.getFirstFixAtOrAfter(lastFix.getTimePoint()));
+                Distance d1 = lastFix.getPosition().getDistance(interpolatedPosition);
+                Distance d2 = interpolatedPosition.getDistance(fix.getPosition());
+                // the interpolated point should be on the great circle, not open a "triangle"
+                assertEquals(
+                        lastFix.getPosition().getDistance(fix.getPosition())
+                                .getMeters(), d1.getMeters() + d2.getMeters(),
+                        0.00001);
             }
             lastMillis = millis;
             lastFix = fix;
