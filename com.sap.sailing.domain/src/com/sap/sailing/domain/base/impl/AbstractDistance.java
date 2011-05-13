@@ -3,7 +3,7 @@ package com.sap.sailing.domain.base.impl;
 import com.sap.sailing.domain.base.Distance;
 import com.sap.sailing.domain.base.Mile;
 
-public class AbstractDistance implements Distance {
+public abstract class AbstractDistance implements Distance {
 
     @Override
     public double getNauticalMiles() {
@@ -30,4 +30,13 @@ public class AbstractDistance implements Distance {
         return getMeters() / Mile.METERS_PER_SEA_MILE;
     }
 
+    @Override
+    public double getCentralAngleDeg() {
+        return getCentralAngleRad() / Math.PI * 180.; // one geographical mile equals one minute
+    }
+
+    @Override
+    public double getCentralAngleRad() {
+        return getCentralAngleDeg() * Math.PI / 180.;
+    }
 }

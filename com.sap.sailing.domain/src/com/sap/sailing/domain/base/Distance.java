@@ -6,4 +6,6 @@ public interface Distance {
     double getNauticalMiles();
     double getMeters();
     double getKilometers();
+    double getCentralAngleDeg();
+    double getCentralAngleRad();
 }
