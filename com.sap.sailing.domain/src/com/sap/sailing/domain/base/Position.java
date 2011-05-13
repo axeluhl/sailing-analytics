@@ -14,11 +14,11 @@ public interface Position {
      */
     double getCentralAngleRad(Position p);
 
-    double distanceInSeaMiles(Position p);
-
-    double distanceInMeters(Position p);
+    Distance distance(Position p);
     
     double getBearingDeg(Position p);
 
     double getBearingRad(Position p);
+    
+    Position translate(Bearing bearing, Distance distance);
 }

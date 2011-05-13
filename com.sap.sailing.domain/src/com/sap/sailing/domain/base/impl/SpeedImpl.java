@@ -1,6 +1,6 @@
 package com.sap.sailing.domain.base.impl;
 
-import com.sap.sailing.domain.base.Seamile;
+import com.sap.sailing.domain.base.Mile;
 import com.sap.sailing.domain.base.Speed;
 
 public class SpeedImpl implements Speed {
@@ -30,12 +30,12 @@ public class SpeedImpl implements Speed {
 
     @Override
     public double getMetersPerSecond() {
-        return getKnots() * Seamile.AS_METERS / 3600;
+        return getKnots() * Mile.METERS_PER_SEA_MILE / 3600;
     }
 
     @Override
     public double getKilometersPerHour() {
-        return getKnots() * Seamile.AS_METERS / 1000;
+        return getKnots() * Mile.METERS_PER_SEA_MILE / 1000;
     }
 
 }

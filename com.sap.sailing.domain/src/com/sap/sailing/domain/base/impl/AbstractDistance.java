@@ -1,0 +1,33 @@
+package com.sap.sailing.domain.base.impl;
+
+import com.sap.sailing.domain.base.Distance;
+import com.sap.sailing.domain.base.Mile;
+
+public class AbstractDistance implements Distance {
+
+    @Override
+    public double getNauticalMiles() {
+        return getMeters() / Mile.METERS_PER_NAUTICAL_MILE;
+    }
+
+    @Override
+    public double getMeters() {
+        return getNauticalMiles() * Mile.METERS_PER_NAUTICAL_MILE;
+    }
+
+    @Override
+    public double getKilometers() {
+        return getMeters() / 1000;
+    }
+
+    @Override
+    public double getGeographicalMiles() {
+        return getMeters() / Mile.METERS_PER_GEOGRAPHICAL_MILE;
+    }
+
+    @Override
+    public double getSeaMiles() {
+        return getMeters() / Mile.METERS_PER_SEA_MILE;
+    }
+
+}

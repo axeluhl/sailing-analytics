@@ -1,7 +1,8 @@
 package com.sap.sailing.domain.base.impl;
 
+import com.sap.sailing.domain.base.Bearing;
+import com.sap.sailing.domain.base.Distance;
 import com.sap.sailing.domain.base.Position;
-import com.sap.sailing.domain.base.Seamile;
 
 public class AbstractPosition implements Position {
     @Override
@@ -32,14 +33,8 @@ public class AbstractPosition implements Position {
     }
 
     @Override
-    public double distanceInSeaMiles(Position p) {
-        return getCentralAngleRad(p) / Math.PI * 180. * 60.; // 60 minutes to the
-                                                           // degree
-    }
-
-    @Override
-    public double distanceInMeters(Position p) {
-        return distanceInSeaMiles(p) / Seamile.AS_METERS;
+    public Distance distance(Position p) {
+        return new CentralAngleDistance(getCentralAngleRad(p));
     }
 
     @Override
@@ -56,6 +51,12 @@ public class AbstractPosition implements Position {
             result = result + 2*Math.PI;
         }
         return result;
+    }
+
+    @Override
+    public Position translate(Bearing bearing, Distance distance) {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }
