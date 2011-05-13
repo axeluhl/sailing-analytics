@@ -7,4 +7,5 @@ Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Require-Bundle: com.sap.sailing.domain,
  com.tractrac.clientmodule,
- org.junit4
+ org.junit4,
+ com.sap.sailing.domain.tractracadapter
