@@ -18,9 +18,4 @@ public class DegreePosition extends AbstractPosition {
     public double getLngDeg() {
         return lng;
     }
-
-    @Override
-    public String toString() {
-        return "("+getLatDeg()+","+getLngDeg()+")";
-    }
 }

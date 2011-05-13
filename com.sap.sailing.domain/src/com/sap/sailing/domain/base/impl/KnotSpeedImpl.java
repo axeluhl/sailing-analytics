@@ -1,28 +1,26 @@
 package com.sap.sailing.domain.base.impl;
 
+import com.sap.sailing.domain.base.Bearing;
+import com.sap.sailing.domain.base.Distance;
 import com.sap.sailing.domain.base.Mile;
 import com.sap.sailing.domain.base.Speed;
+import com.sap.sailing.domain.base.TimePoint;
 
-public class SpeedImpl implements Speed {
+public class KnotSpeedImpl implements Speed {
     private final double speedInKnots;
-    private final double bearingDeg;
+    private final Bearing bearing;
     
-    public SpeedImpl(double speedInKnots, double bearingDeg) {
+    public KnotSpeedImpl(double speedInKnots, Bearing bearing) {
         super();
         this.speedInKnots = speedInKnots;
-        this.bearingDeg = bearingDeg;
+        this.bearing = bearing;
     }
 
     @Override
-    public double getBearingDeg() {
-        return bearingDeg;
+    public Bearing getBearing() {
+        return bearing;
     }
     
-    @Override
-    public double getBearingRad() {
-        return getBearingDeg() / 180 * Math.PI;
-    }
-
     @Override
     public double getKnots() {
         return speedInKnots;
@@ -36,6 +34,11 @@ public class SpeedImpl implements Speed {
     @Override
     public double getKilometersPerHour() {
         return getKnots() * Mile.METERS_PER_SEA_MILE / 1000;
+    }
+
+    @Override
+    public Distance travel(TimePoint t1, TimePoint t2) {
+        return new NauticalMileDistance((t2.asMillis() - t1.asMillis()) / 1000. / 3600. * getKnots());
     }
 
 }

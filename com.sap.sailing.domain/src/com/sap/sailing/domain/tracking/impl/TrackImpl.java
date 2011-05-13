@@ -4,9 +4,13 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.TreeSet;
 
+import com.sap.sailing.domain.base.Distance;
 import com.sap.sailing.domain.base.Position;
+import com.sap.sailing.domain.base.Speed;
 import com.sap.sailing.domain.base.TimePoint;
+import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.tracking.GPSFix;
+import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.Track;
 
 public class TrackImpl<ItemType, FixType extends GPSFix> implements Track<ItemType, FixType> {
@@ -66,8 +70,49 @@ public class TrackImpl<ItemType, FixType extends GPSFix> implements Track<ItemTy
 
     @Override
     public Position getEstimatedPosition(TimePoint timePoint) {
-        // TODO Auto-generated method stub
-        return null;
+        FixType lastFixAtOrBefore = getLastFixAtOrBefore(timePoint);
+        FixType firstFixAtOrAfter = getFirstFixAtOrAfter(timePoint);
+        if (lastFixAtOrBefore != null && lastFixAtOrBefore == firstFixAtOrAfter) {
+            return lastFixAtOrBefore.getPosition(); // exact match; how unlikely is that?
+        } else {
+            Speed estimatedSpeed = estimateSpeed(lastFixAtOrBefore, firstFixAtOrAfter);
+            if (estimatedSpeed == null) {
+                return null;
+            } else {
+                if (lastFixAtOrBefore != null) {
+                    Distance distance = estimatedSpeed.travel(lastFixAtOrBefore.getTimePoint(), timePoint);
+                    Position result = lastFixAtOrBefore.getPosition()
+                            .translateGreatCircle(estimatedSpeed.getBearing(),
+                                    distance);
+                    return result;
+                } else {
+                    // firstFixAtOrAfter can't be null because otherwise no speed could have been estimated
+                    return firstFixAtOrAfter.getPosition();
+                }
+            }
+        }
+    }
+
+    private Speed estimateSpeed(FixType fix1, FixType fix2) {
+        if (fix1 == null) {
+            if (fix2 instanceof GPSFixMoving) {
+                return ((GPSFixMoving) fix2).getSpeed();
+            } else {
+                return null;
+            }
+        } else if (fix2 == null) {
+            if (fix1 instanceof GPSFixMoving) {
+                return ((GPSFixMoving) fix1).getSpeed();
+            } else {
+                return null;
+            }
+        } else {
+            Distance distance = fix1.getPosition().getDistance(fix2.getPosition());
+            long millis = Math.abs(fix1.getTimePoint().asMillis() - fix2.getTimePoint().asMillis());
+            Speed speed = new KnotSpeedImpl(distance.getNauticalMiles() / (millis / 1000.),
+                    fix1.getPosition().getBearingGreatCircle(fix2.getPosition()));
+            return speed;
+        }
     }
 
     @SuppressWarnings("unchecked")

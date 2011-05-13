@@ -2,4 +2,8 @@ package com.sap.sailing.domain.base;
 
 public interface Bearing {
 
+    double getDegrees();
+
+    double getRadians();
+
 }

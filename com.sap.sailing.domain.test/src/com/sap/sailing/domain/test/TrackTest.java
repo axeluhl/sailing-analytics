@@ -13,9 +13,10 @@ import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.BoatImpl;
+import com.sap.sailing.domain.base.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.base.impl.DegreePosition;
-import com.sap.sailing.domain.base.impl.NanosecondTimePoint;
-import com.sap.sailing.domain.base.impl.SpeedImpl;
+import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
+import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackImpl;
@@ -25,19 +26,32 @@ public class TrackTest {
     private DynamicTrackImpl<Boat, GPSFixMoving> track;
 
     @Before
-    public void setUp() {
+    public void setUp() throws InterruptedException {
         track = new DynamicTrackImpl<Boat, GPSFixMoving>(new BoatImpl("MyFirstBoat",
                 new BoatClassImpl("505")));
-        GPSFixMovingImpl gpsFix1 = new GPSFixMovingImpl(new DegreePosition(1, 2), new NanosecondTimePoint(System.nanoTime()), 
-                new SpeedImpl(1, 90));
-        GPSFixMovingImpl gpsFix2 = new GPSFixMovingImpl(new DegreePosition(1, 3), new NanosecondTimePoint(System.nanoTime()), 
-                new SpeedImpl(1, 90));
-        GPSFixMovingImpl gpsFix3 = new GPSFixMovingImpl(new DegreePosition(1, 4), new NanosecondTimePoint(System.nanoTime()), 
-                new SpeedImpl(2, 0));
-        GPSFixMovingImpl gpsFix4 = new GPSFixMovingImpl(new DegreePosition(3, 4), new NanosecondTimePoint(System.nanoTime()), 
-                new SpeedImpl(2, 0));
-        GPSFixMovingImpl gpsFix5 = new GPSFixMovingImpl(new DegreePosition(5, 4), new NanosecondTimePoint(System.nanoTime()), 
-                new SpeedImpl(2, 0));
+        GPSFixMovingImpl gpsFix1 = new GPSFixMovingImpl(
+                new DegreePosition(1, 2), new MillisecondsTimePoint(
+                        System.currentTimeMillis()), new KnotSpeedImpl(1,
+                        new DegreeBearingImpl(90)));
+        waitThreeMillis();
+        GPSFixMovingImpl gpsFix2 = new GPSFixMovingImpl(
+                new DegreePosition(1, 3), new MillisecondsTimePoint(
+                        System.currentTimeMillis()), new KnotSpeedImpl(1,
+                        new DegreeBearingImpl(90)));
+        waitThreeMillis();
+        GPSFixMovingImpl gpsFix3 = new GPSFixMovingImpl(
+                new DegreePosition(1, 4), new MillisecondsTimePoint(
+                        System.currentTimeMillis()), new KnotSpeedImpl(2,
+                        new DegreeBearingImpl(0)));
+        waitThreeMillis();
+        GPSFixMovingImpl gpsFix4 = new GPSFixMovingImpl(
+                new DegreePosition(3, 4), new MillisecondsTimePoint(
+                        System.currentTimeMillis()), new KnotSpeedImpl(2,
+                        new DegreeBearingImpl(0)));
+        waitThreeMillis();
+        GPSFixMovingImpl gpsFix5 = new GPSFixMovingImpl(
+                new DegreePosition(5, 4), new MillisecondsTimePoint(
+                        System.currentTimeMillis()), new KnotSpeedImpl(2, new DegreeBearingImpl(0)));
         track.addGPSFix(gpsFix1);
         track.addGPSFix(gpsFix2);
         track.addGPSFix(gpsFix3);
@@ -45,6 +59,14 @@ public class TrackTest {
         track.addGPSFix(gpsFix5);
     }
     
+    /**
+     * Used to ensure that for the test fixes there is always a time point between the two that
+     * is different from the time points of the adjacent fixes
+     */
+    private void waitThreeMillis() throws InterruptedException {
+        Thread.sleep(3);
+    }
+
     @Test
     public void testIterate() {
         Iterator<GPSFixMoving> i = track.getFixes().iterator();
@@ -57,15 +79,15 @@ public class TrackTest {
     
     @Test
     public void testOrdering() {
-        long lastNanos = 0;
+        long lastMillis = 0;
         GPSFix lastFix = null;
         boolean first = true;
         for (Iterator<GPSFixMoving> i = track.getFixes().iterator(); i.hasNext(); first = false) {
             GPSFixMoving fix = i.next();
-            long nanos = fix.getTimePoint().asNanos();
+            long millis = fix.getTimePoint().asMillis();
             if (!first) {
-                assertTrue(nanos > lastNanos);
-                TimePoint inBetweenTimePoint = new NanosecondTimePoint((nanos+lastNanos)/2);
+                assertTrue(millis > lastMillis);
+                TimePoint inBetweenTimePoint = new MillisecondsTimePoint((millis+lastMillis)/2);
                 assertEquals(lastFix, track.getLastFixBefore(inBetweenTimePoint));
                 assertEquals(lastFix, track.getLastFixAtOrBefore(inBetweenTimePoint));
                 assertEquals(fix, track.getFirstFixAfter(inBetweenTimePoint));
@@ -79,21 +101,28 @@ public class TrackTest {
                 assertEquals(fix, track.getFirstFixAfter(lastFix.getTimePoint()));
                 assertEquals(lastFix, track.getFirstFixAtOrAfter(lastFix.getTimePoint()));
             }
-            lastNanos = nanos;
+            lastMillis = millis;
             lastFix = fix;
         }
     }
     
     @Test
+    public void assertEstimatedPositionBeforeStartIsStart() {
+        GPSFixMoving start = track.getFixes().iterator().next();
+        TimePoint oneNanoBeforeStart = new MillisecondsTimePoint(start.getTimePoint().asMillis()-1);
+        assertEquals(start.getPosition(), track.getEstimatedPosition(oneNanoBeforeStart));
+    }
+    
+    @Test
     public void testSimpleInterpolation() {
-        long lastNanos = 0;
+        long lastMillis = 0;
         GPSFix lastFix = null;
         boolean first = true;
         for (Iterator<GPSFixMoving> i = track.getFixes().iterator(); i.hasNext(); first = false) {
             GPSFixMoving fix = i.next();
-            long nanos = fix.getTimePoint().asNanos();
+            long millis = fix.getTimePoint().asMillis();
             if (!first) {
-                TimePoint inBetweenTimePoint = new NanosecondTimePoint((nanos+lastNanos)/2);
+                TimePoint inBetweenTimePoint = new MillisecondsTimePoint((millis+lastMillis)/2);
                 Position interpolatedPosition = track.getEstimatedPosition(inBetweenTimePoint);
                 
                 assertEquals(lastFix, track.getLastFixBefore(inBetweenTimePoint));
@@ -109,7 +138,7 @@ public class TrackTest {
                 assertEquals(fix, track.getFirstFixAfter(lastFix.getTimePoint()));
                 assertEquals(lastFix, track.getFirstFixAtOrAfter(lastFix.getTimePoint()));
             }
-            lastNanos = nanos;
+            lastMillis = millis;
             lastFix = fix;
         }
     }

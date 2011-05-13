@@ -1,12 +1,18 @@
 package com.sap.sailing.domain.base;
 
 public interface Speed {
-    /**
-     * @return bearing in degrees where 0 is north, 90 is east, 180 is south, 270 is west
-     */
-    double getBearingDeg();
-    double getBearingRad();
+    Bearing getBearing();
+
     double getKnots();
+
     double getMetersPerSecond();
+
     double getKilometersPerHour();
+
+    /**
+     * Traveling at this speed starting at time <code>from</code> until
+     * time </code>to</code>, how far have we traveled? If <code>to</code>
+     * is before </code>from</code>, the speed will be applied in reverse.
+     */
+    Distance travel(TimePoint from, TimePoint to);
 }
