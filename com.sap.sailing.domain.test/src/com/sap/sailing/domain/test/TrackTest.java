@@ -9,6 +9,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.Boat;
+import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.BoatImpl;
@@ -65,6 +66,36 @@ public class TrackTest {
             if (!first) {
                 assertTrue(nanos > lastNanos);
                 TimePoint inBetweenTimePoint = new NanosecondTimePoint((nanos+lastNanos)/2);
+                assertEquals(lastFix, track.getLastFixBefore(inBetweenTimePoint));
+                assertEquals(lastFix, track.getLastFixAtOrBefore(inBetweenTimePoint));
+                assertEquals(fix, track.getFirstFixAfter(inBetweenTimePoint));
+                assertEquals(fix, track.getFirstFixAtOrAfter(inBetweenTimePoint));
+
+                assertEquals(lastFix, track.getLastFixAtOrBefore(lastFix.getTimePoint()));
+                assertEquals(fix, track.getFirstFixAtOrAfter(fix.getTimePoint()));
+
+                assertEquals(lastFix, track.getLastFixBefore(fix.getTimePoint()));
+                assertEquals(fix, track.getLastFixAtOrBefore(fix.getTimePoint()));
+                assertEquals(fix, track.getFirstFixAfter(lastFix.getTimePoint()));
+                assertEquals(lastFix, track.getFirstFixAtOrAfter(lastFix.getTimePoint()));
+            }
+            lastNanos = nanos;
+            lastFix = fix;
+        }
+    }
+    
+    @Test
+    public void testSimpleInterpolation() {
+        long lastNanos = 0;
+        GPSFix lastFix = null;
+        boolean first = true;
+        for (Iterator<GPSFixMoving> i = track.getFixes().iterator(); i.hasNext(); first = false) {
+            GPSFixMoving fix = i.next();
+            long nanos = fix.getTimePoint().asNanos();
+            if (!first) {
+                TimePoint inBetweenTimePoint = new NanosecondTimePoint((nanos+lastNanos)/2);
+                Position interpolatedPosition = track.getEstimatedPosition(inBetweenTimePoint);
+                
                 assertEquals(lastFix, track.getLastFixBefore(inBetweenTimePoint));
                 assertEquals(lastFix, track.getLastFixAtOrBefore(inBetweenTimePoint));
                 assertEquals(fix, track.getFirstFixAfter(inBetweenTimePoint));

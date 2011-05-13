@@ -17,4 +17,8 @@ public interface Position {
     double distanceInSeaMiles(Position p);
 
     double distanceInMeters(Position p);
+    
+    double getBearingDeg(Position p);
+
+    double getBearingRad(Position p);
 }
