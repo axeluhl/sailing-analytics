@@ -14,6 +14,7 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 
+import com.maptrack.client.io.TypeController;
 import com.sap.tractrac.clientmodule.util.Base64;
 import com.tractrac.clientmodule.Event;
 import com.tractrac.clientmodule.data.DataController;
@@ -24,6 +25,7 @@ public abstract class AbstractTracTracLiveTest implements Listener {
     private final URL paramUrl;
     private final URI liveUri;
     private final URI storedUri;
+    private Event event;
     
     private Thread ioThread;
     private DataController controller;
@@ -39,7 +41,7 @@ public abstract class AbstractTracTracLiveTest implements Listener {
         killAllRunningSimulations();
         startRaceSimulation(3, 7);
         // Read event data from configuration file
-        Event event = KeyValue.setup(paramUrl);
+        event = KeyValue.setup(paramUrl);
         assertNotNull(event);
         assertEquals("J80 Worlds", event.getName());
         // Initialize data controller using live and stored data sources
@@ -48,6 +50,18 @@ public abstract class AbstractTracTracLiveTest implements Listener {
         addSubscriptions(event, controller); // subclasses to define this
         // Start live and stored data streams
         ioThread = new Thread(controller, "io");
+        // test cases need to start the thread calling startController
+        // after adding their listeners
+    }
+
+    protected void addListenersAndStartController(TypeController... listeners) {
+        for (TypeController listener : listeners) {
+            getController().add(listener);
+        }
+        startController();
+    }
+
+    protected void startController() {
         ioThread.start();
     }
     
@@ -56,7 +70,7 @@ public abstract class AbstractTracTracLiveTest implements Listener {
     @After
     public void tearDown() throws MalformedURLException, IOException {
         killAllRunningSimulations();
-        controller.stop(false);
+        controller.stop(/* abortStored */ true);
         try {
             ioThread.join();
         } catch (InterruptedException ex) {
@@ -86,4 +100,13 @@ public abstract class AbstractTracTracLiveTest implements Listener {
         conn.setRequestProperty("Authorization", "Basic "+
                 Base64.encode("tracsim:simming10".getBytes()));
     }
+
+    protected Event getEvent() {
+        return event;
+    }
+
+    protected DataController getController() {
+        return controller;
+    }
+
 }

@@ -1,23 +1,26 @@
 package com.sap.sailing.domain.base.impl;
 
-
 public class DegreePosition extends AbstractPosition {
-	private final double lat;
-	private final double lng;
-	
-	public DegreePosition(double lat, double lng) {
-		this.lat = lat;
-		this.lng = lng;
-	}
+    private final double lat;
+    private final double lng;
 
-	@Override
-	public double getLatDeg() {
-		return lat;
-	}
+    public DegreePosition(double lat, double lng) {
+        this.lat = lat;
+        this.lng = lng;
+    }
 
-	@Override
-	public double getLngDeg() {
-		return lng;
-	}
+    @Override
+    public double getLatDeg() {
+        return lat;
+    }
 
+    @Override
+    public double getLngDeg() {
+        return lng;
+    }
+
+    @Override
+    public String toString() {
+        return "("+getLatDeg()+","+getLngDeg()+")";
+    }
 }
