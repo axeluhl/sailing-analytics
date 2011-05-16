@@ -1,10 +1,15 @@
 package com.sap.sailing.domain.tracking.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.TimePoint;
+import com.sap.sailing.domain.tracking.GPSFixMoving;
+import com.sap.sailing.domain.tracking.Track;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
@@ -13,7 +18,7 @@ public class TrackedRaceImpl implements TrackedRace {
     private TimePoint start;
     private TimePoint firstFinish;
     private final Iterable<TrackedLeg> trackedLegs;
-    
+    private final Map<Competitor, Track<Competitor, GPSFixMoving>> tracks;
     
     public TrackedRaceImpl(RaceDefinition race) {
         super();
@@ -23,6 +28,10 @@ public class TrackedRaceImpl implements TrackedRace {
             trackedLegsList.add(new TrackedLegImpl(leg, race.getCompetitors()));
         }
         trackedLegs = trackedLegsList;
+        tracks = new HashMap<Competitor, Track<Competitor, GPSFixMoving>>();
+        for (Competitor competitor : race.getCompetitors()) {
+            tracks.put(competitor, new DynamicTrackImpl<Competitor, GPSFixMoving>(competitor));
+        }
     }
 
     @Override
@@ -56,6 +65,11 @@ public class TrackedRaceImpl implements TrackedRace {
     @Override
     public Iterable<TrackedLeg> getTrackedLegs() {
         return trackedLegs;
+    }
+
+    @Override
+    public Track<Competitor, GPSFixMoving> getTrack(Competitor competitor) {
+        return tracks.get(competitor);
     }
 
 }

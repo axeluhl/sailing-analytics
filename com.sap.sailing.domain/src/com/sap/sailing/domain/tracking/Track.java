@@ -40,4 +40,5 @@ public interface Track<ItemType, FixType extends GPSFix> {
      * is present to perform an estimation, <code>null</code> is returned.
      */
     Position getEstimatedPosition(TimePoint timePoint);
+
 }

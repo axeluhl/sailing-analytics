@@ -15,7 +15,7 @@ import com.sap.sailing.domain.tracking.Track;
 
 public class TrackImpl<ItemType, FixType extends GPSFix> implements Track<ItemType, FixType> {
     private final ItemType trackedItem;
-    
+
     /**
      * The fixes, ordered by their time points
      */
