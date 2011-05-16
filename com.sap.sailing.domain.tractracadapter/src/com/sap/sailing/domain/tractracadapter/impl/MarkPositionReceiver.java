@@ -7,7 +7,6 @@ import com.maptrack.client.io.TypeController;
 import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Event;
-import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.tracking.DynamicTrack;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.Track;
@@ -52,7 +51,7 @@ public class MarkPositionReceiver {
                     public void gotData(ControlPoint controlPoint, ControlPointPositionData record) {
                         if (received++ % 1000 == 0) {
                             System.out.print("M");
-                            if ((received / 1000) % 80 == 0) {
+                            if ((received / 1000 + 1) % 80 == 0) {
                                 System.out.println();
                             }
                         }
