@@ -5,7 +5,7 @@ import com.sap.sailing.domain.base.TimePoint;
 
 /**
  * A track records the {@link GPSFix}es received for an object of type
- * <code>T</code>. It allows clients to ask for a position at any given
+ * <code>ItemType</code>. It allows clients to ask for a position at any given
  * {@link TimePoint} and interpolates the fixed positions to obtain an estimate
  * of the position at the time requested.
  * 
