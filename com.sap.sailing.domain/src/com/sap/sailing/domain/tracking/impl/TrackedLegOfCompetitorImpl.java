@@ -7,12 +7,18 @@ import com.sap.sailing.domain.base.Speed;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 
+/**
+ * Provides a convenient view on the tracked leg, projecting to a single competitor's performance.
+ * 
+ * @author Axel Uhl (d043530)
+ *
+ */
 public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
-    private final Leg leg;
+    private final TrackedLegImpl trackedLeg;
     private final Competitor competitor;
     
-    public TrackedLegOfCompetitorImpl(Leg leg, Competitor competitor) {
-        this.leg = leg;
+    public TrackedLegOfCompetitorImpl(TrackedLegImpl trackedLeg, Competitor competitor) {
+        this.trackedLeg = trackedLeg;
         this.competitor = competitor;
     }
 
@@ -23,7 +29,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
 
     @Override
     public Leg getLeg() {
-        return leg;
+        return trackedLeg.getLeg();
     }
 
     @Override

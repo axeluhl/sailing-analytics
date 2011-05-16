@@ -9,7 +9,9 @@ import java.util.Set;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.tracking.DynamicTrack;
+import com.sap.sailing.domain.tracking.DynamicTrackedLeg;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.RawListener;
@@ -62,4 +64,14 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
         notifyListeners(fix, trackedRace, competitor);
     }
     
+    @Override
+    public DynamicTrackedLeg getTrackedLegFinishingAt(Waypoint endOfLeg) {
+        return (DynamicTrackedLeg) super.getTrackedLegFinishingAt(endOfLeg);
+    }
+
+    @Override
+    public DynamicTrackedLeg getTrackedLegStartingAt(Waypoint startOfLeg) {
+        return (DynamicTrackedLeg) super.getTrackedLegStartingAt(startOfLeg);
+    }
+
 }

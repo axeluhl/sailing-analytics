@@ -2,8 +2,10 @@ package com.sap.sailing.domain.base.impl;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Leg;
@@ -11,15 +13,19 @@ import com.sap.sailing.domain.base.Waypoint;
 
 public class CourseImpl extends NamedImpl implements Course {
     private final Iterable<Waypoint> waypoints;
+    private final Map<Waypoint, Integer> waypointIndexes;
     private final List<Leg> legs;
     
     public CourseImpl(String name, Iterable<Waypoint> waypoints) {
         super(name);
         this.waypoints = waypoints;
+        waypointIndexes = new HashMap<Waypoint, Integer>();
         legs = new ArrayList<Leg>();
         Iterator<Waypoint> waypointIter = waypoints.iterator();
+        int i=0;
         if (waypointIter.hasNext()) {
             Waypoint previous = waypointIter.next();
+            waypointIndexes.put(previous, i++);
             while (waypointIter.hasNext()) {
                 Waypoint current = waypointIter.next();
                 Leg leg = new LegImpl(previous, current);
@@ -53,6 +59,16 @@ public class CourseImpl extends NamedImpl implements Course {
             result.append(waypoint);
         }
         return result.toString();
+    }
+
+    @Override
+    public int getIndexOfWaypoint(Waypoint waypoint) {
+        int result = -1;
+        Integer indexEntry = waypointIndexes.get(waypoint);
+        if (indexEntry != null) {
+            result = indexEntry;
+        }
+        return result;
     }
     
 }

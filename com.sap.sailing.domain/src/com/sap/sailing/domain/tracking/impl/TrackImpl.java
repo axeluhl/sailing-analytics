@@ -2,6 +2,7 @@ package com.sap.sailing.domain.tracking.impl;
 
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.NavigableSet;
 import java.util.TreeSet;
 
 import com.sap.sailing.domain.base.Distance;
@@ -9,6 +10,7 @@ import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.Speed;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
+import com.sap.sailing.domain.base.impl.NauticalMileDistance;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.Track;
@@ -137,6 +139,24 @@ public class TrackImpl<ItemType, FixType extends GPSFix> implements Track<ItemTy
     @Override
     public FixType getFirstFixAfter(TimePoint timePoint) {
         return (FixType) fixes.higher(new DummyGPSFixWithDateOnly(timePoint));
+    }
+
+    @Override
+    public Distance getDistanceTraveled(TimePoint from, TimePoint to) {
+        double distanceInNauticalMiles = 0;
+        if (from.compareTo(to) < 0) {
+            Position fromPos = getEstimatedPosition(from);
+            NavigableSet<GPSFix> subset = fixes.subSet(new DummyGPSFixWithDateOnly(from),
+            /* fromInclusive */false, new DummyGPSFixWithDateOnly(to),
+            /* toInclusive */false);
+            for (GPSFix fix : subset) {
+                distanceInNauticalMiles += fromPos.getDistance(fix.getPosition()).getNauticalMiles();
+                fromPos = fix.getPosition();
+            }
+            Position toPos = getEstimatedPosition(to);
+            distanceInNauticalMiles += fromPos.getDistance(toPos).getNauticalMiles();
+        }
+        return new NauticalMileDistance(distanceInNauticalMiles);
     }
 
 }

@@ -1,6 +1,8 @@
 package com.sap.sailing.domain.tracking;
 
+import com.sap.sailing.domain.base.Distance;
 import com.sap.sailing.domain.base.Position;
+import com.sap.sailing.domain.base.Speed;
 import com.sap.sailing.domain.base.TimePoint;
 
 /**
@@ -25,6 +27,8 @@ public interface Track<ItemType, FixType extends GPSFix> {
     FixType getLastFixBefore(TimePoint timePoint);
 
     FixType getFirstFixAfter(TimePoint timePoint);
+    
+    Distance getDistanceTraveled(TimePoint from, TimePoint to);
 
     /**
      * If the time point lies before the first fix recorded by this track,

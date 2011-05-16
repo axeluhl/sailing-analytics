@@ -3,7 +3,9 @@ package com.sap.sailing.domain.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -135,6 +137,67 @@ public class TrackTest {
             }
             lastMillis = millis;
             lastFix = fix;
+        }
+    }
+    
+    @Test
+    public void testDistanceTraveled() {
+        List<Distance> distances = new ArrayList<Distance>();
+        List<GPSFixMoving> fixes = new ArrayList<GPSFixMoving>();
+        boolean first = true;
+        GPSFixMoving oldFix = null;
+        for (GPSFixMoving fix : track.getFixes()) {
+            fixes.add(fix);
+            if (first) {
+                first = false;
+            } else {
+                Distance d = oldFix.getPosition().getDistance(fix.getPosition());
+                distances.add(d);
+            }
+            oldFix = fix;
+        }
+        for (int i=0; i<fixes.size(); i++) {
+            for (int j=i; j<fixes.size(); j++) {
+                double distanceSumInNauticalMiles = 0;
+                for (int k=i; k<j; k++) {
+                    distanceSumInNauticalMiles += distances.get(k).getNauticalMiles();
+                }
+                // travel fully from fix #i to fix #j and require the segment distances to sum up equal
+                double nauticalMilesFromIToJ = track.getDistanceTraveled(fixes.get(i).getTimePoint(), fixes.get(j).getTimePoint())
+                        .getNauticalMiles();
+                assertEquals(distanceSumInNauticalMiles, nauticalMilesFromIToJ, 0.0000001);
+                if (j > i) {
+                    // now skip half a segment at the beginning:
+                    double nauticalMilesFromHalfAfterIToJ = track.getDistanceTraveled(
+                            new MillisecondsTimePoint((fixes.get(i).getTimePoint().asMillis() + fixes.get(i + 1)
+                                    .getTimePoint().asMillis()) / 2), fixes.get(j).getTimePoint()).getNauticalMiles();
+                    assertTrue("for i=" + i + ", j=" + j + ": " + nauticalMilesFromHalfAfterIToJ + "<"
+                            + distanceSumInNauticalMiles, nauticalMilesFromHalfAfterIToJ < distanceSumInNauticalMiles);
+                    if (i > 0) {
+                        // now skip half a segment before the beginning:
+                        double nauticalMilesFromHalfBeforeIToJ = track.getDistanceTraveled(
+                                new MillisecondsTimePoint((fixes.get(i).getTimePoint().asMillis() + fixes.get(i - 1)
+                                        .getTimePoint().asMillis()) / 2), fixes.get(j).getTimePoint())
+                                .getNauticalMiles();
+                        assertTrue(nauticalMilesFromHalfBeforeIToJ > distanceSumInNauticalMiles);
+                    }
+                    // now skip half a segment at the end:
+                    double nauticalMilesFromIToHalfBeforeJ = track.getDistanceTraveled(
+                            fixes.get(i).getTimePoint(),
+                            new MillisecondsTimePoint((fixes.get(j).getTimePoint().asMillis() + fixes.get(j - 1)
+                                    .getTimePoint().asMillis()) / 2)).getNauticalMiles();
+                    assertTrue(nauticalMilesFromIToHalfBeforeJ < distanceSumInNauticalMiles);
+                    if (j < fixes.size() - 1) {
+                        // now skip half a segment before the beginning:
+                        double nauticalMilesFromIToHalfAfterJ = track.getDistanceTraveled(
+                                fixes.get(i).getTimePoint(),
+                                new MillisecondsTimePoint((fixes.get(j).getTimePoint().asMillis() + fixes.get(j + 1)
+                                        .getTimePoint().asMillis()) / 2)).getNauticalMiles();
+                        assertTrue("for i=" + i + ", j=" + j + ": " + nauticalMilesFromIToHalfAfterJ + ">"
+                                + distanceSumInNauticalMiles, nauticalMilesFromIToHalfAfterJ > distanceSumInNauticalMiles);
+                    }
+                }
+            }
         }
     }
 }

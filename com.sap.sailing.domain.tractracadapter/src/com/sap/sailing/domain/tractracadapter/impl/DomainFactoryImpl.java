@@ -36,10 +36,10 @@ import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
+import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
-import com.sap.sailing.domain.tracking.TrackedEvent;
+import com.sap.sailing.domain.tracking.impl.DynamicTrackedEventImpl;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
-import com.sap.sailing.domain.tracking.impl.TrackedEventImpl;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.tractrac.clientmodule.CompetitorClass;
 import com.tractrac.clientmodule.ControlPoint;
@@ -74,7 +74,7 @@ public class DomainFactoryImpl implements DomainFactory {
     
     private final WeakHashMap<Race, RaceDefinition> raceCache = new WeakHashMap<Race, RaceDefinition>();
     
-    private final WeakHashMap<Event, TrackedEvent> eventTrackingCache = new WeakHashMap<Event, TrackedEvent>();
+    private final WeakHashMap<Event, DynamicTrackedEvent> eventTrackingCache = new WeakHashMap<Event, DynamicTrackedEvent>();
 
     @Override
     public Position createPosition(
@@ -210,7 +210,7 @@ public class DomainFactoryImpl implements DomainFactory {
 
     @Override
     public Iterable<TypeController> getUpdateReceivers(
-            TrackedEvent trackedEvent) {
+            DynamicTrackedEvent trackedEvent) {
         Collection<TypeController> result = new ArrayList<TypeController>();
         for (TypeController raceCourseReceiver : new RaceCourseReceiver(
                 trackedEvent, inverseEventCache.get(trackedEvent
@@ -227,14 +227,19 @@ public class DomainFactoryImpl implements DomainFactory {
                         .getEvent())).getRawPositionListeners()) {
             result.add(rawPositionReceiver);
         }
+        for (TypeController markRoundingReceiver : new MarkRoundingReceiver(
+                trackedEvent, inverseEventCache.get(trackedEvent
+                        .getEvent())).getMarkRoundingListeners()) {
+            result.add(markRoundingReceiver);
+        }
         return result;
     }
 
     @Override
-    public TrackedEvent trackEvent(com.sap.sailing.domain.base.Event event) {
-        TrackedEvent result = eventTrackingCache.get(event);
+    public DynamicTrackedEvent trackEvent(com.sap.sailing.domain.base.Event event) {
+        DynamicTrackedEvent result = eventTrackingCache.get(event);
         if (result == null) {
-            result = new TrackedEventImpl(event);
+            result = new DynamicTrackedEventImpl(event);
             eventTrackingCache.put(event, result);
         }
         return result;

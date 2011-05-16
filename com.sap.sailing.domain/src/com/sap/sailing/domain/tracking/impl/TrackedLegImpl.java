@@ -11,19 +11,25 @@ import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 public class TrackedLegImpl implements TrackedLeg {
     private final Leg leg;
     private final Map<Competitor, TrackedLegOfCompetitor> trackedLegsOfCompetitors;
+    private TrackedRaceImpl trackedRace;
     
-    public TrackedLegImpl(Leg leg, Iterable<Competitor> competitors) {
+    public TrackedLegImpl(TrackedRaceImpl trackedRace, Leg leg, Iterable<Competitor> competitors) {
         super();
         this.leg = leg;
+        this.trackedRace = trackedRace;
         trackedLegsOfCompetitors = new HashMap<Competitor, TrackedLegOfCompetitor>();
         for (Competitor competitor : competitors) {
-            trackedLegsOfCompetitors.put(competitor, new TrackedLegOfCompetitorImpl(leg, competitor));
+            trackedLegsOfCompetitors.put(competitor, new TrackedLegOfCompetitorImpl(this, competitor));
         }
     }
     
     @Override
     public Leg getLeg() {
         return leg;
+    }
+    
+    protected TrackedRaceImpl getTrackedRace() {
+        return trackedRace;
     }
 
     @Override

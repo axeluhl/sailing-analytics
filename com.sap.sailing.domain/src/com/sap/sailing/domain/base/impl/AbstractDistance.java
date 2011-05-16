@@ -39,4 +39,9 @@ public abstract class AbstractDistance implements Distance {
     public double getCentralAngleRad() {
         return getCentralAngleDeg() * Math.PI / 180.;
     }
+    
+    @Override
+    public String toString() {
+        return getMeters()+"m";
+    }
 }

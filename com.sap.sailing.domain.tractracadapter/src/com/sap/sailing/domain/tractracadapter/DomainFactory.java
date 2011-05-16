@@ -8,6 +8,7 @@ import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.Person;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Team;
+import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.TrackedEvent;
 import com.sap.sailing.domain.tractracadapter.impl.DomainFactoryImpl;
@@ -56,7 +57,7 @@ public interface DomainFactory {
      */
     com.sap.sailing.domain.base.Event createEvent(Event event);
     
-    TrackedEvent trackEvent(com.sap.sailing.domain.base.Event event);
+    DynamicTrackedEvent trackEvent(com.sap.sailing.domain.base.Event event);
     
     BoatClass getBoatClass(CompetitorClass competitorClass);
 
@@ -76,7 +77,7 @@ public interface DomainFactory {
      *            {@link #trackEvent(com.sap.sailing.domain.base.Event)} because
      *            otherwise the link to the {@link Event} can't be established
      */
-    Iterable<TypeController> getUpdateReceivers(TrackedEvent trackedEvent);
+    Iterable<TypeController> getUpdateReceivers(DynamicTrackedEvent trackedEvent);
 
     RaceDefinition createRaceDefinition(Race race, Course course);
 
@@ -86,4 +87,5 @@ public interface DomainFactory {
      * which of its buoys is affected.
      */
     Buoy getBuoy(ControlPoint controlPoint, ControlPointPositionData record);
+
 }

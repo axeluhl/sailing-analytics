@@ -8,16 +8,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.maptrack.client.io.TypeController;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.RawListener;
-import com.sap.sailing.domain.tracking.TrackedEvent;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
@@ -59,7 +60,7 @@ public class ReceiveTrackingDataTest extends AbstractTracTracLiveTest {
         };
         List<TypeController> listeners = new ArrayList<TypeController>();
         Event event = domainFactory.createEvent(getEvent());
-        TrackedEvent trackedEvent = domainFactory.trackEvent(event);
+        DynamicTrackedEvent trackedEvent = domainFactory.trackEvent(event);
         trackedEvent.addRaceListener(new RaceListener() {
             @Override
             public void raceAdded(TrackedRace trackedRace) {
@@ -73,6 +74,7 @@ public class ReceiveTrackingDataTest extends AbstractTracTracLiveTest {
         addListenersAndStartController(listeners.toArray(new TypeController[0]));
     }
 
+    @Ignore
     @Test
     public void testReceiveCompetitorPosition() {
         synchronized (semaphor) {
