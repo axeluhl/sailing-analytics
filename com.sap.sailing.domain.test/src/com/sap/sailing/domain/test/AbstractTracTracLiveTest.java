@@ -9,7 +9,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.Iterator;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -52,7 +51,7 @@ public abstract class AbstractTracTracLiveTest implements Listener {
         // test cases need to start the thread calling startController
         // after adding their listeners
     }
-
+    
     protected void addListenersAndStartController(TypeController... listeners) {
         for (TypeController listener : listeners) {
             getController().add(listener);
@@ -106,16 +105,6 @@ public abstract class AbstractTracTracLiveTest implements Listener {
         return controller;
     }
 
-    protected <T> int size(Iterable<T> iter) {
-        int result = 0;
-        Iterator<T> i = iter.iterator();
-        while (i.hasNext()) {
-            result++;
-            i.next();
-        }
-        return result;
-    }
-    
     @Override
     public void liveDataConnected() {
         // TODO Auto-generated method stub

@@ -40,9 +40,9 @@ public class PositionConversionTest extends AbstractTracTracLiveTest {
                     public void gotData(ControlPoint tracked,
                             ControlPointPositionData record) {
                         if (first) {
-                            firstTracked[0] = tracked;
-                            firstData[0] = record;
                             synchronized (semaphor) {
+                                firstTracked[0] = tracked;
+                                firstData[0] = record;
                                 semaphor.notifyAll();
                             }
                             first = false;

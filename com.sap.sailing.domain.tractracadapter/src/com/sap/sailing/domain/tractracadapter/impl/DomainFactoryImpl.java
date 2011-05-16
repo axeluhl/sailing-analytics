@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.tractracadapter.impl;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.WeakHashMap;
 
@@ -8,9 +9,11 @@ import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
+import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.Person;
 import com.sap.sailing.domain.base.Position;
+import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Team;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.Waypoint;
@@ -21,19 +24,23 @@ import com.sap.sailing.domain.base.impl.CompetitorImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.base.impl.DegreePosition;
+import com.sap.sailing.domain.base.impl.EventImpl;
 import com.sap.sailing.domain.base.impl.GateImpl;
 import com.sap.sailing.domain.base.impl.KilometersPerHourSpeedImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.base.impl.NationalityImpl;
 import com.sap.sailing.domain.base.impl.PersonImpl;
+import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
+import com.sap.sailing.domain.tractracadapter.RaceCourseReceiver;
 import com.tractrac.clientmodule.CompetitorClass;
 import com.tractrac.clientmodule.ControlPoint;
-import com.tractrac.clientmodule.data.RouteData;
+import com.tractrac.clientmodule.Race;
+import com.tractrac.clientmodule.RaceCompetitor;
 
 public class DomainFactoryImpl implements DomainFactory {
     private final WeakHashMap<ControlPoint, com.sap.sailing.domain.base.ControlPoint> controlPointCache =
@@ -91,9 +98,9 @@ public class DomainFactoryImpl implements DomainFactory {
     }
     
     @Override
-    public Course createCourse(String name, RouteData routeData) {
+    public Course createCourse(String name, Iterable<ControlPoint> controlPoints) {
         List<Waypoint> waypointList = new ArrayList<Waypoint>();
-        for (ControlPoint controlPoint : routeData.getPoints()) {
+        for (ControlPoint controlPoint : controlPoints) {
             Waypoint waypoint = createWaypoint(controlPoint);
             waypointList.add(waypoint);
         }
@@ -107,7 +114,6 @@ public class DomainFactoryImpl implements DomainFactory {
             BoatClass boatClass = getBoatClass(competitor.getCompetitorClass());
             Nationality nationality = getNationality(competitor.getNationality());
             Team team = getTeam(competitor.getName(), nationality);
-            // TODO create boat and class
             Boat boat = new BoatImpl(competitor.getShortName(), boatClass);
             result = new CompetitorImpl(competitor.getName(), team, boat);
             competitorCache.put(competitor, result);
@@ -157,6 +163,33 @@ public class DomainFactoryImpl implements DomainFactory {
             nationalityCache.put(nationalityName, result);
         }
         return result;
+    }
+
+    @Override
+    public RaceDefinition createRaceDefinition(Race race) {
+        Collection<Competitor> competitors = new ArrayList<Competitor>();
+        BoatClass boatClass = null;
+        for (RaceCompetitor raceCompetitor : race.getRaceCompetitorList()) {
+            competitors.add(getCompetitor(raceCompetitor.getCompetitor()));
+            if (boatClass == null) {
+                boatClass = getBoatClass(raceCompetitor.getCompetitor().getCompetitorClass());
+            }
+        }
+        // FIXME getControlPointList() delivers an unsorted list of control points; have to wait for RouteData event first 
+        return new RaceDefinitionImpl(race.getName(), createCourse(race
+                .getEvent().getName(), race.getEvent().getControlPointList()),
+                boatClass, competitors);
+    }
+
+    @Override
+    public Event createEvent(com.tractrac.clientmodule.Event event) {
+        return new EventImpl(event.getName());
+    }
+
+    @Override
+    public RaceCourseReceiver getRaceCourseReceiver(
+            Event event, com.tractrac.clientmodule.Event tractracEvent) {
+        return new RaceCourseReceiverImpl(event, tractracEvent);
     }
 
 }

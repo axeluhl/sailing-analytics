@@ -23,5 +23,5 @@ public interface TrackedLegOfCompetitor extends ForCompetitor {
     
     int getNumberOfDirectionChanges();
     
-    Iterable<BoatGPSFix> getGPSFixes();
+    Iterable<GPSFixMoving> getGPSFixes();
 }

@@ -1,9 +1,12 @@
 package com.sap.sailing.domain.tracking;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.Leg;
 
 public interface TrackedLeg {
-    Iterable<TrackedLegOfCompetitor> getTrackedLegsOfBoats();
+    Leg getLeg();
+    
+    Iterable<TrackedLegOfCompetitor> getTrackedLegsOfCompetitors();
 
     TrackedLegOfCompetitor getTrackedLeg(Competitor competitor);
 

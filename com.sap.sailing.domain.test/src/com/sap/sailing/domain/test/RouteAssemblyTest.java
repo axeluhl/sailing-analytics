@@ -10,6 +10,7 @@ import org.junit.Test;
 
 import com.maptrack.client.io.TypeController;
 import com.sap.sailing.domain.base.Course;
+import com.sap.sailing.domain.base.impl.Util;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.tractrac.clientmodule.Route;
 import com.tractrac.clientmodule.data.ICallbackData;
@@ -36,9 +37,9 @@ public class RouteAssemblyTest extends AbstractTracTracLiveTest {
                     public void gotData(Route route,
                             RouteData record) {
                         if (first) {
-                            firstRoute[0] = route;
-                            firstData[0] = record;
                             synchronized (semaphor) {
+                                firstRoute[0] = route;
+                                firstData[0] = record;
                                 semaphor.notifyAll();
                             }
                             first = false;
@@ -58,10 +59,10 @@ public class RouteAssemblyTest extends AbstractTracTracLiveTest {
         }
         assertNotNull(firstRoute[0]);
         assertNotNull(firstData[0]);
-        Course course = DomainFactory.INSTANCE.createCourse(firstRoute[0].getName(), firstData[0]);
+        Course course = DomainFactory.INSTANCE.createCourse(firstRoute[0].getName(), firstData[0].getPoints());
         assertNotNull(course);
         assertEquals("Race 12 (Oro)", course.getName());
-        assertEquals(9, size(course.getWaypoints()));
-        assertEquals(size(course.getWaypoints())-1, size(course.getLegs()));
+        assertEquals(9, Util.size(course.getWaypoints()));
+        assertEquals(Util.size(course.getWaypoints())-1, Util.size(course.getLegs()));
     }
 }

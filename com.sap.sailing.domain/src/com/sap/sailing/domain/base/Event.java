@@ -5,10 +5,10 @@ public interface Event extends Named {
     
     Iterable<RaceDefinition> getAllRaces(BoatClass boatClass);
     
-    Iterable<Course> getCourses();
-    
     Iterable<BoatClass> getClasses();
     
     Iterable<Competitor> getCompetitors();
+
+    void addRace(RaceDefinition race);
     
 }
