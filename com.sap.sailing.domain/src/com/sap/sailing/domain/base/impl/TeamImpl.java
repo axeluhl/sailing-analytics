@@ -1,0 +1,26 @@
+package com.sap.sailing.domain.base.impl;
+
+import com.sap.sailing.domain.base.Person;
+import com.sap.sailing.domain.base.Team;
+
+public class TeamImpl extends NamedImpl implements Team {
+    private final Iterable<Person> sailors;
+    private final Person coach;
+    
+    public TeamImpl(String name, Iterable<Person> sailors, Person coach) {
+        super(name);
+        this.sailors = sailors;
+        this.coach = coach;
+    }
+
+    @Override
+    public Iterable<Person> getSailors() {
+        return sailors;
+    }
+    
+    @Override
+    public Person getCoach() {
+        return coach;
+    }
+
+}
