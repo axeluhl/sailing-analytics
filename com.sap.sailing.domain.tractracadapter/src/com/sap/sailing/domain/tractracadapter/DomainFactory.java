@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.tractracadapter;
 
+import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.Person;
@@ -8,6 +9,7 @@ import com.sap.sailing.domain.base.Team;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tractracadapter.impl.DomainFactoryImpl;
 import com.tractrac.clientmodule.Competitor;
+import com.tractrac.clientmodule.CompetitorClass;
 import com.tractrac.clientmodule.ControlPoint;
 import com.tractrac.clientmodule.Event;
 import com.tractrac.clientmodule.Race;
@@ -52,4 +54,6 @@ public interface DomainFactory {
     
     RaceCourseReceiver getRaceCourseReceiver(
             com.sap.sailing.domain.base.Event event, Event tractracEvent);
+
+    BoatClass getBoatClass(CompetitorClass competitorClass);
 }

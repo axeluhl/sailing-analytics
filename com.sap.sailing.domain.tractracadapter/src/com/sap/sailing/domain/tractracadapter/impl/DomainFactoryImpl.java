@@ -146,7 +146,8 @@ public class DomainFactoryImpl implements DomainFactory {
         return result;
     }
 
-    private BoatClass getBoatClass(CompetitorClass competitorClass) {
+    @Override
+    public BoatClass getBoatClass(CompetitorClass competitorClass) {
         BoatClass result = classCache.get(competitorClass);
         if (result == null) {
             result = new BoatClassImpl(competitorClass.getName());

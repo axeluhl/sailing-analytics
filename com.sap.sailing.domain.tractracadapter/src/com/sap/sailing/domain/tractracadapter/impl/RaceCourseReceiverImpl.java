@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.maptrack.client.io.TypeController;
+import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Event;
@@ -31,17 +32,23 @@ public class RaceCourseReceiverImpl implements RaceCourseReceiver {
     public Iterable<TypeController> getRouteListeners() {
         List<TypeController> result = new ArrayList<TypeController>();
         for (final Race race : tractracEvent.getRaceList()) {
+            BoatClass boatClass = null;
             final List<Competitor> competitors = new ArrayList<Competitor>();
             for (RaceCompetitor rc : race.getRaceCompetitorList()) {
+                com.tractrac.clientmodule.Competitor competitor = rc.getCompetitor();
+                if (boatClass == null) {
+                    boatClass = DomainFactory.INSTANCE.getBoatClass(competitor.getCompetitorClass());
+                }
                 competitors.add(DomainFactory.INSTANCE.getCompetitor(rc.getCompetitor()));
             }
+            final BoatClass finalBoatClass = boatClass;
             TypeController routeListener = RouteData.subscribe(race,
                     new ICallbackData<Route, RouteData>() {
                         @Override
                         public void gotData(Route route, RouteData record) {
                             Course course = DomainFactory.INSTANCE.createCourse(route.getName(), record.getPoints());
                             RaceDefinition raceDefinition = new RaceDefinitionImpl(race.getName(),
-                                    course, /* TODO how to know the BoatClass? */ null, competitors);
+                                    course, finalBoatClass, competitors);
                             event.addRace(raceDefinition);
                         }
                     });

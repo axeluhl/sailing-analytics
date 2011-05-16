@@ -11,11 +11,11 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.maptrack.client.io.TypeController;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
@@ -46,6 +46,7 @@ public class ReceiveTrackingDataTest extends AbstractTracTracLiveTest {
      */
     @Before
     public void setupListener() {
+        final DomainFactory domainFactory = DomainFactory.INSTANCE;
         ICallbackData<RaceCompetitor, CompetitorPositionRawData> positionListener = new ICallbackData<RaceCompetitor, CompetitorPositionRawData>() {
             private boolean first = true;
             
@@ -59,8 +60,8 @@ public class ReceiveTrackingDataTest extends AbstractTracTracLiveTest {
                         first = false;
                     }
                     DynamicTrackedRace trackedRace = trackedRaces.get(tracked.getRace());
-                    GPSFixMoving fix = DomainFactory.INSTANCE.createGPSFixMoving(record);
-                    Competitor competitor = DomainFactory.INSTANCE.getCompetitor(tracked.getCompetitor());
+                    GPSFixMoving fix = domainFactory.createGPSFixMoving(record);
+                    Competitor competitor = domainFactory.getCompetitor(tracked.getCompetitor());
                     trackedRace.recordFix(competitor, fix);
                     semaphor.notifyAll();
                 }
@@ -72,12 +73,15 @@ public class ReceiveTrackingDataTest extends AbstractTracTracLiveTest {
             TypeController listener = CompetitorPositionRawData.subscribe(race,
                 positionListener, /* fromTime */0 /* means ALL */);
             listeners.add(listener);
-            trackedRaces.put(race, new DynamicTrackedRaceImpl(DomainFactory.INSTANCE.createRaceDefinition(race)));
+            trackedRaces.put(race, new DynamicTrackedRaceImpl(domainFactory.createRaceDefinition(race)));
+        }
+        Event event = domainFactory.createEvent(getEvent());
+        for (TypeController raceListener : DomainFactory.INSTANCE.getRaceCourseReceiver(event, getEvent()).getRouteListeners()) {
+            listeners.add(raceListener);
         }
         addListenersAndStartController(listeners.toArray(new TypeController[0]));
     }
 
-    @Ignore
     @Test
     public void testReceiveCompetitorPosition() {
         synchronized (semaphor) {
