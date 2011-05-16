@@ -95,7 +95,7 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public Waypoint createWaypoint(ControlPoint controlPoint) {
+    public Waypoint getWaypoint(ControlPoint controlPoint) {
         com.sap.sailing.domain.base.ControlPoint domainControlPoint = controlPointCache.get(controlPoint);
         if (domainControlPoint == null) {
             if (controlPoint.getHasTwoPoints()) {
@@ -116,7 +116,7 @@ public class DomainFactoryImpl implements DomainFactory {
     public Course createCourse(String name, Iterable<ControlPoint> controlPoints) {
         List<Waypoint> waypointList = new ArrayList<Waypoint>();
         for (ControlPoint controlPoint : controlPoints) {
-            Waypoint waypoint = createWaypoint(controlPoint);
+            Waypoint waypoint = getWaypoint(controlPoint);
             waypointList.add(waypoint);
         }
         return new CourseImpl(name, waypointList);
@@ -183,7 +183,18 @@ public class DomainFactoryImpl implements DomainFactory {
 
     @Override
     public RaceDefinition getRaceDefinition(Race race) {
-        return raceCache.get(race);
+        RaceDefinition result = raceCache.get(race);
+        boolean interrupted = false;
+        synchronized (raceCache) {
+            while (!interrupted && result == null) {
+                try {
+                    raceCache.wait();
+                } catch (InterruptedException e) {
+                    interrupted = true;
+                }
+            }
+        }
+        return result;
     }
 
     @Override
@@ -202,7 +213,7 @@ public class DomainFactoryImpl implements DomainFactory {
             TrackedEvent trackedEvent) {
         Collection<TypeController> result = new ArrayList<TypeController>();
         for (TypeController raceCourseReceiver : new RaceCourseReceiver(
-                trackedEvent.getEvent(), inverseEventCache.get(trackedEvent
+                trackedEvent, inverseEventCache.get(trackedEvent
                         .getEvent())).getRouteListeners()) {
             result.add(raceCourseReceiver);
         }
@@ -247,18 +258,22 @@ public class DomainFactoryImpl implements DomainFactory {
             }
             result = new RaceDefinitionImpl(race.getName(), course, boatClass,
                     competitors);
+            synchronized (raceCache) {
+                raceCache.put(race, result);
+                raceCache.notifyAll();
+            }
         }
         return result;
     }
 
     @Override
     public Buoy getBuoy(ControlPoint controlPoint, ControlPointPositionData record) {
-        com.sap.sailing.domain.base.ControlPoint myControlPoint = controlPointCache.get(controlPoint);
+        Waypoint myWaypoint = getWaypoint(controlPoint);
         Buoy result;
         if (controlPoint.getHasTwoPoints()) {
-            result = record.getIndex() == 0 ? ((Gate) myControlPoint).getLeft() : ((Gate) myControlPoint).getRight();
+            result = record.getIndex() == 0 ? ((Gate) myWaypoint.getControlPoint()).getLeft() : ((Gate) myWaypoint.getControlPoint()).getRight();
         } else {
-            result = (Buoy) myControlPoint;
+            result = myWaypoint.getControlPoint().getBuoys().iterator().next();
         }
         return result;
     }

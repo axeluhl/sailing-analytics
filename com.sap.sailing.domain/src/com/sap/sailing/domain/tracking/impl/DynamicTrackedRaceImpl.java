@@ -38,6 +38,7 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
             fixes.put(competitor, list);
         }
         list.add(fix);
+        notifyListeners(fix, this, competitor);
     }
 
     @Override
@@ -50,11 +51,15 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
         listeners.add(listener);
     }
 
-    @Override
-    public void gpsFixReceived(GPSFixMoving fix, TrackedRace trackedRace, Competitor competitor) {
+    private void notifyListeners(GPSFixMoving fix, TrackedRace trackedRace, Competitor competitor) {
         for (RawListener<GPSFixMoving> listener : listeners) {
             listener.gpsFixReceived(fix, trackedRace, competitor);
         }
+    }
+
+    @Override
+    public void gpsFixReceived(GPSFixMoving fix, TrackedRace trackedRace, Competitor competitor) {
+        notifyListeners(fix, trackedRace, competitor);
     }
     
 }

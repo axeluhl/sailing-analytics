@@ -3,15 +3,17 @@ package com.sap.sailing.domain.tracking.impl;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Event;
-import com.sap.sailing.domain.base.Gate;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.tracking.GPSFix;
+import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.Track;
 import com.sap.sailing.domain.tracking.TrackedEvent;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -21,6 +23,7 @@ public class TrackedEventImpl implements TrackedEvent {
     private final Map<RaceDefinition, TrackedRace> trackedRaces;
     private final Map<BoatClass, Collection<TrackedRace>> trackedRacesByBoatClass;
     private final Map<Buoy, Track<Buoy, GPSFix>> buoyTracks;
+    private final Set<RaceListener> raceListeners;
   
     public TrackedEventImpl(Event event) {
         super();
@@ -28,26 +31,30 @@ public class TrackedEventImpl implements TrackedEvent {
         this.trackedRaces = new HashMap<RaceDefinition, TrackedRace>();
         this.trackedRacesByBoatClass = new HashMap<BoatClass, Collection<TrackedRace>>();
         buoyTracks = new HashMap<Buoy, Track<Buoy, GPSFix>>();
+        raceListeners = new HashSet<RaceListener>();
     }
     
     @Override
     public void addTrackedRace(TrackedRace trackedRace) {
-        trackedRaces.put(trackedRace.getRace(), trackedRace);
-        Collection<TrackedRace> coll = trackedRacesByBoatClass.get(trackedRace.getRace().getBoatClass());
-        if (coll == null) {
-            coll = new ArrayList<TrackedRace>();
-            trackedRacesByBoatClass.put(trackedRace.getRace().getBoatClass(), coll);
-        }
-        for (Waypoint waypoint : trackedRace.getRace().getCourse().getWaypoints()) {
-            // TODO add Waypoint.getBuoys()
-            if (waypoint instanceof Buoy) {
-                buoyTracks.put((Buoy) waypoint, new DynamicTrackImpl<Buoy, GPSFix>((Buoy) waypoint));
-            } else {
-                buoyTracks.put(((Gate) waypoint).getLeft(), new DynamicTrackImpl<Buoy, GPSFix>(((Gate) waypoint).getLeft()));
-                buoyTracks.put(((Gate) waypoint).getRight(), new DynamicTrackImpl<Buoy, GPSFix>(((Gate) waypoint).getRight()));
+        synchronized (trackedRaces) {
+            trackedRaces.put(trackedRace.getRace(), trackedRace);
+            Collection<TrackedRace> coll = trackedRacesByBoatClass.get(trackedRace.getRace().getBoatClass());
+            if (coll == null) {
+                coll = new ArrayList<TrackedRace>();
+                trackedRacesByBoatClass.put(trackedRace.getRace().getBoatClass(), coll);
+            }
+            for (Waypoint waypoint : trackedRace.getRace().getCourse().getWaypoints()) {
+                for (Buoy buoy : waypoint.getBuoys()) {
+                    if (!buoyTracks.containsKey(buoy)) {
+                        buoyTracks.put(buoy, new DynamicTrackImpl<Buoy, GPSFix>(buoy));
+                    }
+                }
+            }
+            coll.add(trackedRace);
+            for (RaceListener listener : raceListeners) {
+                listener.raceAdded(trackedRace);
             }
         }
-        coll.add(trackedRace);
     }
 
     @Override
@@ -72,7 +79,22 @@ public class TrackedEventImpl implements TrackedEvent {
 
     @Override
     public Track<Buoy, GPSFix> getTrack(Buoy buoy) {
-        return buoyTracks.get(buoy);
+        Track<Buoy, GPSFix> result = buoyTracks.get(buoy);
+        if (result == null) {
+            result = new DynamicTrackImpl<Buoy, GPSFix>(buoy);
+            buoyTracks.put(buoy, result);
+        }
+        return result;
+    }
+
+    @Override
+    public void addRaceListener(RaceListener listener) {
+        raceListeners.add(listener);
+        synchronized (trackedRaces) {
+            for (TrackedRace trackedRace : getTrackedRaces()) {
+                listener.raceAdded(trackedRace);
+            }
+        }
     }
 
 }

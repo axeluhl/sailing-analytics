@@ -15,6 +15,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
+import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.RawListener;
 import com.sap.sailing.domain.tracking.TrackedEvent;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -40,7 +41,7 @@ public class ReceiveTrackingDataTest extends AbstractTracTracLiveTest {
     @Before
     public void setupListener() {
         final DomainFactory domainFactory = DomainFactory.INSTANCE;
-        RawListener<GPSFixMoving> positionListener = new RawListener<GPSFixMoving>() {
+        final RawListener<GPSFixMoving> positionListener = new RawListener<GPSFixMoving>() {
             private boolean first = true;
             
             @Override
@@ -59,10 +60,13 @@ public class ReceiveTrackingDataTest extends AbstractTracTracLiveTest {
         List<TypeController> listeners = new ArrayList<TypeController>();
         Event event = domainFactory.createEvent(getEvent());
         TrackedEvent trackedEvent = domainFactory.trackEvent(event);
-        for (TrackedRace race : trackedEvent.getTrackedRaces()) {
-            System.out.println("Subscribing raw position listener for race "+race);
-            ((DynamicTrackedRace) race).addListener(positionListener);
-        }
+        trackedEvent.addRaceListener(new RaceListener() {
+            @Override
+            public void raceAdded(TrackedRace trackedRace) {
+                System.out.println("Subscribing raw position listener for race "+trackedRace);
+                ((DynamicTrackedRace) trackedRace).addListener(positionListener);
+            }
+        });
         for (TypeController raceListener : domainFactory.getUpdateReceivers(trackedEvent)) {
             listeners.add(raceListener);
         }

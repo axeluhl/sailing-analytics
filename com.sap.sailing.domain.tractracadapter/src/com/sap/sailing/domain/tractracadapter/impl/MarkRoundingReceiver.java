@@ -42,7 +42,7 @@ public class MarkRoundingReceiver {
                         Competitor myCompetitor = DomainFactory.INSTANCE.getCompetitor(competitor.getCompetitor());
                         for (MarkPassingsData.Entry passing : record.getPassings()) {
                             TimePoint time = new MillisecondsTimePoint(passing.getTimestamp());
-                            Waypoint passed = DomainFactory.INSTANCE.createWaypoint(passing.getControlPoint());
+                            Waypoint passed = DomainFactory.INSTANCE.getWaypoint(passing.getControlPoint());
                             // TODO do something smart with the pre-aggregated passing data
                         }
                     }

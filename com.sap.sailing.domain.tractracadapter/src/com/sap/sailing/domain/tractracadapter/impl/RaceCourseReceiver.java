@@ -8,6 +8,8 @@ import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.tracking.TrackedEvent;
+import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.tractrac.clientmodule.Race;
 import com.tractrac.clientmodule.Route;
@@ -25,12 +27,12 @@ import com.tractrac.clientmodule.data.RouteData;
  * 
  */
 public class RaceCourseReceiver {
-    private final Event event;
+    private final TrackedEvent trackedEvent;
     private final com.tractrac.clientmodule.Event tractracEvent;
     
-    public RaceCourseReceiver(Event event, com.tractrac.clientmodule.Event tractracEvent) {
+    public RaceCourseReceiver(TrackedEvent trackedEvent, com.tractrac.clientmodule.Event tractracEvent) {
         super();
-        this.event = event;
+        this.trackedEvent = trackedEvent;
         this.tractracEvent = tractracEvent;
     }
 
@@ -48,7 +50,8 @@ public class RaceCourseReceiver {
                         public void gotData(Route route, RouteData record) {
                             Course course = DomainFactory.INSTANCE.createCourse(route.getName(), record.getPoints());
                             RaceDefinition raceDefinition = DomainFactory.INSTANCE.createRaceDefinition(race, course);
-                            event.addRace(raceDefinition);
+                            trackedEvent.getEvent().addRace(raceDefinition);
+                            trackedEvent.addTrackedRace(new DynamicTrackedRaceImpl(raceDefinition));
                         }
                     });
             result.add(routeListener);

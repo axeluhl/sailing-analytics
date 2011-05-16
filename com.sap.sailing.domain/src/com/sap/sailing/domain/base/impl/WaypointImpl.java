@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.base.impl;
 
+import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Waypoint;
 
@@ -23,5 +24,10 @@ public class WaypointImpl implements Waypoint {
     @Override
     public String toString() {
         return getName();
+    }
+
+    @Override
+    public Iterable<Buoy> getBuoys() {
+        return getControlPoint().getBuoys();
     }
 }

@@ -22,4 +22,11 @@ public interface TrackedEvent {
      * Their positions are tracked.
      */
     Track<Buoy, GPSFix> getTrack(Buoy buoy);
+    
+    /**
+     * Listener will be notified when {@link #addTrackedRace(TrackedRace)} is called and
+     * upon registration for each tracked race already known. Therefore, the listener
+     * won't miss any tracked race.
+     */
+    void addRaceListener(RaceListener listener);
 }

@@ -1,5 +1,8 @@
 package com.sap.sailing.domain.base.impl;
 
+import java.util.ArrayList;
+import java.util.Collection;
+
 import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Gate;
 
@@ -33,5 +36,13 @@ public class GateImpl implements Gate {
     @Override
     public String toString() {
         return getName();
+    }
+
+    @Override
+    public Iterable<Buoy> getBuoys() {
+        Collection<Buoy> result = new ArrayList<Buoy>(2);
+        result.add(getLeft());
+        result.add(getRight());
+        return result;
     }
 }

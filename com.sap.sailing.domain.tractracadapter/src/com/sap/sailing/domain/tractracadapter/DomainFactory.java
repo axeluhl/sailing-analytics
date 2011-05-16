@@ -27,7 +27,7 @@ public interface DomainFactory {
 
     com.sap.sailing.domain.base.TimePoint createTimePoint(long timestamp);
 
-    com.sap.sailing.domain.base.Waypoint createWaypoint(
+    com.sap.sailing.domain.base.Waypoint getWaypoint(
             ControlPoint controlPoint);
 
     Course createCourse(String name, Iterable<ControlPoint> controlPoints);
@@ -44,7 +44,9 @@ public interface DomainFactory {
 
     /**
      * Fetch a race definition previously created by a call to
-     * {@link #createRaceDefinition(Race, Course)}
+     * {@link #createRaceDefinition(Race, Course)}. If no such race
+     * definition was created so far, the call blocks until such a definition
+     * is provided by another call.
      */
     RaceDefinition getRaceDefinition(Race race);
 
