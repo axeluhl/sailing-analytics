@@ -44,16 +44,16 @@ public class RaceCourseReceiver {
     public Iterable<TypeController> getRouteListeners() {
         List<TypeController> result = new ArrayList<TypeController>();
         for (final Race race : tractracEvent.getRaceList()) {
-            TypeController routeListener = RouteData.subscribe(race,
-                    new ICallbackData<Route, RouteData>() {
-                        @Override
-                        public void gotData(Route route, RouteData record) {
-                            Course course = DomainFactory.INSTANCE.createCourse(route.getName(), record.getPoints());
-                            RaceDefinition raceDefinition = DomainFactory.INSTANCE.createRaceDefinition(race, course);
-                            trackedEvent.getEvent().addRace(raceDefinition);
-                            trackedEvent.addTrackedRace(new DynamicTrackedRaceImpl(raceDefinition));
-                        }
-                    });
+            TypeController routeListener = RouteData.subscribe(race, new ICallbackData<Route, RouteData>() {
+                @Override
+                public void gotData(Route route, RouteData record) {
+                    System.out.print("R");
+                    Course course = DomainFactory.INSTANCE.createCourse(route.getName(), record.getPoints());
+                    RaceDefinition raceDefinition = DomainFactory.INSTANCE.createRaceDefinition(race, course);
+                    trackedEvent.getEvent().addRace(raceDefinition);
+                    trackedEvent.addTrackedRace(new DynamicTrackedRaceImpl(raceDefinition));
+                }
+            });
             result.add(routeListener);
         }
         return result;

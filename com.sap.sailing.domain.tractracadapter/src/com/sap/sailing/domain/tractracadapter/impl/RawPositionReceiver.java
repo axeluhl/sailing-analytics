@@ -30,6 +30,7 @@ public class RawPositionReceiver {
         ICallbackData<RaceCompetitor, CompetitorPositionRawData> positionListener = new ICallbackData<RaceCompetitor, CompetitorPositionRawData>() {
             public void gotData(RaceCompetitor tracked,
                     CompetitorPositionRawData record) {
+                System.out.print("P");
                 Race race = tracked.getRace();
                 RaceDefinition raceDefinition = domainFactory.getRaceDefinition(race);
                 DynamicTrackedRace trackedRace = (DynamicTrackedRace) trackedEvent.getTrackedRace(raceDefinition);

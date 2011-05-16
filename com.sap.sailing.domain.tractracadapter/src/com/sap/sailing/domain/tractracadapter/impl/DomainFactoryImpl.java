@@ -219,7 +219,7 @@ public class DomainFactoryImpl implements DomainFactory {
         }
         for (TypeController markPositionReceiver : new MarkPositionReceiver(
                 trackedEvent, inverseEventCache.get(trackedEvent
-                        .getEvent())).getRouteListeners()) {
+                        .getEvent())).getControlPointListeners()) {
             result.add(markPositionReceiver);
         }
         for (TypeController rawPositionReceiver : new RawPositionReceiver(
