@@ -38,14 +38,17 @@ import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
+import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedEventImpl;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
+import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.tractrac.clientmodule.CompetitorClass;
 import com.tractrac.clientmodule.ControlPoint;
 import com.tractrac.clientmodule.Race;
 import com.tractrac.clientmodule.RaceCompetitor;
 import com.tractrac.clientmodule.data.ControlPointPositionData;
+import com.tractrac.clientmodule.data.MarkPassingsData.Entry;
 
 public class DomainFactoryImpl implements DomainFactory {
     private final WeakHashMap<ControlPoint, com.sap.sailing.domain.base.ControlPoint> controlPointCache =
@@ -281,6 +284,13 @@ public class DomainFactoryImpl implements DomainFactory {
         } else {
             result = myWaypoint.getControlPoint().getBuoys().iterator().next();
         }
+        return result;
+    }
+
+    @Override
+    public MarkPassing createMarkPassing(com.tractrac.clientmodule.Competitor competitor, Entry passing) {
+        MarkPassing result = new MarkPassingImpl(createTimePoint(passing.getTimestamp()),
+                getWaypoint(passing.getControlPoint()), getCompetitor(competitor));
         return result;
     }
 

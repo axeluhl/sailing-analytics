@@ -10,6 +10,7 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Team;
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
+import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedEvent;
 import com.sap.sailing.domain.tractracadapter.impl.DomainFactoryImpl;
 import com.tractrac.clientmodule.Competitor;
@@ -19,6 +20,7 @@ import com.tractrac.clientmodule.Event;
 import com.tractrac.clientmodule.Race;
 import com.tractrac.clientmodule.data.ControlPointPositionData;
 import com.tractrac.clientmodule.data.DataController;
+import com.tractrac.clientmodule.data.MarkPassingsData.Entry;
 import com.tractrac.clientmodule.data.Position;
 
 public interface DomainFactory {
@@ -87,5 +89,7 @@ public interface DomainFactory {
      * which of its buoys is affected.
      */
     Buoy getBuoy(ControlPoint controlPoint, ControlPointPositionData record);
+
+    MarkPassing createMarkPassing(Competitor competitor, Entry passing);
 
 }

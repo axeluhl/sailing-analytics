@@ -2,8 +2,8 @@ package com.sap.sailing.domain.tracking.impl;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
-import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.tracking.DynamicTrackedLeg;
+import com.sap.sailing.domain.tracking.MarkPassing;
 
 public class DynamicTrackedLegImpl extends TrackedLegImpl implements DynamicTrackedLeg {
     
@@ -12,7 +12,7 @@ public class DynamicTrackedLegImpl extends TrackedLegImpl implements DynamicTrac
     }
 
     @Override
-    public void completed(Competitor competitor, TimePoint at) {
+    public void completed(MarkPassing passing) {
         // TODO implement DynamicTrackedLegImpl.completed
     }
 

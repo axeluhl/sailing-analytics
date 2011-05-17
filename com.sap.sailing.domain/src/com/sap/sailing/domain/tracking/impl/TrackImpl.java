@@ -1,7 +1,6 @@
 package com.sap.sailing.domain.tracking.impl;
 
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.NavigableSet;
 import java.util.TreeSet;
 
@@ -22,13 +21,6 @@ public class TrackImpl<ItemType, FixType extends GPSFix> implements Track<ItemTy
      * The fixes, ordered by their time points
      */
     final TreeSet<GPSFix> fixes;
-    
-    private class GPSFixByTimePointComparator implements Comparator<GPSFix> {
-        @Override
-        public int compare(GPSFix o1, GPSFix o2) {
-            return o1.getTimePoint().compareTo(o2.getTimePoint());
-        }
-    }
     
     private class DummyGPSFixWithDateOnly implements GPSFix {
         private final TimePoint timePoint;
@@ -52,7 +44,7 @@ public class TrackImpl<ItemType, FixType extends GPSFix> implements Track<ItemTy
     public TrackImpl(ItemType trackedItem) {
         super();
         this.trackedItem = trackedItem;
-        this.fixes = new TreeSet<GPSFix>(new GPSFixByTimePointComparator());
+        this.fixes = new TreeSet<GPSFix>(TimedComparator.INSTANCE);
     }
 
     @Override

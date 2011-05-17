@@ -13,6 +13,7 @@ import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.domain.tracking.DynamicTrackedLeg;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
+import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.tractrac.clientmodule.Race;
 import com.tractrac.clientmodule.RaceCompetitor;
@@ -49,7 +50,8 @@ public class MarkPassingReceiver {
                             TimePoint time = new MillisecondsTimePoint(passing.getTimestamp());
                             Waypoint passed = DomainFactory.INSTANCE.getWaypoint(passing.getControlPoint());
                             DynamicTrackedLeg finished = trackedRace.getTrackedLegFinishingAt(passed);
-                            finished.completed(myCompetitor, time);
+                            MarkPassing markPassing = DomainFactory.INSTANCE.createMarkPassing(competitor.getCompetitor(), passing);
+                            finished.completed(markPassing);
                             DynamicTrackedLeg begun = trackedRace.getTrackedLegStartingAt(passed);
                             // TODO do something smart with the pre-aggregated passing data
                         }
