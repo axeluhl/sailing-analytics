@@ -46,7 +46,7 @@ public class RouteAssemblyTest extends AbstractTracTracLiveTest {
                         }
                     }
                 });
-        addListenersAndStartController(routeListener);
+        addListenersForStoredDataAndStartController(routeListener);
         synchronized (semaphor) {
             while (firstRoute[0] == null) {
                 try {

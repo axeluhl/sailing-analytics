@@ -9,6 +9,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Collections;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -37,9 +38,9 @@ public abstract class AbstractTracTracLiveTest implements Listener {
     }
 
     @Before
-    public void setUp() throws MalformedURLException, IOException {
+    public void setUp() throws MalformedURLException, IOException, InterruptedException {
         killAllRunningSimulations();
-        startRaceSimulation(3, 7);
+        startRaceSimulation(/* speedMultiplier */ 100, 7);
         // Read event data from configuration file
         event = KeyValue.setup(paramUrl);
         assertNotNull(event);
@@ -52,11 +53,21 @@ public abstract class AbstractTracTracLiveTest implements Listener {
         // after adding their listeners
     }
     
-    protected void addListenersAndStartController(TypeController... listeners) {
-        for (TypeController listener : listeners) {
+    protected void addListenersForStoredDataAndStartController(TypeController... listenersForStoredData) {
+        for (TypeController listener : listenersForStoredData) {
             getController().add(listener);
         }
         startController();
+    }
+    
+    /**
+     * Called when the {@link #storedDataEnd()} event was received. Adds the listeners
+     * returned to the {@link #getController() controller}, presumably for live data.
+     * This default implementation returns an empty iterable. Subclasses may override
+     * to return more.
+     */
+    protected Iterable<TypeController> getListenersForLiveData() {
+        return Collections.emptySet();
     }
 
     protected void startController() {
@@ -107,38 +118,32 @@ public abstract class AbstractTracTracLiveTest implements Listener {
 
     @Override
     public void liveDataConnected() {
-        // TODO Auto-generated method stub
-
+        System.out.println("Live data connected");
     }
 
     @Override
     public void liveDataDisconnected() {
-        // TODO Auto-generated method stub
-
+        System.out.println("Live data disconnected");
     }
 
     @Override
     public void stopped() {
-        // TODO Auto-generated method stub
-
+        System.out.println("stopped");
     }
 
     @Override
     public void storedDataBegin() {
-        // TODO Auto-generated method stub
-
+        System.out.println("Stored data begin");
     }
 
     @Override
     public void storedDataEnd() {
-        // TODO Auto-generated method stub
-
+        System.out.println("Stored data end");
     }
 
     @Override
-    public void storedDataProgress(float arg0) {
-        // TODO Auto-generated method stub
-
+    public void storedDataProgress(float progress) {
+        System.out.println("Stored data progreess: "+progress);
     }
 
 }

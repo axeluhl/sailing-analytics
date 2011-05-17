@@ -49,7 +49,7 @@ public class PositionConversionTest extends AbstractTracTracLiveTest {
                         }
                     }
                 }, /* fromTime */0 /* means ALL */);
-        addListenersAndStartController(listener);
+        addListenersForStoredDataAndStartController(listener);
         synchronized (semaphor) {
             while (firstTracked[0] == null) {
                 try {

@@ -41,6 +41,7 @@ public class MarkRoundingReceiver {
                 new ICallbackData<RaceCompetitor, MarkPassingsData>() {
                     @Override
                     public void gotData(RaceCompetitor competitor, MarkPassingsData record) {
+                        System.out.print("L"); // as in "Leg"
                         Competitor myCompetitor = DomainFactory.INSTANCE.getCompetitor(competitor.getCompetitor());
                         DynamicTrackedRace trackedRace = trackedEvent.getTrackedRace(DomainFactory.INSTANCE.getRaceDefinition(
                                 competitor.getRace()));

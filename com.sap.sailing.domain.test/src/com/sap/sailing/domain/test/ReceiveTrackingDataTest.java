@@ -41,11 +41,11 @@ public class ReceiveTrackingDataTest extends AbstractTracTracLiveTest {
     @Before
     public void setupListener() {
         final DomainFactory domainFactory = DomainFactory.INSTANCE;
-        final RawListener<GPSFixMoving> positionListener = new RawListener<GPSFixMoving>() {
+        final RawListener<Competitor, GPSFixMoving> positionListener = new RawListener<Competitor, GPSFixMoving>() {
             private boolean first = true;
             
             @Override
-            public void gpsFixReceived(GPSFixMoving fix, TrackedRace trackedRace, Competitor competitor) {
+            public void gpsFixReceived(GPSFixMoving fix, Competitor competitor) {
                 System.out.println("Received fix "+fix);
                 synchronized (semaphor) {
                     if (first) {
@@ -70,7 +70,7 @@ public class ReceiveTrackingDataTest extends AbstractTracTracLiveTest {
         for (TypeController raceListener : domainFactory.getUpdateReceivers(trackedEvent)) {
             listeners.add(raceListener);
         }
-        addListenersAndStartController(listeners.toArray(new TypeController[0]));
+        addListenersForStoredDataAndStartController(listeners.toArray(new TypeController[0]));
     }
 
     @Test
