@@ -188,6 +188,7 @@ public class DomainFactoryImpl implements DomainFactory {
         synchronized (raceCache) {
             while (!interrupted && result == null) {
                 try {
+                    // FIXME not permitted to block an event thread
                     raceCache.wait();
                 } catch (InterruptedException e) {
                     interrupted = true;

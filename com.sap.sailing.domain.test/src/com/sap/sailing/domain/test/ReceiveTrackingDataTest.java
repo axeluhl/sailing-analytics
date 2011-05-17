@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.maptrack.client.io.TypeController;
@@ -74,7 +73,6 @@ public class ReceiveTrackingDataTest extends AbstractTracTracLiveTest {
         addListenersAndStartController(listeners.toArray(new TypeController[0]));
     }
 
-    @Ignore
     @Test
     public void testReceiveCompetitorPosition() {
         synchronized (semaphor) {
