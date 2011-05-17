@@ -48,7 +48,7 @@ public class MarkPositionReceiver {
         TypeController controlPointListener = ControlPointPositionData.subscribe(tractracEvent,
                 new ICallbackData<ControlPoint, ControlPointPositionData>() {
                     @Override
-                    public void gotData(ControlPoint controlPoint, ControlPointPositionData record) {
+                    public void gotData(ControlPoint controlPoint, ControlPointPositionData record, boolean isLiveData) {
                         if (received++ % 1000 == 0) {
                             System.out.print("M");
                             if ((received / 1000 + 1) % 80 == 0) {
@@ -59,7 +59,7 @@ public class MarkPositionReceiver {
                         ((DynamicTrack<Buoy, GPSFix>) trackedEvent.getTrack(buoy)).addGPSFix(DomainFactory.INSTANCE
                                 .createGPSFixMoving(record));
                     }
-                }, /* fromTime */0l);
+                }, /* fromTime */0l, /* toTime */0l);
         result.add(controlPointListener);
         return result;
     }

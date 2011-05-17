@@ -40,7 +40,7 @@ public class MarkRoundingReceiver {
             TypeController controlPointListener = MarkPassingsData.subscribe(race,
                 new ICallbackData<RaceCompetitor, MarkPassingsData>() {
                     @Override
-                    public void gotData(RaceCompetitor competitor, MarkPassingsData record) {
+                    public void gotData(RaceCompetitor competitor, MarkPassingsData record, boolean isLiveData) {
                         Competitor myCompetitor = DomainFactory.INSTANCE.getCompetitor(competitor.getCompetitor());
                         DynamicTrackedRace trackedRace = trackedEvent.getTrackedRace(DomainFactory.INSTANCE.getRaceDefinition(
                                 competitor.getRace()));

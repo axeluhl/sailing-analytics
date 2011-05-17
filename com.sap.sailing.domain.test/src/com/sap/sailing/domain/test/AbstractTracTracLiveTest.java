@@ -136,6 +136,18 @@ public abstract class AbstractTracTracLiveTest implements Listener {
     }
 
     @Override
+    public void liveDataConnectError(String arg0) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void storedDataError(String arg0) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
     public void storedDataProgress(float arg0) {
         // TODO Auto-generated method stub
 

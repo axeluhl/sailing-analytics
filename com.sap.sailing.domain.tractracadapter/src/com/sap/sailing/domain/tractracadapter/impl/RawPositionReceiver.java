@@ -29,7 +29,7 @@ public class RawPositionReceiver {
         final DomainFactory domainFactory = DomainFactory.INSTANCE;
         ICallbackData<RaceCompetitor, CompetitorPositionRawData> positionListener = new ICallbackData<RaceCompetitor, CompetitorPositionRawData>() {
             public void gotData(RaceCompetitor tracked,
-                    CompetitorPositionRawData record) {
+                    CompetitorPositionRawData record, boolean isLiveData) {
                 System.out.print("P");
                 Race race = tracked.getRace();
                 RaceDefinition raceDefinition = domainFactory.getRaceDefinition(race);
@@ -42,7 +42,7 @@ public class RawPositionReceiver {
         List<TypeController> listeners = new ArrayList<TypeController>();
         for (Race race : tractracEvent.getRaceList()) {
             TypeController listener = CompetitorPositionRawData.subscribe(race,
-                positionListener, /* fromTime */0 /* means ALL */);
+                positionListener, /* fromTime */0 /* means ALL */, /* toTime */0);
             listeners.add(listener);
         }
         return listeners;

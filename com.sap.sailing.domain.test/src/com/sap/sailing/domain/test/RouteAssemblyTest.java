@@ -35,7 +35,7 @@ public class RouteAssemblyTest extends AbstractTracTracLiveTest {
                     
                     @Override
                     public void gotData(Route route,
-                            RouteData record) {
+                            RouteData record, boolean isLiveData) {
                         if (first) {
                             synchronized (semaphor) {
                                 firstRoute[0] = route;
@@ -65,4 +65,5 @@ public class RouteAssemblyTest extends AbstractTracTracLiveTest {
         assertEquals(9, Util.size(course.getWaypoints()));
         assertEquals(Util.size(course.getWaypoints())-1, Util.size(course.getLegs()));
     }
+
 }

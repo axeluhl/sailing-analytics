@@ -38,7 +38,7 @@ public class PositionConversionTest extends AbstractTracTracLiveTest {
                     private boolean first = true;
                     
                     public void gotData(ControlPoint tracked,
-                            ControlPointPositionData record) {
+                            ControlPointPositionData record, boolean isLiveData) {
                         if (first) {
                             synchronized (semaphor) {
                                 firstTracked[0] = tracked;
@@ -48,7 +48,7 @@ public class PositionConversionTest extends AbstractTracTracLiveTest {
                             first = false;
                         }
                     }
-                }, /* fromTime */0 /* means ALL */);
+                }, /* fromTime */0 /* means ALL */, /* toTime */ 0);
         addListenersAndStartController(listener);
         synchronized (semaphor) {
             while (firstTracked[0] == null) {

@@ -4,10 +4,7 @@ Bundle-Name: Ttcm
 Bundle-SymbolicName: com.tractrac.clientmodule
 Bundle-Version: 1.0.0.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Bundle-ClassPath: lib/TracClientLib.jar,
- lib/TracCommon.jar,
- lib/TracDataLib.jar,
- lib/TracTracClientModule.jar,
+Bundle-ClassPath: lib/TracTracClientModule.jar,
  .
 Export-Package: com.maptrack.asio,
  com.maptrack.asio.record,
@@ -33,10 +30,8 @@ Export-Package: com.maptrack.asio,
  com.maptrack.dataflow.storeddata.stream,
  com.maptrack.dataflow.storeddata.tcp,
  com.maptrack.exceptions,
- com.maptrack.fileio.record,
  com.maptrack.map,
  com.maptrack.protocol,
- com.maptrack.protocol.details,
  com.maptrack.protocol.devices,
  com.maptrack.protocol.session,
  com.maptrack.utils,
