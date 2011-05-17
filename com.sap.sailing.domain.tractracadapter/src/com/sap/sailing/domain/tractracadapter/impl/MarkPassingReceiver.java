@@ -19,11 +19,11 @@ import com.tractrac.clientmodule.RaceCompetitor;
 import com.tractrac.clientmodule.data.ICallbackData;
 import com.tractrac.clientmodule.data.MarkPassingsData;
 
-public class MarkRoundingReceiver {
+public class MarkPassingReceiver {
     private final DynamicTrackedEvent trackedEvent;
     private final com.tractrac.clientmodule.Event tractracEvent;
     
-    public MarkRoundingReceiver(DynamicTrackedEvent trackedEvent, com.tractrac.clientmodule.Event tractracEvent) {
+    public MarkPassingReceiver(DynamicTrackedEvent trackedEvent, com.tractrac.clientmodule.Event tractracEvent) {
         super();
         this.trackedEvent = trackedEvent;
         this.tractracEvent = tractracEvent;
@@ -34,7 +34,7 @@ public class MarkRoundingReceiver {
      * course definition of a race. When this happens, a new {@link RaceDefinition} is
      * created with the respective {@link Course} and added to the {@link #event event}.
      */
-    public Iterable<TypeController> getMarkRoundingListeners() {
+    public Iterable<TypeController> getMarkPassingListeners() {
         List<TypeController> result = new ArrayList<TypeController>();
         for (final Race race : tractracEvent.getRaceList()) {
             TypeController controlPointListener = MarkPassingsData.subscribe(race,

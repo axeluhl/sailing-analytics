@@ -228,9 +228,9 @@ public class DomainFactoryImpl implements DomainFactory {
                         .getEvent())).getRawPositionListeners()) {
             result.add(rawPositionReceiver);
         }
-        for (TypeController markRoundingReceiver : new MarkRoundingReceiver(
+        for (TypeController markRoundingReceiver : new MarkPassingReceiver(
                 trackedEvent, inverseEventCache.get(trackedEvent
-                        .getEvent())).getMarkRoundingListeners()) {
+                        .getEvent())).getMarkPassingListeners()) {
             result.add(markRoundingReceiver);
         }
         return result;
