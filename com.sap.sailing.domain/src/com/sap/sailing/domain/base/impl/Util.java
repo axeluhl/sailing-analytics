@@ -17,4 +17,17 @@ public class Util {
             return result;
         }
     }
+
+    public static <T> boolean contains(Iterable<T> ts, T t) {
+        if (ts instanceof Collection<?>) {
+            return ((Collection<?>) ts).contains(t);
+        } else {
+            for (T t2 : ts) {
+                if (t2.equals(t)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
 }

@@ -13,17 +13,18 @@ import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.domain.tracking.DynamicTrackedLeg;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
+import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.tractrac.clientmodule.Race;
 import com.tractrac.clientmodule.RaceCompetitor;
 import com.tractrac.clientmodule.data.ICallbackData;
 import com.tractrac.clientmodule.data.MarkPassingsData;
 
-public class MarkRoundingReceiver {
+public class MarkPassingReceiver {
     private final DynamicTrackedEvent trackedEvent;
     private final com.tractrac.clientmodule.Event tractracEvent;
     
-    public MarkRoundingReceiver(DynamicTrackedEvent trackedEvent, com.tractrac.clientmodule.Event tractracEvent) {
+    public MarkPassingReceiver(DynamicTrackedEvent trackedEvent, com.tractrac.clientmodule.Event tractracEvent) {
         super();
         this.trackedEvent = trackedEvent;
         this.tractracEvent = tractracEvent;
@@ -34,13 +35,14 @@ public class MarkRoundingReceiver {
      * course definition of a race. When this happens, a new {@link RaceDefinition} is
      * created with the respective {@link Course} and added to the {@link #event event}.
      */
-    public Iterable<TypeController> getMarkRoundingListeners() {
+    public Iterable<TypeController> getMarkPassingListeners() {
         List<TypeController> result = new ArrayList<TypeController>();
         for (final Race race : tractracEvent.getRaceList()) {
             TypeController controlPointListener = MarkPassingsData.subscribe(race,
                 new ICallbackData<RaceCompetitor, MarkPassingsData>() {
                     @Override
                     public void gotData(RaceCompetitor competitor, MarkPassingsData record, boolean isLiveData) {
+                        System.out.print("L"); // as in "Leg"
                         Competitor myCompetitor = DomainFactory.INSTANCE.getCompetitor(competitor.getCompetitor());
                         DynamicTrackedRace trackedRace = trackedEvent.getTrackedRace(DomainFactory.INSTANCE.getRaceDefinition(
                                 competitor.getRace()));
@@ -48,7 +50,8 @@ public class MarkRoundingReceiver {
                             TimePoint time = new MillisecondsTimePoint(passing.getTimestamp());
                             Waypoint passed = DomainFactory.INSTANCE.getWaypoint(passing.getControlPoint());
                             DynamicTrackedLeg finished = trackedRace.getTrackedLegFinishingAt(passed);
-                            finished.completed(myCompetitor, time);
+                            MarkPassing markPassing = DomainFactory.INSTANCE.createMarkPassing(competitor.getCompetitor(), passing);
+                            finished.completed(markPassing);
                             DynamicTrackedLeg begun = trackedRace.getTrackedLegStartingAt(passed);
                             // TODO do something smart with the pre-aggregated passing data
                         }

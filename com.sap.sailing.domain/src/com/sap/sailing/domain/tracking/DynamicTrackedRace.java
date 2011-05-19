@@ -11,7 +11,7 @@ public interface DynamicTrackedRace extends TrackedRace {
      */
     DynamicTrack<Competitor, GPSFixMoving> getTrack(Competitor competitor);
     
-    void addListener(RawListener<GPSFixMoving> listener);
+    void addListener(RawListener<Competitor, GPSFixMoving> listener);
 
     @Override
     DynamicTrackedLeg getTrackedLegFinishingAt(Waypoint endOfLeg);

@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.base;
 
+import java.util.List;
+
 /**
  * 
  * A course consists of a sequence of {@link Waypoint}s. The {@link Leg}s extend between the adjacent waypoints.
@@ -9,7 +11,7 @@ package com.sap.sailing.domain.base;
  * 
  */
 public interface Course extends Named {
-    Iterable<Leg> getLegs();
+    List<Leg> getLegs();
 
     Iterable<Waypoint> getWaypoints();
 

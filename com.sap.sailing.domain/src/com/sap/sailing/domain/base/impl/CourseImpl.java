@@ -36,7 +36,7 @@ public class CourseImpl extends NamedImpl implements Course {
     }
 
     @Override
-    public Iterable<Leg> getLegs() {
+    public List<Leg> getLegs() {
         return Collections.unmodifiableList(legs);
     }
 
