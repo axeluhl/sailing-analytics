@@ -59,7 +59,7 @@ public class MarkPositionReceiver {
                         ((DynamicTrack<Buoy, GPSFix>) trackedEvent.getTrack(buoy)).addGPSFix(DomainFactory.INSTANCE
                                 .createGPSFixMoving(record));
                     }
-                }, /* fromTime */0l, /* toTime */0l);
+                }, /* fromTime */0l, /* toTime */Long.MAX_VALUE);
         result.add(controlPointListener);
         return result;
     }

@@ -48,7 +48,7 @@ public class PositionConversionTest extends AbstractTracTracLiveTest {
                             first = false;
                         }
                     }
-                }, /* fromTime */0 /* means ALL */, /* toTime */ 0);
+                }, /* fromTime */0 /* means ALL */, /* toTime */ Long.MAX_VALUE);
         addListenersForStoredDataAndStartController(listener);
         synchronized (semaphor) {
             while (firstTracked[0] == null) {

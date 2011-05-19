@@ -39,10 +39,10 @@ public abstract class AbstractTracTracLiveTest implements Listener {
     protected AbstractTracTracLiveTest() throws URISyntaxException, MalformedURLException {
         paramUrl = new URL("http://www.traclive.dk/simulateconf/j80race12.txt");
 //        paramUrl = new URL("http://simulation.tracdev.dk/simulateconf/j80race12.txt");
-        liveUri = new URI("tcp://localhost:1621");
-        storedUri = new URI("tcp://localhost:1620");
-//        liveUri = new URI("tcp://localhost:4411");
-//        storedUri = new URI("tcp://localhost:4410");
+//        liveUri = new URI("tcp://localhost:1621");
+//        storedUri = new URI("tcp://localhost:1620");
+        liveUri = new URI("tcp://localhost:4410");
+        storedUri = new URI("tcp://localhost:4411");
     }
 
     @Before

@@ -42,7 +42,7 @@ public class RawPositionReceiver {
         List<TypeController> listeners = new ArrayList<TypeController>();
         for (Race race : tractracEvent.getRaceList()) {
             TypeController listener = CompetitorPositionRawData.subscribe(race,
-                positionListener, /* fromTime */0 /* means ALL */, /* toTime */0);
+                positionListener, /* fromTime */0 /* means ALL */, /* toTime */Long.MAX_VALUE);
             listeners.add(listener);
         }
         return listeners;
