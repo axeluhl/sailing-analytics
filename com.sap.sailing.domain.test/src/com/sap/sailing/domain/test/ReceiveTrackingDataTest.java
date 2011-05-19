@@ -74,7 +74,7 @@ public class ReceiveTrackingDataTest extends AbstractTracTracLiveTest {
         addListenersForStoredDataAndStartController(listeners.toArray(new TypeController[0]));
     }
 
-    @Ignore
+    //@Ignore
     @Test
     public void testReceiveCompetitorPosition() {
         synchronized (semaphor) {

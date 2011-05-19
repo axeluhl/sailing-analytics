@@ -24,6 +24,10 @@ import com.tractrac.clientmodule.setup.KeyValue;
 
 public abstract class AbstractTracTracLiveTest implements Listener {
 
+//    private static final String START_SIMULATOR_URL = "http://simulation.tracdev.dk/start.php";
+//    private static final String KILL_URL = "http://simulation.tracdev.dk/kill.php";
+    private static final String START_SIMULATOR_URL = "http://www.traclive.dk/simulate/start.php";
+    private static final String KILL_URL = "http://www.traclive.dk/simulate/kill.php";
     private final URL paramUrl;
     private final URI liveUri;
     private final URI storedUri;
@@ -34,8 +38,11 @@ public abstract class AbstractTracTracLiveTest implements Listener {
 
     protected AbstractTracTracLiveTest() throws URISyntaxException, MalformedURLException {
         paramUrl = new URL("http://www.traclive.dk/simulateconf/j80race12.txt");
+//        paramUrl = new URL("http://simulation.tracdev.dk/simulateconf/j80race12.txt");
         liveUri = new URI("tcp://localhost:1621");
         storedUri = new URI("tcp://localhost:1620");
+//        liveUri = new URI("tcp://localhost:4411");
+//        storedUri = new URI("tcp://localhost:4410");
     }
 
     @Before
@@ -89,7 +96,7 @@ public abstract class AbstractTracTracLiveTest implements Listener {
     private void startRaceSimulation(int speedMultiplier, int raceNumber)
             throws MalformedURLException, IOException {
         URL url = new URL(
-                "http://www.traclive.dk/simulate/start.php?racenumber="+raceNumber+"&speed="+
+                START_SIMULATOR_URL+"?racenumber="+raceNumber+"&speed="+
                 speedMultiplier+"&replaytime=sample");
         URLConnection conn = url.openConnection();
         authorize(conn);
@@ -98,7 +105,7 @@ public abstract class AbstractTracTracLiveTest implements Listener {
 
     private void killAllRunningSimulations() throws IOException,
             MalformedURLException {
-        URL url = new URL("http://www.traclive.dk/simulate/kill.php");
+        URL url = new URL(KILL_URL);
         URLConnection conn = url.openConnection();
         authorize(conn);
         conn.getContent(new Class[] { String.class });
@@ -150,11 +157,11 @@ public abstract class AbstractTracTracLiveTest implements Listener {
 
     @Override
     public void storedDataError(String arg0) {
-        // TODO Auto-generated method stub
+        System.err.println("Error with stored data "+arg0);
     }
 
     @Override
     public void liveDataConnectError(String arg0) {
-        // TODO Auto-generated method stub
+        System.err.println("Error with live data "+arg0);
     }
 }
