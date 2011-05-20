@@ -9,6 +9,7 @@ import java.util.Set;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Buoy;
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Waypoint;
@@ -95,6 +96,18 @@ public class TrackedEventImpl implements TrackedEvent {
                 listener.raceAdded(trackedRace);
             }
         }
+    }
+
+    @Override
+    public int getTotalPoints(Competitor competitor) {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    @Override
+    public int getNetPoints(Competitor competitor) {
+        // TODO Auto-generated method stub
+        return 0;
     }
 
 }

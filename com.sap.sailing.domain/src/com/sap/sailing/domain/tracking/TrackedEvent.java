@@ -2,6 +2,7 @@ package com.sap.sailing.domain.tracking;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Buoy;
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Gate;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -29,4 +30,9 @@ public interface TrackedEvent {
      * won't miss any tracked race.
      */
     void addRaceListener(RaceListener listener);
+    
+    int getTotalPoints(Competitor competitor);
+    
+    int getNetPoints(Competitor competitor);
+    
 }

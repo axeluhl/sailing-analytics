@@ -94,13 +94,14 @@ public abstract class AbstractTracTracLiveTest implements Listener {
     }
 
     private void startRaceSimulation(int speedMultiplier, int raceNumber)
-            throws MalformedURLException, IOException {
+            throws MalformedURLException, IOException, InterruptedException {
         URL url = new URL(
                 START_SIMULATOR_URL+"?racenumber="+raceNumber+"&speed="+
                 speedMultiplier+"&replaytime=sample");
         URLConnection conn = url.openConnection();
         authorize(conn);
         conn.getContent(new Class[] { String.class });
+        Thread.sleep(2000);
     }
 
     private void killAllRunningSimulations() throws IOException,

@@ -2,10 +2,8 @@ package com.sap.sailing.domain.base.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
+import java.util.Iterator;
 import java.util.Set;
 
 import com.sap.sailing.domain.base.BoatClass;
@@ -14,37 +12,34 @@ import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
 
 public class EventImpl extends NamedImpl implements Event {
-    private final Map<BoatClass, Collection<RaceDefinition>> races;
+    private final Collection<RaceDefinition> races;
     
     public EventImpl(String name) {
         super(name);
-        races = new HashMap<BoatClass, Collection<RaceDefinition>>();
+        races = new ArrayList<RaceDefinition>();
     }
 
     @Override
     public Iterable<RaceDefinition> getAllRaces() {
-        return new CompositeIterable<RaceDefinition>(races.values());
+        return races;
     }
     
     @Override
     public void addRace(RaceDefinition race) {
-        Collection<RaceDefinition> rc = races.get(race.getBoatClass());
-        if (rc == null) {
-            rc = new ArrayList<RaceDefinition>();
-            races.put(race.getBoatClass(), rc);
+        if (getBoatClass() != null && race.getBoatClass() != getBoatClass()) {
+            throw new IllegalArgumentException("Boat class "+race.getBoatClass()+" doesn't match event's boat class "+getBoatClass());
         }
-        rc.add(race);
+        races.add(race);
     }
 
     @Override
-    public Iterable<RaceDefinition> getAllRaces(BoatClass boatClass) {
-        Collection<RaceDefinition> racesInClass = races.get(boatClass);
-        return racesInClass == null ? null : Collections.unmodifiableCollection(racesInClass);
-    }
-
-    @Override
-    public Iterable<BoatClass> getClasses() {
-        return races.keySet();
+    public BoatClass getBoatClass() {
+        Iterator<RaceDefinition> raceIter = getAllRaces().iterator();
+        if (raceIter.hasNext()) {
+            return raceIter.next().getBoatClass();
+        } else {
+            return null;
+        }
     }
 
     @Override

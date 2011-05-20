@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.tracking;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.Waypoint;
@@ -31,5 +32,15 @@ public interface TrackedRace {
      * the last known leg for that competitor is returned. 
      */
     TrackedLegOfCompetitor getTrackedLeg(Competitor competitor, TimePoint at);
+    
+    TrackedLegOfCompetitor getTrackedLeg(Competitor competitor, Leg leg);
+    
+    TimePoint getTimePointOfLastUpdate();
+    
+    int getRankDifference(Competitor competitor, Leg leg);
+    
+    int getRank(Competitor competitor, TimePoint timePoint);
+    
+    int getRank(Competitor competitor, Waypoint waypoint);
     
 }

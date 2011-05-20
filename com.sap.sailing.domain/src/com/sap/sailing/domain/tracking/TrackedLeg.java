@@ -14,5 +14,4 @@ public interface TrackedLeg {
 
     int getRankAtEndOfLeg(Competitor competitor);
 
-    int getRankDifference(Competitor competitor);
 }

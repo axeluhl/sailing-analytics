@@ -3,9 +3,7 @@ package com.sap.sailing.domain.base;
 public interface Event extends Named {
     Iterable<RaceDefinition> getAllRaces();
     
-    Iterable<RaceDefinition> getAllRaces(BoatClass boatClass);
-    
-    Iterable<BoatClass> getClasses();
+    BoatClass getBoatClass();
     
     Iterable<Competitor> getCompetitors();
 

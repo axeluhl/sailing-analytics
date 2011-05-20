@@ -42,7 +42,7 @@ public class MarkPassingReceiver {
                 new ICallbackData<RaceCompetitor, MarkPassingsData>() {
                     @Override
                     public void gotData(RaceCompetitor competitor, MarkPassingsData record, boolean isLiveData) {
-                        System.out.print("L"); // as in "Leg"
+//                        System.out.print("L"); // as in "Leg"
                         Competitor myCompetitor = DomainFactory.INSTANCE.getCompetitor(competitor.getCompetitor());
                         DynamicTrackedRace trackedRace = trackedEvent.getTrackedRace(DomainFactory.INSTANCE.getRaceDefinition(
                                 competitor.getRace()));

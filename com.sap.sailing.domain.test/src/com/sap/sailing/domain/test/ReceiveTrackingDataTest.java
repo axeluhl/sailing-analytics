@@ -46,7 +46,7 @@ public class ReceiveTrackingDataTest extends AbstractTracTracLiveTest {
             
             @Override
             public void gpsFixReceived(GPSFixMoving fix, Competitor competitor) {
-                System.out.println("Received fix "+fix);
+//                System.out.println("Received fix "+fix);
                 synchronized (semaphor) {
                     if (first) {
                         firstTracked[0] = competitor;
@@ -87,18 +87,6 @@ public class ReceiveTrackingDataTest extends AbstractTracTracLiveTest {
         }
         assertNotNull(firstTracked[0]);
         assertNotNull(firstData[0]);
-    }
-
-    @Override
-    public void liveDataConnectError(String arg0) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    public void storedDataError(String arg0) {
-        // TODO Auto-generated method stub
-        
     }
 
 }

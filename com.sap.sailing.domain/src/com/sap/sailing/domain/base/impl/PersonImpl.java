@@ -9,11 +9,13 @@ import com.sap.sailing.domain.base.Person;
 public class PersonImpl extends NamedImpl implements Person {
     private final Nationality nationality;
     private final Date dateOfBirth;
+    private final String description;
     
-    public PersonImpl(String name, Nationality nationality, Date dateOfBirth) {
+    public PersonImpl(String name, Nationality nationality, Date dateOfBirth, String description) {
         super(name);
         this.nationality = nationality;
         this.dateOfBirth = dateOfBirth;
+        this.description = description;
     }
 
     @Override
@@ -29,6 +31,11 @@ public class PersonImpl extends NamedImpl implements Person {
     @Override
     public Date getDateOfBirth() {
         return dateOfBirth;
+    }
+
+    @Override
+    public String getDescription() {
+        return description;
     }
 
 }

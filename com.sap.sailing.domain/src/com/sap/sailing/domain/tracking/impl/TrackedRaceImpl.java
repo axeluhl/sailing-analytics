@@ -123,4 +123,34 @@ public class TrackedRaceImpl implements TrackedRace {
         return trackedLegs.get(leg);
     }
 
+    @Override
+    public TrackedLegOfCompetitor getTrackedLeg(Competitor competitor, Leg leg) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public TimePoint getTimePointOfLastUpdate() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public int getRankDifference(Competitor competitor, Leg leg) {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    @Override
+    public int getRank(Competitor competitor, TimePoint timePoint) {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    @Override
+    public int getRank(Competitor competitor, Waypoint waypoint) {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
 }

@@ -158,7 +158,7 @@ public class DomainFactoryImpl implements DomainFactory {
     public Person getPerson(String name, Nationality nationality) {
         Person result = personCache.get(name);
         if (result == null) {
-            result = new PersonImpl(name, nationality, /* date of birth unknown */ null);
+            result = new PersonImpl(name, nationality, /* date of birth unknown */ null, /* description */ "");
             personCache.put(name, result);
         }
         return result;
