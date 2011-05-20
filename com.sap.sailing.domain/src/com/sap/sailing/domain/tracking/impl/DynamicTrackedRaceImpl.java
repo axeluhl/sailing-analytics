@@ -1,6 +1,8 @@
 package com.sap.sailing.domain.tracking.impl;
 
+import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.NavigableSet;
 import java.util.Set;
 
@@ -80,10 +82,25 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
 
     @Override
     public void updateMarkPassings(Competitor competitor, Iterable<MarkPassing> markPassings) {
+        clearMarkPassings(competitor);
         NavigableSet<MarkPassing> competitorMarkPassings = getMarkPassings(competitor);
-        competitorMarkPassings.clear();
         for (MarkPassing markPassing : markPassings) {
             competitorMarkPassings.add(markPassing);
+            getMarkPassingsInOrder(markPassing.getWaypoint()).add(markPassing);
+        }
+    }
+    
+    @Override
+    public Collection<MarkPassing> getMarkPassingsInOrder(Waypoint waypoint) {
+        return (Collection<MarkPassing>) super.getMarkPassingsInOrder(waypoint);
+    }
+
+    private void clearMarkPassings(Competitor competitor) {
+        Iterator<MarkPassing> mpIter = getMarkPassings(competitor).iterator();
+        while (mpIter.hasNext()) {
+            MarkPassing mp = mpIter.next();
+            mpIter.remove();
+            getMarkPassingsInOrder(mp.getWaypoint()).remove(mp);
         }
     }
 

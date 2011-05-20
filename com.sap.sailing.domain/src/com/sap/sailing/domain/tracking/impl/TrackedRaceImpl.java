@@ -29,7 +29,8 @@ public class TrackedRaceImpl implements TrackedRace {
     private final LinkedHashMap<Leg, TrackedLeg> trackedLegs;
     
     private final Map<Competitor, Track<Competitor, GPSFixMoving>> tracks;
-    private final Map<Competitor, NavigableSet<MarkPassing>> markPassings;
+    private final Map<Competitor, NavigableSet<MarkPassing>> markPassingsForCompetitor;
+    private final Map<Waypoint, NavigableSet<MarkPassing>> markPassingsForWaypoint;
     
     public TrackedRaceImpl(RaceDefinition race) {
         super();
@@ -39,16 +40,25 @@ public class TrackedRaceImpl implements TrackedRace {
             trackedLegsMap.put(leg, new DynamicTrackedLegImpl(this, leg, race.getCompetitors()));
         }
         trackedLegs = trackedLegsMap;
-        markPassings = new HashMap<Competitor, NavigableSet<MarkPassing>>();
+        markPassingsForCompetitor = new HashMap<Competitor, NavigableSet<MarkPassing>>();
         tracks = new HashMap<Competitor, Track<Competitor, GPSFixMoving>>();
         for (Competitor competitor : race.getCompetitors()) {
-            markPassings.put(competitor, new TreeSet<MarkPassing>(TimedComparator.INSTANCE));
+            markPassingsForCompetitor.put(competitor, new TreeSet<MarkPassing>(TimedComparator.INSTANCE));
             tracks.put(competitor, new DynamicTrackImpl<Competitor, GPSFixMoving>(competitor));
+        }
+        markPassingsForWaypoint = new HashMap<Waypoint, NavigableSet<MarkPassing>>();
+        for (Waypoint waypoint : race.getCourse().getWaypoints()) {
+            markPassingsForWaypoint.put(waypoint, new TreeSet<MarkPassing>(TimedComparator.INSTANCE));
         }
     }
     
     protected NavigableSet<MarkPassing> getMarkPassings(Competitor competitor) {
-        return markPassings.get(competitor);
+        return markPassingsForCompetitor.get(competitor);
+    }
+    
+    @Override
+    public Iterable<MarkPassing> getMarkPassingsInOrder(Waypoint waypoint) {
+        return markPassingsForWaypoint.get(waypoint);
     }
 
     @Override
@@ -113,7 +123,7 @@ public class TrackedRaceImpl implements TrackedRace {
 
     @Override
     public TrackedLegOfCompetitor getTrackedLeg(Competitor competitor, TimePoint at) {
-        NavigableSet<MarkPassing> roundings = markPassings.get(competitor);
+        NavigableSet<MarkPassing> roundings = markPassingsForCompetitor.get(competitor);
         MarkPassing lastBeforeOrAt = roundings.floor(new DummyMarkPassingWithTimePointOnly(at));
         TrackedLegOfCompetitor result = null;
         if (lastBeforeOrAt != null) {

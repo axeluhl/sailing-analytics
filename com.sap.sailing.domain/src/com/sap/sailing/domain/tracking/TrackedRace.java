@@ -48,5 +48,7 @@ public interface TrackedRace {
     int getRank(Competitor competitor, TimePoint timePoint);
     
     int getRank(Competitor competitor, Waypoint waypoint);
+
+    Iterable<MarkPassing> getMarkPassingsInOrder(Waypoint waypoint);
     
 }
