@@ -18,4 +18,13 @@ public interface DynamicTrackedRace extends TrackedRace {
 
     @Override
     DynamicTrackedLeg getTrackedLegStartingAt(Waypoint startOfLeg);
+
+    /**
+     * Updates all mark passings for <code>competitor</code> for this race. The
+     * mark passings must be provided in the order of the race's course and in
+     * increasing time stamps. Calling this method replaces all previous mark passings
+     * for this race for <code>competitor</code> and ensures that the "leaderboard"
+     * and all other derived information are updated accordingly. 
+     */
+    void updateMarkPassings(Competitor competitor, Iterable<MarkPassing> markPassings);
 }

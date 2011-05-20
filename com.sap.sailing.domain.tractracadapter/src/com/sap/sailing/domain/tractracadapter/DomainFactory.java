@@ -8,6 +8,8 @@ import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.Person;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Team;
+import com.sap.sailing.domain.base.TimePoint;
+import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
@@ -20,7 +22,6 @@ import com.tractrac.clientmodule.Event;
 import com.tractrac.clientmodule.Race;
 import com.tractrac.clientmodule.data.ControlPointPositionData;
 import com.tractrac.clientmodule.data.DataController;
-import com.tractrac.clientmodule.data.MarkPassingsData.Entry;
 import com.tractrac.clientmodule.data.Position;
 
 public interface DomainFactory {
@@ -30,7 +31,7 @@ public interface DomainFactory {
 
     com.sap.sailing.domain.base.TimePoint createTimePoint(long timestamp);
 
-    com.sap.sailing.domain.base.Waypoint getWaypoint(
+    com.sap.sailing.domain.base.Waypoint createWaypoint(
             ControlPoint controlPoint);
 
     Course createCourse(String name, Iterable<ControlPoint> controlPoints);
@@ -90,6 +91,8 @@ public interface DomainFactory {
      */
     Buoy getBuoy(ControlPoint controlPoint, ControlPointPositionData record);
 
-    MarkPassing createMarkPassing(Competitor competitor, Entry passing);
+    com.sap.sailing.domain.base.ControlPoint getControlPoint(ControlPoint controlPoint);
+
+    MarkPassing createMarkPassing(com.tractrac.clientmodule.Competitor competitor, Waypoint passed, TimePoint time);
 
 }

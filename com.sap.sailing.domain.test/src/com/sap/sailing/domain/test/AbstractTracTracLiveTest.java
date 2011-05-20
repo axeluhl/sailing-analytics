@@ -24,8 +24,6 @@ import com.tractrac.clientmodule.setup.KeyValue;
 
 public abstract class AbstractTracTracLiveTest implements Listener {
 
-//    private static final String START_SIMULATOR_URL = "http://simulation.tracdev.dk/start.php";
-//    private static final String KILL_URL = "http://simulation.tracdev.dk/kill.php";
     private static final String START_SIMULATOR_URL = "http://www.traclive.dk/simulate/start.php";
     private static final String KILL_URL = "http://www.traclive.dk/simulate/kill.php";
     private final URL paramUrl;
@@ -38,9 +36,6 @@ public abstract class AbstractTracTracLiveTest implements Listener {
 
     protected AbstractTracTracLiveTest() throws URISyntaxException, MalformedURLException {
         paramUrl = new URL("http://www.traclive.dk/simulateconf/j80race12.txt");
-//        paramUrl = new URL("http://simulation.tracdev.dk/simulateconf/j80race12.txt");
-//        liveUri = new URI("tcp://localhost:1621");
-//        storedUri = new URI("tcp://localhost:1620");
         liveUri = new URI("tcp://localhost:4410");
         storedUri = new URI("tcp://localhost:4411");
     }
@@ -101,7 +96,6 @@ public abstract class AbstractTracTracLiveTest implements Listener {
         URLConnection conn = url.openConnection();
         authorize(conn);
         conn.getContent(new Class[] { String.class });
-        Thread.sleep(2000);
     }
 
     private void killAllRunningSimulations() throws IOException,

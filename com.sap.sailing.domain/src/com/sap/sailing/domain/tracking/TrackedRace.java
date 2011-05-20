@@ -15,6 +15,12 @@ public interface TrackedRace {
     
     Iterable<TrackedLeg> getTrackedLegs();
     
+    /**
+     * Tracking information about the leg <code>competitor</code> is currently on, or
+     * <code>null</code> if the competitor hasn't started any leg yet.
+     */
+    TrackedLegOfCompetitor getCurrentLeg(Competitor competitor);
+    
     TrackedLeg getTrackedLegFinishingAt(Waypoint endOfLeg);
     
     TrackedLeg getTrackedLegStartingAt(Waypoint startOfLeg);

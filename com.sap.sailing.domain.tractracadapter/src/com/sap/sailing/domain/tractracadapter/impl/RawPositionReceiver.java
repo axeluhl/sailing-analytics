@@ -6,6 +6,7 @@ import java.util.List;
 import com.maptrack.client.io.TypeController;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.impl.Util.Triple;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.TrackedEvent;
@@ -15,9 +16,10 @@ import com.tractrac.clientmodule.RaceCompetitor;
 import com.tractrac.clientmodule.data.CompetitorPositionRawData;
 import com.tractrac.clientmodule.data.ICallbackData;
 
-public class RawPositionReceiver {
+public class RawPositionReceiver extends AbstractReceiverWithQueue<RaceCompetitor, CompetitorPositionRawData, Boolean> {
     private final TrackedEvent trackedEvent;
     private final com.tractrac.clientmodule.Event tractracEvent;
+    private final DomainFactory domainFactory = DomainFactory.INSTANCE;
     
     public RawPositionReceiver(TrackedEvent trackedEvent, com.tractrac.clientmodule.Event tractracEvent) {
         super();
@@ -25,18 +27,14 @@ public class RawPositionReceiver {
         this.tractracEvent = tractracEvent;
     }
     
+    /**
+     * Obtains the listener and starts a thread of this object which will block for events received.
+     */
     public Iterable<TypeController> getRawPositionListeners() {
-        final DomainFactory domainFactory = DomainFactory.INSTANCE;
         ICallbackData<RaceCompetitor, CompetitorPositionRawData> positionListener = new ICallbackData<RaceCompetitor, CompetitorPositionRawData>() {
             public void gotData(RaceCompetitor tracked,
                     CompetitorPositionRawData record, boolean isLiveData) {
-//                System.out.print("P");
-                Race race = tracked.getRace();
-                RaceDefinition raceDefinition = domainFactory.getRaceDefinition(race);
-                DynamicTrackedRace trackedRace = (DynamicTrackedRace) trackedEvent.getTrackedRace(raceDefinition);
-                GPSFixMoving fix = domainFactory.createGPSFixMoving(record);
-                Competitor competitor = domainFactory.getCompetitor(tracked.getCompetitor());
-                trackedRace.recordFix(competitor, fix);
+                enqueue(new Triple<RaceCompetitor, CompetitorPositionRawData, Boolean>(tracked, record, isLiveData));
             }
         };
         List<TypeController> listeners = new ArrayList<TypeController>();
@@ -45,6 +43,18 @@ public class RawPositionReceiver {
                 positionListener, /* fromTime */0 /* means ALL */, /* toTime */Long.MAX_VALUE);
             listeners.add(listener);
         }
+        new Thread(this, getClass().getName()).start();
         return listeners;
+    }
+
+    @Override
+    protected void handleEvent(Triple<RaceCompetitor, CompetitorPositionRawData, Boolean> event) {
+        System.out.print("P");
+        Race race = event.getA().getRace();
+        RaceDefinition raceDefinition = domainFactory.getRaceDefinition(race);
+        DynamicTrackedRace trackedRace = (DynamicTrackedRace) trackedEvent.getTrackedRace(raceDefinition);
+        GPSFixMoving fix = domainFactory.createGPSFixMoving(event.getB());
+        Competitor competitor = domainFactory.getCompetitor(event.getA().getCompetitor());
+        trackedRace.recordFix(competitor, fix);
     }
 }

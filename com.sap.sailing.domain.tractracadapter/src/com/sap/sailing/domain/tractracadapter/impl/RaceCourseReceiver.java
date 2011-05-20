@@ -47,7 +47,7 @@ public class RaceCourseReceiver {
             TypeController routeListener = RouteData.subscribe(race, new ICallbackData<Route, RouteData>() {
                 @Override
                 public void gotData(Route route, RouteData record, boolean isLiveData) {
-//                    System.out.print("R");
+                    System.out.print("R");
                     Course course = DomainFactory.INSTANCE.createCourse(route.getName(), record.getPoints());
                     RaceDefinition raceDefinition = DomainFactory.INSTANCE.createRaceDefinition(race, course);
                     trackedEvent.getEvent().addRace(raceDefinition);

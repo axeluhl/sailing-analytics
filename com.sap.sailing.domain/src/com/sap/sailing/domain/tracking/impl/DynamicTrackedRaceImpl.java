@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.tracking.impl;
 
 import java.util.HashSet;
+import java.util.NavigableSet;
 import java.util.Set;
 
 import com.sap.sailing.domain.base.Competitor;
@@ -75,6 +76,15 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     public void legCompleted(MarkPassing markPassing) {
         DynamicTrackedLeg trackedLeg = getTrackedLegFinishingAt(markPassing.getWaypoint());
         trackedLeg.completed(markPassing);
+    }
+
+    @Override
+    public void updateMarkPassings(Competitor competitor, Iterable<MarkPassing> markPassings) {
+        NavigableSet<MarkPassing> competitorMarkPassings = getMarkPassings(competitor);
+        competitorMarkPassings.clear();
+        for (MarkPassing markPassing : markPassings) {
+            competitorMarkPassings.add(markPassing);
+        }
     }
 
 }

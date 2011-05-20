@@ -14,6 +14,15 @@ public interface Course extends Named {
     List<Leg> getLegs();
 
     Iterable<Waypoint> getWaypoints();
+    
+    /**
+     * Starts searching at position <code>start</code> in {@link #getWaypoints()} for a waypoint
+     * whose {@link Waypoint#getControlPoint() control point} is identical to <code>controlPoint</code>.
+     * If no such waypoint is found, <code>null</code> is returned.
+     * 
+     * @param start 0-based
+     */
+    Waypoint getWaypointForControlPoint(ControlPoint controlPoint, int start);
 
     /**
      * Position of the waypoint in {@link #getWaypoints()}, 0-based, or -1

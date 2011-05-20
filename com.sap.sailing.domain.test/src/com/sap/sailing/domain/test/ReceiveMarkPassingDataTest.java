@@ -9,13 +9,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.maptrack.client.io.TypeController;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.base.impl.Util;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
@@ -80,7 +78,6 @@ public class ReceiveMarkPassingDataTest extends AbstractTracTracLiveTest {
         }
     }
 
-    @Ignore("Currently no live data seems to be received")
     @Test
     public void testReceiveCompetitorPosition() {
         synchronized (semaphor) {
@@ -97,9 +94,16 @@ public class ReceiveMarkPassingDataTest extends AbstractTracTracLiveTest {
         assertTrue(firstData[0].getPassings().size() > 0);
         MarkPassingsData.Entry entry = firstData[0].getPassings().iterator().next();
         assertNotNull(entry);
-        Waypoint waypoint = DomainFactory.INSTANCE.getWaypoint(entry.getControlPoint());
-        assertNotNull(waypoint);
-        assertTrue(Util.contains(raceDefinition.getCourse().getWaypoints(), waypoint));
+        // we expect to find the mark passings in order, so as we traverse the course for
+        // its waypoints and compare their control points to the control point received,
+        // the first waypoint is used
+        boolean found = false;
+        for (Waypoint waypoint : raceDefinition.getCourse().getWaypoints()) {
+            if (waypoint.getControlPoint() == DomainFactory.INSTANCE.getControlPoint(entry.getControlPoint())) {
+                found = true;
+            }
+        }
+        assertTrue(found);
     }
 
 }

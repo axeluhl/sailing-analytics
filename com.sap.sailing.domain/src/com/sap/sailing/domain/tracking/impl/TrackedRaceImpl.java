@@ -29,7 +29,7 @@ public class TrackedRaceImpl implements TrackedRace {
     private final LinkedHashMap<Leg, TrackedLeg> trackedLegs;
     
     private final Map<Competitor, Track<Competitor, GPSFixMoving>> tracks;
-    private final Map<Competitor, NavigableSet<MarkPassing>> markRoundings;
+    private final Map<Competitor, NavigableSet<MarkPassing>> markPassings;
     
     public TrackedRaceImpl(RaceDefinition race) {
         super();
@@ -39,12 +39,16 @@ public class TrackedRaceImpl implements TrackedRace {
             trackedLegsMap.put(leg, new DynamicTrackedLegImpl(this, leg, race.getCompetitors()));
         }
         trackedLegs = trackedLegsMap;
-        markRoundings = new HashMap<Competitor, NavigableSet<MarkPassing>>();
+        markPassings = new HashMap<Competitor, NavigableSet<MarkPassing>>();
         tracks = new HashMap<Competitor, Track<Competitor, GPSFixMoving>>();
         for (Competitor competitor : race.getCompetitors()) {
-            markRoundings.put(competitor, new TreeSet<MarkPassing>(TimedComparator.INSTANCE));
+            markPassings.put(competitor, new TreeSet<MarkPassing>(TimedComparator.INSTANCE));
             tracks.put(competitor, new DynamicTrackImpl<Competitor, GPSFixMoving>(competitor));
         }
+    }
+    
+    protected NavigableSet<MarkPassing> getMarkPassings(Competitor competitor) {
+        return markPassings.get(competitor);
     }
 
     @Override
@@ -109,7 +113,7 @@ public class TrackedRaceImpl implements TrackedRace {
 
     @Override
     public TrackedLegOfCompetitor getTrackedLeg(Competitor competitor, TimePoint at) {
-        NavigableSet<MarkPassing> roundings = markRoundings.get(competitor);
+        NavigableSet<MarkPassing> roundings = markPassings.get(competitor);
         MarkPassing lastBeforeOrAt = roundings.floor(new DummyMarkPassingWithTimePointOnly(at));
         TrackedLegOfCompetitor result = null;
         if (lastBeforeOrAt != null) {
@@ -151,6 +155,16 @@ public class TrackedRaceImpl implements TrackedRace {
     public int getRank(Competitor competitor, Waypoint waypoint) {
         // TODO Auto-generated method stub
         return 0;
+    }
+
+    @Override
+    public TrackedLegOfCompetitor getCurrentLeg(Competitor competitor) {
+        TrackedLegOfCompetitor result = null;
+        // TODO
+//        for (TrackedLeg l : trackedLegs.values()) {
+//            result = l;
+//        }
+        return result;
     }
 
 }

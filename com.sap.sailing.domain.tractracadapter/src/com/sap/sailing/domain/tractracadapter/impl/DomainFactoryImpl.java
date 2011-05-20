@@ -2,6 +2,7 @@ package com.sap.sailing.domain.tractracadapter.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.WeakHashMap;
 
@@ -12,7 +13,6 @@ import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Event;
-import com.sap.sailing.domain.base.Gate;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.Person;
 import com.sap.sailing.domain.base.Position;
@@ -48,7 +48,6 @@ import com.tractrac.clientmodule.ControlPoint;
 import com.tractrac.clientmodule.Race;
 import com.tractrac.clientmodule.RaceCompetitor;
 import com.tractrac.clientmodule.data.ControlPointPositionData;
-import com.tractrac.clientmodule.data.MarkPassingsData.Entry;
 
 public class DomainFactoryImpl implements DomainFactory {
     private final WeakHashMap<ControlPoint, com.sap.sailing.domain.base.ControlPoint> controlPointCache =
@@ -98,7 +97,12 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public Waypoint getWaypoint(ControlPoint controlPoint) {
+    public Waypoint createWaypoint(ControlPoint controlPoint) {
+        com.sap.sailing.domain.base.ControlPoint domainControlPoint = getControlPoint(controlPoint);
+        return new WaypointImpl(domainControlPoint);
+    }
+
+    public com.sap.sailing.domain.base.ControlPoint getControlPoint(ControlPoint controlPoint) {
         com.sap.sailing.domain.base.ControlPoint domainControlPoint = controlPointCache.get(controlPoint);
         if (domainControlPoint == null) {
             if (controlPoint.getHasTwoPoints()) {
@@ -112,14 +116,14 @@ public class DomainFactoryImpl implements DomainFactory {
             }
         }
         controlPointCache.put(controlPoint, domainControlPoint);
-        return new WaypointImpl(domainControlPoint);
+        return domainControlPoint;
     }
     
     @Override
     public Course createCourse(String name, Iterable<ControlPoint> controlPoints) {
         List<Waypoint> waypointList = new ArrayList<Waypoint>();
         for (ControlPoint controlPoint : controlPoints) {
-            Waypoint waypoint = getWaypoint(controlPoint);
+            Waypoint waypoint = createWaypoint(controlPoint);
             waypointList.add(waypoint);
         }
         return new CourseImpl(name, waypointList);
@@ -277,20 +281,25 @@ public class DomainFactoryImpl implements DomainFactory {
 
     @Override
     public Buoy getBuoy(ControlPoint controlPoint, ControlPointPositionData record) {
-        Waypoint myWaypoint = getWaypoint(controlPoint);
+        com.sap.sailing.domain.base.ControlPoint myControlPoint = getControlPoint(controlPoint);
         Buoy result;
+        Iterator<Buoy> iter = myControlPoint.getBuoys().iterator();
         if (controlPoint.getHasTwoPoints()) {
-            result = record.getIndex() == 0 ? ((Gate) myWaypoint.getControlPoint()).getLeft() : ((Gate) myWaypoint.getControlPoint()).getRight();
+            if (record.getIndex() == 0) {
+                result = iter.next();
+            } else {
+                iter.next();
+                result = iter.next();
+            }
         } else {
-            result = myWaypoint.getControlPoint().getBuoys().iterator().next();
+            result = iter.next();
         }
         return result;
     }
 
     @Override
-    public MarkPassing createMarkPassing(com.tractrac.clientmodule.Competitor competitor, Entry passing) {
-        MarkPassing result = new MarkPassingImpl(createTimePoint(passing.getTimestamp()),
-                getWaypoint(passing.getControlPoint()), getCompetitor(competitor));
+    public MarkPassing createMarkPassing(com.tractrac.clientmodule.Competitor competitor, Waypoint passed, TimePoint time) {
+        MarkPassing result = new MarkPassingImpl(time, passed, getCompetitor(competitor));
         return result;
     }
 

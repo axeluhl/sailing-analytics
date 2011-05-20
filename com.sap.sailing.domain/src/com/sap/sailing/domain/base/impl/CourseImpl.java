@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Waypoint;
@@ -69,6 +70,21 @@ public class CourseImpl extends NamedImpl implements Course {
             result = indexEntry;
         }
         return result;
+    }
+
+    @Override
+    public Waypoint getWaypointForControlPoint(ControlPoint controlPoint, int start) {
+        if (start > legs.size()) {
+            throw new IllegalArgumentException("Starting to search beyond end of course: "+start+" vs. "+(legs.size()+1));
+        }
+        int i=0;
+        for (Waypoint waypoint : getWaypoints()) {
+            if (i >= start && waypoint.getControlPoint() == controlPoint) {
+                return waypoint;
+            }
+            i++;
+        }
+        return null;
     }
     
 }

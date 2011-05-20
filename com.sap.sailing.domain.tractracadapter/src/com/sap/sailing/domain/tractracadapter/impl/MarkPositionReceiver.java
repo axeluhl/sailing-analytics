@@ -7,6 +7,7 @@ import com.maptrack.client.io.TypeController;
 import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.impl.Util.Triple;
 import com.sap.sailing.domain.tracking.DynamicTrack;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.Track;
@@ -27,7 +28,7 @@ import com.tractrac.clientmodule.data.ICallbackData;
  * @author Axel Uhl (d043530)
  * 
  */
-public class MarkPositionReceiver {
+public class MarkPositionReceiver extends AbstractReceiverWithQueue<ControlPoint, ControlPointPositionData, Boolean> {
     private final TrackedEvent trackedEvent;
     private final com.tractrac.clientmodule.Event tractracEvent;
     private int received;
@@ -41,7 +42,8 @@ public class MarkPositionReceiver {
     /**
      * The listeners returned will, when added to a controller, receive events about the
      * position changes of marks during a race. Receiving such an event updates the Buoy's
-     * {@link Track} in the {@link TrackedEvent}.
+     * {@link Track} in the {@link TrackedEvent}. Starts a thread for this receiver,
+     * blocking for events received.
      */
     public Iterable<TypeController> getControlPointListeners() {
         List<TypeController> result = new ArrayList<TypeController>();
@@ -49,19 +51,25 @@ public class MarkPositionReceiver {
                 new ICallbackData<ControlPoint, ControlPointPositionData>() {
                     @Override
                     public void gotData(ControlPoint controlPoint, ControlPointPositionData record, boolean isLiveData) {
-                        if (received++ % 1000 == 0) {
-                            System.out.print("M");
-                            if ((received / 1000 + 1) % 80 == 0) {
-                                System.out.println();
-                            }
-                        }
-                        Buoy buoy = DomainFactory.INSTANCE.getBuoy(controlPoint, record);
-                        ((DynamicTrack<Buoy, GPSFix>) trackedEvent.getTrack(buoy)).addGPSFix(DomainFactory.INSTANCE
-                                .createGPSFixMoving(record));
+                        enqueue(new Triple<ControlPoint, ControlPointPositionData, Boolean>(controlPoint, record, isLiveData));
                     }
                 }, /* fromTime */0l, /* toTime */Long.MAX_VALUE);
         result.add(controlPointListener);
+        new Thread(this, getClass().getName()).start();
         return result;
+    }
+
+    @Override
+    protected void handleEvent(Triple<ControlPoint, ControlPointPositionData, Boolean> event) {
+        if (received++ % 1000 == 0) {
+            System.out.print("M");
+            if ((received / 1000 + 1) % 80 == 0) {
+                System.out.println();
+            }
+        }
+        Buoy buoy = DomainFactory.INSTANCE.getBuoy(event.getA(), event.getB());
+        ((DynamicTrack<Buoy, GPSFix>) trackedEvent.getTrack(buoy)).addGPSFix(DomainFactory.INSTANCE
+                .createGPSFixMoving(event.getB()));
     }
 
 }
