@@ -8,6 +8,7 @@ import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.Speed;
 import com.sap.sailing.domain.base.TimePoint;
+import com.sap.sailing.domain.base.impl.KilometersPerHourSpeedImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
@@ -135,9 +136,14 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
         return max;
     }
 
-    private Speed averageSpeed(Speed fixSpeed, Speed calculatedSpeed) {
-        // TODO Auto-generated method stub
-        return null;
+    private Speed averageSpeed(Speed... speeds) {
+        double sumInKMH = 0;
+        int count = 0;
+        for (Speed speed : speeds) {
+            sumInKMH += speed.getKilometersPerHour();
+            count++;
+        }
+        return new KilometersPerHourSpeedImpl(sumInKMH/count);
     }
 
     @Override
