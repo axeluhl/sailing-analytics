@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.tracking;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.Waypoint;
 
 public interface DynamicTrackedRace extends TrackedRace {
@@ -29,4 +30,8 @@ public interface DynamicTrackedRace extends TrackedRace {
      * and all other derived information are updated accordingly. 
      */
     void updateMarkPassings(Competitor competitor, Iterable<MarkPassing> markPassings);
+
+    void setStart(TimePoint start);
+
+    void setFirstFinish(TimePoint stop);
 }

@@ -14,6 +14,8 @@ public abstract class AbstractTimePoint implements TimePoint {
         long milliDiff = asMillis() - o.asMillis();
         return milliDiff<0 ?  -1 : milliDiff == 0 ? 0 : 1;
     }
+    
+    
 
     @Override
     public Date asDate() {
@@ -23,6 +25,16 @@ public abstract class AbstractTimePoint implements TimePoint {
         return date;
     }
     
+    @Override
+    public int hashCode() {
+        return (int) (asMillis() & Integer.MAX_VALUE);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return compareTo((TimePoint) obj) == 0;
+    }
+
     @Override
     public String toString() {
         return dateFormatter.format(asDate());

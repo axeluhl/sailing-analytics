@@ -62,6 +62,11 @@ public interface TrackedRace {
     
     int getRankDifference(Competitor competitor, Leg leg);
     
+    /**
+     * Computes the rank of the competitor in this race for the current time. 
+     */
+    int getRank(Competitor competitor);
+    
     int getRank(Competitor competitor, TimePoint timePoint);
     
     int getRank(Competitor competitor, Waypoint waypoint);
@@ -86,5 +91,5 @@ public interface TrackedRace {
      * mark passing has been reported (yet), <code>null</code> is returned.
      */
     MarkPassing getMarkPassing(Competitor competitor, Waypoint waypoint);
-    
+
 }

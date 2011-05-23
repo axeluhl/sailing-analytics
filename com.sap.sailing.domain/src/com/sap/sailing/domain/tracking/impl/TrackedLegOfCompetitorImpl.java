@@ -1,12 +1,17 @@
 package com.sap.sailing.domain.tracking.impl;
 
+import java.util.Iterator;
+
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Distance;
 import com.sap.sailing.domain.base.Leg;
+import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.Speed;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
+import com.sap.sailing.domain.tracking.Track;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
@@ -105,6 +110,32 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
 
     @Override
     public Speed getMaximumSpeedOverGround() {
+        // fetch all fixes on this leg so far and determine their maximum speed
+        MarkPassing legStart = getMarkPassingForLegStart();
+        if (legStart == null) {
+            return null;
+        }
+        Track<Competitor, GPSFixMoving> track = getTrackedRace().getTrack(getCompetitor());
+        Iterator<GPSFixMoving> iter = track.getFixes(legStart.getTimePoint(), /* inclusive */ false);
+        Speed max = Speed.NULL;
+        if (iter.hasNext()) {
+            TimePoint markPassingTimeMillis = getMarkPassingForLegStart().getTimePoint();
+            Position lastPos = track.getEstimatedPosition(markPassingTimeMillis);
+            long lastTimeMillis = markPassingTimeMillis.asMillis();
+            while (iter.hasNext()) {
+                GPSFixMoving fix = iter.next();
+                Speed fixSpeed = fix.getSpeed();
+                Speed calculatedSpeed = lastPos.getDistance(fix.getPosition()).inTime(fix.getTimePoint().asMillis()-lastTimeMillis);
+                Speed averaged = averageSpeed(fixSpeed, calculatedSpeed);
+                if (averaged.compareTo(max) > 0) {
+                    max = averaged;
+                }
+            }
+        }
+        return max;
+    }
+
+    private Speed averageSpeed(Speed fixSpeed, Speed calculatedSpeed) {
         // TODO Auto-generated method stub
         return null;
     }

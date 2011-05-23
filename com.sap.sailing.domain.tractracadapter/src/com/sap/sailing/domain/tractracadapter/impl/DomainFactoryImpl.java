@@ -252,7 +252,7 @@ public class DomainFactoryImpl implements DomainFactory {
         }
         return result;
     }
-
+    
     @Override
     public RaceDefinition createRaceDefinition(Race race, Course course) {
         RaceDefinition result = raceCache.get(race);

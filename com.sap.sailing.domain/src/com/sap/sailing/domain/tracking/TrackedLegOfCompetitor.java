@@ -31,6 +31,9 @@ public interface TrackedLegOfCompetitor {
 
     Speed getAverageSpeedOverGround();
 
+    /**
+     * @return <code>null</code> if the competitor hasn't started this leg yet
+     */
     Speed getMaximumSpeedOverGround();
 
     int getNumberOfTacks();

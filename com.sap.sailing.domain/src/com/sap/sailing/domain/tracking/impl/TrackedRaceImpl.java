@@ -12,6 +12,7 @@ import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.Track;
@@ -67,28 +68,23 @@ public class TrackedRaceImpl implements TrackedRace {
         return start;
     }
 
-
-    public void setStart(TimePoint start) {
+    protected void setStart(TimePoint start) {
         this.start = start;
     }
-
 
     @Override
     public TimePoint getFirstFinish() {
         return firstFinish;
     }
 
-
-    public void setFirstFinish(TimePoint firstFinish) {
+    protected void setFirstFinish(TimePoint firstFinish) {
         this.firstFinish = firstFinish;
     }
-
 
     @Override
     public RaceDefinition getRace() {
         return race;
     }
-
 
     @Override
     public Iterable<TrackedLeg> getTrackedLegs() {
@@ -154,6 +150,11 @@ public class TrackedRaceImpl implements TrackedRace {
     public int getRankDifference(Competitor competitor, Leg leg) {
         // TODO Auto-generated method stub
         return 0;
+    }
+    
+    @Override
+    public int getRank(Competitor competitor) {
+        return getRank(competitor, MillisecondsTimePoint.now());
     }
 
     @Override

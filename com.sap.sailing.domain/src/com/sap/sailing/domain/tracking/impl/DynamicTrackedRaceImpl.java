@@ -9,6 +9,7 @@ import java.util.Set;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.tracking.DynamicTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedLeg;
@@ -97,4 +98,13 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
         }
     }
 
+    @Override
+    public void setFirstFinish(TimePoint firstFinish) {
+        super.setFirstFinish(firstFinish);
+    }
+
+    @Override
+    public void setStart(TimePoint start) {
+        super.setStart(start);
+    }
 }

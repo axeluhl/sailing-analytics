@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.tracking;
 
+import java.util.Iterator;
+
 import com.sap.sailing.domain.base.Distance;
 import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.SpeedWithBearing;
@@ -45,4 +47,9 @@ public interface Track<ItemType, FixType extends GPSFix> {
      */
     Position getEstimatedPosition(TimePoint timePoint);
 
+    /**
+     * Returns an iterator starting at the first fix after <code>startingAt</code> (or
+     * "at or after" in case <code>inclusive</code> is <code>true</code>).
+     */
+    Iterator<FixType> getFixes(TimePoint startingAt, boolean inclusive);
 }

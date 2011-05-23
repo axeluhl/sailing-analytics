@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.tracking.impl;
 
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.NavigableSet;
 import java.util.TreeSet;
 
@@ -20,7 +21,7 @@ public class TrackImpl<ItemType, FixType extends GPSFix> implements Track<ItemTy
     /**
      * The fixes, ordered by their time points
      */
-    final TreeSet<GPSFix> fixes;
+    private final NavigableSet<GPSFix> fixes;
     
     private class DummyGPSFixWithDateOnly implements GPSFix {
         private final TimePoint timePoint;
@@ -45,6 +46,10 @@ public class TrackImpl<ItemType, FixType extends GPSFix> implements Track<ItemTy
         super();
         this.trackedItem = trackedItem;
         this.fixes = new TreeSet<GPSFix>(TimedComparator.INSTANCE);
+    }
+    
+    protected NavigableSet<GPSFix> getInternalFixes() {
+        return fixes;
     }
 
     @Override
@@ -149,6 +154,14 @@ public class TrackImpl<ItemType, FixType extends GPSFix> implements Track<ItemTy
             distanceInNauticalMiles += fromPos.getDistance(toPos).getNauticalMiles();
         }
         return new NauticalMileDistance(distanceInNauticalMiles);
+    }
+
+    @Override
+    public Iterator<FixType> getFixes(TimePoint startingAt, boolean inclusive) {
+        @SuppressWarnings("unchecked")
+        Iterator<FixType> result = (Iterator<FixType>) getInternalFixes().tailSet(
+                new DummyGPSFixWithDateOnly(startingAt), inclusive).iterator();
+        return result;
     }
 
 }
