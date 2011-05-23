@@ -54,4 +54,10 @@ public class TrackedLegImpl implements TrackedLeg {
         return 0;
     }
 
+    @Override
+    public int getRank(Competitor competitor) {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
 }

@@ -4,8 +4,11 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Distance;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Speed;
-import com.sap.sailing.domain.tracking.GPSFixMoving;
+import com.sap.sailing.domain.base.TimePoint;
+import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
+import com.sap.sailing.domain.tracking.TrackedRace;
 
 /**
  * Provides a convenient view on the tracked leg, projecting to a single competitor's performance.
@@ -22,6 +25,10 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
         this.competitor = competitor;
     }
 
+    protected TrackedLegImpl getTrackedLeg() {
+        return trackedLeg;
+    }
+
     @Override
     public Competitor getCompetitor() {
         return competitor;
@@ -31,17 +38,46 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     public Leg getLeg() {
         return trackedLeg.getLeg();
     }
+    
+    private TrackedRace getTrackedRace() {
+        return getTrackedLeg().getTrackedRace();
+    }
 
     @Override
     public long getTimeInMilliSeconds() {
-        // TODO Auto-generated method stub
-        return 0;
+        long result = -1;
+        MarkPassing passedEndWaypoint = getTrackedRace().getMarkPassing(getCompetitor(), getTrackedLeg().getLeg().getTo());
+        if (passedEndWaypoint != null) {
+            result = passedEndWaypoint.getTimePoint().asMillis() - getTrackedRace().getStart().asMillis();
+        }
+        return result;
     }
 
     @Override
     public Distance getDistanceTraveled() {
-        // TODO Auto-generated method stub
-        return null;
+        return getDistanceTraveled(MillisecondsTimePoint.now());
+    }
+    
+    private Distance getDistanceTraveled(TimePoint until) {
+        MarkPassing legStart = getMarkPassingForLegStart();
+        if (legStart == null) {
+            return Distance.NULL;
+        } else {
+            MarkPassing legEnd = getTrackedRace().getMarkPassing(getCompetitor(), getLeg().getTo());
+            TimePoint end;
+            if (legEnd == null) {
+                // leg not yet finished; take time specified
+                end = until;
+            } else {
+                end = legEnd.getTimePoint();
+            }
+            return getTrackedRace().getTrack(getCompetitor()).getDistanceTraveled(legStart.getTimePoint(), end);
+        }
+    }
+
+    private MarkPassing getMarkPassingForLegStart() {
+        MarkPassing legStart = getTrackedRace().getMarkPassing(getCompetitor(), getLeg().getFrom());
+        return legStart;
     }
 
     @Override
@@ -52,8 +88,19 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
 
     @Override
     public Speed getAverageSpeedOverGround() {
-        // TODO Auto-generated method stub
-        return null;
+        MarkPassing legStart = getMarkPassingForLegStart();
+        if (legStart == null) {
+            return null;
+        } else {
+            TimePoint now = MillisecondsTimePoint.now();
+            Distance d = getDistanceTraveled(now);
+            long millis = getTimeInMilliSeconds();
+            if (millis == -1) {
+                // didn't finish the leg yet
+                millis = now.asMillis() - legStart.getTimePoint().asMillis();
+            }
+            return d.inTime(millis);
+        }
     }
 
     @Override
@@ -81,7 +128,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
 
     @Override
-    public Iterable<GPSFixMoving> getGPSFixes() {
+    public Distance getWindwardDistanceToGo() {
         // TODO Auto-generated method stub
         return null;
     }

@@ -29,7 +29,7 @@ import com.sap.sailing.domain.base.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.base.impl.DegreePosition;
 import com.sap.sailing.domain.base.impl.EventImpl;
 import com.sap.sailing.domain.base.impl.GateImpl;
-import com.sap.sailing.domain.base.impl.KilometersPerHourSpeedImpl;
+import com.sap.sailing.domain.base.impl.KilometersPerHourSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.base.impl.NationalityImpl;
 import com.sap.sailing.domain.base.impl.PersonImpl;
@@ -87,7 +87,7 @@ public class DomainFactoryImpl implements DomainFactory {
     @Override
     public GPSFixMoving createGPSFixMoving(com.tractrac.clientmodule.data.Position position) {
         GPSFixMoving result = new GPSFixMovingImpl(createPosition(position), new MillisecondsTimePoint(position.getTimestamp()),
-                new KilometersPerHourSpeedImpl(position.getSpeed(), new DegreeBearingImpl(position.getDirection())));
+                new KilometersPerHourSpeedWithBearingImpl(position.getSpeed(), new DegreeBearingImpl(position.getDirection())));
         return result;
     }
     

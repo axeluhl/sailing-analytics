@@ -3,7 +3,7 @@ package com.sap.sailing.domain.base.impl;
 import com.sap.sailing.domain.base.Bearing;
 import com.sap.sailing.domain.base.Mile;
 
-public class KnotSpeedImpl extends AbstractSpeedImpl {
+public class KnotSpeedImpl extends AbstractSpeedWithBearingImpl {
     private final double speedInKnots;
     
     public KnotSpeedImpl(double speedInKnots, Bearing bearing) {

@@ -1,11 +1,26 @@
 package com.sap.sailing.domain.tracking;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.Course;
+import com.sap.sailing.domain.base.Distance;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.Waypoint;
 
+/**
+ * Live tracking data of a single race. The race follows a defined {@link Course} with a sequence
+ * of {@link Leg}s. The tracking information of such a leg can be requested either for all
+ * competitors (see {@link #getTrackedLegs()} and {@link #getTrackedLeg(Leg)}) or for a
+ * single competitor (see {@link #getTrackedLeg(Competitor, Leg)}).<p>
+ * 
+ * The overall race standings can be requested in terms of a competitor's ranking. More
+ * detailed information about what happens / happened within a leg is available from
+ * {@link TrackedLeg} and {@link TrackedLegOfCompetitor}.
+ * 
+ * @author Axel Uhl (d043530)
+ *
+ */
 public interface TrackedRace {
     RaceDefinition getRace();
     
@@ -14,6 +29,8 @@ public interface TrackedRace {
     TimePoint getFirstFinish();
     
     Iterable<TrackedLeg> getTrackedLegs();
+    
+    TrackedLeg getTrackedLeg(Leg leg);
     
     /**
      * Tracking information about the leg <code>competitor</code> is currently on, or
@@ -48,7 +65,26 @@ public interface TrackedRace {
     int getRank(Competitor competitor, TimePoint timePoint);
     
     int getRank(Competitor competitor, Waypoint waypoint);
+    
+    /**
+     * For a competitor, computes the distance (TODO not yet clear whether over ground or
+     * projected onto wind direction) into the race <code>secondsIntoTheRace</code> after
+     * the race {@link TrackedRace#getStart() started}.
+     */
+    Distance getStartAdvantage(Competitor competitor, double secondsIntoTheRace);
 
+    /**
+     * For the given waypoint lists the {@link MarkPassing} events that describe which competitor passed the waypoint at
+     * which point in time. This can, e.g., be used to sort those competitors who already finished a leg within the leg
+     * that ends with <code>waypoint</code>. The remaining competitors needs to be ordered by the advantage line-related
+     * distance to the waypoint.
+     */
     Iterable<MarkPassing> getMarkPassingsInOrder(Waypoint waypoint);
+
+    /**
+     * Obtains the {@link MarkPassing} for <code>competitor</code> passing <code>waypoint</code>. If no such
+     * mark passing has been reported (yet), <code>null</code> is returned.
+     */
+    MarkPassing getMarkPassing(Competitor competitor, Waypoint waypoint);
     
 }

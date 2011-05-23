@@ -96,6 +96,7 @@ public abstract class AbstractTracTracLiveTest implements Listener {
         URLConnection conn = url.openConnection();
         authorize(conn);
         conn.getContent(new Class[] { String.class });
+        Thread.sleep(2000); // wait 2s to ensure server has cleaned up properly
     }
 
     private void killAllRunningSimulations() throws IOException,

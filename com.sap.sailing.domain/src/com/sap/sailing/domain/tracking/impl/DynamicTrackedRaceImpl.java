@@ -15,12 +15,11 @@ import com.sap.sailing.domain.tracking.DynamicTrackedLeg;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
-import com.sap.sailing.domain.tracking.MarkPassingListener;
 import com.sap.sailing.domain.tracking.RawListener;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
 public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
-        DynamicTrackedRace, RawListener<Competitor, GPSFixMoving>, MarkPassingListener {
+        DynamicTrackedRace, RawListener<Competitor, GPSFixMoving> {
     private final Set<RawListener<Competitor, GPSFixMoving>> listeners;
     
     public DynamicTrackedRaceImpl(RaceDefinition race) {
@@ -70,14 +69,8 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     }
     
     @Override
-    protected DynamicTrackedLeg getTrackedLeg(Leg leg) {
+    public DynamicTrackedLeg getTrackedLeg(Leg leg) {
         return (DynamicTrackedLeg) super.getTrackedLeg(leg);
-    }
-
-    @Override
-    public void legCompleted(MarkPassing markPassing) {
-        DynamicTrackedLeg trackedLeg = getTrackedLegFinishingAt(markPassing.getWaypoint());
-        trackedLeg.completed(markPassing);
     }
 
     @Override

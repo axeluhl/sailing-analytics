@@ -2,8 +2,14 @@ package com.sap.sailing.domain.base.impl;
 
 import com.sap.sailing.domain.base.Distance;
 import com.sap.sailing.domain.base.Mile;
+import com.sap.sailing.domain.base.Speed;
 
 public abstract class AbstractDistance implements Distance {
+
+    @Override
+    public Speed inTime(long milliseconds) {
+        return new KilometersPerHourSpeedImpl(getKilometers() / milliseconds * 3.6);
+    }
 
     @Override
     public double getNauticalMiles() {

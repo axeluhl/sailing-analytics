@@ -1,13 +1,12 @@
 package com.sap.sailing.domain.base.impl;
 
-import com.sap.sailing.domain.base.Bearing;
 import com.sap.sailing.domain.base.Mile;
+import com.sap.sailing.domain.base.Speed;
 
-public class KilometersPerHourSpeedImpl extends AbstractSpeedImpl {
+public class KilometersPerHourSpeedImpl extends AbstractSpeedImpl implements Speed {
     private final double speedInKilometersPerHour;
 
-    public KilometersPerHourSpeedImpl(double speedInKilometersPerHour, Bearing bearing) {
-        super(bearing);
+    public KilometersPerHourSpeedImpl(double speedInKilometersPerHour) {
         this.speedInKilometersPerHour = speedInKilometersPerHour;
     }
 
@@ -25,4 +24,5 @@ public class KilometersPerHourSpeedImpl extends AbstractSpeedImpl {
     public double getKilometersPerHour() {
         return speedInKilometersPerHour;
     }
+
 }

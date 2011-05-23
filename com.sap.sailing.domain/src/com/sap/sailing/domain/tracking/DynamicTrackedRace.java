@@ -12,6 +12,8 @@ public interface DynamicTrackedRace extends TrackedRace {
     DynamicTrack<Competitor, GPSFixMoving> getTrack(Competitor competitor);
     
     void addListener(RawListener<Competitor, GPSFixMoving> listener);
+    
+    // TODO need another listener protocol for general changes in ranking and leg completion
 
     @Override
     DynamicTrackedLeg getTrackedLegFinishingAt(Waypoint endOfLeg);

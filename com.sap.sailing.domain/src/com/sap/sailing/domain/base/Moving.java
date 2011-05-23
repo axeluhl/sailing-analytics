@@ -1,5 +1,5 @@
 package com.sap.sailing.domain.base;
 
 public interface Moving {
-    Speed getSpeed();
+    SpeedWithBearing getSpeed();
 }

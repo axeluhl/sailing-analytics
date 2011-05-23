@@ -2,7 +2,7 @@ package com.sap.sailing.domain.tracking;
 
 import com.sap.sailing.domain.base.Distance;
 import com.sap.sailing.domain.base.Position;
-import com.sap.sailing.domain.base.Speed;
+import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.TimePoint;
 
 /**
@@ -37,7 +37,7 @@ public interface Track<ItemType, FixType extends GPSFix> {
      * the two fixes is interpolated along a great circle. The speed is estimated
      * by using the time points of the two fixes between which <code>timePoint</code>
      * lies. If a time point after the last fix recorded so far is provided,
-     * the {@link Speed} at the last point is estimated, either from looking
+     * the {@link SpeedWithBearing} at the last point is estimated, either from looking
      * at the last two fixes in the track or, if only one fix exists, by
      * using that single fix's speed information if present (must be a
      * {@link GPSFixMoving} for that). Otherwise, if not enough information

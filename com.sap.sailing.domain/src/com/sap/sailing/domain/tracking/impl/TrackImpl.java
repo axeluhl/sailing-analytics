@@ -6,7 +6,7 @@ import java.util.TreeSet;
 
 import com.sap.sailing.domain.base.Distance;
 import com.sap.sailing.domain.base.Position;
-import com.sap.sailing.domain.base.Speed;
+import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.base.impl.NauticalMileDistance;
@@ -69,7 +69,7 @@ public class TrackImpl<ItemType, FixType extends GPSFix> implements Track<ItemTy
         if (lastFixAtOrBefore != null && lastFixAtOrBefore == firstFixAtOrAfter) {
             return lastFixAtOrBefore.getPosition(); // exact match; how unlikely is that?
         } else {
-            Speed estimatedSpeed = estimateSpeed(lastFixAtOrBefore, firstFixAtOrAfter);
+            SpeedWithBearing estimatedSpeed = estimateSpeed(lastFixAtOrBefore, firstFixAtOrAfter);
             if (estimatedSpeed == null) {
                 return null;
             } else {
@@ -87,7 +87,7 @@ public class TrackImpl<ItemType, FixType extends GPSFix> implements Track<ItemTy
         }
     }
 
-    private Speed estimateSpeed(FixType fix1, FixType fix2) {
+    private SpeedWithBearing estimateSpeed(FixType fix1, FixType fix2) {
         if (fix1 == null) {
             if (fix2 instanceof GPSFixMoving) {
                 return ((GPSFixMoving) fix2).getSpeed();
@@ -103,7 +103,7 @@ public class TrackImpl<ItemType, FixType extends GPSFix> implements Track<ItemTy
         } else {
             Distance distance = fix1.getPosition().getDistance(fix2.getPosition());
             long millis = Math.abs(fix1.getTimePoint().asMillis() - fix2.getTimePoint().asMillis());
-            Speed speed = new KnotSpeedImpl(distance.getNauticalMiles() / (millis / 1000.),
+            SpeedWithBearing speed = new KnotSpeedImpl(distance.getNauticalMiles() / (millis / 1000.),
                     fix1.getPosition().getBearingGreatCircle(fix2.getPosition()));
             return speed;
         }

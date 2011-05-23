@@ -7,6 +7,7 @@ import java.util.NavigableSet;
 import java.util.TreeSet;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.Distance;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.TimePoint;
@@ -133,7 +134,7 @@ public class TrackedRaceImpl implements TrackedRace {
         return result;
     }
     
-    protected TrackedLeg getTrackedLeg(Leg leg) {
+    public TrackedLeg getTrackedLeg(Leg leg) {
         return trackedLegs.get(leg);
     }
 
@@ -175,6 +176,22 @@ public class TrackedRaceImpl implements TrackedRace {
 //            result = l;
 //        }
         return result;
+    }
+
+    @Override
+    public Distance getStartAdvantage(Competitor competitor, double secondsIntoTheRace) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public MarkPassing getMarkPassing(Competitor competitor, Waypoint waypoint) {
+        for (MarkPassing markPassing : getMarkPassings(competitor)) {
+            if (markPassing.getWaypoint() == waypoint) {
+                return markPassing;
+            }
+        }
+        return null;
     }
 
 }
