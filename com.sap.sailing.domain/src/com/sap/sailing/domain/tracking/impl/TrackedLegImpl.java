@@ -42,22 +42,4 @@ public class TrackedLegImpl implements TrackedLeg {
         return trackedLegsOfCompetitors.get(competitor);
     }
 
-    @Override
-    public int getRankAtBeginningOfLeg(Competitor competitor) {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-
-    @Override
-    public int getRankAtEndOfLeg(Competitor competitor) {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-
-    @Override
-    public int getRank(Competitor competitor) {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-
 }

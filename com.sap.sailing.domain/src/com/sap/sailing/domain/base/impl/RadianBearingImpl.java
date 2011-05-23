@@ -2,7 +2,7 @@ package com.sap.sailing.domain.base.impl;
 
 import com.sap.sailing.domain.base.Bearing;
 
-public class RadianBearingImpl implements Bearing {
+public class RadianBearingImpl extends AbstractBearing implements Bearing {
     private final double bearingRad;
     
     public RadianBearingImpl(double bearingRad) {

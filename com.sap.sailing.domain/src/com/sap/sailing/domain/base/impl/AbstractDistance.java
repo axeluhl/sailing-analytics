@@ -7,6 +7,11 @@ import com.sap.sailing.domain.base.Speed;
 public abstract class AbstractDistance implements Distance {
 
     @Override
+    public int compareTo(Distance o) {
+        return getMeters() > o.getMeters() ? 1 : getMeters() == o.getMeters() ? 0 : -1;
+    }
+
+    @Override
     public Speed inTime(long milliseconds) {
         return new KilometersPerHourSpeedImpl(getKilometers() / milliseconds * 3.6);
     }

@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.tracking;
 
+import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Distance;
@@ -91,5 +92,10 @@ public interface TrackedRace {
      * mark passing has been reported (yet), <code>null</code> is returned.
      */
     MarkPassing getMarkPassing(Competitor competitor, Waypoint waypoint);
+
+    /**
+     * Yields the track describing <code>buoy</code>'s movement over time
+     */
+    Track<Buoy, GPSFix> getTrack(Buoy buoy);
 
 }

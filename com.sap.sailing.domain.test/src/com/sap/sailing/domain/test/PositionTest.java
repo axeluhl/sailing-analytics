@@ -5,7 +5,9 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
+import com.sap.sailing.domain.base.Distance;
 import com.sap.sailing.domain.base.Position;
+import com.sap.sailing.domain.base.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.base.impl.DegreePosition;
 
 public class PositionTest {
@@ -46,4 +48,54 @@ public class PositionTest {
         assertEquals(0, p1.translateGreatCircle(p1.getBearingGreatCircle(p2), p1.getDistance(p2)).getDistance(p2).getMeters(), 0.00001);
     }
     
+    @Test
+    public void simpleProjectionTest1() {
+        // The simplest thing we can test is projecting coordinates along latitudes or longitudes:
+        Position p1 = new DegreePosition(20, 15);
+        Position p2 = new DegreePosition(15, 15);
+        Position result = p1.projectToLineThrough(p2, new DegreeBearingImpl(90)); // project onto a latitude
+                                                                                  // crossing through p2
+        assertEquals(15, result.getLatDeg(), 0.0000001);
+        assertEquals(15, result.getLngDeg(), 0.0000001);
+    }
+
+    @Test
+    public void simpleProjectionTest2() {
+        Position p1 = new DegreePosition(0, 30);
+        Position p2 = new DegreePosition(15, 15);
+        Position result = p1.projectToLineThrough(p2, new DegreeBearingImpl(0)); // project onto a longitude
+                                                                                 // crossing through p2
+        assertEquals(0, result.getLatDeg(), 0.0000001);
+        assertEquals(15, result.getLngDeg(), 0.0000001);
+    }
+
+    @Test
+    public void simpleProjectionTest3() {
+        // The simplest thing we can test is projecting coordinates along latitudes or longitudes:
+        Position p1 = new DegreePosition(0, 15);
+        Position p2 = new DegreePosition(15, 15);
+        Position result = p1.projectToLineThrough(p2, new DegreeBearingImpl(270)); // project onto a latitude
+                                                                                   // crossing through p2
+        assertEquals(15, result.getLatDeg(), 0.0000001);
+        assertEquals(15, result.getLngDeg(), 0.0000001);
+    }
+
+    @Test
+    public void simpleProjectionTest4() {
+        Position p1 = new DegreePosition(0, -30);
+        Position p2 = new DegreePosition(15, 15);
+        Position result = p1.projectToLineThrough(p2, new DegreeBearingImpl(180)); // project onto a longitude
+                                                                                   // crossing through p2
+        assertEquals(0, result.getLatDeg(), 0.0000001);
+        assertEquals(15, result.getLngDeg(), 0.0000001);
+    }
+
+    @Test
+    public void testZeroCrossTrackError() {
+        Position p1 = new DegreePosition(20, 15);
+        Position p2 = new DegreePosition(15, 15);
+        Distance result = p1.crossTrackError(p2, new DegreeBearingImpl(0));
+        assertEquals(0, result.getMeters(), 0.0000001);
+    }
+
 }

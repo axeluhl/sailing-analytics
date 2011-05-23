@@ -34,4 +34,22 @@ public interface Position {
      * <code>translate(getBearingGreatCircle(p), getDistance(p)).equals(p)</code>
      */
     Position translateGreatCircle(Bearing bearing, Distance distance);
+
+    /**
+     * Projects this position onto the great circle through <code>p</code> with bearing <code>bearing</code>. Note that
+     * if the angle between this position and the great circle is 90 degrees then there is no solution, and a
+     * <code>NaN</code> or exception will result.
+     */
+    Position projectToLineThrough(Position p, Bearing bearing);
+
+    Distance crossTrackError(Position p, Bearing bearing);
+
+    /**
+     * Computes how far along the great circle starting at <code>p</code> and pointing
+     * to <code>bearing</code> one has to travel to reach the projection of this position
+     * onto the great circle described by <code>p</code> and <code>bearing</code>. Note that
+     * if the angle between this position and the great circle is 90 degrees then there is
+     * no solution, and a <code>NaN</code> or exception will result.
+     */
+    Distance alongTrackDistance(Position p, Bearing bearing);
 }

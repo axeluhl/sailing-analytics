@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.NavigableSet;
 import java.util.TreeSet;
 
+import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Distance;
 import com.sap.sailing.domain.base.Leg;
@@ -13,14 +14,17 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.Track;
+import com.sap.sailing.domain.tracking.TrackedEvent;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
 public class TrackedRaceImpl implements TrackedRace {
+    private final TrackedEvent trackedEvent;
     private final RaceDefinition race;
     private TimePoint start;
     private TimePoint firstFinish;
@@ -34,8 +38,9 @@ public class TrackedRaceImpl implements TrackedRace {
     private final Map<Competitor, NavigableSet<MarkPassing>> markPassingsForCompetitor;
     private final Map<Waypoint, NavigableSet<MarkPassing>> markPassingsForWaypoint;
     
-    public TrackedRaceImpl(RaceDefinition race) {
+    public TrackedRaceImpl(TrackedEvent trackedEvent, RaceDefinition race) {
         super();
+        this.trackedEvent = trackedEvent;
         this.race = race;
         LinkedHashMap<Leg, TrackedLeg> trackedLegsMap = new LinkedHashMap<Leg, TrackedLeg>();
         for (Leg leg : race.getCourse().getLegs()) {
@@ -193,6 +198,16 @@ public class TrackedRaceImpl implements TrackedRace {
             }
         }
         return null;
+    }
+
+    @Override
+    public Track<Buoy, GPSFix> getTrack(Buoy buoy) {
+        TrackedEvent trackedEvent = getTrackedEvent();
+        return trackedEvent.getTrack(buoy);
+    }
+
+    private TrackedEvent getTrackedEvent() {
+        return trackedEvent;
     }
 
 }

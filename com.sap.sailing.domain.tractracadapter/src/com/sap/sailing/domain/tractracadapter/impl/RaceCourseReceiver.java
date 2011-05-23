@@ -51,7 +51,7 @@ public class RaceCourseReceiver {
                     Course course = DomainFactory.INSTANCE.createCourse(route.getName(), record.getPoints());
                     RaceDefinition raceDefinition = DomainFactory.INSTANCE.createRaceDefinition(race, course);
                     trackedEvent.getEvent().addRace(raceDefinition);
-                    trackedEvent.addTrackedRace(new DynamicTrackedRaceImpl(raceDefinition));
+                    trackedEvent.addTrackedRace(new DynamicTrackedRaceImpl(trackedEvent, raceDefinition));
                 }
             });
             result.add(routeListener);

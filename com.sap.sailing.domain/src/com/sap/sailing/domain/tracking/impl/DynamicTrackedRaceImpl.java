@@ -17,14 +17,15 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RawListener;
+import com.sap.sailing.domain.tracking.TrackedEvent;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
 public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
         DynamicTrackedRace, RawListener<Competitor, GPSFixMoving> {
     private final Set<RawListener<Competitor, GPSFixMoving>> listeners;
     
-    public DynamicTrackedRaceImpl(RaceDefinition race) {
-        super(race);
+    public DynamicTrackedRaceImpl(TrackedEvent trackedEvent, RaceDefinition race) {
+        super(trackedEvent, race);
         listeners = new HashSet<RawListener<Competitor, GPSFixMoving>>();
         for (Competitor competitor : getRace().getCompetitors()) {
             DynamicTrack<Competitor, GPSFixMoving> track = getTrack(competitor);

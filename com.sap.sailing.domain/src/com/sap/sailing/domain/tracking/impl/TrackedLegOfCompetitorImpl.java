@@ -2,11 +2,13 @@ package com.sap.sailing.domain.tracking.impl;
 
 import java.util.Iterator;
 
+import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Distance;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.Speed;
+import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.impl.KilometersPerHourSpeedImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
@@ -25,6 +27,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     private final TrackedLegImpl trackedLeg;
     private final Competitor competitor;
+    private final double UPWIND_DOWNWIND_TOLERANCE_IN_DEG = 40; // TracTrac does 22.5, Marcus Baur suggest 40
     
     public TrackedLegOfCompetitorImpl(TrackedLegImpl trackedLeg, Competitor competitor) {
         this.trackedLeg = trackedLeg;
@@ -86,10 +89,9 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
         return legStart;
     }
 
-    @Override
-    public Speed getAverageVelocityMadeGood() {
-        // TODO Auto-generated method stub
-        return null;
+    private MarkPassing getMarkPassingForLegEnd() {
+        MarkPassing legEnd = getTrackedRace().getMarkPassing(getCompetitor(), getLeg().getTo());
+        return legEnd;
     }
 
     @Override
@@ -147,6 +149,80 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
 
     @Override
+    public Distance getWindwardDistanceToGo() {
+        if (getMarkPassingForLegEnd() != null) {
+            return Distance.NULL;
+        } else {
+            Distance result = null;
+            for (Buoy buoy : getLeg().getTo().getBuoys()) {
+                Distance d = getWindwardDistanceTo(buoy);
+                if (result == null || d.compareTo(result) < 0) {
+                    result = d;
+                }
+            }
+            return result;
+        }
+    }
+
+    /**
+     * If the current {@link #getLeg() leg} is +/- {@link #UPWIND_DOWNWIND_TOLERANCE_IN_DEG} degrees collinear with the
+     * wind's bearing, the competitor's position is projected onto the line crossing <code>buoy</code> in the wind's
+     * bearing, and the distance from the projection to the <code>buoy</code> is returned. Otherwise, it is assumed that
+     * the leg is neither an upwind nor a downwind leg, and hence the true distance to <code>buoy</code> is returned.
+     */
+    private Distance getWindwardDistanceTo(Buoy buoy) {
+        MillisecondsTimePoint now = MillisecondsTimePoint.now();
+        return getWindwardDistanceTo(buoy, now);
+    }
+
+    private Distance getWindwardDistanceTo(Buoy buoy, TimePoint at) {
+        return getWindwardDistance(getTrackedRace().getTrack(getCompetitor()).getEstimatedPosition(at),
+                getTrackedRace().getTrack(buoy).getEstimatedPosition(at), at);
+    }
+
+    /**
+     * If the current {@link #getLeg() leg} is +/- {@link #UPWIND_DOWNWIND_TOLERANCE_IN_DEG} degrees collinear with the
+     * wind's bearing, the competitor's position is projected onto the line crossing <code>buoy</code> in the wind's
+     * bearing, and the distance from the projection to the <code>buoy</code> is returned. Otherwise, it is assumed that
+     * the leg is neither an upwind nor a downwind leg, and hence the true distance to <code>buoy</code> is returned.
+     */
+    private Distance getWindwardDistance(Position pos1, Position pos2, TimePoint at) {
+        if (isUpOrDownwindLeg()) {
+            Position projectionToLineThroughPos2 = pos1.projectToLineThrough(pos2, getWind(at).getBearing());
+            return projectionToLineThroughPos2.getDistance(pos2);
+        } else {
+            // cross leg, return true distance
+            return pos1.getDistance(pos2);
+        }
+    }
+
+    private SpeedWithBearing getWind(TimePoint at) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /**
+     * Determines whether the current {@link #getLeg() leg} is +/- {@link #UPWIND_DOWNWIND_TOLERANCE_IN_DEG} degrees
+     * collinear with the wind's bearing.
+     */
+    private boolean isUpOrDownwindLeg() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public int getRank() {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    @Override
+    public Speed getAverageVelocityMadeGood() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
     public int getNumberOfTacks() {
         // TODO Auto-generated method stub
         return 0;
@@ -162,12 +238,6 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     public int getNumberOfDirectionChanges() {
         // TODO Auto-generated method stub
         return 0;
-    }
-
-    @Override
-    public Distance getWindwardDistanceToGo() {
-        // TODO Auto-generated method stub
-        return null;
     }
 
 }

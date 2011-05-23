@@ -2,7 +2,7 @@ package com.sap.sailing.domain.base;
 
 import com.sap.sailing.domain.base.impl.NauticalMileDistance;
 
-public interface Distance {
+public interface Distance extends Comparable<Distance> {
     static final Distance NULL = new NauticalMileDistance(0);
     
     double getGeographicalMiles();
