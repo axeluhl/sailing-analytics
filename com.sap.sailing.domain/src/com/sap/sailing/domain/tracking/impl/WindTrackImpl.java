@@ -8,8 +8,8 @@ import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.Speed;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.TimePoint;
+import com.sap.sailing.domain.base.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
-import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindTrack;
 
@@ -32,24 +32,32 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
         getInternalFixes().add(wind);
     }
 
-    private final TimePoint zeroSeconds = new MillisecondsTimePoint(0);
-    private final TimePoint oneSecond = new MillisecondsTimePoint(1000);
     @Override
     public Wind getEstimatedWind(Position p, TimePoint at) {
-        NavigableSet<Wind> beforeSet = getInternalFixes().headSet(new DummyWind(at), /* inclusive */ true);
-        Position blownTo = p;
-        int secondsCount = 0;
+        DummyWind atTimed = new DummyWind(at);
+        NavigableSet<Wind> beforeSet = getInternalFixes().headSet(atTimed, /* inclusive */ true);
+        if (beforeSet.isEmpty()) {
+            // try after:
+            NavigableSet<Wind> afterSet = getInternalFixes().tailSet(atTimed, /* inclusive */ true);
+            if (afterSet.isEmpty()) {
+                return null;
+            } else {
+                return afterSet.iterator().next();
+            }
+        }
+        double knotSum = 0;
+        double bearingDegSum = 0;
+        int count = 0;
         for (Wind before : beforeSet.descendingSet()) {
-            if (at.asMillis() - before.getTimePoint().asMillis() < millisecondsOverWhichToAverage) { 
-                blownTo = blownTo.translateGreatCircle(before.getBearing(), before.travel(zeroSeconds, oneSecond));
-                secondsCount++;
+            if (beforeSet.size() == 1 || at.asMillis() - before.getTimePoint().asMillis() < millisecondsOverWhichToAverage) { 
+                knotSum += before.getKnots();
+                bearingDegSum += before.getBearing().getDegrees();
+                count++;
             } else {
                 break;
             }
         }
-        Distance totalDistanceBlown = p.getDistance(blownTo);
-        Speed avgSpeed = totalDistanceBlown.inTime(1000*secondsCount);
-        SpeedWithBearing avgWindSpeed = new KnotSpeedImpl(avgSpeed.getKnots(), p.getBearingGreatCircle(blownTo));
+        SpeedWithBearing avgWindSpeed = new KnotSpeedImpl(knotSum / count, new DegreeBearingImpl(bearingDegSum/count));
         return new WindImpl(p, at, avgWindSpeed);
     }
 
