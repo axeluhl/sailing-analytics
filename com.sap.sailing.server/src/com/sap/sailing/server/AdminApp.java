@@ -27,6 +27,8 @@ public class AdminApp extends HttpServlet {
 
     private static final String ACTION_NAME_ADD_EVENT = "addevent";
 
+    private static final String ACTION_NAME_STOP_EVENT = "stopevent";
+
     private ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
     
     private RacingEventService service;
@@ -41,23 +43,33 @@ public class AdminApp extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String action = req.getParameter(PARAM_ACTION);
-        if (action != null) {
-            if (ACTION_NAME_LIST_EVENTS.equals(action)) {
-                listEvents(resp);
-            } else if (ACTION_NAME_ADD_EVENT.equals(action)) {
-                try {
+        try {
+            String action = req.getParameter(PARAM_ACTION);
+            if (action != null) {
+                if (ACTION_NAME_LIST_EVENTS.equals(action)) {
+                    listEvents(resp);
+                } else if (ACTION_NAME_ADD_EVENT.equals(action)) {
                     addEvent(req, resp);
-                } catch (Throwable e) {
-                    resp.getWriter().println("Error processing request:");
-                    e.printStackTrace(resp.getWriter());
+                } else if (ACTION_NAME_STOP_EVENT.equals(action)) {
+                    stopEvent(req, resp);
                 }
+            } else {
+                resp.getWriter().println("Hello admin!");
             }
-        } else {
-            resp.getWriter().println("Hello admin!");
+        } catch (Throwable e) {
+            resp.getWriter().println("Error processing request:");
+            e.printStackTrace(resp.getWriter());
         }
     }
     
+    private void stopEvent(HttpServletRequest req, HttpServletResponse resp) throws MalformedURLException, IOException,
+            InterruptedException {
+        Event event = service.getEventByName(req.getParameter("eventname"));
+        if (event != null) {
+            service.stopTracking(event);
+        }
+    }
+
     private void addEvent(HttpServletRequest req, HttpServletResponse resp) throws MalformedURLException,
             URISyntaxException, FileNotFoundException {
         URL paramURL = new URL(req.getParameter("paramURL"));

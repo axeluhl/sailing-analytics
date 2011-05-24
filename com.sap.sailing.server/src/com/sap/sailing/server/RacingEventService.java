@@ -1,6 +1,7 @@
 package com.sap.sailing.server;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -18,4 +19,6 @@ public interface RacingEventService {
     
     void addEvent(URL paramURL, URI liveURI, URI storedURI) throws MalformedURLException, FileNotFoundException,
             URISyntaxException;
+
+    void stopTracking(Event event) throws MalformedURLException, IOException, InterruptedException;
 }

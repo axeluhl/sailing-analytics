@@ -20,7 +20,14 @@
          point="org.eclipse.equinox.http.registry.resources">
       <resource
             alias="/addevent"
-            base-name="resources/addevent.html">
+            base-name="/web/addevent.html">
+      </resource>
+   </extension>
+   <extension
+         point="org.eclipse.equinox.http.registry.resources">
+      <resource
+            alias="/stopevent"
+            base-name="/web/stopevent.html">
       </resource>
    </extension>
 </plugin>

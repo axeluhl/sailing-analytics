@@ -1,6 +1,7 @@
 package com.sap.sailing.server;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -47,6 +48,13 @@ public class RacingEventServiceImpl implements RacingEventService {
         EventTracker tracker = getDomainFactory().createEventTracker(paramURL, liveURI, storedURI);
         eventTrackers.put(tracker.getEvent(), tracker);
         eventsByName.put(tracker.getEvent().getName(), tracker.getEvent());
+    }
+
+    @Override
+    public void stopTracking(Event event) throws MalformedURLException, IOException, InterruptedException {
+        eventTrackers.get(event).stop();
+        eventTrackers.remove(event);
+        eventsByName.remove(event.getName());
     }
     
 }
