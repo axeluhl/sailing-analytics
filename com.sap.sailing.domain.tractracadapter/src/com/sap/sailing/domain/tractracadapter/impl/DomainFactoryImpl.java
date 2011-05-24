@@ -50,6 +50,9 @@ import com.tractrac.clientmodule.RaceCompetitor;
 import com.tractrac.clientmodule.data.ControlPointPositionData;
 
 public class DomainFactoryImpl implements DomainFactory {
+    // TODO clarify how millisecondsOverWhichToAverageWind could be updated and propagated live
+    private final long millisecondsOverWhichToAverageWind = 30000;
+    
     private final WeakHashMap<ControlPoint, com.sap.sailing.domain.base.ControlPoint> controlPointCache =
         new WeakHashMap<ControlPoint, com.sap.sailing.domain.base.ControlPoint>();
     
@@ -195,7 +198,6 @@ public class DomainFactoryImpl implements DomainFactory {
         synchronized (raceCache) {
             while (!interrupted && result == null) {
                 try {
-                    // FIXME not permitted to block an event thread
                     raceCache.wait();
                 } catch (InterruptedException e) {
                     interrupted = true;
@@ -222,7 +224,7 @@ public class DomainFactoryImpl implements DomainFactory {
         Collection<TypeController> result = new ArrayList<TypeController>();
         for (TypeController raceCourseReceiver : new RaceCourseReceiver(
                 trackedEvent, inverseEventCache.get(trackedEvent
-                        .getEvent())).getRouteListeners()) {
+                        .getEvent()), millisecondsOverWhichToAverageWind).getRouteListeners()) {
             result.add(raceCourseReceiver);
         }
         for (TypeController markPositionReceiver : new MarkPositionReceiver(

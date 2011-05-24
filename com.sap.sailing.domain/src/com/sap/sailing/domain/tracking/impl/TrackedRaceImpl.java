@@ -10,19 +10,21 @@ import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Distance;
 import com.sap.sailing.domain.base.Leg;
+import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.RaceDefinition;
-import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
-import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
+import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedEvent;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.Wind;
+import com.sap.sailing.domain.tracking.WindTrack;
 
 public class TrackedRaceImpl implements TrackedRace {
     private final TrackedEvent trackedEvent;
@@ -38,8 +40,9 @@ public class TrackedRaceImpl implements TrackedRace {
     private final Map<Competitor, GPSFixTrack<Competitor, GPSFixMoving>> tracks;
     private final Map<Competitor, NavigableSet<MarkPassing>> markPassingsForCompetitor;
     private final Map<Waypoint, NavigableSet<MarkPassing>> markPassingsForWaypoint;
+    private final WindTrack windTrack;
     
-    public TrackedRaceImpl(TrackedEvent trackedEvent, RaceDefinition race) {
+    public TrackedRaceImpl(TrackedEvent trackedEvent, RaceDefinition race, long millisecondsOverWhichToAverageWind) {
         super();
         this.trackedEvent = trackedEvent;
         this.race = race;
@@ -58,6 +61,7 @@ public class TrackedRaceImpl implements TrackedRace {
         for (Waypoint waypoint : race.getCourse().getWaypoints()) {
             markPassingsForWaypoint.put(waypoint, new TreeSet<MarkPassing>(TimedComparator.INSTANCE));
         }
+        windTrack = new WindTrackImpl(millisecondsOverWhichToAverageWind);
     }
     
     protected NavigableSet<MarkPassing> getMarkPassings(Competitor competitor) {
@@ -212,10 +216,8 @@ public class TrackedRaceImpl implements TrackedRace {
     }
 
     @Override
-    public SpeedWithBearing getWind(TimePoint at) {
-        // TODO Auto-generated method stub
-        // TODO refactor Track such that it can't only handle GPSFix but also Bearing, re-using sorting over time
-        return null;
+    public Wind getWind(Position p, TimePoint at) {
+        return windTrack.getEstimatedWind(p, at);
     }
 
 }

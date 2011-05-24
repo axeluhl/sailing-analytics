@@ -9,15 +9,15 @@ import com.sap.sailing.domain.base.Distance;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.Speed;
-import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.impl.KilometersPerHourSpeedImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
-import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
+import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.Wind;
 
 /**
  * Provides a convenient view on the tracked leg, projecting to a single competitor's performance.
@@ -189,7 +189,8 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
      */
     private Distance getWindwardDistance(Position pos1, Position pos2, TimePoint at) {
         if (isUpOrDownwindLeg(at)) {
-            Position projectionToLineThroughPos2 = pos1.projectToLineThrough(pos2, getWind(at).getBearing());
+            Wind wind = getWind(pos1.translateGreatCircle(pos1.getBearingGreatCircle(pos2), pos1.getDistance(pos2).scale(0.5)), at);
+            Position projectionToLineThroughPos2 = pos1.projectToLineThrough(pos2, wind.getBearing());
             return projectionToLineThroughPos2.getDistance(pos2);
         } else {
             // cross leg, return true distance
@@ -201,8 +202,8 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
      * For now, we have an incredibly simple wind "model" which assigns a single common wind force and bearing
      * to all positions on the course, only variable over time.
      */
-    private SpeedWithBearing getWind(TimePoint at) {
-        return getTrackedRace().getWind(at);
+    private Wind getWind(Position p, TimePoint at) {
+        return getTrackedRace().getWind(p, at);
     }
 
     /**
@@ -210,14 +211,14 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
      * collinear with the current wind's bearing.
      */
     private boolean isUpOrDownwindLeg(TimePoint at) {
-        Bearing windBearing = getWind(at).getBearing();
+        Wind wind = getWindOnLeg(at);
         // check for all combinations of start/end waypoint buoys:
         for (Buoy startBuoy : getLeg().getFrom().getBuoys()) {
             Position startBuoyPos = getTrackedRace().getTrack(startBuoy).getEstimatedPosition(at);
             for (Buoy endBuoy : getLeg().getTo().getBuoys()) {
                 Position endBuoyPos = getTrackedRace().getTrack(endBuoy).getEstimatedPosition(at);
                 Bearing legBearing = startBuoyPos.getBearingGreatCircle(endBuoyPos);
-                double deltaDeg = legBearing.getDegrees() - windBearing.getDegrees();
+                double deltaDeg = legBearing.getDegrees() - wind.getBearing().getDegrees();
                 if (deltaDeg > 180) {
                     deltaDeg -= 180;
                 } else if (deltaDeg < 0) {
@@ -229,6 +230,17 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
             }
         }
         return false;
+    }
+
+    private Wind getWindOnLeg(TimePoint at) {
+        Position approximateLegStartPosition = getTrackedRace().getTrack(
+                getLeg().getFrom().getBuoys().iterator().next()).getEstimatedPosition(at);
+        Position approximateLegEndPosition = getTrackedRace().getTrack(
+                getLeg().getTo().getBuoys().iterator().next()).getEstimatedPosition(at);
+        Wind wind = getWind(
+                approximateLegStartPosition.translateGreatCircle(approximateLegStartPosition.getBearingGreatCircle(approximateLegEndPosition),
+                        approximateLegStartPosition.getDistance(approximateLegEndPosition)), at);
+        return wind;
     }
 
     @Override

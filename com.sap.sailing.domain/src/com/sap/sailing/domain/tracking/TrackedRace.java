@@ -5,8 +5,8 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Distance;
 import com.sap.sailing.domain.base.Leg;
+import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.RaceDefinition;
-import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.Waypoint;
 
@@ -99,6 +99,6 @@ public interface TrackedRace {
      */
     GPSFixTrack<Buoy, GPSFix> getTrack(Buoy buoy);
 
-    SpeedWithBearing getWind(TimePoint at);
+    Wind getWind(Position p, TimePoint at);
 
 }

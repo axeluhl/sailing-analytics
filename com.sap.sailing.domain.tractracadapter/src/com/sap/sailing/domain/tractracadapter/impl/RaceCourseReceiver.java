@@ -29,11 +29,14 @@ import com.tractrac.clientmodule.data.RouteData;
 public class RaceCourseReceiver {
     private final TrackedEvent trackedEvent;
     private final com.tractrac.clientmodule.Event tractracEvent;
+    private final long millisecondsOverWhichToAverageWind;
     
-    public RaceCourseReceiver(TrackedEvent trackedEvent, com.tractrac.clientmodule.Event tractracEvent) {
+    public RaceCourseReceiver(TrackedEvent trackedEvent, com.tractrac.clientmodule.Event tractracEvent,
+            long millisecondsOverWhichToAverageWind) {
         super();
         this.trackedEvent = trackedEvent;
         this.tractracEvent = tractracEvent;
+        this.millisecondsOverWhichToAverageWind = millisecondsOverWhichToAverageWind;
     }
 
     /**
@@ -51,7 +54,7 @@ public class RaceCourseReceiver {
                     Course course = DomainFactory.INSTANCE.createCourse(route.getName(), record.getPoints());
                     RaceDefinition raceDefinition = DomainFactory.INSTANCE.createRaceDefinition(race, course);
                     trackedEvent.getEvent().addRace(raceDefinition);
-                    trackedEvent.addTrackedRace(new DynamicTrackedRaceImpl(trackedEvent, raceDefinition));
+                    trackedEvent.addTrackedRace(new DynamicTrackedRaceImpl(trackedEvent, raceDefinition, millisecondsOverWhichToAverageWind));
                 }
             });
             result.add(routeListener);

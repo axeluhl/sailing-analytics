@@ -24,8 +24,8 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
         DynamicTrackedRace, RawListener<Competitor, GPSFixMoving> {
     private final Set<RawListener<Competitor, GPSFixMoving>> listeners;
     
-    public DynamicTrackedRaceImpl(TrackedEvent trackedEvent, RaceDefinition race) {
-        super(trackedEvent, race);
+    public DynamicTrackedRaceImpl(TrackedEvent trackedEvent, RaceDefinition race, long millisecondsOverWhichToAverageWind) {
+        super(trackedEvent, race, millisecondsOverWhichToAverageWind);
         listeners = new HashSet<RawListener<Competitor, GPSFixMoving>>();
         for (Competitor competitor : getRace().getCompetitors()) {
             DynamicTrack<Competitor, GPSFixMoving> track = getTrack(competitor);
