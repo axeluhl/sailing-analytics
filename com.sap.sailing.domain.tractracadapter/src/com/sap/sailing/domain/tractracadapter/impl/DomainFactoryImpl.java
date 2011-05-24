@@ -1,5 +1,10 @@
 package com.sap.sailing.domain.tractracadapter.impl;
 
+import java.io.FileNotFoundException;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -43,6 +48,7 @@ import com.sap.sailing.domain.tracking.impl.DynamicTrackedEventImpl;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
+import com.sap.sailing.domain.tractracadapter.EventTracker;
 import com.tractrac.clientmodule.CompetitorClass;
 import com.tractrac.clientmodule.ControlPoint;
 import com.tractrac.clientmodule.Race;
@@ -303,6 +309,12 @@ public class DomainFactoryImpl implements DomainFactory {
     public MarkPassing createMarkPassing(com.tractrac.clientmodule.Competitor competitor, Waypoint passed, TimePoint time) {
         MarkPassing result = new MarkPassingImpl(time, passed, getCompetitor(competitor));
         return result;
+    }
+
+    @Override
+    public EventTracker createEventTracker(URL paramURL, URI liveURI, URI storedURI) throws MalformedURLException,
+            FileNotFoundException, URISyntaxException {
+        return new EventTrackerImpl(this, paramURL, liveURI, storedURI);
     }
 
 }

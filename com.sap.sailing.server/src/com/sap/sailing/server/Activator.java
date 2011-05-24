@@ -13,8 +13,12 @@ public class Activator implements BundleActivator, ServiceListener {
 
     private RacingEventService service;
     private ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
-    private BundleContext fContext;
-
+    private static BundleContext fContext;
+    
+    static BundleContext getDefault() {
+        return fContext;
+    }
+    
     /*
      * (non-Javadoc)
      * 
@@ -37,7 +41,6 @@ public class Activator implements BundleActivator, ServiceListener {
 
         // grab the service
         service = (RacingEventService) racingEventServiceTracker.getService();
-
     }
 
     /*

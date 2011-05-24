@@ -1,5 +1,11 @@
 package com.sap.sailing.domain.tractracadapter;
 
+import java.io.FileNotFoundException;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+
 import com.maptrack.client.io.TypeController;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Buoy;
@@ -60,6 +66,9 @@ public interface DomainFactory {
      */
     com.sap.sailing.domain.base.Event createEvent(Event event);
     
+    EventTracker createEventTracker(URL paramURL, URI liveURI, URI storedURI) throws MalformedURLException,
+            FileNotFoundException, URISyntaxException;
+
     DynamicTrackedEvent trackEvent(com.sap.sailing.domain.base.Event event);
     
     BoatClass getBoatClass(CompetitorClass competitorClass);

@@ -16,4 +16,11 @@
             class="com.sap.sailing.server.AdminApp">
       </servlet>
    </extension>
+   <extension
+         point="org.eclipse.equinox.http.registry.resources">
+      <resource
+            alias="/addevent"
+            base-name="resources/addevent.html">
+      </resource>
+   </extension>
 </plugin>
