@@ -1,12 +1,11 @@
 package com.sap.sailing.server;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class DictionaryServiceImpl implements DictionaryService {
 
-    private List fDictionaries = new ArrayList();
+    private List<Dictionary> fDictionaries = new ArrayList<Dictionary>();
 
     public void registerDictionary(Dictionary dictionary) {
         fDictionaries.add(dictionary);

@@ -12,7 +12,7 @@ import org.osgi.util.tracker.ServiceTracker;
 public class Activator implements BundleActivator, ServiceListener {
 
     private DictionaryService service;
-    private ServiceTracker dictionaryServiceTracker;
+    private ServiceTracker<DictionaryService, DictionaryService> dictionaryServiceTracker;
     private BundleContext fContext;
 
     /*
@@ -24,12 +24,12 @@ public class Activator implements BundleActivator, ServiceListener {
         fContext = context;
         service = new DictionaryServiceImpl();
 
-        Hashtable props = new Hashtable();
+        Hashtable<String, ?> props = new Hashtable<String, String>();
         // register the service
         context.registerService(DictionaryService.class.getName(), service, props);
 
         // create a tracker and track the service
-        dictionaryServiceTracker = new ServiceTracker(context, DictionaryService.class.getName(), null);
+        dictionaryServiceTracker = new ServiceTracker<DictionaryService, DictionaryService>(context, DictionaryService.class.getName(), null);
         dictionaryServiceTracker.open();
 
         // have a service listener to implement the whiteboard pattern
@@ -57,7 +57,7 @@ public class Activator implements BundleActivator, ServiceListener {
     }
 
     public void serviceChanged(ServiceEvent ev) {
-        ServiceReference sr = ev.getServiceReference();
+        ServiceReference<?> sr = ev.getServiceReference();
         switch (ev.getType()) {
         case ServiceEvent.REGISTERED: {
             Dictionary dictionary = (Dictionary) fContext.getService(sr);
