@@ -22,7 +22,7 @@ public interface TrackedEvent {
      * Buoy positions, also for those defining a {@link Gate}, are variable over time.
      * Their positions are tracked.
      */
-    Track<Buoy, GPSFix> getTrack(Buoy buoy);
+    GPSFixTrack<Buoy, GPSFix> getTrack(Buoy buoy);
     
     /**
      * Listener will be notified when {@link #addTrackedRace(TrackedRace)} is called and

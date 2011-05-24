@@ -6,6 +6,7 @@ import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Distance;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.Waypoint;
 
@@ -46,7 +47,7 @@ public interface TrackedRace {
     /**
      * The raw, updating feed of a single competitor participating in this race
      */
-    Track<Competitor, GPSFixMoving> getTrack(Competitor competitor);
+    GPSFixTrack<Competitor, GPSFixMoving> getTrack(Competitor competitor);
     
     /**
      * Tells the leg on which the <code>competitor</code> was at time <code>at</code>.
@@ -96,6 +97,8 @@ public interface TrackedRace {
     /**
      * Yields the track describing <code>buoy</code>'s movement over time
      */
-    Track<Buoy, GPSFix> getTrack(Buoy buoy);
+    GPSFixTrack<Buoy, GPSFix> getTrack(Buoy buoy);
+
+    SpeedWithBearing getWind(TimePoint at);
 
 }

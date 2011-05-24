@@ -10,7 +10,7 @@ import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.impl.Util.Triple;
 import com.sap.sailing.domain.tracking.DynamicTrack;
 import com.sap.sailing.domain.tracking.GPSFix;
-import com.sap.sailing.domain.tracking.Track;
+import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.TrackedEvent;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.tractrac.clientmodule.ControlPoint;
@@ -42,7 +42,7 @@ public class MarkPositionReceiver extends AbstractReceiverWithQueue<ControlPoint
     /**
      * The listeners returned will, when added to a controller, receive events about the
      * position changes of marks during a race. Receiving such an event updates the Buoy's
-     * {@link Track} in the {@link TrackedEvent}. Starts a thread for this receiver,
+     * {@link GPSFixTrack} in the {@link TrackedEvent}. Starts a thread for this receiver,
      * blocking for events received.
      */
     public Iterable<TypeController> getControlPointListeners() {

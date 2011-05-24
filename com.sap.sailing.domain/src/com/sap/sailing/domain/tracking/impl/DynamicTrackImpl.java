@@ -8,7 +8,7 @@ import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.RawListener;
 
 public class DynamicTrackImpl<ItemType, FixType extends GPSFix> extends
-        TrackImpl<ItemType, FixType> implements DynamicTrack<ItemType, FixType> {
+        GPSFixTrackImpl<ItemType, FixType> implements DynamicTrack<ItemType, FixType> {
     private final Set<RawListener<ItemType, FixType>> listeners;
     
     public DynamicTrackImpl(ItemType trackedItem) {

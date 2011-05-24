@@ -2,6 +2,7 @@ package com.sap.sailing.domain.tracking.impl;
 
 import java.util.Iterator;
 
+import com.sap.sailing.domain.base.Bearing;
 import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Distance;
@@ -14,7 +15,7 @@ import com.sap.sailing.domain.base.impl.KilometersPerHourSpeedImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
-import com.sap.sailing.domain.tracking.Track;
+import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
@@ -118,7 +119,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
         if (legStart == null) {
             return null;
         }
-        Track<Competitor, GPSFixMoving> track = getTrackedRace().getTrack(getCompetitor());
+        GPSFixTrack<Competitor, GPSFixMoving> track = getTrackedRace().getTrack(getCompetitor());
         Iterator<GPSFixMoving> iter = track.getFixes(legStart.getTimePoint(), /* inclusive */ false);
         Speed max = Speed.NULL;
         if (iter.hasNext()) {
@@ -187,7 +188,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
      * the leg is neither an upwind nor a downwind leg, and hence the true distance to <code>buoy</code> is returned.
      */
     private Distance getWindwardDistance(Position pos1, Position pos2, TimePoint at) {
-        if (isUpOrDownwindLeg()) {
+        if (isUpOrDownwindLeg(at)) {
             Position projectionToLineThroughPos2 = pos1.projectToLineThrough(pos2, getWind(at).getBearing());
             return projectionToLineThroughPos2.getDistance(pos2);
         } else {
@@ -196,17 +197,37 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
         }
     }
 
+    /**
+     * For now, we have an incredibly simple wind "model" which assigns a single common wind force and bearing
+     * to all positions on the course, only variable over time.
+     */
     private SpeedWithBearing getWind(TimePoint at) {
-        // TODO Auto-generated method stub
-        return null;
+        return getTrackedRace().getWind(at);
     }
 
     /**
      * Determines whether the current {@link #getLeg() leg} is +/- {@link #UPWIND_DOWNWIND_TOLERANCE_IN_DEG} degrees
-     * collinear with the wind's bearing.
+     * collinear with the current wind's bearing.
      */
-    private boolean isUpOrDownwindLeg() {
-        // TODO Auto-generated method stub
+    private boolean isUpOrDownwindLeg(TimePoint at) {
+        Bearing windBearing = getWind(at).getBearing();
+        // check for all combinations of start/end waypoint buoys:
+        for (Buoy startBuoy : getLeg().getFrom().getBuoys()) {
+            Position startBuoyPos = getTrackedRace().getTrack(startBuoy).getEstimatedPosition(at);
+            for (Buoy endBuoy : getLeg().getTo().getBuoys()) {
+                Position endBuoyPos = getTrackedRace().getTrack(endBuoy).getEstimatedPosition(at);
+                Bearing legBearing = startBuoyPos.getBearingGreatCircle(endBuoyPos);
+                double deltaDeg = legBearing.getDegrees() - windBearing.getDegrees();
+                if (deltaDeg > 180) {
+                    deltaDeg -= 180;
+                } else if (deltaDeg < 0) {
+                    deltaDeg += 180;
+                }
+                if (deltaDeg < UPWIND_DOWNWIND_TOLERANCE_IN_DEG) {
+                    return true;
+                }
+            }
+        }
         return false;
     }
 

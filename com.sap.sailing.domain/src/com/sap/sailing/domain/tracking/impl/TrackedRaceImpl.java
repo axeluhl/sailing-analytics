@@ -11,13 +11,14 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Distance;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
-import com.sap.sailing.domain.tracking.Track;
+import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.TrackedEvent;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
@@ -34,7 +35,7 @@ public class TrackedRaceImpl implements TrackedRace {
      */
     private final LinkedHashMap<Leg, TrackedLeg> trackedLegs;
     
-    private final Map<Competitor, Track<Competitor, GPSFixMoving>> tracks;
+    private final Map<Competitor, GPSFixTrack<Competitor, GPSFixMoving>> tracks;
     private final Map<Competitor, NavigableSet<MarkPassing>> markPassingsForCompetitor;
     private final Map<Waypoint, NavigableSet<MarkPassing>> markPassingsForWaypoint;
     
@@ -48,7 +49,7 @@ public class TrackedRaceImpl implements TrackedRace {
         }
         trackedLegs = trackedLegsMap;
         markPassingsForCompetitor = new HashMap<Competitor, NavigableSet<MarkPassing>>();
-        tracks = new HashMap<Competitor, Track<Competitor, GPSFixMoving>>();
+        tracks = new HashMap<Competitor, GPSFixTrack<Competitor, GPSFixMoving>>();
         for (Competitor competitor : race.getCompetitors()) {
             markPassingsForCompetitor.put(competitor, new TreeSet<MarkPassing>(TimedComparator.INSTANCE));
             tracks.put(competitor, new DynamicTrackImpl<Competitor, GPSFixMoving>(competitor));
@@ -97,7 +98,7 @@ public class TrackedRaceImpl implements TrackedRace {
     }
 
     @Override
-    public Track<Competitor, GPSFixMoving> getTrack(Competitor competitor) {
+    public GPSFixTrack<Competitor, GPSFixMoving> getTrack(Competitor competitor) {
         return tracks.get(competitor);
     }
 
@@ -201,13 +202,20 @@ public class TrackedRaceImpl implements TrackedRace {
     }
 
     @Override
-    public Track<Buoy, GPSFix> getTrack(Buoy buoy) {
+    public GPSFixTrack<Buoy, GPSFix> getTrack(Buoy buoy) {
         TrackedEvent trackedEvent = getTrackedEvent();
         return trackedEvent.getTrack(buoy);
     }
 
     private TrackedEvent getTrackedEvent() {
         return trackedEvent;
+    }
+
+    @Override
+    public SpeedWithBearing getWind(TimePoint at) {
+        // TODO Auto-generated method stub
+        // TODO refactor Track such that it can't only handle GPSFix but also Bearing, re-using sorting over time
+        return null;
     }
 
 }

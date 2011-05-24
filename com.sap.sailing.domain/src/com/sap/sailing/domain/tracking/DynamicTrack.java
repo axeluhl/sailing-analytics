@@ -6,7 +6,7 @@ package com.sap.sailing.domain.tracking;
  * @author Axel Uhl (d043530)
  */
 public interface DynamicTrack<ItemType, FixType extends GPSFix> extends
-        Track<ItemType, FixType> {
+        GPSFixTrack<ItemType, FixType> {
     void addGPSFix(FixType gpsFix);
 
     /**
