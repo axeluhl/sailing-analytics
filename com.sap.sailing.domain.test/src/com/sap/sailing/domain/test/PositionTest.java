@@ -9,6 +9,7 @@ import com.sap.sailing.domain.base.Distance;
 import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.base.impl.DegreePosition;
+import com.sap.sailing.domain.base.impl.NauticalMileDistance;
 
 public class PositionTest {
     @Test
@@ -39,6 +40,15 @@ public class PositionTest {
         assertEquals(315.0, p5.getBearingGreatCircle(p7).getDegrees(), 0.1);
         assertEquals(135.0, p7.getBearingGreatCircle(p5).getDegrees(), 0.1);
         assertEquals(225.0, p6.getBearingGreatCircle(p5).getDegrees(), 0.1);
+    }
+    
+    @Test
+    public void translateTest() {
+        Position p1 = new DegreePosition(0, 0);
+        // now travel to 123° for 0.001 nautical miles (~ 1.852m)
+        Position p2 = p1.translateGreatCircle(new DegreeBearingImpl(123), new NauticalMileDistance(0.001));
+        assertEquals(123, p1.getBearingGreatCircle(p2).getDegrees(), 0.0000001);
+        assertEquals(0.001, p1.getDistance(p2).getNauticalMiles(), 0.0000001);
     }
     
     @Test

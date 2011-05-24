@@ -21,5 +21,10 @@ public abstract class AbstractSpeedWithBearingImpl extends AbstractSpeedImpl imp
     public Position travelTo(Position pos, TimePoint from, TimePoint to) {
         return pos.translateGreatCircle(getBearing(), this.travel(from, to));
     }
+    
+    @Override
+    public String toString() {
+        return super.toString()+" to "+getBearing().getDegrees()+"°";
+    }
 
 }

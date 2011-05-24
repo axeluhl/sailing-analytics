@@ -15,5 +15,10 @@ public abstract class AbstractSpeedImpl implements Speed {
     public int compareTo(Speed speed) {
         return getMetersPerSecond() > speed.getMetersPerSecond() ? 1 : getMetersPerSecond() == speed.getMetersPerSecond() ? 0 : -1;
     }
+    
+    @Override
+    public String toString() {
+        return ""+getKnots()+"kn";
+    }
 
 }

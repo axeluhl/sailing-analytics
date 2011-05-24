@@ -13,7 +13,7 @@ public abstract class AbstractDistance implements Distance {
 
     @Override
     public Speed inTime(long milliseconds) {
-        return new KilometersPerHourSpeedImpl(getKilometers() / milliseconds * 3.6);
+        return new KilometersPerHourSpeedImpl(getKilometers() * 1000. * 3600. / milliseconds);
     }
 
     @Override

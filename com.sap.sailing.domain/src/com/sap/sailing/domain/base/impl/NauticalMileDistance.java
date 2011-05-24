@@ -17,7 +17,7 @@ public class NauticalMileDistance extends AbstractDistance {
 
     @Override
     public double getCentralAngleDeg() {
-        return getGeographicalMiles() * 60.;
+        return getGeographicalMiles() / 60.;
     }
 
     @Override

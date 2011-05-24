@@ -26,6 +26,11 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
     public WindTrackImpl(long millisecondsOverWhichToAverage) {
         this.millisecondsOverWhichToAverage = millisecondsOverWhichToAverage;
     }
+    
+    @Override
+    public void add(Wind wind) {
+        getInternalFixes().add(wind);
+    }
 
     private final TimePoint zeroSeconds = new MillisecondsTimePoint(0);
     private final TimePoint oneSecond = new MillisecondsTimePoint(1000);
@@ -35,7 +40,7 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
         Position blownTo = p;
         int secondsCount = 0;
         for (Wind before : beforeSet.descendingSet()) {
-            if (at.asMillis() - before.getTimePoint().asMillis() > millisecondsOverWhichToAverage) { 
+            if (at.asMillis() - before.getTimePoint().asMillis() < millisecondsOverWhichToAverage) { 
                 blownTo = blownTo.translateGreatCircle(before.getBearing(), before.travel(zeroSeconds, oneSecond));
                 secondsCount++;
             } else {
@@ -83,6 +88,10 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
         @Override
         public int compareTo(Speed o) {
             return 0;
+        }
+        @Override
+        public Bearing getFrom() {
+            return null;
         }
     }
 }
