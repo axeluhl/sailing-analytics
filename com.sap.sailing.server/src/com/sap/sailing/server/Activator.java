@@ -11,8 +11,8 @@ import org.osgi.util.tracker.ServiceTracker;
 
 public class Activator implements BundleActivator, ServiceListener {
 
-    private DictionaryService service;
-    private ServiceTracker<DictionaryService, DictionaryService> dictionaryServiceTracker;
+    private RacingEventService service;
+    private ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
     private BundleContext fContext;
 
     /*
@@ -22,24 +22,22 @@ public class Activator implements BundleActivator, ServiceListener {
      */
     public void start(BundleContext context) throws Exception {
         fContext = context;
-        service = new DictionaryServiceImpl();
+        service = new RacingEventServiceImpl();
 
         Hashtable<String, ?> props = new Hashtable<String, String>();
         // register the service
-        context.registerService(DictionaryService.class.getName(), service, props);
+        context.registerService(RacingEventService.class.getName(), service, props);
 
         // create a tracker and track the service
-        dictionaryServiceTracker = new ServiceTracker<DictionaryService, DictionaryService>(context, DictionaryService.class.getName(), null);
-        dictionaryServiceTracker.open();
+        racingEventServiceTracker = new ServiceTracker<RacingEventService, RacingEventService>(context, RacingEventService.class.getName(), null);
+        racingEventServiceTracker.open();
 
         // have a service listener to implement the whiteboard pattern
-        fContext.addServiceListener(this, "(objectclass=" + Dictionary.class.getName() + ")");
+        fContext.addServiceListener(this, "(objectclass=" + RacingEventService.class.getName() + ")");
 
         // grab the service
-        service = (DictionaryService) dictionaryServiceTracker.getService();
+        service = (RacingEventService) racingEventServiceTracker.getService();
 
-        // register the dictionary
-        service.registerDictionary(new DictionaryImpl());
     }
 
     /*
@@ -49,27 +47,15 @@ public class Activator implements BundleActivator, ServiceListener {
      */
     public void stop(BundleContext context) throws Exception {
         // close the service tracker
-        dictionaryServiceTracker.close();
-        dictionaryServiceTracker = null;
-
+        racingEventServiceTracker.close();
+        racingEventServiceTracker = null;
         service = null;
         fContext = null;
     }
 
     public void serviceChanged(ServiceEvent ev) {
         ServiceReference<?> sr = ev.getServiceReference();
-        switch (ev.getType()) {
-        case ServiceEvent.REGISTERED: {
-            Dictionary dictionary = (Dictionary) fContext.getService(sr);
-            service.registerDictionary(dictionary);
-        }
-            break;
-        case ServiceEvent.UNREGISTERING: {
-            Dictionary dictionary = (Dictionary) fContext.getService(sr);
-            service.unregisterDictionary(dictionary);
-        }
-            break;
-        }
+        System.out.println("service changed: "+ev+" for service reference "+sr);
     }
 
 }
