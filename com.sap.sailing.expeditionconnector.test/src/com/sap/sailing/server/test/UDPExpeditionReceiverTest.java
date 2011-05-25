@@ -1,6 +1,7 @@
 package com.sap.sailing.server.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
@@ -10,12 +11,18 @@ import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.TimeZone;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sailing.domain.base.TimePoint;
+import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.expeditionconnector.ExpeditionListener;
 import com.sap.sailing.expeditionconnector.ExpeditionMessage;
 import com.sap.sailing.expeditionconnector.UDPExpeditionReceiver;
@@ -120,6 +127,28 @@ public class UDPExpeditionReceiverTest {
         assertEquals(319.0, m.getValue(9), 0.00000001);
         assertTrue(m.hasValue(146));
         assertEquals(40348.390035, m.getValue(146), 0.00000001);
+    }
+
+    @Test
+    public void testTimeStampConversion() throws IOException, InterruptedException {
+        receiver.addListener(listener, /* validMessagesOnly */ true);
+        sendAndWaitABit(new String[] { "#0,1,7.900,2,-42.0,3,25.90,9,323.0,13,326.0,48,54.511867,49,10.152700,50,340.3,146,40348.578310*25" });
+        assertEquals(1, messages.size());
+        assertTrue(messages.get(0).hasValue(ExpeditionMessage.ID_GPS_TIME));
+        assertTrue(messages.get(0).hasValue(ExpeditionMessage.ID_GPS_LAT));
+        assertTrue(messages.get(0).hasValue(ExpeditionMessage.ID_GPS_LNG));
+        GPSFix fix = messages.get(0).getGPSFix();
+        assertNotNull(fix);
+        TimePoint time = fix.getTimePoint();
+        Date date = time.asDate();
+        GregorianCalendar cal = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
+        cal.setTime(date);
+        assertEquals(2010, cal.get(Calendar.YEAR));
+        assertEquals(5, cal.get(Calendar.MONTH));
+        assertEquals(19, cal.get(Calendar.DAY_OF_MONTH));
+        assertEquals(13, cal.get(Calendar.HOUR_OF_DAY));
+        assertEquals(52, cal.get(Calendar.MINUTE));
+        assertEquals(46, cal.get(Calendar.SECOND));
     }
 
     @Test
