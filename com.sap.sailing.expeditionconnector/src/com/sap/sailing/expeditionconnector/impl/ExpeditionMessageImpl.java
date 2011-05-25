@@ -6,14 +6,19 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
+import java.util.TreeSet;
 
+import com.sap.sailing.domain.base.Bearing;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.TimePoint;
+import com.sap.sailing.domain.base.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.base.impl.DegreePosition;
+import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.impl.GPSFixImpl;
+import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.expeditionconnector.ExpeditionMessage;
 
 public class ExpeditionMessageImpl implements ExpeditionMessage {
@@ -61,42 +66,92 @@ public class ExpeditionMessageImpl implements ExpeditionMessage {
     @Override
     public GPSFix getGPSFix() {
         if (hasValue(ID_GPS_LAT) && hasValue(ID_GPS_LNG)) {
-            TimePoint timePoint;
-            if (hasValue(ID_GPS_TIME)) {
-                TimeZone UTC = TimeZone.getTimeZone("UTC");
-                if (UTC == null) {
-                    UTC = TimeZone.getTimeZone("GMT");
-                }
-                GregorianCalendar cal = new GregorianCalendar(UTC);
-                cal.set(1899, 11, 30, 0, 0, 0);
-                timePoint = new MillisecondsTimePoint((long)
-                        (getValue(ID_GPS_TIME)*24*3600*1000) +   // this is the milliseconds since 31.12.1899 0:00:00 UTC
-                        cal.getTimeInMillis());
-            } else {
-                timePoint = new MillisecondsTimePoint(createdAtMillis);
+            return new GPSFixImpl(new DegreePosition(getValue(ID_GPS_LAT), getValue(ID_GPS_LNG)), getTimePoint());
+        } else {
+            return null;
+        }
+    }
+
+    private TimePoint getTimePoint() {
+        TimePoint timePoint;
+        if (hasValue(ID_GPS_TIME)) {
+            TimeZone UTC = TimeZone.getTimeZone("UTC");
+            if (UTC == null) {
+                UTC = TimeZone.getTimeZone("GMT");
             }
-            return new GPSFixImpl(new DegreePosition(getValue(ID_GPS_LAT), getValue(ID_GPS_LNG)), timePoint);
+            GregorianCalendar cal = new GregorianCalendar(UTC);
+            cal.set(1899, 11, 30, 0, 0, 0);
+            timePoint = new MillisecondsTimePoint((long)
+                    (getValue(ID_GPS_TIME)*24*3600*1000) +   // this is the milliseconds since 31.12.1899 0:00:00 UTC
+                    cal.getTimeInMillis());
+        } else {
+            timePoint = new MillisecondsTimePoint(createdAtMillis);
+        }
+        return timePoint;
+    }
+
+    @Override
+    public GPSFixMoving getGPSFixMoving() {
+        if (hasValue(ID_GPS_LAT) && hasValue(ID_GPS_LNG)) {
+            return new GPSFixMovingImpl(new DegreePosition(getValue(ID_GPS_LAT), getValue(ID_GPS_LNG)), getTimePoint(),
+                    getSpeedOverGround());
         } else {
             return null;
         }
     }
 
     @Override
-    public GPSFixMoving getGPSFixMoving() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
     public SpeedWithBearing getTrueWind() {
-        // TODO Auto-generated method stub
-        return null;
+        if (hasValue(ID_TWD) && hasValue(ID_TWS)) {
+            return new KnotSpeedImpl(getValue(ID_TWS), getTrueWindBearing());
+        } else {
+            return null;
+        }
+    }
+    
+    @Override
+    public Bearing getTrueWindBearing() {
+        if (hasValue(ID_TWD)) {
+            return new DegreeBearingImpl(getValue(ID_TWD));
+        } else {
+            return null;
+        }
     }
 
     @Override
     public SpeedWithBearing getSpeedOverGround() {
-        // TODO Auto-generated method stub
-        return null;
+        if (hasValue(ID_GPS_COG) && hasValue(ID_GPS_SOG)) {
+            return new KnotSpeedImpl(getValue(ID_GPS_SOG), getCourseOverGround());
+        } else {
+            return null;
+        }
+    }
+    
+    @Override
+    public Bearing getCourseOverGround() {
+        if (hasValue(ID_GPS_COG)) {
+            return new DegreeBearingImpl(getValue(ID_GPS_COG));
+        } else {
+            return null;
+        }
     }
 
+    @Override
+    public String toString() {
+        StringBuilder result = new StringBuilder("Boat #");
+        result.append(getBoatID());
+        TreeSet<Integer> ids = new TreeSet<Integer>(values.keySet());
+        boolean first = true;
+        for (Integer id : ids) {
+            if (!first) {
+                result.append(", ");
+            } else {
+                first = false;
+            }
+            result.append(id);
+            result.append(":");
+            result.append(getValue(id));
+        }
+        return result.toString();
+    }
 }

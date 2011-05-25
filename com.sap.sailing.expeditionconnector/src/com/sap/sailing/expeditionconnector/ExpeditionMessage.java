@@ -2,6 +2,7 @@ package com.sap.sailing.expeditionconnector;
 
 import java.util.Set;
 
+import com.sap.sailing.domain.base.Bearing;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
@@ -38,6 +39,21 @@ public interface ExpeditionMessage {
     final int ID_HEADING = 13;
     
     /**
+     * variable ID for true wind angle, relative to keel, in decimal degrees
+     */
+    final int ID_TWA = 4;
+    
+    /**
+     * variable ID for geographical true wind direction, in decimal degrees
+     */
+    final int ID_TWD = 6;
+    
+    /**
+     * variable ID for true wind speed in decimal knots
+     */
+    final int ID_TWS = 5;
+    
+    /**
      * A message's checksum determines whether the package is to be considered valid.
      */
     boolean isValid();
@@ -70,4 +86,8 @@ public interface ExpeditionMessage {
     SpeedWithBearing getTrueWind();
     
     SpeedWithBearing getSpeedOverGround();
+
+    Bearing getTrueWindBearing();
+
+    Bearing getCourseOverGround();
 }

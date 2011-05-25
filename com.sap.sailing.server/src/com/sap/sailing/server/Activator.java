@@ -15,25 +15,14 @@ public class Activator implements BundleActivator, ServiceListener {
         return fContext;
     }
     
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
-     */
     public void start(BundleContext context) throws Exception {
         fContext = context;
         RacingEventService service = new RacingEventServiceImpl();
-
         Hashtable<String, ?> props = new Hashtable<String, String>();
         // register the service
         context.registerService(RacingEventService.class.getName(), service, props);
     }
     
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
-     */
     public void stop(BundleContext context) throws Exception {
         fContext = null;
     }
@@ -42,5 +31,4 @@ public class Activator implements BundleActivator, ServiceListener {
         ServiceReference<?> sr = ev.getServiceReference();
         System.out.println("service changed: "+ev+" for service reference "+sr);
     }
-
 }

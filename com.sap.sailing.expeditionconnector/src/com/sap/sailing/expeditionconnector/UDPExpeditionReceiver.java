@@ -13,40 +13,52 @@ import java.util.regex.Pattern;
 import com.sap.sailing.expeditionconnector.impl.ExpeditionMessageImpl;
 
 /**
- * When run, starts receiving UDP packets expected to be in the format Expedition writes and
- * notifies registered listeners about all contents received. To stop receiving, call {@link #stop}.
- *  
+ * When run, starts receiving UDP packets expected to be in the format Expedition writes and notifies registered
+ * listeners about all contents received. To stop receiving, call {@link #stop}.
+ * 
  * @author Axel Uhl (d043530)
- *
+ * 
  */
 public class UDPExpeditionReceiver implements Runnable {
     private boolean stopped = false;
 
     private final int listeningOnPort;
-    
+
     private final DatagramSocket udpSocket;
-    
+
     /**
      * For each listener remembers if the listener is only interested in valid messages.
      */
-    private final Map<ExpeditionListener, Boolean> listeners; 
+    private final Map<ExpeditionListener, Boolean> listeners;
 
     /**
      * Maximum IP packet length
      */
     private static final int MAX_PACKET_SIZE = 65536;
-    
+
+    /**
+     * Launches a listener and dumps messages received to the console
+     * @param args 0: port to listen on
+     *  
+     * @throws IOException
+     */
+    public static void main(String[] args) throws IOException {
+        UDPExpeditionReceiver receiver = new UDPExpeditionReceiver(Integer.valueOf(args[0]));
+        receiver.addListener(new ExpeditionListener() {
+            @Override
+            public void received(ExpeditionMessage message) {
+                System.out.println(message);
+            }
+        }, /* validMessagesOnly */ false);
+        receiver.run();
+    }
+
     public UDPExpeditionReceiver(int listeningOnPort) throws SocketException {
         udpSocket = new DatagramSocket(listeningOnPort);
         listeners = new HashMap<ExpeditionListener, Boolean>();
         this.listeningOnPort = listeningOnPort;
     }
 
-    public static void main(String[] args) throws IOException {
-        UDPExpeditionReceiver receiver = new UDPExpeditionReceiver(Integer.valueOf(args[0]));
-        receiver.run();
-    }
-    
     public void stop() throws SocketException, IOException {
         stopped = true;
         byte[] buf = new byte[0];
@@ -77,9 +89,10 @@ public class UDPExpeditionReceiver implements Runnable {
         }
         udpSocket.close();
     }
-    
+
     private ExpeditionMessage parse(String packetAsString) {
-        Pattern completeLinePattern = Pattern.compile("#([0-9]*)(( *,([0-9][0-9]*) *, *(-?[0-9]*(\\.[0-9]*)?))*)\\*([0-9a-fA-F][0-9a-fA-F]*)");
+        Pattern completeLinePattern = Pattern
+                .compile("#([0-9]*)(( *,([0-9][0-9]*) *, *(-?[0-9]*(\\.[0-9]*)?))*)\\*([0-9a-fA-F][0-9a-fA-F]*)");
         Matcher m = completeLinePattern.matcher(packetAsString);
         boolean valid = m.matches();
         if (valid) {
@@ -96,7 +109,7 @@ public class UDPExpeditionReceiver implements Runnable {
             valid = valid && checksumOk(checksum, packetAsString);
             return new ExpeditionMessageImpl(boatID, values, valid);
         } else {
-            System.err.println("Unparsable expedition message: "+packetAsString);
+            System.err.println("Unparsable expedition message: " + packetAsString);
             return null; // couldn't even parse
         }
     }
@@ -112,7 +125,7 @@ public class UDPExpeditionReceiver implements Runnable {
     public void addListener(ExpeditionListener listener, boolean validMessagesOnly) {
         listeners.put(listener, validMessagesOnly);
     }
-    
+
     public void removeListener(ExpeditionListener listener) {
         listeners.remove(listener);
     }
