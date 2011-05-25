@@ -7,3 +7,4 @@ Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: com.sap.sailing.expeditionconnector
 Require-Bundle: com.sap.sailing.domain
+Bundle-ActivationPolicy: lazy

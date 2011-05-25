@@ -1,0 +1,3 @@
+#!/bin/sh
+ssh sailing@furcashudson "rm target/plugins/*"
+scp * sailing@furcashudson:target/plugins

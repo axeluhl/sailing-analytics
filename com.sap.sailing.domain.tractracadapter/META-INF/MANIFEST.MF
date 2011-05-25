@@ -8,3 +8,4 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Require-Bundle: com.sap.sailing.domain,
  com.tractrac.clientmodule
 Export-Package: com.sap.sailing.domain.tractracadapter
+Bundle-ActivationPolicy: lazy

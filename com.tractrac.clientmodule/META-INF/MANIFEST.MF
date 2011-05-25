@@ -54,3 +54,4 @@ Export-Package: com.maptrack.asio,
  ucar.grib.grib1,
  ucar.grib.grib2,
  ucar.unidata.io
+Bundle-ActivationPolicy: lazy
