@@ -1,6 +1,7 @@
 package com.sap.sailing.server.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -99,6 +100,7 @@ public class UDPExpeditionReceiverTest {
     @After
     public void tearDown() {
         socket.close();
+        receiver.removeListener(listener);
     }
     
     @Test
@@ -106,7 +108,18 @@ public class UDPExpeditionReceiverTest {
         receiver.addListener(listener, /* validMessagesOnly */ false);
         sendAndWaitABit(validLines);
         assertEquals(validLines.length, messages.size());
-        listener.toString(); // just use, ensuring it won't be GCed
+        ExpeditionMessage m = messages.get(0);
+        assertEquals(0, m.getBoatID());
+        assertTrue(m.hasValue(1));
+        assertEquals(7.700, m.getValue(1), 0.00000001);
+        assertTrue(m.hasValue(2));
+        assertEquals(-39.0, m.getValue(2), 0.00000001);
+        assertTrue(m.hasValue(3));
+        assertEquals(23.00, m.getValue(3), 0.00000001);
+        assertTrue(m.hasValue(9));
+        assertEquals(319.0, m.getValue(9), 0.00000001);
+        assertTrue(m.hasValue(146));
+        assertEquals(40348.390035, m.getValue(146), 0.00000001);
     }
 
     @Test
@@ -114,7 +127,13 @@ public class UDPExpeditionReceiverTest {
         receiver.addListener(listener, /* validMessagesOnly */ true);
         sendAndWaitABit(someValidWithFourInvalidLines);
         assertEquals(someValidWithFourInvalidLines.length-4 /* assuming 4 lines are invalid */, messages.size());
-        listener.toString(); // just use, ensuring it won't be GCed
+    }
+
+    @Test
+    public void sendAndValidateSomeInvalidDatagramsAcceptingInvalid() throws IOException, InterruptedException {
+        receiver.addListener(listener, /* validMessagesOnly */ false);
+        sendAndWaitABit(someValidWithFourInvalidLines);
+        assertEquals(someValidWithFourInvalidLines.length, messages.size());
     }
 
     private void sendAndWaitABit(String[] linesToSend) throws IOException, InterruptedException {
