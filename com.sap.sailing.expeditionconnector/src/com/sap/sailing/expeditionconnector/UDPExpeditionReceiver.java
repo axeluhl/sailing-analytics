@@ -102,8 +102,11 @@ public class UDPExpeditionReceiver implements Runnable {
     }
 
     private boolean checksumOk(int checksum, String packetAsString) {
-        // TODO Auto-generated method stub
-        return true;
+        int b = 0;
+        for (byte stringByte : packetAsString.substring(0, packetAsString.lastIndexOf('*')).getBytes()) {
+            b ^= stringByte;
+        }
+        return b == checksum;
     }
 
     public void addListener(ExpeditionListener listener, boolean validMessagesOnly) {
