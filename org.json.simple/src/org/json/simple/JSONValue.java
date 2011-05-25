@@ -92,7 +92,8 @@ public class JSONValue {
      * @param value
      * @param writer
      */
-	public static void writeJSONString(Object value, Writer out) throws IOException {
+	@SuppressWarnings("unchecked")
+    public static void writeJSONString(Object value, Writer out) throws IOException {
 		if(value == null){
 			out.write("null");
 			return;
@@ -142,7 +143,7 @@ public class JSONValue {
 		}
 		
 		if(value instanceof Map){
-			JSONObject.writeJSONString((Map<?,?>)value, out);
+			JSONObject.writeJSONString((Map<Object,Object>)value, out);
 			return;
 		}
 		
@@ -168,7 +169,8 @@ public class JSONValue {
 	 * @param value
 	 * @return JSON text, or "null" if value is null or it's an NaN or an INF number.
 	 */
-	public static String toJSONString(Object value){
+	@SuppressWarnings("unchecked")
+    public static String toJSONString(Object value){
 		if(value == null)
 			return "null";
 		
@@ -199,7 +201,7 @@ public class JSONValue {
 			return ((JSONAware)value).toJSONString();
 		
 		if(value instanceof Map)
-			return JSONObject.toJSONString((Map<?,?>)value);
+			return JSONObject.toJSONString((Map<Object,Object>)value);
 		
 		if(value instanceof List)
 			return JSONArray.toJSONString((List<?>)value);
