@@ -3,6 +3,7 @@ package com.sap.sailing.server;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.SocketException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -17,6 +18,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.RaceDefinition;
 
 public class AdminApp extends HttpServlet {
     private static final long serialVersionUID = -6849138354941569249L;
@@ -28,6 +30,17 @@ public class AdminApp extends HttpServlet {
     private static final String ACTION_NAME_ADD_EVENT = "addevent";
 
     private static final String ACTION_NAME_STOP_EVENT = "stopevent";
+    
+    private static final String ACTION_NAME_SUBSCRIBE_RACE_FOR_EXPEDITION_WIND = "receiveexpeditionwind";
+
+    private static final String ACTION_NAME_UNSUBSCRIBE_RACE_FOR_EXPEDITION_WIND = "stopreceivingexpeditionwind";
+
+    private static final String PARAM_NAME_EVENTNAME = "eventname";
+
+    private static final String PARAM_NAME_RACENAME = "racename";
+
+    private static final String PARAM_NAME_PORT = "port";
+
 
     private ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
     
@@ -52,6 +65,10 @@ public class AdminApp extends HttpServlet {
                     addEvent(req, resp);
                 } else if (ACTION_NAME_STOP_EVENT.equals(action)) {
                     stopEvent(req, resp);
+                } else if (ACTION_NAME_SUBSCRIBE_RACE_FOR_EXPEDITION_WIND.equals(action)) {
+                    startReceivingExpeditionWindForRace(req, resp);
+                } else if (ACTION_NAME_UNSUBSCRIBE_RACE_FOR_EXPEDITION_WIND.equals(action)) {
+                    stopReceivingExpeditionWindForRace(req, resp);
                 }
             } else {
                 resp.getWriter().println("Hello admin!");
@@ -62,12 +79,39 @@ public class AdminApp extends HttpServlet {
         }
     }
     
+    private void stopReceivingExpeditionWindForRace(HttpServletRequest req, HttpServletResponse resp) throws SocketException, IOException {
+        RaceDefinition race = getRaceDefinition(req);
+        service.stopTrackingWind(getEvent(req), race);
+    }
+
+    private RaceDefinition getRaceDefinition(HttpServletRequest req) {
+        Event event = getEvent(req);
+        String racename = req.getParameter(PARAM_NAME_RACENAME);
+        for (RaceDefinition race : event.getAllRaces()) {
+            if (racename.equals(race.getName())) {
+                return race;
+            }
+        }
+        return null;
+    }
+
+    private void startReceivingExpeditionWindForRace(HttpServletRequest req, HttpServletResponse resp) throws SocketException {
+        RaceDefinition race = getRaceDefinition(req);
+        int port = Integer.valueOf(req.getParameter(PARAM_NAME_PORT));
+        service.startTrackingWind(getEvent(req), race, port);
+    }
+
     private void stopEvent(HttpServletRequest req, HttpServletResponse resp) throws MalformedURLException, IOException,
             InterruptedException {
-        Event event = service.getEventByName(req.getParameter("eventname"));
+        Event event = getEvent(req);
         if (event != null) {
             service.stopTracking(event);
         }
+    }
+
+    private Event getEvent(HttpServletRequest req) {
+        Event event = service.getEventByName(req.getParameter(PARAM_NAME_EVENTNAME));
+        return event;
     }
 
     private void addEvent(HttpServletRequest req, HttpServletResponse resp) throws MalformedURLException,

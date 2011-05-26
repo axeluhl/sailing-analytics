@@ -19,6 +19,7 @@ import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RawListener;
 import com.sap.sailing.domain.tracking.TrackedEvent;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.Wind;
 
 public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
         DynamicTrackedRace, RawListener<Competitor, GPSFixMoving> {
@@ -107,5 +108,10 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     @Override
     public void setStart(TimePoint start) {
         super.setStart(start);
+    }
+
+    @Override
+    public void recordWind(Wind wind) {
+        getWindTrack().add(wind);
     }
 }

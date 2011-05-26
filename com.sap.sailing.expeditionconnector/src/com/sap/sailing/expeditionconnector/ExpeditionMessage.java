@@ -4,6 +4,7 @@ import java.util.Set;
 
 import com.sap.sailing.domain.base.Bearing;
 import com.sap.sailing.domain.base.SpeedWithBearing;
+import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 
@@ -34,7 +35,7 @@ public interface ExpeditionMessage {
     final int ID_GPS_TIME = 146;
     
     /**
-     * variable ID for heading, meaning the keel's direction, in decimal degrees
+     * variable ID for magnetic heading, meaning the keel's direction, in decimal degrees
      */
     final int ID_HEADING = 13;
     
@@ -44,7 +45,7 @@ public interface ExpeditionMessage {
     final int ID_TWA = 4;
     
     /**
-     * variable ID for geographical true wind direction, in decimal degrees
+     * variable ID for magnetic true wind direction, in decimal degrees
      */
     final int ID_TWD = 6;
     
@@ -90,4 +91,6 @@ public interface ExpeditionMessage {
     Bearing getTrueWindBearing();
 
     Bearing getCourseOverGround();
+
+    TimePoint getTimePoint();
 }

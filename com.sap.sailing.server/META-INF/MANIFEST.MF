@@ -13,6 +13,7 @@ Require-Bundle: org.eclipse.equinox.http.registry;bundle-version="1.1.100",
  javax.servlet;bundle-version="2.5.0",
  com.sap.sailing.domain,
  com.sap.sailing.domain.tractracadapter,
- org.json.simple;bundle-version="1.1.0"
+ org.json.simple;bundle-version="1.1.0",
+ com.sap.sailing.expeditionconnector
 Bundle-ClassPath: .
 Export-Package: com.sap.sailing.server

@@ -26,6 +26,7 @@ public class ExpeditionMessageImpl implements ExpeditionMessage {
     private final Map<Integer, Double> values;
     private final boolean valid;
     private final long createdAtMillis;
+    private final TimePoint timePoint;
     
     public ExpeditionMessageImpl(int boatID, Map<Integer, Double> values, boolean valid) {
         this.boatID = boatID;
@@ -33,6 +34,19 @@ public class ExpeditionMessageImpl implements ExpeditionMessage {
         this.values = new HashMap<Integer, Double>(values);
         this.valid = valid;
         this.createdAtMillis = System.currentTimeMillis();
+        if (hasValue(ID_GPS_TIME)) {
+            TimeZone UTC = TimeZone.getTimeZone("UTC");
+            if (UTC == null) {
+                UTC = TimeZone.getTimeZone("GMT");
+            }
+            GregorianCalendar cal = new GregorianCalendar(UTC);
+            cal.set(1899, 11, 30, 0, 0, 0);
+            timePoint = new MillisecondsTimePoint((long)
+                    (getValue(ID_GPS_TIME)*24*3600*1000) +   // this is the milliseconds since 31.12.1899 0:00:00 UTC
+                    cal.getTimeInMillis());
+        } else {
+            timePoint = new MillisecondsTimePoint(createdAtMillis);
+        }
     }
     
     @Override
@@ -72,21 +86,8 @@ public class ExpeditionMessageImpl implements ExpeditionMessage {
         }
     }
 
-    private TimePoint getTimePoint() {
-        TimePoint timePoint;
-        if (hasValue(ID_GPS_TIME)) {
-            TimeZone UTC = TimeZone.getTimeZone("UTC");
-            if (UTC == null) {
-                UTC = TimeZone.getTimeZone("GMT");
-            }
-            GregorianCalendar cal = new GregorianCalendar(UTC);
-            cal.set(1899, 11, 30, 0, 0, 0);
-            timePoint = new MillisecondsTimePoint((long)
-                    (getValue(ID_GPS_TIME)*24*3600*1000) +   // this is the milliseconds since 31.12.1899 0:00:00 UTC
-                    cal.getTimeInMillis());
-        } else {
-            timePoint = new MillisecondsTimePoint(createdAtMillis);
-        }
+    @Override
+    public TimePoint getTimePoint() {
         return timePoint;
     }
 

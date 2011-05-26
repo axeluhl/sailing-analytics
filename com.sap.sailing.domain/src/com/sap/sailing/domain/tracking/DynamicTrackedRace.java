@@ -6,6 +6,8 @@ import com.sap.sailing.domain.base.Waypoint;
 
 public interface DynamicTrackedRace extends TrackedRace {
     void recordFix(Competitor competitor, GPSFixMoving fix);
+    
+    void recordWind(Wind wind);
 
     /**
      * The raw, updating feed of a single competitor participating in this race
