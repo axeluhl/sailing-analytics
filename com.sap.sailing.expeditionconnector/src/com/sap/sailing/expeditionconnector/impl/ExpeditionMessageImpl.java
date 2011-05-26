@@ -141,6 +141,7 @@ public class ExpeditionMessageImpl implements ExpeditionMessage {
     public String toString() {
         StringBuilder result = new StringBuilder("Boat #");
         result.append(getBoatID());
+        result.append(": ");
         TreeSet<Integer> ids = new TreeSet<Integer>(values.keySet());
         boolean first = true;
         for (Integer id : ids) {

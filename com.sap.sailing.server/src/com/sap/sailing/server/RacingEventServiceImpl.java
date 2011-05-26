@@ -86,6 +86,7 @@ public class RacingEventServiceImpl implements RacingEventService {
         if (receiver == null) {
             receiver = new UDPExpeditionReceiver(port);
             windReceivers.put(port, receiver);
+            new Thread(receiver, "Expedition Wind Receiver on port "+port).start();
         }
         return receiver;
     }
@@ -98,6 +99,7 @@ public class RacingEventServiceImpl implements RacingEventService {
                 receiver.removeListener(windTracker);
             }
         }
+        windTrackers.remove(race);
         // if there is no more tracker we can also stop and remove the receiver(s) we created
         if (windTrackers.isEmpty()) {
             for (UDPExpeditionReceiver receiver : windReceivers.values()) {

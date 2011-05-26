@@ -95,10 +95,14 @@ public class AdminApp extends HttpServlet {
         return null;
     }
 
-    private void startReceivingExpeditionWindForRace(HttpServletRequest req, HttpServletResponse resp) throws SocketException {
+    private void startReceivingExpeditionWindForRace(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         RaceDefinition race = getRaceDefinition(req);
-        int port = Integer.valueOf(req.getParameter(PARAM_NAME_PORT));
-        service.startTrackingWind(getEvent(req), race, port);
+        if (race == null) {
+            resp.getWriter().println("Race not found");
+        } else {
+            int port = Integer.valueOf(req.getParameter(PARAM_NAME_PORT));
+            service.startTrackingWind(getEvent(req), race, port);
+        }
     }
 
     private void stopEvent(HttpServletRequest req, HttpServletResponse resp) throws MalformedURLException, IOException,

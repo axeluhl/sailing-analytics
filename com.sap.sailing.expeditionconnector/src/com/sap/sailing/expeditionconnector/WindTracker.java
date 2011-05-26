@@ -25,8 +25,10 @@ public class WindTracker implements ExpeditionListener {
     public void received(ExpeditionMessage message) {
         SpeedWithBearing windSpeed = message.getTrueWind();
         GPSFix positionAndTime = message.getGPSFix();
-        Wind wind = new WindImpl(positionAndTime.getPosition(), positionAndTime.getTimePoint(), windSpeed);
-        race.recordWind(wind);
+        if (windSpeed != null && positionAndTime != null) {
+            Wind wind = new WindImpl(positionAndTime.getPosition(), positionAndTime.getTimePoint(), windSpeed);
+            race.recordWind(wind);
+        }
     }
 
 }

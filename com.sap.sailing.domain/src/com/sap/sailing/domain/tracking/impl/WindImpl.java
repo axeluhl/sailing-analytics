@@ -41,7 +41,7 @@ public class WindImpl extends KnotSpeedImpl implements Wind {
     
     @Override
     public String toString() {
-        return ""+getTimePoint()+": "+getKnots()+"kn from "+getFrom();
+        return ""+getTimePoint()+"@"+getPosition()+": "+getKnots()+"kn from "+getFrom();
     }
     
 }

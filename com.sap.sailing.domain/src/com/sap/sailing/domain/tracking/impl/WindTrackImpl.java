@@ -60,6 +60,40 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
         SpeedWithBearing avgWindSpeed = new KnotSpeedImpl(knotSum / count, new DegreeBearingImpl(bearingDegSum/count));
         return new WindImpl(p, at, avgWindSpeed);
     }
+    
+    @Override
+    public String toString() {
+        StringBuilder result = new StringBuilder();
+        for (Wind wind : getFixes()) {
+            result.append(wind);
+            result.append(" avg(");
+            result.append(millisecondsOverWhichToAverage);
+            result.append("ms): ");
+            result.append(getEstimatedWind(wind.getPosition(), wind.getTimePoint()));
+            result.append("\n");
+        }
+        return result.toString();
+    }
+    
+    public String toCSV() {
+        StringBuilder result = new StringBuilder();
+        for (Wind wind : getFixes()) {
+            append(result, wind);
+            Wind estimate = getEstimatedWind(wind.getPosition(), wind.getTimePoint());
+            append(result, estimate);
+            result.append("\n");
+        }
+        return result.toString();
+    }
+
+    private void append(StringBuilder result, Wind wind) {
+        result.append(wind.getTimePoint().asMillis());
+        result.append("\t");
+        result.append(wind.getKnots());
+        result.append("\t");
+        result.append(wind.getFrom().getDegrees());
+        result.append("\t");
+    }
 
     private class DummyWind extends DummyTimed implements Wind {
         public DummyWind(TimePoint timePoint) {

@@ -53,6 +53,10 @@ public class UDPExpeditionReceiver implements Runnable {
         receiver.run();
     }
 
+    /**
+     * You need call {@link #run} to actually start receiving events. To do this asynchronously,
+     * start this object in a new thread.
+     */
     public UDPExpeditionReceiver(int listeningOnPort) throws SocketException {
         udpSocket = new DatagramSocket(listeningOnPort);
         listeners = new HashMap<ExpeditionListener, Boolean>();
@@ -64,6 +68,9 @@ public class UDPExpeditionReceiver implements Runnable {
         byte[] buf = new byte[0];
         DatagramPacket stopPacket = new DatagramPacket(buf, 0, InetAddress.getLocalHost(), listeningOnPort);
         new DatagramSocket().send(stopPacket);
+        if (!udpSocket.isConnected()) {
+            udpSocket.close();
+        }
     }
 
     public void run() {
@@ -88,6 +95,9 @@ public class UDPExpeditionReceiver implements Runnable {
             }
         }
         udpSocket.close();
+        if (udpSocket.isConnected()) {
+            udpSocket.disconnect();
+        }
     }
 
     private ExpeditionMessage parse(String packetAsString) {
