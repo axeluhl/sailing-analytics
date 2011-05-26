@@ -42,7 +42,8 @@ public class RaceStartedAndFinishedReceiver extends AbstractReceiverWithQueue<Ra
      * course definition of a race. When this happens, a new {@link RaceDefinition} is
      * created with the respective {@link Course} and added to the {@link #event event}.
      */
-    public Iterable<TypeController> getStartStopListeners() {
+    @Override
+    public Iterable<TypeController> getTypeControllers() {
         List<TypeController> result = new ArrayList<TypeController>();
         for (final Race race : tractracEvent.getRaceList()) {
             TypeController startStopListener = StartStopTimesData.subscribeRace(race, new ICallbackData<Race, StartStopTimesData>() {
@@ -53,6 +54,7 @@ public class RaceStartedAndFinishedReceiver extends AbstractReceiverWithQueue<Ra
             });
             result.add(startStopListener);
         }
+        new Thread(this, getClass().getName()).start();
         return result;
     }
 
@@ -63,10 +65,10 @@ public class RaceStartedAndFinishedReceiver extends AbstractReceiverWithQueue<Ra
         DynamicTrackedRace race = trackedEvent.getTrackedRace(raceDefinition);
         MillisecondsTimePoint start = new MillisecondsTimePoint(event.getB().getStartTime());
         MillisecondsTimePoint stop = new MillisecondsTimePoint(event.getB().getStopTime());
-        if (!race.getStart().equals(start)) {
+        if (race.getStart() == null || !race.getStart().equals(start)) {
             race.setStart(start);
         }
-        if (!race.getFirstFinish().equals(stop)) {
+        if (race.getFirstFinish() == null || !race.getFirstFinish().equals(stop)) {
             race.setFirstFinish(stop);
         }
     }

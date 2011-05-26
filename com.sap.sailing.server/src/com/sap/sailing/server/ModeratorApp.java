@@ -114,12 +114,13 @@ public class ModeratorApp extends Servlet {
         } else {
             JSONObject jsonRace = new JSONObject();
             jsonRace.put("name", trackedRace.getRace().getName());
-            jsonRace.put("start", trackedRace.getStart().asMillis());
+            jsonRace.put("start", trackedRace.getStart()==null? 0l : trackedRace.getStart().asMillis());
             jsonRace.put("finish", trackedRace.getFirstFinish() == null ? 0l : trackedRace.getFirstFinish().asMillis());
             JSONArray jsonLegs = new JSONArray();
             for (TrackedLeg leg : trackedRace.getTrackedLegs()) {
 
             }
+            jsonRace.writeJSONString(resp.getWriter());
         }
     }
 

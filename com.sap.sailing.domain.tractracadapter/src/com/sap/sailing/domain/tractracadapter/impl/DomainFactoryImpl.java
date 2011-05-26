@@ -11,7 +11,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.WeakHashMap;
 
-import com.maptrack.client.io.TypeController;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Buoy;
@@ -49,6 +48,7 @@ import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.EventTracker;
+import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.tractrac.clientmodule.CompetitorClass;
 import com.tractrac.clientmodule.ControlPoint;
 import com.tractrac.clientmodule.Race;
@@ -225,29 +225,24 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public Iterable<TypeController> getUpdateReceivers(
+    public Iterable<Receiver> getUpdateReceivers(
             DynamicTrackedEvent trackedEvent) {
-        Collection<TypeController> result = new ArrayList<TypeController>();
-        for (TypeController raceCourseReceiver : new RaceCourseReceiver(
+        Collection<Receiver> result = new ArrayList<Receiver>();
+        result.add(new RaceCourseReceiver(
                 trackedEvent, inverseEventCache.get(trackedEvent
-                        .getEvent()), millisecondsOverWhichToAverageWind).getRouteListeners()) {
-            result.add(raceCourseReceiver);
-        }
-        for (TypeController markPositionReceiver : new MarkPositionReceiver(
+                        .getEvent()), millisecondsOverWhichToAverageWind));
+        result.add(new MarkPositionReceiver(
                 trackedEvent, inverseEventCache.get(trackedEvent
-                        .getEvent())).getControlPointListeners()) {
-            result.add(markPositionReceiver);
-        }
-        for (TypeController rawPositionReceiver : new RawPositionReceiver(
+                        .getEvent())));
+        result.add(new RawPositionReceiver(
                 trackedEvent, inverseEventCache.get(trackedEvent
-                        .getEvent())).getRawPositionListeners()) {
-            result.add(rawPositionReceiver);
-        }
-        for (TypeController markRoundingReceiver : new MarkPassingReceiver(
+                        .getEvent())));
+        result.add(new MarkPassingReceiver(
                 trackedEvent, inverseEventCache.get(trackedEvent
-                        .getEvent())).getMarkPassingListeners()) {
-            result.add(markRoundingReceiver);
-        }
+                        .getEvent())));
+        result.add(new RaceStartedAndFinishedReceiver(
+                trackedEvent, inverseEventCache.get(trackedEvent
+                        .getEvent())));
         return result;
     }
 

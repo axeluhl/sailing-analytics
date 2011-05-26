@@ -3,6 +3,7 @@ package com.sap.sailing.domain.tractracadapter.impl;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import com.sap.sailing.domain.base.impl.Util.Triple;
+import com.sap.sailing.domain.tractracadapter.Receiver;
 
 /**
  * Some event receiver that can be executed in a thread because it's a runnable, and
@@ -10,7 +11,7 @@ import com.sap.sailing.domain.base.impl.Util.Triple;
  * 
  * @author Axel Uhl (d043530)
  */
-public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable {
+public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Receiver {
     private final LinkedBlockingQueue<Triple<A, B, C>> queue;
 
     public AbstractReceiverWithQueue() {
@@ -45,4 +46,5 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable {
     }
 
     protected abstract void handleEvent(Triple<A, B, C> event);
+
 }

@@ -45,7 +45,8 @@ public class MarkPositionReceiver extends AbstractReceiverWithQueue<ControlPoint
      * {@link GPSFixTrack} in the {@link TrackedEvent}. Starts a thread for this receiver,
      * blocking for events received.
      */
-    public Iterable<TypeController> getControlPointListeners() {
+    @Override
+    public Iterable<TypeController> getTypeControllers() {
         List<TypeController> result = new ArrayList<TypeController>();
         TypeController controlPointListener = ControlPointPositionData.subscribe(tractracEvent,
                 new ICallbackData<ControlPoint, ControlPointPositionData>() {

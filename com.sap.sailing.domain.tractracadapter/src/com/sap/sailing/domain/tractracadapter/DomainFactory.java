@@ -89,7 +89,7 @@ public interface DomainFactory {
      *            {@link #trackEvent(com.sap.sailing.domain.base.Event)} because
      *            otherwise the link to the {@link Event} can't be established
      */
-    Iterable<TypeController> getUpdateReceivers(DynamicTrackedEvent trackedEvent);
+    Iterable<Receiver> getUpdateReceivers(DynamicTrackedEvent trackedEvent);
 
     RaceDefinition createRaceDefinition(Race race, Course course);
 

@@ -7,11 +7,14 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 import com.maptrack.client.io.TypeController;
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.EventTracker;
+import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.tractrac.clientmodule.Event;
 import com.tractrac.clientmodule.data.DataController;
 import com.tractrac.clientmodule.data.DataController.Listener;
@@ -22,6 +25,7 @@ public class EventTrackerImpl implements Listener, EventTracker {
     private final com.sap.sailing.domain.base.Event domainEvent;
     private final Thread ioThread;
     private final DataController controller;
+    private final Set<Receiver> receivers;
 
     protected EventTrackerImpl(DomainFactory domainFactory, URL paramURL, URI liveURI, URI storedURI)
             throws URISyntaxException, MalformedURLException, FileNotFoundException {
@@ -33,7 +37,15 @@ public class EventTrackerImpl implements Listener, EventTracker {
         ioThread = new Thread(controller, "io");
         domainEvent = domainFactory.createEvent(tractracEvent);
         DynamicTrackedEvent trackedEvent = domainFactory.trackEvent(domainEvent);
-        addListenersForStoredDataAndStartController(domainFactory.getUpdateReceivers(trackedEvent));
+        receivers = new HashSet<Receiver>();
+        Set<TypeController> typeControllers = new HashSet<TypeController>();
+        for (Receiver receiver : domainFactory.getUpdateReceivers(trackedEvent)) {
+            receivers.add(receiver);
+            for (TypeController typeController : receiver.getTypeControllers()) {
+                typeControllers.add(typeController);
+            }
+        }
+        addListenersForStoredDataAndStartController(typeControllers);
     }
     
     protected void addListenersForStoredDataAndStartController(Iterable<TypeController> listenersForStoredData) {
@@ -65,6 +77,9 @@ public class EventTrackerImpl implements Listener, EventTracker {
     @Override
     public void stop() throws MalformedURLException, IOException, InterruptedException {
         controller.stop(/* abortStored */ true);
+        for (Receiver receiver : receivers) {
+            receiver.stop();
+        }
         ioThread.join();
     }
 

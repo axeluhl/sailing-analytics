@@ -21,6 +21,7 @@ import com.sap.sailing.domain.tracking.RawListener;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
+import com.sap.sailing.domain.tractracadapter.Receiver;
 
 public class ReceiveTrackingDataTest extends AbstractTracTracLiveTest {
     final private Object semaphor = new Object();
@@ -67,8 +68,10 @@ public class ReceiveTrackingDataTest extends AbstractTracTracLiveTest {
                 ((DynamicTrackedRace) trackedRace).addListener(positionListener);
             }
         });
-        for (TypeController raceListener : domainFactory.getUpdateReceivers(trackedEvent)) {
-            listeners.add(raceListener);
+        for (Receiver receiver : domainFactory.getUpdateReceivers(trackedEvent)) {
+            for (TypeController raceListener : receiver.getTypeControllers()) {
+                listeners.add(raceListener);
+            }
         }
         addListenersForStoredDataAndStartController(listeners.toArray(new TypeController[0]));
     }

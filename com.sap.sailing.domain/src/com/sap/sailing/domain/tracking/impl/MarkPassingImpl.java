@@ -31,5 +31,10 @@ public class MarkPassingImpl implements MarkPassing {
     public Competitor getCompetitor() {
         return competitor;
     }
+    
+    @Override
+    public String toString() {
+        return ""+getTimePoint()+": "+getCompetitor()+" passed "+getWaypoint();
+    }
 
 }

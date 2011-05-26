@@ -8,6 +8,7 @@ import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.impl.Util.Triple;
 import com.sap.sailing.domain.tracking.TrackedEvent;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
@@ -26,7 +27,7 @@ import com.tractrac.clientmodule.data.RouteData;
  * @author Axel Uhl (d043530)
  * 
  */
-public class RaceCourseReceiver {
+public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteData, Race>  {
     private final TrackedEvent trackedEvent;
     private final com.tractrac.clientmodule.Event tractracEvent;
     private final long millisecondsOverWhichToAverageWind;
@@ -44,22 +45,30 @@ public class RaceCourseReceiver {
      * course definition of a race. When this happens, a new {@link RaceDefinition} is
      * created with the respective {@link Course} and added to the {@link #event event}.
      */
-    public Iterable<TypeController> getRouteListeners() {
+    @Override
+    public Iterable<TypeController> getTypeControllers() {
         List<TypeController> result = new ArrayList<TypeController>();
         for (final Race race : tractracEvent.getRaceList()) {
             TypeController routeListener = RouteData.subscribe(race, new ICallbackData<Route, RouteData>() {
                 @Override
                 public void gotData(Route route, RouteData record, boolean isLiveData) {
-                    System.out.print("R");
-                    Course course = DomainFactory.INSTANCE.createCourse(route.getName(), record.getPoints());
-                    RaceDefinition raceDefinition = DomainFactory.INSTANCE.createRaceDefinition(race, course);
-                    trackedEvent.getEvent().addRace(raceDefinition);
-                    trackedEvent.addTrackedRace(new DynamicTrackedRaceImpl(trackedEvent, raceDefinition, millisecondsOverWhichToAverageWind));
+                    enqueue(new Triple<Route, RouteData, Race>(route, record, race));
                 }
             });
+            new Thread(this, getClass().getName()).start();
             result.add(routeListener);
         }
         return result;
+    }
+    
+    @Override
+    protected void handleEvent(Triple<Route, RouteData, Race> event) {
+        System.out.print("R");
+        Course course = DomainFactory.INSTANCE.createCourse(event.getA().getName(), event.getB().getPoints());
+        RaceDefinition raceDefinition = DomainFactory.INSTANCE.createRaceDefinition(event.getC(), course);
+        trackedEvent.getEvent().addRace(raceDefinition);
+        trackedEvent.addTrackedRace(new DynamicTrackedRaceImpl(trackedEvent, raceDefinition,
+                millisecondsOverWhichToAverageWind));
     }
 
 }

@@ -37,7 +37,8 @@ public class MarkPassingReceiver extends AbstractReceiverWithQueue<RaceCompetito
      * Starts a thread for this object, blocking for events received which are then handled
      * asynchronously.
      */
-    public Iterable<TypeController> getMarkPassingListeners() {
+    @Override
+    public Iterable<TypeController> getTypeControllers() {
         List<TypeController> result = new ArrayList<TypeController>();
         for (final Race race : tractracEvent.getRaceList()) {
             TypeController controlPointListener = MarkPassingsData.subscribe(race,
