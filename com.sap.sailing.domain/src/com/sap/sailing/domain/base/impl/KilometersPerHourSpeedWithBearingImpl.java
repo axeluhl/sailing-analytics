@@ -23,4 +23,8 @@ public class KilometersPerHourSpeedWithBearingImpl extends KilometersPerHourSpee
         return pos.translateGreatCircle(getBearing(), this.travel(from, to));
     }
 
+    @Override
+    public String toString() {
+        return super.toString()+" to "+getBearing().getDegrees()+"°";
+    }
 }

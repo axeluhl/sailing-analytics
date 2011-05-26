@@ -99,7 +99,7 @@ public class EventTrackerImpl implements Listener, EventTracker {
 
     @Override
     public void storedDataProgress(float progress) {
-        System.out.println("Stored data progreess: "+progress);
+        System.out.println("Stored data progress: "+progress);
         
     }
 

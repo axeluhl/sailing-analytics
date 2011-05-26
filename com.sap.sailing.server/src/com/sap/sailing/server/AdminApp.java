@@ -32,10 +32,6 @@ public class AdminApp extends Servlet {
 
     private static final String ACTION_NAME_UNSUBSCRIBE_RACE_FOR_EXPEDITION_WIND = "stopreceivingexpeditionwind";
 
-    private static final String PARAM_NAME_EVENTNAME = "eventname";
-
-    private static final String PARAM_NAME_RACENAME = "racename";
-
     private static final String PARAM_NAME_PORT = "port";
 
     public AdminApp() {
@@ -80,29 +76,16 @@ public class AdminApp extends Servlet {
     private void stopReceivingExpeditionWindForRace(HttpServletRequest req, HttpServletResponse resp) throws SocketException, IOException {
         RaceDefinition race = getRaceDefinition(req);
         if (race == null) {
-            resp.getWriter().println("No such race");
+            resp.sendError(500, "Race not found");
         } else {
             getService().stopTrackingWind(getEvent(req), race);
         }
     }
 
-    private RaceDefinition getRaceDefinition(HttpServletRequest req) {
-        Event event = getEvent(req);
-        if (event != null) {
-            String racename = req.getParameter(PARAM_NAME_RACENAME);
-            for (RaceDefinition race : event.getAllRaces()) {
-                if (racename.equals(race.getName())) {
-                    return race;
-                }
-            }
-        }
-        return null;
-    }
-
     private void startReceivingExpeditionWindForRace(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         RaceDefinition race = getRaceDefinition(req);
         if (race == null) {
-            resp.getWriter().println("Race not found");
+            resp.sendError(500, "Race not found");
         } else {
             int port = Integer.valueOf(req.getParameter(PARAM_NAME_PORT));
             getService().startTrackingWind(getEvent(req), race, port);
@@ -115,13 +98,8 @@ public class AdminApp extends Servlet {
         if (event != null) {
             getService().stopTracking(event);
         } else {
-            resp.getWriter().println("Event not found");
+            resp.sendError(500, "Event not found");
         }
-    }
-
-    private Event getEvent(HttpServletRequest req) {
-        Event event = getService().getEventByName(req.getParameter(PARAM_NAME_EVENTNAME));
-        return event;
     }
 
     private void addEvent(HttpServletRequest req, HttpServletResponse resp) throws MalformedURLException,

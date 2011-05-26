@@ -23,5 +23,10 @@ public class GPSFixImpl implements GPSFix {
     public TimePoint getTimePoint() {
         return timePoint;
     }
+    
+    @Override
+    public String toString() {
+        return getTimePoint()+": "+getPosition();
+    }
 
 }

@@ -9,16 +9,33 @@ import javax.servlet.http.HttpServletResponse;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Person;
+import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.TimePoint;
+import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.tracking.GPSFix;
+import com.sap.sailing.domain.tracking.GPSFixTrack;
+import com.sap.sailing.domain.tracking.TrackedLeg;
+import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.server.util.DateParser;
+import com.sap.sailing.server.util.InvalidDateException;
 
 public class ModeratorApp extends Servlet {
     private static final long serialVersionUID = 1333207389294903999L;
 
     private static final String ACTION_NAME_LIST_EVENTS = "listevents";
+
+    private static final String ACTION_NAME_SHOW_RACE = "showrace";
+    
+    private static final String ACTION_NAME_SHOW_WAYPOINTS = "showwaypoints";
+    
+    private static final String PARAM_NAME_TIME = "time";
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -27,6 +44,10 @@ public class ModeratorApp extends Servlet {
             if (action != null) {
                 if (ACTION_NAME_LIST_EVENTS.equals(action)) {
                     listEvents(resp);
+                } else if (ACTION_NAME_SHOW_RACE.equals(action)) {
+                    showRace(req, resp);
+                } else if (ACTION_NAME_SHOW_WAYPOINTS.equals(action)) {
+                    showWaypoints(req, resp);
                 }
             } else {
                 resp.getWriter().println("Hello moderator!");
@@ -37,6 +58,70 @@ public class ModeratorApp extends Servlet {
         }
     }
 
+    private void showWaypoints(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        TrackedRace trackedRace = getTrackedRace(req);
+        if (trackedRace == null) {
+            resp.sendError(500, "Race not found");
+        } else {
+            String time = req.getParameter(PARAM_NAME_TIME);
+            try {
+                TimePoint timePoint;
+                if (time != null && time.length() > 0) {
+                    timePoint = new MillisecondsTimePoint(DateParser.parse(time).getTime());
+                } else {
+                    timePoint = MillisecondsTimePoint.now();
+                }
+                JSONArray jsonWaypoints = new JSONArray();
+                for (Waypoint waypoint : trackedRace.getRace().getCourse().getWaypoints()) {
+                    JSONObject jsonWaypoint = new JSONObject();
+                    jsonWaypoint.put("name", waypoint.getName());
+                    JSONArray jsonBuoys = new JSONArray();
+                    for (Buoy buoy : waypoint.getBuoys()) {
+                        JSONObject jsonBuoy = new JSONObject();
+                        jsonBuoy.put("name", buoy.getName());
+                        GPSFixTrack<Buoy, GPSFix> buoyTrack = trackedRace.getTrack(buoy);
+                        Position buoyPosition = buoyTrack.getLastFixAtOrBefore(timePoint).getPosition();
+                        if (buoyPosition != null) {
+                            jsonBuoy.put("lat", buoyPosition.getLatDeg());
+                            jsonBuoy.put("lng", buoyPosition.getLngDeg());
+                        }
+                        jsonBuoys.add(jsonBuoy);
+                    }
+                    jsonWaypoint.put("buoys", jsonBuoys);
+                    jsonWaypoints.add(jsonWaypoint);
+                }
+                jsonWaypoints.writeJSONString(resp.getWriter());
+            } catch (InvalidDateException e) {
+                resp.sendError(500, "Couldn't parse time specification " + time);
+            }
+        }
+    }
+
+    private TrackedRace getTrackedRace(HttpServletRequest req) {
+        Event event = getEvent(req);
+        RaceDefinition race = getRaceDefinition(req);
+        TrackedRace trackedRace = null;
+        if (event != null && race != null) {
+            trackedRace = getService().getDomainFactory().trackEvent(event).getTrackedRace(race);
+        }
+        return trackedRace;
+    }
+
+    private void showRace(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        TrackedRace trackedRace = getTrackedRace(req);
+        if (trackedRace == null) {
+            resp.sendError(500, "Race not found");
+        } else {
+            JSONObject jsonRace = new JSONObject();
+            jsonRace.put("name", trackedRace.getRace().getName());
+            jsonRace.put("start", trackedRace.getStart().asMillis());
+            jsonRace.put("finish", trackedRace.getFirstFinish() == null ? 0l : trackedRace.getFirstFinish().asMillis());
+            JSONArray jsonLegs = new JSONArray();
+            for (TrackedLeg leg : trackedRace.getTrackedLegs()) {
+
+            }
+        }
+    }
 
     private void listEvents(HttpServletResponse resp) throws IOException {
         JSONArray eventList = new JSONArray();

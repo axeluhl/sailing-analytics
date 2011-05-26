@@ -28,7 +28,7 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable {
     }
     
     private boolean isStopEvent(Triple<A, B, C> event) {
-        return event.getA() != null || event.getB() != null || event.getC() != null;
+        return event.getA() == null && event.getB() == null && event.getC() == null;
     }
 
     @Override

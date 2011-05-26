@@ -37,7 +37,8 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     @Override
     public void recordFix(Competitor competitor, GPSFixMoving fix) {
         DynamicTrack<Competitor, GPSFixMoving> track = getTrack(competitor);
-        track.addGPSFix(fix);
+        track.addGPSFix(fix); // the track notifies this tracked race which in turn notifies its listeners
+        updated(fix.getTimePoint());
     }
 
     @Override
@@ -83,6 +84,7 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
         for (MarkPassing markPassing : markPassings) {
             competitorMarkPassings.add(markPassing);
             getMarkPassingsInOrder(markPassing.getWaypoint()).add(markPassing);
+            updated(markPassing.getTimePoint());
         }
     }
     

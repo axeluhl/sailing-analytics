@@ -31,6 +31,7 @@ public class TrackedRaceImpl implements TrackedRace {
     private final RaceDefinition race;
     private TimePoint start;
     private TimePoint firstFinish;
+    private TimePoint lastUpdate;
     
     /**
      * legs appear in the order in which they appear in the race's course
@@ -152,8 +153,7 @@ public class TrackedRaceImpl implements TrackedRace {
 
     @Override
     public TimePoint getTimePointOfLastUpdate() {
-        // TODO Auto-generated method stub
-        return null;
+        return lastUpdate;
     }
 
     @Override
@@ -187,6 +187,12 @@ public class TrackedRaceImpl implements TrackedRace {
 //            result = l;
 //        }
         return result;
+    }
+    
+    @Override
+    public TrackedLeg getCurrentLeg() {
+        // TODO implement getCurrentLeg()
+        return null;
     }
 
     @Override
@@ -222,6 +228,12 @@ public class TrackedRaceImpl implements TrackedRace {
     @Override
     public Wind getWind(Position p, TimePoint at) {
         return getWindTrack().getEstimatedWind(p, at);
+    }
+    
+    protected void updated(TimePoint timeOfEvent) {
+        if (lastUpdate == null || timeOfEvent.compareTo(lastUpdate) > 0) {
+            lastUpdate = timeOfEvent;
+        }
     }
 
 }

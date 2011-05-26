@@ -18,4 +18,8 @@ public class GPSFixMovingImpl extends GPSFixImpl implements GPSFixMoving {
         return speed;
     }
 
+    @Override
+    public String toString() {
+        return super.toString()+" with "+getSpeed();
+    }
 }

@@ -40,6 +40,11 @@ public interface TrackedRace {
      */
     TrackedLegOfCompetitor getCurrentLeg(Competitor competitor);
     
+    /**
+     * Tells which leg the leader is currently on
+     */
+    TrackedLeg getCurrentLeg();
+    
     TrackedLeg getTrackedLegFinishingAt(Waypoint endOfLeg);
     
     TrackedLeg getTrackedLegStartingAt(Waypoint startOfLeg);
@@ -60,6 +65,9 @@ public interface TrackedRace {
     
     TrackedLegOfCompetitor getTrackedLeg(Competitor competitor, Leg leg);
     
+    /**
+     * @return can be <code>null</code> in case this tracked race hasn't been updated with any changes yet
+     */
     TimePoint getTimePointOfLastUpdate();
     
     int getRankDifference(Competitor competitor, Leg leg);
