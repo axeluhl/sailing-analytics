@@ -154,7 +154,16 @@ public class AdminApp extends HttpServlet {
     private void listEvents(HttpServletResponse resp) throws IOException {
         JSONArray eventList = new JSONArray();
         for (Event event : service.getAllEvents()) {
-            eventList.add(event.getName());
+            JSONObject jsonEvent = new JSONObject();
+            jsonEvent.put("name", event.getName());
+            JSONArray jsonRaces = new JSONArray();
+            for (RaceDefinition race : event.getAllRaces()) {
+                JSONObject jsonRace = new JSONObject();
+                jsonRace.put("name", race.getName());
+                jsonRaces.add(jsonRace);
+            }
+            jsonEvent.put("races", jsonRaces);
+            eventList.add(jsonEvent);
         }
         eventList.writeJSONString(resp.getWriter());
     }
