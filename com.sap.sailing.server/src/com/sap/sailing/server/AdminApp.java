@@ -20,6 +20,7 @@ import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Person;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.impl.Util.Pair;
@@ -180,6 +181,14 @@ public class AdminApp extends HttpServlet {
                 JSONObject jsonRace = new JSONObject();
                 jsonRace.put("name", race.getName());
                 jsonRace.put("boatclass", race.getBoatClass()==null?"":race.getBoatClass().getName());
+                JSONArray jsonLegs = new JSONArray();
+                for (Leg leg : race.getCourse().getLegs()) {
+                    JSONObject jsonLeg = new JSONObject();
+                    jsonLeg.put("start", leg.getFrom().getName());
+                    jsonLeg.put("end", leg.getTo().getName());
+                    jsonLegs.add(jsonLeg);
+                }
+                jsonRace.put("legs", jsonLegs);
                 jsonRaces.add(jsonRace);
             }
             jsonEvent.put("races", jsonRaces);
