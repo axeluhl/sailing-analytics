@@ -7,12 +7,15 @@ import java.net.SocketException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.impl.Util.Pair;
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
@@ -64,9 +67,16 @@ public class RacingEventServiceImpl implements RacingEventService {
 
     @Override
     public void stopTracking(Event event) throws MalformedURLException, IOException, InterruptedException {
-        eventTrackers.get(event).stop();
-        eventTrackers.remove(event);
-        eventsByName.remove(event.getName());
+        if (eventTrackers.containsKey(event)) {
+            eventTrackers.get(event).stop();
+            eventTrackers.remove(event);
+        }
+        if (event != null && event.getName() != null) {
+            eventsByName.remove(event.getName());
+        }
+        for (RaceDefinition race : event.getAllRaces()) {
+            stopTrackingWind(event, race);
+        }
     }
 
     @Override
@@ -107,6 +117,19 @@ public class RacingEventServiceImpl implements RacingEventService {
             }
             windReceivers.clear();
         }
+    }
+
+    @Override
+    public Iterable<Pair<Event, RaceDefinition>> getWindTrackedRaces() {
+        List<Pair<Event, RaceDefinition>> result = new ArrayList<Pair<Event, RaceDefinition>>();
+        for (Event event : eventsByName.values()) {
+            for (RaceDefinition race : event.getAllRaces()) {
+                if (windTrackers.containsKey(race)) {
+                    result.add(new Pair<Event, RaceDefinition>(event, race));
+                }
+            }
+        }
+        return result;
     }
     
 }

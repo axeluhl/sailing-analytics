@@ -1,0 +1,4 @@
+#!/bin/sh
+cd plugins
+ssh trac@195.227.10.246 "rm target/plugins/*"
+scp * trac@195.227.10.246:target/plugins

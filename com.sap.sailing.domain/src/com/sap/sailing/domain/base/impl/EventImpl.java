@@ -1,7 +1,5 @@
 package com.sap.sailing.domain.base.impl;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -12,11 +10,11 @@ import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
 
 public class EventImpl extends NamedImpl implements Event {
-    private final Collection<RaceDefinition> races;
+    private final Set<RaceDefinition> races;
     
     public EventImpl(String name) {
         super(name);
-        races = new ArrayList<RaceDefinition>();
+        races = new HashSet<RaceDefinition>();
     }
 
     @Override

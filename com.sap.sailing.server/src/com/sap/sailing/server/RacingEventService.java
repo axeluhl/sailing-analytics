@@ -10,6 +10,7 @@ import java.net.URL;
 
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.impl.Util.Pair;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 
 public interface RacingEventService {
@@ -22,6 +23,9 @@ public interface RacingEventService {
     void addEvent(URL paramURL, URI liveURI, URI storedURI) throws MalformedURLException, FileNotFoundException,
             URISyntaxException;
 
+    /**
+     * This will also stop tracking wind for all races of this event. See {@link #stopTrackingWind(Event, RaceDefinition)}.
+     */
     void stopTracking(Event event) throws MalformedURLException, IOException, InterruptedException;
     
     /**
@@ -33,5 +37,7 @@ public interface RacingEventService {
     void startTrackingWind(Event event, RaceDefinition race, int port) throws SocketException;
 
     void stopTrackingWind(Event event, RaceDefinition race) throws SocketException, IOException;
+
+    Iterable<Pair<Event, RaceDefinition>> getWindTrackedRaces();
 
 }

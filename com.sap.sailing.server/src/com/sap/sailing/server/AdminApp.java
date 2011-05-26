@@ -14,11 +14,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.impl.Util.Pair;
 
 public class AdminApp extends HttpServlet {
     private static final long serialVersionUID = -6849138354941569249L;
@@ -30,6 +32,8 @@ public class AdminApp extends HttpServlet {
     private static final String ACTION_NAME_ADD_EVENT = "addevent";
 
     private static final String ACTION_NAME_STOP_EVENT = "stopevent";
+    
+    private static final String ACTION_NAME_LIST_WINDTRACKERS = "listwindtrackers";
     
     private static final String ACTION_NAME_SUBSCRIBE_RACE_FOR_EXPEDITION_WIND = "receiveexpeditionwind";
 
@@ -69,6 +73,8 @@ public class AdminApp extends HttpServlet {
                     startReceivingExpeditionWindForRace(req, resp);
                 } else if (ACTION_NAME_UNSUBSCRIBE_RACE_FOR_EXPEDITION_WIND.equals(action)) {
                     stopReceivingExpeditionWindForRace(req, resp);
+                } else if (ACTION_NAME_LIST_WINDTRACKERS.equals(action)) {
+                    listWindTrackers(req, resp);
                 }
             } else {
                 resp.getWriter().println("Hello admin!");
@@ -79,17 +85,34 @@ public class AdminApp extends HttpServlet {
         }
     }
     
+    private void listWindTrackers(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        JSONArray windTrackers = new JSONArray();
+        for (Pair<Event, RaceDefinition> eventAndRace : service.getWindTrackedRaces()) {
+            JSONObject windTracker = new JSONObject();
+            windTracker.put("eventname", eventAndRace.getA().getName());
+            windTracker.put("racename", eventAndRace.getB().getName());
+            windTrackers.add(windTracker);
+        }
+        windTrackers.writeJSONString(resp.getWriter());
+    }
+
     private void stopReceivingExpeditionWindForRace(HttpServletRequest req, HttpServletResponse resp) throws SocketException, IOException {
         RaceDefinition race = getRaceDefinition(req);
-        service.stopTrackingWind(getEvent(req), race);
+        if (race == null) {
+            resp.getWriter().println("No such race");
+        } else {
+            service.stopTrackingWind(getEvent(req), race);
+        }
     }
 
     private RaceDefinition getRaceDefinition(HttpServletRequest req) {
         Event event = getEvent(req);
-        String racename = req.getParameter(PARAM_NAME_RACENAME);
-        for (RaceDefinition race : event.getAllRaces()) {
-            if (racename.equals(race.getName())) {
-                return race;
+        if (event != null) {
+            String racename = req.getParameter(PARAM_NAME_RACENAME);
+            for (RaceDefinition race : event.getAllRaces()) {
+                if (racename.equals(race.getName())) {
+                    return race;
+                }
             }
         }
         return null;
@@ -110,6 +133,8 @@ public class AdminApp extends HttpServlet {
         Event event = getEvent(req);
         if (event != null) {
             service.stopTracking(event);
+        } else {
+            resp.getWriter().println("Event not found");
         }
     }
 
