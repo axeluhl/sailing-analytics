@@ -18,7 +18,9 @@ import org.json.simple.JSONObject;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.Person;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.impl.Util.Pair;
 
@@ -156,10 +158,28 @@ public class AdminApp extends HttpServlet {
         for (Event event : service.getAllEvents()) {
             JSONObject jsonEvent = new JSONObject();
             jsonEvent.put("name", event.getName());
+            jsonEvent.put("boatclass", event.getBoatClass().getName());
+            JSONArray jsonCompetitors = new JSONArray();
+            for (Competitor competitor : event.getCompetitors()) {
+                JSONObject jsonCompetitor = new JSONObject();
+                jsonCompetitor.put("name", competitor.getName());
+                jsonCompetitor.put("nationality", competitor.getTeam().getNationality().getThreeLetterAcronym());
+                JSONArray jsonTeam = new JSONArray();
+                for (Person sailor : competitor.getTeam().getSailors()) {
+                    JSONObject jsonSailor = new JSONObject();
+                    jsonSailor.put("name", sailor.getName());
+                    jsonSailor.put("description", sailor.getDescription()==null?"":sailor.getDescription());
+                    jsonTeam.add(jsonSailor);
+                }
+                jsonCompetitor.put("team", jsonTeam);
+                jsonCompetitors.add(jsonCompetitor);
+            }
+            jsonEvent.put("competitors", jsonCompetitors);
             JSONArray jsonRaces = new JSONArray();
             for (RaceDefinition race : event.getAllRaces()) {
                 JSONObject jsonRace = new JSONObject();
                 jsonRace.put("name", race.getName());
+                jsonRace.put("boatclass", race.getBoatClass()==null?"":race.getBoatClass().getName());
                 jsonRaces.add(jsonRace);
             }
             jsonEvent.put("races", jsonRaces);
