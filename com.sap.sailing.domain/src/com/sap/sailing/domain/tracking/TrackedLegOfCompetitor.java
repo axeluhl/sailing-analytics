@@ -52,14 +52,15 @@ public interface TrackedLegOfCompetitor {
     int getNumberOfDirectionChanges(TimePoint timePoint);
 
     /**
-     * Computes the competitor's rank within this leg. If the competitor has already finished this leg, the rank is
-     * determined by comparing to all other competitors that also finished this leg. If not yet finished, the rank is
-     * i+j+1 where i is the number of competitors that already finished the leg, and j is the number of competitors
-     * whose wind-projected distance to the leg's end waypoint is shorter than that of <code>competitor</code>.
+     * Computes the competitor's rank within this leg. If the competitor has already finished this leg at
+     * <code>timePoint</code>, the rank is determined by comparing to all other competitors that also finished this leg.
+     * If not yet finished, the rank is i+j+1 where i is the number of competitors that already finished the leg, and j
+     * is the number of competitors whose wind-projected distance to the leg's end waypoint is shorter than that of
+     * <code>competitor</code>.
      * <p>
      * 
-     * The wind projection is only an approximation of a more exact "advantage line" and in particular doesn't
-     * account for crossing the lay line.
+     * The wind projection is only an approximation of a more exact "advantage line" and in particular doesn't account
+     * for crossing the lay line.
      */
     int getRank(TimePoint timePoint);
 

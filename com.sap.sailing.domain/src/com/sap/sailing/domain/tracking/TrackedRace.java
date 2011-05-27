@@ -70,7 +70,7 @@ public interface TrackedRace {
      */
     TimePoint getTimePointOfLastUpdate();
     
-    int getRankDifference(Competitor competitor, Leg leg);
+    int getRankDifference(Competitor competitor, Leg leg, TimePoint timePoint);
     
     /**
      * Computes the rank of the competitor in this race for the current time. 
@@ -78,8 +78,6 @@ public interface TrackedRace {
     int getRank(Competitor competitor);
     
     int getRank(Competitor competitor, TimePoint timePoint);
-    
-    int getRank(Competitor competitor, Waypoint waypoint);
     
     /**
      * For a competitor, computes the distance (TODO not yet clear whether over ground or

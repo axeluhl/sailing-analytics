@@ -13,22 +13,24 @@ import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Waypoint;
 
 public class CourseImpl extends NamedImpl implements Course {
-    private final Iterable<Waypoint> waypoints;
+    private final List<Waypoint> waypoints;
     private final Map<Waypoint, Integer> waypointIndexes;
     private final List<Leg> legs;
     
     public CourseImpl(String name, Iterable<Waypoint> waypoints) {
         super(name);
-        this.waypoints = waypoints;
+        this.waypoints = new ArrayList<Waypoint>();
         waypointIndexes = new HashMap<Waypoint, Integer>();
         legs = new ArrayList<Leg>();
         Iterator<Waypoint> waypointIter = waypoints.iterator();
         int i=0;
         if (waypointIter.hasNext()) {
             Waypoint previous = waypointIter.next();
+            this.waypoints.add(previous);
             waypointIndexes.put(previous, i++);
             while (waypointIter.hasNext()) {
                 Waypoint current = waypointIter.next();
+                this.waypoints.add(current);
                 Leg leg = new LegImpl(previous, current);
                 legs.add(leg);
                 previous = current;
@@ -85,6 +87,16 @@ public class CourseImpl extends NamedImpl implements Course {
             i++;
         }
         return null;
+    }
+
+    @Override
+    public Waypoint getFirstWaypoint() {
+        return waypoints.get(0);
+    }
+
+    @Override
+    public Waypoint getLastWaypoint() {
+        return waypoints.get(waypoints.size()-1);
     }
     
 }

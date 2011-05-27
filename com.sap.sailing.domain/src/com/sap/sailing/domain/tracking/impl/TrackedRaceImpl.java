@@ -147,8 +147,7 @@ public class TrackedRaceImpl implements TrackedRace {
 
     @Override
     public TrackedLegOfCompetitor getTrackedLeg(Competitor competitor, Leg leg) {
-        // TODO Auto-generated method stub
-        return null;
+        return getTrackedLeg(leg).getTrackedLeg(competitor);
     }
 
     @Override
@@ -157,9 +156,17 @@ public class TrackedRaceImpl implements TrackedRace {
     }
 
     @Override
-    public int getRankDifference(Competitor competitor, Leg leg) {
-        // TODO Auto-generated method stub
-        return 0;
+    public int getRankDifference(Competitor competitor, Leg leg, TimePoint timePoint) {
+        int previousRank;
+        if (leg == getRace().getCourse().getLegs().iterator().next()) {
+            // first leg; report rank difference from 0
+            previousRank = 0;
+        } else {
+            TrackedLeg previousLeg = getTrackedLegFinishingAt(leg.getFrom());
+            previousRank = previousLeg.getTrackedLeg(competitor).getRank(timePoint);
+        }
+        int currentRank = getTrackedLeg(competitor, leg).getRank(timePoint);
+        return currentRank - previousRank;
     }
     
     @Override
@@ -169,30 +176,37 @@ public class TrackedRaceImpl implements TrackedRace {
 
     @Override
     public int getRank(Competitor competitor, TimePoint timePoint) {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-
-    @Override
-    public int getRank(Competitor competitor, Waypoint waypoint) {
-        // TODO Auto-generated method stub
-        return 0;
+        return getTrackedLeg(competitor, timePoint).getRank(timePoint);
     }
 
     @Override
     public TrackedLegOfCompetitor getCurrentLeg(Competitor competitor) {
+        NavigableSet<MarkPassing> competitorMarkPassings = markPassingsForCompetitor.get(competitor);
         TrackedLegOfCompetitor result = null;
-        // TODO
-//        for (TrackedLeg l : trackedLegs.values()) {
-//            result = l;
-//        }
+        if (!competitorMarkPassings.isEmpty()) {
+            result = getTrackedLegStartingAt(competitorMarkPassings.last().getWaypoint()).getTrackedLeg(competitor);
+        }
         return result;
     }
     
     @Override
     public TrackedLeg getCurrentLeg() {
-        // TODO implement getCurrentLeg()
-        return null;
+        Waypoint lastWaypointPassed = null;
+        int indexOfLastWaypointPassed = -1;
+        for (Map.Entry<Waypoint, NavigableSet<MarkPassing>> entry : markPassingsForWaypoint.entrySet()) {
+            if (!entry.getValue().isEmpty()) {
+                int indexOfWaypoint = getRace().getCourse().getIndexOfWaypoint(entry.getKey());
+                if (indexOfWaypoint > indexOfLastWaypointPassed) {
+                    indexOfLastWaypointPassed = indexOfWaypoint;
+                    lastWaypointPassed = entry.getKey();
+                }
+            }
+        }
+        TrackedLeg result = null;
+        if (lastWaypointPassed != null && lastWaypointPassed != getRace().getCourse().getLastWaypoint()) {
+            result = getTrackedLegStartingAt(lastWaypointPassed);
+        }
+        return result;
     }
 
     @Override
@@ -235,5 +249,5 @@ public class TrackedRaceImpl implements TrackedRace {
             lastUpdate = timeOfEvent;
         }
     }
-
+    
 }

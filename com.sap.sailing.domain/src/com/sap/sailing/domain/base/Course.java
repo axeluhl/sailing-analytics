@@ -29,4 +29,8 @@ public interface Course extends Named {
      * if waypoint doesn't exist in {@link #getWaypoints()}.
      */
     int getIndexOfWaypoint(Waypoint waypoint);
+
+    Waypoint getFirstWaypoint();
+    
+    Waypoint getLastWaypoint();
 }
