@@ -63,7 +63,7 @@ public interface TrackedLegOfCompetitor {
      */
     int getRank(TimePoint timePoint);
 
-    double getGapToLeaderInSeconds(TimePoint timePoint);
+    double getGapToLeaderInSeconds(TimePoint timePoint) throws NoWindException;
 
     boolean hasFinishedLeg(TimePoint timePoint);
 

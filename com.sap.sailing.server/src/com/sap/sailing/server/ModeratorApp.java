@@ -169,8 +169,12 @@ public class ModeratorApp extends Servlet {
                             // well, we don't know the wind direction... then no average VMG will be shown...
                         }
                         jsonCompetitorInLeg.put("rank", trackedLegOfCompetitor.getRank(timePoint));
-                        jsonCompetitorInLeg.put("gapToLeaderInSeconds",
-                                trackedLegOfCompetitor.getGapToLeaderInSeconds(timePoint));
+                        try {
+                            jsonCompetitorInLeg.put("gapToLeaderInSeconds",
+                                    trackedLegOfCompetitor.getGapToLeaderInSeconds(timePoint));
+                        } catch (NoWindException e1) {
+                            // well, we don't know the wind direction... then no gap to leader will be shown...
+                        }
                         try {
                             jsonCompetitorInLeg.put("windwardDistanceToGoInMeters", trackedLegOfCompetitor
                                     .getWindwardDistanceToGo(timePoint).getMeters());
