@@ -1,11 +1,15 @@
 package com.sap.sailing.domain.tracking.impl;
 
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.NavigableSet;
 
 import com.sap.sailing.domain.base.Distance;
 import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.TimePoint;
+import com.sap.sailing.domain.base.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.base.impl.NauticalMileDistance;
 import com.sap.sailing.domain.tracking.GPSFix;
@@ -14,10 +18,12 @@ import com.sap.sailing.domain.tracking.GPSFixTrack;
 
 public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl<FixType> implements GPSFixTrack<ItemType, FixType> {
     private final ItemType trackedItem;
+    private final long millisecondsOverWhichToAverage;
 
-    public GPSFixTrackImpl(ItemType trackedItem) {
+    public GPSFixTrackImpl(ItemType trackedItem, long millisecondsOverWhichToAverage) {
         super();
         this.trackedItem = trackedItem;
+        this.millisecondsOverWhichToAverage = millisecondsOverWhichToAverage;
     }
     
     private class DummyGPSFix extends DummyTimed implements GPSFix {
@@ -94,6 +100,9 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         double distanceInNauticalMiles = 0;
         if (from.compareTo(to) < 0) {
             Position fromPos = getEstimatedPosition(from);
+            if (fromPos == null) {
+                return Distance.NULL;
+            }
             NavigableSet<GPSFix> subset = getGPSFixes().subSet(new DummyGPSFix(from),
             /* fromInclusive */false, new DummyGPSFix(to),
             /* toInclusive */false);
@@ -105,6 +114,54 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
             distanceInNauticalMiles += fromPos.getDistance(toPos).getNauticalMiles();
         }
         return new NauticalMileDistance(distanceInNauticalMiles);
+    }
+
+    /**
+     * Since we don't know for sure whether the GPS fixes are {@link GPSFixMoving} instances, here we only estimate
+     * speed based on the distance and time between the fixes, averaged over an interval of
+     * {@link #millisecondsOverWhichToAverage} milliseconds around <code>at</code>. Subclasses that know about the
+     * particular fix type may redefine this to exploit a {@link SpeedWithBearing} attached, e.g., to a
+     * {@link GPSFixMoving}.
+     */
+    @Override
+    public SpeedWithBearing getEstimatedSpeed(TimePoint at) {
+        DummyGPSFix atTimed = new DummyGPSFix(at);
+        NavigableSet<GPSFix> beforeSet = getGPSFixes().headSet(atTimed, /* inclusive */ true);
+        NavigableSet<GPSFix> afterSet = getGPSFixes().tailSet(atTimed, /* inclusive */ true);
+        List<GPSFix> relevantFixes = new LinkedList<GPSFix>();
+        for (GPSFix beforeFix : beforeSet.descendingSet()) {
+            if (at.asMillis() - beforeFix.getTimePoint().asMillis() > getMillisecondsOverWhichToAverage()/2) {
+                break;
+            }
+            relevantFixes.add(0, beforeFix);
+        }
+        for (GPSFix afterFix : afterSet) {
+            if (at.asMillis() - afterFix.getTimePoint().asMillis() > getMillisecondsOverWhichToAverage()/2) {
+                break;
+            }
+            relevantFixes.add(afterFix);
+        }
+        double knotSum = 0;
+        double bearingDegSum = 0;
+        int count = 0;
+        if (!relevantFixes.isEmpty()) {
+            Iterator<GPSFix> fixIter = relevantFixes.iterator();
+            GPSFix last = fixIter.next();
+            while (fixIter.hasNext()) {
+                GPSFix next = fixIter.next();
+                knotSum += last.getPosition().getDistance(next.getPosition())
+                        .inTime(next.getTimePoint().asMillis() - last.getTimePoint().asMillis()).getKnots();
+                bearingDegSum += last.getPosition().getBearingGreatCircle(next.getPosition()).getDegrees();
+                count++;
+                last = next;
+            }
+        }
+        SpeedWithBearing avgSpeed = new KnotSpeedImpl(knotSum / count, new DegreeBearingImpl(bearingDegSum/count));
+        return avgSpeed;
+    }
+
+    protected long getMillisecondsOverWhichToAverage() {
+        return millisecondsOverWhichToAverage;
     }
 
 }

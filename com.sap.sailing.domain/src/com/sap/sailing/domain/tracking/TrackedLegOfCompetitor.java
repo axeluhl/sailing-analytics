@@ -4,6 +4,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Distance;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Speed;
+import com.sap.sailing.domain.base.TimePoint;
 
 public interface TrackedLegOfCompetitor {
     Leg getLeg();
@@ -18,29 +19,34 @@ public interface TrackedLegOfCompetitor {
 
     /**
      * The distance over ground traveled by the competitor in this leg
+     * @param timePoint TODO
      */
-    Distance getDistanceTraveled();
+    Distance getDistanceTraveled(TimePoint timePoint);
 
     /**
      * Estimates how much the competitor still has to go to the end waypoint of this leg, projected onto the wind
      * direction. If the competitor already finished this leg, a zero, non-<code>null</code> distance will result.
+     * @param timePoint TODO
+     * 
+     * @throws NoWindException
+     *             thrown in case no wind direction is known
      */
-    Distance getWindwardDistanceToGo();
+    Distance getWindwardDistanceToGo(TimePoint timePoint) throws NoWindException;
 
-    Speed getAverageVelocityMadeGood();
+    Speed getAverageVelocityMadeGood(TimePoint timePoint);
 
-    Speed getAverageSpeedOverGround();
+    Speed getAverageSpeedOverGround(TimePoint timePoint);
 
     /**
      * @return <code>null</code> if the competitor hasn't started this leg yet
      */
     Speed getMaximumSpeedOverGround();
 
-    int getNumberOfTacks();
+    int getNumberOfTacks(TimePoint timePoint);
 
-    int getNumberOfJibes();
+    int getNumberOfJibes(TimePoint timePoint);
 
-    int getNumberOfDirectionChanges();
+    int getNumberOfDirectionChanges(TimePoint timePoint);
 
     /**
      * Computes the competitor's rank within this leg. If the competitor has already finished this leg, the rank is
@@ -51,7 +57,14 @@ public interface TrackedLegOfCompetitor {
      * 
      * The wind projection is only an approximation of a more exact "advantage line" and in particular doesn't
      * account for crossing the lay line.
+     * @param timePoint TODO
      */
-    int getRank();
+    int getRank(TimePoint timePoint);
+
+    double getGapToLeaderInSeconds(TimePoint timePoint);
+
+    boolean hasFinishedLeg(TimePoint timePoint);
+
+    Speed getVelocityMadeGood(TimePoint timePoint) throws NoWindException;
     
 }

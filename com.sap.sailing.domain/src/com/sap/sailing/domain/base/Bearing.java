@@ -6,4 +6,9 @@ public interface Bearing {
 
     double getRadians();
 
+    /**
+     * adds or subtracts 180 degrees to obtain the opposite bearing
+     */
+    Bearing reverse();
+
 }

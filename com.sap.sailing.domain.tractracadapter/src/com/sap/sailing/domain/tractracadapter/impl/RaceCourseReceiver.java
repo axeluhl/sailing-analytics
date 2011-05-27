@@ -31,13 +31,15 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
     private final TrackedEvent trackedEvent;
     private final com.tractrac.clientmodule.Event tractracEvent;
     private final long millisecondsOverWhichToAverageWind;
+    private final long millisecondsOverWhichToAverageSpeed;
     
     public RaceCourseReceiver(TrackedEvent trackedEvent, com.tractrac.clientmodule.Event tractracEvent,
-            long millisecondsOverWhichToAverageWind) {
+            long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed) {
         super();
         this.trackedEvent = trackedEvent;
         this.tractracEvent = tractracEvent;
         this.millisecondsOverWhichToAverageWind = millisecondsOverWhichToAverageWind;
+        this.millisecondsOverWhichToAverageSpeed = millisecondsOverWhichToAverageSpeed;
     }
 
     /**
@@ -68,7 +70,7 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
         RaceDefinition raceDefinition = DomainFactory.INSTANCE.createRaceDefinition(event.getC(), course);
         trackedEvent.getEvent().addRace(raceDefinition);
         trackedEvent.addTrackedRace(new DynamicTrackedRaceImpl(trackedEvent, raceDefinition,
-                millisecondsOverWhichToAverageWind));
+                millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed));
     }
 
 }

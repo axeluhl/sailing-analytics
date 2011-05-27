@@ -9,7 +9,7 @@ import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.Timed;
 import com.sap.sailing.domain.tracking.Track;
 
-public class TrackImpl<FixType extends Timed> implements Track<FixType> {
+public abstract class TrackImpl<FixType extends Timed> implements Track<FixType> {
     /**
      * The fixes, ordered by their time points
      */

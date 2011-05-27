@@ -22,6 +22,7 @@ import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
+import com.sap.sailing.domain.tracking.impl.DynamicGPSFixMovingTrackImpl;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackImpl;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 
@@ -30,8 +31,8 @@ public class TrackTest {
 
     @Before
     public void setUp() throws InterruptedException {
-        track = new DynamicTrackImpl<Boat, GPSFixMoving>(new BoatImpl("MyFirstBoat",
-                new BoatClassImpl("505")));
+        track = new DynamicGPSFixMovingTrackImpl<Boat>(new BoatImpl("MyFirstBoat",
+                new BoatClassImpl("505")), /* millisecondsOverWhichToAverage */ 5000);
         GPSFixMovingImpl gpsFix1 = new GPSFixMovingImpl(
                 new DegreePosition(1, 2), new MillisecondsTimePoint(
                         System.currentTimeMillis()), new KnotSpeedImpl(1,

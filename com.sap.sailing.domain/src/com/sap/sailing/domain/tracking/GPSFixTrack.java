@@ -34,4 +34,10 @@ public interface GPSFixTrack<ItemType, FixType extends GPSFix> extends Track<Fix
      * is present to perform an estimation, <code>null</code> is returned.
      */
     Position getEstimatedPosition(TimePoint timePoint);
+
+    /**
+     * Using an averaging / smoothening algorithm, computes the estimated speed determined
+     * by the GPS fixes in this track at time point <code>at</code>.
+     */
+    SpeedWithBearing getEstimatedSpeed(TimePoint at);
 }

@@ -18,6 +18,8 @@ public abstract class Servlet extends HttpServlet {
 
     protected static final String PARAM_NAME_RACENAME = "racename";
 
+    protected static final String PARAM_NAME_TIME = "time";
+
     private ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
     
     private RacingEventService service;

@@ -25,14 +25,16 @@ public class TrackedEventImpl implements TrackedEvent {
     private final Map<BoatClass, Collection<TrackedRace>> trackedRacesByBoatClass;
     private final Map<Buoy, GPSFixTrack<Buoy, GPSFix>> buoyTracks;
     private final Set<RaceListener> raceListeners;
+    private final long millisecondsOverWhichToAverageSpeed;
   
-    public TrackedEventImpl(Event event) {
+    public TrackedEventImpl(Event event, long millisecondsOverWhichToAverageSpeed) {
         super();
         this.event = event;
         this.trackedRaces = new HashMap<RaceDefinition, TrackedRace>();
         this.trackedRacesByBoatClass = new HashMap<BoatClass, Collection<TrackedRace>>();
         buoyTracks = new HashMap<Buoy, GPSFixTrack<Buoy, GPSFix>>();
         raceListeners = new HashSet<RaceListener>();
+        this.millisecondsOverWhichToAverageSpeed = millisecondsOverWhichToAverageSpeed;
     }
     
     @Override
@@ -47,7 +49,7 @@ public class TrackedEventImpl implements TrackedEvent {
             for (Waypoint waypoint : trackedRace.getRace().getCourse().getWaypoints()) {
                 for (Buoy buoy : waypoint.getBuoys()) {
                     if (!buoyTracks.containsKey(buoy)) {
-                        buoyTracks.put(buoy, new DynamicTrackImpl<Buoy, GPSFix>(buoy));
+                        buoyTracks.put(buoy, new DynamicTrackImpl<Buoy, GPSFix>(buoy, millisecondsOverWhichToAverageSpeed));
                     }
                 }
             }
@@ -82,7 +84,7 @@ public class TrackedEventImpl implements TrackedEvent {
     public GPSFixTrack<Buoy, GPSFix> getTrack(Buoy buoy) {
         GPSFixTrack<Buoy, GPSFix> result = buoyTracks.get(buoy);
         if (result == null) {
-            result = new DynamicTrackImpl<Buoy, GPSFix>(buoy);
+            result = new DynamicTrackImpl<Buoy, GPSFix>(buoy, millisecondsOverWhichToAverageSpeed);
             buoyTracks.put(buoy, result);
         }
         return result;

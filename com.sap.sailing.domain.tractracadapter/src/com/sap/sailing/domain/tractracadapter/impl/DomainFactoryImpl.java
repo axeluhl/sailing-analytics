@@ -56,6 +56,8 @@ import com.tractrac.clientmodule.RaceCompetitor;
 import com.tractrac.clientmodule.data.ControlPointPositionData;
 
 public class DomainFactoryImpl implements DomainFactory {
+    private final long millisecondsOverWhichToAverageSpeed = 5000;
+
     // TODO clarify how millisecondsOverWhichToAverageWind could be updated and propagated live
     private final long millisecondsOverWhichToAverageWind = 30000;
     
@@ -230,7 +232,7 @@ public class DomainFactoryImpl implements DomainFactory {
         Collection<Receiver> result = new ArrayList<Receiver>();
         result.add(new RaceCourseReceiver(
                 trackedEvent, inverseEventCache.get(trackedEvent
-                        .getEvent()), millisecondsOverWhichToAverageWind));
+                        .getEvent()), millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed));
         result.add(new MarkPositionReceiver(
                 trackedEvent, inverseEventCache.get(trackedEvent
                         .getEvent())));
@@ -250,7 +252,7 @@ public class DomainFactoryImpl implements DomainFactory {
     public DynamicTrackedEvent trackEvent(com.sap.sailing.domain.base.Event event) {
         DynamicTrackedEvent result = eventTrackingCache.get(event);
         if (result == null) {
-            result = new DynamicTrackedEventImpl(event);
+            result = new DynamicTrackedEventImpl(event, millisecondsOverWhichToAverageSpeed);
             eventTrackingCache.put(event, result);
         }
         return result;

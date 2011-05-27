@@ -43,7 +43,7 @@ public class TrackedRaceImpl implements TrackedRace {
     private final Map<Waypoint, NavigableSet<MarkPassing>> markPassingsForWaypoint;
     private final WindTrack windTrack;
     
-    public TrackedRaceImpl(TrackedEvent trackedEvent, RaceDefinition race, long millisecondsOverWhichToAverageWind) {
+    public TrackedRaceImpl(TrackedEvent trackedEvent, RaceDefinition race, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed) {
         super();
         this.trackedEvent = trackedEvent;
         this.race = race;
@@ -56,7 +56,7 @@ public class TrackedRaceImpl implements TrackedRace {
         tracks = new HashMap<Competitor, GPSFixTrack<Competitor, GPSFixMoving>>();
         for (Competitor competitor : race.getCompetitors()) {
             markPassingsForCompetitor.put(competitor, new TreeSet<MarkPassing>(TimedComparator.INSTANCE));
-            tracks.put(competitor, new DynamicTrackImpl<Competitor, GPSFixMoving>(competitor));
+            tracks.put(competitor, new DynamicGPSFixMovingTrackImpl<Competitor>(competitor, millisecondsOverWhichToAverageSpeed));
         }
         markPassingsForWaypoint = new HashMap<Waypoint, NavigableSet<MarkPassing>>();
         for (Waypoint waypoint : race.getCourse().getWaypoints()) {

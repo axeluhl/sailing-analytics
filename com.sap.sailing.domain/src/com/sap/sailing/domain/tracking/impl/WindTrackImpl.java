@@ -28,12 +28,12 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
     }
     
     @Override
-    public void add(Wind wind) {
+    public synchronized void add(Wind wind) {
         getInternalFixes().add(wind);
     }
 
     @Override
-    public Wind getEstimatedWind(Position p, TimePoint at) {
+    public synchronized Wind getEstimatedWind(Position p, TimePoint at) {
         DummyWind atTimed = new DummyWind(at);
         NavigableSet<Wind> beforeSet = getInternalFixes().headSet(atTimed, /* inclusive */ true);
         if (beforeSet.isEmpty()) {

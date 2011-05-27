@@ -15,9 +15,21 @@ import javax.servlet.http.HttpServletResponse;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import com.sap.sailing.domain.base.Bearing;
 import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.SpeedWithBearing;
+import com.sap.sailing.domain.base.TimePoint;
+import com.sap.sailing.domain.base.impl.DegreeBearingImpl;
+import com.sap.sailing.domain.base.impl.DegreePosition;
+import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
+import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.base.impl.Util.Pair;
+import com.sap.sailing.domain.tracking.Wind;
+import com.sap.sailing.domain.tracking.impl.WindImpl;
+import com.sap.sailing.server.util.DateParser;
+import com.sap.sailing.server.util.InvalidDateException;
 
 public class AdminApp extends Servlet {
     private static final long serialVersionUID = -6849138354941569249L;
@@ -25,6 +37,16 @@ public class AdminApp extends Servlet {
     private static final String ACTION_NAME_ADD_EVENT = "addevent";
 
     private static final String ACTION_NAME_STOP_EVENT = "stopevent";
+    
+    private static final String ACTION_NAME_SET_WIND = "setwind";
+    
+    private static final String PARAM_NAME_BEARING = "truebearingdegrees";
+    
+    private static final String PARAM_NAME_SPEED = "knotspeed";
+    
+    private static final String PARAM_NAME_LATDEG = "latdeg";
+    
+    private static final String PARAM_NAME_LNGDEG = "lngdeg";
     
     private static final String ACTION_NAME_LIST_WINDTRACKERS = "listwindtrackers";
     
@@ -52,6 +74,8 @@ public class AdminApp extends Servlet {
                     stopReceivingExpeditionWindForRace(req, resp);
                 } else if (ACTION_NAME_LIST_WINDTRACKERS.equals(action)) {
                     listWindTrackers(req, resp);
+                } else if (ACTION_NAME_SET_WIND.equals(action)) {
+                    setWind(req, resp);
                 }
             } else {
                 resp.getWriter().println("Hello admin!");
@@ -62,6 +86,52 @@ public class AdminApp extends Servlet {
         }
     }
     
+    private void setWind(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        Event event = getEvent(req);
+        if (event == null) {
+            resp.sendError(500, "Event not found");
+        } else {
+            RaceDefinition race = getRaceDefinition(req);
+            if (race == null) {
+                resp.sendError(500, "Race not found");
+            } else {
+                String bearingAsString = req.getParameter(PARAM_NAME_BEARING);
+                if (bearingAsString != null) {
+                    Bearing bearing = new DegreeBearingImpl(Double.valueOf(bearingAsString));
+                    String speedAsString = req.getParameter(PARAM_NAME_SPEED);
+                    SpeedWithBearing speed;
+                    if (speedAsString == null) {
+                        // only bearing provided; no speed; assume speed as 1kn
+                        speed = new KnotSpeedImpl(1, bearing);
+                    } else {
+                        speed = new KnotSpeedImpl(Double.valueOf(speedAsString), bearing);
+                    }
+                    Position p = null;
+                    String lat = req.getParameter(PARAM_NAME_LATDEG);
+                    if (lat != null) {
+                        String lng = req.getParameter(PARAM_NAME_LNGDEG);
+                        if (lng != null) {
+                            p = new DegreePosition(Double.valueOf(lat), Double.valueOf(lng));
+                        }
+                    }
+                    String time = req.getParameter(PARAM_NAME_TIME);
+                    try {
+                        TimePoint timePoint;
+                        if (time != null && time.length() > 0) {
+                            timePoint = new MillisecondsTimePoint(DateParser.parse(time).getTime());
+                        } else {
+                            timePoint = MillisecondsTimePoint.now();
+                        }
+                        Wind wind = new WindImpl(p, timePoint, speed);
+                        getService().getDomainFactory().trackEvent(event).getTrackedRace(race).recordWind(wind);
+                    } catch (InvalidDateException e) {
+                        resp.sendError(500, "Couldn't parse time specification " + time);
+                    }
+                }
+            }
+        }
+    }
+
     private void listWindTrackers(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         JSONArray windTrackers = new JSONArray();
         for (Pair<Event, RaceDefinition> eventAndRace : getService().getWindTrackedRaces()) {
