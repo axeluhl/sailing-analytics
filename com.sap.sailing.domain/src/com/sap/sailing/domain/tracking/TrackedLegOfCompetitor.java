@@ -30,14 +30,13 @@ public interface TrackedLegOfCompetitor {
     /**
      * Estimates how much the competitor still has to go to the end waypoint of this leg, projected onto the wind
      * direction. If the competitor already finished this leg, a zero, non-<code>null</code> distance will result.
-     * @param timePoint TODO
      * 
      * @throws NoWindException
      *             thrown in case no wind direction is known
      */
     Distance getWindwardDistanceToGo(TimePoint timePoint) throws NoWindException;
 
-    Speed getAverageVelocityMadeGood(TimePoint timePoint);
+    Speed getAverageVelocityMadeGood(TimePoint timePoint) throws NoWindException;
 
     Speed getAverageSpeedOverGround(TimePoint timePoint);
 
@@ -61,7 +60,6 @@ public interface TrackedLegOfCompetitor {
      * 
      * The wind projection is only an approximation of a more exact "advantage line" and in particular doesn't
      * account for crossing the lay line.
-     * @param timePoint TODO
      */
     int getRank(TimePoint timePoint);
 

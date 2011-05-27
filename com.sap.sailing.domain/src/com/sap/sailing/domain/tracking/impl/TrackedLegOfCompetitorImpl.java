@@ -155,12 +155,12 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
 
     @Override
     public Distance getWindwardDistanceToGo(TimePoint timePoint) throws NoWindException {
-        if (getMarkPassingForLegEnd() != null) {
-            return Distance.NULL;
+        if (hasFinishedLeg(timePoint)) {
+            return Distance.NULL; // 
         } else {
             Distance result = null;
             for (Buoy buoy : getLeg().getTo().getBuoys()) {
-                Distance d = getWindwardDistanceTo(buoy);
+                Distance d = getWindwardDistanceTo(buoy, timePoint);
                 if (result == null || d.compareTo(result) < 0) {
                     result = d;
                 }
@@ -175,11 +175,6 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
      * bearing, and the distance from the projection to the <code>buoy</code> is returned. Otherwise, it is assumed that
      * the leg is neither an upwind nor a downwind leg, and hence the true distance to <code>buoy</code> is returned.
      */
-    private Distance getWindwardDistanceTo(Buoy buoy) throws NoWindException {
-        MillisecondsTimePoint now = MillisecondsTimePoint.now();
-        return getWindwardDistanceTo(buoy, now);
-    }
-
     private Distance getWindwardDistanceTo(Buoy buoy, TimePoint at) throws NoWindException {
         return getWindwardDistance(getTrackedRace().getTrack(getCompetitor()).getEstimatedPosition(at),
                 getTrackedRace().getTrack(buoy).getEstimatedPosition(at), at);
@@ -190,6 +185,8 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
      * wind's bearing, the competitor's position is projected onto the line crossing <code>buoy</code> in the wind's
      * bearing, and the distance from the projection to the <code>buoy</code> is returned. Otherwise, it is assumed that
      * the leg is neither an upwind nor a downwind leg, and hence the true distance to <code>buoy</code> is returned.
+     * 
+     * @param at the wind estimation is performed for this point in time
      */
     private Distance getWindwardDistance(Position pos1, Position pos2, TimePoint at) throws NoWindException {
         if (isUpOrDownwindLeg(at)) {
@@ -218,7 +215,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
         if (cos < 0) {
             bearing = bearing.reverse();
         }
-        SpeedWithBearing result = new KnotSpeedImpl(wind.getKnots() * cos, bearing);
+        SpeedWithBearing result = new KnotSpeedImpl(Math.abs(wind.getKnots() * cos), bearing);
         return result;
     }
 
@@ -278,9 +275,23 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
 
     @Override
-    public Speed getAverageVelocityMadeGood(TimePoint timePoint) {
-        // TODO Auto-generated method stub
-        return null;
+    public Speed getAverageVelocityMadeGood(TimePoint timePoint) throws NoWindException {
+        Speed result = null;
+        MarkPassing start = getMarkPassingForLegStart();
+        if (start != null && start.getTimePoint().compareTo(timePoint) > 0) {
+            MarkPassing end = getMarkPassingForLegEnd();
+            TimePoint to;
+            if (timePoint.compareTo(end.getTimePoint()) >= 0) {
+                to = end.getTimePoint();
+            } else {
+                to = timePoint;
+            }
+            Position endPos = getTrackedRace().getTrack(getCompetitor()).getEstimatedPosition(to);
+            Distance d = getWindwardDistance(
+                    getTrackedRace().getTrack(getCompetitor()).getEstimatedPosition(start.getTimePoint()), endPos, to);
+            result = d.inTime(to.asMillis()-start.getTimePoint().asMillis());
+        }
+        return result;
     }
 
     @Override
@@ -309,7 +320,8 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
 
     @Override
     public boolean hasFinishedLeg(TimePoint timePoint) {
-        return getTrackedRace().getMarkPassing(getCompetitor(), getLeg().getTo()).getTimePoint().compareTo(timePoint) <= 0;
+        MarkPassing markPassingForLegEnd = getMarkPassingForLegEnd();
+        return markPassingForLegEnd != null && markPassingForLegEnd.getTimePoint().compareTo(timePoint) <= 0;
     }
 
     @Override

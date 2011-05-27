@@ -159,10 +159,14 @@ public class ModeratorApp extends Servlet {
                         } catch (NoWindException e) {
                             // well, we don't know the wind direction... then no VMG will be shown...
                         }
-                        Speed averageVelocityMadeGood = trackedLegOfCompetitor.getAverageVelocityMadeGood(timePoint);
-                        if (averageVelocityMadeGood != null) {
-                            jsonCompetitorInLeg.put("averageVelocityMadeGoodInKnots",
-                                    averageVelocityMadeGood.getKnots());
+                        try {
+                            Speed averageVelocityMadeGood = trackedLegOfCompetitor.getAverageVelocityMadeGood(timePoint);
+                            if (averageVelocityMadeGood != null) {
+                                jsonCompetitorInLeg.put("averageVelocityMadeGoodInKnots",
+                                        averageVelocityMadeGood.getKnots());
+                            }
+                        } catch (NoWindException e1) {
+                            // well, we don't know the wind direction... then no average VMG will be shown...
                         }
                         jsonCompetitorInLeg.put("rank", trackedLegOfCompetitor.getRank(timePoint));
                         jsonCompetitorInLeg.put("gapToLeaderInSeconds",
