@@ -52,7 +52,7 @@ public class TrackedLegImpl implements TrackedLeg {
         return byRank.first().getCompetitor();
     }
 
-    private TreeSet<TrackedLegOfCompetitor> getCompetitorTracksOrderedByRank(TimePoint timePoint) {
+    protected TreeSet<TrackedLegOfCompetitor> getCompetitorTracksOrderedByRank(TimePoint timePoint) {
         TreeSet<TrackedLegOfCompetitor> treeSet = new TreeSet<TrackedLegOfCompetitor>(new WindwardToGoComparator(timePoint));
         for (TrackedLegOfCompetitor competitorLeg : getTrackedLegsOfCompetitors()) {
             treeSet.add(competitorLeg);
