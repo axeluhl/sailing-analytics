@@ -44,6 +44,23 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends DynamicTrackImpl<Ite
             }
             relevantFixes.add(afterFix);
         }
+        if (relevantFixes.isEmpty()) {
+            // find the fix closest to "at":
+            if (beforeSet.isEmpty()) {
+                if (!afterSet.isEmpty()) {
+                    relevantFixes.add(afterSet.first());
+                }
+            } else {
+                if (afterSet.isEmpty()) {
+                    relevantFixes.add(beforeSet.last());
+                } else {
+                    GPSFixMoving beforeFix = beforeSet.last();
+                    GPSFixMoving afterFix = afterSet.first();
+                    relevantFixes.add(at.asMillis() - beforeFix.getTimePoint().asMillis() <= afterFix.getTimePoint()
+                            .asMillis() - at.asMillis() ? beforeFix : afterFix);
+                }
+            }
+        }
         double knotSum = 0;
         double bearingDegSum = 0;
         int count = 0;

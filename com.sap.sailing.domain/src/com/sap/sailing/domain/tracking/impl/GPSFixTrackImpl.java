@@ -112,8 +112,10 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
             }
             Position toPos = getEstimatedPosition(to);
             distanceInNauticalMiles += fromPos.getDistance(toPos).getNauticalMiles();
+            return new NauticalMileDistance(distanceInNauticalMiles);
+        } else {
+            return Distance.NULL;
         }
-        return new NauticalMileDistance(distanceInNauticalMiles);
     }
 
     /**

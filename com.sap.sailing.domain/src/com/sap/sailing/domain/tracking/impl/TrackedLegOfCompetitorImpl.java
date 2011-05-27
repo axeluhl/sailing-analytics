@@ -61,7 +61,12 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
         long result = -1;
         MarkPassing passedEndWaypoint = getTrackedRace().getMarkPassing(getCompetitor(), getTrackedLeg().getLeg().getTo());
         if (passedEndWaypoint != null) {
-            result = passedEndWaypoint.getTimePoint().asMillis() - getTrackedRace().getStart().asMillis();
+            MarkPassing passedStartWaypoint = getTrackedRace().getMarkPassing(getCompetitor(), getTrackedLeg().getLeg().getFrom());
+            if (passedStartWaypoint != null) {
+                result = passedEndWaypoint.getTimePoint().asMillis() - passedStartWaypoint.getTimePoint().asMillis();
+            } else {
+                result = 0;
+            }
         }
         return result;
     }

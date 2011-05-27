@@ -18,8 +18,12 @@ public interface TrackedLegOfCompetitor {
     long getTimeInMilliSeconds();
 
     /**
-     * The distance over ground traveled by the competitor in this leg
-     * @param timePoint TODO
+     * The distance over ground traveled by the competitor in this leg up to <code>timePoint</code>. If
+     * <code>timePoint</code> is before the competitor started this leg, a {@link Distance#NULL zero} distance
+     * is returned. If the <code>timePoint</code> is after the time point at which the competitor finished this
+     * leg, the total distance traveled in this leg is returned. If the time point is after the last fix but
+     * the competitor hasn't finished the leg yet, the distance traveled up to the position at which the
+     * competitor is estimated to be at <code>timePoint</code> is used.
      */
     Distance getDistanceTraveled(TimePoint timePoint);
 
