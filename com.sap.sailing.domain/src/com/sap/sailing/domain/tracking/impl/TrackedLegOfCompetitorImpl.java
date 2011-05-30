@@ -328,7 +328,8 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
                     return (getMarkPassingForLegEnd().getTimePoint().asMillis()-whenLeaderFinishedLeg.asMillis())/1000;
                 } else {
                     Distance windwardDistanceToGo = getWindwardDistanceToGo(timePoint);
-                    return windwardDistanceToGo.getMeters() / windwardSpeed.getMetersPerSecond();
+                    long millisSinceLeaderPassedMarkToTimePoint = timePoint.asMillis()-whenLeaderFinishedLeg.asMillis();
+                    return windwardDistanceToGo.getMeters() / windwardSpeed.getMetersPerSecond() + millisSinceLeaderPassedMarkToTimePoint/1000;
                 }
             }
         }
