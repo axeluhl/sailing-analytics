@@ -38,7 +38,9 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
         while (event == null || !isStopEvent(event)) {
             try {
                 event = queue.take();
-                handleEvent(event);
+                if (!isStopEvent(event)) {
+                    handleEvent(event);
+                }
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

@@ -14,6 +14,10 @@ public interface TrackedEvent {
 
     Iterable<TrackedRace> getTrackedRaces(BoatClass boatClass);
 
+    /**
+     * Obtains the tracked race for <code>race</code>. Blocks until the tracked race has been created
+     * and added to this tracked event (see {@link #addTrackedRace(TrackedRace)}).
+     */
     TrackedRace getTrackedRace(RaceDefinition race);
 
     void addTrackedRace(TrackedRace trackedRace);

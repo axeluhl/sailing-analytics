@@ -207,6 +207,7 @@ public class DomainFactoryImpl implements DomainFactory {
             while (!interrupted && result == null) {
                 try {
                     raceCache.wait();
+                    result = raceCache.get(race);
                 } catch (InterruptedException e) {
                     interrupted = true;
                 }

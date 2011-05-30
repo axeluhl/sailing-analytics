@@ -125,7 +125,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
             return null;
         }
         GPSFixTrack<Competitor, GPSFixMoving> track = getTrackedRace().getTrack(getCompetitor());
-        Iterator<GPSFixMoving> iter = track.getFixes(legStart.getTimePoint(), /* inclusive */ false);
+        Iterator<GPSFixMoving> iter = track.getFixesIterator(legStart.getTimePoint(), /* inclusive */ false);
         Speed max = Speed.NULL;
         if (iter.hasNext()) {
             TimePoint markPassingTimeMillis = getMarkPassingForLegStart().getTimePoint();

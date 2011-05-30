@@ -1,4 +1,5 @@
 #!/bin/sh
 cd plugins
-ssh trac@195.227.10.246 "rm target/plugins/*"
-scp * trac@195.227.10.246:target/plugins
+# target IP is 195.227.10.246, but since it's outside the firewall we use an SSH tunnel
+ssh -p 12347 trac@localhost "rm target/plugins/*"
+scp -P 12347 * trac@localhost:target/plugins

@@ -26,5 +26,5 @@ public interface Track<FixType extends Timed> {
      * Returns an iterator starting at the first fix after <code>startingAt</code> (or
      * "at or after" in case <code>inclusive</code> is <code>true</code>).
      */
-    Iterator<FixType> getFixes(TimePoint startingAt, boolean inclusive);
+    Iterator<FixType> getFixesIterator(TimePoint startingAt, boolean inclusive);
 }

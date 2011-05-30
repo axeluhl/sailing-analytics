@@ -57,6 +57,7 @@ public class TrackedEventImpl implements TrackedEvent {
             for (RaceListener listener : raceListeners) {
                 listener.raceAdded(trackedRace);
             }
+            trackedRaces.notifyAll();
         }
     }
 
@@ -77,7 +78,19 @@ public class TrackedEventImpl implements TrackedEvent {
 
     @Override
     public TrackedRace getTrackedRace(RaceDefinition race) {
-        return trackedRaces.get(race);
+        TrackedRace result = trackedRaces.get(race);
+        boolean interrupted = false;
+        synchronized (trackedRaces) {
+            while (!interrupted && result == null) {
+                try {
+                    trackedRaces.wait();
+                    result = trackedRaces.get(race);
+                } catch (InterruptedException e) {
+                    interrupted = true;
+                }
+            }
+        }
+        return result;
     }
 
     @Override

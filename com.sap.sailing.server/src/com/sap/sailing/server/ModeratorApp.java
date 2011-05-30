@@ -1,6 +1,7 @@
 package com.sap.sailing.server;
 
 import java.io.IOException;
+import java.util.Iterator;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -22,6 +23,7 @@ import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.tracking.GPSFix;
+import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.NoWindException;
 import com.sap.sailing.domain.tracking.TrackedLeg;
@@ -39,6 +41,10 @@ public class ModeratorApp extends Servlet {
     
     private static final String ACTION_NAME_SHOW_WAYPOINTS = "showwaypoints";
     
+    private static final String ACTION_NAME_SHOW_BOAT_POSITIONS = "showboatpositions";
+    
+    private static final String PARAM_NAME_SINCE = "since";
+    
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         try {
@@ -50,6 +56,8 @@ public class ModeratorApp extends Servlet {
                     showRace(req, resp);
                 } else if (ACTION_NAME_SHOW_WAYPOINTS.equals(action)) {
                     showWaypoints(req, resp);
+                } else if (ACTION_NAME_SHOW_BOAT_POSITIONS.equals(action)) {
+                    showBoatPositions(req, resp);
                 } else {
                     resp.sendError(500, "Unknown action \""+action+"\"");
                 }
@@ -59,6 +67,52 @@ public class ModeratorApp extends Servlet {
         } catch (Throwable e) {
             resp.getWriter().println("Error processing request:");
             e.printStackTrace(resp.getWriter());
+        }
+    }
+
+    private void showBoatPositions(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        TrackedRace trackedRace = getTrackedRace(req);
+        if (trackedRace == null) {
+            resp.sendError(500, "Race not found");
+        } else {
+            String time = req.getParameter(PARAM_NAME_SINCE);
+            try {
+                TimePoint timePoint = null;
+                if (time != null && time.length() > 0) {
+                    timePoint = new MillisecondsTimePoint(DateParser.parse(time).getTime());
+                }
+                JSONObject jsonRace = new JSONObject();
+                jsonRace.put("name", trackedRace.getRace().getName());
+                JSONArray jsonCompetitors = new JSONArray();
+                for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
+                    JSONObject jsonCompetitor = new JSONObject();
+                    jsonCompetitor.put("name", competitor.getName());
+                    GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
+                    Iterator<GPSFixMoving> fixIter;
+                    if (timePoint == null) {
+                        fixIter = track.getFixes().iterator();
+                    } else {
+                        fixIter = track.getFixesIterator(timePoint, /* inclusive */ true);
+                    }
+                    JSONArray jsonFixes = new JSONArray();
+                    while (fixIter.hasNext()) {
+                        GPSFixMoving fix = fixIter.next();
+                        JSONObject jsonFix = new JSONObject();
+                        jsonFix.put("timepoint", fix.getTimePoint().asMillis());
+                        jsonFix.put("latdeg", fix.getPosition().getLatDeg());
+                        jsonFix.put("lngdev", fix.getPosition().getLngDeg());
+                        jsonFix.put("truebearingdeg", fix.getSpeed().getBearing().getDegrees());
+                        jsonFix.put("knotspeed", fix.getSpeed().getKnots());
+                        jsonFixes.add(jsonFix);
+                    }
+                    jsonCompetitor.put("track", jsonFixes);
+                    jsonCompetitors.add(jsonCompetitor);
+                }
+                jsonRace.put("competitors", jsonCompetitors);
+                jsonRace.writeJSONString(resp.getWriter());
+            } catch (InvalidDateException e) {
+                resp.sendError(500, "Couldn't parse time specification " + time);
+            }
         }
     }
 
