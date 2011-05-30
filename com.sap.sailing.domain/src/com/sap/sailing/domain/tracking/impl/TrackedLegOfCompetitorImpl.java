@@ -354,4 +354,17 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
         return getTrackedRace().getTrack(getCompetitor()).getEstimatedSpeed(at);
     }
 
+    @Override
+    public double getEstimatedTimeToNextMarkInSeconds(TimePoint timePoint) throws NoWindException {
+        double result;
+        if (hasFinishedLeg(timePoint)) {
+            result = 0;
+        } else {
+            Distance windwardDistanceToGo = getWindwardDistanceToGo(timePoint);
+            Speed vmg = getVelocityMadeGood(timePoint);
+            result = windwardDistanceToGo.getMeters() / vmg.getMetersPerSecond();
+        }
+        return result;
+    }
+
 }

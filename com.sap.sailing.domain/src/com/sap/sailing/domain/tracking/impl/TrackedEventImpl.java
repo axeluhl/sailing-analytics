@@ -12,6 +12,7 @@ import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.RaceListener;
@@ -114,15 +115,18 @@ public class TrackedEventImpl implements TrackedEvent {
     }
 
     @Override
-    public int getTotalPoints(Competitor competitor) {
+    public int getTotalPoints(Competitor competitor, TimePoint timePoint) {
         // TODO Auto-generated method stub
         return 0;
     }
 
     @Override
-    public int getNetPoints(Competitor competitor) {
-        // TODO Auto-generated method stub
-        return 0;
+    public int getNetPoints(Competitor competitor, TimePoint timePoint) {
+        int result = 0;
+        for (TrackedRace trackedRace : getTrackedRaces()) {
+            result += trackedRace.getRank(competitor, timePoint);
+        }
+        return result;
     }
 
 }

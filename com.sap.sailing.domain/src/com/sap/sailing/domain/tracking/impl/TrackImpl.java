@@ -3,7 +3,7 @@ package com.sap.sailing.domain.tracking.impl;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.NavigableSet;
-import java.util.TreeSet;
+import java.util.concurrent.ConcurrentSkipListSet;
 
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.Timed;
@@ -29,7 +29,7 @@ public abstract class TrackImpl<FixType extends Timed> implements Track<FixType>
     
     public TrackImpl() {
         super();
-        this.fixes = new TreeSet<Timed>(TimedComparator.INSTANCE);
+        this.fixes = new ConcurrentSkipListSet<Timed>(TimedComparator.INSTANCE);
     }
     
     protected NavigableSet<FixType> getInternalFixes() {

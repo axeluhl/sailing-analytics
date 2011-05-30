@@ -180,7 +180,7 @@ public class ModeratorApp extends Servlet {
                 if (time != null && time.length() > 0) {
                     timePoint = new MillisecondsTimePoint(DateParser.parse(time).getTime());
                 } else {
-                    timePoint = MillisecondsTimePoint.now();
+                    timePoint = trackedRace.getTimePointOfLastUpdate();
                 }
                 JSONObject jsonRace = new JSONObject();
                 jsonRace.put("name", trackedRace.getRace().getName());
@@ -228,6 +228,12 @@ public class ModeratorApp extends Servlet {
                                     trackedLegOfCompetitor.getGapToLeaderInSeconds(timePoint));
                         } catch (NoWindException e1) {
                             // well, we don't know the wind direction... then no gap to leader will be shown...
+                        }
+                        try {
+                            jsonCompetitorInLeg.put("estimatedTimeToNextMarkInSeconds", trackedLegOfCompetitor
+                                    .getEstimatedTimeToNextMarkInSeconds(timePoint));
+                        } catch (NoWindException e) {
+                            // well, we don't know the wind direction... then no windward distance will be shown...
                         }
                         try {
                             jsonCompetitorInLeg.put("windwardDistanceToGoInMeters", trackedLegOfCompetitor

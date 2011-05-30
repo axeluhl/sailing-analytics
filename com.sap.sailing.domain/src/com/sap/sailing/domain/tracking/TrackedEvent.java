@@ -6,6 +6,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Gate;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.TimePoint;
 
 public interface TrackedEvent {
     Event getEvent();
@@ -35,8 +36,8 @@ public interface TrackedEvent {
      */
     void addRaceListener(RaceListener listener);
     
-    int getTotalPoints(Competitor competitor);
+    int getTotalPoints(Competitor competitor, TimePoint timePoint);
     
-    int getNetPoints(Competitor competitor);
+    int getNetPoints(Competitor competitor, TimePoint timePoint);
     
 }
