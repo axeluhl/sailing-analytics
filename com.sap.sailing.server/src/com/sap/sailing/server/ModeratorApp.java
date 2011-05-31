@@ -273,6 +273,13 @@ public class ModeratorApp extends Servlet {
                     jsonLeg.put("end", leg.getTo().getName());
                     jsonLegs.add(jsonLeg);
                 }
+                TrackedRace trackedRace = getService().getDomainFactory().trackEvent(event).getTrackedRace(race);
+                if (trackedRace.getStart() != null) {
+                    jsonRace.put("start", trackedRace.getStart().asMillis());
+                }
+                if (trackedRace.getFirstFinish() != null) {
+                    jsonRace.put("finish", trackedRace.getFirstFinish().asMillis());
+                }
                 jsonRace.put("legs", jsonLegs);
                 jsonRaces.add(jsonRace);
             }
