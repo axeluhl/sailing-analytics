@@ -66,6 +66,8 @@ public interface TrackedLegOfCompetitor {
 
     double getGapToLeaderInSeconds(TimePoint timePoint) throws NoWindException;
 
+    boolean hasStartedLeg(TimePoint timePoint);
+    
     boolean hasFinishedLeg(TimePoint timePoint);
 
     Speed getVelocityMadeGood(TimePoint timePoint) throws NoWindException;

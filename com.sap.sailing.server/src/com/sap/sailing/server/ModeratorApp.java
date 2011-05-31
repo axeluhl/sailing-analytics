@@ -225,6 +225,7 @@ public class ModeratorApp extends Servlet {
                         } catch (NoWindException e) {
                             // well, we don't know the wind direction... then no windward distance will be shown...
                         }
+                        jsonCompetitorInLeg.put("started", trackedLegOfCompetitor.hasStartedLeg(timePoint));
                         jsonCompetitorInLeg.put("finished", trackedLegOfCompetitor.hasFinishedLeg(timePoint));
                         jsonCompetitors.add(jsonCompetitorInLeg);
                     }

@@ -340,6 +340,12 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
 
     @Override
+    public boolean hasStartedLeg(TimePoint timePoint) {
+        MarkPassing markPassingForLegStart = getMarkPassingForLegStart();
+        return markPassingForLegStart != null && markPassingForLegStart.getTimePoint().compareTo(timePoint) <= 0;
+    }
+
+    @Override
     public boolean hasFinishedLeg(TimePoint timePoint) {
         MarkPassing markPassingForLegEnd = getMarkPassingForLegEnd();
         return markPassingForLegEnd != null && markPassingForLegEnd.getTimePoint().compareTo(timePoint) <= 0;
