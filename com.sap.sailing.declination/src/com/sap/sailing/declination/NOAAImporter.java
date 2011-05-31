@@ -2,11 +2,14 @@ package com.sap.sailing.declination;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
+import java.io.EOFException;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.ObjectInput;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 import java.net.HttpURLConnection;
@@ -16,6 +19,8 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -145,7 +150,7 @@ public class NOAAImporter {
                 double grid = Double.valueOf(args[2]);
                 NOAAImporter importer = new NOAAImporter();
                 for (int year = fromYear; year <= toYear; year++) {
-                    ObjectOutput out = new ObjectOutputStream(new FileOutputStream("resources/declination-"+year+".txt"));
+                    ObjectOutput out = new ObjectOutputStream(new FileOutputStream(getResourceForYear(year)));
                     int month = 6;
                     for (double lat = 0; lat < 90; lat += grid) {
                         System.out.println("Date: " + year + "/" + (month + 1) + ", Latitude: " + lat);
@@ -171,12 +176,129 @@ public class NOAAImporter {
         }
     }
 
+    private String getResourceForYear(int year) {
+        String filename = getFilenameForYear(year);
+        return "resources/" + filename;
+    }
+
+    private String getFilenameForYear(int year) {
+        String filename = "declination-"+year+".txt";
+        return filename;
+    }
+    
+    private InputStream getInputStreamForYear(int year) {
+        return getClass().getResourceAsStream("/"+getFilenameForYear(year));
+    }
+    
+    private Set<DeclinationRecord> getStoredDeclinations(int year) throws IOException, ClassNotFoundException, ParseException {
+        DeclinationRecord record;
+        Set<DeclinationRecord> result = new HashSet<DeclinationRecord>();
+        InputStream is = getInputStreamForYear(year);
+        if (is != null) {
+            ObjectInput in = new ObjectInputStream(is);
+            while ((record = readExternal(in)) != null) {
+                result.add(record);
+            }
+        }
+        return result;
+    }
+    
+    /**
+     * Tries two things in parallel: fetch a more or less precise response from the online service and load
+     * the requested year's declination values from a stored resource to look up a value that comes close.
+     * The online lookup will be given preference. However, should it take longer than
+     * <code>timeoutForOnlineFetchInMilliseconds</code>, then the method will return whatever it found
+     * in the stored file, or <code>null</code> if no file exists for the year of <code>timePoint</code>.
+     * 
+     * @param timeoutForOnlineFetchInMilliseconds if 0, this means wait forever for the online result
+     * @throws ParseException 
+     * @throws ClassNotFoundException 
+     * @throws IOException 
+     */
+    public DeclinationRecord getDeclination(final Position position, final TimePoint timePoint,
+            long timeoutForOnlineFetchInMilliseconds) throws IOException, ClassNotFoundException, ParseException {
+        final DeclinationRecord[] result = new DeclinationRecord[1];
+        Thread fetcher = new Thread("Declination fetcher for "+position+"@"+timePoint) {
+            @Override
+            public void run() {
+                try {
+                    DeclinationRecord fetched = importRecord(position, timePoint);
+                    synchronized (result) {
+                        result[0] = fetched;
+                        result.notifyAll();
+                    }
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        };
+        fetcher.start();
+        Calendar cal = new GregorianCalendar();
+        cal.setTime(timePoint.asDate());
+        Set<DeclinationRecord> set = getStoredDeclinations(cal.get(Calendar.YEAR));
+        if (set != null) {
+            double meanTimeAndPositionDistance = Double.MAX_VALUE;
+            DeclinationRecord nearest = null;
+            for (DeclinationRecord r : set) {
+                if (result[0] != null) {
+                    break; // result obtained online; don't need to search in stored declinations anymore
+                }
+                if (nearest == null) {
+                    nearest = r;
+                } else {
+                    double newDistance = getMeanTimeAndPositionDistance(r, position, timePoint);
+                    if (newDistance < meanTimeAndPositionDistance) {
+                        nearest = r;
+                        meanTimeAndPositionDistance = newDistance;
+                    }
+                }
+            }
+            // now wait for the background thread as long as specified
+            synchronized (result) {
+                if (result[0] == null) {
+                    try {
+                        result.wait(timeoutForOnlineFetchInMilliseconds);
+                    } catch (InterruptedException e) {
+                        // ignore; simply use value from file in this case
+                    }
+                }
+            }
+            if (result[0] == null && nearest != null) {
+                result[0] = nearest;
+            }
+        }
+        return result[0];
+    }
+
+    /**
+     * Computes a measure for a "distance" based on time and space, between two declination records. Being six months
+     * off is deemed to be as bad as being sixty nautical miles off.
+     */
+    private double getMeanTimeAndPositionDistance(DeclinationRecord r, Position position, TimePoint timePoint) {
+        double nauticalMileDistance = position.getDistance(r.getPosition()).getNauticalMiles();
+        long millisDistance = Math.abs(timePoint.asMillis()-r.getTimePoint().asMillis());
+        return ((double) millisDistance)/1000. /*s*/ / 3600. /*h*/ / 24. /*days*/ / 186. /*six months*/ +
+                nauticalMileDistance/60.;
+    }
+
     private void fetchAndAppendDeclination(int year, int month, double lat, double lng, NOAAImporter importer,
             ObjectOutput out) throws IOException {
         Position position = new DegreePosition(lat, lng);
         Calendar cal = new GregorianCalendar(year, month, /* dayOfMonth */ 1);
         TimePoint timePoint = new MillisecondsTimePoint(cal.getTimeInMillis());
-        DeclinationRecord declination = importer.importRecord(position, timePoint);
+        DeclinationRecord declination = null;
+        // re-try three times
+        for (int i=0; i<3; i++) {
+            try {
+                declination = importer.importRecord(position, timePoint);
+                break;
+            } catch (IOException ioe) {
+                ioe.printStackTrace();
+                if (i<2) {
+                    System.out.println("re-trying");
+                }
+            }
+        }
         if (declination != null) {
             writeExternal(declination, out);
         }
@@ -191,14 +313,21 @@ public class NOAAImporter {
         out.writeDouble(record.getAnnualChange().getDegrees());
     }
 
+    /**
+     * @return <code>null</code> if EOF has been reached
+     */
     public DeclinationRecord readExternal(ObjectInput in) throws IOException, ClassNotFoundException, ParseException {
-        TimePoint timePoint = new MillisecondsTimePoint(dateFormatter.parse(in.readUTF()).getTime());
-        double lat = in.readDouble();
-        double lng = in.readDouble();
-        Position position = new DegreePosition(lat, lng);
-        Bearing bearing = new DegreeBearingImpl(in.readDouble());
-        Bearing annualChange = new DegreeBearingImpl(in.readDouble());
-        return new DeclinationRecordImpl(position, timePoint, bearing, annualChange);
+        try {
+            TimePoint timePoint = new MillisecondsTimePoint(dateFormatter.parse(in.readUTF()).getTime());
+            double lat = in.readDouble();
+            double lng = in.readDouble();
+            Position position = new DegreePosition(lat, lng);
+            Bearing bearing = new DegreeBearingImpl(in.readDouble());
+            Bearing annualChange = new DegreeBearingImpl(in.readDouble());
+            return new DeclinationRecordImpl(position, timePoint, bearing, annualChange);
+        } catch (EOFException e) {
+            return null;
+        }
     }
 
     private void usage() {

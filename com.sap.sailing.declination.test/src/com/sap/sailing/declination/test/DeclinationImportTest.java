@@ -1,6 +1,7 @@
 package com.sap.sailing.declination.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
@@ -58,5 +59,14 @@ public class DeclinationImportTest {
         System.out.println("took "+(System.currentTimeMillis()-start)+"ms");
         assertEquals(-9.-32./60., record.getBearing().getDegrees(), 0.000000001);
         assertEquals(0.+10./60., record.getAnnualChange().getDegrees(), 0.000000001);
+    }
+    
+    @Test
+    public void readOnlineOrFromFile() throws IOException, ClassNotFoundException, ParseException {
+        DeclinationRecord declination = importer.getDeclination(new DegreePosition(53, 3),
+                new MillisecondsTimePoint(new SimpleDateFormat("yyyy-MM-dd").parse("2011-05-27").getTime()), 
+                /* timeoutForOnlineFetchInMilliseconds */ 1000);
+        assertNotNull(declination);
+        System.out.println(declination);
     }
 }

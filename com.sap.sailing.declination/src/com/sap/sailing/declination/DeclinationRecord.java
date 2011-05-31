@@ -2,7 +2,7 @@ package com.sap.sailing.declination;
 
 import com.sap.sailing.domain.base.Bearing;
 import com.sap.sailing.domain.base.Position;
-import com.sap.sailing.domain.base.TimePoint;
+import com.sap.sailing.domain.base.Timed;
 
 /**
  * Tells the magnetic declination for a position and a given point in time together with an anticipated annual change.
@@ -10,10 +10,8 @@ import com.sap.sailing.domain.base.TimePoint;
  * @author Axel Uhl (d043530)
  * 
  */
-public interface DeclinationRecord {
+public interface DeclinationRecord extends Timed {
     Position getPosition();
-    
-    TimePoint getTimePoint();
     
     Bearing getBearing();
     
