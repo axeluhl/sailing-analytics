@@ -43,7 +43,7 @@ public class ModeratorApp extends Servlet {
     
     private static final String PARAM_NAME_SINCE = "since";
     
-    private static final String PARAM_NAME_SINCE_MILLIS = "sinceinmillis";
+    private static final String PARAM_NAME_SINCE_MILLIS = "sinceasmillis";
     
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
