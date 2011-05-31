@@ -10,7 +10,6 @@ public class DeclinationRecordImpl implements DeclinationRecord {
     private final TimePoint timePoint;
     private final Bearing bearing;
     private final Bearing annualChange;
-    
     public DeclinationRecordImpl(Position position, TimePoint timePoint, Bearing bearing, Bearing annualChange) {
         super();
         this.position = position;
@@ -37,6 +36,11 @@ public class DeclinationRecordImpl implements DeclinationRecord {
     @Override
     public Bearing getAnnualChange() {
         return annualChange;
+    }
+    
+    @Override
+    public String toString() {
+        return ""+getTimePoint()+"@"+getPosition()+": "+getBearing()+", "+getAnnualChange()+"/year";
     }
 
 }

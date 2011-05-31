@@ -52,8 +52,10 @@ public class DeclinationImportTest {
 
     @Test
     public void importSouthernHemisphereDeclination() throws IOException, ParseException {
+        long start = System.currentTimeMillis();
         DeclinationRecord record = importer.importRecord(new DegreePosition(-10, 3),
                 new MillisecondsTimePoint(new SimpleDateFormat("yyyy-MM-dd").parse("2011-05-27").getTime()));
+        System.out.println("took "+(System.currentTimeMillis()-start)+"ms");
         assertEquals(-9.-32./60., record.getBearing().getDegrees(), 0.000000001);
         assertEquals(0.+10./60., record.getAnnualChange().getDegrees(), 0.000000001);
     }
