@@ -104,4 +104,6 @@ public interface DomainFactory {
 
     MarkPassing createMarkPassing(com.tractrac.clientmodule.Competitor competitor, Waypoint passed, TimePoint time);
 
+    Iterable<Receiver> getUpdateReceivers(DynamicTrackedEvent trackedEvent, ReceiverType... types);
+
 }

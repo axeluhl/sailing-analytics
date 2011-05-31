@@ -49,6 +49,7 @@ import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.EventTracker;
 import com.sap.sailing.domain.tractracadapter.Receiver;
+import com.sap.sailing.domain.tractracadapter.ReceiverType;
 import com.tractrac.clientmodule.CompetitorClass;
 import com.tractrac.clientmodule.ControlPoint;
 import com.tractrac.clientmodule.Race;
@@ -226,27 +227,46 @@ public class DomainFactoryImpl implements DomainFactory {
         }
         return result;
     }
+    
+    @Override
+    public Iterable<Receiver> getUpdateReceivers(DynamicTrackedEvent trackedEvent, ReceiverType... types) {
+        Collection<Receiver> result = new ArrayList<Receiver>();
+        for (ReceiverType type : types) {
+            switch (type) {
+            case RACECOURSE:
+                result.add(new RaceCourseReceiver(
+                        trackedEvent, inverseEventCache.get(trackedEvent
+                                .getEvent()), millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed));
+                break;
+            case MARKPOSITIONS:
+                result.add(new MarkPositionReceiver(
+                        trackedEvent, inverseEventCache.get(trackedEvent
+                                .getEvent())));
+                break;
+            case RAWPOSITIONS:
+                result.add(new RawPositionReceiver(
+                        trackedEvent, inverseEventCache.get(trackedEvent
+                                .getEvent())));
+                break;
+            case MARKPASSINGS:
+                result.add(new MarkPassingReceiver(
+                        trackedEvent, inverseEventCache.get(trackedEvent
+                                .getEvent())));
+                break;
+            case RACESTARTFINISH:
+                result.add(new RaceStartedAndFinishedReceiver(
+                        trackedEvent, inverseEventCache.get(trackedEvent
+                                .getEvent())));
+                break;
+            }
+        }
+        return result;
+    }
 
     @Override
-    public Iterable<Receiver> getUpdateReceivers(
-            DynamicTrackedEvent trackedEvent) {
-        Collection<Receiver> result = new ArrayList<Receiver>();
-        result.add(new RaceCourseReceiver(
-                trackedEvent, inverseEventCache.get(trackedEvent
-                        .getEvent()), millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed));
-        result.add(new MarkPositionReceiver(
-                trackedEvent, inverseEventCache.get(trackedEvent
-                        .getEvent())));
-        result.add(new RawPositionReceiver(
-                trackedEvent, inverseEventCache.get(trackedEvent
-                        .getEvent())));
-        result.add(new MarkPassingReceiver(
-                trackedEvent, inverseEventCache.get(trackedEvent
-                        .getEvent())));
-        result.add(new RaceStartedAndFinishedReceiver(
-                trackedEvent, inverseEventCache.get(trackedEvent
-                        .getEvent())));
-        return result;
+    public Iterable<Receiver> getUpdateReceivers(DynamicTrackedEvent trackedEvent) {
+        return getUpdateReceivers(trackedEvent, ReceiverType.RACECOURSE, ReceiverType.MARKPASSINGS,
+                ReceiverType.MARKPOSITIONS, ReceiverType.RACESTARTFINISH, ReceiverType.RAWPOSITIONS);
     }
 
     @Override

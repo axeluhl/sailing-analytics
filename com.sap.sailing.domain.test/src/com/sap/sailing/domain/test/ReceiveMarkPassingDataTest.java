@@ -18,6 +18,7 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.Receiver;
+import com.sap.sailing.domain.tractracadapter.ReceiverType;
 import com.tractrac.clientmodule.Race;
 import com.tractrac.clientmodule.RaceCompetitor;
 import com.tractrac.clientmodule.data.ICallbackData;
@@ -61,8 +62,9 @@ public class ReceiveMarkPassingDataTest extends AbstractTracTracLiveTest {
         List<TypeController> listeners = new ArrayList<TypeController>();
         listeners.add(markPassingsListener);
         for (Receiver receiver : DomainFactory.INSTANCE.getUpdateReceivers(
-                DomainFactory.INSTANCE.trackEvent(
-                        DomainFactory.INSTANCE.createEvent(getEvent())))) {
+                DomainFactory.INSTANCE.trackEvent(DomainFactory.INSTANCE.createEvent(getEvent())),
+                ReceiverType.RACECOURSE, ReceiverType.MARKPOSITIONS, ReceiverType.RACESTARTFINISH,
+                ReceiverType.RAWPOSITIONS)) {
             for (TypeController tc : receiver.getTypeControllers()) {
                 listeners.add(tc);
             }
