@@ -146,23 +146,23 @@ public class NOAAImporter {
                 NOAAImporter importer = new NOAAImporter();
                 for (int year = fromYear; year <= toYear; year++) {
                     ObjectOutput out = new ObjectOutputStream(new FileOutputStream("resources/declination-"+year+".txt"));
-                    for (int month = 0; month < 12; month++) {
-                        for (double lat = 0; lat < 90; lat += grid) {
-                            System.out.println("Date: "+year+"/"+month+", Latitude: "+lat);
-                            for (double lng = 0; lng < 180; lng += grid) {
-                                fetchAndAppendDeclination(year, month, lat, lng, importer, out);
-                            }
-                            for (double lng = -grid; lng > -180; lng -= grid) {
-                                fetchAndAppendDeclination(year, month, lat, lng, importer, out);
-                            }
+                    int month = 6;
+                    for (double lat = 0; lat < 90; lat += grid) {
+                        System.out.println("Date: " + year + "/" + (month + 1) + ", Latitude: " + lat);
+                        for (double lng = 0; lng < 180; lng += grid) {
+                            fetchAndAppendDeclination(year, month, lat, lng, importer, out);
                         }
-                        for (double lat = -grid; lat > -90; lat -= grid) {
-                            for (double lng = 0; lng < 180; lng += grid) {
-                                fetchAndAppendDeclination(year, month, lat, lng, importer, out);
-                            }
-                            for (double lng = -grid; lng > -180; lng -= grid) {
-                                fetchAndAppendDeclination(year, month, lat, lng, importer, out);
-                            }
+                        for (double lng = -grid; lng > -180; lng -= grid) {
+                            fetchAndAppendDeclination(year, month, lat, lng, importer, out);
+                        }
+                    }
+                    for (double lat = -grid; lat > -90; lat -= grid) {
+                        System.out.println("Date: " + year + "/" + (month + 1) + ", Latitude: " + lat);
+                        for (double lng = 0; lng < 180; lng += grid) {
+                            fetchAndAppendDeclination(year, month, lat, lng, importer, out);
+                        }
+                        for (double lng = -grid; lng > -180; lng -= grid) {
+                            fetchAndAppendDeclination(year, month, lat, lng, importer, out);
                         }
                     }
                     out.close();
