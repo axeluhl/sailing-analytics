@@ -9,13 +9,16 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 
 import com.maptrack.client.io.TypeController;
+import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.tractrac.clientmodule.util.Base64;
 import com.tractrac.clientmodule.Event;
 import com.tractrac.clientmodule.data.DataController;
@@ -30,6 +33,7 @@ public abstract class AbstractTracTracLiveTest implements Listener {
     private final URI liveUri;
     private final URI storedUri;
     private Event event;
+    private final Collection<Receiver> receivers;
     
     private Thread ioThread;
     private DataController controller;
@@ -38,6 +42,7 @@ public abstract class AbstractTracTracLiveTest implements Listener {
         paramUrl = new URL("http://www.traclive.dk/simulateconf/j80race12.txt");
         liveUri = new URI("tcp://localhost:4410");
         storedUri = new URI("tcp://localhost:4411");
+        receivers = new HashSet<Receiver>();
     }
 
     @Before
@@ -56,9 +61,12 @@ public abstract class AbstractTracTracLiveTest implements Listener {
         // after adding their listeners
     }
     
-    protected void addListenersForStoredDataAndStartController(TypeController... listenersForStoredData) {
-        for (TypeController listener : listenersForStoredData) {
-            getController().add(listener);
+    protected void addListenersForStoredDataAndStartController(Iterable<Receiver> receivers) {
+        for (Receiver receiver : receivers) {
+            this.receivers.add(receiver);
+            for (TypeController typeController : receiver.getTypeControllers()) {
+                getController().add(typeController);
+            }
         }
         startController();
     }
@@ -85,6 +93,9 @@ public abstract class AbstractTracTracLiveTest implements Listener {
             ioThread.join();
         } catch (InterruptedException ex) {
             Assert.fail(ex.getMessage());
+        }
+        for (Receiver receiver : receivers) {
+            receiver.stop();
         }
     }
 
@@ -147,7 +158,7 @@ public abstract class AbstractTracTracLiveTest implements Listener {
 
     @Override
     public void storedDataProgress(float progress) {
-        System.out.println("Stored data progreess: "+progress);
+        System.out.println("Stored data progress: "+progress);
         
     }
 

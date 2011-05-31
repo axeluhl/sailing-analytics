@@ -73,7 +73,7 @@ public class ReceiveTrackingDataTest extends AbstractTracTracLiveTest {
                 listeners.add(raceListener);
             }
         }
-        addListenersForStoredDataAndStartController(listeners.toArray(new TypeController[0]));
+        addListenersForStoredDataAndStartController(domainFactory.getUpdateReceivers(trackedEvent));
     }
 
     @Test

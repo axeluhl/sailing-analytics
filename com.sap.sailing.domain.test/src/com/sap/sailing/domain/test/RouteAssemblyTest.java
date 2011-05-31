@@ -5,6 +5,7 @@ import static org.junit.Assert.assertNotNull;
 
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
+import java.util.Collections;
 
 import org.junit.Test;
 
@@ -12,6 +13,7 @@ import com.maptrack.client.io.TypeController;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.impl.Util;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
+import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.tractrac.clientmodule.Route;
 import com.tractrac.clientmodule.data.ICallbackData;
 import com.tractrac.clientmodule.data.RouteData;
@@ -29,24 +31,33 @@ public class RouteAssemblyTest extends AbstractTracTracLiveTest {
         final RouteData[] firstData = new RouteData[1];
         final Object semaphor = new Object();
         
-        TypeController routeListener = RouteData.subscribe(getEvent().getRaceList().iterator().next(),
-                new ICallbackData<Route, RouteData>() {
-                    private boolean first = true;
-                    
-                    @Override
-                    public void gotData(Route route,
-                            RouteData record, boolean isLiveData) {
-                        if (first) {
-                            synchronized (semaphor) {
-                                firstRoute[0] = route;
-                                firstData[0] = record;
-                                semaphor.notifyAll();
+        Receiver receiver = new Receiver() {
+            @Override
+            public void stop() {
+            }
+
+            @Override
+            public Iterable<TypeController> getTypeControllers() {
+                TypeController routeListener = RouteData.subscribe(getEvent().getRaceList().iterator().next(),
+                        new ICallbackData<Route, RouteData>() {
+                            private boolean first = true;
+
+                            @Override
+                            public void gotData(Route route, RouteData record, boolean isLiveData) {
+                                if (first) {
+                                    synchronized (semaphor) {
+                                        firstRoute[0] = route;
+                                        firstData[0] = record;
+                                        semaphor.notifyAll();
+                                    }
+                                    first = false;
+                                }
                             }
-                            first = false;
-                        }
-                    }
-                });
-        addListenersForStoredDataAndStartController(routeListener);
+                        });
+                return Collections.singleton(routeListener);
+            }
+        };
+        addListenersForStoredDataAndStartController(Collections.singleton(receiver));
         synchronized (semaphor) {
             while (firstRoute[0] == null) {
                 try {

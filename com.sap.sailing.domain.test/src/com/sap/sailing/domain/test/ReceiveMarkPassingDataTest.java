@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.Before;
@@ -42,34 +43,41 @@ public class ReceiveMarkPassingDataTest extends AbstractTracTracLiveTest {
      */
     @Before
     public void setupListener() {
-        Race race = getEvent().getRaceList().iterator().next();
-        TypeController markPassingsListener = MarkPassingsData.subscribe(race,
-                new ICallbackData<RaceCompetitor, MarkPassingsData>() {
-                    private boolean first = true;
-                    
-                    @Override
-                    public void gotData(RaceCompetitor route,
-                            MarkPassingsData record, boolean isLiveData) {
-                        if (first) {
-                            synchronized (semaphor) {
-                                firstData[0] = record;
-                                semaphor.notifyAll();
+        final Race race = getEvent().getRaceList().iterator().next();
+        Receiver receiver = new Receiver() {
+            @Override
+            public Iterable<TypeController> getTypeControllers() {
+                TypeController markPassingsListener = MarkPassingsData.subscribe(race,
+                        new ICallbackData<RaceCompetitor, MarkPassingsData>() {
+                            private boolean first = true;
+
+                            @Override
+                            public void gotData(RaceCompetitor route, MarkPassingsData record, boolean isLiveData) {
+                                if (first) {
+                                    synchronized (semaphor) {
+                                        firstData[0] = record;
+                                        semaphor.notifyAll();
+                                    }
+                                    first = false;
+                                }
                             }
-                            first = false;
-                        }
-                    }
-                });
-        List<TypeController> listeners = new ArrayList<TypeController>();
-        listeners.add(markPassingsListener);
-        for (Receiver receiver : DomainFactory.INSTANCE.getUpdateReceivers(
+                        });
+                return Collections.singleton(markPassingsListener);
+            }
+
+            @Override
+            public void stop() {
+            }
+        };
+        List<Receiver> receivers = new ArrayList<Receiver>();
+        receivers.add(receiver);
+        for (Receiver r : DomainFactory.INSTANCE.getUpdateReceivers(
                 DomainFactory.INSTANCE.trackEvent(DomainFactory.INSTANCE.createEvent(getEvent())),
                 ReceiverType.RACECOURSE, ReceiverType.MARKPOSITIONS, ReceiverType.RACESTARTFINISH,
                 ReceiverType.RAWPOSITIONS)) {
-            for (TypeController tc : receiver.getTypeControllers()) {
-                listeners.add(tc);
-            }
+            receivers.add(r);
         }
-        addListenersForStoredDataAndStartController(markPassingsListener);
+        addListenersForStoredDataAndStartController(receivers);
         raceDefinition = DomainFactory.INSTANCE.getRaceDefinition(race);
         synchronized (semaphor) {
             while (firstData[0] == null) {

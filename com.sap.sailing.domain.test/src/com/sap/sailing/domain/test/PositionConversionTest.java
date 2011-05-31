@@ -5,12 +5,14 @@ import static org.junit.Assert.assertNotNull;
 
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
+import java.util.Collections;
 
 import org.junit.Test;
 
 import com.maptrack.client.io.TypeController;
 import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
+import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.tractrac.clientmodule.ControlPoint;
 import com.tractrac.clientmodule.data.ControlPointPositionData;
 import com.tractrac.clientmodule.data.ICallbackData;
@@ -33,23 +35,33 @@ public class PositionConversionTest extends AbstractTracTracLiveTest {
         final ControlPointPositionData[] firstData = new ControlPointPositionData[1];
         final Object semaphor = new Object();
         
-        TypeController listener = ControlPointPositionData.subscribe(getEvent(),
-                new ICallbackData<ControlPoint, ControlPointPositionData>() {
-                    private boolean first = true;
-                    
-                    public void gotData(ControlPoint tracked,
-                            ControlPointPositionData record, boolean isLiveData) {
-                        if (first) {
-                            synchronized (semaphor) {
-                                firstTracked[0] = tracked;
-                                firstData[0] = record;
-                                semaphor.notifyAll();
+        Receiver receiver = new Receiver() {
+            @Override
+            public void stop() {
+            }
+
+            @Override
+            public Iterable<TypeController> getTypeControllers() {
+                TypeController listener = ControlPointPositionData.subscribe(getEvent(),
+                        new ICallbackData<ControlPoint, ControlPointPositionData>() {
+                            private boolean first = true;
+
+                            public void gotData(ControlPoint tracked, ControlPointPositionData record,
+                                    boolean isLiveData) {
+                                if (first) {
+                                    synchronized (semaphor) {
+                                        firstTracked[0] = tracked;
+                                        firstData[0] = record;
+                                        semaphor.notifyAll();
+                                    }
+                                    first = false;
+                                }
                             }
-                            first = false;
-                        }
-                    }
-                }, /* fromTime */0 /* means ALL */, /* toTime */ Long.MAX_VALUE);
-        addListenersForStoredDataAndStartController(listener);
+                        }, /* fromTime */0 /* means ALL */, /* toTime */Long.MAX_VALUE);
+                return Collections.singleton(listener);
+            }
+        };
+        addListenersForStoredDataAndStartController(Collections.singleton(receiver));
         synchronized (semaphor) {
             while (firstTracked[0] == null) {
                 try {
