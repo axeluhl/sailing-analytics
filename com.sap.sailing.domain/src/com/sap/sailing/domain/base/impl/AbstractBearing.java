@@ -11,6 +11,17 @@ public abstract class AbstractBearing implements Bearing {
             return new DegreeBearingImpl(getDegrees()+180);
         }
     }
+    
+    @Override
+    public Bearing add(Bearing diff) {
+        double newDeg = getDegrees() + diff.getDegrees();
+        if (newDeg > 360) {
+            newDeg -= 360;
+        } else if (newDeg < 0) {
+            newDeg += 360;
+        }
+        return new DegreeBearingImpl(newDeg);
+    }
 
     @Override
     public String toString() {

@@ -10,5 +10,7 @@ public interface Bearing {
      * adds or subtracts 180 degrees to obtain the opposite bearing
      */
     Bearing reverse();
+    
+    Bearing add(Bearing diff);
 
 }

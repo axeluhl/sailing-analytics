@@ -5,6 +5,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
+import com.sap.sailing.domain.base.Bearing;
 import com.sap.sailing.domain.base.Distance;
 import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.impl.DegreeBearingImpl;
@@ -106,6 +107,22 @@ public class PositionTest {
         Position p2 = new DegreePosition(15, 15);
         Distance result = p1.crossTrackError(p2, new DegreeBearingImpl(0));
         assertEquals(0, result.getMeters(), 0.0000001);
+    }
+    
+    @Test
+    public void addBearings() {
+        Bearing b1 = new DegreeBearingImpl(123);
+        Bearing b2 = new DegreeBearingImpl(234);
+        Bearing sum = b1.add(b2);
+        assertEquals(123+234, sum.getDegrees(), 0.000000001);
+    }
+
+    @Test
+    public void addBearingsWithCarry() {
+        Bearing b1 = new DegreeBearingImpl(123);
+        Bearing b2 = new DegreeBearingImpl(345);
+        Bearing sum = b1.add(b2);
+        assertEquals(123+345-360, sum.getDegrees(), 0.000000001);
     }
 
 }

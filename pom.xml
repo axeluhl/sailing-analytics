@@ -13,6 +13,7 @@
 		<module>com.sap.sailing.domain</module>
 		<module>com.sap.sailing.domain.test</module>
 		<module>com.sap.sailing.domain.tractracadapter</module>
+		<module>com.sap.sailing.declination</module>
 		<module>com.sap.sailing.expeditionconnector</module>
 		<module>com.sap.sailing.expeditionconnector.test</module>
 		<module>com.sap.sailing.server</module>
