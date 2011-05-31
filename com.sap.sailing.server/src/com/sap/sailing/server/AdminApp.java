@@ -28,7 +28,6 @@ import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.base.impl.Util.Pair;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
-import com.sap.sailing.server.util.DateParser;
 import com.sap.sailing.server.util.InvalidDateException;
 
 public class AdminApp extends Servlet {
@@ -114,18 +113,12 @@ public class AdminApp extends Servlet {
                             p = new DegreePosition(Double.valueOf(lat), Double.valueOf(lng));
                         }
                     }
-                    String time = req.getParameter(PARAM_NAME_TIME);
                     try {
-                        TimePoint timePoint;
-                        if (time != null && time.length() > 0) {
-                            timePoint = new MillisecondsTimePoint(DateParser.parse(time).getTime());
-                        } else {
-                            timePoint = MillisecondsTimePoint.now();
-                        }
+                        TimePoint timePoint = getTimePoint(req, PARAM_NAME_TIME, PARAM_NAME_TIME_MILLIS, MillisecondsTimePoint.now());
                         Wind wind = new WindImpl(p, timePoint, speed);
                         getService().getDomainFactory().trackEvent(event).getTrackedRace(race).recordWind(wind);
                     } catch (InvalidDateException e) {
-                        resp.sendError(500, "Couldn't parse time specification " + time);
+                        resp.sendError(500, "Couldn't parse time specification " + e.getMessage());
                     }
                 }
             }

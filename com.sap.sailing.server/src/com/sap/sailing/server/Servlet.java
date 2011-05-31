@@ -8,6 +8,10 @@ import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.TimePoint;
+import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.server.util.DateParser;
+import com.sap.sailing.server.util.InvalidDateException;
 
 public abstract class Servlet extends HttpServlet {
     private static final long serialVersionUID = -6514453597593669376L;
@@ -19,6 +23,8 @@ public abstract class Servlet extends HttpServlet {
     protected static final String PARAM_NAME_RACENAME = "racename";
 
     protected static final String PARAM_NAME_TIME = "time";
+
+    protected static final String PARAM_NAME_TIME_MILLIS = "timeasmillis";
 
     private ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
     
@@ -56,5 +62,22 @@ public abstract class Servlet extends HttpServlet {
             }
         }
         return null;
+    }
+
+    protected TimePoint getTimePoint(HttpServletRequest req, String nameOfISOTimeParam, String nameOfMillisTime,
+            TimePoint defaultValue) throws InvalidDateException {
+        String time = req.getParameter(nameOfISOTimeParam);
+        TimePoint timePoint;
+        if (time != null && time.length() > 0) {
+            timePoint = new MillisecondsTimePoint(DateParser.parse(time).getTime());
+        } else {
+            String timeAsMillis = req.getParameter(nameOfMillisTime);
+            if (timeAsMillis != null && timeAsMillis.length() > 0) {
+                timePoint = new MillisecondsTimePoint(Long.valueOf(timeAsMillis));
+            } else {
+                timePoint = defaultValue;
+            }
+        }
+        return timePoint;
     }
 }

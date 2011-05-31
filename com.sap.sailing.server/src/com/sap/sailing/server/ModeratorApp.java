@@ -21,7 +21,6 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Speed;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
@@ -29,7 +28,6 @@ import com.sap.sailing.domain.tracking.NoWindException;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.server.util.DateParser;
 import com.sap.sailing.server.util.InvalidDateException;
 
 public class ModeratorApp extends Servlet {
@@ -44,6 +42,8 @@ public class ModeratorApp extends Servlet {
     private static final String ACTION_NAME_SHOW_BOAT_POSITIONS = "showboatpositions";
     
     private static final String PARAM_NAME_SINCE = "since";
+    
+    private static final String PARAM_NAME_SINCE_MILLIS = "sinceinmillis";
     
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -75,12 +75,8 @@ public class ModeratorApp extends Servlet {
         if (trackedRace == null) {
             resp.sendError(500, "Race not found");
         } else {
-            String time = req.getParameter(PARAM_NAME_SINCE);
             try {
-                TimePoint timePoint = null;
-                if (time != null && time.length() > 0) {
-                    timePoint = new MillisecondsTimePoint(DateParser.parse(time).getTime());
-                }
+                TimePoint timePoint = getTimePoint(req, PARAM_NAME_SINCE, PARAM_NAME_SINCE_MILLIS, null);
                 JSONObject jsonRace = new JSONObject();
                 jsonRace.put("name", trackedRace.getRace().getName());
                 JSONArray jsonCompetitors = new JSONArray();
@@ -111,7 +107,7 @@ public class ModeratorApp extends Servlet {
                 jsonRace.put("competitors", jsonCompetitors);
                 jsonRace.writeJSONString(resp.getWriter());
             } catch (InvalidDateException e) {
-                resp.sendError(500, "Couldn't parse time specification " + time);
+                resp.sendError(500, "Couldn't parse time specification " + e.getMessage());
             }
         }
     }
@@ -121,14 +117,8 @@ public class ModeratorApp extends Servlet {
         if (trackedRace == null) {
             resp.sendError(500, "Race not found");
         } else {
-            String time = req.getParameter(PARAM_NAME_TIME);
             try {
-                TimePoint timePoint;
-                if (time != null && time.length() > 0) {
-                    timePoint = new MillisecondsTimePoint(DateParser.parse(time).getTime());
-                } else {
-                    timePoint = MillisecondsTimePoint.now();
-                }
+                TimePoint timePoint = getTimePoint(req, PARAM_NAME_TIME, PARAM_NAME_TIME_MILLIS, trackedRace.getTimePointOfLastUpdate());
                 JSONArray jsonWaypoints = new JSONArray();
                 for (Waypoint waypoint : trackedRace.getRace().getCourse().getWaypoints()) {
                     JSONObject jsonWaypoint = new JSONObject();
@@ -153,7 +143,7 @@ public class ModeratorApp extends Servlet {
                 }
                 jsonWaypoints.writeJSONString(resp.getWriter());
             } catch (InvalidDateException e) {
-                resp.sendError(500, "Couldn't parse time specification " + time);
+                resp.sendError(500, "Couldn't parse time specification " + e.getMessage());
             }
         }
     }
@@ -174,14 +164,8 @@ public class ModeratorApp extends Servlet {
         if (trackedRace == null) {
             resp.sendError(500, "Race not found");
         } else {
-            String time = req.getParameter(PARAM_NAME_TIME);
             try {
-                TimePoint timePoint;
-                if (time != null && time.length() > 0) {
-                    timePoint = new MillisecondsTimePoint(DateParser.parse(time).getTime());
-                } else {
-                    timePoint = trackedRace.getTimePointOfLastUpdate();
-                }
+                TimePoint timePoint = getTimePoint(req, PARAM_NAME_TIME, PARAM_NAME_TIME_MILLIS, trackedRace.getTimePointOfLastUpdate());
                 JSONObject jsonRace = new JSONObject();
                 jsonRace.put("name", trackedRace.getRace().getName());
                 jsonRace.put("start", trackedRace.getStart() == null ? 0l : trackedRace.getStart().asMillis());
@@ -250,7 +234,7 @@ public class ModeratorApp extends Servlet {
                 jsonRace.put("legs", jsonLegs);
                 jsonRace.writeJSONString(resp.getWriter());
             } catch (InvalidDateException e) {
-                resp.sendError(500, "Couldn't parse time specification " + time);
+                resp.sendError(500, "Couldn't parse time specification " + e.getMessage());
             }
         }
     }
