@@ -7,3 +7,4 @@ Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Require-Bundle: com.sap.sailing.domain
+Export-Package: com.sap.sailing.declination
