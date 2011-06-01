@@ -171,6 +171,8 @@ public class ModeratorApp extends Servlet {
                 jsonRace.put("start", trackedRace.getStart() == null ? 0l : trackedRace.getStart().asMillis());
                 jsonRace.put("finish", trackedRace.getFirstFinish() == null ? 0l : trackedRace.getFirstFinish()
                         .asMillis());
+                jsonRace.put("lastupdate", trackedRace.getTimePointOfLastUpdate() == null ? 0l : trackedRace
+                        .getTimePointOfLastUpdate().asMillis());
                 JSONArray jsonLegs = new JSONArray();
                 for (TrackedLeg leg : trackedRace.getTrackedLegs()) {
                     JSONObject jsonLeg = new JSONObject();
