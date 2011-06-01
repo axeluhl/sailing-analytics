@@ -273,9 +273,17 @@ public class TrackedRaceImpl implements TrackedRace {
         this.currentWindSource = windSource;
     }
     
-    protected void updated(TimePoint timeOfEvent) {
+    protected synchronized void updated(TimePoint timeOfEvent) {
         if (lastUpdate == null || timeOfEvent.compareTo(lastUpdate) > 0) {
             lastUpdate = timeOfEvent;
+            notifyAll();
+        }
+    }
+
+    @Override
+    public synchronized void waitUntilFirstUpdateAfter(TimePoint since) throws InterruptedException {
+        while (getTimePointOfLastUpdate() == null || getTimePointOfLastUpdate().compareTo(since) <= 0) {
+            wait();
         }
     }
     

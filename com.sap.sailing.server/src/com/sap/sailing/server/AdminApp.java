@@ -132,15 +132,20 @@ public class AdminApp extends Servlet {
                             break;
                         }
                         JSONObject jsonWind = new JSONObject();
+                        jsonWind.put("truebearingdeg", wind.getBearing().getDegrees());
+                        jsonWind.put("knotspeed", wind.getKnots());
+                        if (wind.getTimePoint() != null) {
+                            jsonWind.put("timepoint", wind.getTimePoint().asMillis());
+                            jsonWind.put("dampenedtruebearingdeg",
+                                    windTrack.getEstimatedWind(wind.getPosition(), wind.getTimePoint()).getBearing()
+                                            .getDegrees());
+                            jsonWind.put("dampenedknotspeed",
+                                    windTrack.getEstimatedWind(wind.getPosition(), wind.getTimePoint()).getKnots());
+                        }
                         if (wind.getPosition() != null) {
                             jsonWind.put("latdeg", wind.getPosition().getLatDeg());
                             jsonWind.put("lngdeg", wind.getPosition().getLngDeg());
                         }
-                        if (wind.getTimePoint() != null) {
-                            jsonWind.put("timepoint", wind.getTimePoint().asMillis());
-                        }
-                        jsonWind.put("truebearingdeg", wind.getBearing().getDegrees());
-                        jsonWind.put("knotspeed", wind.getKnots());
                         jsonWindArray.add(jsonWind);
                     }
                     jsonWindTracks.put(windSource.toString(), jsonWindArray);

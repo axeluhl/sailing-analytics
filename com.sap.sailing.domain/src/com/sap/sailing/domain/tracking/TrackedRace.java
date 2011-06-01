@@ -117,4 +117,9 @@ public interface TrackedRace {
     WindSource getWindSource();
 
     WindTrack getWindTrack(WindSource windSource);
+
+    /**
+     * Waits until {@link #getTimePointOfLastUpdate()} is after <code>since</code>.
+     */
+    void waitUntilFirstUpdateAfter(TimePoint since) throws InterruptedException;
 }

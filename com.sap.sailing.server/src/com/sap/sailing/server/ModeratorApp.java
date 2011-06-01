@@ -159,7 +159,7 @@ public class ModeratorApp extends Servlet {
         return trackedRace;
     }
 
-    private void showRace(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    private void showRace(HttpServletRequest req, HttpServletResponse resp) throws IOException, InterruptedException {
         Event event = getEvent(req);
         TrackedRace trackedRace = getTrackedRace(req);
         if (trackedRace == null) {
@@ -167,6 +167,11 @@ public class ModeratorApp extends Servlet {
         } else {
             try {
                 TimePoint timePoint = getTimePoint(req, PARAM_NAME_TIME, PARAM_NAME_TIME_MILLIS, trackedRace.getTimePointOfLastUpdate());
+                TimePoint since = getTimePoint(req, PARAM_NAME_SINCE, PARAM_NAME_SINCE_MILLIS, null);
+                if (since != null) {
+                    // block until there is new data:
+                    trackedRace.waitUntilFirstUpdateAfter(since);
+                }
                 JSONObject jsonRace = new JSONObject();
                 jsonRace.put("name", trackedRace.getRace().getName());
                 jsonRace.put("start", trackedRace.getStart() == null ? 0l : trackedRace.getStart().asMillis());

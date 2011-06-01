@@ -30,12 +30,12 @@ public class JSONParser {
 	public static final int S_END=6;
 	public static final int S_IN_ERROR=-1;
 	
-	private LinkedList handlerStatusStack;
+	private LinkedList<Object> handlerStatusStack;
 	private Yylex lexer = new Yylex((Reader)null);
 	private Yytoken token = null;
 	private int status = S_INIT;
 	
-	private int peekStatus(LinkedList statusStack){
+	private int peekStatus(LinkedList<Object> statusStack){
 		if(statusStack.size()==0)
 			return -1;
 		Integer status=(Integer)statusStack.getFirst();
@@ -108,10 +108,11 @@ public class JSONParser {
 	 * @throws IOException
 	 * @throws ParseException
 	 */
-	public Object parse(Reader in, ContainerFactory containerFactory) throws IOException, ParseException{
+	@SuppressWarnings("unchecked")
+    public Object parse(Reader in, ContainerFactory containerFactory) throws IOException, ParseException{
 		reset(in);
-		LinkedList statusStack = new LinkedList();
-		LinkedList valueStack = new LinkedList();
+		LinkedList<Object> statusStack = new LinkedList<Object>();
+		LinkedList<Object> valueStack = new LinkedList<Object>();
 		
 		try{
 			do{
@@ -183,15 +184,15 @@ public class JSONParser {
 					case Yytoken.TYPE_VALUE:
 						statusStack.removeFirst();
 						String key=(String)valueStack.removeFirst();
-						Map parent=(Map)valueStack.getFirst();
+                                                Map<Object, Object> parent=(Map<Object, Object>)valueStack.getFirst();
 						parent.put(key,token.value);
 						status=peekStatus(statusStack);
 						break;
 					case Yytoken.TYPE_LEFT_SQUARE:
 						statusStack.removeFirst();
 						key=(String)valueStack.removeFirst();
-						parent=(Map)valueStack.getFirst();
-						List newArray=createArrayContainer(containerFactory);
+						parent=(Map<Object, Object>)valueStack.getFirst();
+						List<?> newArray=createArrayContainer(containerFactory);
 						parent.put(key,newArray);
 						status=S_IN_ARRAY;
 						statusStack.addFirst(new Integer(status));
@@ -200,8 +201,8 @@ public class JSONParser {
 					case Yytoken.TYPE_LEFT_BRACE:
 						statusStack.removeFirst();
 						key=(String)valueStack.removeFirst();
-						parent=(Map)valueStack.getFirst();
-						Map newObject=createObjectContainer(containerFactory);
+						parent=(Map<Object, Object>)valueStack.getFirst();
+						Map<?, ?> newObject=createObjectContainer(containerFactory);
 						parent.put(key,newObject);
 						status=S_IN_OBJECT;
 						statusStack.addFirst(new Integer(status));
@@ -217,7 +218,7 @@ public class JSONParser {
 					case Yytoken.TYPE_COMMA:
 						break;
 					case Yytoken.TYPE_VALUE:
-						List val=(List)valueStack.getFirst();
+						List<Object> val=(List<Object>)valueStack.getFirst();
 						val.add(token.value);
 						break;
 					case Yytoken.TYPE_RIGHT_SQUARE:
@@ -231,16 +232,16 @@ public class JSONParser {
 						}
 						break;
 					case Yytoken.TYPE_LEFT_BRACE:
-						val=(List)valueStack.getFirst();
-						Map newObject=createObjectContainer(containerFactory);
+						val=(List<Object>)valueStack.getFirst();
+						Map<?, ?> newObject=createObjectContainer(containerFactory);
 						val.add(newObject);
 						status=S_IN_OBJECT;
 						statusStack.addFirst(new Integer(status));
 						valueStack.addFirst(newObject);
 						break;
 					case Yytoken.TYPE_LEFT_SQUARE:
-						val=(List)valueStack.getFirst();
-						List newArray=createArrayContainer(containerFactory);
+						val=(List<Object>)valueStack.getFirst();
+						List<?> newArray=createArrayContainer(containerFactory);
 						val.add(newArray);
 						status=S_IN_ARRAY;
 						statusStack.addFirst(new Integer(status));
@@ -271,20 +272,20 @@ public class JSONParser {
 			token = new Yytoken(Yytoken.TYPE_EOF, null);
 	}
 	
-	private Map createObjectContainer(ContainerFactory containerFactory){
+	private Map<?, ?> createObjectContainer(ContainerFactory containerFactory){
 		if(containerFactory == null)
 			return new JSONObject();
-		Map m = containerFactory.createObjectContainer();
+		Map<?, ?> m = containerFactory.createObjectContainer();
 		
 		if(m == null)
 			return new JSONObject();
 		return m;
 	}
 	
-	private List createArrayContainer(ContainerFactory containerFactory){
+	private List<?> createArrayContainer(ContainerFactory containerFactory){
 		if(containerFactory == null)
 			return new JSONArray();
-		List l = containerFactory.creatArrayContainer();
+		List<?> l = containerFactory.creatArrayContainer();
 		
 		if(l == null)
 			return new JSONArray();
@@ -329,17 +330,17 @@ public class JSONParser {
 	public void parse(Reader in, ContentHandler contentHandler, boolean isResume) throws IOException, ParseException{
 		if(!isResume){
 			reset(in);
-			handlerStatusStack = new LinkedList();
+			handlerStatusStack = new LinkedList<Object>();
 		}
 		else{
 			if(handlerStatusStack == null){
 				isResume = false;
 				reset(in);
-				handlerStatusStack = new LinkedList();
+				handlerStatusStack = new LinkedList<Object>();
 			}
 		}
 		
-		LinkedList statusStack = handlerStatusStack;	
+		LinkedList<Object> statusStack = handlerStatusStack;	
 		
 		try{
 			do{
