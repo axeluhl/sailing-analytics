@@ -13,21 +13,21 @@ import java.util.Set;
 import com.maptrack.client.io.TypeController;
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
-import com.sap.sailing.domain.tractracadapter.EventTracker;
+import com.sap.sailing.domain.tractracadapter.RaceTracker;
 import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.tractrac.clientmodule.Event;
 import com.tractrac.clientmodule.data.DataController;
 import com.tractrac.clientmodule.data.DataController.Listener;
 import com.tractrac.clientmodule.setup.KeyValue;
 
-public class EventTrackerImpl implements Listener, EventTracker {
+public class RaceTrackerImpl implements Listener, RaceTracker {
     private final Event tractracEvent;
     private final com.sap.sailing.domain.base.Event domainEvent;
     private final Thread ioThread;
     private final DataController controller;
     private final Set<Receiver> receivers;
 
-    protected EventTrackerImpl(DomainFactory domainFactory, URL paramURL, URI liveURI, URI storedURI)
+    protected RaceTrackerImpl(DomainFactory domainFactory, URL paramURL, URI liveURI, URI storedURI)
             throws URISyntaxException, MalformedURLException, FileNotFoundException {
         // Read event data from configuration file
         tractracEvent = KeyValue.setup(paramURL);

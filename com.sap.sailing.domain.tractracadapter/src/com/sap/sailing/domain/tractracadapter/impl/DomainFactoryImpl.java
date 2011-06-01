@@ -47,7 +47,7 @@ import com.sap.sailing.domain.tracking.impl.DynamicTrackedEventImpl;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
-import com.sap.sailing.domain.tractracadapter.EventTracker;
+import com.sap.sailing.domain.tractracadapter.RaceTracker;
 import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
 import com.tractrac.clientmodule.CompetitorClass;
@@ -330,9 +330,9 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public EventTracker createEventTracker(URL paramURL, URI liveURI, URI storedURI) throws MalformedURLException,
+    public RaceTracker createEventTracker(URL paramURL, URI liveURI, URI storedURI) throws MalformedURLException,
             FileNotFoundException, URISyntaxException {
-        return new EventTrackerImpl(this, paramURL, liveURI, storedURI);
+        return new RaceTrackerImpl(this, paramURL, liveURI, storedURI);
     }
 
 }

@@ -19,7 +19,7 @@ import com.sap.sailing.domain.base.impl.Util.Pair;
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
-import com.sap.sailing.domain.tractracadapter.EventTracker;
+import com.sap.sailing.domain.tractracadapter.RaceTracker;
 import com.sap.sailing.expeditionconnector.UDPExpeditionReceiver;
 import com.sap.sailing.expeditionconnector.WindTracker;
 
@@ -28,7 +28,7 @@ public class RacingEventServiceImpl implements RacingEventService {
     
     private final Map<String, Event> eventsByName;
     
-    private final Map<Event, EventTracker> eventTrackers;
+    private final Map<Event, RaceTracker> eventTrackers;
     
     private final Map<RaceDefinition, WindTracker> windTrackers;
     
@@ -37,7 +37,7 @@ public class RacingEventServiceImpl implements RacingEventService {
     public RacingEventServiceImpl() {
         domainFactory = DomainFactory.INSTANCE;
         eventsByName = new HashMap<String, Event>();
-        eventTrackers = new HashMap<Event, EventTracker>();
+        eventTrackers = new HashMap<Event, RaceTracker>();
         windTrackers = new HashMap<RaceDefinition, WindTracker>();
         windReceivers = new HashMap<Integer, UDPExpeditionReceiver>();
     }
@@ -60,7 +60,7 @@ public class RacingEventServiceImpl implements RacingEventService {
     @Override
     public void addEvent(URL paramURL, URI liveURI, URI storedURI) throws MalformedURLException, FileNotFoundException,
             URISyntaxException {
-        EventTracker tracker = getDomainFactory().createEventTracker(paramURL, liveURI, storedURI);
+        RaceTracker tracker = getDomainFactory().createEventTracker(paramURL, liveURI, storedURI);
         eventTrackers.put(tracker.getEvent(), tracker);
         eventsByName.put(tracker.getEvent().getName(), tracker.getEvent());
     }
