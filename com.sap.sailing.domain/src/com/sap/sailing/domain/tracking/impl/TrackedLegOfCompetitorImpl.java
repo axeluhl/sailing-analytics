@@ -281,16 +281,19 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
         MarkPassing start = getMarkPassingForLegStart();
         if (start != null && start.getTimePoint().compareTo(timePoint) > 0) {
             MarkPassing end = getMarkPassingForLegEnd();
-            TimePoint to;
-            if (timePoint.compareTo(end.getTimePoint()) >= 0) {
-                to = end.getTimePoint();
-            } else {
-                to = timePoint;
+            if (end != null) {
+                TimePoint to;
+                if (timePoint.compareTo(end.getTimePoint()) >= 0) {
+                    to = end.getTimePoint();
+                } else {
+                    to = timePoint;
+                }
+                Position endPos = getTrackedRace().getTrack(getCompetitor()).getEstimatedPosition(to);
+                Distance d = getWindwardDistance(
+                        getTrackedRace().getTrack(getCompetitor()).getEstimatedPosition(start.getTimePoint()), endPos,
+                        to);
+                result = d.inTime(to.asMillis() - start.getTimePoint().asMillis());
             }
-            Position endPos = getTrackedRace().getTrack(getCompetitor()).getEstimatedPosition(to);
-            Distance d = getWindwardDistance(
-                    getTrackedRace().getTrack(getCompetitor()).getEstimatedPosition(start.getTimePoint()), endPos, to);
-            result = d.inTime(to.asMillis()-start.getTimePoint().asMillis());
         }
         return result;
     }

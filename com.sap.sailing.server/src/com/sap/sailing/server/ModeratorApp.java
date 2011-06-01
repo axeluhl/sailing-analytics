@@ -28,6 +28,7 @@ import com.sap.sailing.domain.tracking.NoWindException;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.server.util.InvalidDateException;
 
 public class ModeratorApp extends Servlet {
@@ -173,6 +174,16 @@ public class ModeratorApp extends Servlet {
                         .asMillis());
                 jsonRace.put("lastupdate", trackedRace.getTimePointOfLastUpdate() == null ? 0l : trackedRace
                         .getTimePointOfLastUpdate().asMillis());
+                Wind currentWind = trackedRace.getWind(
+                        trackedRace.getTrack(trackedRace.getCurrentLeg().getLeg().getFrom().getBuoys().iterator().next()).
+                        getEstimatedPosition(timePoint), timePoint);
+                if (currentWind != null) {
+                    JSONObject jsonWind = new JSONObject();
+                    jsonWind.put("truebearingdeg", currentWind.getBearing().getDegrees());
+                    jsonWind.put("knowspeed", currentWind.getKnots());
+                    jsonWind.put("source", trackedRace.getWindSource().toString());
+                    jsonRace.put("wind", jsonWind);
+                }
                 JSONArray jsonLegs = new JSONArray();
                 for (TrackedLeg leg : trackedRace.getTrackedLegs()) {
                     JSONObject jsonLeg = new JSONObject();
@@ -208,7 +219,15 @@ public class ModeratorApp extends Servlet {
                         } catch (NoWindException e1) {
                             // well, we don't know the wind direction... then no average VMG will be shown...
                         }
-                        jsonCompetitorInLeg.put("rank", trackedLegOfCompetitor.getRank(timePoint));
+                        try {
+                            jsonCompetitorInLeg.put("rank", trackedLegOfCompetitor.getRank(timePoint));
+                        } catch (RuntimeException re) {
+                            if (re.getCause() != null && re.getCause() instanceof NoWindException) {
+                                // well, we don't know the wind direction, so we can't compute a ranking
+                            } else {
+                                throw re;
+                            }
+                        }
                         try {
                             jsonCompetitorInLeg.put("gapToLeaderInSeconds",
                                     trackedLegOfCompetitor.getGapToLeaderInSeconds(timePoint));

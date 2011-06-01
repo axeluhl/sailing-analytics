@@ -7,6 +7,7 @@ import java.net.SocketException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.Iterator;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -29,6 +30,7 @@ import com.sap.sailing.domain.base.impl.Util.Pair;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindSource;
+import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.server.util.InvalidDateException;
 
@@ -42,8 +44,18 @@ public class AdminApp extends Servlet {
     private static final String ACTION_NAME_SET_WIND = "setwind";
     
     private static final String ACTION_NAME_SELECT_WIND_SOURCE = "selectwindsource";
+    
+    private static final String ACTION_NAME_SHOW_WIND = "showwind";
+    
+    private static final String PARAM_NAME_FROM_TIME = "fromtime";
 
-    private static final String PARAM_WINDSOURCE_NAME = "sourcename";
+    private static final String PARAM_NAME_FROM_TIME_MILLIS = "fromtimeasmillis";
+
+    private static final String PARAM_NAME_TO_TIME = "totime";
+
+    private static final String PARAM_NAME_TO_TIME_MILLIS = "totimeasmillis";
+
+    private static final String PARAM_NAME_WINDSOURCE_NAME = "sourcename";
     
     private static final String PARAM_NAME_BEARING = "truebearingdegrees";
     
@@ -83,6 +95,8 @@ public class AdminApp extends Servlet {
                     setWind(req, resp);
                 } else if (ACTION_NAME_SELECT_WIND_SOURCE.equals(action)) {
                     selectWindSource(req, resp);
+                } else if (ACTION_NAME_SHOW_WIND.equals(action)) {
+                    showWind(req, resp);
                 }
             } else {
                 resp.getWriter().println("Hello admin!");
@@ -93,8 +107,51 @@ public class AdminApp extends Servlet {
         }
     }
     
+    private void showWind(HttpServletRequest req, HttpServletResponse resp) throws IOException, InvalidDateException {
+        Event event = getEvent(req);
+        if (event == null) {
+            resp.sendError(500, "Event not found");
+        } else {
+            RaceDefinition race = getRaceDefinition(req);
+            if (race == null) {
+                resp.sendError(500, "Race not found");
+            } else {
+                TrackedRace trackedRace = getService().getDomainFactory().trackEvent(event).getTrackedRace(race);
+                TimePoint from = getTimePoint(req, PARAM_NAME_FROM_TIME, PARAM_NAME_FROM_TIME_MILLIS,
+                        trackedRace.getStart()==null?new MillisecondsTimePoint(0):trackedRace.getStart());
+                TimePoint to = getTimePoint(req, PARAM_NAME_TO_TIME, PARAM_NAME_TO_TIME_MILLIS, MillisecondsTimePoint.now());
+                JSONObject jsonWindTracks = new JSONObject();
+                jsonWindTracks.put("currentwindsource", trackedRace.getWindSource().toString());
+                for (WindSource windSource : WindSource.values()) {
+                    JSONArray jsonWindArray = new JSONArray();
+                    WindTrack windTrack = trackedRace.getWindTrack(windSource);
+                    Iterator<Wind> windIter = windTrack.getFixesIterator(from, /* inclusive */true);
+                    while (windIter.hasNext()) {
+                        Wind wind = windIter.next();
+                        if (wind.getTimePoint().compareTo(to) > 0) {
+                            break;
+                        }
+                        JSONObject jsonWind = new JSONObject();
+                        if (wind.getPosition() != null) {
+                            jsonWind.put("latdeg", wind.getPosition().getLatDeg());
+                            jsonWind.put("lngdeg", wind.getPosition().getLngDeg());
+                        }
+                        if (wind.getTimePoint() != null) {
+                            jsonWind.put("timepoint", wind.getTimePoint().asMillis());
+                        }
+                        jsonWind.put("truebearingdeg", wind.getBearing().getDegrees());
+                        jsonWind.put("knotspeed", wind.getKnots());
+                        jsonWindArray.add(jsonWind);
+                    }
+                    jsonWindTracks.put(windSource.toString(), jsonWindArray);
+                }
+                jsonWindTracks.writeJSONString(resp.getWriter());
+            }
+        }
+    }
+
     private void selectWindSource(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        String sourceName = req.getParameter(PARAM_WINDSOURCE_NAME);
+        String sourceName = req.getParameter(PARAM_NAME_WINDSOURCE_NAME);
         if (sourceName == null) {
             resp.sendError(500, "Wind source name not provided");
         } else {

@@ -113,4 +113,8 @@ public interface TrackedRace {
     Wind getWind(Position p, TimePoint at);
 
     void setWindSource(WindSource windSource);
+
+    WindSource getWindSource();
+
+    WindTrack getWindTrack(WindSource windSource);
 }

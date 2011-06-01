@@ -253,13 +253,19 @@ public class TrackedRaceImpl implements TrackedRace {
         return trackedEvent;
     }
     
-    protected WindTrack getWindTrack(WindSource windSource) {
+    @Override
+    public WindTrack getWindTrack(WindSource windSource) {
         return windTracks.get(windSource);
     }
 
     @Override
     public Wind getWind(Position p, TimePoint at) {
         return getWindTrack(currentWindSource).getEstimatedWind(p, at);
+    }
+    
+    @Override
+    public WindSource getWindSource() {
+        return this.currentWindSource;
     }
     
     @Override

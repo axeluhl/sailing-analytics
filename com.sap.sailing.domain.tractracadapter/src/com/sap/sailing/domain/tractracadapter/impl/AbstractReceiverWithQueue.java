@@ -21,6 +21,7 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
     
     public void stop() {
         // mark the end and hence terminate the thread by adding a null/null/null event to the queue
+        queue.clear();
         queue.add(new Triple<A, B, C>(null, null, null));
     }
     
