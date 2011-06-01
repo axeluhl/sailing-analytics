@@ -105,6 +105,12 @@ public interface TrackedRace {
      */
     GPSFixTrack<Buoy, GPSFix> getTrack(Buoy buoy);
 
+    /**
+     * Obtains estimated interpolated wind information for a given position and time point.
+     * The information is taken from the currently selected {@link WindSource wind source} which
+     * can be selected using {@link #setWindSource}.
+     */
     Wind getWind(Position p, TimePoint at);
 
+    void setWindSource(WindSource windSource);
 }

@@ -4,6 +4,7 @@ import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.Wind;
+import com.sap.sailing.domain.tracking.WindSource;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 
 /**
@@ -27,7 +28,7 @@ public class WindTracker implements ExpeditionListener {
         GPSFix positionAndTime = message.getGPSFix();
         if (windSpeed != null && positionAndTime != null) {
             Wind wind = new WindImpl(positionAndTime.getPosition(), positionAndTime.getTimePoint(), windSpeed);
-            race.recordWind(wind);
+            race.recordWind(wind, WindSource.EXPEDITION);
         }
     }
 

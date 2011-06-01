@@ -26,7 +26,9 @@ import com.sap.sailing.domain.base.impl.DegreePosition;
 import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.base.impl.Util.Pair;
+import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
+import com.sap.sailing.domain.tracking.WindSource;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.server.util.InvalidDateException;
 
@@ -38,6 +40,10 @@ public class AdminApp extends Servlet {
     private static final String ACTION_NAME_STOP_EVENT = "stopevent";
     
     private static final String ACTION_NAME_SET_WIND = "setwind";
+    
+    private static final String ACTION_NAME_SELECT_WIND_SOURCE = "selectwindsource";
+
+    private static final String PARAM_WINDSOURCE_NAME = "sourcename";
     
     private static final String PARAM_NAME_BEARING = "truebearingdegrees";
     
@@ -75,6 +81,8 @@ public class AdminApp extends Servlet {
                     listWindTrackers(req, resp);
                 } else if (ACTION_NAME_SET_WIND.equals(action)) {
                     setWind(req, resp);
+                } else if (ACTION_NAME_SELECT_WIND_SOURCE.equals(action)) {
+                    selectWindSource(req, resp);
                 }
             } else {
                 resp.getWriter().println("Hello admin!");
@@ -85,6 +93,46 @@ public class AdminApp extends Servlet {
         }
     }
     
+    private void selectWindSource(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        String sourceName = req.getParameter(PARAM_WINDSOURCE_NAME);
+        if (sourceName == null) {
+            resp.sendError(500, "Wind source name not provided");
+        } else {
+            try {
+                WindSource windSource = WindSource.valueOf(sourceName);
+                Event event = getEvent(req);
+                if (event == null) {
+                    resp.sendError(500, "Event not found");
+                } else {
+                    RaceDefinition race = getRaceDefinition(req);
+                    if (race == null) {
+                        resp.sendError(500, "Race not found");
+                    } else {
+                        TrackedRace trackedRace = getService().getDomainFactory().trackEvent(event)
+                                .getTrackedRace(race);
+                        trackedRace.setWindSource(windSource);
+                        resp.getWriter().println(
+                                "Successfully set wind source for event " + event.getName() + " and race "
+                                        + race.getName() + " to " + windSource);
+                    }
+                }
+            } catch (IllegalArgumentException e) {
+                StringBuilder errorMessage = new StringBuilder("Wind source name " + sourceName
+                        + " not known. Known wind source names: ");
+                boolean first = true;
+                for (WindSource s : WindSource.values()) {
+                    if (first) {
+                        first = false;
+                    } else {
+                        errorMessage.append(", ");
+                    }
+                    errorMessage.append(s.toString());
+                }
+                resp.sendError(500, errorMessage.toString());
+            }
+        }
+    }
+
     private void setWind(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         Event event = getEvent(req);
         if (event == null) {
@@ -116,7 +164,7 @@ public class AdminApp extends Servlet {
                     try {
                         TimePoint timePoint = getTimePoint(req, PARAM_NAME_TIME, PARAM_NAME_TIME_MILLIS, MillisecondsTimePoint.now());
                         Wind wind = new WindImpl(p, timePoint, speed);
-                        getService().getDomainFactory().trackEvent(event).getTrackedRace(race).recordWind(wind);
+                        getService().getDomainFactory().trackEvent(event).getTrackedRace(race).recordWind(wind, WindSource.WEB);
                     } catch (InvalidDateException e) {
                         resp.sendError(500, "Couldn't parse time specification " + e.getMessage());
                     }

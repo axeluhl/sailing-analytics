@@ -24,6 +24,7 @@ import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
+import com.sap.sailing.domain.tracking.WindSource;
 import com.sap.sailing.domain.tracking.WindTrack;
 
 public class TrackedRaceImpl implements TrackedRace {
@@ -41,7 +42,20 @@ public class TrackedRaceImpl implements TrackedRace {
     private final Map<Competitor, GPSFixTrack<Competitor, GPSFixMoving>> tracks;
     private final Map<Competitor, NavigableSet<MarkPassing>> markPassingsForCompetitor;
     private final Map<Waypoint, NavigableSet<MarkPassing>> markPassingsForWaypoint;
-    private final WindTrack windTrack;
+    
+    /**
+     * A tracked race can maintain a number of sources for wind information from which a client
+     * can select. As all intra-leg computations are done dynamically based on wind information,
+     * selecting a different wind information source can alter the intra-leg results. See
+     * {@link #currentWindSource}.
+     */
+    private final Map<WindSource, WindTrack> windTracks;
+    
+    /**
+     * The wind source to be used for all computations based on wind. Used as key into
+     * {@link #windTracks}. The default value is {@link WindSource#EXPEDITION}.
+     */
+    private WindSource currentWindSource;
     
     public TrackedRaceImpl(TrackedEvent trackedEvent, RaceDefinition race, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed) {
         super();
@@ -62,7 +76,11 @@ public class TrackedRaceImpl implements TrackedRace {
         for (Waypoint waypoint : race.getCourse().getWaypoints()) {
             markPassingsForWaypoint.put(waypoint, new TreeSet<MarkPassing>(TimedComparator.INSTANCE));
         }
-        windTrack = new WindTrackImpl(millisecondsOverWhichToAverageWind);
+        windTracks = new HashMap<WindSource, WindTrack>();
+        for (WindSource windSource : WindSource.values()) {
+            windTracks.put(windSource, new WindTrackImpl(millisecondsOverWhichToAverageWind));
+        }
+        currentWindSource = WindSource.EXPEDITION;
     }
     
     protected NavigableSet<MarkPassing> getMarkPassings(Competitor competitor) {
@@ -235,13 +253,18 @@ public class TrackedRaceImpl implements TrackedRace {
         return trackedEvent;
     }
     
-    protected WindTrack getWindTrack() {
-        return windTrack;
+    protected WindTrack getWindTrack(WindSource windSource) {
+        return windTracks.get(windSource);
     }
 
     @Override
     public Wind getWind(Position p, TimePoint at) {
-        return getWindTrack().getEstimatedWind(p, at);
+        return getWindTrack(currentWindSource).getEstimatedWind(p, at);
+    }
+    
+    @Override
+    public void setWindSource(WindSource windSource) {
+        this.currentWindSource = windSource;
     }
     
     protected void updated(TimePoint timeOfEvent) {
