@@ -1,0 +1,226 @@
+{
+  "event": 
+  {
+    "id":"9171e93c-771e-11e0-8236-406186cbf87c",
+    "name":"Sailing Team Germany"
+  },
+  "races":
+  [
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110505_SailingTea/index.php?raceid=d5d6df2a-7876-11e0-8236-406186cbf87c",
+      "id":"d5d6df2a-7876-11e0-8236-406186cbf87c",
+      "name":"weym470may2011",
+      "tracking_starttime":"2011-05-09 12:12:49",
+      "tracking_endtime":"2011-05-09 16:05:47",
+      "race_starttime":"2011-05-09 14:00:00",
+      "status":"OFFLINE"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110505_SailingTea/index.php?raceid=abe9361a-7ae0-11e0-8236-406186cbf87c",
+      "id":"abe9361a-7ae0-11e0-8236-406186cbf87c",
+      "name":"weymay102011470",
+      "tracking_starttime":"2011-05-10 08:47:48",
+      "tracking_endtime":"2011-05-10 15:14:33",
+      "race_starttime":"2011-05-10 11:00:00",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110505_SailingTea/index.php?raceid=a04043f4-7b9d-11e0-8236-406186cbf87c",
+      "id":"a04043f4-7b9d-11e0-8236-406186cbf87c",
+      "name":"weym470may112011",
+      "tracking_starttime":"2011-05-11 08:21:46",
+      "tracking_endtime":"2011-05-11 15:08:27",
+      "race_starttime":"2011-05-10 11:00:00",
+      "status":"HIDDEN"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110505_SailingTea/index.php?raceid=bd8c778e-7c65-11e0-8236-406186cbf87c",
+      "id":"bd8c778e-7c65-11e0-8236-406186cbf87c",
+      "name":"weym470may122011",
+      "tracking_starttime":"2011-05-12 10:00:00",
+      "tracking_endtime":"2011-05-12 10:19:54",
+      "race_starttime":"2011-05-12 10:01:30",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110505_SailingTea/index.php?raceid=271e78b4-7c75-11e0-8236-406186cbf87c",
+      "id":"271e78b4-7c75-11e0-8236-406186cbf87c",
+      "name":"weym470may122011-2",
+      "tracking_starttime":"2011-05-12 10:20:04",
+      "tracking_endtime":"2011-05-12 10:27:00",
+      "race_starttime":"",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110505_SailingTea/index.php?raceid=3e26b7ce-7c75-11e0-8236-406186cbf87c",
+      "id":"3e26b7ce-7c75-11e0-8236-406186cbf87c",
+      "name":"weym470may122011-3",
+      "tracking_starttime":"2011-05-12 10:27:01",
+      "tracking_endtime":"2011-05-12 10:50:19",
+      "race_starttime":"",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110505_SailingTea/index.php?raceid=058d1b6e-7c85-11e0-8236-406186cbf87c",
+      "id":"058d1b6e-7c85-11e0-8236-406186cbf87c",
+      "name":"weym470may122011-4",
+      "tracking_starttime":"2011-05-12 10:51:54",
+      "tracking_endtime":"2011-05-12 11:29:45",
+      "race_starttime":"2011-05-12 11:08:20",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110505_SailingTea/index.php?raceid=35d27df0-7c85-11e0-8236-406186cbf87c",
+      "id":"35d27df0-7c85-11e0-8236-406186cbf87c",
+      "name":"weym470may122011-5",
+      "tracking_starttime":"2011-05-12 11:29:59",
+      "tracking_endtime":"2011-05-12 14:31:39",
+      "race_starttime":"",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110505_SailingTea/index.php?raceid=9b24344e-7ccd-11e0-8236-406186cbf87c",
+      "id":"9b24344e-7ccd-11e0-8236-406186cbf87c",
+      "name":"weym470may122013-1",
+      "tracking_starttime":"2011-05-13 10:15:41",
+      "tracking_endtime":"2011-05-13 11:01:39",
+      "race_starttime":"",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110505_SailingTea/index.php?raceid=c70d1b02-7ccd-11e0-8236-406186cbf87c",
+      "id":"c70d1b02-7ccd-11e0-8236-406186cbf87c",
+      "name":"weym470may112013-2",
+      "tracking_starttime":"2011-05-13 11:02:04",
+      "tracking_endtime":"2011-05-13 11:41:55",
+      "race_starttime":"",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110505_SailingTea/index.php?raceid=e95b4fa8-7ccd-11e0-8236-406186cbf87c",
+      "id":"e95b4fa8-7ccd-11e0-8236-406186cbf87c",
+      "name":"weym470may112013-3",
+      "tracking_starttime":"2011-05-13 11:42:42",
+      "tracking_endtime":"2011-05-13 12:08:52",
+      "race_starttime":"",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110505_SailingTea/index.php?raceid=1209a77e-7cce-11e0-8236-406186cbf87c",
+      "id":"1209a77e-7cce-11e0-8236-406186cbf87c",
+      "name":"weym470may112013-4",
+      "tracking_starttime":"2011-05-13 12:11:02",
+      "tracking_endtime":"2011-05-13 13:06:56",
+      "race_starttime":"",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110505_SailingTea/index.php?raceid=f4d3430e-7df9-11e0-8236-406186cbf87c",
+      "id":"f4d3430e-7df9-11e0-8236-406186cbf87c",
+      "name":"weym470may112014-1",
+      "tracking_starttime":"2011-05-14 09:41:43",
+      "tracking_endtime":"2011-05-14 10:33:33",
+      "race_starttime":"",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110505_SailingTea/index.php?raceid=04498426-7dfd-11e0-8236-406186cbf87c",
+      "id":"04498426-7dfd-11e0-8236-406186cbf87c",
+      "name":"weym470may112014-2",
+      "tracking_starttime":"2011-05-14 10:34:10",
+      "tracking_endtime":"2011-05-14 11:40:15",
+      "race_starttime":"",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110505_SailingTea/index.php?raceid=dd011c72-7ec3-11e0-8236-406186cbf87c",
+      "id":"dd011c72-7ec3-11e0-8236-406186cbf87c",
+      "name":"weym470may112015-1",
+      "tracking_starttime":"2011-05-15 09:56:39",
+      "tracking_endtime":"2011-05-15 10:31:20",
+      "race_starttime":"2011-05-15 11:00:00",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110505_SailingTea/index.php?raceid=a97e26a0-7ec4-11e0-8236-406186cbf87c",
+      "id":"a97e26a0-7ec4-11e0-8236-406186cbf87c",
+      "name":"weym470may112015-2",
+      "tracking_starttime":"2011-05-15 11:24:54",
+      "tracking_endtime":"2011-05-15 12:06:10",
+      "race_starttime":"2011-05-15 12:00:00",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110505_SailingTea/index.php?raceid=fb72f166-7ec4-11e0-8236-406186cbf87c",
+      "id":"fb72f166-7ec4-11e0-8236-406186cbf87c",
+      "name":"weym470may112015-3",
+      "tracking_starttime":"2011-05-15 12:33:34",
+      "tracking_endtime":"2011-05-15 14:14:44",
+      "race_starttime":"2011-05-15 12:00:00",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110505_SailingTea/index.php?raceid=0c797634-7f8c-11e0-8236-406186cbf87c",
+      "id":"0c797634-7f8c-11e0-8236-406186cbf87c",
+      "name":"weym470may112016-2",
+      "tracking_starttime":"2011-05-16 10:27:08",
+      "tracking_endtime":"2011-05-16 14:10:19",
+      "race_starttime":"",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110505_SailingTea/index.php?raceid=c3b81270-7f8b-11e0-8236-406186cbf87c",
+      "id":"c3b81270-7f8b-11e0-8236-406186cbf87c",
+      "name":"weym470may112016-1",
+      "tracking_starttime":"2011-05-16 20:02:00",
+      "tracking_endtime":"2011-05-16 20:03:00",
+      "race_starttime":"",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110505_SailingTea/index.php?raceid=6961f7f4-7f8c-11e0-8236-406186cbf87c",
+      "id":"6961f7f4-7f8c-11e0-8236-406186cbf87c",
+      "name":"weym470may112016-3",
+      "tracking_starttime":"2011-05-16 20:04:00",
+      "tracking_endtime":"2011-05-16 20:05:00",
+      "race_starttime":"",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110505_SailingTea/index.php?raceid=c4c4e634-8053-11e0-8236-406186cbf87c",
+      "id":"c4c4e634-8053-11e0-8236-406186cbf87c",
+      "name":"weym470may112017-1",
+      "tracking_starttime":"2011-05-17 09:40:47",
+      "tracking_endtime":"2011-05-17 10:22:55",
+      "race_starttime":"",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110505_SailingTea/index.php?raceid=ea62a9ee-8053-11e0-8236-406186cbf87c",
+      "id":"ea62a9ee-8053-11e0-8236-406186cbf87c",
+      "name":"weym470may112017-2",
+      "tracking_starttime":"2011-05-17 10:27:49",
+      "tracking_endtime":"2011-05-17 10:56:12",
+      "race_starttime":"",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110505_SailingTea/index.php?raceid=0d80f624-8054-11e0-8236-406186cbf87c",
+      "id":"0d80f624-8054-11e0-8236-406186cbf87c",
+      "name":"weym470may112017-3",
+      "tracking_starttime":"2011-05-17 11:51:31",
+      "tracking_endtime":"2011-05-17 13:26:49",
+      "race_starttime":"",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110505_SailingTea/index.php?raceid=5100ff90-812e-11e0-8236-406186cbf87c",
+      "id":"5100ff90-812e-11e0-8236-406186cbf87c",
+      "name":"weym470may112019-1",
+      "tracking_starttime":"2011-05-19 10:56:13",
+      "tracking_endtime":"2011-05-19 11:30:23",
+      "race_starttime":"",
+      "status":"REPLAY"
+    }
+  ]
+}

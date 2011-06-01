@@ -1,0 +1,136 @@
+{
+  "event": 
+  {
+    "id":"d93aebc4-4960-11e0-8236-406186cbf87c",
+    "name":"SAP 2011 505 World Championship"
+  },
+  "races":
+  [
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110308_SAPWorldCh/index.php?raceid=6cc999ee-4961-11e0-8236-406186cbf87c",
+      "id":"6cc999ee-4961-11e0-8236-406186cbf87c",
+      "name":"Pre Worlds - Race 1",
+      "tracking_starttime":"2011-03-22 02:51:26",
+      "tracking_endtime":"2011-03-22 04:49:23",
+      "race_starttime":"2011-03-22 03:18:00",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110308_SAPWorldCh/index.php?raceid=816f7670-4961-11e0-8236-406186cbf87c",
+      "id":"816f7670-4961-11e0-8236-406186cbf87c",
+      "name":"Pre Worlds - Race 2",
+      "tracking_starttime":"2011-03-22 04:49:31",
+      "tracking_endtime":"2011-03-22 07:22:28",
+      "race_starttime":"2011-03-22 04:58:00",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110308_SAPWorldCh/index.php?raceid=943141d0-4961-11e0-8236-406186cbf87c",
+      "id":"943141d0-4961-11e0-8236-406186cbf87c",
+      "name":"Pre Worlds - Race 3",
+      "tracking_starttime":"2011-03-23 03:40:00",
+      "tracking_endtime":"2011-03-23 05:55:36",
+      "race_starttime":"2011-03-23 03:40:00",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110308_SAPWorldCh/index.php?raceid=ef2a93b2-568f-11e0-8236-406186cbf87c",
+      "id":"ef2a93b2-568f-11e0-8236-406186cbf87c",
+      "name":"Before tomorrow",
+      "tracking_starttime":"2011-03-25 00:45:00",
+      "tracking_endtime":"2011-03-25 07:45:00",
+      "race_starttime":"",
+      "status":"HIDDEN"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110308_SAPWorldCh/index.php?raceid=ddf91d10-4961-11e0-8236-406186cbf87c",
+      "id":"ddf91d10-4961-11e0-8236-406186cbf87c",
+      "name":"Worlds - Race 1",
+      "tracking_starttime":"2011-03-26 02:50:00",
+      "tracking_endtime":"2011-03-26 04:51:28",
+      "race_starttime":"2011-03-26 03:05:00",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110308_SAPWorldCh/index.php?raceid=ec10b32c-4961-11e0-8236-406186cbf87c",
+      "id":"ec10b32c-4961-11e0-8236-406186cbf87c",
+      "name":"Worlds - Race 2",
+      "tracking_starttime":"2011-03-26 04:53:37",
+      "tracking_endtime":"2011-03-26 07:30:00",
+      "race_starttime":"2011-03-26 05:05:00",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110308_SAPWorldCh/index.php?raceid=03662078-599a-11e0-8236-406186cbf87c",
+      "id":"03662078-599a-11e0-8236-406186cbf87c",
+      "name":"Gone out",
+      "tracking_starttime":"2011-03-28 23:00:00",
+      "tracking_endtime":"2011-03-29 03:00:00",
+      "race_starttime":"",
+      "status":"HIDDEN"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110308_SAPWorldCh/index.php?raceid=07c378a2-5a4c-11e0-8236-406186cbf87c",
+      "id":"07c378a2-5a4c-11e0-8236-406186cbf87c",
+      "name":"Start - test",
+      "tracking_starttime":"2011-03-29 21:00:00",
+      "tracking_endtime":"2011-03-29 22:55:46",
+      "race_starttime":"",
+      "status":"HIDDEN"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110308_SAPWorldCh/index.php?raceid=01986776-4962-11e0-8236-406186cbf87c",
+      "id":"01986776-4962-11e0-8236-406186cbf87c",
+      "name":"Worlds - Race 3",
+      "tracking_starttime":"2011-03-30 00:05:00",
+      "tracking_endtime":"2011-03-30 02:01:48",
+      "race_starttime":"2011-03-30 00:20:00",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110308_SAPWorldCh/index.php?raceid=14704814-4962-11e0-8236-406186cbf87c",
+      "id":"14704814-4962-11e0-8236-406186cbf87c",
+      "name":"Worlds - Race 4",
+      "tracking_starttime":"2011-03-30 02:02:27",
+      "tracking_endtime":"2011-03-30 11:11:00",
+      "race_starttime":"2011-03-30 02:10:00",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110308_SAPWorldCh/index.php?raceid=a89a9cd6-5b2f-11e0-8236-406186cbf87c",
+      "id":"a89a9cd6-5b2f-11e0-8236-406186cbf87c",
+      "name":"Find it",
+      "tracking_starttime":"2011-03-31 00:00:00",
+      "tracking_endtime":"2011-03-31 10:00:00",
+      "race_starttime":"",
+      "status":"HIDDEN"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110308_SAPWorldCh/index.php?raceid=2bc0b684-4962-11e0-8236-406186cbf87c",
+      "id":"2bc0b684-4962-11e0-8236-406186cbf87c",
+      "name":"Worlds - Race 5",
+      "tracking_starttime":"2011-03-31 02:00:00",
+      "tracking_endtime":"2011-03-31 04:06:27",
+      "race_starttime":"2011-03-31 02:10:00",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110308_SAPWorldCh/index.php?raceid=4803b90e-4962-11e0-8236-406186cbf87c",
+      "id":"4803b90e-4962-11e0-8236-406186cbf87c",
+      "name":"Worlds - Race 6",
+      "tracking_starttime":"2011-03-31 04:07:21",
+      "tracking_endtime":"2011-03-31 08:00:00",
+      "race_starttime":"2011-03-31 04:20:00",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110308_SAPWorldCh/index.php?raceid=5ffe619e-4962-11e0-8236-406186cbf87c",
+      "id":"5ffe619e-4962-11e0-8236-406186cbf87c",
+      "name":"Worlds - Race 7",
+      "tracking_starttime":"2011-04-01 00:20:00",
+      "tracking_endtime":"2011-04-01 02:43:23",
+      "race_starttime":"2011-04-01 00:40:00",
+      "status":"REPLAY"
+    }
+  ]
+}
