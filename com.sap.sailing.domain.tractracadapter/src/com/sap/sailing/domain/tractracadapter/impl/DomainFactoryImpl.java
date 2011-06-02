@@ -330,7 +330,7 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public RaceTracker createEventTracker(URL paramURL, URI liveURI, URI storedURI) throws MalformedURLException,
+    public RaceTracker createRaceTracker(URL paramURL, URI liveURI, URI storedURI) throws MalformedURLException,
             FileNotFoundException, URISyntaxException {
         return new RaceTrackerImpl(this, paramURL, liveURI, storedURI);
     }

@@ -46,6 +46,10 @@ public class ModeratorApp extends Servlet {
     
     private static final String PARAM_NAME_SINCE_MILLIS = "sinceasmillis";
     
+    private static final String PARAM_NAME_TO = "to";
+    
+    private static final String PARAM_NAME_TO_MILLIS = "toasmillis";
+    
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         try {
@@ -77,7 +81,8 @@ public class ModeratorApp extends Servlet {
             resp.sendError(500, "Race not found");
         } else {
             try {
-                TimePoint timePoint = getTimePoint(req, PARAM_NAME_SINCE, PARAM_NAME_SINCE_MILLIS, null);
+                TimePoint sinceTimePoint = getTimePoint(req, PARAM_NAME_SINCE, PARAM_NAME_SINCE_MILLIS, null);
+                TimePoint toTimePoint = getTimePoint(req, PARAM_NAME_TO, PARAM_NAME_TO_MILLIS, null);
                 JSONObject jsonRace = new JSONObject();
                 jsonRace.put("name", trackedRace.getRace().getName());
                 JSONArray jsonCompetitors = new JSONArray();
@@ -86,14 +91,17 @@ public class ModeratorApp extends Servlet {
                     jsonCompetitor.put("name", competitor.getName());
                     GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
                     Iterator<GPSFixMoving> fixIter;
-                    if (timePoint == null) {
+                    if (sinceTimePoint == null) {
                         fixIter = track.getFixes().iterator();
                     } else {
-                        fixIter = track.getFixesIterator(timePoint, /* inclusive */ true);
+                        fixIter = track.getFixesIterator(sinceTimePoint, /* inclusive */ true);
                     }
                     JSONArray jsonFixes = new JSONArray();
                     while (fixIter.hasNext()) {
                         GPSFixMoving fix = fixIter.next();
+                        if (toTimePoint != null && fix.getTimePoint() != null && toTimePoint.compareTo(fix.getTimePoint()) < 0) {
+                            break;
+                        }
                         JSONObject jsonFix = new JSONObject();
                         jsonFix.put("timepoint", fix.getTimePoint().asMillis());
                         jsonFix.put("latdeg", fix.getPosition().getLatDeg());

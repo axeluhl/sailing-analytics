@@ -66,7 +66,7 @@ public interface DomainFactory {
      */
     com.sap.sailing.domain.base.Event createEvent(Event event);
     
-    RaceTracker createEventTracker(URL paramURL, URI liveURI, URI storedURI) throws MalformedURLException,
+    RaceTracker createRaceTracker(URL paramURL, URI liveURI, URI storedURI) throws MalformedURLException,
             FileNotFoundException, URISyntaxException;
 
     DynamicTrackedEvent trackEvent(com.sap.sailing.domain.base.Event event);

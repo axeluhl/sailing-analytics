@@ -28,7 +28,7 @@ public class RacingEventServiceImpl implements RacingEventService {
     
     private final Map<String, Event> eventsByName;
     
-    private final Map<Event, RaceTracker> eventTrackers;
+    private final Map<Event, RaceTracker> raceTrackers;
     
     private final Map<RaceDefinition, WindTracker> windTrackers;
     
@@ -37,7 +37,7 @@ public class RacingEventServiceImpl implements RacingEventService {
     public RacingEventServiceImpl() {
         domainFactory = DomainFactory.INSTANCE;
         eventsByName = new HashMap<String, Event>();
-        eventTrackers = new HashMap<Event, RaceTracker>();
+        raceTrackers = new HashMap<Event, RaceTracker>();
         windTrackers = new HashMap<RaceDefinition, WindTracker>();
         windReceivers = new HashMap<Integer, UDPExpeditionReceiver>();
     }
@@ -60,16 +60,16 @@ public class RacingEventServiceImpl implements RacingEventService {
     @Override
     public void addEvent(URL paramURL, URI liveURI, URI storedURI) throws MalformedURLException, FileNotFoundException,
             URISyntaxException {
-        RaceTracker tracker = getDomainFactory().createEventTracker(paramURL, liveURI, storedURI);
-        eventTrackers.put(tracker.getEvent(), tracker);
+        RaceTracker tracker = getDomainFactory().createRaceTracker(paramURL, liveURI, storedURI);
+        raceTrackers.put(tracker.getEvent(), tracker);
         eventsByName.put(tracker.getEvent().getName(), tracker.getEvent());
     }
 
     @Override
     public void stopTracking(Event event) throws MalformedURLException, IOException, InterruptedException {
-        if (eventTrackers.containsKey(event)) {
-            eventTrackers.get(event).stop();
-            eventTrackers.remove(event);
+        if (raceTrackers.containsKey(event)) {
+            raceTrackers.get(event).stop();
+            raceTrackers.remove(event);
         }
         if (event != null && event.getName() != null) {
             eventsByName.remove(event.getName());
