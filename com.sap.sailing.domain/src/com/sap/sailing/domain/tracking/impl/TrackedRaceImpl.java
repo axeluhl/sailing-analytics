@@ -30,9 +30,17 @@ import com.sap.sailing.domain.tracking.WindTrack;
 public class TrackedRaceImpl implements TrackedRace {
     private final TrackedEvent trackedEvent;
     private final RaceDefinition race;
+    
+    /**
+     * Keeps the oldest timestamp that is fed into this tracked race, either from a boat fix, a buoy
+     * fix, a race start/finish or a coarse definition.
+     */
+    private TimePoint startOfTracking;
+    
     private TimePoint start;
     private TimePoint firstFinish;
-    private TimePoint lastUpdate;
+    private TimePoint timePointOfNewestEvent;
+    private int updateCount;
     
     /**
      * legs appear in the order in which they appear in the race's course
@@ -41,6 +49,10 @@ public class TrackedRaceImpl implements TrackedRace {
     
     private final Map<Competitor, GPSFixTrack<Competitor, GPSFixMoving>> tracks;
     private final Map<Competitor, NavigableSet<MarkPassing>> markPassingsForCompetitor;
+    
+    /**
+     * The mark passing sets used as values are ordered by time stamp.
+     */
     private final Map<Waypoint, NavigableSet<MarkPassing>> markPassingsForWaypoint;
     
     /**
@@ -59,6 +71,7 @@ public class TrackedRaceImpl implements TrackedRace {
     
     public TrackedRaceImpl(TrackedEvent trackedEvent, RaceDefinition race, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed) {
         super();
+        this.updateCount = 0;
         this.trackedEvent = trackedEvent;
         this.race = race;
         LinkedHashMap<Leg, TrackedLeg> trackedLegsMap = new LinkedHashMap<Leg, TrackedLeg>();
@@ -90,6 +103,11 @@ public class TrackedRaceImpl implements TrackedRace {
     @Override
     public Iterable<MarkPassing> getMarkPassingsInOrder(Waypoint waypoint) {
         return markPassingsForWaypoint.get(waypoint);
+    }
+    
+    @Override
+    public TimePoint getStartOfTracking() {
+        return startOfTracking;
     }
 
     @Override
@@ -169,8 +187,8 @@ public class TrackedRaceImpl implements TrackedRace {
     }
 
     @Override
-    public TimePoint getTimePointOfLastUpdate() {
-        return lastUpdate;
+    public int getUpdateCount() {
+        return updateCount;
     }
 
     @Override
@@ -208,15 +226,19 @@ public class TrackedRaceImpl implements TrackedRace {
     }
     
     @Override
-    public TrackedLeg getCurrentLeg() {
+    public TrackedLeg getCurrentLeg(TimePoint timePoint) {
         Waypoint lastWaypointPassed = null;
         int indexOfLastWaypointPassed = -1;
         for (Map.Entry<Waypoint, NavigableSet<MarkPassing>> entry : markPassingsForWaypoint.entrySet()) {
             if (!entry.getValue().isEmpty()) {
-                int indexOfWaypoint = getRace().getCourse().getIndexOfWaypoint(entry.getKey());
-                if (indexOfWaypoint > indexOfLastWaypointPassed) {
-                    indexOfLastWaypointPassed = indexOfWaypoint;
-                    lastWaypointPassed = entry.getKey();
+                MarkPassing first = entry.getValue().first();
+                // Did the mark passing happen at or before the requested time point?
+                if (first.getTimePoint().compareTo(timePoint) <= 0) {
+                    int indexOfWaypoint = getRace().getCourse().getIndexOfWaypoint(entry.getKey());
+                    if (indexOfWaypoint > indexOfLastWaypointPassed) {
+                        indexOfLastWaypointPassed = indexOfWaypoint;
+                        lastWaypointPassed = entry.getKey();
+                    }
                 }
             }
         }
@@ -272,18 +294,27 @@ public class TrackedRaceImpl implements TrackedRace {
     public void setWindSource(WindSource windSource) {
         this.currentWindSource = windSource;
     }
-    
+
+    @Override
+    public TimePoint getTimePointOfNewestEvent() {
+        return timePointOfNewestEvent;
+    }
+
     protected synchronized void updated(TimePoint timeOfEvent) {
-        if (lastUpdate == null || timeOfEvent.compareTo(lastUpdate) > 0) {
-            lastUpdate = timeOfEvent;
-            notifyAll();
+        updateCount++;
+        if (timePointOfNewestEvent == null || timePointOfNewestEvent.compareTo(timeOfEvent) < 0) {
+            timePointOfNewestEvent = timeOfEvent;
         }
+        if (startOfTracking == null || startOfTracking.compareTo(timeOfEvent) > 0) {
+            startOfTracking = timeOfEvent;
+        }
+        notifyAll();
     }
 
     @Override
-    public synchronized void waitUntilFirstUpdateAfter(TimePoint since) throws InterruptedException {
-        while (getTimePointOfLastUpdate() == null || getTimePointOfLastUpdate().compareTo(since) <= 0) {
-            wait();
+    public synchronized void waitForNextUpdate(int sinceUpdate) throws InterruptedException {
+        while (updateCount <= sinceUpdate) {
+            wait(); // ...until updated(...) notifies us
         }
     }
     

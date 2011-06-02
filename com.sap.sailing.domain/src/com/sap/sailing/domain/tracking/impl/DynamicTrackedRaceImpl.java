@@ -117,5 +117,6 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     @Override
     public void recordWind(Wind wind, WindSource windSource) {
         getWindTrack(windSource).add(wind);
+        updated(wind.getTimePoint());
     }
 }

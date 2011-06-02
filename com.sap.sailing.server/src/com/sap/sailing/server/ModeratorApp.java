@@ -42,6 +42,8 @@ public class ModeratorApp extends Servlet {
     
     private static final String ACTION_NAME_SHOW_BOAT_POSITIONS = "showboatpositions";
     
+    private static final String PARAM_NAME_SINCE_UPDATE = "sinceupdate";
+    
     private static final String PARAM_NAME_SINCE = "since";
     
     private static final String PARAM_NAME_SINCE_MILLIS = "sinceasmillis";
@@ -127,7 +129,7 @@ public class ModeratorApp extends Servlet {
             resp.sendError(500, "Race not found");
         } else {
             try {
-                TimePoint timePoint = getTimePoint(req, PARAM_NAME_TIME, PARAM_NAME_TIME_MILLIS, trackedRace.getTimePointOfLastUpdate());
+                TimePoint timePoint = getTimePoint(req, PARAM_NAME_TIME, PARAM_NAME_TIME_MILLIS, trackedRace.getTimePointOfNewestEvent());
                 JSONArray jsonWaypoints = new JSONArray();
                 for (Waypoint waypoint : trackedRace.getRace().getCourse().getWaypoints()) {
                     JSONObject jsonWaypoint = new JSONObject();
@@ -174,22 +176,28 @@ public class ModeratorApp extends Servlet {
             resp.sendError(500, "Race not found");
         } else {
             try {
-                TimePoint timePoint = getTimePoint(req, PARAM_NAME_TIME, PARAM_NAME_TIME_MILLIS, trackedRace.getTimePointOfLastUpdate());
-                TimePoint since = getTimePoint(req, PARAM_NAME_SINCE, PARAM_NAME_SINCE_MILLIS, null);
-                if (since != null) {
+                TimePoint timePoint = getTimePoint(req, PARAM_NAME_TIME, PARAM_NAME_TIME_MILLIS, trackedRace.getTimePointOfNewestEvent());
+                String sinceUpdateString = req.getParameter(PARAM_NAME_SINCE_UPDATE);
+                if (sinceUpdateString != null) {
+                    int sinceUpdate = Integer.valueOf(sinceUpdateString);
                     // block until there is new data:
-                    trackedRace.waitUntilFirstUpdateAfter(since);
+                    trackedRace.waitForNextUpdate(sinceUpdate);
                 }
                 JSONObject jsonRace = new JSONObject();
                 jsonRace.put("name", trackedRace.getRace().getName());
                 jsonRace.put("start", trackedRace.getStart() == null ? 0l : trackedRace.getStart().asMillis());
                 jsonRace.put("finish", trackedRace.getFirstFinish() == null ? 0l : trackedRace.getFirstFinish()
                         .asMillis());
-                jsonRace.put("lastupdate", trackedRace.getTimePointOfLastUpdate() == null ? 0l : trackedRace
-                        .getTimePointOfLastUpdate().asMillis());
-                Wind currentWind = trackedRace.getWind(
-                        trackedRace.getTrack(trackedRace.getCurrentLeg().getLeg().getFrom().getBuoys().iterator().next()).
-                        getEstimatedPosition(timePoint), timePoint);
+                jsonRace.put("timeofnewestevent", trackedRace.getTimePointOfNewestEvent() == null ? 0l : trackedRace
+                        .getTimePointOfNewestEvent().asMillis());
+                jsonRace.put("updatecount", trackedRace.getUpdateCount());
+                Position positionForWind = null;
+                TrackedLeg currentLeg = trackedRace.getCurrentLeg(timePoint);
+                if (currentLeg != null) {
+                    positionForWind = trackedRace.getTrack(currentLeg.getLeg().getFrom().getBuoys().iterator().next())
+                            .getEstimatedPosition(timePoint);
+                }
+                Wind currentWind = trackedRace.getWind(positionForWind, timePoint);
                 if (currentWind != null) {
                     JSONObject jsonWind = new JSONObject();
                     jsonWind.put("truebearingdeg", currentWind.getBearing().getDegrees());

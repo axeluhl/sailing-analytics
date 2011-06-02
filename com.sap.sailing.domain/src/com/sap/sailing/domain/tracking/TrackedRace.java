@@ -41,9 +41,9 @@ public interface TrackedRace {
     TrackedLegOfCompetitor getCurrentLeg(Competitor competitor);
     
     /**
-     * Tells which leg the leader is currently on
+     * Tells which leg the leader at <code>timePoint</code> is on
      */
-    TrackedLeg getCurrentLeg();
+    TrackedLeg getCurrentLeg(TimePoint timePoint);
     
     TrackedLeg getTrackedLegFinishingAt(Waypoint endOfLeg);
     
@@ -66,9 +66,10 @@ public interface TrackedRace {
     TrackedLegOfCompetitor getTrackedLeg(Competitor competitor, Leg leg);
     
     /**
-     * @return can be <code>null</code> in case this tracked race hasn't been updated with any changes yet
+     * @return a sequential number counting the updates that occurred to this tracked race. Callers may use this to ask
+     *         for updates newer than such a sequence number.
      */
-    TimePoint getTimePointOfLastUpdate();
+    int getUpdateCount();
     
     int getRankDifference(Competitor competitor, Leg leg, TimePoint timePoint);
     
@@ -119,7 +120,12 @@ public interface TrackedRace {
     WindTrack getWindTrack(WindSource windSource);
 
     /**
-     * Waits until {@link #getTimePointOfLastUpdate()} is after <code>since</code>.
+     * Waits until {@link #getUpdateCount()} is after <code>since</code>.
+     * @param sinceUpdate TODO
      */
-    void waitUntilFirstUpdateAfter(TimePoint since) throws InterruptedException;
+    void waitForNextUpdate(int sinceUpdate) throws InterruptedException;
+
+    TimePoint getStartOfTracking();
+
+    TimePoint getTimePointOfNewestEvent();
 }
