@@ -27,7 +27,7 @@ public class JSONServiceImpl implements JSONService {
         for (Object raceEntry : (JSONArray) jsonObject.get("races")) {
             JSONObject jsonRaceEntry = (JSONObject) raceEntry;
             RaceRecord raceRecord = new RaceRecord(jsonURL, (String) jsonRaceEntry.get("name"),
-                    (String) jsonRaceEntry.get("url"), (String) jsonRaceEntry.get("ID"));
+                    (String) jsonRaceEntry.get("url"), (String) jsonRaceEntry.get("id"));
             raceRecords.add(raceRecord);
         }
     }

@@ -19,7 +19,7 @@ public class RaceRecord {
         int indexOfLastSlash = jsonURLAsString.lastIndexOf('/');
         int indexOfLastButOneSlash = jsonURLAsString.lastIndexOf('/', indexOfLastSlash-1);
         String eventName = jsonURLAsString.substring(indexOfLastButOneSlash+1, indexOfLastSlash);
-        paramURL = new URL(jsonURLAsString.substring(0, indexOfLastSlash)+"clientparams.php?event="+
+        paramURL = new URL(jsonURLAsString.substring(0, indexOfLastSlash)+"/clientparams.php?event="+
                 eventName+"&race="+ID);
     }
 
