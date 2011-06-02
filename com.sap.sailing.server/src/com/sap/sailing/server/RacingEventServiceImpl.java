@@ -7,6 +7,7 @@ import java.net.SocketException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -22,6 +23,8 @@ import com.sap.sailing.domain.base.impl.Util.Pair;
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
+import com.sap.sailing.domain.tractracadapter.JSONService;
+import com.sap.sailing.domain.tractracadapter.RaceRecord;
 import com.sap.sailing.domain.tractracadapter.RaceTracker;
 import com.sap.sailing.expeditionconnector.UDPExpeditionReceiver;
 import com.sap.sailing.expeditionconnector.WindTracker;
@@ -61,17 +64,12 @@ public class RacingEventServiceImpl implements RacingEventService {
     }
 
     @Override
-    public void addEvent(URL jsonURL, URI liveURI, URI storedURI) throws MalformedURLException, FileNotFoundException,
-            URISyntaxException {
-        // TODO download JSON, fetch all races and call addRace for their paramURL; manage Event / RaceDefinition instances
-        RaceTracker tracker = getDomainFactory().createRaceTracker(paramURL, liveURI, storedURI);
-        Set<RaceTracker> trackers = raceTrackers.get(tracker.getEvent());
-        if (trackers == null) {
-            trackers = new HashSet<RaceTracker>();
-            raceTrackers.put(tracker.getEvent(), trackers);
+    public void addEvent(URL jsonURL, URI liveURI, URI storedURI) throws URISyntaxException, IOException, ParseException, org.json.simple.parser.ParseException {
+        JSONService jsonService = DomainFactory.INSTANCE.parseJSONURL(jsonURL);
+        for (RaceRecord rr : jsonService.getRaceRecords()) {
+            URL paramURL = rr.getParamURL();
+            addRace(paramURL, liveURI, storedURI);
         }
-        trackers.add(tracker);
-        eventsByName.put(tracker.getEvent().getName(), tracker.getEvent());
     }
 
     @Override
@@ -84,7 +82,15 @@ public class RacingEventServiceImpl implements RacingEventService {
             raceTrackers.put(tracker.getEvent(), trackers);
         }
         trackers.add(tracker);
-        eventsByName.put(tracker.getEvent().getName(), tracker.getEvent());
+        String eventName = tracker.getEvent().getName();
+        Event eventWithName = eventsByName.get(eventName);
+        if (eventWithName != null) {
+            if (eventWithName != tracker.getEvent()) {
+                throw new RuntimeException("Internal error. Two Event objects with equal name "+eventName);
+            }
+        } else {
+            eventsByName.put(eventName, tracker.getEvent());
+        }
     }
 
     @Override

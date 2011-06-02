@@ -7,6 +7,7 @@ import java.net.SocketException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.text.ParseException;
 
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -34,7 +35,7 @@ public interface RacingEventService {
      *            paramURL for the Java client can be derived.
      */
     void addEvent(URL jsonURL, URI liveURI, URI storedURI) throws MalformedURLException, FileNotFoundException,
-            URISyntaxException;
+            URISyntaxException, IOException, ParseException, org.json.simple.parser.ParseException;
 
     /**
      * Adds a single race tracker, using the race's parameter URL which delivers the single configuration

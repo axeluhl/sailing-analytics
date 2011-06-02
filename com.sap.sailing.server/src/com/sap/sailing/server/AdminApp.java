@@ -1,12 +1,12 @@
 package com.sap.sailing.server;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.SocketException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.text.ParseException;
 import java.util.Iterator;
 
 import javax.servlet.ServletException;
@@ -291,16 +291,16 @@ public class AdminApp extends Servlet {
         }
     }
 
-    private void addEvent(HttpServletRequest req, HttpServletResponse resp) throws MalformedURLException,
-            URISyntaxException, FileNotFoundException {
+    private void addEvent(HttpServletRequest req, HttpServletResponse resp) throws URISyntaxException, IOException,
+            ParseException, org.json.simple.parser.ParseException {
         URL jsonURL = new URL(req.getParameter(PARAM_NAME_EVENT_JSON_URL));
         URI liveURI = new URI(req.getParameter(PARAM_NAME_LIVE_URI));
         URI storedURI = new URI(req.getParameter(PARAM_NAME_STORED_URI));
         getService().addEvent(jsonURL, liveURI, storedURI);
     }
 
-    private void addRace(HttpServletRequest req, HttpServletResponse resp) throws MalformedURLException,
-            URISyntaxException, FileNotFoundException {
+    private void addRace(HttpServletRequest req, HttpServletResponse resp) throws URISyntaxException, IOException,
+            ParseException, org.json.simple.parser.ParseException {
         URL paramURL = new URL(req.getParameter(PARAM_NAME_PARAM_URL));
         URI liveURI = new URI(req.getParameter(PARAM_NAME_LIVE_URI));
         URI storedURI = new URI(req.getParameter(PARAM_NAME_STORED_URI));
