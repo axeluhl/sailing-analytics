@@ -12,6 +12,7 @@ import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.impl.Util.Pair;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
+import com.sap.sailing.domain.tractracadapter.RaceTracker;
 
 public interface RacingEventService {
     Iterable<Event> getAllEvents();
@@ -20,14 +21,46 @@ public interface RacingEventService {
 
     DomainFactory getDomainFactory();
     
-    void addEvent(URL paramURL, URI liveURI, URI storedURI) throws MalformedURLException, FileNotFoundException,
+    /**
+     * Defines the event and for each race listed in the JSON document creates a {@link RaceTracker} that
+     * tracks the respective race. The {@link RaceDefinition}s obtained this way are all grouped into
+     * the single {@link Event} produced for the event listed in the JSON response. Note that the
+     * many race trackers will have their TracTrac <code>Event</code> each, all with the same name,
+     * meaning the same event but being distinct.
+     * 
+     * @param jsonURL
+     *            URL of a JSON response that contains an "event" object telling the event's name and ID, as well as a
+     *            JSON array named "races" which tells ID and replay URL for the race. From those replay URLs the
+     *            paramURL for the Java client can be derived.
+     */
+    void addEvent(URL jsonURL, URI liveURI, URI storedURI) throws MalformedURLException, FileNotFoundException,
             URISyntaxException;
 
     /**
-     * This will also stop tracking wind for all races of this event. See {@link #stopTrackingWind(Event, RaceDefinition)}.
+     * Adds a single race tracker, using the race's parameter URL which delivers the single configuration
+     * text file for that race. While the result of passing this URL to the TracTrac <code>KeyValue.setup</code>
+     * is a TracTrac <code>Event</code>, those events only manage a single race. In our domain model, we group
+     * those races into a single instance of our {@link Event} class.<p>
+     * 
+     * If this is the first race of an event, the {@link Event} is created as well. If the {@link RaceDefinition} for
+     * the race already exists, it isn't created again. Also, if a {@link RaceTracker} for the given race already
+     * exists, it is not added again.
+     */
+    void addRace(URL paramURL, URI liveURI, URI storedURI) throws MalformedURLException, FileNotFoundException,
+            URISyntaxException;
+
+    /**
+     * Stops tracking all races of the event specified. This will also stop tracking wind for all races of this event.
+     * See {@link #stopTrackingWind(Event, RaceDefinition)}.
      */
     void stopTracking(Event event) throws MalformedURLException, IOException, InterruptedException;
     
+    /**
+     * Stops tracking a single race. Other races of the same event that are currently tracked will continue to be
+     * tracked.
+     */
+    void stopTracking(Event event, RaceDefinition race) throws MalformedURLException, IOException, InterruptedException;
+
     /**
      * @param port
      *            the UDP port on which to listen for incoming messages from Expedition clients

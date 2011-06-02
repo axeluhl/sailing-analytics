@@ -6,6 +6,7 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Require-Bundle: com.sap.sailing.domain,
- com.tractrac.clientmodule
+ com.tractrac.clientmodule,
+ org.json.simple;bundle-version="1.1.0"
 Export-Package: com.sap.sailing.domain.tractracadapter
 Bundle-ActivationPolicy: lazy

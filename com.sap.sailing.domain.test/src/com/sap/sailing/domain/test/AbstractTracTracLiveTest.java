@@ -39,20 +39,18 @@ public abstract class AbstractTracTracLiveTest implements Listener {
     private DataController controller;
 
     protected AbstractTracTracLiveTest() throws URISyntaxException, MalformedURLException {
-        paramUrl = new URL("http://www.traclive.dk/simulateconf/j80race12.txt");
-        liveUri = new URI("tcp://localhost:4410");
-        storedUri = new URI("tcp://localhost:4411");
+        paramUrl = new URL("http://germanmaster.traclive.dk/events/event_20110505_SailingTea/clientparams.php?event=event_20110505_SailingTea&race=bd8c778e-7c65-11e0-8236-406186cbf87c");
+        liveUri = new URI("tcp://localhost:4412");
+        storedUri = new URI("tcp://localhost:4413");
         receivers = new HashSet<Receiver>();
     }
 
     @Before
     public void setUp() throws MalformedURLException, IOException, InterruptedException {
-        killAllRunningSimulations();
-        startRaceSimulation(/* speedMultiplier */ 100, 7);
         // Read event data from configuration file
         event = KeyValue.setup(paramUrl);
         assertNotNull(event);
-        assertEquals("J80 Worlds", event.getName());
+        assertEquals("Sailing Team Germany", event.getName());
         // Initialize data controller using live and stored data sources
         controller = new DataController(liveUri, storedUri, this);
         // Start live and stored data streams
@@ -99,7 +97,8 @@ public abstract class AbstractTracTracLiveTest implements Listener {
         }
     }
 
-    private void startRaceSimulation(int speedMultiplier, int raceNumber)
+    
+    protected void startRaceSimulation(int speedMultiplier, int raceNumber)
             throws MalformedURLException, IOException, InterruptedException {
         URL url = new URL(
                 START_SIMULATOR_URL+"?racenumber="+raceNumber+"&speed="+

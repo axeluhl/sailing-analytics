@@ -11,7 +11,10 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.maptrack.client.io.TypeController;
+import com.sap.sailing.domain.base.Course;
+import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
+import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.RaceTracker;
 import com.sap.sailing.domain.tractracadapter.Receiver;
@@ -27,6 +30,21 @@ public class RaceTrackerImpl implements Listener, RaceTracker {
     private final DataController controller;
     private final Set<Receiver> receivers;
 
+    /**
+     * A race tracker uses the <code>paramURL</code> for the TracTrac Java client to register for push data about one
+     * race. The {@link RaceDefinition} for that race, however, cannot be created until the {@link Course} has been
+     * received. Therefore, the {@link RaceCourseReceiver} will create the {@link RaceDefinition} and will add it to the
+     * {@link com.sap.sailing.domain.base.Event}.
+     * <p>
+     * 
+     * The link to the {@link RaceDefinition} is created in the {@link DomainFactory} when the
+     * {@link RaceCourseReceiver} creates the {@link TrackedRace} object. Starting then, the {@link DomainFactory} will
+     * respond with the {@link RaceDefinition} when its {@link DomainFactory#getRace(Event)} is called with the TracTrac
+     * {@link Event} as argument that is used for its tracking.<p>
+     * 
+     * When {@link #getRace} is called on this object before the {@link RaceCourseReceiver} has created the
+     * {@link RaceDefinition}, the call will block until this has happened.
+     */
     protected RaceTrackerImpl(DomainFactory domainFactory, URL paramURL, URI liveURI, URI storedURI)
             throws URISyntaxException, MalformedURLException, FileNotFoundException {
         // Read event data from configuration file
@@ -39,13 +57,18 @@ public class RaceTrackerImpl implements Listener, RaceTracker {
         DynamicTrackedEvent trackedEvent = domainFactory.trackEvent(domainEvent);
         receivers = new HashSet<Receiver>();
         Set<TypeController> typeControllers = new HashSet<TypeController>();
-        for (Receiver receiver : domainFactory.getUpdateReceivers(trackedEvent)) {
+        for (Receiver receiver : domainFactory.getUpdateReceivers(trackedEvent, tractracEvent)) {
             receivers.add(receiver);
             for (TypeController typeController : receiver.getTypeControllers()) {
                 typeControllers.add(typeController);
             }
         }
         addListenersForStoredDataAndStartController(typeControllers);
+    }
+    
+    @Override
+    public RaceDefinition getRace() {
+        return DomainFactory.INSTANCE.getRace(tractracEvent);
     }
     
     protected void addListenersForStoredDataAndStartController(Iterable<TypeController> listenersForStoredData) {

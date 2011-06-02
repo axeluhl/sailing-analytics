@@ -10,8 +10,11 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -28,7 +31,7 @@ public class RacingEventServiceImpl implements RacingEventService {
     
     private final Map<String, Event> eventsByName;
     
-    private final Map<Event, RaceTracker> raceTrackers;
+    private final Map<Event, Set<RaceTracker>> raceTrackers;
     
     private final Map<RaceDefinition, WindTracker> windTrackers;
     
@@ -37,7 +40,7 @@ public class RacingEventServiceImpl implements RacingEventService {
     public RacingEventServiceImpl() {
         domainFactory = DomainFactory.INSTANCE;
         eventsByName = new HashMap<String, Event>();
-        raceTrackers = new HashMap<Event, RaceTracker>();
+        raceTrackers = new HashMap<Event, Set<RaceTracker>>();
         windTrackers = new HashMap<RaceDefinition, WindTracker>();
         windReceivers = new HashMap<Integer, UDPExpeditionReceiver>();
     }
@@ -58,17 +61,38 @@ public class RacingEventServiceImpl implements RacingEventService {
     }
 
     @Override
-    public void addEvent(URL paramURL, URI liveURI, URI storedURI) throws MalformedURLException, FileNotFoundException,
+    public void addEvent(URL jsonURL, URI liveURI, URI storedURI) throws MalformedURLException, FileNotFoundException,
+            URISyntaxException {
+        // TODO download JSON, fetch all races and call addRace for their paramURL; manage Event / RaceDefinition instances
+        RaceTracker tracker = getDomainFactory().createRaceTracker(paramURL, liveURI, storedURI);
+        Set<RaceTracker> trackers = raceTrackers.get(tracker.getEvent());
+        if (trackers == null) {
+            trackers = new HashSet<RaceTracker>();
+            raceTrackers.put(tracker.getEvent(), trackers);
+        }
+        trackers.add(tracker);
+        eventsByName.put(tracker.getEvent().getName(), tracker.getEvent());
+    }
+
+    @Override
+    public void addRace(URL paramURL, URI liveURI, URI storedURI) throws MalformedURLException, FileNotFoundException,
             URISyntaxException {
         RaceTracker tracker = getDomainFactory().createRaceTracker(paramURL, liveURI, storedURI);
-        raceTrackers.put(tracker.getEvent(), tracker);
+        Set<RaceTracker> trackers = raceTrackers.get(tracker.getEvent());
+        if (trackers == null) {
+            trackers = new HashSet<RaceTracker>();
+            raceTrackers.put(tracker.getEvent(), trackers);
+        }
+        trackers.add(tracker);
         eventsByName.put(tracker.getEvent().getName(), tracker.getEvent());
     }
 
     @Override
     public void stopTracking(Event event) throws MalformedURLException, IOException, InterruptedException {
         if (raceTrackers.containsKey(event)) {
-            raceTrackers.get(event).stop();
+            for (RaceTracker raceTracker : raceTrackers.get(event)) {
+                raceTracker.stop();
+            }
             raceTrackers.remove(event);
         }
         if (event != null && event.getName() != null) {
@@ -76,6 +100,24 @@ public class RacingEventServiceImpl implements RacingEventService {
         }
         for (RaceDefinition race : event.getAllRaces()) {
             stopTrackingWind(event, race);
+        }
+    }
+
+    @Override
+    public void stopTracking(Event event, RaceDefinition race) throws MalformedURLException, IOException, InterruptedException {
+        if (raceTrackers.containsKey(event)) {
+            Iterator<RaceTracker> trackerIter = raceTrackers.get(event).iterator();
+            while (trackerIter.hasNext()) {
+                RaceTracker raceTracker = trackerIter.next();
+                if (raceTracker.getRace() == race) {
+                    raceTracker.stop();
+                    trackerIter.remove();
+                }
+            }
+        }
+        // if the last tracked race was removed, remove the entire event
+        if (raceTrackers.get(event).isEmpty()) {
+            stopTracking(event);
         }
     }
 

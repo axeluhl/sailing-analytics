@@ -72,8 +72,8 @@ public class RouteAssemblyTest extends AbstractTracTracLiveTest {
         assertNotNull(firstData[0]);
         Course course = DomainFactory.INSTANCE.createCourse(firstRoute[0].getName(), firstData[0].getPoints());
         assertNotNull(course);
-        assertEquals("Race 12 (Oro)", course.getName());
-        assertEquals(9, Util.size(course.getWaypoints()));
+        assertEquals("windward-leeward training", course.getName());
+        assertEquals(3, Util.size(course.getWaypoints()));
         assertEquals(Util.size(course.getWaypoints())-1, Util.size(course.getLegs()));
     }
 

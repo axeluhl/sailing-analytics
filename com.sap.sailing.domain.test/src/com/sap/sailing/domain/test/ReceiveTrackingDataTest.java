@@ -68,12 +68,12 @@ public class ReceiveTrackingDataTest extends AbstractTracTracLiveTest {
                 ((DynamicTrackedRace) trackedRace).addListener(positionListener);
             }
         });
-        for (Receiver receiver : domainFactory.getUpdateReceivers(trackedEvent)) {
+        for (Receiver receiver : domainFactory.getUpdateReceivers(trackedEvent, getEvent())) {
             for (TypeController raceListener : receiver.getTypeControllers()) {
                 listeners.add(raceListener);
             }
         }
-        addListenersForStoredDataAndStartController(domainFactory.getUpdateReceivers(trackedEvent));
+        addListenersForStoredDataAndStartController(domainFactory.getUpdateReceivers(trackedEvent, getEvent()));
     }
 
     @Test

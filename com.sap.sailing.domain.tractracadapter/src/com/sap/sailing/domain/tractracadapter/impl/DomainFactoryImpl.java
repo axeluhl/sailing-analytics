@@ -1,12 +1,15 @@
 package com.sap.sailing.domain.tractracadapter.impl;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.WeakHashMap;
@@ -41,12 +44,16 @@ import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
+import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
+import com.sap.sailing.domain.tracking.TrackedEvent;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedEventImpl;
+import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
+import com.sap.sailing.domain.tractracadapter.JSONService;
 import com.sap.sailing.domain.tractracadapter.RaceTracker;
 import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
@@ -80,11 +87,13 @@ public class DomainFactoryImpl implements DomainFactory {
     
     private final WeakHashMap<CompetitorClass, BoatClass> classCache = new WeakHashMap<CompetitorClass, BoatClass>();
     
-    private final WeakHashMap<com.tractrac.clientmodule.Event, com.sap.sailing.domain.base.Event> eventCache =
-            new WeakHashMap<com.tractrac.clientmodule.Event, com.sap.sailing.domain.base.Event>();
+    /**
+     * Caches events by their name
+     */
+    private final HashMap<String, com.sap.sailing.domain.base.Event> eventCache =
+            new HashMap<String, com.sap.sailing.domain.base.Event>();
     
-    private final WeakHashMap<com.sap.sailing.domain.base.Event, com.tractrac.clientmodule.Event> inverseEventCache =
-            new WeakHashMap<com.sap.sailing.domain.base.Event, com.tractrac.clientmodule.Event>();
+    private final WeakHashMap<com.tractrac.clientmodule.Event, RaceDefinition> tractracEventToRaceDefinitionMap = new WeakHashMap<com.tractrac.clientmodule.Event, RaceDefinition>();
     
     private final WeakHashMap<Race, RaceDefinition> raceCache = new WeakHashMap<Race, RaceDefinition>();
     
@@ -219,44 +228,38 @@ public class DomainFactoryImpl implements DomainFactory {
 
     @Override
     public Event createEvent(com.tractrac.clientmodule.Event event) {
-        Event result = eventCache.get(event);
+        Event result = eventCache.get(event.getName());
         if (result == null) {
             result = new EventImpl(event.getName());
-            eventCache.put(event, result);
-            inverseEventCache.put(result, event);
+            eventCache.put(event.getName(), result);
         }
         return result;
     }
     
     @Override
-    public Iterable<Receiver> getUpdateReceivers(DynamicTrackedEvent trackedEvent, ReceiverType... types) {
+    public Iterable<Receiver> getUpdateReceivers(DynamicTrackedEvent trackedEvent, com.tractrac.clientmodule.Event tractracEvent, ReceiverType... types) {
         Collection<Receiver> result = new ArrayList<Receiver>();
         for (ReceiverType type : types) {
             switch (type) {
             case RACECOURSE:
                 result.add(new RaceCourseReceiver(
-                        trackedEvent, inverseEventCache.get(trackedEvent
-                                .getEvent()), millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed));
+                        trackedEvent, tractracEvent, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed));
                 break;
             case MARKPOSITIONS:
                 result.add(new MarkPositionReceiver(
-                        trackedEvent, inverseEventCache.get(trackedEvent
-                                .getEvent())));
+                        trackedEvent, tractracEvent));
                 break;
             case RAWPOSITIONS:
                 result.add(new RawPositionReceiver(
-                        trackedEvent, inverseEventCache.get(trackedEvent
-                                .getEvent())));
+                        trackedEvent, tractracEvent));
                 break;
             case MARKPASSINGS:
                 result.add(new MarkPassingReceiver(
-                        trackedEvent, inverseEventCache.get(trackedEvent
-                                .getEvent())));
+                        trackedEvent, tractracEvent));
                 break;
             case RACESTARTFINISH:
                 result.add(new RaceStartedAndFinishedReceiver(
-                        trackedEvent, inverseEventCache.get(trackedEvent
-                                .getEvent())));
+                        trackedEvent, tractracEvent));
                 break;
             }
         }
@@ -264,9 +267,9 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public Iterable<Receiver> getUpdateReceivers(DynamicTrackedEvent trackedEvent) {
-        return getUpdateReceivers(trackedEvent, ReceiverType.RACECOURSE, ReceiverType.MARKPASSINGS,
-                ReceiverType.MARKPOSITIONS, ReceiverType.RACESTARTFINISH, ReceiverType.RAWPOSITIONS);
+    public Iterable<Receiver> getUpdateReceivers(DynamicTrackedEvent trackedEvent, com.tractrac.clientmodule.Event tractracEvent) {
+        return getUpdateReceivers(trackedEvent, tractracEvent, ReceiverType.RACECOURSE,
+                ReceiverType.MARKPASSINGS, ReceiverType.MARKPOSITIONS, ReceiverType.RACESTARTFINISH, ReceiverType.RAWPOSITIONS);
     }
 
     @Override
@@ -286,17 +289,13 @@ public class DomainFactoryImpl implements DomainFactory {
             BoatClass boatClass = null;
             final List<Competitor> competitors = new ArrayList<Competitor>();
             for (RaceCompetitor rc : race.getRaceCompetitorList()) {
-                com.tractrac.clientmodule.Competitor competitor = rc
-                        .getCompetitor();
+                com.tractrac.clientmodule.Competitor competitor = rc.getCompetitor();
                 if (boatClass == null) {
-                    boatClass = DomainFactory.INSTANCE.getBoatClass(competitor
-                            .getCompetitorClass());
+                    boatClass = DomainFactory.INSTANCE.getBoatClass(competitor.getCompetitorClass());
                 }
-                competitors.add(DomainFactory.INSTANCE.getCompetitor(rc
-                        .getCompetitor()));
+                competitors.add(DomainFactory.INSTANCE.getCompetitor(rc.getCompetitor()));
             }
-            result = new RaceDefinitionImpl(race.getName(), course, boatClass,
-                    competitors);
+            result = new RaceDefinitionImpl(race.getName(), course, boatClass, competitors);
             synchronized (raceCache) {
                 raceCache.put(race, result);
                 raceCache.notifyAll();
@@ -333,6 +332,26 @@ public class DomainFactoryImpl implements DomainFactory {
     public RaceTracker createRaceTracker(URL paramURL, URI liveURI, URI storedURI) throws MalformedURLException,
             FileNotFoundException, URISyntaxException {
         return new RaceTrackerImpl(this, paramURL, liveURI, storedURI);
+    }
+
+    @Override
+    public RaceDefinition getRace(com.tractrac.clientmodule.Event tractracEvent) {
+        return tractracEventToRaceDefinitionMap.get(tractracEvent);
+    }
+
+    @Override
+    public DynamicTrackedRace trackRace(TrackedEvent trackedEvent, RaceDefinition raceDefinition,
+            long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
+            com.tractrac.clientmodule.Event tractracEvent) {
+        DynamicTrackedRaceImpl result = new DynamicTrackedRaceImpl(trackedEvent, raceDefinition,
+                millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed);
+        tractracEventToRaceDefinitionMap.put(tractracEvent, raceDefinition);
+        return result;
+    }
+
+    @Override
+    public JSONService parseJSONURL(URL jsonURL) throws IOException, ParseException, org.json.simple.parser.ParseException {
+        return new JSONServiceImpl(jsonURL);
     }
 
 }

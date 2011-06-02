@@ -39,7 +39,11 @@ public class AdminApp extends Servlet {
     
     private static final String ACTION_NAME_ADD_EVENT = "addevent";
 
+    private static final String ACTION_NAME_ADD_RACE = "addrace";
+
     private static final String ACTION_NAME_STOP_EVENT = "stopevent";
+    
+    private static final String ACTION_NAME_STOP_RACE = "stoprace";
     
     private static final String ACTION_NAME_SET_WIND = "setwind";
     
@@ -47,6 +51,14 @@ public class AdminApp extends Servlet {
     
     private static final String ACTION_NAME_SHOW_WIND = "showwind";
     
+    private static final String PARAM_NAME_EVENT_JSON_URL = "eventJSONURL";
+
+    private static final String PARAM_NAME_PARAM_URL = "paramURL";
+
+    private static final String PARAM_NAME_LIVE_URI = "liveURI";
+
+    private static final String PARAM_NAME_STORED_URI = "storedURI";
+
     private static final String PARAM_NAME_FROM_TIME = "fromtime";
 
     private static final String PARAM_NAME_FROM_TIME_MILLIS = "fromtimeasmillis";
@@ -85,6 +97,10 @@ public class AdminApp extends Servlet {
                     addEvent(req, resp);
                 } else if (ACTION_NAME_STOP_EVENT.equals(action)) {
                     stopEvent(req, resp);
+                } else if (ACTION_NAME_ADD_RACE.equals(action)) {
+                    addRace(req, resp);
+                } else if (ACTION_NAME_STOP_RACE.equals(action)) {
+                    stopRace(req, resp);
                 } else if (ACTION_NAME_SUBSCRIBE_RACE_FOR_EXPEDITION_WIND.equals(action)) {
                     startReceivingExpeditionWindForRace(req, resp);
                 } else if (ACTION_NAME_UNSUBSCRIBE_RACE_FOR_EXPEDITION_WIND.equals(action)) {
@@ -277,10 +293,32 @@ public class AdminApp extends Servlet {
 
     private void addEvent(HttpServletRequest req, HttpServletResponse resp) throws MalformedURLException,
             URISyntaxException, FileNotFoundException {
-        URL paramURL = new URL(req.getParameter("paramURL"));
-        URI liveURI = new URI(req.getParameter("liveURI"));
-        URI storedURI = new URI(req.getParameter("storedURI"));
+        URL jsonURL = new URL(req.getParameter(PARAM_NAME_EVENT_JSON_URL));
+        URI liveURI = new URI(req.getParameter(PARAM_NAME_LIVE_URI));
+        URI storedURI = new URI(req.getParameter(PARAM_NAME_STORED_URI));
+        getService().addEvent(jsonURL, liveURI, storedURI);
+    }
+
+    private void addRace(HttpServletRequest req, HttpServletResponse resp) throws MalformedURLException,
+            URISyntaxException, FileNotFoundException {
+        URL paramURL = new URL(req.getParameter(PARAM_NAME_PARAM_URL));
+        URI liveURI = new URI(req.getParameter(PARAM_NAME_LIVE_URI));
+        URI storedURI = new URI(req.getParameter(PARAM_NAME_STORED_URI));
         getService().addEvent(paramURL, liveURI, storedURI);
+    }
+
+    private void stopRace(HttpServletRequest req, HttpServletResponse resp) throws MalformedURLException, IOException, InterruptedException {
+        Event event = getEvent(req);
+        if (event != null) {
+            RaceDefinition race = getRaceDefinition(req);
+            if (race == null) {
+                resp.sendError(500, "Race not found");
+            } else {
+                getService().stopTracking(event, race);
+            }
+        } else {
+            resp.sendError(500, "Event not found");
+        }
     }
 
 }

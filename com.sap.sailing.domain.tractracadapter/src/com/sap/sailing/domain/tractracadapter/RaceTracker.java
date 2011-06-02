@@ -3,10 +3,14 @@ package com.sap.sailing.domain.tractracadapter;
 import java.io.IOException;
 import java.net.MalformedURLException;
 
+import com.sap.sailing.domain.base.RaceDefinition;
+
 public interface RaceTracker {
 
-    public abstract void stop() throws MalformedURLException, IOException, InterruptedException;
+    void stop() throws MalformedURLException, IOException, InterruptedException;
 
-    public abstract com.sap.sailing.domain.base.Event getEvent();
+    com.sap.sailing.domain.base.Event getEvent();
 
+    RaceDefinition getRace();
+    
 }

@@ -1,10 +1,12 @@
 package com.sap.sailing.domain.tractracadapter;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.text.ParseException;
 
 import com.maptrack.client.io.TypeController;
 import com.sap.sailing.domain.base.BoatClass;
@@ -17,6 +19,7 @@ import com.sap.sailing.domain.base.Team;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
+import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedEvent;
@@ -89,7 +92,7 @@ public interface DomainFactory {
      *            {@link #trackEvent(com.sap.sailing.domain.base.Event)} because
      *            otherwise the link to the {@link Event} can't be established
      */
-    Iterable<Receiver> getUpdateReceivers(DynamicTrackedEvent trackedEvent);
+    Iterable<Receiver> getUpdateReceivers(DynamicTrackedEvent trackedEvent, Event tractracEvent);
 
     RaceDefinition createRaceDefinition(Race race, Course course);
 
@@ -104,6 +107,12 @@ public interface DomainFactory {
 
     MarkPassing createMarkPassing(com.tractrac.clientmodule.Competitor competitor, Waypoint passed, TimePoint time);
 
-    Iterable<Receiver> getUpdateReceivers(DynamicTrackedEvent trackedEvent, ReceiverType... types);
+    Iterable<Receiver> getUpdateReceivers(DynamicTrackedEvent trackedEvent, Event tractracEvent, ReceiverType... types);
 
+    DynamicTrackedRace trackRace(TrackedEvent trackedEvent, RaceDefinition raceDefinition,
+            long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed, Event tractracEvent);
+
+    RaceDefinition getRace(Event tractracEvent);
+
+    JSONService parseJSONURL(URL jsonURL) throws IOException, ParseException, org.json.simple.parser.ParseException;
 }

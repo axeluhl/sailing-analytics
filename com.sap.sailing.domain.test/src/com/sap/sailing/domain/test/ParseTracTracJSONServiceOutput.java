@@ -7,12 +7,19 @@ import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.List;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.junit.Test;
+
+import com.sap.sailing.domain.tractracadapter.DomainFactory;
+import com.sap.sailing.domain.tractracadapter.JSONService;
+import com.sap.sailing.domain.tractracadapter.RaceRecord;
 
 public class ParseTracTracJSONServiceOutput {
     @Test
@@ -34,6 +41,10 @@ public class ParseTracTracJSONServiceOutput {
     private JSONObject parseJSONObject(String filename) throws IOException, ParseException {
         InputStream is = getClass().getResourceAsStream(filename);
         assertNotNull(is);
+        return parseJSONObject(is);
+    }
+
+    private JSONObject parseJSONObject(InputStream is) throws IOException, ParseException {
         JSONParser parser = new JSONParser();
         Object result = parser.parse(new InputStreamReader(is));
         assertTrue(result instanceof JSONObject);
@@ -53,6 +64,32 @@ public class ParseTracTracJSONServiceOutput {
             JSONObject jsonRace = (JSONObject) race;
             assertNotNull(jsonRace.get("url"));
             assertNotNull(jsonRace.get("name"));
+        }
+    }
+    
+    @Test
+    public void testWeymouthOnline() throws MalformedURLException, IOException, java.text.ParseException, ParseException {
+        JSONService jsonService = DomainFactory.INSTANCE.parseJSONURL(new URL(
+                "http://germanmaster.traclive.dk/events/event_20110505_SailingTea/jsonservice.php"));
+        assertEquals("Sailing Team Germany", jsonService.getEventName());
+        List<RaceRecord> races = jsonService.getRaceRecords();
+        assertEquals(24, races.size());
+        for (RaceRecord race : races) {
+            assertNotNull(race.getReplayURL());
+            assertEquals("weym", race.getName().substring(0, "weym".length()));
+        }
+    }
+
+    @Test
+    public void testHamiltonOnline() throws MalformedURLException, IOException, java.text.ParseException, ParseException {
+        JSONService jsonService = DomainFactory.INSTANCE.parseJSONURL(new URL(
+                "http://germanmaster.traclive.dk/events/event_20110308_SAPWorldCh/jsonservice.php"));
+        assertEquals("SAP 2011 505 World Championship", jsonService.getEventName());
+        List<RaceRecord> races = jsonService.getRaceRecords();
+        assertEquals(14, races.size());
+        for (RaceRecord race : races) {
+            assertNotNull(race.getReplayURL());
+            assertNotNull(race.getName());
         }
     }
 }
