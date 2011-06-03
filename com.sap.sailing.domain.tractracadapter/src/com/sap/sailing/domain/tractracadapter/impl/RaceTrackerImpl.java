@@ -97,13 +97,15 @@ public class RaceTrackerImpl implements Listener, RaceTracker {
         ioThread.start();
     }
     
+    @SuppressWarnings("deprecation") // Explicit recommendation by Lasse Staffensen to use Thread.stop on their ioThread.
+                                     // See Lasse's e-mail of June 2nd 2011, 8:28pm
     @Override
     public void stop() throws MalformedURLException, IOException, InterruptedException {
         controller.stop(/* abortStored */ true);
         for (Receiver receiver : receivers) {
             receiver.stop();
         }
-        ioThread.join();
+        ioThread.stop();
     }
 
     protected DataController getController() {
