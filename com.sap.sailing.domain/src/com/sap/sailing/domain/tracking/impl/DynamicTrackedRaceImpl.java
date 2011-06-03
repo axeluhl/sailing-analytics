@@ -7,12 +7,10 @@ import java.util.NavigableSet;
 import java.util.Set;
 
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.tracking.DynamicTrack;
-import com.sap.sailing.domain.tracking.DynamicTrackedLeg;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
@@ -64,21 +62,6 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
         notifyListeners(fix, this, competitor);
     }
     
-    @Override
-    public DynamicTrackedLeg getTrackedLegFinishingAt(Waypoint endOfLeg) {
-        return (DynamicTrackedLeg) super.getTrackedLegFinishingAt(endOfLeg);
-    }
-
-    @Override
-    public DynamicTrackedLeg getTrackedLegStartingAt(Waypoint startOfLeg) {
-        return (DynamicTrackedLeg) super.getTrackedLegStartingAt(startOfLeg);
-    }
-    
-    @Override
-    public DynamicTrackedLeg getTrackedLeg(Leg leg) {
-        return (DynamicTrackedLeg) super.getTrackedLeg(leg);
-    }
-
     @Override
     public void updateMarkPassings(Competitor competitor, Iterable<MarkPassing> markPassings) {
         clearMarkPassings(competitor);

@@ -76,7 +76,7 @@ public class TrackedRaceImpl implements TrackedRace {
         this.race = race;
         LinkedHashMap<Leg, TrackedLeg> trackedLegsMap = new LinkedHashMap<Leg, TrackedLeg>();
         for (Leg leg : race.getCourse().getLegs()) {
-            trackedLegsMap.put(leg, new DynamicTrackedLegImpl(this, leg, race.getCompetitors()));
+            trackedLegsMap.put(leg, createTrackedLeg(race, leg));
         }
         trackedLegs = trackedLegsMap;
         markPassingsForCompetitor = new HashMap<Competitor, NavigableSet<MarkPassing>>();
@@ -94,6 +94,10 @@ public class TrackedRaceImpl implements TrackedRace {
             windTracks.put(windSource, new WindTrackImpl(millisecondsOverWhichToAverageWind));
         }
         currentWindSource = WindSource.EXPEDITION;
+    }
+
+    protected TrackedLeg createTrackedLeg(RaceDefinition race, Leg leg) {
+        return new TrackedLegImpl(this, leg, race.getCompetitors());
     }
     
     protected NavigableSet<MarkPassing> getMarkPassings(Competitor competitor) {

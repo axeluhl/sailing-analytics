@@ -2,7 +2,6 @@ package com.sap.sailing.domain.tracking;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.TimePoint;
-import com.sap.sailing.domain.base.Waypoint;
 
 public interface DynamicTrackedRace extends TrackedRace {
     void recordFix(Competitor competitor, GPSFixMoving fix);
@@ -17,12 +16,6 @@ public interface DynamicTrackedRace extends TrackedRace {
     void addListener(RawListener<Competitor, GPSFixMoving> listener);
     
     // TODO need another listener protocol for general changes in ranking and leg completion
-
-    @Override
-    DynamicTrackedLeg getTrackedLegFinishingAt(Waypoint endOfLeg);
-
-    @Override
-    DynamicTrackedLeg getTrackedLegStartingAt(Waypoint startOfLeg);
 
     /**
      * Updates all mark passings for <code>competitor</code> for this race. The

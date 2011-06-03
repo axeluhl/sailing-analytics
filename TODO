@@ -1,7 +1,8 @@
  - Create an alternative implementation of TrackedLeg, TrackedLegOfCompetitor, TrackedRace
    based on LiveResult and MarkResult
 
- - Include declination stuff into processing of Expedition wind data
+ - Include declination stuff into processing of Expedition wind data. Need smart caching,
+   probably rounding to full degrees.
 
  - Clarify deploy / install / upgrade process, maybe using "mvn deploy" and a maven
    "repository" on the target host
@@ -12,9 +13,11 @@
 
  - Open test server firewall ports or forward a specific DNS name to test server port
 
+ - Test fail-over in case one of the two Java VM fails
+
  - Pass test server info to BeTomorrow so they can start their wind test. Include
    information about the query API by which they can determine the success of the
    wind update
 
-
+ - Set up two Expedition machines with RF and UMTS transmission, test killing one
 
