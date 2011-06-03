@@ -5,10 +5,10 @@ import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.impl.DegreeBearingImpl;
-import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
+import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.tracking.Wind;
 
-public class WindImpl extends KnotSpeedImpl implements Wind {
+public class WindImpl extends KnotSpeedWithBearingImpl implements Wind {
     private final Position position;
     private final TimePoint timepoint;
     private final Bearing from;

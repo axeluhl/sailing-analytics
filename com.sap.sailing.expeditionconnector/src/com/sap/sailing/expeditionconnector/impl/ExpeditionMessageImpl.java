@@ -13,7 +13,7 @@ import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.base.impl.DegreePosition;
-import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
+import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
@@ -104,7 +104,7 @@ public class ExpeditionMessageImpl implements ExpeditionMessage {
     @Override
     public SpeedWithBearing getTrueWind() {
         if (hasValue(ID_TWD) && hasValue(ID_TWS)) {
-            return new KnotSpeedImpl(getValue(ID_TWS), getTrueWindBearing());
+            return new KnotSpeedWithBearingImpl(getValue(ID_TWS), getTrueWindBearing());
         } else {
             return null;
         }
@@ -122,7 +122,7 @@ public class ExpeditionMessageImpl implements ExpeditionMessage {
     @Override
     public SpeedWithBearing getSpeedOverGround() {
         if (hasValue(ID_GPS_COG) && hasValue(ID_GPS_SOG)) {
-            return new KnotSpeedImpl(getValue(ID_GPS_SOG), getCourseOverGround());
+            return new KnotSpeedWithBearingImpl(getValue(ID_GPS_SOG), getCourseOverGround());
         } else {
             return null;
         }

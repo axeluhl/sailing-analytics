@@ -18,7 +18,7 @@ import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.base.impl.DegreePosition;
-import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
+import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
@@ -35,27 +35,27 @@ public class TrackTest {
                 new BoatClassImpl("505")), /* millisecondsOverWhichToAverage */ 5000);
         GPSFixMovingImpl gpsFix1 = new GPSFixMovingImpl(
                 new DegreePosition(1, 2), new MillisecondsTimePoint(
-                        System.currentTimeMillis()), new KnotSpeedImpl(1,
+                        System.currentTimeMillis()), new KnotSpeedWithBearingImpl(1,
                         new DegreeBearingImpl(90)));
         waitThreeMillis();
         GPSFixMovingImpl gpsFix2 = new GPSFixMovingImpl(
                 new DegreePosition(1, 3), new MillisecondsTimePoint(
-                        System.currentTimeMillis()), new KnotSpeedImpl(1,
+                        System.currentTimeMillis()), new KnotSpeedWithBearingImpl(1,
                         new DegreeBearingImpl(90)));
         waitThreeMillis();
         GPSFixMovingImpl gpsFix3 = new GPSFixMovingImpl(
                 new DegreePosition(1, 4), new MillisecondsTimePoint(
-                        System.currentTimeMillis()), new KnotSpeedImpl(2,
+                        System.currentTimeMillis()), new KnotSpeedWithBearingImpl(2,
                         new DegreeBearingImpl(0)));
         waitThreeMillis();
         GPSFixMovingImpl gpsFix4 = new GPSFixMovingImpl(
                 new DegreePosition(3, 4), new MillisecondsTimePoint(
-                        System.currentTimeMillis()), new KnotSpeedImpl(2,
+                        System.currentTimeMillis()), new KnotSpeedWithBearingImpl(2,
                         new DegreeBearingImpl(0)));
         waitThreeMillis();
         GPSFixMovingImpl gpsFix5 = new GPSFixMovingImpl(
                 new DegreePosition(5, 4), new MillisecondsTimePoint(
-                        System.currentTimeMillis()), new KnotSpeedImpl(2, new DegreeBearingImpl(0)));
+                        System.currentTimeMillis()), new KnotSpeedWithBearingImpl(2, new DegreeBearingImpl(0)));
         track.addGPSFix(gpsFix1);
         track.addGPSFix(gpsFix2);
         track.addGPSFix(gpsFix3);

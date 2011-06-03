@@ -24,7 +24,7 @@ import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.base.impl.DegreePosition;
-import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
+import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.base.impl.Util.Pair;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -227,9 +227,9 @@ public class AdminApp extends Servlet {
                     SpeedWithBearing speed;
                     if (speedAsString == null) {
                         // only bearing provided; no speed; assume speed as 1kn
-                        speed = new KnotSpeedImpl(1, bearing);
+                        speed = new KnotSpeedWithBearingImpl(1, bearing);
                     } else {
-                        speed = new KnotSpeedImpl(Double.valueOf(speedAsString), bearing);
+                        speed = new KnotSpeedWithBearingImpl(Double.valueOf(speedAsString), bearing);
                     }
                     Position p = null;
                     String lat = req.getParameter(PARAM_NAME_LATDEG);

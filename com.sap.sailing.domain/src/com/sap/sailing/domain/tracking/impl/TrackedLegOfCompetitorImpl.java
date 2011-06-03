@@ -13,7 +13,7 @@ import com.sap.sailing.domain.base.Speed;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.impl.KilometersPerHourSpeedImpl;
-import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
+import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
@@ -58,7 +58,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
 
     @Override
-    public long getTimeInMilliSeconds() {
+    public long getTimeInMilliSeconds(TimePoint timePoint) {
         long result = -1;
         MarkPassing passedEndWaypoint = getTrackedRace().getMarkPassing(getCompetitor(), getTrackedLeg().getLeg().getTo());
         if (passedEndWaypoint != null) {
@@ -66,7 +66,8 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
             if (passedStartWaypoint != null) {
                 result = passedEndWaypoint.getTimePoint().asMillis() - passedStartWaypoint.getTimePoint().asMillis();
             } else {
-                result = 0;
+                throw new RuntimeException(""+getCompetitor()+" passed waypoint at end of leg "+
+                        getLeg()+" without having passed waypoint at beginning of leg");
             }
         }
         return result;
@@ -108,7 +109,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
         } else {
             TimePoint now = MillisecondsTimePoint.now();
             Distance d = getDistanceTraveled(now);
-            long millis = getTimeInMilliSeconds();
+            long millis = getTimeInMilliSeconds(timePoint);
             if (millis == -1) {
                 // didn't finish the leg yet
                 millis = now.asMillis() - legStart.getTimePoint().asMillis();
@@ -118,7 +119,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
 
     @Override
-    public Speed getMaximumSpeedOverGround() {
+    public Speed getMaximumSpeedOverGround(TimePoint timePoint) {
         // fetch all fixes on this leg so far and determine their maximum speed
         MarkPassing legStart = getMarkPassingForLegStart();
         if (legStart == null) {
@@ -216,7 +217,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
         if (cos < 0) {
             bearing = bearing.reverse();
         }
-        SpeedWithBearing result = new KnotSpeedImpl(Math.abs(wind.getKnots() * cos), bearing);
+        SpeedWithBearing result = new KnotSpeedWithBearingImpl(Math.abs(wind.getKnots() * cos), bearing);
         return result;
     }
 
@@ -265,7 +266,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
                 getLeg().getTo().getBuoys().iterator().next()).getEstimatedPosition(at);
         Wind wind = getWind(
                 approximateLegStartPosition.translateGreatCircle(approximateLegStartPosition.getBearingGreatCircle(approximateLegEndPosition),
-                        approximateLegStartPosition.getDistance(approximateLegEndPosition)), at);
+                        approximateLegStartPosition.getDistance(approximateLegEndPosition).scale(0.5)), at);
         return wind;
     }
 

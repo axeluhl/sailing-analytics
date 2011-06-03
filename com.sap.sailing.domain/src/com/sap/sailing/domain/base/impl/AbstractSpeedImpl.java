@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.base.impl;
 
 import com.sap.sailing.domain.base.Distance;
+import com.sap.sailing.domain.base.Mile;
 import com.sap.sailing.domain.base.Speed;
 import com.sap.sailing.domain.base.TimePoint;
 
@@ -11,6 +12,16 @@ public abstract class AbstractSpeedImpl implements Speed {
         return new NauticalMileDistance((t2.asMillis() - t1.asMillis()) / 1000. / 3600. * getKnots());
     }
     
+    @Override
+    public double getMetersPerSecond() {
+        return getKnots() * Mile.METERS_PER_SEA_MILE / 3600;
+    }
+
+    @Override
+    public double getKilometersPerHour() {
+        return getKnots() * Mile.METERS_PER_SEA_MILE / 1000;
+    }
+
     @Override
     public int compareTo(Speed speed) {
         return getMetersPerSecond() > speed.getMetersPerSecond() ? 1 : getMetersPerSecond() == speed.getMetersPerSecond() ? 0 : -1;

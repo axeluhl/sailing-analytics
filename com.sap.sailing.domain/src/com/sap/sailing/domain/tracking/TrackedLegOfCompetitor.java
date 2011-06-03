@@ -15,7 +15,7 @@ public interface TrackedLegOfCompetitor {
      * How long did it take the competitor to complete this {@link #getLeg() leg}? If the competitor hasn't finished the
      * leg yet, -1 is returned.
      */
-    long getTimeInMilliSeconds();
+    long getTimeInMilliSeconds(TimePoint timePoint);
 
     /**
      * The distance over ground traveled by the competitor in this leg up to <code>timePoint</code>. If
@@ -43,7 +43,7 @@ public interface TrackedLegOfCompetitor {
     /**
      * @return <code>null</code> if the competitor hasn't started this leg yet
      */
-    Speed getMaximumSpeedOverGround();
+    Speed getMaximumSpeedOverGround(TimePoint timePoint);
 
     int getNumberOfTacks(TimePoint timePoint);
 

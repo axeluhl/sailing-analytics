@@ -6,7 +6,7 @@ import org.junit.Test;
 
 import com.sap.sailing.domain.base.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.base.impl.DegreePosition;
-import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
+import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindTrack;
@@ -20,7 +20,7 @@ public class WindTest {
     public void testSingleElementWindTrack() {
         WindTrack track = new WindTrackImpl(AVERAGING_INTERVAL_MILLIS);
         DegreePosition pos = new DegreePosition(0, 0);
-        Wind wind = new WindImpl(pos, new MillisecondsTimePoint(0), new KnotSpeedImpl(10, new DegreeBearingImpl(123)));
+        Wind wind = new WindImpl(pos, new MillisecondsTimePoint(0), new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(123)));
         track.add(wind);
         Wind estimate = track.getEstimatedWind(pos, new MillisecondsTimePoint(0));
         assertEquals(10, estimate.getKnots(), 0.000000001);
@@ -31,7 +31,7 @@ public class WindTest {
     public void testSingleElementExtrapolation() {
         WindTrack track = new WindTrackImpl(30000 /* 30s averaging interval */);
         DegreePosition pos = new DegreePosition(0, 0);
-        Wind wind = new WindImpl(pos, new MillisecondsTimePoint(0), new KnotSpeedImpl(10, new DegreeBearingImpl(123)));
+        Wind wind = new WindImpl(pos, new MillisecondsTimePoint(0), new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(123)));
         track.add(wind);
         // we only have one measurement; this should be extrapolated because it's our best guess
         Wind estimate = track.getEstimatedWind(pos, new MillisecondsTimePoint(1000));
@@ -43,7 +43,7 @@ public class WindTest {
     public void testSingleElementExtrapolationBeyondThreshold() {
         WindTrack track = new WindTrackImpl(30000 /* 30s averaging interval */);
         DegreePosition pos = new DegreePosition(0, 0);
-        Wind wind = new WindImpl(pos, new MillisecondsTimePoint(0), new KnotSpeedImpl(10, new DegreeBearingImpl(123)));
+        Wind wind = new WindImpl(pos, new MillisecondsTimePoint(0), new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(123)));
         track.add(wind);
         // we only have one measurement; this should be extrapolated because it's our best guess even if
         // the last measurement was longer ago than our smoothening interval
@@ -56,9 +56,9 @@ public class WindTest {
     public void testTwoElementWindTrackSameBearing() {
         WindTrack track = new WindTrackImpl(30000 /* 30s averaging interval */);
         DegreePosition pos = new DegreePosition(0, 0);
-        Wind wind1 = new WindImpl(pos, new MillisecondsTimePoint(0), new KnotSpeedImpl(10, new DegreeBearingImpl(100)));
+        Wind wind1 = new WindImpl(pos, new MillisecondsTimePoint(0), new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(100)));
         track.add(wind1);
-        Wind wind2 = new WindImpl(pos, new MillisecondsTimePoint(1000), new KnotSpeedImpl(20, new DegreeBearingImpl(100)));
+        Wind wind2 = new WindImpl(pos, new MillisecondsTimePoint(1000), new KnotSpeedWithBearingImpl(20, new DegreeBearingImpl(100)));
         track.add(wind2);
         Wind estimate = track.getEstimatedWind(pos, new MillisecondsTimePoint(2000));
         assertEquals(15, estimate.getKnots(), 0.000000001);
@@ -69,9 +69,9 @@ public class WindTest {
     public void testTwoElementWindTrackDifferentBearing() {
         WindTrack track = new WindTrackImpl(30000 /* 30s averaging interval */);
         DegreePosition pos = new DegreePosition(0, 0);
-        Wind wind1 = new WindImpl(pos, new MillisecondsTimePoint(0), new KnotSpeedImpl(10, new DegreeBearingImpl(110)));
+        Wind wind1 = new WindImpl(pos, new MillisecondsTimePoint(0), new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(110)));
         track.add(wind1);
-        Wind wind2 = new WindImpl(pos, new MillisecondsTimePoint(1000), new KnotSpeedImpl(10, new DegreeBearingImpl(100)));
+        Wind wind2 = new WindImpl(pos, new MillisecondsTimePoint(1000), new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(100)));
         track.add(wind2);
         Wind estimate = track.getEstimatedWind(pos, new MillisecondsTimePoint(2000));
         assertEquals(10, estimate.getKnots(), 0.000000001);

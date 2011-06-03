@@ -77,7 +77,7 @@ public class TracTracTrackedRaceImpl extends DynamicTrackedRaceImpl implements D
      * and fetches the live results for <code>competitor</code> for this race's boat class. If no such live data
      * is found, <code>null</code> is returned.
      */
-    private LiveResultItem getCompetitorLiveResults(Competitor competitor, TimePoint timePoint) {
+    protected LiveResultItem getCompetitorLiveResults(Competitor competitor, TimePoint timePoint) {
         refreshResultGenerator(timePoint);
         LiveResultItem competitorItem = null;
         for (LiveResult liveResult : resultGenerator.getLiveResults()) {
@@ -99,7 +99,7 @@ public class TracTracTrackedRaceImpl extends DynamicTrackedRaceImpl implements D
      * fetches the leg results for <code>competitor</code> in the leg starting at <code>legStartWaypoint</code> for this
      * race's boat class. If no such mark data is found, <code>null</code> is returned.
      */
-    private MarkResultItem getCompetitorMarkResults(Competitor competitor, Waypoint legStartWaypoint, TimePoint timePoint) {
+    protected MarkResultItem getCompetitorMarkResults(Competitor competitor, Waypoint legStartWaypoint, TimePoint timePoint) {
         refreshResultGenerator(timePoint);
         int waypointIndex = getRace().getCourse().getIndexOfWaypoint(legStartWaypoint);
         MarkResultItem competitorItem = null;

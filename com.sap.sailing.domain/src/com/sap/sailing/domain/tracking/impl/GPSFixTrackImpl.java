@@ -10,7 +10,7 @@ import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.impl.DegreeBearingImpl;
-import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
+import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.NauticalMileDistance;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
@@ -82,7 +82,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         } else {
             Distance distance = fix1.getPosition().getDistance(fix2.getPosition());
             long millis = Math.abs(fix1.getTimePoint().asMillis() - fix2.getTimePoint().asMillis());
-            SpeedWithBearing speed = new KnotSpeedImpl(distance.getNauticalMiles() / (millis / 1000.),
+            SpeedWithBearing speed = new KnotSpeedWithBearingImpl(distance.getNauticalMiles() / (millis / 1000.),
                     fix1.getPosition().getBearingGreatCircle(fix2.getPosition()));
             return speed;
         }
@@ -158,7 +158,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
                 last = next;
             }
         }
-        SpeedWithBearing avgSpeed = new KnotSpeedImpl(knotSum / count, new DegreeBearingImpl(bearingDegSum/count));
+        SpeedWithBearing avgSpeed = new KnotSpeedWithBearingImpl(knotSum / count, new DegreeBearingImpl(bearingDegSum/count));
         return avgSpeed;
     }
 

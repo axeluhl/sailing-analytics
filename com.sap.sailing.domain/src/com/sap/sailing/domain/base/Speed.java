@@ -1,10 +1,10 @@
 package com.sap.sailing.domain.base;
 
 import com.sap.sailing.domain.base.impl.DegreeBearingImpl;
-import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
+import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 
 public interface Speed extends Comparable<Speed> {
-    final static Speed NULL = new KnotSpeedImpl(0, new DegreeBearingImpl(0));
+    final static Speed NULL = new KnotSpeedWithBearingImpl(0, new DegreeBearingImpl(0));
     
     double getKnots();
 
