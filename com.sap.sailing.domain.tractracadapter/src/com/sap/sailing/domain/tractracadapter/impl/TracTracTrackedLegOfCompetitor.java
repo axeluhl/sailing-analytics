@@ -11,6 +11,7 @@ import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.NauticalMileDistance;
+import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.NoWindException;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.tractrac.ResultAPI.LiveResultItem;
@@ -111,14 +112,14 @@ public class TracTracTrackedLegOfCompetitor implements TrackedLegOfCompetitor {
 
     @Override
     public boolean hasStartedLeg(TimePoint timePoint) {
-        // TODO Auto-generated method stub
-        return false;
+        MarkPassing markPassingForLegStart = getTrackedRace().getMarkPassing(getCompetitor(), getLeg().getFrom());
+        return markPassingForLegStart != null && markPassingForLegStart.getTimePoint().compareTo(timePoint) <= 0;
     }
 
     @Override
     public boolean hasFinishedLeg(TimePoint timePoint) {
-        // TODO Auto-generated method stub
-        return false;
+        MarkPassing markPassingForLegEnd = getTrackedRace().getMarkPassing(getCompetitor(), getLeg().getTo());
+        return markPassingForLegEnd != null && markPassingForLegEnd.getTimePoint().compareTo(timePoint) <= 0;
     }
 
     @Override
