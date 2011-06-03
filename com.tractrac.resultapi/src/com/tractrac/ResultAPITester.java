@@ -8,7 +8,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
 import com.tractrac.ResultAPI.LiveResult;
@@ -38,7 +41,8 @@ public class ResultAPITester {
             // Use the start-time of program to make a simply timer
             long startTimeReal = System.currentTimeMillis();
             // Set the start-time of the race
-            long StartTimeRace = (new Date(111, 3, 01, 00, 20, 00)).getTime();
+            Calendar cal = new GregorianCalendar(111, 3, 01, 00, 20, 00);
+            long StartTimeRace = cal.getTimeInMillis();
             // Set the speed up of the demonstration
             int speedup = 10;
             
@@ -62,7 +66,7 @@ public class ResultAPITester {
                  command = br.readLine();
                  // Calculate time according to our simple timer
                  long time = (System.currentTimeMillis() - startTimeReal) * speedup + StartTimeRace;
-                 System.out.println("Current time: " + (new Date(time)).toGMTString());
+                 System.out.println("Current time: " + new SimpleDateFormat().format(new Date(time)));
                  if (useWindDirection) System.out.println("Using wind directino: " + windDirectionDegrees);
                  else System.out.println("Not using wind direction");
                  if (command.equalsIgnoreCase("Q")) System.exit(0);
