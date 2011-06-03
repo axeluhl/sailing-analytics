@@ -1,1 +1,17 @@
  - Include declination stuff into processing of Expedition wind data
+
+ - Clarify deploy / install / upgrade process, maybe using "mvn deploy" and a maven
+   "repository" on the target host
+
+ - Re-install ssh keys on server
+
+ - Set up a test server that tries to be always-on
+
+ - Open test server firewall ports or forward a specific DNS name to test server port
+
+ - Pass test server info to BeTomorrow so they can start their wind test. Include
+   information about the query API by which they can determine the success of the
+   wind update
+
+
+
