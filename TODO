@@ -1,4 +1,5 @@
- - Include new TracTrac client and see which information is now available
+ - Create an alternative implementation of TrackedLeg, TrackedLegOfCompetitor, TrackedRace
+   based on LiveResult and MarkResult
 
  - Include declination stuff into processing of Expedition wind data
 
