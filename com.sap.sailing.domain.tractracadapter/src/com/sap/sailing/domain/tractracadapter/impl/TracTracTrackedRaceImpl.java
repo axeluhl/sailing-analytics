@@ -5,12 +5,16 @@ import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.TimePoint;
+import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.TrackedEvent;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
 import com.tractrac.ResultAPI.LiveResult;
 import com.tractrac.ResultAPI.LiveResultItem;
+import com.tractrac.ResultAPI.MarkResult;
+import com.tractrac.ResultAPI.MarkResultItem;
+import com.tractrac.ResultAPI.PerLegResult;
 import com.tractrac.ResultAPI.ResultGenerator;
 
 public class TracTracTrackedRaceImpl extends DynamicTrackedRaceImpl implements DynamicTrackedRace {
@@ -50,22 +54,68 @@ public class TracTracTrackedRaceImpl extends DynamicTrackedRaceImpl implements D
 
     @Override
     public int getRankDifference(Competitor competitor, Leg leg, TimePoint timePoint) {
-        refreshResultGenerator(timePoint);
-        // TODO Auto-generated method stub
-        return 0;
+        MarkResultItem markResult = getCompetitorMarkResults(competitor, leg.getFrom(), timePoint);
+        if (markResult != null) {
+            return markResult.getDeltarank();
+        } else {
+            throw new RuntimeException("Didn't find mark results for competitor "+competitor+" in leg "+leg+" at time point "+timePoint);
+        }
     }
 
     @Override
     public int getRank(Competitor competitor, TimePoint timePoint) {
+        LiveResultItem competitorItem = getCompetitorLiveResults(competitor, timePoint);
+        if (competitorItem != null) {
+            return competitorItem.getRank();
+        } else {
+            throw new RuntimeException("Couldn't find live results for competitor "+competitor+" at time "+timePoint);
+        }
+    }
+
+    /**
+     * {@link #refreshResultGenerator(TimePoint) Updates the Trac Trac result generator} to <code>timePoint</code>
+     * and fetches the live results for <code>competitor</code> for this race's boat class. If no such live data
+     * is found, <code>null</code> is returned.
+     */
+    private LiveResultItem getCompetitorLiveResults(Competitor competitor, TimePoint timePoint) {
         refreshResultGenerator(timePoint);
+        LiveResultItem competitorItem = null;
         for (LiveResult liveResult : resultGenerator.getLiveResults()) {
             if (liveResult.getClassName().equals(getRace().getBoatClass().getName())) {
                 for (LiveResultItem item : liveResult.values()) {
-                    
+                    if (item.getUuid().equals(competitor.getId())) {
+                        // found result record for right competitor
+                        competitorItem = item;
+                        break;
+                    }
                 }
             }
         }
-        return 0;
+        return competitorItem;
+    }
+
+    /**
+     * {@link #refreshResultGenerator(TimePoint) Updates the Trac Trac result generator} to <code>timePoint</code> and
+     * fetches the leg results for <code>competitor</code> in the leg starting at <code>legStartWaypoint</code> for this
+     * race's boat class. If no such mark data is found, <code>null</code> is returned.
+     */
+    private MarkResultItem getCompetitorMarkResults(Competitor competitor, Waypoint legStartWaypoint, TimePoint timePoint) {
+        refreshResultGenerator(timePoint);
+        int waypointIndex = getRace().getCourse().getIndexOfWaypoint(legStartWaypoint);
+        MarkResultItem competitorItem = null;
+        for (PerLegResult perLegResult : resultGenerator.getPerLegResults()) {
+            if (perLegResult.getClassName().equals(getRace().getBoatClass().getName())) {
+                MarkResult markResult = perLegResult.getMarkResult(waypointIndex);
+                for (MarkResultItem item : markResult.values()) {
+                    if (item.getUuid().equals(competitor.getId())) {
+                        // found result record for right competitor
+                        competitorItem = item;
+                        break;
+                    }
+                }
+            }
+        }
+        return competitorItem;
     }
 
 }

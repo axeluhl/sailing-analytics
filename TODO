@@ -4,7 +4,7 @@
  - Use a JDBC driver to store wind data in MungoDB; retrieve it from there upon startup
 
  - Include declination stuff into processing of Expedition wind data. Need smart caching,
-   probably rounding to full degrees.
+   probably rounding to a configurable degrees amount.
 
  - Clarify deploy / install / upgrade process, maybe using "mvn deploy" and a maven
    "repository" on the target host
