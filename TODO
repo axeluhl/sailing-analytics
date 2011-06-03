@@ -1,3 +1,5 @@
+ - Include new TracTrac client and see which information is now available
+
  - Include declination stuff into processing of Expedition wind data
 
  - Clarify deploy / install / upgrade process, maybe using "mvn deploy" and a maven
