@@ -1,6 +1,8 @@
  - Create an alternative implementation of TrackedLeg, TrackedLegOfCompetitor, TrackedRace
    based on LiveResult and MarkResult
 
+ - Use a JDBC driver to store wind data in MungoDB; retrieve it from there upon startup
+
  - Include declination stuff into processing of Expedition wind data. Need smart caching,
    probably rounding to full degrees.
 

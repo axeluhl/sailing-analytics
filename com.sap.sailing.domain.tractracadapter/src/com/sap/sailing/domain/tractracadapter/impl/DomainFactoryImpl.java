@@ -158,7 +158,7 @@ public class DomainFactoryImpl implements DomainFactory {
             Nationality nationality = getNationality(competitor.getNationality());
             Team team = getTeam(competitor.getName(), nationality);
             Boat boat = new BoatImpl(competitor.getShortName(), boatClass);
-            result = new CompetitorImpl(competitor.getName(), team, boat);
+            result = new CompetitorImpl(competitor.getId(), competitor.getName(), team, boat);
             competitorCache.put(competitor, result);
         }
         return result;

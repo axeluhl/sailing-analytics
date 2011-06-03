@@ -7,6 +7,7 @@ Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Require-Bundle: com.sap.sailing.domain,
  com.tractrac.clientmodule,
- org.json.simple;bundle-version="1.1.0"
+ org.json.simple;bundle-version="1.1.0",
+ com.tractrac.resultapi
 Export-Package: com.sap.sailing.domain.tractracadapter
 Bundle-ActivationPolicy: lazy

@@ -10,3 +10,4 @@ Bundle-ClassPath: lib/TracResultAPI.jar,
  .,
  lib/TracClientSail.jar,
  lib/TracClientLib.jar
+Export-Package: com.tractrac.ResultAPI

@@ -7,11 +7,18 @@ import com.sap.sailing.domain.base.Team;
 public class CompetitorImpl extends NamedImpl implements Competitor {
     private final Team team;
     private final Boat boat;
+    private final Object id;
     
-    public CompetitorImpl(String name, Team team, Boat boat) {
+    public CompetitorImpl(Object id, String name, Team team, Boat boat) {
         super(name);
+        this.id = id;
         this.team = team;
         this.boat = boat;
+    }
+    
+    @Override
+    public Object getId() {
+        return id;
     }
 
     @Override
