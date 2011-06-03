@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Resultapi
+Bundle-SymbolicName: com.tractrac.resultapi
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: TRACTRAC
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Require-Bundle: com.tractrac.clientmodule
+Bundle-ClassPath: lib/TracResultAPI.jar,
+ .,
+ lib/TracClientSail.jar,
+ lib/TracClientLib.jar
