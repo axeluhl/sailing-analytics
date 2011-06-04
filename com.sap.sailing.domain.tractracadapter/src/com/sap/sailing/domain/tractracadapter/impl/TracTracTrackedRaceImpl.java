@@ -43,7 +43,7 @@ public class TracTracTrackedRaceImpl extends DynamicTrackedRaceImpl implements D
             resultGeneratorValidFor = timePoint;
             Position p = getTrack(getRace().getCourse().getFirstWaypoint().getBuoys().iterator().next())
                     .getEstimatedPosition(timePoint);
-            resultGenerator.recalcuateWithWind(timePoint.asMillis(), getWind(p, timePoint).getBearing().getDegrees());
+            resultGenerator.recalcuateWithWind(timePoint.asMillis(), getWind(p, timePoint).getFrom().getDegrees());
         }
     }
 

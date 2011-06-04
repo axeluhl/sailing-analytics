@@ -21,6 +21,7 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Speed;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
@@ -129,7 +130,8 @@ public class ModeratorApp extends Servlet {
             resp.sendError(500, "Race not found");
         } else {
             try {
-                TimePoint timePoint = getTimePoint(req, PARAM_NAME_TIME, PARAM_NAME_TIME_MILLIS, trackedRace.getTimePointOfNewestEvent());
+                TimePoint timePoint = getTimePoint(req, PARAM_NAME_TIME, PARAM_NAME_TIME_MILLIS,
+                        trackedRace.getTimePointOfNewestEvent() == null ? MillisecondsTimePoint.now() : trackedRace.getTimePointOfNewestEvent());
                 JSONArray jsonWaypoints = new JSONArray();
                 for (Waypoint waypoint : trackedRace.getRace().getCourse().getWaypoints()) {
                     JSONObject jsonWaypoint = new JSONObject();
@@ -177,7 +179,8 @@ public class ModeratorApp extends Servlet {
             resp.sendError(500, "Race not found");
         } else {
             try {
-                TimePoint timePoint = getTimePoint(req, PARAM_NAME_TIME, PARAM_NAME_TIME_MILLIS, trackedRace.getTimePointOfNewestEvent());
+                TimePoint timePoint = getTimePoint(req, PARAM_NAME_TIME, PARAM_NAME_TIME_MILLIS,
+                        trackedRace.getTimePointOfNewestEvent()==null?MillisecondsTimePoint.now():trackedRace.getTimePointOfNewestEvent());
                 String sinceUpdateString = req.getParameter(PARAM_NAME_SINCE_UPDATE);
                 if (sinceUpdateString != null) {
                     int sinceUpdate = Integer.valueOf(sinceUpdateString);
@@ -291,7 +294,9 @@ public class ModeratorApp extends Servlet {
         for (Event event : getService().getAllEvents()) {
             JSONObject jsonEvent = new JSONObject();
             jsonEvent.put("name", event.getName());
-            jsonEvent.put("boatclass", event.getBoatClass().getName());
+            if (event.getBoatClass() != null) {
+                jsonEvent.put("boatclass", event.getBoatClass().getName());
+            }
             JSONArray jsonCompetitors = new JSONArray();
             for (Competitor competitor : event.getCompetitors()) {
                 JSONObject jsonCompetitor = new JSONObject();
