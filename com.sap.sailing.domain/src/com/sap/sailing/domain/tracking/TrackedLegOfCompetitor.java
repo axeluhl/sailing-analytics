@@ -19,11 +19,11 @@ public interface TrackedLegOfCompetitor {
 
     /**
      * The distance over ground traveled by the competitor in this leg up to <code>timePoint</code>. If
-     * <code>timePoint</code> is before the competitor started this leg, a {@link Distance#NULL zero} distance
-     * is returned. If the <code>timePoint</code> is after the time point at which the competitor finished this
-     * leg, the total distance traveled in this leg is returned. If the time point is after the last fix but
-     * the competitor hasn't finished the leg yet, the distance traveled up to the position at which the
-     * competitor is estimated to be at <code>timePoint</code> is used.
+     * <code>timePoint</code> is before the competitor started this leg, a {@link Distance#NULL zero} distance is
+     * returned. If the <code>timePoint</code> is after the time point at which the competitor finished this leg (if the
+     * respective mark passing has already been received), the total distance traveled in this leg is returned. If the
+     * time point is after the last fix but the competitor hasn't finished the leg yet, the distance traveled up to the
+     * position at which the competitor is estimated to be at <code>timePoint</code> is used.
      */
     Distance getDistanceTraveled(TimePoint timePoint);
 
@@ -38,6 +38,13 @@ public interface TrackedLegOfCompetitor {
 
     Speed getAverageVelocityMadeGood(TimePoint timePoint) throws NoWindException;
 
+    /**
+     * Computes the competitor's average speed over ground for this leg from the beginning of the leg up to time
+     * <code>timePoint</code> or at the time of the last event received for the race in case <code>timePoint</code> is
+     * after the time when the last fix for this competitor was received. If the competitor already completed the leg at
+     * <code>timePoint</code> and the respective mark passing event was already received, the average speed over ground
+     * for the entire leg (and no further) is computed.
+     */
     Speed getAverageSpeedOverGround(TimePoint timePoint);
 
     /**

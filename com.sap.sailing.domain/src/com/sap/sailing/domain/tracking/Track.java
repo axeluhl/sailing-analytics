@@ -22,6 +22,10 @@ public interface Track<FixType extends Timed> {
 
     FixType getFirstFixAfter(TimePoint timePoint);
     
+    FixType getFirstFix();
+    
+    FixType getLastFix();
+    
     /**
      * Returns an iterator starting at the first fix after <code>startingAt</code> (or
      * "at or after" in case <code>inclusive</code> is <code>true</code>).

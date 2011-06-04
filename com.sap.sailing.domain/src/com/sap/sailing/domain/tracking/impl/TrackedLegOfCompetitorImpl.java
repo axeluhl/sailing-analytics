@@ -14,7 +14,6 @@ import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.impl.KilometersPerHourSpeedImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
-import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.MarkPassing;
@@ -80,11 +79,9 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
             return Distance.NULL;
         } else {
             MarkPassing legEnd = getTrackedRace().getMarkPassing(getCompetitor(), getLeg().getTo());
-            TimePoint end;
-            if (legEnd == null) {
-                // leg not yet finished; take time specified
-                end = timePoint;
-            } else {
+            TimePoint end = timePoint;
+            if (legEnd != null && timePoint.compareTo(legEnd.getTimePoint()) > 0) {
+                // timePoint is after leg finish; take leg end and end time point
                 end = legEnd.getTimePoint();
             }
             return getTrackedRace().getTrack(getCompetitor()).getDistanceTraveled(legStart.getTimePoint(), end);
@@ -107,13 +104,14 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
         if (legStart == null) {
             return null;
         } else {
-            TimePoint now = MillisecondsTimePoint.now();
-            Distance d = getDistanceTraveled(now);
-            long millis = getTimeInMilliSeconds(timePoint);
-            if (millis == -1) {
-                // didn't finish the leg yet
-                millis = now.asMillis() - legStart.getTimePoint().asMillis();
+            TimePoint timePointToUse;
+            if (hasFinishedLeg(timePoint)) {
+                timePointToUse = getMarkPassingForLegEnd().getTimePoint();
+            } else {
+                timePointToUse = getTrackedRace().getTimePointOfNewestEvent();
             }
+            Distance d = getDistanceTraveled(timePointToUse);
+            long millis = timePointToUse.asMillis() - legStart.getTimePoint().asMillis();
             return d.inTime(millis);
         }
     }
@@ -130,7 +128,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
         Speed max = Speed.NULL;
         if (iter.hasNext()) {
             TimePoint markPassingTimeMillis = getMarkPassingForLegStart().getTimePoint();
-            Position lastPos = track.getEstimatedPosition(markPassingTimeMillis);
+            Position lastPos = track.getEstimatedPosition(markPassingTimeMillis, false);
             long lastTimeMillis = markPassingTimeMillis.asMillis();
             while (iter.hasNext()) {
                 GPSFixMoving fix = iter.next();
@@ -178,8 +176,12 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
      * the leg is neither an upwind nor a downwind leg, and hence the true distance to <code>buoy</code> is returned.
      */
     private Distance getWindwardDistanceTo(Buoy buoy, TimePoint at) throws NoWindException {
-        return getWindwardDistance(getTrackedRace().getTrack(getCompetitor()).getEstimatedPosition(at),
-                getTrackedRace().getTrack(buoy).getEstimatedPosition(at), at);
+        Position estimatedPosition = getTrackedRace().getTrack(getCompetitor()).getEstimatedPosition(at, false);
+        if (estimatedPosition == null) { // perhaps no fixes for this leg yet?
+            estimatedPosition = getTrackedRace().getTrack(getLeg().getFrom().getBuoys().iterator().next()).getEstimatedPosition(at, false);
+        }
+        return getWindwardDistance(estimatedPosition,
+                getTrackedRace().getTrack(buoy).getEstimatedPosition(at, false), at);
     }
 
     /**
@@ -208,7 +210,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
      * @throws NoWindException in case the wind direction is not known
      */
     private SpeedWithBearing getWindwardSpeed(SpeedWithBearing speed, TimePoint at) throws NoWindException {
-        Wind wind = getWind(getTrackedRace().getTrack(getCompetitor()).getEstimatedPosition(at), at);
+        Wind wind = getWind(getTrackedRace().getTrack(getCompetitor()).getEstimatedPosition(at, false), at);
         if (wind == null) {
             throw new NoWindException("Need at least wind direction to determine windward speed");
         }
@@ -241,9 +243,9 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
         }
         // check for all combinations of start/end waypoint buoys:
         for (Buoy startBuoy : getLeg().getFrom().getBuoys()) {
-            Position startBuoyPos = getTrackedRace().getTrack(startBuoy).getEstimatedPosition(at);
+            Position startBuoyPos = getTrackedRace().getTrack(startBuoy).getEstimatedPosition(at, false);
             for (Buoy endBuoy : getLeg().getTo().getBuoys()) {
-                Position endBuoyPos = getTrackedRace().getTrack(endBuoy).getEstimatedPosition(at);
+                Position endBuoyPos = getTrackedRace().getTrack(endBuoy).getEstimatedPosition(at, false);
                 Bearing legBearing = startBuoyPos.getBearingGreatCircle(endBuoyPos);
                 double deltaDeg = legBearing.getDegrees() - wind.getBearing().getDegrees();
                 if (deltaDeg > 180) {
@@ -261,9 +263,9 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
 
     private Wind getWindOnLeg(TimePoint at) {
         Position approximateLegStartPosition = getTrackedRace().getTrack(
-                getLeg().getFrom().getBuoys().iterator().next()).getEstimatedPosition(at);
+                getLeg().getFrom().getBuoys().iterator().next()).getEstimatedPosition(at, false);
         Position approximateLegEndPosition = getTrackedRace().getTrack(
-                getLeg().getTo().getBuoys().iterator().next()).getEstimatedPosition(at);
+                getLeg().getTo().getBuoys().iterator().next()).getEstimatedPosition(at, false);
         Wind wind = getWind(
                 approximateLegStartPosition.translateGreatCircle(approximateLegStartPosition.getBearingGreatCircle(approximateLegEndPosition),
                         approximateLegStartPosition.getDistance(approximateLegEndPosition).scale(0.5)), at);
@@ -289,9 +291,9 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
                 } else {
                     to = timePoint;
                 }
-                Position endPos = getTrackedRace().getTrack(getCompetitor()).getEstimatedPosition(to);
+                Position endPos = getTrackedRace().getTrack(getCompetitor()).getEstimatedPosition(to, false);
                 Distance d = getWindwardDistance(
-                        getTrackedRace().getTrack(getCompetitor()).getEstimatedPosition(start.getTimePoint()), endPos,
+                        getTrackedRace().getTrack(getCompetitor()).getEstimatedPosition(start.getTimePoint(), false), endPos,
                         to);
                 result = d.inTime(to.asMillis() - start.getTimePoint().asMillis());
             }
@@ -338,8 +340,8 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
             }
         }
         Competitor leader = getTrackedLeg().getLeader(timePoint);
-        Distance windwardDistanceToGo = getWindwardDistance(getTrackedRace().getTrack(getCompetitor()).getEstimatedPosition(timePoint),
-                getTrackedRace().getTrack(leader).getEstimatedPosition(timePoint), timePoint);
+        Distance windwardDistanceToGo = getWindwardDistance(getTrackedRace().getTrack(getCompetitor()).getEstimatedPosition(timePoint, false),
+                getTrackedRace().getTrack(leader).getEstimatedPosition(timePoint, false), timePoint);
         return windwardDistanceToGo.getMeters() / windwardSpeed.getMetersPerSecond();
     }
 

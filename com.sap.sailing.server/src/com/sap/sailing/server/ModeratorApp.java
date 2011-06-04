@@ -201,7 +201,7 @@ public class ModeratorApp extends Servlet {
                 TrackedLeg currentLeg = trackedRace.getCurrentLeg(timePoint);
                 if (currentLeg != null) {
                     positionForWind = trackedRace.getTrack(currentLeg.getLeg().getFrom().getBuoys().iterator().next())
-                            .getEstimatedPosition(timePoint);
+                            .getEstimatedPosition(timePoint, false);
                 }
                 Wind currentWind = trackedRace.getWind(positionForWind, timePoint);
                 if (currentWind != null) {
@@ -220,62 +220,67 @@ public class ModeratorApp extends Servlet {
                     for (Competitor competitor : event.getCompetitors()) {
                         JSONObject jsonCompetitorInLeg = new JSONObject();
                         TrackedLegOfCompetitor trackedLegOfCompetitor = leg.getTrackedLeg(competitor);
-                        jsonCompetitorInLeg.put("name", competitor.getName());
-                        Speed averageSpeedOverGround = trackedLegOfCompetitor.getAverageSpeedOverGround(timePoint);
-                        if (averageSpeedOverGround != null) {
-                            jsonCompetitorInLeg.put("averageSpeedOverGroundInKnots", averageSpeedOverGround.getKnots());
-                        }
-                        Distance distanceTraveled = trackedLegOfCompetitor.getDistanceTraveled(timePoint);
-                        if (distanceTraveled != null) {
-                            jsonCompetitorInLeg.put("distanceTraveledOverGroundInMeters", distanceTraveled.getMeters());
-                        }
-                        try {
-                            Speed velocityMadeGood = trackedLegOfCompetitor.getVelocityMadeGood(timePoint);
-                            if (velocityMadeGood != null) {
-                                jsonCompetitorInLeg.put("velocityMadeGoodInKnots", velocityMadeGood.getKnots());
+                        if (trackedLegOfCompetitor != null) {
+                            jsonCompetitorInLeg.put("name", competitor.getName());
+                            Speed averageSpeedOverGround = trackedLegOfCompetitor.getAverageSpeedOverGround(timePoint);
+                            if (averageSpeedOverGround != null) {
+                                jsonCompetitorInLeg.put("averageSpeedOverGroundInKnots",
+                                        averageSpeedOverGround.getKnots());
                             }
-                        } catch (NoWindException e) {
-                            // well, we don't know the wind direction... then no VMG will be shown...
-                        }
-                        try {
-                            Speed averageVelocityMadeGood = trackedLegOfCompetitor.getAverageVelocityMadeGood(timePoint);
-                            if (averageVelocityMadeGood != null) {
-                                jsonCompetitorInLeg.put("averageVelocityMadeGoodInKnots",
-                                        averageVelocityMadeGood.getKnots());
+                            Distance distanceTraveled = trackedLegOfCompetitor.getDistanceTraveled(timePoint);
+                            if (distanceTraveled != null) {
+                                jsonCompetitorInLeg.put("distanceTraveledOverGroundInMeters",
+                                        distanceTraveled.getMeters());
                             }
-                        } catch (NoWindException e1) {
-                            // well, we don't know the wind direction... then no average VMG will be shown...
-                        }
-                        try {
-                            jsonCompetitorInLeg.put("rank", trackedLegOfCompetitor.getRank(timePoint));
-                        } catch (RuntimeException re) {
-                            if (re.getCause() != null && re.getCause() instanceof NoWindException) {
-                                // well, we don't know the wind direction, so we can't compute a ranking
-                            } else {
-                                throw re;
+                            try {
+                                Speed velocityMadeGood = trackedLegOfCompetitor.getVelocityMadeGood(timePoint);
+                                if (velocityMadeGood != null) {
+                                    jsonCompetitorInLeg.put("velocityMadeGoodInKnots", velocityMadeGood.getKnots());
+                                }
+                            } catch (NoWindException e) {
+                                // well, we don't know the wind direction... then no VMG will be shown...
                             }
+                            try {
+                                Speed averageVelocityMadeGood = trackedLegOfCompetitor
+                                        .getAverageVelocityMadeGood(timePoint);
+                                if (averageVelocityMadeGood != null) {
+                                    jsonCompetitorInLeg.put("averageVelocityMadeGoodInKnots",
+                                            averageVelocityMadeGood.getKnots());
+                                }
+                            } catch (NoWindException e1) {
+                                // well, we don't know the wind direction... then no average VMG will be shown...
+                            }
+                            try {
+                                jsonCompetitorInLeg.put("rank", trackedLegOfCompetitor.getRank(timePoint));
+                            } catch (RuntimeException re) {
+                                if (re.getCause() != null && re.getCause() instanceof NoWindException) {
+                                    // well, we don't know the wind direction, so we can't compute a ranking
+                                } else {
+                                    throw re;
+                                }
+                            }
+                            try {
+                                jsonCompetitorInLeg.put("gapToLeaderInSeconds",
+                                        trackedLegOfCompetitor.getGapToLeaderInSeconds(timePoint));
+                            } catch (NoWindException e1) {
+                                // well, we don't know the wind direction... then no gap to leader will be shown...
+                            }
+                            try {
+                                jsonCompetitorInLeg.put("estimatedTimeToNextMarkInSeconds",
+                                        trackedLegOfCompetitor.getEstimatedTimeToNextMarkInSeconds(timePoint));
+                            } catch (NoWindException e) {
+                                // well, we don't know the wind direction... then no windward distance will be shown...
+                            }
+                            try {
+                                jsonCompetitorInLeg.put("windwardDistanceToGoInMeters", trackedLegOfCompetitor
+                                        .getWindwardDistanceToGo(timePoint).getMeters());
+                            } catch (NoWindException e) {
+                                // well, we don't know the wind direction... then no windward distance will be shown...
+                            }
+                            jsonCompetitorInLeg.put("started", trackedLegOfCompetitor.hasStartedLeg(timePoint));
+                            jsonCompetitorInLeg.put("finished", trackedLegOfCompetitor.hasFinishedLeg(timePoint));
+                            jsonCompetitors.add(jsonCompetitorInLeg);
                         }
-                        try {
-                            jsonCompetitorInLeg.put("gapToLeaderInSeconds",
-                                    trackedLegOfCompetitor.getGapToLeaderInSeconds(timePoint));
-                        } catch (NoWindException e1) {
-                            // well, we don't know the wind direction... then no gap to leader will be shown...
-                        }
-                        try {
-                            jsonCompetitorInLeg.put("estimatedTimeToNextMarkInSeconds", trackedLegOfCompetitor
-                                    .getEstimatedTimeToNextMarkInSeconds(timePoint));
-                        } catch (NoWindException e) {
-                            // well, we don't know the wind direction... then no windward distance will be shown...
-                        }
-                        try {
-                            jsonCompetitorInLeg.put("windwardDistanceToGoInMeters", trackedLegOfCompetitor
-                                    .getWindwardDistanceToGo(timePoint).getMeters());
-                        } catch (NoWindException e) {
-                            // well, we don't know the wind direction... then no windward distance will be shown...
-                        }
-                        jsonCompetitorInLeg.put("started", trackedLegOfCompetitor.hasStartedLeg(timePoint));
-                        jsonCompetitorInLeg.put("finished", trackedLegOfCompetitor.hasFinishedLeg(timePoint));
-                        jsonCompetitors.add(jsonCompetitorInLeg);
                     }
                     jsonLeg.put("competitors", jsonCompetitors);
                     jsonLegs.add(jsonLeg);

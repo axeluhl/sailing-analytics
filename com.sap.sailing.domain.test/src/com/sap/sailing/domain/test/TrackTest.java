@@ -114,7 +114,7 @@ public class TrackTest {
     public void assertEstimatedPositionBeforeStartIsStart() {
         GPSFixMoving start = track.getFixes().iterator().next();
         TimePoint oneNanoBeforeStart = new MillisecondsTimePoint(start.getTimePoint().asMillis()-1);
-        assertEquals(start.getPosition(), track.getEstimatedPosition(oneNanoBeforeStart));
+        assertEquals(start.getPosition(), track.getEstimatedPosition(oneNanoBeforeStart, false));
     }
     
     @Test
@@ -127,7 +127,7 @@ public class TrackTest {
             long millis = fix.getTimePoint().asMillis();
             if (!first) {
                 TimePoint inBetweenTimePoint = new MillisecondsTimePoint((millis+lastMillis)/2);
-                Position interpolatedPosition = track.getEstimatedPosition(inBetweenTimePoint);
+                Position interpolatedPosition = track.getEstimatedPosition(inBetweenTimePoint, false);
                 Distance d1 = lastFix.getPosition().getDistance(interpolatedPosition);
                 Distance d2 = interpolatedPosition.getDistance(fix.getPosition());
                 // the interpolated point should be on the great circle, not open a "triangle"
@@ -139,6 +139,18 @@ public class TrackTest {
             lastMillis = millis;
             lastFix = fix;
         }
+    }
+    
+    @Test
+    public void testSimpleExtrapolation() {
+        GPSFix fix = track.getLastFix();
+        long millis = fix.getTimePoint().asMillis();
+        GPSFix lastFix = track.getLastFixBefore(fix.getTimePoint());
+        long lastMillis = lastFix.getTimePoint().asMillis();
+        TimePoint afterTimePoint = new MillisecondsTimePoint(lastMillis + (lastMillis-millis));
+        Position extrapolatedPosition = track.getEstimatedPosition(afterTimePoint, true);
+        assertEquals(2, fix.getPosition().getDistance(extrapolatedPosition).getMeters()
+                / lastFix.getPosition().getDistance(extrapolatedPosition).getMeters(), 0.00001);
     }
     
     @Test

@@ -42,25 +42,28 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
     }
     
     @Override
-    public Position getEstimatedPosition(TimePoint timePoint) {
+    public Position getEstimatedPosition(TimePoint timePoint, boolean extrapolate) {
         FixType lastFixAtOrBefore = getLastFixAtOrBefore(timePoint);
         FixType firstFixAtOrAfter = getFirstFixAtOrAfter(timePoint);
         if (lastFixAtOrBefore != null && lastFixAtOrBefore == firstFixAtOrAfter) {
             return lastFixAtOrBefore.getPosition(); // exact match; how unlikely is that?
         } else {
-            SpeedWithBearing estimatedSpeed = estimateSpeed(lastFixAtOrBefore, firstFixAtOrAfter);
-            if (estimatedSpeed == null) {
-                return null;
+            if (firstFixAtOrAfter == null && !extrapolate) {
+                return lastFixAtOrBefore == null ? null : lastFixAtOrBefore.getPosition();
             } else {
-                if (lastFixAtOrBefore != null) {
-                    Distance distance = estimatedSpeed.travel(lastFixAtOrBefore.getTimePoint(), timePoint);
-                    Position result = lastFixAtOrBefore.getPosition()
-                            .translateGreatCircle(estimatedSpeed.getBearing(),
-                                    distance);
-                    return result;
+                SpeedWithBearing estimatedSpeed = estimateSpeed(lastFixAtOrBefore, firstFixAtOrAfter);
+                if (estimatedSpeed == null) {
+                    return null;
                 } else {
-                    // firstFixAtOrAfter can't be null because otherwise no speed could have been estimated
-                    return firstFixAtOrAfter.getPosition();
+                    if (lastFixAtOrBefore != null) {
+                        Distance distance = estimatedSpeed.travel(lastFixAtOrBefore.getTimePoint(), timePoint);
+                        Position result = lastFixAtOrBefore.getPosition().translateGreatCircle(
+                                estimatedSpeed.getBearing(), distance);
+                        return result;
+                    } else {
+                        // firstFixAtOrAfter can't be null because otherwise no speed could have been estimated
+                        return firstFixAtOrAfter.getPosition();
+                    }
                 }
             }
         }
@@ -99,7 +102,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
     public Distance getDistanceTraveled(TimePoint from, TimePoint to) {
         double distanceInNauticalMiles = 0;
         if (from.compareTo(to) < 0) {
-            Position fromPos = getEstimatedPosition(from);
+            Position fromPos = getEstimatedPosition(from, false);
             if (fromPos == null) {
                 return Distance.NULL;
             }
@@ -110,7 +113,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
                 distanceInNauticalMiles += fromPos.getDistance(fix.getPosition()).getNauticalMiles();
                 fromPos = fix.getPosition();
             }
-            Position toPos = getEstimatedPosition(to);
+            Position toPos = getEstimatedPosition(to, false);
             distanceInNauticalMiles += fromPos.getDistance(toPos).getNauticalMiles();
             return new NauticalMileDistance(distanceInNauticalMiles);
         } else {

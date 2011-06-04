@@ -124,20 +124,20 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     public com.sap.sailing.domain.base.ControlPoint getControlPoint(ControlPoint controlPoint) {
-        com.sap.sailing.domain.base.ControlPoint domainControlPoint = controlPointCache.get(controlPoint);
-        if (domainControlPoint == null) {
-            if (controlPoint.getHasTwoPoints()) {
-                // it's a gate
-                domainControlPoint = new GateImpl(new BuoyImpl(
-                        controlPoint.getName() + " (left)"), new BuoyImpl(
-                        controlPoint.getName() + " (right)"),
-                        controlPoint.getName());
-            } else {
-                domainControlPoint = new BuoyImpl(controlPoint.getName());
+        synchronized (controlPointCache) {
+            com.sap.sailing.domain.base.ControlPoint domainControlPoint = controlPointCache.get(controlPoint);
+            if (domainControlPoint == null) {
+                if (controlPoint.getHasTwoPoints()) {
+                    // it's a gate
+                    domainControlPoint = new GateImpl(new BuoyImpl(controlPoint.getName() + " (left)"), new BuoyImpl(
+                            controlPoint.getName() + " (right)"), controlPoint.getName());
+                } else {
+                    domainControlPoint = new BuoyImpl(controlPoint.getName());
+                }
             }
+            controlPointCache.put(controlPoint, domainControlPoint);
+            return domainControlPoint;
         }
-        controlPointCache.put(controlPoint, domainControlPoint);
-        return domainControlPoint;
     }
     
     @Override
@@ -152,88 +152,102 @@ public class DomainFactoryImpl implements DomainFactory {
 
     @Override
     public Competitor getCompetitor(com.tractrac.clientmodule.Competitor competitor) {
-        Competitor result = competitorCache.get(competitor);
-        if (result == null) {
-            BoatClass boatClass = getBoatClass(competitor.getCompetitorClass());
-            Nationality nationality = getNationality(competitor.getNationality());
-            Team team = getTeam(competitor.getName(), nationality);
-            Boat boat = new BoatImpl(competitor.getShortName(), boatClass);
-            result = new CompetitorImpl(competitor.getId(), competitor.getName(), team, boat);
-            competitorCache.put(competitor, result);
+        synchronized (competitorCache) {
+            Competitor result = competitorCache.get(competitor);
+            if (result == null) {
+                BoatClass boatClass = getBoatClass(competitor.getCompetitorClass());
+                Nationality nationality = getNationality(competitor.getNationality());
+                Team team = getTeam(competitor.getName(), nationality);
+                Boat boat = new BoatImpl(competitor.getShortName(), boatClass);
+                result = new CompetitorImpl(competitor.getId(), competitor.getName(), team, boat);
+                competitorCache.put(competitor, result);
+            }
+            return result;
         }
-        return result;
     }
 
     @Override
     public Team getTeam(String name, Nationality nationality) {
-        Team result = teamCache.get(name);
-        if (result == null) {
-            String[] sailorNames = name.split("\\b*\\+\\b*");
-            List<Person> sailors = new ArrayList<Person>();
-            for (String sailorName : sailorNames) {
-                sailors.add(getPerson(sailorName, nationality));
+        synchronized (teamCache) {
+            Team result = teamCache.get(name);
+            if (result == null) {
+                String[] sailorNames = name.split("\\b*\\+\\b*");
+                List<Person> sailors = new ArrayList<Person>();
+                for (String sailorName : sailorNames) {
+                    sailors.add(getPerson(sailorName.trim(), nationality));
+                }
+                result = new TeamImpl(name, sailors, /* TODO coach not known */null);
+                teamCache.put(name, result);
             }
-            result = new TeamImpl(name, sailors, /* TODO coach not known */ null);
-            teamCache.put(name, result);
+            return result;
         }
-        return result;
     }
 
     @Override
     public Person getPerson(String name, Nationality nationality) {
-        Person result = personCache.get(name);
-        if (result == null) {
-            result = new PersonImpl(name, nationality, /* date of birth unknown */ null, /* description */ "");
-            personCache.put(name, result);
+        synchronized (personCache) {
+            Person result = personCache.get(name);
+            if (result == null) {
+                result = new PersonImpl(name, nationality, /* date of birth unknown */null, /* description */"");
+                personCache.put(name, result);
+            }
+            return result;
         }
-        return result;
     }
 
     @Override
     public BoatClass getBoatClass(CompetitorClass competitorClass) {
-        BoatClass result = classCache.get(competitorClass);
-        if (result == null) {
-            result = new BoatClassImpl(competitorClass.getName());
-            classCache.put(competitorClass, result);
+        synchronized (classCache) {
+            BoatClass result = classCache.get(competitorClass);
+            if (result == null) {
+                result = new BoatClassImpl(competitorClass.getName());
+                classCache.put(competitorClass, result);
+            }
+            return result;
         }
-        return result;
     }
 
     @Override
     public Nationality getNationality(String nationalityName) {
-        Nationality result = nationalityCache.get(nationalityName);
-        if (result == null) {
-            result = new NationalityImpl(nationalityName, nationalityName);
-            nationalityCache.put(nationalityName, result);
+        synchronized (nationalityCache) {
+            Nationality result = nationalityCache.get(nationalityName);
+            if (result == null) {
+                result = new NationalityImpl(nationalityName, nationalityName);
+                nationalityCache.put(nationalityName, result);
+            }
+            return result;
         }
-        return result;
     }
 
     @Override
     public RaceDefinition getRaceDefinition(Race race) {
-        RaceDefinition result = raceCache.get(race);
-        boolean interrupted = false;
         synchronized (raceCache) {
-            while (!interrupted && result == null) {
-                try {
-                    raceCache.wait();
-                    result = raceCache.get(race);
-                } catch (InterruptedException e) {
-                    interrupted = true;
+            RaceDefinition result = raceCache.get(race);
+            boolean interrupted = false;
+            synchronized (raceCache) {
+                while (!interrupted && result == null) {
+                    try {
+                        raceCache.wait();
+                        result = raceCache.get(race);
+                    } catch (InterruptedException e) {
+                        interrupted = true;
+                    }
                 }
             }
+            return result;
         }
-        return result;
     }
 
     @Override
     public Event createEvent(com.tractrac.clientmodule.Event event) {
-        Event result = eventCache.get(event.getName());
-        if (result == null) {
-            result = new EventImpl(event.getName());
-            eventCache.put(event.getName(), result);
+        synchronized (eventCache) {
+            Event result = eventCache.get(event.getName());
+            if (result == null) {
+                result = new EventImpl(event.getName());
+                eventCache.put(event.getName(), result);
+            }
+            return result;
         }
-        return result;
     }
     
     @Override
@@ -274,34 +288,38 @@ public class DomainFactoryImpl implements DomainFactory {
 
     @Override
     public DynamicTrackedEvent trackEvent(com.sap.sailing.domain.base.Event event) {
-        DynamicTrackedEvent result = eventTrackingCache.get(event);
-        if (result == null) {
-            result = new DynamicTrackedEventImpl(event, millisecondsOverWhichToAverageSpeed);
-            eventTrackingCache.put(event, result);
+        synchronized (eventTrackingCache) {
+            DynamicTrackedEvent result = eventTrackingCache.get(event);
+            if (result == null) {
+                result = new DynamicTrackedEventImpl(event, millisecondsOverWhichToAverageSpeed);
+                eventTrackingCache.put(event, result);
+            }
+            return result;
         }
-        return result;
     }
     
     @Override
     public RaceDefinition createRaceDefinition(Race race, Course course) {
-        RaceDefinition result = raceCache.get(race);
-        if (result == null) {
-            BoatClass boatClass = null;
-            final List<Competitor> competitors = new ArrayList<Competitor>();
-            for (RaceCompetitor rc : race.getRaceCompetitorList()) {
-                com.tractrac.clientmodule.Competitor competitor = rc.getCompetitor();
-                if (boatClass == null) {
-                    boatClass = DomainFactory.INSTANCE.getBoatClass(competitor.getCompetitorClass());
+        synchronized (raceCache) {
+            RaceDefinition result = raceCache.get(race);
+            if (result == null) {
+                BoatClass boatClass = null;
+                final List<Competitor> competitors = new ArrayList<Competitor>();
+                for (RaceCompetitor rc : race.getRaceCompetitorList()) {
+                    com.tractrac.clientmodule.Competitor competitor = rc.getCompetitor();
+                    if (boatClass == null) {
+                        boatClass = DomainFactory.INSTANCE.getBoatClass(competitor.getCompetitorClass());
+                    }
+                    competitors.add(DomainFactory.INSTANCE.getCompetitor(rc.getCompetitor()));
                 }
-                competitors.add(DomainFactory.INSTANCE.getCompetitor(rc.getCompetitor()));
+                result = new RaceDefinitionImpl(race.getName(), course, boatClass, competitors);
+                synchronized (raceCache) {
+                    raceCache.put(race, result);
+                    raceCache.notifyAll();
+                }
             }
-            result = new RaceDefinitionImpl(race.getName(), course, boatClass, competitors);
-            synchronized (raceCache) {
-                raceCache.put(race, result);
-                raceCache.notifyAll();
-            }
+            return result;
         }
-        return result;
     }
 
     @Override

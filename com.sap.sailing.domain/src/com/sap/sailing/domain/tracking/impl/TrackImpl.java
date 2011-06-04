@@ -71,6 +71,18 @@ public abstract class TrackImpl<FixType extends Timed> implements Track<FixType>
         return (FixType) fixes.higher(new DummyTimed(timePoint));
     }
 
+    @SuppressWarnings("unchecked")
+    @Override
+    public FixType getFirstFix() {
+        return (FixType) fixes.first();
+    }
+    
+    @SuppressWarnings("unchecked")
+    @Override
+    public FixType getLastFix() {
+        return (FixType) fixes.last();
+    }
+    
     @Override
     public Iterator<FixType> getFixesIterator(TimePoint startingAt, boolean inclusive) {
         @SuppressWarnings("unchecked")
