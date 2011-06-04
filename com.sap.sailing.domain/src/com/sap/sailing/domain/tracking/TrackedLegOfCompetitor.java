@@ -30,6 +30,7 @@ public interface TrackedLegOfCompetitor {
     /**
      * Estimates how much the competitor still has to go to the end waypoint of this leg, projected onto the wind
      * direction. If the competitor already finished this leg, a zero, non-<code>null</code> distance will result.
+     * If the competitor hasn't started the leg yet, the full leg distance is returned.
      * 
      * @throws NoWindException
      *             thrown in case no wind direction is known

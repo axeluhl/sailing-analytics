@@ -156,7 +156,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     @Override
     public Distance getWindwardDistanceToGo(TimePoint timePoint) throws NoWindException {
         if (hasFinishedLeg(timePoint)) {
-            return Distance.NULL; // 
+            return Distance.NULL;
         } else {
             Distance result = null;
             for (Buoy buoy : getLeg().getTo().getBuoys()) {
@@ -177,11 +177,16 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
      */
     private Distance getWindwardDistanceTo(Buoy buoy, TimePoint at) throws NoWindException {
         Position estimatedPosition = getTrackedRace().getTrack(getCompetitor()).getEstimatedPosition(at, false);
-        if (estimatedPosition == null) { // perhaps no fixes for this leg yet?
-            estimatedPosition = getTrackedRace().getTrack(getLeg().getFrom().getBuoys().iterator().next()).getEstimatedPosition(at, false);
+        if (!hasStartedLeg(at) || estimatedPosition == null) {
+            // covers the case with no fixes for this leg yet, also if the mark passing has already been received
+            estimatedPosition = getTrackedRace().getTrack(getLeg().getFrom().getBuoys().iterator().next())
+                    .getEstimatedPosition(at, false);
         }
-        return getWindwardDistance(estimatedPosition,
-                getTrackedRace().getTrack(buoy).getEstimatedPosition(at, false), at);
+        if (estimatedPosition == null) { // may happen if mark positions haven't been received yet
+            return null;
+        }
+        return getWindwardDistance(estimatedPosition, getTrackedRace().getTrack(buoy).getEstimatedPosition(at, false),
+                at);
     }
 
     /**
