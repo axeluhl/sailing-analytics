@@ -134,7 +134,8 @@ public class AdminApp extends Servlet {
             } else {
                 TrackedRace trackedRace = getService().getDomainFactory().trackEvent(event).getTrackedRace(race);
                 TimePoint from = getTimePoint(req, PARAM_NAME_FROM_TIME, PARAM_NAME_FROM_TIME_MILLIS,
-                        trackedRace.getStart()==null?new MillisecondsTimePoint(0):trackedRace.getStart());
+                        trackedRace.getStart()==null?new MillisecondsTimePoint(0):
+                            /* 24h before race start */ new MillisecondsTimePoint(trackedRace.getStart().asMillis()-24*3600*1000));
                 TimePoint to = getTimePoint(req, PARAM_NAME_TO_TIME, PARAM_NAME_TO_TIME_MILLIS, MillisecondsTimePoint.now());
                 JSONObject jsonWindTracks = new JSONObject();
                 jsonWindTracks.put("currentwindsource", trackedRace.getWindSource().toString());
@@ -304,7 +305,7 @@ public class AdminApp extends Servlet {
         URL paramURL = new URL(req.getParameter(PARAM_NAME_PARAM_URL));
         URI liveURI = new URI(req.getParameter(PARAM_NAME_LIVE_URI));
         URI storedURI = new URI(req.getParameter(PARAM_NAME_STORED_URI));
-        getService().addEvent(paramURL, liveURI, storedURI);
+        getService().addRace(paramURL, liveURI, storedURI);
     }
 
     private void stopRace(HttpServletRequest req, HttpServletResponse resp) throws MalformedURLException, IOException, InterruptedException {
