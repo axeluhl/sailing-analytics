@@ -147,10 +147,21 @@ public class TrackTest {
         long millis = fix.getTimePoint().asMillis();
         GPSFix lastFix = track.getLastFixBefore(fix.getTimePoint());
         long lastMillis = lastFix.getTimePoint().asMillis();
-        TimePoint afterTimePoint = new MillisecondsTimePoint(lastMillis + (lastMillis-millis));
+        TimePoint afterTimePoint = new MillisecondsTimePoint(millis + (millis-lastMillis));
         Position extrapolatedPosition = track.getEstimatedPosition(afterTimePoint, true);
-        assertEquals(2, fix.getPosition().getDistance(extrapolatedPosition).getMeters()
+        assertEquals(0.5, fix.getPosition().getDistance(extrapolatedPosition).getMeters()
                 / lastFix.getPosition().getDistance(extrapolatedPosition).getMeters(), 0.00001);
+    }
+    
+    @Test
+    public void testExtrapolationDoesntHappenIfSuppressed() {
+        GPSFix fix = track.getLastFix();
+        long millis = fix.getTimePoint().asMillis();
+        GPSFix lastFix = track.getLastFixBefore(fix.getTimePoint());
+        long lastMillis = lastFix.getTimePoint().asMillis();
+        TimePoint afterTimePoint = new MillisecondsTimePoint(millis + (millis-lastMillis));
+        Position extrapolatedPosition = track.getEstimatedPosition(afterTimePoint, false);
+        assertEquals(extrapolatedPosition, fix.getPosition());
     }
     
     @Test

@@ -7,12 +7,23 @@ import org.junit.Test;
 
 import com.sap.sailing.domain.base.Bearing;
 import com.sap.sailing.domain.base.Distance;
+import com.sap.sailing.domain.base.Mile;
 import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.base.impl.DegreePosition;
 import com.sap.sailing.domain.base.impl.NauticalMileDistance;
 
 public class PositionTest {
+    @Test
+    public void translateTwoDegreesSouth() {
+        Distance distance = new NauticalMileDistance(120/Mile.METERS_PER_GEOGRAPHICAL_MILE*Mile.METERS_PER_NAUTICAL_MILE);
+        Bearing south = new DegreeBearingImpl(180);
+        Position fiveNorthFourEast = new DegreePosition(5, 4);
+        Position result = fiveNorthFourEast.translateGreatCircle(south, distance);
+        assertEquals(3, result.getLatDeg(), 0.001);
+        assertEquals(4, result.getLngDeg(), 0.0000001);
+    }
+    
     @Test
     public void distanceTest() {
         Position p1 = new DegreePosition(49.2, 008.3);

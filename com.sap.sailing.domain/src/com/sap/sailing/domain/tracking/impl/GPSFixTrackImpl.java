@@ -77,18 +77,23 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
                 return null;
             }
         } else if (fix2 == null) {
-            if (fix1 instanceof GPSFixMoving) {
-                return ((GPSFixMoving) fix1).getSpeed();
+            FixType lastBeforeFix1 = getLastFixBefore(fix1.getTimePoint());
+            if (lastBeforeFix1 != null) {
+                fix2 = fix1;
+                fix1 = lastBeforeFix1; // compute speed based on the last two fixes and assume constant speed
             } else {
-                return null;
+                if (fix1 instanceof GPSFixMoving) {
+                    return ((GPSFixMoving) fix1).getSpeed();
+                } else {
+                    return null;
+                }
             }
-        } else {
-            Distance distance = fix1.getPosition().getDistance(fix2.getPosition());
-            long millis = Math.abs(fix1.getTimePoint().asMillis() - fix2.getTimePoint().asMillis());
-            SpeedWithBearing speed = new KnotSpeedWithBearingImpl(distance.getNauticalMiles() / (millis / 1000.),
-                    fix1.getPosition().getBearingGreatCircle(fix2.getPosition()));
-            return speed;
         }
+        Distance distance = fix1.getPosition().getDistance(fix2.getPosition());
+        long millis = Math.abs(fix1.getTimePoint().asMillis() - fix2.getTimePoint().asMillis());
+        SpeedWithBearing speed = new KnotSpeedWithBearingImpl(distance.getNauticalMiles() / (millis / 1000. / 3600.),
+                fix1.getPosition().getBearingGreatCircle(fix2.getPosition()));
+        return speed;
     }
 
     
