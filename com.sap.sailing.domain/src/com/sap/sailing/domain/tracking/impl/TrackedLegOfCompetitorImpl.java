@@ -327,8 +327,8 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     public double getGapToLeaderInSeconds(TimePoint timePoint) throws NoWindException {
         // If the leader already completed this leg, compute the estimated arrival time at the
         // end of this leg; if this leg's competitor also already finished the leg, return the
-        // difference between this competitor's leg completion time and the leader's completion
-        // time; else, calculate the windward distance to the leader and divide by
+        // difference between this competitor's leg completion time point and the leader's completion
+        // time point; else, calculate the windward distance to the leader and divide by
         // the windward speed
         Speed windwardSpeed = getWindwardSpeed(getTrackedRace().getTrack(getCompetitor()).getEstimatedSpeed(timePoint), timePoint);
         Iterator<MarkPassing> markPassingsForLegEnd = getTrackedRace().getMarkPassingsInOrder(getLeg().getTo()).iterator();
