@@ -8,6 +8,7 @@ import com.sap.sailing.domain.base.Mile;
 import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.Speed;
 import com.sap.sailing.domain.base.TimePoint;
+import com.sap.sailing.domain.base.impl.KilometersPerHourSpeedImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.NauticalMileDistance;
@@ -78,7 +79,7 @@ public class TracTracTrackedLegOfCompetitor implements TrackedLegOfCompetitor {
 
     @Override
     public Speed getMaximumSpeedOverGround(TimePoint timePoint) {
-        return new KnotSpeedImpl(getMarkResults(timePoint).getTopspeed());
+        return new KilometersPerHourSpeedImpl(getMarkResults(timePoint).getTopspeed());
     }
 
     @Override

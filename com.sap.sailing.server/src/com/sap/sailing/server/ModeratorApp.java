@@ -170,6 +170,7 @@ public class ModeratorApp extends Servlet {
     }
 
     private void showRace(HttpServletRequest req, HttpServletResponse resp) throws IOException, InterruptedException {
+        long start = System.currentTimeMillis();
         Event event = getEvent(req);
         TrackedRace trackedRace = getTrackedRace(req);
         if (trackedRace == null) {
@@ -282,6 +283,7 @@ public class ModeratorApp extends Servlet {
                 resp.sendError(500, "Couldn't parse time specification " + e.getMessage());
             }
         }
+        System.out.println("showrace took "+(System.currentTimeMillis()-start)+"ms");
     }
 
     private void listEvents(HttpServletResponse resp) throws IOException {
