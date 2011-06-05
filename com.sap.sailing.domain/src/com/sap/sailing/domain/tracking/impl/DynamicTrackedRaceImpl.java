@@ -24,12 +24,11 @@ import com.sap.sailing.domain.tracking.WindSource;
 
 public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
         DynamicTrackedRace, RaceChangeListener<Competitor> {
-    private final Set<RaceChangeListener<Competitor>> listeners;
+    private final Set<RaceChangeListener<Competitor>> listeners = new HashSet<RaceChangeListener<Competitor>>();
     
     public DynamicTrackedRaceImpl(TrackedEvent trackedEvent, RaceDefinition race,
             long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed) {
         super(trackedEvent, race, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed);
-        listeners = new HashSet<RaceChangeListener<Competitor>>();
         for (Competitor competitor : getRace().getCompetitors()) {
             DynamicTrack<Competitor, GPSFixMoving> track = getTrack(competitor);
             track.addListener(this);
