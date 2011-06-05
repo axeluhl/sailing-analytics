@@ -27,7 +27,7 @@ import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindSource;
 import com.sap.sailing.domain.tracking.WindTrack;
 
-public class TrackedRaceImpl implements TrackedRace {
+public abstract class TrackedRaceImpl implements TrackedRace {
     private final TrackedEvent trackedEvent;
     private final RaceDefinition race;
     
@@ -99,9 +99,7 @@ public class TrackedRaceImpl implements TrackedRace {
         competitorRankings = new HashMap<TimePoint, TreeSet<Competitor>>();
     }
 
-    protected TrackedLeg createTrackedLeg(RaceDefinition race, Leg leg) {
-        return new TrackedLegImpl(this, leg, race.getCompetitors());
-    }
+    abstract protected TrackedLeg createTrackedLeg(RaceDefinition race, Leg leg);
     
     @Override
     public NavigableSet<MarkPassing> getMarkPassings(Competitor competitor) {

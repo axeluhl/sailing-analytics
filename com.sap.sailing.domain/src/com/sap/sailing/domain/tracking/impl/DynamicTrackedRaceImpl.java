@@ -7,6 +7,7 @@ import java.util.NavigableSet;
 import java.util.Set;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.Waypoint;
@@ -17,6 +18,7 @@ import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.TrackedEvent;
+import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindSource;
 
@@ -31,6 +33,9 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
         for (Competitor competitor : getRace().getCompetitors()) {
             DynamicTrack<Competitor, GPSFixMoving> track = getTrack(competitor);
             track.addListener(this);
+        }
+        for (WindSource windSource : WindSource.values()) {
+            getWindTrack(windSource).addListener(this);
         }
     }
 
@@ -77,6 +82,7 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
             competitorMarkPassings.add(markPassing);
             getMarkPassingsInOrder(markPassing.getWaypoint()).add(markPassing);
             updated(markPassing.getTimePoint());
+            notifyListeners(markPassing);
         }
     }
     
@@ -125,5 +131,9 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     public void windDataReceived(Wind wind) {
         notifyListeners(wind);
     }
-    
+
+    @Override
+    protected TrackedLeg createTrackedLeg(RaceDefinition race, Leg leg) {
+        return new TrackedLegImpl(this, leg, race.getCompetitors());
+    }
 }

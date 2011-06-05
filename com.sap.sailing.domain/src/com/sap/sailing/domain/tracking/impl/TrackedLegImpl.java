@@ -7,16 +7,21 @@ import java.util.TreeSet;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.TimePoint;
+import com.sap.sailing.domain.tracking.GPSFix;
+import com.sap.sailing.domain.tracking.MarkPassing;
+import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.Wind;
 
-public class TrackedLegImpl implements TrackedLeg {
+public class TrackedLegImpl implements TrackedLeg, RaceChangeListener<Competitor> {
     private final Leg leg;
     private final Map<Competitor, TrackedLegOfCompetitor> trackedLegsOfCompetitors;
     private TrackedRaceImpl trackedRace;
+    private final Map<TimePoint, TreeSet<TrackedLegOfCompetitor>> competitorTracksOrderedByRank;
     
-    public TrackedLegImpl(TrackedRaceImpl trackedRace, Leg leg, Iterable<Competitor> competitors) {
+    public TrackedLegImpl(DynamicTrackedRaceImpl trackedRace, Leg leg, Iterable<Competitor> competitors) {
         super();
         this.leg = leg;
         this.trackedRace = trackedRace;
@@ -24,6 +29,8 @@ public class TrackedLegImpl implements TrackedLeg {
         for (Competitor competitor : competitors) {
             trackedLegsOfCompetitors.put(competitor, new TrackedLegOfCompetitorImpl(this, competitor));
         }
+        trackedRace.addListener(this);
+        competitorTracksOrderedByRank = new HashMap<TimePoint, TreeSet<TrackedLegOfCompetitor>>();
     }
     
     @Override
@@ -62,11 +69,38 @@ public class TrackedLegImpl implements TrackedLeg {
      * consider the order of the boats not currently in this leg, too.
      */
     protected TreeSet<TrackedLegOfCompetitor> getCompetitorTracksOrderedByRank(TimePoint timePoint) {
-        TreeSet<TrackedLegOfCompetitor> treeSet = new TreeSet<TrackedLegOfCompetitor>(new WindwardToGoComparator(this, timePoint));
-        for (TrackedLegOfCompetitor competitorLeg : getTrackedLegsOfCompetitors()) {
-            treeSet.add(competitorLeg);
+        synchronized (competitorTracksOrderedByRank) {
+            TreeSet<TrackedLegOfCompetitor> treeSet = competitorTracksOrderedByRank.get(timePoint);
+            if (treeSet == null) {
+                treeSet = new TreeSet<TrackedLegOfCompetitor>(new WindwardToGoComparator(this, timePoint));
+                for (TrackedLegOfCompetitor competitorLeg : getTrackedLegsOfCompetitors()) {
+                    treeSet.add(competitorLeg);
+                }
+                competitorTracksOrderedByRank.put(timePoint, treeSet);
+            }
+            return treeSet;
         }
-        return treeSet;
+    }
+
+    @Override
+    public void gpsFixReceived(GPSFix fix, Competitor competitor) {
+        clearCaches();
+    }
+
+    @Override
+    public void markPassingReceived(MarkPassing markPassing) {
+        clearCaches();
+    }
+
+    @Override
+    public void windDataReceived(Wind wind) {
+        clearCaches();
     }
     
+    private void clearCaches() {
+        synchronized (competitorTracksOrderedByRank) {
+            competitorTracksOrderedByRank.clear();
+        }
+    }
+
 }
