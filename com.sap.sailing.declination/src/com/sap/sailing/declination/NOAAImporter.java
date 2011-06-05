@@ -53,11 +53,11 @@ public class NOAAImporter {
         this.annualChangePattern = Pattern.compile(REGEXP_ANNUAL_CHANGE);
     }
 
-    public Pattern getDeclinationPattern() {
+    protected Pattern getDeclinationPattern() {
         return declinationPattern;
     }
 
-    public Pattern getAnnualChangePattern() {
+    protected Pattern getAnnualChangePattern() {
         return annualChangePattern;
     }
 

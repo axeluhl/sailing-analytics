@@ -13,16 +13,16 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.declination.DeclinationRecord;
-import com.sap.sailing.declination.NOAAImporter;
+import com.sap.sailing.declination.impl.NOAAImporterForTesting;
 import com.sap.sailing.domain.base.impl.DegreePosition;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 
 public class DeclinationImportTest {
-    private NOAAImporter importer;
+    private NOAAImporterForTesting importer;
     
     @Before
     public void setUp() {
-        importer = new NOAAImporter();
+        importer = new NOAAImporterForTesting();
     }
     
     @Test
