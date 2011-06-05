@@ -38,7 +38,7 @@ public class WindwardToGoComparator implements Comparator<TrackedLegOfCompetitor
                 // both didn't finish the leg yet:
                 Distance o1d = o1.getWindwardDistanceToGo(timePoint);
                 Distance o2d = o2.getWindwardDistanceToGo(timePoint);
-                result = o1d.compareTo(o2d);
+                result = o1d.compareTo(o2d); // smaller distance to go means smaller rank
             }
             return result;
         } catch (NoWindException e) {

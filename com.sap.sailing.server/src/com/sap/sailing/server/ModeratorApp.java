@@ -285,6 +285,7 @@ public class ModeratorApp extends Servlet {
                     jsonLeg.put("competitors", jsonCompetitors);
                     jsonLegs.add(jsonLeg);
                 }
+                jsonRace.put("legs", jsonLegs);
                 JSONArray jsonRaceRanking = new JSONArray();
                 for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
                     JSONObject competitorRank = new JSONObject();
@@ -293,7 +294,6 @@ public class ModeratorApp extends Servlet {
                     jsonRaceRanking.add(competitorRank);
                 }
                 jsonRace.put("ranks", jsonRaceRanking);
-                jsonRace.put("legs", jsonLegs);
                 jsonRace.writeJSONString(resp.getWriter());
             } catch (InvalidDateException e) {
                 resp.sendError(500, "Couldn't parse time specification " + e.getMessage());
