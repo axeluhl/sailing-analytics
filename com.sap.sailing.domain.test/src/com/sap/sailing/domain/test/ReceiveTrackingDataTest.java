@@ -15,10 +15,12 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
-import com.sap.sailing.domain.tracking.GPSFixMoving;
+import com.sap.sailing.domain.tracking.GPSFix;
+import com.sap.sailing.domain.tracking.MarkPassing;
+import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.RaceListener;
-import com.sap.sailing.domain.tracking.RawListener;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.Receiver;
@@ -26,7 +28,7 @@ import com.sap.sailing.domain.tractracadapter.Receiver;
 public class ReceiveTrackingDataTest extends AbstractTracTracLiveTest {
     final private Object semaphor = new Object();
     final private Competitor[] firstTracked = new Competitor[1];
-    final private GPSFixMoving[] firstData = new GPSFixMoving[1];
+    final private GPSFix[] firstData = new GPSFix[1];
 
     public ReceiveTrackingDataTest() throws URISyntaxException,
             MalformedURLException {
@@ -42,11 +44,11 @@ public class ReceiveTrackingDataTest extends AbstractTracTracLiveTest {
     @Before
     public void setupListener() {
         final DomainFactory domainFactory = DomainFactory.INSTANCE;
-        final RawListener<Competitor, GPSFixMoving> positionListener = new RawListener<Competitor, GPSFixMoving>() {
+        final RaceChangeListener<Competitor> positionListener = new RaceChangeListener<Competitor>() {
             private boolean first = true;
             
             @Override
-            public void gpsFixReceived(GPSFixMoving fix, Competitor competitor) {
+            public void gpsFixReceived(GPSFix fix, Competitor competitor) {
                 System.out.println("Received fix "+fix);
                 synchronized (semaphor) {
                     if (first) {
@@ -56,6 +58,12 @@ public class ReceiveTrackingDataTest extends AbstractTracTracLiveTest {
                     }
                     semaphor.notifyAll();
                 }
+            }
+            @Override
+            public void markPassingReceived(MarkPassing markPassing) {
+            }
+            @Override
+            public void windDataReceived(Wind wind) {
             }
         };
         List<TypeController> listeners = new ArrayList<TypeController>();

@@ -12,5 +12,5 @@ public interface DynamicTrack<ItemType, FixType extends GPSFix> extends
     /**
      * A listener is notified whenever a new fix is added to this track
      */
-    void addListener(RawListener<ItemType, FixType> listener);
+    void addListener(RaceChangeListener<ItemType> listener);
 }

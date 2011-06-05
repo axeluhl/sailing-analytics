@@ -285,6 +285,14 @@ public class ModeratorApp extends Servlet {
                     jsonLeg.put("competitors", jsonCompetitors);
                     jsonLegs.add(jsonLeg);
                 }
+                JSONArray jsonRaceRanking = new JSONArray();
+                for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
+                    JSONObject competitorRank = new JSONObject();
+                    competitorRank.put("competitor", competitor.getName());
+                    competitorRank.put("rank", trackedRace.getRank(competitor, timePoint));
+                    jsonRaceRanking.add(competitorRank);
+                }
+                jsonRace.put("ranks", jsonRaceRanking);
                 jsonRace.put("legs", jsonLegs);
                 jsonRace.writeJSONString(resp.getWriter());
             } catch (InvalidDateException e) {

@@ -12,22 +12,22 @@ import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.tracking.DynamicTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
+import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
-import com.sap.sailing.domain.tracking.RawListener;
+import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.TrackedEvent;
-import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindSource;
 
 public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
-        DynamicTrackedRace, RawListener<Competitor, GPSFixMoving> {
-    private final Set<RawListener<Competitor, GPSFixMoving>> listeners;
+        DynamicTrackedRace, RaceChangeListener<Competitor> {
+    private final Set<RaceChangeListener<Competitor>> listeners;
     
     public DynamicTrackedRaceImpl(TrackedEvent trackedEvent, RaceDefinition race,
             long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed) {
         super(trackedEvent, race, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed);
-        listeners = new HashSet<RawListener<Competitor, GPSFixMoving>>();
+        listeners = new HashSet<RaceChangeListener<Competitor>>();
         for (Competitor competitor : getRace().getCompetitors()) {
             DynamicTrack<Competitor, GPSFixMoving> track = getTrack(competitor);
             track.addListener(this);
@@ -47,21 +47,28 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     }
 
     @Override
-    public void addListener(RawListener<Competitor, GPSFixMoving> listener) {
+    public void addListener(RaceChangeListener<Competitor> listener) {
         listeners.add(listener);
     }
 
-    private void notifyListeners(GPSFixMoving fix, TrackedRace trackedRace, Competitor competitor) {
-        for (RawListener<Competitor, GPSFixMoving> listener : listeners) {
+    private void notifyListeners(GPSFix fix, Competitor competitor) {
+        for (RaceChangeListener<Competitor> listener : listeners) {
             listener.gpsFixReceived(fix, competitor);
         }
     }
 
-    @Override
-    public void gpsFixReceived(GPSFixMoving fix, Competitor competitor) {
-        notifyListeners(fix, this, competitor);
+    private void notifyListeners(Wind wind) {
+        for (RaceChangeListener<Competitor> listener : listeners) {
+            listener.windDataReceived(wind);
+        }
     }
-    
+
+    private void notifyListeners(MarkPassing markPassing) {
+        for (RaceChangeListener<Competitor> listener : listeners) {
+            listener.markPassingReceived(markPassing);
+        }
+    }
+
     @Override
     public void updateMarkPassings(Competitor competitor, Iterable<MarkPassing> markPassings) {
         clearMarkPassings(competitor);
@@ -102,4 +109,21 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
         getWindTrack(windSource).add(wind);
         updated(wind.getTimePoint());
     }
+
+    @Override
+    public void gpsFixReceived(GPSFix fix, Competitor competitor) {
+        notifyListeners(fix, competitor);
+    }
+
+    @Override
+    public void markPassingReceived(MarkPassing markPassing) {
+        notifyListeners(markPassing);
+        
+    }
+
+    @Override
+    public void windDataReceived(Wind wind) {
+        notifyListeners(wind);
+    }
+    
 }
