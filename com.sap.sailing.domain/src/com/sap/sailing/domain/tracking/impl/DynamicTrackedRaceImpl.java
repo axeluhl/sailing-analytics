@@ -24,7 +24,7 @@ import com.sap.sailing.domain.tracking.WindSource;
 
 public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
         DynamicTrackedRace, RaceChangeListener<Competitor> {
-    private final Set<RaceChangeListener<Competitor>> listeners = new HashSet<RaceChangeListener<Competitor>>();
+    private Set<RaceChangeListener<Competitor>> listeners;
     
     public DynamicTrackedRaceImpl(TrackedEvent trackedEvent, RaceDefinition race,
             long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed) {
@@ -49,26 +49,33 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     public DynamicTrack<Competitor, GPSFixMoving> getTrack(Competitor competitor) {
         return (DynamicTrack<Competitor, GPSFixMoving>) super.getTrack(competitor);
     }
+    
+    private synchronized Set<RaceChangeListener<Competitor>> getListeners() {
+        if (listeners == null) {
+            listeners = new HashSet<RaceChangeListener<Competitor>>();
+        }
+        return listeners;
+    }
 
     @Override
-    public void addListener(RaceChangeListener<Competitor> listener) {
-        listeners.add(listener);
+    public synchronized void addListener(RaceChangeListener<Competitor> listener) {
+        getListeners().add(listener);
     }
 
     private void notifyListeners(GPSFix fix, Competitor competitor) {
-        for (RaceChangeListener<Competitor> listener : listeners) {
+        for (RaceChangeListener<Competitor> listener : getListeners()) {
             listener.gpsFixReceived(fix, competitor);
         }
     }
 
     private void notifyListeners(Wind wind) {
-        for (RaceChangeListener<Competitor> listener : listeners) {
+        for (RaceChangeListener<Competitor> listener : getListeners()) {
             listener.windDataReceived(wind);
         }
     }
 
     private void notifyListeners(MarkPassing markPassing) {
-        for (RaceChangeListener<Competitor> listener : listeners) {
+        for (RaceChangeListener<Competitor> listener : getListeners()) {
             listener.markPassingReceived(markPassing);
         }
     }
