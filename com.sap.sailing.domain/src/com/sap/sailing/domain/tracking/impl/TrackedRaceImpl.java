@@ -15,6 +15,7 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.base.impl.Util;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
@@ -165,7 +166,7 @@ public abstract class TrackedRaceImpl implements TrackedRace {
         int indexOfWaypoint = getRace().getCourse().getIndexOfWaypoint(startOfLeg);
         if (indexOfWaypoint == -1) {
             throw new IllegalArgumentException("Waypoint "+startOfLeg+" not found in "+getRace().getCourse());
-        } else if (indexOfWaypoint == trackedLegs.size()-1) {
+        } else if (indexOfWaypoint == Util.size(getRace().getCourse().getWaypoints())-1) {
             throw new IllegalArgumentException("Waypoint "+startOfLeg+" isn't start of any leg in "+getRace().getCourse());
         }
         return trackedLegs.get(race.getCourse().getLegs().get(indexOfWaypoint));
