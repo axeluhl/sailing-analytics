@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.tracking;
 
+import java.util.NavigableSet;
+
 import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
@@ -35,10 +37,11 @@ public interface TrackedRace {
     TrackedLeg getTrackedLeg(Leg leg);
     
     /**
-     * Tracking information about the leg <code>competitor</code> is currently on, or
-     * <code>null</code> if the competitor hasn't started any leg yet.
+     * Tracking information about the leg <code>competitor</code> is on at <code>timePoint</code>, or
+     * <code>null</code> if the competitor hasn't started any leg yet at <code>timePoint</code> or has
+     * already finished the race.
      */
-    TrackedLegOfCompetitor getCurrentLeg(Competitor competitor);
+    TrackedLegOfCompetitor getCurrentLeg(Competitor competitor, TimePoint timePoint);
     
     /**
      * Tells which leg the leader at <code>timePoint</code> is on
@@ -78,6 +81,12 @@ public interface TrackedRace {
      */
     int getRank(Competitor competitor);
     
+    /**
+     * Computes the rank of <code>competitor</code> in this race. A competitor is ahead of all
+     * competitors that are one or more legs behind. Within the same leg, the rank is determined
+     * by the windward distance to go and therefore depends on the assumptions of the wind direction
+     * for the given <code>timePoint</code>.
+     */
     int getRank(Competitor competitor, TimePoint timePoint);
     
     /**
@@ -128,4 +137,6 @@ public interface TrackedRace {
     TimePoint getStartOfTracking();
 
     TimePoint getTimePointOfNewestEvent();
+
+    NavigableSet<MarkPassing> getMarkPassings(Competitor competitor);
 }

@@ -1,17 +1,15 @@
 package com.sap.sailing.domain.tracking.impl;
 
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeSet;
 
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.Distance;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.TimePoint;
-import com.sap.sailing.domain.tracking.NoWindException;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
+import com.sap.sailing.domain.tracking.TrackedRace;
 
 public class TrackedLegImpl implements TrackedLeg {
     private final Leg leg;
@@ -33,7 +31,8 @@ public class TrackedLegImpl implements TrackedLeg {
         return leg;
     }
     
-    protected TrackedRaceImpl getTrackedRace() {
+    @Override
+    public TrackedRace getTrackedRace() {
         return trackedRace;
     }
 
@@ -52,49 +51,22 @@ public class TrackedLegImpl implements TrackedLeg {
         return byRank.first().getCompetitor();
     }
 
+    /**
+     * Orders the tracked legs for all competitors for this tracked leg for the given time point. This
+     * results in an order that gives a ranking for this tracked leg. In particular, boats that have not
+     * yet entered this leg will all be ranked equal because their windward distance to go is the full
+     * leg's winward distance. Boats who already finished this leg have their tracks ordered by the time
+     * points at which they finished the leg.<p>
+     * 
+     * Note that this does not reflect overall race standings. For that, the ordering would have to
+     * consider the order of the boats not currently in this leg, too.
+     */
     protected TreeSet<TrackedLegOfCompetitor> getCompetitorTracksOrderedByRank(TimePoint timePoint) {
-        TreeSet<TrackedLegOfCompetitor> treeSet = new TreeSet<TrackedLegOfCompetitor>(new WindwardToGoComparator(timePoint));
+        TreeSet<TrackedLegOfCompetitor> treeSet = new TreeSet<TrackedLegOfCompetitor>(new WindwardToGoComparator(this, timePoint));
         for (TrackedLegOfCompetitor competitorLeg : getTrackedLegsOfCompetitors()) {
             treeSet.add(competitorLeg);
         }
         return treeSet;
     }
     
-    /**
-     * Compares competitor tracks based on the windward distance they still have to go and/or leg completion times at a
-     * given point in time.
-     */
-    private class WindwardToGoComparator implements Comparator<TrackedLegOfCompetitor> {
-        private TimePoint timePoint;
-
-        public WindwardToGoComparator(TimePoint timePoint) {
-            this.timePoint = timePoint;
-        }
-        
-        @Override
-        public int compare(TrackedLegOfCompetitor o1, TrackedLegOfCompetitor o2) {
-            try {
-                int result;
-                if (o1.hasFinishedLeg(timePoint)) {
-                    if (o2.hasFinishedLeg(timePoint)) {
-                        result = getTrackedRace().getMarkPassing(o1.getCompetitor(), getLeg().getTo()).getTimePoint().compareTo(
-                                getTrackedRace().getMarkPassing(o2.getCompetitor(), getLeg().getTo()).getTimePoint());
-                    } else {
-                        result = -1; // o1 < o2 because o1 already finished the leg but o2 didn't
-                    }
-                } else if (o2.hasFinishedLeg(timePoint)) {
-                    result = 1; // o1 > o2 because o2 already finished the leg but o1 didn't
-                } else {
-                    // both didn't finish the leg yet:
-                    Distance o1d = o1.getWindwardDistanceToGo(timePoint);
-                    Distance o2d = o2.getWindwardDistanceToGo(timePoint);
-                    result = o1d.compareTo(o2d);
-                }
-                return result;
-            } catch (NoWindException e) {
-                throw new RuntimeException(e);
-            }
-        }
-    }
-
 }

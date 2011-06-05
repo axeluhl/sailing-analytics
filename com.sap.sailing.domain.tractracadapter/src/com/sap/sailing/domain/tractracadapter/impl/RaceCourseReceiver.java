@@ -66,6 +66,7 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
     @Override
     protected void handleEvent(Triple<Route, RouteData, Race> event) {
         System.out.print("R");
+        // FIXME we learned by e-mail from Lasse (2011-06-04T20:38:00CET) that courses may change during a race; how to handle???
         Course course = DomainFactory.INSTANCE.createCourse(event.getA().getName(), event.getB().getPoints());
         RaceDefinition raceDefinition = DomainFactory.INSTANCE.createRaceDefinition(event.getC(), course);
         trackedEvent.getEvent().addRace(raceDefinition);

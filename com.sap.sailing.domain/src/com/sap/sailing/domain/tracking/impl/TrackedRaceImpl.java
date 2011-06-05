@@ -42,6 +42,8 @@ public class TrackedRaceImpl implements TrackedRace {
     private TimePoint timePointOfNewestEvent;
     private int updateCount;
     
+    private final Map<TimePoint, TreeSet<Competitor>> competitorRankings; 
+    
     /**
      * legs appear in the order in which they appear in the race's course
      */
@@ -94,13 +96,15 @@ public class TrackedRaceImpl implements TrackedRace {
             windTracks.put(windSource, new WindTrackImpl(millisecondsOverWhichToAverageWind));
         }
         currentWindSource = WindSource.EXPEDITION;
+        competitorRankings = new HashMap<TimePoint, TreeSet<Competitor>>();
     }
 
     protected TrackedLeg createTrackedLeg(RaceDefinition race, Leg leg) {
         return new TrackedLegImpl(this, leg, race.getCompetitors());
     }
     
-    protected NavigableSet<MarkPassing> getMarkPassings(Competitor competitor) {
+    @Override
+    public NavigableSet<MarkPassing> getMarkPassings(Competitor competitor) {
         return markPassingsForCompetitor.get(competitor);
     }
     
@@ -216,15 +220,34 @@ public class TrackedRaceImpl implements TrackedRace {
 
     @Override
     public int getRank(Competitor competitor, TimePoint timePoint) {
-        return getTrackedLeg(competitor, timePoint).getRank(timePoint);
+        synchronized (competitorRankings) {
+            TreeSet<Competitor> rankedCompetitors = competitorRankings.get(timePoint);
+            if (rankedCompetitors == null) {
+                RaceRankComparator comparator = new RaceRankComparator(this, timePoint);
+                rankedCompetitors = new TreeSet<Competitor>(comparator);
+                for (Competitor c : getRace().getCompetitors()) {
+                    rankedCompetitors.add(c);
+                }
+                competitorRankings.put(timePoint, rankedCompetitors);
+            }
+            return rankedCompetitors.headSet(competitor, /* inclusive */ true).size();
+        }
     }
 
     @Override
-    public TrackedLegOfCompetitor getCurrentLeg(Competitor competitor) {
+    public TrackedLegOfCompetitor getCurrentLeg(Competitor competitor, TimePoint timePoint) {
         NavigableSet<MarkPassing> competitorMarkPassings = markPassingsForCompetitor.get(competitor);
+        DummyMarkPassingWithTimePointOnly markPassingTimePoint = new DummyMarkPassingWithTimePointOnly(timePoint);
         TrackedLegOfCompetitor result = null;
         if (!competitorMarkPassings.isEmpty()) {
-            result = getTrackedLegStartingAt(competitorMarkPassings.last().getWaypoint()).getTrackedLeg(competitor);
+            MarkPassing lastMarkPassingAtOfBeforeTimePoint = competitorMarkPassings.floor(markPassingTimePoint);
+            if (lastMarkPassingAtOfBeforeTimePoint != null) {
+                Waypoint waypointPassedLastAtOrBeforeTimePoint = lastMarkPassingAtOfBeforeTimePoint.getWaypoint();
+                // don't return a leg if competitor has already finished last leg and therefore the race
+                if (waypointPassedLastAtOrBeforeTimePoint != getRace().getCourse().getLastWaypoint()) {
+                    result = getTrackedLegStartingAt(waypointPassedLastAtOrBeforeTimePoint).getTrackedLeg(competitor);
+                }
+            }
         }
         return result;
     }
@@ -306,6 +329,7 @@ public class TrackedRaceImpl implements TrackedRace {
 
     protected synchronized void updated(TimePoint timeOfEvent) {
         updateCount++;
+        clearAllCaches();
         if (timePointOfNewestEvent == null || timePointOfNewestEvent.compareTo(timeOfEvent) < 0) {
             timePointOfNewestEvent = timeOfEvent;
         }
@@ -313,6 +337,12 @@ public class TrackedRaceImpl implements TrackedRace {
             startOfTracking = timeOfEvent;
         }
         notifyAll();
+    }
+
+    private synchronized void clearAllCaches() {
+        synchronized (competitorRankings) {
+            competitorRankings.clear();
+        }
     }
 
     @Override

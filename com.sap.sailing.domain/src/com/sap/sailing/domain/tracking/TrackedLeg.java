@@ -10,4 +10,6 @@ public interface TrackedLeg {
 
     TrackedLegOfCompetitor getTrackedLeg(Competitor competitor);
 
+    TrackedRace getTrackedRace();
+
 }
