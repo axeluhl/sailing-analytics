@@ -1,4 +1,7 @@
 plugins/
 features/
 artifacts.jar
+org.eclipse.core.runtime/
+org.eclipse.osgi/
+org.eclipse.update/
 content.jar
