@@ -69,6 +69,7 @@ public class DomainFactoryImpl implements DomainFactory {
     // TODO clarify how millisecondsOverWhichToAverageWind could be updated and propagated live
     private final long millisecondsOverWhichToAverageWind = 30000;
     
+    // TODO consider (re-)introducing WeakHashMaps for cache structures, but such that the cache is maintained as long as our domain objects are strongly referenced
     private final Map<ControlPoint, com.sap.sailing.domain.base.ControlPoint> controlPointCache =
         new HashMap<ControlPoint, com.sap.sailing.domain.base.ControlPoint>();
     
