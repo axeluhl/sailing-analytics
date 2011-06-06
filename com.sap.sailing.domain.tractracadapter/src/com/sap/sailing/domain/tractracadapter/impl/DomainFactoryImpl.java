@@ -12,7 +12,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.WeakHashMap;
+import java.util.Map;
 
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
@@ -69,35 +69,35 @@ public class DomainFactoryImpl implements DomainFactory {
     // TODO clarify how millisecondsOverWhichToAverageWind could be updated and propagated live
     private final long millisecondsOverWhichToAverageWind = 30000;
     
-    private final WeakHashMap<ControlPoint, com.sap.sailing.domain.base.ControlPoint> controlPointCache =
-        new WeakHashMap<ControlPoint, com.sap.sailing.domain.base.ControlPoint>();
+    private final Map<ControlPoint, com.sap.sailing.domain.base.ControlPoint> controlPointCache =
+        new HashMap<ControlPoint, com.sap.sailing.domain.base.ControlPoint>();
     
-    private final WeakHashMap<com.tractrac.clientmodule.Competitor, com.sap.sailing.domain.base.Competitor> competitorCache =
-            new WeakHashMap<com.tractrac.clientmodule.Competitor, com.sap.sailing.domain.base.Competitor>();
+    private final Map<com.tractrac.clientmodule.Competitor, com.sap.sailing.domain.base.Competitor> competitorCache =
+            new HashMap<com.tractrac.clientmodule.Competitor, com.sap.sailing.domain.base.Competitor>();
     
     /**
      * Ensure that the <em>same</em> string is used as key that is also used to set the {@link Nationality}
      * object's {@link Nationality#getName() name}.
      */
-    private final WeakHashMap<String, Nationality> nationalityCache = new WeakHashMap<String, Nationality>();
+    private final Map<String, Nationality> nationalityCache = new HashMap<String, Nationality>();
     
-    private final WeakHashMap<String, Person> personCache = new WeakHashMap<String, Person>();
+    private final Map<String, Person> personCache = new HashMap<String, Person>();
     
-    private final WeakHashMap<String, Team> teamCache = new WeakHashMap<String, Team>();
+    private final Map<String, Team> teamCache = new HashMap<String, Team>();
     
-    private final WeakHashMap<CompetitorClass, BoatClass> classCache = new WeakHashMap<CompetitorClass, BoatClass>();
+    private final Map<CompetitorClass, BoatClass> classCache = new HashMap<CompetitorClass, BoatClass>();
     
     /**
      * Caches events by their name
      */
-    private final HashMap<String, com.sap.sailing.domain.base.Event> eventCache =
+    private final Map<String, com.sap.sailing.domain.base.Event> eventCache =
             new HashMap<String, com.sap.sailing.domain.base.Event>();
     
-    private final WeakHashMap<com.tractrac.clientmodule.Event, RaceDefinition> tractracEventToRaceDefinitionMap = new WeakHashMap<com.tractrac.clientmodule.Event, RaceDefinition>();
+    private final Map<com.tractrac.clientmodule.Event, RaceDefinition> tractracEventToRaceDefinitionMap = new HashMap<com.tractrac.clientmodule.Event, RaceDefinition>();
     
-    private final WeakHashMap<Race, RaceDefinition> raceCache = new WeakHashMap<Race, RaceDefinition>();
+    private final Map<Race, RaceDefinition> raceCache = new HashMap<Race, RaceDefinition>();
     
-    private final WeakHashMap<Event, DynamicTrackedEvent> eventTrackingCache = new WeakHashMap<Event, DynamicTrackedEvent>();
+    private final Map<Event, DynamicTrackedEvent> eventTrackingCache = new HashMap<Event, DynamicTrackedEvent>();
 
     @Override
     public Position createPosition(
