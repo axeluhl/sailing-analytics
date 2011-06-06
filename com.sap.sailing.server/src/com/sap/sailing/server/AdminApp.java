@@ -113,6 +113,8 @@ public class AdminApp extends Servlet {
                     selectWindSource(req, resp);
                 } else if (ACTION_NAME_SHOW_WIND.equals(action)) {
                     showWind(req, resp);
+                } else {
+                    resp.sendError(500, "Unknown action \""+action+"\"");
                 }
             } else {
                 resp.getWriter().println("Hello admin!");
@@ -247,6 +249,8 @@ public class AdminApp extends Servlet {
                     } catch (InvalidDateException e) {
                         resp.sendError(500, "Couldn't parse time specification " + e.getMessage());
                     }
+                } else {
+                    resp.sendError(500, "wind bearing parameter "+PARAM_NAME_BEARING+" missing");
                 }
             }
         }

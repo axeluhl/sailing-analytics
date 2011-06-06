@@ -15,6 +15,7 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.tracking.GPSFix;
+import com.sap.sailing.domain.tracking.NoWindException;
 import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.TrackedEvent;
@@ -121,7 +122,7 @@ public class TrackedEventImpl implements TrackedEvent {
     }
 
     @Override
-    public int getNetPoints(Competitor competitor, TimePoint timePoint) {
+    public int getNetPoints(Competitor competitor, TimePoint timePoint) throws NoWindException {
         int result = 0;
         for (TrackedRace trackedRace : getTrackedRaces()) {
             result += trackedRace.getRank(competitor, timePoint);

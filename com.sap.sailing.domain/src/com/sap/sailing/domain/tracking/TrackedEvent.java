@@ -38,6 +38,6 @@ public interface TrackedEvent {
     
     int getTotalPoints(Competitor competitor, TimePoint timePoint);
     
-    int getNetPoints(Competitor competitor, TimePoint timePoint);
+    int getNetPoints(Competitor competitor, TimePoint timePoint) throws NoWindException;
     
 }

@@ -20,6 +20,8 @@ import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.MarkPassing;
+import com.sap.sailing.domain.tracking.NoWindError;
+import com.sap.sailing.domain.tracking.NoWindException;
 import com.sap.sailing.domain.tracking.TrackedEvent;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
@@ -213,12 +215,13 @@ public abstract class TrackedRaceImpl implements TrackedRace {
     }
     
     @Override
-    public int getRank(Competitor competitor) {
+    public int getRank(Competitor competitor) throws NoWindException {
         return getRank(competitor, MillisecondsTimePoint.now());
     }
 
     @Override
-    public int getRank(Competitor competitor, TimePoint timePoint) {
+    public int getRank(Competitor competitor, TimePoint timePoint) throws NoWindException {
+        try {
         synchronized (competitorRankings) {
             TreeSet<Competitor> rankedCompetitors = competitorRankings.get(timePoint);
             if (rankedCompetitors == null) {
@@ -230,6 +233,9 @@ public abstract class TrackedRaceImpl implements TrackedRace {
                 competitorRankings.put(timePoint, rankedCompetitors);
             }
             return rankedCompetitors.headSet(competitor, /* inclusive */ true).size();
+        }
+        } catch (NoWindError e) {
+            throw e.getCause();
         }
     }
 

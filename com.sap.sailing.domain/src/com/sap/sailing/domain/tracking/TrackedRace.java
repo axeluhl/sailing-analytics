@@ -79,7 +79,7 @@ public interface TrackedRace {
     /**
      * Computes the rank of the competitor in this race for the current time. 
      */
-    int getRank(Competitor competitor);
+    int getRank(Competitor competitor) throws NoWindException;
     
     /**
      * Computes the rank of <code>competitor</code> in this race. A competitor is ahead of all
@@ -87,7 +87,7 @@ public interface TrackedRace {
      * by the windward distance to go and therefore depends on the assumptions of the wind direction
      * for the given <code>timePoint</code>.
      */
-    int getRank(Competitor competitor, TimePoint timePoint);
+    int getRank(Competitor competitor, TimePoint timePoint) throws NoWindException;
     
     /**
      * For a competitor, computes the distance (TODO not yet clear whether over ground or
