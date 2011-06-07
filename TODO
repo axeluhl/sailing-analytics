@@ -1,16 +1,16 @@
  - move buoy tracks from TrackedEvent to TrackedRace
 
- - enable switching between our and TracTrac-provided leaderboard information
-
  - Use a JDBC driver to store wind data in MongoDB; retrieve it from there upon startup
 
  - Clarify Equinox server upgrade process from the maven-repository
 
  - Open test server firewall ports for UDP / Expedition wind integration
 
- - Test fail-over in case one of the two Java VM fails
-
  - Set up two Expedition machines with RF and UMTS transmission, test killing one
+
+ - enable switching between our and TracTrac-provided leaderboard information
+
+ - Test fail-over in case one of the two Java VM fails
 
  - Pass final production instance URL information to BeTomorrow for wind integration
 
