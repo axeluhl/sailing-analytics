@@ -27,8 +27,8 @@ import com.tractrac.clientmodule.setup.KeyValue;
 
 public abstract class AbstractTracTracLiveTest implements Listener {
 
-    private static final String START_SIMULATOR_URL = "http://www.traclive.dk/simulate/start.php";
-    private static final String KILL_URL = "http://www.traclive.dk/simulate/kill.php";
+    private static final String START_SIMULATOR_URL = "http://sapsimulation.tracdev.dk/start.php";
+    private static final String KILL_URL = "http://sapsimulation.tracdev.dk/kill.php";
     private final URL paramUrl;
     private final URI liveUri;
     private final URI storedUri;
@@ -39,8 +39,13 @@ public abstract class AbstractTracTracLiveTest implements Listener {
     private DataController controller;
 
     protected AbstractTracTracLiveTest() throws URISyntaxException, MalformedURLException {
-        paramUrl = new URL("http://germanmaster.traclive.dk/events/event_20110505_SailingTea/clientparams.php?event=event_20110505_SailingTea&race=bd8c778e-7c65-11e0-8236-406186cbf87c");
-        liveUri = new URI("tcp://localhost:4412");
+        // for live simulation:
+        //   paramUrl  = new URL("http://sapsimulation.tracdev.dk/simulateconf/j80race12.txt");
+        //   liveUri   = new URI("tcp://sapsimulation.tracdev.dk:4420"); // or with tunneling: tcp://localhost:4420
+        //   storedUri = new URI("tcp://sapsimulation.tracdev.dk:4421"); // or with tunneling: tcp://localhost:4421
+        // for stored race, non-real-time simulation:
+        paramUrl  = new URL("http://germanmaster.traclive.dk/events/event_20110505_SailingTea/clientparams.php?event=event_20110505_SailingTea&race=bd8c778e-7c65-11e0-8236-406186cbf87c");
+        liveUri   = new URI("tcp://localhost:4412");
         storedUri = new URI("tcp://localhost:4413");
         receivers = new HashSet<Receiver>();
     }
@@ -119,7 +124,7 @@ public abstract class AbstractTracTracLiveTest implements Listener {
 
     private void authorize(URLConnection conn) {
         conn.setRequestProperty("Authorization", "Basic "+
-                Base64.encode("tracsim:simming10".getBytes()));
+                Base64.encode("SAP:ext2Boat".getBytes()));
     }
 
     protected Event getEvent() {
