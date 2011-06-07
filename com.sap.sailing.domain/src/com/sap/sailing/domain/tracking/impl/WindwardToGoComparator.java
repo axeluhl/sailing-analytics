@@ -4,6 +4,7 @@ import java.util.Comparator;
 
 import com.sap.sailing.domain.base.Distance;
 import com.sap.sailing.domain.base.TimePoint;
+import com.sap.sailing.domain.tracking.NoWindError;
 import com.sap.sailing.domain.tracking.NoWindException;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
@@ -42,7 +43,7 @@ public class WindwardToGoComparator implements Comparator<TrackedLegOfCompetitor
             }
             return result;
         } catch (NoWindException e) {
-            throw new RuntimeException(e);
+            throw new NoWindError(e);
         }
     }
 }
