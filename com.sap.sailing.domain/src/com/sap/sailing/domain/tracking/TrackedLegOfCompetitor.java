@@ -72,14 +72,23 @@ public interface TrackedLegOfCompetitor {
      */
     int getRank(TimePoint timePoint);
 
-    double getGapToLeaderInSeconds(TimePoint timePoint) throws NoWindException;
+    /**
+     * Returns <code>null</code> in case this leg's competitor hasn't started the leg yet.
+     */
+    Double getGapToLeaderInSeconds(TimePoint timePoint) throws NoWindException;
 
     boolean hasStartedLeg(TimePoint timePoint);
     
     boolean hasFinishedLeg(TimePoint timePoint);
 
+    /**
+     * Returns <code>null</code> in case this leg's competitor hasn't started the leg yet.
+     */
     Speed getVelocityMadeGood(TimePoint timePoint) throws NoWindException;
 
-    double getEstimatedTimeToNextMarkInSeconds(TimePoint timePoint) throws NoWindException;
+    /**
+     * Returns <code>null</code> in case this leg's competitor hasn't started the leg yet.
+     */
+    Double getEstimatedTimeToNextMarkInSeconds(TimePoint timePoint) throws NoWindException;
     
 }

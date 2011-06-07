@@ -106,9 +106,9 @@ public class TracTracTrackedLegOfCompetitor implements TrackedLegOfCompetitor {
     }
 
     @Override
-    public double getGapToLeaderInSeconds(TimePoint timePoint) throws NoWindException {
+    public Double getGapToLeaderInSeconds(TimePoint timePoint) throws NoWindException {
         // TODO Auto-generated method stub
-        return 0;
+        return 0.0;
     }
 
     @Override
@@ -130,9 +130,9 @@ public class TracTracTrackedLegOfCompetitor implements TrackedLegOfCompetitor {
     }
 
     @Override
-    public double getEstimatedTimeToNextMarkInSeconds(TimePoint timePoint) throws NoWindException {
+    public Double getEstimatedTimeToNextMarkInSeconds(TimePoint timePoint) throws NoWindException {
         // TODO Auto-generated method stub
-        return 0;
+        return 0.0;
     }
 
     private TracTracTrackedRaceImpl getTrackedRace() {

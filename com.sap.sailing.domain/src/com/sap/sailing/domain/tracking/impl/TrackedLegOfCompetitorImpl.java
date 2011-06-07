@@ -324,7 +324,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
 
     @Override
-    public double getGapToLeaderInSeconds(TimePoint timePoint) throws NoWindException {
+    public Double getGapToLeaderInSeconds(TimePoint timePoint) throws NoWindException {
         // If the leader already completed this leg, compute the estimated arrival time at the
         // end of this leg; if this leg's competitor also already finished the leg, return the
         // difference between this competitor's leg completion time point and the leader's completion
@@ -332,22 +332,45 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
         // the windward speed
         Speed windwardSpeed = getWindwardSpeed(getTrackedRace().getTrack(getCompetitor()).getEstimatedSpeed(timePoint), timePoint);
         Iterator<MarkPassing> markPassingsForLegEnd = getTrackedRace().getMarkPassingsInOrder(getLeg().getTo()).iterator();
-        if (markPassingsForLegEnd.hasNext()) {
-            TimePoint whenLeaderFinishedLeg = markPassingsForLegEnd.next().getTimePoint();
-            if (whenLeaderFinishedLeg.compareTo(timePoint) <= 0) {
-                if (hasFinishedLeg(timePoint)) {
-                    return (getMarkPassingForLegEnd().getTimePoint().asMillis()-whenLeaderFinishedLeg.asMillis())/1000;
-                } else {
-                    Distance windwardDistanceToGo = getWindwardDistanceToGo(timePoint);
-                    long millisSinceLeaderPassedMarkToTimePoint = timePoint.asMillis()-whenLeaderFinishedLeg.asMillis();
-                    return windwardDistanceToGo.getMeters() / windwardSpeed.getMetersPerSecond() + millisSinceLeaderPassedMarkToTimePoint/1000;
+        // Has our competitor started the leg already? If not, we won't be able to compute a gap
+        if (hasStartedLeg(timePoint)) {
+            if (markPassingsForLegEnd.hasNext()) {
+                // someone has already finished the leg
+                TimePoint whenLeaderFinishedLeg = markPassingsForLegEnd.next().getTimePoint();
+                // Was it before the requested timePoint?
+                if (whenLeaderFinishedLeg.compareTo(timePoint) <= 0) {
+                    // Has our competitor also already finished this leg?
+                    if (hasFinishedLeg(timePoint)) {
+                        // Yes, so the gap is the time period between the time points at which the leader and
+                        // our competitor finished this leg.
+                        return (getMarkPassingForLegEnd().getTimePoint().asMillis() - whenLeaderFinishedLeg.asMillis()) / 1000.;
+                    } else {
+                        // leader has finished already; our competitor hasn't
+                        Distance windwardDistanceToGo = getWindwardDistanceToGo(timePoint);
+                        long millisSinceLeaderPassedMarkToTimePoint = timePoint.asMillis()
+                                - whenLeaderFinishedLeg.asMillis();
+                        return windwardDistanceToGo.getMeters() / windwardSpeed.getMetersPerSecond()
+                                + millisSinceLeaderPassedMarkToTimePoint / 1000.;
+                    }
                 }
             }
+            // no-one has finished this leg yet at timePoint
+            Competitor leader = getTrackedLeg().getLeader(timePoint);
+            // Maybe our competitor is the leader. Check:
+            if (leader == getCompetitor()) {
+                return 0.0; // the leader's gap to the leader
+            } else {
+                // no, we're not the leader, so compute our windward distance and divide by our current VMG
+                Distance windwardDistanceToGo = getWindwardDistance(getTrackedRace().getTrack(getCompetitor())
+                        .getEstimatedPosition(timePoint, false), getTrackedRace().getTrack(leader)
+                        .getEstimatedPosition(timePoint, false), timePoint);
+                return windwardDistanceToGo.getMeters() / windwardSpeed.getMetersPerSecond();
+            }
+        } else {
+            // our competitor hasn't started the leg yet, so we can't compute a gap since we don't
+            // have a speed estimate
+            return null;
         }
-        Competitor leader = getTrackedLeg().getLeader(timePoint);
-        Distance windwardDistanceToGo = getWindwardDistance(getTrackedRace().getTrack(getCompetitor()).getEstimatedPosition(timePoint, false),
-                getTrackedRace().getTrack(leader).getEstimatedPosition(timePoint, false), timePoint);
-        return windwardDistanceToGo.getMeters() / windwardSpeed.getMetersPerSecond();
     }
 
     @Override
@@ -364,22 +387,34 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
 
     @Override
     public Speed getVelocityMadeGood(TimePoint at) throws NoWindException {
-        return getWindwardSpeed(getSpeedOverGround(at), at);
+        if (hasStartedLeg(at)) {
+            return getWindwardSpeed(getSpeedOverGround(at), at);
+        } else {
+            return null;
+        }
     }
 
     private SpeedWithBearing getSpeedOverGround(TimePoint at) {
-        return getTrackedRace().getTrack(getCompetitor()).getEstimatedSpeed(at);
+        if (hasStartedLeg(at)) {
+            return getTrackedRace().getTrack(getCompetitor()).getEstimatedSpeed(at);
+        } else {
+            return null;
+        }
     }
 
     @Override
-    public double getEstimatedTimeToNextMarkInSeconds(TimePoint timePoint) throws NoWindException {
-        double result;
+    public Double getEstimatedTimeToNextMarkInSeconds(TimePoint timePoint) throws NoWindException {
+        Double result;
         if (hasFinishedLeg(timePoint)) {
-            result = 0;
+            result = 0.0;
         } else {
-            Distance windwardDistanceToGo = getWindwardDistanceToGo(timePoint);
-            Speed vmg = getVelocityMadeGood(timePoint);
-            result = windwardDistanceToGo.getMeters() / vmg.getMetersPerSecond();
+            if (hasStartedLeg(timePoint)) {
+                Distance windwardDistanceToGo = getWindwardDistanceToGo(timePoint);
+                Speed vmg = getVelocityMadeGood(timePoint);
+                result = windwardDistanceToGo.getMeters() / vmg.getMetersPerSecond();
+            } else {
+                result = null;
+            }
         }
         return result;
     }

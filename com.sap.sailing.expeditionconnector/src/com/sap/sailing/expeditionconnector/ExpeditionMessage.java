@@ -45,7 +45,10 @@ public interface ExpeditionMessage {
     final int ID_TWA = 4;
     
     /**
-     * variable ID for magnetic true wind direction, in decimal degrees
+     * Variable ID for what Expedition thinks is the true wind direction, in decimal degrees. Some
+     * users prefer to not enter the current declination for a time / place into their Expedition
+     * client. In this case, the values presented for this key are the magnetic wind direction instead.
+     * They should then be corrected by adding the current declination.
      */
     final int ID_TWD = 6;
     
@@ -84,6 +87,12 @@ public interface ExpeditionMessage {
     
     GPSFixMoving getGPSFixMoving();
     
+    /**
+     * Returns what what Expedition thinks is the true wind direction, in decimal degrees. Some users prefer to not
+     * enter the current declination for a time / place into their Expedition client. In this case, the values presented
+     * for this key are the magnetic wind direction instead. They should then be corrected by adding the current
+     * declination.
+     */
     SpeedWithBearing getTrueWind();
     
     SpeedWithBearing getSpeedOverGround();

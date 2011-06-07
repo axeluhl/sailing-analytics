@@ -103,7 +103,6 @@ public class ExpeditionMessageImpl implements ExpeditionMessage {
 
     @Override
     public SpeedWithBearing getTrueWind() {
-        // FIXME use DeclinationService to change from the provided magnetic wind direction into true wind direction
         if (hasValue(ID_TWD) && hasValue(ID_TWS)) {
             return new KnotSpeedWithBearingImpl(getValue(ID_TWS), getTrueWindBearing());
         } else {
