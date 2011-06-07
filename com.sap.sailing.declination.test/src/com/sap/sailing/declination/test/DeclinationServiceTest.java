@@ -12,6 +12,8 @@ import org.junit.Test;
 
 import com.sap.sailing.declination.Declination;
 import com.sap.sailing.declination.DeclinationService;
+import com.sap.sailing.declination.impl.DeclinationServiceImpl;
+import com.sap.sailing.domain.base.impl.CentralAngleDistance;
 import com.sap.sailing.domain.base.impl.DegreePosition;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 
@@ -20,7 +22,7 @@ public class DeclinationServiceTest extends AbstractDeclinationTest {
     
     @Before
     public void setUp() {
-        service = DeclinationService.INSTANCE;
+        service = new DeclinationServiceImpl(new CentralAngleDistance(1./180.*Math.PI));
     }
     
     @Test

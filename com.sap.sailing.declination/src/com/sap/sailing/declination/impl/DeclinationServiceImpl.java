@@ -18,7 +18,16 @@ public class DeclinationServiceImpl implements DeclinationService {
     private final Distance defaultMaxDistance;
     private final DeclinationStore persistentStore;
     private final NOAAImporter noaaImporter;
+    
+    /**
+     * Keys are years
+     */
     private final Map<Integer, QuadTree<Declination>> yearStore;
+    
+    /**
+     * Keys are years
+     */
+    private final Map<Integer, QuadTree<Declination>> importerCache;
     
     /**
      * Constructs a service that has a default position tolerance of <code>defaultMaxDistance</code>.
@@ -28,6 +37,7 @@ public class DeclinationServiceImpl implements DeclinationService {
         this.yearStore = new HashMap<Integer, QuadTree<Declination>>();
         this.persistentStore = new DeclinationStore();
         this.noaaImporter = new NOAAImporter();
+        this.importerCache = new HashMap<Integer, QuadTree<Declination>>();
     }
 
     @Override
@@ -61,7 +71,22 @@ public class DeclinationServiceImpl implements DeclinationService {
             step = -step - (int) Math.signum(step); // alternate around the original year until no more stored declinations are found
         }
         if (result == null) {
+            QuadTree<Declination> importerCacheForYear = importerCache.get(year);
+            if (importerCacheForYear != null) {
+                result = importerCacheForYear.get(position);
+                if (result.getPosition().getDistance(position).compareTo(maxDistance) <= 0) {
+                    return result;
+                    // else it's further away from the requested position as demanded by maxDistance
+                }
+            }
             result = noaaImporter.getDeclination(position, timePoint, timeoutForOnlineFetchInMilliseconds);
+            if (result != null) {
+                if (importerCacheForYear == null) {
+                    importerCacheForYear = new QuadTree<Declination>();
+                    importerCache.put(year, importerCacheForYear);
+                }
+                importerCacheForYear.put(result.getPosition(), result);
+            }
         }
         return result;
     }

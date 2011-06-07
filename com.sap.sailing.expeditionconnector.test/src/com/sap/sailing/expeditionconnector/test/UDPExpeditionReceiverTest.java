@@ -184,7 +184,7 @@ public class UDPExpeditionReceiverTest {
             packet.setLength(lineAsBytes.length);
             socket.send(packet);
         }
-        Thread.sleep(1000 /* ms */); // wait until all data was received
+        Thread.sleep(2000 /* ms */); // wait until all data was received
         receiver.stop();
         receiverThread.join(); // ensure the received has cleaned up and closed its socket
     }
