@@ -136,7 +136,7 @@
   <distributionManagement>
     <repository>
       <id>ssh-repository</id>
-      <url>scpexe://trac@kielweek.web4sap.com/home/trac/maven-repository</url>
+      <url>scpexe://trac@localhost:12347/home/trac/maven-repository</url>
     </repository>
   </distributionManagement>
 
