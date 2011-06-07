@@ -27,27 +27,27 @@ package com.sap.sailing.util;
 import java.io.Serializable;
 
 public class QuadTreeLeaf<T> implements Serializable {
-//
-//    static final long serialVersionUID = 7885745536157252519L;
-//
-//    private GLatLng point;
-//    private T object;
-//
-//    public QuadTreeLeaf(GLatLng point, T obj) {
-//        this.point = point;
-//        this.object = obj;
-//    }
-//
-//	public GLatLng getPoint() {
-//		return point;
-//	}
-//
-//	public T getObject() {
-//		return object;
-//	}
-//	
-//	public String toString() {
-//		return "QuadTreeLeaf at ("+point.lat()+", "+point.lng()+") with object "+getObject();
-//	}
+
+    static final long serialVersionUID = 7885745536157252519L;
+
+    private GLatLng point;
+    private T object;
+
+    public QuadTreeLeaf(GLatLng point, T obj) {
+        this.point = point;
+        this.object = obj;
+    }
+
+    public GLatLng getPoint() {
+        return point;
+    }
+
+    public T getObject() {
+        return object;
+    }
+
+    public String toString() {
+        return "QuadTreeLeaf at (" + point.lat() + ", " + point.lng() + ") with object " + getObject();
+    }
 
 }

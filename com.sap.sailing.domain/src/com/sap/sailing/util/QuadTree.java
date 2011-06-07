@@ -32,129 +32,128 @@ import java.util.Vector;
  * certain area.
  * 
  * @param <T> type of object stored by coordinates
- * @param <P> type of position / coordinate specification
  */
-public class QuadTree<T, P> implements Serializable {
-//
-//    static final long serialVersionUID = -7707825592455579873L;
-//
-//    private QuadTreeNode<T> top;
-//    
-//    public QuadTree() {
-//        this(new GLatLngBounds(new GLatLng(-90.0, -180.0), new GLatLng(90.0, 180.0)), 20, QuadTreeNode.NO_MIN_SIZE);
-//    }
-//
-//    public QuadTree(GLatLngBounds bounds, int maxItems) {
-//        this(bounds, maxItems, QuadTreeNode.NO_MIN_SIZE);
-//    }
-//
-//    public QuadTree(GLatLngBounds bounds, int maxItems, double minSize) {
-//        top = new QuadTreeNode<T>(bounds, maxItems, minSize);
-//    }
-//
-//    /**
-//     * Add a object into the tree at a location.
-//     * 
-//     * @param lat up-down location in QuadTree Grid (latitude, y)
-//     * @param lon left-right location in QuadTree Grid (longitude, x)
-//     * @return true if the insertion worked.
-//     * @throws RuntimeException in case the leaf's lat/lng lies outside of the node's bounds.
-//     * This would typically be caused by the point being outside the whole quad tree's bounds.
-//     */
-//    public void put(GLatLng point, T obj) {
-//        getTop().put(point, obj);
-//    }
-//
-//    /**
-//     * Remove a object out of the tree at a location.
-//     * 
-//     * @param lat up-down location in QuadTree Grid (latitude, y)
-//     * @param lon left-right location in QuadTree Grid (longitude, x)
-//     * @return the object removed, null if the object not found.
-//     */
-//    public T remove(GLatLng point, T obj) {
-//        return getTop().remove(point, obj);
-//    }
-//
-//    /** Clear the tree. */
-//    public void clear() {
-//        getTop().clear();
-//    }
-//
-//    /**
-//     * Get an object closest to a lat/lon.
-//     * 
-//     * @param lat up-down location in QuadTree Grid (latitude, y)
-//     * @param lon left-right location in QuadTree Grid (longitude, x)
-//     * @return the object that was found.
-//     */
-//    public T get(GLatLng point) {
-//        return getTop().get(point);
-//    }
-//
-//    /**
-//     * Get an object closest to a lat/lon, within a maximum distance.
-//     * 
-//     * @param lat up-down location in QuadTree Grid (latitude, y)
-//     * @param lon left-right location in QuadTree Grid (longitude, x)
-//     * @param withinDistance maximum get distance. The distance is given
-//     *        as the square root of the sum of
-//     *        the squares of the latitude and longitude differences, respectively.
-//     *        It therefore does not correspond to any distance in meters or
-//     *        any euclidian distance at all. However, it should be good enough
-//     *        (at least outside the polar regions, and in particular for smaller
-//     *        regions), and in particular to find <em>minimum</em> distances.
-//     * @return the object that was found, null if nothing is within
-//     *         the maximum distance.
-//     */
-//    public T get(GLatLng point, double withinDistance) {
-//        return getTop().get(point, withinDistance);
-//    }
-//
-//    /**
-//     * Get all the objects within a bounding box.
-//     * 
-//     * @return Vector of objects.
-//     */
-//    public Collection<T> get(GLatLngBounds rect) {
-//        return get(rect, new Vector<T>());
-//    }
-//
-//    /**
-//     * Get all the objects within a bounding box, and return the
-//     * objects within a given Vector.
-//     * 
-//     * @param vector a vector to add objects to.
-//     * @return Vector of objects.
-//     */
-//    private Collection<T> get(GLatLngBounds rect, Collection<T> vector) {
-//
-//        if (vector == null) {
-//            vector = new Vector<T>();
-//        }
-//        // crossing the dateline, right?? Or at least containing the
-//        // entire earth. Might be trouble for VERY LARGE scales. The
-//        // last check is for micro-errors that happen to lon points
-//        // where there might be a smudge overlap for very small
-//        // scales.
-//        if (rect.getSouthWest().lng() > rect.getNorthEast().lng() || (Math.abs(rect.getSouthWest().lng() - rect.getNorthEast().lng()) < .001)) {
-//            return getTop().get(new GLatLngBounds(rect.getSouthWest(), new GLatLng(rect.getNorthEast().lat(), 180)),
-//                   getTop().get(new GLatLngBounds(new GLatLng(rect.getSouthWest().lat(), -180), rect.getNorthEast()), vector));
-//        } else
-//            return getTop().get(rect, vector);
-//    }
-//
-//        protected QuadTreeNode<T> getTop() {
-//                return top;
-//        }
-//
-//        /**
-//         * Calculates an approximated "distance" between two lat/lng points by interpreting
-//         * the coordinates as a euclidian and doing the "sqrt thing"
-//         */
-//        public static double getLatLngDistance(GLatLng a, GLatLng b) {
-//                double distance = Math.sqrt((a.lat()-b.lat()) * (a.lat()-b.lat())
-//                                          + (a.lng()-b.lng()) * (a.lng()-b.lng()));
-//                return distance;
-//        }
+public class QuadTree<T> implements Serializable {
+
+    static final long serialVersionUID = -7707825592455579873L;
+
+    private QuadTreeNode<T> top;
+    
+    public QuadTree() {
+        this(new GLatLngBounds(new GLatLng(-90.0, -180.0), new GLatLng(90.0, 180.0)), 20, QuadTreeNode.NO_MIN_SIZE);
+    }
+
+    public QuadTree(GLatLngBounds bounds, int maxItems) {
+        this(bounds, maxItems, QuadTreeNode.NO_MIN_SIZE);
+    }
+
+    public QuadTree(GLatLngBounds bounds, int maxItems, double minSize) {
+        top = new QuadTreeNode<T>(bounds, maxItems, minSize);
+    }
+
+    /**
+     * Add a object into the tree at a location.
+     * 
+     * @param lat up-down location in QuadTree Grid (latitude, y)
+     * @param lon left-right location in QuadTree Grid (longitude, x)
+     * @return true if the insertion worked.
+     * @throws RuntimeException in case the leaf's lat/lng lies outside of the node's bounds.
+     * This would typically be caused by the point being outside the whole quad tree's bounds.
+     */
+    public void put(GLatLng point, T obj) {
+        getTop().put(point, obj);
+    }
+
+    /**
+     * Remove a object out of the tree at a location.
+     * 
+     * @param lat up-down location in QuadTree Grid (latitude, y)
+     * @param lon left-right location in QuadTree Grid (longitude, x)
+     * @return the object removed, null if the object not found.
+     */
+    public T remove(GLatLng point, T obj) {
+        return getTop().remove(point, obj);
+    }
+
+    /** Clear the tree. */
+    public void clear() {
+        getTop().clear();
+    }
+
+    /**
+     * Get an object closest to a lat/lon.
+     * 
+     * @param lat up-down location in QuadTree Grid (latitude, y)
+     * @param lon left-right location in QuadTree Grid (longitude, x)
+     * @return the object that was found.
+     */
+    public T get(GLatLng point) {
+        return getTop().get(point);
+    }
+
+    /**
+     * Get an object closest to a lat/lon, within a maximum distance.
+     * 
+     * @param lat up-down location in QuadTree Grid (latitude, y)
+     * @param lon left-right location in QuadTree Grid (longitude, x)
+     * @param withinDistance maximum get distance. The distance is given
+     *        as the square root of the sum of
+     *        the squares of the latitude and longitude differences, respectively.
+     *        It therefore does not correspond to any distance in meters or
+     *        any euclidian distance at all. However, it should be good enough
+     *        (at least outside the polar regions, and in particular for smaller
+     *        regions), and in particular to find <em>minimum</em> distances.
+     * @return the object that was found, null if nothing is within
+     *         the maximum distance.
+     */
+    public T get(GLatLng point, double withinDistance) {
+        return getTop().get(point, withinDistance);
+    }
+
+    /**
+     * Get all the objects within a bounding box.
+     * 
+     * @return Vector of objects.
+     */
+    public Collection<T> get(GLatLngBounds rect) {
+        return get(rect, new Vector<T>());
+    }
+
+    /**
+     * Get all the objects within a bounding box, and return the
+     * objects within a given Vector.
+     * 
+     * @param vector a vector to add objects to.
+     * @return Vector of objects.
+     */
+    private Collection<T> get(GLatLngBounds rect, Collection<T> vector) {
+
+        if (vector == null) {
+            vector = new Vector<T>();
+        }
+        // crossing the dateline, right?? Or at least containing the
+        // entire earth. Might be trouble for VERY LARGE scales. The
+        // last check is for micro-errors that happen to lon points
+        // where there might be a smudge overlap for very small
+        // scales.
+        if (rect.getSouthWest().lng() > rect.getNorthEast().lng() || (Math.abs(rect.getSouthWest().lng() - rect.getNorthEast().lng()) < .001)) {
+            return getTop().get(new GLatLngBounds(rect.getSouthWest(), new GLatLng(rect.getNorthEast().lat(), 180)),
+                   getTop().get(new GLatLngBounds(new GLatLng(rect.getSouthWest().lat(), -180), rect.getNorthEast()), vector));
+        } else
+            return getTop().get(rect, vector);
+    }
+
+    protected QuadTreeNode<T> getTop() {
+        return top;
+    }
+
+    /**
+     * Calculates an approximated "distance" between two lat/lng points by interpreting the coordinates as a euclidian
+     * and doing the "sqrt thing"
+     */
+    public static double getLatLngDistance(GLatLng a, GLatLng b) {
+        double distance = Math.sqrt((a.lat() - b.lat()) * (a.lat() - b.lat()) + (a.lng() - b.lng())
+                * (a.lng() - b.lng()));
+        return distance;
+    }
 }
