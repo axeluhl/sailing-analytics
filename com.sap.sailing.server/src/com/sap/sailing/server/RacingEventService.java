@@ -11,9 +11,9 @@ import java.text.ParseException;
 
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
-import com.sap.sailing.domain.base.impl.Util.Pair;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.RaceTracker;
+import com.sap.sailing.util.Util.Pair;
 
 public interface RacingEventService {
     Iterable<Event> getAllEvents();

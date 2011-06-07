@@ -19,7 +19,6 @@ import java.util.Set;
 
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
-import com.sap.sailing.domain.base.impl.Util.Pair;
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
@@ -28,6 +27,7 @@ import com.sap.sailing.domain.tractracadapter.RaceRecord;
 import com.sap.sailing.domain.tractracadapter.RaceTracker;
 import com.sap.sailing.expeditionconnector.UDPExpeditionReceiver;
 import com.sap.sailing.expeditionconnector.WindTracker;
+import com.sap.sailing.util.Util.Pair;
 
 public class RacingEventServiceImpl implements RacingEventService {
     private final DomainFactory domainFactory;

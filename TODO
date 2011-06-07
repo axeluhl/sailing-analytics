@@ -1,25 +1,20 @@
- - Create an alternative implementation of TrackedLeg, TrackedLegOfCompetitor, TrackedRace
-   based on LiveResult and MarkResult
+ - enable switching between our and TracTrac-provided leaderboard information
 
  - Use a JDBC driver to store wind data in MungoDB; retrieve it from there upon startup
 
  - Include declination stuff into processing of Expedition wind data. Need smart caching,
-   probably rounding to a configurable degrees amount.
+   probably rounding to a configurable degrees amount. Use QuadTree to access
+   position-based declination information.
 
- - Clarify deploy / install / upgrade process, maybe using "mvn deploy" and a maven
-   "repository" on the target host
+ - Clarify Equinox server upgrade process from the maven-repository
 
- - Re-install ssh keys on server
-
- - Set up a test server that tries to be always-on
-
- - Open test server firewall ports or forward a specific DNS name to test server port
+ - Open test server firewall ports for UDP / Expedition wind integration
 
  - Test fail-over in case one of the two Java VM fails
 
- - Pass test server info to BeTomorrow so they can start their wind test. Include
-   information about the query API by which they can determine the success of the
-   wind update
-
  - Set up two Expedition machines with RF and UMTS transmission, test killing one
+
+ - Pass final production instance URL information to BeTomorrow for wind integration
+
+ - Display gain/loss for next-best competitor (green/red arrow up/down) based on VMG comparison
 

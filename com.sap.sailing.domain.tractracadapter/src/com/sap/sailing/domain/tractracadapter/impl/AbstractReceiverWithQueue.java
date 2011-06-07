@@ -2,8 +2,8 @@ package com.sap.sailing.domain.tractracadapter.impl;
 
 import java.util.concurrent.LinkedBlockingQueue;
 
-import com.sap.sailing.domain.base.impl.Util.Triple;
 import com.sap.sailing.domain.tractracadapter.Receiver;
+import com.sap.sailing.util.Util.Triple;
 
 /**
  * Some event receiver that can be executed in a thread because it's a runnable, and

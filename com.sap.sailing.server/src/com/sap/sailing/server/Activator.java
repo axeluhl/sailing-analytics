@@ -11,7 +11,7 @@ import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
-import com.sap.sailing.domain.base.impl.Util.Pair;
+import com.sap.sailing.util.Util.Pair;
 
 public class Activator implements BundleActivator, ServiceListener {
     private static BundleContext fContext;

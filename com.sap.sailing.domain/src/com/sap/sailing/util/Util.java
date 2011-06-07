@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.base.impl;
+package com.sap.sailing.util;
 
 import java.util.Collection;
 import java.util.Iterator;
