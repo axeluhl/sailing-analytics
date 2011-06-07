@@ -150,7 +150,7 @@ public class AdminApp extends Servlet {
                 if (latitudes != null && longitudes != null) {
                     for (int i = 0; i < Math.max(latitudes.length, longitudes.length); i++) {
                         double latDeg = Double.valueOf(latitudes[i]);
-                        double lngDeg = Double.valueOf(latitudes[i]);
+                        double lngDeg = Double.valueOf(longitudes[i]);
                         DegreePosition pos = new DegreePosition(latDeg, lngDeg);
                         Wind wind = trackedRace.getWind(pos, time);
                         if (wind == null) {
