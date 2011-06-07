@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.sap.sailing.declination.DeclinationService;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
@@ -128,11 +129,12 @@ public class RacingEventServiceImpl implements RacingEventService {
     }
 
     @Override
-    public synchronized void startTrackingWind(Event event, RaceDefinition race, int port) throws SocketException {
+    public synchronized void startTrackingWind(Event event, RaceDefinition race, int port,
+            DeclinationService declinationService) throws SocketException {
         if (!windTrackers.containsKey(race)) {
             DynamicTrackedEvent trackedEvent = getDomainFactory().trackEvent(event);
             DynamicTrackedRace trackedRace = trackedEvent.getTrackedRace(race);
-            WindTracker windTracker = new WindTracker(trackedRace);
+            WindTracker windTracker = new WindTracker(trackedRace, declinationService);
             UDPExpeditionReceiver receiver = getOrCreateWindReceiverForPort(port);
             windTrackers.put(race, windTracker);
             receiver.addListener(windTracker, /* validMessagesOnly */ true);

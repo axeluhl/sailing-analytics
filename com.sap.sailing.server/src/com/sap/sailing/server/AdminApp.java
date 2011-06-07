@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import com.sap.sailing.declination.DeclinationService;
 import com.sap.sailing.domain.base.Bearing;
 import com.sap.sailing.domain.base.Distance;
 import com.sap.sailing.domain.base.Event;
@@ -88,6 +89,8 @@ public class AdminApp extends Servlet {
     private static final String ACTION_NAME_UNSUBSCRIBE_RACE_FOR_EXPEDITION_WIND = "stopreceivingexpeditionwind";
 
     private static final String PARAM_NAME_PORT = "port";
+
+    private static final String PARAM_NAME_CORRECT_EXPEDITION_WIND_BEARING_BY_DECLINATION = "correctexpeditionwindbearingbydeclination";
 
     public AdminApp() {
     }
@@ -317,21 +320,32 @@ public class AdminApp extends Servlet {
     }
 
     private void stopReceivingExpeditionWindForRace(HttpServletRequest req, HttpServletResponse resp) throws SocketException, IOException {
-        RaceDefinition race = getRaceDefinition(req);
-        if (race == null) {
-            resp.sendError(500, "Race not found");
+        Event event = getEvent(req);
+        if (event == null) {
+            resp.sendError(500, "Event not found");
         } else {
-            getService().stopTrackingWind(getEvent(req), race);
+            RaceDefinition race = getRaceDefinition(req);
+            if (race == null) {
+                resp.sendError(500, "Race not found");
+            } else {
+                getService().stopTrackingWind(event, race);
+            }
         }
     }
 
     private void startReceivingExpeditionWindForRace(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        RaceDefinition race = getRaceDefinition(req);
-        if (race == null) {
-            resp.sendError(500, "Race not found");
+        Event event = getEvent(req);
+        if (event == null) {
+            resp.sendError(500, "Event not found");
         } else {
-            int port = Integer.valueOf(req.getParameter(PARAM_NAME_PORT));
-            getService().startTrackingWind(getEvent(req), race, port);
+            RaceDefinition race = getRaceDefinition(req);
+            if (race == null) {
+                resp.sendError(500, "Race not found");
+            } else {
+                int port = Integer.valueOf(req.getParameter(PARAM_NAME_PORT));
+                String correctByDeclination = req.getParameter(PARAM_NAME_CORRECT_EXPEDITION_WIND_BEARING_BY_DECLINATION);
+                getService().startTrackingWind(event, race, port, Boolean.valueOf(correctByDeclination) ? DeclinationService.INSTANCE : null);
+            }
         }
     }
 

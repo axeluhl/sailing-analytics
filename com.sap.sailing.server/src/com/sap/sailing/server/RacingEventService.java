@@ -9,6 +9,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.ParseException;
 
+import com.sap.sailing.declination.DeclinationService;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
@@ -65,10 +66,14 @@ public interface RacingEventService {
     /**
      * @param port
      *            the UDP port on which to listen for incoming messages from Expedition clients
+     * @param declinationService
+     *            An optional service to convert the Expedition-provided wind bearings (which Expedition
+     *            believes to be true bearings) from magnetic to true bearings. Can be <code>null</code>
+     *            in which case the Expedition true bearings are used as true bearings.
      * @throws SocketException
      *             thrown, e.g., in case there is already another listener on the port requested
      */
-    void startTrackingWind(Event event, RaceDefinition race, int port) throws SocketException;
+    void startTrackingWind(Event event, RaceDefinition race, int port, DeclinationService declinationService) throws SocketException;
 
     void stopTrackingWind(Event event, RaceDefinition race) throws SocketException, IOException;
 
