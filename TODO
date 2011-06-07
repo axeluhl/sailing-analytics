@@ -1,3 +1,5 @@
+ - move buoy tracks from TrackedEvent to TrackedRace
+
  - enable switching between our and TracTrac-provided leaderboard information
 
  - Use a JDBC driver to store wind data in MongoDB; retrieve it from there upon startup
