@@ -4,10 +4,6 @@
 
  - Use a JDBC driver to store wind data in MongoDB; retrieve it from there upon startup
 
- - Include declination stuff into processing of Expedition wind data. Need smart caching,
-   probably rounding to a configurable degrees amount. Use QuadTree to access
-   position-based declination information.
-
  - Clarify Equinox server upgrade process from the maven-repository
 
  - Open test server firewall ports for UDP / Expedition wind integration
