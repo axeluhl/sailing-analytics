@@ -26,6 +26,9 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.Vector;
 
+import com.sap.sailing.domain.base.Position;
+import com.sap.sailing.domain.base.impl.DegreePosition;
+
 /**
  * The QuadTree lets you organize objects in a grid, that redefines
  * itself and focuses more gridding when more objects appear in a
@@ -40,7 +43,7 @@ public class QuadTree<T> implements Serializable {
     private QuadTreeNode<T> top;
     
     public QuadTree() {
-        this(new GLatLngBounds(new GLatLng(-90.0, -180.0), new GLatLng(90.0, 180.0)), 20, QuadTreeNode.NO_MIN_SIZE);
+        this(new GLatLngBounds(new DegreePosition(-90.0, -180.0), new DegreePosition(90.0, 180.0)), 20, QuadTreeNode.NO_MIN_SIZE);
     }
 
     public QuadTree(GLatLngBounds bounds, int maxItems) {
@@ -60,7 +63,7 @@ public class QuadTree<T> implements Serializable {
      * @throws RuntimeException in case the leaf's lat/lng lies outside of the node's bounds.
      * This would typically be caused by the point being outside the whole quad tree's bounds.
      */
-    public void put(GLatLng point, T obj) {
+    public void put(Position point, T obj) {
         getTop().put(point, obj);
     }
 
@@ -71,7 +74,7 @@ public class QuadTree<T> implements Serializable {
      * @param lon left-right location in QuadTree Grid (longitude, x)
      * @return the object removed, null if the object not found.
      */
-    public T remove(GLatLng point, T obj) {
+    public T remove(Position point, T obj) {
         return getTop().remove(point, obj);
     }
 
@@ -87,7 +90,7 @@ public class QuadTree<T> implements Serializable {
      * @param lon left-right location in QuadTree Grid (longitude, x)
      * @return the object that was found.
      */
-    public T get(GLatLng point) {
+    public T get(Position point) {
         return getTop().get(point);
     }
 
@@ -106,7 +109,7 @@ public class QuadTree<T> implements Serializable {
      * @return the object that was found, null if nothing is within
      *         the maximum distance.
      */
-    public T get(GLatLng point, double withinDistance) {
+    public T get(Position point, double withinDistance) {
         return getTop().get(point, withinDistance);
     }
 
@@ -136,9 +139,9 @@ public class QuadTree<T> implements Serializable {
         // last check is for micro-errors that happen to lon points
         // where there might be a smudge overlap for very small
         // scales.
-        if (rect.getSouthWest().lng() > rect.getNorthEast().lng() || (Math.abs(rect.getSouthWest().lng() - rect.getNorthEast().lng()) < .001)) {
-            return getTop().get(new GLatLngBounds(rect.getSouthWest(), new GLatLng(rect.getNorthEast().lat(), 180)),
-                   getTop().get(new GLatLngBounds(new GLatLng(rect.getSouthWest().lat(), -180), rect.getNorthEast()), vector));
+        if (rect.getSouthWest().getLngDeg() > rect.getNorthEast().getLngDeg() || (Math.abs(rect.getSouthWest().getLngDeg() - rect.getNorthEast().getLngDeg()) < .001)) {
+            return getTop().get(new GLatLngBounds(rect.getSouthWest(), new DegreePosition(rect.getNorthEast().getLatDeg(), 180)),
+                   getTop().get(new GLatLngBounds(new DegreePosition(rect.getSouthWest().getLatDeg(), -180), rect.getNorthEast()), vector));
         } else
             return getTop().get(rect, vector);
     }
@@ -151,9 +154,9 @@ public class QuadTree<T> implements Serializable {
      * Calculates an approximated "distance" between two lat/lng points by interpreting the coordinates as a euclidian
      * and doing the "sqrt thing"
      */
-    public static double getLatLngDistance(GLatLng a, GLatLng b) {
-        double distance = Math.sqrt((a.lat() - b.lat()) * (a.lat() - b.lat()) + (a.lng() - b.lng())
-                * (a.lng() - b.lng()));
+    public static double getLatLngDistance(Position a, Position b) {
+        double distance = Math.sqrt((a.getLatDeg() - b.getLatDeg()) * (a.getLatDeg() - b.getLatDeg()) + (a.getLngDeg() - b.getLngDeg())
+                * (a.getLngDeg() - b.getLngDeg()));
         return distance;
     }
 }

@@ -26,19 +26,21 @@ package com.sap.sailing.util;
 
 import java.io.Serializable;
 
+import com.sap.sailing.domain.base.Position;
+
 public class QuadTreeLeaf<T> implements Serializable {
 
     static final long serialVersionUID = 7885745536157252519L;
 
-    private GLatLng point;
+    private Position point;
     private T object;
 
-    public QuadTreeLeaf(GLatLng point, T obj) {
+    public QuadTreeLeaf(Position point, T obj) {
         this.point = point;
         this.object = obj;
     }
 
-    public GLatLng getPoint() {
+    public Position getPoint() {
         return point;
     }
 
@@ -47,7 +49,7 @@ public class QuadTreeLeaf<T> implements Serializable {
     }
 
     public String toString() {
-        return "QuadTreeLeaf at (" + point.lat() + ", " + point.lng() + ") with object " + getObject();
+        return "QuadTreeLeaf at (" + point.getLatDeg() + ", " + point.getLngDeg() + ") with object " + getObject();
     }
 
 }

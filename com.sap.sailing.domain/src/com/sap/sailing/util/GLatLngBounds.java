@@ -1,29 +1,31 @@
 package com.sap.sailing.util;
 
+import com.sap.sailing.domain.base.Position;
+
 public class GLatLngBounds {
-    private final GLatLng southWest;
-    private final GLatLng northEast;
+    private final Position southWest;
+    private final Position northEast;
     
-    public GLatLngBounds(GLatLng southWest, GLatLng northEast) {
+    public GLatLngBounds(Position southWest, Position northEast) {
         this.southWest = southWest;
         this.northEast = northEast;
     }
 
-    public GLatLng getSouthWest() {
+    public Position getSouthWest() {
         return southWest;
     }
 
-    public GLatLng getNorthEast() {
+    public Position getNorthEast() {
         return northEast;
     }
 
-    public boolean contains(GLatLng p) {
-        return p.lat() >= getSouthWest().lat() && p.lat() <= getNorthEast().lat() &&
-               (getNorthEast().lng() >= getSouthWest().lng() && p.lng() >= getSouthWest().lng() && p.lng() <= getNorthEast().lng() ||
+    public boolean contains(Position p) {
+        return p.getLatDeg() >= getSouthWest().getLatDeg() && p.getLatDeg() <= getNorthEast().getLatDeg() &&
+               (getNorthEast().getLngDeg() >= getSouthWest().getLngDeg() && p.getLngDeg() >= getSouthWest().getLngDeg() && p.getLngDeg() <= getNorthEast().getLngDeg() ||
                // cross date line bounds
-                getNorthEast().lng() < getSouthWest().lng() &&
-                      (p.lng() <= 180 && p.lng() >= getSouthWest().lng() ||
-                       p.lng() >= -180 && p.lng() <= getNorthEast().lng()));
+                getNorthEast().getLngDeg() < getSouthWest().getLngDeg() &&
+                      (p.getLngDeg() <= 180 && p.getLngDeg() >= getSouthWest().getLngDeg() ||
+                       p.getLngDeg() >= -180 && p.getLngDeg() <= getNorthEast().getLngDeg()));
     }
 
     public boolean containsBounds(GLatLngBounds rect) {

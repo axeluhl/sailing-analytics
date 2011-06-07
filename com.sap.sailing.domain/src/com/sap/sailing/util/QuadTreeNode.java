@@ -27,6 +27,9 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Vector;
 
+import com.sap.sailing.domain.base.Position;
+import com.sap.sailing.domain.base.impl.DegreePosition;
+
 /**
  * The QuadTreeNode is the part of the QuadTree that either holds
  * children nodes, or objects as leaves. Currently, the nodes that
@@ -54,7 +57,7 @@ public class QuadTreeNode<T> implements Serializable {
      * single point value.
      */
     private boolean allTheSamePoint;
-    private GLatLng firstPoint;
+    private Position firstPoint;
 
     /**
      * Constructor to use if you are going to store the objects in
@@ -109,19 +112,19 @@ public class QuadTreeNode<T> implements Serializable {
 	protected void split() {
         // Make sure we're bigger than the minimum, if we care,
         if (minSize != NO_MIN_SIZE) {
-            if (Math.abs(bounds.getNorthEast().lat() - bounds.getSouthWest().lat()) < minSize
-                    && Math.abs(bounds.getNorthEast().lng() - bounds.getSouthWest().lng()) < minSize)
+            if (Math.abs(bounds.getNorthEast().getLatDeg() - bounds.getSouthWest().getLatDeg()) < minSize
+                    && Math.abs(bounds.getNorthEast().getLngDeg() - bounds.getSouthWest().getLngDeg()) < minSize)
                 return;
         }
 
-        double nsHalf = (bounds.getNorthEast().lat() + bounds.getSouthWest().lat()) / 2.0;
-        double ewHalf = (bounds.getNorthEast().lng() + bounds.getSouthWest().lng()) / 2.0;
+        double nsHalf = (bounds.getNorthEast().getLatDeg() + bounds.getSouthWest().getLatDeg()) / 2.0;
+        double ewHalf = (bounds.getNorthEast().getLngDeg() + bounds.getSouthWest().getLngDeg()) / 2.0;
         children = new QuadTreeNode[4];
 
-        children[NORTHWEST] = new QuadTreeNode<T>(new GLatLngBounds(new GLatLng(nsHalf, bounds.getSouthWest().lng()), new GLatLng(bounds.getNorthEast().lat(), ewHalf)), maxItems);
-        children[NORTHEAST] = new QuadTreeNode<T>(new GLatLngBounds(new GLatLng(nsHalf, ewHalf), bounds.getNorthEast()), maxItems);
-        children[SOUTHEAST] = new QuadTreeNode<T>(new GLatLngBounds(new GLatLng(bounds.getSouthWest().lat(), ewHalf), new GLatLng(nsHalf, bounds.getNorthEast().lng())), maxItems);
-        children[SOUTHWEST] = new QuadTreeNode<T>(new GLatLngBounds(bounds.getSouthWest(), new GLatLng(nsHalf, ewHalf)), maxItems);
+        children[NORTHWEST] = new QuadTreeNode<T>(new GLatLngBounds(new DegreePosition(nsHalf, bounds.getSouthWest().getLngDeg()), new DegreePosition(bounds.getNorthEast().getLatDeg(), ewHalf)), maxItems);
+        children[NORTHEAST] = new QuadTreeNode<T>(new GLatLngBounds(new DegreePosition(nsHalf, ewHalf), bounds.getNorthEast()), maxItems);
+        children[SOUTHEAST] = new QuadTreeNode<T>(new GLatLngBounds(new DegreePosition(bounds.getSouthWest().getLatDeg(), ewHalf), new DegreePosition(nsHalf, bounds.getNorthEast().getLngDeg())), maxItems);
+        children[SOUTHWEST] = new QuadTreeNode<T>(new GLatLngBounds(bounds.getSouthWest(), new DegreePosition(nsHalf, ewHalf)), maxItems);
         Vector<QuadTreeLeaf<T>> temp = new Vector<QuadTreeLeaf<T>>(items);
         items.removeAllElements();
         for (Iterator<QuadTreeLeaf<T>> i=temp.iterator(); i.hasNext(); ) {
@@ -138,7 +141,7 @@ public class QuadTreeNode<T> implements Serializable {
      * @return node if child covers the point, null if the point is
      *         out of range.
      */
-    protected QuadTreeNode<T> getChild(GLatLng point) {
+    protected QuadTreeNode<T> getChild(Position point) {
         if (bounds.contains(point)) {
             if (children != null) {
                 for (int i = 0; i < children.length; i++) {
@@ -161,7 +164,7 @@ public class QuadTreeNode<T> implements Serializable {
      * @throws RuntimeException in case the leaf's lat/lng lies outside of the node's bounds.
      * This would typically be caused by the point being outside the whole quad tree's bounds.
      */
-    public void put(GLatLng point, T obj) {
+    public void put(Position point, T obj) {
         put(new QuadTreeLeaf<T>(point, obj));
     }
 
@@ -193,8 +196,8 @@ public class QuadTreeNode<T> implements Serializable {
                 node.put(leaf);
             } else {
             	throw new RuntimeException("leaf "+leaf+" not contained in bounds (("+
-            			bounds.getSouthWest().lat()+", "+bounds.getSouthWest().lng()+"), ("+
-            			bounds.getNorthEast().lat()+", "+bounds.getNorthEast().lng()+"))");
+            			bounds.getSouthWest().getLatDeg()+", "+bounds.getSouthWest().getLngDeg()+"), ("+
+            			bounds.getNorthEast().getLatDeg()+", "+bounds.getNorthEast().getLngDeg()+"))");
             }
         }
     }
@@ -206,7 +209,7 @@ public class QuadTreeNode<T> implements Serializable {
      * @param lon left-right location in QuadTree Grid (longitude, x)
      * @return the object removed, null if the object not found.
      */
-    public T remove(GLatLng point, T obj) {
+    public T remove(Position point, T obj) {
         return remove(new QuadTreeLeaf<T>(point, obj));
     }
 
@@ -254,7 +257,7 @@ public class QuadTreeNode<T> implements Serializable {
      * @return the object that matches the best distance, null if no
      *         object was found.
      */
-    public T get(GLatLng point) {
+    public T get(Position point) {
         return get(point, Double.POSITIVE_INFINITY);
     }
 
@@ -277,7 +280,7 @@ public class QuadTreeNode<T> implements Serializable {
      * @return the object that matches the best distance, null if no
      *         closer object was found.
      */
-    public T get(GLatLng point, double withinDistance) {
+    public T get(Position point, double withinDistance) {
         return get(point, new MutableDistance(withinDistance));
     }
 
@@ -299,7 +302,7 @@ public class QuadTreeNode<T> implements Serializable {
      * @return the object that matches the best distance, null if no
      *         closer object was found.
      */
-    public T get(GLatLng point, MutableDistance bestDistance) {
+    public T get(Position point, MutableDistance bestDistance) {
         T closest = null;
         if (children == null) {
             // This must be the node that has it...
@@ -335,23 +338,23 @@ public class QuadTreeNode<T> implements Serializable {
      * 
      * @return closest distance to the point.
      */
-    private static double borderDistance(GLatLngBounds bounds, GLatLng point) {
+    private static double borderDistance(GLatLngBounds bounds, Position point) {
 
         double nsdistance;
         double ewdistance;
 
-        if (bounds.getSouthWest().lat() <= point.lat() && point.lat() <= bounds.getNorthEast().lat()) {
+        if (bounds.getSouthWest().getLatDeg() <= point.getLatDeg() && point.getLatDeg() <= bounds.getNorthEast().getLatDeg()) {
             nsdistance = 0;
         } else {
-            nsdistance = Math.min((Math.abs(point.lat() - bounds.getNorthEast().lat())), (Math.abs(point.lat()
-                    - bounds.getSouthWest().lat())));
+            nsdistance = Math.min((Math.abs(point.getLatDeg() - bounds.getNorthEast().getLatDeg())), (Math.abs(point.getLatDeg()
+                    - bounds.getSouthWest().getLatDeg())));
         }
 
-        if (bounds.getSouthWest().lng() <= point.lng() && point.lng() <= bounds.getNorthEast().lng()) {
+        if (bounds.getSouthWest().getLngDeg() <= point.getLngDeg() && point.getLngDeg() <= bounds.getNorthEast().getLngDeg()) {
             ewdistance = 0;
         } else {
-            ewdistance = Math.min((Math.abs(point.lng() - bounds.getNorthEast().lng())),
-                    (Math.abs(point.lng() - bounds.getSouthWest().lng())));
+            ewdistance = Math.min((Math.abs(point.getLngDeg() - bounds.getNorthEast().getLngDeg())),
+                    (Math.abs(point.getLngDeg() - bounds.getSouthWest().getLngDeg())));
         }
 
         double distance = Math.sqrt(nsdistance*nsdistance + ewdistance*ewdistance);
@@ -369,7 +372,7 @@ public class QuadTreeNode<T> implements Serializable {
         if (children == null) {
             for (Iterator<QuadTreeLeaf<T>> i=items.iterator(); i.hasNext(); ) {
             	QuadTreeLeaf<T> qtl = i.next();
-                if (rect.contains(new GLatLng(qtl.getPoint().lat(), qtl.getPoint().lng()))) {
+                if (rect.contains(new DegreePosition(qtl.getPoint().getLatDeg(), qtl.getPoint().getLngDeg()))) {
                     vector.add(qtl.getObject());
                 }
             }
