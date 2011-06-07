@@ -131,7 +131,10 @@ public class ModeratorApp extends Servlet {
         } else {
             try {
                 TimePoint timePoint = getTimePoint(req, PARAM_NAME_TIME, PARAM_NAME_TIME_MILLIS,
-                        trackedRace.getTimePointOfNewestEvent() == null ? MillisecondsTimePoint.now() : trackedRace.getTimePointOfNewestEvent());
+                        trackedRace.getStart() != null ? trackedRace.getStart()
+                                : trackedRace.getStartOfTracking() != null ? trackedRace.getStartOfTracking()
+                                        : trackedRace.getTimePointOfNewestEvent() == null ? MillisecondsTimePoint.now()
+                                                : trackedRace.getTimePointOfNewestEvent());
                 JSONArray jsonWaypoints = new JSONArray();
                 for (Waypoint waypoint : trackedRace.getRace().getCourse().getWaypoints()) {
                     JSONObject jsonWaypoint = new JSONObject();

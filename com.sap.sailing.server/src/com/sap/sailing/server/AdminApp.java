@@ -17,6 +17,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.Bearing;
+import com.sap.sailing.domain.base.Distance;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -37,6 +38,8 @@ import com.sap.sailing.util.Util.Pair;
 public class AdminApp extends Servlet {
     private static final long serialVersionUID = -6849138354941569249L;
     
+    private static final String ACTION_NAME_ADD_WIND_TO_MARKS = "addwindtomarksforonehour";
+
     private static final String ACTION_NAME_ADD_EVENT = "addevent";
 
     private static final String ACTION_NAME_ADD_RACE = "addrace";
@@ -113,6 +116,8 @@ public class AdminApp extends Servlet {
                     selectWindSource(req, resp);
                 } else if (ACTION_NAME_SHOW_WIND.equals(action)) {
                     showWind(req, resp);
+                } else if (ACTION_NAME_ADD_WIND_TO_MARKS.equals(action)) {
+                    addWindToMarks(req, resp);
                 } else {
                     resp.sendError(500, "Unknown action \""+action+"\"");
                 }
@@ -125,6 +130,44 @@ public class AdminApp extends Servlet {
         }
     }
     
+    private void addWindToMarks(HttpServletRequest req, HttpServletResponse resp) throws IOException, InvalidDateException {
+        Event event = getEvent(req);
+        if (event == null) {
+            resp.sendError(500, "Event not found");
+        } else {
+            RaceDefinition race = getRaceDefinition(req);
+            if (race == null) {
+                resp.sendError(500, "Race not found");
+            } else {
+                TrackedRace trackedRace = getService().getDomainFactory().trackEvent(event).getTrackedRace(race);
+                TimePoint time = getTimePoint(req, PARAM_NAME_TIME, PARAM_NAME_TIME_MILLIS, MillisecondsTimePoint.now());
+                TimePoint oneHourLater = new MillisecondsTimePoint(time.asMillis()+3600*1000);
+                String[] latitudes = req.getParameterValues(PARAM_NAME_LATDEG);
+                String[] longitudes = req.getParameterValues(PARAM_NAME_LNGDEG);
+                JSONArray result = new JSONArray();
+                if (latitudes != null && longitudes != null) {
+                    for (int i = 0; i < Math.max(latitudes.length, longitudes.length); i++) {
+                        double latDeg = Double.valueOf(latitudes[i]);
+                        double lngDeg = Double.valueOf(latitudes[i]);
+                        DegreePosition pos = new DegreePosition(latDeg, lngDeg);
+                        Wind wind = trackedRace.getWind(pos, time);
+                        Distance d = wind.travel(time, oneHourLater);
+                        Position to = pos.translateGreatCircle(wind.getBearing(), d);
+                        JSONObject record = new JSONObject();
+                        record.put("markLatDeg", latDeg);
+                        record.put("markLngDeg", lngDeg);
+                        record.put("windTrueBearingDeg", wind.getBearing().getDegrees());
+                        record.put("windKnotSpeed", wind.getKnots());
+                        record.put("toLatDeg", to.getLatDeg());
+                        record.put("toLngDeg", to.getLngDeg());
+                        result.add(record);
+                    }
+                }
+                result.writeJSONString(resp.getWriter());
+            }
+        }
+    }
+
     private void showWind(HttpServletRequest req, HttpServletResponse resp) throws IOException, InvalidDateException {
         Event event = getEvent(req);
         if (event == null) {
