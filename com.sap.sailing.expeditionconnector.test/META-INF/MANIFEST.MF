@@ -8,4 +8,5 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Require-Bundle: org.junit4;bundle-version="4.8.1",
  com.sap.sailing.server,
  com.sap.sailing.expeditionconnector,
- com.sap.sailing.domain
+ com.sap.sailing.domain,
+ com.sap.sailing.declination

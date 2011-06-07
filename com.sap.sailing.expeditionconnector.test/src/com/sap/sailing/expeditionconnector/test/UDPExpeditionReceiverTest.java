@@ -1,4 +1,4 @@
-package com.sap.sailing.server.test;
+package com.sap.sailing.expeditionconnector.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -10,22 +10,34 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.TimeZone;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sailing.declination.Declination;
+import com.sap.sailing.declination.DeclinationService;
+import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.TimePoint;
+import com.sap.sailing.domain.base.impl.DegreePosition;
+import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.tracking.GPSFix;
+import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.expeditionconnector.ExpeditionListener;
 import com.sap.sailing.expeditionconnector.ExpeditionMessage;
 import com.sap.sailing.expeditionconnector.UDPExpeditionReceiver;
+import com.sap.sailing.expeditionconnector.WindTracker;
+import com.sap.sailing.util.Util;
 
 public class UDPExpeditionReceiverTest {
     private String[] validLines;
@@ -172,8 +184,50 @@ public class UDPExpeditionReceiverTest {
             packet.setLength(lineAsBytes.length);
             socket.send(packet);
         }
-        Thread.sleep(500 /* ms */); // wait until all data was received
+        Thread.sleep(1000 /* ms */); // wait until all data was received
         receiver.stop();
         receiverThread.join(); // ensure the received has cleaned up and closed its socket
+    }
+    
+    @Test
+    public void testWindTrackerWithDeclination() throws IOException, InterruptedException, ClassNotFoundException, ParseException {
+        MockedTrackedRace race = new MockedTrackedRace();
+        DeclinationService declinationService = DeclinationService.INSTANCE;
+        WindTracker windTracker = new WindTracker(race, declinationService);
+        receiver.addListener(listener, /* validMessagesOnly */ true);
+        receiver.addListener(windTracker, /* validMessagesOnly */ true);
+        String[] lines = new String[validLines.length+1];
+        lines[0] = "#0,1,7.900,2,-42.0,3,25.90,9,323.0,13,326.0,48,54.511867,49,10.152700,50,340.3,146,40348.578310*25";
+        System.arraycopy(validLines, 0, lines, 1, validLines.length);
+        // ensure declination service has 2011 loaded (which takes a few seconds)
+        declinationService.getDeclination(
+                new MillisecondsTimePoint(new SimpleDateFormat("yyyy-MM-dd").parse("2011-07-01").getTime()),
+                new DegreePosition(54, 9), /* timeoutForOnlineFetchInMilliseconds */3000);
+        sendAndWaitABit(lines);
+        Thread.sleep(3000); // wait until at least the declination was received
+        assertEquals(lines.length, messages.size());
+        // note that the tracks are ordered by timestamps; however, not all Expedition messages have an original timestamp.
+        // So, some of them are timestamped with "now" which shuffles ordering. We keep track of the matched wind fixes in
+        // a map
+        Set<Wind> matched = new HashSet<Wind>();
+        // now assert that wind bearings have undergone declination correction
+        Position lastKnownPosition = null;
+        for (ExpeditionMessage m : messages) {
+            if (m.getGPSFix() != null) {
+                lastKnownPosition = m.getGPSFix().getPosition();
+            }
+            if (m.getTrueWind() != null) {
+                Declination declination = declinationService.getDeclination(m.getTimePoint(), lastKnownPosition,
+                        /* timeoutForOnlineFetchInMilliseconds */5000);
+                for (Wind recordedWind : race.getWindTrack().getFixes()) {
+                    if (Math.abs(m.getTrueWindBearing().getDegrees() + declination.getBearingCorrectedTo(m.getTimePoint()).getDegrees() -
+                        recordedWind.getBearing().getDegrees()) <= 0.0000001) {
+                        matched.add(recordedWind);
+                        break;
+                    }
+                }
+            }
+        }
+        assertEquals(Util.size(race.getWindTrack().getFixes()), matched.size());
     }
 }
