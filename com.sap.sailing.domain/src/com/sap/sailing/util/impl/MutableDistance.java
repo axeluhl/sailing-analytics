@@ -20,7 +20,7 @@
 // 
 // **********************************************************************
 
-package com.sap.sailing.util;
+package com.sap.sailing.util.impl;
 
 /**
  * A *really* simple class used as a changable double.

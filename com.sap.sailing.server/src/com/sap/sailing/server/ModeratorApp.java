@@ -335,6 +335,8 @@ public class ModeratorApp extends Servlet {
                 JSONObject jsonRace = new JSONObject();
                 jsonRace.put("name", race.getName());
                 jsonRace.put("boatclass", race.getBoatClass()==null?"":race.getBoatClass().getName());
+                TimePoint start = getService().getDomainFactory().trackEvent(event).getTrackedRace(race).getStart();
+                jsonRace.put("start", start==null?Integer.MAX_VALUE:start.asMillis());
                 JSONArray jsonLegs = new JSONArray();
                 for (Leg leg : race.getCourse().getLegs()) {
                     JSONObject jsonLeg = new JSONObject();

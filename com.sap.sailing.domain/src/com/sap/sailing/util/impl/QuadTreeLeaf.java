@@ -22,7 +22,7 @@
 // 
 // **********************************************************************
 
-package com.sap.sailing.util;
+package com.sap.sailing.util.impl;
 
 import java.io.Serializable;
 

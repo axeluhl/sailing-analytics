@@ -1,12 +1,12 @@
-package com.sap.sailing.util;
+package com.sap.sailing.util.impl;
 
 import com.sap.sailing.domain.base.Position;
 
-public class GLatLngBounds {
+public class Bounds {
     private final Position southWest;
     private final Position northEast;
     
-    public GLatLngBounds(Position southWest, Position northEast) {
+    public Bounds(Position southWest, Position northEast) {
         this.southWest = southWest;
         this.northEast = northEast;
     }
@@ -28,7 +28,7 @@ public class GLatLngBounds {
                        p.getLngDeg() >= -180 && p.getLngDeg() <= getNorthEast().getLngDeg()));
     }
 
-    public boolean containsBounds(GLatLngBounds rect) {
+    public boolean containsBounds(Bounds rect) {
         return this.contains(rect.getSouthWest()) && this.contains(rect.getNorthEast()) ||
                rect.contains(this.getSouthWest()) && rect.contains(this.getNorthEast());
     }

@@ -28,6 +28,8 @@ import java.util.Vector;
 
 import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.impl.DegreePosition;
+import com.sap.sailing.util.impl.Bounds;
+import com.sap.sailing.util.impl.QuadTreeNode;
 
 /**
  * The QuadTree lets you organize objects in a grid, that redefines
@@ -43,14 +45,14 @@ public class QuadTree<T> implements Serializable {
     private QuadTreeNode<T> top;
     
     public QuadTree() {
-        this(new GLatLngBounds(new DegreePosition(-90.0, -180.0), new DegreePosition(90.0, 180.0)), 20, QuadTreeNode.NO_MIN_SIZE);
+        this(new Bounds(new DegreePosition(-90.0, -180.0), new DegreePosition(90.0, 180.0)), 20, QuadTreeNode.NO_MIN_SIZE);
     }
 
-    public QuadTree(GLatLngBounds bounds, int maxItems) {
-        this(bounds, maxItems, QuadTreeNode.NO_MIN_SIZE);
+    public QuadTree(Position southWest, Position northEast, int maxItems) {
+        this(new Bounds(southWest, northEast), maxItems, QuadTreeNode.NO_MIN_SIZE);
     }
 
-    public QuadTree(GLatLngBounds bounds, int maxItems, double minSize) {
+    public QuadTree(Bounds bounds, int maxItems, double minSize) {
         top = new QuadTreeNode<T>(bounds, maxItems, minSize);
     }
 
@@ -118,7 +120,7 @@ public class QuadTree<T> implements Serializable {
      * 
      * @return Vector of objects.
      */
-    public Collection<T> get(GLatLngBounds rect) {
+    public Collection<T> get(Bounds rect) {
         return get(rect, new Vector<T>());
     }
 
@@ -129,7 +131,7 @@ public class QuadTree<T> implements Serializable {
      * @param vector a vector to add objects to.
      * @return Vector of objects.
      */
-    private Collection<T> get(GLatLngBounds rect, Collection<T> vector) {
+    private Collection<T> get(Bounds rect, Collection<T> vector) {
 
         if (vector == null) {
             vector = new Vector<T>();
@@ -140,8 +142,8 @@ public class QuadTree<T> implements Serializable {
         // where there might be a smudge overlap for very small
         // scales.
         if (rect.getSouthWest().getLngDeg() > rect.getNorthEast().getLngDeg() || (Math.abs(rect.getSouthWest().getLngDeg() - rect.getNorthEast().getLngDeg()) < .001)) {
-            return getTop().get(new GLatLngBounds(rect.getSouthWest(), new DegreePosition(rect.getNorthEast().getLatDeg(), 180)),
-                   getTop().get(new GLatLngBounds(new DegreePosition(rect.getSouthWest().getLatDeg(), -180), rect.getNorthEast()), vector));
+            return getTop().get(new Bounds(rect.getSouthWest(), new DegreePosition(rect.getNorthEast().getLatDeg(), 180)),
+                   getTop().get(new Bounds(new DegreePosition(rect.getSouthWest().getLatDeg(), -180), rect.getNorthEast()), vector));
         } else
             return getTop().get(rect, vector);
     }

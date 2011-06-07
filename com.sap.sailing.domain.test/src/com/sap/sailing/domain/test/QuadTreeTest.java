@@ -6,15 +6,14 @@ import org.junit.Test;
 
 import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.impl.DegreePosition;
-import com.sap.sailing.util.GLatLngBounds;
 import com.sap.sailing.util.QuadTree;
 
 public class QuadTreeTest {
     private class GLatLngQuadTree extends QuadTree<Position> {
         private static final long serialVersionUID = 386138477174564517L;
 
-        public GLatLngQuadTree(GLatLngBounds gLatLngBounds, int i) {
-            super(gLatLngBounds, i);
+        public GLatLngQuadTree(Position southWest, Position northEast, int i) {
+            super(southWest, northEast, i);
         }
 
         public void put(Position x) {
@@ -24,8 +23,8 @@ public class QuadTreeTest {
     
     @Test
     public void testDistance() {
-	GLatLngQuadTree quadtree = new GLatLngQuadTree(new GLatLngBounds(new DegreePosition(49.29,
-		7.9), new DegreePosition(50.88506, 8.75)), /* maxItems */30);
+	GLatLngQuadTree quadtree = new GLatLngQuadTree(new DegreePosition(49.29,
+		7.9), new DegreePosition(50.88506, 8.75), /* maxItems */30);
 	quadtree.put(new DegreePosition(50.88505000000001, 7.995520000000001));
 	quadtree.put(new DegreePosition(50.884930000000004, 7.996440000000001));
 	quadtree.put(new DegreePosition(50.884840000000004, 7.99666));

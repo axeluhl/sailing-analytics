@@ -20,7 +20,7 @@
 // 
 // **********************************************************************
 
-package com.sap.sailing.util;
+package com.sap.sailing.util.impl;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -29,6 +29,7 @@ import java.util.Vector;
 
 import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.impl.DegreePosition;
+import com.sap.sailing.util.QuadTree;
 
 /**
  * The QuadTreeNode is the part of the QuadTree that either holds
@@ -50,7 +51,7 @@ public class QuadTreeNode<T> implements Serializable {
     private QuadTreeNode<T>[] children;
     private int maxItems;
     private double minSize;
-    private GLatLngBounds bounds;
+    private Bounds bounds;
     
     /**
      * Added to avoid problems when a node is completely filled with a
@@ -67,7 +68,7 @@ public class QuadTreeNode<T> implements Serializable {
      *        splitting itself into four children and redispensing the
      *        items into them.
      */
-    public QuadTreeNode(GLatLngBounds rect, int maximumItems) {
+    public QuadTreeNode(Bounds rect, int maximumItems) {
         this(rect, maximumItems, NO_MIN_SIZE);
     }
 
@@ -86,7 +87,7 @@ public class QuadTreeNode<T> implements Serializable {
      * @param minimumSize the minimum difference between the
      *        boundaries of the node.
      */
-    public QuadTreeNode(GLatLngBounds rect, int maximumItems, double minimumSize) {
+    public QuadTreeNode(Bounds rect, int maximumItems, double minimumSize) {
         bounds = rect;
         maxItems = maximumItems;
         minSize = minimumSize;
@@ -121,10 +122,10 @@ public class QuadTreeNode<T> implements Serializable {
         double ewHalf = (bounds.getNorthEast().getLngDeg() + bounds.getSouthWest().getLngDeg()) / 2.0;
         children = new QuadTreeNode[4];
 
-        children[NORTHWEST] = new QuadTreeNode<T>(new GLatLngBounds(new DegreePosition(nsHalf, bounds.getSouthWest().getLngDeg()), new DegreePosition(bounds.getNorthEast().getLatDeg(), ewHalf)), maxItems);
-        children[NORTHEAST] = new QuadTreeNode<T>(new GLatLngBounds(new DegreePosition(nsHalf, ewHalf), bounds.getNorthEast()), maxItems);
-        children[SOUTHEAST] = new QuadTreeNode<T>(new GLatLngBounds(new DegreePosition(bounds.getSouthWest().getLatDeg(), ewHalf), new DegreePosition(nsHalf, bounds.getNorthEast().getLngDeg())), maxItems);
-        children[SOUTHWEST] = new QuadTreeNode<T>(new GLatLngBounds(bounds.getSouthWest(), new DegreePosition(nsHalf, ewHalf)), maxItems);
+        children[NORTHWEST] = new QuadTreeNode<T>(new Bounds(new DegreePosition(nsHalf, bounds.getSouthWest().getLngDeg()), new DegreePosition(bounds.getNorthEast().getLatDeg(), ewHalf)), maxItems);
+        children[NORTHEAST] = new QuadTreeNode<T>(new Bounds(new DegreePosition(nsHalf, ewHalf), bounds.getNorthEast()), maxItems);
+        children[SOUTHEAST] = new QuadTreeNode<T>(new Bounds(new DegreePosition(bounds.getSouthWest().getLatDeg(), ewHalf), new DegreePosition(nsHalf, bounds.getNorthEast().getLngDeg())), maxItems);
+        children[SOUTHWEST] = new QuadTreeNode<T>(new Bounds(bounds.getSouthWest(), new DegreePosition(nsHalf, ewHalf)), maxItems);
         Vector<QuadTreeLeaf<T>> temp = new Vector<QuadTreeLeaf<T>>(items);
         items.removeAllElements();
         for (Iterator<QuadTreeLeaf<T>> i=temp.iterator(); i.hasNext(); ) {
@@ -338,7 +339,7 @@ public class QuadTreeNode<T> implements Serializable {
      * 
      * @return closest distance to the point.
      */
-    private static double borderDistance(GLatLngBounds bounds, Position point) {
+    private static double borderDistance(Bounds bounds, Position point) {
 
         double nsdistance;
         double ewdistance;
@@ -368,7 +369,7 @@ public class QuadTreeNode<T> implements Serializable {
      * @param vector current vector of objects.
      * @return updated Vector of objects.
      */
-    public Collection<T> get(GLatLngBounds rect, Collection<T> vector) {
+    public Collection<T> get(Bounds rect, Collection<T> vector) {
         if (children == null) {
             for (Iterator<QuadTreeLeaf<T>> i=items.iterator(); i.hasNext(); ) {
             	QuadTreeLeaf<T> qtl = i.next();
