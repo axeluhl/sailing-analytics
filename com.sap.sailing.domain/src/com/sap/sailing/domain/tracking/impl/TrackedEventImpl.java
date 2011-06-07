@@ -50,8 +50,11 @@ public class TrackedEventImpl implements TrackedEvent {
             }
             for (Waypoint waypoint : trackedRace.getRace().getCourse().getWaypoints()) {
                 for (Buoy buoy : waypoint.getBuoys()) {
-                    if (!buoyTracks.containsKey(buoy)) {
-                        buoyTracks.put(buoy, new DynamicTrackImpl<Buoy, GPSFix>(buoy, millisecondsOverWhichToAverageSpeed));
+                    synchronized (buoyTracks) {
+                        if (!buoyTracks.containsKey(buoy)) {
+                            buoyTracks.put(buoy, new DynamicTrackImpl<Buoy, GPSFix>(buoy,
+                                    millisecondsOverWhichToAverageSpeed));
+                        }
                     }
                 }
             }
@@ -97,12 +100,14 @@ public class TrackedEventImpl implements TrackedEvent {
 
     @Override
     public GPSFixTrack<Buoy, GPSFix> getTrack(Buoy buoy) {
-        GPSFixTrack<Buoy, GPSFix> result = buoyTracks.get(buoy);
-        if (result == null) {
-            result = new DynamicTrackImpl<Buoy, GPSFix>(buoy, millisecondsOverWhichToAverageSpeed);
-            buoyTracks.put(buoy, result);
+        synchronized (buoyTracks) {
+            GPSFixTrack<Buoy, GPSFix> result = buoyTracks.get(buoy);
+            if (result == null) {
+                result = new DynamicTrackImpl<Buoy, GPSFix>(buoy, millisecondsOverWhichToAverageSpeed);
+                buoyTracks.put(buoy, result);
+            }
+            return result;
         }
-        return result;
     }
 
     @Override
