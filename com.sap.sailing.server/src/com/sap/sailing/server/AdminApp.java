@@ -27,6 +27,7 @@ import com.sap.sailing.domain.base.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.base.impl.DegreePosition;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.tracking.NoWindException;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindSource;
@@ -130,8 +131,9 @@ public class AdminApp extends Servlet {
         }
     }
     
-    private void addWindToMarks(HttpServletRequest req, HttpServletResponse resp) throws IOException, InvalidDateException {
-        Event event = getEvent(req);
+    private void addWindToMarks(HttpServletRequest req, HttpServletResponse resp) throws IOException,
+            InvalidDateException, NoWindException {
+    Event event = getEvent(req);
         if (event == null) {
             resp.sendError(500, "Event not found");
         } else {
@@ -151,6 +153,10 @@ public class AdminApp extends Servlet {
                         double lngDeg = Double.valueOf(latitudes[i]);
                         DegreePosition pos = new DegreePosition(latDeg, lngDeg);
                         Wind wind = trackedRace.getWind(pos, time);
+                        if (wind == null) {
+                            throw new NoWindException("No wind set for race "+race.getName()+
+                                    " in event "+event.getName()+" while computing wind lines on marks");
+                        }
                         Distance d = wind.travel(time, oneHourLater);
                         Position to = pos.translateGreatCircle(wind.getBearing(), d);
                         JSONObject record = new JSONObject();
