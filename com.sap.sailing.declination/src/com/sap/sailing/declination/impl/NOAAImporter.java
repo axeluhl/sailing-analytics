@@ -1,4 +1,4 @@
-package com.sap.sailing.declination;
+package com.sap.sailing.declination.impl;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
@@ -10,12 +10,10 @@ import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.sap.sailing.declination.impl.DeclinationRecordImpl;
-import com.sap.sailing.declination.impl.DeclinationStore;
+import com.sap.sailing.declination.Declination;
 import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.impl.DegreeBearingImpl;
@@ -33,13 +31,11 @@ public class NOAAImporter {
     
     private final Pattern declinationPattern;
     private final Pattern annualChangePattern;
-    private final DeclinationStore declinationStore;
 
     public NOAAImporter() {
         super();
         this.declinationPattern = Pattern.compile(REGEXP_DECLINATION);
         this.annualChangePattern = Pattern.compile(REGEXP_ANNUAL_CHANGE);
-        declinationStore = new DeclinationStore();
     }
 
     protected Pattern getDeclinationPattern() {
@@ -50,8 +46,8 @@ public class NOAAImporter {
         return annualChangePattern;
     }
 
-    public DeclinationRecord importRecord(Position position, TimePoint timePoint) throws IOException {
-        DeclinationRecord result = null;
+    public Declination importRecord(Position position, TimePoint timePoint) throws IOException {
+        Declination result = null;
         URL url = new URL(QUERY_URL);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod("POST");
@@ -128,14 +124,14 @@ public class NOAAImporter {
      * @throws ClassNotFoundException 
      * @throws IOException 
      */
-    public DeclinationRecord getDeclination(final Position position, final TimePoint timePoint,
+    public Declination getDeclination(final Position position, final TimePoint timePoint,
             long timeoutForOnlineFetchInMilliseconds) throws IOException, ClassNotFoundException, ParseException {
-        final DeclinationRecord[] result = new DeclinationRecord[1];
+        final Declination[] result = new Declination[1];
         Thread fetcher = new Thread("Declination fetcher for "+position+"@"+timePoint) {
             @Override
             public void run() {
                 try {
-                    DeclinationRecord fetched = importRecord(position, timePoint);
+                    Declination fetched = importRecord(position, timePoint);
                     synchronized (result) {
                         result[0] = fetched;
                         result.notifyAll();
@@ -146,52 +142,16 @@ public class NOAAImporter {
             }
         };
         fetcher.start();
-        Calendar cal = new GregorianCalendar();
-        cal.setTime(timePoint.asDate());
-        Set<DeclinationRecord> set = declinationStore.getStoredDeclinations(cal.get(Calendar.YEAR));
-        if (set != null) {
-            double meanTimeAndPositionDistance = Double.MAX_VALUE;
-            DeclinationRecord nearest = null;
-            for (DeclinationRecord r : set) {
-                if (result[0] != null) {
-                    break; // result obtained online; don't need to search in stored declinations anymore
+        synchronized (result) {
+            if (result[0] == null) {
+                try {
+                    result.wait(timeoutForOnlineFetchInMilliseconds);
+                } catch (InterruptedException e) {
+                    // ignore; simply use value from file in this case
                 }
-                if (nearest == null) {
-                    nearest = r;
-                } else {
-                    double newDistance = getMeanTimeAndPositionDistance(r, position, timePoint);
-                    if (newDistance < meanTimeAndPositionDistance) {
-                        nearest = r;
-                        meanTimeAndPositionDistance = newDistance;
-                    }
-                }
-            }
-            // now wait for the background thread as long as specified
-            synchronized (result) {
-                if (result[0] == null) {
-                    try {
-                        result.wait(timeoutForOnlineFetchInMilliseconds);
-                    } catch (InterruptedException e) {
-                        // ignore; simply use value from file in this case
-                    }
-                }
-            }
-            if (result[0] == null && nearest != null) {
-                result[0] = nearest;
             }
         }
         return result[0];
-    }
-
-    /**
-     * Computes a measure for a "distance" based on time and space, between two declination records. Being six months
-     * off is deemed to be as bad as being sixty nautical miles off.
-     */
-    private double getMeanTimeAndPositionDistance(DeclinationRecord r, Position position, TimePoint timePoint) {
-        double nauticalMileDistance = position.getDistance(r.getPosition()).getNauticalMiles();
-        long millisDistance = Math.abs(timePoint.asMillis()-r.getTimePoint().asMillis());
-        return ((double) millisDistance)/1000. /*s*/ / 3600. /*h*/ / 24. /*days*/ / 186. /*six months*/ +
-                nauticalMileDistance/60.;
     }
 
 }

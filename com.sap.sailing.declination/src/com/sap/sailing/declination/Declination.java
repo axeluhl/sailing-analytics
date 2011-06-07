@@ -2,6 +2,7 @@ package com.sap.sailing.declination;
 
 import com.sap.sailing.domain.base.Bearing;
 import com.sap.sailing.domain.base.Position;
+import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.Timed;
 
 /**
@@ -10,10 +11,12 @@ import com.sap.sailing.domain.base.Timed;
  * @author Axel Uhl (d043530)
  * 
  */
-public interface DeclinationRecord extends Timed {
+public interface Declination extends Timed {
     Position getPosition();
     
     Bearing getBearing();
     
     Bearing getAnnualChange();
+    
+    Bearing getBearingCorrectedTo(TimePoint timePoint);
 }

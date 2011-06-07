@@ -29,6 +29,7 @@ import java.util.Vector;
 
 import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.impl.DegreePosition;
+import com.sap.sailing.util.Bounds;
 import com.sap.sailing.util.QuadTree;
 
 /**

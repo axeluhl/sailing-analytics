@@ -6,25 +6,15 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.regex.Matcher;
 
-import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sailing.declination.DeclinationRecord;
-import com.sap.sailing.declination.impl.NOAAImporterForTesting;
+import com.sap.sailing.declination.Declination;
 import com.sap.sailing.domain.base.impl.DegreePosition;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 
-public class DeclinationImportTest {
-    private NOAAImporterForTesting importer;
-    
-    @Before
-    public void setUp() {
-        importer = new NOAAImporterForTesting();
-    }
-    
+public class DeclinationImportTest extends AbstractDeclinationTest {
     @Test
     public void testRegexpDeclination() {
         Matcher declinationMatcher = importer.getDeclinationPattern().matcher("    <p class=\"indent\"><b>Declination</b> = 12&deg; 41' W");
@@ -45,8 +35,8 @@ public class DeclinationImportTest {
     
     @Test
     public void importSimpleDeclination() throws IOException, ParseException {
-        DeclinationRecord record = importer.importRecord(new DegreePosition(53, 3),
-                new MillisecondsTimePoint(new SimpleDateFormat("yyyy-MM-dd").parse("1920-05-27").getTime()));
+        Declination record = importer.importRecord(new DegreePosition(53, 3),
+                new MillisecondsTimePoint(simpleDateFormat.parse("1920-05-27").getTime()));
         assertEquals(-12.-41./60., record.getBearing().getDegrees(), 0.000000001);
         assertEquals(0.+11./60., record.getAnnualChange().getDegrees(), 0.000000001);
     }
@@ -54,8 +44,8 @@ public class DeclinationImportTest {
     @Test
     public void importSouthernHemisphereDeclination() throws IOException, ParseException {
         long start = System.currentTimeMillis();
-        DeclinationRecord record = importer.importRecord(new DegreePosition(-10, 3),
-                new MillisecondsTimePoint(new SimpleDateFormat("yyyy-MM-dd").parse("2011-05-27").getTime()));
+        Declination record = importer.importRecord(new DegreePosition(-10, 3),
+                new MillisecondsTimePoint(simpleDateFormat.parse("2011-05-27").getTime()));
         System.out.println("took "+(System.currentTimeMillis()-start)+"ms");
         assertEquals(-9.-32./60., record.getBearing().getDegrees(), 0.000000001);
         assertEquals(0.+10./60., record.getAnnualChange().getDegrees(), 0.000000001);
@@ -63,10 +53,11 @@ public class DeclinationImportTest {
     
     @Test
     public void readOnlineOrFromFile() throws IOException, ClassNotFoundException, ParseException {
-        DeclinationRecord declination = importer.getDeclination(new DegreePosition(53, 3),
-                new MillisecondsTimePoint(new SimpleDateFormat("yyyy-MM-dd").parse("2011-05-27").getTime()), 
+        Declination declination = importer.getDeclination(new DegreePosition(53, 3),
+                new MillisecondsTimePoint(simpleDateFormat.parse("2011-05-27").getTime()), 
                 /* timeoutForOnlineFetchInMilliseconds */ 1000);
         assertNotNull(declination);
         System.out.println(declination);
     }
+    
 }

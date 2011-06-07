@@ -1,4 +1,4 @@
-package com.sap.sailing.util.impl;
+package com.sap.sailing.util;
 
 import com.sap.sailing.domain.base.Position;
 

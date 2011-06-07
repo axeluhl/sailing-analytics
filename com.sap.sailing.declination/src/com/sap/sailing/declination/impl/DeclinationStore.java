@@ -13,20 +13,20 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
-import java.util.HashSet;
-import java.util.Set;
 
-import com.sap.sailing.declination.DeclinationRecord;
-import com.sap.sailing.declination.NOAAImporter;
+import com.sap.sailing.declination.Declination;
 import com.sap.sailing.domain.base.Bearing;
 import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.base.impl.DegreePosition;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.util.QuadTree;
 
 /**
- * Manages resources in which declinations can be stored for off-line look-up.
+ * Manages resources in which declinations can be stored for off-line look-up. Time resolution is
+ * one year. The declination values are expected to be provided for mid-year (June 30). The annual
+ * change can be used to extrapolate to other times of year.
  * 
  * @author Axel Uhl (d043530)
  *
@@ -34,14 +34,18 @@ import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 public class DeclinationStore {
     private static final SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
 
-    public Set<DeclinationRecord> getStoredDeclinations(int year) throws IOException, ClassNotFoundException, ParseException {
-        DeclinationRecord record;
-        Set<DeclinationRecord> result = new HashSet<DeclinationRecord>();
+    /**
+     * Returns <code>null</code> if no stored declinations exist for the <code>year</code> requested.
+     */
+    public QuadTree<Declination> getStoredDeclinations(int year) throws IOException, ClassNotFoundException, ParseException {
+        Declination record;
+        QuadTree<Declination> result = null;
         InputStream is = getInputStreamForYear(year);
         if (is != null) {
+            result = new QuadTree<Declination>();
             ObjectInput in = new ObjectInputStream(is);
             while ((record = readExternal(in)) != null) {
-                result.add(record);
+                result.put(record.getPosition(), record);
             }
         }
         return result;
@@ -61,7 +65,7 @@ public class DeclinationStore {
         return getClass().getResourceAsStream("/"+getFilenameForYear(year));
     }
     
-    public void writeExternal(DeclinationRecord record, ObjectOutput out) throws IOException {
+    public void writeExternal(Declination record, ObjectOutput out) throws IOException {
         out.writeUTF(dateFormatter.format(record.getTimePoint().asDate()));
         out.writeDouble(record.getPosition().getLatDeg());
         out.writeDouble(record.getPosition().getLngDeg());
@@ -72,7 +76,7 @@ public class DeclinationStore {
     /**
      * @return <code>null</code> if EOF has been reached
      */
-    public DeclinationRecord readExternal(ObjectInput in) throws IOException, ClassNotFoundException, ParseException {
+    public Declination readExternal(ObjectInput in) throws IOException, ClassNotFoundException, ParseException {
         try {
             TimePoint timePoint = new MillisecondsTimePoint(dateFormatter.parse(in.readUTF()).getTime());
             double lat = in.readDouble();
@@ -91,7 +95,7 @@ public class DeclinationStore {
         Position position = new DegreePosition(lat, lng);
         Calendar cal = new GregorianCalendar(year, month, /* dayOfMonth */ 1);
         TimePoint timePoint = new MillisecondsTimePoint(cal.getTimeInMillis());
-        DeclinationRecord declination = null;
+        Declination declination = null;
         // re-try three times
         for (int i=0; i<3; i++) {
             try {

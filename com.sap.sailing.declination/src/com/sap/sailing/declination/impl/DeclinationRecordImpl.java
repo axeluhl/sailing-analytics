@@ -1,11 +1,12 @@
 package com.sap.sailing.declination.impl;
 
-import com.sap.sailing.declination.DeclinationRecord;
+import com.sap.sailing.declination.Declination;
 import com.sap.sailing.domain.base.Bearing;
 import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.TimePoint;
+import com.sap.sailing.domain.base.impl.DegreeBearingImpl;
 
-public class DeclinationRecordImpl implements DeclinationRecord {
+public class DeclinationRecordImpl implements Declination {
     private final Position position;
     private final TimePoint timePoint;
     private final Bearing bearing;
@@ -38,6 +39,12 @@ public class DeclinationRecordImpl implements DeclinationRecord {
         return annualChange;
     }
     
+    @Override
+    public Bearing getBearingCorrectedTo(TimePoint timePoint) {
+        return new DegreeBearingImpl(getBearing().getDegrees() + getAnnualChange().getDegrees()
+                * (timePoint.asMillis() - getTimePoint().asMillis()) / 1000 /* s *// 3600 /* h *// 24 /* days *// 365);
+    }
+
     @Override
     public String toString() {
         return ""+getTimePoint()+"@"+getPosition()+": "+getBearing()+", "+getAnnualChange()+"/year";
