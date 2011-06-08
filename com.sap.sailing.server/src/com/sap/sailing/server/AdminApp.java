@@ -342,9 +342,16 @@ public class AdminApp extends Servlet {
             if (race == null) {
                 resp.sendError(500, "Race not found");
             } else {
-                int port = Integer.valueOf(req.getParameter(PARAM_NAME_PORT));
-                String correctByDeclination = req.getParameter(PARAM_NAME_CORRECT_EXPEDITION_WIND_BEARING_BY_DECLINATION);
-                getService().startTrackingWind(event, race, port, Boolean.valueOf(correctByDeclination) ? DeclinationService.INSTANCE : null);
+                String portParam = req.getParameter(PARAM_NAME_PORT);
+                if (portParam == null) {
+                    resp.sendError(500, "No port parameter provided");
+                } else {
+                    int port = Integer.valueOf(portParam);
+                    String correctByDeclination = req
+                            .getParameter(PARAM_NAME_CORRECT_EXPEDITION_WIND_BEARING_BY_DECLINATION);
+                    getService().startTrackingWind(event, race, port,
+                            Boolean.valueOf(correctByDeclination) ? DeclinationService.INSTANCE : null);
+                }
             }
         }
     }
