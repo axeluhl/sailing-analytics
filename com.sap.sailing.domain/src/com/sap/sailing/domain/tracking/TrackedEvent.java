@@ -1,10 +1,8 @@
 package com.sap.sailing.domain.tracking;
 
 import com.sap.sailing.domain.base.BoatClass;
-import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Event;
-import com.sap.sailing.domain.base.Gate;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.TimePoint;
 
@@ -23,12 +21,6 @@ public interface TrackedEvent {
 
     void addTrackedRace(TrackedRace trackedRace);
 
-    /**
-     * Buoy positions, also for those defining a {@link Gate}, are variable over time.
-     * Their positions are tracked.
-     */
-    GPSFixTrack<Buoy, GPSFix> getTrack(Buoy buoy);
-    
     /**
      * Listener will be notified when {@link #addTrackedRace(TrackedRace)} is called and
      * upon registration for each tracked race already known. Therefore, the listener

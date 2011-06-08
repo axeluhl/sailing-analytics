@@ -262,7 +262,7 @@ public class DomainFactoryImpl implements DomainFactory {
                 break;
             case MARKPOSITIONS:
                 result.add(new MarkPositionReceiver(
-                        trackedEvent, tractracEvent));
+                        trackedEvent, tractracEvent, this));
                 break;
             case RAWPOSITIONS:
                 result.add(new RawPositionReceiver(

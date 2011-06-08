@@ -21,7 +21,6 @@ import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.NoWindError;
 import com.sap.sailing.domain.tracking.NoWindException;
-import com.sap.sailing.domain.tracking.TrackedEvent;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -31,7 +30,6 @@ import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.util.Util;
 
 public abstract class TrackedRaceImpl implements TrackedRace {
-    private final TrackedEvent trackedEvent;
     private final RaceDefinition race;
     
     /**
@@ -73,12 +71,24 @@ public abstract class TrackedRaceImpl implements TrackedRace {
      * {@link #windTracks}. The default value is {@link WindSource#EXPEDITION}.
      */
     private WindSource currentWindSource;
+
+    private final Map<Buoy, GPSFixTrack<Buoy, GPSFix>> buoyTracks;
     
-    public TrackedRaceImpl(TrackedEvent trackedEvent, RaceDefinition race, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed) {
+    private final long millisecondsOverWhichToAverageSpeed;
+    
+    public TrackedRaceImpl(RaceDefinition race, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed) {
         super();
         this.updateCount = 0;
-        this.trackedEvent = trackedEvent;
         this.race = race;
+        this.millisecondsOverWhichToAverageSpeed = millisecondsOverWhichToAverageSpeed;
+        this.buoyTracks = new HashMap<Buoy, GPSFixTrack<Buoy, GPSFix>>();
+        for (Waypoint waypoint : race.getCourse().getWaypoints()) {
+            for (Buoy buoy : waypoint.getBuoys()) {
+                if (!buoyTracks.containsKey(buoy)) {
+                    buoyTracks.put(buoy, new DynamicTrackImpl<Buoy, GPSFix>(buoy, millisecondsOverWhichToAverageSpeed));
+                }
+            }
+        }
         LinkedHashMap<Leg, TrackedLeg> trackedLegsMap = new LinkedHashMap<Leg, TrackedLeg>();
         for (Leg leg : race.getCourse().getLegs()) {
             trackedLegsMap.put(leg, createTrackedLeg(race, leg));
@@ -299,14 +309,16 @@ public abstract class TrackedRaceImpl implements TrackedRace {
 
     @Override
     public GPSFixTrack<Buoy, GPSFix> getTrack(Buoy buoy) {
-        TrackedEvent trackedEvent = getTrackedEvent();
-        return trackedEvent.getTrack(buoy);
+        synchronized (buoyTracks) {
+            GPSFixTrack<Buoy, GPSFix> result = buoyTracks.get(buoy);
+            if (result == null) {
+                result = new DynamicTrackImpl<Buoy, GPSFix>(buoy, millisecondsOverWhichToAverageSpeed);
+                buoyTracks.put(buoy, result);
+            }
+            return result;
+        }
     }
 
-    private TrackedEvent getTrackedEvent() {
-        return trackedEvent;
-    }
-    
     @Override
     public WindTrack getWindTrack(WindSource windSource) {
         return windTracks.get(windSource);

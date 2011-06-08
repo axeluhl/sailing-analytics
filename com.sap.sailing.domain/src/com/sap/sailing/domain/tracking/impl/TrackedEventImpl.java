@@ -8,16 +8,12 @@ import java.util.Map;
 import java.util.Set;
 
 import com.sap.sailing.domain.base.BoatClass;
-import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.TimePoint;
-import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.NoWindException;
 import com.sap.sailing.domain.tracking.RaceListener;
-import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.TrackedEvent;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
@@ -25,18 +21,14 @@ public class TrackedEventImpl implements TrackedEvent {
     private final Event event;
     private final Map<RaceDefinition, TrackedRace> trackedRaces;
     private final Map<BoatClass, Collection<TrackedRace>> trackedRacesByBoatClass;
-    private final Map<Buoy, GPSFixTrack<Buoy, GPSFix>> buoyTracks;
     private final Set<RaceListener> raceListeners;
-    private final long millisecondsOverWhichToAverageSpeed;
   
-    public TrackedEventImpl(Event event, long millisecondsOverWhichToAverageSpeed) {
+    public TrackedEventImpl(Event event) {
         super();
         this.event = event;
         this.trackedRaces = new HashMap<RaceDefinition, TrackedRace>();
         this.trackedRacesByBoatClass = new HashMap<BoatClass, Collection<TrackedRace>>();
-        buoyTracks = new HashMap<Buoy, GPSFixTrack<Buoy, GPSFix>>();
         raceListeners = new HashSet<RaceListener>();
-        this.millisecondsOverWhichToAverageSpeed = millisecondsOverWhichToAverageSpeed;
     }
     
     @Override
@@ -47,16 +39,6 @@ public class TrackedEventImpl implements TrackedEvent {
             if (coll == null) {
                 coll = new ArrayList<TrackedRace>();
                 trackedRacesByBoatClass.put(trackedRace.getRace().getBoatClass(), coll);
-            }
-            for (Waypoint waypoint : trackedRace.getRace().getCourse().getWaypoints()) {
-                for (Buoy buoy : waypoint.getBuoys()) {
-                    synchronized (buoyTracks) {
-                        if (!buoyTracks.containsKey(buoy)) {
-                            buoyTracks.put(buoy, new DynamicTrackImpl<Buoy, GPSFix>(buoy,
-                                    millisecondsOverWhichToAverageSpeed));
-                        }
-                    }
-                }
             }
             coll.add(trackedRace);
             for (RaceListener listener : raceListeners) {
@@ -96,18 +78,6 @@ public class TrackedEventImpl implements TrackedEvent {
             }
         }
         return result;
-    }
-
-    @Override
-    public GPSFixTrack<Buoy, GPSFix> getTrack(Buoy buoy) {
-        synchronized (buoyTracks) {
-            GPSFixTrack<Buoy, GPSFix> result = buoyTracks.get(buoy);
-            if (result == null) {
-                result = new DynamicTrackImpl<Buoy, GPSFix>(buoy, millisecondsOverWhichToAverageSpeed);
-                buoyTracks.put(buoy, result);
-            }
-            return result;
-        }
     }
 
     @Override

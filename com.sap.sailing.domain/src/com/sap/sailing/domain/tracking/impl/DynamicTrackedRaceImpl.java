@@ -28,7 +28,7 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     
     public DynamicTrackedRaceImpl(TrackedEvent trackedEvent, RaceDefinition race,
             long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed) {
-        super(trackedEvent, race, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed);
+        super(race, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed);
         for (Competitor competitor : getRace().getCompetitors()) {
             DynamicTrack<Competitor, GPSFixMoving> track = getTrack(competitor);
             track.addListener(this);

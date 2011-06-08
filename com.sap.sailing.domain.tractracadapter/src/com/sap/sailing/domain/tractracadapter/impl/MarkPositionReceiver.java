@@ -7,13 +7,16 @@ import com.maptrack.client.io.TypeController;
 import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.tracking.DynamicTrack;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.TrackedEvent;
+import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.util.Util.Triple;
 import com.tractrac.clientmodule.ControlPoint;
+import com.tractrac.clientmodule.Race;
 import com.tractrac.clientmodule.data.ControlPointPositionData;
 import com.tractrac.clientmodule.data.ICallbackData;
 
@@ -29,14 +32,17 @@ import com.tractrac.clientmodule.data.ICallbackData;
  * 
  */
 public class MarkPositionReceiver extends AbstractReceiverWithQueue<ControlPoint, ControlPointPositionData, Boolean> {
-    private final TrackedEvent trackedEvent;
+    private final TrackedRace trackedRace;
     private final com.tractrac.clientmodule.Event tractracEvent;
     private int received;
     
-    public MarkPositionReceiver(TrackedEvent trackedEvent, com.tractrac.clientmodule.Event tractracEvent) {
+    public MarkPositionReceiver(TrackedEvent trackedEvent, com.tractrac.clientmodule.Event tractracEvent, DomainFactory domainFactory) {
         super();
-        this.trackedEvent = trackedEvent;
         this.tractracEvent = tractracEvent;
+        // assumption: there is currently only one race per TracTrac Event object
+        Race race = tractracEvent.getRaceList().iterator().next();
+        RaceDefinition raceDefinition = domainFactory.getRaceDefinition(race);
+        this.trackedRace = trackedEvent.getTrackedRace(raceDefinition);
     }
 
     /**
@@ -69,7 +75,7 @@ public class MarkPositionReceiver extends AbstractReceiverWithQueue<ControlPoint
             }
         }
         Buoy buoy = DomainFactory.INSTANCE.getBuoy(event.getA(), event.getB());
-        ((DynamicTrack<Buoy, GPSFix>) trackedEvent.getTrack(buoy)).addGPSFix(DomainFactory.INSTANCE
+        ((DynamicTrack<Buoy, GPSFix>) trackedRace.getTrack(buoy)).addGPSFix(DomainFactory.INSTANCE
                 .createGPSFixMoving(event.getB()));
     }
 

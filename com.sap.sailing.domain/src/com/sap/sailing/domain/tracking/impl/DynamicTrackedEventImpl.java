@@ -9,7 +9,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 public class DynamicTrackedEventImpl extends TrackedEventImpl implements DynamicTrackedEvent {
 
     public DynamicTrackedEventImpl(Event event, long millisecondsOverWhichToAverageSpeed) {
-        super(event, millisecondsOverWhichToAverageSpeed);
+        super(event);
     }
 
     @Override
