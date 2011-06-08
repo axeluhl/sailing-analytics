@@ -17,9 +17,11 @@
 		<module>com.sap.sailing.expeditionconnector</module>
 		<module>com.sap.sailing.expeditionconnector.test</module>
 		<module>com.sap.sailing.server</module>
+		<module>com.sap.sailing.mongodb.test</module>
 		<module>com.tractrac.clientmodule</module>
 		<module>com.tractrac.resultapi</module>
 		<module>org.json.simple</module>
+		<module>com.mongodb.driver</module>
 	</modules>
 	
 	<properties>
