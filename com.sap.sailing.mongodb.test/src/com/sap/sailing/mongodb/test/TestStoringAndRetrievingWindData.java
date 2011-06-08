@@ -5,6 +5,7 @@ import static org.junit.Assert.assertNotNull;
 
 import java.net.UnknownHostException;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import com.mongodb.BasicDBObject;
@@ -17,7 +18,14 @@ import com.mongodb.MongoException;
 public class TestStoringAndRetrievingWindData {
     private static final String WIND_TEST_DB = "wind_test_db";
     private static final String WIND_TEST_COLLECTION = "wind_test_collection";
-
+    
+    @Before
+    public void dropTestDB() throws UnknownHostException, MongoException {
+        Mongo mongo = new Mongo();
+        assertNotNull(mongo);
+        mongo.dropDatabase(WIND_TEST_DB);
+    }
+    
     @Test
     public void testDBConnection() throws UnknownHostException, MongoException {
         Mongo mongo = new Mongo();
@@ -34,14 +42,29 @@ public class TestStoringAndRetrievingWindData {
 
     @Test
     public void testDBRead() throws UnknownHostException, MongoException {
-        Mongo mongo = new Mongo();
-        assertNotNull(mongo);
-        DB db = mongo.getDB(WIND_TEST_DB);
-        assertNotNull(db);
-        DBCollection coll = db.getCollection(WIND_TEST_COLLECTION);
-        assertNotNull(coll);
-        DBObject object = coll.findOne();
-        assertEquals(object.get("truebearingdeg"), 234.3);
-        assertEquals(object.get("knotspeed"), 10.7);
+        {
+            Mongo mongo = new Mongo();
+            assertNotNull(mongo);
+            DB db = mongo.getDB(WIND_TEST_DB);
+            assertNotNull(db);
+            DBCollection coll = db.getCollection(WIND_TEST_COLLECTION);
+            assertNotNull(coll);
+            BasicDBObject doc = new BasicDBObject();
+            doc.put("truebearingdeg", 234.3);
+            doc.put("knotspeed", 10.7);
+            coll.insert(doc);
+        }
+
+        {
+            Mongo mongo = new Mongo();
+            assertNotNull(mongo);
+            DB db = mongo.getDB(WIND_TEST_DB);
+            assertNotNull(db);
+            DBCollection coll = db.getCollection(WIND_TEST_COLLECTION);
+            assertNotNull(coll);
+            DBObject object = coll.findOne();
+            assertEquals(object.get("truebearingdeg"), 234.3);
+            assertEquals(object.get("knotspeed"), 10.7);
+        }
     }
 }
