@@ -1,3 +1,5 @@
+ - Fix startTime issues with J80
+
  - Fix concurrency bug regarding TrackedRace instantiation
 
  - Use a JDBC driver to store wind data in MongoDB; retrieve it from there upon startup
