@@ -361,10 +361,17 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
                 return 0.0; // the leader's gap to the leader
             } else {
                 // no, we're not the leader, so compute our windward distance and divide by our current VMG
-                Distance windwardDistanceToGo = getWindwardDistance(getTrackedRace().getTrack(getCompetitor())
-                        .getEstimatedPosition(timePoint, false), getTrackedRace().getTrack(leader)
-                        .getEstimatedPosition(timePoint, false), timePoint);
-                return windwardDistanceToGo.getMeters() / windwardSpeed.getMetersPerSecond();
+                Position ourEstimatedPosition = getTrackedRace().getTrack(getCompetitor())
+                        .getEstimatedPosition(timePoint, false);
+                Position leaderEstimatedPosition = getTrackedRace().getTrack(leader)
+                        .getEstimatedPosition(timePoint, false);
+                if (ourEstimatedPosition == null || leaderEstimatedPosition == null) {
+                    return null;
+                } else {
+                    Distance windwardDistanceToGo = getWindwardDistance(ourEstimatedPosition, leaderEstimatedPosition,
+                            timePoint);
+                    return windwardDistanceToGo.getMeters() / windwardSpeed.getMetersPerSecond();
+                }
             }
         } else {
             // our competitor hasn't started the leg yet, so we can't compute a gap since we don't
