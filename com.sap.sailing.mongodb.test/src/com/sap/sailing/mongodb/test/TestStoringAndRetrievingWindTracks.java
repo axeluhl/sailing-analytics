@@ -85,6 +85,6 @@ public class TestStoringAndRetrievingWindTracks extends AbstractTracTracLiveTest
             assertEquals(myBearingDeg, wind.getBearing().getDegrees(), 0.000000001);
             myBearingDeg += 1.1;
         }
-        assertTrue(myBearingDeg >= 139.999999999);
+        assertTrue("Expected myBeaaringDeg to be >= 139.999999999 but was "+myBearingDeg, myBearingDeg >= 139.999999999);
     }
 }
