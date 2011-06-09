@@ -14,7 +14,7 @@ import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.RaceTracker;
-import com.sap.sailing.util.Util.Pair;
+import com.sap.sailing.util.Util.Triple;
 
 public interface RacingEventService {
     Iterable<Event> getAllEvents();
@@ -77,6 +77,6 @@ public interface RacingEventService {
 
     void stopTrackingWind(Event event, RaceDefinition race) throws SocketException, IOException;
 
-    Iterable<Pair<Event, RaceDefinition>> getWindTrackedRaces();
+    Iterable<Triple<Event, RaceDefinition, Integer>> getWindTrackedRaces();
 
 }

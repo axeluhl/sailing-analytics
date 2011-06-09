@@ -11,7 +11,7 @@ import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
-import com.sap.sailing.util.Util.Pair;
+import com.sap.sailing.util.Util.Triple;
 
 public class Activator implements BundleActivator, ServiceListener {
     private static BundleContext fContext;
@@ -34,7 +34,7 @@ public class Activator implements BundleActivator, ServiceListener {
         racingEventServiceTracker.open();
         // grab the service
         RacingEventService service = (RacingEventService) racingEventServiceTracker.getService();
-        for (Pair<Event, RaceDefinition> windTracker : service.getWindTrackedRaces()) {
+        for (Triple<Event, RaceDefinition, Integer> windTracker : service.getWindTrackedRaces()) {
             service.stopTrackingWind(windTracker.getA(), windTracker.getB());
         }
         for (Event event : service.getAllEvents()) {

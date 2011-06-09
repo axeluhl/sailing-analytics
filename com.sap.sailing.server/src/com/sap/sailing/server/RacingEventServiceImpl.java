@@ -29,6 +29,7 @@ import com.sap.sailing.domain.tractracadapter.RaceTracker;
 import com.sap.sailing.expeditionconnector.UDPExpeditionReceiver;
 import com.sap.sailing.expeditionconnector.WindTracker;
 import com.sap.sailing.util.Util.Pair;
+import com.sap.sailing.util.Util.Triple;
 
 public class RacingEventServiceImpl implements RacingEventService {
     private final DomainFactory domainFactory;
@@ -37,7 +38,11 @@ public class RacingEventServiceImpl implements RacingEventService {
     
     private final Map<Event, Set<RaceTracker>> raceTrackers;
     
-    private final Map<RaceDefinition, WindTracker> windTrackers;
+    /**
+     * Remembers the wind tracker and the port on which the UDP receiver with which the wind tracker is
+     * registers is listening for incoming Expedition messages.
+     */
+    private final Map<RaceDefinition, Pair<WindTracker, Integer>> windTrackers;
     
     private final Map<Integer, UDPExpeditionReceiver> windReceivers;
 
@@ -45,7 +50,7 @@ public class RacingEventServiceImpl implements RacingEventService {
         domainFactory = DomainFactory.INSTANCE;
         eventsByName = new HashMap<String, Event>();
         raceTrackers = new HashMap<Event, Set<RaceTracker>>();
-        windTrackers = new HashMap<RaceDefinition, WindTracker>();
+        windTrackers = new HashMap<RaceDefinition, Pair<WindTracker, Integer>>();
         windReceivers = new HashMap<Integer, UDPExpeditionReceiver>();
     }
     
@@ -136,7 +141,7 @@ public class RacingEventServiceImpl implements RacingEventService {
             DynamicTrackedRace trackedRace = trackedEvent.getTrackedRace(race);
             WindTracker windTracker = new WindTracker(trackedRace, declinationService);
             UDPExpeditionReceiver receiver = getOrCreateWindReceiverForPort(port);
-            windTrackers.put(race, windTracker);
+            windTrackers.put(race, new Pair<WindTracker, Integer>(windTracker, port));
             receiver.addListener(windTracker, /* validMessagesOnly */ true);
         }
     }
@@ -153,7 +158,7 @@ public class RacingEventServiceImpl implements RacingEventService {
 
     @Override
     public synchronized void stopTrackingWind(Event event, RaceDefinition race) throws SocketException, IOException {
-        WindTracker windTracker = windTrackers.get(race);
+        WindTracker windTracker = windTrackers.get(race).getA();
         if (windTracker != null) {
             for (UDPExpeditionReceiver receiver : windReceivers.values()) {
                 receiver.removeListener(windTracker);
@@ -170,12 +175,12 @@ public class RacingEventServiceImpl implements RacingEventService {
     }
 
     @Override
-    public Iterable<Pair<Event, RaceDefinition>> getWindTrackedRaces() {
-        List<Pair<Event, RaceDefinition>> result = new ArrayList<Pair<Event, RaceDefinition>>();
+    public Iterable<Triple<Event, RaceDefinition, Integer>> getWindTrackedRaces() {
+        List<Triple<Event, RaceDefinition, Integer>> result = new ArrayList<Triple<Event, RaceDefinition, Integer>>();
         for (Event event : eventsByName.values()) {
             for (RaceDefinition race : event.getAllRaces()) {
                 if (windTrackers.containsKey(race)) {
-                    result.add(new Pair<Event, RaceDefinition>(event, race));
+                    result.add(new Triple<Event, RaceDefinition, Integer>(event, race, windTrackers.get(race).getB()));
                 }
             }
         }

@@ -14,24 +14,33 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import com.mongodb.Mongo;
 import com.mongodb.MongoException;
+import com.sap.sailing.domain.base.TimePoint;
+import com.sap.sailing.domain.base.impl.DegreeBearingImpl;
+import com.sap.sailing.domain.base.impl.DegreePosition;
+import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
+import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.tracking.Wind;
+import com.sap.sailing.domain.tracking.impl.WindImpl;
+import com.sap.sailing.mongodb.DomainObjectFactory;
+import com.sap.sailing.mongodb.MongoObjectFactory;
 
 public class TestStoringAndRetrievingWindData {
     private static final String WIND_TEST_DB = "wind_test_db";
     private static final String WIND_TEST_COLLECTION = "wind_test_collection";
+    private Mongo mongo;
+    private DB db;
     
     @Before
     public void dropTestDB() throws UnknownHostException, MongoException {
-        Mongo mongo = new Mongo();
+        mongo = new Mongo();
         assertNotNull(mongo);
         mongo.dropDatabase(WIND_TEST_DB);
+        db = mongo.getDB(WIND_TEST_DB);
+        assertNotNull(db);
     }
     
     @Test
     public void testDBConnection() throws UnknownHostException, MongoException {
-        Mongo mongo = new Mongo();
-        assertNotNull(mongo);
-        DB db = mongo.getDB(WIND_TEST_DB);
-        assertNotNull(db);
         DBCollection coll = db.getCollection(WIND_TEST_COLLECTION);
         assertNotNull(coll);
         BasicDBObject doc = new BasicDBObject();
@@ -43,10 +52,6 @@ public class TestStoringAndRetrievingWindData {
     @Test
     public void testDBRead() throws UnknownHostException, MongoException {
         {
-            Mongo mongo = new Mongo();
-            assertNotNull(mongo);
-            DB db = mongo.getDB(WIND_TEST_DB);
-            assertNotNull(db);
             DBCollection coll = db.getCollection(WIND_TEST_COLLECTION);
             assertNotNull(coll);
             BasicDBObject doc = new BasicDBObject();
@@ -65,6 +70,32 @@ public class TestStoringAndRetrievingWindData {
             DBObject object = coll.findOne();
             assertEquals(object.get("truebearingdeg"), 234.3);
             assertEquals(object.get("knotspeed"), 10.7);
+        }
+    }
+    
+    @Test
+    public void storeWindObject() throws UnknownHostException, MongoException {
+        TimePoint now = MillisecondsTimePoint.now();
+        Wind wind = new WindImpl(new DegreePosition(123, 45), now, new KnotSpeedWithBearingImpl(10.4,
+                new DegreeBearingImpl(355.5)));
+        {
+            DBObject windForMongo = MongoObjectFactory.INSTANCE.storeWind(wind);
+            DBCollection coll = db.getCollection(WIND_TEST_COLLECTION);
+            coll.insert(windForMongo);
+        }
+        
+        {
+            Mongo mongo = new Mongo();
+            assertNotNull(mongo);
+            DB db = mongo.getDB(WIND_TEST_DB);
+            assertNotNull(db);
+            DBCollection coll = db.getCollection(WIND_TEST_COLLECTION);
+            assertNotNull(coll);
+            DBObject object = coll.findOne();
+            Wind readWind = DomainObjectFactory.INSTANCE.loadWind(object);
+            assertEquals(wind.getPosition(), readWind.getPosition());
+            assertEquals(wind.getKnots(), readWind.getKnots(), 0.00000001);
+            assertEquals(wind.getBearing().getDegrees(), readWind.getBearing().getDegrees(), 0.00000001);
         }
     }
 }

@@ -13,6 +13,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
@@ -64,6 +66,8 @@ import com.tractrac.clientmodule.RaceCompetitor;
 import com.tractrac.clientmodule.data.ControlPointPositionData;
 
 public class DomainFactoryImpl implements DomainFactory {
+    private static final Logger logger = Logger.getLogger(DomainFactoryImpl.class.getName());
+    
     private final long millisecondsOverWhichToAverageSpeed = 5000;
 
     // TODO clarify how millisecondsOverWhichToAverageWind could be updated and propagated live
@@ -219,6 +223,11 @@ public class DomainFactoryImpl implements DomainFactory {
             return result;
         }
     }
+    
+    @Override
+    public RaceDefinition getExistingRaceDefinitionForRace(Race race) {
+        return raceCache.get(race);
+    }
 
     @Override
     public RaceDefinition getRaceDefinition(Race race) {
@@ -318,6 +327,8 @@ public class DomainFactoryImpl implements DomainFactory {
                     raceCache.put(race, result);
                     raceCache.notifyAll();
                 }
+            } else {
+                throw new RuntimeException("Race "+race.getName()+" already exists");
             }
             return result;
         }
@@ -362,6 +373,7 @@ public class DomainFactoryImpl implements DomainFactory {
     public DynamicTrackedRace trackRace(TrackedEvent trackedEvent, RaceDefinition raceDefinition,
             long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
             com.tractrac.clientmodule.Event tractracEvent) {
+        logger.log(Level.INFO, "Creating DynamicTrackedRaceImpl for RaceDefinition "+raceDefinition.getName());
         DynamicTrackedRaceImpl result = new DynamicTrackedRaceImpl(trackedEvent, raceDefinition,
                 millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed);
         tractracEventToRaceDefinitionMap.put(tractracEvent, raceDefinition);

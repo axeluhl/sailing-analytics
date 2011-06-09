@@ -2,6 +2,8 @@ package com.sap.sailing.domain.tractracadapter.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.maptrack.client.io.TypeController;
 import com.sap.sailing.domain.base.ControlPoint;
@@ -28,6 +30,8 @@ import com.tractrac.clientmodule.data.RouteData;
  * 
  */
 public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteData, Race>  {
+    private final static Logger logger = Logger.getLogger(RaceCourseReceiver.class.getName());
+    
     private final TrackedEvent trackedEvent;
     private final com.tractrac.clientmodule.Event tractracEvent;
     private final long millisecondsOverWhichToAverageWind;
@@ -66,13 +70,23 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
     @Override
     protected void handleEvent(Triple<Route, RouteData, Race> event) {
         System.out.print("R");
-        // FIXME we learned by e-mail from Lasse (2011-06-04T20:38:00CET) that courses may change during a race; how to handle???
-        Course course = DomainFactory.INSTANCE.createCourse(event.getA().getName(), event.getB().getPoints());
-        RaceDefinition raceDefinition = DomainFactory.INSTANCE.createRaceDefinition(event.getC(), course);
-        trackedEvent.getEvent().addRace(raceDefinition);
-        DynamicTrackedRace trackedRace = DomainFactory.INSTANCE.trackRace(trackedEvent, raceDefinition,
-                millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed, tractracEvent);
-        trackedEvent.addTrackedRace(trackedRace);
+        DomainFactory domainFactory = DomainFactory.INSTANCE;
+        Course course = domainFactory.createCourse(event.getA().getName(), event.getB().getPoints());
+        RaceDefinition existingRaceDefinitionForRace = domainFactory.getExistingRaceDefinitionForRace(event.getC());
+        if (existingRaceDefinitionForRace != null) {
+            logger.log(Level.INFO, "Received course update for existing race "+event.getC().getName());
+            // race already exists; this means that we obviously found a course re-definition (yuck...)
+            // Therefore, don't create TrackedRace again because it already exists.
+            existingRaceDefinitionForRace.updateCourse(course);
+        } else {
+            logger.log(Level.INFO, "Received course for non-existing race "+event.getC().getName()+". Creating RaceDefinition.");
+            // create race redefinition
+            RaceDefinition raceDefinition = domainFactory.createRaceDefinition(event.getC(), course);
+            trackedEvent.getEvent().addRace(raceDefinition);
+            DynamicTrackedRace trackedRace = domainFactory.trackRace(trackedEvent, raceDefinition,
+                    millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed, tractracEvent);
+            trackedEvent.addTrackedRace(trackedRace);
+        }
     }
 
 }

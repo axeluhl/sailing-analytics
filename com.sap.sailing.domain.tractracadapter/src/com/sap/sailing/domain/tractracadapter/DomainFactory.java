@@ -115,4 +115,9 @@ public interface DomainFactory {
     RaceDefinition getRace(Event tractracEvent);
 
     JSONService parseJSONURL(URL jsonURL) throws IOException, ParseException, org.json.simple.parser.ParseException;
+
+    /**
+     * Returns a {@link RaceDefinition} for the race if it already exists, <code>null</code> otherwise.
+     */
+    RaceDefinition getExistingRaceDefinitionForRace(Race race);
 }

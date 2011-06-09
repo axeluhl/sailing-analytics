@@ -30,6 +30,7 @@ import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.util.Util;
 
 public abstract class TrackedRaceImpl implements TrackedRace {
+    // TODO observe the race course; if it changes, update leg structures; consider fine-grained update events that tell what changed
     private final RaceDefinition race;
     
     /**
