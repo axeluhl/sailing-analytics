@@ -1,5 +1,3 @@
- - Use a JDBC driver to store wind data in MongoDB; retrieve it from there upon startup
-
  - Implement and test course update with corresponding TrackedLeg[OfCompetitor] updates
 
  - Clarify Equinox server upgrade process from the maven-repository
@@ -15,4 +13,6 @@
  - Pass final production instance URL information to BeTomorrow for wind integration
 
  - Display gain/loss for next-best competitor (green/red arrow up/down) based on VMG comparison
+
+ - Improve Mongo-based tests by using Mongo transactions instead of waiting for prior transactions to complete
 
