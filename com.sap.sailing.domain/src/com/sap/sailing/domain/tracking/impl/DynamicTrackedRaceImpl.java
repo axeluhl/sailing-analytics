@@ -127,8 +127,8 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     }
 
     @Override
-    public void setFirstFinish(TimePoint firstFinish) {
-        super.setFirstFinish(firstFinish);
+    public void setFinish(TimePoint firstFinish) {
+        super.setFinish(firstFinish);
     }
 
     @Override

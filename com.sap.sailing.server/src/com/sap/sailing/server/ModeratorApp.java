@@ -195,7 +195,7 @@ public class ModeratorApp extends Servlet {
                 jsonRace.put("startoftracking", trackedRace.getStartOfTracking() == null ? 0l : trackedRace
                         .getStartOfTracking().asMillis());
                 jsonRace.put("start", trackedRace.getStart() == null ? 0l : trackedRace.getStart().asMillis());
-                jsonRace.put("finish", trackedRace.getFirstFinish() == null ? 0l : trackedRace.getFirstFinish()
+                jsonRace.put("finish", trackedRace.getFinish() == null ? 0l : trackedRace.getFinish()
                         .asMillis());
                 jsonRace.put("timeofnewestevent", trackedRace.getTimePointOfNewestEvent() == null ? 0l : trackedRace
                         .getTimePointOfNewestEvent().asMillis());
@@ -351,8 +351,8 @@ public class ModeratorApp extends Servlet {
                 if (trackedRace.getStart() != null) {
                     jsonRace.put("start", trackedRace.getStart().asMillis());
                 }
-                if (trackedRace.getFirstFinish() != null) {
-                    jsonRace.put("finish", trackedRace.getFirstFinish().asMillis());
+                if (trackedRace.getFinish() != null) {
+                    jsonRace.put("finish", trackedRace.getFinish().asMillis());
                 }
                 jsonRace.put("legs", jsonLegs);
                 jsonRaces.add(jsonRace);

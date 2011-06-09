@@ -42,7 +42,7 @@ public abstract class TrackedRaceImpl implements TrackedRace {
     private TimePoint startOfTracking;
     
     private TimePoint start;
-    private TimePoint firstFinish;
+    private TimePoint finish;
     private TimePoint timePointOfNewestEvent;
     private int updateCount;
     
@@ -143,12 +143,12 @@ public abstract class TrackedRaceImpl implements TrackedRace {
     }
 
     @Override
-    public TimePoint getFirstFinish() {
-        return firstFinish;
+    public TimePoint getFinish() {
+        return finish;
     }
 
-    protected void setFirstFinish(TimePoint firstFinish) {
-        this.firstFinish = firstFinish;
+    protected void setFinish(TimePoint finish) {
+        this.finish = finish;
     }
 
     @Override

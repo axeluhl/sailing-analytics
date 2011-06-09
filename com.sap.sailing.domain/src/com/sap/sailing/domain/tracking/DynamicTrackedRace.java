@@ -28,5 +28,5 @@ public interface DynamicTrackedRace extends TrackedRace {
 
     void setStart(TimePoint start);
 
-    void setFirstFinish(TimePoint stop);
+    void setFinish(TimePoint stop);
 }

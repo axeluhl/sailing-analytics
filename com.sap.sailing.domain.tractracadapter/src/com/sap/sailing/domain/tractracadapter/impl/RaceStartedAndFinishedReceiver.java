@@ -68,8 +68,8 @@ public class RaceStartedAndFinishedReceiver extends AbstractReceiverWithQueue<Ra
         if (race.getStart() == null || !race.getStart().equals(start)) {
             race.setStart(start);
         }
-        if (race.getFirstFinish() == null || !race.getFirstFinish().equals(stop)) {
-            race.setFirstFinish(stop);
+        if (race.getFinish() == null || !race.getFinish().equals(stop)) {
+            race.setFinish(stop);
         }
     }
 

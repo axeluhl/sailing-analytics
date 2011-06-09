@@ -45,7 +45,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public TimePoint getFirstFinish() {
+    public TimePoint getFinish() {
         // TODO Auto-generated method stub
         return null;
     }
@@ -226,7 +226,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public void setFirstFinish(TimePoint stop) {
+    public void setFinish(TimePoint stop) {
         // TODO Auto-generated method stub
         
     }

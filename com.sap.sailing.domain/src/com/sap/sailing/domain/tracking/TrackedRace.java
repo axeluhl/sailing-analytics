@@ -30,7 +30,7 @@ public interface TrackedRace {
     
     TimePoint getStart();
     
-    TimePoint getFirstFinish();
+    TimePoint getFinish();
     
     Iterable<TrackedLeg> getTrackedLegs();
     
