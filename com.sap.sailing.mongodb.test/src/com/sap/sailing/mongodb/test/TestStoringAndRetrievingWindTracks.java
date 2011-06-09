@@ -73,6 +73,7 @@ public class TestStoringAndRetrievingWindTracks extends AbstractTracTracLiveTest
             windTrack.add(new WindImpl(pos, MillisecondsTimePoint.now(), new KnotSpeedWithBearingImpl(10., new DegreeBearingImpl(bearingDeg))));
             Thread.sleep(1); // ensure that the next now() call is distinguishably later
         }
+        Thread.sleep(1000); // give MongoDB some time to make written data available to other connections
         
         Mongo myMongo = new Mongo();
         DB database = myMongo.getDB(WIND_TEST_DB);
