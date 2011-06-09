@@ -10,6 +10,7 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.TrackedEvent;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
+import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.tractrac.ResultAPI.LiveResult;
 import com.tractrac.ResultAPI.LiveResultItem;
 import com.tractrac.ResultAPI.MarkResult;
@@ -29,7 +30,7 @@ public class TracTracTrackedRaceImpl extends DynamicTrackedRaceImpl implements D
 
     public TracTracTrackedRaceImpl(ResultGenerator resultGenerator, TrackedEvent trackedEvent, RaceDefinition race,
             long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed) {
-        super(trackedEvent, race, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed);
+        super(trackedEvent, race, EmptyWindStore.INSTANCE, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed);
         this.resultGenerator = resultGenerator;
     }
     

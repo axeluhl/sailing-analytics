@@ -12,6 +12,7 @@ import java.text.ParseException;
 import com.sap.sailing.declination.DeclinationService;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.RaceTracker;
 import com.sap.sailing.util.Util.Triple;
@@ -34,8 +35,9 @@ public interface RacingEventService {
      *            URL of a JSON response that contains an "event" object telling the event's name and ID, as well as a
      *            JSON array named "races" which tells ID and replay URL for the race. From those replay URLs the
      *            paramURL for the Java client can be derived.
+     * @param windStore TODO
      */
-    void addEvent(URL jsonURL, URI liveURI, URI storedURI) throws MalformedURLException, FileNotFoundException,
+    void addEvent(URL jsonURL, URI liveURI, URI storedURI, WindStore windStore) throws MalformedURLException, FileNotFoundException,
             URISyntaxException, IOException, ParseException, org.json.simple.parser.ParseException;
 
     /**
@@ -47,8 +49,9 @@ public interface RacingEventService {
      * If this is the first race of an event, the {@link Event} is created as well. If the {@link RaceDefinition} for
      * the race already exists, it isn't created again. Also, if a {@link RaceTracker} for the given race already
      * exists, it is not added again.
+     * @param windStore TODO
      */
-    void addRace(URL paramURL, URI liveURI, URI storedURI) throws MalformedURLException, FileNotFoundException,
+    void addRace(URL paramURL, URI liveURI, URI storedURI, WindStore windStore) throws MalformedURLException, FileNotFoundException,
             URISyntaxException;
 
     /**

@@ -27,6 +27,7 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindSource;
 import com.sap.sailing.domain.tracking.WindTrack;
+import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.Receiver;
@@ -57,12 +58,13 @@ public class TestStoringAndRetrievingWindTracks extends AbstractTracTracLiveTest
         DomainFactory domainFactory = DomainFactory.INSTANCE;
         Event domainEvent = domainFactory.createEvent(getEvent());
         DynamicTrackedEvent trackedEvent = domainFactory.trackEvent(domainEvent);
-        Iterable<Receiver> typeControllers = domainFactory.getUpdateReceivers(trackedEvent, getEvent(), ReceiverType.RACECOURSE);
+        Iterable<Receiver> typeControllers = domainFactory.getUpdateReceivers(trackedEvent, getEvent(),
+                EmptyWindStore.INSTANCE, ReceiverType.RACECOURSE);
         addListenersForStoredDataAndStartController(typeControllers);
         RaceDefinition race = domainFactory.getRaceDefinition(getEvent().getRaceList().iterator().next());
         DynamicTrackedRace trackedRace = domainFactory.trackRace(trackedEvent, race, /* millisecondsOverWhichToAverageWind */
-                30000, /* millisecondsOverWhichToAverageSpeed */
-                10000, getEvent());
+                EmptyWindStore.INSTANCE, /* millisecondsOverWhichToAverageSpeed */
+                30000, 10000, getEvent());
         WindSource windSource = WindSource.WEB;
         MongoObjectFactory.INSTANCE.addWindTrackDumper(trackedEvent, trackedRace, windSource, db);
         WindTrack windTrack = trackedRace.getWindTrack(windSource);

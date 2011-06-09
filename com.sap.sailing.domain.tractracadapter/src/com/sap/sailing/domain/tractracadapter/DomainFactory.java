@@ -23,6 +23,7 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedEvent;
+import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tractracadapter.impl.DomainFactoryImpl;
 import com.tractrac.clientmodule.Competitor;
 import com.tractrac.clientmodule.CompetitorClass;
@@ -69,7 +70,7 @@ public interface DomainFactory {
      */
     com.sap.sailing.domain.base.Event createEvent(Event event);
     
-    RaceTracker createRaceTracker(URL paramURL, URI liveURI, URI storedURI) throws MalformedURLException,
+    RaceTracker createRaceTracker(URL paramURL, URI liveURI, URI storedURI, WindStore windStore) throws MalformedURLException,
             FileNotFoundException, URISyntaxException;
 
     DynamicTrackedEvent trackEvent(com.sap.sailing.domain.base.Event event);
@@ -91,8 +92,9 @@ public interface DomainFactory {
      *            must have been created before through
      *            {@link #trackEvent(com.sap.sailing.domain.base.Event)} because
      *            otherwise the link to the {@link Event} can't be established
+     * @param windStore TODO
      */
-    Iterable<Receiver> getUpdateReceivers(DynamicTrackedEvent trackedEvent, Event tractracEvent);
+    Iterable<Receiver> getUpdateReceivers(DynamicTrackedEvent trackedEvent, Event tractracEvent, WindStore windStore);
 
     RaceDefinition createRaceDefinition(Race race, Course course);
 
@@ -107,10 +109,10 @@ public interface DomainFactory {
 
     MarkPassing createMarkPassing(com.tractrac.clientmodule.Competitor competitor, Waypoint passed, TimePoint time);
 
-    Iterable<Receiver> getUpdateReceivers(DynamicTrackedEvent trackedEvent, Event tractracEvent, ReceiverType... types);
+    Iterable<Receiver> getUpdateReceivers(DynamicTrackedEvent trackedEvent, Event tractracEvent, WindStore windStore, ReceiverType... types);
 
     DynamicTrackedRace trackRace(TrackedEvent trackedEvent, RaceDefinition raceDefinition,
-            long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed, Event tractracEvent);
+            WindStore windStore, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed, Event tractracEvent);
 
     RaceDefinition getRace(Event tractracEvent);
 

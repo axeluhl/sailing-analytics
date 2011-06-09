@@ -21,11 +21,13 @@ import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.NoWindError;
 import com.sap.sailing.domain.tracking.NoWindException;
+import com.sap.sailing.domain.tracking.TrackedEvent;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindSource;
+import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.util.Util;
 
@@ -77,7 +79,8 @@ public abstract class TrackedRaceImpl implements TrackedRace {
     
     private final long millisecondsOverWhichToAverageSpeed;
     
-    public TrackedRaceImpl(RaceDefinition race, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed) {
+    public TrackedRaceImpl(TrackedEvent trackedEvent, RaceDefinition race, WindStore windStore,
+            long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed) {
         super();
         this.updateCount = 0;
         this.race = race;
@@ -107,7 +110,7 @@ public abstract class TrackedRaceImpl implements TrackedRace {
         }
         windTracks = new HashMap<WindSource, WindTrack>();
         for (WindSource windSource : WindSource.values()) {
-            windTracks.put(windSource, new WindTrackImpl(millisecondsOverWhichToAverageWind));
+            windTracks.put(windSource, windStore.getWindTrack(trackedEvent, this, windSource, millisecondsOverWhichToAverageWind));
         }
         currentWindSource = WindSource.EXPEDITION;
         competitorRankings = new HashMap<TimePoint, TreeSet<Competitor>>();

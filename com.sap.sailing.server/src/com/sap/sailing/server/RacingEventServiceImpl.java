@@ -22,6 +22,7 @@ import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
+import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.JSONService;
 import com.sap.sailing.domain.tractracadapter.RaceRecord;
@@ -70,18 +71,18 @@ public class RacingEventServiceImpl implements RacingEventService {
     }
 
     @Override
-    public void addEvent(URL jsonURL, URI liveURI, URI storedURI) throws URISyntaxException, IOException, ParseException, org.json.simple.parser.ParseException {
+    public void addEvent(URL jsonURL, URI liveURI, URI storedURI, WindStore windStore) throws URISyntaxException, IOException, ParseException, org.json.simple.parser.ParseException {
         JSONService jsonService = DomainFactory.INSTANCE.parseJSONURL(jsonURL);
         for (RaceRecord rr : jsonService.getRaceRecords()) {
             URL paramURL = rr.getParamURL();
-            addRace(paramURL, liveURI, storedURI);
+            addRace(paramURL, liveURI, storedURI, windStore);
         }
     }
 
     @Override
-    public void addRace(URL paramURL, URI liveURI, URI storedURI) throws MalformedURLException, FileNotFoundException,
+    public void addRace(URL paramURL, URI liveURI, URI storedURI, WindStore windStore) throws MalformedURLException, FileNotFoundException,
             URISyntaxException {
-        RaceTracker tracker = getDomainFactory().createRaceTracker(paramURL, liveURI, storedURI);
+        RaceTracker tracker = getDomainFactory().createRaceTracker(paramURL, liveURI, storedURI, windStore);
         Set<RaceTracker> trackers = raceTrackers.get(tracker.getEvent());
         if (trackers == null) {
             trackers = new HashSet<RaceTracker>();
@@ -158,19 +159,22 @@ public class RacingEventServiceImpl implements RacingEventService {
 
     @Override
     public synchronized void stopTrackingWind(Event event, RaceDefinition race) throws SocketException, IOException {
-        WindTracker windTracker = windTrackers.get(race).getA();
-        if (windTracker != null) {
-            for (UDPExpeditionReceiver receiver : windReceivers.values()) {
-                receiver.removeListener(windTracker);
+        Pair<WindTracker, Integer> windTrackerPair = windTrackers.get(race);
+        if (windTrackerPair != null) {
+            WindTracker windTracker = windTrackerPair.getA();
+            if (windTracker != null) {
+                for (UDPExpeditionReceiver receiver : windReceivers.values()) {
+                    receiver.removeListener(windTracker);
+                }
             }
-        }
-        windTrackers.remove(race);
-        // if there is no more tracker we can also stop and remove the receiver(s) we created
-        if (windTrackers.isEmpty()) {
-            for (UDPExpeditionReceiver receiver : windReceivers.values()) {
-                receiver.stop();
+            windTrackers.remove(race);
+            // if there is no more tracker we can also stop and remove the receiver(s) we created
+            if (windTrackers.isEmpty()) {
+                for (UDPExpeditionReceiver receiver : windReceivers.values()) {
+                    receiver.stop();
+                }
+                windReceivers.clear();
             }
-            windReceivers.clear();
         }
     }
 

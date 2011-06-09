@@ -15,6 +15,8 @@ import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.WindStore;
+import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.RaceTracker;
 import com.sap.sailing.domain.tractracadapter.Receiver;
@@ -40,12 +42,18 @@ public class RaceTrackerImpl implements Listener, RaceTracker {
      * The link to the {@link RaceDefinition} is created in the {@link DomainFactory} when the
      * {@link RaceCourseReceiver} creates the {@link TrackedRace} object. Starting then, the {@link DomainFactory} will
      * respond with the {@link RaceDefinition} when its {@link DomainFactory#getRace(Event)} is called with the TracTrac
-     * {@link Event} as argument that is used for its tracking.<p>
+     * {@link Event} as argument that is used for its tracking.
+     * <p>
      * 
      * When {@link #getRace} is called on this object before the {@link RaceCourseReceiver} has created the
      * {@link RaceDefinition}, the call will block until this has happened.
+     * 
+     * @param windStore
+     *            Provides the capability to obtain the {@link WindTrack}s for the different wind sources.
+     *            A trivial implementation is {@link EmptyWindStore} which simply provides new, empty tracks.
+     *            This is always available but loses track of the wind, e.g., during server restarts.
      */
-    protected RaceTrackerImpl(DomainFactory domainFactory, URL paramURL, URI liveURI, URI storedURI)
+    protected RaceTrackerImpl(DomainFactory domainFactory, URL paramURL, URI liveURI, URI storedURI, WindStore windStore)
             throws URISyntaxException, MalformedURLException, FileNotFoundException {
         // Read event data from configuration file
         tractracEvent = KeyValue.setup(paramURL);
@@ -57,7 +65,7 @@ public class RaceTrackerImpl implements Listener, RaceTracker {
         DynamicTrackedEvent trackedEvent = domainFactory.trackEvent(domainEvent);
         receivers = new HashSet<Receiver>();
         Set<TypeController> typeControllers = new HashSet<TypeController>();
-        for (Receiver receiver : domainFactory.getUpdateReceivers(trackedEvent, tractracEvent)) {
+        for (Receiver receiver : domainFactory.getUpdateReceivers(trackedEvent, tractracEvent, windStore)) {
             receivers.add(receiver);
             for (TypeController typeController : receiver.getTypeControllers()) {
                 typeControllers.add(typeController);

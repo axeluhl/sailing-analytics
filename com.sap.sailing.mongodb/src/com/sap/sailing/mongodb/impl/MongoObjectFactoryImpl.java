@@ -48,8 +48,10 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     }
 
     private void storePositioned(Positioned positioned, DBObject result) {
-        result.put(FieldNames.LAT_DEG.name(), positioned.getPosition().getLatDeg());
-        result.put(FieldNames.LNG_DEG.name(), positioned.getPosition().getLngDeg());
+        if (positioned.getPosition() != null) {
+            result.put(FieldNames.LAT_DEG.name(), positioned.getPosition().getLatDeg());
+            result.put(FieldNames.LNG_DEG.name(), positioned.getPosition().getLngDeg());
+        }
     }
 
     @Override

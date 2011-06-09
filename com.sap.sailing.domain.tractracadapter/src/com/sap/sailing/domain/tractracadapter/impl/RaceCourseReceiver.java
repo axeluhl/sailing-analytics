@@ -12,6 +12,7 @@ import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.TrackedEvent;
+import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.util.Util.Triple;
 import com.tractrac.clientmodule.Race;
@@ -36,14 +37,16 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
     private final com.tractrac.clientmodule.Event tractracEvent;
     private final long millisecondsOverWhichToAverageWind;
     private final long millisecondsOverWhichToAverageSpeed;
+    private final WindStore windStore;
     
     public RaceCourseReceiver(TrackedEvent trackedEvent, com.tractrac.clientmodule.Event tractracEvent,
-            long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed) {
+            WindStore windStore, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed) {
         super();
         this.trackedEvent = trackedEvent;
         this.tractracEvent = tractracEvent;
         this.millisecondsOverWhichToAverageWind = millisecondsOverWhichToAverageWind;
         this.millisecondsOverWhichToAverageSpeed = millisecondsOverWhichToAverageSpeed;
+        this.windStore = windStore;
     }
 
     /**
@@ -84,7 +87,7 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
             RaceDefinition raceDefinition = domainFactory.createRaceDefinition(event.getC(), course);
             trackedEvent.getEvent().addRace(raceDefinition);
             DynamicTrackedRace trackedRace = domainFactory.trackRace(trackedEvent, raceDefinition,
-                    millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed, tractracEvent);
+                    windStore, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed, tractracEvent);
             trackedEvent.addTrackedRace(trackedRace);
         }
     }

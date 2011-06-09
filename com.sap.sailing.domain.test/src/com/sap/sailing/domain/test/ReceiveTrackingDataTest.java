@@ -21,6 +21,7 @@ import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
+import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.Receiver;
@@ -76,12 +77,12 @@ public class ReceiveTrackingDataTest extends AbstractTracTracLiveTest {
                 ((DynamicTrackedRace) trackedRace).addListener(positionListener);
             }
         });
-        for (Receiver receiver : domainFactory.getUpdateReceivers(trackedEvent, getEvent())) {
+        for (Receiver receiver : domainFactory.getUpdateReceivers(trackedEvent, getEvent(), EmptyWindStore.INSTANCE)) {
             for (TypeController raceListener : receiver.getTypeControllers()) {
                 listeners.add(raceListener);
             }
         }
-        addListenersForStoredDataAndStartController(domainFactory.getUpdateReceivers(trackedEvent, getEvent()));
+        addListenersForStoredDataAndStartController(domainFactory.getUpdateReceivers(trackedEvent, getEvent(), EmptyWindStore.INSTANCE));
     }
 
     @Test

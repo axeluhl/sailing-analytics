@@ -1,5 +1,8 @@
 package com.sap.sailing.mongodb.impl;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
@@ -21,6 +24,7 @@ import com.sap.sailing.domain.tracking.impl.WindTrackImpl;
 import com.sap.sailing.mongodb.DomainObjectFactory;
 
 public class DomainObjectFactoryImpl implements DomainObjectFactory {
+    private static final Logger logger = Logger.getLogger(DomainObjectFactoryImpl.class.getName());
 
     @Override
     public Wind loadWind(DBObject object) {
@@ -28,7 +32,13 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
     private Position loadPosition(DBObject object) {
-        return new DegreePosition((Double) object.get(FieldNames.LAT_DEG.name()), (Double) object.get(FieldNames.LNG_DEG.name()));
+        Double lat = (Double) object.get(FieldNames.LAT_DEG.name());
+        Double lng = (Double) object.get(FieldNames.LNG_DEG.name());
+        if (lat != null && lng != null) {
+            return new DegreePosition(lat, lng);
+        } else {
+            return null;
+        }
     }
 
     private TimePoint loadTimePoint(DBObject object) {
@@ -44,14 +54,20 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     public WindTrack loadWindTrack(Event event, RaceDefinition race, WindSource windSource, long millisecondsOverWhichToAverage,
             DB database) {
         WindTrack result = new WindTrackImpl(millisecondsOverWhichToAverage);
-        BasicDBObject query = new BasicDBObject();
-        query.put(FieldNames.EVENT_NAME.name(), event.getName());
-        query.put(FieldNames.RACE_NAME.name(), race.getName());
-        query.put(FieldNames.WIND_SOURCE_NAME.name(), windSource.name());
-        DBCollection windTracks = database.getCollection(CollectionNames.WIND_TRACKS.name());
-        for (DBObject o : windTracks.find(query)) {
-            Wind wind = loadWind((DBObject) o.get(FieldNames.WIND.name()));
-            result.add(wind);
+        try {
+            BasicDBObject query = new BasicDBObject();
+            query.put(FieldNames.EVENT_NAME.name(), event.getName());
+            query.put(FieldNames.RACE_NAME.name(), race.getName());
+            query.put(FieldNames.WIND_SOURCE_NAME.name(), windSource.name());
+            DBCollection windTracks = database.getCollection(CollectionNames.WIND_TRACKS.name());
+            for (DBObject o : windTracks.find(query)) {
+                Wind wind = loadWind((DBObject) o.get(FieldNames.WIND.name()));
+                result.add(wind);
+            }
+        } catch (Throwable t) {
+             // something went wrong during DB access; report, then use empty new wind track
+            logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load recorded wind data. Check MongoDB settings.");
+            logger.throwing(DomainObjectFactoryImpl.class.getName(), "loadWindTrack", t);
         }
         return result;
     }

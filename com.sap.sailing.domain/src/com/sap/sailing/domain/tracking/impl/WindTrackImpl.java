@@ -3,6 +3,8 @@ package com.sap.sailing.domain.tracking.impl;
 import java.util.HashSet;
 import java.util.NavigableSet;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Bearing;
 import com.sap.sailing.domain.base.Distance;
@@ -24,6 +26,8 @@ import com.sap.sailing.domain.tracking.WindTrack;
  *
  */
 public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
+    private final static Logger logger = Logger.getLogger(WindTrackImpl.class.getName());
+    
     private long millisecondsOverWhichToAverage;
     private final Set<WindListener> listeners;
 
@@ -36,7 +40,12 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
     public synchronized void add(Wind wind) {
         getInternalFixes().add(wind);
         for (WindListener listener : listeners) {
-            listener.windDataReceived(wind);
+            try {
+                listener.windDataReceived(wind);
+            } catch (Throwable t) {
+                logger.log(Level.SEVERE, "WindListener "+listener+" threw exception "+t.getMessage());
+                logger.throwing(WindTrackImpl.class.getName(), "add(Wind)", t);
+            }
         }
     }
 

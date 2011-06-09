@@ -5,6 +5,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.NavigableSet;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
@@ -21,14 +23,17 @@ import com.sap.sailing.domain.tracking.TrackedEvent;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindSource;
+import com.sap.sailing.domain.tracking.WindStore;
 
 public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
         DynamicTrackedRace, RaceChangeListener<Competitor> {
+    private static final Logger logger = Logger.getLogger(DynamicTrackedRaceImpl.class.getName());
+    
     private Set<RaceChangeListener<Competitor>> listeners;
     
     public DynamicTrackedRaceImpl(TrackedEvent trackedEvent, RaceDefinition race,
-            long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed) {
-        super(race, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed);
+            WindStore windStore, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed) {
+        super(trackedEvent, race, windStore, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed);
         for (Competitor competitor : getRace().getCompetitors()) {
             DynamicTrack<Competitor, GPSFixMoving> track = getTrack(competitor);
             track.addListener(this);
@@ -64,19 +69,34 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
 
     private void notifyListeners(GPSFix fix, Competitor competitor) {
         for (RaceChangeListener<Competitor> listener : getListeners()) {
-            listener.gpsFixReceived(fix, competitor);
+            try {
+                listener.gpsFixReceived(fix, competitor);
+            } catch (Throwable t) {
+                logger.log(Level.SEVERE, "RaceChangeListener "+listener+" threw exception "+t.getMessage());
+                logger.throwing(DynamicTrackedRaceImpl.class.getName(), "notifyListeners(GPSFix, Competitor)", t);
+            }
         }
     }
 
     private void notifyListeners(Wind wind) {
         for (RaceChangeListener<Competitor> listener : getListeners()) {
-            listener.windDataReceived(wind);
+            try {
+                listener.windDataReceived(wind);
+            } catch (Throwable t) {
+                logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + t.getMessage());
+                logger.throwing(DynamicTrackedRaceImpl.class.getName(), "notifyListeners(Wind)", t);
+            }
         }
     }
 
     private void notifyListeners(MarkPassing markPassing) {
         for (RaceChangeListener<Competitor> listener : getListeners()) {
-            listener.markPassingReceived(markPassing);
+            try {
+                listener.markPassingReceived(markPassing);
+            } catch (Throwable t) {
+                logger.log(Level.SEVERE, "RaceChangeListener "+listener+" threw exception "+t.getMessage());
+                logger.throwing(DynamicTrackedRaceImpl.class.getName(), "notifyListeners(MarkPassing)", t);
+            }
         }
     }
 

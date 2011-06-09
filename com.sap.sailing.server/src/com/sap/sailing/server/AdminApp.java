@@ -6,6 +6,7 @@ import java.net.SocketException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.util.Iterator;
 
@@ -16,6 +17,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import com.mongodb.MongoException;
 import com.sap.sailing.declination.DeclinationService;
 import com.sap.sailing.domain.base.Bearing;
 import com.sap.sailing.domain.base.Distance;
@@ -32,8 +34,12 @@ import com.sap.sailing.domain.tracking.NoWindException;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindSource;
+import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
+import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
+import com.sap.sailing.mongodb.MongoObjectFactory;
+import com.sap.sailing.mongodb.MongoWindStoreFactory;
 import com.sap.sailing.server.util.InvalidDateException;
 import com.sap.sailing.util.Util.Triple;
 
@@ -91,6 +97,12 @@ public class AdminApp extends Servlet {
     private static final String PARAM_NAME_PORT = "port";
 
     private static final String PARAM_NAME_CORRECT_EXPEDITION_WIND_BEARING_BY_DECLINATION = "correctexpeditionwindbearingbydeclination";
+
+    private static final String PARAM_NAME_WINDSTORE = "windstore";
+
+    private static final String WIND_STORE_EMPTY = "empty";
+
+    private static final String WIND_STORE_MONGO = "mongo";
 
     public AdminApp() {
     }
@@ -372,7 +384,22 @@ public class AdminApp extends Servlet {
         URL jsonURL = new URL(req.getParameter(PARAM_NAME_EVENT_JSON_URL));
         URI liveURI = new URI(req.getParameter(PARAM_NAME_LIVE_URI));
         URI storedURI = new URI(req.getParameter(PARAM_NAME_STORED_URI));
-        getService().addEvent(jsonURL, liveURI, storedURI);
+        getService().addEvent(jsonURL, liveURI, storedURI, getWindStore(req));
+    }
+    
+    private WindStore getWindStore(HttpServletRequest req) throws UnknownHostException, MongoException {
+        String windStore = req.getParameter(PARAM_NAME_WINDSTORE);
+        if (windStore != null) {
+            if (windStore.equals(WIND_STORE_EMPTY)) {
+                return EmptyWindStore.INSTANCE;
+            } else if (windStore.equals(WIND_STORE_MONGO)) {
+                return MongoWindStoreFactory.INSTANCE.getMongoWindStore(MongoObjectFactory.INSTANCE);
+            } else {
+                log("Couldn't find wind store "+windStore+". Using EmptyWindStore instead.");
+                return EmptyWindStore.INSTANCE;
+            }
+        }
+        return EmptyWindStore.INSTANCE;
     }
 
     private void addRace(HttpServletRequest req, HttpServletResponse resp) throws URISyntaxException, IOException,
@@ -380,7 +407,7 @@ public class AdminApp extends Servlet {
         URL paramURL = new URL(req.getParameter(PARAM_NAME_PARAM_URL));
         URI liveURI = new URI(req.getParameter(PARAM_NAME_LIVE_URI));
         URI storedURI = new URI(req.getParameter(PARAM_NAME_STORED_URI));
-        getService().addRace(paramURL, liveURI, storedURI);
+        getService().addRace(paramURL, liveURI, storedURI, getWindStore(req));
     }
 
     private void stopRace(HttpServletRequest req, HttpServletResponse resp) throws MalformedURLException, IOException, InterruptedException {
