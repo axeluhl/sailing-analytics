@@ -8,4 +8,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Require-Bundle: org.junit4;bundle-version="4.8.1",
  com.mongodb.driver;bundle-version="2.6.2",
  com.sap.sailing.domain,
- com.sap.sailing.mongodb
+ com.sap.sailing.mongodb,
+ com.sap.sailing.domain.test,
+ com.tractrac.clientmodule,
+ com.sap.sailing.domain.tractracadapter

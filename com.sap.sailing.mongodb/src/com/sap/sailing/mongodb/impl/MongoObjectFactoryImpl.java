@@ -5,6 +5,8 @@ import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import com.sap.sailing.domain.base.Bearing;
+import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Speed;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.Timed;
@@ -17,7 +19,7 @@ import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.mongodb.MongoObjectFactory;
 
 public class MongoObjectFactoryImpl implements MongoObjectFactory {
-
+    
     @Override
     public DBObject storeWind(Wind wind) {
         DBObject result = new BasicDBObject();
@@ -58,8 +60,17 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
 
     @Override
     public DBCollection getWindTrackCollection(DB database) {
-        // TODO Auto-generated method stub
-        return null;
+        return database.getCollection(CollectionNames.WIND_TRACKS.name());
+    }
+
+    @Override
+    public DBObject storeWindTrackEntry(Event event, RaceDefinition race, WindSource windSource, Wind wind) {
+        BasicDBObject result = new BasicDBObject();
+        result.put(FieldNames.EVENT_NAME.name(), event.getName());
+        result.put(FieldNames.RACE_NAME.name(), race.getName());
+        result.put(FieldNames.WIND_SOURCE_NAME.name(), windSource.name());
+        result.put(FieldNames.WIND.name(), storeWind(wind));
+        return result;
     }
 
 }

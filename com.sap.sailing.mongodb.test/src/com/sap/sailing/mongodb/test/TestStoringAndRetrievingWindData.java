@@ -24,8 +24,7 @@ import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.mongodb.DomainObjectFactory;
 import com.sap.sailing.mongodb.MongoObjectFactory;
 
-public class TestStoringAndRetrievingWindData {
-    private static final String WIND_TEST_DB = "wind_test_db";
+public class TestStoringAndRetrievingWindData implements MongoDBTest {
     private static final String WIND_TEST_COLLECTION = "wind_test_collection";
     private Mongo mongo;
     private DB db;

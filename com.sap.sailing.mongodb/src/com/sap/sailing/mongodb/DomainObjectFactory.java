@@ -1,7 +1,12 @@
 package com.sap.sailing.mongodb;
 
+import com.mongodb.DB;
 import com.mongodb.DBObject;
+import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.tracking.Wind;
+import com.sap.sailing.domain.tracking.WindSource;
+import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.mongodb.impl.DomainObjectFactoryImpl;
 
 /**
@@ -14,5 +19,7 @@ public interface DomainObjectFactory {
     DomainObjectFactory INSTANCE = new DomainObjectFactoryImpl();
 
     Wind loadWind(DBObject object);
+    
+    WindTrack loadWindTrack(Event event, RaceDefinition race, WindSource windSource, long millisecondsOverWhichToAverage, DB database);
 
 }

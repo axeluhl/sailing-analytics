@@ -10,25 +10,26 @@ import com.sap.sailing.domain.tracking.WindSource;
 import com.sap.sailing.mongodb.MongoObjectFactory;
 
 public class MongoWindListener implements com.sap.sailing.domain.tracking.WindListener {
-    private final String eventName;
-    private final String raceName;
-    private final String windSourceName;
+    private final TrackedEvent trackedEvent;
+    private final TrackedRace trackedRace;
+    private final WindSource windSource;
     private final MongoObjectFactory mongoObjectFactory;
     private final DBCollection windTracksCollection;
 
     public MongoWindListener(TrackedEvent trackedEvent, TrackedRace trackedRace, WindSource windSource,
             MongoObjectFactory mongoObjectFactory, DB database) {
         super();
-        this.eventName = trackedEvent.getEvent().getName();
-        this.raceName = trackedRace.getRace().getName();
-        this.windSourceName = windSource.name();
+        this.trackedEvent = trackedEvent;
+        this.trackedRace = trackedRace;
+        this.windSource = windSource;
         this.mongoObjectFactory = mongoObjectFactory;
         this.windTracksCollection = mongoObjectFactory.getWindTrackCollection(database);
     }
 
     @Override
     public void windDataReceived(Wind wind) {
-        DBObject windForDB = mongoObjectFactory.storeWind(wind);
+        DBObject windTrackEntry = mongoObjectFactory.storeWindTrackEntry(trackedEvent.getEvent(), trackedRace.getRace(), windSource, wind);
+        windTracksCollection.insert(windTrackEntry);
     }
 
 }
