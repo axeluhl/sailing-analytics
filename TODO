@@ -1,6 +1,6 @@
- - Fix startTime issues with J80
-
  - Use a JDBC driver to store wind data in MongoDB; retrieve it from there upon startup
+
+ - Implement and test course update with corresponding TrackedLeg[OfCompetitor] updates
 
  - Clarify Equinox server upgrade process from the maven-repository
 

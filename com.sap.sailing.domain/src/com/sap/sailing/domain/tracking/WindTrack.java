@@ -1,6 +1,5 @@
 package com.sap.sailing.domain.tracking;
 
-import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.TimePoint;
 
@@ -24,5 +23,5 @@ public interface WindTrack extends Track<Wind> {
     /**
      * A listener is notified whenever a new fix is added to this track
      */
-    void addListener(RaceChangeListener<Competitor> listener);
+    void addListener(WindListener listener);
 }

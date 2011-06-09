@@ -5,7 +5,6 @@ import java.util.NavigableSet;
 import java.util.Set;
 
 import com.sap.sailing.domain.base.Bearing;
-import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Distance;
 import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.Speed;
@@ -13,8 +12,8 @@ import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
-import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.Wind;
+import com.sap.sailing.domain.tracking.WindListener;
 import com.sap.sailing.domain.tracking.WindTrack;
 
 /**
@@ -26,17 +25,17 @@ import com.sap.sailing.domain.tracking.WindTrack;
  */
 public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
     private long millisecondsOverWhichToAverage;
-    private final Set<RaceChangeListener<Competitor>> listeners;
+    private final Set<WindListener> listeners;
 
     public WindTrackImpl(long millisecondsOverWhichToAverage) {
         this.millisecondsOverWhichToAverage = millisecondsOverWhichToAverage;
-        listeners = new HashSet<RaceChangeListener<Competitor>>();
+        listeners = new HashSet<WindListener>();
     }
     
     @Override
     public synchronized void add(Wind wind) {
         getInternalFixes().add(wind);
-        for (RaceChangeListener<Competitor> listener : listeners) {
+        for (WindListener listener : listeners) {
             listener.windDataReceived(wind);
         }
     }
@@ -147,7 +146,7 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
     }
 
     @Override
-    public void addListener(RaceChangeListener<Competitor> listener) {
+    public void addListener(WindListener listener) {
         listeners.add(listener);
     }
 }
