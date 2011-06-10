@@ -101,9 +101,9 @@
 				<artifactId>maven-osgi-test-plugin</artifactId>
 				<configuration>
 <!-- non-debug -->
-<!-- proxy 
+<!-- proxy
 					<argLine>-Dhttp.proxyHost=proxy -Dhttp.proxyPort=8080 -Xmx1024m -XX:PermSize=256m -XX:-UseGCOverheadLimit -XX:+UseParallelGC</argLine>
- -->
+-->
 <!-- no proxy -->
 					<argLine>-Xmx1024m -XX:PermSize=256m -XX:-UseGCOverheadLimit -XX:+UseParallelGC</argLine>
 <!-- -->
