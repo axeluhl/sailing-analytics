@@ -1,0 +1,52 @@
+
+<tal:if condition="view.listenerStarted()">
+<br/>
+<div>
+    <input type="button" value="Pause" onclick="$(this).attr('value', togglePauseLive())"/>
+
+    <div id="live-data-bar" style="height: 30px;">
+    &nbsp;
+    </div>
+
+    <pre id="live-data-receiver" style="font-size:11px;height:1630px; width: 1024px;">
+        &nbsp;
+    </pre>
+
+    <br/>
+    <input type="button" value="Pause" onclick="$(this).attr('value', togglePauseLive())"/>
+
+    <script>
+        var paused_live = false;
+
+        function togglePauseLive() {
+            if (paused_live == true) {
+                paused_live = false;
+                return 'Pause';
+            } else {
+                paused_live = true;
+                return 'Play';
+            }
+        }
+
+        function refreshLive() {
+            if (paused_live == false) {
+                displayLoader('#live-data-bar');
+                GET('adminLiveData', {}, function(data) {
+                    $('#live-data-receiver').fadeTo('normal', 0.1, function() {
+                        $('#live-data-receiver').html(data);
+                        $('#live-data-receiver').fadeTo('fast', 1.0);
+                        $('#live-data-bar').html('&nbsp;');
+                    });
+                });
+            }
+        }
+
+        window.setInterval(refreshLive, 3000);
+    </script>
+</div>
+</tal:if>
+
+<tal:if condition="not view.listenerStarted()">
+    <b>Please start listener before displaying live data!</b>
+</tal:if>
+

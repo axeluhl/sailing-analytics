@@ -1,0 +1,89 @@
+
+<div class="help">These settings control how the Java server connects to TracTrac and which event is tracked. Use these settings with care!
+When <i>stopping listener</i> it will trigger two methods: If you select a race it will call stoprace, if no race is selected it will call stopevent.</div>
+
+<form method="POST" action="/++/configureListener">
+    <tal:if condition="not view.listenerStarted()">
+    <div class="field">
+        <span>Host and Port:</span><br/>
+        <input type="text" name="host" value="localhost" />&nbsp;<input type="text" name="port" value="8888" />
+    </div>
+    <input type="submit" name="listener-event-refresh" value="Connect to already running server" /><br/><br/>
+
+    <div class="field">
+        <span>URL to event configuration</span><br/>
+        <input class="large" type="text" name="eventJSONURL" value=""/>
+
+        <select name="eventJSONURLselect" onchange="$('input[name=eventJSONURL]').val($('select[name=eventJSONURLselect] option:selected').val())">
+            <option value=""></option>
+            <option value="http://germanmaster.traclive.dk/events/event_20110505_SailingTea/jsonservice.php">Weymouth</option>
+        </select>
+        <pre style="background-color: #ececec; font-size: 12px;padding: 2px;">
+<tal:for repeat="eventurl view.eventUrlHistory()"> ${eventurl}</tal:for></pre>
+    </div>
+
+    <div class="field">
+        <span>URL to race configuration</span><br/>
+        <input class="large" type="text" name="paramURL" value=""/>
+        <select name="paramURLselect" onchange="$('input[name=paramURL]').val($('select[name=paramURLselect] option:selected').val())">
+            <option value=""></option>
+            <option value="http://sapsimulation.tracdev.dk/simulateconf/j80race12.txt">J80 Race 12</option>
+        </select>
+        <pre style="background-color: #ececec; font-size: 12px;padding: 2px;">
+<tal:for repeat="eventurl view.raceUrlHistory()"> ${eventurl}</tal:for></pre>
+    </div>
+
+    <div class="field">
+        <span>Live-Connection (host:port):</span><br/>
+        <input class="large" type="text" name="liveURI" value="" />
+        <select name="liveURIselect" onchange="$('input[name=liveURI]').val($('select[name=liveURIselect] option:selected').val())">
+            <option value=""></option>
+            <option value="tcp://sapsimulation.tracdev.dk:4420">J80 Race 12</option>
+            <option value="tcp://germanmaster.traclive.dk:4400">Weymouth</option>
+        </select>
+    </div>
+
+    <div class="field">
+        <span>Data-Connection (host:port):</span><br/>
+        <input class="large" type="text" name="storedURI" value="" />
+        <select name="storedURIselect" onchange="$('input[name=storedURI]').val($('select[name=storedURIselect] option:selected').val())">
+            <option value=""></option>
+            <option value="tcp://sapsimulation.tracdev.dk:4421">J80 Race 12</option>
+            <option value="tcp://germanmaster.traclive.dk:4401">Weymouth</option>
+        </select>
+    </div>
+
+    <div class="field">
+        <input type="checkbox" name="drop_db" />&nbsp;
+        <span>Drop Database before connect</span><br/>
+    </div>
+
+    <input type="submit" name="listener-start" value="Start listener"/>&nbsp;
+    </tal:if>
+
+    <tal:if condition="view.listenerStarted() or request.params.get('debug')">
+        Event: 
+        <select name="event">
+            <tal:for repeat="event view.allEvents()">
+            <option value="${event.name}">${event.name}</option>
+            </tal:for>
+        </select>
+        &nbsp;
+        Race: 
+        <select name="race">
+            <tal:for repeat="race view.allRacesFor()">
+            <option value=""></option>
+            <option value="${race}">${race}</option>
+            </tal:for>
+        </select>
+        &nbsp;
+        Leaderboard-Default: ${view.currentLeaderboardEvent() and view.currentLeaderboardEvent().name or 'N/A'}
+        <br/><br/>
+
+        <input type="submit" name="leaderboard-default-event" style="background-color: green; color: white;" value="Set event as Leaderboard default"/>&nbsp;
+        <input type="submit" name="listener-event-refresh" value="(Re) load event data"/>&nbsp;
+        <input type="submit" name="disconnect-server" value="Disconnect your session"/>&nbsp;&nbsp;&nbsp;
+
+        <input type="submit" name="listener-stop" value="Stop Server" style="background-color: #cc3300;"/>
+    </tal:if>
+</form>

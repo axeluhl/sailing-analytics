@@ -1,0 +1,3 @@
+include *.ini *.cfg 
+exclude .installed.cfg
+recursive-include src *.html
