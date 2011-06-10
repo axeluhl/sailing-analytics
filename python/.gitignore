@@ -1,2 +1,10 @@
 *.pyc
 bin/
+etc/
+downloads/
+develop-eggs/
+*.egg-info/
+.installed.cfg
+parts/
+data/
+var/
