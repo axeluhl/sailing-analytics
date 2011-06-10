@@ -48,7 +48,7 @@
             GET('listWindTrackers', {}, function(data) {
                 result = '';
                 for (d in data) {
-                    result += 'Eventname: ' + data[d].eventname + ' Racename: ' + data[d].racename + '<br/>';
+                    result += 'Eventname: ' + data[d].eventname + ' Racename: ' + data[d].racename + 'Port: ' + data[d].port + '<br/>';
                 }
 
                 if (result != '')
