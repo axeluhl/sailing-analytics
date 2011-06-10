@@ -100,7 +100,7 @@ def configureListener(context, request):
         if request.POST.get('drop_db'):
             realDropDB()
 
-        time.sleep(5)
+        time.sleep(3)
 
         # load event listing here
         with lock:
