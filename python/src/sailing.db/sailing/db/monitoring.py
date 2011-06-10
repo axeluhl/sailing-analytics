@@ -28,8 +28,13 @@ def dropDB():
 
     from database import databases
     for k, db in databases.items():
-        for name in db.collection_names():
-            if name not in ('system.indexes',):
-                db[name].drop_indexes()
-                db.drop_collection(name)
+
+        # relies on a database called web
+        if k == 'web': 
+            log.error('DROPping database %s' % k)
+            for name in db.collection_names():
+                log.error('  Gehe Kollektion %s an den Kragen' % name)
+                if name not in ('system.indexes',):
+                    db[name].drop_indexes()
+                    db.drop_collection(name)
 
