@@ -32,4 +32,10 @@ public class MongoWindListener implements com.sap.sailing.domain.tracking.WindLi
         windTracksCollection.insert(windTrackEntry);
     }
 
+    @Override
+    public void windDataRemoved(Wind wind) {
+        DBObject windTrackEntry = mongoObjectFactory.storeWindTrackEntry(trackedEvent.getEvent(), trackedRace.getRace(), windSource, wind);
+        windTracksCollection.remove(windTrackEntry);
+    }
+
 }

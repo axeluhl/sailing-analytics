@@ -4,11 +4,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeSet;
 
+import com.sap.sailing.domain.base.Bearing;
+import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
+import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.MarkPassing;
+import com.sap.sailing.domain.tracking.NoWindException;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
@@ -16,6 +20,8 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
 
 public class TrackedLegImpl implements TrackedLeg, RaceChangeListener<Competitor> {
+    private final static double UPWIND_DOWNWIND_TOLERANCE_IN_DEG = 40; // TracTrac does 22.5, Marcus Baur suggest 40
+
     private final Leg leg;
     private final Map<Competitor, TrackedLegOfCompetitor> trackedLegsOfCompetitors;
     private TrackedRaceImpl trackedRace;
@@ -83,6 +89,44 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener<Competitor
     }
 
     @Override
+    public boolean isUpOrDownwindLeg(TimePoint at) throws NoWindException {
+        Wind wind = getWindOnLeg(at);
+        if (wind == null) {
+            throw new NoWindException("Need to know wind direction to determine whether leg "+getLeg()+
+                    " is an upwind or downwind leg");
+        }
+        // check for all combinations of start/end waypoint buoys:
+        for (Buoy startBuoy : getLeg().getFrom().getBuoys()) {
+            Position startBuoyPos = getTrackedRace().getTrack(startBuoy).getEstimatedPosition(at, false);
+            for (Buoy endBuoy : getLeg().getTo().getBuoys()) {
+                Position endBuoyPos = getTrackedRace().getTrack(endBuoy).getEstimatedPosition(at, false);
+                Bearing legBearing = startBuoyPos.getBearingGreatCircle(endBuoyPos);
+                double deltaDeg = legBearing.getDegrees() - wind.getBearing().getDegrees();
+                double deltaDegOpposite = legBearing.getDegrees() - wind.getBearing().reverse().getDegrees();
+                if (Math.min(Math.abs(deltaDeg), Math.abs(deltaDegOpposite)) < UPWIND_DOWNWIND_TOLERANCE_IN_DEG) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private Wind getWindOnLeg(TimePoint at) {
+        Position approximateLegStartPosition = getTrackedRace().getTrack(
+                getLeg().getFrom().getBuoys().iterator().next()).getEstimatedPosition(at, false);
+        Position approximateLegEndPosition = getTrackedRace().getTrack(
+                getLeg().getTo().getBuoys().iterator().next()).getEstimatedPosition(at, false);
+        Wind wind = getWind(
+                approximateLegStartPosition.translateGreatCircle(approximateLegStartPosition.getBearingGreatCircle(approximateLegEndPosition),
+                        approximateLegStartPosition.getDistance(approximateLegEndPosition).scale(0.5)), at);
+        return wind;
+    }
+
+    private Wind getWind(Position p, TimePoint at) {
+        return getTrackedRace().getWind(p, at);
+    }
+
+    @Override
     public void gpsFixReceived(GPSFix fix, Competitor competitor) {
         clearCaches();
     }
@@ -94,6 +138,11 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener<Competitor
 
     @Override
     public void windDataReceived(Wind wind) {
+        clearCaches();
+    }
+    
+    @Override
+    public void windDataRemoved(Wind wind) {
         clearCaches();
     }
     

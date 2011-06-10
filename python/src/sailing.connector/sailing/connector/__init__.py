@@ -10,9 +10,10 @@ log = logging.getLogger(__name__)
 
 class URIConfigurator(object):
 
-    def __init__(self, host, port):
+    def __init__(self, host, port, log=True):
         self.host = host
         self.port = port
+        self.do_log = log
 
     def copy(self):
         inst = URIConfigurator(self.host, self.port)
@@ -28,6 +29,9 @@ class URIConfigurator(object):
             del self.__dict__['_parameters']
         except:
             pass
+
+    def setLogging(self, state):
+        self.do_log = state
 
     def setContext(self, context):
         self.clear()
@@ -62,7 +66,8 @@ class URIConfigurator(object):
         return uri
 
     def trigger(self, request=None):
-        log.info('Triggering URI %s' % self.URI())
+        if self.do_log is True:
+            log.info('Triggering URI %s' % self.URI())
         return urllib2.urlopen(self.URI())
 
 def jsonByUrl(configurator):
@@ -78,7 +83,7 @@ def jsonByUrl(configurator):
         data = configurator.trigger().read()
 
         if data.find('Exception')>0:
-            raise Exception, 'Java triggered exception: %s' % data[:350]
+            raise Exception, 'Java triggered exception: %s' % data[:550]
 
     return cjson.decode(data.strip())
 
