@@ -95,8 +95,8 @@ public class AbstractPosition implements Position {
     }
 
     @Override
-    public Position projectToLineThrough(Position pos2, Bearing bearing) {
-        return pos2.translateGreatCircle(bearing, alongTrackDistance(pos2, bearing));
+    public Position projectToLineThrough(Position pos, Bearing bearing) {
+        return pos.translateGreatCircle(bearing, this.alongTrackDistance(pos, bearing));
     }
 
     @Override
