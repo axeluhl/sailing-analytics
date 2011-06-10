@@ -15,8 +15,6 @@
  */
 package difflib;
 
-import java.util.*;
-
 /**
  * The general interface for computing diffs between two texts
  * 
@@ -42,5 +40,5 @@ public interface DiffAlgorithm<T> {
      * @param revised the revised text
      * @return the patch
      */
-    public Patch<T> diff(List<T> original, List<T> revised);
+    public Patch<T> diff(Iterable<T> original, Iterable<T> revised);
 }

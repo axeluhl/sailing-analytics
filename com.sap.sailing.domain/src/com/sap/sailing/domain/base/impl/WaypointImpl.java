@@ -6,6 +6,14 @@ import com.sap.sailing.domain.base.Waypoint;
 
 public class WaypointImpl implements Waypoint {
     private final ControlPoint controlPoint;
+    
+    public boolean equals(Object o) {
+        return getControlPoint() == ((Waypoint) o).getControlPoint();
+    }
+    
+    public int hashCode() {
+        return 984637 ^ getControlPoint().hashCode();
+    }
 
     public WaypointImpl(ControlPoint controlPoint) {
         this.controlPoint = controlPoint;

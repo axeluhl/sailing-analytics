@@ -57,10 +57,17 @@
 
 package difflib.myers;
 
-import difflib.*;
-
 import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.List;
+
+import difflib.ChangeDelta;
+import difflib.Chunk;
+import difflib.DeleteDelta;
+import difflib.Delta;
+import difflib.DiffAlgorithm;
+import difflib.InsertDelta;
+import difflib.Patch;
 
 /**
  * A clean-room implementation of <a href="http://www.cs.arizona.edu/people/gene/">
@@ -83,11 +90,19 @@ public class MyersDiff<T> implements DiffAlgorithm<T> {
      * 
      * Return empty diff if get the error while procession the difference.
      */
-    public Patch<T> diff(List<T> original, List<T> revised) {
+    public Patch<T> diff(Iterable<T> original, Iterable<T> revised) {
+        List<T> originalList = new ArrayList<T>();
+        for (T o : original) {
+            originalList.add(o);
+        }
         @SuppressWarnings("unchecked")
-        T[] originalArray = (T[]) original.toArray();
+        T[] originalArray = (T[]) originalList.toArray();
+        List<T> revisedList = new ArrayList<T>();
+        for (T o : revised) {
+            revisedList.add(o);
+        }
         @SuppressWarnings("unchecked")
-        T[] revisedArray = (T[]) revised.toArray();
+        T[] revisedArray = (T[]) revisedList.toArray();
         return diff(originalArray, revisedArray);
     }
     
