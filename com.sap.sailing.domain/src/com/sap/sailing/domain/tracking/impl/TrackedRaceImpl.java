@@ -5,6 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.NavigableSet;
 import java.util.TreeSet;
+import java.util.concurrent.ConcurrentSkipListSet;
 
 import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Competitor;
@@ -101,12 +102,12 @@ public abstract class TrackedRaceImpl implements TrackedRace {
         markPassingsForCompetitor = new HashMap<Competitor, NavigableSet<MarkPassing>>();
         tracks = new HashMap<Competitor, GPSFixTrack<Competitor, GPSFixMoving>>();
         for (Competitor competitor : race.getCompetitors()) {
-            markPassingsForCompetitor.put(competitor, new TreeSet<MarkPassing>(TimedComparator.INSTANCE));
+            markPassingsForCompetitor.put(competitor, new ConcurrentSkipListSet<MarkPassing>(TimedComparator.INSTANCE));
             tracks.put(competitor, new DynamicGPSFixMovingTrackImpl<Competitor>(competitor, millisecondsOverWhichToAverageSpeed));
         }
         markPassingsForWaypoint = new HashMap<Waypoint, NavigableSet<MarkPassing>>();
         for (Waypoint waypoint : race.getCourse().getWaypoints()) {
-            markPassingsForWaypoint.put(waypoint, new TreeSet<MarkPassing>(TimedComparator.INSTANCE));
+            markPassingsForWaypoint.put(waypoint, new ConcurrentSkipListSet<MarkPassing>(TimedComparator.INSTANCE));
         }
         windTracks = new HashMap<WindSource, WindTrack>();
         for (WindSource windSource : WindSource.values()) {
