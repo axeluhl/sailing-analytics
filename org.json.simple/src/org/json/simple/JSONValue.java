@@ -178,10 +178,7 @@ public class JSONValue {
 			return "\""+escape((String)value)+"\"";
 		
 		if(value instanceof Double){
-			if(((Double)value).isInfinite() || ((Double)value).isNaN())
-				return "null";
-			else
-				return value.toString();
+			return value.toString();
 		}
 		
 		if(value instanceof Float){
