@@ -93,6 +93,10 @@ def configureListener(context, request):
 
         try:
             result = conf.trigger()
+
+            if result.find('Exception')>0:
+                raise Exception, 'Server triggered exception: %s' % result[:550]
+
         except Exception, ex:
             return view.yieldMessage('Error: %s' % str(ex))
 

@@ -54,6 +54,14 @@ When <i>stopping listener</i> it will trigger two methods: If you select a race 
     </div>
 
     <div class="field">
+        <span>Persistent store where to persist wind tracks</span><br/>
+        <select name="windstore">
+            <option value="empty">Do not persist wind</option>
+            <option value="mongo">MongoDB Persister</option>
+        </select>
+    </div>
+
+    <div class="field">
         <input type="checkbox" name="drop_db" />&nbsp;
         <span>Drop Database before connect</span><br/>
     </div>

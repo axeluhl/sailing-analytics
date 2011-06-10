@@ -68,7 +68,7 @@ class URIConfigurator(object):
     def trigger(self, request=None):
         if self.do_log is True:
             log.info('Triggering URI %s' % self.URI())
-        return urllib2.urlopen(self.URI())
+        return urllib2.urlopen(self.URI()).read()
 
 def jsonByUrl(configurator):
     """ Connects to specified REST service and returns parsed data """
