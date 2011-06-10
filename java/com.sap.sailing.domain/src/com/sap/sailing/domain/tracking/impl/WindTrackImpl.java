@@ -75,13 +75,13 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
             }
         }
         long lastMillis = beforeSet.last().getTimePoint().asMillis();
-		if (count == 1 && at.asMillis() - lastMillis >= millisecondsOverWhichToAverage && !afterSet.isEmpty()) {
-			// last was out of interval; check if next is closer than last
-        	Wind next = afterSet.first();
-        	if (at.asMillis() - lastMillis > next.getTimePoint().asMillis() - at.asMillis()) {
-        		// next is closer than last
-        		return next;
-        	}
+        if (count == 1 && at.asMillis() - lastMillis >= millisecondsOverWhichToAverage && !afterSet.isEmpty()) {
+            // last was out of interval; check if next is closer than last
+            Wind next = afterSet.first();
+            if (at.asMillis() - lastMillis > next.getTimePoint().asMillis() - at.asMillis()) {
+                // next is closer than last
+                return next;
+            }
         }
         SpeedWithBearing avgWindSpeed = new KnotSpeedWithBearingImpl(knotSum / count, new DegreeBearingImpl(bearingDegSum/count));
         return new WindImpl(p, at, avgWindSpeed);
