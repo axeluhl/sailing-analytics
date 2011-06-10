@@ -1,4 +1,4 @@
 #!/bin/sh
 cd plugins
-ssh sailing@furcashudson "rm target/plugins/*"
-scp * sailing@furcashudson:target/plugins
+ssh sailing@furcashudson "rm git/java/target/plugins/*"
+scp * sailing@furcashudson:git/java/target/plugins
