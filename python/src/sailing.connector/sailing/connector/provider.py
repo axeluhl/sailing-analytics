@@ -27,6 +27,9 @@ class LiveDataReceiver(threading.Thread):
         self.updatecount = 0
 
         self.running = False
+
+        # start thread paused - in real life there should only
+        # be one race running and therefore we only need one running listener
         self.paused = True
 
         threading.Thread.__init__(self)
@@ -50,6 +53,7 @@ class LiveDataReceiver(threading.Thread):
 
             # blocking call by updatecount setting
             conf.setParameters(dict(eventname=self.eventname, racename=self.racename, sinceupdate=self.updatecount))
+            conf.setLogging(False)
 
             try:
                 # need to lock because other threads could overwrite information
@@ -60,7 +64,7 @@ class LiveDataReceiver(threading.Thread):
                 self.updatecount = updatecount
 
             except Exception, ex:
-                # print error but do not kill thread as this could be recoverable
+                # print error but do not kill thread as this could be recoverable (connection problems, ...)
                 log.error('Error in thread for %s %s' % (self.eventname, self.racename), exc_info=True)
 
                 # avoid filling console with errors
@@ -85,7 +89,7 @@ def eventConfiguration(configurator):
         if not dbevent:
             dbevent = model.EventImpl()
 
-        # create competitors for the whole event
+        # create or update competitors for the whole event
         cpnames = []; cobjects = []
         for cp in event['competitors']:
             cpnames.append(cp['name'])
@@ -130,6 +134,9 @@ def eventConfiguration(configurator):
             races = [0.0 for r in range(raceindex)]
             
             marks = cp.marks; values = cp.values
+
+            # update races and marks - support add operation
+            # removal not really supported - needs complete refresh
             for r in range(raceindex):
                 if len(races) < r+1:
                     races.append(0.0)
@@ -147,10 +154,21 @@ def eventConfiguration(configurator):
                     if len(values[r]) < m+1:
                         values[r].append([])
 
+            # recognize if races and/or marks changed
+            if cp.races and cp.races != races:
+                log.error('Difference between races for competitor %s found. Old: %s New: %s' % (cp.name, cp.races, races))
+
+            if cp.marks and cp.marks != marks:
+                log.error('Difference between marks for competitor %s found. Old: %s New: %s' % (cp.name, cp.marks, marks))
+
             cp.update(dict(races=races, marks=marks))
 
-        # finally create or update event
-        dbevent.update(dict(name=event['name'], boatclass=event['boatclass'], competitors=cpnames, races=[rname[0] for rname in rcnames], marks=rcmarks))
+        # finally update event
+        dbevent.update(dict(name=event['name'], 
+                            boatclass=event['boatclass'], 
+                            competitors=cpnames, 
+                            races=[rname[0] for rname in rcnames], 
+                            marks=rcmarks))
 
     # return all received events
     return events
@@ -164,20 +182,39 @@ def liveRaceInformation(configurator):
     racename = configurator.race.name
     eventname = configurator.race.event
 
+    if not data.has_key('legs'):
+        raise Exception, 'Data returned by showrace for %s, %s seems to be invalid! Data: %s' % (eventname, racename, data)
+
     # it is important to know which position the race has
     # so we look it up in the Event itself
     event = model.EventImpl.queryOneBy(name=eventname)
-    raceindex = event.races.index(racename)
 
-    # this should help us finding out which legs are still running
-    # we assume that only one race at time is running so we stick
-    # to the legs
+    # check that legs still match the expected value
+    legcount = len(data['legs'])
+    if legcount:
+        legcheck_competitor = model.CompetitorImpl.queryOneBy(name=data['legs'][0]['competitors'][0], eventname=eventname)
+
+        known_leg_count = len(legcheck_competitor.marks)
+        if known_leg_count != legcount:
+
+            # length of saved legs and incoming legs does not match
+            # in this case we need to reload all events and then continue
+            configurator.setContext(config.MODERATOR)
+            configurator.setCommand(config.LIST_EVENTS)
+            eventConfiguration(configurator)
+
+            # refresh event from database
+            event = model.EventImpl.queryOneBy(name=eventname)
+            log.error('Refreshed event %s information because legs (Old: %s New: %s) seem to have changed.' % (eventname, known_leg_count, legcount))
+
+    raceindex = event.races.index(racename)
 
     lcount = 0; current_legs = {}
     for leg in data['legs']:
         for competitor in leg['competitors']:
             comp = model.CompetitorImpl.queryOneBy(name=competitor['name'], event=eventname)
             if not comp:
+                # strange things can happen - make such errors visible
                 raise Exception, 'Could not find competitor %s for event %s' % (competitor['name'], eventname)
 
             c_races = comp.races
@@ -185,11 +222,11 @@ def liveRaceInformation(configurator):
             c_values = comp.values
             c_total_rank = comp.total
 
-            # if competitor hasn't yet started we just ignore this leg
+            # if competitor hasn't started yet we just ignore this leg
+            # and don't update the competitors information for the given leg
             if competitor.get('started', False) is False:
                 continue
 
-            # we take to into account because this is the one we have saved before
             mark_name = leg['to']
 
             # last mark in race?
@@ -238,13 +275,28 @@ def liveRaceInformation(configurator):
                     c_values[raceindex][lcount].append(0.0)
 
                 k = competitor.get(key, None)
-                if k in [None, 'null', 'Null', '']:
+
+                # treat nulled numbers as unset
+                if k in [None, 'null', 'Null', 'nUlL', '']:
                     k = 0.0
+
+                # check for cases where calculations from backend yield
+                # strange numbers - this happens in cases where the competitor
+                # has no speed during mark passing
+                if k in ['Infinity', 'Infinite'] or float(k) > 6000:
+
+                    # use a magic number (that is very unlikely to occur)
+                    # to indicate that competitor has no speed
+                    # hint: it is not the question it is the answer
+                    k = 42.260426041982
 
                 c_values[raceindex][lcount][attr[0]] = k
 
             # compute total rank for competitor
             rank = competitor.get('rank', 0)
+
+            # search thru ranks provided and use the
+            # rank as the current one
             if data.has_key('ranks'):
                 for c in data['ranks']:
                     if c['competitor'] == competitor['name']:
