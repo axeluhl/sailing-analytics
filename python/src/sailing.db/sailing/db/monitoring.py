@@ -1,5 +1,8 @@
 from database import databases, collections
 
+import logging
+log = logging.getLogger(__name__)
+
 def dbStats():
     result = dict()
     for dbname in databases:
