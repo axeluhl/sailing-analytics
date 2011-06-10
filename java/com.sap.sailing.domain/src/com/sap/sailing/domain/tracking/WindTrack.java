@@ -24,4 +24,6 @@ public interface WindTrack extends Track<Wind> {
      * A listener is notified whenever a new fix is added to this track
      */
     void addListener(WindListener listener);
+
+    void remove(Wind wind);
 }

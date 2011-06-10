@@ -31,7 +31,6 @@ import com.sap.sailing.domain.tracking.Wind;
 public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     private final TrackedLegImpl trackedLeg;
     private final Competitor competitor;
-    private final double UPWIND_DOWNWIND_TOLERANCE_IN_DEG = 40; // TracTrac does 22.5, Marcus Baur suggest 40
     
     public TrackedLegOfCompetitorImpl(TrackedLegImpl trackedLeg, Competitor competitor) {
         this.trackedLeg = trackedLeg;
@@ -198,7 +197,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
      * @param at the wind estimation is performed for this point in time
      */
     private Distance getWindwardDistance(Position pos1, Position pos2, TimePoint at) throws NoWindException {
-        if (isUpOrDownwindLeg(at)) {
+        if (getTrackedLeg().isUpOrDownwindLeg(at)) {
             Wind wind = getWind(pos1.translateGreatCircle(pos1.getBearingGreatCircle(pos2), pos1.getDistance(pos2).scale(0.5)), at);
             Position projectionToLineThroughPos2 = pos1.projectToLineThrough(pos2, wind.getBearing());
             return projectionToLineThroughPos2.getDistance(pos2);
@@ -234,43 +233,6 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
      */
     private Wind getWind(Position p, TimePoint at) {
         return getTrackedRace().getWind(p, at);
-    }
-
-    /**
-     * Determines whether the current {@link #getLeg() leg} is +/- {@link #UPWIND_DOWNWIND_TOLERANCE_IN_DEG} degrees
-     * collinear with the current wind's bearing.
-     */
-    private boolean isUpOrDownwindLeg(TimePoint at) throws NoWindException {
-        Wind wind = getWindOnLeg(at);
-        if (wind == null) {
-            throw new NoWindException("Need to know wind direction to determine whether leg "+getLeg()+
-                    " is an upwind or downwind leg");
-        }
-        // check for all combinations of start/end waypoint buoys:
-        for (Buoy startBuoy : getLeg().getFrom().getBuoys()) {
-            Position startBuoyPos = getTrackedRace().getTrack(startBuoy).getEstimatedPosition(at, false);
-            for (Buoy endBuoy : getLeg().getTo().getBuoys()) {
-                Position endBuoyPos = getTrackedRace().getTrack(endBuoy).getEstimatedPosition(at, false);
-                Bearing legBearing = startBuoyPos.getBearingGreatCircle(endBuoyPos);
-                double deltaDeg = legBearing.getDegrees() - wind.getBearing().getDegrees();
-                double deltaDegOpposite = legBearing.getDegrees() - wind.getBearing().reverse().getDegrees();
-                if (Math.min(Math.abs(deltaDeg), Math.abs(deltaDegOpposite)) < UPWIND_DOWNWIND_TOLERANCE_IN_DEG) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    private Wind getWindOnLeg(TimePoint at) {
-        Position approximateLegStartPosition = getTrackedRace().getTrack(
-                getLeg().getFrom().getBuoys().iterator().next()).getEstimatedPosition(at, false);
-        Position approximateLegEndPosition = getTrackedRace().getTrack(
-                getLeg().getTo().getBuoys().iterator().next()).getEstimatedPosition(at, false);
-        Wind wind = getWind(
-                approximateLegStartPosition.translateGreatCircle(approximateLegStartPosition.getBearingGreatCircle(approximateLegEndPosition),
-                        approximateLegStartPosition.getDistance(approximateLegEndPosition).scale(0.5)), at);
-        return wind;
     }
 
     @Override

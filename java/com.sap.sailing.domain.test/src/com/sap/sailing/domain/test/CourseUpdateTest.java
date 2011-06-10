@@ -83,5 +83,6 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
     @Test
     public void testLastWaypointRemoved() {
         Iterable<Waypoint> waypoints = course.getWaypoints();
+        // TODO continue with testLastWaypointRemoved()...
     }
 }

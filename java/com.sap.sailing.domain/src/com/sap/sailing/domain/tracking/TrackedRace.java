@@ -139,4 +139,6 @@ public interface TrackedRace {
     TimePoint getTimePointOfNewestEvent();
 
     NavigableSet<MarkPassing> getMarkPassings(Competitor competitor);
+
+    void removeWind(Wind wind, WindSource windSource);
 }
