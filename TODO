@@ -1,0 +1,41 @@
+
+Axel
+====
+
+ - Implement and test course update with corresponding TrackedLeg[OfCompetitor] updates
+
+ - Clarify Equinox server upgrade process from the maven-repository
+
+ - Open test server firewall ports for UDP / Expedition wind integration
+
+ - test UDP ports
+
+ - Set up two Expedition machines with RF and UMTS transmission, test killing one
+
+ - enable switching between our and TracTrac-provided leaderboard information
+
+ - Test fail-over in case one of the two Java VM fails
+
+ - Pass final production instance URL information to BeTomorrow for wind integration
+
+ - Display gain/loss for next-best competitor (green/red arrow up/down) based on VMG comparison
+
+ - Improve Mongo-based tests by using Mongo transactions instead of waiting for prior transactions to complete
+
+
+Simon
+=====
+
++ Server: Mehr RAM bestellen
++ Prüfen, warum in der Map Anzeige manchmal ein Competitor doppelt ist
++ Wind aus der Map löschen wenn der sich geändert hat
++ Simulator mit Speed = 1 anschmeissen und dann prüfen was passiert
++ Prüfen warum im live leaderbaord manchmal 4 legs angezeigt werden
++ Prüfen warum der Listener thread manchmal nicht richtig gestoppt wird (disconnect sollte auch thread stoppen)
++ Datenbank nicht einfach so löschen (Wind Positionen)
++ Infinity oder große Werte als Ankerindikatoren erkennen und anzeigen können
++ Anzeige Truebearing bei Wind-Informationen
++ MongoDB als Windsource bei addrace oder addevent einstellbar machen
++ Anzeigen im Leaderboard ob der Wind up oder down ist (competitor.values wäre ein guter platz dafür)
++ Implementierung Leaderboard auf Basis HTML Designer
++ Wenn Axel Branches eingerichtet hat, dann MongoDBs auf Server startbar machen über supervisord

@@ -89,6 +89,17 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
         }
     }
 
+    private void notifyListenersWindRemoved(Wind wind) {
+        for (RaceChangeListener<Competitor> listener : getListeners()) {
+            try {
+                listener.windDataRemoved(wind);
+            } catch (Throwable t) {
+                logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + t.getMessage());
+                logger.throwing(DynamicTrackedRaceImpl.class.getName(), "notifyListenersWindRemoved(Wind)", t);
+            }
+        }
+    }
+
     private void notifyListeners(MarkPassing markPassing) {
         for (RaceChangeListener<Competitor> listener : getListeners()) {
             try {
@@ -141,6 +152,12 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
         getWindTrack(windSource).add(wind);
         updated(wind.getTimePoint());
     }
+    
+    @Override
+    public void removeWind(Wind wind, WindSource windSource) {
+        getWindTrack(windSource).remove(wind);
+        updated(wind.getTimePoint());
+    }
 
     @Override
     public void gpsFixReceived(GPSFix fix, Competitor competitor) {
@@ -157,6 +174,12 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     public void windDataReceived(Wind wind) {
         notifyListeners(wind);
     }
+
+    @Override
+    public void windDataRemoved(Wind wind) {
+        notifyListenersWindRemoved(wind);
+    }
+
 
     @Override
     protected TrackedLeg createTrackedLeg(RaceDefinition race, Leg leg) {

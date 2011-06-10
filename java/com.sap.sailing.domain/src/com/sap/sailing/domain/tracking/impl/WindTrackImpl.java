@@ -39,12 +39,27 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
     @Override
     public synchronized void add(Wind wind) {
         getInternalFixes().add(wind);
+        notifyListenersAboutReceive(wind);
+    }
+
+    private void notifyListenersAboutReceive(Wind wind) {
         for (WindListener listener : listeners) {
             try {
                 listener.windDataReceived(wind);
             } catch (Throwable t) {
                 logger.log(Level.SEVERE, "WindListener "+listener+" threw exception "+t.getMessage());
-                logger.throwing(WindTrackImpl.class.getName(), "add(Wind)", t);
+                logger.throwing(WindTrackImpl.class.getName(), "notifyListenersAboutReceive(Wind)", t);
+            }
+        }
+    }
+
+    private void notifyListenersAboutRemoval(Wind wind) {
+        for (WindListener listener : listeners) {
+            try {
+                listener.windDataRemoved(wind);
+            } catch (Throwable t) {
+                logger.log(Level.SEVERE, "WindListener "+listener+" threw exception "+t.getMessage());
+                logger.throwing(WindTrackImpl.class.getName(), "notifyListenersAboutRemoval(Wind)", t);
             }
         }
     }
@@ -75,13 +90,13 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
             }
         }
         long lastMillis = beforeSet.last().getTimePoint().asMillis();
-		if (count == 1 && at.asMillis() - lastMillis >= millisecondsOverWhichToAverage && !afterSet.isEmpty()) {
-			// last was out of interval; check if next is closer than last
-        	Wind next = afterSet.first();
-        	if (at.asMillis() - lastMillis > next.getTimePoint().asMillis() - at.asMillis()) {
-        		// next is closer than last
-        		return next;
-        	}
+        if (count == 1 && at.asMillis() - lastMillis >= millisecondsOverWhichToAverage && !afterSet.isEmpty()) {
+            // last was out of interval; check if next is closer than last
+            Wind next = afterSet.first();
+            if (at.asMillis() - lastMillis > next.getTimePoint().asMillis() - at.asMillis()) {
+                // next is closer than last
+                return next;
+            }
         }
         SpeedWithBearing avgWindSpeed = new KnotSpeedWithBearingImpl(knotSum / count, new DegreeBearingImpl(bearingDegSum/count));
         return new WindImpl(p, at, avgWindSpeed);
@@ -166,5 +181,11 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
     @Override
     public void addListener(WindListener listener) {
         listeners.add(listener);
+    }
+
+    @Override
+    public void remove(Wind wind) {
+        getInternalFixes().remove(wind);
+        notifyListenersAboutRemoval(wind);
     }
 }
