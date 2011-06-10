@@ -122,6 +122,12 @@ public class DomainFactoryImpl implements DomainFactory {
     public TimePoint createTimePoint(long timestamp) {
         return new MillisecondsTimePoint(timestamp);
     }
+    
+    @Override
+    public Iterable<Waypoint> getUpdatedWaypointList(Course courseToUpdate, List<ControlPoint> controlPoints) {
+        Iterable<Waypoint> courseWaypoints = courseToUpdate.getWaypoints();
+        
+    }
 
     @Override
     public Waypoint createWaypoint(ControlPoint controlPoint) {

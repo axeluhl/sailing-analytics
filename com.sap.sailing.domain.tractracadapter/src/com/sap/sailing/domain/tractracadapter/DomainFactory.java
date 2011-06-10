@@ -7,6 +7,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.ParseException;
+import java.util.List;
 
 import com.maptrack.client.io.TypeController;
 import com.sap.sailing.domain.base.BoatClass;
@@ -122,4 +123,12 @@ public interface DomainFactory {
      * Returns a {@link RaceDefinition} for the race if it already exists, <code>null</code> otherwise.
      */
     RaceDefinition getExistingRaceDefinitionForRace(Race race);
+
+    /**
+     * When a course is changed dynamically, we receive an updated list of control points that now define
+     * the new, probably (but not necessarily!) changed course. For updating the course we need an adjusted list
+     * of waypoints. The waypoints are created from the control points and represent usages of the control points
+     * in a course. A single control point may be used more than once in a course's list of waypoints.
+     */
+    Iterable<Waypoint> getUpdatedWaypointList(Course courseToUpdate, List<ControlPoint> controlPoints);
 }

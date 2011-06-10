@@ -39,11 +39,12 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
         addListenersForStoredDataAndStartController(myReceivers);
         RaceDefinition race = DomainFactory.INSTANCE.getRaceDefinition(getEvent().getRaceList().iterator().next());
         course = race.getCourse();
+        assertNotNull(course);
+        assertEquals(3, Util.size(course.getWaypoints()));
     }
     
     @Test
     public void testLastWaypointRemoved() {
-        assertNotNull(course);
-        assertEquals(3, Util.size(course.getWaypoints()));
+        
     }
 }
