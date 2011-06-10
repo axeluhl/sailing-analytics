@@ -2,6 +2,7 @@
 Axel
 ====
 
+ - write regression test for WindTrack problem earlier today
 
  - Implement and test course update with corresponding TrackedLeg[OfCompetitor] updates
 
