@@ -237,4 +237,10 @@ public class MockedTrackedRace implements DynamicTrackedRace {
         return null;
     }
 
+    @Override
+    public void removeWind(Wind wind, WindSource windSource) {
+        // TODO Auto-generated method stub
+        
+    }
+
 }

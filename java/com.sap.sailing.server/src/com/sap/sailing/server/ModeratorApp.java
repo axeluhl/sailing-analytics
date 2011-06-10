@@ -67,7 +67,7 @@ public class ModeratorApp extends Servlet {
                 } else if (ACTION_NAME_SHOW_BOAT_POSITIONS.equals(action)) {
                     showBoatPositions(req, resp);
                 } else {
-                    resp.sendError(500, "Unknown action \""+action+"\"");
+                    resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Unknown action \""+action+"\"");
                 }
             } else {
                 resp.getWriter().println("Hello moderator!");
@@ -81,7 +81,7 @@ public class ModeratorApp extends Servlet {
     private void showBoatPositions(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         TrackedRace trackedRace = getTrackedRace(req);
         if (trackedRace == null) {
-            resp.sendError(500, "Race not found");
+            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Race not found");
         } else {
             try {
                 TimePoint sinceTimePoint = getTimePoint(req, PARAM_NAME_SINCE, PARAM_NAME_SINCE_MILLIS, null);
@@ -119,7 +119,7 @@ public class ModeratorApp extends Servlet {
                 jsonRace.put("competitors", jsonCompetitors);
                 jsonRace.writeJSONString(resp.getWriter());
             } catch (InvalidDateException e) {
-                resp.sendError(500, "Couldn't parse time specification " + e.getMessage());
+                resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Couldn't parse time specification " + e.getMessage());
             }
         }
     }
@@ -127,7 +127,7 @@ public class ModeratorApp extends Servlet {
     private void showWaypoints(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         TrackedRace trackedRace = getTrackedRace(req);
         if (trackedRace == null) {
-            resp.sendError(500, "Race not found");
+            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Race not found");
         } else {
             try {
                 TimePoint timePoint = getTimePoint(req, PARAM_NAME_TIME, PARAM_NAME_TIME_MILLIS,
@@ -159,7 +159,7 @@ public class ModeratorApp extends Servlet {
                 }
                 jsonWaypoints.writeJSONString(resp.getWriter());
             } catch (InvalidDateException e) {
-                resp.sendError(500, "Couldn't parse time specification " + e.getMessage());
+                resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Couldn't parse time specification " + e.getMessage());
             }
         }
     }
@@ -179,7 +179,7 @@ public class ModeratorApp extends Servlet {
         Event event = getEvent(req);
         TrackedRace trackedRace = getTrackedRace(req);
         if (trackedRace == null) {
-            resp.sendError(500, "Race not found");
+            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Race not found");
         } else {
             try {
                 TimePoint timePoint = getTimePoint(req, PARAM_NAME_TIME, PARAM_NAME_TIME_MILLIS,
@@ -220,6 +220,12 @@ public class ModeratorApp extends Servlet {
                     JSONObject jsonLeg = new JSONObject();
                     jsonLeg.put("from", leg.getLeg().getFrom().getName());
                     jsonLeg.put("to", leg.getLeg().getTo().getName());
+                    try {
+                        jsonLeg.put("upordownwindleg", leg.isUpOrDownwindLeg(timePoint));
+                    } catch (NoWindException e) {
+                        // no wind, then it's simply no upwind or downwind leg
+                        jsonLeg.put("upordownwindleg", "false");
+                    }
                     JSONArray jsonCompetitors = new JSONArray();
                     for (Competitor competitor : event.getCompetitors()) {
                         JSONObject jsonCompetitorInLeg = new JSONObject();
@@ -304,7 +310,7 @@ public class ModeratorApp extends Servlet {
                 }
                 jsonRace.writeJSONString(resp.getWriter());
             } catch (InvalidDateException e) {
-                resp.sendError(500, "Couldn't parse time specification " + e.getMessage());
+                resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Couldn't parse time specification " + e.getMessage());
             }
         }
         System.out.println("showrace took "+(System.currentTimeMillis()-start)+"ms");

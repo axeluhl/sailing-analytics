@@ -39,12 +39,27 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
     @Override
     public synchronized void add(Wind wind) {
         getInternalFixes().add(wind);
+        notifyListenersAboutReceive(wind);
+    }
+
+    private void notifyListenersAboutReceive(Wind wind) {
         for (WindListener listener : listeners) {
             try {
                 listener.windDataReceived(wind);
             } catch (Throwable t) {
                 logger.log(Level.SEVERE, "WindListener "+listener+" threw exception "+t.getMessage());
-                logger.throwing(WindTrackImpl.class.getName(), "add(Wind)", t);
+                logger.throwing(WindTrackImpl.class.getName(), "notifyListenersAboutReceive(Wind)", t);
+            }
+        }
+    }
+
+    private void notifyListenersAboutRemoval(Wind wind) {
+        for (WindListener listener : listeners) {
+            try {
+                listener.windDataRemoved(wind);
+            } catch (Throwable t) {
+                logger.log(Level.SEVERE, "WindListener "+listener+" threw exception "+t.getMessage());
+                logger.throwing(WindTrackImpl.class.getName(), "notifyListenersAboutRemoval(Wind)", t);
             }
         }
     }
@@ -166,5 +181,11 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
     @Override
     public void addListener(WindListener listener) {
         listeners.add(listener);
+    }
+
+    @Override
+    public void remove(Wind wind) {
+        getInternalFixes().remove(wind);
+        notifyListenersAboutRemoval(wind);
     }
 }

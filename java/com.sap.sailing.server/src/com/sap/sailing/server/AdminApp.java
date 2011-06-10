@@ -58,6 +58,8 @@ public class AdminApp extends Servlet {
     
     private static final String ACTION_NAME_SET_WIND = "setwind";
     
+    private static final String ACTION_NAME_REMOVE_WIND = "removewind";
+    
     private static final String ACTION_NAME_SELECT_WIND_SOURCE = "selectwindsource";
     
     private static final String ACTION_NAME_SHOW_WIND = "showwind";
@@ -106,7 +108,7 @@ public class AdminApp extends Servlet {
 
     public AdminApp() {
     }
-
+    
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         try {
@@ -128,6 +130,8 @@ public class AdminApp extends Servlet {
                     listWindTrackers(req, resp);
                 } else if (ACTION_NAME_SET_WIND.equals(action)) {
                     setWind(req, resp);
+                } else if (ACTION_NAME_REMOVE_WIND.equals(action)) {
+                    removeWind(req, resp);
                 } else if (ACTION_NAME_SELECT_WIND_SOURCE.equals(action)) {
                     selectWindSource(req, resp);
                 } else if (ACTION_NAME_SHOW_WIND.equals(action)) {
@@ -135,7 +139,7 @@ public class AdminApp extends Servlet {
                 } else if (ACTION_NAME_ADD_WIND_TO_MARKS.equals(action)) {
                     addWindToMarks(req, resp);
                 } else {
-                    resp.sendError(500, "Unknown action \""+action+"\"");
+                    resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Unknown action \""+action+"\"");
                 }
             } else {
                 resp.getWriter().println("Hello admin!");
@@ -150,11 +154,11 @@ public class AdminApp extends Servlet {
             InvalidDateException, NoWindException {
     Event event = getEvent(req);
         if (event == null) {
-            resp.sendError(500, "Event not found");
+            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Event not found");
         } else {
             RaceDefinition race = getRaceDefinition(req);
             if (race == null) {
-                resp.sendError(500, "Race not found");
+                resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Race not found");
             } else {
                 TrackedRace trackedRace = getService().getDomainFactory().trackEvent(event).getTrackedRace(race);
                 TimePoint time = getTimePoint(req, PARAM_NAME_TIME, PARAM_NAME_TIME_MILLIS, MillisecondsTimePoint.now());
@@ -192,11 +196,11 @@ public class AdminApp extends Servlet {
     private void showWind(HttpServletRequest req, HttpServletResponse resp) throws IOException, InvalidDateException {
         Event event = getEvent(req);
         if (event == null) {
-            resp.sendError(500, "Event not found");
+            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Event not found");
         } else {
             RaceDefinition race = getRaceDefinition(req);
             if (race == null) {
-                resp.sendError(500, "Race not found");
+                resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Race not found");
             } else {
                 TrackedRace trackedRace = getService().getDomainFactory().trackEvent(event).getTrackedRace(race);
                 TimePoint from = getTimePoint(req, PARAM_NAME_FROM_TIME, PARAM_NAME_FROM_TIME_MILLIS,
@@ -241,17 +245,17 @@ public class AdminApp extends Servlet {
     private void selectWindSource(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         String sourceName = req.getParameter(PARAM_NAME_WINDSOURCE_NAME);
         if (sourceName == null) {
-            resp.sendError(500, "Wind source name not provided");
+            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Wind source name not provided");
         } else {
             try {
                 WindSource windSource = WindSource.valueOf(sourceName);
                 Event event = getEvent(req);
                 if (event == null) {
-                    resp.sendError(500, "Event not found");
+                    resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Event not found");
                 } else {
                     RaceDefinition race = getRaceDefinition(req);
                     if (race == null) {
-                        resp.sendError(500, "Race not found");
+                        resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Race not found");
                     } else {
                         TrackedRace trackedRace = getService().getDomainFactory().trackEvent(event)
                                 .getTrackedRace(race);
@@ -273,7 +277,7 @@ public class AdminApp extends Servlet {
                     }
                     errorMessage.append(s.toString());
                 }
-                resp.sendError(500, errorMessage.toString());
+                resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, errorMessage.toString());
             }
         }
     }
@@ -281,11 +285,11 @@ public class AdminApp extends Servlet {
     private void setWind(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         Event event = getEvent(req);
         if (event == null) {
-            resp.sendError(500, "Event not found");
+            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Event not found");
         } else {
             RaceDefinition race = getRaceDefinition(req);
             if (race == null) {
-                resp.sendError(500, "Race not found");
+                resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Race not found");
             } else {
                 String bearingAsString = req.getParameter(PARAM_NAME_BEARING);
                 if (bearingAsString != null) {
@@ -311,10 +315,50 @@ public class AdminApp extends Servlet {
                         Wind wind = new WindImpl(p, timePoint, speed);
                         getService().getDomainFactory().trackEvent(event).getTrackedRace(race).recordWind(wind, WindSource.WEB);
                     } catch (InvalidDateException e) {
-                        resp.sendError(500, "Couldn't parse time specification " + e.getMessage());
+                        resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Couldn't parse time specification " + e.getMessage());
                     }
                 } else {
-                    resp.sendError(500, "wind bearing parameter "+PARAM_NAME_BEARING+" missing");
+                    resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "wind bearing parameter "+PARAM_NAME_BEARING+" missing");
+                }
+            }
+        }
+    }
+
+    private void removeWind(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        Event event = getEvent(req);
+        if (event == null) {
+            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Event not found");
+        } else {
+            RaceDefinition race = getRaceDefinition(req);
+            if (race == null) {
+                resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Race not found");
+            } else {
+                String sourceName = req.getParameter(PARAM_NAME_WINDSOURCE_NAME);
+                if (sourceName == null) {
+                    resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Wind source name not provided");
+                } else {
+                    WindSource windSource = WindSource.valueOf(sourceName);
+                    if (windSource == null) {
+                        resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Wind source name " + sourceName + " unknown");
+                    } else {
+                        try {
+                            WindTrack windTrack = getService().getDomainFactory().trackEvent(event)
+                                    .getTrackedRace(race).getWindTrack(windSource);
+                            TimePoint timePoint = getTimePoint(req, PARAM_NAME_TIME, PARAM_NAME_TIME_MILLIS,
+                                    MillisecondsTimePoint.now());
+                            Wind wind = windTrack.getLastFixAtOrBefore(timePoint);
+                            if (wind != null  && wind.getTimePoint().equals(timePoint)) {
+                                windTrack.remove(wind);
+                                resp.getWriter().println("Successfully removed entry "+wind);
+                            } else {
+                                resp.getWriter().println(
+                                        "No wind recorded for event " + event.getName() + " and race " + race.getName()
+                                                + " at " + timePoint.asDate()+". No error, just no effect :-)");
+                            }
+                        } catch (InvalidDateException e) {
+                            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Couldn't parse time specification " + e.getMessage());
+                        }
+                    }
                 }
             }
         }
@@ -335,11 +379,11 @@ public class AdminApp extends Servlet {
     private void stopReceivingExpeditionWindForRace(HttpServletRequest req, HttpServletResponse resp) throws SocketException, IOException {
         Event event = getEvent(req);
         if (event == null) {
-            resp.sendError(500, "Event not found");
+            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Event not found");
         } else {
             RaceDefinition race = getRaceDefinition(req);
             if (race == null) {
-                resp.sendError(500, "Race not found");
+                resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Race not found");
             } else {
                 getService().stopTrackingWind(event, race);
             }
@@ -349,15 +393,15 @@ public class AdminApp extends Servlet {
     private void startReceivingExpeditionWindForRace(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         Event event = getEvent(req);
         if (event == null) {
-            resp.sendError(500, "Event not found");
+            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Event not found");
         } else {
             RaceDefinition race = getRaceDefinition(req);
             if (race == null) {
-                resp.sendError(500, "Race not found");
+                resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Race not found");
             } else {
                 String portParam = req.getParameter(PARAM_NAME_PORT);
                 if (portParam == null) {
-                    resp.sendError(500, "No port parameter provided");
+                    resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "No port parameter provided");
                 } else {
                     int port = Integer.valueOf(portParam);
                     String correctByDeclination = req
@@ -375,7 +419,7 @@ public class AdminApp extends Servlet {
         if (event != null) {
             getService().stopTracking(event);
         } else {
-            resp.sendError(500, "Event not found");
+            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Event not found");
         }
     }
 
@@ -415,12 +459,12 @@ public class AdminApp extends Servlet {
         if (event != null) {
             RaceDefinition race = getRaceDefinition(req);
             if (race == null) {
-                resp.sendError(500, "Race not found");
+                resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Race not found");
             } else {
                 getService().stopTracking(event, race);
             }
         } else {
-            resp.sendError(500, "Event not found");
+            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Event not found");
         }
     }
 

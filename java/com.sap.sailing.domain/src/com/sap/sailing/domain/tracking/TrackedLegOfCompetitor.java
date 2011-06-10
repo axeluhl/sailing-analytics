@@ -90,5 +90,5 @@ public interface TrackedLegOfCompetitor {
      * Returns <code>null</code> in case this leg's competitor hasn't started the leg yet.
      */
     Double getEstimatedTimeToNextMarkInSeconds(TimePoint timePoint) throws NoWindException;
-    
+
 }
