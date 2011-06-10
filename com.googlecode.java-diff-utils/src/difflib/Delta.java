@@ -22,9 +22,9 @@ import java.util.*;
  * 
  * @author <a href="dm.naumenko@gmail.com">Dmitry Naumenko</a>
  */
-public abstract class Delta {
-    private Chunk original;
-    private Chunk revised;
+public abstract class Delta<T> {
+    private Chunk<T> original;
+    private Chunk<T> revised;
     
     public enum TYPE {
         CHANGE, DELETE, INSERT
@@ -36,7 +36,7 @@ public abstract class Delta {
      * @param original chunk describes the original text
      * @param revised chunk describes the revised text
      */
-    public Delta(Chunk original, Chunk revised) {
+    public Delta(Chunk<T> original, Chunk<T> revised) {
         this.original = original;
         this.revised = revised;
     }
@@ -47,7 +47,7 @@ public abstract class Delta {
      * @param target the text to patch.
      * @throws PatchFailedException if the patch cannot be applied.
      */
-    public abstract void verify(List<?> target) throws PatchFailedException;
+    public abstract void verify(List<T> target) throws PatchFailedException;
     
     /**
      * Applies this delta as the patch for a given target
@@ -55,7 +55,7 @@ public abstract class Delta {
      * @param target the given target
      * @throws PatchFailedException
      */
-    public abstract void applyTo(List<Object> target) throws PatchFailedException;
+    public abstract void applyTo(List<T> target) throws PatchFailedException;
     
     /**
      * Cancel this delta for a given revised text. The action is opposite to
@@ -63,7 +63,7 @@ public abstract class Delta {
      * 
      * @param target the given revised text
      */
-    public abstract void restore(List<Object> target);
+    public abstract void restore(List<T> target);
     
     /**
      * Returns the type of delta
@@ -74,28 +74,28 @@ public abstract class Delta {
     /**
      * @return the Chunk describing the original text
      */
-    public Chunk getOriginal() {
+    public Chunk<T> getOriginal() {
         return original;
     }
     
     /**
      * @param original the Chunk describing the original text to set
      */
-    public void setOriginal(Chunk original) {
+    public void setOriginal(Chunk<T> original) {
         this.original = original;
     }
     
     /**
      * @return the Chunk describing the revised text
      */
-    public Chunk getRevised() {
+    public Chunk<T> getRevised() {
         return revised;
     }
     
     /**
      * @param revised the Chunk describing the revised text to set
      */
-    public void setRevised(Chunk revised) {
+    public void setRevised(Chunk<T> revised) {
         this.revised = revised;
     }
     
@@ -126,7 +126,8 @@ public abstract class Delta {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        Delta other = (Delta) obj;
+        @SuppressWarnings("unchecked")
+        Delta<T> other = (Delta<T>) obj;
         if (original == null) {
             if (other.original != null)
                 return false;

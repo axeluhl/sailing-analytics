@@ -22,7 +22,7 @@ import java.util.*;
  * 
  * @author <a href="dm.naumenko@gmail.com">Dmitry Naumenko</a>
  */
-public interface DiffAlgorithm {
+public interface DiffAlgorithm<T> {
     
     /**
      * Computes the difference between the original sequence and the revised
@@ -32,7 +32,7 @@ public interface DiffAlgorithm {
      * @param revised the revised text
      * @return the patch
      */
-    public Patch diff(Object[] original, Object[] revised);
+    public Patch<T> diff(T[] original, T[] revised);
     
     /**
      * Computes the difference between the original sequence and the revised
@@ -42,5 +42,5 @@ public interface DiffAlgorithm {
      * @param revised the revised text
      * @return the patch
      */
-    public Patch diff(List<?> original, List<?> revised);
+    public Patch<T> diff(List<T> original, List<T> revised);
 }

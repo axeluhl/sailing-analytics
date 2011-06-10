@@ -71,7 +71,7 @@ import java.util.List;
  *
  * @author <a href="mailto:juanco@suigeneris.org">Juanco Anez</a>
  */
-public class MyersDiff implements DiffAlgorithm {
+public class MyersDiff<T> implements DiffAlgorithm<T> {
     /**
      * Constructs an instance of the Myers differencing algorithm.
      */
@@ -83,8 +83,12 @@ public class MyersDiff implements DiffAlgorithm {
      * 
      * Return empty diff if get the error while procession the difference.
      */
-    public Patch diff(List<?> original, List<?> revised) {
-        return diff(original.toArray(), revised.toArray());
+    public Patch<T> diff(List<T> original, List<T> revised) {
+        @SuppressWarnings("unchecked")
+        T[] originalArray = (T[]) original.toArray();
+        @SuppressWarnings("unchecked")
+        T[] revisedArray = (T[]) revised.toArray();
+        return diff(originalArray, revisedArray);
     }
     
     /**
@@ -92,7 +96,7 @@ public class MyersDiff implements DiffAlgorithm {
      * 
      * Return empty diff if get the error while procession the difference.
      */
-    public Patch diff(Object[] orig, Object[] rev) {
+    public Patch<T> diff(T[] orig, T[] rev) {
         PathNode path;
         try {
             path = buildPath(orig, rev);
@@ -100,7 +104,7 @@ public class MyersDiff implements DiffAlgorithm {
         } catch (DifferentiationFailedException e) {
             e.printStackTrace();
         }
-        return new Patch();
+        return new Patch<T>();
     }
     
     /**
@@ -185,7 +189,7 @@ public class MyersDiff implements DiffAlgorithm {
      * @throws DifferentiationFailedException if a {@link Patch} could
      *         not be built from the given path.
      */
-    public static Patch buildRevision(PathNode path, Object[] orig, Object[] rev) {
+    public static <T> Patch<T> buildRevision(PathNode path, T[] orig, T[] rev) {
         if (path == null)
             throw new IllegalArgumentException("path is null");
         if (orig == null)
@@ -193,7 +197,7 @@ public class MyersDiff implements DiffAlgorithm {
         if (rev == null)
             throw new IllegalArgumentException("revised sequence is null");
         
-        Patch patch = new Patch();
+        Patch<T> patch = new Patch<T>();
         if (path.isSnake())
             path = path.prev;
         while (path != null && path.prev != null && path.prev.j >= 0) {
@@ -206,15 +210,15 @@ public class MyersDiff implements DiffAlgorithm {
             int ianchor = path.i;
             int janchor = path.j;
             
-            Chunk original = new Chunk(ianchor, copyOfRange(orig, ianchor, i));
-            Chunk revised = new Chunk(janchor, copyOfRange(rev, janchor, j));
-            Delta delta = null;
+            Chunk<T> original = new Chunk<T>(ianchor, copyOfRange(orig, ianchor, i));
+            Chunk<T> revised = new Chunk<T>(janchor, copyOfRange(rev, janchor, j));
+            Delta<T> delta = null;
             if (original.size() == 0 && revised.size() != 0) {
-                delta = new InsertDelta(original, revised);
+                delta = new InsertDelta<T>(original, revised);
             } else if (original.size() > 0 && revised.size() == 0) {
-                delta = new DeleteDelta(original, revised);
+                delta = new DeleteDelta<T>(original, revised);
             } else {
-                delta = new ChangeDelta(original, revised);
+                delta = new ChangeDelta<T>(original, revised);
             }
             
             patch.addDelta(delta);

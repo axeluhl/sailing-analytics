@@ -49,14 +49,14 @@ public class GenerateUnifiedDiffTest extends TestCase {
 
     public void testGenerateUnifiedDiffWithoutAnyDeltas() {
         List<String> test = Arrays.asList("abc");
-        Patch patch = DiffUtils.diff(test, test);
+        Patch<String> patch = DiffUtils.diff(test, test);
         DiffUtils.generateUnifiedDiff("abc", "abc", test, patch, 0);
     }
 
     public void testDiff_Issue10() {
         final List<String> baseLines = fileToLines(MOCK_FOLDER + "issue10_base.txt");
         final List<String> patchLines = fileToLines(MOCK_FOLDER + "issue10_patch.txt");
-        final Patch p = DiffUtils.parseUnifiedDiff(patchLines);
+        final Patch<String> p = DiffUtils.parseUnifiedDiff(patchLines);
         try {
             DiffUtils.patch(baseLines, p);
         } catch (PatchFailedException e) {
@@ -97,20 +97,19 @@ public class GenerateUnifiedDiffTest extends TestCase {
         revised.add("test line 4");
         revised.add("test line 5");
 
-        Patch patch = DiffUtils.diff(original, revised);
+        Patch<String> patch = DiffUtils.diff(original, revised);
         List<String> udiff = DiffUtils.generateUnifiedDiff("original", "revised",
                 original, patch, 10);
         DiffUtils.parseUnifiedDiff(udiff);
     }
 
-    @SuppressWarnings("unchecked")
     private void verify(List<String> origLines, List<String> revLines,
             String originalFile, String revisedFile) {
-        Patch patch = DiffUtils.diff(origLines, revLines);
+        Patch<String> patch = DiffUtils.diff(origLines, revLines);
         List<String> unifiedDiff = DiffUtils.generateUnifiedDiff(originalFile, revisedFile,
                 origLines, patch, 10);
 
-        Patch fromUnifiedPatch = DiffUtils.parseUnifiedDiff(unifiedDiff);
+        Patch<String> fromUnifiedPatch = DiffUtils.parseUnifiedDiff(unifiedDiff);
         List<String> patchedLines;
         try {
             patchedLines = (List<String>) fromUnifiedPatch.applyTo(origLines);

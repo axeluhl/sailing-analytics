@@ -6,14 +6,13 @@ import java.util.Comparator;
 /**
  * @author mksenzov
  */
-public class DeltaComparator implements Comparator<Delta>, Serializable {
+public class DeltaComparator<T> implements Comparator<Delta<T>>, Serializable {
     private static final long serialVersionUID = 1L;
-    public static final Comparator<Delta> INSTANCE = new DeltaComparator();
 
-    private DeltaComparator() {
+    public DeltaComparator() {
     }
 
-    public int compare(final Delta a, final Delta b) {
+    public int compare(final Delta<T> a, final Delta<T> b) {
         final int posA = a.getOriginal().getPosition();
         final int posB = b.getOriginal().getPosition();
         if (posA > posB) {

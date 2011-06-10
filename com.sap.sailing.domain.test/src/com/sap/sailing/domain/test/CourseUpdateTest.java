@@ -69,13 +69,13 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
         changedWaypoints.add(wp3);
         changedWaypoints.add(wp4);
         
-        Patch patch = DiffUtils.diff(waypoints, changedWaypoints);
+        Patch<Waypoint> patch = DiffUtils.diff(waypoints, changedWaypoints);
         assertEquals(1, patch.getDeltas().size());
-        Delta firstDelta = patch.getDeltas().iterator().next();
+        Delta<Waypoint> firstDelta = patch.getDeltas().iterator().next();
         assertEquals(Delta.TYPE.DELETE, firstDelta.getType());
-        Chunk original = firstDelta.getOriginal();
+        Chunk<Waypoint> original = firstDelta.getOriginal();
         assertEquals(1, original.getPosition());
-        List<?> deletedWaypoints = original.getLines();
+        List<Waypoint> deletedWaypoints = original.getLines();
         assertEquals(1, deletedWaypoints.size());
         assertEquals(wp2, deletedWaypoints.iterator().next());
     }

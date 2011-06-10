@@ -22,12 +22,12 @@ import java.util.List;
  * 
  * @author <a href="dm.naumenko@gmail.com">Dmitry Naumenko</a>
  */
-public class DeleteDelta extends Delta {
+public class DeleteDelta<T> extends Delta<T> {
     
     /**
      * {@inheritDoc}
      */
-    public DeleteDelta(Chunk original, Chunk revised) {
+    public DeleteDelta(Chunk<T> original, Chunk<T> revised) {
         super(original, revised);
     }
     
@@ -37,7 +37,7 @@ public class DeleteDelta extends Delta {
      * @throws PatchFailedException
      */
     @Override
-    public void applyTo(List<Object> target) throws PatchFailedException {
+    public void applyTo(List<T> target) throws PatchFailedException {
         verify(target);
         int position = getOriginal().getPosition();
         int size = getOriginal().size();
@@ -50,9 +50,9 @@ public class DeleteDelta extends Delta {
      * {@inheritDoc}
      */
     @Override
-    public void restore(List<Object> target) {
+    public void restore(List<T> target) {
         int position = this.getRevised().getPosition();
-        List<?> lines = this.getOriginal().getLines();
+        List<T> lines = this.getOriginal().getLines();
         for (int i = 0; i < lines.size(); i++) {
             target.add(position + i, lines.get(i));
         }
@@ -64,7 +64,7 @@ public class DeleteDelta extends Delta {
     }
     
     @Override
-    public void verify(List<?> target) throws PatchFailedException {
+    public void verify(List<T> target) throws PatchFailedException {
         getOriginal().verify(target);
     }
     
