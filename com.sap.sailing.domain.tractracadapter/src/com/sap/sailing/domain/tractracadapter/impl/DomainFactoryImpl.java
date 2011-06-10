@@ -127,6 +127,7 @@ public class DomainFactoryImpl implements DomainFactory {
     public Iterable<Waypoint> getUpdatedWaypointList(Course courseToUpdate, List<ControlPoint> controlPoints) {
         Iterable<Waypoint> courseWaypoints = courseToUpdate.getWaypoints();
         
+        return null; // TODO
     }
 
     @Override
