@@ -53,9 +53,9 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
     public synchronized Wind getEstimatedWind(Position p, TimePoint at) {
         DummyWind atTimed = new DummyWind(at);
         NavigableSet<Wind> beforeSet = getInternalFixes().headSet(atTimed, /* inclusive */ true);
+        NavigableSet<Wind> afterSet = getInternalFixes().tailSet(atTimed, /* inclusive */ true);
         if (beforeSet.isEmpty()) {
-            // try after:
-            NavigableSet<Wind> afterSet = getInternalFixes().tailSet(atTimed, /* inclusive */ true);
+        	// try after:
             if (afterSet.isEmpty()) {
                 return null;
             } else {
@@ -66,13 +66,22 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
         double bearingDegSum = 0;
         int count = 0;
         for (Wind before : beforeSet.descendingSet()) {
-            if (beforeSet.size() == 1 || at.asMillis() - before.getTimePoint().asMillis() < millisecondsOverWhichToAverage) { 
+            if (count == 0 || at.asMillis() - before.getTimePoint().asMillis() < millisecondsOverWhichToAverage) { 
                 knotSum += before.getKnots();
                 bearingDegSum += before.getBearing().getDegrees();
                 count++;
             } else {
                 break;
             }
+        }
+        long lastMillis = beforeSet.last().getTimePoint().asMillis();
+		if (count == 1 && at.asMillis() - lastMillis >= millisecondsOverWhichToAverage && !afterSet.isEmpty()) {
+			// last was out of interval; check if next is closer than last
+        	Wind next = afterSet.first();
+        	if (at.asMillis() - lastMillis > next.getTimePoint().asMillis() - at.asMillis()) {
+        		// next is closer than last
+        		return next;
+        	}
         }
         SpeedWithBearing avgWindSpeed = new KnotSpeedWithBearingImpl(knotSum / count, new DegreeBearingImpl(bearingDegSum/count));
         return new WindImpl(p, at, avgWindSpeed);

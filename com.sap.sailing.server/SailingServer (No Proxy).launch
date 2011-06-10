@@ -7,7 +7,7 @@
 <stringAttribute key="bootstrap" value=""/>
 <stringAttribute key="checked" value="[NONE]"/>
 <booleanAttribute key="clearConfig" value="false"/>
-<stringAttribute key="configLocation" value="${workspace_loc}/target"/>
+<stringAttribute key="configLocation" value="${workspace_loc}/.metadata/.plugins/org.eclipse.pde.core/SailingServer (No Proxy)"/>
 <booleanAttribute key="default" value="true"/>
 <booleanAttribute key="default_auto_start" value="true"/>
 <intAttribute key="default_start_level" value="4"/>
@@ -18,12 +18,12 @@
 </listAttribute>
 <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-os ${target.os} -ws ${target.ws} -arch ${target.arch} -nl ${target.nl} -consoleLog -console"/>
 <stringAttribute key="org.eclipse.jdt.launching.SOURCE_PATH_PROVIDER" value="org.eclipse.pde.ui.workbenchClasspathProvider"/>
-<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Declipse.ignoreApp=true -Dosgi.noShutdown=true -Dorg.osgi.service.http.port=8888"/>
+<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Dmongo.port=10200 -Declipse.ignoreApp=true -Dosgi.noShutdown=true -Dorg.osgi.service.http.port=8888"/>
 <stringAttribute key="pde.version" value="3.3"/>
 <booleanAttribute key="show_selected_only" value="false"/>
-<stringAttribute key="target_bundles" value="org.mortbay.jetty.server@default:default,org.junit*3.8.2.v3_8_2_v20100427-1100@default:default,org.eclipse.core.runtime.compatibility.registry@default:false,org.eclipse.equinox.http.servlet@default:default,org.apache.jasper@default:default,org.hamcrest.core@default:default,org.eclipse.osgi.util@default:default,org.apache.ant@default:default,org.eclipse.equinox.common@2:true,javax.servlet@default:default,org.eclipse.osgi.services@default:default,org.eclipse.equinox.http.jetty@default:default,org.junit*4.8.1.v4_8_1_v20100427-1100@default:default,org.eclipse.osgi@-1:true,org.eclipse.equinox.util@default:default,org.eclipse.equinox.http.registry@default:default,org.eclipse.core.jobs@default:default,org.eclipse.equinox.registry@default:default,javax.servlet.jsp@default:default,org.apache.commons.logging@default:default,javax.activation@default:default,org.apache.commons.el@default:default,org.junit4@default:default,org.mortbay.jetty.util@default:default"/>
+<stringAttribute key="target_bundles" value="org.apache.jasper@default:default,javax.servlet@default:default,org.eclipse.core.jobs@default:default,org.apache.commons.logging@default:default,org.mortbay.jetty.util@default:default,org.eclipse.osgi.util@default:default,org.eclipse.core.runtime.compatibility.registry@default:false,org.eclipse.osgi.services@default:default,org.apache.ant@default:default,org.eclipse.equinox.registry@default:default,org.junit*4.8.1.v4_8_1_v20100427-1100@default:default,org.eclipse.equinox.util@default:default,org.apache.commons.el@default:default,org.eclipse.equinox.http.registry@default:default,org.hamcrest.core@default:default,org.mortbay.jetty.server@default:default,org.junit*3.8.2.v3_8_2_v20100427-1100@default:default,org.eclipse.equinox.http.jetty@default:default,org.eclipse.equinox.common@2:true,org.junit4@default:default,javax.servlet.jsp@default:default,org.eclipse.osgi@-1:true,org.eclipse.equinox.http.servlet@default:default"/>
 <booleanAttribute key="tracing" value="false"/>
 <booleanAttribute key="useCustomFeatures" value="false"/>
-<booleanAttribute key="useDefaultConfigArea" value="false"/>
-<stringAttribute key="workspace_bundles" value="com.sap.sailing.declination@default:default,com.mongodb.driver@default:default,com.sap.sailing.server@default:default,com.sap.sailing.domain@default:default,com.tractrac.clientmodule@default:default,com.sap.sailing.expeditionconnector@default:default,org.json.simple@default:default,com.sap.sailing.mongodb.test@default:default,com.sap.sailing.expeditionconnector.test@default:default,com.tractrac.resultapi@default:default,com.sap.sailing.domain.test@default:default,com.sap.sailing.domain.tractracadapter@default:default,com.sap.sailing.mongodb@default:default"/>
+<booleanAttribute key="useDefaultConfigArea" value="true"/>
+<stringAttribute key="workspace_bundles" value="com.tractrac.resultapi@default:default,com.sap.sailing.expeditionconnector.test@default:default,org.json.simple@default:default,com.sap.sailing.mongodb@default:default,com.sap.sailing.server@default:default,com.sap.sailing.declination.test@default:default,com.mongodb.driver@default:default,com.sap.sailing.domain.tractracadapter@default:default,com.sap.sailing.domain.test@default:default,com.sap.sailing.expeditionconnector@default:default,com.tractrac.clientmodule@default:default,com.sap.sailing.domain@default:default,com.sap.sailing.mongodb.test@default:default,com.googlecode.java-diff-utils@default:default,com.sap.sailing.declination@default:default,com.googlecode.java-diff-utils.test@default:default"/>
 </launchConfiguration>

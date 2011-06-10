@@ -253,12 +253,8 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
                 Position endBuoyPos = getTrackedRace().getTrack(endBuoy).getEstimatedPosition(at, false);
                 Bearing legBearing = startBuoyPos.getBearingGreatCircle(endBuoyPos);
                 double deltaDeg = legBearing.getDegrees() - wind.getBearing().getDegrees();
-                if (deltaDeg > 180) {
-                    deltaDeg -= 180;
-                } else if (deltaDeg < 0) {
-                    deltaDeg += 180;
-                }
-                if (deltaDeg < UPWIND_DOWNWIND_TOLERANCE_IN_DEG) {
+                double deltaDegOpposite = legBearing.getDegrees() - wind.getBearing().reverse().getDegrees();
+                if (Math.min(Math.abs(deltaDeg), Math.abs(deltaDegOpposite)) < UPWIND_DOWNWIND_TOLERANCE_IN_DEG) {
                     return true;
                 }
             }

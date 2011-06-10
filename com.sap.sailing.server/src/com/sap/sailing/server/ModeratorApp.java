@@ -186,6 +186,7 @@ public class ModeratorApp extends Servlet {
                         trackedRace.getTimePointOfNewestEvent()==null?MillisecondsTimePoint.now():trackedRace.getTimePointOfNewestEvent());
                 String sinceUpdateString = req.getParameter(PARAM_NAME_SINCE_UPDATE);
                 if (sinceUpdateString != null) {
+                	System.out.println("Blocking...");
                     int sinceUpdate = Integer.valueOf(sinceUpdateString);
                     // block until there is new data:
                     trackedRace.waitForNextUpdate(sinceUpdate);
