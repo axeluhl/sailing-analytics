@@ -2,17 +2,22 @@ package com.sap.sailing.domain.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
+import com.sap.sailing.domain.base.CourseListener;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Waypoint;
@@ -22,37 +27,58 @@ import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.Receiver;
-import com.sap.sailing.domain.tractracadapter.ReceiverType;
+import com.sap.sailing.domain.tractracadapter.impl.DomainFactoryImpl;
+import com.sap.sailing.domain.tractracadapter.impl.RaceCourseReceiver;
 import com.sap.sailing.util.Util;
+import com.sap.sailing.util.Util.Triple;
+import com.tractrac.clientmodule.Race;
+import com.tractrac.clientmodule.Route;
+import com.tractrac.clientmodule.data.RouteData;
 
 import difflib.Chunk;
 import difflib.Delta;
 import difflib.DiffUtils;
 import difflib.Patch;
+import difflib.PatchFailedException;
 
 public class CourseUpdateTest extends AbstractTracTracLiveTest {
     private Course course;
     private Event domainEvent;
     private DynamicTrackedEvent trackedEvent;
-    
+    private final RouteData[] routeData = new RouteData[1];
+    private final List<Receiver> receivers;
+    private DomainFactory domainFactory;
+
     public CourseUpdateTest() throws URISyntaxException, MalformedURLException {
         super();
+        receivers = new ArrayList<Receiver>();
     }
 
     @Before
     public void setUp() throws MalformedURLException, IOException, InterruptedException {
         super.setUp();
-        domainEvent = DomainFactory.INSTANCE.createEvent(getEvent());
-        trackedEvent = DomainFactory.INSTANCE.trackEvent(domainEvent);
-        Iterable<Receiver> myReceivers = DomainFactory.INSTANCE.getUpdateReceivers(trackedEvent, getEvent(),
-                EmptyWindStore.INSTANCE, ReceiverType.RACECOURSE);
-        addListenersForStoredDataAndStartController(myReceivers);
-        RaceDefinition race = DomainFactory.INSTANCE.getRaceDefinition(getEvent().getRaceList().iterator().next());
+        domainFactory = new DomainFactoryImpl();
+        domainEvent = domainFactory.createEvent(getEvent());
+        trackedEvent = domainFactory.trackEvent(domainEvent);
+        receivers.add(new RaceCourseReceiver(domainFactory, trackedEvent, getEvent(), /* millisecondsOverWhichToAverageWind */
+                EmptyWindStore.INSTANCE,
+                30000, /* millisecondsOverWhichToAverageSpeed */30000) {
+            @Override
+            protected void handleEvent(Triple<Route, RouteData, Race> event) {
+                synchronized (routeData) {
+                    routeData[0] = event.getB();
+                    routeData.notifyAll();
+                }
+                super.handleEvent(event);
+            }
+        });
+        addListenersForStoredDataAndStartController(receivers);
+        RaceDefinition race = domainFactory.getRaceDefinition(getEvent().getRaceList().iterator().next());
         course = race.getCourse();
         assertNotNull(course);
         assertEquals(3, Util.size(course.getWaypoints()));
     }
-    
+
     @Test
     public void testWaypointListDiff() {
         Waypoint wp1 = new WaypointImpl(new BuoyImpl("b1"));
@@ -68,7 +94,7 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
         changedWaypoints.add(wp1);
         changedWaypoints.add(wp3);
         changedWaypoints.add(wp4);
-        
+
         Patch<Waypoint> patch = DiffUtils.diff(waypoints, changedWaypoints);
         assertEquals(1, patch.getDeltas().size());
         Delta<Waypoint> firstDelta = patch.getDeltas().iterator().next();
@@ -79,10 +105,68 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
         assertEquals(1, deletedWaypoints.size());
         assertEquals(wp2, deletedWaypoints.iterator().next());
     }
-    
+
     @Test
-    public void testLastWaypointRemoved() {
-        Iterable<Waypoint> waypoints = course.getWaypoints();
-        // TODO continue with testLastWaypointRemoved()...
+    public void testLastWaypointRemoved() throws PatchFailedException, InterruptedException {
+        final boolean[] result = new boolean[1];
+        synchronized (routeData) {
+            while (routeData[0] == null) {
+                routeData.wait();
+            }
+        }
+        final List<com.tractrac.clientmodule.ControlPoint> controlPoints = new ArrayList<com.tractrac.clientmodule.ControlPoint>(
+                routeData[0].getPoints());
+        final com.tractrac.clientmodule.ControlPoint removedControlPoint = controlPoints.remove(controlPoints.size()-1);
+        course.addCourseListener(new CourseListener() {
+            @Override
+            public void waypointAdded(int zeroBasedIndex, Waypoint waypointThatGotAdded) {
+                System.out.println("waypointAdded " + zeroBasedIndex + " / " + waypointThatGotAdded);
+            }
+
+            @Override
+            public void waypointRemoved(int zeroBasedIndex, Waypoint waypointThatGotRemoved) {
+                System.out.println("waypointRemoved " + zeroBasedIndex + " / " + waypointThatGotRemoved);
+                ControlPoint cp = domainFactory.getControlPoint(removedControlPoint);
+                result[0] = zeroBasedIndex == controlPoints.size() && waypointThatGotRemoved.getControlPoint() == cp;
+            }
+        });
+        domainFactory.updateCourseWaypoints(course, controlPoints);
+        assertTrue(result[0]);
+    }
+
+    @Test
+    public void testWaypointAddedAtEnd() throws PatchFailedException, InterruptedException {
+        final boolean[] result = new boolean[1];
+        final com.tractrac.clientmodule.ControlPoint cp1 = new com.tractrac.clientmodule.ControlPoint(
+                UUID.randomUUID(), "CP1", /* hasTwo */false) {
+        };
+        synchronized (routeData) {
+            while (routeData[0] == null) {
+                routeData.wait();
+            }
+        }
+        final List<com.tractrac.clientmodule.ControlPoint> controlPoints = new ArrayList<com.tractrac.clientmodule.ControlPoint>(
+                routeData[0].getPoints());
+        controlPoints.add(cp1);
+        course.addCourseListener(new CourseListener() {
+            @Override
+            public void waypointAdded(int zeroBasedIndex, Waypoint waypointThatGotAdded) {
+                System.out.println("waypointAdded " + zeroBasedIndex + " / " + waypointThatGotAdded);
+                ControlPoint cp = domainFactory.getControlPoint(cp1);
+                result[0] = zeroBasedIndex == controlPoints.size() - 1 && waypointThatGotAdded.getControlPoint() == cp;
+            }
+
+            @Override
+            public void waypointRemoved(int zeroBasedIndex, Waypoint waypointThatGotRemoved) {
+                System.out.println("waypointRemoved " + zeroBasedIndex + " / " + waypointThatGotRemoved);
+            }
+        });
+        domainFactory.updateCourseWaypoints(course, controlPoints);
+        assertTrue(result[0]);
+    }
+    
+    @After
+    public void tearDown() {
+        routeData[0] = null;
     }
 }

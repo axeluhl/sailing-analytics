@@ -63,12 +63,17 @@ public class CourseImpl extends NamedImpl implements Course {
     }
 
     @Override
-    public void removeWaypoint(Waypoint waypointToRemove) {
-        int index = waypoints.indexOf(waypointToRemove);
-        if (index >= 0) {
-            waypoints.remove(waypointToRemove);
-            legs.remove(index);
-            notifyListenersWaypointRemoved(index, waypointToRemove);
+    public void removeWaypoint(int zeroBasedPosition) {
+        if (zeroBasedPosition >= 0) {
+            boolean isLast = zeroBasedPosition == waypoints.size()-1;
+            Waypoint removedWaypoint = waypoints.remove(zeroBasedPosition);
+            if (isLast) {
+                // last waypoint was removed; remove last leg
+                legs.remove(legs.size()-1);
+            } else {
+                legs.remove(zeroBasedPosition);
+            }
+            notifyListenersWaypointRemoved(zeroBasedPosition, removedWaypoint);
         }
     }
 

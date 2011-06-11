@@ -24,8 +24,9 @@ public class MarkPassingReceiver extends AbstractReceiverWithQueue<RaceCompetito
     private final DynamicTrackedEvent trackedEvent;
     private final com.tractrac.clientmodule.Event tractracEvent;
     
-    public MarkPassingReceiver(DynamicTrackedEvent trackedEvent, com.tractrac.clientmodule.Event tractracEvent) {
-        super();
+    public MarkPassingReceiver(DynamicTrackedEvent trackedEvent, com.tractrac.clientmodule.Event tractracEvent,
+            DomainFactory domainFactory) {
+        super(domainFactory);
         this.trackedEvent = trackedEvent;
         this.tractracEvent = tractracEvent;
     }
@@ -56,7 +57,7 @@ public class MarkPassingReceiver extends AbstractReceiverWithQueue<RaceCompetito
     
     protected void handleEvent(Triple<RaceCompetitor, MarkPassingsData, Boolean> event) {
         System.out.print("L"); // as in "Leg"
-        DynamicTrackedRace trackedRace = trackedEvent.getTrackedRace(DomainFactory.INSTANCE.getRaceDefinition(event
+        DynamicTrackedRace trackedRace = trackedEvent.getTrackedRace(getDomainFactory().getRaceDefinition(event
                 .getA().getRace()));
         Course course = trackedRace.getRace().getCourse();
         Iterator<Waypoint> waypointIter = course.getWaypoints().iterator();
@@ -65,9 +66,9 @@ public class MarkPassingReceiver extends AbstractReceiverWithQueue<RaceCompetito
         for (MarkPassingsData.Entry passing : event.getB().getPassings()) {
             Waypoint passed = waypointIter.next();
             TimePoint time = new MillisecondsTimePoint(passing.getTimestamp());
-            MarkPassing markPassing = DomainFactory.INSTANCE.createMarkPassing(event.getA().getCompetitor(), passed, time);
+            MarkPassing markPassing = getDomainFactory().createMarkPassing(event.getA().getCompetitor(), passed, time);
             markPassings.add(markPassing);
         }
-        trackedRace.updateMarkPassings(DomainFactory.INSTANCE.getCompetitor(event.getA().getCompetitor()), markPassings);
+        trackedRace.updateMarkPassings(getDomainFactory().getCompetitor(event.getA().getCompetitor()), markPassings);
     }
 }
