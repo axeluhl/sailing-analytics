@@ -41,9 +41,10 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
     private final long millisecondsOverWhichToAverageSpeed;
     private final WindStore windStore;
     
-    public RaceCourseReceiver(TrackedEvent trackedEvent, com.tractrac.clientmodule.Event tractracEvent,
-            WindStore windStore, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed) {
-        super();
+    public RaceCourseReceiver(DomainFactory domainFactory, TrackedEvent trackedEvent,
+            com.tractrac.clientmodule.Event tractracEvent, WindStore windStore,
+            long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed) {
+        super(domainFactory);
         this.trackedEvent = trackedEvent;
         this.tractracEvent = tractracEvent;
         this.millisecondsOverWhichToAverageWind = millisecondsOverWhichToAverageWind;
@@ -75,15 +76,14 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
     @Override
     protected void handleEvent(Triple<Route, RouteData, Race> event) {
         System.out.print("R");
-        DomainFactory domainFactory = DomainFactory.INSTANCE;
-        Course course = domainFactory.createCourse(event.getA().getName(), event.getB().getPoints());
-        RaceDefinition existingRaceDefinitionForRace = domainFactory.getExistingRaceDefinitionForRace(event.getC());
+        Course course = getDomainFactory().createCourse(event.getA().getName(), event.getB().getPoints());
+        RaceDefinition existingRaceDefinitionForRace = getDomainFactory().getExistingRaceDefinitionForRace(event.getC());
         if (existingRaceDefinitionForRace != null) {
             logger.log(Level.INFO, "Received course update for existing race "+event.getC().getName());
             // race already exists; this means that we obviously found a course re-definition (yuck...)
             // Therefore, don't create TrackedRace again because it already exists.
             try {
-                domainFactory.updateCourseWaypoints(course, event.getB().getPoints());
+                getDomainFactory().updateCourseWaypoints(course, event.getB().getPoints());
             } catch (PatchFailedException e) {
                 logger.log(Level.SEVERE, "Internal error updating race course "+course+": "+e.getMessage());
                 logger.throwing(RaceCourseReceiver.class.getName(), "handleEvent", e);
@@ -91,9 +91,9 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
         } else {
             logger.log(Level.INFO, "Received course for non-existing race "+event.getC().getName()+". Creating RaceDefinition.");
             // create race redefinition
-            RaceDefinition raceDefinition = domainFactory.createRaceDefinition(event.getC(), course);
+            RaceDefinition raceDefinition = getDomainFactory().createRaceDefinition(event.getC(), course);
             trackedEvent.getEvent().addRace(raceDefinition);
-            DynamicTrackedRace trackedRace = domainFactory.trackRace(trackedEvent, raceDefinition,
+            DynamicTrackedRace trackedRace = getDomainFactory().trackRace(trackedEvent, raceDefinition,
                     windStore, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed, tractracEvent);
             trackedEvent.addTrackedRace(trackedRace);
         }

@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -26,6 +27,7 @@ import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.Receiver;
+import com.sap.sailing.domain.tractracadapter.impl.DomainFactoryImpl;
 import com.sap.sailing.domain.tractracadapter.impl.RaceCourseReceiver;
 import com.sap.sailing.util.Util;
 import com.sap.sailing.util.Util.Triple;
@@ -44,20 +46,23 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
     private Event domainEvent;
     private DynamicTrackedEvent trackedEvent;
     private final RouteData[] routeData = new RouteData[1];
+    private final List<Receiver> receivers;
+    private DomainFactory domainFactory;
 
     public CourseUpdateTest() throws URISyntaxException, MalformedURLException {
         super();
+        receivers = new ArrayList<Receiver>();
     }
 
     @Before
     public void setUp() throws MalformedURLException, IOException, InterruptedException {
         super.setUp();
-        domainEvent = DomainFactory.INSTANCE.createEvent(getEvent());
-        trackedEvent = DomainFactory.INSTANCE.trackEvent(domainEvent);
-        List<Receiver> myReceivers = new ArrayList<Receiver>();
-        myReceivers.add(new RaceCourseReceiver(trackedEvent, getEvent(), EmptyWindStore.INSTANCE, /* millisecondsOverWhichToAverageWind */
-                30000,
-                /* millisecondsOverWhichToAverageSpeed */30000) {
+        domainFactory = new DomainFactoryImpl();
+        domainEvent = domainFactory.createEvent(getEvent());
+        trackedEvent = domainFactory.trackEvent(domainEvent);
+        receivers.add(new RaceCourseReceiver(domainFactory, trackedEvent, getEvent(), /* millisecondsOverWhichToAverageWind */
+                EmptyWindStore.INSTANCE,
+                30000, /* millisecondsOverWhichToAverageSpeed */30000) {
             @Override
             protected void handleEvent(Triple<Route, RouteData, Race> event) {
                 synchronized (routeData) {
@@ -67,8 +72,8 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
                 super.handleEvent(event);
             }
         });
-        addListenersForStoredDataAndStartController(myReceivers);
-        RaceDefinition race = DomainFactory.INSTANCE.getRaceDefinition(getEvent().getRaceList().iterator().next());
+        addListenersForStoredDataAndStartController(receivers);
+        RaceDefinition race = domainFactory.getRaceDefinition(getEvent().getRaceList().iterator().next());
         course = race.getCourse();
         assertNotNull(course);
         assertEquals(3, Util.size(course.getWaypoints()));
@@ -104,6 +109,34 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
     @Test
     public void testLastWaypointRemoved() throws PatchFailedException, InterruptedException {
         final boolean[] result = new boolean[1];
+        synchronized (routeData) {
+            while (routeData[0] == null) {
+                routeData.wait();
+            }
+        }
+        final List<com.tractrac.clientmodule.ControlPoint> controlPoints = new ArrayList<com.tractrac.clientmodule.ControlPoint>(
+                routeData[0].getPoints());
+        final com.tractrac.clientmodule.ControlPoint removedControlPoint = controlPoints.remove(controlPoints.size()-1);
+        course.addCourseListener(new CourseListener() {
+            @Override
+            public void waypointAdded(int zeroBasedIndex, Waypoint waypointThatGotAdded) {
+                System.out.println("waypointAdded " + zeroBasedIndex + " / " + waypointThatGotAdded);
+            }
+
+            @Override
+            public void waypointRemoved(int zeroBasedIndex, Waypoint waypointThatGotRemoved) {
+                System.out.println("waypointRemoved " + zeroBasedIndex + " / " + waypointThatGotRemoved);
+                ControlPoint cp = domainFactory.getControlPoint(removedControlPoint);
+                result[0] = zeroBasedIndex == controlPoints.size() && waypointThatGotRemoved.getControlPoint() == cp;
+            }
+        });
+        domainFactory.updateCourseWaypoints(course, controlPoints);
+        assertTrue(result[0]);
+    }
+
+    @Test
+    public void testWaypointAddedAtEnd() throws PatchFailedException, InterruptedException {
+        final boolean[] result = new boolean[1];
         final com.tractrac.clientmodule.ControlPoint cp1 = new com.tractrac.clientmodule.ControlPoint(
                 UUID.randomUUID(), "CP1", /* hasTwo */false) {
         };
@@ -115,7 +148,6 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
         final List<com.tractrac.clientmodule.ControlPoint> controlPoints = new ArrayList<com.tractrac.clientmodule.ControlPoint>(
                 routeData[0].getPoints());
         controlPoints.add(cp1);
-        final DomainFactory domainFactory = DomainFactory.INSTANCE;
         course.addCourseListener(new CourseListener() {
             @Override
             public void waypointAdded(int zeroBasedIndex, Waypoint waypointThatGotAdded) {
@@ -131,5 +163,10 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
         });
         domainFactory.updateCourseWaypoints(course, controlPoints);
         assertTrue(result[0]);
+    }
+    
+    @After
+    public void tearDown() {
+        routeData[0] = null;
     }
 }

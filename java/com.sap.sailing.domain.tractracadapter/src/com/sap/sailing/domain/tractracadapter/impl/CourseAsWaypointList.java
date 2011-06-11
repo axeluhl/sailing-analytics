@@ -10,7 +10,7 @@ import difflib.Patch;
 
 /**
  * Wraps a {@link Course} as a {@link List<Waypoint>} based on the course's {@link Course#addWaypoint(int, Waypoint)}
- * and {@link Course#removeWaypoint(Waypoint)} methods. This is convenient in case a {@link Patch<Waypoint>} is to be
+ * and {@link Course#removeWaypoint(int)} methods. This is convenient in case a {@link Patch<Waypoint>} is to be
  * {@link Patch#applyTo(java.util.List) applied} to a {@link Course}.
  * 
  * @author Axel Uhl (D043530)
@@ -30,9 +30,18 @@ public class CourseAsWaypointList extends AbstractList<Waypoint> {
     }
 
     @Override
+    public int indexOf(Object o) {
+        if (!(o instanceof Waypoint)) {
+            return -1;
+        } else {
+            return course.getIndexOfWaypoint((Waypoint) o);
+        }
+    }
+
+    @Override
     public Waypoint remove(int index) {
         Waypoint toRemove = get(index);
-        course.removeWaypoint(toRemove);
+        course.removeWaypoint(index);
         return toRemove;
     }
 

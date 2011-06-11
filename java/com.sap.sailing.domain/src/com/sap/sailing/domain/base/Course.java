@@ -38,5 +38,5 @@ public interface Course extends Named {
 
     void addWaypoint(int zeroBasedPosition, Waypoint waypointToAdd);
 
-    void removeWaypoint(Waypoint waypointToRemove);
+    void removeWaypoint(int zeroBasedPosition);
 }

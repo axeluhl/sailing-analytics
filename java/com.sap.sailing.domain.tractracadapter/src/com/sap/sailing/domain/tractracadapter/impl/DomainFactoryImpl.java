@@ -286,7 +286,7 @@ public class DomainFactoryImpl implements DomainFactory {
             switch (type) {
             case RACECOURSE:
                 result.add(new RaceCourseReceiver(
-                        trackedEvent, tractracEvent, windStore, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed));
+                        this, trackedEvent, tractracEvent, windStore, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed));
                 break;
             case MARKPOSITIONS:
                 result.add(new MarkPositionReceiver(
@@ -294,15 +294,15 @@ public class DomainFactoryImpl implements DomainFactory {
                 break;
             case RAWPOSITIONS:
                 result.add(new RawPositionReceiver(
-                        trackedEvent, tractracEvent));
+                        trackedEvent, tractracEvent, this));
                 break;
             case MARKPASSINGS:
                 result.add(new MarkPassingReceiver(
-                        trackedEvent, tractracEvent));
+                        trackedEvent, tractracEvent, this));
                 break;
             case RACESTARTFINISH:
                 result.add(new RaceStartedAndFinishedReceiver(
-                        trackedEvent, tractracEvent));
+                        trackedEvent, tractracEvent, this));
                 break;
             }
         }
@@ -339,9 +339,9 @@ public class DomainFactoryImpl implements DomainFactory {
                 for (RaceCompetitor rc : race.getRaceCompetitorList()) {
                     com.tractrac.clientmodule.Competitor competitor = rc.getCompetitor();
                     if (boatClass == null) {
-                        boatClass = DomainFactory.INSTANCE.getBoatClass(competitor.getCompetitorClass());
+                        boatClass = getBoatClass(competitor.getCompetitorClass());
                     }
-                    competitors.add(DomainFactory.INSTANCE.getCompetitor(rc.getCompetitor()));
+                    competitors.add(getCompetitor(rc.getCompetitor()));
                 }
                 result = new RaceDefinitionImpl(race.getName(), course, boatClass, competitors);
                 synchronized (raceCache) {
