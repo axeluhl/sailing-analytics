@@ -31,8 +31,8 @@ public class RaceStartedAndFinishedReceiver extends AbstractReceiverWithQueue<Ra
     private final DynamicTrackedEvent trackedEvent;
     private final com.tractrac.clientmodule.Event tractracEvent;
     
-    public RaceStartedAndFinishedReceiver(DynamicTrackedEvent trackedEvent, com.tractrac.clientmodule.Event tractracEvent) {
-        super();
+    public RaceStartedAndFinishedReceiver(DynamicTrackedEvent trackedEvent, com.tractrac.clientmodule.Event tractracEvent, DomainFactory domainFactory) {
+        super(domainFactory);
         this.trackedEvent = trackedEvent;
         this.tractracEvent = tractracEvent;
     }
@@ -61,7 +61,7 @@ public class RaceStartedAndFinishedReceiver extends AbstractReceiverWithQueue<Ra
     @Override
     protected void handleEvent(Triple<Race, StartStopTimesData, Boolean> event) {
         System.out.print("StartStop");
-        RaceDefinition raceDefinition = DomainFactory.INSTANCE.getRaceDefinition(event.getA());
+        RaceDefinition raceDefinition = getDomainFactory().getRaceDefinition(event.getA());
         DynamicTrackedRace race = trackedEvent.getTrackedRace(raceDefinition);
         MillisecondsTimePoint start = new MillisecondsTimePoint(event.getB().getStartTime());
         MillisecondsTimePoint stop = new MillisecondsTimePoint(event.getB().getStopTime());

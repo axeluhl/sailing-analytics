@@ -44,7 +44,7 @@ public class MarkPositionReceiver extends AbstractReceiverWithQueue<ControlPoint
     private int received;
     
     public MarkPositionReceiver(final TrackedEvent trackedEvent, com.tractrac.clientmodule.Event tractracEvent, final DomainFactory domainFactory) {
-        super();
+        super(domainFactory);
         this.tractracEvent = tractracEvent;
         // assumption: there is currently only one race per TracTrac Event object
         final Race race = tractracEvent.getRaceList().iterator().next();
@@ -101,9 +101,9 @@ public class MarkPositionReceiver extends AbstractReceiverWithQueue<ControlPoint
                 System.out.println();
             }
         }
-        Buoy buoy = DomainFactory.INSTANCE.getBuoy(event.getA(), event.getB());
+        Buoy buoy = getDomainFactory().getBuoy(event.getA(), event.getB());
         // FIXME during getTrackedRaceBlocking it seems as if trackedRace gets assigned a new, invalid instance
-        ((DynamicTrack<Buoy, GPSFix>) getTrackedRaceBlocking().getTrack(buoy)).addGPSFix(DomainFactory.INSTANCE
+        ((DynamicTrack<Buoy, GPSFix>) getTrackedRaceBlocking().getTrack(buoy)).addGPSFix(getDomainFactory()
                 .createGPSFixMoving(event.getB()));
     }
 

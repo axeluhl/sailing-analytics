@@ -19,10 +19,9 @@ import com.tractrac.clientmodule.data.ICallbackData;
 public class RawPositionReceiver extends AbstractReceiverWithQueue<RaceCompetitor, CompetitorPositionRawData, Boolean> {
     private final TrackedEvent trackedEvent;
     private final com.tractrac.clientmodule.Event tractracEvent;
-    private final DomainFactory domainFactory = DomainFactory.INSTANCE;
     
-    public RawPositionReceiver(TrackedEvent trackedEvent, com.tractrac.clientmodule.Event tractracEvent) {
-        super();
+    public RawPositionReceiver(TrackedEvent trackedEvent, com.tractrac.clientmodule.Event tractracEvent, DomainFactory domainFactory) {
+        super(domainFactory);
         this.trackedEvent = trackedEvent;
         this.tractracEvent = tractracEvent;
     }
@@ -52,10 +51,10 @@ public class RawPositionReceiver extends AbstractReceiverWithQueue<RaceCompetito
     protected void handleEvent(Triple<RaceCompetitor, CompetitorPositionRawData, Boolean> event) {
         System.out.print("P");
         Race race = event.getA().getRace();
-        RaceDefinition raceDefinition = domainFactory.getRaceDefinition(race);
+        RaceDefinition raceDefinition = getDomainFactory().getRaceDefinition(race);
         DynamicTrackedRace trackedRace = (DynamicTrackedRace) trackedEvent.getTrackedRace(raceDefinition);
-        GPSFixMoving fix = domainFactory.createGPSFixMoving(event.getB());
-        Competitor competitor = domainFactory.getCompetitor(event.getA().getCompetitor());
+        GPSFixMoving fix = getDomainFactory().createGPSFixMoving(event.getB());
+        Competitor competitor = getDomainFactory().getCompetitor(event.getA().getCompetitor());
         trackedRace.recordFix(competitor, fix);
     }
 }

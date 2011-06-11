@@ -3,22 +3,31 @@ package com.sap.sailing.domain.base.impl;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
+import com.sap.sailing.domain.base.CourseListener;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Waypoint;
 
 public class CourseImpl extends NamedImpl implements Course {
+    private static final Logger logger = Logger.getLogger(CourseImpl.class.getName());
+    
     private final List<Waypoint> waypoints;
     private final Map<Waypoint, Integer> waypointIndexes;
     private final List<Leg> legs;
+    private final Set<CourseListener> listeners;
     
     public CourseImpl(String name, Iterable<Waypoint> waypoints) {
         super(name);
+        listeners = new HashSet<CourseListener>();
         this.waypoints = new ArrayList<Waypoint>();
         waypointIndexes = new HashMap<Waypoint, Integer>();
         legs = new ArrayList<Leg>();
@@ -32,9 +41,62 @@ public class CourseImpl extends NamedImpl implements Course {
                 Waypoint current = waypointIter.next();
                 this.waypoints.add(current);
                 waypointIndexes.put(current, i++);
-                Leg leg = new LegImpl(previous, current);
+                Leg leg = new LegImpl(this, i);
                 legs.add(leg);
                 previous = current;
+            }
+        }
+    }
+    
+    /**
+     * For access by {@link LegImpl}
+     */
+    Waypoint getWaypoint(int i) {
+        return waypoints.get(i);
+    }
+    
+    @Override
+    public void addWaypoint(int zeroBasedPosition, Waypoint waypointToAdd) {
+        waypoints.add(zeroBasedPosition, waypointToAdd);
+        legs.add(new LegImpl(this, zeroBasedPosition));
+        notifyListenersWaypointAdded(zeroBasedPosition, waypointToAdd);
+    }
+
+    @Override
+    public void removeWaypoint(int zeroBasedPosition) {
+        if (zeroBasedPosition >= 0) {
+            boolean isLast = zeroBasedPosition == waypoints.size()-1;
+            Waypoint removedWaypoint = waypoints.remove(zeroBasedPosition);
+            if (isLast) {
+                // last waypoint was removed; remove last leg
+                legs.remove(legs.size()-1);
+            } else {
+                legs.remove(zeroBasedPosition);
+            }
+            notifyListenersWaypointRemoved(zeroBasedPosition, removedWaypoint);
+        }
+    }
+
+    private void notifyListenersWaypointRemoved(int index, Waypoint waypointToRemove) {
+        for (CourseListener listener : listeners) {
+            try {
+                listener.waypointRemoved(index, waypointToRemove);
+            } catch (Throwable t) {
+                logger.log(Level.SEVERE, "Exception while notifying listener about waypoint " + waypointToRemove
+                        + " that got removed from course " + this + ": " + t.getMessage());
+                logger.throwing(CourseImpl.class.getName(), "notifyListenersWaypointRemoved", t);
+            }
+        }
+    }
+
+    private void notifyListenersWaypointAdded(int zeroBasedPosition, Waypoint waypointToAdd) {
+        for (CourseListener listener : listeners) {
+            try {
+                listener.waypointAdded(zeroBasedPosition, waypointToAdd);
+            } catch (Throwable t) {
+                logger.log(Level.SEVERE, "Exception while notifying listener about waypoint " + waypointToAdd
+                        + " that got added to course " + this + ": " + t.getMessage());
+                logger.throwing(CourseImpl.class.getName(), "notifyListenersWaypointAdded", t);
             }
         }
     }
@@ -98,6 +160,11 @@ public class CourseImpl extends NamedImpl implements Course {
     @Override
     public Waypoint getLastWaypoint() {
         return waypoints.get(waypoints.size()-1);
+    }
+
+    @Override
+    public void addCourseListener(CourseListener listener) {
+        listeners.add(listener);
     }
     
 }
