@@ -30,11 +30,9 @@ Simon
 + Prüfen, warum in der Map Anzeige manchmal ein Competitor doppelt ist
 + Wind aus der Map löschen wenn der sich geändert hat
 + Simulator mit Speed = 1 anschmeissen und dann prüfen was passiert
-+ Prüfen warum im live leaderbaord manchmal 4 legs angezeigt werden
-+ Prüfen warum der Listener thread manchmal nicht richtig gestoppt wird (disconnect sollte auch thread stoppen)
-+ Datenbank nicht einfach so löschen (Wind Positionen)
-+ Infinity oder große Werte als Ankerindikatoren erkennen und anzeigen können
-+ Anzeige Truebearing bei Wind-Informationen
++ Prüfen warum im live leaderbaord manchmal 4 legs angezeigt werden (max ist 2+1)
++ Prüfen warum der Listener thread manchmal nicht richtig gestoppt wird
++ Infinity oder große Werte als Ankerindikatoren anzeigen im UI
 + MongoDB als Windsource bei addrace oder addevent einstellbar machen
 + Anzeigen im Leaderboard ob der Wind up oder down ist (competitor.values wäre ein guter platz dafür)
 + Implementierung Leaderboard auf Basis HTML Designer

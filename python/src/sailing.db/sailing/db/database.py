@@ -36,11 +36,11 @@ def setupDatabases():
         databases[dbname] = db
         connections[dbname] = conn
 
-        for collection in d['collections']:
+        for collection in d['collections'][0].strip().split(' '):
             collections[collection] = mongokit.Collection(db, collection)
             collection2connection[collection] = conn
 
-        LOG.info('Attached collections: %s' % ', '.join(collections))
+        LOG.info('Attached collections to database %s: %s' % (dbname, ', '.join(d['collections'])))
 
 def getCollection(collection):
     """ Return a MongoDB collection by its name """

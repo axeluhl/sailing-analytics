@@ -57,6 +57,13 @@ public class RaceTrackerImpl implements Listener, RaceTracker {
             throws URISyntaxException, MalformedURLException, FileNotFoundException {
         // Read event data from configuration file
         tractracEvent = KeyValue.setup(paramURL);
+        
+        // can happen that tractrac event is null (occurs when there is no internet connection)
+        // so lets raise some meaningful exception
+        if (tractracEvent == null) {
+        	throw new RuntimeException("Connection failed. Could not connect to " + paramURL);
+        }
+        
         // Initialize data controller using live and stored data sources
         controller = new DataController(liveURI, storedURI, this);
         // Start live and stored data streams

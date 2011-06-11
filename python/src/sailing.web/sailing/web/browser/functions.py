@@ -29,7 +29,6 @@ threaded_listener = {}
 def dropDB(context, request):
     from sailing.db.monitoring import dropDB
     dropDB()
-
     return HTTPFound(location='/')
 
 def startListenerThreads(conf, eventlist):
@@ -68,32 +67,7 @@ def configureListener(context, request):
     view.session['listener-conf'] = conf
 
     if request.POST.get('listener-start', None):
-        conf.setContext(config.ADMIN) dead threads
-                lstn = threaded_listener.get(key, None)
-                if lstn and lstn.running is False and lstn.is_alive() is False:
-                    del threaded_listener[key]
-
-                # now there should be only running threads left
-                if not threaded_listener.has_key(key):
-                    t = provider.LiveDataReceiver(conf.host, conf.port, event['name'], racename) 
-                    threaded_listener[key] = t
-                    t.start()
-
-# addEvent
-def configureListener(context, request):
-    host = request.POST.get('host', 'localhost')
-    port = request.POST.get('port', '8888')
-
-    lock = threading.Lock()
-
-    view = core.BaseView(context, request)
-
-    conf = URIConfigurator(host, port)
-    view.session['listener-conf'] = conf
-
-    if request.POST.get('listener-start', None):
         conf.setContext(config.ADMIN)
-
 
         if request.POST.get('eventJSONURL'):
             conf.setCommand(config.ADD_EVENT)
@@ -119,6 +93,10 @@ def configureListener(context, request):
 
         try:
             result = conf.trigger()
+
+            if result.find('Exception')>0:
+                raise Exception, 'Server triggered exception: %s' % result[:550]
+
         except Exception, ex:
             return view.yieldMessage('Error: %s' % str(ex))
 
@@ -166,7 +144,6 @@ def configureListener(context, request):
         if racename:
             conf.setCommand(config.STOP_RACE)
             conf.setParameters(dict(eventname=eventname, racename=racename))
-
         else: 
             conf.setCommand(config.STOP_EVENT)
             conf.setParameters(dict(eventname=eventname))
@@ -176,8 +153,6 @@ def configureListener(context, request):
         del view.session['listener-conf']
         view.session.save()
 
-        # not using get_ident here because we need to be able
-        # to get a listener by knowing the event and race
         key = hash('%s-%s-%s-%s' % (conf.host, conf.port, eventname, racename))
         if threaded_listener.has_key(key):
             threaded_listener[key].running = False
@@ -194,7 +169,7 @@ def configureListener(context, request):
             eventlist = provider.eventConfiguration(conf)
 
         if model.EventImpl.queryCount() == 0:
-            return view.yieldMessage('Seems that there are no events that can be shown! Server not started?')
+            return view.yieldMessage('Seems that there are no events that can be shown! Listener not started?')
 
         # start listener thread if this is not yet active
         startListenerThreads(conf, eventlist)
@@ -216,8 +191,7 @@ def configuredListeners(context, request):
     out = []
     for key, listener in threaded_listener.items():
         out.append( {'host': listener.host, 'port': listener.port,
-                        'eventname': listener.eventname, 
-                        'last_update': listener.last_update and listener.last_update.strftime('%d.%m %H:%M:%S') or '-',
+                        'eventname': listener.eventname, 'last_update': listener.last_update and listener.last_update.strftime('%d.%m %H:%M:%S') or '-',
                         'paused' : listener.paused, 'running': listener.running, 'id' : key,
                         'racename': listener.racename} )
 
@@ -291,7 +265,6 @@ def mapCompetitors(context, request):
     
     data = jsonByUrl(conf)
 
-    # sort by current ranks (if available)
     if data.get('ranks'):
         data = data['ranks']
         data.sort(lambda x,y: cmp(x['rank'], y['rank']))

@@ -39,7 +39,7 @@ public class DiffUtils {
      * @param revised  the revised text
      * @return the patch describing the difference between the original and revised texts
      */
-    public static <T> Patch<T> diff(List<T> original, List<T> revised) {
+    public static <T> Patch<T> diff(Iterable<T> original, Iterable<T> revised) {
         return DiffUtils.diff(original, revised, new MyersDiff<T>());
     }
 
@@ -51,7 +51,7 @@ public class DiffUtils {
      * @param algorithm the given algorithm
      * @return the patch describing the difference between the original and revised texts
      */
-    public static <T> Patch<T> diff(List<T> original, List<T> revised, DiffAlgorithm<T> algorithm) {
+    public static <T> Patch<T> diff(Iterable<T> original, Iterable<T> revised, DiffAlgorithm<T> algorithm) {
         return algorithm.diff(original, revised);
     }
 

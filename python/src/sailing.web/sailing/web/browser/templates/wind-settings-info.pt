@@ -22,7 +22,9 @@
             <tal:for repeat="track wind['EXPEDITION'][:10]">
                 <b>${view.millisToDatetime(track['timepoint'])}</b>&nbsp;
                 Bearing: ${track['truebearingdeg']}&nbsp;
+                Dampened Bearing: ${track['dampenedtruebearingdeg']}&nbsp;
                 Speed: ${track['knotspeed']}&nbsp;
+                Dampened Speed: ${track['dampenedknotspeed']}&nbsp;
                 LatDeg: ${track.get('latdeg', 'N/A')}&nbsp;
                 LngDeg: ${track.get('lngdeg', 'N/A')}<br/>
             </tal:for>
@@ -39,7 +41,9 @@
             <tal:for repeat="track wind['WEB'][:10]">
                 <b>${view.millisToDatetime(track['timepoint'])}</b>&nbsp;
                 Bearing: ${track['truebearingdeg']}&nbsp;
+                Dampened Bearing: ${track['dampenedtruebearingdeg']}&nbsp;
                 Speed: ${track['knotspeed']}&nbsp;
+                Dampened Speed: ${track['dampenedknotspeed']}&nbsp;
                 LatDeg: ${track.get('latdeg', 'N/A')}&nbsp;
                 LngDeg: ${track.get('lngdeg', 'N/A')}<br/>
             </tal:for>
