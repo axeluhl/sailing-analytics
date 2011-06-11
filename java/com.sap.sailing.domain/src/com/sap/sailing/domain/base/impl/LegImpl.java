@@ -4,27 +4,27 @@ import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Waypoint;
 
 public class LegImpl implements Leg {
-    private final Waypoint from;
-    private final Waypoint to;
+    private final CourseImpl course;
+    private final int indexOfStartWaypoint;
     
-    public LegImpl(Waypoint from, Waypoint to) {
+    public LegImpl(CourseImpl course, int indexOfStartWaypoint) {
         super();
-        this.from = from;
-        this.to = to;
+        this.course = course;
+        this.indexOfStartWaypoint = indexOfStartWaypoint;
     }
 
     @Override
     public Waypoint getFrom() {
-        return from;
+        return course.getWaypoint(indexOfStartWaypoint);
     }
 
     @Override
     public Waypoint getTo() {
-        return to;
+        return course.getWaypoint(indexOfStartWaypoint+1);
     }
     
     @Override
     public String toString() {
-        return from + " -> " + to;
+        return getFrom() + " -> " + getTo();
     }
 }
