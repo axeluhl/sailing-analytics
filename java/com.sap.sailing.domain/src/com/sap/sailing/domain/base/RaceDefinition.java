@@ -1,5 +1,17 @@
 package com.sap.sailing.domain.base;
 
+/**
+ * Tells the {@link BoatClass boat class} and the {@link Course course} for a single race that is usually part of a
+ * regatta. Note, that a course may change over time, even while the race is on, because the race committee may decide,
+ * e.g., to remove a waypoint due to little wind.
+ * <p>
+ * 
+ * A {@link Course} can be {@link Course#addCourseListener(CourseListener) observed} for waypoint additions and
+ * removals.
+ * 
+ * @author Axel Uhl (D043530)
+ * 
+ */
 public interface RaceDefinition extends Named {
     BoatClass getBoatClass();
     
@@ -7,12 +19,4 @@ public interface RaceDefinition extends Named {
 
     Iterable<Competitor> getCompetitors();
 
-    /**
-     * A course may be updated while the race is on. This can have an impact on the waypoints,
-     * their number and order and the buoys of which waypoints consist. This operation carefully
-     * and incrementally updates the {@link Course} object returned by {@link #getCourse()}.
-     * 
-     * TODO need to update TrackedRace regarding the TrackedLeg and TrackedLegOfCompetitor instances
-     */
-    void updateCourse(Course course);
 }
