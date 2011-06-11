@@ -49,7 +49,7 @@ public class TestStoringAndRetrievingWindData implements MongoDBTest {
     }
 
     @Test
-    public void testDBRead() throws UnknownHostException, MongoException {
+    public void testDBRead() throws UnknownHostException, MongoException, InterruptedException {
         {
             DBCollection coll = db.getCollection(WIND_TEST_COLLECTION);
             assertNotNull(coll);
@@ -60,6 +60,7 @@ public class TestStoringAndRetrievingWindData implements MongoDBTest {
         }
 
         {
+            Thread.sleep(500); // wait until MongoDB has recorded the change and made it visible
             Mongo mongo = new Mongo();
             assertNotNull(mongo);
             DB db = mongo.getDB(WIND_TEST_DB);
@@ -73,7 +74,7 @@ public class TestStoringAndRetrievingWindData implements MongoDBTest {
     }
     
     @Test
-    public void storeWindObject() throws UnknownHostException, MongoException {
+    public void storeWindObject() throws UnknownHostException, MongoException, InterruptedException {
         TimePoint now = MillisecondsTimePoint.now();
         Wind wind = new WindImpl(new DegreePosition(123, 45), now, new KnotSpeedWithBearingImpl(10.4,
                 new DegreeBearingImpl(355.5)));
@@ -84,6 +85,7 @@ public class TestStoringAndRetrievingWindData implements MongoDBTest {
         }
         
         {
+            Thread.sleep(500); // wait until MongoDB has recorded the change and made it visible
             Mongo mongo = new Mongo();
             assertNotNull(mongo);
             DB db = mongo.getDB(WIND_TEST_DB);
