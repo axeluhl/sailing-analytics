@@ -29,12 +29,27 @@ public class Patch<T> {
     private List<Delta<T>> deltas = new LinkedList<Delta<T>>();
 
     /**
-     * Apply this patch to the given target
+     * Apply this patch to the given target, producing a new list as result
      * @return the patched text
      * @throws PatchFailedException if can't apply patch
      */
     public List<T> applyTo(List<T> target) throws PatchFailedException {
         List<T> result = new LinkedList<T>(target);
+        ListIterator<Delta<T>> it = getDeltas().listIterator(deltas.size());
+        while (it.hasPrevious()) {
+            Delta<T> delta = it.previous();
+            delta.applyTo(result);
+        }
+        return result;
+    }
+    
+    /**
+     * Apply this patch to the given target in-place, updating the <code>target</code> list
+     * @return the patched text
+     * @throws PatchFailedException if can't apply patch
+     */
+    public List<T> applyToInPlace(List<T> target) throws PatchFailedException {
+        List<T> result = target;
         ListIterator<Delta<T>> it = getDeltas().listIterator(deltas.size());
         while (it.hasPrevious()) {
             Delta<T> delta = it.previous();
@@ -73,5 +88,21 @@ public class Patch<T> {
     public List<Delta<T>> getDeltas() {
         Collections.sort(deltas, new DeltaComparator<T>());
         return deltas;
+    }
+    
+    @Override
+    public String toString() {
+        StringBuilder result = new StringBuilder();
+        result.append('[');
+        boolean first = true;
+        for (Delta<T> delta : getDeltas()) {
+            if (first) {
+                first = false;
+            } else {
+                result.append(", ");
+            }
+            result.append(delta);
+        }
+        return result.toString();
     }
 }

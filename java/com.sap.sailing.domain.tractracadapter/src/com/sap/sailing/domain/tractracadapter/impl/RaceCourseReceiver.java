@@ -20,6 +20,8 @@ import com.tractrac.clientmodule.Route;
 import com.tractrac.clientmodule.data.ICallbackData;
 import com.tractrac.clientmodule.data.RouteData;
 
+import difflib.PatchFailedException;
+
 /**
  * The ordering of the {@link ControlPoint}s of a {@link Course} are received
  * dynamically through a callback interface. Therefore, when connected to an
@@ -80,7 +82,12 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
             logger.log(Level.INFO, "Received course update for existing race "+event.getC().getName());
             // race already exists; this means that we obviously found a course re-definition (yuck...)
             // Therefore, don't create TrackedRace again because it already exists.
-            domainFactory.updateCourseWaypoints(course, event.getB().getPoints());
+            try {
+                domainFactory.updateCourseWaypoints(course, event.getB().getPoints());
+            } catch (PatchFailedException e) {
+                logger.log(Level.SEVERE, "Internal error updating race course "+course+": "+e.getMessage());
+                logger.throwing(RaceCourseReceiver.class.getName(), "handleEvent", e);
+            }
         } else {
             logger.log(Level.INFO, "Received course for non-existing race "+event.getC().getName()+". Creating RaceDefinition.");
             // create race redefinition

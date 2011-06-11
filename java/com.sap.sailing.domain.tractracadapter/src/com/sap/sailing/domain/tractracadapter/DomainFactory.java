@@ -35,6 +35,8 @@ import com.tractrac.clientmodule.data.ControlPointPositionData;
 import com.tractrac.clientmodule.data.DataController;
 import com.tractrac.clientmodule.data.Position;
 
+import difflib.PatchFailedException;
+
 public interface DomainFactory {
     static DomainFactory INSTANCE = new DomainFactoryImpl();
 
@@ -130,5 +132,5 @@ public interface DomainFactory {
      * of waypoints. The waypoints are created from the control points and represent usages of the control points
      * in a course. A single control point may be used more than once in a course's list of waypoints.
      */
-    void updateCourseWaypoints(Course courseToUpdate, List<ControlPoint> controlPoints);
+    void updateCourseWaypoints(Course courseToUpdate, List<ControlPoint> controlPoints) throws PatchFailedException;
 }

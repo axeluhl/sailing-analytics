@@ -69,6 +69,7 @@ import com.tractrac.clientmodule.data.ControlPointPositionData;
 
 import difflib.DiffUtils;
 import difflib.Patch;
+import difflib.PatchFailedException;
 
 public class DomainFactoryImpl implements DomainFactory {
     private static final Logger logger = Logger.getLogger(DomainFactoryImpl.class.getName());
@@ -128,7 +129,7 @@ public class DomainFactoryImpl implements DomainFactory {
     }
     
     @Override
-    public void updateCourseWaypoints(Course courseToUpdate, List<ControlPoint> controlPoints) {
+    public void updateCourseWaypoints(Course courseToUpdate, List<ControlPoint> controlPoints) throws PatchFailedException {
         Iterable<Waypoint> courseWaypoints = courseToUpdate.getWaypoints();
         List<Waypoint> newWaypointList = new LinkedList<Waypoint>();
         for (ControlPoint tractracControlPoint : controlPoints) {
@@ -136,8 +137,8 @@ public class DomainFactoryImpl implements DomainFactory {
             newWaypointList.add(waypoint);
         }
         Patch<Waypoint> patch = DiffUtils.diff(courseWaypoints, newWaypointList);
-        // now for each chunk in the patch make the corresponding update to the TrackedLeg and TrackedLegOfCompetitor
-        // collections in TrackedRace TODO which means this API is ill-defined...
+        CourseAsWaypointList courseAsWaypointList = new CourseAsWaypointList(courseToUpdate);
+        patch.applyToInPlace(courseAsWaypointList);
     }
 
     @Override
@@ -309,9 +310,11 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public Iterable<Receiver> getUpdateReceivers(DynamicTrackedEvent trackedEvent, com.tractrac.clientmodule.Event tractracEvent, WindStore windStore) {
-        return getUpdateReceivers(trackedEvent, tractracEvent, windStore,
-                ReceiverType.RACECOURSE, ReceiverType.MARKPASSINGS, ReceiverType.MARKPOSITIONS, ReceiverType.RACESTARTFINISH, ReceiverType.RAWPOSITIONS);
+    public Iterable<Receiver> getUpdateReceivers(DynamicTrackedEvent trackedEvent,
+            com.tractrac.clientmodule.Event tractracEvent, WindStore windStore) {
+        return getUpdateReceivers(trackedEvent, tractracEvent, windStore, ReceiverType.RACECOURSE,
+                ReceiverType.MARKPASSINGS, ReceiverType.MARKPOSITIONS, ReceiverType.RACESTARTFINISH,
+                ReceiverType.RAWPOSITIONS);
     }
 
     @Override
