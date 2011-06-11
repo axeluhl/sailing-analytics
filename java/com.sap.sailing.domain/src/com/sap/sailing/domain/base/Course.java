@@ -33,4 +33,10 @@ public interface Course extends Named {
     Waypoint getFirstWaypoint();
     
     Waypoint getLastWaypoint();
+    
+    void addCourseListener(CourseListener listener);
+
+    void addWaypoint(int zeroBasedPosition, Waypoint waypointToAdd);
+
+    void removeWaypoint(Waypoint waypointToRemove);
 }

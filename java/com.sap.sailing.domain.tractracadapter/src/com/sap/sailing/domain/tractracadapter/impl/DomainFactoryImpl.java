@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -65,6 +66,9 @@ import com.tractrac.clientmodule.ControlPoint;
 import com.tractrac.clientmodule.Race;
 import com.tractrac.clientmodule.RaceCompetitor;
 import com.tractrac.clientmodule.data.ControlPointPositionData;
+
+import difflib.DiffUtils;
+import difflib.Patch;
 
 public class DomainFactoryImpl implements DomainFactory {
     private static final Logger logger = Logger.getLogger(DomainFactoryImpl.class.getName());
@@ -124,10 +128,16 @@ public class DomainFactoryImpl implements DomainFactory {
     }
     
     @Override
-    public Iterable<Waypoint> getUpdatedWaypointList(Course courseToUpdate, List<ControlPoint> controlPoints) {
+    public void updateCourseWaypoints(Course courseToUpdate, List<ControlPoint> controlPoints) {
         Iterable<Waypoint> courseWaypoints = courseToUpdate.getWaypoints();
-        
-        return null; // TODO
+        List<Waypoint> newWaypointList = new LinkedList<Waypoint>();
+        for (ControlPoint tractracControlPoint : controlPoints) {
+            Waypoint waypoint = createWaypoint(tractracControlPoint);
+            newWaypointList.add(waypoint);
+        }
+        Patch<Waypoint> patch = DiffUtils.diff(courseWaypoints, newWaypointList);
+        // now for each chunk in the patch make the corresponding update to the TrackedLeg and TrackedLegOfCompetitor
+        // collections in TrackedRace TODO which means this API is ill-defined...
     }
 
     @Override

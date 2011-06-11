@@ -130,5 +130,5 @@ public interface DomainFactory {
      * of waypoints. The waypoints are created from the control points and represent usages of the control points
      * in a course. A single control point may be used more than once in a course's list of waypoints.
      */
-    Iterable<Waypoint> getUpdatedWaypointList(Course courseToUpdate, List<ControlPoint> controlPoints);
+    void updateCourseWaypoints(Course courseToUpdate, List<ControlPoint> controlPoints);
 }
