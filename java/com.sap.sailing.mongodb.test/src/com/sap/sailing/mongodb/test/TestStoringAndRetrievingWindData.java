@@ -60,7 +60,7 @@ public class TestStoringAndRetrievingWindData implements MongoDBTest {
         }
 
         {
-            Thread.sleep(500); // wait until MongoDB has recorded the change and made it visible
+            Thread.sleep(1000); // wait until MongoDB has recorded the change and made it visible
             Mongo mongo = new Mongo();
             assertNotNull(mongo);
             DB db = mongo.getDB(WIND_TEST_DB);
@@ -85,7 +85,7 @@ public class TestStoringAndRetrievingWindData implements MongoDBTest {
         }
         
         {
-            Thread.sleep(500); // wait until MongoDB has recorded the change and made it visible
+            Thread.sleep(1000); // wait until MongoDB has recorded the change and made it visible
             Mongo mongo = new Mongo();
             assertNotNull(mongo);
             DB db = mongo.getDB(WIND_TEST_DB);
