@@ -65,10 +65,14 @@ class Competitor(BaseDocument):
         'event': unicode,
         'nationality': unicode,
 
+        'leg_indexes': {}, # holds association between leg position and unique id <position in marks>:<unique id>
+
         'total': float,
         'current_rank': int, # current rank for given time
         'races' : [float, ],
-        'marks' : [[float, ], ],
+        'marks' : [[float, ], ], # should be named legs but refactoring is so hard in python
+        'upordownwind' : [[bool], ], # indicates wheter the leg is up or downwind
+        'additional' : [[[float]]], # additional information regarding one leg (finished, started)
         'values' : [[[float, ]]]
     }
 

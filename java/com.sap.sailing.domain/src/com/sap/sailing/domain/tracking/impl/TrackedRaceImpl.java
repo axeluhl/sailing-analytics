@@ -97,7 +97,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         }
         trackedLegs = new LinkedHashMap<Leg, TrackedLeg>();
         for (Leg leg : race.getCourse().getLegs()) {
-            trackedLegs.put(leg, createTrackedLeg(race, leg));
+            trackedLegs.put(leg, createTrackedLeg(leg));
         }
         markPassingsForCompetitor = new HashMap<Competitor, NavigableSet<MarkPassing>>();
         tracks = new HashMap<Competitor, GPSFixTrack<Competitor, GPSFixMoving>>();
@@ -115,9 +115,13 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         }
         currentWindSource = WindSource.EXPEDITION;
         competitorRankings = new HashMap<TimePoint, TreeSet<Competitor>>();
+        getRace().getCourse().addCourseListener(this);
     }
 
-    abstract protected TrackedLeg createTrackedLeg(RaceDefinition race, Leg leg);
+    /**
+     * Precondition: race has already been set, e.g., in constructor before this methocd is called
+     */
+    abstract protected TrackedLeg createTrackedLeg(Leg leg);
     
     @Override
     public NavigableSet<MarkPassing> getMarkPassings(Competitor competitor) {
@@ -388,13 +392,35 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                 buoyTracks.put(buoy, new DynamicTrackImpl<Buoy, GPSFix>(buoy, millisecondsOverWhichToAverageSpeed));
             }
         }
-        // TODO update trackedLegs
+        // a waypoint got added; this means that a leg got added as well; but we shouldn't claim we know where
+        // in the leg list of the course the leg was added; that's an implementation secret of CourseImpl. So try:
+        LinkedHashMap<Leg, TrackedLeg> reorderedTrackedLegs = new LinkedHashMap<Leg, TrackedLeg>();
+        for (Leg leg : getRace().getCourse().getLegs()) {
+            if (!trackedLegs.containsKey(leg)) {
+                // no tracked leg for leg yet:
+                TrackedLeg newTrackedLeg = createTrackedLeg(leg);
+                reorderedTrackedLegs.put(leg, newTrackedLeg);
+            } else {
+                reorderedTrackedLegs.put(leg, trackedLegs.get(leg));
+            }
+        }
+        // now ensure that the iteration order is in sync with the leg iteration order
+        trackedLegs.clear();
+        for (Map.Entry<Leg, TrackedLeg> entry : reorderedTrackedLegs.entrySet()) {
+            trackedLegs.put(entry.getKey(), entry.getValue());
+        }
         updated(/* time point*/ null);
     }
 
     @Override
     public synchronized void waypointRemoved(int zeroBasedIndex, Waypoint waypointThatGotRemoved) {
-        // TODO update trackedLegs
+        TrackedLeg toRemove;
+        if (zeroBasedIndex > trackedLegs.size()) {   // last waypoint removed
+            toRemove = getTrackedLegFinishingAt(waypointThatGotRemoved);
+        } else {
+            toRemove = getTrackedLegStartingAt(waypointThatGotRemoved);
+        }
+        trackedLegs.remove(toRemove.getLeg());
         updated(/* time point*/ null);
     }
 }

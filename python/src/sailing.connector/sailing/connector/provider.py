@@ -53,7 +53,7 @@ class LiveDataReceiver(threading.Thread):
 
             # blocking call by updatecount setting
             conf.setParameters(dict(eventname=self.eventname, racename=self.racename, sinceupdate=self.updatecount))
-            conf.setLogging(False)
+            conf.setLogging(True)
 
             try:
                 # need to lock because other threads could overwrite information
@@ -66,6 +66,12 @@ class LiveDataReceiver(threading.Thread):
             except Exception, ex:
                 # print error but do not kill thread as this could be recoverable (connection problems, ...)
                 log.error('Error in thread for %s %s' % (self.eventname, self.racename), exc_info=True)
+
+                if str(ex).find('Race not found')>=0:
+                    # if race is not found then pause
+                    log.error('   Pausing listener because race is invalid.')
+                    self.paused = True
+                    continue
 
                 # avoid filling console with errors
                 time.sleep(2)
@@ -85,6 +91,9 @@ def eventConfiguration(configurator):
     events = jsonByUrl(configurator) 
 
     for event in events:
+        if not event.has_key('boatclass'):
+            continue
+
         dbevent = model.EventImpl.queryOneBy(name=event['name'])
         if not dbevent:
             dbevent = model.EventImpl()
@@ -123,7 +132,9 @@ def eventConfiguration(configurator):
                 # including all legs where something ends into model
                 # in this case we get the last mark that equals the
                 # points for the whole race
-                marknames.append(leg['end'])
+                if leg.has_key('end'):
+                    marknames.append(leg['end'])
+                else: marknames.append('UNKNOWN')
 
             rcmarks.append(marknames)
 
@@ -133,7 +144,7 @@ def eventConfiguration(configurator):
         for cp in cobjects:
             races = [0.0 for r in range(raceindex)]
             
-            marks = cp.marks; values = cp.values
+            marks = cp.marks; values = cp.values; upordown = cp.upordownwind; additional = cp.additional
 
             # update races and marks - support add operation
             # removal not really supported - needs complete refresh
@@ -144,24 +155,36 @@ def eventConfiguration(configurator):
                 if len(marks) < r+1:
                     marks.append([])
 
+                if len(upordown) < r+1:
+                    upordown.append([])
+
                 if len(values) < r+1:
                     values.append([])
+
+                if len(additional) < r+1:
+                    additional.append([])
 
                 for m in range(len(rcmarks[r])):
                     if len(marks[r]) < m+1:
                         marks[r].append(0.0)
 
+                    if len(upordown[r]) < m+1:
+                        upordown[r].append(False)
+
                     if len(values[r]) < m+1:
                         values[r].append([])
 
+                    if len(additional[r]) < m+1:
+                        additional[r].append([])
+
             # recognize if races and/or marks changed
-            if cp.races and cp.races != races:
+            if cp.races and len(cp.races) != len(races):
                 log.error('Difference between races for competitor %s found. Old: %s New: %s' % (cp.name, cp.races, races))
 
-            if cp.marks and cp.marks != marks:
+            if cp.marks and len(cp.marks) != len(marks):
                 log.error('Difference between marks for competitor %s found. Old: %s New: %s' % (cp.name, cp.marks, marks))
 
-            cp.update(dict(races=races, marks=marks))
+            cp.update(dict(races=races, marks=marks, upordownwind=upordown, additional=additional))
 
         # finally update event
         dbevent.update(dict(name=event['name'], 
@@ -188,17 +211,19 @@ def liveRaceInformation(configurator):
     # it is important to know which position the race has
     # so we look it up in the Event itself
     event = model.EventImpl.queryOneBy(name=eventname)
+    raceindex = event.races.index(racename)
 
     # check that legs still match the expected value
     legcount = len(data['legs'])
     if legcount:
-        legcheck_competitor = model.CompetitorImpl.queryOneBy(name=data['legs'][0]['competitors'][0], eventname=eventname)
+        legcheck_competitor = model.CompetitorImpl.queryOneBy(name=data['legs'][0]['competitors'][0]['name'], event=eventname)
 
-        known_leg_count = len(legcheck_competitor.marks)
+        known_leg_count = len(legcheck_competitor.marks[raceindex])
         if known_leg_count != legcount:
 
             # length of saved legs and incoming legs does not match
             # in this case we need to reload all events and then continue
+            # this can lead to competitors that loose data
             configurator.setContext(config.MODERATOR)
             configurator.setCommand(config.LIST_EVENTS)
             eventConfiguration(configurator)
@@ -207,10 +232,10 @@ def liveRaceInformation(configurator):
             event = model.EventImpl.queryOneBy(name=eventname)
             log.error('Refreshed event %s information because legs (Old: %s New: %s) seem to have changed.' % (eventname, known_leg_count, legcount))
 
-    raceindex = event.races.index(racename)
-
     lcount = 0; current_legs = {}
     for leg in data['legs']:
+        leg_id = '%s,%s' % (leg['fromwaypointid'], leg['towaypointid'])
+
         for competitor in leg['competitors']:
             comp = model.CompetitorImpl.queryOneBy(name=competitor['name'], event=eventname)
             if not comp:
@@ -221,6 +246,8 @@ def liveRaceInformation(configurator):
             c_marks = comp.marks
             c_values = comp.values
             c_total_rank = comp.total
+            c_additional = comp.additional
+            c_upordown = comp.upordownwind
 
             # if competitor hasn't started yet we just ignore this leg
             # and don't update the competitors information for the given leg
@@ -292,6 +319,14 @@ def liveRaceInformation(configurator):
 
                 c_values[raceindex][lcount][attr[0]] = k
 
+            if len(c_additional[raceindex][lcount]) == 0:
+                c_additional[raceindex][lcount] = [0, 0]
+
+            c_additional[raceindex][lcount][0] = competitor['started']
+            c_additional[raceindex][lcount][1] = competitor['finished']
+
+            c_upordown[raceindex][lcount] = leg['upordownwindleg']
+
             # compute total rank for competitor
             rank = competitor.get('rank', 0)
 
@@ -303,7 +338,7 @@ def liveRaceInformation(configurator):
                         rank = c['rank']
                         break
 
-            comp.update(dict(current_rank=rank,races=c_races, marks=c_marks, values=c_values, total=c_total_rank))
+            comp.update(dict(current_rank=rank,races=c_races, marks=c_marks, values=c_values, additional=c_additional, upordownwind=c_upordown, total=c_total_rank))
 
         # next leg
         lcount += 1

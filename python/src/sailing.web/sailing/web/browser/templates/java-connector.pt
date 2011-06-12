@@ -4,69 +4,76 @@ When <i>stopping listener</i> it will trigger two methods: If you select a race 
 
 <form method="POST" action="/++/configureListener">
     <tal:if condition="not view.listenerStarted()">
-    <div class="field">
-        <span>Host and Port:</span><br/>
-        <input type="text" name="host" value="localhost" />&nbsp;<input type="text" name="port" value="8888" />
-    </div>
-    <input type="submit" name="listener-event-refresh" value="Connect to already running server" /><br/><br/>
 
-    <div class="field">
-        <span>URL to event configuration</span><br/>
-        <input class="large" type="text" name="eventJSONURL" value=""/>
+    <fieldset>
+        <legend>1. Listener Configuration</legend>
+        <div class="field">
+            <span>Host and Port:</span><br/>
+            <input type="text" name="host" value="localhost" />&nbsp;<input type="text" name="port" value="8888" />
+        </div>
+        <input type="submit" name="listener-event-refresh" value="Connect to already running server" /><br/><br/>
+    </fieldset>
 
-        <select name="eventJSONURLselect" onchange="$('input[name=eventJSONURL]').val($('select[name=eventJSONURLselect] option:selected').val())">
-            <option value=""></option>
-            <option value="http://germanmaster.traclive.dk/events/event_20110505_SailingTea/jsonservice.php">Weymouth</option>
-        </select>
-        <pre style="background-color: #ececec; font-size: 12px;padding: 2px;">
-<tal:for repeat="eventurl view.eventUrlHistory()"> ${eventurl}</tal:for></pre>
-    </div>
+    <fieldset>
+        <legend>2. Event Configuration</legend>
+        <div class="field">
+            <span>URL to event configuration</span><br/>
+            <input class="large" type="text" name="eventJSONURL" value=""/>
 
-    <div class="field">
-        <span>URL to race configuration</span><br/>
-        <input class="large" type="text" name="paramURL" value=""/>
-        <select name="paramURLselect" onchange="$('input[name=paramURL]').val($('select[name=paramURLselect] option:selected').val())">
-            <option value=""></option>
-            <option value="http://sapsimulation.tracdev.dk/simulateconf/j80race12.txt">J80 Race 12</option>
-        </select>
-        <pre style="background-color: #ececec; font-size: 12px;padding: 2px;">
-<tal:for repeat="eventurl view.raceUrlHistory()"> ${eventurl}</tal:for></pre>
-    </div>
+            <select name="eventJSONURLselect" onchange="$('input[name=eventJSONURL]').val($('select[name=eventJSONURLselect] option:selected').val())">
+                <option value=""></option>
+                <option value="http://germanmaster.traclive.dk/events/event_20110505_SailingTea/jsonservice.php">Weymouth</option>
+            </select>
+            <pre style="background-color: #ececec; font-size: 12px;padding: 2px;">
+    <tal:for repeat="eventurl view.eventUrlHistory()"> ${eventurl}</tal:for></pre>
+        </div>
 
-    <div class="field">
-        <span>Live-Connection (host:port):</span><br/>
-        <input class="large" type="text" name="liveURI" value="" />
-        <select name="liveURIselect" onchange="$('input[name=liveURI]').val($('select[name=liveURIselect] option:selected').val())">
-            <option value=""></option>
-            <option value="tcp://sapsimulation.tracdev.dk:4420">J80 Race 12</option>
-            <option value="tcp://germanmaster.traclive.dk:4400">Weymouth</option>
-        </select>
-    </div>
+        <div class="field">
+            <span>URL to race configuration</span><br/>
+            <input class="large" type="text" name="paramURL" value=""/>
+            <select name="paramURLselect" onchange="$('input[name=paramURL]').val($('select[name=paramURLselect] option:selected').val())">
+                <option value=""></option>
+                <option value="http://sapsimulation.tracdev.dk/simulateconf/j80race12.txt">J80 Race 12</option>
+            </select>
+            <pre style="background-color: #ececec; font-size: 12px;padding: 2px;">
+    <tal:for repeat="eventurl view.raceUrlHistory()"> ${eventurl}</tal:for></pre>
+        </div>
 
-    <div class="field">
-        <span>Data-Connection (host:port):</span><br/>
-        <input class="large" type="text" name="storedURI" value="" />
-        <select name="storedURIselect" onchange="$('input[name=storedURI]').val($('select[name=storedURIselect] option:selected').val())">
-            <option value=""></option>
-            <option value="tcp://sapsimulation.tracdev.dk:4421">J80 Race 12</option>
-            <option value="tcp://germanmaster.traclive.dk:4401">Weymouth</option>
-        </select>
-    </div>
+        <div class="field">
+            <span>Live-Connection (host:port):</span><br/>
+            <input class="large" type="text" name="liveURI" value="" />
+            <select name="liveURIselect" onchange="$('input[name=liveURI]').val($('select[name=liveURIselect] option:selected').val())">
+                <option value=""></option>
+                <option value="tcp://sapsimulation.tracdev.dk:4420">J80 Race 12</option>
+                <option value="tcp://germanmaster.traclive.dk:4400">Weymouth</option>
+            </select>
+        </div>
 
-    <div class="field">
-        <span>Persistent store where to persist wind tracks</span><br/>
-        <select name="windstore">
-            <option value="empty">Do not persist wind</option>
-            <option value="mongo">MongoDB Persister</option>
-        </select>
-    </div>
+        <div class="field">
+            <span>Data-Connection (host:port):</span><br/>
+            <input class="large" type="text" name="storedURI" value="" />
+            <select name="storedURIselect" onchange="$('input[name=storedURI]').val($('select[name=storedURIselect] option:selected').val())">
+                <option value=""></option>
+                <option value="tcp://sapsimulation.tracdev.dk:4421">J80 Race 12</option>
+                <option value="tcp://germanmaster.traclive.dk:4401">Weymouth</option>
+            </select>
+        </div>
 
-    <div class="field">
-        <input type="checkbox" name="drop_db" />&nbsp;
-        <span>Drop Database before connect</span><br/>
-    </div>
+        <div class="field">
+            <span>Store where to persist wind tracks</span><br/>
+            <select name="windstore">
+                <option value="empty">Do not persist wind</option>
+                <option value="mongo">MongoDB Persister</option>
+            </select>
+        </div>
 
-    <input type="submit" name="listener-start" value="Start listener"/>&nbsp;
+        <div class="field">
+            <input type="checkbox" name="drop_db" />&nbsp;
+            <span>Drop Database before connect</span><br/>
+        </div>
+
+        <input type="submit" name="listener-start" value="Start listener"/>&nbsp;
+    </fieldset>
     </tal:if>
 
     <tal:if condition="view.listenerStarted() or request.params.get('debug')">

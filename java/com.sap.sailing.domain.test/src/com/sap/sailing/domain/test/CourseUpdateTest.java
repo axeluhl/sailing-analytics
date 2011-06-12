@@ -2,12 +2,14 @@ package com.sap.sailing.domain.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
@@ -15,15 +17,20 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.CourseListener;
 import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.BuoyImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
+import com.sap.sailing.domain.tracking.TrackedLeg;
+import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
+import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.Receiver;
@@ -42,6 +49,7 @@ import difflib.Patch;
 import difflib.PatchFailedException;
 
 public class CourseUpdateTest extends AbstractTracTracLiveTest {
+    private RaceDefinition race;
     private Course course;
     private Event domainEvent;
     private DynamicTrackedEvent trackedEvent;
@@ -73,10 +81,14 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
             }
         });
         addListenersForStoredDataAndStartController(receivers);
-        RaceDefinition race = domainFactory.getRaceDefinition(getEvent().getRaceList().iterator().next());
+        race = domainFactory.getRaceDefinition(getEvent().getRaceList().iterator().next());
         course = race.getCourse();
         assertNotNull(course);
         assertEquals(3, Util.size(course.getWaypoints()));
+        
+        // make sure leg is initialized correctly in CourseImpl
+        assertEquals("start/finish", course.getLegs().get(0).getFrom().getName());
+        assertEquals("top", course.getLegs().get(1).getFrom().getName());
     }
 
     @Test
@@ -187,6 +199,47 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
         });
         domainFactory.updateCourseWaypoints(course, controlPoints);
         assertTrue(result[0]);
+    }
+    
+    @Test
+    public void testTrackedRacesTrackedLegsUpdatedProperly() throws InterruptedException, PatchFailedException {
+        final boolean[] result = new boolean[1];
+        final com.tractrac.clientmodule.ControlPoint cp1 = new com.tractrac.clientmodule.ControlPoint(
+                UUID.randomUUID(), "CP1", /* hasTwo */false) {
+        };
+        waitForRouteData();
+        final List<com.tractrac.clientmodule.ControlPoint> controlPoints = new ArrayList<com.tractrac.clientmodule.ControlPoint>(
+                routeData[0].getPoints());
+        controlPoints.add(cp1);
+        course.addCourseListener(new CourseListener() {
+            @Override
+            public void waypointAdded(int zeroBasedIndex, Waypoint waypointThatGotAdded) {
+                System.out.println("waypointAdded " + zeroBasedIndex + " / " + waypointThatGotAdded);
+                ControlPoint cp = domainFactory.getControlPoint(cp1);
+                result[0] = zeroBasedIndex == controlPoints.size() - 1 && waypointThatGotAdded.getControlPoint() == cp;
+            }
+
+            @Override
+            public void waypointRemoved(int zeroBasedIndex, Waypoint waypointThatGotRemoved) {
+                System.out.println("waypointRemoved " + zeroBasedIndex + " / " + waypointThatGotRemoved);
+            }
+        });
+        domainFactory.updateCourseWaypoints(course, controlPoints);
+        assertTrue(result[0]);
+        TrackedRace trackedRace = trackedEvent.getTrackedRace(race);
+        Iterator<Leg> legIter = course.getLegs().iterator();
+        for (TrackedLeg trackedLeg : trackedRace.getTrackedLegs()) {
+            assertTrue(legIter.hasNext());
+            Leg leg = legIter.next();
+            assertSame(leg, trackedLeg.getLeg());
+        }
+        // and again, this time for the TrackedLegOfCompetitors
+        for (Leg leg : course.getLegs()) {
+            for (Competitor competitor : race.getCompetitors()) {
+                TrackedLegOfCompetitor trackedLegOfCompetitor = trackedRace.getTrackedLeg(competitor, leg);
+                assertSame(leg, trackedLegOfCompetitor.getLeg());
+            }
+        }
     }
     
     @After
