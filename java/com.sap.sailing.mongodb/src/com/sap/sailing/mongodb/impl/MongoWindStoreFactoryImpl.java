@@ -21,6 +21,12 @@ public class MongoWindStoreFactoryImpl implements MongoWindStoreFactory, BundleA
     private int defaultPort;
     private String defaultDatabaseName;
     
+    public MongoWindStoreFactoryImpl() {
+        defaultHostName = "127.0.0.1";
+        defaultPort = 27017;
+        defaultDatabaseName = DEFAULT_DB_NAME;
+    }
+    
     @Override
     public MongoWindStore getMongoWindStore(MongoObjectFactory mongoObjectFactory) throws UnknownHostException, MongoException {
         return getMongoWindStore(defaultHostName, defaultPort, defaultDatabaseName, mongoObjectFactory);
@@ -62,6 +68,9 @@ public class MongoWindStoreFactoryImpl implements MongoWindStoreFactory, BundleA
     }
     
     public static MongoWindStoreFactory getDefaultInstance() {
+        if (defaultInstance == null) {
+            defaultInstance = new MongoWindStoreFactoryImpl();
+        }
         return defaultInstance;
     }
 
