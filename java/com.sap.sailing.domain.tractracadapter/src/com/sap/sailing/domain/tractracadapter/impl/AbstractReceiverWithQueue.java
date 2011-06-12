@@ -2,6 +2,7 @@ package com.sap.sailing.domain.tractracadapter.impl;
 
 import java.util.concurrent.LinkedBlockingQueue;
 
+import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sailing.util.Util.Triple;
 
@@ -13,10 +14,16 @@ import com.sap.sailing.util.Util.Triple;
  */
 public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Receiver {
     private final LinkedBlockingQueue<Triple<A, B, C>> queue;
+    private final DomainFactory domainFactory;
 
-    public AbstractReceiverWithQueue() {
+    public AbstractReceiverWithQueue(DomainFactory domainFactory) {
         super();
+        this.domainFactory = domainFactory;
         this.queue = new LinkedBlockingQueue<Triple<A, B, C>>();
+    }
+    
+    protected DomainFactory getDomainFactory() {
+        return domainFactory;
     }
     
     public void stop() {

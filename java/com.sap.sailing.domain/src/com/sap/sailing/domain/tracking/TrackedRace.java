@@ -13,17 +13,19 @@ import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.Waypoint;
 
 /**
- * Live tracking data of a single race. The race follows a defined {@link Course} with a sequence
- * of {@link Leg}s. The tracking information of such a leg can be requested either for all
- * competitors (see {@link #getTrackedLegs()} and {@link #getTrackedLeg(Leg)}) or for a
- * single competitor (see {@link #getTrackedLeg(Competitor, Leg)}).<p>
+ * Live tracking data of a single race. The race follows a defined {@link Course} with a sequence of {@link Leg}s. The
+ * course may change over time as the race committee decides to change it. Therefore, a {@link TrackedRace} instance
+ * {@link Course#addCourseListener(com.sap.sailing.domain.base.CourseListener) observes} the race {@link Course} for
+ * such changes. The tracking information of a leg can be requested either for all competitors (see
+ * {@link #getTrackedLegs()} and {@link #getTrackedLeg(Leg)}) or for a single competitor (see
+ * {@link #getTrackedLeg(Competitor, Leg)}).
+ * <p>
  * 
- * The overall race standings can be requested in terms of a competitor's ranking. More
- * detailed information about what happens / happened within a leg is available from
- * {@link TrackedLeg} and {@link TrackedLegOfCompetitor}.
+ * The overall race standings can be requested in terms of a competitor's ranking. More detailed information about what
+ * happens / happened within a leg is available from {@link TrackedLeg} and {@link TrackedLegOfCompetitor}.
  * 
  * @author Axel Uhl (d043530)
- *
+ * 
  */
 public interface TrackedRace {
     RaceDefinition getRace();

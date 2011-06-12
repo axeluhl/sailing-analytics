@@ -32,10 +32,4 @@ public class RaceDefinitionImpl extends NamedImpl implements RaceDefinition {
         return boatClass;
     }
 
-    @Override
-    public void updateCourse(Course course) {
-        // FIXME we learned by e-mail from Lasse (2011-06-04T20:38:00CET) that courses may change during a race; how to handle???
-        // TODO implement RaceDefinitionImpl.updateCourse and a corresponding observer pattern updating the TrackedLeg[OfCompetitor] structures as well
-    }
-
 }

@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -65,6 +66,10 @@ import com.tractrac.clientmodule.ControlPoint;
 import com.tractrac.clientmodule.Race;
 import com.tractrac.clientmodule.RaceCompetitor;
 import com.tractrac.clientmodule.data.ControlPointPositionData;
+
+import difflib.DiffUtils;
+import difflib.Patch;
+import difflib.PatchFailedException;
 
 public class DomainFactoryImpl implements DomainFactory {
     private static final Logger logger = Logger.getLogger(DomainFactoryImpl.class.getName());
@@ -124,10 +129,16 @@ public class DomainFactoryImpl implements DomainFactory {
     }
     
     @Override
-    public Iterable<Waypoint> getUpdatedWaypointList(Course courseToUpdate, List<ControlPoint> controlPoints) {
+    public void updateCourseWaypoints(Course courseToUpdate, List<ControlPoint> controlPoints) throws PatchFailedException {
         Iterable<Waypoint> courseWaypoints = courseToUpdate.getWaypoints();
-        
-        return null; // TODO
+        List<Waypoint> newWaypointList = new LinkedList<Waypoint>();
+        for (ControlPoint tractracControlPoint : controlPoints) {
+            Waypoint waypoint = createWaypoint(tractracControlPoint);
+            newWaypointList.add(waypoint);
+        }
+        Patch<Waypoint> patch = DiffUtils.diff(courseWaypoints, newWaypointList);
+        CourseAsWaypointList courseAsWaypointList = new CourseAsWaypointList(courseToUpdate);
+        patch.applyToInPlace(courseAsWaypointList);
     }
 
     @Override
@@ -275,7 +286,7 @@ public class DomainFactoryImpl implements DomainFactory {
             switch (type) {
             case RACECOURSE:
                 result.add(new RaceCourseReceiver(
-                        trackedEvent, tractracEvent, windStore, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed));
+                        this, trackedEvent, tractracEvent, windStore, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed));
                 break;
             case MARKPOSITIONS:
                 result.add(new MarkPositionReceiver(
@@ -283,15 +294,15 @@ public class DomainFactoryImpl implements DomainFactory {
                 break;
             case RAWPOSITIONS:
                 result.add(new RawPositionReceiver(
-                        trackedEvent, tractracEvent));
+                        trackedEvent, tractracEvent, this));
                 break;
             case MARKPASSINGS:
                 result.add(new MarkPassingReceiver(
-                        trackedEvent, tractracEvent));
+                        trackedEvent, tractracEvent, this));
                 break;
             case RACESTARTFINISH:
                 result.add(new RaceStartedAndFinishedReceiver(
-                        trackedEvent, tractracEvent));
+                        trackedEvent, tractracEvent, this));
                 break;
             }
         }
@@ -299,9 +310,11 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public Iterable<Receiver> getUpdateReceivers(DynamicTrackedEvent trackedEvent, com.tractrac.clientmodule.Event tractracEvent, WindStore windStore) {
-        return getUpdateReceivers(trackedEvent, tractracEvent, windStore,
-                ReceiverType.RACECOURSE, ReceiverType.MARKPASSINGS, ReceiverType.MARKPOSITIONS, ReceiverType.RACESTARTFINISH, ReceiverType.RAWPOSITIONS);
+    public Iterable<Receiver> getUpdateReceivers(DynamicTrackedEvent trackedEvent,
+            com.tractrac.clientmodule.Event tractracEvent, WindStore windStore) {
+        return getUpdateReceivers(trackedEvent, tractracEvent, windStore, ReceiverType.RACECOURSE,
+                ReceiverType.MARKPASSINGS, ReceiverType.MARKPOSITIONS, ReceiverType.RACESTARTFINISH,
+                ReceiverType.RAWPOSITIONS);
     }
 
     @Override
@@ -326,9 +339,9 @@ public class DomainFactoryImpl implements DomainFactory {
                 for (RaceCompetitor rc : race.getRaceCompetitorList()) {
                     com.tractrac.clientmodule.Competitor competitor = rc.getCompetitor();
                     if (boatClass == null) {
-                        boatClass = DomainFactory.INSTANCE.getBoatClass(competitor.getCompetitorClass());
+                        boatClass = getBoatClass(competitor.getCompetitorClass());
                     }
-                    competitors.add(DomainFactory.INSTANCE.getCompetitor(rc.getCompetitor()));
+                    competitors.add(getCompetitor(rc.getCompetitor()));
                 }
                 result = new RaceDefinitionImpl(race.getName(), course, boatClass, competitors);
                 synchronized (raceCache) {
