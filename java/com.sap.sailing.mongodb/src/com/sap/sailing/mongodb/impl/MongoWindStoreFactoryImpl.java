@@ -18,7 +18,7 @@ public class MongoWindStoreFactoryImpl implements MongoWindStoreFactory, BundleA
     private static MongoWindStoreFactory defaultInstance;
     
     private String defaultHostName;
-    private Integer defaultPort;
+    private int defaultPort;
     private String defaultDatabaseName;
     
     @Override
@@ -63,6 +63,10 @@ public class MongoWindStoreFactoryImpl implements MongoWindStoreFactory, BundleA
     
     public static MongoWindStoreFactory getDefaultInstance() {
         return defaultInstance;
+    }
+
+    public Integer getDefaultPort() {
+        return defaultPort;
     }
 
     @Override
