@@ -219,7 +219,9 @@ public class ModeratorApp extends Servlet {
                 for (TrackedLeg leg : trackedRace.getTrackedLegs()) {
                     JSONObject jsonLeg = new JSONObject();
                     jsonLeg.put("from", leg.getLeg().getFrom().getName());
+                    jsonLeg.put("fromwaypointid", leg.getLeg().getFrom().getId());
                     jsonLeg.put("to", leg.getLeg().getTo().getName());
+                    jsonLeg.put("towaypointid", leg.getLeg().getTo().getId());
                     try {
                         jsonLeg.put("upordownwindleg", leg.isUpOrDownwindLeg(timePoint));
                     } catch (NoWindException e) {
