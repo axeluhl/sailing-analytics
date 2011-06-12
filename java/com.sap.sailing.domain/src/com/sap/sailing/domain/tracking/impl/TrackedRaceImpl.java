@@ -9,6 +9,7 @@ import java.util.concurrent.ConcurrentSkipListSet;
 
 import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CourseListener;
 import com.sap.sailing.domain.base.Distance;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Position;
@@ -32,7 +33,7 @@ import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.util.Util;
 
-public abstract class TrackedRaceImpl implements TrackedRace {
+public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     // TODO observe the race course; if it changes, update leg structures; consider fine-grained update events that tell what changed
     private final RaceDefinition race;
     
@@ -94,11 +95,10 @@ public abstract class TrackedRaceImpl implements TrackedRace {
                 }
             }
         }
-        LinkedHashMap<Leg, TrackedLeg> trackedLegsMap = new LinkedHashMap<Leg, TrackedLeg>();
+        trackedLegs = new LinkedHashMap<Leg, TrackedLeg>();
         for (Leg leg : race.getCourse().getLegs()) {
-            trackedLegsMap.put(leg, createTrackedLeg(race, leg));
+            trackedLegs.put(leg, createTrackedLeg(race, leg));
         }
-        trackedLegs = trackedLegsMap;
         markPassingsForCompetitor = new HashMap<Competitor, NavigableSet<MarkPassing>>();
         tracks = new HashMap<Competitor, GPSFixTrack<Competitor, GPSFixMoving>>();
         for (Competitor competitor : race.getCompetitors()) {
@@ -349,14 +349,19 @@ public abstract class TrackedRaceImpl implements TrackedRace {
         return timePointOfNewestEvent;
     }
 
+    /**
+     * @param timeOfEvent may be <code>null</code> meaning to only unblock waiters but not update any time points
+     */
     protected synchronized void updated(TimePoint timeOfEvent) {
         updateCount++;
         clearAllCaches();
-        if (timePointOfNewestEvent == null || timePointOfNewestEvent.compareTo(timeOfEvent) < 0) {
-            timePointOfNewestEvent = timeOfEvent;
-        }
-        if (startOfTracking == null || startOfTracking.compareTo(timeOfEvent) > 0) {
-            startOfTracking = timeOfEvent;
+        if (timeOfEvent != null) {
+            if (timePointOfNewestEvent == null || timePointOfNewestEvent.compareTo(timeOfEvent) < 0) {
+                timePointOfNewestEvent = timeOfEvent;
+            }
+            if (startOfTracking == null || startOfTracking.compareTo(timeOfEvent) > 0) {
+                startOfTracking = timeOfEvent;
+            }
         }
         notifyAll();
     }
@@ -374,4 +379,22 @@ public abstract class TrackedRaceImpl implements TrackedRace {
         }
     }
     
+
+    @Override
+    public synchronized void waypointAdded(int zeroBasedIndex, Waypoint waypointThatGotAdded) {
+        markPassingsForWaypoint.put(waypointThatGotAdded, new ConcurrentSkipListSet<MarkPassing>(TimedComparator.INSTANCE));
+        for (Buoy buoy : waypointThatGotAdded.getBuoys()) {
+            if (!buoyTracks.containsKey(buoy)) {
+                buoyTracks.put(buoy, new DynamicTrackImpl<Buoy, GPSFix>(buoy, millisecondsOverWhichToAverageSpeed));
+            }
+        }
+        // TODO update trackedLegs
+        updated(/* time point*/ null);
+    }
+
+    @Override
+    public synchronized void waypointRemoved(int zeroBasedIndex, Waypoint waypointThatGotRemoved) {
+        // TODO update trackedLegs
+        updated(/* time point*/ null);
+    }
 }

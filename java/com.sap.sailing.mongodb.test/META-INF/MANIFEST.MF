@@ -11,4 +11,5 @@ Require-Bundle: org.junit4;bundle-version="4.8.1",
  com.sap.sailing.mongodb,
  com.sap.sailing.domain.test,
  com.tractrac.clientmodule,
- com.sap.sailing.domain.tractracadapter
+ com.sap.sailing.domain.tractracadapter,
+ org.eclipse.osgi

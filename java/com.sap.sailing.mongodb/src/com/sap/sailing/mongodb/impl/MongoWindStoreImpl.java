@@ -29,13 +29,12 @@ public class MongoWindStoreImpl implements MongoWindStore {
 
     public MongoWindStoreImpl(int port, String dbName, MongoObjectFactory mongoObjectFactory)
             throws UnknownHostException, MongoException {
-        this("localhost", port, dbName, mongoObjectFactory);
+        this("127.0.0.1", port, dbName, mongoObjectFactory);
     }
 
     public MongoWindStoreImpl(String hostname, int port, String dbName, MongoObjectFactory mongoObjectFactory)
             throws UnknownHostException, MongoException {
-//        mongo = new Mongo(hostname, port); // TODO clarify why this doesn't work with "localhost"/27017
-        mongo = new Mongo();
+        mongo = new Mongo(hostname, port);
         db = mongo.getDB(dbName);
         this.mongoObjectFactory = mongoObjectFactory;
     }

@@ -11,7 +11,7 @@ package com.sap.sailing.domain.base;
  * @author Axel Uhl (d043530)
  * 
  */
-public interface Waypoint extends Named {
+public interface Waypoint extends Named, WithID {
     ControlPoint getControlPoint();
 
     Iterable<Buoy> getBuoys();
