@@ -388,7 +388,6 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                 buoyTracks.put(buoy, new DynamicTrackImpl<Buoy, GPSFix>(buoy, millisecondsOverWhichToAverageSpeed));
             }
         }
-        // TODO add to buoyTracks for buoys of waypoint added
         // TODO update trackedLegs
         updated(/* time point*/ null);
     }
