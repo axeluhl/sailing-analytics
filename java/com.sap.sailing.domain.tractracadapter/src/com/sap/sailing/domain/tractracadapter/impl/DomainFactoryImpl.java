@@ -133,6 +133,11 @@ public class DomainFactoryImpl implements DomainFactory {
         Iterable<Waypoint> courseWaypoints = courseToUpdate.getWaypoints();
         List<Waypoint> newWaypointList = new LinkedList<Waypoint>();
         for (ControlPoint tractracControlPoint : controlPoints) {
+            // The following creates new waypoints; those using equal control points (equality controlled by their UUID)
+            // are considered equal. Therefore, the diff will try to construct a minimal set of changes where those
+            // old waypoints remain the same but where the patch may alter their positions. Deleted waypoints are trivial
+            // regarding ID retention. Waypoints added obtain a new ID during the createWaypoint and will be inserted
+            // with this new ID.
             Waypoint waypoint = createWaypoint(tractracControlPoint);
             newWaypointList.add(waypoint);
         }
