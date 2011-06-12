@@ -72,6 +72,7 @@ class Competitor(BaseDocument):
         'races' : [float, ],
         'marks' : [[float, ], ], # should be named legs but refactoring is so hard in python
         'upordownwind' : [[bool], ], # indicates wheter the leg is up or downwind
+        'additional' : [[[float]]], # additional information regarding one leg (finished, started)
         'values' : [[[float, ]]]
     }
 
