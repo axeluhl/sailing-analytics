@@ -49,8 +49,8 @@ public class TracTracTrackedRaceImpl extends DynamicTrackedRaceImpl implements D
     }
 
     @Override
-    protected TrackedLeg createTrackedLeg(RaceDefinition race, Leg leg) {
-        return new TracTracTrackedLegImpl(this, leg, race.getCompetitors());
+    protected TrackedLeg createTrackedLeg(Leg leg) {
+        return new TracTracTrackedLegImpl(this, leg, getRace().getCompetitors());
     }
 
     @Override
