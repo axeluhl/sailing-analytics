@@ -34,6 +34,7 @@ import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
 import com.sap.sailing.mongodb.DomainObjectFactory;
 import com.sap.sailing.mongodb.MongoObjectFactory;
+import com.sap.sailing.mongodb.impl.MongoWindStoreFactoryImpl;
 
 public class TestStoringAndRetrievingWindTracks extends AbstractTracTracLiveTest implements MongoDBTest {
 
@@ -44,9 +45,13 @@ public class TestStoringAndRetrievingWindTracks extends AbstractTracTracLiveTest
         super();
     }
     
+    private Mongo newMongo() throws UnknownHostException, MongoException {
+        return new Mongo("127.0.0.1", ((MongoWindStoreFactoryImpl) MongoWindStoreFactoryImpl.getDefaultInstance()).getDefaultPort());
+    }
+    
     @Before
     public void dropTestDB() throws UnknownHostException, MongoException {
-        mongo = new Mongo();
+        mongo = newMongo();
         assertNotNull(mongo);
         mongo.dropDatabase(WIND_TEST_DB);
         db = mongo.getDB(WIND_TEST_DB);
@@ -75,7 +80,7 @@ public class TestStoringAndRetrievingWindTracks extends AbstractTracTracLiveTest
         }
         Thread.sleep(1000); // give MongoDB some time to make written data available to other connections
         
-        Mongo myMongo = new Mongo();
+        Mongo myMongo = newMongo();
         DB database = myMongo.getDB(WIND_TEST_DB);
         WindTrack result = DomainObjectFactory.INSTANCE.loadWindTrack(domainEvent, race, windSource, /* millisecondsOverWhichToAverage */
                 30000, database);

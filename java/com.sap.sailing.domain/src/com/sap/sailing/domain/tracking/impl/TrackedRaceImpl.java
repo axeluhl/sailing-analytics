@@ -95,11 +95,10 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                 }
             }
         }
-        LinkedHashMap<Leg, TrackedLeg> trackedLegsMap = new LinkedHashMap<Leg, TrackedLeg>();
+        trackedLegs = new LinkedHashMap<Leg, TrackedLeg>();
         for (Leg leg : race.getCourse().getLegs()) {
-            trackedLegsMap.put(leg, createTrackedLeg(race, leg));
+            trackedLegs.put(leg, createTrackedLeg(race, leg));
         }
-        trackedLegs = trackedLegsMap;
         markPassingsForCompetitor = new HashMap<Competitor, NavigableSet<MarkPassing>>();
         tracks = new HashMap<Competitor, GPSFixTrack<Competitor, GPSFixMoving>>();
         for (Competitor competitor : race.getCompetitors()) {
