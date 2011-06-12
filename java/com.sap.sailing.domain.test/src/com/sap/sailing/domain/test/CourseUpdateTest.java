@@ -109,11 +109,7 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
     @Test
     public void testLastWaypointRemoved() throws PatchFailedException, InterruptedException {
         final boolean[] result = new boolean[1];
-        synchronized (routeData) {
-            while (routeData[0] == null) {
-                routeData.wait();
-            }
-        }
+        waitForRouteData();
         final List<com.tractrac.clientmodule.ControlPoint> controlPoints = new ArrayList<com.tractrac.clientmodule.ControlPoint>(
                 routeData[0].getPoints());
         final com.tractrac.clientmodule.ControlPoint removedControlPoint = controlPoints.remove(controlPoints.size()-1);
@@ -135,16 +131,44 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
     }
 
     @Test
-    public void testWaypointAddedAtEnd() throws PatchFailedException, InterruptedException {
+    public void testLastButOneWaypointRemoved() throws PatchFailedException, InterruptedException {
         final boolean[] result = new boolean[1];
-        final com.tractrac.clientmodule.ControlPoint cp1 = new com.tractrac.clientmodule.ControlPoint(
-                UUID.randomUUID(), "CP1", /* hasTwo */false) {
-        };
+        waitForRouteData();
+        final List<com.tractrac.clientmodule.ControlPoint> controlPoints = new ArrayList<com.tractrac.clientmodule.ControlPoint>(
+                routeData[0].getPoints());
+        final com.tractrac.clientmodule.ControlPoint removedControlPoint = controlPoints.remove(1);
+        course.addCourseListener(new CourseListener() {
+            @Override
+            public void waypointAdded(int zeroBasedIndex, Waypoint waypointThatGotAdded) {
+                System.out.println("waypointAdded " + zeroBasedIndex + " / " + waypointThatGotAdded);
+            }
+
+            @Override
+            public void waypointRemoved(int zeroBasedIndex, Waypoint waypointThatGotRemoved) {
+                System.out.println("waypointRemoved " + zeroBasedIndex + " / " + waypointThatGotRemoved);
+                ControlPoint cp = domainFactory.getControlPoint(removedControlPoint);
+                result[0] = zeroBasedIndex == 1 && waypointThatGotRemoved.getControlPoint() == cp;
+            }
+        });
+        domainFactory.updateCourseWaypoints(course, controlPoints);
+        assertTrue(result[0]);
+    }
+
+    private void waitForRouteData() throws InterruptedException {
         synchronized (routeData) {
             while (routeData[0] == null) {
                 routeData.wait();
             }
         }
+    }
+
+    @Test
+    public void testWaypointAddedAtEnd() throws PatchFailedException, InterruptedException {
+        final boolean[] result = new boolean[1];
+        final com.tractrac.clientmodule.ControlPoint cp1 = new com.tractrac.clientmodule.ControlPoint(
+                UUID.randomUUID(), "CP1", /* hasTwo */false) {
+        };
+        waitForRouteData();
         final List<com.tractrac.clientmodule.ControlPoint> controlPoints = new ArrayList<com.tractrac.clientmodule.ControlPoint>(
                 routeData[0].getPoints());
         controlPoints.add(cp1);
