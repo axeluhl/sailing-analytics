@@ -80,7 +80,7 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
         
         // make sure leg is initialized correctly in CourseImpl
         assertEquals("start/finish", course.getLegs().get(0).getFrom().getName());
-        assertEquals("start/finish", course.getLegs().get(1).getFrom().getName());
+        assertEquals("top", course.getLegs().get(1).getFrom().getName());
     }
 
     @Test
