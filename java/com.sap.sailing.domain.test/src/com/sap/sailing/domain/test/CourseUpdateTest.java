@@ -2,6 +2,7 @@ package com.sap.sailing.domain.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
@@ -19,6 +20,7 @@ import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.CourseListener;
 import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.BuoyImpl;
@@ -187,6 +189,31 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
         });
         domainFactory.updateCourseWaypoints(course, controlPoints);
         assertTrue(result[0]);
+    }
+    
+    @Test
+    public void addWaypointInTheMiddle() throws InterruptedException {
+        waitForRouteData();
+        final com.tractrac.clientmodule.ControlPoint cp1 = new com.tractrac.clientmodule.ControlPoint(
+                UUID.randomUUID(), "CP1", /* hasTwo */false) {
+        };
+        WaypointImpl waypointAdded = new WaypointImpl(domainFactory.getControlPoint(cp1));
+        course.addWaypoint(1, waypointAdded);
+        List<Leg> legs = course.getLegs();
+        assertEquals(routeData[0].getPoints().size(), legs.size()); // usually legs.size()==waypoints.size()-1; but we've added one
+        assertEquals(waypointAdded, legs.get(0).getTo());
+        assertEquals(waypointAdded, legs.get(1).getFrom());
+    }
+    
+    @Test
+    public void removeWaypointInTheMiddle() throws InterruptedException {
+        waitForRouteData();
+        course.removeWaypoint(1);
+        List<Leg> legs = course.getLegs();
+        assertEquals(routeData[0].getPoints().size()-2, legs.size()); // usually legs.size()==waypoints.size()-1; but we've added one
+        for (int i=0; i<legs.size()-1; i++) {
+            assertSame(legs.get(i).getTo(), legs.get(i+1).getFrom());
+        }
     }
     
     @After
