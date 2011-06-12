@@ -1,5 +1,5 @@
 
-import cjson
+import cjson, datetime
 import urllib, urllib2
 
 from sailing.web.util import get_abspath
@@ -67,7 +67,7 @@ class URIConfigurator(object):
 
     def trigger(self, request=None):
         if self.do_log is True:
-            log.info('Triggering URI %s' % self.URI())
+            log.info(' %s Triggering URI %s' % (datetime.datetime.now(), self.URI()))
         return urllib2.urlopen(self.URI()).read()
 
 def jsonByUrl(configurator):
@@ -80,7 +80,7 @@ def jsonByUrl(configurator):
         handle.close()
 
     else:
-        data = configurator.trigger().read()
+        data = configurator.trigger()
 
         if data.find('Exception')>0:
             raise Exception, 'Java triggered exception: %s' % data[:550]

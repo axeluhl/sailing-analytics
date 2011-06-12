@@ -66,6 +66,7 @@
 
             // also show wind directions
             GET('determineWindDirection', {at : at}, function(data) {
+                map.clearPaths();
                 if (typeof data == 'string') {
                     alert('Error: ' + data);
                     return;

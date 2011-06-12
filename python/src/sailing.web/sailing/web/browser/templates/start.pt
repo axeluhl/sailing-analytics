@@ -20,7 +20,6 @@
 
         <div style="text-align: right;margin: 13px 1px 13px 1px;">
         <form method="POST" action="/++/configureListener">
-            <tal:if condition="view.listenerStarted()">
             <div id="listeners-container">
                 <select id="listeners">
                     <option>Loading....</option>
@@ -36,7 +35,6 @@
                 <input type="button" value="Stop" onclick="GET('stopListener', {tid: $('#listeners option:selected').val()}, loadListeners)"/>
                 &nbsp;&nbsp;
             </div>
-            </tal:if>
         </form>
         </div>
 

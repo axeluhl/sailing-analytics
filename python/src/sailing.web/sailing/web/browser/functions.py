@@ -40,6 +40,10 @@ def startListenerThreads(conf, eventlist):
     with lock:
         for event in eventlist: 
             event_impl = model.EventImpl.queryOneBy(name=event['name'])
+
+            if not event_impl:
+                raise Exception, 'Could not find event %s in database' % event['name']
+
             for racename in event_impl.races:
                 key = hash('%s-%s-%s-%s' % (conf.host, conf.port, event['name'], racename))
 
@@ -168,10 +172,10 @@ def configureListener(context, request):
             conf.setCommand(config.LIST_EVENTS)
             eventlist = provider.eventConfiguration(conf)
 
-        if model.EventImpl.queryCount() == 0:
-            return view.yieldMessage('Seems that there are no events that can be shown! Listener not started?')
+        if eventlist == [] or eventlist[0].get('races', []) == []:
+            return view.yieldMessage('Seems that java server (listener) is not initialized correctly. Yields no events and/or races! Try to reconfigure...')
 
-        # start listener thread if this is not yet active
+        # start listener thread if it is not yet active
         startListenerThreads(conf, eventlist)
 
         view.session['listener-started'] = True
@@ -463,7 +467,7 @@ def adminLiveData(context, request):
 
         results += '\nLEG: %s RACE-START: %s NEWEST: %s WIND: (%s %s %s)\n' % (legpos+1, view.millisToDatetime(race.start), view.millisToDatetime(race.timeofnewestevent), race.wind_source, race.wind_bearing, race.wind_speed)
         results += 'NAME'.ljust(16) + 'TOTAL'.ljust(7) + 'CRANK'.ljust(7) + 'RRANK'.ljust(7) 
-        results += 'MRANK'.ljust(7) + 'LRANK'.ljust(9) + 'SPD'.ljust(9) + 'DST'.ljust(9) + 'VMG'.ljust(9) + 'AVMG'.ljust(9) + 'SGAP'.ljust(9) + 'ETA'.ljust(9) + 'DSTGO'.ljust(9)
+        results += 'MRANK'.ljust(7) + 'LRANK'.ljust(9) + 'SPD'.ljust(9) + 'DSTTRV'.ljust(9) + 'VMG'.ljust(9) + 'AVMG'.ljust(9) + 'SGAP'.ljust(9) + 'ETA'.ljust(9) + 'DSTGO'.ljust(9)
         results += '\n'
 
         # sort competitors by rank in current leg
@@ -474,7 +478,10 @@ def adminLiveData(context, request):
             results += '%s %s' % (str(c.races[racepos]).ljust(7), str(c.marks[racepos][legpos]).ljust(7))
                 
             for v in c.values[racepos][legpos]:
-                results += str('%.1f' % v).ljust(9)
+                if v == 42.260426041982:
+                    results += 'ANCHOR'.ljust(9)
+                else:
+                    results += str('%.2f' % v).ljust(9)
 
             results += '\n'
 
