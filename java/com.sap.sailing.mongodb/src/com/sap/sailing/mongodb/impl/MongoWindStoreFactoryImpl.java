@@ -13,13 +13,25 @@ import com.sap.sailing.mongodb.MongoWindStore;
 import com.sap.sailing.mongodb.MongoWindStoreFactory;
 
 public class MongoWindStoreFactoryImpl implements MongoWindStoreFactory, BundleActivator {
+    private static final String MONGO_PORT = "mongo.port";
+
+    private static final String MONGO_HOSTNAME = "mongo.hostname";
+
+    private static final String MONGO_DB_NAME = "mongo.dbName";
+
     private static final Logger logger = Logger.getLogger(MongoWindStoreFactoryImpl.class.getName());
     
     private static MongoWindStoreFactory defaultInstance;
     
     private String defaultHostName;
-    private Integer defaultPort;
+    private int defaultPort;
     private String defaultDatabaseName;
+    
+    public MongoWindStoreFactoryImpl() {
+        defaultHostName = System.getProperty(MONGO_HOSTNAME, "127.0.0.1");
+        defaultPort = Integer.valueOf(System.getProperty(MONGO_PORT, "27017"));
+        defaultDatabaseName = System.getProperty(MONGO_DB_NAME, DEFAULT_DB_NAME);
+    }
     
     @Override
     public MongoWindStore getMongoWindStore(MongoObjectFactory mongoObjectFactory) throws UnknownHostException, MongoException {
@@ -45,24 +57,31 @@ public class MongoWindStoreFactoryImpl implements MongoWindStoreFactory, BundleA
     @Override
     public void start(BundleContext context) throws Exception {
         defaultInstance = this;
-        defaultDatabaseName = context.getProperty("mongo.dbName");
+        defaultDatabaseName = context.getProperty(MONGO_DB_NAME);
         if (defaultDatabaseName == null) {
             defaultDatabaseName = DEFAULT_DB_NAME;
         } else {
             logger.log(Level.INFO, "found mongo.dbName="+defaultDatabaseName);
         }
-        defaultHostName = context.getProperty("mongo.hostname");
+        defaultHostName = context.getProperty(MONGO_HOSTNAME);
         if (defaultHostName == null) {
             defaultHostName = "localhost";
         } else {
             logger.log(Level.INFO, "found mongo.hostname="+defaultHostName);
         }
-        defaultPort = context.getProperty("mongo.port") != null ? Integer.valueOf(context.getProperty("mongo.port")) : 27017;
+        defaultPort = context.getProperty(MONGO_PORT) != null ? Integer.valueOf(context.getProperty(MONGO_PORT)) : 27017;
         logger.log(Level.INFO, "Using port "+defaultPort+" as default for Mongo wind stores");
     }
     
     public static MongoWindStoreFactory getDefaultInstance() {
+        if (defaultInstance == null) {
+            defaultInstance = new MongoWindStoreFactoryImpl();
+        }
         return defaultInstance;
+    }
+
+    public Integer getDefaultPort() {
+        return defaultPort;
     }
 
     @Override

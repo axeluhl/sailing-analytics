@@ -23,15 +23,20 @@ import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.mongodb.DomainObjectFactory;
 import com.sap.sailing.mongodb.MongoObjectFactory;
+import com.sap.sailing.mongodb.impl.MongoWindStoreFactoryImpl;
 
 public class TestStoringAndRetrievingWindData implements MongoDBTest {
     private static final String WIND_TEST_COLLECTION = "wind_test_collection";
     private Mongo mongo;
     private DB db;
     
+    private Mongo newMongo() throws UnknownHostException, MongoException {
+        return new Mongo("127.0.0.1", ((MongoWindStoreFactoryImpl) MongoWindStoreFactoryImpl.getDefaultInstance()).getDefaultPort());
+    }
+    
     @Before
     public void dropTestDB() throws UnknownHostException, MongoException {
-        mongo = new Mongo();
+        mongo = newMongo();
         assertNotNull(mongo);
         mongo.dropDatabase(WIND_TEST_DB);
         db = mongo.getDB(WIND_TEST_DB);
@@ -61,7 +66,7 @@ public class TestStoringAndRetrievingWindData implements MongoDBTest {
 
         {
             Thread.sleep(1000); // wait until MongoDB has recorded the change and made it visible
-            Mongo mongo = new Mongo();
+            Mongo mongo = newMongo();
             assertNotNull(mongo);
             DB db = mongo.getDB(WIND_TEST_DB);
             assertNotNull(db);
@@ -86,7 +91,7 @@ public class TestStoringAndRetrievingWindData implements MongoDBTest {
         
         {
             Thread.sleep(1000); // wait until MongoDB has recorded the change and made it visible
-            Mongo mongo = new Mongo();
+            Mongo mongo = newMongo();
             assertNotNull(mongo);
             DB db = mongo.getDB(WIND_TEST_DB);
             assertNotNull(db);

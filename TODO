@@ -4,17 +4,15 @@ Axel
 
  - Implement and test course update with corresponding TrackedLeg[OfCompetitor] updates
 
- - Clarify Equinox server upgrade process from the maven-repository
-
  - Open test server firewall ports for UDP / Expedition wind integration
 
  - test UDP ports
 
  - Set up two Expedition machines with RF and UMTS transmission, test killing one
 
- - enable switching between our and TracTrac-provided leaderboard information
-
  - Test fail-over in case one of the two Java VM fails
+
+ - enable switching between our and TracTrac-provided leaderboard information
 
  - Pass final production instance URL information to BeTomorrow for wind integration
 

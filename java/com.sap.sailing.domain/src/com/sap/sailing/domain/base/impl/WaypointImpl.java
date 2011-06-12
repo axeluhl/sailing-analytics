@@ -6,17 +6,20 @@ import com.sap.sailing.domain.base.Waypoint;
 
 public class WaypointImpl implements Waypoint {
     private final ControlPoint controlPoint;
+    private static int idCounter = 1;
+    private final int id;
     
+    public WaypointImpl(ControlPoint controlPoint) {
+        this.controlPoint = controlPoint;
+        id = idCounter++;
+    }
+
     public boolean equals(Object o) {
         return getControlPoint() == ((Waypoint) o).getControlPoint();
     }
     
     public int hashCode() {
         return 984637 ^ getControlPoint().hashCode();
-    }
-
-    public WaypointImpl(ControlPoint controlPoint) {
-        this.controlPoint = controlPoint;
     }
 
     @Override
@@ -37,5 +40,13 @@ public class WaypointImpl implements Waypoint {
     @Override
     public Iterable<Buoy> getBuoys() {
         return getControlPoint().getBuoys();
+    }
+
+    /**
+     * Note that a waypoint is not compared by its identity but by the control point it represents.
+     */
+    @Override
+    public Integer getId() {
+        return id;
     }
 }
