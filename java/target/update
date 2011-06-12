@@ -1,0 +1,8 @@
+#!/bin/sh
+branch=`basename \`pwd\` | sed -e 's/[12]$//'`
+echo Branch: $branch
+branchMavenRepository=~/maven-repositories/$branch
+echo Maven repository for branch: $branchMavenRepository
+echo Copying all JAR files from Maven repository to branch server\s plugin directory...
+find $branchMavenRepository -name '*.jar' -exec cp -v "{}" ./plugins \;
+echo Done.
