@@ -350,14 +350,19 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         return timePointOfNewestEvent;
     }
 
+    /**
+     * @param timeOfEvent may be <code>null</code> meaning to only unblock waiters but not update any time points
+     */
     protected synchronized void updated(TimePoint timeOfEvent) {
         updateCount++;
         clearAllCaches();
-        if (timePointOfNewestEvent == null || timePointOfNewestEvent.compareTo(timeOfEvent) < 0) {
-            timePointOfNewestEvent = timeOfEvent;
-        }
-        if (startOfTracking == null || startOfTracking.compareTo(timeOfEvent) > 0) {
-            startOfTracking = timeOfEvent;
+        if (timeOfEvent != null) {
+            if (timePointOfNewestEvent == null || timePointOfNewestEvent.compareTo(timeOfEvent) < 0) {
+                timePointOfNewestEvent = timeOfEvent;
+            }
+            if (startOfTracking == null || startOfTracking.compareTo(timeOfEvent) > 0) {
+                startOfTracking = timeOfEvent;
+            }
         }
         notifyAll();
     }
@@ -377,14 +382,21 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     
 
     @Override
-    public void waypointAdded(int zeroBasedIndex, Waypoint waypointThatGotAdded) {
-        // TODO Auto-generated method stub
-        
+    public synchronized void waypointAdded(int zeroBasedIndex, Waypoint waypointThatGotAdded) {
+        markPassingsForWaypoint.put(waypointThatGotAdded, new ConcurrentSkipListSet<MarkPassing>(TimedComparator.INSTANCE));
+        for (Buoy buoy : waypointThatGotAdded.getBuoys()) {
+            if (!buoyTracks.containsKey(buoy)) {
+                buoyTracks.put(buoy, new DynamicTrackImpl<Buoy, GPSFix>(buoy, millisecondsOverWhichToAverageSpeed));
+            }
+        }
+        // TODO add to buoyTracks for buoys of waypoint added
+        // TODO update trackedLegs
+        updated(/* time point*/ null);
     }
 
     @Override
-    public void waypointRemoved(int zeroBasedIndex, Waypoint waypointThatGotRemoved) {
-        // TODO Auto-generated method stub
-        
+    public synchronized void waypointRemoved(int zeroBasedIndex, Waypoint waypointThatGotRemoved) {
+        // TODO update trackedLegs
+        updated(/* time point*/ null);
     }
 }
