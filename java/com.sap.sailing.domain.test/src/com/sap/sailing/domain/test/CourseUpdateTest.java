@@ -77,6 +77,10 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
         course = race.getCourse();
         assertNotNull(course);
         assertEquals(3, Util.size(course.getWaypoints()));
+        
+        // make sure leg is initialized correctly in CourseImpl
+        assertEquals("start/finish", course.getLegs().get(0).getFrom().getName());
+        assertEquals("start/finish", course.getLegs().get(1).getFrom().getName());
     }
 
     @Test

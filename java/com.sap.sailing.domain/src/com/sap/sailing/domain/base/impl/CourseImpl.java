@@ -36,12 +36,15 @@ public class CourseImpl extends NamedImpl implements Course {
         if (waypointIter.hasNext()) {
             Waypoint previous = waypointIter.next();
             this.waypoints.add(previous);
+
+            int indexOfStartWaypoint = i;
+            
             waypointIndexes.put(previous, i++);
             while (waypointIter.hasNext()) {
                 Waypoint current = waypointIter.next();
                 this.waypoints.add(current);
                 waypointIndexes.put(current, i++);
-                Leg leg = new LegImpl(this, i);
+                Leg leg = new LegImpl(this, indexOfStartWaypoint);
                 legs.add(leg);
                 previous = current;
             }
