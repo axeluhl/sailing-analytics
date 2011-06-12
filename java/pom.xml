@@ -105,7 +105,7 @@
 					<argLine>-Dhttp.proxyHost=proxy -Dhttp.proxyPort=8080 -Xmx1024m -XX:PermSize=256m -XX:-UseGCOverheadLimit -XX:+UseParallelGC</argLine>
  -->
 <!-- no proxy -->
-					<argLine>-Xmx1024m -XX:PermSize=256m -XX:-UseGCOverheadLimit -XX:+UseParallelGC</argLine>
+					<argLine>-Dmongo.port=10200 -Xmx1024m -XX:PermSize=256m -XX:-UseGCOverheadLimit -XX:+UseParallelGC</argLine>
 <!-- -->
 <!-- -->
 <!-- debug

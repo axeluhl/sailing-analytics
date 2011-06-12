@@ -40,11 +40,10 @@ public class CourseImpl extends NamedImpl implements Course {
             while (waypointIter.hasNext()) {
                 Waypoint current = waypointIter.next();
                 this.waypoints.add(current);
-                waypointIndexes.put(current, i);
-                Leg leg = new LegImpl(this, i-1);
+                waypointIndexes.put(current, i++);
+                Leg leg = new LegImpl(this, i);
                 legs.add(leg);
                 previous = current;
-                i++;
             }
         }
     }
@@ -59,7 +58,7 @@ public class CourseImpl extends NamedImpl implements Course {
     @Override
     public void addWaypoint(int zeroBasedPosition, Waypoint waypointToAdd) {
         waypoints.add(zeroBasedPosition, waypointToAdd);
-        legs.add(new LegImpl(this, waypoints.size()-1)); // add a leg to the end; the old one with zeroBasedPosition takes over
+        legs.add(new LegImpl(this, zeroBasedPosition));
         notifyListenersWaypointAdded(zeroBasedPosition, waypointToAdd);
     }
 
