@@ -183,7 +183,7 @@ public class ModeratorApp extends Servlet {
         } else {
             try {
                 TimePoint timePoint = getTimePoint(req, PARAM_NAME_TIME, PARAM_NAME_TIME_MILLIS,
-                        trackedRace.getTimePointOfNewestEvent()==null?MillisecondsTimePoint.now():trackedRace.getTimePointOfNewestEvent());
+                        trackedRace.getTimePointOfLastEvent()==null?MillisecondsTimePoint.now():trackedRace.getTimePointOfLastEvent());
                 String sinceUpdateString = req.getParameter(PARAM_NAME_SINCE_UPDATE);
                 if (sinceUpdateString != null) {
                 	System.out.println("Blocking...");
@@ -236,6 +236,11 @@ public class ModeratorApp extends Servlet {
                         TrackedLegOfCompetitor trackedLegOfCompetitor = leg.getTrackedLeg(competitor);
                         if (trackedLegOfCompetitor != null) {
                             jsonCompetitorInLeg.put("name", competitor.getName());
+                            Speed currentSpeedOverGround = trackedLegOfCompetitor.getSpeedOverGround(timePoint);
+                            if (currentSpeedOverGround != null) {
+                                jsonCompetitorInLeg.put("currentSpeedOverGroundInKnots",
+                                        currentSpeedOverGround == null ? null : currentSpeedOverGround.getKnots());
+                            }
                             Speed averageSpeedOverGround = trackedLegOfCompetitor.getAverageSpeedOverGround(timePoint);
                             if (averageSpeedOverGround != null) {
                                 jsonCompetitorInLeg.put("averageSpeedOverGroundInKnots",

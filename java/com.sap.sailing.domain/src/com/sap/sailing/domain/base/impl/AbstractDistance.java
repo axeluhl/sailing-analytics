@@ -7,6 +7,16 @@ import com.sap.sailing.domain.base.Speed;
 public abstract class AbstractDistance implements Distance {
 
     @Override
+    public boolean equals(Object o) {
+        return (o instanceof Distance) && this.compareTo((Distance) o) == 0;
+    }
+    
+    @Override
+    public int hashCode() {
+        return 9128347 ^ (int) getMeters();
+    }
+    
+    @Override
     public int compareTo(Distance o) {
         return getMeters() > o.getMeters() ? 1 : getMeters() == o.getMeters() ? 0 : -1;
     }

@@ -65,7 +65,7 @@ public class MongoWindStoreFactoryImpl implements MongoWindStoreFactory, BundleA
         }
         defaultHostName = context.getProperty(MONGO_HOSTNAME);
         if (defaultHostName == null) {
-            defaultHostName = "localhost";
+            defaultHostName = "127.0.0.1";
         } else {
             logger.log(Level.INFO, "found mongo.hostname="+defaultHostName);
         }
