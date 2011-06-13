@@ -1,18 +1,45 @@
 
+var global_sortkey = 'name';
+var global_direction = 'desc';
+var global_race = '1:3';
+var global_competitors = '1:20';
+
+var loader_image = "<img style='margin: 3px 0px 3px 3px' src='/static/images/ajax-loader-greybg.gif'/>";
+
 /*
  * Loads leaderboard data. Parameters:
  *
- * races:  Slice that indicates which data to load (e.g. "0:2")
+ * races:  Slice that indicates which data to load (e.g. "1:3")
  * sortby: Sorting parameters (e.g "1,1,1")
- * competitors: Slice indicating which competitors to show (e.g. "0:20")
+ * competitors: Slice indicating which competitors to show (e.g. "1:20")
  */
-function loadLeaderboard(races, sortby, competitors) {
+function loadLeaderboard(races, sortby, competitors, direction) {
+    showLoader();
     $.getJSON('/++/moderatorLiveData', 
-                {races:races, sortby:sortby, competitors:competitors}, 
+                {races:races, sortby:sortby, competitors:competitors, direction:direction}, 
         function(data) {
             displayLeaderboard(data);
+            hideLoader();
         }
     );
+}
+
+function showLoader() {
+    $('.refresh-btn').html(loader_image);
+}
+
+function hideLoader() {
+    $('.refresh-btn').html('');
+}
+function sortBy(param, element) {
+    element.toggleClass('sort-asc').toggleClass('sort-desc');
+
+    if (element.hasClass('sort-asc'))
+        global_direction = 'asc';
+    else global_direction = 'desc';
+
+    global_sortkey = param;
+    loadLeaderboard(global_race, param, global_competitors, global_direction);
 }
 
 function yieldValue(element, newvalue) {

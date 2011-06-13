@@ -29,8 +29,6 @@ Simon
 
 + Server: Mehr RAM bestellen
 + Prüfen, warum in der Map Anzeige manchmal ein Competitor doppelt ist
-+ Simulator mit Speed = 1 anschmeissen und dann prüfen was passiert
-+ Prüfen warum im live leaderbaord manchmal 4 legs angezeigt werden (max ist 2+1)
-+ Prüfen warum der Listener thread manchmal nicht richtig gestoppt wird
++ ANCHOR anzeigen für große Werte (Bei DSTTRV raussuchen was da z.B. groß ist)
 + Implementierung Leaderboard auf Basis HTML Designer
 + Wenn Axel Branches eingerichtet hat, dann MongoDBs auf Server startbar machen über supervisord
