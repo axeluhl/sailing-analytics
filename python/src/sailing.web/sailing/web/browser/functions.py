@@ -501,7 +501,7 @@ def adminLiveData(context, request):
 
         results += '\nLAST SHOWRACE CALL: %s (UPCOUNT PARAM: %s)\nLEG: %s (FROM: %s TO: %s)\nRACE-START: %s NEWEST EVENT: %s WIND: (%s %s %s)\n' % (t_up, t_upcount, legpos+1, competitors[0].marknames[racepos][legpos][0], competitors[0].marknames[racepos][legpos][1], view.millisToDatetime(race.start), view.millisToDatetime(race.timeofnewestevent), race.wind_source, race.wind_bearing, race.wind_speed)
         results += 'NAME'.ljust(16) + 'TOTAL'.ljust(7) + 'CRANK'.ljust(7) + 'RRANK'.ljust(7) 
-        results += 'MRANK'.ljust(7) + 'LRANK'.ljust(9) + 'SPD'.ljust(9) + 'DSTTRV'.ljust(9) + 'VMG'.ljust(9) + 'AVMG'.ljust(9) + 'SGAP'.ljust(9) + 'ETA'.ljust(9) + 'DSTGO'.ljust(9) + 'FINISHD'.ljust(9) + 'STARTD'.ljust(9) + 'UPDOWNWIND'.ljust(12)
+        results += 'MRANK'.ljust(7) + 'LRANK'.ljust(9) + 'SPD'.ljust(9) + 'DSTTRV'.ljust(9) + 'VMG'.ljust(9) + 'AVMG'.ljust(9) + 'SGAP'.ljust(9) + 'ETA'.ljust(9) + 'DSTGO'.ljust(9) + 'STARTD'.ljust(9) + 'FINISHD'.ljust(9) + 'UPDOWNWIND'.ljust(12)
         results += '\n'
 
         # sort competitors by rank in current leg
