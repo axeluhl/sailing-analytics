@@ -81,7 +81,10 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
             }
         });
         addListenersForStoredDataAndStartController(receivers);
-        race = domainFactory.getRaceDefinition(getEvent().getRaceList().iterator().next());
+        Race tractracRace = getEvent().getRaceList().iterator().next();
+        // now we expect that there is no 
+        assertNull(domainFactory.getExistingRaceDefinitionForRace(tractracRace));
+        race = domainFactory.getRaceDefinition(tractracRace);
         course = race.getCourse();
         assertNotNull(course);
         assertEquals(3, Util.size(course.getWaypoints()));
@@ -89,6 +92,11 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
         // make sure leg is initialized correctly in CourseImpl
         assertEquals("start/finish", course.getLegs().get(0).getFrom().getName());
         assertEquals("top", course.getLegs().get(1).getFrom().getName());
+    }
+
+    private void assertNull(RaceDefinition existingRaceDefinitionForRace) {
+        // TODO Auto-generated method stub
+        
     }
 
     /**

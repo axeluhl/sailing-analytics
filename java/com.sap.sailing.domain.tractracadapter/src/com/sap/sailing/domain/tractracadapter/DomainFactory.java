@@ -117,6 +117,11 @@ public interface DomainFactory {
     DynamicTrackedRace trackRace(TrackedEvent trackedEvent, RaceDefinition raceDefinition,
             WindStore windStore, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed, Event tractracEvent);
 
+    /**
+     * Non-blocking call that returns <code>null</code> if the {@link RaceDefinition} for the TracTrac Event
+     * hasn't been created yet, e.g., because the course definition hasn't been received yet or the listener
+     * for receiving course information hasn't been registered (yet).
+     */
     RaceDefinition getRace(Event tractracEvent);
 
     JSONService parseJSONURL(URL jsonURL) throws IOException, ParseException, org.json.simple.parser.ParseException;
