@@ -25,4 +25,9 @@ public interface RaceHandle {
 
     DynamicTrackedEvent getTrackedEvent();
 
+    /**
+     * The tracker managing the tracking of the race to which this is a handle.
+     */
+    RaceTracker getRaceTracker();
+
 }

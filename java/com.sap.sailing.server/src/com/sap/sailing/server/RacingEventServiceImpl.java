@@ -16,6 +16,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import com.sap.sailing.declination.DeclinationService;
 import com.sap.sailing.domain.base.Event;
@@ -34,11 +35,13 @@ import com.sap.sailing.util.Util.Pair;
 import com.sap.sailing.util.Util.Triple;
 
 public class RacingEventServiceImpl implements RacingEventService {
+    private static final Logger logger = Logger.getLogger(RacingEventServiceImpl.class.getName());
+    
     private final DomainFactory domainFactory;
     
     private final Map<String, Event> eventsByName;
     
-    private final Map<Event, Set<RaceTracker>> raceTrackers;
+    private final Map<Event, Set<RaceTracker>> raceTrackersByEvent;
     
     /**
      * Remembers the wind tracker and the port on which the UDP receiver with which the wind tracker is
@@ -46,13 +49,19 @@ public class RacingEventServiceImpl implements RacingEventService {
      */
     private final Map<RaceDefinition, Pair<WindTracker, Integer>> windTrackers;
     
+    /**
+     * Remembers the trackers by paramURL/liveURI/storedURI to avoid duplication
+     */
+    private final Map<Triple<URL, URI, URI>, RaceTracker> raceTrackersByURLs;
+    
     private final Map<Integer, UDPExpeditionReceiver> windReceivers;
 
     public RacingEventServiceImpl() {
         domainFactory = DomainFactory.INSTANCE;
         eventsByName = new HashMap<String, Event>();
-        raceTrackers = new HashMap<Event, Set<RaceTracker>>();
+        raceTrackersByEvent = new HashMap<Event, Set<RaceTracker>>();
         windTrackers = new HashMap<RaceDefinition, Pair<WindTracker, Integer>>();
+        raceTrackersByURLs = new HashMap<Triple<URL, URI, URI>, RaceTracker>();
         windReceivers = new HashMap<Integer, UDPExpeditionReceiver>();
     }
     
@@ -85,33 +94,44 @@ public class RacingEventServiceImpl implements RacingEventService {
     @Override
     public RaceHandle addRace(URL paramURL, URI liveURI, URI storedURI, WindStore windStore) throws MalformedURLException, FileNotFoundException,
             URISyntaxException {
-        // FIXME check if a tracker for this parameter combination already exists and if so, return its race handle
-        RaceTracker tracker = getDomainFactory().createRaceTracker(paramURL, liveURI, storedURI, windStore);
-        Set<RaceTracker> trackers = raceTrackers.get(tracker.getEvent());
-        if (trackers == null) {
-            trackers = new HashSet<RaceTracker>();
-            raceTrackers.put(tracker.getEvent(), trackers);
-        }
-        trackers.add(tracker);
-        String eventName = tracker.getEvent().getName();
-        Event eventWithName = eventsByName.get(eventName);
-        if (eventWithName != null) {
-            if (eventWithName != tracker.getEvent()) {
-                throw new RuntimeException("Internal error. Two Event objects with equal name "+eventName);
+        Triple<URL, URI, URI> key = new Triple<URL, URI, URI>(paramURL, liveURI, storedURI);
+        RaceTracker tracker = raceTrackersByURLs.get(key);
+        if (tracker == null) {
+            tracker = getDomainFactory().createRaceTracker(paramURL, liveURI, storedURI, windStore);
+            raceTrackersByURLs.put(key, tracker);
+            Set<RaceTracker> trackers = raceTrackersByEvent.get(tracker.getEvent());
+            if (trackers == null) {
+                trackers = new HashSet<RaceTracker>();
+                raceTrackersByEvent.put(tracker.getEvent(), trackers);
+            }
+            trackers.add(tracker);
+            String eventName = tracker.getEvent().getName();
+            Event eventWithName = eventsByName.get(eventName);
+            if (eventWithName != null) {
+                if (eventWithName != tracker.getEvent()) {
+                    throw new RuntimeException("Internal error. Two Event objects with equal name "+eventName);
+                }
+            } else {
+                eventsByName.put(eventName, tracker.getEvent());
             }
         } else {
-            eventsByName.put(eventName, tracker.getEvent());
+            WindStore existingTrackersWindStore = tracker.getWindStore();
+            if (!existingTrackersWindStore.equals(windStore)) {
+                logger.warning("Wind store mismatch. Requested wind store: "+windStore+
+                        ". Wind store in use by existing tracker: "+existingTrackersWindStore);
+            }
         }
         return tracker.getRaceHandle();
     }
 
     @Override
     public void stopTracking(Event event) throws MalformedURLException, IOException, InterruptedException {
-        if (raceTrackers.containsKey(event)) {
-            for (RaceTracker raceTracker : raceTrackers.get(event)) {
-                raceTracker.stop();
+        if (raceTrackersByEvent.containsKey(event)) {
+            for (RaceTracker raceTracker : raceTrackersByEvent.get(event)) {
+                raceTracker.stop(); // this also removes the TrackedRace from trackedEvent
+                raceTrackersByURLs.remove(raceTracker.getURLs());
             }
-            raceTrackers.remove(event);
+            raceTrackersByEvent.remove(event);
         }
         if (event != null && event.getName() != null) {
             eventsByName.remove(event.getName());
@@ -123,19 +143,19 @@ public class RacingEventServiceImpl implements RacingEventService {
 
     @Override
     public void stopTracking(Event event, RaceDefinition race) throws MalformedURLException, IOException, InterruptedException {
-        if (raceTrackers.containsKey(event)) {
-            Iterator<RaceTracker> trackerIter = raceTrackers.get(event).iterator();
+        if (raceTrackersByEvent.containsKey(event)) {
+            Iterator<RaceTracker> trackerIter = raceTrackersByEvent.get(event).iterator();
             while (trackerIter.hasNext()) {
                 RaceTracker raceTracker = trackerIter.next();
                 if (raceTracker.getRace() == race) {
-                    raceTracker.stop();
+                    raceTracker.stop(); // this also removes the TrackedRace from trackedEvent
                     trackerIter.remove();
+                    raceTrackersByURLs.remove(raceTracker.getURLs());
                 }
             }
         }
-        // FIXME remove TrackedRace from TrackedEvent
         // if the last tracked race was removed, remove the entire event
-        if (raceTrackers.get(event).isEmpty()) {
+        if (raceTrackersByEvent.get(event).isEmpty()) {
             stopTracking(event);
         }
     }
