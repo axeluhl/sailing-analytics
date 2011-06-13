@@ -10,6 +10,10 @@ Axel
 
  - Set up two Expedition machines with RF and UMTS transmission, test killing one
 
+ - Test duplicate addrace for the same race; consider cleaning cache when stopRace/stopEvent is invoked
+
+ - Test duplicate addevent for the same event
+
  - Test fail-over in case one of the two Java VM fails
 
  - enable switching between our and TracTrac-provided leaderboard information
