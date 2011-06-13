@@ -321,7 +321,7 @@ def liveRaceInformation(configurator):
                 # check for cases where calculations from backend yield
                 # strange numbers - this happens in cases where the competitor
                 # has no speed during mark passing
-                if k in ['Infinity', 'Infinite']:
+                if k in ['Infinity', 'Infinite'] or float(k) > 150000.0:
 
                     # use a magic number (that is very unlikely to occur)
                     # to indicate that competitor has no speed
