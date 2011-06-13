@@ -61,7 +61,13 @@ public class CourseImpl extends NamedImpl implements Course {
     @Override
     public void addWaypoint(int zeroBasedPosition, Waypoint waypointToAdd) {
         waypoints.add(zeroBasedPosition, waypointToAdd);
-        legs.add(new LegImpl(this, zeroBasedPosition));
+        int legStartWaypointIndex;
+        if (zeroBasedPosition == waypoints.size()-1) {   // added to end
+            legStartWaypointIndex = zeroBasedPosition-1;
+        } else {
+            legStartWaypointIndex = zeroBasedPosition;
+        }
+        legs.add(new LegImpl(this, legStartWaypointIndex));
         notifyListenersWaypointAdded(zeroBasedPosition, waypointToAdd);
     }
 
