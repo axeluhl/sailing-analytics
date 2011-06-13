@@ -23,40 +23,39 @@ function displayLeaderboard(data) {
     for (key in data) {
         competitor = data[key];
 
-        $('#overall-clipping tr[rowid='+rowid+'] td[colid=3] span').each(function(index) {
-            if ($(this).html() != key) {
-                /* competitor position has changed - refresh whole line */
+        name_element = $('#clipping-'+rowid+'-3 span');
+        if (true || name_element.html() == key) {
+            /* competitor position has changed - refresh whole line */
 
-                $(this).html(key);
-                $(this).closest('tr').find('td[colid=2] span').html(competitor.nationality);
-                $(this).closest('tr').find('td[colid=1] span').html(competitor.global_rank);
+            name_element.html(key);
+            $('#clipping-'+rowid+'-1 span').html(competitor.global_rank);
+            $('#clipping-'+rowid+'-2 span').html(competitor.nationality);
 
-                /* now set values independent what has been there before */
-                racepos = 1;
-                for (racerank in competitor.raceranks) {
-                    $('#race-'+racepos+' .main-box ul li[rowid='+rowid+']').html(competitor.raceranks[racerank]);
+            /* now set values independent what has been there before */
+            racepos = 1;
+            for (racerank in competitor.raceranks) {
+                $('#race-'+racepos+'-rankrow-'+rowid).html(competitor.raceranks[racerank]);
 
-                    markpos = 1;
-                    for (markrank in competitor.markranks[racepos-1]) {
-                        $('#race-'+racepos+' #leg-'+markpos+' .leg-box ul li[rowid='+rowid+']').html(competitor.markranks[racepos-1][markrank]);
+                markpos = 1;
+                for (markrank in competitor.markranks[racepos-1]) {
+                    $('#race-'+racepos+'-mark-'+markpos+'-row-'+rowid).html(competitor.markranks[racepos-1][markrank]);
 
-                        legpos = 1;
-                        for (legvalue in competitor.legvalues[racepos-1][markpos-1]) {
-                            if (legvalue == 0) {
-                                $('#race-'+racepos+' #leg-'+markpos+' .table-box ul li[rowid='+rowid+']').html(parseFloat(competitor.legvalues[racepos-1][markpos-1][legvalue]).toFixed());
-                            } else {
-                                $('#r'+racepos+'-m'+markpos+' tr[rowid='+rowid+'] td[colid='+(legpos-1)+'] span').html(competitor.legvalues[racepos-1][markpos-1][legvalue]);
-                            }
-                            legpos += 1;
+                    legpos = 1;
+                    for (legvalue in competitor.legvalues[racepos-1][markpos-1]) {
+                        if (legvalue == 0) {
+                            $('#race-'+racepos+'-mark-'+markpos+'-legrow-'+rowid).html(parseFloat(competitor.legvalues[racepos-1][markpos-1][legvalue]).toFixed());
+                        } else {
+                            $('#race-'+racepos+'-mark-'+markpos+'-valrow-'+rowid+'-pos-'+(legpos-1)+' span').html(competitor.legvalues[racepos-1][markpos-1][legvalue]);
                         }
-
-                        markpos += 1;
+                        legpos += 1;
                     }
+
+                    markpos += 1;
                 }
-            } else {
-                /* check if values have changed */
             }
-        });
+        } else {
+            /* check if values have changed */
+        }
 
         rowid += 1;
     }
