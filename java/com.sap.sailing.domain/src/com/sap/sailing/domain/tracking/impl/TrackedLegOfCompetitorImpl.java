@@ -77,7 +77,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
         if (legStart == null) {
             return Distance.NULL;
         } else {
-            MarkPassing legEnd = getTrackedRace().getMarkPassing(getCompetitor(), getLeg().getTo());
+            MarkPassing legEnd = getMarkPassingForLegEnd();
             TimePoint end = timePoint;
             if (legEnd != null && timePoint.compareTo(legEnd.getTimePoint()) > 0) {
                 // timePoint is after leg finish; take leg end and end time point
