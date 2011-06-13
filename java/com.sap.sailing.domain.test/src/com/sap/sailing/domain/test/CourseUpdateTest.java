@@ -91,6 +91,34 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
         assertEquals("top", course.getLegs().get(1).getFrom().getName());
     }
 
+    /**
+     * Asserts that the race course's legs have corresponding {@link TrackedLeg}s and the {@link TrackedLeg}s have
+     * {@link TrackedLegOfCompetitor} for each of the race's competitors.
+     */
+    @Test
+    public void testSuccessfulSetup() throws InterruptedException {
+        testLegStructure(2);
+    }
+
+    private void testLegStructure(int minimalNumberOfLegsExpected) throws InterruptedException {
+        waitForRouteData();
+        assertTrue(course.getLegs().size() >= minimalNumberOfLegsExpected);
+        TrackedRace trackedRace = trackedEvent.getTrackedRace(race);
+        assertEquals(course.getLegs().size(), Util.size(trackedRace.getTrackedLegs()));
+        Iterator<Leg> legIter = course.getLegs().iterator();
+        for (TrackedLeg trackedLeg : trackedRace.getTrackedLegs()) {
+            assertTrue(legIter.hasNext());
+            Leg leg = legIter.next();
+            assertSame(leg, trackedLeg.getLeg());
+            for (Competitor competitor : race.getCompetitors()) {
+                TrackedLegOfCompetitor tloc = trackedLeg.getTrackedLeg(competitor);
+                assertNotNull(tloc);
+                assertSame(competitor, tloc.getCompetitor());
+                assertSame(leg, tloc.getLeg());
+            }
+        }
+    }
+    
     @Test
     public void testWaypointListDiff() {
         Waypoint wp1 = new WaypointImpl(new BuoyImpl("b1"));
@@ -140,6 +168,7 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
         });
         domainFactory.updateCourseWaypoints(course, controlPoints);
         assertTrue(result[0]);
+        testLegStructure(1);
     }
 
     @Test
@@ -164,6 +193,7 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
         });
         domainFactory.updateCourseWaypoints(course, controlPoints);
         assertTrue(result[0]);
+        testLegStructure(1);
     }
 
     private void waitForRouteData() throws InterruptedException {
@@ -199,6 +229,7 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
         });
         domainFactory.updateCourseWaypoints(course, controlPoints);
         assertTrue(result[0]);
+        testLegStructure(3);
     }
     
     @Test
@@ -226,20 +257,7 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
         });
         domainFactory.updateCourseWaypoints(course, controlPoints);
         assertTrue(result[0]);
-        TrackedRace trackedRace = trackedEvent.getTrackedRace(race);
-        Iterator<Leg> legIter = course.getLegs().iterator();
-        for (TrackedLeg trackedLeg : trackedRace.getTrackedLegs()) {
-            assertTrue(legIter.hasNext());
-            Leg leg = legIter.next();
-            assertSame(leg, trackedLeg.getLeg());
-        }
-        // and again, this time for the TrackedLegOfCompetitors
-        for (Leg leg : course.getLegs()) {
-            for (Competitor competitor : race.getCompetitors()) {
-                TrackedLegOfCompetitor trackedLegOfCompetitor = trackedRace.getTrackedLeg(competitor, leg);
-                assertSame(leg, trackedLegOfCompetitor.getLeg());
-            }
-        }
+        testLegStructure(3);
     }
     
     @After
