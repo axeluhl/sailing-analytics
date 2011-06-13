@@ -543,6 +543,7 @@ def moderatorLiveData(context, request):
     sortby = request.params.get('sortby', 'name')
     race_range = request.params.get('races', '1:3')
     competitor_range = request.params.get('competitors', '1:20')
+    direction = request.params.get('direction', 'asc');
 
     if race_range in ['null', 'undefined']:
         race_range = '1:3'
@@ -551,6 +552,9 @@ def moderatorLiveData(context, request):
     races_list = event.races[int(race_start_index)-1:int(race_end_index)]
 
     competitors = view.competitorsSortedBy(event.name, sortby.strip())
+
+    if direction == 'asc':
+        competitors.reverse()
 
     races = []
     for racename in races_list:
@@ -592,5 +596,6 @@ def moderatorLiveData(context, request):
         data.append({'name': competitor.name, 'raceranks': racedata, 'markranks': markranks, 'legvalues': legvalues, 
             'nationality': competitor.nationality, 'global_rank': competitor.total})
 
-    return data
+    c_range_start, c_range_end = competitor_range.split(':')
+    return data[int(c_range_start)-1:int(c_range_end)]
 

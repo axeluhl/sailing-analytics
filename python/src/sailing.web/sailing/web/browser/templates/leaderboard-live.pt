@@ -35,8 +35,8 @@
         <!-- / MAIN INTERFACE -->
         <div id='main-interface'>
           <div class='blue-table'>
-            <a class='refresh-btn' href='javascript:;' onclick='loadLeaderboard(null, "1,1");'></a>
-            <a class='sort-rank sort-asc' href='#'></a>
+              <a class='refresh-btn' href='javascript:;' onclick=''><img src='/static/images/ajax-loader-greybg.gif'/></a>
+            <a class='sort-rank sort-asc' href='javascript:;' onclick='sortBy("total", $(this))'></a>
             <table id='overall-clipping'>
               <tbody>
                 <tal:for repeat="clpos range(1,21)">
@@ -77,7 +77,7 @@
                 </ul>
                 <span>1</span>
               </a>
-              <a class='main-box-sort sort-asc' href='#'></a>
+              <a class='main-box-sort sort-asc' href='javascript:;' onclick='sortBy("${raceid}", $(this))'></a>
             </div>
 
             <tal:for repeat="leg event.marks[int(raceid)-1]">
@@ -85,7 +85,7 @@
               <!-- / SECOND ELEMENT WITH LIST -->
               <div class='leg-box'>
               <span>M${markid}</span>
-                <a class='leg-box-sort sort-asc' href='#'></a>
+              <a class='leg-box-sort sort-asc' href='javascript:;' onclick='sortBy("${raceid},${markid}", $(this))'></a>
                 <a class='leg-box-active' href='javascript:;' onclick='$(this).closest(".leg-wrap").find(".table-box, .race-table").toggle();'>
                   <ul>
                       <tal:for repeat="markrow range(1,21)">
@@ -100,7 +100,7 @@
                   <li id='race-${raceid}-mark-${markid}-legrow-${legrow}'></li>
                   </tal:for>
                 </ul>
-                <a class='table-box-sort sort-asc' href='#'></a>
+                <a class='table-box-sort sort-asc' href='javascript:;' onclick='sortBy("${raceid},${markid},1", $(this))'></a>
               </div>
               <table class='race-table' id='r1-m1' style="display:none;">
                 <thead>
@@ -128,22 +128,22 @@
                 <tbody>
                   <tr rowid='0'>
                     <td class='table-sorting' colid='1'>
-                      <a class='sort-asc' href='#'></a>
+                      <a class='sort-asc' href='javascript:;' onclick='sortBy("${raceid},${markid},3", $(this))'></a>
                     </td>
                     <td class='table-sorting' colid='2'>
-                      <a class='sort-asc' href='#'></a>
+                      <a class='sort-asc' href='javascript:;' onclick='sortBy("${raceid},${markid},2", $(this))'></a>
                     </td>
                     <td class='table-sorting' colid='3'>
-                      <a class='sort-asc' href='#'></a>
+                      <a class='sort-asc' href='javascript:;' onclick='sortBy("${raceid},${markid},4", $(this))'></a>
                     </td>
                     <td class='table-sorting' colid='4'>
-                      <a class='sort-asc' href='#'></a>
+                      <a class='sort-asc' href='javascript:;' onclick='sortBy("${raceid},${markid},6", $(this))'></a>
                     </td>
                     <td class='table-sorting' colid='5'>
-                      <a class='sort-asc' href='#'></a>
+                      <a class='sort-asc' href='javascript:;' onclick='sortBy("${raceid},${markid},8", $(this))'></a>
                     </td>
                     <td class='table-sorting' colid='6'>
-                      <a class='sort-asc' href='#'></a>
+                      <a class='sort-asc' href='javascript:;' onclick='sortBy("${raceid},${markid},7", $(this))'></a>
                     </td>
                   </tr>
                   <tal:for repeat="valrow range(1,21)">
