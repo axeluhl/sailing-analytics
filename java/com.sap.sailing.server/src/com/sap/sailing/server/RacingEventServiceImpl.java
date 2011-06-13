@@ -72,7 +72,7 @@ public class RacingEventServiceImpl implements RacingEventService {
 
     @Override
     public void addEvent(URL jsonURL, URI liveURI, URI storedURI, WindStore windStore) throws URISyntaxException, IOException, ParseException, org.json.simple.parser.ParseException {
-        JSONService jsonService = DomainFactory.INSTANCE.parseJSONURL(jsonURL);
+        JSONService jsonService = getDomainFactory().parseJSONURL(jsonURL);
         for (RaceRecord rr : jsonService.getRaceRecords()) {
             URL paramURL = rr.getParamURL();
             addRace(paramURL, liveURI, storedURI, windStore);

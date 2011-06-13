@@ -50,8 +50,14 @@ public interface TrackedRace {
      */
     TrackedLeg getCurrentLeg(TimePoint timePoint);
     
+    /**
+     * Precondition: waypoint must still be part of {@link #getRace()}.{@link RaceDefinition#getCourse() getCourse()}.
+     */
     TrackedLeg getTrackedLegFinishingAt(Waypoint endOfLeg);
     
+    /**
+     * Precondition: waypoint must still be part of {@link #getRace()}.{@link RaceDefinition#getCourse() getCourse()}.
+     */
     TrackedLeg getTrackedLegStartingAt(Waypoint startOfLeg);
     
     /**

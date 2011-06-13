@@ -196,7 +196,7 @@ def configuredListeners(context, request):
     for key, listener in threaded_listener.items():
         out.append( {'host': listener.host, 'port': listener.port,
                         'eventname': listener.eventname, 'last_update': listener.last_update and listener.last_update.strftime('%d.%m %H:%M:%S') or '-',
-                        'paused' : listener.paused, 'running': listener.running, 'id' : key,
+                        'paused' : listener.paused, 'running': listener.running, 'xid' : str(key),
                         'racename': listener.racename} )
 
     return out
@@ -209,7 +209,7 @@ def pauseListener(context, request):
         for v in threaded_listener.values():
             v.paused = True
     else:
-        if threaded_listener.has_key(tid):
+        if threaded_listener.has_key(int(tid)):
             threaded_listener.get(tid).paused = True
     return True
 
@@ -221,14 +221,14 @@ def unPauseListener(context, request):
         for v in threaded_listener.values():
             v.paused = False
     else:
-        if threaded_listener.has_key(tid):
+        if threaded_listener.has_key(int(tid)):
             threaded_listener.get(tid).paused = False
     return True
 
 @jsonize
 def stopListener(context, request):
     tid = int(request.params.get('tid', 0))
-    if threaded_listener.has_key(tid):
+    if threaded_listener.has_key(int(tid)):
         threaded_listener.get(tid).running = False
     return True
 
@@ -288,6 +288,14 @@ def windSettings(context, request):
         conf.trigger()
 
     elif request.POST.get('setcustom'):
+
+        # first set custom wind
+        conf.setCommand(config.SET_WIND_SOURCE)
+        conf.setParameters(dict(sourcename='WEB'))
+        conf.trigger()
+
+        conf.setContext(config.ADMIN)
+        conf.setRace(view.currentRace())
         conf.setCommand(config.SET_WIND)
 
         dc = {}
@@ -461,6 +469,9 @@ def adminLiveData(context, request):
             # always show the last leg
             currentlegs.insert(0, currentlegs[0]-1)
     
+    if len(threaded_listener.values()) == 0:
+        return 'The listener does not seem to be started properly. Please reconfigure your connection!'
+
     t_up = threaded_listener.values()[0].last_update.strftime('%H:%M:%S')
     t_upcount = threaded_listener.values()[0].updatecount
 
