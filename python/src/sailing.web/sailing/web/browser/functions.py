@@ -196,7 +196,7 @@ def configuredListeners(context, request):
     for key, listener in threaded_listener.items():
         out.append( {'host': listener.host, 'port': listener.port,
                         'eventname': listener.eventname, 'last_update': listener.last_update and listener.last_update.strftime('%d.%m %H:%M:%S') or '-',
-                        'paused' : listener.paused, 'running': listener.running, 'id' : key,
+                        'paused' : listener.paused, 'running': listener.running, 'xid' : str(key),
                         'racename': listener.racename} )
 
     return out
@@ -209,7 +209,7 @@ def pauseListener(context, request):
         for v in threaded_listener.values():
             v.paused = True
     else:
-        if threaded_listener.has_key(tid):
+        if threaded_listener.has_key(int(tid)):
             threaded_listener.get(tid).paused = True
     return True
 
@@ -221,14 +221,14 @@ def unPauseListener(context, request):
         for v in threaded_listener.values():
             v.paused = False
     else:
-        if threaded_listener.has_key(tid):
+        if threaded_listener.has_key(int(tid)):
             threaded_listener.get(tid).paused = False
     return True
 
 @jsonize
 def stopListener(context, request):
     tid = int(request.params.get('tid', 0))
-    if threaded_listener.has_key(tid):
+    if threaded_listener.has_key(int(tid)):
         threaded_listener.get(tid).running = False
     return True
 
