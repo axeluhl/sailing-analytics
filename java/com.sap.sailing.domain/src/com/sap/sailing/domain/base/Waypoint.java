@@ -5,9 +5,6 @@ package com.sap.sailing.domain.base;
  * {@link ControlPoint}, such as a {@link Buoy} or a {@link Gate}. The same control point can be used by multiple
  * waypoints.<p>
  * 
- * Two waypoints {@link Object#equals(Object) equal} each other if they have the <em>same</em>
- * {@link #getControlPoint() control point}.
- * 
  * @author Axel Uhl (d043530)
  * 
  */
