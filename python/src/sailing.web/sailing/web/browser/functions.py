@@ -461,6 +461,9 @@ def adminLiveData(context, request):
             # always show the last leg
             currentlegs.insert(0, currentlegs[0]-1)
     
+    if len(threaded_listener.values()) == 0:
+        return 'The listener does not seem to be started properly. Please reconfigure your connection!'
+
     t_up = threaded_listener.values()[0].last_update.strftime('%H:%M:%S')
     t_upcount = threaded_listener.values()[0].updatecount
 
