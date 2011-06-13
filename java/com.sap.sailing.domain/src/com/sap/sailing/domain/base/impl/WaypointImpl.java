@@ -14,14 +14,6 @@ public class WaypointImpl implements Waypoint {
         id = idCounter++;
     }
 
-    public boolean equals(Object o) {
-        return getControlPoint() == ((Waypoint) o).getControlPoint();
-    }
-    
-    public int hashCode() {
-        return 984637 ^ getControlPoint().hashCode();
-    }
-
     @Override
     public ControlPoint getControlPoint() {
         return controlPoint;

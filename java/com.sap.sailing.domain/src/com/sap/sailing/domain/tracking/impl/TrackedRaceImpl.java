@@ -170,7 +170,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     public GPSFixTrack<Competitor, GPSFixMoving> getTrack(Competitor competitor) {
         return tracks.get(competitor);
     }
-
+    
     @Override
     public TrackedLeg getTrackedLegFinishingAt(Waypoint endOfLeg) {
         int indexOfWaypoint = getRace().getCourse().getIndexOfWaypoint(endOfLeg);
@@ -414,13 +414,22 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     @Override
     public synchronized void waypointRemoved(int zeroBasedIndex, Waypoint waypointThatGotRemoved) {
-        TrackedLeg toRemove;
-        if (zeroBasedIndex > trackedLegs.size()) {   // last waypoint removed
-            toRemove = getTrackedLegFinishingAt(waypointThatGotRemoved);
-        } else {
-            toRemove = getTrackedLegStartingAt(waypointThatGotRemoved);
+        Leg toRemove = null;
+        Leg last = null;
+        int i=0;
+        for (Map.Entry<Leg, TrackedLeg> e : trackedLegs.entrySet()) {
+            last = e.getKey();
+            if (i == zeroBasedIndex) {
+                toRemove = e.getKey();
+                break;
+            }
+            i++;
         }
-        trackedLegs.remove(toRemove.getLeg());
+        if (toRemove == null) {
+            // last waypoint removed
+            toRemove = last;
+        }
+        trackedLegs.remove(toRemove);
         updated(/* time point*/ null);
     }
 }

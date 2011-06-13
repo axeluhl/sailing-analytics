@@ -9,7 +9,15 @@ When <i>stopping listener</i> it will trigger two methods: If you select a race 
         <legend>1. Listener Configuration</legend>
         <div class="field">
             <span>Host and Port:</span><br/>
-            <input type="text" name="host" value="localhost" />&nbsp;<input type="text" name="port" value="8888" />
+            <input type="text" id="serverhost" name="host"/>&nbsp;<input id="serverport" type="text" name="port"/>&nbsp;
+            <select name="hostport" id="hostport" onchange="$('#serverhost').val($('#hostport option:selected').attr('host'));$('#serverport').val($('#hostport option:selected').attr('port'))">
+                <option host="" port=""></option>
+                <option host="localhost" port="8888">Localhost (8888)</option>
+                <option host="localhost" port="8886">DEV</option>
+                <option host="localhost" port="8888">TEST</option>
+                <option host="localhost" port="8889">PROD1</option>
+                <option host="localhost" port="8890">PROD2</option>
+            </select>
         </div>
         <input type="submit" name="listener-event-refresh" value="Connect to already running server" /><br/><br/>
     </fieldset>

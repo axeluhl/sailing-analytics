@@ -132,13 +132,30 @@ public class DomainFactoryImpl implements DomainFactory {
     public void updateCourseWaypoints(Course courseToUpdate, List<ControlPoint> controlPoints) throws PatchFailedException {
         Iterable<Waypoint> courseWaypoints = courseToUpdate.getWaypoints();
         List<Waypoint> newWaypointList = new LinkedList<Waypoint>();
+        // key existing waypoints by control points and re-use each one at most once during construction of the
+        // new waypoint list; since several waypoints can have the same control point, the map goes from
+        // control point to List<Waypoint>. The waypoints in the lists are held in the order of their
+        // occurrence in courseToUpdate.getWaypoints().
+        Map<com.sap.sailing.domain.base.ControlPoint, List<Waypoint>> existingWaypointsByControlPoint =
+                new HashMap<com.sap.sailing.domain.base.ControlPoint, List<Waypoint>>();
+        for (Waypoint waypoint : courseToUpdate.getWaypoints()) {
+            List<Waypoint> wpl = existingWaypointsByControlPoint.get(waypoint.getControlPoint());
+            if (wpl == null) {
+                wpl = new ArrayList<Waypoint>();
+                existingWaypointsByControlPoint.put(waypoint.getControlPoint(), wpl);
+            }
+            wpl.add(waypoint);
+        }
         for (ControlPoint tractracControlPoint : controlPoints) {
-            // The following creates new waypoints; those using equal control points (equality controlled by their UUID)
-            // are considered equal. Therefore, the diff will try to construct a minimal set of changes where those
-            // old waypoints remain the same but where the patch may alter their positions. Deleted waypoints are trivial
-            // regarding ID retention. Waypoints added obtain a new ID during the createWaypoint and will be inserted
-            // with this new ID.
-            Waypoint waypoint = createWaypoint(tractracControlPoint);
+            com.sap.sailing.domain.base.ControlPoint domainControlPoint = getControlPoint(tractracControlPoint);
+            List<Waypoint> waypoints = existingWaypointsByControlPoint.get(domainControlPoint);
+            Waypoint waypoint;
+            if (waypoints == null || waypoints.isEmpty()) {
+                // must be a new control point for which we don't have a waypoint yet
+                waypoint = createWaypoint(tractracControlPoint);
+            } else {
+                waypoint = waypoints.remove(0); // take the first from the list
+            }
             newWaypointList.add(waypoint);
         }
         Patch<Waypoint> patch = DiffUtils.diff(courseWaypoints, newWaypointList);
