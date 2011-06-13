@@ -501,7 +501,7 @@ def adminLiveData(context, request):
 
         results += '\nLAST SHOWRACE CALL: %s (UPCOUNT PARAM: %s)\nLEG: %s (FROM: %s TO: %s)\nRACE-START: %s NEWEST EVENT: %s WIND: (%s %s %s)\n' % (t_up, t_upcount, legpos+1, competitors[0].marknames[racepos][legpos][0], competitors[0].marknames[racepos][legpos][1], view.millisToDatetime(race.start), view.millisToDatetime(race.timeofnewestevent), race.wind_source, race.wind_bearing, race.wind_speed)
         results += 'NAME'.ljust(16) + 'TOTAL'.ljust(7) + 'CRANK'.ljust(7) + 'RRANK'.ljust(7) 
-        results += 'MRANK'.ljust(7) + 'LRANK'.ljust(9) + 'SPD'.ljust(9) + 'DSTTRV'.ljust(9) + 'VMG'.ljust(9) + 'AVMG'.ljust(9) + 'SGAP'.ljust(9) + 'ETA'.ljust(9) + 'DSTGO'.ljust(9) + 'FINISHD'.ljust(9) + 'STARTD'.ljust(9) + 'UPDOWNWIND'.ljust(12)
+        results += 'MRANK'.ljust(7) + 'LRANK'.ljust(9) + 'SPD'.ljust(9) + 'DSTTRV'.ljust(9) + 'VMG'.ljust(9) + 'AVMG'.ljust(9) + 'SGAP'.ljust(9) + 'ETA'.ljust(9) + 'DSTGO'.ljust(9) + 'STARTD'.ljust(9) + 'FINISHD'.ljust(9) + 'UPDOWNWIND'.ljust(12)
         results += '\n'
 
         # sort competitors by rank in current leg
@@ -532,4 +532,59 @@ def adminLiveData(context, request):
         return 'This race seems to be finished!'
 
     return results
+
+@jsonize
+def moderatorLiveData(context, request):
+    """ Returns data for the moderators leaderboard """
+
+    view = core.BaseView(context, request)
+    event = view.currentLeaderboardEvent()
+
+    sortby = request.params.get('sortby', '')
+    race_range = request.params.get('races', '1:3')
+    competitor_range = request.params.get('competitors', '1:20')
+
+    race_start_index, race_end_index = race_range.split(':')
+    races_list = event.races[int(race_start_index)-1:int(race_end_index)]
+
+    competitors = model.CompetitorImpl.queryBy(event=event.name)
+
+    races = []
+    for racename in races_list:
+        races.append(model.RaceImpl.queryOneBy(name=racename, event=event.name))
+
+    # list of competitors with corresponding data
+    data = {}
+
+    for competitor in competitors:
+        racedata = competitor.races[int(race_start_index)-1:int(race_end_index)]
+
+        # for each race found compute the marks and values
+        markranks = []; legvalues = []; racecounter = 0
+        for racename in races_list:
+            real_racepos = event.races.index(racename)
+            if len(markranks) < racecounter+1:
+                markranks.append([])
+                legvalues.append([])
+
+            markranks[racecounter] = markranks[racecounter] + competitor.marks[real_racepos]
+
+            # prepare values according to UI
+            # UI:       RANK, DSTTRAV, SPEED, VMG, SGAP, DSTGO, ETA
+            # INTERN:   RANK, AVGSPEED, DSTRV, VMG, AVMG, SGAP, ETA, DSTGO 
+            iv = competitor.values[real_racepos]
+            newvalues = [iv[0], iv[2], iv[1], iv[3], iv[5], iv[-1], iv[-2]]
+
+            for valpos in range(len(newvalues)):
+                newvalues[valpos] = ['%.2f' % val for val in newvalues[valpos]]
+
+            legvalues[racecounter] = legvalues[racecounter] + newvalues
+
+            racecounter += 1
+
+        cd = data.setdefault(competitor.name, {})
+        cd.update({'raceranks': racedata, 'markranks': markranks, 'legvalues': legvalues, 
+            'nationality': competitor.nationality, 'global_rank': competitor.total})
+
+    return data
 
