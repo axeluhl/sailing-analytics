@@ -6,6 +6,8 @@ var global_competitors = '1:20';
 
 var loader_image = "<img style='margin: 3px 0px 3px 3px' src='/static/images/ajax-loader-greybg.gif'/>";
 
+var listener_paused = false;
+
 /*
  * Loads leaderboard data. Parameters:
  *
@@ -19,9 +21,31 @@ function loadLeaderboard(races, sortby, competitors, direction) {
                 {races:races, sortby:sortby, competitors:competitors, direction:direction}, 
         function(data) {
             displayLeaderboard(data);
+
+            global_race = races;
+            global_sortkey = sortby;
+            global_competitors = competitors;
+            global_direction = direction;
+
             hideLoader();
         }
     );
+}
+
+function liveRefresh() {
+    if (listener_paused == false)
+        loadLeaderboard(global_race, global_sortkey, global_competitors, global_direction);
+}
+
+function toggleListener() {
+    $('#refresh-button').toggleClass('refresh');
+    if ($('#refresh-button').hasClass('refresh')) {
+        $('#refresh-button').css('background-image', 'url(/moderator-static/refresh-icon.png)');
+        listener_paused = true;
+    } else {
+        listener_paused = false;
+        $('#refresh-button').css('background-image', 'url(/moderator-static/pause_button.png)');
+    }
 }
 
 function showLoader() {
@@ -125,5 +149,6 @@ $(document).ready(function() {
 
   $.ajaxSetup({cache:false});
 
-  loadLeaderboard();
+  loadLeaderboard(global_race, global_sortkey, global_competitors, global_direction);
+  window.setInterval('liveRefresh()', 5000);
 });
