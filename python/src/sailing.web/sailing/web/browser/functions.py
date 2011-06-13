@@ -556,9 +556,14 @@ def moderatorLiveData(context, request):
     if direction == 'asc':
         competitors.reverse()
 
-    races = []
+    races = []; current_legs = []; current_race = None
     for racename in races_list:
-        races.append(model.RaceImpl.queryOneBy(name=racename, event=event.name))
+        rimpl = model.RaceImpl.queryOneBy(name=racename, event=event.name)
+        if len(rimpl.current_legs) > 0:
+            current_legs = rimpl.current_legs
+            current_race = event.races.index(rimpl.name)
+
+        races.append(rimpl)
 
     # list of competitors with corresponding data
     data = []
@@ -593,8 +598,16 @@ def moderatorLiveData(context, request):
 
             racecounter += 1
 
-        data.append({'name': competitor.name, 'raceranks': racedata, 'markranks': markranks, 'legvalues': legvalues, 
-            'nationality': competitor.nationality, 'global_rank': competitor.total})
+        dc = {}
+        dc.update({'name': competitor.name[:9], 'raceranks': racedata, 'markranks': markranks, 'legvalues': legvalues, 
+            'nationality': competitor.nationality, 'global_rank': competitor.total, 'current_race': '', 'current_legs' : []})
+
+        try:
+            dc.update({'current_legs': [lg+1 for lg in current_legs], 'current_race': current_race+1})
+        except:
+            pass
+
+        data.append(dc)
 
     c_range_start, c_range_end = competitor_range.split(':')
     return data[int(c_range_start)-1:int(c_range_end)]
