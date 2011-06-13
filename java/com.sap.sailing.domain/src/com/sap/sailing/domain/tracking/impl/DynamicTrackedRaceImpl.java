@@ -119,6 +119,9 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
             competitorMarkPassings.add(markPassing);
             getMarkPassingsInOrder(markPassing.getWaypoint()).add(markPassing);
             updated(markPassing.getTimePoint());
+        }
+        // notify *after* all mark passings have been re-established; should avoid flicker
+        for (MarkPassing markPassing : markPassings) {
             notifyListeners(markPassing);
         }
     }
