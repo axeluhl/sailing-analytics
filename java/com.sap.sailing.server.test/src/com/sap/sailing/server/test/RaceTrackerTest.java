@@ -2,6 +2,7 @@ package com.sap.sailing.server.test;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertSame;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -83,12 +84,28 @@ public class RaceTrackerTest {
     @Test
     public void testStopTracking() throws MalformedURLException, IOException, InterruptedException, URISyntaxException {
         TrackedEvent oldTrackedEvent = raceHandle.getTrackedEvent();
-        TrackedRace oldTrackedRace = oldTrackedEvent.getTrackedRaces().iterator().next();
+        TrackedRace oldTrackedRace = getTrackedRace(oldTrackedEvent);
         service.stopTracking(raceHandle.getEvent());
         RaceHandle myRaceHandle = service.addRace(paramUrl, liveUri, storedUri, EmptyWindStore.INSTANCE);
         TrackedEvent newTrackedEvent = myRaceHandle.getTrackedEvent();
         TrackedRace newTrackedRace = getTrackedRace(newTrackedEvent);
         // expecting a new tracked race to be created when starting over with tracking
         assertNotSame(oldTrackedRace, newTrackedRace);
+    }
+
+    /**
+     * This test asserts that tracking the same race twice doesn't create another tracker and in particular no
+     * new tracked event / tracked race.
+     */
+    @Test
+    public void testTrackingSameRaceWithoutStopping() throws MalformedURLException, IOException, InterruptedException, URISyntaxException {
+        TrackedEvent oldTrackedEvent = raceHandle.getTrackedEvent();
+        TrackedRace oldTrackedRace = getTrackedRace(oldTrackedEvent);
+        RaceHandle myRaceHandle = service.addRace(paramUrl, liveUri, storedUri, EmptyWindStore.INSTANCE);
+        TrackedEvent newTrackedEvent = myRaceHandle.getTrackedEvent();
+        TrackedRace newTrackedRace = getTrackedRace(newTrackedEvent);
+        // expecting a new tracked race to be created when starting over with tracking
+        assertSame(oldTrackedRace, newTrackedRace);
+        assertSame(raceHandle.getRaceTracker(), myRaceHandle.getRaceTracker());
     }
 }

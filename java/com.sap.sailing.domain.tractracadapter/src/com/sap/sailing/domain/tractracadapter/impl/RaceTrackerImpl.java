@@ -22,6 +22,7 @@ import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.RaceHandle;
 import com.sap.sailing.domain.tractracadapter.RaceTracker;
 import com.sap.sailing.domain.tractracadapter.Receiver;
+import com.sap.sailing.util.Util.Triple;
 import com.tractrac.clientmodule.Event;
 import com.tractrac.clientmodule.data.DataController;
 import com.tractrac.clientmodule.data.DataController.Listener;
@@ -35,6 +36,8 @@ public class RaceTrackerImpl implements Listener, RaceTracker {
     private final Set<Receiver> receivers;
     private final DomainFactory domainFactory;
     private final DynamicTrackedEvent trackedEvent;
+    private final WindStore windStore;
+    private final Triple<URL, URI, URI> urls;
 
     /**
      * Creates a race tracked for the specified URL/URIs and starts receiving all available existing and future push
@@ -60,6 +63,8 @@ public class RaceTrackerImpl implements Listener, RaceTracker {
      */
     protected RaceTrackerImpl(DomainFactory domainFactory, URL paramURL, URI liveURI, URI storedURI, WindStore windStore)
             throws URISyntaxException, MalformedURLException, FileNotFoundException {
+        urls = new Triple<URL, URI, URI>(paramURL, liveURI, storedURI);
+        this.windStore = windStore;
         this.domainFactory = domainFactory;
         // Read event data from configuration file
         tractracEvent = KeyValue.setup(paramURL);
@@ -88,13 +93,23 @@ public class RaceTrackerImpl implements Listener, RaceTracker {
     }
     
     @Override
+    public Triple<URL, URI, URI> getURLs() {
+        return urls;
+    }
+
+    @Override
+    public WindStore getWindStore() {
+        return windStore;
+    }
+
+    @Override
     public DynamicTrackedEvent getTrackedEvent() {
         return trackedEvent;
     }
     
     @Override
     public RaceHandle getRaceHandle() {
-        return new RaceHandleImpl(domainFactory, tractracEvent, getTrackedEvent());
+        return new RaceHandleImpl(domainFactory, tractracEvent, getTrackedEvent(), this);
     }
     
     @Override
