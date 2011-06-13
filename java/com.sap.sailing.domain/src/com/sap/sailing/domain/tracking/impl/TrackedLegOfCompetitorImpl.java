@@ -361,7 +361,8 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
         }
     }
 
-    private SpeedWithBearing getSpeedOverGround(TimePoint at) {
+    @Override
+    public SpeedWithBearing getSpeedOverGround(TimePoint at) {
         if (hasStartedLeg(at)) {
             return getTrackedRace().getTrack(getCompetitor()).getEstimatedSpeed(at);
         } else {

@@ -236,6 +236,11 @@ public class ModeratorApp extends Servlet {
                         TrackedLegOfCompetitor trackedLegOfCompetitor = leg.getTrackedLeg(competitor);
                         if (trackedLegOfCompetitor != null) {
                             jsonCompetitorInLeg.put("name", competitor.getName());
+                            Speed currentSpeedOverGround = trackedLegOfCompetitor.getSpeedOverGround(timePoint);
+                            if (currentSpeedOverGround != null) {
+                                jsonCompetitorInLeg.put("currentSpeedOverGroundInKnots",
+                                        currentSpeedOverGround == null ? null : currentSpeedOverGround.getKnots());
+                            }
                             Speed averageSpeedOverGround = trackedLegOfCompetitor.getAverageSpeedOverGround(timePoint);
                             if (averageSpeedOverGround != null) {
                                 jsonCompetitorInLeg.put("averageSpeedOverGroundInKnots",
