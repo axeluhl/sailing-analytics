@@ -183,7 +183,7 @@ public class ModeratorApp extends Servlet {
         } else {
             try {
                 TimePoint timePoint = getTimePoint(req, PARAM_NAME_TIME, PARAM_NAME_TIME_MILLIS,
-                        trackedRace.getTimePointOfNewestEvent()==null?MillisecondsTimePoint.now():trackedRace.getTimePointOfNewestEvent());
+                        trackedRace.getTimePointOfLastEvent()==null?MillisecondsTimePoint.now():trackedRace.getTimePointOfLastEvent());
                 String sinceUpdateString = req.getParameter(PARAM_NAME_SINCE_UPDATE);
                 if (sinceUpdateString != null) {
                 	System.out.println("Blocking...");

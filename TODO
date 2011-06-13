@@ -1,12 +1,7 @@
-
 Axel
 ====
 
  - What about distance traveled in first leg? It seems to jump too high at the beginning.
-
- - Why is average VMG always zero?
-
- - smoothen / dampen VMG and hence the ETA / sGAP
 
  - Open test server firewall ports for UDP / Expedition wind integration
 
