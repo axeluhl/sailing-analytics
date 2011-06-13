@@ -1,6 +1,5 @@
 package com.sap.sailing.server.test;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import java.io.FileNotFoundException;
@@ -20,7 +19,6 @@ import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.RaceHandle;
 import com.sap.sailing.server.RacingEventServiceImpl;
-import com.sap.sailing.util.Util;
 
 public class RaceTrackerTest {
     private final URL paramUrl;
@@ -48,33 +46,41 @@ public class RaceTrackerTest {
     }
     
     @Before
-    public void setUp() throws MalformedURLException, FileNotFoundException, URISyntaxException {
+    public void setUp() throws MalformedURLException, FileNotFoundException, URISyntaxException, InterruptedException {
         service = new RacingEventServiceImpl();
         raceHandle = service.addRace(paramUrl, liveUri, storedUri, EmptyWindStore.INSTANCE);
         domainFactory = service.getDomainFactory();
+    }
+
+    private TrackedRace getTrackedRace(TrackedEvent trackedEvent) throws InterruptedException {
+        final TrackedRace[] trackedRaces = new TrackedRace[1];
+        trackedEvent.addRaceListener(new RaceListener() {
+            @Override
+            public void raceAdded(TrackedRace trackedRace) {
+                synchronized (trackedRaces) {
+                    trackedRaces[0] = trackedRace;
+                    trackedRaces.notifyAll();
+                }
+            }
+        });
+        synchronized (trackedRaces) {
+            if (trackedRaces[0] == null) {
+                trackedRaces.wait();
+            }
+        }
+        return trackedRaces[0];
+    }
+
+    private TrackedEvent getTrackedEvent() {
+        TrackedEvent trackedEvent = domainFactory.trackEvent(raceHandle.getEvent());
+        return trackedEvent;
     }
     
     @Test
     public void testInitialization() throws InterruptedException {
         RaceDefinition race = raceHandle.getRace();
         assertNotNull(race);
-        TrackedEvent trackedEvent = domainFactory.trackEvent(raceHandle.getEvent());
-        final boolean[] gotTrackedRace = new boolean[1];
-        trackedEvent.addRaceListener(new RaceListener() {
-            @Override
-            public void raceAdded(TrackedRace trackedRace) {
-                synchronized (gotTrackedRace) {
-                    gotTrackedRace[0] = true;
-                    gotTrackedRace.notifyAll();
-                }
-            }
-        });
-        synchronized (gotTrackedRace) {
-            if (!gotTrackedRace[0]) {
-                gotTrackedRace.wait();
-            }
-        }
-        assertEquals(1, Util.size(trackedEvent.getTrackedRaces()));
+        assertNotNull(getTrackedRace(getTrackedEvent()));
     }
     
     @Test
