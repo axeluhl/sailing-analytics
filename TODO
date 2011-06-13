@@ -2,17 +2,21 @@
 Axel
 ====
 
- - Implement and test course update with corresponding TrackedLeg[OfCompetitor] updates
+ - track time of last event and return in showrace output
+
+ - What about distance traveled in first leg? It seems to jump too high at the beginning.
+
+ - Test duplicate addrace for the same race; consider cleaning cache when stopRace/stopEvent is invoked
+
+ - Test duplicate addevent for the same event
+
+ - smoothen / dampen VMG and hence the ETA / sGAP
 
  - Open test server firewall ports for UDP / Expedition wind integration
 
  - test UDP ports
 
  - Set up two Expedition machines with RF and UMTS transmission, test killing one
-
- - Test duplicate addrace for the same race; consider cleaning cache when stopRace/stopEvent is invoked
-
- - Test duplicate addevent for the same event
 
  - Test fail-over in case one of the two Java VM fails
 
