@@ -60,17 +60,25 @@ def startListenerThreads(conf, eventlist):
 
 # addEvent
 def configureListener(context, request):
-    host = request.POST.get('host', 'localhost')
-    port = request.POST.get('port', '8888')
+    host = request.POST.get('host', None)
+    port = request.POST.get('port', None)
 
     lock = threading.Lock()
 
     view = core.BaseView(context, request)
 
-    conf = URIConfigurator(host, port)
-    view.session['listener-conf'] = conf
+    if host and port:
+        conf = URIConfigurator(host, port)
+        view.session['listener-conf'] = conf
+
+    else: 
+        # reuse listener conf
+        conf = view.listenerConf()
 
     if request.POST.get('listener-start', None):
+        if conf is None:
+            return view.yieldMessage('Please set host and port!')
+
         conf.setContext(config.ADMIN)
 
         if request.POST.get('eventJSONURL'):
@@ -157,9 +165,18 @@ def configureListener(context, request):
         del view.session['listener-conf']
         view.session.save()
 
-        key = hash('%s-%s-%s-%s' % (conf.host, conf.port, eventname, racename))
-        if threaded_listener.has_key(key):
-            threaded_listener[key].running = False
+        racenames = []
+        if not racename:
+            racenames = model.EventImpl.queryOneBy(name=eventname).races
+        else: racenames = [racename, ]
+
+        for rname in racenames:
+            key = hash('%s-%s-%s-%s' % (conf.host, conf.port, eventname, rname))
+            if threaded_listener.has_key(key):
+                threaded_listener[key].running = False
+
+                # remove this thread - will die later if still blocking
+                del threaded_listener[key]
 
         try:
             conf.trigger()
@@ -167,6 +184,9 @@ def configureListener(context, request):
             return view.yieldMessage('Error: %s' % str(ex))
 
     elif request.POST.get('listener-event-refresh', None):
+        if conf is None:
+            return view.yieldMessage('Please set host and port!')
+
         with lock:
             conf.setContext(config.MODERATOR)
             conf.setCommand(config.LIST_EVENTS)
@@ -479,7 +499,7 @@ def adminLiveData(context, request):
     for pos in range(len(currentlegs)):
         legpos = currentlegs[pos]
 
-        results += '\nLAST SHOWRACE CALL: %s (UPCOUNT PARAM: %s)\nLEG: %s RACE-START: %s NEWEST: %s WIND: (%s %s %s)\n' % (t_up, t_upcount, legpos+1, view.millisToDatetime(race.start), view.millisToDatetime(race.timeofnewestevent), race.wind_source, race.wind_bearing, race.wind_speed)
+        results += '\nLAST SHOWRACE CALL: %s (UPCOUNT PARAM: %s)\nLEG: %s (FROM: %s TO: %s)\nRACE-START: %s NEWEST EVENT: %s WIND: (%s %s %s)\n' % (t_up, t_upcount, legpos+1, competitors[0].marknames[racepos][legpos][0], competitors[0].marknames[racepos][legpos][1], view.millisToDatetime(race.start), view.millisToDatetime(race.timeofnewestevent), race.wind_source, race.wind_bearing, race.wind_speed)
         results += 'NAME'.ljust(16) + 'TOTAL'.ljust(7) + 'CRANK'.ljust(7) + 'RRANK'.ljust(7) 
         results += 'MRANK'.ljust(7) + 'LRANK'.ljust(9) + 'SPD'.ljust(9) + 'DSTTRV'.ljust(9) + 'VMG'.ljust(9) + 'AVMG'.ljust(9) + 'SGAP'.ljust(9) + 'ETA'.ljust(9) + 'DSTGO'.ljust(9) + 'FINISHD'.ljust(9) + 'STARTD'.ljust(9) + 'UPDOWNWIND'.ljust(12)
         results += '\n'
@@ -501,8 +521,8 @@ def adminLiveData(context, request):
                 results += str(c.additional[racepos][legpos][0]).ljust(9)
                 results += str(c.additional[racepos][legpos][1]).ljust(9)
             except:
-                results += "False".ljust(9)
-                results += "False".ljust(9)
+                results += "N/A".ljust(9)
+                results += "N/A".ljust(9)
 
             results += str(c.upordownwind[racepos][legpos]).ljust(12)
 
