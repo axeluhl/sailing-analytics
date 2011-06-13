@@ -67,7 +67,7 @@ class Competitor(BaseDocument):
 
         'leg_indexes': {}, # holds association between leg position and unique id <position in marks>:<unique id>
 
-        'total': float,
+        'total': int, # total rank
         'current_rank': int, # current rank for given time
         'races' : [float, ],
         'marks' : [[float, ], ], # ranks for marks

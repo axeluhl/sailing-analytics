@@ -169,7 +169,7 @@ public class ModeratorApp extends Servlet {
         RaceDefinition race = getRaceDefinition(req);
         TrackedRace trackedRace = null;
         if (event != null && race != null) {
-            trackedRace = getService().getDomainFactory().trackEvent(event).getTrackedRace(race);
+            trackedRace = getService().getDomainFactory().getTrackedEvent(event).getTrackedRace(race);
         }
         return trackedRace;
     }
@@ -183,7 +183,7 @@ public class ModeratorApp extends Servlet {
         } else {
             try {
                 TimePoint timePoint = getTimePoint(req, PARAM_NAME_TIME, PARAM_NAME_TIME_MILLIS,
-                        trackedRace.getTimePointOfNewestEvent()==null?MillisecondsTimePoint.now():trackedRace.getTimePointOfNewestEvent());
+                        trackedRace.getTimePointOfLastEvent()==null?MillisecondsTimePoint.now():trackedRace.getTimePointOfLastEvent());
                 String sinceUpdateString = req.getParameter(PARAM_NAME_SINCE_UPDATE);
                 if (sinceUpdateString != null) {
                 	System.out.println("Blocking...");
@@ -200,6 +200,8 @@ public class ModeratorApp extends Servlet {
                         .asMillis());
                 jsonRace.put("timeofnewestevent", trackedRace.getTimePointOfNewestEvent() == null ? 0l : trackedRace
                         .getTimePointOfNewestEvent().asMillis());
+                jsonRace.put("timeoflastevent", trackedRace.getTimePointOfLastEvent() == null ? 0l : trackedRace
+                        .getTimePointOfLastEvent().asMillis());
                 jsonRace.put("updatecount", trackedRace.getUpdateCount());
                 Position positionForWind = null;
                 TrackedLeg currentLeg = trackedRace.getCurrentLeg(timePoint);
@@ -234,6 +236,11 @@ public class ModeratorApp extends Servlet {
                         TrackedLegOfCompetitor trackedLegOfCompetitor = leg.getTrackedLeg(competitor);
                         if (trackedLegOfCompetitor != null) {
                             jsonCompetitorInLeg.put("name", competitor.getName());
+                            Speed currentSpeedOverGround = trackedLegOfCompetitor.getSpeedOverGround(timePoint);
+                            if (currentSpeedOverGround != null) {
+                                jsonCompetitorInLeg.put("currentSpeedOverGroundInKnots",
+                                        currentSpeedOverGround == null ? null : currentSpeedOverGround.getKnots());
+                            }
                             Speed averageSpeedOverGround = trackedLegOfCompetitor.getAverageSpeedOverGround(timePoint);
                             if (averageSpeedOverGround != null) {
                                 jsonCompetitorInLeg.put("averageSpeedOverGroundInKnots",
@@ -347,7 +354,7 @@ public class ModeratorApp extends Servlet {
                 JSONObject jsonRace = new JSONObject();
                 jsonRace.put("name", race.getName());
                 jsonRace.put("boatclass", race.getBoatClass()==null?"":race.getBoatClass().getName());
-                TimePoint start = getService().getDomainFactory().trackEvent(event).getTrackedRace(race).getStart();
+                TimePoint start = getService().getDomainFactory().getTrackedEvent(event).getTrackedRace(race).getStart();
                 jsonRace.put("start", start==null?Long.MAX_VALUE:start.asMillis());
                 JSONArray jsonLegs = new JSONArray();
                 for (Leg leg : race.getCourse().getLegs()) {
@@ -356,7 +363,7 @@ public class ModeratorApp extends Servlet {
                     jsonLeg.put("end", leg.getTo().getName());
                     jsonLegs.add(jsonLeg);
                 }
-                TrackedRace trackedRace = getService().getDomainFactory().trackEvent(event).getTrackedRace(race);
+                TrackedRace trackedRace = getService().getDomainFactory().getOrCreateTrackedEvent(event).getTrackedRace(race);
                 if (trackedRace.getStart() != null) {
                     jsonRace.put("start", trackedRace.getStart().asMillis());
                 }

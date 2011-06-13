@@ -77,7 +77,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
         if (legStart == null) {
             return Distance.NULL;
         } else {
-            MarkPassing legEnd = getTrackedRace().getMarkPassing(getCompetitor(), getLeg().getTo());
+            MarkPassing legEnd = getMarkPassingForLegEnd();
             TimePoint end = timePoint;
             if (legEnd != null && timePoint.compareTo(legEnd.getTimePoint()) > 0) {
                 // timePoint is after leg finish; take leg end and end time point
@@ -245,7 +245,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     public Speed getAverageVelocityMadeGood(TimePoint timePoint) throws NoWindException {
         Speed result = null;
         MarkPassing start = getMarkPassingForLegStart();
-        if (start != null && start.getTimePoint().compareTo(timePoint) > 0) {
+        if (start != null && start.getTimePoint().compareTo(timePoint) <= 0) {
             MarkPassing end = getMarkPassingForLegEnd();
             if (end != null) {
                 TimePoint to;
@@ -254,11 +254,13 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
                 } else {
                     to = timePoint;
                 }
-                Position endPos = getTrackedRace().getTrack(getCompetitor()).getEstimatedPosition(to, false);
-                Distance d = getWindwardDistance(
-                        getTrackedRace().getTrack(getCompetitor()).getEstimatedPosition(start.getTimePoint(), false), endPos,
-                        to);
-                result = d.inTime(to.asMillis() - start.getTimePoint().asMillis());
+                Position endPos = getTrackedRace().getTrack(getCompetitor()).getEstimatedPosition(to, /* extrapolate */ false);
+                if (endPos != null) {
+                    Distance d = getWindwardDistance(
+                            getTrackedRace().getTrack(getCompetitor())
+                                    .getEstimatedPosition(start.getTimePoint(), false), endPos, to);
+                    result = d.inTime(to.asMillis() - start.getTimePoint().asMillis());
+                }
             }
         }
         return result;
@@ -359,7 +361,8 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
         }
     }
 
-    private SpeedWithBearing getSpeedOverGround(TimePoint at) {
+    @Override
+    public SpeedWithBearing getSpeedOverGround(TimePoint at) {
         if (hasStartedLeg(at)) {
             return getTrackedRace().getTrack(getCompetitor()).getEstimatedSpeed(at);
         } else {

@@ -46,6 +46,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     private TimePoint start;
     private TimePoint finish;
     private TimePoint timePointOfNewestEvent;
+    private TimePoint timePointOfLastEvent;
     private int updateCount;
     
     private final Map<TimePoint, TreeSet<Competitor>> competitorRankings; 
@@ -352,6 +353,11 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     public TimePoint getTimePointOfNewestEvent() {
         return timePointOfNewestEvent;
     }
+    
+    @Override
+    public TimePoint getTimePointOfLastEvent() {
+        return timePointOfLastEvent;
+    }
 
     /**
      * @param timeOfEvent may be <code>null</code> meaning to only unblock waiters but not update any time points
@@ -366,6 +372,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             if (startOfTracking == null || startOfTracking.compareTo(timeOfEvent) > 0) {
                 startOfTracking = timeOfEvent;
             }
+            timePointOfLastEvent = timeOfEvent;
         }
         notifyAll();
     }

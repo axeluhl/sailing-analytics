@@ -16,10 +16,13 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindStore;
+import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
+import com.sap.sailing.domain.tractracadapter.RaceHandle;
 import com.sap.sailing.domain.tractracadapter.RaceTracker;
 import com.sap.sailing.domain.tractracadapter.Receiver;
+import com.sap.sailing.util.Util.Triple;
 import com.tractrac.clientmodule.Event;
 import com.tractrac.clientmodule.data.DataController;
 import com.tractrac.clientmodule.data.DataController.Listener;
@@ -31,10 +34,18 @@ public class RaceTrackerImpl implements Listener, RaceTracker {
     private final Thread ioThread;
     private final DataController controller;
     private final Set<Receiver> receivers;
+    private final DomainFactory domainFactory;
+    private final DynamicTrackedEvent trackedEvent;
+    private final WindStore windStore;
+    private final Triple<URL, URI, URI> urls;
 
     /**
+     * Creates a race tracked for the specified URL/URIs and starts receiving all available existing and future push
+     * data from there. Receiving continues until {@link #stop()} is called.
+     * <p>
+     * 
      * A race tracker uses the <code>paramURL</code> for the TracTrac Java client to register for push data about one
-     * race. The {@link RaceDefinition} for that race, however, cannot be created until the {@link Course} has been
+     * race. The {@link RaceDefinition} for that race, however, isn't created until the {@link Course} has been
      * received. Therefore, the {@link RaceCourseReceiver} will create the {@link RaceDefinition} and will add it to the
      * {@link com.sap.sailing.domain.base.Event}.
      * <p>
@@ -45,16 +56,16 @@ public class RaceTrackerImpl implements Listener, RaceTracker {
      * {@link Event} as argument that is used for its tracking.
      * <p>
      * 
-     * When {@link #getRace} is called on this object before the {@link RaceCourseReceiver} has created the
-     * {@link RaceDefinition}, the call will block until this has happened.
-     * 
      * @param windStore
-     *            Provides the capability to obtain the {@link WindTrack}s for the different wind sources.
-     *            A trivial implementation is {@link EmptyWindStore} which simply provides new, empty tracks.
-     *            This is always available but loses track of the wind, e.g., during server restarts.
+     *            Provides the capability to obtain the {@link WindTrack}s for the different wind sources. A trivial
+     *            implementation is {@link EmptyWindStore} which simply provides new, empty tracks. This is always
+     *            available but loses track of the wind, e.g., during server restarts.
      */
     protected RaceTrackerImpl(DomainFactory domainFactory, URL paramURL, URI liveURI, URI storedURI, WindStore windStore)
             throws URISyntaxException, MalformedURLException, FileNotFoundException {
+        urls = new Triple<URL, URI, URI>(paramURL, liveURI, storedURI);
+        this.windStore = windStore;
+        this.domainFactory = domainFactory;
         // Read event data from configuration file
         tractracEvent = KeyValue.setup(paramURL);
         
@@ -69,7 +80,7 @@ public class RaceTrackerImpl implements Listener, RaceTracker {
         // Start live and stored data streams
         ioThread = new Thread(controller, "io");
         domainEvent = domainFactory.createEvent(tractracEvent);
-        DynamicTrackedEvent trackedEvent = domainFactory.trackEvent(domainEvent);
+        trackedEvent = domainFactory.getOrCreateTrackedEvent(domainEvent);
         receivers = new HashSet<Receiver>();
         Set<TypeController> typeControllers = new HashSet<TypeController>();
         for (Receiver receiver : domainFactory.getUpdateReceivers(trackedEvent, tractracEvent, windStore)) {
@@ -82,8 +93,28 @@ public class RaceTrackerImpl implements Listener, RaceTracker {
     }
     
     @Override
+    public Triple<URL, URI, URI> getURLs() {
+        return urls;
+    }
+
+    @Override
+    public WindStore getWindStore() {
+        return windStore;
+    }
+
+    @Override
+    public DynamicTrackedEvent getTrackedEvent() {
+        return trackedEvent;
+    }
+    
+    @Override
+    public RaceHandle getRaceHandle() {
+        return new RaceHandleImpl(domainFactory, tractracEvent, getTrackedEvent(), this);
+    }
+    
+    @Override
     public RaceDefinition getRace() {
-        return DomainFactory.INSTANCE.getRace(tractracEvent);
+        return domainFactory.getRace(tractracEvent);
     }
     
     protected void addListenersForStoredDataAndStartController(Iterable<TypeController> listenersForStoredData) {
@@ -118,7 +149,8 @@ public class RaceTrackerImpl implements Listener, RaceTracker {
         for (Receiver receiver : receivers) {
             receiver.stop();
         }
-        ioThread.join();
+        ioThread.join(3000); // wait no more than three seconds
+        trackedEvent.removedTrackedRace(trackedEvent.getTrackedRace(getRace()));
     }
 
     protected DataController getController() {

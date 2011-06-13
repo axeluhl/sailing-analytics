@@ -243,4 +243,10 @@ public class MockedTrackedRace implements DynamicTrackedRace {
         
     }
 
+    @Override
+    public TimePoint getTimePointOfLastEvent() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }
