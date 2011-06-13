@@ -200,6 +200,8 @@ public class ModeratorApp extends Servlet {
                         .asMillis());
                 jsonRace.put("timeofnewestevent", trackedRace.getTimePointOfNewestEvent() == null ? 0l : trackedRace
                         .getTimePointOfNewestEvent().asMillis());
+                jsonRace.put("timeoflastevent", trackedRace.getTimePointOfLastEvent() == null ? 0l : trackedRace
+                        .getTimePointOfLastEvent().asMillis());
                 jsonRace.put("updatecount", trackedRace.getUpdateCount());
                 Position positionForWind = null;
                 TrackedLeg currentLeg = trackedRace.getCurrentLeg(timePoint);

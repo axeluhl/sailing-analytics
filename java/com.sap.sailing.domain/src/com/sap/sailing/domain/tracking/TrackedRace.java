@@ -137,8 +137,7 @@ public interface TrackedRace {
     WindTrack getWindTrack(WindSource windSource);
 
     /**
-     * Waits until {@link #getUpdateCount()} is after <code>since</code>.
-     * @param sinceUpdate TODO
+     * Waits until {@link #getUpdateCount()} is after <code>sinceUpdate</code>.
      */
     void waitForNextUpdate(int sinceUpdate) throws InterruptedException;
 
@@ -149,4 +148,10 @@ public interface TrackedRace {
     NavigableSet<MarkPassing> getMarkPassings(Competitor competitor);
 
     void removeWind(Wind wind, WindSource windSource);
+
+    /**
+     * Time stamp that the last event received from the underlying push service carried on it.
+     * Note that these times may not increase monotonically.
+     */
+    TimePoint getTimePointOfLastEvent();
 }
