@@ -143,7 +143,7 @@ public class RacingEventServiceImpl implements RacingEventService {
     public synchronized void startTrackingWind(Event event, RaceDefinition race, int port,
             DeclinationService declinationService) throws SocketException {
         if (!windTrackers.containsKey(race)) {
-            DynamicTrackedEvent trackedEvent = getDomainFactory().trackEvent(event);
+            DynamicTrackedEvent trackedEvent = getDomainFactory().getOrCreateTrackedEvent(event);
             DynamicTrackedRace trackedRace = trackedEvent.getTrackedRace(race);
             WindTracker windTracker = new WindTracker(trackedRace, declinationService);
             UDPExpeditionReceiver receiver = getOrCreateWindReceiverForPort(port);

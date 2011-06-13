@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 
 public interface RaceTracker {
 
@@ -19,5 +20,7 @@ public interface RaceTracker {
     RaceDefinition getRace();
 
     RaceHandle getRaceHandle();
+
+    DynamicTrackedEvent getTrackedEvent();
     
 }

@@ -67,7 +67,7 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
         super.setUp();
         domainFactory = new DomainFactoryImpl();
         domainEvent = domainFactory.createEvent(getEvent());
-        trackedEvent = domainFactory.trackEvent(domainEvent);
+        trackedEvent = domainFactory.getOrCreateTrackedEvent(domainEvent);
         receivers.add(new RaceCourseReceiver(domainFactory, trackedEvent, getEvent(), /* millisecondsOverWhichToAverageWind */
                 EmptyWindStore.INSTANCE,
                 30000, /* millisecondsOverWhichToAverageSpeed */30000) {

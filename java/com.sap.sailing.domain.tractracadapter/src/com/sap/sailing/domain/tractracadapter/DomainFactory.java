@@ -76,7 +76,11 @@ public interface DomainFactory {
     RaceTracker createRaceTracker(URL paramURL, URI liveURI, URI storedURI, WindStore windStore) throws MalformedURLException,
             FileNotFoundException, URISyntaxException;
 
-    DynamicTrackedEvent trackEvent(com.sap.sailing.domain.base.Event event);
+    /**
+     * Looks for tracking information about <code>event</code>. If no such object exists yet, a new one
+     * is created.
+     */
+    DynamicTrackedEvent getOrCreateTrackedEvent(com.sap.sailing.domain.base.Event event);
     
     BoatClass getBoatClass(CompetitorClass competitorClass);
 
@@ -93,7 +97,7 @@ public interface DomainFactory {
      * 
      * @param trackedEvent
      *            must have been created before through
-     *            {@link #trackEvent(com.sap.sailing.domain.base.Event)} because
+     *            {@link #getOrCreateTrackedEvent(com.sap.sailing.domain.base.Event)} because
      *            otherwise the link to the {@link Event} can't be established
      * @param windStore TODO
      */
@@ -138,4 +142,10 @@ public interface DomainFactory {
      * in a course. A single control point may be used more than once in a course's list of waypoints.
      */
     void updateCourseWaypoints(Course courseToUpdate, List<ControlPoint> controlPoints) throws PatchFailedException;
+
+    /**
+     * Looks for the tracking information for <code>event</code>. If not found, <code>null</code> is returned
+     * immediately. See also {@link #getOrCreateTrackedEvent(com.sap.sailing.domain.base.Event)}.
+     */
+    DynamicTrackedEvent getTrackedEvent(com.sap.sailing.domain.base.Event event);
 }

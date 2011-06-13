@@ -338,9 +338,14 @@ public class DomainFactoryImpl implements DomainFactory {
                 ReceiverType.MARKPASSINGS, ReceiverType.MARKPOSITIONS, ReceiverType.RACESTARTFINISH,
                 ReceiverType.RAWPOSITIONS);
     }
+    
+    @Override
+    public DynamicTrackedEvent getTrackedEvent(com.sap.sailing.domain.base.Event event) {
+        return eventTrackingCache.get(event);
+    }
 
     @Override
-    public DynamicTrackedEvent trackEvent(com.sap.sailing.domain.base.Event event) {
+    public DynamicTrackedEvent getOrCreateTrackedEvent(com.sap.sailing.domain.base.Event event) {
         synchronized (eventTrackingCache) {
             DynamicTrackedEvent result = eventTrackingCache.get(event);
             if (result == null) {

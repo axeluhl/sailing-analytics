@@ -16,6 +16,7 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindStore;
+import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.RaceHandle;
@@ -33,6 +34,7 @@ public class RaceTrackerImpl implements Listener, RaceTracker {
     private final DataController controller;
     private final Set<Receiver> receivers;
     private final DomainFactory domainFactory;
+    private final DynamicTrackedEvent trackedEvent;
 
     /**
      * Creates a race tracked for the specified URL/URIs and starts receiving all available existing and future push
@@ -73,7 +75,7 @@ public class RaceTrackerImpl implements Listener, RaceTracker {
         // Start live and stored data streams
         ioThread = new Thread(controller, "io");
         domainEvent = domainFactory.createEvent(tractracEvent);
-        DynamicTrackedEvent trackedEvent = domainFactory.trackEvent(domainEvent);
+        trackedEvent = domainFactory.getOrCreateTrackedEvent(domainEvent);
         receivers = new HashSet<Receiver>();
         Set<TypeController> typeControllers = new HashSet<TypeController>();
         for (Receiver receiver : domainFactory.getUpdateReceivers(trackedEvent, tractracEvent, windStore)) {
@@ -86,8 +88,13 @@ public class RaceTrackerImpl implements Listener, RaceTracker {
     }
     
     @Override
+    public DynamicTrackedEvent getTrackedEvent() {
+        return trackedEvent;
+    }
+    
+    @Override
     public RaceHandle getRaceHandle() {
-        return new RaceHandleImpl(domainFactory, tractracEvent);
+        return new RaceHandleImpl(domainFactory, tractracEvent, getTrackedEvent());
     }
     
     @Override
