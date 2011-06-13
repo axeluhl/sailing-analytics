@@ -572,14 +572,18 @@ def moderatorLiveData(context, request):
 
             markranks[racecounter] = markranks[racecounter] + competitor.marks[real_racepos]
 
-            # prepare values according to UI
-            # UI:       RANK, DSTTRAV, SPEED, VMG, SGAP, DSTGO, ETA
-            # INTERN:   RANK, AVGSPEED, DSTRV, VMG, AVMG, SGAP, ETA, DSTGO 
             iv = competitor.values[real_racepos]
-            newvalues = [iv[0], iv[2], iv[1], iv[3], iv[5], iv[-1], iv[-2]]
 
-            for valpos in range(len(newvalues)):
-                newvalues[valpos] = ['%.2f' % val for val in newvalues[valpos]]
+            newvalues = iv
+            for valpos in range(len(iv)):
+                nv = ['%.2f' % (val < 15000 and val or 0.0) for val in newvalues[valpos]]
+
+                # prepare values according to UI
+                # UI:       RANK, DSTTRAV, SPEED, VMG, SGAP, DSTGO, ETA
+                # INTERN:   RANK, AVGSPEED, DSTRV, VMG, AVMG, SGAP, ETA, DSTGO 
+                if nv:
+                    nv = [nv[0], nv[2], nv[1], nv[3], nv[5], nv[-1], nv[-2]]
+                newvalues[valpos] = nv
 
             legvalues[racecounter] = legvalues[racecounter] + newvalues
 
