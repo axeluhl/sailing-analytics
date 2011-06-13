@@ -22,6 +22,7 @@ class CompetitorImpl(ModelBase):
     default_values = {
         'races': [],
         'marks': [[]],
+        'marknames': [[]]
     }
 
     @classmethod

@@ -70,7 +70,8 @@ class Competitor(BaseDocument):
         'total': float,
         'current_rank': int, # current rank for given time
         'races' : [float, ],
-        'marks' : [[float, ], ], # should be named legs but refactoring is so hard in python
+        'marks' : [[float, ], ], # ranks for marks
+        'marknames' : [[[unicode,] ]], # marknames for legs
         'upordownwind' : [[bool], ], # indicates wheter the leg is up or downwind
         'additional' : [[[float]]], # additional information regarding one leg (finished, started)
         'values' : [[[float, ]]]
