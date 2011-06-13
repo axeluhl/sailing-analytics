@@ -53,12 +53,14 @@ class LiveDataReceiver(threading.Thread):
 
             # blocking call by updatecount setting
             conf.setParameters(dict(eventname=self.eventname, racename=self.racename, sinceupdate=self.updatecount))
-            conf.setLogging(True)
+            conf.setLogging(False)
 
             try:
                 # need to lock because other threads could overwrite information
                 with lock:
                     updatecount = liveRaceInformation(conf)
+                    print >>sys.stderr, '.',
+                    sys.stderr.flush()
 
                 self.last_update = datetime.datetime.now()
                 self.updatecount = updatecount

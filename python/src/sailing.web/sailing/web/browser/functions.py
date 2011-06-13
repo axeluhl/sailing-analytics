@@ -165,9 +165,18 @@ def configureListener(context, request):
         del view.session['listener-conf']
         view.session.save()
 
-        key = hash('%s-%s-%s-%s' % (conf.host, conf.port, eventname, racename))
-        if threaded_listener.has_key(key):
-            threaded_listener[key].running = False
+        racenames = []
+        if not racename:
+            racenames = model.EventImpl.queryOneBy(name=eventname).races
+        else: racenames = [racename, ]
+
+        for rname in racenames:
+            key = hash('%s-%s-%s-%s' % (conf.host, conf.port, eventname, rname))
+            if threaded_listener.has_key(key):
+                threaded_listener[key].running = False
+
+                # remove this thread - will die later if still blocking
+                del threaded_listener[key]
 
         try:
             conf.trigger()
