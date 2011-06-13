@@ -35,7 +35,7 @@
         <!-- / MAIN INTERFACE -->
         <div id='main-interface'>
           <div class='blue-table'>
-            <a class='refresh-btn' href='#'></a>
+            <a class='refresh-btn' href='javascript:;' onclick='loadLeaderboard();'></a>
             <a class='sort-rank sort-asc' href='#'></a>
             <table id='overall-clipping'>
               <tbody>
@@ -303,10 +303,12 @@
               </a>
               <a class='main-box-sort sort-asc' href='#'></a>
             </div>
-            <div class='leg-wrap'>
+
+            <tal:for repeat="leg event.marks[int(raceid)-1]">
+            <div class='leg-wrap' id="leg-${repeat['leg'].number}" tal:define='markid repeat["leg"].number'>
               <!-- / SECOND ELEMENT WITH LIST -->
               <div class='leg-box'>
-                <span>M1</span>
+              <span>M${markid}</span>
                 <a class='leg-box-sort sort-asc' href='#'></a>
                 <a class='leg-box-active' href='javascript:;' onclick='$(this).closest(".leg-wrap").find(".table-box, .race-table").toggle();'>
                   <ul>
@@ -333,7 +335,7 @@
                   </ul>
                 </a>
               </div>
-              <div class='table-box'>
+              <div class='table-box' style="display:none;">
                 <ul>
                   <li rowid='1'></li>
                   <li rowid='2'></li>
@@ -358,23 +360,26 @@
                 </ul>
                 <a class='table-box-sort sort-asc' href='#'></a>
               </div>
-              <table class='race-table' id='r1-m1'>
+              <table class='race-table' id='r1-m1' style="display:none;">
                 <thead>
                   <tr>
                     <th colid='1'>
-                      <span>gap</span>
+                      <span>DSTTRV</span>
                     </th>
                     <th colid='2'>
-                      <span>a. speed</span>
+                      <span>SPEED</span>
                     </th>
                     <th colid='3'>
-                      <span>distance</span>
+                      <span>VMG</span>
                     </th>
                     <th colid='4'>
-                      <span>g&l mt</span>
+                      <span>SGAP</span>
                     </th>
                     <th colid='5'>
-                      <span>g&l pl</span>
+                      <span>DSTGO</span>
+                    </th>
+                    <th colid='6'>
+                      <span>ETA</span>
                     </th>
                   </tr>
                 </thead>
@@ -395,6 +400,9 @@
                     <td class='table-sorting' colid='5'>
                       <a class='sort-asc' href='#'></a>
                     </td>
+                    <td class='table-sorting' colid='6'>
+                      <a class='sort-asc' href='#'></a>
+                    </td>
                   </tr>
                   <tr class='odd' rowid='1'>
                     <td colid='1'>
@@ -410,6 +418,9 @@
                       <span>&nbsp;</span>
                     </td>
                     <td colid='5'>
+                      <span>&nbsp;</span>
+                    </td>
+                    <td colid='6'>
                       <span>&nbsp;</span>
                     </td>
                   </tr>
@@ -429,6 +440,9 @@
                     <td colid='5'>
                       <span>&nbsp;</span>
                     </td>
+                    <td colid='6'>
+                      <span>&nbsp;</span>
+                    </td>
                   </tr>
                   <tr class='odd' rowid='3'>
                     <td colid='1'>
@@ -444,6 +458,9 @@
                       <span>&nbsp;</span>
                     </td>
                     <td colid='5'>
+                      <span>&nbsp;</span>
+                    </td>
+                    <td colid='6'>
                       <span>&nbsp;</span>
                     </td>
                   </tr>
@@ -463,6 +480,9 @@
                     <td colid='5'>
                       <span>&nbsp;</span>
                     </td>
+                    <td colid='6'>
+                      <span>&nbsp;</span>
+                    </td>
                   </tr>
                   <tr class='odd' rowid='5'>
                     <td colid='1'>
@@ -478,6 +498,9 @@
                       <span>&nbsp;</span>
                     </td>
                     <td colid='5'>
+                      <span>&nbsp;</span>
+                    </td>
+                    <td colid='6'>
                       <span>&nbsp;</span>
                     </td>
                   </tr>
@@ -497,6 +520,9 @@
                     <td colid='5'>
                       <span>&nbsp;</span>
                     </td>
+                    <td colid='6'>
+                      <span>&nbsp;</span>
+                    </td>
                   </tr>
                   <tr class='odd' rowid='7'>
                     <td colid='1'>
@@ -512,6 +538,9 @@
                       <span>&nbsp;</span>
                     </td>
                     <td colid='5'>
+                      <span>&nbsp;</span>
+                    </td>
+                    <td colid='6'>
                       <span>&nbsp;</span>
                     </td>
                   </tr>
@@ -531,6 +560,9 @@
                     <td colid='5'>
                       <span>&nbsp;</span>
                     </td>
+                    <td colid='6'>
+                      <span>&nbsp;</span>
+                    </td>
                   </tr>
                   <tr class='odd' rowid='9'>
                     <td colid='1'>
@@ -546,6 +578,9 @@
                       <span>&nbsp;</span>
                     </td>
                     <td colid='5'>
+                      <span>&nbsp;</span>
+                    </td>
+                    <td colid='6'>
                       <span>&nbsp;</span>
                     </td>
                   </tr>
@@ -565,6 +600,9 @@
                     <td colid='5'>
                       <span>&nbsp;</span>
                     </td>
+                    <td colid='6'>
+                      <span>&nbsp;</span>
+                    </td>
                   </tr>
                   <tr class='odd' rowid='11'>
                     <td colid='1'>
@@ -580,6 +618,9 @@
                       <span>&nbsp;</span>
                     </td>
                     <td colid='5'>
+                      <span>&nbsp;</span>
+                    </td>
+                    <td colid='6'>
                       <span>&nbsp;</span>
                     </td>
                   </tr>
@@ -599,6 +640,9 @@
                     <td colid='5'>
                       <span>&nbsp;</span>
                     </td>
+                    <td colid='6'>
+                      <span>&nbsp;</span>
+                    </td>
                   </tr>
                   <tr class='odd' rowid='13'>
                     <td colid='1'>
@@ -614,6 +658,9 @@
                       <span>&nbsp;</span>
                     </td>
                     <td colid='5'>
+                      <span>&nbsp;</span>
+                    </td>
+                    <td colid='6'>
                       <span>&nbsp;</span>
                     </td>
                   </tr>
@@ -633,6 +680,9 @@
                     <td colid='5'>
                       <span>&nbsp;</span>
                     </td>
+                    <td colid='6'>
+                      <span>&nbsp;</span>
+                    </td>
                   </tr>
                   <tr class='odd' rowid='15'>
                     <td colid='1'>
@@ -648,6 +698,9 @@
                       <span>&nbsp;</span>
                     </td>
                     <td colid='5'>
+                      <span>&nbsp;</span>
+                    </td>
+                    <td colid='6'>
                       <span>&nbsp;</span>
                     </td>
                   </tr>
@@ -667,6 +720,9 @@
                     <td colid='5'>
                       <span>&nbsp;</span>
                     </td>
+                    <td colid='6'>
+                      <span>&nbsp;</span>
+                    </td>
                   </tr>
                   <tr class='odd' rowid='17'>
                     <td colid='1'>
@@ -682,6 +738,9 @@
                       <span>&nbsp;</span>
                     </td>
                     <td colid='5'>
+                      <span>&nbsp;</span>
+                    </td>
+                    <td colid='6'>
                       <span>&nbsp;</span>
                     </td>
                   </tr>
@@ -701,6 +760,9 @@
                     <td colid='5'>
                       <span>&nbsp;</span>
                     </td>
+                    <td colid='6'>
+                      <span>&nbsp;</span>
+                    </td>
                   </tr>
                   <tr class='odd' rowid='19'>
                     <td colid='1'>
@@ -716,6 +778,9 @@
                       <span>&nbsp;</span>
                     </td>
                     <td colid='5'>
+                      <span>&nbsp;</span>
+                    </td>
+                    <td colid='6'>
                       <span>&nbsp;</span>
                     </td>
                   </tr>
@@ -735,221 +800,14 @@
                     <td colid='5'>
                       <span>&nbsp;</span>
                     </td>
+                    <td colid='6'>
+                      <span>&nbsp;</span>
+                    </td>
                   </tr>
                 </tbody>
               </table>
             </div>
-            <!-- / REST LEGS -->
-            <div class='leg-wrap'>
-              <div class='leg-box'>
-                <span>M2</span>
-                <a class='leg-box-sort sort-desc' href='#'></a>
-                <a class='leg-box-active' href='#'>
-                  <ul>
-                    <li rowid='1'></li>
-                    <li rowid='2'></li>
-                    <li rowid='3'></li>
-                    <li rowid='4'></li>
-                    <li rowid='5'></li>
-                    <li rowid='6'></li>
-                    <li rowid='7'></li>
-                    <li rowid='8'></li>
-                    <li rowid='9'></li>
-                    <li rowid='10'></li>
-                    <li rowid='11'></li>
-                    <li rowid='12'></li>
-                    <li rowid='13'></li>
-                    <li rowid='14'></li>
-                    <li rowid='15'></li>
-                    <li rowid='16'></li>
-                    <li rowid='17'></li>
-                    <li rowid='18'></li>
-                    <li rowid='19'></li>
-                    <li rowid='20'></li>
-                  </ul>
-                </a>
-              </div>
-            </div>
-            <div class='leg-wrap'>
-              <div class='leg-box'>
-                <span>M3</span>
-                <a class='leg-box-sort sort-desc' href='#'></a>
-                <a class='leg-box-active' href='#'>
-                  <ul>
-                    <li rowid='1'></li>
-                    <li rowid='2'></li>
-                    <li rowid='3'></li>
-                    <li rowid='4'></li>
-                    <li rowid='5'></li>
-                    <li rowid='6'></li>
-                    <li rowid='7'></li>
-                    <li rowid='8'></li>
-                    <li rowid='9'></li>
-                    <li rowid='10'></li>
-                    <li rowid='11'></li>
-                    <li rowid='12'></li>
-                    <li rowid='13'></li>
-                    <li rowid='14'></li>
-                    <li rowid='15'></li>
-                    <li rowid='16'></li>
-                    <li rowid='17'></li>
-                    <li rowid='18'></li>
-                    <li rowid='19'></li>
-                    <li rowid='20'></li>
-                  </ul>
-                </a>
-              </div>
-            </div>
-            <div class='leg-wrap'>
-              <div class='leg-box'>
-                <span>M4</span>
-                <a class='leg-box-sort sort-desc' href='#'></a>
-                <a class='leg-box-active' href='#'>
-                  <ul>
-                    <li rowid='1'></li>
-                    <li rowid='2'></li>
-                    <li rowid='3'></li>
-                    <li rowid='4'></li>
-                    <li rowid='5'></li>
-                    <li rowid='6'></li>
-                    <li rowid='7'></li>
-                    <li rowid='8'></li>
-                    <li rowid='9'></li>
-                    <li rowid='10'></li>
-                    <li rowid='11'></li>
-                    <li rowid='12'></li>
-                    <li rowid='13'></li>
-                    <li rowid='14'></li>
-                    <li rowid='15'></li>
-                    <li rowid='16'></li>
-                    <li rowid='17'></li>
-                    <li rowid='18'></li>
-                    <li rowid='19'></li>
-                    <li rowid='20'></li>
-                  </ul>
-                </a>
-              </div>
-            </div>
-            <div class='leg-wrap'>
-              <div class='leg-box'>
-                <span>M5</span>
-                <a class='leg-box-sort sort-desc' href='#'></a>
-                <a class='leg-box-active' href='#'>
-                  <ul>
-                    <li rowid='1'></li>
-                    <li rowid='2'></li>
-                    <li rowid='3'></li>
-                    <li rowid='4'></li>
-                    <li rowid='5'></li>
-                    <li rowid='6'></li>
-                    <li rowid='7'></li>
-                    <li rowid='8'></li>
-                    <li rowid='9'></li>
-                    <li rowid='10'></li>
-                    <li rowid='11'></li>
-                    <li rowid='12'></li>
-                    <li rowid='13'></li>
-                    <li rowid='14'></li>
-                    <li rowid='15'></li>
-                    <li rowid='16'></li>
-                    <li rowid='17'></li>
-                    <li rowid='18'></li>
-                    <li rowid='19'></li>
-                    <li rowid='20'></li>
-                  </ul>
-                </a>
-              </div>
-            </div>
-            <div class='leg-wrap'>
-              <div class='leg-box'>
-                <span>M6</span>
-                <a class='leg-box-sort sort-desc' href='#'></a>
-                <a class='leg-box-active' href='#'>
-                  <ul>
-                    <li rowid='1'></li>
-                    <li rowid='2'></li>
-                    <li rowid='3'></li>
-                    <li rowid='4'></li>
-                    <li rowid='5'></li>
-                    <li rowid='6'></li>
-                    <li rowid='7'></li>
-                    <li rowid='8'></li>
-                    <li rowid='9'></li>
-                    <li rowid='10'></li>
-                    <li rowid='11'></li>
-                    <li rowid='12'></li>
-                    <li rowid='13'></li>
-                    <li rowid='14'></li>
-                    <li rowid='15'></li>
-                    <li rowid='16'></li>
-                    <li rowid='17'></li>
-                    <li rowid='18'></li>
-                    <li rowid='19'></li>
-                    <li rowid='20'></li>
-                  </ul>
-                </a>
-              </div>
-            </div>
-            <div class='leg-wrap'>
-              <div class='leg-box'>
-                <span>M7</span>
-                <a class='leg-box-sort sort-desc' href='#'></a>
-                <a class='leg-box-active' href='#'>
-                  <ul>
-                    <li rowid='1'></li>
-                    <li rowid='2'></li>
-                    <li rowid='3'></li>
-                    <li rowid='4'></li>
-                    <li rowid='5'></li>
-                    <li rowid='6'></li>
-                    <li rowid='7'></li>
-                    <li rowid='8'></li>
-                    <li rowid='9'></li>
-                    <li rowid='10'></li>
-                    <li rowid='11'></li>
-                    <li rowid='12'></li>
-                    <li rowid='13'></li>
-                    <li rowid='14'></li>
-                    <li rowid='15'></li>
-                    <li rowid='16'></li>
-                    <li rowid='17'></li>
-                    <li rowid='18'></li>
-                    <li rowid='19'></li>
-                    <li rowid='20'></li>
-                  </ul>
-                </a>
-              </div>
-            </div>
-            <div class='leg-wrap'>
-              <div class='leg-box'>
-                <span>M8</span>
-                <a class='leg-box-sort sort-desc' href='#'></a>
-                <a class='leg-box-active' href='#'>
-                  <ul>
-                    <li rowid='1'></li>
-                    <li rowid='2'></li>
-                    <li rowid='3'></li>
-                    <li rowid='4'></li>
-                    <li rowid='5'></li>
-                    <li rowid='6'></li>
-                    <li rowid='7'></li>
-                    <li rowid='8'></li>
-                    <li rowid='9'></li>
-                    <li rowid='10'></li>
-                    <li rowid='11'></li>
-                    <li rowid='12'></li>
-                    <li rowid='13'></li>
-                    <li rowid='14'></li>
-                    <li rowid='15'></li>
-                    <li rowid='16'></li>
-                    <li rowid='17'></li>
-                    <li rowid='18'></li>
-                    <li rowid='19'></li>
-                    <li rowid='20'></li>
-                  </ul>
-                </a>
-              </div>
-            </div>
+            </tal:for>
           </div>
           </tal:for>
         </div>

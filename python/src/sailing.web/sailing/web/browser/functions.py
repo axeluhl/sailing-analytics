@@ -533,3 +533,58 @@ def adminLiveData(context, request):
 
     return results
 
+@jsonize
+def moderatorLiveData(context, request):
+    """ Returns data for the moderators leaderboard """
+
+    view = core.BaseView(context, request)
+    event = view.currentLeaderboardEvent()
+
+    sortby = request.params.get('sortby', '')
+    race_range = request.params.get('races', '1:3')
+    competitor_range = request.params.get('competitors', '1:20')
+
+    race_start_index, race_end_index = race_range.split(':')
+    races_list = event.races[int(race_start_index)-1:int(race_end_index)]
+
+    competitors = model.CompetitorImpl.queryBy(event=event.name)
+
+    races = []
+    for racename in races_list:
+        races.append(model.RaceImpl.queryOneBy(name=racename, event=event.name))
+
+    # list of competitors with corresponding data
+    data = {}
+
+    for competitor in competitors:
+        racedata = competitor.races[int(race_start_index)-1:int(race_end_index)]
+
+        # for each race found compute the marks and values
+        markranks = []; legvalues = []; racecounter = 0
+        for racename in races_list:
+            real_racepos = event.races.index(racename)
+            if len(markranks) < racecounter+1:
+                markranks.append([])
+                legvalues.append([])
+
+            markranks[racecounter] = markranks[racecounter] + competitor.marks[real_racepos]
+
+            # prepare values according to UI
+            # UI:       RANK, DSTTRAV, SPEED, VMG, SGAP, DSTGO, ETA
+            # INTERN:   RANK, AVGSPEED, DSTRV, VMG, AVMG, SGAP, ETA, DSTGO 
+            iv = competitor.values[real_racepos]
+            newvalues = [iv[0], iv[2], iv[1], iv[3], iv[5], iv[-1], iv[-2]]
+
+            for valpos in range(len(newvalues)):
+                newvalues[valpos] = ['%.2f' % val for val in newvalues[valpos]]
+
+            legvalues[racecounter] = legvalues[racecounter] + newvalues
+
+            racecounter += 1
+
+        cd = data.setdefault(competitor.name, {})
+        cd.update({'raceranks': racedata, 'markranks': markranks, 'legvalues': legvalues, 
+            'nationality': competitor.nationality, 'global_rank': competitor.total})
+
+    return data
+
