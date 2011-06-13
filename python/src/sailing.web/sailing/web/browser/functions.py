@@ -288,6 +288,14 @@ def windSettings(context, request):
         conf.trigger()
 
     elif request.POST.get('setcustom'):
+
+        # first set custom wind
+        conf.setCommand(config.SET_WIND_SOURCE)
+        conf.setParameters(dict(sourcename='WEB'))
+        conf.trigger()
+
+        conf.setContext(config.ADMIN)
+        conf.setRace(view.currentRace())
         conf.setCommand(config.SET_WIND)
 
         dc = {}
