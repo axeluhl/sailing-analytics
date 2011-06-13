@@ -25,6 +25,7 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.JSONService;
+import com.sap.sailing.domain.tractracadapter.RaceHandle;
 import com.sap.sailing.domain.tractracadapter.RaceRecord;
 import com.sap.sailing.domain.tractracadapter.RaceTracker;
 import com.sap.sailing.expeditionconnector.UDPExpeditionReceiver;
@@ -71,17 +72,20 @@ public class RacingEventServiceImpl implements RacingEventService {
     }
 
     @Override
-    public void addEvent(URL jsonURL, URI liveURI, URI storedURI, WindStore windStore) throws URISyntaxException, IOException, ParseException, org.json.simple.parser.ParseException {
+    public Event addEvent(URL jsonURL, URI liveURI, URI storedURI, WindStore windStore) throws URISyntaxException, IOException, ParseException, org.json.simple.parser.ParseException {
         JSONService jsonService = getDomainFactory().parseJSONURL(jsonURL);
+        Event event = null;
         for (RaceRecord rr : jsonService.getRaceRecords()) {
             URL paramURL = rr.getParamURL();
-            addRace(paramURL, liveURI, storedURI, windStore);
+            event = addRace(paramURL, liveURI, storedURI, windStore).getEvent();
         }
+        return event;
     }
 
     @Override
-    public void addRace(URL paramURL, URI liveURI, URI storedURI, WindStore windStore) throws MalformedURLException, FileNotFoundException,
+    public RaceHandle addRace(URL paramURL, URI liveURI, URI storedURI, WindStore windStore) throws MalformedURLException, FileNotFoundException,
             URISyntaxException {
+        // FIXME check if a tracker for this parameter combination already exists and if so, return its race handle
         RaceTracker tracker = getDomainFactory().createRaceTracker(paramURL, liveURI, storedURI, windStore);
         Set<RaceTracker> trackers = raceTrackers.get(tracker.getEvent());
         if (trackers == null) {
@@ -98,6 +102,7 @@ public class RacingEventServiceImpl implements RacingEventService {
         } else {
             eventsByName.put(eventName, tracker.getEvent());
         }
+        return tracker.getRaceHandle();
     }
 
     @Override
@@ -128,6 +133,7 @@ public class RacingEventServiceImpl implements RacingEventService {
                 }
             }
         }
+        // FIXME remove TrackedRace from TrackedEvent
         // if the last tracked race was removed, remove the entire event
         if (raceTrackers.get(event).isEmpty()) {
             stopTracking(event);
@@ -138,7 +144,7 @@ public class RacingEventServiceImpl implements RacingEventService {
     public synchronized void startTrackingWind(Event event, RaceDefinition race, int port,
             DeclinationService declinationService) throws SocketException {
         if (!windTrackers.containsKey(race)) {
-            DynamicTrackedEvent trackedEvent = getDomainFactory().trackEvent(event);
+            DynamicTrackedEvent trackedEvent = getDomainFactory().getOrCreateTrackedEvent(event);
             DynamicTrackedRace trackedRace = trackedEvent.getTrackedRace(race);
             WindTracker windTracker = new WindTracker(trackedRace, declinationService);
             UDPExpeditionReceiver receiver = getOrCreateWindReceiverForPort(port);

@@ -2,15 +2,13 @@
 Axel
 ====
 
- - track time of last event and return in showrace output
-
  - What about distance traveled in first leg? It seems to jump too high at the beginning.
+
+ - smoothen / dampen VMG and hence the ETA / sGAP
 
  - Test duplicate addrace for the same race; consider cleaning cache when stopRace/stopEvent is invoked
 
  - Test duplicate addevent for the same event
-
- - smoothen / dampen VMG and hence the ETA / sGAP
 
  - Open test server firewall ports for UDP / Expedition wind integration
 
@@ -25,6 +23,10 @@ Axel
  - Pass final production instance URL information to BeTomorrow for wind integration
 
  - Display gain/loss for next-best competitor (green/red arrow up/down) based on VMG comparison
+
+ - Now that we can update Course's waypoints, consider creating a RaceDefinition right upon
+   receiving the Event/Race from TracTrac, using an empty list of waypoints. This may simplify
+   the entire life cycle of RaceDefinition objects.
 
  - Improve Mongo-based tests by using Mongo transactions instead of waiting for prior transactions to complete
 

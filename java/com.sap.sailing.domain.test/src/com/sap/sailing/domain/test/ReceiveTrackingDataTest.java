@@ -72,12 +72,15 @@ public class ReceiveTrackingDataTest extends AbstractTracTracLiveTest {
         };
         List<TypeController> listeners = new ArrayList<TypeController>();
         Event event = domainFactory.createEvent(getEvent());
-        DynamicTrackedEvent trackedEvent = domainFactory.trackEvent(event);
+        DynamicTrackedEvent trackedEvent = domainFactory.getOrCreateTrackedEvent(event);
         trackedEvent.addRaceListener(new RaceListener() {
             @Override
             public void raceAdded(TrackedRace trackedRace) {
                 System.out.println("Subscribing raw position listener for race "+trackedRace);
                 ((DynamicTrackedRace) trackedRace).addListener(positionListener);
+            }
+            @Override
+            public void raceRemoved(TrackedRace trackedRace) {
             }
         });
         for (Receiver receiver : domainFactory.getUpdateReceivers(trackedEvent, getEvent(), EmptyWindStore.INSTANCE)) {

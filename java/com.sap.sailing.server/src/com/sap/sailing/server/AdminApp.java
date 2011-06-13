@@ -160,7 +160,7 @@ public class AdminApp extends Servlet {
             if (race == null) {
                 resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Race not found");
             } else {
-                TrackedRace trackedRace = getService().getDomainFactory().trackEvent(event).getTrackedRace(race);
+                TrackedRace trackedRace = getService().getDomainFactory().getTrackedEvent(event).getTrackedRace(race);
                 TimePoint time = getTimePoint(req, PARAM_NAME_TIME, PARAM_NAME_TIME_MILLIS, MillisecondsTimePoint.now());
                 TimePoint oneHourLater = new MillisecondsTimePoint(time.asMillis()+3600*1000);
                 String[] latitudes = req.getParameterValues(PARAM_NAME_LATDEG);
@@ -202,7 +202,7 @@ public class AdminApp extends Servlet {
             if (race == null) {
                 resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Race not found");
             } else {
-                TrackedRace trackedRace = getService().getDomainFactory().trackEvent(event).getTrackedRace(race);
+                TrackedRace trackedRace = getService().getDomainFactory().getTrackedEvent(event).getTrackedRace(race);
                 TimePoint from = getTimePoint(req, PARAM_NAME_FROM_TIME, PARAM_NAME_FROM_TIME_MILLIS,
                         trackedRace.getStart()==null?new MillisecondsTimePoint(0):
                             /* 24h before race start */ new MillisecondsTimePoint(trackedRace.getStart().asMillis()-24*3600*1000));
@@ -257,7 +257,7 @@ public class AdminApp extends Servlet {
                     if (race == null) {
                         resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Race not found");
                     } else {
-                        TrackedRace trackedRace = getService().getDomainFactory().trackEvent(event)
+                        TrackedRace trackedRace = getService().getDomainFactory().getTrackedEvent(event)
                                 .getTrackedRace(race);
                         trackedRace.setWindSource(windSource);
                         resp.getWriter().println(
@@ -313,7 +313,7 @@ public class AdminApp extends Servlet {
                     try {
                         TimePoint timePoint = getTimePoint(req, PARAM_NAME_TIME, PARAM_NAME_TIME_MILLIS, MillisecondsTimePoint.now());
                         Wind wind = new WindImpl(p, timePoint, speed);
-                        getService().getDomainFactory().trackEvent(event).getTrackedRace(race).recordWind(wind, WindSource.WEB);
+                        getService().getDomainFactory().getTrackedEvent(event).getTrackedRace(race).recordWind(wind, WindSource.WEB);
                     } catch (InvalidDateException e) {
                         resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Couldn't parse time specification " + e.getMessage());
                     }
@@ -342,7 +342,7 @@ public class AdminApp extends Servlet {
                         resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Wind source name " + sourceName + " unknown");
                     } else {
                         try {
-                            WindTrack windTrack = getService().getDomainFactory().trackEvent(event)
+                            WindTrack windTrack = getService().getDomainFactory().getTrackedEvent(event)
                                     .getTrackedRace(race).getWindTrack(windSource);
                             TimePoint timePoint = getTimePoint(req, PARAM_NAME_TIME, PARAM_NAME_TIME_MILLIS,
                                     MillisecondsTimePoint.now());
