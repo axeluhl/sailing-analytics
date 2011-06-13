@@ -35,7 +35,7 @@
         <!-- / MAIN INTERFACE -->
         <div id='main-interface'>
           <div class='blue-table'>
-            <a class='refresh-btn' href='javascript:;' onclick='loadLeaderboard();'></a>
+            <a class='refresh-btn' href='javascript:;' onclick='loadLeaderboard(null, "1,1");'></a>
             <a class='sort-rank sort-asc' href='#'></a>
             <table id='overall-clipping'>
               <tbody>

@@ -15,20 +15,26 @@ function loadLeaderboard(races, sortby, competitors) {
     );
 }
 
+function yieldValue(element, newvalue) {
+    element.html(newvalue);
+}
+
 /**
  * Puts data into the right context for the leaderboard
  */
 function displayLeaderboard(data) {
     rowid = 1;
-    for (key in data) {
-        competitor = data[key];
+    for (cpos in data) {
+        competitor = data[cpos];
+
+        /* always change global rank */
+        $('#clipping-'+rowid+'-1 span').html(competitor.global_rank);
 
         name_element = $('#clipping-'+rowid+'-3 span');
-        if (true || name_element.html() == key) {
+        if (name_element.html() != competitor.name) {
             /* competitor position has changed - refresh whole line */
 
-            name_element.html(key);
-            $('#clipping-'+rowid+'-1 span').html(competitor.global_rank);
+            name_element.html(competitor.name);
             $('#clipping-'+rowid+'-2 span').html(competitor.nationality);
 
             /* now set values independent what has been there before */
@@ -55,6 +61,29 @@ function displayLeaderboard(data) {
             }
         } else {
             /* check if values have changed */
+            name_element.html(competitor.name);
+            $('#clipping-'+rowid+'-2 span').html(competitor.nationality);
+
+            for (racerank in competitor.raceranks) {
+                yieldValue($('#race-'+racepos+'-rankrow-'+rowid), competitor.raceranks[racerank]);
+
+                markpos = 1;
+                for (markrank in competitor.markranks[racepos-1]) {
+                    yieldValue($('#race-'+racepos+'-mark-'+markpos+'-row-'+rowid), competitor.markranks[racepos-1][markrank]);
+
+                    legpos = 1;
+                    for (legvalue in competitor.legvalues[racepos-1][markpos-1]) {
+                        if (legvalue == 0) {
+                            yieldValue($('#race-'+racepos+'-mark-'+markpos+'-legrow-'+rowid), parseFloat(competitor.legvalues[racepos-1][markpos-1][legvalue]).toFixed());
+                        } else {
+                            yieldValue($('#race-'+racepos+'-mark-'+markpos+'-valrow-'+rowid+'-pos-'+(legpos-1)+' span'), competitor.legvalues[racepos-1][markpos-1][legvalue]);
+                        }
+                        legpos += 1;
+                    }
+
+                    markpos += 1;
+                }
+            }
         }
 
         rowid += 1;
@@ -66,6 +95,8 @@ $(document).ready(function() {
 
   $("#rootwrapper").css("height", wHeight);
   $("#appinterface").css("height", wHeight-131);
+
+  $.ajaxSetup({cache:false});
 
   loadLeaderboard();
 });

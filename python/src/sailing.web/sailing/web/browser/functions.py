@@ -540,21 +540,24 @@ def moderatorLiveData(context, request):
     view = core.BaseView(context, request)
     event = view.currentLeaderboardEvent()
 
-    sortby = request.params.get('sortby', '')
+    sortby = request.params.get('sortby', 'name')
     race_range = request.params.get('races', '1:3')
     competitor_range = request.params.get('competitors', '1:20')
+
+    if race_range in ['null', 'undefined']:
+        race_range = '1:3'
 
     race_start_index, race_end_index = race_range.split(':')
     races_list = event.races[int(race_start_index)-1:int(race_end_index)]
 
-    competitors = model.CompetitorImpl.queryBy(event=event.name)
+    competitors = view.competitorsSortedBy(event.name, sortby.strip())
 
     races = []
     for racename in races_list:
         races.append(model.RaceImpl.queryOneBy(name=racename, event=event.name))
 
     # list of competitors with corresponding data
-    data = {}
+    data = []
 
     for competitor in competitors:
         racedata = competitor.races[int(race_start_index)-1:int(race_end_index)]
@@ -582,8 +585,7 @@ def moderatorLiveData(context, request):
 
             racecounter += 1
 
-        cd = data.setdefault(competitor.name, {})
-        cd.update({'raceranks': racedata, 'markranks': markranks, 'legvalues': legvalues, 
+        data.append({'name': competitor.name, 'raceranks': racedata, 'markranks': markranks, 'legvalues': legvalues, 
             'nationality': competitor.nationality, 'global_rank': competitor.total})
 
     return data
