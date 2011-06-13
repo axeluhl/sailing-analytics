@@ -85,7 +85,7 @@
                     GET('configuredListeners', {}, function(data) {
                         options = '';
                         for (d in data) {
-                            options += format('<option value="{id}">{host}:{port} | {eventname} | {racename} | Last Update: {last_update} Paused: {paused} Running: {running}</option>', data[d]);
+                            options += format('<option value="'+data[d].xid+'">{host}:{port} | {eventname} | {racename} | Last Update: {last_update} Paused: {paused} Running: {running}</option>', data[d]);
                         }
 
                         if (options == '')
