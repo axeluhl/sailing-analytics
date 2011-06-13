@@ -1,5 +1,6 @@
 package com.sap.sailing.server.test;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import java.io.FileNotFoundException;
@@ -12,10 +13,14 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.tracking.RaceListener;
+import com.sap.sailing.domain.tracking.TrackedEvent;
+import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.RaceHandle;
 import com.sap.sailing.server.RacingEventServiceImpl;
+import com.sap.sailing.util.Util;
 
 public class RaceTrackerTest {
     private final URL paramUrl;
@@ -50,8 +55,30 @@ public class RaceTrackerTest {
     }
     
     @Test
-    public void testInitialization() {
+    public void testInitialization() throws InterruptedException {
         RaceDefinition race = raceHandle.getRace();
         assertNotNull(race);
+        TrackedEvent trackedEvent = domainFactory.trackEvent(raceHandle.getEvent());
+        final boolean[] gotTrackedRace = new boolean[1];
+        trackedEvent.addRaceListener(new RaceListener() {
+            @Override
+            public void raceAdded(TrackedRace trackedRace) {
+                synchronized (gotTrackedRace) {
+                    gotTrackedRace[0] = true;
+                    gotTrackedRace.notifyAll();
+                }
+            }
+        });
+        synchronized (gotTrackedRace) {
+            if (!gotTrackedRace[0]) {
+                gotTrackedRace.wait();
+            }
+        }
+        assertEquals(1, Util.size(trackedEvent.getTrackedRaces()));
+    }
+    
+    @Test
+    public void testStopTracking() {
+        
     }
 }
