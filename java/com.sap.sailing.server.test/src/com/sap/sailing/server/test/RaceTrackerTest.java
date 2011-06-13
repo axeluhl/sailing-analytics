@@ -18,7 +18,6 @@ import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.TrackedEvent;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
-import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.RaceHandle;
 import com.sap.sailing.server.RacingEventServiceImpl;
 
@@ -62,6 +61,9 @@ public class RaceTrackerTest {
                     trackedRaces.notifyAll();
                 }
             }
+            @Override
+            public void raceRemoved(TrackedRace trackedRace) {
+            }
         });
         synchronized (trackedRaces) {
             if (trackedRaces[0] == null) {
@@ -85,7 +87,7 @@ public class RaceTrackerTest {
         service.stopTracking(raceHandle.getEvent());
         RaceHandle myRaceHandle = service.addRace(paramUrl, liveUri, storedUri, EmptyWindStore.INSTANCE);
         TrackedEvent newTrackedEvent = myRaceHandle.getTrackedEvent();
-        TrackedRace newTrackedRace = newTrackedEvent.getTrackedRaces().iterator().next();
+        TrackedRace newTrackedRace = getTrackedRace(newTrackedEvent);
         // expecting a new tracked race to be created when starting over with tracking
         assertNotSame(oldTrackedRace, newTrackedRace);
     }

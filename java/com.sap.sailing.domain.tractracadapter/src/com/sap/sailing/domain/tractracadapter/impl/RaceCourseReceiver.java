@@ -84,6 +84,9 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
             // Therefore, don't create TrackedRace again because it already exists.
             try {
                 getDomainFactory().updateCourseWaypoints(course, event.getB().getPoints());
+                if (trackedEvent.getExistingTrackedRace(existingRaceDefinitionForRace) == null) {
+                    createTrackedRace(existingRaceDefinitionForRace);
+                }
             } catch (PatchFailedException e) {
                 logger.log(Level.SEVERE, "Internal error updating race course "+course+": "+e.getMessage());
                 logger.throwing(RaceCourseReceiver.class.getName(), "handleEvent", e);
@@ -93,10 +96,14 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
             // create race definition
             RaceDefinition raceDefinition = getDomainFactory().createRaceDefinition(event.getC(), course);
             trackedEvent.getEvent().addRace(raceDefinition);
-            DynamicTrackedRace trackedRace = getDomainFactory().trackRace(trackedEvent, raceDefinition,
-                    windStore, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed, tractracEvent);
-            trackedEvent.addTrackedRace(trackedRace);
+            createTrackedRace(raceDefinition);
         }
+    }
+
+    private void createTrackedRace(RaceDefinition race) {
+        DynamicTrackedRace trackedRace = getDomainFactory().trackRace(trackedEvent, race,
+                windStore, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed, tractracEvent);
+        trackedEvent.addTrackedRace(trackedRace);
     }
 
 }

@@ -134,7 +134,8 @@ public class RaceTrackerImpl implements Listener, RaceTracker {
         for (Receiver receiver : receivers) {
             receiver.stop();
         }
-        ioThread.join();
+        ioThread.join(3000); // wait no more than three seconds
+        trackedEvent.removedTrackedRace(trackedEvent.getTrackedRace(getRace()));
     }
 
     protected DataController getController() {

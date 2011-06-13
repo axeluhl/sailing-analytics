@@ -19,7 +19,15 @@ public interface TrackedEvent {
      */
     TrackedRace getTrackedRace(RaceDefinition race);
 
+    /**
+     * Non-blocking call that returns <code>null</code> if no tracking information currently exists
+     * for <code>race</code>. See also {@link #getTrackedRace(RaceDefinition)} for a blocking variant.
+     */
+    TrackedRace getExistingTrackedRace(RaceDefinition race);
+    
     void addTrackedRace(TrackedRace trackedRace);
+
+    void removedTrackedRace(TrackedRace trackedRace);
 
     /**
      * Listener will be notified when {@link #addTrackedRace(TrackedRace)} is called and
@@ -31,5 +39,5 @@ public interface TrackedEvent {
     int getTotalPoints(Competitor competitor, TimePoint timePoint);
     
     int getNetPoints(Competitor competitor, TimePoint timePoint) throws NoWindException;
-    
+
 }

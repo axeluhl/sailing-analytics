@@ -85,6 +85,7 @@ public class RacingEventServiceImpl implements RacingEventService {
     @Override
     public RaceHandle addRace(URL paramURL, URI liveURI, URI storedURI, WindStore windStore) throws MalformedURLException, FileNotFoundException,
             URISyntaxException {
+        // FIXME check if a tracker for this parameter combination already exists and if so, return its race handle
         RaceTracker tracker = getDomainFactory().createRaceTracker(paramURL, liveURI, storedURI, windStore);
         Set<RaceTracker> trackers = raceTrackers.get(tracker.getEvent());
         if (trackers == null) {
