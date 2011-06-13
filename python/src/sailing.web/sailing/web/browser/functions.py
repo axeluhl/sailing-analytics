@@ -60,17 +60,25 @@ def startListenerThreads(conf, eventlist):
 
 # addEvent
 def configureListener(context, request):
-    host = request.POST.get('host', 'localhost')
-    port = request.POST.get('port', '8888')
+    host = request.POST.get('host', None)
+    port = request.POST.get('port', None)
 
     lock = threading.Lock()
 
     view = core.BaseView(context, request)
 
-    conf = URIConfigurator(host, port)
-    view.session['listener-conf'] = conf
+    if host and port:
+        conf = URIConfigurator(host, port)
+        view.session['listener-conf'] = conf
+
+    else: 
+        # reuse listener conf
+        conf = view.listenerConf()
 
     if request.POST.get('listener-start', None):
+        if conf is None:
+            return view.yieldMessage('Please set host and port!')
+
         conf.setContext(config.ADMIN)
 
         if request.POST.get('eventJSONURL'):
@@ -167,6 +175,9 @@ def configureListener(context, request):
             return view.yieldMessage('Error: %s' % str(ex))
 
     elif request.POST.get('listener-event-refresh', None):
+        if conf is None:
+            return view.yieldMessage('Please set host and port!')
+
         with lock:
             conf.setContext(config.MODERATOR)
             conf.setCommand(config.LIST_EVENTS)
