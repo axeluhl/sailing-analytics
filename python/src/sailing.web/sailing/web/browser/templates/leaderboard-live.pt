@@ -31,6 +31,36 @@
             <a href='#'></a>
           </div>
         </div>
+        <!-- / THE RIGHT BAR -->
+        <div id='right-systembar'>
+          <a class='slide-forward' href='#'>
+            <span class='race-count'>
+              <tal:for repeat="bundle lastbundle">
+              <ul class='race-bundle-${repeat["bundle"].number}'>
+                <tal:for repeat="race bundle">
+                <li class='race-${event.races.index(race)+1}'>
+                    ${event.races.index(race)+1}
+                </li>
+                </tal:for>
+              </ul>
+              </tal:for>
+            </span>
+          </a>
+          <div class='function-btn-wrapper'>
+            <ul class='function-btn'>
+              <li class='function-1'>
+                <a href='#'>
+                  f1
+                </a>
+              </li>
+              <li class='function-2'>
+                <a href='#'>
+                  f2
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
         <!-- / YIELD THE MAIN INTERFACE -->
         <!-- / MAIN INTERFACE -->
         <div id='main-interface'>
@@ -161,36 +191,6 @@
             </tal:for>
           </div>
           </tal:for>
-        </div>
-        <!-- / THE RIGHT BAR -->
-        <div id='right-systembar'>
-          <a class='slide-forward' href='#'>
-            <span class='race-count'>
-              <tal:for repeat="bundle lastbundle">
-              <ul class='race-bundle-${repeat["bundle"].number}'>
-                <tal:for repeat="race bundle">
-                <li class='race-${event.races.index(race)+1}'>
-                    ${event.races.index(race)+1}
-                </li>
-                </tal:for>
-              </ul>
-              </tal:for>
-            </span>
-          </a>
-          <div class='function-btn-wrapper'>
-            <ul class='function-btn'>
-              <li class='function-1'>
-                <a href='#'>
-                  f1
-                </a>
-              </li>
-              <li class='function-2'>
-                <a href='#'>
-                  f2
-                </a>
-              </li>
-            </ul>
-          </div>
         </div>
       </div>
     </div>

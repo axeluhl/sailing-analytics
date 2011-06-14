@@ -96,7 +96,7 @@ class BaseView(object):
     def currentLeaderboardEvent(self):
         cev = model.EventImpl.queryOneBy(name=current_leaderboard_event)
 
-        # XXX remove this
+        # XXX remove this - only for tests
         if not cev:
             return model.EventImpl.queryBy()[0]
 
@@ -113,7 +113,15 @@ class BaseView(object):
         conf.setCommand(config.SHOW_WIND)
         conf.setParameters(dict(eventname=race.event, racename=race.name))
        
-        return jsonByUrl(conf)
+        data = jsonByUrl(conf)
+
+        for name in ['WEB', 'EXPEDITION']:
+            if data and data.get(name):
+                expwind = data[name]
+                expwind.reverse()
+                data[name] = expwind
+
+        return data
 
     def allEvents(self):
         return model.EventImpl.queryBy()

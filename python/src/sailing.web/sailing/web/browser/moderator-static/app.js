@@ -48,12 +48,16 @@ function toggleListener() {
     }
 }
 
+function displayRaceAndLeg(raceindex, legs) {
+    $('.refresh-btn').html('<div style="padding: 8px 4px 5px 15px; color: white; font-size: 23px;font-weight: bold;">R'+raceindex+' : '+legs+'</div>');
+}
+
 function showLoader() {
     $('.refresh-btn').html(loader_image);
 }
 
 function hideLoader() {
-    $('.refresh-btn').html('');
+    //$('.refresh-btn').html('');
 }
 function sortBy(param, element) {
     element.toggleClass('sort-asc').toggleClass('sort-desc');
@@ -67,7 +71,9 @@ function sortBy(param, element) {
 }
 
 function yieldValue(element, newvalue) {
-    element.html(newvalue);
+    if (element.html() != newvalue) {
+        element.html(newvalue);
+    }
 }
 
 /**
@@ -75,6 +81,9 @@ function yieldValue(element, newvalue) {
  */
 function displayLeaderboard(data) {
     rowid = 1;
+
+    displayRaceAndLeg(data[0].current_race, data[0].current_legs);
+
     for (cpos in data) {
         competitor = data[cpos];
 
@@ -86,6 +95,7 @@ function displayLeaderboard(data) {
             /* competitor position has changed - refresh whole line */
 
             name_element.html(competitor.name);
+
             $('#clipping-'+rowid+'-2 span').html(competitor.nationality);
 
             /* now set values independent what has been there before */

@@ -23,7 +23,8 @@
             <div id="listeners-container">
                 <select id="listeners">
                     <option>Loading....</option>
-                </select>
+                </select>&nbsp;&nbsp;<br/>
+                <div align="right">
                 <input type="button" value="UnPause" onclick="GET('unPauseListener', {tid:$('#listeners option:selected').val()}, loadListeners)"/>
                 &nbsp;
                 <input type="button" value="Pause" onclick="GET('pauseListener', {tid:$('#listeners option:selected').val()}, loadListeners)"/>
@@ -34,6 +35,7 @@
                 &nbsp;
                 <input type="button" value="Stop" onclick="GET('stopListener', {tid: $('#listeners option:selected').val()}, loadListeners)"/>
                 &nbsp;&nbsp;
+                </div>
             </div>
         </form>
         </div>
@@ -85,7 +87,7 @@
                     GET('configuredListeners', {}, function(data) {
                         options = '';
                         for (d in data) {
-                            options += format('<option value="'+data[d].xid+'">{host}:{port} | {eventname} | {racename} | Last Update: {last_update} Paused: {paused} Running: {running}</option>', data[d]);
+                            options += format('<option value="'+data[d].xid+'">{host}:{port} | {eventname} | {racename} | U: {last_update} P: {paused}</option>', data[d]);
                         }
 
                         if (options == '')
