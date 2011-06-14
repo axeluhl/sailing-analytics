@@ -1,0 +1,14 @@
+This is a short readme file outlining the architecture of the SAP
+Sailing server. For hints for how to perform typical administrative
+tasks, please see the ADMIN file which should be stored right next to
+this README file.
+
+Java:
+-----
+
+We use Equinox as an OSGi container into which we deploy a set of
+bundles that implement TracTrac connectivity, Expedition wind
+connectivity, sailing domain knowledge, race tracking capabilities as
+well as servlets with RESTful APIs for use by web clients.
+
+The 
