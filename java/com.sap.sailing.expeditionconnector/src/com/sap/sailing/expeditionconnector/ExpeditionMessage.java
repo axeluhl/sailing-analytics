@@ -102,4 +102,6 @@ public interface ExpeditionMessage {
     Bearing getCourseOverGround();
 
     TimePoint getTimePoint();
+
+    TimePoint getCreatedAt();
 }

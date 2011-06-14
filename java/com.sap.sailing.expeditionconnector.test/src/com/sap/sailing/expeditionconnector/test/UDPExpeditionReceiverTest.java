@@ -1,6 +1,7 @@
 package com.sap.sailing.expeditionconnector.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -162,6 +163,30 @@ public class UDPExpeditionReceiverTest {
         assertEquals(52, cal.get(Calendar.MINUTE));
         // for some bizarre reason the conversion doesn't seem to be predictable; a calendar / platform issue?
         assertTrue(cal.get(Calendar.SECOND) == 46 || cal.get(Calendar.SECOND) == 45);
+    }
+
+    /**
+     * If no timestamp is received in a message, by default the time the message was received is used to fill it in.
+     */
+    @Test
+    public void testTimeStampCompletionFromCurrentTime() throws IOException, InterruptedException {
+        receiver.addListener(listener, /* validMessagesOnly */ true);
+        sendAndWaitABit(new String[] { "#0,9,318.0*0E" });
+        assertEquals(1, messages.size());
+        assertFalse(messages.get(0).hasValue(ExpeditionMessage.ID_GPS_TIME));
+        assertEquals(messages.get(0).getCreatedAt(), messages.get(0).getTimePoint());
+    }
+
+    /**
+     * If no timestamp is received in a message, by default the time the message was received is used to fill it in.
+     */
+    @Test
+    public void testTimeStampCompletionFromLastTimePointReceived() throws IOException, InterruptedException {
+        receiver.addListener(listener, /* validMessagesOnly */ true);
+        sendAndWaitABit(new String[] { "#0,9,318.0*0E" });
+        assertEquals(1, messages.size());
+        assertFalse(messages.get(0).hasValue(ExpeditionMessage.ID_GPS_TIME));
+        assertEquals(messages.get(0).getCreatedAt(), messages.get(0).getTimePoint());
     }
 
     @Test

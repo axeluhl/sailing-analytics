@@ -47,7 +47,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     private TimePoint finish;
     private TimePoint timePointOfNewestEvent;
     private TimePoint timePointOfLastEvent;
-    private int updateCount;
+    private long updateCount;
     
     private final Map<TimePoint, TreeSet<Competitor>> competitorRankings; 
     
@@ -216,7 +216,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     }
 
     @Override
-    public int getUpdateCount() {
+    public long getUpdateCount() {
         return updateCount;
     }
 
