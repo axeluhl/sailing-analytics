@@ -30,8 +30,8 @@
                             ${event.races[repeat['race'].index]}<br/><b style="color: red;">${race}</b>&nbsp;&raquo;&nbsp;
                                 <tal:for repeat="mark cp.marks[repeat['race'].index]">
                                 &nbsp;&nbsp;&nbsp;<b>${mark}</b>&nbsp;&raquo;&nbsp;
-                                    <tal:for repeat="value cp.values[repeat['race'].index][repeat['mark'].index]">
-                                    <b style="color: green" tal:on-error="value">${'%.2f' % value}</b>|
+                                    <tal:for repeat="value cp.values[repeat['race'].index][repeat['mark'].index].items()">
+                                    <b style="color: green">${value[0]}:${value[1]}</b>|
                                     </tal:for>
                                 </tal:for>
                                 <br/>

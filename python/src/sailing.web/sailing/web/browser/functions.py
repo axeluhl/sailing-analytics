@@ -497,36 +497,26 @@ def adminLiveData(context, request):
     t_up = threaded_listener.values()[0].last_update.strftime('%H:%M:%S')
     t_upcount = threaded_listener.values()[0].updatecount
 
+    columns = view.configuredColumns('TOP')
+
     results = ''
     for pos in range(len(currentlegs)):
         legpos = currentlegs[pos]
 
         results += '\nLAST SHOWRACE CALL: %s (UPCOUNT PARAM: %s)\nLEG: %s (FROM: %s TO: %s)\nRACE-START: %s NEWEST EVENT: %s WIND: (%s %s %s)\n' % (t_up, t_upcount, legpos+1, competitors[0].marknames[racepos][legpos][0], competitors[0].marknames[racepos][legpos][1], view.millisToDatetime(race.start), view.millisToDatetime(race.timeofnewestevent), race.wind_source, race.wind_bearing, race.wind_speed)
         results += 'NAME'.ljust(16) + 'TOTAL'.ljust(7) + 'CRANK'.ljust(7) + 'RRANK'.ljust(7) 
-        results += 'MRANK'.ljust(7) + 'LRANK'.ljust(9) + 'SPD'.ljust(9) + 'DSTTRV'.ljust(9) + 'VMG'.ljust(9) + 'AVMG'.ljust(9) + 'SGAP'.ljust(9) + 'ETA'.ljust(9) + 'DSTGO'.ljust(9) + 'STARTD'.ljust(9) + 'FINISHD'.ljust(9) + 'UPDOWNWIND'.ljust(12)
+        results += 'MRANK'.ljust(7) + ''.join([title[0].ljust(9) for title in columns])
         results += '\n'
 
         # sort competitors by rank in current leg
-        competitors.sort(lambda x,y:cmp(x.values[racepos][legpos] and x.values[racepos][legpos][0] or 6000, y.values[racepos][legpos] and y.values[racepos][legpos][0] or 6000))
+        competitors.sort(lambda x,y:cmp(x.values[racepos][legpos] and x.values[racepos][legpos].get('rank') or 6000, y.values[racepos][legpos] and y.values[racepos][legpos].get('rank') or 6000))
 
         for c in competitors:
             results += '%s %s %s' % (c.name.ljust(15), str(c.total).ljust(6), str(c.current_rank).ljust(6))
             results += '%s %s' % (str(c.races[racepos]).ljust(7), str(c.marks[racepos][legpos]).ljust(7))
                 
-            for v in c.values[racepos][legpos]:
-                if v == 42.260426041982:
-                    results += 'ANCHOR'.ljust(9)
-                else:
-                    results += str('%.2f' % v).ljust(9)
-
-            try:
-                results += str(c.additional[racepos][legpos][0]).ljust(9)
-                results += str(c.additional[racepos][legpos][1]).ljust(9)
-            except:
-                results += "N/A".ljust(9)
-                results += "N/A".ljust(9)
-
-            results += str(c.upordownwind[racepos][legpos]).ljust(12)
+            for v in columns:
+                results += view.displayLegValue(v, c.values[racepos][legpos].get(v[-1])).ljust(9)
 
             results += '\n'
 

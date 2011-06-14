@@ -36,7 +36,7 @@
                         <td valign="top">${cr.wind_source and cr.wind_source[:3] or 'EXP'}</td>
                         <td valign="top">${cr.wind_bearing or ''}</td>
                         <td valign="top">
-                            Current Leg(s): ${','.join(cr.current_legs)}<br/>
+                            Current Leg(s): ${cr.current_legs}<br/><br/>
                             <tal:for repeat="markname event.marks[racepos]">
                             ${markname}<br/>
                             </tal:for>

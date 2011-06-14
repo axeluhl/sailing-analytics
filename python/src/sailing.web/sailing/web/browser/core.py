@@ -141,7 +141,7 @@ class BaseView(object):
     def allCompetitorsFor(self, event):
         return model.CompetitorImpl.queryBy(event=event)
 
-    def competitorsSortedBy(self, eventname, sortparam):
+    def competitorsSortedBy(self, eventname, sortparam, columnmode):
         param = sortparam
         if param == 'name':
             competitors = model.CompetitorImpl.sortedBy(eventname=eventname)
@@ -156,13 +156,32 @@ class BaseView(object):
             if len(params) == 2:
                 competitors = model.CompetitorImpl.sortedBy(eventname=eventname, raceindex=int(params[0])-1, markindex=int(params[1])-1)
             elif len(params) == 3:
-                competitors = model.CompetitorImpl.sortedBy(eventname=eventname, raceindex=int(params[0])-1, markindex=int(params[1])-1, valueindex=int(params[2])-1)
+                columns = self.configuredColumns(columnmode)
+                competitors = model.CompetitorImpl.sortedBy(eventname=eventname, raceindex=int(params[0])-1, markindex=int(params[1])-1, valueindex=int(params[2])-1, columns=columns)
 
         else:
             param = int(param.strip())
             competitors = model.CompetitorImpl.sortedBy(eventname=eventname, raceindex=param-1)
 
         return competitors
+
+    def configuredColumns(self, modename):
+        return config.COLUMN_MODE_NAMES.get(modename)
+
+    def displayLegValue(self, name, value):
+        if isinstance(value, float) \
+                and value == 42.260426041982:
+            val = 'ANCH'
+        else:
+            if value in [None, 'None']:
+                return ''
+
+            val = name[2] % value
+
+        if name[0] == 'ETASEC':
+            val = '%.f:%.f' % (int(value) / 60, int(value)-( (int(value)/60)*60 ))
+
+        return val
 
 def callFunction(context, request):
     """ Calls a function dynamically """

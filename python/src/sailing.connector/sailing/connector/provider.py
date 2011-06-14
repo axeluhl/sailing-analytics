@@ -58,6 +58,8 @@ class LiveDataReceiver(threading.Thread):
             try:
                 # need to lock because other threads could overwrite information
                 with lock:
+                    print >>sys.stderr, '*',
+                    sys.stderr.flush()
                     updatecount = liveRaceInformation(conf)
                     print >>sys.stderr, '.',
                     sys.stderr.flush()
@@ -76,7 +78,7 @@ class LiveDataReceiver(threading.Thread):
                     continue
 
                 # avoid filling console with errors
-                time.sleep(2)
+                time.sleep(5)
 
             # avoid hammering java server - can occur if call does not block correctly
             time.sleep(1)
@@ -93,6 +95,7 @@ def eventConfiguration(configurator):
     events = jsonByUrl(configurator) 
 
     for event in events:
+        # erroneous data
         if not event.has_key('boatclass'):
             continue
 
@@ -142,12 +145,11 @@ def eventConfiguration(configurator):
 
         rcnames.sort(lambda x,y: cmp(x[1], y[1]))
 
-        # fill competitors with empty data
+        # fill competitor ranks and leg values with empty data
         for cp in cobjects:
             races = [0.0 for r in range(raceindex)]
             
             marks = cp.marks; values = cp.values; 
-            upordown = cp.upordownwind; additional = cp.additional
             marknames = cp.marknames
 
             # update races and marks - support add operation
@@ -162,14 +164,8 @@ def eventConfiguration(configurator):
                 if len(marknames) < r+1:
                     marknames.append([])
 
-                if len(upordown) < r+1:
-                    upordown.append([])
-
                 if len(values) < r+1:
                     values.append([])
-
-                if len(additional) < r+1:
-                    additional.append([])
 
                 for m in range(len(rcmarks[r])):
                     if len(marks[r]) < m+1:
@@ -178,14 +174,8 @@ def eventConfiguration(configurator):
                     if len(marknames[r]) < m+1:
                         marknames[r].append('')
 
-                    if len(upordown[r]) < m+1:
-                        upordown[r].append(False)
-
                     if len(values[r]) < m+1:
-                        values[r].append([])
-
-                    if len(additional[r]) < m+1:
-                        additional[r].append([])
+                        values[r].append({})
 
             # recognize if races and/or marks changed
             if cp.races and len(cp.races) != len(races):
@@ -194,7 +184,7 @@ def eventConfiguration(configurator):
             if cp.marks and len(cp.marks) != len(marks):
                 log.error('Difference between marks for competitor %s found. Old: %s New: %s' % (cp.name, cp.marks, marks))
 
-            cp.update(dict(races=races, marks=marks, upordownwind=upordown, additional=additional, marknames=marknames))
+            cp.update(dict(races=races, marks=marks, marknames=marknames))
 
         # finally update event
         dbevent.update(dict(name=event['name'], 
@@ -252,12 +242,21 @@ def liveRaceInformation(configurator):
                 # strange things can happen - make such errors visible
                 raise Exception, 'Could not find competitor %s for event %s' % (competitor['name'], eventname)
 
+            # compute total rank for competitor
+            c_current_rank = competitor.get('rank', 0)
+
+            # search thru ranks provided and use the
+            # rank there as the current one
+            if data.has_key('ranks'):
+                for c in data['ranks']:
+                    if c['competitor'] == competitor['name']:
+                        c_current_rank = c['rank']
+                        break
+
             c_races = comp.races
             c_marks = comp.marks
             c_values = comp.values
             c_total_rank = comp.total
-            c_additional = comp.additional
-            c_upordown = comp.upordownwind
             c_marknames = comp.marknames
 
             # if competitor hasn't started yet we just ignore this leg
@@ -305,55 +304,48 @@ def liveRaceInformation(configurator):
                 current_legs[lcount] = 1
 
             # now update values for the current position
-            for key in config.SORTED_LEG_VALUE_NAMES:
-
-                # dynamically extend this one
-                attr = config.LEG_VALUE_DATA[key]
-                if len(c_values[raceindex][lcount]) < attr[0]+1:
-                    c_values[raceindex][lcount].append(0.0)
-
-                k = competitor.get(key, None)
+            dc_leg_values = {}
+            for key in competitor.keys():
+                kvalue = competitor.get(key, None)
 
                 # treat nulled numbers as unset
-                if k in [None, 'null', 'Null', 'nUlL', '']:
-                    k = 0.0
+                if kvalue in [None, 'null', 'Null', 'nUlL', '']:
+                    kvalue = None
 
                 # check for cases where calculations from backend yield
                 # strange numbers - this happens in cases where the competitor
                 # has no speed during mark passing
-                if k in ['Infinity', 'Infinite'] or float(k) > 150000.0:
+                if isinstance(kvalue, (float, int)) and (kvalue in ['Infinity', 'Infinite'] or float(kvalue) > 150000.0):
 
                     # use a magic number (that is very unlikely to occur)
                     # to indicate that competitor has no speed
                     # hint: it is not the question it is the answer
-                    k = 42.260426041982
+                    kvalue = 42.260426041982
 
-                c_values[raceindex][lcount][attr[0]] = k
+                dc_leg_values[key] = kvalue
 
-            if len(c_additional[raceindex][lcount]) == 0:
-                c_additional[raceindex][lcount] = [0, 0]
+            dc_leg_values['upOrDownWindLeg'] = leg['upordownwindleg']
 
-            c_additional[raceindex][lcount][0] = competitor['started']
-            c_additional[raceindex][lcount][1] = competitor['finished']
+            # compute gains and losses (places, )
+            if legcount == 0:
+                # for the first leg just put 0 into data
+                dc_leg_values['gainsAndLossesInPlaces'] = 0
+            else:
+                # search for the last place
+                last_rank_computed = c_marks[raceindex][lcount-1]
+                if last_rank_computed > c_current_rank:
+                    dc_leg_values['gainsAndLossesInPlaces'] = c_current_rank - last_rank_computed
+                else: dc_leg_values['gainsAndLossesInPlaces'] = last_rank_computed - c_current_rank
 
-            c_upordown[raceindex][lcount] = leg['upordownwindleg']
+            c_values[raceindex][lcount] = dc_leg_values
 
             # save marknames for the given leg
             c_marknames[raceindex][lcount] = (leg['from'], leg['to'])
 
-            # compute total rank for competitor
-            rank = competitor.get('rank', 0)
-
-            # search thru ranks provided and use the
-            # rank as the current one
-            if data.has_key('ranks'):
-                for c in data['ranks']:
-                    if c['competitor'] == competitor['name']:
-                        rank = c['rank']
-                        break
-
-            comp.update(dict(current_rank=rank,races=c_races, marks=c_marks, values=c_values, 
-                                additional=c_additional, upordownwind=c_upordown, 
+            comp.update(dict(current_rank=c_current_rank,
+                                races=c_races, 
+                                marks=c_marks, 
+                                values=c_values,
                                 total=c_total_rank))
 
         # next leg
@@ -369,7 +361,7 @@ def liveRaceInformation(configurator):
     if data.get('wind'):
         mdup['wind_source'] = data['wind']['source']
         mdup['wind_bearing'] = data['wind']['truebearingdeg']
-        mdup['wind_speed'] = data['wind']['knowspeed']
+        mdup['wind_speed'] = data['wind']['knotspeed']
 
     mdup['current_legs'] = current_legs.keys()
     dbrace.update(mdup)

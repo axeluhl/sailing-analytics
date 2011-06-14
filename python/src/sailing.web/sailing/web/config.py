@@ -27,18 +27,32 @@ LIST_WIND_TRACKERS = 'listwindtrackers'
 STOP_EXP_WIND = 'stopreceivingexpeditionwind'
 START_EXP_WIND = 'receiveexpeditionwind'
 
-# keys for competitor board leg values
-LEG_VALUE_DATA = {
-        'rank': [0, ],
-        'averageSpeedOverGroundInKnots': [1, ],
-        'distanceTraveledOverGroundInMeters': [2, ],
-        'velocityMadeGoodInKnots': [3, ],
-        'averageVelocityMadeGoodInKnots': [4, ],
-        'gapToLeaderInSeconds': [5, ],
-        'estimatedTimeToNextMarkInSeconds': [6, ],
-        'windwardDistanceToGoInMeters' : [7, ],
+VN = {
+        'CSPDKNOT': ('CSPEEDKN', 'Current Speed (kn)', '%.1f', 'currentSpeedOverGroundInKnots'),
+        'CSPDMS' : ('CSPDMS', 'Current Speed (m/s)', '%.1f', 'currentSpeedOverGroundInMetersPerSecond'),
+        'ASPDKNOT': ('ASPDKN', 'Avg Speed (kn)', '%.1f', 'averageSpeedOverGroundInKnots'),
+        'ASPDMS' : ('ASPDMS', 'Avg Speed (m/s)', '%.1f', 'averageSpeedOverGroundInMetersPerSecond'),
+        'DSTTRV' : ('DSTTRV', 'Distance Travelled (m)', '%.f', 'distanceTraveledOverGroundInMeters'),
+        'VMGKNOT': ('VMGKN', 'VMG (kn)', '%.1f', 'velocityMadeGoodInKnots'),
+        'VMGMS' : ('VMGMS', 'VMG (m/s)', '%.1f', 'velocityMadeGoodInMetersPerSecond'),
+        'AVMGKNOT': ('AVMGKN', 'Avg VMG (kn)', '%.1f', 'averageVelocityMadeGoodInKnots'),
+        'AVMGMS' : ('AVMGMS', 'Avg VMG (m/s)', '%.1f', 'averageVelocityMadeGoodInMetersPerSecond'),
+        'ETA' : ('ETASEC', 'ETA (sec.)', '%.f', 'estimatedTimeToNextMarkInSeconds'),
+        'DSTGO' : ('DSTGO', 'Distance To Go (m)', '%.f', 'windwardDistanceToGoInMeters'),
+        'GAPSEC' : ('SGAP', 'Gap To Leader (sec)', '%.1f','gapToLeaderInSeconds'),
+        'UPDOWNWIND' : ('UPDOWN', 'Up or Downwind?', '%s', 'upOrDownWindLeg'),
+        'GLP' : ('GLP', 'Gains and Losses (Places)', '%s', 'gainsAndLossesInPlaces'),
+        'RANK' : ('LRANK', 'Rank', '%s', 'rank'),
+        'STARTED' : ('STARTD', 'Started?', '%s','started'),
+        'FINISHED' : ('FINISHD', 'Finished?', '%s','finished')
         }
 
-SORTED_LEG_VALUE_NAMES = LEG_VALUE_DATA.keys()
-SORTED_LEG_VALUE_NAMES.sort(lambda x,y: cmp(LEG_VALUE_DATA[x][0], LEG_VALUE_DATA[y][0]))
+COLUMN_MODE_NAMES = {
+        'TOP': 
+            [VN['RANK'], VN['CSPDKNOT'], VN['ASPDKNOT'], VN['DSTTRV'], VN['VMGKNOT'], VN['DSTGO'], VN['ETA'], VN['STARTED'], VN['FINISHED'], VN['UPDOWNWIND']],
+        'LEADERBOARD-STATIC': 
+            [VN['RANK'], VN['CSPDMS'], VN['DSTTRV'], VN['VMGMS'], VN['GLP']],
+        'LEADERBOARD-F1':
+            [VN['RANK'], VN['GAPSEC'], VN['ASPDMS'], VN['DSTTRV'], VN['GLP']]
+        }
 
