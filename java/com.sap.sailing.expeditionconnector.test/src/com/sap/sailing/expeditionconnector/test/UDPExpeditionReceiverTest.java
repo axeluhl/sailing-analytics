@@ -183,10 +183,17 @@ public class UDPExpeditionReceiverTest {
     @Test
     public void testTimeStampCompletionFromLastTimePointReceived() throws IOException, InterruptedException {
         receiver.addListener(listener, /* validMessagesOnly */ true);
-        sendAndWaitABit(new String[] { "#0,9,318.0*0E" });
-        assertEquals(1, messages.size());
-        assertFalse(messages.get(0).hasValue(ExpeditionMessage.ID_GPS_TIME));
-        assertEquals(messages.get(0).getCreatedAt(), messages.get(0).getTimePoint());
+        sendAndWaitABit(validLines);
+        assertEquals(validLines.length, messages.size());
+        assertTrue(messages.get(0).hasValue(ExpeditionMessage.ID_GPS_TIME));
+        assertTrue(messages.get(10).hasValue(ExpeditionMessage.ID_GPS_TIME));
+        TimePoint m0Time = messages.get(0).getTimePoint();
+        TimePoint m10Time = messages.get(10).getTimePoint();
+        for (int i=1; i<=9; i++) {
+            TimePoint m_iTime = messages.get(i).getTimePoint();
+            assertTrue(m_iTime.compareTo(m0Time) >= 0);
+            assertTrue(m_iTime.compareTo(m10Time) <= 0);
+        }
     }
 
     @Test

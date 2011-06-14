@@ -10,6 +10,8 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.sap.sailing.domain.base.TimePoint;
+import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.expeditionconnector.impl.ExpeditionMessageImpl;
 
 /**
@@ -35,6 +37,12 @@ public class UDPExpeditionReceiver implements Runnable {
      * Maximum IP packet length
      */
     private static final int MAX_PACKET_SIZE = 65536;
+    
+    /**
+     * Remembers, per boat ID, the milliseconds difference between the time the message was received
+     * and the GPS time stamp provided by the message.
+     */
+    private final Map<Integer, Long> timeStampOfLastMessageReceived;
 
     /**
      * Launches a listener and dumps messages received to the console
@@ -61,6 +69,7 @@ public class UDPExpeditionReceiver implements Runnable {
         udpSocket = new DatagramSocket(listeningOnPort);
         listeners = new HashMap<ExpeditionListener, Boolean>();
         this.listeningOnPort = listeningOnPort;
+        this.timeStampOfLastMessageReceived = new HashMap<Integer, Long>();
     }
 
     public void stop() throws SocketException, IOException {
@@ -110,6 +119,16 @@ public class UDPExpeditionReceiver implements Runnable {
             String variableValuePairs = m.group(2).trim().substring(",".length()); // skip the leading ","
             Map<Integer, Double> values = new HashMap<Integer, Double>();
             String[] variablesAndValuesInterleaved = variableValuePairs.split(",");
+            long now = System.currentTimeMillis();
+            Long diff = timeStampOfLastMessageReceived.get(boatID);
+            TimePoint defaultForMessageTimePoint;
+            if (diff != null) {
+                // compute a reasonable default for a time stamp in case message doesn't provide one
+                // by subtracting the last diff from now
+                defaultForMessageTimePoint = new MillisecondsTimePoint(now - diff);
+            } else {
+                defaultForMessageTimePoint = MillisecondsTimePoint.now();
+            }
             for (int i = 0; i < variablesAndValuesInterleaved.length; i++) {
                 int variableID = Integer.valueOf(variablesAndValuesInterleaved[i++]);
                 double variableValue = Double.valueOf(variablesAndValuesInterleaved[i]);
@@ -117,7 +136,12 @@ public class UDPExpeditionReceiver implements Runnable {
             }
             int checksum = Integer.valueOf(m.group(m.groupCount()), 16);
             valid = valid && checksumOk(checksum, packetAsString);
-            return new ExpeditionMessageImpl(boatID, values, valid);
+            ExpeditionMessageImpl result = new ExpeditionMessageImpl(boatID, values, valid, defaultForMessageTimePoint);
+            if (result.hasValue(ExpeditionMessage.ID_GPS_TIME)) {
+                // an original GPS time stamp; then remember the difference between now and the time stamp
+                timeStampOfLastMessageReceived.put(boatID, now-result.getTimePoint().asMillis());
+            }
+            return result;
         } else {
             System.err.println("Unparsable expedition message: " + packetAsString);
             return null; // couldn't even parse
