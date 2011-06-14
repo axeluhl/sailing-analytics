@@ -221,6 +221,7 @@ public class AdminApp extends Servlet {
                         JSONObject jsonWind = new JSONObject();
                         jsonWind.put("truebearingdeg", wind.getBearing().getDegrees());
                         jsonWind.put("knotspeed", wind.getKnots());
+                        jsonWind.put("meterspersecondspeed", wind.getMetersPerSecond());
                         if (wind.getTimePoint() != null) {
                             jsonWind.put("timepoint", wind.getTimePoint().asMillis());
                             jsonWind.put("dampenedtruebearingdeg",
@@ -228,6 +229,8 @@ public class AdminApp extends Servlet {
                                             .getDegrees());
                             jsonWind.put("dampenedknotspeed",
                                     windTrack.getEstimatedWind(wind.getPosition(), wind.getTimePoint()).getKnots());
+                            jsonWind.put("dampenedmeterspersecondspeed",
+                                    windTrack.getEstimatedWind(wind.getPosition(), wind.getTimePoint()).getMetersPerSecond());
                         }
                         if (wind.getPosition() != null) {
                             jsonWind.put("latdeg", wind.getPosition().getLatDeg());
