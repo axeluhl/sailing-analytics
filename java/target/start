@@ -1,1 +1,1 @@
-java -jar plugins/org.eclipse.equinox.launcher_1.2.0.v20110124-0830.jar -console -configuration ./
+java -Xmx2048m -jar plugins/org.eclipse.equinox.launcher_1.2.0.v20110124-0830.jar -console -configuration ./
