@@ -35,7 +35,7 @@
         <!-- / MAIN INTERFACE -->
         <div id='main-interface'>
           <div class='blue-table'>
-              <a class='refresh-btn' href='javascript:;' onclick=''><img src='/static/images/ajax-loader-greybg.gif'/></a>
+              <a id="refresh-button" class='refresh-btn' href='javascript:;' onclick='toggleListener($(this));'><img src='/static/images/ajax-loader-greybg.gif'/></a>
             <a class='sort-rank sort-asc' href='javascript:;' onclick='sortBy("total", $(this))'></a>
             <table id='overall-clipping'>
               <tbody>
