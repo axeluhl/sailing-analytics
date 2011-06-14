@@ -3,8 +3,58 @@ Sailing server. For hints for how to perform typical administrative
 tasks, please see the ADMIN file which should be stored right next to
 this README file.
 
-Java:
------
+The architecture mainly consists of
+
+ - A 64-bit Linux server running the following services.
+
+ - Apache web server handling inbound HTTP requests on port 80 (see
+   hostname configurations in /etc/httpd/conf.d/kiel.conf)
+
+ - dev/test/prod1/prod2 OSGi server instances running the Java
+   component
+
+ - UDP mirror process that duplicates UDP packets received for "the"
+   production instance and forwards them to the two inbound UDP ports
+   for prod1 and prod2, respectively.
+
+ - dev/test/prod Python servers running the web application for
+   browser, iPhone and iPad that connect to a Java OSGi server to
+   complete its requests
+
+ - a Pound load balancer that does alive checks for the prod1/prod2
+   Java instances to enable quick fail-over
+
+ - a number of MongoDB instances for dev/test/prod1/prod2 that store
+   leaderboard information for the Python application as well as wind
+   information for the Java component
+
+We have a VNC server running on port 5902 with a KDE window
+manager. There, we operate console windows for the various Java
+instances and the UDP mirror.
+
+Inbound Port Assignments
+------------------------
+
+ - TCP
+     22:    ssh
+     80:    apache
+     5902:  vnc
+     8026:  Python "dev" instance
+     8886:  servlet container of "dev" Java instance
+     8887:  servlet container of "test" Java instance
+     8888:  servlet container of "prod1" Java instance
+     8889:  servlet container of "prod2" Java instance
+     10200: MongoDB "dev" instance
+     12347: SSH forward to localhost:22 required for "mvn deploy"
+ - UDP
+     2010:  wind input for "dev" Java instance
+     2011:  wind input for "test" Java instance
+     2012:  wind input for "prod" (mirrored to 2013/2014)
+     2013:  wind input for "prod1" Java instance
+     2014:  wind input for "prod2" Java instance
+
+Java
+----
 
 We use Equinox as an OSGi container into which we deploy a set of
 bundles that implement TracTrac connectivity, Expedition wind
