@@ -85,13 +85,15 @@ def configureListener(context, request):
             conf.setCommand(config.ADD_EVENT)
             conf.setParameters(dict(eventJSONURL=request.POST.get('eventJSONURL'), 
                                     liveURI=request.POST.get('liveURI'), 
-                                    storedURI=request.POST.get('storedURI')))
+                                    storedURI=request.POST.get('storedURI'),
+                                    windstore=request.POST.get('windstore')))
 
         elif request.POST.get('paramURL'):
             conf.setCommand(config.ADD_RACE)
             conf.setParameters(dict(paramURL=request.POST.get('paramURL'), 
                                     liveURI=request.POST.get('liveURI'), 
-                                    storedURI=request.POST.get('storedURI')))
+                                    storedURI=request.POST.get('storedURI'),
+                                    windstore=request.POST.get('windstore')))
 
             if not view.session.get('race.url_history'):
                 view.session['race.url_history'] = []

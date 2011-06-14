@@ -213,7 +213,8 @@ public class ModeratorApp extends Servlet {
                 if (currentWind != null) {
                     JSONObject jsonWind = new JSONObject();
                     jsonWind.put("truebearingdeg", currentWind.getBearing().getDegrees());
-                    jsonWind.put("knowspeed", currentWind.getKnots());
+                    jsonWind.put("knotspeed", currentWind.getKnots());
+                    jsonWind.put("meterspersecondspeed", currentWind.getMetersPerSecond());
                     jsonWind.put("source", trackedRace.getWindSource().toString());
                     jsonRace.put("wind", jsonWind);
                 }
@@ -240,11 +241,15 @@ public class ModeratorApp extends Servlet {
                             if (currentSpeedOverGround != null) {
                                 jsonCompetitorInLeg.put("currentSpeedOverGroundInKnots",
                                         currentSpeedOverGround == null ? null : currentSpeedOverGround.getKnots());
+                                jsonCompetitorInLeg.put("currentSpeedOverGroundInMetersPerSecond",
+                                        currentSpeedOverGround == null ? null : currentSpeedOverGround.getMetersPerSecond());
                             }
                             Speed averageSpeedOverGround = trackedLegOfCompetitor.getAverageSpeedOverGround(timePoint);
                             if (averageSpeedOverGround != null) {
                                 jsonCompetitorInLeg.put("averageSpeedOverGroundInKnots",
                                         averageSpeedOverGround.getKnots());
+                                jsonCompetitorInLeg.put("averageSpeedOverGroundInMetersPerSecond",
+                                        averageSpeedOverGround.getMetersPerSecond());
                             }
                             Distance distanceTraveled = trackedLegOfCompetitor.getDistanceTraveled(timePoint);
                             if (distanceTraveled != null) {
@@ -255,6 +260,7 @@ public class ModeratorApp extends Servlet {
                                 Speed velocityMadeGood = trackedLegOfCompetitor.getVelocityMadeGood(timePoint);
                                 if (velocityMadeGood != null) {
                                     jsonCompetitorInLeg.put("velocityMadeGoodInKnots", velocityMadeGood.getKnots());
+                                    jsonCompetitorInLeg.put("velocityMadeGoodInMetersPerSecond", velocityMadeGood.getMetersPerSecond());
                                 }
                             } catch (NoWindException e) {
                                 // well, we don't know the wind direction... then no VMG will be shown...
@@ -265,6 +271,8 @@ public class ModeratorApp extends Servlet {
                                 if (averageVelocityMadeGood != null) {
                                     jsonCompetitorInLeg.put("averageVelocityMadeGoodInKnots",
                                             averageVelocityMadeGood.getKnots());
+                                    jsonCompetitorInLeg.put("averageVelocityMadeGoodInMetersPerSecond",
+                                            averageVelocityMadeGood.getMetersPerSecond());
                                 }
                             } catch (NoWindException e1) {
                                 // well, we don't know the wind direction... then no average VMG will be shown...

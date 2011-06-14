@@ -12,14 +12,15 @@
         </tal:for>
     </select>
     &nbsp;
+    <input id="receiver-loader" type="button" onclick="listWindTrackers()" value="Load Receiver Information"/>
+    &nbsp;
     Race: 
     <select name="racename">
         <tal:for repeat="racename view.allRacesFor()">
         <option value="${racename}">${racename}</option>
         </tal:for>
     </select>
-
-    <input id="receiver-loader" type="button" onclick="listWindTrackers()" value="Load Receiver Information"/>
+    &nbsp;
     <input id="receiver-stopper" type="button" onclick="stopReceiver()" value="Stop Receiver"/>
 
     <br/><br/>
