@@ -47,7 +47,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     private TimePoint finish;
     private TimePoint timePointOfNewestEvent;
     private TimePoint timePointOfLastEvent;
-    private int updateCount;
+    private long updateCount;
     
     private final Map<TimePoint, TreeSet<Competitor>> competitorRankings; 
     
@@ -216,7 +216,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     }
 
     @Override
-    public int getUpdateCount() {
+    public long getUpdateCount() {
         return updateCount;
     }
 
@@ -242,18 +242,18 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     @Override
     public int getRank(Competitor competitor, TimePoint timePoint) throws NoWindException {
         try {
-        synchronized (competitorRankings) {
-            TreeSet<Competitor> rankedCompetitors = competitorRankings.get(timePoint);
-            if (rankedCompetitors == null) {
-                RaceRankComparator comparator = new RaceRankComparator(this, timePoint);
-                rankedCompetitors = new TreeSet<Competitor>(comparator);
-                for (Competitor c : getRace().getCompetitors()) {
-                    rankedCompetitors.add(c);
+            synchronized (competitorRankings) {
+                TreeSet<Competitor> rankedCompetitors = competitorRankings.get(timePoint);
+                if (rankedCompetitors == null) {
+                    RaceRankComparator comparator = new RaceRankComparator(this, timePoint);
+                    rankedCompetitors = new TreeSet<Competitor>(comparator);
+                    for (Competitor c : getRace().getCompetitors()) {
+                        rankedCompetitors.add(c);
+                    }
+                    competitorRankings.put(timePoint, rankedCompetitors);
                 }
-                competitorRankings.put(timePoint, rankedCompetitors);
+                return rankedCompetitors.headSet(competitor, /* inclusive */true).size();
             }
-            return rankedCompetitors.headSet(competitor, /* inclusive */ true).size();
-        }
         } catch (NoWindError e) {
             throw e.getCause();
         }

@@ -74,13 +74,21 @@ public abstract class TrackImpl<FixType extends Timed> implements Track<FixType>
     @SuppressWarnings("unchecked")
     @Override
     public FixType getFirstFix() {
-        return (FixType) fixes.first();
+        if (fixes.isEmpty()) {
+            return null;
+        } else {
+            return (FixType) fixes.first();
+        }
     }
     
     @SuppressWarnings("unchecked")
     @Override
     public FixType getLastFix() {
-        return (FixType) fixes.last();
+        if (fixes.isEmpty()) {
+            return null;
+        } else {
+            return (FixType) fixes.last();
+        }
     }
     
     @Override

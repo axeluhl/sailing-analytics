@@ -28,6 +28,18 @@ public class ExpeditionMessageImpl implements ExpeditionMessage {
     private final long createdAtMillis;
     private final TimePoint timePoint;
     
+    private static final TimeZone UTC = TimeZone.getTimeZone("UTC") == null ? TimeZone.getTimeZone("GMT") : TimeZone.getTimeZone("UTC");
+    private static final GregorianCalendar cal = new GregorianCalendar(UTC);
+    
+    static {
+        cal.set(1899, 11, 30, 0, 0, 0);
+    }
+
+    /**
+     * Creates a message instance based on <code>values</code>. If there is no timestamp delivered by
+     * <code>values</code>, the {@link System#currentTimeMillis() current time} is used as the message's
+     * {@link #getTimePoint() time point}.
+     */
     public ExpeditionMessageImpl(int boatID, Map<Integer, Double> values, boolean valid) {
         this.boatID = boatID;
         // ensure that nobody can manipulate the map used by this message object from outside
@@ -35,17 +47,34 @@ public class ExpeditionMessageImpl implements ExpeditionMessage {
         this.valid = valid;
         this.createdAtMillis = System.currentTimeMillis();
         if (hasValue(ID_GPS_TIME)) {
-            TimeZone UTC = TimeZone.getTimeZone("UTC");
-            if (UTC == null) {
-                UTC = TimeZone.getTimeZone("GMT");
-            }
-            GregorianCalendar cal = new GregorianCalendar(UTC);
-            cal.set(1899, 11, 30, 0, 0, 0);
             timePoint = new MillisecondsTimePoint((long)
                     (getValue(ID_GPS_TIME)*24*3600*1000) +   // this is the milliseconds since 31.12.1899 0:00:00 UTC
                     cal.getTimeInMillis());
         } else {
             timePoint = new MillisecondsTimePoint(createdAtMillis);
+        }
+    }
+    
+    /**
+     * @param defaultTimePoint
+     *            a non-<code>null</code> default time point to use in case the message received does not carry a time
+     *            stamp
+     */
+    public ExpeditionMessageImpl(int boatID, Map<Integer, Double> values, boolean valid, TimePoint defaultTimePoint) {
+        if (defaultTimePoint == null) {
+            throw new IllegalArgumentException("defaultTimePoint for ExpeditionMessageImpl constructor must not be null");
+        }
+        this.boatID = boatID;
+        // ensure that nobody can manipulate the map used by this message object from outside
+        this.values = new HashMap<Integer, Double>(values);
+        this.valid = valid;
+        this.createdAtMillis = System.currentTimeMillis();
+        if (hasValue(ID_GPS_TIME)) {
+            timePoint = new MillisecondsTimePoint((long)
+                    (getValue(ID_GPS_TIME)*24*3600*1000) +   // this is the milliseconds since 31.12.1899 0:00:00 UTC
+                    cal.getTimeInMillis());
+        } else {
+            timePoint = defaultTimePoint;
         }
     }
     
@@ -89,6 +118,11 @@ public class ExpeditionMessageImpl implements ExpeditionMessage {
     @Override
     public TimePoint getTimePoint() {
         return timePoint;
+    }
+
+    @Override
+    public TimePoint getCreatedAt() {
+        return new MillisecondsTimePoint(createdAtMillis);
     }
 
     @Override

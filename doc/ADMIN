@@ -1,0 +1,177 @@
+This file explains the typical administrative tasks to be performed on
+the SAP Sailing server. For an explanation of what this server does,
+please refer to the README file stored next to this ADMIN file.
+
+Emercengy Startup After Reboot
+------------------------------
+
+When for some reason the server re-booted, a number of manual steps
+need to be performed to get back up and running. Proceed as follows:
+
+ - "ssh -A -L 5911:localhost:5902 trac@kielweek.web4sap.com"
+
+ - "vncserver -depth 24 -geometry 1600x900 :2"
+
+Connect with your VNC viewer to localhost:11 and open six console
+windows. Perform the steps "Launching Readily-built Java Server
+Instances" for the <instance> names dev, test, prod1 and prod2 in a
+separate console window each.
+
+Perform the steps "Launch MongoDB" and "Launch Python Server"
+described below. Use one of the two spare consoles in VNC to perform
+the step "Launch UDP Mirror" described below.
+
+Launching Readily-built Java Server Instances
+---------------------------------------------
+
+We usually launch, manage and observe the Java server instances using
+a VNC viewer which connects to port 5902 of the server. We have a
+console window there for each server instance, and the console
+windows' title bars indicate by the current working directory which
+window represents which instance. This section describes how to
+initially start a server instance. See below for how to update and
+restart an already running instance.
+
+Port 5902 is blocked by the firewall, so you have to establish an SSH
+tunnel, e.g., by
+
+ - ssh -A -L 5911:localhost:22 trac@kielweek.web4sap.com
+
+You can then have your VNC viewer connect to you localhost:11. In the
+console for the server instance you want to launch, ensure you're in
+the correct directory, if not already there:
+
+ - "cd servers/<instance>" where <instance> is one of
+   dev/test/prod1/prod2
+
+Then launch the server:
+
+ - ./start
+
+This should start an OSGi console with the latest version of the
+bundles deployed to ~trac/servers/<instance>/plugins.
+
+Launch MongoDB
+--------------
+
+The MongoDB is used to store wind information and general
+leaderboard-related information required by the Python web
+application.
+
+ - log in as user "web"
+
+ - "cd project/dev/python"
+
+ - "bin/supervisord"
+
+This will launch the MongoDB server, listening on port 10200. You can
+check whether the MongoDB server started successfully by issuing the
+following command:
+
+ - "bin/supervisorctl"
+
+Launch Python Server
+---------------------
+
+The Python Server implements the web applications used by the
+moderator as well as the iPhone/iPad web application.
+
+ - log in as user "web"
+
+ - "cd project/dev/python"
+
+ - nohup bin/debug.sh
+
+Launch UDP Mirror
+-----------------
+
+The two production instances shall share the same wind
+information. Therefore, it is necessary to launch a "UDP mirror" that
+distributes UDP packets received on the single inbound UDP port for
+the production instances to the two Java server instances.
+
+In the VNC session, use a separate console window for user "trac" and
+do the following:
+
+ - "cd ~/servers/prod1"
+
+ - "./udpmirror -v 2012 localhost 2013 localhost 2014"
+
+The "-v" argument ensures that UDP packets received will be dumped to
+the console. The process will listen for inbound UDP packets on port
+2012 and forward anything received on that port to localhost:2013 as
+well as localhost:2014. See also the list of ports as documented in
+the README file.
+
+Re-Building the Java Server
+---------------------------
+
+If, e.g., after a bug fix, it is necessary to re-build and re-deploy
+the Java server, you should consider doing this first on the "master"
+branch of the git versioning system. The master branch contains the
+sources for the "dev" server instance. The git branch to server
+instance mappings are as follows:
+
+	 git branch   	 server instance
+	 ----------	 ---------------
+	 master		 dev
+	 test		 test
+	 prod		 prod1 / prod2
+
+First, check out the branch you want to re-build:
+
+ - log in as user "trac"
+
+ - ensure that your SSH key is loaded / unlocked, either by logging in
+   using SSH with the -A argument, or by invoking the alias "sa" and
+   entering the password for the trac user's SSH key
+
+ - ensure there is an ssh tunnel with port forward from port 12347 to
+   port 22, e.g., by running the following command:
+
+   "ssh -A -L 12347:localhost:22 trac@localhost"
+
+ - "cd git/java"
+
+ - "git checkout -f <branchname>"  where <branchname> is either one of
+   master, test or prod
+
+ - ensure that there is an ssh tunnel to localhost that 
+
+ - "mvn deploy"
+
+This will compile the sources, bundle them up in to OSGi bundle JAR
+files, run all tests which required online access to the TracTrac
+servers, and, if successful, deploy the new JAR files to
+maven-repositories/<instancename> where <instancename> is one of dev,
+test or prod.
+
+Note that the running server(s) are not updated automatically by
+deploying the new bundle versions to the maven-repositories
+subdirectory. See next topic.
+
+Updating an OSGi Server Instance
+--------------------------------
+
+We usually have four OSGi consoles running with a terminal window
+each, visible at the VNC server running on por 5902. The title bar
+shows the current working directory which should be something like
+"~/servers/<instancename>" where <instancename> is one of dev, test,
+prod1 and prod2.
+
+At the "osgi>" prompt of the OSGi console you can type
+
+ - "exit"
+
+to terminate the particular Java server instance. To update the server
+instance from its respective maven repository (located under
+~/maven-repositories/...) you can issue
+
+ - "./update"
+
+To start the server instance again, type
+
+ - "./start"
+
+and the server should welcome you again with the "osgi>" prompt after
+a successful start.

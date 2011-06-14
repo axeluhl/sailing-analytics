@@ -46,13 +46,15 @@ public abstract class AbstractTracTracLiveTest implements Listener {
         // for stored race, non-real-time simulation:
         paramUrl  = new URL("http://germanmaster.traclive.dk/events/event_20110505_SailingTea/clientparams.php?event=event_20110505_SailingTea&race=bd8c778e-7c65-11e0-8236-406186cbf87c");
         
-        // tunneled:
-        //liveUri   = new URI("tcp://localhost:4412");
-        //storedUri = new URI("tcp://localhost:4413");
-        
-        //no tunnel:
-        liveUri   = new URI("tcp://germanmaster.traclive.dk:4400");
-        storedUri = new URI("tcp://germanmaster.traclive.dk:4401");
+        if (Boolean.valueOf(System.getProperty("tractrac.tunnel", "false"))) {
+            // tunnel
+            liveUri   = new URI("tcp://localhost:4412");
+            storedUri = new URI("tcp://localhost:4413");
+        } else {
+            //no tunnel:
+            liveUri   = new URI("tcp://germanmaster.traclive.dk:4400");
+            storedUri = new URI("tcp://germanmaster.traclive.dk:4401");
+        }
         receivers = new HashSet<Receiver>();
     }
 

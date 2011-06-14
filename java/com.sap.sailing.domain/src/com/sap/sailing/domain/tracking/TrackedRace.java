@@ -80,7 +80,7 @@ public interface TrackedRace {
      * @return a sequential number counting the updates that occurred to this tracked race. Callers may use this to ask
      *         for updates newer than such a sequence number.
      */
-    int getUpdateCount();
+    long getUpdateCount();
     
     int getRankDifference(Competitor competitor, Leg leg, TimePoint timePoint);
     
