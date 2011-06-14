@@ -71,7 +71,7 @@ function sortBy(param, element) {
 }
 
 function yieldValue(element, newvalue) {
-    if (element.html() != newvalue) {
+    if (element.html() != newvalue && !isNaN(newvalue)) {
         element.html(newvalue);
     }
 }
@@ -88,7 +88,7 @@ function displayLeaderboard(data) {
         competitor = data[cpos];
 
         /* always change global rank */
-        $('#clipping-'+rowid+'-1 span').html(competitor.global_rank);
+        $('#clipping-'+rowid+'-1 span').html(competitor.current_rank);
 
         name_element = $('#clipping-'+rowid+'-3 span');
         if (name_element.html() != competitor.name) {
@@ -105,12 +105,12 @@ function displayLeaderboard(data) {
 
                 markpos = 1;
                 for (markrank in competitor.markranks[racepos-1]) {
-                    $('#race-'+racepos+'-mark-'+markpos+'-row-'+rowid).html(competitor.markranks[racepos-1][markrank]);
+                    yieldValue($('#race-'+racepos+'-mark-'+markpos+'-row-'+rowid), competitor.markranks[racepos-1][markrank]);
 
                     legpos = 1;
                     for (legvalue in competitor.legvalues[racepos-1][markpos-1]) {
                         if (legvalue == 0) {
-                            $('#race-'+racepos+'-mark-'+markpos+'-legrow-'+rowid).html(parseFloat(competitor.legvalues[racepos-1][markpos-1][legvalue]).toFixed());
+                            yieldValue($('#race-'+racepos+'-mark-'+markpos+'-legrow-'+rowid), parseFloat(competitor.legvalues[racepos-1][markpos-1][legvalue]).toFixed());
                         } else {
                             $('#race-'+racepos+'-mark-'+markpos+'-valrow-'+rowid+'-pos-'+(legpos-1)+' span').html(competitor.legvalues[racepos-1][markpos-1][legvalue]);
                         }

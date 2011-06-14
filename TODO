@@ -27,8 +27,17 @@ Axel
 Simon
 =====
 
-+ Server: Mehr RAM bestellen
-+ Prüfen, warum in der Map Anzeige manchmal ein Competitor doppelt ist
-+ ANCHOR anzeigen für große Werte (Bei DSTTRV raussuchen was da z.B. groß ist)
-+ Implementierung Leaderboard auf Basis HTML Designer
++ Sortierung funktioniert nicht richtig in den Legs und den Werten (der 1. Platz fehlt manchmal)
++ Anstatt DropDB lieber ein Removeallby eventname, racename ermöglichen (auch in der DB UI)
+
++ Alternating rows implementieren
++ Sortierungspfeile abschalten wenn nicht sortiert ist (vielleicht anderes Icon anzeigen)
++ Was ist mit der Overall Ansicht mit den Total Points?
++ Zwei Zeilen in den Titeln
++ Wie kriege ich die Bars hin?
+
++ Mehrere Rennen anzeigbar und auswählbar machen
+
++ iPhone UI implementieren
+
 + Wenn Axel Branches eingerichtet hat, dann MongoDBs auf Server startbar machen über supervisord

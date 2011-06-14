@@ -250,7 +250,8 @@ def liveRaceInformation(configurator):
             if data.has_key('ranks'):
                 for c in data['ranks']:
                     if c['competitor'] == competitor['name']:
-                        c_current_rank = c['rank']
+                        if c_current_rank == 0:
+                            c_current_rank = c['rank']
                         break
 
             c_races = comp.races
@@ -326,6 +327,9 @@ def liveRaceInformation(configurator):
 
             dc_leg_values['upOrDownWindLeg'] = leg['upordownwindleg']
 
+            if not dc_leg_values.get('rank'):
+                dc_leg_values['rank'] = c_current_rank
+
             # compute gains and losses (places, )
             if lcount == 0:
                 # for the first leg just put 0 into data
@@ -333,7 +337,7 @@ def liveRaceInformation(configurator):
             else:
                 # search for the last place
                 last_rank_computed = c_marks[raceindex][lcount-1]
-                dc_leg_values['gainsAndLossesInPlaces'] = last_rank_computed - c_values[raceindex][lcount]['rank']
+                dc_leg_values['gainsAndLossesInPlaces'] = last_rank_computed - dc_leg_values['rank']
 
             c_values[raceindex][lcount] = dc_leg_values
 

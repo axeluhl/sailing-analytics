@@ -37,9 +37,9 @@ VN = {
         'VMGMS' : ('VMGMS', 'VMG (m/s)', '%.1f', 'velocityMadeGoodInMetersPerSecond'),
         'AVMGKNOT': ('AVMGKN', 'Avg VMG (kn)', '%.1f', 'averageVelocityMadeGoodInKnots'),
         'AVMGMS' : ('AVMGMS', 'Avg VMG (m/s)', '%.1f', 'averageVelocityMadeGoodInMetersPerSecond'),
-        'ETA' : ('ETASEC', 'ETA (sec.)', '%.f', 'estimatedTimeToNextMarkInSeconds'),
+        'ETA' : ('ETASEC', 'ETA (s)', '%.f', 'estimatedTimeToNextMarkInSeconds'),
         'DSTGO' : ('DSTGO', 'Distance To Go (m)', '%.f', 'windwardDistanceToGoInMeters'),
-        'GAPSEC' : ('SGAP', 'Gap To Leader (sec)', '%.1f','gapToLeaderInSeconds'),
+        'GAPSEC' : ('SGAP', 'Gap To Leader (s)', '%.1f','gapToLeaderInSeconds'),
         'UPDOWNWIND' : ('UPDOWN', 'Up or Downwind?', '%s', 'upOrDownWindLeg'),
         'GLP' : ('GLP', 'Gains and Losses (Places)', '%s', 'gainsAndLossesInPlaces'),
         'RANK' : ('LRANK', 'Rank', '%s', 'rank'),
@@ -55,6 +55,12 @@ COLUMN_MODE_NAMES = {
         'LEADERBOARD-F1':
             [VN['RANK'], VN['GAPSEC'], VN['ASPDMS'], VN['DSTTRV'], VN['GLP']],
         'LEADERBOARD-F2':
-            [VN['RANK'], VN['GAPSEC'], VN['GLP']]
+            [VN['RANK'], VN['GAPSEC'], VN['GLP']],
+        'LEADERBOARD-F3':
+            [VN['RANK'], VN['GAPSEC'], VN['ETA']],
+        'LEADERBOARD-F4':
+            [VN['RANK'], VN['GAPSEC'], VN['ETA'], VN['DSTGO'], VN['CSPDMS']],
+        'LEADERBOARD-F5':
+            [VN['RANK'], VN['ASPDMS'], VN['DSTTRV']],
         }
 

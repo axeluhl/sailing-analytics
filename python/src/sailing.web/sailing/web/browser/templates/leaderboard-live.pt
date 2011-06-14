@@ -50,13 +50,28 @@
           <div class='function-btn-wrapper'>
             <ul class='function-btn'>
               <li class='function-1'>
-                <a href='#'>
+                <a href='/@@/leaderboard-live?c=F1'>
                   f1
                 </a>
               </li>
-              <li class='function-2'>
-                <a href='#'>
+              <li class='function-1'>
+                <a href='/@@/leaderboard-live?c=F2'>
                   f2
+                </a>
+              </li>
+              <li class='function-1'>
+                <a href='/@@/leaderboard-live?c=F3'>
+                  f3
+                </a>
+              </li>
+              <li class='function-1'>
+                <a href='/@@/leaderboard-live?c=F4'>
+                  f4
+                </a>
+              </li>
+              <li class='function-1'>
+                <a href='/@@/leaderboard-live?c=F5'>
+                  f5
                 </a>
               </li>
             </ul>

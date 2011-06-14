@@ -122,7 +122,7 @@ body {
       padding: 10px 0 10px 30px;
       border-top: 1px solid #e1e1e1; }
       #header ul.systeminfo li.active {
-        background: url(/moderator-static/pause_button.png) no-repeat left center; }
+        background: url(/moderator-static/freeze.png) no-repeat left center; }
       #header ul.systeminfo li.message-0 {
         border: none; }
     #header ul.systeminfo:after {
@@ -220,7 +220,7 @@ span.race-count {
     #main-interface .blue-table .refresh-btn {
       display: block;
       height: 39px;
-      background: url(/moderator-static/pause_button.png) right center no-repeat #484848; }
+      background: url(/moderator-static/freeze.png) right center no-repeat #484848; }
     #main-interface .blue-table .sort-rank {
       display: block;
       height: 39px; }

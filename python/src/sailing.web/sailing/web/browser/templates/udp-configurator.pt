@@ -31,7 +31,11 @@
     <br/><br/>
     <div class="field">
         <span>Port:</span><br/>
-        <input type="text" name="port" value=""/>
+        <select name="port">
+            <option value="2012">PROD</option>
+            <option value="2011">TEST</option>
+            <option value="2010">DEV</option>
+        </select>
     </div>
     <div class="field">
         <span>Bearing correction by declination?</span><br/>
