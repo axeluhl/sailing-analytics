@@ -4,6 +4,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Distance;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Speed;
+import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.TimePoint;
 
 public interface TrackedLegOfCompetitor {
@@ -90,5 +91,7 @@ public interface TrackedLegOfCompetitor {
      * Returns <code>null</code> in case this leg's competitor hasn't started the leg yet.
      */
     Double getEstimatedTimeToNextMarkInSeconds(TimePoint timePoint) throws NoWindException;
+
+    SpeedWithBearing getSpeedOverGround(TimePoint at);
 
 }

@@ -224,4 +224,15 @@ public class TrackTest {
             }
         }
     }
+    
+    @Test
+    public void testDistanceTraveledOnInBetweenSectionFromFixToFix() {
+        // take second and third fix and compute distance between them
+        Iterator<GPSFixMoving> iter = track.getFixes().iterator();
+        iter.next(); // skip first;
+        GPSFix second = iter.next();
+        GPSFix third = iter.next();
+        assertEquals(second.getPosition().getDistance(third.getPosition()),
+                track.getDistanceTraveled(second.getTimePoint(), third.getTimePoint()));
+    }
 }

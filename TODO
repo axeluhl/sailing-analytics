@@ -1,18 +1,13 @@
-
 Axel
 ====
 
- - Implement and test course update with corresponding TrackedLeg[OfCompetitor] updates
+ - What about distance traveled in first leg? It seems to jump too high at the beginning.
 
  - Open test server firewall ports for UDP / Expedition wind integration
 
  - test UDP ports
 
  - Set up two Expedition machines with RF and UMTS transmission, test killing one
-
- - Test duplicate addrace for the same race; consider cleaning cache when stopRace/stopEvent is invoked
-
- - Test duplicate addevent for the same event
 
  - Test fail-over in case one of the two Java VM fails
 
@@ -22,6 +17,10 @@ Axel
 
  - Display gain/loss for next-best competitor (green/red arrow up/down) based on VMG comparison
 
+ - Now that we can update Course's waypoints, consider creating a RaceDefinition right upon
+   receiving the Event/Race from TracTrac, using an empty list of waypoints. This may simplify
+   the entire life cycle of RaceDefinition objects.
+
  - Improve Mongo-based tests by using Mongo transactions instead of waiting for prior transactions to complete
 
 
@@ -30,8 +29,6 @@ Simon
 
 + Server: Mehr RAM bestellen
 + Prüfen, warum in der Map Anzeige manchmal ein Competitor doppelt ist
-+ Simulator mit Speed = 1 anschmeissen und dann prüfen was passiert
-+ Prüfen warum im live leaderbaord manchmal 4 legs angezeigt werden (max ist 2+1)
-+ Prüfen warum der Listener thread manchmal nicht richtig gestoppt wird
++ ANCHOR anzeigen für große Werte (Bei DSTTRV raussuchen was da z.B. groß ist)
 + Implementierung Leaderboard auf Basis HTML Designer
 + Wenn Axel Branches eingerichtet hat, dann MongoDBs auf Server startbar machen über supervisord

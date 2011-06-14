@@ -74,7 +74,7 @@ import difflib.PatchFailedException;
 public class DomainFactoryImpl implements DomainFactory {
     private static final Logger logger = Logger.getLogger(DomainFactoryImpl.class.getName());
     
-    private final long millisecondsOverWhichToAverageSpeed = 5000;
+    private final long millisecondsOverWhichToAverageSpeed = 15000;
 
     // TODO clarify how millisecondsOverWhichToAverageWind could be updated and propagated live
     private final long millisecondsOverWhichToAverageWind = 30000;
@@ -338,9 +338,14 @@ public class DomainFactoryImpl implements DomainFactory {
                 ReceiverType.MARKPASSINGS, ReceiverType.MARKPOSITIONS, ReceiverType.RACESTARTFINISH,
                 ReceiverType.RAWPOSITIONS);
     }
+    
+    @Override
+    public DynamicTrackedEvent getTrackedEvent(com.sap.sailing.domain.base.Event event) {
+        return eventTrackingCache.get(event);
+    }
 
     @Override
-    public DynamicTrackedEvent trackEvent(com.sap.sailing.domain.base.Event event) {
+    public DynamicTrackedEvent getOrCreateTrackedEvent(com.sap.sailing.domain.base.Event event) {
         synchronized (eventTrackingCache) {
             DynamicTrackedEvent result = eventTrackingCache.get(event);
             if (result == null) {

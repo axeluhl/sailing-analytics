@@ -7,6 +7,7 @@ import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Mile;
 import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.Speed;
+import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.impl.KilometersPerHourSpeedImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
@@ -137,6 +138,15 @@ public class TracTracTrackedLegOfCompetitor implements TrackedLegOfCompetitor {
 
     private TracTracTrackedRaceImpl getTrackedRace() {
         return trackedRace;
+    }
+
+    @Override
+    public SpeedWithBearing getSpeedOverGround(TimePoint at) {
+        if (hasStartedLeg(at)) {
+            return getTrackedRace().getTrack(getCompetitor()).getEstimatedSpeed(at);
+        } else {
+            return null;
+        }
     }
 
 }

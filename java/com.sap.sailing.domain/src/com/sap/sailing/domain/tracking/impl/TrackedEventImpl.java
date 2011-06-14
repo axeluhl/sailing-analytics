@@ -47,6 +47,24 @@ public class TrackedEventImpl implements TrackedEvent {
             trackedRaces.notifyAll();
         }
     }
+    
+    @Override
+    public void removedTrackedRace(TrackedRace trackedRace) {
+        synchronized (trackedRaces) {
+            trackedRaces.remove(trackedRace.getRace());
+            Collection<TrackedRace> trbbc = trackedRacesByBoatClass.get(trackedRace.getRace().getBoatClass());
+            if (trbbc != null) {
+                trbbc.remove(trackedRace);
+                if (trbbc.isEmpty()) {
+                    trbbc.remove(trackedRace.getRace().getBoatClass());
+                }
+            }
+            for (RaceListener listener : raceListeners) {
+                listener.raceRemoved(trackedRace);
+            }
+            trackedRaces.notifyAll();
+        }
+    }
 
     @Override
     public Event getEvent() {
@@ -78,6 +96,11 @@ public class TrackedEventImpl implements TrackedEvent {
             }
         }
         return result;
+    }
+    
+    @Override
+    public TrackedRace getExistingTrackedRace(RaceDefinition race) {
+        return trackedRaces.get(race);
     }
 
     @Override
