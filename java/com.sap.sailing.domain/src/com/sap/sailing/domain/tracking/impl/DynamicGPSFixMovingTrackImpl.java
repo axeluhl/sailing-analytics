@@ -28,6 +28,7 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends DynamicTrackImpl<Ite
      */
     @Override
     public SpeedWithBearing getEstimatedSpeed(TimePoint at) {
+        // TODO factor out the obtaining of relevant fixes which should be the same in super.getEstimatedSpeed(at)
         DummyGPSFixMoving atTimed = new DummyGPSFixMoving(at);
         NavigableSet<GPSFixMoving> beforeSet = getInternalFixes().headSet(atTimed, /* inclusive */ true);
         NavigableSet<GPSFixMoving> afterSet = getInternalFixes().tailSet(atTimed, /* inclusive */ true);

@@ -107,7 +107,14 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
             if (hasFinishedLeg(timePoint)) {
                 timePointToUse = getMarkPassingForLegEnd().getTimePoint();
             } else {
-                timePointToUse = getTrackedRace().getTimePointOfNewestEvent();
+                // use time point of latest fix
+                GPSFixMoving lastFix = getTrackedRace().getTrack(getCompetitor()).getLastFix();
+                if (lastFix != null) {
+                    timePointToUse = lastFix.getTimePoint();
+                } else {
+                    // No fix at all? Then we can't determine any speed 
+                    return null;
+                }
             }
             Distance d = getDistanceTraveled(timePointToUse);
             long millis = timePointToUse.asMillis() - legStart.getTimePoint().asMillis();
