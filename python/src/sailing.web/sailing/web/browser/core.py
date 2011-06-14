@@ -181,6 +181,9 @@ class BaseView(object):
         if name[0] == 'ETASEC':
             val = '%.f:%.f' % (int(value) / 60, int(value)-( (int(value)/60)*60 ))
 
+        if name[0] == 'GLP' and value > 0:
+            val = '+%s' % value
+
         return val
 
 def callFunction(context, request):

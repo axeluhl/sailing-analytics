@@ -536,14 +536,17 @@ def moderatorLiveData(context, request):
     race_range = request.params.get('races', '1:3')
     competitor_range = request.params.get('competitors', '1:20')
     direction = request.params.get('direction', 'asc');
+    colmode = request.params.get('colmode')
 
+    columns = view.configuredColumns(colmode)
+    
     if race_range in ['null', 'undefined']:
         race_range = '1:3'
 
     race_start_index, race_end_index = race_range.split(':')
     races_list = event.races[int(race_start_index)-1:int(race_end_index)]
 
-    competitors = view.competitorsSortedBy(event.name, sortby.strip())
+    competitors = view.competitorsSortedBy(event.name, sortby.strip(), colmode)
 
     if direction == 'asc':
         competitors.reverse()
@@ -573,20 +576,15 @@ def moderatorLiveData(context, request):
 
             markranks[racecounter] = markranks[racecounter] + competitor.marks[real_racepos]
 
-            iv = competitor.values[real_racepos]
+            cvalues = []
+            for legvalue_for_race in competitor.values[real_racepos]:
+                result = []
+                for column in columns:
+                    result.append(view.displayLegValue(column, legvalue_for_race.get(column[-1])))
 
-            newvalues = iv
-            for valpos in range(len(iv)):
-                nv = ['%.2f' % (val < 15000 and val or 0.0) for val in newvalues[valpos]]
+                cvalues.append(result)
 
-                # prepare values according to UI
-                # UI:       RANK, DSTTRAV, SPEED, VMG, SGAP, DSTGO, ETA
-                # INTERN:   RANK, AVGSPEED, DSTRV, VMG, AVMG, SGAP, ETA, DSTGO 
-                if nv:
-                    nv = [nv[0], nv[2], nv[1], nv[3], nv[5], nv[-1], nv[-2]]
-                newvalues[valpos] = nv
-
-            legvalues[racecounter] = legvalues[racecounter] + newvalues
+            legvalues[racecounter] = legvalues[racecounter] + cvalues
 
             racecounter += 1
 

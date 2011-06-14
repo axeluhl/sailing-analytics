@@ -32,7 +32,7 @@ VN = {
         'CSPDMS' : ('CSPDMS', 'Current Speed (m/s)', '%.1f', 'currentSpeedOverGroundInMetersPerSecond'),
         'ASPDKNOT': ('ASPDKN', 'Avg Speed (kn)', '%.1f', 'averageSpeedOverGroundInKnots'),
         'ASPDMS' : ('ASPDMS', 'Avg Speed (m/s)', '%.1f', 'averageSpeedOverGroundInMetersPerSecond'),
-        'DSTTRV' : ('DSTTRV', 'Distance Travelled (m)', '%.f', 'distanceTraveledOverGroundInMeters'),
+        'DSTTRV' : ('DSTTRV', 'Distance Travelled (m)', '%.1f', 'distanceTraveledOverGroundInMeters'),
         'VMGKNOT': ('VMGKN', 'VMG (kn)', '%.1f', 'velocityMadeGoodInKnots'),
         'VMGMS' : ('VMGMS', 'VMG (m/s)', '%.1f', 'velocityMadeGoodInMetersPerSecond'),
         'AVMGKNOT': ('AVMGKN', 'Avg VMG (kn)', '%.1f', 'averageVelocityMadeGoodInKnots'),
@@ -53,6 +53,8 @@ COLUMN_MODE_NAMES = {
         'LEADERBOARD-STATIC': 
             [VN['RANK'], VN['CSPDMS'], VN['DSTTRV'], VN['VMGMS'], VN['GLP']],
         'LEADERBOARD-F1':
-            [VN['RANK'], VN['GAPSEC'], VN['ASPDMS'], VN['DSTTRV'], VN['GLP']]
+            [VN['RANK'], VN['GAPSEC'], VN['ASPDMS'], VN['DSTTRV'], VN['GLP']],
+        'LEADERBOARD-F2':
+            [VN['RANK'], VN['GAPSEC'], VN['GLP']]
         }
 

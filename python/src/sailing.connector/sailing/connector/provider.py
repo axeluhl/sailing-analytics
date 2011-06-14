@@ -327,15 +327,13 @@ def liveRaceInformation(configurator):
             dc_leg_values['upOrDownWindLeg'] = leg['upordownwindleg']
 
             # compute gains and losses (places, )
-            if legcount == 0:
+            if lcount == 0:
                 # for the first leg just put 0 into data
                 dc_leg_values['gainsAndLossesInPlaces'] = 0
             else:
                 # search for the last place
                 last_rank_computed = c_marks[raceindex][lcount-1]
-                if last_rank_computed > c_current_rank:
-                    dc_leg_values['gainsAndLossesInPlaces'] = c_current_rank - last_rank_computed
-                else: dc_leg_values['gainsAndLossesInPlaces'] = last_rank_computed - c_current_rank
+                dc_leg_values['gainsAndLossesInPlaces'] = last_rank_computed - c_values[raceindex][lcount]['rank']
 
             c_values[raceindex][lcount] = dc_leg_values
 

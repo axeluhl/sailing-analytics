@@ -15,10 +15,10 @@ var listener_paused = false;
  * sortby: Sorting parameters (e.g "1,1,1")
  * competitors: Slice indicating which competitors to show (e.g. "1:20")
  */
-function loadLeaderboard(races, sortby, competitors, direction) {
+function loadLeaderboard(races, sortby, competitors, direction, colmode) {
     showLoader();
     $.getJSON('/++/moderatorLiveData', 
-                {races:races, sortby:sortby, competitors:competitors, direction:direction}, 
+                {races:races, sortby:sortby, competitors:competitors, direction:direction,colmode:colmode}, 
         function(data) {
             displayLeaderboard(data);
 
@@ -34,7 +34,7 @@ function loadLeaderboard(races, sortby, competitors, direction) {
 
 function liveRefresh() {
     if (listener_paused == false)
-        loadLeaderboard(global_race, global_sortkey, global_competitors, global_direction);
+        loadLeaderboard(global_race, global_sortkey, global_competitors, global_direction, global_colmode);
 }
 
 function toggleListener() {
@@ -67,7 +67,7 @@ function sortBy(param, element) {
     else global_direction = 'desc';
 
     global_sortkey = param;
-    loadLeaderboard(global_race, param, global_competitors, global_direction);
+    loadLeaderboard(global_race, param, global_competitors, global_direction, global_colmode);
 }
 
 function yieldValue(element, newvalue) {
@@ -159,6 +159,6 @@ $(document).ready(function() {
 
   $.ajaxSetup({cache:false});
 
-  loadLeaderboard(global_race, global_sortkey, global_competitors, global_direction);
+  loadLeaderboard(global_race, global_sortkey, global_competitors, global_direction, global_colmode);
   window.setInterval('liveRefresh()', 5000);
 });
