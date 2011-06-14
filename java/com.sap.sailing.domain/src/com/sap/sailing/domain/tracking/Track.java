@@ -22,8 +22,14 @@ public interface Track<FixType extends Timed> {
 
     FixType getFirstFixAfter(TimePoint timePoint);
     
+    /**
+     * The first fix in this track or <code>null</code> if the track is empty
+     */
     FixType getFirstFix();
     
+    /**
+     * The last fix in this track or <code>null</code> if the track is empty
+     */
     FixType getLastFix();
     
     /**

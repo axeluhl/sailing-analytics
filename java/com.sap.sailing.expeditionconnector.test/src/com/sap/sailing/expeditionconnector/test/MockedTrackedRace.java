@@ -99,7 +99,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public int getUpdateCount() {
+    public long getUpdateCount() {
         // TODO Auto-generated method stub
         return 0;
     }
