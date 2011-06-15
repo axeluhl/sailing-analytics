@@ -128,6 +128,10 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener<Competitor
                 getLeg().getFrom().getBuoys().iterator().next()).getEstimatedPosition(at, false);
         Position approximateLegEndPosition = getTrackedRace().getTrack(
                 getLeg().getTo().getBuoys().iterator().next()).getEstimatedPosition(at, false);
+        if (approximateLegStartPosition == null || approximateLegEndPosition == null) {
+            throw new RuntimeException("No mark positions received yet for leg "+getLeg()+
+                    ". Can't determine wind direction since position is not known.");
+        }
         Wind wind = getWind(
                 approximateLegStartPosition.translateGreatCircle(approximateLegStartPosition.getBearingGreatCircle(approximateLegEndPosition),
                         approximateLegStartPosition.getDistance(approximateLegEndPosition).scale(0.5)), at);

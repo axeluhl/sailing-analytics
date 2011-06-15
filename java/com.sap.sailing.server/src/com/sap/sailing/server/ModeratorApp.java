@@ -2,6 +2,7 @@ package com.sap.sailing.server;
 
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -232,6 +233,7 @@ public class ModeratorApp extends Servlet {
                         jsonLeg.put("upordownwindleg", "false");
                     }
                     JSONArray jsonCompetitors = new JSONArray();
+                    Map<Competitor, Integer> ranks = leg.getRanks(timePoint);
                     for (Competitor competitor : event.getCompetitors()) {
                         JSONObject jsonCompetitorInLeg = new JSONObject();
                         TrackedLegOfCompetitor trackedLegOfCompetitor = leg.getTrackedLeg(competitor);
@@ -278,7 +280,7 @@ public class ModeratorApp extends Servlet {
                                 // well, we don't know the wind direction... then no average VMG will be shown...
                             }
                             try {
-                                jsonCompetitorInLeg.put("rank", trackedLegOfCompetitor.getRank(timePoint));
+                                jsonCompetitorInLeg.put("rank", ranks.get(competitor));
                             } catch (RuntimeException re) {
                                 if (re.getCause() != null && re.getCause() instanceof NoWindException) {
                                     // well, we don't know the wind direction, so we can't compute a ranking
