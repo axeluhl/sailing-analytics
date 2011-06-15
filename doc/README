@@ -588,10 +588,39 @@ into one in the future.
 
 * Server Directory Structures
 
-git/
+git/:
+      This is our git "hub" directory with checked-out workspace.
+      We use it also as the directory to check out a specific branch
+      that we want to build using Maven.
 
-servers/
+servers/:
+      The four Java server instances dev, test, prod1 and prod2 have their
+      directories here.
+  [dev|test|prod1|prod2]/
+    configuration/
+      config.ini: contains the set of initial bundles to launch upon
+                  server start as well as bundle properties such as the
+		  HTTP port to listen to and the mongo.port property
+    start: the start script used to launch the respective server instance
+    update: used to copy the built artifacts from the corresponding
+            maven-repositories/ subdirectory to the plugins/ subdirectory
+    plugins/: contains the JAR files for the server instance
 
 maven-repositories/
+  [dev|test|prod]/: the target repositories for the "mvn deploy" tasks
+                    for the respective git branch (dev|test|prod)
 
 * Maven Environment
+
+Our Java OSGi bundles are built and tested using the Apache Maven build system together
+with the Tycho plugin for Maven. The bundles carrying the JUnit tests (typically ending
+with *.test in their bundle name) are built using eclipse-test-plugin as packaging
+type. The regular OSGi bundles are built using eclipse-plugin as packaging type.
+
+When invoking "mvn install" in the ~trac/git/java directory, all bundles for the Java
+server will be built and the tests will start to run. A report is printed at the end. If
+it decides for "SUCCESS" then all builds and tests finished successfully. However, this
+hasn't had any effect on any of the running servers, not even the maven repository.
+
+For that, see the respective instructions in the ADMIN file located next to this README
+file (search for "mvn deploy").
