@@ -484,7 +484,107 @@ into one in the future.
 		  positions to be returned; if not specified,
 		  known boat positions are listed until the
 		  "end of time"
-  action=showwaypoints: shows the position 
+  action=showwaypoints: shows the positions of a race's marks / buoys
+   		  at a specified point in time; if no time/timeasmillis
+		  is provided, the race start time is used; if that is
+		  not available, the start of tracking is used;
+		  if that is not available either, the time point
+		  of the newest event is used; if that is not
+		  available, the current time is used. The output
+		  is an array of JSON objects with following format each:
+		    { "name": ...,    	      // waypoint name
+       		      "buoys": [ {	      // usually one or two buoys
+		        "name": ...,	      // buoy name
+			"lat": ...,	      // optional; if buoy pos known
+			"lng": ... } ... ] }  // optionsl; if buoy pos known
+    eventname:    name of the event, as returned by the "listevents"
+    		  action on the /moderator servlet
+    racename:     name of the race, as returned by the "listevents"
+    		  action on the /moderator servlet
+    time:         optional; time stamp for the wind measurement
+                  in ISO format in arbitrary precision; takes
+ 		  precedence over a "timeasmillis" parameter.
+		  Example values:
+                    2011-05-27T13:27:19.283
+		    2010-06-30
+		    2011-08-01T15:44:00
+    timeasmillis: optional; time stamp for the wind measurement
+    		  in milliseconds since 1970-01-01T00:00:00 UTC
+  action=showrace: shows lots of tracking information about a
+  		  tracked race at a given point in time. If no
+		  time point is provided (time / timeasmillis),
+		  the time point of the event received last is
+		  used. If no such time point exists, the current
+		  time is used. The output has the following
+		  structure:
+		    { "name": ...,             // race name
+		      "startoftracking": ...,  // millisecond timestamp
+		      "start": ...,	       // millisecond timestamp
+		      "finish": ..., 	       // millisecond timestamp
+		      "timeofnewestevent": ...,// greatest millisecond timestamp
+		      			       // of any event received so far
+		      "timeoflastevent": ...,  // millisecond timestamp
+		      			       // of the event received last
+		      "updatecount": ...,      // integer number telling
+		      		               // the number of events
+					       // received so far; a bit
+					       // like a "transaction time"
+		      "wind": {		       // optional, if wind set
+		        "truebearingdeg": ...,
+			"knotspeed": ...,
+			"meterspersecondspeed": ...,
+			"source": ... },
+		      "legs": [ {              // leg tracking info per leg
+		        "from": ...,	       // name of from-waypoint
+			"fromwaypointid": ..., // a unique integer for the
+					       // from-waypoint
+			"to": ...,	       // name of to-waypoint
+			"towaypointid": ...,   // a unique integer for the
+					       // from-waypoint
+			"upordownwindleg": ...,// true or false
+			"competitors": [ {     // competitor list
+			  "name": ...,
+			  	               // current SOG is optional
+			  "currentSpeedOverGroundInKnots": ...,
+			  "currentSpeedOverGroundInMetersPerSecond": ...,
+			                       // average SOG is optionsl
+			  "averageSpeedOverGroundInKnots": ...,
+			  "averageSpeedOverGroundInMetersPerSecond": ...,
+			                       // distance traveled is optional
+			  "distanceTraveledOverGroundInMeters": ...,
+			                       // VMG info is optional
+			  "velocityMadeGoodInKnots": ...,
+			  "velocityMadeGoodInMetersPerSecond": ...,
+			  "averageVelocityMadeGoodInKnots": ...,
+			  "averageVelocityMadeGoodInMetersPerSecond": ...,
+			  "rank": ...,         // competitor's rank in this leg
+			  "gapToLeaderInSeconds": ..., // optional, only if wind is known
+			  "estimatedTimeToNextMarkInSeconds": ..., // optional, only if wind is known
+			  "windwardDistanceToGoInMeters": ..., // optional, only if wind is known
+			  "started": ...,      // true or false, tells if competitor has started leg
+			  "finished": ...      // true of false, tells if competitor has finished leg
+			   } ... ]  // competitor's rank in leg
+			} ... ],
+			"ranks": [ {           // the overall total ranks, across legs
+			  "competitor": ...,   // name of competitor
+			  "rank": ... } ... ] }
+    eventname:    name of the event, as returned by the "listevents"
+    		  action on the /moderator servlet
+    racename:     name of the race, as returned by the "listevents"
+    		  action on the /moderator servlet
+    time:         optional; time stamp for the wind measurement
+                  in ISO format in arbitrary precision; takes
+ 		  precedence over a "timeasmillis" parameter.
+		  Example values:
+                    2011-05-27T13:27:19.283
+		    2010-06-30
+		    2011-08-01T15:44:00
+    timeasmillis: optional; time stamp for the wind measurement
+    		  in milliseconds since 1970-01-01T00:00:00 UTC
+    sinceupdate:  optional; an integer number that if provided,
+    		  causes the call to block on the server
+    		  until the update count returned will be greater
+		  than the value provided for sinceupdate.
 
 * Server Directory Structures
 
