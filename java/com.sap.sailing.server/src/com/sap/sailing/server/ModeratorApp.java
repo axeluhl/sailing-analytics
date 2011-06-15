@@ -364,21 +364,18 @@ public class ModeratorApp extends Servlet {
                 JSONObject jsonRace = new JSONObject();
                 jsonRace.put("name", race.getName());
                 jsonRace.put("boatclass", race.getBoatClass()==null?"":race.getBoatClass().getName());
-                TimePoint start = getService().getDomainFactory().getTrackedEvent(event).getTrackedRace(race).getStart();
+                TrackedRace trackedRace = getService().getDomainFactory().getOrCreateTrackedEvent(event).getTrackedRace(race);
+                TimePoint start = trackedRace.getStart();
                 jsonRace.put("start", start==null?Long.MAX_VALUE:start.asMillis());
+                if (trackedRace.getFinish() != null) {
+                    jsonRace.put("finish", trackedRace.getFinish().asMillis());
+                }
                 JSONArray jsonLegs = new JSONArray();
                 for (Leg leg : race.getCourse().getLegs()) {
                     JSONObject jsonLeg = new JSONObject();
                     jsonLeg.put("start", leg.getFrom().getName());
                     jsonLeg.put("end", leg.getTo().getName());
                     jsonLegs.add(jsonLeg);
-                }
-                TrackedRace trackedRace = getService().getDomainFactory().getOrCreateTrackedEvent(event).getTrackedRace(race);
-                if (trackedRace.getStart() != null) {
-                    jsonRace.put("start", trackedRace.getStart().asMillis());
-                }
-                if (trackedRace.getFinish() != null) {
-                    jsonRace.put("finish", trackedRace.getFinish().asMillis());
                 }
                 jsonRace.put("legs", jsonLegs);
                 jsonRaces.add(jsonRace);
