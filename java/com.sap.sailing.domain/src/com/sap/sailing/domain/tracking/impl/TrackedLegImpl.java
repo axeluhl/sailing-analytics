@@ -1,7 +1,9 @@
 package com.sap.sailing.domain.tracking.impl;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.SortedSet;
 import java.util.TreeSet;
 
 import com.sap.sailing.domain.base.Bearing;
@@ -25,7 +27,7 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener<Competitor
     private final Leg leg;
     private final Map<Competitor, TrackedLegOfCompetitor> trackedLegsOfCompetitors;
     private TrackedRaceImpl trackedRace;
-    private final Map<TimePoint, TreeSet<TrackedLegOfCompetitor>> competitorTracksOrderedByRank;
+    private final Map<TimePoint, SortedSet<TrackedLegOfCompetitor>> competitorTracksOrderedByRank;
     
     public TrackedLegImpl(DynamicTrackedRaceImpl trackedRace, Leg leg, Iterable<Competitor> competitors) {
         super();
@@ -36,7 +38,7 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener<Competitor
             trackedLegsOfCompetitors.put(competitor, new TrackedLegOfCompetitorImpl(this, competitor));
         }
         trackedRace.addListener(this);
-        competitorTracksOrderedByRank = new HashMap<TimePoint, TreeSet<TrackedLegOfCompetitor>>();
+        competitorTracksOrderedByRank = new HashMap<TimePoint, SortedSet<TrackedLegOfCompetitor>>();
     }
     
     @Override
@@ -60,7 +62,7 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener<Competitor
     }
 
     protected Competitor getLeader(TimePoint timePoint) {
-        TreeSet<TrackedLegOfCompetitor> byRank = getCompetitorTracksOrderedByRank(timePoint);
+        SortedSet<TrackedLegOfCompetitor> byRank = getCompetitorTracksOrderedByRank(timePoint);
         return byRank.first().getCompetitor();
     }
 
@@ -74,18 +76,28 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener<Competitor
      * Note that this does not reflect overall race standings. For that, the ordering would have to
      * consider the order of the boats not currently in this leg, too.
      */
-    protected TreeSet<TrackedLegOfCompetitor> getCompetitorTracksOrderedByRank(TimePoint timePoint) {
+    protected SortedSet<TrackedLegOfCompetitor> getCompetitorTracksOrderedByRank(TimePoint timePoint) {
         synchronized (competitorTracksOrderedByRank) {
-            TreeSet<TrackedLegOfCompetitor> treeSet = competitorTracksOrderedByRank.get(timePoint);
+            SortedSet<TrackedLegOfCompetitor> treeSet = competitorTracksOrderedByRank.get(timePoint);
             if (treeSet == null) {
                 treeSet = new TreeSet<TrackedLegOfCompetitor>(new WindwardToGoComparator(this, timePoint));
                 for (TrackedLegOfCompetitor competitorLeg : getTrackedLegsOfCompetitors()) {
                     treeSet.add(competitorLeg);
                 }
-                competitorTracksOrderedByRank.put(timePoint, treeSet);
+                competitorTracksOrderedByRank.put(timePoint, Collections.unmodifiableSortedSet(treeSet));
             }
             return treeSet;
         }
+    }
+    
+    @Override
+    public Map<Competitor, Integer> getRanks(TimePoint timePoint) {
+        SortedSet<TrackedLegOfCompetitor> orderedTrackedLegsOfCompetitors = getCompetitorTracksOrderedByRank(timePoint);
+        Map<Competitor, Integer> result = new HashMap<Competitor, Integer>();
+        for (TrackedLegOfCompetitor tloc : orderedTrackedLegsOfCompetitors) {
+            result.put(tloc.getCompetitor(), orderedTrackedLegsOfCompetitors.headSet(tloc).size()+1);
+        }
+        return result;
     }
 
     @Override

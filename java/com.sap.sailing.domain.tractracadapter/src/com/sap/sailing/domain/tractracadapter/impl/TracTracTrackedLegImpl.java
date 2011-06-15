@@ -51,4 +51,13 @@ public class TracTracTrackedLegImpl implements TrackedLeg {
         return false;
     }
 
+    @Override
+    public Map<Competitor, Integer> getRanks(TimePoint timePoint) {
+        Map<Competitor, Integer> result = new HashMap<Competitor, Integer>();
+        for (Competitor c : getTrackedRace().getRace().getCompetitors()) {
+            result.put(c, getTrackedLeg(c).getRank(timePoint));
+        }
+        return result;
+    }
+
 }
