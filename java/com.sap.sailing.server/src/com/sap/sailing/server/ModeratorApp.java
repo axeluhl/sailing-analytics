@@ -109,7 +109,7 @@ public class ModeratorApp extends Servlet {
                         JSONObject jsonFix = new JSONObject();
                         jsonFix.put("timepoint", fix.getTimePoint().asMillis());
                         jsonFix.put("latdeg", fix.getPosition().getLatDeg());
-                        jsonFix.put("lngdev", fix.getPosition().getLngDeg());
+                        jsonFix.put("lngdeg", fix.getPosition().getLngDeg());
                         jsonFix.put("truebearingdeg", fix.getSpeed().getBearing().getDegrees());
                         jsonFix.put("knotspeed", fix.getSpeed().getKnots());
                         jsonFixes.add(jsonFix);

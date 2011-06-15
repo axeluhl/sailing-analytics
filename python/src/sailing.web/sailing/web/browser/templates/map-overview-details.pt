@@ -61,7 +61,7 @@
                 $('#wind-bearing').html(data.truebearingdeg);
                 $('#wind-speed').html(data.knotspeed);
                 $('#wind-lat').html(data.latdeg);
-                $('#wind-lng').html(data.lngdev);
+                $('#wind-lng').html(data.lngdeg);
             });
 
             // also show wind directions
@@ -125,7 +125,7 @@
                             obj = data[d];
 
                             if (obj.latdeg != undefined) {
-                                map.addMarker(obj.latdeg, obj.lngdev, obj.name, _base_url() + 'static/images/boat16.png');
+                                map.addMarker(obj.latdeg, obj.lngdeg, obj.name, _base_url() + 'static/images/boat16.png');
                             } else {
                             }
                         }
