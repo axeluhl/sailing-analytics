@@ -4,10 +4,6 @@
 <div>
     <input type="button" value="Pause" onclick="$(this).attr('value', togglePauseLive())"/>
 
-    <div id="live-data-bar" style="height: 30px;">
-    &nbsp;
-    </div>
-
     <pre id="live-data-receiver" style="font-size:11px;height:1630px; width: 1024px;">
         &nbsp;
     </pre>
@@ -30,12 +26,10 @@
 
         function refreshLive() {
             if (paused_live == false) {
-                displayLoader('#live-data-bar');
                 GET('adminLiveData', {}, function(data) {
                     $('#live-data-receiver').fadeTo('normal', 0.1, function() {
                         $('#live-data-receiver').html(data);
                         $('#live-data-receiver').fadeTo('fast', 1.0);
-                        $('#live-data-bar').html('&nbsp;');
                     });
                 });
             }

@@ -2,7 +2,7 @@ This file explains the typical administrative tasks to be performed on
 the SAP Sailing server. For an explanation of what this server does,
 please refer to the README file stored next to this ADMIN file.
 
-Emercengy Startup After Reboot
+Emergency Startup After Reboot
 ------------------------------
 
 When for some reason the server re-booted, a number of manual steps

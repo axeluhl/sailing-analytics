@@ -6,7 +6,8 @@
   </head>
   <body class='race-1' tal:define="event view.currentLeaderboardEvent(); 
                                     racebundles [event.races[i:i+3] for i in xrange(0, len(event.races), 3)];
-                                    firstbundle racebundles[:3]; lastbundle racebundles[3:]">
+                                    firstbundle racebundles[:3]; lastbundle racebundles[3:];
+                                    columns view.configuredColumns('LEADERBOARD-%s' % request.params.get('c', 'F1'))">
     <div id='rootwrapper'>
       <div id='header'>
         &nbsp;
@@ -49,13 +50,28 @@
           <div class='function-btn-wrapper'>
             <ul class='function-btn'>
               <li class='function-1'>
-                <a href='#'>
+                <a href='/@@/leaderboard-live?c=F1'>
                   f1
                 </a>
               </li>
-              <li class='function-2'>
-                <a href='#'>
+              <li class='function-1'>
+                <a href='/@@/leaderboard-live?c=F2'>
                   f2
+                </a>
+              </li>
+              <li class='function-1'>
+                <a href='/@@/leaderboard-live?c=F3'>
+                  f3
+                </a>
+              </li>
+              <li class='function-1'>
+                <a href='/@@/leaderboard-live?c=F4'>
+                  f4
+                </a>
+              </li>
+              <li class='function-1'>
+                <a href='/@@/leaderboard-live?c=F5'>
+                  f5
                 </a>
               </li>
             </ul>
@@ -135,50 +151,24 @@
               <table class='race-table' id='r1-m1' style="display:none;">
                 <thead>
                   <tr>
-                    <th colid='1'>
-                      <span>DSTTRV</span>
+                    <tal:for repeat="column columns[1:]">
+                    <th colid='${repeat["column"].number}'>
+                        <span>${column[0]}</span>
                     </th>
-                    <th colid='2'>
-                      <span>SPEED</span>
-                    </th>
-                    <th colid='3'>
-                      <span>VMG</span>
-                    </th>
-                    <th colid='4'>
-                      <span>SGAP</span>
-                    </th>
-                    <th colid='5'>
-                      <span>DSTGO</span>
-                    </th>
-                    <th colid='6'>
-                      <span>ETA</span>
-                    </th>
+                    </tal:for>
                   </tr>
                 </thead>
                 <tbody>
                   <tr rowid='0'>
-                    <td class='table-sorting' colid='1'>
-                      <a class='sort-asc' href='javascript:;' onclick='sortBy("${raceid},${markid},3", $(this))'></a>
+                    <tal:for repeat="column columns[1:]">
+                    <td class='table-sorting' colid='${repeat["column"].number}'>
+                        <a class='sort-asc' href='javascript:;' onclick='sortBy("${raceid},${markid},${repeat["column"].number}", $(this))'></a>
                     </td>
-                    <td class='table-sorting' colid='2'>
-                      <a class='sort-asc' href='javascript:;' onclick='sortBy("${raceid},${markid},2", $(this))'></a>
-                    </td>
-                    <td class='table-sorting' colid='3'>
-                      <a class='sort-asc' href='javascript:;' onclick='sortBy("${raceid},${markid},4", $(this))'></a>
-                    </td>
-                    <td class='table-sorting' colid='4'>
-                      <a class='sort-asc' href='javascript:;' onclick='sortBy("${raceid},${markid},6", $(this))'></a>
-                    </td>
-                    <td class='table-sorting' colid='5'>
-                      <a class='sort-asc' href='javascript:;' onclick='sortBy("${raceid},${markid},8", $(this))'></a>
-                    </td>
-                    <td class='table-sorting' colid='6'>
-                      <a class='sort-asc' href='javascript:;' onclick='sortBy("${raceid},${markid},7", $(this))'></a>
-                    </td>
+                    </tal:for>
                   </tr>
                   <tal:for repeat="valrow range(1,21)">
                   <tr class='odd' id='race-${raceid}-valrow-${valrow}'>
-                    <tal:for repeat="valrowpos range(1,7)">
+                    <tal:for repeat="valrowpos range(1,len(columns[1:])+1)">
                     <td id='race-${raceid}-mark-${markid}-valrow-${valrow}-pos-${valrowpos}'>
                       <span>&nbsp;</span>
                     </td>
@@ -196,5 +186,11 @@
     </div>
   </body>
   <script src='https://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.min.js'></script>
+
+  <script>
+      global_colmode = 'LEADERBOARD-${request.params.get('c', 'F1')}';
+  </script>
+
   <script src='/moderator-static/app.js' type='text/javascript'></script>
+
 </html>

@@ -72,9 +72,7 @@ class Competitor(BaseDocument):
         'races' : [float, ],
         'marks' : [[float, ], ], # ranks for marks
         'marknames' : [[[unicode,] ]], # marknames for legs
-        'upordownwind' : [[bool], ], # indicates wheter the leg is up or downwind
-        'additional' : [[[float]]], # additional information regarding one leg (finished, started)
-        'values' : [[[float, ]]]
+        'values' : [[{}]] # values is a hashset that for each leg contains values
     }
 
     indexes = [

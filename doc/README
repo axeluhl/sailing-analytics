@@ -40,6 +40,8 @@ Inbound Port Assignments
      80:    apache
      5902:  vnc
      8026:  Python "dev" instance
+     ....:  Python "test" instance
+     ....:  Python "prod" instance
      8886:  servlet container of "dev" Java instance
      8887:  servlet container of "test" Java instance
      8888:  servlet container of "prod1" Java instance
@@ -61,4 +63,79 @@ bundles that implement TracTrac connectivity, Expedition wind
 connectivity, sailing domain knowledge, race tracking capabilities as
 well as servlets with RESTful APIs for use by web clients.
 
-The 
+Most data is managed on the TracTrac servers. The only data currently
+stored persistently by the Java component is the wind data received
+through the supported channels. This helps in re-playing a race later
+and understanding the wind conditions at the time which should support
+fine-grained after-race analysis.
+
+* Jetty
+
+A Jetty servlet container runs embedded in Equinox. Servlets are
+registered (currently in the com.sap.sailing.server bundle) using the
+org.eclipse.equinox.http.registry.servlets extension point. See
+com.sap.sailing.server/plugin.xml for the currently registered
+servlets.
+
+Static content to be provided by Jetty is also registered as an
+"extension" for the org.eclipse.equinox.http.registry.resources
+extension point. We have a few very simple forms registered that aid
+in testing the web application provided by Jetty.
+
+The port on which Jetty listens for incoming connections is configured
+using the system / bundle property org.osgi.service.http.port.
+
+* Binary Libraries
+
+The Java component as of this writing has two bundles that wrap
+binary libraries: com.tractrac.clientmodule and com.mongodb.driver.
+
+* External Communications
+
+The com.tractrac.clientmodule bundle is used to obtain data about
+races / regattas and register for the corresponding live data
+feeds. These feeds contain information about boat positions, race
+course changes such as marks being moved, replaced or added, mark
+positions, mark passings and race start/stop events.
+
+To improve rankings and predictions, wind data is tracked by the Java
+component. Wind can be fed through wind sources. Currently supported
+are "WEB" and "EXPEDITION." The WEB wind source is a REST API by which
+a single wind datum with optional position specification, time point,
+wind bearing and speed can be provided. EXPEDITION uses a connector
+bundle (com.sap.sailing.expeditionconnector) to receive wind data via
+UDP from one or more Expedition instances.
+
+The Expedition connector can listen on inbound UDP ports for messages
+sent point-to-point or using UDP broadcast by the Expedition tool
+which in turn receives its data from boat-mounted sensors and other
+devices, such as the Nexus on-board system. Expedition enriches this
+data and sends selected attributes over the network.
+
+The connector understands the Expedition data feed format, supports
+Expedition checksum verification and knows about the most important
+attribute IDs such as true wind bearing, GPS time, latitude and
+longitude.
+
+* Storing Wind in MongoDB
+
+The Java component piggy-backs on the MongoDB persistence solution
+installed mainly for the Python server. Storing wind is helpful
+particularly for post-race analysis and to support the case of a
+re-start of the Java component(s) on the server, e.g., in case an
+update or a quick-fix needs to be installed.
+
+Since all other data can be reloaded from the TracTrac server, we
+don't store that redundantly. But the wind information isn't retrieved
+from TracTrac and hence needs to be stored on our server.
+
+By default we use the database named "winddb". The MongoDB settings
+can be configured using system / bundle properties:
+
+  mongo.port (default is 27017)
+  mongo.hostname (default is 127.0.0.1)
+  mongo.dbname (default is winddb)
+
+* List of REST APIs and their parameters
+
+* Maven Environment
