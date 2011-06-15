@@ -40,7 +40,7 @@ function liveRefresh() {
 function toggleListener() {
     $('#refresh-button').toggleClass('refresh');
     if ($('#refresh-button').hasClass('refresh')) {
-        $('#refresh-button').css('background-image', 'url(/moderator-static/refresh-icon.png)');
+        $('#refresh-button').css('background-image', 'url(/moderator-static/freeze.png)');
         listener_paused = true;
     } else {
         listener_paused = false;
@@ -59,12 +59,30 @@ function showLoader() {
 function hideLoader() {
     //$('.refresh-btn').html('');
 }
+
+function showOverallWrap(caller) {
+    element = $('#overall-wrap');
+    element.fadeToggle('fast', function() {
+        if (!element.is(':visible')) {
+            caller.css('background-image', 'url(/moderator-static/arrow-right.png)');
+        } else {
+            caller.css('background-image', 'url(/moderator-static/arrow-left.png)');
+        }
+    });
+}
+
 function sortBy(param, element) {
+    $('.sort-asc, .sort-desc').css('background-image', 'url(/moderator-static/sort-none.png)');
+
     element.toggleClass('sort-asc').toggleClass('sort-desc');
 
-    if (element.hasClass('sort-asc'))
+    if (element.hasClass('sort-asc')) {
         global_direction = 'asc';
-    else global_direction = 'desc';
+        element.css('background-image', 'url(/moderator-static/sort-arrow-active-bottom.png)')
+    } else {
+        global_direction = 'desc';
+        element.css('background-image', 'url(/moderator-static/sort-arrow-active-top.png)')
+    }
 
     global_sortkey = param;
     loadLeaderboard(global_race, param, global_competitors, global_direction, global_colmode);

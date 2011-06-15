@@ -30,9 +30,6 @@ Simon
 + Sortierung funktioniert nicht richtig in den Legs und den Werten (der 1. Platz fehlt manchmal)
 + Anstatt DropDB lieber ein Removeallby eventname, racename ermöglichen (auch in der DB UI)
 
-+ Alternating rows implementieren
-+ Sortierungspfeile abschalten wenn nicht sortiert ist (vielleicht anderes Icon anzeigen)
-+ Was ist mit der Overall Ansicht mit den Total Points?
 + Zwei Zeilen in den Titeln
 + Wie kriege ich die Bars hin?
 

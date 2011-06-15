@@ -344,11 +344,23 @@ def liveRaceInformation(configurator):
             # save marknames for the given leg
             c_marknames[raceindex][lcount] = (leg['from'], leg['to'])
 
+            # compute total and net points of competitor
+
+            # net points: sum'd ranks of all races
+            net_points = map(sum, c_races)
+
+            # total points: sum'd over ranks of all races but
+            # but for more than ten races discard some values
+            # XXX
+            total_points = 0
+
             comp.update(dict(current_rank=c_current_rank,
                                 races=c_races, 
                                 marks=c_marks, 
                                 values=c_values,
-                                total=c_total_rank))
+                                total=c_total_rank,
+                                net_points=net_points,
+                                total_points=total_points))
 
         # next leg
         lcount += 1

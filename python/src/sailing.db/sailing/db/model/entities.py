@@ -65,6 +65,9 @@ class Competitor(BaseDocument):
         'event': unicode,
         'nationality': unicode,
 
+        'total_points': int,
+        'net_points' : int,
+
         'leg_indexes': {}, # holds association between leg position and unique id <position in marks>:<unique id>
 
         'total': int, # total rank
