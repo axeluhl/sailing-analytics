@@ -1,5 +1,5 @@
 
-<div class="info">
+<div class="info" tal:define="columns view.configuredColumns('LEADERBOARD-STATIC')">
 <div tal:repeat="event view.allEvents()">
     <table width="100%">
         <tr>
@@ -10,8 +10,8 @@
             <td style="color:white;font-size: 18px;font-weight: bold;background-color: #DE8A2E;">R${repeat['race'].number} (${race})</td>
                 <tal:for repeat="mark event.marks[repeat['race'].index]">
                     <td style="color:white;font-size: 14px;font-weight: bold;background-color: #95AA31;">R${repeat['race'].number}M${repeat['mark'].number}</td>
-                    <tal:for repeat="value ['Rank', 'AvgSpeed', 'DstTrav', 'Vel', 'AvgVel', 'Gap', 'EstNxt', 'DstToGo']">
-                    <td style="color: white;background-color: #FEC631">${value}</td>
+                    <tal:for repeat="value columns">
+                    <td style="color: white;background-color: #FEC631">${value[0]}</td>
                     </tal:for>
                 </tal:for>
 
@@ -22,7 +22,7 @@
             </tal:for>
         </tr>
 
-        <tal:for repeat="cp view.competitorsSortedBy(eventname=request.params.get('eventname'), sortparam=request.params.get('sortname'))">
+        <tal:for repeat="cp view.competitorsSortedBy(eventname=request.params.get('eventname'), sortparam=request.params.get('sortname'), columnmode='LEADERBOARD-STATIC')">
         <tr>
             <td valign="top">${cp.total or 0}</td>
             <td valign="top">${cp.name}</td>
@@ -31,8 +31,8 @@
             <td style="color:white;font-size: 18px;font-weight: bold;background-color: #DE8A2E;">${cp.races[repeat['race'].index]}</td>
                 <tal:for repeat="mark event.marks[repeat['race'].index]">
                     <td style="color:white;font-size: 14px;font-weight: bold;background-color: #95AA31;">${cp.marks[repeat['race'].index][repeat['mark'].index]}</td>
-                    <tal:for repeat="value ['Rank', 'AvgSpeed', 'DstTrav', 'Vel', 'AvgVel', 'Gap', 'EstNxt', 'DstToGo']">
-                        <td style="color:white;background-color: #FEC631"><b tal:on-error="string:">${'%.2f' % cp.values[repeat['race'].index][repeat['mark'].index][repeat['value'].index]}</b></td>
+                    <tal:for repeat="name columns">
+                        <td style="color:white;background-color: #FEC631"><b tal:on-error="string:">${view.displayLegValue(name, cp.values[repeat['race'].index][repeat['mark'].index].get(name[-1]))}</b></td>
                     </tal:for>
                 </tal:for>
 

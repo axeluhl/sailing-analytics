@@ -497,36 +497,26 @@ def adminLiveData(context, request):
     t_up = threaded_listener.values()[0].last_update.strftime('%H:%M:%S')
     t_upcount = threaded_listener.values()[0].updatecount
 
+    columns = view.configuredColumns('TOP')
+
     results = ''
     for pos in range(len(currentlegs)):
         legpos = currentlegs[pos]
 
         results += '\nLAST SHOWRACE CALL: %s (UPCOUNT PARAM: %s)\nLEG: %s (FROM: %s TO: %s)\nRACE-START: %s NEWEST EVENT: %s WIND: (%s %s %s)\n' % (t_up, t_upcount, legpos+1, competitors[0].marknames[racepos][legpos][0], competitors[0].marknames[racepos][legpos][1], view.millisToDatetime(race.start), view.millisToDatetime(race.timeofnewestevent), race.wind_source, race.wind_bearing, race.wind_speed)
         results += 'NAME'.ljust(16) + 'TOTAL'.ljust(7) + 'CRANK'.ljust(7) + 'RRANK'.ljust(7) 
-        results += 'MRANK'.ljust(7) + 'LRANK'.ljust(9) + 'SPD'.ljust(9) + 'DSTTRV'.ljust(9) + 'VMG'.ljust(9) + 'AVMG'.ljust(9) + 'SGAP'.ljust(9) + 'ETA'.ljust(9) + 'DSTGO'.ljust(9) + 'STARTD'.ljust(9) + 'FINISHD'.ljust(9) + 'UPDOWNWIND'.ljust(12)
+        results += 'MRANK'.ljust(7) + ''.join([title[0].ljust(9) for title in columns])
         results += '\n'
 
         # sort competitors by rank in current leg
-        competitors.sort(lambda x,y:cmp(x.values[racepos][legpos] and x.values[racepos][legpos][0] or 6000, y.values[racepos][legpos] and y.values[racepos][legpos][0] or 6000))
+        competitors.sort(lambda x,y:cmp(x.values[racepos][legpos] and x.values[racepos][legpos].get('rank') or 6000, y.values[racepos][legpos] and y.values[racepos][legpos].get('rank') or 6000))
 
         for c in competitors:
             results += '%s %s %s' % (c.name.ljust(15), str(c.total).ljust(6), str(c.current_rank).ljust(6))
             results += '%s %s' % (str(c.races[racepos]).ljust(7), str(c.marks[racepos][legpos]).ljust(7))
                 
-            for v in c.values[racepos][legpos]:
-                if v == 42.260426041982:
-                    results += 'ANCHOR'.ljust(9)
-                else:
-                    results += str('%.2f' % v).ljust(9)
-
-            try:
-                results += str(c.additional[racepos][legpos][0]).ljust(9)
-                results += str(c.additional[racepos][legpos][1]).ljust(9)
-            except:
-                results += "N/A".ljust(9)
-                results += "N/A".ljust(9)
-
-            results += str(c.upordownwind[racepos][legpos]).ljust(12)
+            for v in columns:
+                results += view.displayLegValue(v, c.values[racepos][legpos].get(v[-1])).ljust(9)
 
             results += '\n'
 
@@ -546,14 +536,17 @@ def moderatorLiveData(context, request):
     race_range = request.params.get('races', '1:3')
     competitor_range = request.params.get('competitors', '1:20')
     direction = request.params.get('direction', 'asc');
+    colmode = request.params.get('colmode')
 
+    columns = view.configuredColumns(colmode)
+    
     if race_range in ['null', 'undefined']:
         race_range = '1:3'
 
     race_start_index, race_end_index = race_range.split(':')
     races_list = event.races[int(race_start_index)-1:int(race_end_index)]
 
-    competitors = view.competitorsSortedBy(event.name, sortby.strip())
+    competitors = view.competitorsSortedBy(event.name, sortby.strip(), colmode)
 
     if direction == 'asc':
         competitors.reverse()
@@ -583,26 +576,22 @@ def moderatorLiveData(context, request):
 
             markranks[racecounter] = markranks[racecounter] + competitor.marks[real_racepos]
 
-            iv = competitor.values[real_racepos]
+            cvalues = []
+            for legvalue_for_race in competitor.values[real_racepos]:
+                result = []
+                for column in columns:
+                    result.append(view.displayLegValue(column, legvalue_for_race.get(column[-1])))
 
-            newvalues = iv
-            for valpos in range(len(iv)):
-                nv = ['%.2f' % (val < 15000 and val or 0.0) for val in newvalues[valpos]]
+                cvalues.append(result)
 
-                # prepare values according to UI
-                # UI:       RANK, DSTTRAV, SPEED, VMG, SGAP, DSTGO, ETA
-                # INTERN:   RANK, AVGSPEED, DSTRV, VMG, AVMG, SGAP, ETA, DSTGO 
-                if nv:
-                    nv = [nv[0], nv[2], nv[1], nv[3], nv[5], nv[-1], nv[-2]]
-                newvalues[valpos] = nv
-
-            legvalues[racecounter] = legvalues[racecounter] + newvalues
+            legvalues[racecounter] = legvalues[racecounter] + cvalues
 
             racecounter += 1
 
         dc = {}
         dc.update({'name': competitor.name[:9], 'raceranks': racedata, 'markranks': markranks, 'legvalues': legvalues, 
-            'nationality': competitor.nationality, 'global_rank': competitor.total, 'current_race': '', 'current_legs' : []})
+            'nationality': competitor.nationality, 'global_rank': competitor.total, 'current_race': '', 'current_legs' : [],
+            'current_rank' : competitor.current_rank})
 
         try:
             dc.update({'current_legs': [lg+1 for lg in current_legs], 'current_race': current_race+1})

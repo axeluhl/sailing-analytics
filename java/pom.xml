@@ -18,7 +18,6 @@
 		<module>com.sap.sailing.expeditionconnector</module>
 		<module>com.sap.sailing.expeditionconnector.test</module>
 		<module>com.sap.sailing.server</module>
-		<module>com.sap.sailing.server.test</module>
 		<module>com.sap.sailing.mongodb</module>
 		<module>com.sap.sailing.mongodb.test</module>
 		<module>com.tractrac.clientmodule</module>
@@ -102,9 +101,9 @@
 				<artifactId>maven-osgi-test-plugin</artifactId>
 				<configuration>
 <!-- non-debug -->
-<!-- proxy 
+<!-- proxy
 					<argLine>-Dhttp.proxyHost=proxy -Dhttp.proxyPort=8080 -Xmx1024m -XX:PermSize=256m -XX:-UseGCOverheadLimit -XX:+UseParallelGC</argLine>
- -->
+-->
 <!-- no proxy -->
 					<argLine>-Dmongo.port=10200 -Xmx1024m -XX:PermSize=256m -XX:-UseGCOverheadLimit -XX:+UseParallelGC</argLine>
 <!-- -->

@@ -26,7 +26,7 @@ class CompetitorImpl(ModelBase):
     }
 
     @classmethod
-    def sortedBy(cls, eventname, raceindex=None, markindex=None, valueindex=None):
+    def sortedBy(cls, eventname, raceindex=None, markindex=None, valueindex=None, columns=None):
         """ Returns competitors sorted by given index. If index
         is None no sorting is performed on this index. If all index
         params are None sorting is performed by total. """
@@ -36,12 +36,9 @@ class CompetitorImpl(ModelBase):
             yval = y.total
 
             if valueindex is not None:
-                try:
-                    xval = x.values[raceindex][markindex][valueindex]
-                    yval = y.values[raceindex][markindex][valueindex]
-                except IndexError:
-                    xval = 0.0
-                    yval = 0.0
+                valuekey = columns[valueindex][-1]
+                xval = x.values[raceindex][markindex].get(valuekey, 0.0)
+                yval = y.values[raceindex][markindex].get(valuekey, 0.0)
 
             elif markindex is not None:
                 xval = x.marks[raceindex][markindex]

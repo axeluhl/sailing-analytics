@@ -74,7 +74,7 @@ import difflib.PatchFailedException;
 public class DomainFactoryImpl implements DomainFactory {
     private static final Logger logger = Logger.getLogger(DomainFactoryImpl.class.getName());
     
-    private final long millisecondsOverWhichToAverageSpeed = 15000;
+    private final long millisecondsOverWhichToAverageSpeed = 40000; // makes for a 20s half-side interval
 
     // TODO clarify how millisecondsOverWhichToAverageWind could be updated and propagated live
     private final long millisecondsOverWhichToAverageWind = 30000;
