@@ -56,7 +56,7 @@
         <!-- / THE LEFT BAR -->
         <div id='left-systembar'>
           <tal:for repeat="bundle firstbundle">
-          <a class='slide-backward' href='javascript:;' onclick='switchRace("${event.races.index(bundle[0])+1}:${event.races.index(bundle[-1])+1}");'>
+          <a class='slide-backward' href='?c=${request.params.get("c", "F1")}&r=${repeat["bundle"].index}'>
             <span class='race-count'>
               <ul class='race-bundle-${repeat["bundle"].number}'>
                 <tal:for repeat="race bundle">
@@ -76,7 +76,7 @@
         <!-- / THE RIGHT BAR -->
         <div id='right-systembar'>
           <tal:for repeat="bundle lastbundle">
-          <a class='slide-forward' href='javascript:;' onclick='switchRace("${event.races.index(bundle[0])+1}:${event.races.index(bundle[-1])+1}");'>
+          <a class='slide-forward' href='?c=${request.params.get("c", "F1")}&r=${repeat["bundle"].index}'>
             <span class='race-count'>
               <ul class='race-bundle-${repeat["bundle"].number}'>
                 <tal:for repeat="race bundle">
@@ -123,7 +123,7 @@
           </div>
 
           <!-- / WRAPPER FOR RACES -->
-          <tal:for repeat='bundle firstbundle'>
+          <tal:for repeat='bundle racebundles[int(request.params.get("r", 0))]'>
           <div class='race' id='race-${repeat["bundle"].number}' tal:define='raceid repeat["bundle"].number'>
             <!-- / FIRST ELEMENT WITH LIST -->
             <div class='main-box'>

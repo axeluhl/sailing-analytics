@@ -33,7 +33,7 @@ VN = {
         'CSPDMS' : ('CSPDMS', 'Current Speed (m/s)', '%.1f', 'currentSpeedOverGroundInMetersPerSecond'),
         'ASPDKNOT': ('ASPDKN', 'Avg Speed (kn)', '%.2f', 'averageSpeedOverGroundInKnots'),
         'ASPDMS' : ('ASPDMS', 'Avg Speed (m/s)', '%.1f', 'averageSpeedOverGroundInMetersPerSecond'),
-        'DSTTRV' : ('DSTTRV', 'Dist. Traveld (m)', '%.f', 'distanceTraveledOverGroundInMeters'),
+        'DSTTRV' : ('DSTTRV', 'Distance Traveled (m)', '%.f', 'distanceTraveledOverGroundInMeters'),
         'VMGKNOT': ('VMGKN', 'VMG (kn)', '%.1f', 'velocityMadeGoodInKnots'),
         'VMGMS' : ('VMGMS', 'VMG (m/s)', '%.1f', 'velocityMadeGoodInMetersPerSecond'),
         'AVMGKNOT': ('AVMGKN', 'Avg VMG (kn)', '%.1f', 'averageVelocityMadeGoodInKnots'),

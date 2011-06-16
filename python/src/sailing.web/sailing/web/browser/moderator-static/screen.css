@@ -365,7 +365,6 @@ span.race-count {
       #main-interface .race table.race-table th {
         padding: 13px 10px;
         color: #151515;
-        text-transform: uppercase;
         font-weight: bold;
         width: 110px; }
         #main-interface .race table.race-table th:first-child {
