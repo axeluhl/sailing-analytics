@@ -56,12 +56,12 @@
         <!-- / THE LEFT BAR -->
         <div id='left-systembar'>
           <tal:for repeat="bundle firstbundle">
-          <a class='slide-backward' href='hallo'>
+          <a class='slide-backward' href='javascript:;' onclick='switchRace("${event.races.index(bundle[0])+1}:${event.races.index(bundle[-1])+1}");'>
             <span class='race-count'>
               <ul class='race-bundle-${repeat["bundle"].number}'>
                 <tal:for repeat="race bundle">
                 <!-- XXX fix this to show current race -->
-                <li class='race-${event.races.index(race)+1}' onclick='switchRace("${event.races.index(race)+1}")'>
+                <li class='race-${event.races.index(race)+1}'>
                     ${event.races.index(race)+1}
                 </li>
                 </tal:for>
@@ -75,9 +75,9 @@
         </div>
         <!-- / THE RIGHT BAR -->
         <div id='right-systembar'>
-          <a class='slide-forward' href='javascript:;'>
+          <tal:for repeat="bundle lastbundle">
+          <a class='slide-forward' href='javascript:;' onclick='switchRace("${event.races.index(bundle[0])+1}:${event.races.index(bundle[-1])+1}");'>
             <span class='race-count'>
-              <tal:for repeat="bundle lastbundle">
               <ul class='race-bundle-${repeat["bundle"].number}'>
                 <tal:for repeat="race bundle">
                 <li class='race-${event.races.index(race)+1}'>
@@ -85,9 +85,9 @@
                 </li>
                 </tal:for>
               </ul>
-              </tal:for>
             </span>
           </a>
+         </tal:for>
         </div>
         <!-- / YIELD THE MAIN INTERFACE -->
         <!-- / MAIN INTERFACE -->
@@ -123,23 +123,23 @@
           </div>
 
           <!-- / WRAPPER FOR RACES -->
-          <tal:for repeat='bundle firstbundle[0]'>
+          <tal:for repeat='bundle firstbundle'>
           <div class='race' id='race-${repeat["bundle"].number}' tal:define='raceid repeat["bundle"].number'>
             <!-- / FIRST ELEMENT WITH LIST -->
             <div class='main-box'>
-                <a class='main-box-active' href='javascript:;' onclick='$("#race-${raceid} .leg-wrap").toggle();'>
+                <a class='main-box-active' href='javascript:;' onclick='toggleRace("${raceid}");'>
                 <ul>
                   <tal:for repeat="rankrow range(1,21)">
                   <li id='race-${raceid}-rankrow-${rankrow}'></li>
                   </tal:for>
                 </ul>
-                <span>1</span>
+                <span id="race-">${raceid}</span>
               </a>
               <a class='main-box-sort sort-asc' href='javascript:;' onclick='sortBy("${raceid}", $(this))'></a>
             </div>
 
             <tal:for repeat="leg event.marks[int(raceid)-1]">
-            <div class='leg-wrap' id="leg-${repeat['leg'].number}" tal:define='markid repeat["leg"].number'>
+            <div class='leg-wrap' id="leg-${repeat['leg'].number}" tal:define='markid repeat["leg"].number' style="display:none;">
               <!-- / SECOND ELEMENT WITH LIST -->
               <div class='leg-box'>
               <span tal:condition="markid != 1">M${markid}</span>

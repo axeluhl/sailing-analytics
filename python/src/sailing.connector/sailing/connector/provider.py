@@ -79,7 +79,7 @@ class LiveDataReceiver(threading.Thread):
                 time.sleep(5)
 
             # avoid hammering java server - can occur if call does not block correctly
-            time.sleep(1)
+            time.sleep(2)
 
         log.info('STOP listener for %s:%s (%s, %s)' % (self.host, self.port, self.eventname, self.racename))
 
