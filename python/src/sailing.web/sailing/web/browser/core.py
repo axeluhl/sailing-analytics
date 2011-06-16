@@ -17,6 +17,7 @@ log = logging.getLogger(__name__)
 logging.basicConfig()
 
 current_leaderboard_event = None
+current_iphone_event = None
 
 class BaseView(object):
 
@@ -102,6 +103,15 @@ class BaseView(object):
 
         return cev
 
+    def currentIPhoneEvent(self):
+        cev = model.EventImpl.queryOneBy(name=current_leaderboard_event)
+
+        # XXX remove this - only for tests
+        if not cev:
+            return model.EventImpl.queryBy()[0]
+
+        return cev
+
     def raceBy(self, event, name):
         return model.RaceImpl.queryOneBy(event=event, name=name)
 
@@ -141,27 +151,31 @@ class BaseView(object):
     def allCompetitorsFor(self, event):
         return model.CompetitorImpl.queryBy(event=event)
 
-    def competitorsSortedBy(self, eventname, sortparam, columnmode):
+    def competitorsSortedBy(self, eventname, sortparam, columnmode, direction='asc'):
         param = sortparam
         if param == 'name':
-            competitors = model.CompetitorImpl.sortedBy(eventname=eventname)
+            competitors = model.CompetitorImpl.sortedBy(eventname=eventname, direction=direction)
             competitors.sort(lambda x,y: cmp(x.name, y.name))
 
+        elif param == 'current_rank':
+            competitors = model.CompetitorImpl.sortedBy(eventname=eventname, direction=direction)
+            competitors.sort(lambda x,y: cmp(x.current_rank, y.current_rank))
+
         elif param == 'total':
-            competitors = model.CompetitorImpl.sortedBy(eventname=eventname)
+            competitors = model.CompetitorImpl.sortedBy(eventname=eventname, direction=direction)
 
         elif param.find(',')>0:
             params = param.strip().split(',')
 
             if len(params) == 2:
-                competitors = model.CompetitorImpl.sortedBy(eventname=eventname, raceindex=int(params[0])-1, markindex=int(params[1])-1)
+                competitors = model.CompetitorImpl.sortedBy(eventname=eventname, raceindex=int(params[0])-1, markindex=int(params[1])-1, direction=direction)
             elif len(params) == 3:
                 columns = self.configuredColumns(columnmode)
-                competitors = model.CompetitorImpl.sortedBy(eventname=eventname, raceindex=int(params[0])-1, markindex=int(params[1])-1, valueindex=int(params[2])-1, columns=columns)
+                competitors = model.CompetitorImpl.sortedBy(eventname=eventname, raceindex=int(params[0])-1, markindex=int(params[1])-1, valueindex=int(params[2]), columns=columns, direction=direction)
 
         else:
             param = int(param.strip())
-            competitors = model.CompetitorImpl.sortedBy(eventname=eventname, raceindex=param-1)
+            competitors = model.CompetitorImpl.sortedBy(eventname=eventname, raceindex=param-1, direction=direction)
 
         return competitors
 
@@ -179,7 +193,9 @@ class BaseView(object):
             val = name[2] % value
 
         if name[0] == 'ETASEC':
-            val = '%.f:%.f' % (int(value) / 60, int(value)-( (int(value)/60)*60 ))
+            val = '%.f:%d' % (int(value) / 60, int(value)-( (int(value)/60)*60 ))
+            if len(val.split(':')[-1]) == 1:
+                val = '%s0' % val
 
         if name[0] == 'GLP' and value > 0:
             val = '+%s' % value

@@ -30,18 +30,18 @@ START_EXP_WIND = 'receiveexpeditionwind'
 VN = {
         'CSPDKNOT': ('CSPEEDKN', 'Current Speed (kn)', '%.1f', 'currentSpeedOverGroundInKnots'),
         'CSPDMS' : ('CSPDMS', 'Current Speed (m/s)', '%.1f', 'currentSpeedOverGroundInMetersPerSecond'),
-        'ASPDKNOT': ('ASPDKN', 'Avg Speed (kn)', '%.1f', 'averageSpeedOverGroundInKnots'),
+        'ASPDKNOT': ('ASPDKN', 'Avg Speed (kn)', '%.2f', 'averageSpeedOverGroundInKnots'),
         'ASPDMS' : ('ASPDMS', 'Avg Speed (m/s)', '%.1f', 'averageSpeedOverGroundInMetersPerSecond'),
-        'DSTTRV' : ('DSTTRV', 'Distance Travelled (m)', '%.1f', 'distanceTraveledOverGroundInMeters'),
+        'DSTTRV' : ('DSTTRV', 'Dist. Traveld (m)', '%.f', 'distanceTraveledOverGroundInMeters'),
         'VMGKNOT': ('VMGKN', 'VMG (kn)', '%.1f', 'velocityMadeGoodInKnots'),
         'VMGMS' : ('VMGMS', 'VMG (m/s)', '%.1f', 'velocityMadeGoodInMetersPerSecond'),
         'AVMGKNOT': ('AVMGKN', 'Avg VMG (kn)', '%.1f', 'averageVelocityMadeGoodInKnots'),
         'AVMGMS' : ('AVMGMS', 'Avg VMG (m/s)', '%.1f', 'averageVelocityMadeGoodInMetersPerSecond'),
         'ETA' : ('ETASEC', 'ETA (s)', '%.f', 'estimatedTimeToNextMarkInSeconds'),
-        'DSTGO' : ('DSTGO', 'Distance To Go (m)', '%.f', 'windwardDistanceToGoInMeters'),
+        'DSTGO' : ('DSTGO', 'Dist. To Go (m)', '%.f', 'windwardDistanceToGoInMeters'),
         'GAPSEC' : ('SGAP', 'Gap To Leader (s)', '%.1f','gapToLeaderInSeconds'),
         'UPDOWNWIND' : ('UPDOWN', 'Up or Downwind?', '%s', 'upOrDownWindLeg'),
-        'GLP' : ('GLP', 'Gains and Losses (Places)', '%s', 'gainsAndLossesInPlaces'),
+        'GLP' : ('GLP', 'G & L (Places)', '%s', 'gainsAndLossesInPlaces'),
         'RANK' : ('LRANK', 'Rank', '%s', 'rank'),
         'STARTED' : ('STARTD', 'Started?', '%s','started'),
         'FINISHED' : ('FINISHD', 'Finished?', '%s','finished')
@@ -53,7 +53,7 @@ COLUMN_MODE_NAMES = {
         'LEADERBOARD-STATIC': 
             [VN['RANK'], VN['CSPDMS'], VN['DSTTRV'], VN['VMGMS'], VN['GLP']],
         'LEADERBOARD-F1':
-            [VN['RANK'], VN['GAPSEC'], VN['ASPDMS'], VN['DSTTRV'], VN['GLP']],
+            [VN['RANK'], VN['GAPSEC'], VN['ASPDKNOT'], VN['DSTTRV'], VN['GLP']],
         'LEADERBOARD-F2':
             [VN['RANK'], VN['GAPSEC'], VN['GLP']],
         'LEADERBOARD-F3':

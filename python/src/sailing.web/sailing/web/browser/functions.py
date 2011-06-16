@@ -546,9 +546,9 @@ def moderatorLiveData(context, request):
     race_start_index, race_end_index = race_range.split(':')
     races_list = event.races[int(race_start_index)-1:int(race_end_index)]
 
-    competitors = view.competitorsSortedBy(event.name, sortby.strip(), colmode)
+    competitors = view.competitorsSortedBy(event.name, sortby.strip(), colmode, direction)
 
-    if direction == 'asc':
+    if direction == 'desc':
         competitors.reverse()
 
     races = []; current_legs = []; current_race = None
@@ -591,7 +591,8 @@ def moderatorLiveData(context, request):
         dc = {}
         dc.update({'name': competitor.name[:9], 'raceranks': racedata, 'markranks': markranks, 'legvalues': legvalues, 
             'nationality': competitor.nationality, 'global_rank': competitor.total, 'current_race': '', 'current_legs' : [],
-            'current_rank' : competitor.current_rank})
+            'current_rank' : competitor.current_rank, 'total_points' : getattr(competitor, 'total_points', 0),
+            'net_points': getattr(competitor, 'net_points', 0)})
 
         try:
             dc.update({'current_legs': [lg+1 for lg in current_legs], 'current_race': current_race+1})
