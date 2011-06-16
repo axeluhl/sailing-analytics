@@ -46,6 +46,9 @@ When <i>stopping listener</i> it will trigger two methods: If you select a race 
             <select name="paramURLselect" onchange="$('input[name=paramURL]').val($('select[name=paramURLselect] option:selected').val())">
                 <option value=""></option>
                 <option value="http://sapsimulation.tracdev.dk/simulateconf/j80race12.txt">J80 Race 12</option>
+                <option value="http://germanmaster.traclive.dk/events/event_20110505_SailingTea/clientparams.php?event=event_20110505_SailingTea&race=cce678c8-97e6-11e0-9aed-406186cbf87c">Kiwo1</option>
+                <option value="http://germanmaster.traclive.dk/events/event_20110505_SailingTea/clientparams.php?event=event_20110505_SailingTea&race=11290bd6-97e7-11e0-9aed-406186cbf87c">Kiwo2</option>
+                <option value="http://germanmaster.traclive.dk/events/event_20110505_SailingTea/clientparams.php?event=event_20110505_SailingTea&race=39635b24-97e7-11e0-9aed-406186cbf87c">Kiwo3</option>
             </select>
             <pre style="background-color: #ececec; font-size: 12px;padding: 2px;">
     <tal:for repeat="eventurl view.raceUrlHistory()"> ${eventurl}</tal:for></pre>
@@ -81,7 +84,7 @@ When <i>stopping listener</i> it will trigger two methods: If you select a race 
 
         <div class="field">
             <input type="checkbox" name="drop_db" />&nbsp;
-            <span>Drop Database before connect</span><br/>
+            <span>Drop Database before connect (Dangerous!! Better use the selective DROP in DB tab)</span><br/>
         </div>
 
         <input type="submit" name="listener-start" value="Start listener"/>&nbsp;

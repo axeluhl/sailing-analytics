@@ -40,12 +40,18 @@ function liveRefresh() {
 function toggleListener() {
     $('#refresh-button').toggleClass('refresh');
     if (!$('#refresh-button').hasClass('refresh')) {
-        $('#refresh-button').css('background-image', 'url(/moderator-static/freeze.png)');
-        listener_paused = true;
-    } else {
+        $('#refresh-button').css('background-image', 'url(/moderator-static/pause-btn.png)');
         listener_paused = false;
+    } else {
+        listener_paused = true;
         $('#refresh-button').css('background-image', 'url(/moderator-static/refresh-icon.png)');
     }
+}
+
+function toggleRace(raceid) {
+    $(".leg-wrap").hide();
+    $("#race-"+raceid+" .leg-wrap").toggle();
+    $('body').attr('class', 'race-'+raceid);
 }
 
 function displayRaceAndLeg(raceindex, legs) {
@@ -73,8 +79,8 @@ function showOverallWrap(caller) {
     });
 }
 
-function switchRaceBlock(block) {
-    loadLeaderboard(block, param, global_competitors, global_direction, global_colmode);
+function switchRace(block) {
+    loadLeaderboard(block, global_sortkey, global_competitors, global_direction, global_colmode);
 }
 
 function sortBy(param, element) {
