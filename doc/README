@@ -624,3 +624,9 @@ hasn't had any effect on any of the running servers, not even the maven reposito
 
 For that, see the respective instructions in the ADMIN file located next to this README
 file (search for "mvn deploy").
+
+
+Python
+------
+
+TODO Simon to write a few warm words here...
