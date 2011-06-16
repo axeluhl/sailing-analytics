@@ -16,11 +16,20 @@
 .c-race-3-lila {
   background: #9c277b !important; }
 
+.c-race-3-2-lila {
+  background: #a76394 !important; }
+
 .c-race-4-green {
   background: #9ab12a !important; }
 
+.c-race-4-2-green {
+  background: #b1be72 !important; }
+
 .c-race-5-red {
   background: #d83c3c !important; }
+
+.c-race-5-2-red {
+  background: #da8585 !important; }
 
 .c-table-odd {
   background: #484848 !important; }
@@ -117,6 +126,7 @@ body {
   height: 115px;
   background: url(/moderator-static/sap-logo.png) no-repeat 0 0;
   font-size: 14px;
+  font-style: italic;
   font-weight: bold; }
   #header ul.systeminfo {
     float: right;
@@ -226,7 +236,7 @@ span.race-count {
     #main-interface .blue-table .pause-btn {
       display: block;
       height: 39px;
-      background: url(/moderator-static/pause-icon.png) right center no-repeat #484848; }
+      background: url(/moderator-static/pause-btn.png) right center no-repeat #484848; }
     #main-interface .blue-table .sort-rank {
       display: block;
       height: 39px;
@@ -244,7 +254,7 @@ span.race-count {
           background: url(/moderator-static/arrow-top.png) no-repeat right center #484848; }
   #main-interface #overall-clipping {
     border-collapse: collapse;
-    width: 170px;
+    width: 100%;
     text-align: left;
     vertical-align: middle; }
     #main-interface #overall-clipping td {
@@ -253,8 +263,8 @@ span.race-count {
       background: #484848; }
   #main-interface .race {
     height: 100%;
-    margin: 0 8px 0 0;
-    font-size: 14px; }
+    font-size: 14px;
+    display: inline; }
     #main-interface .race div {
       color: #151515;
       font-size: 24px;
@@ -298,11 +308,13 @@ span.race-count {
         font-size: 14px;
         width: 39px; }
         #main-interface .race div.leg-box span {
-          padding: 14px 0 0 10px;
+          padding: 15px 0 0 0;
           display: block;
           position: absolute;
           top: 0;
-          left: 0; }
+          left: 0;
+          width: 100%;
+          text-align: center; }
         #main-interface .race div.leg-box .sort-asc {
           background: url(/moderator-static/sort-none.png) center bottom no-repeat; }
         #main-interface .race div.leg-box .sort-desc {
@@ -429,16 +441,24 @@ body.race-1 #race-1 div.leg-box {
   background: #dea464; }
 
 body.race-2 #race-2 table th {
-  background: #fec631; }
+  background: #d9b85e; }
+body.race-2 #race-2 div.leg-box {
+  background: #d9b85e; }
 
 body.race-3 #race-3 table th {
-  background: #9c277b; }
+  background: #a76394; }
+body.race-3 #race-3 div.leg-box {
+  background: #a76394; }
 
 body.race-4 #race-4 table th {
-  background: #95aa31; }
+  background: #b1be72; }
+body.race-4 #race-4 div.leg-box {
+  background: #b1be72; }
 
 body.race-5 #race-5 table th {
-  background: #d83c3c; }
+  background: #da8585; }
+body.race-5 #race-5 div.leg-box {
+  background: #da8585; }
 
 .border-activity {
   background: url(/moderator-static/border-activity.png) 0 0 no-repeat; }
