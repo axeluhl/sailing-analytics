@@ -246,7 +246,7 @@ public class DomainFactoryImpl implements DomainFactory {
         synchronized (classCache) {
             BoatClass result = classCache.get(competitorClass);
             if (result == null) {
-                result = new BoatClassImpl(competitorClass.getName());
+                result = new BoatClassImpl(competitorClass == null ? "" : competitorClass.getName());
                 classCache.put(competitorClass, result);
             }
             return result;
