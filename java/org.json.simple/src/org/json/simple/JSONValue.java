@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.Writer;
+import java.net.URL;
 import java.util.List;
 import java.util.Map;
 
@@ -150,6 +151,13 @@ public class JSONValue {
 		if(value instanceof List){
 			JSONArray.writeJSONString((List<?>)value, out);
             return;
+		}
+		
+		if (value instanceof URL) {
+            out.write('\"');
+			out.write(value.toString());
+            out.write('\"');
+			return;
 		}
 		
 		out.write(value.toString());

@@ -94,7 +94,7 @@
         <div id='main-interface'>
           <div class='blue-table'>
               <a id="refresh-button" class='pause-btn' href='javascript:;' onclick='toggleListener($(this));'><img src='/static/images/ajax-loader-greybg.gif'/></a>
-            <a class='sort-rank sort-asc' href='javascript:;' onclick='sortBy("current_rank", $(this))'></a>
+            <a class='sort-rank sort-desc' href='javascript:;' onclick='sortBy("current_rank", $(this))'></a>
             <table id='overall-clipping'>
               <tbody>
                 <tal:for repeat="clpos range(1,21)">
@@ -142,10 +142,10 @@
             <div class='leg-wrap' id="leg-${repeat['leg'].number}" tal:define='markid repeat["leg"].number' style="display:none;">
               <!-- / SECOND ELEMENT WITH LIST -->
               <div class='leg-box'>
-              <span tal:condition="markid != 1">M${markid}</span>
+              <span tal:condition="markid != 1">M${markid-1}</span>
               <span tal:condition="markid == 1">S</span>
 
-              <a class='leg-box-sort sort-asc' href='javascript:;' onclick='sortBy("${raceid},${markid}", $(this))'></a>
+              <a class='leg-box-sort sort-desc' href='javascript:;' onclick='sortBy("${raceid},${markid}", $(this))'></a>
                 <a class='leg-box-active' href='javascript:;' onclick='$(this).closest(".leg-wrap").find(".race-table").toggle();'>
                   <ul>
                       <tal:for repeat="markrow range(1,21)">
@@ -168,7 +168,7 @@
                   <tr rowid='0'>
                     <tal:for repeat="column columns">
                     <td class='table-sorting' colid='${repeat["column"].number}'>
-                        <a class='sort-asc' href='javascript:;' onclick='sortBy("${raceid},${markid},${repeat["column"].number}", $(this))'></a>
+                        <a class='sort-desc' href='javascript:;' onclick='sortBy("${raceid},${markid},${repeat["column"].number}", $(this))'></a>
                     </td>
                     </tal:for>
                   </tr>

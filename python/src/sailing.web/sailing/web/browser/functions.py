@@ -81,7 +81,19 @@ def configureListener(context, request):
 
         conf.setContext(config.ADMIN)
 
-        if request.POST.get('eventJSONURL'):
+        if request.POST.get('race-conf'):
+            # multiple races configured
+
+            for raceurl in request.POST.getall('race-conf'):
+                conf.setCommand(config.ADD_RACE)
+                conf.setParameters(dict(paramURL=raceurl, 
+                                        liveURI=request.POST.get('liveURI'), 
+                                        storedURI=request.POST.get('storedURI'),
+                                        windstore=request.POST.get('windstore')))
+                conf.trigger()
+
+
+        elif request.POST.get('eventJSONURL'):
             conf.setCommand(config.ADD_EVENT)
             conf.setParameters(dict(eventJSONURL=request.POST.get('eventJSONURL'), 
                                     liveURI=request.POST.get('liveURI'), 
@@ -105,14 +117,15 @@ def configureListener(context, request):
         else:
             return view.yieldMessage('Please specify an event or race URL!')
 
-        try:
-            result = conf.trigger()
+        if not request.POST.get('race-conf'):
+            try:
+                result = conf.trigger()
 
-            if result.find('Exception')>0:
-                raise Exception, 'Server triggered exception: %s' % result[:550]
+                if result.find('Exception')>0:
+                    raise Exception, 'Server triggered exception: %s' % result[:550]
 
-        except Exception, ex:
-            return view.yieldMessage('Error: %s' % str(ex))
+            except Exception, ex:
+                return view.yieldMessage('Error: %s' % str(ex))
 
         # can take a while until event data is ready
         if request.POST.get('drop_db'):
@@ -132,10 +145,10 @@ def configureListener(context, request):
                 if len(eventlist) == 0:
                     raise Exception, 'No events configured.'
 
+                startListenerThreads(conf, eventlist)
+
             except Exception, ex:
                 return view.yieldMessage('Could not gather any data! Seems that Java listener is not ready yet. Please reconnect. Error: %s' % str(ex))
-
-            startListenerThreads(conf, eventlist)
 
         # mark all stuff done and listener running
         view.session['listener-started'] = True
@@ -529,78 +542,100 @@ def adminLiveData(context, request):
 def moderatorLiveData(context, request):
     """ Returns data for the moderators leaderboard """
 
-    view = core.BaseView(context, request)
-    event = view.currentLeaderboardEvent()
+    lock = threading.Lock()
+    with lock:
+        view = core.BaseView(context, request)
+        event = view.currentLeaderboardEvent()
 
-    sortby = request.params.get('sortby', 'name')
-    race_range = request.params.get('races', '1:3')
-    competitor_range = request.params.get('competitors', '1:20')
-    direction = request.params.get('direction', 'asc');
-    colmode = request.params.get('colmode')
+        sortby = request.params.get('sortby', 'name')
+        race_range = request.params.get('races', '1:3')
+        competitor_range = request.params.get('competitors', '1:20')
+        direction = request.params.get('direction', 'asc');
+        colmode = request.params.get('colmode')
 
-    columns = view.configuredColumns(colmode)
-    
-    if race_range in ['null', 'undefined']:
-        race_range = '1:3'
+        columns = view.configuredColumns(colmode)
+        
+        if race_range in ['null', 'undefined']:
+            race_range = '1:3'
 
-    race_start_index, race_end_index = race_range.split(':')
-    races_list = event.races[int(race_start_index)-1:int(race_end_index)]
+        race_start_index, race_end_index = race_range.split(':')
+        races_list = event.races[int(race_start_index)-1:int(race_end_index)]
 
-    competitors = view.competitorsSortedBy(event.name, sortby.strip(), colmode, direction)
+        competitors = view.competitorsSortedBy(event.name, sortby.strip(), colmode, direction)
 
-    if direction == 'desc':
-        competitors.reverse()
+        if direction == 'desc':
+            competitors.reverse()
 
-    races = []; current_legs = []; current_race = None
-    for racename in races_list:
-        rimpl = model.RaceImpl.queryOneBy(name=racename, event=event.name)
-        if len(rimpl.current_legs) > 0:
-            current_legs = rimpl.current_legs
-            current_race = event.races.index(rimpl.name)
-
-        races.append(rimpl)
-
-    # list of competitors with corresponding data
-    data = []
-
-    for competitor in competitors:
-        racedata = competitor.races[int(race_start_index)-1:int(race_end_index)]
-
-        # for each race found compute the marks and values
-        markranks = []; legvalues = []; racecounter = 0
+        races = []; current_legs = []; current_race = None
         for racename in races_list:
-            real_racepos = event.races.index(racename)
-            if len(markranks) < racecounter+1:
-                markranks.append([])
-                legvalues.append([])
+            rimpl = model.RaceImpl.queryOneBy(name=racename, event=event.name)
+            if len(rimpl.current_legs) > 0:
+                current_legs = rimpl.current_legs
+                current_race = event.races.index(rimpl.name)
 
-            markranks[racecounter] = markranks[racecounter] + competitor.marks[real_racepos]
+            races.append(rimpl)
 
-            cvalues = []
-            for legvalue_for_race in competitor.values[real_racepos]:
-                result = []
-                for column in columns:
-                    result.append(view.displayLegValue(column, legvalue_for_race.get(column[-1])))
+        # list of competitors with corresponding data
+        data = []
 
-                cvalues.append(result)
+        for competitor in competitors:
+            racedata = competitor.races[int(race_start_index)-1:int(race_end_index)]
 
-            legvalues[racecounter] = legvalues[racecounter] + cvalues
+            # for each race found compute the marks and values
+            markranks = []; legvalues = []; racecounter = 0
+            for racename in races_list:
+                real_racepos = event.races.index(racename)
+                if len(markranks) < racecounter+1:
+                    markranks.append([])
+                    legvalues.append([])
 
-            racecounter += 1
+                markranks[racecounter] = markranks[racecounter] + competitor.marks[real_racepos]
 
-        dc = {}
-        dc.update({'name': competitor.name[:9], 'raceranks': racedata, 'markranks': markranks, 'legvalues': legvalues, 
-            'nationality': competitor.nationality, 'global_rank': competitor.total, 'current_race': '', 'current_legs' : [],
-            'current_rank' : competitor.current_rank, 'total_points' : getattr(competitor, 'total_points', 0),
-            'net_points': getattr(competitor, 'net_points', 0), 'races_shown' : range(int(race_start_index), int(race_end_index))})
+                cvalues = []
+                for legvalue_for_race in competitor.values[real_racepos]:
+                    result = []
+                    for column in columns:
+                        result.append(view.displayLegValue(column, legvalue_for_race.get(column[-1])))
 
-        try:
-            dc.update({'current_legs': [lg+1 for lg in current_legs], 'current_race': current_race+1})
-        except:
-            pass
+                    cvalues.append(result)
 
-        data.append(dc)
+                legvalues[racecounter] = legvalues[racecounter] + cvalues
 
-    c_range_start, c_range_end = competitor_range.split(':')
+                racecounter += 1
+
+            dc = {}
+            dc.update({'name': competitor.name[:9], 'raceranks': racedata, 'markranks': markranks, 'legvalues': legvalues, 
+                'nationality': competitor.nationality, 'global_rank': competitor.total, 'current_race': '', 'current_legs' : [],
+                'current_rank' : competitor.current_rank, 'total_points' : getattr(competitor, 'total_points', 0),
+                'net_points': getattr(competitor, 'net_points', 0), 'races_shown' : range(int(race_start_index), int(race_end_index))})
+
+            try:
+                dc.update({'current_legs': [lg+1 for lg in current_legs], 'current_race': current_race+1})
+            except:
+                pass
+
+            data.append(dc)
+
+        c_range_start, c_range_end = competitor_range.split(':')
+
     return data[int(c_range_start)-1:int(c_range_end)]
+
+def loadRacesForEvent(context, request):
+    view = core.BaseView(context, request)
+
+    host = request.params.get('host')
+    port = request.params.get('port')
+    eventJSONURL = request.params.get('eventJSONURL')
+
+    conf = URIConfigurator(host, port)
+    view.session['listener-conf'] = conf
+    view.session.save()
+
+    conf.setContext(config.ADMIN)
+    conf.setCommand(config.LIST_RACES_IN_EVENT)
+    conf.setParameters(dict(eventJSONURL=eventJSONURL))
+
+    data = jsonByUrl(conf)
+
+    return render_to_response('templates/java-connector-select-races.pt', {'races' : data, 'view': view}, request=request)
 

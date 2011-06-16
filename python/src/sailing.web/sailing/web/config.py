@@ -15,6 +15,7 @@ SET_WIND = 'setwind'
 SET_WIND_SOURCE = 'selectwindsource'
 
 LIST_EVENTS = 'listevents'
+LIST_RACES_IN_EVENT = 'listracesinevent'
 LIVE_EVENTS = 'showrace'
 
 SHOW_WAYPOINTS = 'showwaypoints'
