@@ -18,27 +18,27 @@
               <div class='function-btn-wrapper'>
                 <ul class='function-btn'>
                   <li class='function-1 ${request.params.get("c", "F1") == "F1" and "active" or ""}'>
-                    <a href='/@@/leaderboard-live?c=F1'>
+                  <a href='/@@/leaderboard-live?c=F1&r=${request.params.get("r", 0)}'>
                       CUR
                     </a>
                   </li>
                   <li class='function-1 ${request.params.get("c", "F1") == "F2" and "active" or ""}'>
-                    <a href='/@@/leaderboard-live?c=F2'>
+                  <a href='/@@/leaderboard-live?c=F2&r=${request.params.get("r", 0)}'>
                       TV
                     </a>
                   </li>
                   <li class='function-1 ${request.params.get("c", "F1") == "F3" and "active" or ""}'>
-                    <a href='/@@/leaderboard-live?c=F3'>
+                  <a href='/@@/leaderboard-live?c=F3&r=${request.params.get("r", 0)}'>
                       ETA
                     </a>
                   </li>
                   <li class='function-1 ${request.params.get("c", "F1") == "F4" and "active" or ""}'>
-                    <a href='/@@/leaderboard-live?c=F4'>
+                  <a href='/@@/leaderboard-live?c=F4&r=${request.params.get("r", 0)}'>
                       SPEED
                     </a>
                   </li>
                   <li class='function-1 ${request.params.get("c", "F1") == "F5" and "active" or ""}'>
-                    <a href='/@@/leaderboard-live?c=F5'>
+                  <a href='/@@/leaderboard-live?c=F5&r=${request.params.get("r", 0)}'>
                       DST
                     </a>
                   </li>

@@ -76,8 +76,10 @@ function showOverallWrap(caller) {
         $('#main-interface').toggle();
         if (!element.is(':visible')) {
             caller.css('background-image', 'url(/moderator-static/arrow-right.png)');
+            listener_paused = false;
         } else {
             caller.css('background-image', 'url(/moderator-static/arrow-left.png)');
+            listener_paused = true;
         }
     });
 }

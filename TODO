@@ -25,11 +25,5 @@ Axel
 Simon
 =====
 
-+ Sortierung funktioniert nicht richtig in den Legs und den Werten (der 1. Platz fehlt manchmal)
-+ Anstatt DropDB lieber ein Removeallby eventname, racename ermöglichen (auch in der DB UI)
-
-+ Mehrere Rennen anzeigbar und auswählbar machen
-
 + iPhone UI implementieren
 
-+ Speichern der URLs in MongoDB
