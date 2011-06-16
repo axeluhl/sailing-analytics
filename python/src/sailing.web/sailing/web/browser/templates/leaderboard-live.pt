@@ -19,32 +19,27 @@
                 <ul class='function-btn'>
                   <li class='function-1 ${request.params.get("c", "F1") == "F1" and "active" or ""}'>
                     <a href='/@@/leaderboard-live?c=F1'>
-                      fu1
+                      CUR
                     </a>
                   </li>
                   <li class='function-1 ${request.params.get("c", "F1") == "F2" and "active" or ""}'>
                     <a href='/@@/leaderboard-live?c=F2'>
-                      fu2
+                      TV
                     </a>
                   </li>
                   <li class='function-1 ${request.params.get("c", "F1") == "F3" and "active" or ""}'>
                     <a href='/@@/leaderboard-live?c=F3'>
-                      fu3
+                      ETA
                     </a>
                   </li>
                   <li class='function-1 ${request.params.get("c", "F1") == "F4" and "active" or ""}'>
                     <a href='/@@/leaderboard-live?c=F4'>
-                      fu4
+                      SPEED
                     </a>
                   </li>
                   <li class='function-1 ${request.params.get("c", "F1") == "F5" and "active" or ""}'>
                     <a href='/@@/leaderboard-live?c=F5'>
-                      fu5
-                    </a>
-                  </li>
-                  <li class='function-1 ${request.params.get("c", "F1") == "F6" and "active" or ""}'>
-                    <a href='/@@/leaderboard-live?c=F6'>
-                      f6
+                      DST
                     </a>
                   </li>
                 </ul>
