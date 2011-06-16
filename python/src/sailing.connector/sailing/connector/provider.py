@@ -341,7 +341,7 @@ def liveRaceInformation(configurator):
                 else:
                     # search for the last place
                     last_rank_computed = c_marks[raceindex][lcount-1]
-                    if dc_leg_values['rank']:
+                    if dc_leg_values['rank'] and last_rank_computed:
                         dc_leg_values['gainsAndLossesInPlaces'] = last_rank_computed - dc_leg_values['rank']
                     else:
                         dc_leg_values['gainsAndLossesInPlaces'] = 0
@@ -354,7 +354,7 @@ def liveRaceInformation(configurator):
                 # compute total and net points of competitor
 
                 # net points: sum'd ranks of all races
-                net_points = 0
+                net_points = sum(c_races)
 
                 # total points: sum'd over ranks of all races but
                 # but for more than ten races discard some values
