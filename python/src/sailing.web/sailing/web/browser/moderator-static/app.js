@@ -16,6 +16,8 @@ var listener_paused = false;
  * competitors: Slice indicating which competitors to show (e.g. "1:20")
  */
 function loadLeaderboard(races, sortby, competitors, direction, colmode) {
+    listener_paused = true;
+
     showLoader();
     $.getJSON('/++/moderatorLiveData', 
                 {races:races, sortby:sortby, competitors:competitors, direction:direction,colmode:colmode}, 
@@ -28,6 +30,7 @@ function loadLeaderboard(races, sortby, competitors, direction, colmode) {
             global_direction = direction;
 
             hideLoader();
+            listener_paused = false;
         }
     );
 }
