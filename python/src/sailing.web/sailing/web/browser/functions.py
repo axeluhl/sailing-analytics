@@ -591,7 +591,8 @@ def moderatorLiveData(context, request):
         dc = {}
         dc.update({'name': competitor.name[:9], 'raceranks': racedata, 'markranks': markranks, 'legvalues': legvalues, 
             'nationality': competitor.nationality, 'global_rank': competitor.total, 'current_race': '', 'current_legs' : [],
-            'current_rank' : competitor.current_rank})
+            'current_rank' : competitor.current_rank, 'total_points' : getattr(competitor, 'total_points', 0),
+            'net_points': getattr(competitor, 'net_points', 0)})
 
         try:
             dc.update({'current_legs': [lg+1 for lg in current_legs], 'current_race': current_race+1})

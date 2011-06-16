@@ -133,6 +133,7 @@ body {
     width: 100%; }
     #header .function-btn-wrapper ul.function-btn {
       padding: 1px;
+      background: #008fcc;
       *display: inline-block; }
       #header .function-btn-wrapper ul.function-btn:after {
         content: " ";
@@ -177,7 +178,7 @@ span.race-count {
       left: 0; }
       #left-systembar div.blue-table-btn a {
         display: block;
-        height: 91px;
+        height: 105px;
         text-decoration: none;
         background: url(/moderator-static/arrow-right.png) left top no-repeat #008fcc; }
         #left-systembar div.blue-table-btn a:hover {
@@ -222,7 +223,8 @@ span.race-count {
       background: url(/moderator-static/pause-icon.png) right center no-repeat #484848; }
     #main-interface .blue-table .sort-rank {
       display: block;
-      height: 39px; }
+      height: 39px;
+      margin: 15px 0 13px 0; }
     #main-interface .blue-table #table-scrolling li {
       float: left;
       width: 94px;
@@ -238,8 +240,7 @@ span.race-count {
     border-collapse: collapse;
     width: 170px;
     text-align: left;
-    vertical-align: middle;
-    margin: 13px 0 0 0; }
+    vertical-align: middle; }
     #main-interface #overall-clipping td {
       padding: 5px; }
     #main-interface #overall-clipping tr.odd td {
@@ -264,14 +265,14 @@ span.race-count {
           top: 0;
           left: 0;
           display: block;
-          height: 91px;
+          height: 105px;
           width: 100%; }
         #main-interface .race div a.leg-box-sort {
           position: absolute;
           top: 0;
           left: 0;
           display: block;
-          height: 91px;
+          height: 105px;
           width: 100%; }
       #main-interface .race div.main-box {
         width: 39px; }
@@ -282,9 +283,9 @@ span.race-count {
           top: 0;
           left: 0; }
         #main-interface .race div.main-box .sort-asc {
-          background: url(/moderator-static/sort-none.png) center 40px no-repeat; }
+          background: url(/moderator-static/sort-none.png) center bottom no-repeat; }
         #main-interface .race div.main-box .sort-desc {
-          background: url(/moderator-static/sort-none.png) center 40px no-repeat; }
+          background: url(/moderator-static/sort-none.png) center bottom no-repeat; }
       #main-interface .race div.leg-box {
         font-size: 14px;
         width: 39px; }
@@ -295,9 +296,9 @@ span.race-count {
           top: 0;
           left: 0; }
         #main-interface .race div.leg-box .sort-asc {
-          background: url(/moderator-static/sort-none.png) center 40px no-repeat; }
+          background: url(/moderator-static/sort-none.png) center bottom no-repeat; }
         #main-interface .race div.leg-box .sort-desc {
-          background: url(/moderator-static/sort-none.png) center 40px no-repeat; }
+          background: url(/moderator-static/sort-none.png) center bottom no-repeat; }
       #main-interface .race div.table-box {
         width: 39px;
         margin: 0; }
@@ -306,12 +307,12 @@ span.race-count {
           position: absolute;
           top: 0;
           left: 0;
-          height: 91px;
+          height: 105px;
           width: 100%; }
         #main-interface .race div.table-box .sort-asc {
-          background: url(/moderator-static/sort-none.png) center 40px no-repeat; }
+          background: url(/moderator-static/sort-none.png) center bottom no-repeat; }
         #main-interface .race div.table-box .sort-desc {
-          background: url(/moderator-static/sort-none.png) center 40px no-repeat; }
+          background: url(/moderator-static/sort-none.png) center bottom no-repeat; }
         #main-interface .race div.table-box ul {
           background: #151515;
           color: #ececec; }
@@ -319,7 +320,7 @@ span.race-count {
             background: #484848; }
       #main-interface .race div ul {
         font-size: 14px;
-        margin: 91px 0 0 0;
+        margin: 105px 0 0 0;
         text-align: center; }
         #main-interface .race div ul li {
           padding: 5px; }
@@ -345,10 +346,8 @@ span.race-count {
         padding: 13px 10px;
         color: #151515;
         text-transform: uppercase;
-        font-weight: bold; }
-        #main-interface .race table.race-table th.firstelement {
-          width: 39px;
-          padding: 0; }
+        font-weight: bold;
+        width: 110px; }
         #main-interface .race table.race-table th:first-child {
           padding-left: 20px; }
         #main-interface .race table.race-table th:last-child {
@@ -418,37 +417,17 @@ span.race-count {
 
 body.race-1 #race-1 table th {
   background: #de8a2e; }
-body.race-1 #header ul.function-btn {
-  background: #de8a2e; }
-body.race-1 #header ul.function-btn-active li {
-  background: #de8a2e; }
 
 body.race-2 #race-2 table th {
-  background: #fec631; }
-body.race-2 #header ul.function-btn {
-  background: #fec631; }
-body.race-2 #header ul.function-btn-active li {
   background: #fec631; }
 
 body.race-3 #race-3 table th {
   background: #9c277b; }
-body.race-3 #header ul.function-btn {
-  background: #9c277b; }
-body.race-3 #header ul.function-btn-active li {
-  background: #9c277b; }
 
 body.race-4 #race-4 table th {
   background: #95aa31; }
-body.race-4 #header ul.function-btn {
-  background: #95aa31; }
-body.race-4 #header ul.function-btn-active li {
-  background: #95aa31; }
 
 body.race-5 #race-5 table th {
-  background: #d83c3c; }
-body.race-5 #header ul.function-btn {
-  background: #d83c3c; }
-body.race-5 #header ul.function-btn-active li {
   background: #d83c3c; }
 
 .border-activity {

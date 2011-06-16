@@ -30,11 +30,10 @@ Simon
 + Sortierung funktioniert nicht richtig in den Legs und den Werten (der 1. Platz fehlt manchmal)
 + Anstatt DropDB lieber ein Removeallby eventname, racename ermöglichen (auch in der DB UI)
 
-+ Zwei Zeilen in den Titeln
 + Wie kriege ich die Bars hin?
-
 + Mehrere Rennen anzeigbar und auswählbar machen
 
 + iPhone UI implementieren
 
 + Wenn Axel Branches eingerichtet hat, dann MongoDBs auf Server startbar machen über supervisord
+

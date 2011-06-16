@@ -63,12 +63,17 @@ function hideLoader() {
 function showOverallWrap(caller) {
     element = $('#overall-wrap');
     element.fadeToggle('fast', function() {
+        $('#main-interface').toggle();
         if (!element.is(':visible')) {
             caller.css('background-image', 'url(/moderator-static/arrow-right.png)');
         } else {
             caller.css('background-image', 'url(/moderator-static/arrow-left.png)');
         }
     });
+}
+
+function switchRaceBlock(block) {
+    loadLeaderboard(block, param, global_competitors, global_direction, global_colmode);
 }
 
 function sortBy(param, element) {
@@ -105,8 +110,15 @@ function displayLeaderboard(data) {
     for (cpos in data) {
         competitor = data[cpos];
 
-        /* always change global rank */
+        /* always change current rank in view */
         $('#clipping-'+rowid+'-1 span').html(competitor.current_rank);
+
+        /* insert some data in overall view */
+        $('#competitor-global-rank-'+rowid).html(competitor.global_rank);
+        $('#competitor-global-nationality-'+rowid).html(competitor.nationality);
+        $('#competitor-global-name-'+rowid).html(competitor.name);
+        $('#competitor-global-total-'+rowid).html(competitor.total_points);
+        $('#competitor-global-net-'+rowid).html(competitor.net_points);
 
         name_element = $('#clipping-'+rowid+'-3 span');
         if (name_element.html() != competitor.name) {

@@ -128,6 +128,8 @@ def eventConfiguration(configurator):
                 dbrace = model.RaceImpl()
                 dbrace.update(dict(event=event['name'], name=rc['name']))
 
+            dbrace.update(dict(current_legs=[]))
+
             # make sure to include start to enable sorting
             if rc.has_key('start'):
                 dbrace.update(dict(start=rc['start']))
@@ -263,6 +265,7 @@ def liveRaceInformation(configurator):
             # if competitor hasn't started yet we just ignore this leg
             # and don't update the competitors information for the given leg
             if competitor.get('started', False) is False:
+                comp.update(dict(current_leg=None))
                 continue
 
             mark_name = leg['to']
@@ -347,7 +350,7 @@ def liveRaceInformation(configurator):
             # compute total and net points of competitor
 
             # net points: sum'd ranks of all races
-            net_points = map(sum, c_races)
+            net_points = 0
 
             # total points: sum'd over ranks of all races but
             # but for more than ten races discard some values

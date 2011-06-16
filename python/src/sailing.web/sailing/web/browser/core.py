@@ -17,6 +17,7 @@ log = logging.getLogger(__name__)
 logging.basicConfig()
 
 current_leaderboard_event = None
+current_iphone_event = None
 
 class BaseView(object):
 
@@ -102,6 +103,15 @@ class BaseView(object):
 
         return cev
 
+    def currentIPhoneEvent(self):
+        cev = model.EventImpl.queryOneBy(name=current_leaderboard_event)
+
+        # XXX remove this - only for tests
+        if not cev:
+            return model.EventImpl.queryBy()[0]
+
+        return cev
+
     def raceBy(self, event, name):
         return model.RaceImpl.queryOneBy(event=event, name=name)
 
@@ -157,7 +167,7 @@ class BaseView(object):
                 competitors = model.CompetitorImpl.sortedBy(eventname=eventname, raceindex=int(params[0])-1, markindex=int(params[1])-1)
             elif len(params) == 3:
                 columns = self.configuredColumns(columnmode)
-                competitors = model.CompetitorImpl.sortedBy(eventname=eventname, raceindex=int(params[0])-1, markindex=int(params[1])-1, valueindex=int(params[2])-1, columns=columns)
+                competitors = model.CompetitorImpl.sortedBy(eventname=eventname, raceindex=int(params[0])-1, markindex=int(params[1])-1, valueindex=int(params[2]), columns=columns)
 
         else:
             param = int(param.strip())

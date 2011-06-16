@@ -14,12 +14,12 @@
           <li id="eventline" class='message-0 active'>
             <table width="100%" border="0" style="margin-right: 10px;">
                 <tr>
-                    <td style="padding-right: 10px;">Event</td>
                     <td style="font-style: italic;">Sailing Team Germany</td>
+                    <td>Boatclass 505</td>
                 </tr>
                 <tr>
-                    <td style="padding-right: 10px;padding-top: 5px;">Commentator</td>
-                    <td style="font-style: italic;">Marcus Baur</td>
+                    <td style="padding-right: 10px;padding-top: 5px;">commented by</td>
+                    <td style="font-weight: bold;">Marcus Baur</td>
                 </tr>
             </table>
           </li>
@@ -69,7 +69,7 @@
               <tal:for repeat="bundle firstbundle">
               <ul class='race-bundle-${repeat["bundle"].number}'>
                 <tal:for repeat="race bundle">
-                <li class='race-${event.races.index(race)+1}'>
+                <li class='race-${event.races.index(race)+1}' onclick='switchRace("${event.races.index(race)+1}")'>
                     ${event.races.index(race)+1}
                 </li>
                 </tal:for>
@@ -189,7 +189,7 @@
                   <tal:for repeat="valrow range(1,21)">
                   <tr class='${repeat["valrow"].even and "odd" or "even"}' id='race-${raceid}-valrow-${valrow}'>
                     <tal:for repeat="valrowpos range(1,len(columns[1:])+1)">
-                    <td id='race-${raceid}-mark-${markid}-valrow-${valrow}-pos-${valrowpos}'>
+                    <td id='race-${raceid}-mark-${markid}-valrow-${valrow}-pos-${valrowpos}' >
                       <span>&nbsp;</span>
                     </td>
                     </tal:for>
@@ -217,437 +217,33 @@
                   <span>Skipper</span>
                 </th>
                 <th colid='4'>
-                  <span>Crew</span>
-                </th>
-                <th colid='5'>
                   <span>Total Points</span>
                 </th>
-                <th colid='6'>
+                <th colid='5'>
                   <span>Net Points</span>
                 </th>
               </tr>
             </thead>
             <tbody>
-              <tr rowid='0'>
-                <td class='table-sorting' colid='1'>
-                  <a class='sort-asc' href='#'></a>
-                </td>
-                <td class='table-sorting' colid='2'>
-                  <a class='sort-asc' href='#'></a>
-                </td>
-                <td class='table-sorting' colid='3'>
-                  <a class='sort-asc' href='#'></a>
-                </td>
-                <td class='table-sorting' colid='4'>
-                  <a class='sort-asc' href='#'></a>
-                </td>
-                <td class='table-sorting' colid='5'>
-                  <a class='sort-asc' href='#'></a>
-                </td>
-                <td class='table-sorting' colid='6'>
-                  <a class='sort-asc' href='#'></a>
-                </td>
-              </tr>
-              <tr class='odd' rowid='1'>
+              <tal:for repeat="compcolumns range(1,21)">
+              <tr class='${repeat["compcolumns"].even and "odd" or "even"}' rowid='1'>
                 <td colid='1'>
-                  <span>1</span>
+                    <span id="competitor-global-rank-${repeat['compcolumns'].number}">1</span>
                 </td>
                 <td colid='2'>
-                  <span>30</span>
+                  <span id="competitor-global-nationality-${repeat['compcolumns'].number}">30</span>
                 </td>
                 <td colid='3'>
-                  <span>20</span>
+                  <span id="competitor-global-name-${repeat['compcolumns'].number}">20</span>
                 </td>
                 <td colid='4'>
-                  <span>50</span>
+                  <span id="competitor-global-total-${repeat['compcolumns'].number}">10</span>
                 </td>
                 <td colid='5'>
-                  <span>10</span>
-                </td>
-                <td colid='6'>
-                  <span>10</span>
+                  <span id="competitor-global-net-${repeat['compcolumns'].number}">10</span>
                 </td>
               </tr>
-              <tr class='even' rowid='2'>
-                <td colid='1'>
-                  <span>2</span>
-                </td>
-                <td colid='2'>
-                  <span>31</span>
-                </td>
-                <td colid='3'>
-                  <span>21</span>
-                </td>
-                <td colid='4'>
-                  <span>51</span>
-                </td>
-                <td colid='5'>
-                  <span>11</span>
-                </td>
-                <td colid='6'>
-                  <span>11</span>
-                </td>
-              </tr>
-              <tr class='odd' rowid='3'>
-                <td colid='1'>
-                  <span>3</span>
-                </td>
-                <td colid='2'>
-                  <span>32</span>
-                </td>
-                <td colid='3'>
-                  <span>22</span>
-                </td>
-                <td colid='4'>
-                  <span>52</span>
-                </td>
-                <td colid='5'>
-                  <span>12</span>
-                </td>
-                <td colid='6'>
-                  <span>12</span>
-                </td>
-              </tr>
-              <tr class='even' rowid='4'>
-                <td colid='1'>
-                  <span>4</span>
-                </td>
-                <td colid='2'>
-                  <span>33</span>
-                </td>
-                <td colid='3'>
-                  <span>23</span>
-                </td>
-                <td colid='4'>
-                  <span>53</span>
-                </td>
-                <td colid='5'>
-                  <span>13</span>
-                </td>
-                <td colid='6'>
-                  <span>13</span>
-                </td>
-              </tr>
-              <tr class='odd' rowid='5'>
-                <td colid='1'>
-                  <span>5</span>
-                </td>
-                <td colid='2'>
-                  <span>34</span>
-                </td>
-                <td colid='3'>
-                  <span>24</span>
-                </td>
-                <td colid='4'>
-                  <span>54</span>
-                </td>
-                <td colid='5'>
-                  <span>14</span>
-                </td>
-                <td colid='6'>
-                  <span>14</span>
-                </td>
-              </tr>
-              <tr class='even' rowid='6'>
-                <td colid='1'>
-                  <span>6</span>
-                </td>
-                <td colid='2'>
-                  <span>35</span>
-                </td>
-                <td colid='3'>
-                  <span>25</span>
-                </td>
-                <td colid='4'>
-                  <span>55</span>
-                </td>
-                <td colid='5'>
-                  <span>15</span>
-                </td>
-                <td colid='6'>
-                  <span>15</span>
-                </td>
-              </tr>
-              <tr class='odd' rowid='7'>
-                <td colid='1'>
-                  <span>7</span>
-                </td>
-                <td colid='2'>
-                  <span>36</span>
-                </td>
-                <td colid='3'>
-                  <span>26</span>
-                </td>
-                <td colid='4'>
-                  <span>56</span>
-                </td>
-                <td colid='5'>
-                  <span>16</span>
-                </td>
-                <td colid='6'>
-                  <span>16</span>
-                </td>
-              </tr>
-              <tr class='even' rowid='8'>
-                <td colid='1'>
-                  <span>8</span>
-                </td>
-                <td colid='2'>
-                  <span>37</span>
-                </td>
-                <td colid='3'>
-                  <span>27</span>
-                </td>
-                <td colid='4'>
-                  <span>57</span>
-                </td>
-                <td colid='5'>
-                  <span>17</span>
-                </td>
-                <td colid='6'>
-                  <span>17</span>
-                </td>
-              </tr>
-              <tr class='odd' rowid='9'>
-                <td colid='1'>
-                  <span>9</span>
-                </td>
-                <td colid='2'>
-                  <span>38</span>
-                </td>
-                <td colid='3'>
-                  <span>28</span>
-                </td>
-                <td colid='4'>
-                  <span>58</span>
-                </td>
-                <td colid='5'>
-                  <span>18</span>
-                </td>
-                <td colid='6'>
-                  <span>18</span>
-                </td>
-              </tr>
-              <tr class='even' rowid='10'>
-                <td colid='1'>
-                  <span>10</span>
-                </td>
-                <td colid='2'>
-                  <span>39</span>
-                </td>
-                <td colid='3'>
-                  <span>29</span>
-                </td>
-                <td colid='4'>
-                  <span>59</span>
-                </td>
-                <td colid='5'>
-                  <span>19</span>
-                </td>
-                <td colid='6'>
-                  <span>19</span>
-                </td>
-              </tr>
-              <tr class='odd' rowid='11'>
-                <td colid='1'>
-                  <span>11</span>
-                </td>
-                <td colid='2'>
-                  <span>40</span>
-                </td>
-                <td colid='3'>
-                  <span>30</span>
-                </td>
-                <td colid='4'>
-                  <span>60</span>
-                </td>
-                <td colid='5'>
-                  <span>20</span>
-                </td>
-                <td colid='6'>
-                  <span>20</span>
-                </td>
-              </tr>
-              <tr class='even' rowid='12'>
-                <td colid='1'>
-                  <span>12</span>
-                </td>
-                <td colid='2'>
-                  <span>41</span>
-                </td>
-                <td colid='3'>
-                  <span>31</span>
-                </td>
-                <td colid='4'>
-                  <span>61</span>
-                </td>
-                <td colid='5'>
-                  <span>21</span>
-                </td>
-                <td colid='6'>
-                  <span>21</span>
-                </td>
-              </tr>
-              <tr class='odd' rowid='13'>
-                <td colid='1'>
-                  <span>13</span>
-                </td>
-                <td colid='2'>
-                  <span>42</span>
-                </td>
-                <td colid='3'>
-                  <span>32</span>
-                </td>
-                <td colid='4'>
-                  <span>62</span>
-                </td>
-                <td colid='5'>
-                  <span>22</span>
-                </td>
-                <td colid='6'>
-                  <span>22</span>
-                </td>
-              </tr>
-              <tr class='even' rowid='14'>
-                <td colid='1'>
-                  <span>14</span>
-                </td>
-                <td colid='2'>
-                  <span>43</span>
-                </td>
-                <td colid='3'>
-                  <span>33</span>
-                </td>
-                <td colid='4'>
-                  <span>63</span>
-                </td>
-                <td colid='5'>
-                  <span>23</span>
-                </td>
-                <td colid='6'>
-                  <span>23</span>
-                </td>
-              </tr>
-              <tr class='odd' rowid='15'>
-                <td colid='1'>
-                  <span>15</span>
-                </td>
-                <td colid='2'>
-                  <span>44</span>
-                </td>
-                <td colid='3'>
-                  <span>34</span>
-                </td>
-                <td colid='4'>
-                  <span>64</span>
-                </td>
-                <td colid='5'>
-                  <span>24</span>
-                </td>
-                <td colid='6'>
-                  <span>24</span>
-                </td>
-              </tr>
-              <tr class='even' rowid='16'>
-                <td colid='1'>
-                  <span>16</span>
-                </td>
-                <td colid='2'>
-                  <span>45</span>
-                </td>
-                <td colid='3'>
-                  <span>35</span>
-                </td>
-                <td colid='4'>
-                  <span>65</span>
-                </td>
-                <td colid='5'>
-                  <span>25</span>
-                </td>
-                <td colid='6'>
-                  <span>25</span>
-                </td>
-              </tr>
-              <tr class='odd' rowid='17'>
-                <td colid='1'>
-                  <span>17</span>
-                </td>
-                <td colid='2'>
-                  <span>46</span>
-                </td>
-                <td colid='3'>
-                  <span>36</span>
-                </td>
-                <td colid='4'>
-                  <span>66</span>
-                </td>
-                <td colid='5'>
-                  <span>26</span>
-                </td>
-                <td colid='6'>
-                  <span>26</span>
-                </td>
-              </tr>
-              <tr class='even' rowid='18'>
-                <td colid='1'>
-                  <span>18</span>
-                </td>
-                <td colid='2'>
-                  <span>47</span>
-                </td>
-                <td colid='3'>
-                  <span>37</span>
-                </td>
-                <td colid='4'>
-                  <span>67</span>
-                </td>
-                <td colid='5'>
-                  <span>27</span>
-                </td>
-                <td colid='6'>
-                  <span>27</span>
-                </td>
-              </tr>
-              <tr class='odd' rowid='19'>
-                <td colid='1'>
-                  <span>19</span>
-                </td>
-                <td colid='2'>
-                  <span>48</span>
-                </td>
-                <td colid='3'>
-                  <span>38</span>
-                </td>
-                <td colid='4'>
-                  <span>68</span>
-                </td>
-                <td colid='5'>
-                  <span>28</span>
-                </td>
-                <td colid='6'>
-                  <span>28</span>
-                </td>
-              </tr>
-              <tr class='even' rowid='20'>
-                <td colid='1'>
-                  <span>20</span>
-                </td>
-                <td colid='2'>
-                  <span>49</span>
-                </td>
-                <td colid='3'>
-                  <span>39</span>
-                </td>
-                <td colid='4'>
-                  <span>69</span>
-                </td>
-                <td colid='5'>
-                  <span>29</span>
-                </td>
-                <td colid='6'>
-                  <span>29</span>
-                </td>
-              </tr>
+              </tal:for>
             </tbody>
           </table>
         </div>
