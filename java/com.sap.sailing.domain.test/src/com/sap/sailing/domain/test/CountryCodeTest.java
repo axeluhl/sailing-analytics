@@ -15,11 +15,17 @@ import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
+import com.sap.sailing.util.CountryCode;
+import com.sap.sailing.util.CountryCodeFactory;
 import com.sap.sailing.util.Util;
 
 public class CountryCodeTest {
+    private static final int NUMBER_OF_COUNTRY_CODES = 259;
+
+    @Ignore
     @Test
     public void convertHTML() throws IOException {
         InputStream is = Util.class.getResourceAsStream("countrycodes.csv");
@@ -53,7 +59,7 @@ public class CountryCodeTest {
                 }
             }
         }
-        assertEquals(259, matrix.size());
+        assertEquals(NUMBER_OF_COUNTRY_CODES, matrix.size());
         for (String[] r : matrix) {
             StringBuilder sb = new StringBuilder("        add(new CountryCodeImpl(");
             boolean first = true;
@@ -74,6 +80,22 @@ public class CountryCodeTest {
             sb.append("));");
             System.out.println(sb);
         }
+    }
+    
+    @Test
+    public void testAFewCountryCodes() {
+        CountryCodeFactory ccf = CountryCodeFactory.INSTANCE;
+        CountryCode cc;
+        assertEquals(NUMBER_OF_COUNTRY_CODES, Util.size(ccf.getAll()));
+        cc = ccf.getFromThreeLetterIOCName("GER");
+        assertEquals("DE", cc.getTwoLetterISOCode().toUpperCase());
+        assertEquals("DEU", cc.getThreeLetterISOCode().toUpperCase());
+        cc = ccf.getFromLocale(Locale.GERMANY);
+        assertEquals("DE", cc.getTwoLetterISOCode().toUpperCase());
+        assertEquals("DEU", cc.getThreeLetterISOCode().toUpperCase());
+        cc = ccf.getFromIANAInternet("sd");
+        assertEquals("SUD", cc.getUNVehicle().toUpperCase());
+        assertEquals("SDN", cc.getThreeLetterISOCode().toUpperCase());
     }
     
     @Test

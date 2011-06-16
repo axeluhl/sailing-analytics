@@ -6,12 +6,19 @@ import com.sap.sailing.util.impl.CountryCodeFactoryImpl;
 
 public interface CountryCodeFactory {
     CountryCodeFactory INSTANCE = new CountryCodeFactoryImpl();
+
+    Iterable<CountryCode> getAll();
+
+    CountryCode getFromThreeLetterIOCName(String threeLetterIOCName);
+
+    CountryCode getFromTwoLetterISOName(String twoLetterISOName);
+
+    CountryCode getFromThreeLetterISOName(String threeLetterISOName);
     
     CountryCode getFromLocale(Locale locale);
     
-    CountryCode getFromThreeLetterIOCCode(String threeLetterIOCCode);
-    
-    CountryCode getFromTwoLetterISOCode(String twoLetterISOCode);
-    
-    Iterable<CountryCode> getAll();
+    CountryCode getFromIANAInternet(String ianaInternet);
+
+    CountryCode getFromUNVehicle(String unVehicle);
+
 }

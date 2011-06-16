@@ -1,8 +1,11 @@
 package com.sap.sailing.util.impl;
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 import com.sap.sailing.util.CountryCode;
 import com.sap.sailing.util.CountryCodeFactory;
@@ -11,13 +14,17 @@ public class CountryCodeFactoryImpl implements CountryCodeFactory {
     private final Map<String, CountryCode> byThreeLetterIOCName;
     private final Map<String, CountryCode> byTwoLetterISOName;
     private final Map<String, CountryCode> byThreeLetterISOName;
+    private final Map<String, CountryCode> byIanaInternet;
     private final Map<String, CountryCode> byUNVehicle;
+    private final Set<CountryCode> all;
 
     public CountryCodeFactoryImpl() {
         byThreeLetterIOCName = new HashMap<String, CountryCode>();
         byTwoLetterISOName = new HashMap<String, CountryCode>();
         byThreeLetterISOName = new HashMap<String, CountryCode>();
         byUNVehicle = new HashMap<String, CountryCode>();
+        byIanaInternet = new HashMap<String, CountryCode>();
+        all = new HashSet<CountryCode>();
         add(new CountryCodeImpl("AFGHANISTAN", "AF", "AFG", "af", "AFG", "AFG", "004", "93"));
         add(new CountryCodeImpl("ÅLAND ISLANDS", "AX", "ALA", "ax", null, null, "248", null));
         add(new CountryCodeImpl("ALBANIA", "AL", "ALB", "al", "AL", "ALB", "008", "355"));
@@ -281,41 +288,56 @@ public class CountryCodeFactoryImpl implements CountryCodeFactory {
 
     private void add(CountryCode countryCode) {
         if (countryCode.getThreeLetterIOCCode() != null) {
-            byThreeLetterIOCName.put(countryCode.getThreeLetterIOCCode(), countryCode);
+            byThreeLetterIOCName.put(countryCode.getThreeLetterIOCCode().toUpperCase(), countryCode);
         }
         if (countryCode.getTwoLetterISOCode() != null) {
-            byTwoLetterISOName.put(countryCode.getTwoLetterISOCode(), countryCode);
+            byTwoLetterISOName.put(countryCode.getTwoLetterISOCode().toUpperCase(), countryCode);
         }
         if (countryCode.getThreeLetterISOCode() != null) {
-            byThreeLetterISOName.put(countryCode.getThreeLetterISOCode(), countryCode);
+            byThreeLetterISOName.put(countryCode.getThreeLetterISOCode().toUpperCase(), countryCode);
         }
-        if (countryCode.getUnVehicle() != null) {
-            byUNVehicle.put(countryCode.getUnVehicle(), countryCode);
+        if (countryCode.getUNVehicle() != null) {
+            byUNVehicle.put(countryCode.getUNVehicle().toUpperCase(), countryCode);
         }
+        if (countryCode.getIANAInternet() != null) {
+            byIanaInternet.put(countryCode.getIANAInternet().toLowerCase(), countryCode);
+        }
+        all.add(countryCode);
     }
 
     @Override
     public CountryCode getFromLocale(Locale locale) {
-        // TODO Auto-generated method stub
-        return null;
+        return getFromThreeLetterISOName(locale.getISO3Country().toUpperCase());
     }
 
     @Override
-    public CountryCode getFromThreeLetterIOCCode(String threeLetterIOCCode) {
-        // TODO Auto-generated method stub
-        return null;
+    public CountryCode getFromIANAInternet(String ianaInternet) {
+        return byIanaInternet.get(ianaInternet.toLowerCase());
     }
 
     @Override
-    public CountryCode getFromTwoLetterISOCode(String twoLetterISOCode) {
-        // TODO Auto-generated method stub
-        return null;
+    public CountryCode getFromUNVehicle(String unVehicle) {
+        return byUNVehicle.get(unVehicle.toUpperCase());
+    }
+
+    @Override
+    public CountryCode getFromThreeLetterISOName(String threeLetterISOName) {
+        return byThreeLetterISOName.get(threeLetterISOName.toUpperCase());
+    }
+
+    @Override
+    public CountryCode getFromThreeLetterIOCName(String threeLetterIOCName) {
+        return byThreeLetterIOCName.get(threeLetterIOCName.toUpperCase());
+    }
+
+    @Override
+    public CountryCode getFromTwoLetterISOName(String twoLetterISOName) {
+        return byTwoLetterISOName.get(twoLetterISOName.toUpperCase());
     }
 
     @Override
     public Iterable<CountryCode> getAll() {
-        // TODO Auto-generated method stub
-        return null;
+        return Collections.unmodifiableCollection(all);
     }
 
 }

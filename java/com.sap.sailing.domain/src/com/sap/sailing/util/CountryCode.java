@@ -11,13 +11,13 @@ public interface CountryCode {
 
     String getName();
 
-    String getItuCallPrefix();
+    String getITUCallPrefix();
 
-    String getUnISONumeric();
+    String getUNISONumeric();
 
-    String getUnVehicle();
+    String getUNVehicle();
 
-    String getIanaInternet();
+    String getIANAInternet();
 
     String getThreeLetterISOCode();
 

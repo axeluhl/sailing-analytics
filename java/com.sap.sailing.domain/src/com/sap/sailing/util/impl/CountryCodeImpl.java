@@ -58,22 +58,22 @@ public class CountryCodeImpl implements CountryCode {
     }
 
     @Override
-    public String getIanaInternet() {
+    public String getIANAInternet() {
         return ianaInternet;
     }
 
     @Override
-    public String getUnVehicle() {
+    public String getUNVehicle() {
         return unVehicle;
     }
 
     @Override
-    public String getUnISONumeric() {
+    public String getUNISONumeric() {
         return unISONumeric;
     }
 
     @Override
-    public String getItuCallPrefix() {
+    public String getITUCallPrefix() {
         return ituCallPrefix;
     }
 }
