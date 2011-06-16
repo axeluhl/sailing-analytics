@@ -38,7 +38,6 @@ class LiveDataReceiver(threading.Thread):
         log.info('START listener for %s:%s (%s, %s)' % (self.host, self.port, self.eventname, self.racename))
         self.running = True
 
-        lock = threading.Lock()
         while self.running is True:
 
             # make it possible to pause listener
@@ -57,12 +56,11 @@ class LiveDataReceiver(threading.Thread):
 
             try:
                 # need to lock because other threads could overwrite information
-                with lock:
-                    print >>sys.stderr, '*',
-                    sys.stderr.flush()
-                    updatecount = liveRaceInformation(conf)
-                    print >>sys.stderr, '.',
-                    sys.stderr.flush()
+                print >>sys.stderr, '*',
+                sys.stderr.flush()
+                updatecount = liveRaceInformation(conf)
+                print >>sys.stderr, '.',
+                sys.stderr.flush()
 
                 self.last_update = datetime.datetime.now()
                 self.updatecount = updatecount
@@ -127,6 +125,8 @@ def eventConfiguration(configurator):
             if not dbrace:
                 dbrace = model.RaceImpl()
                 dbrace.update(dict(event=event['name'], name=rc['name']))
+
+            dbrace.update(dict(current_legs=[]))
 
             # make sure to include start to enable sorting
             if rc.has_key('start'):
@@ -202,171 +202,190 @@ def liveRaceInformation(configurator):
 
     data = jsonByUrl(configurator)
 
-    racename = configurator.race.name
-    eventname = configurator.race.event
+    lock = threading.Lock()
+    with lock:
 
-    if not data.has_key('legs'):
-        raise Exception, 'Data returned by showrace for %s, %s seems to be invalid! Data: %s' % (eventname, racename, data)
+        racename = configurator.race.name
+        eventname = configurator.race.event
 
-    # it is important to know which position the race has
-    # so we look it up in the Event itself
-    event = model.EventImpl.queryOneBy(name=eventname)
-    raceindex = event.races.index(racename)
+        if not data.has_key('legs'):
+            raise Exception, 'Data returned by showrace for %s, %s seems to be invalid! Data: %s' % (eventname, racename, data)
 
-    # check that legs still match the expected value
-    legcount = len(data['legs'])
-    if legcount:
-        legcheck_competitor = model.CompetitorImpl.queryOneBy(name=data['legs'][0]['competitors'][0]['name'], event=eventname)
+        # it is important to know which position the race has
+        # so we look it up in the Event itself
+        event = model.EventImpl.queryOneBy(name=eventname)
+        raceindex = event.races.index(racename)
 
-        known_leg_count = len(legcheck_competitor.marks[raceindex])
-        if known_leg_count != legcount:
+        # check that legs still match the expected value
+        legcount = len(data['legs'])
+        if legcount:
+            legcheck_competitor = model.CompetitorImpl.queryOneBy(name=data['legs'][0]['competitors'][0]['name'], event=eventname)
 
-            # length of saved legs and incoming legs does not match
-            # in this case we need to reload all events and then continue
-            # this can lead to competitors that loose data
-            configurator.setContext(config.MODERATOR)
-            configurator.setCommand(config.LIST_EVENTS)
-            eventConfiguration(configurator)
+            known_leg_count = len(legcheck_competitor.marks[raceindex])
+            if known_leg_count != legcount:
 
-            # refresh event from database
-            event = model.EventImpl.queryOneBy(name=eventname)
-            log.error('Refreshed event %s information because legs (Old: %s New: %s) seem to have changed.' % (eventname, known_leg_count, legcount))
+                # length of saved legs and incoming legs does not match
+                # in this case we need to reload all events and then continue
+                # this can lead to competitors that loose data
+                configurator.setContext(config.MODERATOR)
+                configurator.setCommand(config.LIST_EVENTS)
+                eventConfiguration(configurator)
 
-    lcount = 0; current_legs = {}
-    for leg in data['legs']:
-        leg_id = '%s,%s' % (leg['fromwaypointid'], leg['towaypointid'])
+                # refresh event from database
+                event = model.EventImpl.queryOneBy(name=eventname)
+                log.error('Refreshed event %s information because legs (Old: %s New: %s) seem to have changed.' % (eventname, known_leg_count, legcount))
 
-        for competitor in leg['competitors']:
-            comp = model.CompetitorImpl.queryOneBy(name=competitor['name'], event=eventname)
-            if not comp:
-                # strange things can happen - make such errors visible
-                raise Exception, 'Could not find competitor %s for event %s' % (competitor['name'], eventname)
+        lcount = 0; current_legs = {}
+        for leg in data['legs']:
+            leg_id = '%s,%s' % (leg['fromwaypointid'], leg['towaypointid'])
 
-            # compute total rank for competitor
-            c_current_rank = competitor.get('rank', 0)
+            for competitor in leg['competitors']:
+                comp = model.CompetitorImpl.queryOneBy(name=competitor['name'], event=eventname)
+                if not comp:
+                    # strange things can happen - make such errors visible
+                    raise Exception, 'Could not find competitor %s for event %s' % (competitor['name'], eventname)
 
-            # search thru ranks provided and use the
-            # rank there as the current one
-            if data.has_key('ranks'):
-                for c in data['ranks']:
-                    if c['competitor'] == competitor['name']:
-                        if c_current_rank == 0:
-                            c_current_rank = c['rank']
-                        break
+                # compute total rank for competitor
+                c_current_rank = competitor.get('rank', 0)
 
-            c_races = comp.races
-            c_marks = comp.marks
-            c_values = comp.values
-            c_total_rank = comp.total
-            c_marknames = comp.marknames
+                # search thru ranks provided and use the
+                # rank there as the current one
+                if data.has_key('ranks'):
+                    for c in data['ranks']:
+                        if c['competitor'] == competitor['name']:
+                            if c_current_rank == 0:
+                                c_current_rank = c['rank']
+                            break
 
-            # if competitor hasn't started yet we just ignore this leg
-            # and don't update the competitors information for the given leg
-            if competitor.get('started', False) is False:
-                continue
+                c_races = comp.races
+                c_marks = comp.marks
+                c_values = comp.values
+                c_total_rank = comp.total
+                c_marknames = comp.marknames
 
-            mark_name = leg['to']
+                # if competitor hasn't started yet we just ignore this leg
+                # and don't update the competitors information for the given leg
+                if competitor.get('started', False) is False:
+                    comp.update(dict(current_leg=None))
+                    continue
 
-            # last mark in race?
-            is_last_mark = event.marks[raceindex][-1] == mark_name
+                mark_name = leg['to']
 
-            # competitor finished this leg?
-            finished = competitor['finished']
+                # last mark in race?
+                is_last_mark = event.marks[raceindex][-1] == mark_name
 
-            # we are now in race[raceindex].legs[legcount] and need to map this
-            # to competitor structures
+                # competitor finished this leg?
+                finished = competitor['finished']
 
-            if finished:
-                # competitor has finished this leg so we need to save rank
-                # to the next mark (e.g. mark_name is 'Mark 1' and finished 
-                # then competitor.marks[raceindex][lcount] = rank). This works
-                # because leg[position] equals marks[position] in list
-                if competitor.has_key('rank'):
-                    c_marks[raceindex][lcount] = computeRank(competitor['rank'], c_marks[raceindex][lcount])
+                # we are now in race[raceindex].legs[legcount] and need to map this
+                # to competitor structures
 
-                    # if finished and last mark then update race information
-                    if is_last_mark:
-                        c_races[raceindex] = computeRank(competitor['rank'], c_races[raceindex])
+                if finished:
+                    # competitor has finished this leg so we need to save rank
+                    # to the next mark (e.g. mark_name is 'Mark 1' and finished 
+                    # then competitor.marks[raceindex][lcount] = rank). This works
+                    # because leg[position] equals marks[position] in list
+                    if competitor.has_key('rank'):
+                        c_marks[raceindex][lcount] = computeRank(competitor['rank'], c_marks[raceindex][lcount])
 
-                        # for the last race just update total rank
+                        # if finished and last mark then update race information
+                        if is_last_mark:
+                            c_races[raceindex] = computeRank(competitor['rank'], c_races[raceindex])
+
+                            # for the last race just update total rank
+                            if raceindex+1 == len(c_races):
+                                c_total_rank = computeRank(competitor['rank'], c_total_rank)
+
+                    else:
+                        c_marks[raceindex][lcount] = 0.0
+                        if is_last_mark:
+                            c_races[raceindex] = 0.0
+
                         if raceindex+1 == len(c_races):
-                            c_total_rank = computeRank(competitor['rank'], c_total_rank)
+                            c_total_rank = 0.0
 
                 else:
-                    c_marks[raceindex][lcount] = 0.0
-                    if is_last_mark:
-                        c_races[raceindex] = 0.0
+                    # leg not finished so put this leg into unfinished legs
+                    current_legs[lcount] = 1
 
-                    if raceindex+1 == len(c_races):
-                        c_total_rank = 0.0
+                # now update values for the current position
+                dc_leg_values = {}
+                for key in competitor.keys():
+                    kvalue = competitor.get(key, None)
 
-            else:
-                # leg not finished so put this leg into unfinished legs
-                current_legs[lcount] = 1
+                    # treat nulled numbers as unset
+                    if kvalue in [None, 'null', 'Null', 'nUlL', '']:
+                        kvalue = None
 
-            # now update values for the current position
-            dc_leg_values = {}
-            for key in competitor.keys():
-                kvalue = competitor.get(key, None)
+                    # check for cases where calculations from backend yield
+                    # strange numbers - this happens in cases where the competitor
+                    # has no speed during mark passing
+                    if isinstance(kvalue, (float, int)) and (kvalue in ['Infinity', 'Infinite'] or float(kvalue) > 150000.0):
 
-                # treat nulled numbers as unset
-                if kvalue in [None, 'null', 'Null', 'nUlL', '']:
-                    kvalue = None
+                        # use a magic number (that is very unlikely to occur)
+                        # to indicate that competitor has no speed
+                        # hint: it is not the question it is the answer
+                        kvalue = 42.260426041982
 
-                # check for cases where calculations from backend yield
-                # strange numbers - this happens in cases where the competitor
-                # has no speed during mark passing
-                if isinstance(kvalue, (float, int)) and (kvalue in ['Infinity', 'Infinite'] or float(kvalue) > 150000.0):
+                    dc_leg_values[key] = kvalue
 
-                    # use a magic number (that is very unlikely to occur)
-                    # to indicate that competitor has no speed
-                    # hint: it is not the question it is the answer
-                    kvalue = 42.260426041982
+                dc_leg_values['upOrDownWindLeg'] = leg['upordownwindleg']
 
-                dc_leg_values[key] = kvalue
+                if not dc_leg_values.get('rank'):
+                    dc_leg_values['rank'] = c_current_rank
 
-            dc_leg_values['upOrDownWindLeg'] = leg['upordownwindleg']
+                # compute gains and losses (places, )
+                if lcount == 0:
+                    # for the first leg just put 0 into data
+                    dc_leg_values['gainsAndLossesInPlaces'] = 0
+                else:
+                    # search for the last place
+                    last_rank_computed = c_marks[raceindex][lcount-1]
+                    if dc_leg_values['rank']:
+                        dc_leg_values['gainsAndLossesInPlaces'] = last_rank_computed - dc_leg_values['rank']
+                    else:
+                        dc_leg_values['gainsAndLossesInPlaces'] = 0
 
-            if not dc_leg_values.get('rank'):
-                dc_leg_values['rank'] = c_current_rank
+                c_values[raceindex][lcount] = dc_leg_values
 
-            # compute gains and losses (places, )
-            if lcount == 0:
-                # for the first leg just put 0 into data
-                dc_leg_values['gainsAndLossesInPlaces'] = 0
-            else:
-                # search for the last place
-                last_rank_computed = c_marks[raceindex][lcount-1]
-                dc_leg_values['gainsAndLossesInPlaces'] = last_rank_computed - dc_leg_values['rank']
+                # save marknames for the given leg
+                c_marknames[raceindex][lcount] = (leg['from'], leg['to'])
 
-            c_values[raceindex][lcount] = dc_leg_values
+                # compute total and net points of competitor
 
-            # save marknames for the given leg
-            c_marknames[raceindex][lcount] = (leg['from'], leg['to'])
+                # net points: sum'd ranks of all races
+                net_points = 0
 
-            comp.update(dict(current_rank=c_current_rank,
-                                races=c_races, 
-                                marks=c_marks, 
-                                values=c_values,
-                                total=c_total_rank))
+                # total points: sum'd over ranks of all races but
+                # but for more than ten races discard some values
+                # XXX
+                total_points = 0
 
-        # next leg
-        lcount += 1
+                comp.update(dict(current_rank=c_current_rank,
+                                    races=c_races, 
+                                    marks=c_marks, 
+                                    values=c_values,
+                                    total=c_total_rank,
+                                    net_points=net_points,
+                                    total_points=total_points))
 
-    # update race with current information
-    dbrace = model.RaceImpl.queryOneBy(event=eventname, name=racename)
-    mdup = dict(startoftracking=data['startoftracking'],
-                    start=data['start'], finish=data['finish'],
-                    timeofnewestevent=data['timeofnewestevent'],
-                    updatecount=data['updatecount'])
+            # next leg
+            lcount += 1
 
-    if data.get('wind'):
-        mdup['wind_source'] = data['wind']['source']
-        mdup['wind_bearing'] = data['wind']['truebearingdeg']
-        mdup['wind_speed'] = data['wind']['knotspeed']
+        # update race with current information
+        dbrace = model.RaceImpl.queryOneBy(event=eventname, name=racename)
+        mdup = dict(startoftracking=data['startoftracking'],
+                        start=data['start'], finish=data['finish'],
+                        timeofnewestevent=data['timeofnewestevent'],
+                        updatecount=data['updatecount'])
 
-    mdup['current_legs'] = current_legs.keys()
-    dbrace.update(mdup)
+        if data.get('wind'):
+            mdup['wind_source'] = data['wind']['source']
+            mdup['wind_bearing'] = data['wind']['truebearingdeg']
+            mdup['wind_speed'] = data['wind']['knotspeed']
 
-    return data['updatecount']
+        mdup['current_legs'] = current_legs.keys()
+        dbrace.update(mdup)
+
+        return data['updatecount']
 

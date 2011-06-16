@@ -39,40 +39,82 @@ function liveRefresh() {
 
 function toggleListener() {
     $('#refresh-button').toggleClass('refresh');
-    if ($('#refresh-button').hasClass('refresh')) {
-        $('#refresh-button').css('background-image', 'url(/moderator-static/refresh-icon.png)');
+    if (!$('#refresh-button').hasClass('refresh')) {
+        $('#refresh-button').css('background-image', 'url(/moderator-static/freeze.png)');
         listener_paused = true;
     } else {
         listener_paused = false;
-        $('#refresh-button').css('background-image', 'url(/moderator-static/pause_button.png)');
+        $('#refresh-button').css('background-image', 'url(/moderator-static/refresh-icon.png)');
     }
 }
 
 function displayRaceAndLeg(raceindex, legs) {
-    $('.refresh-btn').html('<div style="padding: 8px 4px 5px 15px; color: white; font-size: 23px;font-weight: bold;">R'+raceindex+' : '+legs+'</div>');
+    // disabled upon request from Marcus Baur
+    //$('.pause-btn').html('<div style="padding: 8px 4px 5px 15px; color: white; font-size: 23px;font-weight: bold;">R'+raceindex+' : '+legs+'</div>');
 }
 
 function showLoader() {
-    $('.refresh-btn').html(loader_image);
+    $('.pause-btn').html(loader_image);
 }
 
 function hideLoader() {
-    //$('.refresh-btn').html('');
+    $('.pause-btn').html('');
 }
+
+function showOverallWrap(caller) {
+    element = $('#overall-wrap');
+    element.fadeToggle('fast', function() {
+        $('#main-interface').toggle();
+        if (!element.is(':visible')) {
+            caller.css('background-image', 'url(/moderator-static/arrow-right.png)');
+        } else {
+            caller.css('background-image', 'url(/moderator-static/arrow-left.png)');
+        }
+    });
+}
+
+function switchRaceBlock(block) {
+    loadLeaderboard(block, param, global_competitors, global_direction, global_colmode);
+}
+
 function sortBy(param, element) {
+    $('.sort-asc, .sort-desc').css('background-image', 'url(/moderator-static/sort-none.png)');
+
     element.toggleClass('sort-asc').toggleClass('sort-desc');
 
-    if (element.hasClass('sort-asc'))
+    if (element.hasClass('sort-asc')) {
         global_direction = 'asc';
-    else global_direction = 'desc';
+        element.css('background-image', 'url(/moderator-static/sort-arrow-active-bottom.png)')
+    } else {
+        global_direction = 'desc';
+        element.css('background-image', 'url(/moderator-static/sort-arrow-active-top.png)')
+    }
 
     global_sortkey = param;
     loadLeaderboard(global_race, param, global_competitors, global_direction, global_colmode);
 }
 
-function yieldValue(element, newvalue) {
-    if (element.html() != newvalue && !isNaN(newvalue)) {
+function yieldValue(element, newvalue, ignore_zeros, alternate_value) {
+    if (element.html() != newvalue && newvalue != '' && newvalue != 'None') {
+        if (ignore_zeros == true && (newvalue == '0' || newvalue == 0)) {
+
+            // show alternate value
+            if (alternate_value != undefined && alternate_value != '' && alternate_value != 'None') {
+                element.html(alternate_value);
+            }
+
+            return;
+        }
+
+        // special handling for minute shown
+        if (isNaN(newvalue) && newvalue.indexOf(':') == -1)
+            return;
+
         element.html(newvalue);
+    } else {
+        if (alternate_value != undefined && alternate_value != '' && alternate_value != 'None') {
+            element.html(alternate_value);
+        }
     }
 }
 
@@ -87,8 +129,15 @@ function displayLeaderboard(data) {
     for (cpos in data) {
         competitor = data[cpos];
 
-        /* always change global rank */
+        /* always change current rank in view */
         $('#clipping-'+rowid+'-1 span').html(competitor.current_rank);
+
+        /* insert some data in overall view */
+        $('#competitor-global-rank-'+rowid).html(competitor.global_rank);
+        $('#competitor-global-nationality-'+rowid).html(competitor.nationality);
+        $('#competitor-global-name-'+rowid).html(competitor.name);
+        $('#competitor-global-total-'+rowid).html(competitor.total_points);
+        $('#competitor-global-net-'+rowid).html(competitor.net_points);
 
         name_element = $('#clipping-'+rowid+'-3 span');
         if (name_element.html() != competitor.name) {
@@ -101,19 +150,15 @@ function displayLeaderboard(data) {
             /* now set values independent what has been there before */
             racepos = 1;
             for (racerank in competitor.raceranks) {
-                $('#race-'+racepos+'-rankrow-'+rowid).html(competitor.raceranks[racerank]);
+                yieldValue($('#race-'+racepos+'-rankrow-'+rowid), competitor.raceranks[racerank], true, undefined);
 
                 markpos = 1;
                 for (markrank in competitor.markranks[racepos-1]) {
-                    yieldValue($('#race-'+racepos+'-mark-'+markpos+'-row-'+rowid), competitor.markranks[racepos-1][markrank]);
+                    yieldValue($('#race-'+racepos+'-mark-'+markpos+'-row-'+rowid), competitor.markranks[racepos-1][markrank], true, competitor.legvalues[racepos-1][markpos-1][0]);
 
                     legpos = 1;
                     for (legvalue in competitor.legvalues[racepos-1][markpos-1]) {
-                        if (legvalue == 0) {
-                            yieldValue($('#race-'+racepos+'-mark-'+markpos+'-legrow-'+rowid), parseFloat(competitor.legvalues[racepos-1][markpos-1][legvalue]).toFixed());
-                        } else {
-                            $('#race-'+racepos+'-mark-'+markpos+'-valrow-'+rowid+'-pos-'+(legpos-1)+' span').html(competitor.legvalues[racepos-1][markpos-1][legvalue]);
-                        }
+                        yieldValue($('#race-'+racepos+'-mark-'+markpos+'-valrow-'+rowid+'-pos-'+(legpos-1)+' span'), competitor.legvalues[racepos-1][markpos-1][legvalue], false, undefined);
                         legpos += 1;
                     }
 
@@ -126,19 +171,15 @@ function displayLeaderboard(data) {
             $('#clipping-'+rowid+'-2 span').html(competitor.nationality);
 
             for (racerank in competitor.raceranks) {
-                yieldValue($('#race-'+racepos+'-rankrow-'+rowid), competitor.raceranks[racerank]);
+                yieldValue($('#race-'+racepos+'-rankrow-'+rowid), competitor.raceranks[racerank], true);
 
                 markpos = 1;
                 for (markrank in competitor.markranks[racepos-1]) {
-                    yieldValue($('#race-'+racepos+'-mark-'+markpos+'-row-'+rowid), competitor.markranks[racepos-1][markrank]);
+                    yieldValue($('#race-'+racepos+'-mark-'+markpos+'-row-'+rowid), competitor.markranks[racepos-1][markrank], true, competitor.legvalues[racepos-1][markpos-1][0]);
 
                     legpos = 1;
                     for (legvalue in competitor.legvalues[racepos-1][markpos-1]) {
-                        if (legvalue == 0) {
-                            yieldValue($('#race-'+racepos+'-mark-'+markpos+'-legrow-'+rowid), parseFloat(competitor.legvalues[racepos-1][markpos-1][legvalue]).toFixed());
-                        } else {
-                            yieldValue($('#race-'+racepos+'-mark-'+markpos+'-valrow-'+rowid+'-pos-'+(legpos-1)+' span'), competitor.legvalues[racepos-1][markpos-1][legvalue]);
-                        }
+                        yieldValue($('#race-'+racepos+'-mark-'+markpos+'-valrow-'+rowid+'-pos-'+(legpos-1)+' span'), competitor.legvalues[racepos-1][markpos-1][legvalue], false, undefined);
                         legpos += 1;
                     }
 

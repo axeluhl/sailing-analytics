@@ -116,7 +116,7 @@
                     }
                 });
 
-                window.setInterval(loadListeners, 2000);
+                window.setInterval(loadListeners, 10000);
                 loadListeners();
             });
         </script>
