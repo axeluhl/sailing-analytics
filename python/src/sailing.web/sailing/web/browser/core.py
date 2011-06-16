@@ -44,6 +44,17 @@ class BaseView(object):
     def raceUrlHistory(self):
         return self.session.get('race.url_history', ['No URLs to TracTrac races gathered until now'])
 
+    def dbHost(self):
+        from sailing.db import DB_CONFIG
+        return DB_CONFIG
+        
+    def dbObjectStats(self):
+        dc = {}
+        dc['eventcount'] = model.EventImpl.queryCount()
+        dc['competitorcount'] = model.CompetitorImpl.queryCount()
+        dc['racecount'] = model.RaceImpl.queryCount()
+        return dc
+
     def dbDatabaseStats(self):
         return monitoring.dbStats()
 
@@ -76,6 +87,21 @@ class BaseView(object):
 
     def parseDatetime(self, dt, format='%m/%d/%Y %H:%M:%S'):
         return datetime.datetime.strptime(dt.strip(), format)
+
+    def serverStatus(self, host, port):
+        conf = URIConfigurator(host, port)
+        conf.setContext(config.MODERATOR)
+        conf.setCommand(config.LIST_EVENTS)
+
+        try:
+            data = jsonByUrl(conf)
+        except Exception, ex:
+            return ''
+
+        if len(data)==0:
+            return ''
+
+        return '(%s)' % ','.join(event['name'] for event in data)
 
     def listenerStarted(self):
         return self.session.get('listener-started', False)
@@ -171,7 +197,7 @@ class BaseView(object):
                 competitors = model.CompetitorImpl.sortedBy(eventname=eventname, raceindex=int(params[0])-1, markindex=int(params[1])-1, direction=direction)
             elif len(params) == 3:
                 columns = self.configuredColumns(columnmode)
-                competitors = model.CompetitorImpl.sortedBy(eventname=eventname, raceindex=int(params[0])-1, markindex=int(params[1])-1, valueindex=int(params[2]), columns=columns, direction=direction)
+                competitors = model.CompetitorImpl.sortedBy(eventname=eventname, raceindex=int(params[0])-1, markindex=int(params[1])-1, valueindex=int(params[2])-1, columns=columns, direction=direction)
 
         else:
             param = int(param.strip())

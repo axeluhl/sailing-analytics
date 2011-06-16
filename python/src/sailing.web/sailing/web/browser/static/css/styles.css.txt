@@ -101,14 +101,6 @@ div.field input.large {
     width: 687px;
 }
 
-form input[type=submit] {
-    padding: 5px 35px;
-    margin: 5px 2px 2px 2px;
-    border: 1px solid #c8c8c8;
-    background-color: white;
-    color: black;
-}
-
 select {
     border: 1px solid #c8c8c8;
     padding: 3px 2px 3px 9px;
