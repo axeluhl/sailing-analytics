@@ -150,7 +150,9 @@
             <div class='leg-wrap' id="leg-${repeat['leg'].number}" tal:define='markid repeat["leg"].number'>
               <!-- / SECOND ELEMENT WITH LIST -->
               <div class='leg-box'>
-              <span>M${markid}</span>
+              <span tal:condition="markid != 1">M${markid}</span>
+              <span tal:condition="markid == 1">S</span>
+
               <a class='leg-box-sort sort-asc' href='javascript:;' onclick='sortBy("${raceid},${markid}", $(this))'></a>
                 <a class='leg-box-active' href='javascript:;' onclick='$(this).closest(".leg-wrap").find(".table-box, .race-table").toggle();'>
                   <ul>
