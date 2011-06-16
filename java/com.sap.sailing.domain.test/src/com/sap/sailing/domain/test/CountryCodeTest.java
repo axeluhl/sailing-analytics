@@ -1,0 +1,63 @@
+package com.sap.sailing.domain.test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URLDecoder;
+import java.nio.charset.Charset;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.junit.Test;
+
+import com.sap.sailing.util.Util;
+
+public class CountryCodeTest {
+    @Test
+    public void convertHTML() throws IOException {
+        InputStream is = Util.class.getResourceAsStream("countrycodes.csv");
+        assertNotNull(is);
+        BufferedReader br = new BufferedReader(new InputStreamReader(is, Charset.forName("UTF-8")));
+        String line;
+        List<String[]> matrix = new LinkedList<String[]>();
+        String[] row = null;
+        int column = 8;
+        Pattern p = Pattern.compile("<TD[^>]*> *(<[pP]>)?([^<]*)(</[pP]>)? *</TD>");
+        while ((line=br.readLine()) != null) {
+            if (line.contains("<TR>")) {
+                assertEquals(8, column);
+                column = 0;
+                row = new String[8];
+                matrix.add(row);
+            } else {
+                if (line.contains("<TD")) {
+                    Matcher m = p.matcher(line);
+                    if (m.find()) {
+                        String entry = m.group(2);
+                        if (entry != null) {
+                            entry = URLDecoder.decode(entry, "UTF-8").trim();
+                        }
+                        row[column++] = entry == null || entry.length() == 0 ? null : entry;
+                    }
+                }
+            }
+        }
+        assertEquals(259, matrix.size());
+    }
+    
+    @Test
+    public void testGermanyCountryCode() {
+        for (Locale l : Locale.getAvailableLocales()) {
+            System.out.println(""+l+"/"+l.getISO3Country());
+        }
+        assertEquals("DEU", Locale.GERMANY.getISO3Country());
+        assertEquals("DE", Locale.GERMANY.getCountry());
+    }
+}

@@ -11,7 +11,7 @@
   </TR>
 
   <TR> 
-    <TD WIDTH="40%"> <P>&Aring;LAND ISLANDS</P></TD>
+    <TD WIDTH="40%"> <P>ÅLAND ISLANDS</P></TD>
     <TD WIDTH="10%"> <P>AX</P></TD>
     <TD WIDTH="10%"> <P>ALA</P></TD>
     <TD WIDTH="10%"> <P>.ax</P></TD>
@@ -19,7 +19,7 @@
     <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P>248</P></TD>
-    <TD WIDTH="10%">&nbsp;</TD>
+    <TD WIDTH="10%"></TD>
   </TR>
   <TR> 
     <TD WIDTH="40%"> <P>ALBANIA</P></TD>
@@ -35,17 +35,17 @@
   </TR>
   <TR>
     <TD>ALDERNEY</TD>
-    <TD>&nbsp;</TD>
-    <TD>&nbsp;</TD>
+    <TD></TD>
+    <TD></TD>
 
-    <TD>&nbsp;</TD>
+    <TD></TD>
     <TD>GBA</TD>
-    <TD>&nbsp;</TD>
-    <TD>&nbsp;</TD>
-    <TD>&nbsp;</TD>
+    <TD></TD>
+    <TD></TD>
+    <TD></TD>
   </TR>
   <TR> 
-    <TD WIDTH="40%"> <P>ALGERIA (El Djaza&iuml;r)</P></TD>
+    <TD WIDTH="40%"> <P>ALGERIA (El Djazaïr)</P></TD>
 
     <TD WIDTH="10%"> <P>DZ</P></TD>
     <TD WIDTH="10%"> <P>DZA</P></TD>
@@ -62,7 +62,7 @@
 
     <TD WIDTH="10%"> <P>ASM</P></TD>
     <TD WIDTH="10%"> <P>.as</P></TD>
-    <TD WIDTH="10%"> <P>&nbsp;</P></TD>
+    <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P>ASA</P></TD>
     <TD WIDTH="10%"> <P>016</P></TD>
 
@@ -86,7 +86,7 @@
     <TD WIDTH="10%"> <P>AGO</P></TD>
     <TD WIDTH="10%"> <P>.ao</P></TD>
 
-    <TD WIDTH="10%"> <P>&nbsp;</P></TD>
+    <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P>ANG</P></TD>
     <TD WIDTH="10%"> <P>024</P></TD>
     <TD WIDTH="10%">244</TD>
@@ -97,7 +97,7 @@
     <TD WIDTH="10%"> <P>AI</P></TD>
     <TD WIDTH="10%"> <P>AIA</P></TD>
     <TD WIDTH="10%"> <P>.ai</P></TD>
-    <TD WIDTH="10%"> <P>&nbsp;</P></TD>
+    <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P></P></TD>
 
     <TD WIDTH="10%"> <P>660</P></TD>
@@ -109,11 +109,11 @@
 
     <TD WIDTH="10%"> <P>ATA</P></TD>
     <TD WIDTH="10%"> <P>.aq</P></TD>
-    <TD WIDTH="10%"> <P>&nbsp;</P></TD>
+    <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P>010</P></TD>
 
-    <TD WIDTH="10%">&nbsp;</TD>
+    <TD WIDTH="10%"></TD>
   </TR>
   <TR> 
     <TD WIDTH="40%"> <P>ANTIGUA AND BARBUDA</P></TD>
@@ -121,7 +121,7 @@
     <TD WIDTH="10%"> <P>ATG</P></TD>
 
     <TD WIDTH="10%"> <P>.ag</P></TD>
-    <TD WIDTH="10%"> <P>&nbsp;</P></TD>
+    <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P>ANT</P></TD>
     <TD WIDTH="10%"> <P>028</P></TD>
     <TD WIDTH="10%">1-268</TD>
@@ -157,7 +157,7 @@
     <TD WIDTH="10%"> <P>ABW</P></TD>
     <TD WIDTH="10%"> <P>.aw</P></TD>
 
-    <TD WIDTH="10%"> <P>&nbsp;</P></TD>
+    <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P>ARU</P></TD>
     <TD WIDTH="10%"> <P>533</P></TD>
     <TD WIDTH="10%">297</TD>
@@ -165,12 +165,12 @@
   <TR> 
     <TD WIDTH="40%"> <P>ASCENSION ISLAND</P></TD>
 
-    <TD WIDTH="10%"> <P>&nbsp;</P></TD>
-    <TD WIDTH="10%"> <P>&nbsp;</P></TD>
+    <TD WIDTH="10%"> <P></P></TD>
+    <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P>.ac</P></TD>
-    <TD WIDTH="10%"> <P>&nbsp;</P></TD>
-    <TD WIDTH="10%"> <P>&nbsp;</P></TD>
-    <TD WIDTH="10%"> <P>&nbsp;</P></TD>
+    <TD WIDTH="10%"> <P></P></TD>
+    <TD WIDTH="10%"> <P></P></TD>
+    <TD WIDTH="10%"> <P></P></TD>
 
     <TD WIDTH="10%">247</TD>
   </TR>
@@ -312,7 +312,7 @@
     <TD WIDTH="10%"> <P>BMU</P></TD>
     <TD WIDTH="10%"> <P>.bm</P></TD>
 
-    <TD WIDTH="10%"> <P>&nbsp;</P></TD>
+    <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P>BER</P></TD>
     <TD WIDTH="10%"> <P>060</P></TD>
     <TD WIDTH="10%">1-441</TD>
@@ -323,7 +323,7 @@
     <TD WIDTH="10%"> <P>BT</P></TD>
     <TD WIDTH="10%"> <P>BTN</P></TD>
     <TD WIDTH="10%"> <P>.bt</P></TD>
-    <TD WIDTH="10%"> <P>&nbsp;</P></TD>
+    <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P>BHU</P></TD>
 
     <TD WIDTH="10%"> <P>064</P></TD>
@@ -347,8 +347,8 @@
     <TD>BES</TD>
     <TD>.bq</TD>
 
-    <TD>&nbsp;</TD>
-    <TD>&nbsp;</TD>
+    <TD></TD>
+    <TD></TD>
     <TD>535</TD>
     <TD>599</TD>
   </TR>
@@ -382,10 +382,10 @@
     <TD WIDTH="10%"> <P>BVT</P></TD>
 
     <TD WIDTH="10%"> <P>.bv</P></TD>
-    <TD WIDTH="10%"> <P>&nbsp;</P></TD>
+    <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P>074</P></TD>
-    <TD WIDTH="10%">&nbsp;</TD>
+    <TD WIDTH="10%"></TD>
   </TR>
 
   <TR> 
@@ -406,11 +406,11 @@
     <TD WIDTH="10%"> <P>IO</P></TD>
     <TD WIDTH="10%"> <P>IOT</P></TD>
     <TD WIDTH="10%"> <P>.io</P></TD>
-    <TD WIDTH="10%"> <P>&nbsp;</P></TD>
+    <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P></P></TD>
 
     <TD WIDTH="10%"> <P>086</P></TD>
-    <TD WIDTH="10%">&nbsp;</TD>
+    <TD WIDTH="10%"></TD>
   </TR>
   <TR> 
     <TD WIDTH="40%"> <P>BRUNEI DARUSSALAM</P></TD>
@@ -502,7 +502,7 @@
     <TD WIDTH="10%"> <P>CPV</P></TD>
     <TD WIDTH="10%"> <P>.cv</P></TD>
 
-    <TD WIDTH="10%"> <P>&nbsp;</P></TD>
+    <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P>CPV</P></TD>
     <TD WIDTH="10%"> <P>132</P></TD>
     <TD WIDTH="10%">238</TD>
@@ -513,7 +513,7 @@
     <TD WIDTH="10%"> <P>KY</P></TD>
     <TD WIDTH="10%"> <P>CYM</P></TD>
     <TD WIDTH="10%"> <P>.ky</P></TD>
-    <TD WIDTH="10%"> <P>&nbsp;</P></TD>
+    <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P>CAY</P></TD>
 
     <TD WIDTH="10%"> <P>136</P></TD>
@@ -547,12 +547,12 @@
     <TD WIDTH="40%"> <P>CHANNEL ISLANDS</P></TD>
     <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P></P></TD>
-    <TD WIDTH="10%"> <P>&nbsp;</P></TD>
-    <TD WIDTH="10%"> <P>&nbsp;</P></TD>
+    <TD WIDTH="10%"> <P></P></TD>
+    <TD WIDTH="10%"> <P></P></TD>
 
     <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P>830</P></TD>
-    <TD WIDTH="10%">&nbsp;</TD>
+    <TD WIDTH="10%"></TD>
   </TR>
   <TR> 
     <TD WIDTH="40%"> <P>CHILE</P></TD>
@@ -572,7 +572,7 @@
     <TD WIDTH="10%"> <P>CHN</P></TD>
 
     <TD WIDTH="10%"> <P>.cn</P></TD>
-    <TD WIDTH="10%"> <P>&nbsp;</P></TD>
+    <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P>CHN</P></TD>
     <TD WIDTH="10%"> <P>156</P></TD>
     <TD WIDTH="10%">86</TD>
@@ -584,10 +584,10 @@
     <TD WIDTH="10%"> <P>CXR</P></TD>
     <TD WIDTH="10%"> <P>.cx</P></TD>
 
-    <TD WIDTH="10%"> <P>&nbsp;</P></TD>
+    <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P>162</P></TD>
-    <TD WIDTH="10%">&nbsp;</TD>
+    <TD WIDTH="10%"></TD>
   </TR>
   <TR> 
     <TD WIDTH="40%"> <P>COCOS (KEELING) ISLANDS</P></TD>
@@ -595,11 +595,11 @@
     <TD WIDTH="10%"> <P>CC</P></TD>
     <TD WIDTH="10%"> <P>CCK</P></TD>
     <TD WIDTH="10%"> <P>.cc</P></TD>
-    <TD WIDTH="10%"> <P>&nbsp;</P></TD>
+    <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P></P></TD>
 
     <TD WIDTH="10%"> <P>166</P></TD>
-    <TD WIDTH="10%">&nbsp;</TD>
+    <TD WIDTH="10%"></TD>
   </TR>
   <TR> 
     <TD WIDTH="40%"> <P>COLOMBIA</P></TD>
@@ -619,7 +619,7 @@
     <TD WIDTH="10%"> <P>COM</P></TD>
 
     <TD WIDTH="10%"> <P>.km</P></TD>
-    <TD WIDTH="10%"> <P>&nbsp;</P></TD>
+    <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P>COM</P></TD>
     <TD WIDTH="10%"> <P>174</P></TD>
     <TD WIDTH="10%">269</TD>
@@ -658,7 +658,7 @@
     <TD WIDTH="10%"> <P>COK</P></TD>
     <TD WIDTH="10%"> <P>.ck</P></TD>
 
-    <TD WIDTH="10%"> <P>&nbsp;</P></TD>
+    <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P>COK</P></TD>
     <TD WIDTH="10%"> <P>184</P></TD>
     <TD WIDTH="10%">682</TD>
@@ -676,7 +676,7 @@
     <TD WIDTH="10%">506</TD>
   </TR>
   <TR> 
-    <TD WIDTH="40%"> <P>C&Ocirc;TE D'IVOIRE (Ivory Coast)</P></TD>
+    <TD WIDTH="40%"> <P>CÔTE D'IVOIRE (Ivory Coast)</P></TD>
     <TD WIDTH="10%"> <P>CI</P></TD>
 
     <TD WIDTH="10%"> <P>CIV</P></TD>
@@ -716,8 +716,8 @@
     <TD>CW</TD>
     <TD>CUW</TD>
     <TD>.cw</TD>
-    <TD>&nbsp;</TD>
-    <TD>&nbsp;</TD>
+    <TD></TD>
+    <TD></TD>
 
     <TD>531</TD>
     <TD>599</TD>
@@ -764,7 +764,7 @@
     <TD WIDTH="10%"> <P>DJI</P></TD>
     <TD WIDTH="10%"> <P>.dj</P></TD>
 
-    <TD WIDTH="10%"> <P>&nbsp;</P></TD>
+    <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P>DJI</P></TD>
     <TD WIDTH="10%"> <P>262</P></TD>
     <TD WIDTH="10%">253</TD>
@@ -835,7 +835,7 @@
     <TD WIDTH="10%"> <P>GNQ</P></TD>
     <TD WIDTH="10%"> <P>.gq</P></TD>
 
-    <TD WIDTH="10%"> <P>&nbsp;</P></TD>
+    <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P>GEQ</P></TD>
     <TD WIDTH="10%"> <P>226</P></TD>
     <TD WIDTH="10%">240</TD>
@@ -846,7 +846,7 @@
     <TD WIDTH="10%"> <P>ER</P></TD>
     <TD WIDTH="10%"> <P>ERI</P></TD>
     <TD WIDTH="10%"> <P>.er</P></TD>
-    <TD WIDTH="10%"> <P>&nbsp;</P></TD>
+    <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P>ERI</P></TD>
 
     <TD WIDTH="10%"> <P>232</P></TD>
@@ -878,14 +878,14 @@
   </TR>
   <TR>
     <TD>EUROPEAN UNION</TD>
-    <TD>&nbsp;</TD>
-    <TD>&nbsp;</TD>
+    <TD></TD>
+    <TD></TD>
     <TD>.eu</TD>
-    <TD>&nbsp;</TD>
-    <TD>&nbsp;</TD>
+    <TD></TD>
+    <TD></TD>
 
-    <TD>&nbsp;</TD>
-    <TD>&nbsp;</TD>
+    <TD></TD>
+    <TD></TD>
   </TR>
   <TR> 
     <TD WIDTH="40%"> <P>FAEROE ISLANDS</P></TD>
@@ -905,7 +905,7 @@
     <TD WIDTH="10%"> <P>FLK</P></TD>
     <TD WIDTH="10%"> <P>.fk</P></TD>
 
-    <TD WIDTH="10%"> <P>&nbsp;</P></TD>
+    <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P>238</P></TD>
     <TD WIDTH="10%">500</TD>
@@ -952,7 +952,7 @@
     <TD WIDTH="10%"> <P>GUF</P></TD>
     <TD WIDTH="10%"> <P>.gf</P></TD>
 
-    <TD WIDTH="10%"> <P>&nbsp;</P></TD>
+    <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P>254</P></TD>
     <TD WIDTH="10%">594</TD>
@@ -963,7 +963,7 @@
     <TD WIDTH="10%"> <P>PF</P></TD>
     <TD WIDTH="10%"> <P>PYF</P></TD>
     <TD WIDTH="10%"> <P>.pf</P></TD>
-    <TD WIDTH="10%"> <P>&nbsp;</P></TD>
+    <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P></P></TD>
 
     <TD WIDTH="10%"> <P>258</P></TD>
@@ -975,11 +975,11 @@
 
     <TD WIDTH="10%"> <P>ATF</P></TD>
     <TD WIDTH="10%"> <P>.tf</P></TD>
-    <TD WIDTH="10%"> <P>&nbsp;</P></TD>
+    <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P>260</P></TD>
 
-    <TD WIDTH="10%">&nbsp;</TD>
+    <TD WIDTH="10%"></TD>
   </TR>
   <TR> 
     <TD WIDTH="40%"> <P>GABON</P></TD>
@@ -1014,7 +1014,7 @@
     <TD WIDTH="10%"> <P>GE</P></TD>
     <TD WIDTH="10%"> <P>GEO</P></TD>
     <TD WIDTH="10%"> <P>268</P></TD>
-    <TD WIDTH="10%">&nbsp;</TD>
+    <TD WIDTH="10%"></TD>
   </TR>
   <TR> 
     <TD WIDTH="40%"> <P>GERMANY (Deutschland)</P></TD>
@@ -1081,7 +1081,7 @@
     <TD WIDTH="10%"> <P>GRL</P></TD>
 
     <TD WIDTH="10%"> <P>.gl</P></TD>
-    <TD WIDTH="10%"> <P>&nbsp;</P></TD>
+    <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P>304</P></TD>
     <TD WIDTH="10%">299</TD>
@@ -1105,7 +1105,7 @@
     <TD WIDTH="10%"> <P>GLP</P></TD>
     <TD WIDTH="10%"> <P>.gp</P></TD>
 
-    <TD WIDTH="10%"> <P>&nbsp;</P></TD>
+    <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P>312</P></TD>
     <TD WIDTH="10%">590</TD>
@@ -1116,7 +1116,7 @@
     <TD WIDTH="10%"> <P>GU</P></TD>
     <TD WIDTH="10%"> <P>GUM</P></TD>
     <TD WIDTH="10%"> <P>.gu</P></TD>
-    <TD WIDTH="10%"> <P>&nbsp;</P></TD>
+    <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P>GUM</P></TD>
 
     <TD WIDTH="10%"> <P>316</P></TD>
@@ -1141,9 +1141,9 @@
 
     <TD WIDTH="10%"> <P>.gg</P></TD>
     <TD WIDTH="10%"> <P>GBG</P></TD>
-    <TD WIDTH="10%"> <P>&nbsp;</P></TD>
-    <TD WIDTH="10%"> <P>&nbsp;</P></TD>
-    <TD WIDTH="10%">&nbsp;</TD>
+    <TD WIDTH="10%"> <P></P></TD>
+    <TD WIDTH="10%"> <P></P></TD>
+    <TD WIDTH="10%"></TD>
   </TR>
 
   <TR> 
@@ -1164,7 +1164,7 @@
     <TD WIDTH="10%"> <P>GNB</P></TD>
     <TD WIDTH="10%"> <P>.gw</P></TD>
 
-    <TD WIDTH="10%"> <P>&nbsp;</P></TD>
+    <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P>GBS</P></TD>
     <TD WIDTH="10%"> <P>624</P></TD>
     <TD WIDTH="10%">245</TD>
@@ -1199,10 +1199,10 @@
     <TD WIDTH="10%"> <P>HMD</P></TD>
 
     <TD WIDTH="10%"> <P>.hm</P></TD>
-    <TD WIDTH="10%"> <P>&nbsp;</P></TD>
+    <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P>334</P></TD>
-    <TD WIDTH="10%">&nbsp;</TD>
+    <TD WIDTH="10%"></TD>
   </TR>
 
   <TR> 
@@ -1211,7 +1211,7 @@
     <TD WIDTH="10%"> <P>HND</P></TD>
     <TD WIDTH="10%"> <P>.hn</P></TD>
 
-    <TD WIDTH="10%"> <P>&nbsp;</P></TD>
+    <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P>HON</P></TD>
     <TD WIDTH="10%"> <P>340</P></TD>
     <TD WIDTH="10%">504</TD>
@@ -1222,7 +1222,7 @@
     <TD WIDTH="10%"> <P>HK</P></TD>
     <TD WIDTH="10%"> <P>HKG</P></TD>
     <TD WIDTH="10%"> <P>.hk</P></TD>
-    <TD WIDTH="10%"> <P>&nbsp;</P></TD>
+    <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P>HKG</P></TD>
 
     <TD WIDTH="10%"> <P>344</P></TD>
@@ -1281,14 +1281,14 @@
 
   <TR>
     <TD>INTERNATIONAL ORGANIZATIONS </TD>
-    <TD>&nbsp;</TD>
-    <TD>&nbsp;</TD>
+    <TD></TD>
+    <TD></TD>
     <TD>.int</TD>
-    <TD>&nbsp;</TD>
-    <TD>&nbsp;</TD>
-    <TD>&nbsp;</TD>
+    <TD></TD>
+    <TD></TD>
+    <TD></TD>
 
-    <TD>&nbsp;</TD>
+    <TD></TD>
   </TR>
   <TR> 
     <TD WIDTH="40%"> <P>IRAN (Islamic Republic of Iran)</P></TD>
@@ -1336,7 +1336,7 @@
     <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P>833</P></TD>
 
-    <TD WIDTH="10%">&nbsp;</TD>
+    <TD WIDTH="10%"></TD>
   </TR>
   <TR> 
     <TD WIDTH="40%"> <P>ISRAEL</P></TD>
@@ -1393,9 +1393,9 @@
     <TD WIDTH="10%"> <P>.je</P></TD>
 
     <TD WIDTH="10%"> <P>GBJ</P></TD>
-    <TD WIDTH="10%"> <P>&nbsp;</P></TD>
-    <TD WIDTH="10%"> <P>&nbsp;</P></TD>
-    <TD WIDTH="10%">&nbsp;</TD>
+    <TD WIDTH="10%"> <P></P></TD>
+    <TD WIDTH="10%"> <P></P></TD>
+    <TD WIDTH="10%"></TD>
   </TR>
   <TR> 
     <TD WIDTH="40%"> <P>JORDAN (Hashemite Kingdom of Jordan)</P></TD>
@@ -1439,26 +1439,25 @@
     <TD WIDTH="10%"> <P>KIR</P></TD>
     <TD WIDTH="10%"> <P>.ki</P></TD>
 
-    <TD WIDTH="10%"> <P>&nbsp;</P></TD>
+    <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P>KIR</P></TD>
     <TD WIDTH="10%"> <P>296</P></TD>
     <TD WIDTH="10%">686</TD>
   </TR>
   <TR> 
-    <TD WIDTH="40%"> <P>KOREA (Democratic Peoples Republic of &#91;North&#93; 
-        Korea)</P></TD>
+    <TD WIDTH="40%"> <P>KOREA (Democratic Peoples Republic of [North] Korea)</P></TD>
 
     <TD WIDTH="10%"> <P>KP</P></TD>
     <TD WIDTH="10%"> <P>PRK</P></TD>
     <TD WIDTH="10%"> <P>.kp</P></TD>
-    <TD WIDTH="10%"> <P>&nbsp;</P></TD>
+    <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P>PRK</P></TD>
 
     <TD WIDTH="10%"> <P>408</P></TD>
     <TD WIDTH="10%">850</TD>
   </TR>
   <TR> 
-    <TD WIDTH="40%"> <P>KOREA (Republic of &#91;South&#93; Korea)</P></TD>
+    <TD WIDTH="40%"> <P>KOREA (Republic of [South] Korea)</P></TD>
 
     <TD WIDTH="10%"> <P>KR</P></TD>
     <TD WIDTH="10%"> <P>KOR</P></TD>
@@ -1607,7 +1606,7 @@
     <TD WIDTH="10%"> <P>MAC</P></TD>
     <TD WIDTH="10%"> <P>.mo</P></TD>
 
-    <TD WIDTH="10%"> <P>&nbsp;</P></TD>
+    <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P>446</P></TD>
     <TD WIDTH="10%">853</TD>
@@ -1666,7 +1665,7 @@
     <TD WIDTH="10%"> <P>MDV</P></TD>
     <TD WIDTH="10%"> <P>.mv</P></TD>
 
-    <TD WIDTH="10%"> <P>&nbsp;</P></TD>
+    <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P>MDV</P></TD>
     <TD WIDTH="10%"> <P>462</P></TD>
     <TD WIDTH="10%">960</TD>
@@ -1701,7 +1700,7 @@
     <TD WIDTH="10%"> <P>MHL</P></TD>
     <TD WIDTH="10%"> <P>.mh</P></TD>
 
-    <TD WIDTH="10%"> <P>&nbsp;</P></TD>
+    <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P>MHL</P></TD>
     <TD WIDTH="10%"> <P>584</P></TD>
     <TD WIDTH="10%">692</TD>
@@ -1712,7 +1711,7 @@
     <TD WIDTH="10%"> <P>MQ</P></TD>
     <TD WIDTH="10%"> <P>MTQ</P></TD>
     <TD WIDTH="10%"> <P>.mq</P></TD>
-    <TD WIDTH="10%"> <P>&nbsp;</P></TD>
+    <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P></P></TD>
 
     <TD WIDTH="10%"> <P>474</P></TD>
@@ -1748,7 +1747,7 @@
     <TD WIDTH="10%"> <P>MYT</P></TD>
     <TD WIDTH="10%"> <P>.yt</P></TD>
 
-    <TD WIDTH="10%"> <P>&nbsp;</P></TD>
+    <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P>175</P></TD>
     <TD WIDTH="10%">269</TD>
@@ -1771,7 +1770,7 @@
 
     <TD WIDTH="10%"> <P>FSM</P></TD>
     <TD WIDTH="10%"> <P>.fm</P></TD>
-    <TD WIDTH="10%"> <P>&nbsp;</P></TD>
+    <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P>FSM</P></TD>
     <TD WIDTH="10%"> <P>583</P></TD>
 
@@ -1830,7 +1829,7 @@
 
     <TD WIDTH="10%"> <P>MSR</P></TD>
     <TD WIDTH="10%"> <P>.ms</P></TD>
-    <TD WIDTH="10%"> <P>&nbsp;</P></TD>
+    <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P>500</P></TD>
 
@@ -1941,7 +1940,7 @@
     <TD WIDTH="10%"> <P>NCL</P></TD>
     <TD WIDTH="10%"> <P>.nc</P></TD>
 
-    <TD WIDTH="10%"> <P>&nbsp;</P></TD>
+    <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P>540</P></TD>
     <TD WIDTH="10%">687</TD>
@@ -2000,7 +1999,7 @@
     <TD WIDTH="10%"> <P>NIU</P></TD>
     <TD WIDTH="10%"> <P>.nu</P></TD>
 
-    <TD WIDTH="10%"> <P>&nbsp;</P></TD>
+    <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P>570</P></TD>
     <TD WIDTH="10%">683</TD>
@@ -2011,11 +2010,11 @@
     <TD WIDTH="10%"> <P>NF</P></TD>
     <TD WIDTH="10%"> <P>NFK</P></TD>
     <TD WIDTH="10%"> <P>.nf</P></TD>
-    <TD WIDTH="10%"> <P>&nbsp;</P></TD>
+    <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P></P></TD>
 
     <TD WIDTH="10%"> <P>574</P></TD>
-    <TD WIDTH="10%">&nbsp;</TD>
+    <TD WIDTH="10%"></TD>
   </TR>
   <TR> 
     <TD WIDTH="40%"> <P>NORTHERN MARIANA ISLANDS</P></TD>
@@ -2023,7 +2022,7 @@
 
     <TD WIDTH="10%"> <P>MNP</P></TD>
     <TD WIDTH="10%"> <P>.mp</P></TD>
-    <TD WIDTH="10%"> <P>&nbsp;</P></TD>
+    <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P>580</P></TD>
 
@@ -2047,7 +2046,7 @@
     <TD WIDTH="10%"> <P>OMN</P></TD>
     <TD WIDTH="10%"> <P>.om</P></TD>
 
-    <TD WIDTH="10%"> <P>&nbsp;</P></TD>
+    <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P>OMA</P></TD>
     <TD WIDTH="10%"> <P>512</P></TD>
     <TD WIDTH="10%">968</TD>
@@ -2070,7 +2069,7 @@
 
     <TD WIDTH="10%"> <P>PLW</P></TD>
     <TD WIDTH="10%"> <P>.pw</P></TD>
-    <TD WIDTH="10%"> <P>&nbsp;</P></TD>
+    <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P>PLW</P></TD>
     <TD WIDTH="10%"> <P>585</P></TD>
 
@@ -2082,7 +2081,7 @@
     <TD WIDTH="10%"> <P>PSE</P></TD>
 
     <TD WIDTH="10%"> <P>.ps</P></TD>
-    <TD WIDTH="10%"> <P>&nbsp;</P></TD>
+    <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P>PLE</P></TD>
     <TD WIDTH="10%"> <P>275</P></TD>
     <TD WIDTH="10%">970</TD>
@@ -2154,10 +2153,10 @@
     <TD WIDTH="10%"> <P>PCN</P></TD>
     <TD WIDTH="10%"> <P>.pn</P></TD>
 
-    <TD WIDTH="10%"> <P>&nbsp;</P></TD>
+    <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P>612</P></TD>
-    <TD WIDTH="10%">&nbsp;</TD>
+    <TD WIDTH="10%"></TD>
   </TR>
   <TR> 
     <TD WIDTH="40%"> <P>POLAND</P></TD>
@@ -2189,7 +2188,7 @@
     <TD WIDTH="10%"> <P>PRI</P></TD>
 
     <TD WIDTH="10%"> <P>.pr</P></TD>
-    <TD WIDTH="10%"> <P>&nbsp;</P></TD>
+    <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P>PUR</P></TD>
     <TD WIDTH="10%"> <P>630</P></TD>
     <TD WIDTH="10%">1</TD>
@@ -2213,7 +2212,7 @@
     <TD WIDTH="10%"> <P>REU</P></TD>
     <TD WIDTH="10%"> <P>.re</P></TD>
 
-    <TD WIDTH="10%"> <P>&nbsp;</P></TD>
+    <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P>638</P></TD>
     <TD WIDTH="10%">262</TD>
@@ -2260,10 +2259,10 @@
     <TD>BLM</TD>
     <TD>.bl</TD>
 
-    <TD>&nbsp;</TD>
-    <TD>&nbsp;</TD>
+    <TD></TD>
+    <TD></TD>
     <TD>652</TD>
-    <TD>&nbsp;</TD>
+    <TD></TD>
   </TR>
   <TR> 
     <TD WIDTH="40%"> <P>SAINT HELENA</P></TD>
@@ -2271,7 +2270,7 @@
 
     <TD WIDTH="10%"> <P>SHN</P></TD>
     <TD WIDTH="10%"> <P>.sh</P></TD>
-    <TD WIDTH="10%"> <P>&nbsp;</P></TD>
+    <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P>654</P></TD>
 
@@ -2283,7 +2282,7 @@
     <TD WIDTH="10%"> <P>KNA</P></TD>
 
     <TD WIDTH="10%"> <P>.kn</P></TD>
-    <TD WIDTH="10%"> <P>&nbsp;</P></TD>
+    <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P>SKN</P></TD>
     <TD WIDTH="10%"> <P>659</P></TD>
     <TD WIDTH="10%">1-869</TD>
@@ -2306,11 +2305,11 @@
     <TD>MF</TD>
     <TD>MAF</TD>
     <TD>.mf</TD>
-    <TD>&nbsp;</TD>
-    <TD>&nbsp;</TD>
+    <TD></TD>
+    <TD></TD>
 
     <TD>663</TD>
-    <TD>&nbsp;</TD>
+    <TD></TD>
   </TR>
   <TR> 
     <TD WIDTH="40%"> <P>SAINT PIERRE AND MIQUELON</P></TD>
@@ -2318,7 +2317,7 @@
     <TD WIDTH="10%"> <P>SPM</P></TD>
 
     <TD WIDTH="10%"> <P>.pm</P></TD>
-    <TD WIDTH="10%"> <P>&nbsp;</P></TD>
+    <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P>666</P></TD>
     <TD WIDTH="10%">508</TD>
@@ -2366,7 +2365,7 @@
     <TD WIDTH="10%"> <P>STP</P></TD>
     <TD WIDTH="10%"> <P>.st</P></TD>
 
-    <TD WIDTH="10%"> <P>&nbsp;</P></TD>
+    <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P>STP</P></TD>
     <TD WIDTH="10%"> <P>678</P></TD>
     <TD WIDTH="10%">239</TD>
@@ -2401,7 +2400,7 @@
     <TD WIDTH="10%"> <P>SRB</P></TD>
 
     <TD WIDTH="10%"> <P>.rs</P></TD>
-    <TD WIDTH="10%"> <P>&nbsp;</P></TD>
+    <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P>SRB</P></TD>
     <TD WIDTH="10%"> <P>688</P></TD>
     <TD WIDTH="10%">381</TD>
@@ -2449,8 +2448,8 @@
     <TD>SX</TD>
     <TD>SXM</TD>
     <TD>.sx</TD>
-    <TD>&nbsp;</TD>
-    <TD>&nbsp;</TD>
+    <TD></TD>
+    <TD></TD>
     <TD>534</TD>
     <TD>599</TD>
 
@@ -2485,7 +2484,7 @@
     <TD WIDTH="10%"> <P>SLB</P></TD>
     <TD WIDTH="10%"> <P>.sb</P></TD>
 
-    <TD WIDTH="10%"> <P>&nbsp;</P></TD>
+    <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P>SOL</P></TD>
     <TD WIDTH="10%"> <P>90</P></TD>
     <TD WIDTH="10%">677</TD>
@@ -2523,22 +2522,22 @@
 
     <TD WIDTH="10%"> <P>SGS</P></TD>
     <TD WIDTH="10%"> <P>.gs</P></TD>
-    <TD WIDTH="10%"> <P>&nbsp;</P></TD>
+    <TD WIDTH="10%"> <P></P></TD>
     <TD VALIGN=top WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P>239</P></TD>
 
-    <TD WIDTH="10%">&nbsp;</TD>
+    <TD WIDTH="10%"></TD>
   </TR>
   <TR>
     <TD>SOVIET UNION (Internet code still used)</TD>
-    <TD>&nbsp;</TD>
-    <TD>&nbsp;</TD>
+    <TD></TD>
+    <TD></TD>
     <TD>.su</TD>
-    <TD>&nbsp;</TD>
+    <TD></TD>
 
-    <TD>&nbsp;</TD>
-    <TD>&nbsp;</TD>
-    <TD>&nbsp;</TD>
+    <TD></TD>
+    <TD></TD>
+    <TD></TD>
   </TR>
   <TR> 
     <TD WIDTH="40%"> <P>SPAIN (Espa&ntilde;a)</P></TD>
@@ -2594,10 +2593,10 @@
     <TD WIDTH="10%"> <P>SJM</P></TD>
     <TD WIDTH="10%"> <P>.sj</P></TD>
 
-    <TD WIDTH="10%"> <P>&nbsp;</P></TD>
+    <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P>744</P></TD>
-    <TD WIDTH="10%">&nbsp;</TD>
+    <TD WIDTH="10%"></TD>
   </TR>
   <TR> 
     <TD WIDTH="40%"> <P>SWAZILAND</P></TD>
@@ -2653,7 +2652,7 @@
     <TD WIDTH="10%"> <P>TW</P></TD>
     <TD WIDTH="10%"> <P>TWN</P></TD>
     <TD WIDTH="10%"> <P>.tw</P></TD>
-    <TD WIDTH="10%"> <P>&nbsp;</P></TD>
+    <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P>TPE</P></TD>
 
     <TD WIDTH="10%"> <P>158</P></TD>
@@ -2673,14 +2672,14 @@
   </TR>
   <TR> 
     <TD>TANGANYIKA</TD>
-    <TD>&nbsp;</TD>
-    <TD>&nbsp;</TD>
-    <TD>&nbsp;</TD>
+    <TD></TD>
+    <TD></TD>
+    <TD></TD>
     <TD>EAT</TD>
 
-    <TD>&nbsp;</TD>
-    <TD>&nbsp;</TD>
-    <TD>&nbsp;</TD>
+    <TD></TD>
+    <TD></TD>
+    <TD></TD>
   </TR>
   <TR> 
     <TD WIDTH="40%"> <P>TANZANIA</P></TD>
@@ -2688,7 +2687,7 @@
 
     <TD WIDTH="10%"> <P>TZA</P></TD>
     <TD WIDTH="10%"> <P>.tz</P></TD>
-    <TD WIDTH="10%"> <P>&nbsp;</P></TD>
+    <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P>TAN</P></TD>
     <TD WIDTH="10%"> <P>834</P></TD>
 
@@ -2712,7 +2711,7 @@
     <TD WIDTH="10%"> <P>TLS</P></TD>
     <TD WIDTH="10%"> <P>.tl</P></TD>
 
-    <TD WIDTH="10%"> <P>&nbsp;</P></TD>
+    <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P>TLS</P></TD>
     <TD WIDTH="10%"> <P>626</P></TD>
     <TD WIDTH="10%">670</TD>
@@ -2735,7 +2734,7 @@
 
     <TD WIDTH="10%"> <P>TKL</P></TD>
     <TD WIDTH="10%"> <P>.tk</P></TD>
-    <TD WIDTH="10%"> <P>&nbsp;</P></TD>
+    <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P>772</P></TD>
 
@@ -2747,7 +2746,7 @@
     <TD WIDTH="10%"> <P>TON</P></TD>
 
     <TD WIDTH="10%"> <P>.to</P></TD>
-    <TD WIDTH="10%"> <P>&nbsp;</P></TD>
+    <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P>TGA</P></TD>
     <TD WIDTH="10%"> <P>776</P></TD>
     <TD WIDTH="10%">676</TD>
@@ -2807,7 +2806,7 @@
     <TD WIDTH="10%"> <P>TCA</P></TD>
     <TD WIDTH="10%"> <P>.tc</P></TD>
 
-    <TD WIDTH="10%"> <P>&nbsp;</P></TD>
+    <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P>796</P></TD>
     <TD WIDTH="10%">1-649</TD>
@@ -2818,7 +2817,7 @@
     <TD WIDTH="10%"> <P>TV</P></TD>
     <TD WIDTH="10%"> <P>TUV</P></TD>
     <TD WIDTH="10%"> <P>.tv</P></TD>
-    <TD WIDTH="10%"> <P>&nbsp;</P></TD>
+    <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P>TUV</P></TD>
 
     <TD WIDTH="10%"> <P>798</P></TD>
@@ -2854,7 +2853,7 @@
     <TD WIDTH="10%"> <P>ARE</P></TD>
     <TD WIDTH="10%"> <P>.ae</P></TD>
 
-    <TD WIDTH="10%"> <P>&nbsp;</P></TD>
+    <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P>UAE</P></TD>
     <TD WIDTH="10%"> <P>784</P></TD>
     <TD WIDTH="10%">971</TD>
@@ -2865,7 +2864,7 @@
     <TD WIDTH="10%"> <P>GB</P></TD>
     <TD WIDTH="10%"> <P>GBR</P></TD>
     <TD WIDTH="10%"> <P>.uk</P></TD>
-    <TD WIDTH="10%"> <P>&nbsp;</P></TD>
+    <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P>GBR</P></TD>
 
     <TD WIDTH="10%"> <P>826</P></TD>
@@ -2889,10 +2888,10 @@
     <TD WIDTH="10%"> <P>UMI</P></TD>
 
     <TD WIDTH="10%"> <P>.um</P></TD>
-    <TD WIDTH="10%"> <P>&nbsp;</P></TD>
+    <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P>581</P></TD>
-    <TD WIDTH="10%">&nbsp;</TD>
+    <TD WIDTH="10%"></TD>
   </TR>
 
   <TR> 
@@ -2925,7 +2924,7 @@
     <TD WIDTH="10%"> <P>VUT</P></TD>
     <TD WIDTH="10%"> <P>.vu</P></TD>
 
-    <TD WIDTH="10%"> <P>&nbsp;</P></TD>
+    <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P>VAN</P></TD>
     <TD WIDTH="10%"> <P>548</P></TD>
     <TD WIDTH="10%">678</TD>
@@ -2984,7 +2983,7 @@
     <TD WIDTH="10%"> <P>VIR</P></TD>
     <TD WIDTH="10%"> <P>.vi</P></TD>
 
-    <TD WIDTH="10%"> <P>&nbsp;</P></TD>
+    <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P>ISV</P></TD>
     <TD WIDTH="10%"> <P>850</P></TD>
     <TD WIDTH="10%">1-340</TD>
@@ -2992,13 +2991,13 @@
   <TR> 
     <TD>YUGOSLAVIA (Internet code still used)</TD>
 
-    <TD>&nbsp;</TD>
-    <TD>&nbsp;</TD>
+    <TD></TD>
+    <TD></TD>
     <TD>.yu</TD>
-    <TD>&nbsp;</TD>
-    <TD>&nbsp;</TD>
-    <TD>&nbsp;</TD>
-    <TD>&nbsp;</TD>
+    <TD></TD>
+    <TD></TD>
+    <TD></TD>
+    <TD></TD>
   </TR>
 
   <TR> 
@@ -3007,7 +3006,7 @@
     <TD WIDTH="10%"> <P>WLF</P></TD>
     <TD WIDTH="10%"> <P>.wf</P></TD>
 
-    <TD WIDTH="10%"> <P>&nbsp;</P></TD>
+    <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P>876</P></TD>
     <TD WIDTH="10%">681</TD>
@@ -3018,11 +3017,11 @@
     <TD WIDTH="10%"> <P>EH</P></TD>
     <TD WIDTH="10%"> <P>ESH</P></TD>
     <TD WIDTH="10%"> <P>.eh</P></TD>
-    <TD WIDTH="10%"> <P>&nbsp;</P></TD>
+    <TD WIDTH="10%"> <P></P></TD>
     <TD WIDTH="10%"> <P></P></TD>
 
     <TD WIDTH="10%"> <P>732</P></TD>
-    <TD WIDTH="10%">&nbsp;</TD>
+    <TD WIDTH="10%"></TD>
   </TR>
   <TR> 
     <TD WIDTH="40%"> <P>YEMEN (Yemen Arab Republic)</P></TD>
@@ -3050,14 +3049,14 @@
   </TR>
   <TR> 
     <TD>ZANZIBAR</TD>
-    <TD>&nbsp;</TD>
-    <TD>&nbsp;</TD>
-    <TD>&nbsp;</TD>
+    <TD></TD>
+    <TD></TD>
+    <TD></TD>
     <TD>EAZ</TD>
-    <TD>&nbsp;</TD>
+    <TD></TD>
 
-    <TD>&nbsp;</TD>
-    <TD>&nbsp;</TD>
+    <TD></TD>
+    <TD></TD>
   </TR>
   <TR> 
     <TD WIDTH="40%"> <P>ZIMBABWE</P></TD>
