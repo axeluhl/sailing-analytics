@@ -255,7 +255,12 @@ into one in the future.
 
 /admin
   action=listracesinevent: outputs a JSON object describing the
-  		  races and their paramURLs available for tracking
+  		  races and their paramURLs available for tracking in
+		  the following form:
+		    [ { "name": ...,	       // race name
+		        "ID": ...,	       // a UUID for the race
+			"paramURL": ...,       // the paramURL to use for addrace
+			"replayURL": ... } ...]// URL to use for TracTrac 2D view
     eventJSONURL: the URL from where metadata about the entire regatta
                   can be obtained; the resulting document includes the
 		  parameter and simulation URLs for the individual
