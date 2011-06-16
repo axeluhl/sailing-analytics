@@ -94,16 +94,27 @@ function sortBy(param, element) {
     loadLeaderboard(global_race, param, global_competitors, global_direction, global_colmode);
 }
 
-function yieldValue(element, newvalue, ignore_zeros, legvalue) {
+function yieldValue(element, newvalue, ignore_zeros, alternate_value) {
     if (element.html() != newvalue && newvalue != '' && newvalue != 'None') {
-        if (ignore_zeros == true && (newvalue == '0' || newvalue == 0))
+        if (ignore_zeros == true && (newvalue == '0' || newvalue == 0)) {
+
+            // show alternate value
+            if (alternate_value != undefined && alternate_value != '' && alternate_value != 'None') {
+                element.html(alternate_value);
+            }
+
             return;
+        }
 
         // special handling for minute shown
         if (isNaN(newvalue) && newvalue.indexOf(':') == -1)
             return;
 
         element.html(newvalue);
+    } else {
+        if (alternate_value != undefined && alternate_value != '' && alternate_value != 'None') {
+            element.html(alternate_value);
+        }
     }
 }
 
@@ -139,18 +150,18 @@ function displayLeaderboard(data) {
             /* now set values independent what has been there before */
             racepos = 1;
             for (racerank in competitor.raceranks) {
-                yieldValue($('#race-'+racepos+'-rankrow-'+rowid), competitor.raceranks[racerank], true);
+                yieldValue($('#race-'+racepos+'-rankrow-'+rowid), competitor.raceranks[racerank], true, undefined);
 
                 markpos = 1;
                 for (markrank in competitor.markranks[racepos-1]) {
-                    yieldValue($('#race-'+racepos+'-mark-'+markpos+'-row-'+rowid), competitor.markranks[racepos-1][markrank], true);
+                    yieldValue($('#race-'+racepos+'-mark-'+markpos+'-row-'+rowid), competitor.markranks[racepos-1][markrank], true, competitor.legvalues[racepos-1][markpos-1][0]);
 
                     legpos = 1;
                     for (legvalue in competitor.legvalues[racepos-1][markpos-1]) {
                         if (legvalue == 0) {
-                            yieldValue($('#race-'+racepos+'-mark-'+markpos+'-legrow-'+rowid), parseFloat(competitor.legvalues[racepos-1][markpos-1][legvalue]).toFixed(), false);
+                            yieldValue($('#race-'+racepos+'-mark-'+markpos+'-legrow-'+rowid), parseFloat(competitor.legvalues[racepos-1][markpos-1][legvalue]).toFixed(), false, undefined);
                         } else {
-                            yieldValue($('#race-'+racepos+'-mark-'+markpos+'-valrow-'+rowid+'-pos-'+(legpos-1)+' span'), competitor.legvalues[racepos-1][markpos-1][legvalue], false);
+                            yieldValue($('#race-'+racepos+'-mark-'+markpos+'-valrow-'+rowid+'-pos-'+(legpos-1)+' span'), competitor.legvalues[racepos-1][markpos-1][legvalue], false, undefined);
                         }
                         legpos += 1;
                     }
@@ -168,14 +179,14 @@ function displayLeaderboard(data) {
 
                 markpos = 1;
                 for (markrank in competitor.markranks[racepos-1]) {
-                    yieldValue($('#race-'+racepos+'-mark-'+markpos+'-row-'+rowid), competitor.markranks[racepos-1][markrank], true);
+                    yieldValue($('#race-'+racepos+'-mark-'+markpos+'-row-'+rowid), competitor.markranks[racepos-1][markrank], true, competitor.legvalues[racepos-1][markpos-1][0]);
 
                     legpos = 1;
                     for (legvalue in competitor.legvalues[racepos-1][markpos-1]) {
                         if (legvalue == 0) {
-                            yieldValue($('#race-'+racepos+'-mark-'+markpos+'-legrow-'+rowid), parseFloat(competitor.legvalues[racepos-1][markpos-1][legvalue]).toFixed(), false);
+                            yieldValue($('#race-'+racepos+'-mark-'+markpos+'-legrow-'+rowid), parseFloat(competitor.legvalues[racepos-1][markpos-1][legvalue]).toFixed(), false, undefined);
                         } else {
-                            yieldValue($('#race-'+racepos+'-mark-'+markpos+'-valrow-'+rowid+'-pos-'+(legpos-1)+' span'), competitor.legvalues[racepos-1][markpos-1][legvalue], false, legvalue);
+                            yieldValue($('#race-'+racepos+'-mark-'+markpos+'-valrow-'+rowid+'-pos-'+(legpos-1)+' span'), competitor.legvalues[racepos-1][markpos-1][legvalue], false, undefined);
                         }
                         legpos += 1;
                     }
