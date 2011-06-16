@@ -43,6 +43,10 @@ public class CountryCodeTest {
                         String entry = m.group(2);
                         if (entry != null) {
                             entry = URLDecoder.decode(entry, "UTF-8").trim();
+                            if (entry.startsWith(".")) {
+                                // IANA domain name will be stripped of leading "."
+                                entry = entry.substring(1);
+                            }
                         }
                         row[column++] = entry == null || entry.length() == 0 ? null : entry;
                     }
@@ -50,6 +54,26 @@ public class CountryCodeTest {
             }
         }
         assertEquals(259, matrix.size());
+        for (String[] r : matrix) {
+            StringBuilder sb = new StringBuilder("        add(new CountryCodeImpl(");
+            boolean first = true;
+            for (String s : r) {
+                if (first) {
+                    first = false;
+                } else {
+                    sb.append(", ");
+                }
+                if (s == null) {
+                    sb.append("null");
+                } else {
+                    sb.append('\"');
+                    sb.append(s.replaceAll("\\\"", "\\\\\""));
+                    sb.append('\"');
+                }
+            }
+            sb.append("));");
+            System.out.println(sb);
+        }
     }
     
     @Test
