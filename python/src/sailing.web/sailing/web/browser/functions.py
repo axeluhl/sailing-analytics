@@ -81,7 +81,19 @@ def configureListener(context, request):
 
         conf.setContext(config.ADMIN)
 
-        if request.POST.get('eventJSONURL'):
+        if request.POST.get('race-conf'):
+            # multiple races configured
+
+            for raceurl in request.POST.getall('race-conf'):
+                conf.setCommand(config.ADD_RACE)
+                conf.setParameters(dict(paramURL=raceurl, 
+                                        liveURI=request.POST.get('liveURI'), 
+                                        storedURI=request.POST.get('storedURI'),
+                                        windstore=request.POST.get('windstore')))
+                conf.trigger()
+
+
+        elif request.POST.get('eventJSONURL'):
             conf.setCommand(config.ADD_EVENT)
             conf.setParameters(dict(eventJSONURL=request.POST.get('eventJSONURL'), 
                                     liveURI=request.POST.get('liveURI'), 
@@ -105,14 +117,15 @@ def configureListener(context, request):
         else:
             return view.yieldMessage('Please specify an event or race URL!')
 
-        try:
-            result = conf.trigger()
+        if not request.POST.get('race-conf'):
+            try:
+                result = conf.trigger()
 
-            if result.find('Exception')>0:
-                raise Exception, 'Server triggered exception: %s' % result[:550]
+                if result.find('Exception')>0:
+                    raise Exception, 'Server triggered exception: %s' % result[:550]
 
-        except Exception, ex:
-            return view.yieldMessage('Error: %s' % str(ex))
+            except Exception, ex:
+                return view.yieldMessage('Error: %s' % str(ex))
 
         # can take a while until event data is ready
         if request.POST.get('drop_db'):
@@ -132,10 +145,10 @@ def configureListener(context, request):
                 if len(eventlist) == 0:
                     raise Exception, 'No events configured.'
 
+                startListenerThreads(conf, eventlist)
+
             except Exception, ex:
                 return view.yieldMessage('Could not gather any data! Seems that Java listener is not ready yet. Please reconnect. Error: %s' % str(ex))
-
-            startListenerThreads(conf, eventlist)
 
         # mark all stuff done and listener running
         view.session['listener-started'] = True
@@ -606,4 +619,23 @@ def moderatorLiveData(context, request):
         c_range_start, c_range_end = competitor_range.split(':')
 
     return data[int(c_range_start)-1:int(c_range_end)]
+
+def loadRacesForEvent(context, request):
+    view = core.BaseView(context, request)
+
+    host = request.params.get('host')
+    port = request.params.get('port')
+    eventJSONURL = request.params.get('eventJSONURL')
+
+    conf = URIConfigurator(host, port)
+    view.session['listener-conf'] = conf
+    view.session.save()
+
+    conf.setContext(config.ADMIN)
+    conf.setCommand(config.LIST_RACES_IN_EVENT)
+    conf.setParameters(dict(eventJSONURL=eventJSONURL))
+
+    data = jsonByUrl(conf)
+
+    return render_to_response('templates/java-connector-select-races.pt', {'races' : data, 'view': view}, request=request)
 
