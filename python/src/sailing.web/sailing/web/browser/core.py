@@ -44,6 +44,17 @@ class BaseView(object):
     def raceUrlHistory(self):
         return self.session.get('race.url_history', ['No URLs to TracTrac races gathered until now'])
 
+    def dbHost(self):
+        from sailing.db import DB_CONFIG
+        return DB_CONFIG
+        
+    def dbObjectStats(self):
+        dc = {}
+        dc['eventcount'] = model.EventImpl.queryCount()
+        dc['competitorcount'] = model.CompetitorImpl.queryCount()
+        dc['racecount'] = model.RaceImpl.queryCount()
+        return dc
+
     def dbDatabaseStats(self):
         return monitoring.dbStats()
 

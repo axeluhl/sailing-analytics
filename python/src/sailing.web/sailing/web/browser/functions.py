@@ -27,8 +27,16 @@ logging.basicConfig()
 threaded_listener = {}
 
 def dropDB(context, request):
-    from sailing.db.monitoring import dropDB
-    dropDB()
+
+    if not request.params.get('event'):
+        from sailing.db.monitoring import dropDB
+        dropDB()
+
+    else:
+        model.CompetitorImpl.removeAllBy(event=request.params.get('event'))
+        model.RaceImpl.removeAllBy(event=request.params.get('event'), name=request.params.get('race'))
+        model.EventImpl.removeAllBy(name=request.params.get('event'))
+
     return HTTPFound(location='/')
 
 def startListenerThreads(conf, eventlist):
