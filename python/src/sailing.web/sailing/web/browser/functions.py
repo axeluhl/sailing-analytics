@@ -529,78 +529,81 @@ def adminLiveData(context, request):
 def moderatorLiveData(context, request):
     """ Returns data for the moderators leaderboard """
 
-    view = core.BaseView(context, request)
-    event = view.currentLeaderboardEvent()
+    lock = threading.Lock()
+    with lock:
+        view = core.BaseView(context, request)
+        event = view.currentLeaderboardEvent()
 
-    sortby = request.params.get('sortby', 'name')
-    race_range = request.params.get('races', '1:3')
-    competitor_range = request.params.get('competitors', '1:20')
-    direction = request.params.get('direction', 'asc');
-    colmode = request.params.get('colmode')
+        sortby = request.params.get('sortby', 'name')
+        race_range = request.params.get('races', '1:3')
+        competitor_range = request.params.get('competitors', '1:20')
+        direction = request.params.get('direction', 'asc');
+        colmode = request.params.get('colmode')
 
-    columns = view.configuredColumns(colmode)
-    
-    if race_range in ['null', 'undefined']:
-        race_range = '1:3'
+        columns = view.configuredColumns(colmode)
+        
+        if race_range in ['null', 'undefined']:
+            race_range = '1:3'
 
-    race_start_index, race_end_index = race_range.split(':')
-    races_list = event.races[int(race_start_index)-1:int(race_end_index)]
+        race_start_index, race_end_index = race_range.split(':')
+        races_list = event.races[int(race_start_index)-1:int(race_end_index)]
 
-    competitors = view.competitorsSortedBy(event.name, sortby.strip(), colmode, direction)
+        competitors = view.competitorsSortedBy(event.name, sortby.strip(), colmode, direction)
 
-    if direction == 'desc':
-        competitors.reverse()
+        if direction == 'desc':
+            competitors.reverse()
 
-    races = []; current_legs = []; current_race = None
-    for racename in races_list:
-        rimpl = model.RaceImpl.queryOneBy(name=racename, event=event.name)
-        if len(rimpl.current_legs) > 0:
-            current_legs = rimpl.current_legs
-            current_race = event.races.index(rimpl.name)
-
-        races.append(rimpl)
-
-    # list of competitors with corresponding data
-    data = []
-
-    for competitor in competitors:
-        racedata = competitor.races[int(race_start_index)-1:int(race_end_index)]
-
-        # for each race found compute the marks and values
-        markranks = []; legvalues = []; racecounter = 0
+        races = []; current_legs = []; current_race = None
         for racename in races_list:
-            real_racepos = event.races.index(racename)
-            if len(markranks) < racecounter+1:
-                markranks.append([])
-                legvalues.append([])
+            rimpl = model.RaceImpl.queryOneBy(name=racename, event=event.name)
+            if len(rimpl.current_legs) > 0:
+                current_legs = rimpl.current_legs
+                current_race = event.races.index(rimpl.name)
 
-            markranks[racecounter] = markranks[racecounter] + competitor.marks[real_racepos]
+            races.append(rimpl)
 
-            cvalues = []
-            for legvalue_for_race in competitor.values[real_racepos]:
-                result = []
-                for column in columns:
-                    result.append(view.displayLegValue(column, legvalue_for_race.get(column[-1])))
+        # list of competitors with corresponding data
+        data = []
 
-                cvalues.append(result)
+        for competitor in competitors:
+            racedata = competitor.races[int(race_start_index)-1:int(race_end_index)]
 
-            legvalues[racecounter] = legvalues[racecounter] + cvalues
+            # for each race found compute the marks and values
+            markranks = []; legvalues = []; racecounter = 0
+            for racename in races_list:
+                real_racepos = event.races.index(racename)
+                if len(markranks) < racecounter+1:
+                    markranks.append([])
+                    legvalues.append([])
 
-            racecounter += 1
+                markranks[racecounter] = markranks[racecounter] + competitor.marks[real_racepos]
 
-        dc = {}
-        dc.update({'name': competitor.name[:9], 'raceranks': racedata, 'markranks': markranks, 'legvalues': legvalues, 
-            'nationality': competitor.nationality, 'global_rank': competitor.total, 'current_race': '', 'current_legs' : [],
-            'current_rank' : competitor.current_rank, 'total_points' : getattr(competitor, 'total_points', 0),
-            'net_points': getattr(competitor, 'net_points', 0), 'races_shown' : range(int(race_start_index), int(race_end_index))})
+                cvalues = []
+                for legvalue_for_race in competitor.values[real_racepos]:
+                    result = []
+                    for column in columns:
+                        result.append(view.displayLegValue(column, legvalue_for_race.get(column[-1])))
 
-        try:
-            dc.update({'current_legs': [lg+1 for lg in current_legs], 'current_race': current_race+1})
-        except:
-            pass
+                    cvalues.append(result)
 
-        data.append(dc)
+                legvalues[racecounter] = legvalues[racecounter] + cvalues
 
-    c_range_start, c_range_end = competitor_range.split(':')
+                racecounter += 1
+
+            dc = {}
+            dc.update({'name': competitor.name[:9], 'raceranks': racedata, 'markranks': markranks, 'legvalues': legvalues, 
+                'nationality': competitor.nationality, 'global_rank': competitor.total, 'current_race': '', 'current_legs' : [],
+                'current_rank' : competitor.current_rank, 'total_points' : getattr(competitor, 'total_points', 0),
+                'net_points': getattr(competitor, 'net_points', 0), 'races_shown' : range(int(race_start_index), int(race_end_index))})
+
+            try:
+                dc.update({'current_legs': [lg+1 for lg in current_legs], 'current_race': current_race+1})
+            except:
+                pass
+
+            data.append(dc)
+
+        c_range_start, c_range_end = competitor_range.split(':')
+
     return data[int(c_range_start)-1:int(c_range_end)]
 

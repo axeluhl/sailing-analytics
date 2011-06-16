@@ -171,7 +171,7 @@ class BaseView(object):
                 competitors = model.CompetitorImpl.sortedBy(eventname=eventname, raceindex=int(params[0])-1, markindex=int(params[1])-1, direction=direction)
             elif len(params) == 3:
                 columns = self.configuredColumns(columnmode)
-                competitors = model.CompetitorImpl.sortedBy(eventname=eventname, raceindex=int(params[0])-1, markindex=int(params[1])-1, valueindex=int(params[2]), columns=columns, direction=direction)
+                competitors = model.CompetitorImpl.sortedBy(eventname=eventname, raceindex=int(params[0])-1, markindex=int(params[1])-1, valueindex=int(params[2])-1, columns=columns, direction=direction)
 
         else:
             param = int(param.strip())
