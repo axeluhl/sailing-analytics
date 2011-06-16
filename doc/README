@@ -254,6 +254,12 @@ through the /moderator servlet. We may want to consider merging both
 into one in the future.
 
 /admin
+  action=listracesinevent: outputs a JSON object describing the
+  		  races and their paramURLs available for tracking
+    eventJSONURL: the URL from where metadata about the entire regatta
+                  can be obtained; the resulting document includes the
+		  parameter and simulation URLs for the individual
+ 		  races that are part of the event/regatta.
   action=addevent: starts tracking all races described in the document received
   		  from the eventJSONURL to the server instance.
     eventJSONURL: the URL from where metadata about the entire regatta
