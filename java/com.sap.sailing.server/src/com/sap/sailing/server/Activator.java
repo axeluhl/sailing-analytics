@@ -1,6 +1,9 @@
 package com.sap.sailing.server;
 
+import java.nio.charset.Charset;
 import java.util.Hashtable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -14,6 +17,8 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.util.Util.Triple;
 
 public class Activator implements BundleActivator, ServiceListener {
+    private static final Logger logger = Logger.getLogger(Activator.class.getName());
+    
     private static BundleContext fContext;
     
     static BundleContext getDefault() {
@@ -26,6 +31,8 @@ public class Activator implements BundleActivator, ServiceListener {
         Hashtable<String, ?> props = new Hashtable<String, String>();
         // register the service
         context.registerService(RacingEventService.class.getName(), service, props);
+        logger.log(Level.INFO, "Started "+context.getBundle().getSymbolicName()+". Character encoding: "+
+                Charset.defaultCharset());
     }
     
     public void stop(BundleContext context) throws Exception {
