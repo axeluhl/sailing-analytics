@@ -341,7 +341,10 @@ def liveRaceInformation(configurator):
                 else:
                     # search for the last place
                     last_rank_computed = c_marks[raceindex][lcount-1]
-                    dc_leg_values['gainsAndLossesInPlaces'] = last_rank_computed - dc_leg_values['rank']
+                    if dc_leg_values['rank']:
+                        dc_leg_values['gainsAndLossesInPlaces'] = last_rank_computed - dc_leg_values['rank']
+                    else:
+                        dc_leg_values['gainsAndLossesInPlaces'] = 0
 
                 c_values[raceindex][lcount] = dc_leg_values
 
