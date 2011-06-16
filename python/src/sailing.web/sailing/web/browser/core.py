@@ -151,27 +151,27 @@ class BaseView(object):
     def allCompetitorsFor(self, event):
         return model.CompetitorImpl.queryBy(event=event)
 
-    def competitorsSortedBy(self, eventname, sortparam, columnmode):
+    def competitorsSortedBy(self, eventname, sortparam, columnmode, direction='asc'):
         param = sortparam
         if param == 'name':
-            competitors = model.CompetitorImpl.sortedBy(eventname=eventname)
+            competitors = model.CompetitorImpl.sortedBy(eventname=eventname, direction=direction)
             competitors.sort(lambda x,y: cmp(x.name, y.name))
 
         elif param == 'total':
-            competitors = model.CompetitorImpl.sortedBy(eventname=eventname)
+            competitors = model.CompetitorImpl.sortedBy(eventname=eventname, direction=direction)
 
         elif param.find(',')>0:
             params = param.strip().split(',')
 
             if len(params) == 2:
-                competitors = model.CompetitorImpl.sortedBy(eventname=eventname, raceindex=int(params[0])-1, markindex=int(params[1])-1)
+                competitors = model.CompetitorImpl.sortedBy(eventname=eventname, raceindex=int(params[0])-1, markindex=int(params[1])-1, direction=direction)
             elif len(params) == 3:
                 columns = self.configuredColumns(columnmode)
-                competitors = model.CompetitorImpl.sortedBy(eventname=eventname, raceindex=int(params[0])-1, markindex=int(params[1])-1, valueindex=int(params[2]), columns=columns)
+                competitors = model.CompetitorImpl.sortedBy(eventname=eventname, raceindex=int(params[0])-1, markindex=int(params[1])-1, valueindex=int(params[2]), columns=columns, direction=direction)
 
         else:
             param = int(param.strip())
-            competitors = model.CompetitorImpl.sortedBy(eventname=eventname, raceindex=param-1)
+            competitors = model.CompetitorImpl.sortedBy(eventname=eventname, raceindex=param-1, direction=direction)
 
         return competitors
 

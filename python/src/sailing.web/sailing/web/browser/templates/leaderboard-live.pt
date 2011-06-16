@@ -168,7 +168,7 @@
                   <li class="${repeat['legrow'].even and 'odd' or 'even'}" id='race-${raceid}-mark-${markid}-legrow-${legrow}'>&nbsp;</li>
                   </tal:for>
                 </ul>
-                <a class='table-box-sort sort-asc' href='javascript:;' onclick='sortBy("${raceid},${markid},1", $(this))'></a>
+                <a class='table-box-sort sort-asc' href='javascript:;' onclick='sortBy("${raceid},${markid},0", $(this))'></a>
               </div>
               <table class='race-table' id='r1-m1' style="display:none;">
                 <thead>

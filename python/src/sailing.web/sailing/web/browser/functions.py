@@ -546,9 +546,9 @@ def moderatorLiveData(context, request):
     race_start_index, race_end_index = race_range.split(':')
     races_list = event.races[int(race_start_index)-1:int(race_end_index)]
 
-    competitors = view.competitorsSortedBy(event.name, sortby.strip(), colmode)
+    competitors = view.competitorsSortedBy(event.name, sortby.strip(), colmode, direction)
 
-    if direction == 'asc':
+    if direction == 'desc':
         competitors.reverse()
 
     races = []; current_legs = []; current_race = None
