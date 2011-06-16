@@ -92,6 +92,12 @@ public class RacingEventServiceImpl implements RacingEventService {
     }
 
     @Override
+    public List<RaceRecord> getRaceRecords(URL jsonURL) throws IOException, ParseException, org.json.simple.parser.ParseException {
+        JSONService jsonService = getDomainFactory().parseJSONURL(jsonURL);
+        return jsonService.getRaceRecords();
+    }
+
+    @Override
     public RaceHandle addRace(URL paramURL, URI liveURI, URI storedURI, WindStore windStore) throws MalformedURLException, FileNotFoundException,
             URISyntaxException {
         Triple<URL, URI, URI> key = new Triple<URL, URI, URI>(paramURL, liveURI, storedURI);

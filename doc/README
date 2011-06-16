@@ -47,6 +47,8 @@ Inbound Port Assignments
      8888:  servlet container of "prod1" Java instance
      8889:  servlet container of "prod2" Java instance
      10200: MongoDB "dev" instance
+     10201: MongoDB "test" instance
+     10202: MontoDB "prod" instance
      12347: SSH forward to localhost:22 required for "mvn deploy"
  - UDP
      2010:  wind input for "dev" Java instance
