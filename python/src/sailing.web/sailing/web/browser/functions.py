@@ -594,8 +594,6 @@ def moderatorLiveData(context, request):
             'current_rank' : competitor.current_rank, 'total_points' : getattr(competitor, 'total_points', 0),
             'net_points': getattr(competitor, 'net_points', 0)})
 
-        print dc['legvalues']
-
         try:
             dc.update({'current_legs': [lg+1 for lg in current_legs], 'current_race': current_race+1})
         except:
