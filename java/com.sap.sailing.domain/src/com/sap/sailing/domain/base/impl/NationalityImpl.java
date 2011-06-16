@@ -3,16 +3,18 @@ package com.sap.sailing.domain.base.impl;
 import java.io.InputStream;
 
 import com.sap.sailing.domain.base.Nationality;
+import com.sap.sailing.util.CountryCode;
+import com.sap.sailing.util.CountryCodeFactory;
 
 public class NationalityImpl extends NamedImpl implements Nationality {
-    private final String threeLetterAcronym;
+    private final String threeLetterIOCAcronym;
     
-    public NationalityImpl(String name, String threeLetterAcronym) {
+    public NationalityImpl(String name, String threeLetterIOCAcronym) {
         super(name);
-        if (threeLetterAcronym.length() != 3) {
-            throw new IllegalArgumentException("Three-letter nationality acronym \""+threeLetterAcronym+"\" doesn't have three letters.");
+        if (threeLetterIOCAcronym.length() != 3) {
+            throw new IllegalArgumentException("Three-letter IOC nationality acronym \""+threeLetterIOCAcronym+"\" doesn't have three letters.");
         }
-        this.threeLetterAcronym = threeLetterAcronym;
+        this.threeLetterIOCAcronym = threeLetterIOCAcronym;
     }
 
     @Override
@@ -21,8 +23,13 @@ public class NationalityImpl extends NamedImpl implements Nationality {
     }
 
     @Override
-    public String getThreeLetterAcronym() {
-        return threeLetterAcronym;
+    public String getThreeLetterIOCAcronym() {
+        return threeLetterIOCAcronym;
     }
 
+    @Override
+    public CountryCode getCountryCode() {
+        return CountryCodeFactory.INSTANCE.getFromThreeLetterIOCName(getThreeLetterIOCAcronym());
+    }
+    
 }
