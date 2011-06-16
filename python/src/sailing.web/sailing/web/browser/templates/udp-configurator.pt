@@ -32,7 +32,8 @@
     <div class="field">
         <span>Port:</span><br/>
         <select name="port">
-            <option value="2012">PROD</option>
+            <option value="2013">PROD1</option>
+            <option value="2014">PROD2</option>
             <option value="2011">TEST</option>
             <option value="2010">DEV</option>
         </select>
