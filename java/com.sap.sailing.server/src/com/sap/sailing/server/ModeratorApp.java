@@ -32,6 +32,7 @@ import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.server.util.InvalidDateException;
+import com.sap.sailing.util.CountryCode;
 
 public class ModeratorApp extends Servlet {
     private static final long serialVersionUID = 1333207389294903999L;
@@ -347,7 +348,10 @@ public class ModeratorApp extends Servlet {
             for (Competitor competitor : event.getCompetitors()) {
                 JSONObject jsonCompetitor = new JSONObject();
                 jsonCompetitor.put("name", competitor.getName());
-                jsonCompetitor.put("nationality", competitor.getTeam().getNationality().getThreeLetterAcronym());
+                jsonCompetitor.put("nationality", competitor.getTeam().getNationality().getThreeLetterIOCAcronym());
+                CountryCode countryCode = competitor.getTeam().getNationality().getCountryCode();
+                jsonCompetitor.put("nationalityISO2", countryCode == null ? "" : countryCode.getTwoLetterISOCode());
+                jsonCompetitor.put("nationalityISO3", countryCode == null ? "" : countryCode.getThreeLetterISOCode());
                 JSONArray jsonTeam = new JSONArray();
                 for (Person sailor : competitor.getTeam().getSailors()) {
                     JSONObject jsonSailor = new JSONObject();

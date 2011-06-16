@@ -1,4 +1,33 @@
 
+<b>Attention: The connection to the database has nothing to do with the Java server you are currently connected to. These stats only reflect the database connected to the admin app running on ${request.application_url}! If you want to see stats for prod MongoDB then open the moderator URL pointing to prod.</b><br/><br/>
+
+<tal:do define="stats view.dbHost()">
+    <tal:for repeat="db stats.keys()">
+    DB: ${stats[db]['dbname']}, HOST: ${stats[db]['host']}, PORT: ${stats[db]['port']}<br/>
+    </tal:for>
+</tal:do>
+
+<br/><br/>
+<form method="POST" action="/++/dropDB">
+    Event: 
+    <select name="event">
+        <tal:for repeat="event view.allEvents()">
+        <option value="${event.name}">${event.name}</option>
+        </tal:for>
+    </select>
+    &nbsp;
+    Race: 
+    <select name="race">
+        <tal:for repeat="race view.allRacesFor()">
+        <option value="${race}">${race}</option>
+        </tal:for>
+    </select>
+    &nbsp;
+    <input type="submit" name="submit" value="Drop only objects matching selected event and race"/>
+</form>
+<br/><br/>
+
+<h4><Databases</h4>
 <tal:for repeat="db view.dbDatabaseStats().items()">
     Name: ${db[0]}&nbsp;
     Size: ${db[1]['fileSize']}&nbsp;
@@ -23,6 +52,15 @@ Queries: ${stats['opcounters']['query']}&nbsp;
 Deletes: ${stats['opcounters']['delete']}&nbsp;
 </tal:do>
 
+<h4>Objects</h4>
+<tal:do define="stats view.dbObjectStats()">
+Events: ${stats['eventcount']}&nbsp;
+Races: ${stats['racecount']}&nbsp;
+Competitors: ${stats['competitorcount']}
+</tal:do>
+<br/><br/>
+
 <form method="POST" action="/++/dropDB">
     <input type="submit" name="submit" value="Drop DB (ATT: No security question)"/>
 </form>
+
