@@ -39,25 +39,26 @@ function liveRefresh() {
 
 function toggleListener() {
     $('#refresh-button').toggleClass('refresh');
-    if ($('#refresh-button').hasClass('refresh')) {
+    if (!$('#refresh-button').hasClass('refresh')) {
         $('#refresh-button').css('background-image', 'url(/moderator-static/freeze.png)');
         listener_paused = true;
     } else {
         listener_paused = false;
-        $('#refresh-button').css('background-image', 'url(/moderator-static/pause_button.png)');
+        $('#refresh-button').css('background-image', 'url(/moderator-static/refresh-icon.png)');
     }
 }
 
 function displayRaceAndLeg(raceindex, legs) {
-    $('.refresh-btn').html('<div style="padding: 8px 4px 5px 15px; color: white; font-size: 23px;font-weight: bold;">R'+raceindex+' : '+legs+'</div>');
+    // disabled upon request from Marcus Baur
+    //$('.pause-btn').html('<div style="padding: 8px 4px 5px 15px; color: white; font-size: 23px;font-weight: bold;">R'+raceindex+' : '+legs+'</div>');
 }
 
 function showLoader() {
-    $('.refresh-btn').html(loader_image);
+    $('.pause-btn').html(loader_image);
 }
 
 function hideLoader() {
-    //$('.refresh-btn').html('');
+    $('.pause-btn').html('');
 }
 
 function showOverallWrap(caller) {
@@ -93,8 +94,11 @@ function sortBy(param, element) {
     loadLeaderboard(global_race, param, global_competitors, global_direction, global_colmode);
 }
 
-function yieldValue(element, newvalue) {
-    if (element.html() != newvalue && !isNaN(newvalue)) {
+function yieldValue(element, newvalue, ignore_zeros) {
+    if (element.html() != newvalue && !isNaN(newvalue) && newvalue != '' && newvalue != 'None') {
+        if (ignore_zeros == true && (newvalue == '0' || newvalue == 0))
+            return;
+
         element.html(newvalue);
     }
 }
@@ -131,18 +135,18 @@ function displayLeaderboard(data) {
             /* now set values independent what has been there before */
             racepos = 1;
             for (racerank in competitor.raceranks) {
-                $('#race-'+racepos+'-rankrow-'+rowid).html(competitor.raceranks[racerank]);
+                yieldValue($('#race-'+racepos+'-rankrow-'+rowid), competitor.raceranks[racerank], true);
 
                 markpos = 1;
                 for (markrank in competitor.markranks[racepos-1]) {
-                    yieldValue($('#race-'+racepos+'-mark-'+markpos+'-row-'+rowid), competitor.markranks[racepos-1][markrank]);
+                    yieldValue($('#race-'+racepos+'-mark-'+markpos+'-row-'+rowid), competitor.markranks[racepos-1][markrank], true);
 
                     legpos = 1;
                     for (legvalue in competitor.legvalues[racepos-1][markpos-1]) {
                         if (legvalue == 0) {
-                            yieldValue($('#race-'+racepos+'-mark-'+markpos+'-legrow-'+rowid), parseFloat(competitor.legvalues[racepos-1][markpos-1][legvalue]).toFixed());
+                            yieldValue($('#race-'+racepos+'-mark-'+markpos+'-legrow-'+rowid), parseFloat(competitor.legvalues[racepos-1][markpos-1][legvalue]).toFixed(), false);
                         } else {
-                            $('#race-'+racepos+'-mark-'+markpos+'-valrow-'+rowid+'-pos-'+(legpos-1)+' span').html(competitor.legvalues[racepos-1][markpos-1][legvalue]);
+                            yieldValue($('#race-'+racepos+'-mark-'+markpos+'-valrow-'+rowid+'-pos-'+(legpos-1)+' span'), competitor.legvalues[racepos-1][markpos-1][legvalue], false);
                         }
                         legpos += 1;
                     }
@@ -156,18 +160,18 @@ function displayLeaderboard(data) {
             $('#clipping-'+rowid+'-2 span').html(competitor.nationality);
 
             for (racerank in competitor.raceranks) {
-                yieldValue($('#race-'+racepos+'-rankrow-'+rowid), competitor.raceranks[racerank]);
+                yieldValue($('#race-'+racepos+'-rankrow-'+rowid), competitor.raceranks[racerank], true);
 
                 markpos = 1;
                 for (markrank in competitor.markranks[racepos-1]) {
-                    yieldValue($('#race-'+racepos+'-mark-'+markpos+'-row-'+rowid), competitor.markranks[racepos-1][markrank]);
+                    yieldValue($('#race-'+racepos+'-mark-'+markpos+'-row-'+rowid), competitor.markranks[racepos-1][markrank], true);
 
                     legpos = 1;
                     for (legvalue in competitor.legvalues[racepos-1][markpos-1]) {
                         if (legvalue == 0) {
-                            yieldValue($('#race-'+racepos+'-mark-'+markpos+'-legrow-'+rowid), parseFloat(competitor.legvalues[racepos-1][markpos-1][legvalue]).toFixed());
+                            yieldValue($('#race-'+racepos+'-mark-'+markpos+'-legrow-'+rowid), parseFloat(competitor.legvalues[racepos-1][markpos-1][legvalue]).toFixed(), false);
                         } else {
-                            yieldValue($('#race-'+racepos+'-mark-'+markpos+'-valrow-'+rowid+'-pos-'+(legpos-1)+' span'), competitor.legvalues[racepos-1][markpos-1][legvalue]);
+                            yieldValue($('#race-'+racepos+'-mark-'+markpos+'-valrow-'+rowid+'-pos-'+(legpos-1)+' span'), competitor.legvalues[racepos-1][markpos-1][legvalue], false);
                         }
                         legpos += 1;
                     }

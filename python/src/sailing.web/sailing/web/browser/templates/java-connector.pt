@@ -70,8 +70,8 @@ When <i>stopping listener</i> it will trigger two methods: If you select a race 
         <div class="field">
             <span>Store where to persist wind tracks</span><br/>
             <select name="windstore">
-                <option value="empty">Do not persist wind</option>
                 <option value="mongo">MongoDB Persister</option>
+                <option value="empty">Do not persist wind</option>
             </select>
         </div>
 

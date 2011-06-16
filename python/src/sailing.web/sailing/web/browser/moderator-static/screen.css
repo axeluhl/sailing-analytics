@@ -220,7 +220,7 @@ span.race-count {
     #main-interface .blue-table .pause-btn {
       display: block;
       height: 39px;
-      background: url(/moderator-static/pause-icon.png) right center no-repeat #484848; }
+      background: url(/moderator-static/freeze.png) right center no-repeat #484848; }
     #main-interface .blue-table .sort-rank {
       display: block;
       height: 39px;
