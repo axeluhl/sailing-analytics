@@ -34,7 +34,7 @@ When <i>stopping listener</i> it will trigger two methods: If you select a race 
             <select name="eventJSONURLselect" onchange="$('input[name=eventJSONURL]').val($('select[name=eventJSONURLselect] option:selected').val())">
                 <option value=""></option>
                 <option value="http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/jsonservice.php">Kiel Week</option>
-                <option value="http://germanmaster.traclive.dk/events/event_20110505_SailingTea/jsonservice.php">Weymouth</option>
+                <option value="http://germanmaster.traclive.dk/events/event_20110505_SailingTea/jsonservice.php">STG Training</option>
             </select>
             <pre style="background-color: #ececec; font-size: 12px;padding: 2px;">
             <tal:for repeat="eventurl view.eventUrlHistory()"> ${eventurl}</tal:for></pre>
@@ -57,7 +57,7 @@ When <i>stopping listener</i> it will trigger two methods: If you select a race 
                     <option value=""></option>
                     <option value="tcp://germanmaster.traclive.dk:1520">Kiel Week</option>
                     <option value="tcp://sapsimulation.tracdev.dk:4420">J80 Race 12</option>
-                    <option value="tcp://germanmaster.traclive.dk:4400">Weymouth</option>
+                    <option value="tcp://germanmaster.traclive.dk:4400">STG Training</option>
                 </select>
             </div>
 
@@ -68,7 +68,7 @@ When <i>stopping listener</i> it will trigger two methods: If you select a race 
                     <option value=""></option>
                     <option value="tcp://germanmaster.traclive.dk:1521">Kiel Week</option>
                     <option value="tcp://sapsimulation.tracdev.dk:4421">J80 Race 12</option>
-                    <option value="tcp://germanmaster.traclive.dk:4401">Weymouth</option>
+                    <option value="tcp://germanmaster.traclive.dk:4401">STG Training</option>
                 </select>
             </div>
     </fieldset>
