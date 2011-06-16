@@ -94,9 +94,13 @@ function sortBy(param, element) {
     loadLeaderboard(global_race, param, global_competitors, global_direction, global_colmode);
 }
 
-function yieldValue(element, newvalue, ignore_zeros) {
-    if (element.html() != newvalue && !isNaN(newvalue) && newvalue != '' && newvalue != 'None') {
+function yieldValue(element, newvalue, ignore_zeros, legvalue) {
+    if (element.html() != newvalue && newvalue != '' && newvalue != 'None') {
         if (ignore_zeros == true && (newvalue == '0' || newvalue == 0))
+            return;
+
+        // special handling for minute shown
+        if (isNaN(newvalue) && newvalue.indexOf(':') == -1)
             return;
 
         element.html(newvalue);
@@ -171,7 +175,7 @@ function displayLeaderboard(data) {
                         if (legvalue == 0) {
                             yieldValue($('#race-'+racepos+'-mark-'+markpos+'-legrow-'+rowid), parseFloat(competitor.legvalues[racepos-1][markpos-1][legvalue]).toFixed(), false);
                         } else {
-                            yieldValue($('#race-'+racepos+'-mark-'+markpos+'-valrow-'+rowid+'-pos-'+(legpos-1)+' span'), competitor.legvalues[racepos-1][markpos-1][legvalue], false);
+                            yieldValue($('#race-'+racepos+'-mark-'+markpos+'-valrow-'+rowid+'-pos-'+(legpos-1)+' span'), competitor.legvalues[racepos-1][markpos-1][legvalue], false, legvalue);
                         }
                         legpos += 1;
                     }

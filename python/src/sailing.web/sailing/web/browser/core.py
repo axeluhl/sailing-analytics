@@ -189,7 +189,9 @@ class BaseView(object):
             val = name[2] % value
 
         if name[0] == 'ETASEC':
-            val = '%.f:%.f' % (int(value) / 60, int(value)-( (int(value)/60)*60 ))
+            val = '%.f:%d' % (int(value) / 60, int(value)-( (int(value)/60)*60 ))
+            if len(val.split(':')[-1]) == 1:
+                val = '%s0' % val
 
         if name[0] == 'GLP' and value > 0:
             val = '+%s' % value
