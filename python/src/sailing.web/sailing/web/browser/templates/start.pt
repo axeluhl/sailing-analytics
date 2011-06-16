@@ -42,16 +42,16 @@
 
         <div id="tabs">
             <ul>
-                <li><a href="/@@/java-connector">Server</a></li>
+                <li><a href="/@@/java-connector"><span>Server</span></a></li>
                 <li><a href="#tab-simulator">Sim</a></li>
-                <li><a href="/@@/wind-settings">Wind</a></li>
-                <li><a href="/@@/udp-configurator">Exp Receiver</a></li>
-                <li><a href="/@@/general-race-info">Info</a></li>
-                <li><a href="/@@/general-competitor-info">Compets</a></li>
-                <li><a href="/@@/map-overview">Map</a></li>
-                <li><a href="/@@/leaderboard">Leaderboard</a></li>
-                <li><a href="/@@/live-info">Live Info</a></li>
-                <li><a href="/@@/database-stats">DB</a></li>
+                <li><a href="/@@/wind-settings"><span>Wind</span></a></li>
+                <li><a href="/@@/udp-configurator"><span>Exp Receiver</span></a></li>
+                <li><a href="/@@/general-race-info"><span>Info</span></a></li>
+                <li><a href="/@@/general-competitor-info"><span>Compets</span></a></li>
+                <li><a href="/@@/map-overview"><span>Map</span></a></li>
+                <li><a href="/@@/leaderboard"><span>Leaderboard</span></a></li>
+                <li><a href="/@@/live-info"><span>Live Info</span></a></li>
+                <li><a href="/@@/database-stats"><span>DB</span></a></li>
             </ul>
 
         <div id="tab-simulator">
@@ -109,6 +109,7 @@
 
             $(document).ready(function() {
                 $('#tabs').tabs({
+                    spinner: 'Loading...',
                     ajaxOptions: {
                         error: function(xhr, status, index, anchor) {
                             $(anchor.hash).html('An unknown error occured. Please check the logs!');

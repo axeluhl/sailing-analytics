@@ -77,6 +77,21 @@ class BaseView(object):
     def parseDatetime(self, dt, format='%m/%d/%Y %H:%M:%S'):
         return datetime.datetime.strptime(dt.strip(), format)
 
+    def serverStatus(self, host, port):
+        conf = URIConfigurator(host, port)
+        conf.setContext(config.MODERATOR)
+        conf.setCommand(config.LIST_EVENTS)
+
+        try:
+            data = jsonByUrl(conf)
+        except Exception, ex:
+            return ''
+
+        if len(data)==0:
+            return ''
+
+        return '(%s)' % ','.join(event['name'] for event in data)
+
     def listenerStarted(self):
         return self.session.get('listener-started', False)
 

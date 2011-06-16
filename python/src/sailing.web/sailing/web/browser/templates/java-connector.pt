@@ -12,14 +12,14 @@ When <i>stopping listener</i> it will trigger two methods: If you select a race 
             <input type="text" id="serverhost" name="host"/>&nbsp;<input id="serverport" type="text" name="port"/>&nbsp;
             <select name="hostport" id="hostport" onchange="$('#serverhost').val($('#hostport option:selected').attr('host'));$('#serverport').val($('#hostport option:selected').attr('port'))">
                 <option host="" port=""></option>
-                <option host="localhost" port="8888">PROD1-INTERN</option>
-                <option host="prod1.kielweek.web4sap.com" port="80">PROD1-EXTERN</option>
-                <option host="localhost" port="8889">PROD2-INTERN</option>
-                <option host="prod2.kielweek.web4sap.com" port="80">PROD2-EXTERN</option>
-                <option host="localhost" port="8887">TEST-INTERN</option>
-                <option host="test.kielweek.web4sap.com" port="80">TEST-EXTERN</option>
-                <option host="localhost" port="8886">DEV-INTERN</option>
-                <option host="dev.kielweek.web4sap.com" port="80">DEV-EXTERN</option>
+                <option host="dev.kielweek.web4sap.com" port="80">DEV-EXTERN ${view.serverStatus('dev.kielweek.web4sap.com', '80')}</option>
+                <option host="test.kielweek.web4sap.com" port="80">TEST-EXTERN ${view.serverStatus('test.kielweek.web4sap.com', '80')}</option>
+                <option host="prod1.kielweek.web4sap.com" port="80">PROD1-EXTERN ${view.serverStatus('prod1.kielweek.web4sap.com', '80')}</option>
+                <option host="prod2.kielweek.web4sap.com" port="80">PROD2-EXTERN ${view.serverStatus('prod2.kielweek.web4sap.com', '80')}</option>
+                <option host="localhost" port="8887">TEST-INTERN ${view.serverStatus('localhost', '8887')}</option>
+                <option host="localhost" port="8886">DEV-INTERN ${view.serverStatus('localhost', '8886')}</option>
+                <option host="localhost" port="8888">PROD1-INTERN ${view.serverStatus('localhost', '8888')}</option>
+                <option host="localhost" port="8889">PROD2-INTERN ${view.serverStatus('localhost', '8889')}</option>
             </select>
         </div>
         <input type="submit" name="listener-event-refresh" value="Connect to already running server" /><br/><br/>
