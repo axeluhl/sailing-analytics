@@ -44,7 +44,7 @@ public class ResultAPITester {
             Calendar cal = new GregorianCalendar(111, 3, 01, 00, 20, 00);
             long StartTimeRace = cal.getTimeInMillis();
             // Set the speed up of the demonstration
-            int speedup = 10;
+            int speedup = 40;
             
             // Instance the resultgenerator using a URL for a specific race
             ResultGenerator generator = new ResultGenerator(new URL("http://germanmaster.traclive.dk/events/event_20110308_SAPWorldCh/clientparams.php?event=event_20110308_SAPWorldCh&race=5ffe619e-4962-11e0-8236-406186cbf87c&ci=&minimize=&LiveDelaySecs="));
@@ -112,6 +112,8 @@ public class ResultAPITester {
                              System.out.println("\t\t\tLatitude: " + item.getLatitude());
                              System.out.println("\t\t\tLongitude: " + item.getLongitude());
                              System.out.println("\t\t\tSpeed: " + item.getSpeed());
+                             System.out.println("\t\t\tVMG: " + item.getVmg());
+                             System.out.println("\t\t\tVMG, averaged: " + item.getVmgAverage30s());
                              System.out.println("\t\t\tFinished: " + item.isHasFinished());
                          }
                      } 
@@ -126,6 +128,12 @@ public class ResultAPITester {
                          // Get a result list per mark
                          for (MarkResult markResult : plr.values()) {
                             System.out.println("\tMark: " + markResult.getMarkName() + " - " + (m+1) + "/" + plr.getMarkCount());
+                            System.out.print("\tLegtype: ");
+                            if (markResult.getLegType() == MarkResult.LEGTYPE_UPWIND) System.out.println("Upwind");
+                            if (markResult.getLegType() == MarkResult.LEGTYPE_DOWNWIND) System.out.println("Downwind");
+                            if (markResult.getLegType() == MarkResult.LEGTYPE_REACHING) System.out.println("Reaching");
+                            if (markResult.getLegType() == MarkResult.LEGTYPE_UNKNOWN) System.out.println("Unknown");
+                            
                             m++;
                             // Get a result item per competitor
                             for (MarkResultItem item : markResult.values()) {

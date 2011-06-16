@@ -2,6 +2,7 @@ package com.sap.sailing.server;
 
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -108,7 +109,7 @@ public class ModeratorApp extends Servlet {
                         JSONObject jsonFix = new JSONObject();
                         jsonFix.put("timepoint", fix.getTimePoint().asMillis());
                         jsonFix.put("latdeg", fix.getPosition().getLatDeg());
-                        jsonFix.put("lngdev", fix.getPosition().getLngDeg());
+                        jsonFix.put("lngdeg", fix.getPosition().getLngDeg());
                         jsonFix.put("truebearingdeg", fix.getSpeed().getBearing().getDegrees());
                         jsonFix.put("knotspeed", fix.getSpeed().getKnots());
                         jsonFixes.add(jsonFix);
@@ -232,6 +233,7 @@ public class ModeratorApp extends Servlet {
                         jsonLeg.put("upordownwindleg", "false");
                     }
                     JSONArray jsonCompetitors = new JSONArray();
+                    Map<Competitor, Integer> ranks = leg.getRanks(timePoint);
                     for (Competitor competitor : event.getCompetitors()) {
                         JSONObject jsonCompetitorInLeg = new JSONObject();
                         TrackedLegOfCompetitor trackedLegOfCompetitor = leg.getTrackedLeg(competitor);
@@ -278,7 +280,7 @@ public class ModeratorApp extends Servlet {
                                 // well, we don't know the wind direction... then no average VMG will be shown...
                             }
                             try {
-                                jsonCompetitorInLeg.put("rank", trackedLegOfCompetitor.getRank(timePoint));
+                                jsonCompetitorInLeg.put("rank", ranks.get(competitor));
                             } catch (RuntimeException re) {
                                 if (re.getCause() != null && re.getCause() instanceof NoWindException) {
                                     // well, we don't know the wind direction, so we can't compute a ranking
@@ -362,21 +364,18 @@ public class ModeratorApp extends Servlet {
                 JSONObject jsonRace = new JSONObject();
                 jsonRace.put("name", race.getName());
                 jsonRace.put("boatclass", race.getBoatClass()==null?"":race.getBoatClass().getName());
-                TimePoint start = getService().getDomainFactory().getTrackedEvent(event).getTrackedRace(race).getStart();
+                TrackedRace trackedRace = getService().getDomainFactory().getOrCreateTrackedEvent(event).getTrackedRace(race);
+                TimePoint start = trackedRace.getStart();
                 jsonRace.put("start", start==null?Long.MAX_VALUE:start.asMillis());
+                if (trackedRace.getFinish() != null) {
+                    jsonRace.put("finish", trackedRace.getFinish().asMillis());
+                }
                 JSONArray jsonLegs = new JSONArray();
                 for (Leg leg : race.getCourse().getLegs()) {
                     JSONObject jsonLeg = new JSONObject();
                     jsonLeg.put("start", leg.getFrom().getName());
                     jsonLeg.put("end", leg.getTo().getName());
                     jsonLegs.add(jsonLeg);
-                }
-                TrackedRace trackedRace = getService().getDomainFactory().getOrCreateTrackedEvent(event).getTrackedRace(race);
-                if (trackedRace.getStart() != null) {
-                    jsonRace.put("start", trackedRace.getStart().asMillis());
-                }
-                if (trackedRace.getFinish() != null) {
-                    jsonRace.put("finish", trackedRace.getFinish().asMillis());
                 }
                 jsonRace.put("legs", jsonLegs);
                 jsonRaces.add(jsonRace);

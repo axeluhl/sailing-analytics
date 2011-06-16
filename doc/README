@@ -40,6 +40,8 @@ Inbound Port Assignments
      80:    apache
      5902:  vnc
      8026:  Python "dev" instance
+     ....:  Python "test" instance
+     ....:  Python "prod" instance
      8886:  servlet container of "dev" Java instance
      8887:  servlet container of "test" Java instance
      8888:  servlet container of "prod1" Java instance
@@ -61,4 +63,570 @@ bundles that implement TracTrac connectivity, Expedition wind
 connectivity, sailing domain knowledge, race tracking capabilities as
 well as servlets with RESTful APIs for use by web clients.
 
-The 
+Most data is managed on the TracTrac servers. The only data currently
+stored persistently by the Java component is the wind data received
+through the supported channels. This helps in re-playing a race later
+and understanding the wind conditions at the time which should support
+fine-grained after-race analysis.
+
+* Jetty
+
+A Jetty servlet container runs embedded in Equinox. Servlets are
+registered (currently in the com.sap.sailing.server bundle) using the
+org.eclipse.equinox.http.registry.servlets extension point. See
+com.sap.sailing.server/plugin.xml for the currently registered
+servlets.
+
+Static content to be provided by Jetty is also registered as an
+"extension" for the org.eclipse.equinox.http.registry.resources
+extension point. We have a few very simple forms registered that aid
+in testing the web application provided by Jetty.
+
+The port on which Jetty listens for incoming connections is configured
+using the system / bundle property org.osgi.service.http.port.
+
+* Binary Libraries
+
+The Java component as of this writing has two bundles that wrap
+binary libraries: com.tractrac.clientmodule and com.mongodb.driver.
+
+* External Communications
+
+The com.tractrac.clientmodule bundle is used to obtain data about
+races / regattas and register for the corresponding live data
+feeds. These feeds contain information about boat positions, race
+course changes such as marks being moved, replaced or added, mark
+positions, mark passings and race start/stop events.
+
+To improve rankings and predictions, wind data is tracked by the Java
+component. Wind can be fed through wind sources. Currently supported
+are "WEB" and "EXPEDITION." The WEB wind source is a REST API by which
+a single wind datum with optional position specification, time point,
+wind bearing and speed can be provided. EXPEDITION uses a connector
+bundle (com.sap.sailing.expeditionconnector) to receive wind data via
+UDP from one or more Expedition instances.
+
+The Expedition connector can listen on inbound UDP ports for messages
+sent point-to-point or using UDP broadcast by the Expedition tool
+which in turn receives its data from boat-mounted sensors and other
+devices, such as the Nexus on-board system. Expedition enriches this
+data and sends selected attributes over the network.
+
+The connector understands the Expedition data feed format, supports
+Expedition checksum verification and knows about the most important
+attribute IDs such as true wind bearing, GPS time, latitude and
+longitude.
+
+* Storing Wind in MongoDB
+
+The Java component piggy-backs on the MongoDB persistence solution
+installed mainly for the Python server. Storing wind is helpful
+particularly for post-race analysis and to support the case of a
+re-start of the Java component(s) on the server, e.g., in case an
+update or a quick-fix needs to be installed.
+
+Since all other data can be reloaded from the TracTrac server, we
+don't store that redundantly. But the wind information isn't retrieved
+from TracTrac and hence needs to be stored on our server.
+
+By default we use the database named "winddb". The MongoDB settings
+can be configured using system / bundle properties:
+
+  mongo.port (default is 27017)
+  mongo.hostname (default is 127.0.0.1)
+  mongo.dbname (default is winddb)
+
+* List of REST APIs and their parameters
+
+The distribution of services across the /admin and /moderator servlet
+is currently not well sorted out and requires some clean-up. The
+general idea is to have administrative tasks accessible through the
+/admin servlet whereas things that the moderator will see are accessed
+through the /moderator servlet. We may want to consider merging both
+into one in the future.
+
+/admin
+  action=addevent
+         2014:  wind input for "prod2" Java instance
+
+Java
+----
+
+We use Equinox as an OSGi container into which we deploy a set of
+bundles that implement TracTrac connectivity, Expedition wind
+connectivity, sailing domain knowledge, race tracking capabilities as
+well as servlets with RESTful APIs for use by web clients.
+
+Most data is managed on the TracTrac servers. The only data currently
+stored persistently by the Java component is the wind data received
+through the supported channels. This helps in re-playing a race later
+and understanding the wind conditions at the time which should support
+fine-grained after-race analysis.
+
+* Jetty
+
+A Jetty servlet container runs embedded in Equinox. Servlets are
+registered (currently in the com.sap.sailing.server bundle) using the
+org.eclipse.equinox.http.registry.servlets extension point. See
+com.sap.sailing.server/plugin.xml for the currently registered
+servlets.
+
+Static content to be provided by Jetty is also registered as an
+"extension" for the org.eclipse.equinox.http.registry.resources
+extension point. We have a few very simple forms registered that aid
+in testing the web application provided by Jetty.
+
+The port on which Jetty listens for incoming connections is configured
+using the system / bundle property org.osgi.service.http.port.
+
+* Binary Libraries
+
+The Java component as of this writing has two bundles that wrap
+binary libraries: com.tractrac.clientmodule and com.mongodb.driver.
+
+* External Communications
+
+The com.tractrac.clientmodule bundle is used to obtain data about
+races / regattas and register for the corresponding live data
+feeds. These feeds contain information about boat positions, race
+course changes such as marks being moved, replaced or added, mark
+positions, mark passings and race start/stop events.
+
+To improve rankings and predictions, wind data is tracked by the Java
+component. Wind can be fed through wind sources. Currently supported
+are "WEB" and "EXPEDITION." The WEB wind source is a REST API by which
+a single wind datum with optional position specification, time point,
+wind bearing and speed can be provided. EXPEDITION uses a connector
+bundle (com.sap.sailing.expeditionconnector) to receive wind data via
+UDP from one or more Expedition instances.
+
+The Expedition connector can listen on inbound UDP ports for messages
+sent point-to-point or using UDP broadcast by the Expedition tool
+which in turn receives its data from boat-mounted sensors and other
+devices, such as the Nexus on-board system. Expedition enriches this
+data and sends selected attributes over the network.
+
+The connector understands the Expedition data feed format, supports
+Expedition checksum verification and knows about the most important
+attribute IDs such as true wind bearing, GPS time, latitude and
+longitude.
+
+For converting magnetic bearings to true bearings the
+com.sap.sailing.declination bundle can talk to a web page at
+http://www.ngdc.noaa.gov/geomagmodels/struts/calcDeclination. It is
+possible to download and store declinations in a file shipped with the
+bundle. The resources/ folder in the bundle's source holds files named
+"declination-yyyy.txt" where "yyyy" represents the year of which the
+file holds declination values. For 2011 there is a file that holds
+declination values and annual change rates for a 1x1 degree grid. If
+values of greater precision are requested, this may result in online
+requests. After a timeout, interpolation/extrapolation based on the
+known values and annual change rates is tried.
+
+* Storing Wind in MongoDB
+
+The Java component piggy-backs on the MongoDB persistence solution
+installed mainly for the Python server. Storing wind is helpful
+particularly for post-race analysis and to support the case of a
+re-start of the Java component(s) on the server, e.g., in case an
+update or a quick-fix needs to be installed.
+
+Since all other data can be reloaded from the TracTrac server, we
+don't store that redundantly. But the wind information isn't retrieved
+from TracTrac and hence needs to be stored on our server.
+
+By default we use the database named "winddb". The MongoDB settings
+can be configured using system / bundle properties:
+
+  mongo.port (default is 27017)
+  mongo.hostname (default is 127.0.0.1)
+  mongo.dbname (default is winddb)
+
+* List of REST APIs and their parameters
+
+The distribution of services across the /admin and /moderator servlet
+is currently not well sorted out and requires some clean-up. The
+general idea is to have administrative tasks accessible through the
+/admin servlet whereas things that the moderator will see are accessed
+through the /moderator servlet. We may want to consider merging both
+into one in the future.
+
+/admin
+  action=addevent: starts tracking all races described in the document received
+  		  from the eventJSONURL to the server instance.
+    eventJSONURL: the URL from where metadata about the entire regatta
+                  can be obtained; the resulting document includes the
+		  parameter and simulation URLs for the individual
+ 		  races that are part of the event/regatta.
+    liveURI:      the live data URI for the TracTrac server
+    storedURI:	  the stored data URI for the TracTrac server; usually
+    		  the port number of this URI is that of liveURI + 1
+  action=stopevent: stops tracking of all races of the event; this
+                  also stops all wind tracking for the races of the event
+    eventname:    name of the event, as returned by the "listevents"
+    		  action on the /moderator servlet
+  action=addrace: starts tracking a single race; if other races of
+  		  the same event/regatta are already being tracked,
+		  the race is added to the event
+    paramURL:     the URL from where metadata about the race
+                  can be obtained; the resulting document includes
+		  UUIDs of waypoints, competitors, etc.
+    liveURI:      the live data URI for the TracTrac server
+    storedURI:	  the stored data URI for the TracTrac server; usually
+    		  the port number of this URI is that of liveURI + 1
+  action=stoprace: stops tracking of a single race, also stopping the
+  		  wind trackers that were started for this race; other
+ 		  races of the same event that were being tracked will
+		  continue being tracked.
+    eventname:    name of the event, as returned by the "listevents"
+    		  action on the /moderator servlet
+    racename:     name of the race, as returned by the "listevents"
+    		  action on the /moderator servlet
+  action=receiveexpeditionwind: starts a wind tracker that receives
+  		  wind data through a UDP port from an Expedition
+		  client; the wind is fed into a wind track for the
+		  race specified by eventname/racename.
+    eventname:    name of the event, as returned by the "listevents"
+    		  action on the /moderator servlet
+    racename:     name of the race, as returned by the "listevents"
+    		  action on the /moderator servlet
+    port:         the UDP port on which to listen for incoming
+    		  Expedition messages
+    correctexpeditionwindbearingbydeclination: optional; if "true",
+                  the wind bearings received from Expedition will be
+  		  corrected by the magnetic declination for the
+		  time and location specified by the Expedition
+		  message.
+  action=stopreceivingexpeditionwind: stops an expedition wind tracker
+  		  for the race specified by eventname/racename
+    eventname:    name of the event, as returned by the "listevents"
+    		  action on the /moderator servlet
+    racename:     name of the race, as returned by the "listevents"
+    		  action on the /moderator servlet
+  action=listwindtrackers: lists all wind trackers currently
+                  registered in the server instance. The output
+		  structure is an array of {eventname,racename,port}
+		  objects.
+  action=setwind: feeds a single wind measurement into the WEB
+  		  wind track of the race specified. If no time is
+		  specified, the measurement is assumed to have been
+		  taken at the current time.
+    eventname:    name of the event, as returned by the "listevents"
+    		  action on the /moderator servlet
+    racename:     name of the race, as returned by the "listevents"
+    		  action on the /moderator servlet
+    truebearingdegrees: as the name suggests; can have decimal places
+    knotspeed:    optional; as the name suggests; can have decimal
+    		  places. If omitted, 1kn is used as a default
+    latdeg/lngdeg: optional; latitude and longitude in degrees,
+    		  optionally with decimal places
+    time:         optional; time stamp for the wind measurement
+                  in ISO format in arbitrary precision; takes
+ 		  precedence over a "timeasmillis" parameter.
+		  Example values:
+                    2011-05-27T13:27:19.283
+		    2010-06-30
+		    2011-08-01T15:44:00
+    timeasmillis: optional; time stamp for the wind measurement
+    		  in milliseconds since 1970-01-01T00:00:00 UTC
+  action=removewind: removes a single wind measurement with the
+                  millisecond-exact time stamp again from the
+  		  specified race's specified wind source. A time
+		  should be provided, although the current time
+		  will be used as the default. However, it's
+		  unlikely that this will match the time point
+		  of the wind to remove by the millisecond.
+    eventname:    name of the event, as returned by the "listevents"
+    		  action on the /moderator servlet
+    racename:     name of the race, as returned by the "listevents"
+    		  action on the /moderator servlet
+    sourcename:	  name of the wind source, such as WEB or EXPEDITION
+    time:         time stamp for the wind measurement
+                  in ISO format in arbitrary precision; takes
+ 		  precedence over a "timeasmillis" parameter.
+		  Example values:
+                    2011-05-27T13:27:19.283
+		    2010-06-30
+		    2011-08-01T15:44:00
+    timeasmillis: time stamp for the wind measurement
+    		  in milliseconds since 1970-01-01T00:00:00 UTC
+  action=selectwindsource: selects the wind track to be used for
+                  all computations for the race specified. This can
+		  be used to switch, e.g., from EXPEDITION-provided
+		  wind to manually or BeTomorrow-provided wind
+		  information.
+    eventname:    name of the event, as returned by the "listevents"
+    		  action on the /moderator servlet
+    racename:     name of the race, as returned by the "listevents"
+    		  action on the /moderator servlet
+    sourcename:	  name of the wind source, such as WEB or EXPEDITION
+  action=showwind: shows the wind tracks that exist for the race
+  		  specified. The output is a JSON object with the
+		  following structure:
+		    { "currentwindsource": WEB|EXPEDITION,
+		      [ "WEB": { "truebearingdeg": ...,
+                                 "knotspeed": ...,
+				 "meterspersecondspeed": ...,
+				 "timepoint": ... (optional, if time point is known),
+				 "dampenedtruebearingdeg": ... (optional),
+				 "dampenedknotspeed": ... (optional),
+				 "dampenedmeterspersecondspeed": ... (optional)
+				 "latdeg": ... (optional, if position known),
+				 "lngdeg": ... (optional, if position known)
+				}
+			"EXPEDITION": { ... }
+		    }
+    eventname:    name of the event, as returned by the "listevents"
+    		  action on the /moderator servlet
+    racename:     name of the race, as returned by the "listevents"
+    		  action on the /moderator servlet
+  action=addwindtomarksforonehour: Can be used to translate one or
+                  more positions in the direction and distance that
+		  the wind blows at the position's location during
+		  one hour. One use case is drawing the wind lines
+		  through the mark positions. If no time point
+		  is specified, the current time is used for the
+		  wind lookup. The result is a JSON array with
+		  objects of the following structure:
+		    { "markLatDeg": ...,    // position provided
+		      "markLngDeg": ...,    // position provided
+		      "windTrueBearingDeg": ..., // wind info
+		      "windKnotSpeed": ...,      // wind info
+		      "toLatDeg": ...,      // translated position
+		      "toLngDeg" }	    // translated position
+    eventname:    name of the event, as returned by the "listevents"
+    		  action on the /moderator servlet
+    racename:     name of the race, as returned by the "listevents"
+    		  action on the /moderator servlet
+    time:         optional; time stamp for the wind measurement
+                  in ISO format in arbitrary precision; takes
+ 		  precedence over a "timeasmillis" parameter.
+		  Example values:
+                    2011-05-27T13:27:19.283
+		    2010-06-30
+		    2011-08-01T15:44:00
+    timeasmillis: optional; time stamp for the wind measurement
+    		  in milliseconds since 1970-01-01T00:00:00 UTC
+    latdeg/lngdeg: can occur multiple times with an equal number of
+    		  latdeg and lngdeg parameter occurrences. Specifies
+		  the positions to be translated.
+
+
+    
+
+/moderator 
+  action=listevents: shows the events with their races that are
+                  currently being tracked by this server instance. The
+ 		  result is a JSON array with entries describing the
+		  events like this:
+  		    { "name": ...,	// event name
+		      "boatclass": ..., // optional; name of boat class
+		      "competitors": [  // the event's competitors
+		        { "name", ...,  // competitor's name
+			  "nationality": ...,
+			  "team": [ {   // the sailors forming the team
+			    "name": ...,
+			    "description": ... } ... ] } ... ]
+		      "races": [        // list of races in the event
+		        "name": ...,
+			"boatclass": ...,
+			"start": ...,   // race start time as millisecond
+				 	// timestamp, Integer.MAX_VALUE
+					// if not started yet
+			"finish": ...,  // optional; if race finish time
+				  	// is known, this is the
+					// milliseconds timestamp of
+					// when the race finished
+		        "legs": [ {     // legs in the course's order
+                          "start": ..., // name of the leg start mark
+			  "end": ... }  // name of the leg end mark
+                          ... ]
+                      ... ]
+  action=[        // list of races in the event
+		        "name": ...,
+			"boatclass": ...,
+			"start": ...,   // race start time as millisecond
+				 	// timestamp, Integer.MAX_VALUE
+					// if not started yet
+			"finish": ...,  // optional; if race finish time
+				  	// is known, this is the
+					// milliseconds timestamp of
+					// when the race finished
+		        "legs": [ {     // legs in the course's order
+                          "start": ..., // name of the leg start mark
+			  "end": ... }  // name of the leg end mark
+                          ... ]
+                      ... ]
+  action=showboatpositions: outputs a JSON object describing the boats
+                  with their positions for the race specified. Output
+		  format:
+		    { "name": ...,      // race name
+                      "competitors": [ {
+                        "name": ...,
+			"track": [ {
+			  "timepoint": ..., // millisecond timestamp
+			  "latdeg": ...,    // boat position
+			  "lngdeg": ...,
+			  "truebearingdeg": ...,   // true boat bearing in degrees
+			  "knotspeed": ... } ... ] // boat speed in knots
+		        } ... ] }
+    eventname:    name of the event, as returned by the "listevents"
+    		  action on the /moderator servlet
+    racename:     name of the race, as returned by the "listevents"
+    		  action on the /moderator servlet
+    since/sinceasmillis: optional; ISO / milliseconds timestamp
+    	          describing the earliest time point for boat
+		  positions to be returned; if not specified,
+		  known boat positions are listed from the
+		  "beginning of time"
+    to/toasmillis: optional; optional; ISO / milliseconds timestamp
+    	          describing the latest time point for boat
+		  positions to be returned; if not specified,
+		  known boat positions are listed until the
+		  "end of time"
+  action=showwaypoints: shows the positions of a race's marks / buoys
+   		  at a specified point in time; if no time/timeasmillis
+		  is provided, the race start time is used; if that is
+		  not available, the start of tracking is used;
+		  if that is not available either, the time point
+		  of the newest event is used; if that is not
+		  available, the current time is used. The output
+		  is an array of JSON objects with following format each:
+		    { "name": ...,    	      // waypoint name
+       		      "buoys": [ {	      // usually one or two buoys
+		        "name": ...,	      // buoy name
+			"lat": ...,	      // optional; if buoy pos known
+			"lng": ... } ... ] }  // optionsl; if buoy pos known
+    eventname:    name of the event, as returned by the "listevents"
+    		  action on the /moderator servlet
+    racename:     name of the race, as returned by the "listevents"
+    		  action on the /moderator servlet
+    time:         optional; time stamp for the wind measurement
+                  in ISO format in arbitrary precision; takes
+ 		  precedence over a "timeasmillis" parameter.
+		  Example values:
+                    2011-05-27T13:27:19.283
+		    2010-06-30
+		    2011-08-01T15:44:00
+    timeasmillis: optional; time stamp for the wind measurement
+    		  in milliseconds since 1970-01-01T00:00:00 UTC
+  action=showrace: shows lots of tracking information about a
+  		  tracked race at a given point in time. If no
+		  time point is provided (time / timeasmillis),
+		  the time point of the event received last is
+		  used. If no such time point exists, the current
+		  time is used. The output has the following
+		  structure:
+		    { "name": ...,             // race name
+		      "startoftracking": ...,  // millisecond timestamp
+		      "start": ...,	       // millisecond timestamp
+		      "finish": ..., 	       // millisecond timestamp
+		      "timeofnewestevent": ...,// greatest millisecond timestamp
+		      			       // of any event received so far
+		      "timeoflastevent": ...,  // millisecond timestamp
+		      			       // of the event received last
+		      "updatecount": ...,      // integer number telling
+		      		               // the number of events
+					       // received so far; a bit
+					       // like a "transaction time"
+		      "wind": {		       // optional, if wind set
+		        "truebearingdeg": ...,
+			"knotspeed": ...,
+			"meterspersecondspeed": ...,
+			"source": ... },
+		      "legs": [ {              // leg tracking info per leg
+		        "from": ...,	       // name of from-waypoint
+			"fromwaypointid": ..., // a unique integer for the
+					       // from-waypoint
+			"to": ...,	       // name of to-waypoint
+			"towaypointid": ...,   // a unique integer for the
+					       // from-waypoint
+			"upordownwindleg": ...,// true or false
+			"competitors": [ {     // competitor list
+			  "name": ...,
+			  	               // current SOG is optional
+			  "currentSpeedOverGroundInKnots": ...,
+			  "currentSpeedOverGroundInMetersPerSecond": ...,
+			                       // average SOG is optionsl
+			  "averageSpeedOverGroundInKnots": ...,
+			  "averageSpeedOverGroundInMetersPerSecond": ...,
+			                       // distance traveled is optional
+			  "distanceTraveledOverGroundInMeters": ...,
+			                       // VMG info is optional
+			  "velocityMadeGoodInKnots": ...,
+			  "velocityMadeGoodInMetersPerSecond": ...,
+			  "averageVelocityMadeGoodInKnots": ...,
+			  "averageVelocityMadeGoodInMetersPerSecond": ...,
+			  "rank": ...,         // competitor's rank in this leg
+			  "gapToLeaderInSeconds": ..., // optional, only if wind is known
+			  "estimatedTimeToNextMarkInSeconds": ..., // optional, only if wind is known
+			  "windwardDistanceToGoInMeters": ..., // optional, only if wind is known
+			  "started": ...,      // true or false, tells if competitor has started leg
+			  "finished": ...      // true of false, tells if competitor has finished leg
+			   } ... ]  // competitor's rank in leg
+			} ... ],
+			"ranks": [ {           // the overall total ranks, across legs
+			  "competitor": ...,   // name of competitor
+			  "rank": ... } ... ] }
+    eventname:    name of the event, as returned by the "listevents"
+    		  action on the /moderator servlet
+    racename:     name of the race, as returned by the "listevents"
+    		  action on the /moderator servlet
+    time:         optional; time stamp for the wind measurement
+                  in ISO format in arbitrary precision; takes
+ 		  precedence over a "timeasmillis" parameter.
+		  Example values:
+                    2011-05-27T13:27:19.283
+		    2010-06-30
+		    2011-08-01T15:44:00
+    timeasmillis: optional; time stamp for the wind measurement
+    		  in milliseconds since 1970-01-01T00:00:00 UTC
+    sinceupdate:  optional; an integer number that if provided,
+    		  causes the call to block on the server
+    		  until the update count returned will be greater
+		  than the value provided for sinceupdate.
+
+* Server Directory Structures
+
+git/:
+      This is our git "hub" directory with checked-out workspace.
+      We use it also as the directory to check out a specific branch
+      that we want to build using Maven.
+
+servers/:
+      The four Java server instances dev, test, prod1 and prod2 have their
+      directories here.
+  [dev|test|prod1|prod2]/
+    configuration/
+      config.ini: contains the set of initial bundles to launch upon
+                  server start as well as bundle properties such as the
+		  HTTP port to listen to and the mongo.port property
+    start: the start script used to launch the respective server instance
+    update: used to copy the built artifacts from the corresponding
+            maven-repositories/ subdirectory to the plugins/ subdirectory
+    plugins/: contains the JAR files for the server instance
+
+maven-repositories/
+  [dev|test|prod]/: the target repositories for the "mvn deploy" tasks
+                    for the respective git branch (dev|test|prod)
+
+* Maven Environment
+
+Our Java OSGi bundles are built and tested using the Apache Maven build system together
+with the Tycho plugin for Maven. The bundles carrying the JUnit tests (typically ending
+with *.test in their bundle name) are built using eclipse-test-plugin as packaging
+type. The regular OSGi bundles are built using eclipse-plugin as packaging type.
+
+When invoking "mvn install" in the ~trac/git/java directory, all bundles for the Java
+server will be built and the tests will start to run. A report is printed at the end. If
+it decides for "SUCCESS" then all builds and tests finished successfully. However, this
+hasn't had any effect on any of the running servers, not even the maven repository.
+
+For that, see the respective instructions in the ADMIN file located next to this README
+file (search for "mvn deploy").
+
+
+Python
+------
+
+TODO Simon to write a few warm words here...

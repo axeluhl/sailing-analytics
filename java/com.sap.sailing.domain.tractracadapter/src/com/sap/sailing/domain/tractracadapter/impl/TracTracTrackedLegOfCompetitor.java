@@ -9,6 +9,7 @@ import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.Speed;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.TimePoint;
+import com.sap.sailing.domain.base.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.base.impl.KilometersPerHourSpeedImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
@@ -126,8 +127,8 @@ public class TracTracTrackedLegOfCompetitor implements TrackedLegOfCompetitor {
 
     @Override
     public Speed getVelocityMadeGood(TimePoint timePoint) throws NoWindException {
-        // TODO Auto-generated method stub; problem: live VMG is not delivered by new ResultAPI
-        return null;
+        return new KnotSpeedWithBearingImpl(getLiveResults(timePoint).getVmgAverage30s(),
+                new DegreeBearingImpl(getLiveResults(timePoint).getHeading()));
     }
 
     @Override

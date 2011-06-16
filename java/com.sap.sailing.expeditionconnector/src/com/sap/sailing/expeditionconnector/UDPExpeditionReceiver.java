@@ -127,7 +127,7 @@ public class UDPExpeditionReceiver implements Runnable {
                 // by subtracting the last diff from now
                 defaultForMessageTimePoint = new MillisecondsTimePoint(now - diff);
             } else {
-                defaultForMessageTimePoint = MillisecondsTimePoint.now();
+                defaultForMessageTimePoint = null;
             }
             for (int i = 0; i < variablesAndValuesInterleaved.length; i++) {
                 int variableID = Integer.valueOf(variablesAndValuesInterleaved[i++]);
@@ -136,7 +136,12 @@ public class UDPExpeditionReceiver implements Runnable {
             }
             int checksum = Integer.valueOf(m.group(m.groupCount()), 16);
             valid = valid && checksumOk(checksum, packetAsString);
-            ExpeditionMessageImpl result = new ExpeditionMessageImpl(boatID, values, valid, defaultForMessageTimePoint);
+            ExpeditionMessageImpl result;
+            if (defaultForMessageTimePoint == null) {
+                result = new ExpeditionMessageImpl(boatID, values, valid);
+            } else {
+                result = new ExpeditionMessageImpl(boatID, values, valid, defaultForMessageTimePoint);
+            }
             if (result.hasValue(ExpeditionMessage.ID_GPS_TIME)) {
                 // an original GPS time stamp; then remember the difference between now and the time stamp
                 timeStampOfLastMessageReceived.put(boatID, now-result.getTimePoint().asMillis());
