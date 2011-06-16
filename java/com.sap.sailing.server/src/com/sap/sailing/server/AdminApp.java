@@ -9,6 +9,7 @@ import java.net.URL;
 import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.util.Iterator;
+import java.util.List;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -38,6 +39,7 @@ import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
+import com.sap.sailing.domain.tractracadapter.RaceRecord;
 import com.sap.sailing.mongodb.MongoObjectFactory;
 import com.sap.sailing.mongodb.MongoWindStoreFactory;
 import com.sap.sailing.server.util.InvalidDateException;
@@ -51,6 +53,8 @@ public class AdminApp extends Servlet {
     private static final String ACTION_NAME_ADD_EVENT = "addevent";
 
     private static final String ACTION_NAME_ADD_RACE = "addrace";
+    
+    private static final String ACTION_NAME_LIST_RACES_IN_EVENT = "listracesinevent";
 
     private static final String ACTION_NAME_STOP_EVENT = "stopevent";
     
@@ -120,6 +124,8 @@ public class AdminApp extends Servlet {
                     stopEvent(req, resp);
                 } else if (ACTION_NAME_ADD_RACE.equals(action)) {
                     addRace(req, resp);
+                } else if (ACTION_NAME_LIST_RACES_IN_EVENT.equals(action)) {
+                    listRacesInEvent(req, resp);
                 } else if (ACTION_NAME_STOP_RACE.equals(action)) {
                     stopRace(req, resp);
                 } else if (ACTION_NAME_SUBSCRIBE_RACE_FOR_EXPEDITION_WIND.equals(action)) {
@@ -150,6 +156,21 @@ public class AdminApp extends Servlet {
         }
     }
     
+    private void listRacesInEvent(HttpServletRequest req, HttpServletResponse resp) throws IOException, ParseException, org.json.simple.parser.ParseException {
+        URL jsonURL = new URL(req.getParameter(PARAM_NAME_EVENT_JSON_URL));
+        List<RaceRecord> raceRecords = getService().getRaceRecords(jsonURL);
+        JSONArray result = new JSONArray();
+        for (RaceRecord raceRecord : raceRecords) {
+            JSONObject jsonRaceRecord = new JSONObject();
+            jsonRaceRecord.put("name", raceRecord.getName());
+            jsonRaceRecord.put("ID", raceRecord.getID());
+            jsonRaceRecord.put("paramURL", raceRecord.getParamURL());
+            jsonRaceRecord.put("replayURL", raceRecord.getReplayURL());
+            result.add(jsonRaceRecord);
+        }
+        result.writeJSONString(resp.getWriter());
+    }
+
     private void addWindToMarks(HttpServletRequest req, HttpServletResponse resp) throws IOException,
             InvalidDateException, NoWindException {
     Event event = getEvent(req);

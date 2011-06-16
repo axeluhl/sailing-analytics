@@ -8,6 +8,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.ParseException;
+import java.util.List;
 
 import com.sap.sailing.declination.DeclinationService;
 import com.sap.sailing.domain.base.Event;
@@ -17,6 +18,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.RaceHandle;
+import com.sap.sailing.domain.tractracadapter.RaceRecord;
 import com.sap.sailing.domain.tractracadapter.RaceTracker;
 import com.sap.sailing.util.Util.Triple;
 
@@ -110,5 +112,12 @@ public interface RacingEventService {
     void stopTrackingWind(Event event, RaceDefinition race) throws SocketException, IOException;
 
     Iterable<Triple<Event, RaceDefinition, Integer>> getWindTrackedRaces();
+
+    /**
+     * For the JSON URL of an account / event, lists the paramURLs that can be used for {@link #addRace(URL, URI, URI, WindStore)}
+     * calls to individually start tracking races of this event, rather than tracking <em>all</em> races in the event which
+     * is hardly ever useful.
+     */
+    List<RaceRecord> getRaceRecords(URL jsonURL) throws IOException, ParseException, org.json.simple.parser.ParseException;
 
 }
