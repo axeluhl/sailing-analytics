@@ -249,4 +249,10 @@ public class MockedTrackedRace implements DynamicTrackedRace {
         return null;
     }
 
+    @Override
+    public void setMillisecondsOverWhichToAverageSpeed(long millisecondsOverWhichToAverageSpeed) {
+        // TODO Auto-generated method stub
+        
+    }
+
 }

@@ -8,11 +8,13 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.tracking.DynamicTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFix;
@@ -49,10 +51,28 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
         track.addGPSFix(fix); // the track notifies this tracked race which in turn notifies its listeners
         updated(fix.getTimePoint());
     }
+    
+    @Override
+    public void setMillisecondsOverWhichToAverageSpeed(long millisecondsOverWhichToAverageSpeed) {
+        for (Competitor competitor : getRace().getCompetitors()) {
+            getTrack(competitor).setMillisecondsOverWhichToAverage(millisecondsOverWhichToAverageSpeed);
+        }
+        for (Waypoint waypoint : getRace().getCourse().getWaypoints()) {
+            for (Buoy buoy : waypoint.getBuoys()) {
+                getTrack(buoy).setMillisecondsOverWhichToAverage(millisecondsOverWhichToAverageSpeed);
+            }
+        }
+        updated(MillisecondsTimePoint.now());
+    }
 
     @Override
     public DynamicTrack<Competitor, GPSFixMoving> getTrack(Competitor competitor) {
         return (DynamicTrack<Competitor, GPSFixMoving>) super.getTrack(competitor);
+    }
+    
+    @Override
+    public DynamicTrack<Buoy, GPSFix> getTrack(Buoy buoy) {
+        return (DynamicTrack<Buoy, GPSFix>) super.getTrack(buoy);
     }
     
     private synchronized Set<RaceChangeListener<Competitor>> getListeners() {
@@ -85,6 +105,17 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
             } catch (Throwable t) {
                 logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + t.getMessage());
                 logger.throwing(DynamicTrackedRaceImpl.class.getName(), "notifyListeners(Wind)", t);
+            }
+        }
+    }
+
+    private void notifyListeners(long oldMillisecondsOverWhichToAverageSpeed, long newMillisecondsOverWhichToAverageSpeed) {
+        for (RaceChangeListener<Competitor> listener : getListeners()) {
+            try {
+                listener.averagingChanged(oldMillisecondsOverWhichToAverageSpeed, newMillisecondsOverWhichToAverageSpeed);
+            } catch (Throwable t) {
+                logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + t.getMessage());
+                logger.throwing(DynamicTrackedRaceImpl.class.getName(), "notifyListeners(long, long)", t);
             }
         }
     }
@@ -165,6 +196,11 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     @Override
     public void gpsFixReceived(GPSFix fix, Competitor competitor) {
         notifyListeners(fix, competitor);
+    }
+
+    @Override
+    public void averagingChanged(long oldMillisecondsOverWhichToAverage, long newMillisecondsOverWhichToAverage) {
+        notifyListeners(oldMillisecondsOverWhichToAverage, newMillisecondsOverWhichToAverage);
     }
 
     @Override

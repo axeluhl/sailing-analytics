@@ -18,7 +18,7 @@ import com.sap.sailing.domain.tracking.GPSFixTrack;
 
 public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl<FixType> implements GPSFixTrack<ItemType, FixType> {
     private final ItemType trackedItem;
-    private final long millisecondsOverWhichToAverage;
+    private long millisecondsOverWhichToAverage;
 
     public GPSFixTrackImpl(ItemType trackedItem, long millisecondsOverWhichToAverage) {
         super();
@@ -34,6 +34,10 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         public Position getPosition() {
             return null;
         }
+    }
+    
+    protected void setMillisecondsOverWhichToAverage(long millisecondsOverWhichToAverage) {
+        this.millisecondsOverWhichToAverage = millisecondsOverWhichToAverage;
     }
     
     @Override
