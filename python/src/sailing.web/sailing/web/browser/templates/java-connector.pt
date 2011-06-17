@@ -111,12 +111,12 @@ When <i>stopping listener</i> it will trigger two methods: If you select a race 
         Race: 
         <select name="race">
             <tal:for repeat="race view.allRacesFor()">
-            <option value=""></option>
             <option value="${race}">${race}</option>
             </tal:for>
         </select>
         &nbsp;
-        Leaderboard-Default: ${view.currentLeaderboardEvent() and view.currentLeaderboardEvent().name or 'N/A'}
+        Leaderboard-Default: ${view.currentLeaderboardEvent() and view.currentLeaderboardEvent().name or 'N/A'}&nbsp;
+        <a target="_blank" href="${request.application_url}/@@/leaderboard-live">Show Leaderboard</a>
         <br/><br/>
 
         <input type="submit" name="leaderboard-default-event" style="background-color: green; color: white;" value="Set event as Leaderboard default"/>&nbsp;
