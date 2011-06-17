@@ -41,6 +41,7 @@ function liveRefresh() {
 }
 
 function toggleListener() {
+    resizeDocument();
     $('#refresh-button').toggleClass('refresh');
     if (!$('#refresh-button').hasClass('refresh')) {
         $('#refresh-button').css('background-image', 'url(/moderator-static/pause-btn.png)');
@@ -118,7 +119,7 @@ function yieldValue(element, newvalue, ignore_zeros, alternate_value) {
         }
 
         // special handling for minute shown
-        if (isNaN(newvalue) && newvalue.indexOf(':') == -1)
+        if (isNaN(newvalue) && newvalue.indexOf(':') == -1 && newvalue.indexOf('img') == -1)
             return;
 
         element.html(newvalue);
@@ -145,7 +146,7 @@ function displayLeaderboard(data) {
 
         /* insert some data in overall view */
         $('#competitor-global-rank-'+rowid).html(competitor.global_rank);
-        $('#competitor-global-nationality-'+rowid).html(competitor.nationality);
+        $('#competitor-global-nationality-'+rowid).html('<img src="/moderator-static/flags/' + competitor.nationality_short + '.png"/>');
         $('#competitor-global-name-'+rowid).html(competitor.name);
         $('#competitor-global-total-'+rowid).html(competitor.total_points);
         $('#competitor-global-net-'+rowid).html(competitor.net_points);
@@ -156,7 +157,7 @@ function displayLeaderboard(data) {
 
             name_element.html(competitor.name);
 
-            $('#clipping-'+rowid+'-2 span').html(competitor.nationality);
+            $('#clipping-'+rowid+'-2 span').html('<img src="/moderator-static/flags/' + competitor.nationality_short + '.png"/>');
 
             /* now set values independent what has been there before */
             racepos = 1;
@@ -165,7 +166,8 @@ function displayLeaderboard(data) {
 
                 markpos = 1;
                 for (markrank in competitor.markranks[racepos-1]) {
-                    yieldValue($('#race-'+racepos+'-mark-'+markpos+'-row-'+rowid), competitor.markranks[racepos-1][markrank], true, competitor.legvalues[racepos-1][markpos-1][0]);
+                    //yieldValue($('#race-'+racepos+'-mark-'+markpos+'-row-'+rowid), competitor.markranks[racepos-1][markrank], true, competitor.legvalues[racepos-1][markpos-1][0]);
+                    yieldValue($('#race-'+racepos+'-mark-'+(markpos+1)+'-row-'+rowid), competitor.markranks[racepos-1][markrank], true, undefined);
 
                     legpos = 1;
                     for (legvalue in competitor.legvalues[racepos-1][markpos-1]) {
@@ -179,14 +181,15 @@ function displayLeaderboard(data) {
         } else {
             /* check if values have changed */
             name_element.html(competitor.name);
-            $('#clipping-'+rowid+'-2 span').html(competitor.nationality);
+            $('#clipping-'+rowid+'-2 span').html('<img src="/moderator-static/flags/' + competitor.nationality_short + '.png"/>');
 
             for (racerank in competitor.raceranks) {
                 yieldValue($('#race-'+racepos+'-rankrow-'+rowid), competitor.raceranks[racerank], true);
 
                 markpos = 1;
                 for (markrank in competitor.markranks[racepos-1]) {
-                    yieldValue($('#race-'+racepos+'-mark-'+markpos+'-row-'+rowid), competitor.markranks[racepos-1][markrank], true, competitor.legvalues[racepos-1][markpos-1][0]);
+                    //yieldValue($('#race-'+racepos+'-mark-'+markpos+'-row-'+rowid), competitor.markranks[racepos-1][markrank], true, competitor.legvalues[racepos-1][markpos-1][0]);
+                    yieldValue($('#race-'+racepos+'-mark-'+(markpos+1)+'-row-'+rowid), competitor.markranks[racepos-1][markrank], true, undefined);
 
                     legpos = 1;
                     for (legvalue in competitor.legvalues[racepos-1][markpos-1]) {
@@ -203,11 +206,15 @@ function displayLeaderboard(data) {
     }
 }
 
-$(document).ready(function() {
+function resizeDocument() {
   var wHeight = $(window).height();
 
   $("#rootwrapper").css("height", wHeight);
   $("#appinterface").css("height", wHeight-131);
+}
+
+$(document).ready(function() {
+  resizeDocument();
 
   $.ajaxSetup({cache:false});
 

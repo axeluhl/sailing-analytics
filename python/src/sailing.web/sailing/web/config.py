@@ -33,7 +33,7 @@ VN = {
         'CSPDMS' : ('CSPDMS', 'Current Speed (m/s)', '%.1f', 'currentSpeedOverGroundInMetersPerSecond'),
         'ASPDKNOT': ('ASPDKN', 'Avg Speed (kn)', '%.2f', 'averageSpeedOverGroundInKnots'),
         'ASPDMS' : ('ASPDMS', 'Avg Speed (m/s)', '%.1f', 'averageSpeedOverGroundInMetersPerSecond'),
-        'DSTTRV' : ('DSTTRV', 'Distance Traveled (m)', '%.f', 'distanceTraveledOverGroundInMeters'),
+        'DSTTRV' : ('DSTTRV', 'Dist. Trav. (m)', '%.f', 'distanceTraveledOverGroundInMeters'),
         'VMGKNOT': ('VMGKN', 'VMG (kn)', '%.1f', 'velocityMadeGoodInKnots'),
         'VMGMS' : ('VMGMS', 'VMG (m/s)', '%.1f', 'velocityMadeGoodInMetersPerSecond'),
         'AVMGKNOT': ('AVMGKN', 'Avg VMG (kn)', '%.1f', 'averageVelocityMadeGoodInKnots'),
@@ -43,7 +43,7 @@ VN = {
         'GAPSEC' : ('SGAP', 'Gap To Leader (s)', '%.1f','gapToLeaderInSeconds'),
         'UPDOWNWIND' : ('UPDOWN', 'Up or Downwind?', '%s', 'upOrDownWindLeg'),
         'GLP' : ('GLP', 'G & L (Places)', '%s', 'gainsAndLossesInPlaces'),
-        'RANK' : ('LRANK', 'Rank', '%s', 'rank'),
+        'RANK' : ('LRANK', 'Rank in Leg', '%s', 'rank'),
         'STARTED' : ('STARTD', 'Started?', '%s','started'),
         'FINISHED' : ('FINISHD', 'Finished?', '%s','finished')
         }

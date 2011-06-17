@@ -613,7 +613,7 @@ def moderatorLiveData(context, request):
 
             dc = {}
             dc.update({'name': competitor.name[:9], 'raceranks': racedata, 'markranks': markranks, 'legvalues': legvalues, 
-                'nationality': competitor.nationality, 'global_rank': competitor.total, 'current_race': '', 'current_legs' : [],
+                'nationality': competitor.nationality, 'nationality_short': competitor.nationality_short.lower(), 'global_rank': competitor.total, 'current_race': '', 'current_legs' : [],
                 'current_rank' : competitor.current_rank, 'total_points' : getattr(competitor, 'total_points', 0),
                 'net_points': getattr(competitor, 'net_points', 0), 'races_shown' : range(int(race_start_index), int(race_end_index))})
 

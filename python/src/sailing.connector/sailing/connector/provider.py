@@ -109,7 +109,7 @@ def eventConfiguration(configurator):
             cfound = model.CompetitorImpl.queryOneBy(name=cp['name'], event=event['name'])
             if not cfound:
                 competitor = model.CompetitorImpl()
-                competitor.update(dict(name=cp['name'], nationality=cp['nationality'], event=event['name']))
+                competitor.update(dict(name=cp['name'], nationality=cp['nationality'], event=event['name'], nationality_short=cp['nationalityISO2']))
                 cobjects.append(competitor)
             else:
                 cobjects.append(cfound)
@@ -266,8 +266,11 @@ def liveRaceInformation(configurator):
                 # if competitor hasn't started yet we just ignore this leg
                 # and don't update the competitors information for the given leg
                 if competitor.get('started', False) is False:
-                    comp.update(dict(current_leg=None))
+                    comp.update(dict(current_leg=None, current_race=None))
                     continue
+
+                else:
+                    comp.update(dict(current_leg=lcount, current_race=raceindex))
 
                 mark_name = leg['to']
 
@@ -359,7 +362,7 @@ def liveRaceInformation(configurator):
                 # total points: sum'd over ranks of all races but
                 # but for more than ten races discard some values
                 # XXX
-                total_points = 0
+                total_points = net_points
 
                 comp.update(dict(current_rank=c_current_rank,
                                     races=c_races, 
@@ -375,7 +378,7 @@ def liveRaceInformation(configurator):
         # update race with current information
         dbrace = model.RaceImpl.queryOneBy(event=eventname, name=racename)
         mdup = dict(startoftracking=data['startoftracking'],
-                        start=data['start'], finish=data['finish'],
+                        start=data['start'],
                         timeofnewestevent=data['timeofnewestevent'],
                         updatecount=data['updatecount'])
 
