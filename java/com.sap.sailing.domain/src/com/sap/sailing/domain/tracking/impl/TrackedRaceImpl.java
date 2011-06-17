@@ -44,7 +44,6 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     private TimePoint startOfTracking;
     
     private TimePoint start;
-    private TimePoint finish;
     private TimePoint timePointOfNewestEvent;
     private TimePoint timePointOfLastEvent;
     private long updateCount;
@@ -146,15 +145,6 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     protected void setStart(TimePoint start) {
         this.start = start;
-    }
-
-    @Override
-    public TimePoint getFinish() {
-        return finish;
-    }
-
-    protected void setFinish(TimePoint finish) {
-        this.finish = finish;
     }
 
     @Override

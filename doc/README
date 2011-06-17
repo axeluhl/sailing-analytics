@@ -448,25 +448,17 @@ into one in the future.
 			"start": ...,   // race start time as millisecond
 				 	// timestamp, Integer.MAX_VALUE
 					// if not started yet
-			"finish": ...,  // optional; if race finish time
-				  	// is known, this is the
-					// milliseconds timestamp of
-					// when the race finished
 		        "legs": [ {     // legs in the course's order
                           "start": ..., // name of the leg start mark
 			  "end": ... }  // name of the leg end mark
                           ... ]
                       ... ]
-  action=[        // list of races in the event
+  action=listracesinevent:        // list of races in the event
 		        "name": ...,
 			"boatclass": ...,
 			"start": ...,   // race start time as millisecond
 				 	// timestamp, Integer.MAX_VALUE
 					// if not started yet
-			"finish": ...,  // optional; if race finish time
-				  	// is known, this is the
-					// milliseconds timestamp of
-					// when the race finished
 		        "legs": [ {     // legs in the course's order
                           "start": ..., // name of the leg start mark
 			  "end": ... }  // name of the leg end mark
@@ -535,7 +527,6 @@ into one in the future.
 		    { "name": ...,             // race name
 		      "startoftracking": ...,  // millisecond timestamp
 		      "start": ...,	       // millisecond timestamp
-		      "finish": ..., 	       // millisecond timestamp
 		      "timeofnewestevent": ...,// greatest millisecond timestamp
 		      			       // of any event received so far
 		      "timeoflastevent": ...,  // millisecond timestamp
