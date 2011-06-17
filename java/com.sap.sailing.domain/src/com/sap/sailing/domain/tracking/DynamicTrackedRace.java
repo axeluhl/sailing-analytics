@@ -29,7 +29,7 @@ public interface DynamicTrackedRace extends TrackedRace {
     void setStart(TimePoint start);
 
     void setFinish(TimePoint stop);
-
+    
     void setMillisecondsOverWhichToAverageSpeed(long millisecondsOverWhichToAverageSpeed);
 
     void setMillisecondsOverWhichToAverageWind(long millisecondsOverWhichToAverageWind);

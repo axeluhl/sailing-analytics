@@ -26,6 +26,7 @@ import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindSource;
 import com.sap.sailing.domain.tracking.WindStore;
+import com.sap.sailing.domain.tracking.WindTrack;
 
 public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
         DynamicTrackedRace, RaceChangeListener<Competitor> {
@@ -248,4 +249,26 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     protected TrackedLeg createTrackedLeg(Leg leg) {
         return new TrackedLegImpl(this, leg, getRace().getCompetitors());
     }
+
+    @Override
+    public long getMillisecondsOverWhichToAverageSpeed() {
+        long result = 0; // default in case there is no competitor
+        Iterator<Competitor> compIter = getRace().getCompetitors().iterator();
+        if (compIter.hasNext()) {
+            DynamicTrack<Competitor, GPSFixMoving> someTrack = getTrack(compIter.next());
+            result = someTrack.getMillisecondsOverWhichToAverageSpeed();
+        }
+        return result;
+    }
+
+    @Override
+    public long getMillisecondsOverWhichToAverageWind() {
+        long result = 0; // default in case there is no competitor
+        for (WindSource windSource : WindSource.values()) {
+            WindTrack someTrack = getWindTrack(windSource);
+            result = someTrack.getMillisecondsOverWhichToAverageWind();
+        }
+        return result;
+    }
+
 }

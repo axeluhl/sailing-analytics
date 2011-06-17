@@ -46,6 +46,11 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
     }
     
     @Override
+    public long getMillisecondsOverWhichToAverageSpeed() {
+        return millisecondsOverWhichToAverage;
+    }
+
+    @Override
     public Position getEstimatedPosition(TimePoint timePoint, boolean extrapolate) {
         FixType lastFixAtOrBefore = getLastFixAtOrBefore(timePoint);
         FixType firstFixAtOrAfter = getFirstFixAtOrAfter(timePoint);

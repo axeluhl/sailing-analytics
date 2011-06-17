@@ -44,6 +44,11 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
     }
     
     @Override
+    public long getMillisecondsOverWhichToAverageWind() {
+        return millisecondsOverWhichToAverage;
+    }
+
+    @Override
     public void add(Wind wind) {
         getInternalFixes().add(wind);
         notifyListenersAboutReceive(wind);

@@ -31,6 +31,7 @@ import com.sap.sailing.domain.base.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.base.impl.DegreePosition;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.NoWindException;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
@@ -68,6 +69,12 @@ public class AdminApp extends Servlet {
     
     private static final String ACTION_NAME_SHOW_WIND = "showwind";
     
+    private static final String ACTION_NAME_SET_AVERAGING = "setaveraging";
+    
+    private static final String PARAM_NAME_WIND_AVERAGING_INTERVAL_MILLIS = "windaveragingintervalmillis";
+    
+    private static final String PARAM_NAME_SPEED_AVERAGING_INTERVAL_MILLIS = "speedaveragingintervalmillis";
+
     private static final String PARAM_NAME_EVENT_JSON_URL = "eventJSONURL";
 
     private static final String PARAM_NAME_PARAM_URL = "paramURL";
@@ -144,6 +151,8 @@ public class AdminApp extends Servlet {
                     showWind(req, resp);
                 } else if (ACTION_NAME_ADD_WIND_TO_MARKS.equals(action)) {
                     addWindToMarks(req, resp);
+                } else if (ACTION_NAME_SET_AVERAGING.equals(action)) {
+                    setAveraging(req, resp);
                 } else {
                     resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Unknown action \""+action+"\"");
                 }
@@ -156,6 +165,28 @@ public class AdminApp extends Servlet {
         }
     }
     
+    private void setAveraging(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        Event event = getEvent(req);
+        if (event == null) {
+            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Event not found");
+        } else {
+            RaceDefinition race = getRaceDefinition(req);
+            if (race == null) {
+                resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Race not found");
+            } else {
+                DynamicTrackedRace trackedRace = getService().getDomainFactory().getTrackedEvent(event).getTrackedRace(race);
+                String windAveragingIntervalInMIllis = req.getParameter(PARAM_NAME_WIND_AVERAGING_INTERVAL_MILLIS);
+                if (windAveragingIntervalInMIllis != null) {
+                    trackedRace.setMillisecondsOverWhichToAverageWind(Long.valueOf(windAveragingIntervalInMIllis));
+                }
+                String speedAveragingIntervalInMIllis = req.getParameter(PARAM_NAME_SPEED_AVERAGING_INTERVAL_MILLIS);
+                if (speedAveragingIntervalInMIllis != null) {
+                    trackedRace.setMillisecondsOverWhichToAverageSpeed(Long.valueOf(speedAveragingIntervalInMIllis));
+                }
+            }
+        }
+    }
+
     private void listRacesInEvent(HttpServletRequest req, HttpServletResponse resp) throws IOException, ParseException, org.json.simple.parser.ParseException {
         URL jsonURL = new URL(req.getParameter(PARAM_NAME_EVENT_JSON_URL));
         List<RaceRecord> raceRecords = getService().getRaceRecords(jsonURL);
@@ -173,7 +204,7 @@ public class AdminApp extends Servlet {
 
     private void addWindToMarks(HttpServletRequest req, HttpServletResponse resp) throws IOException,
             InvalidDateException, NoWindException {
-    Event event = getEvent(req);
+        Event event = getEvent(req);
         if (event == null) {
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Event not found");
         } else {

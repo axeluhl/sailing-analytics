@@ -261,4 +261,16 @@ public class MockedTrackedRace implements DynamicTrackedRace {
         
     }
 
+    @Override
+    public long getMillisecondsOverWhichToAverageSpeed() {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    @Override
+    public long getMillisecondsOverWhichToAverageWind() {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
 }

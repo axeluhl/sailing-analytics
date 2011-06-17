@@ -28,4 +28,6 @@ public interface WindTrack extends Track<Wind> {
     void remove(Wind wind);
 
     void setMillisecondsOverWhichToAverage(long millisecondsOverWhichToAverage);
+
+    long getMillisecondsOverWhichToAverageWind();
 }
