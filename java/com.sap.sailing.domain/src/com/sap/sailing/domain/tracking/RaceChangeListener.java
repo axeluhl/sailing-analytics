@@ -6,4 +6,6 @@ public interface RaceChangeListener<ItemType> extends WindListener {
 
     void markPassingReceived(MarkPassing markPassing);
 
+    void speedAveragingChanged(long oldMillisecondsOverWhichToAverage, long newMillisecondsOverWhichToAverage);
+
 }

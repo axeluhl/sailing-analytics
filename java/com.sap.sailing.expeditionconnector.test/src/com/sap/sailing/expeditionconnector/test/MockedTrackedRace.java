@@ -45,12 +45,6 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public TimePoint getFinish() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
     public Iterable<TrackedLeg> getTrackedLegs() {
         // TODO Auto-generated method stub
         return null;
@@ -226,12 +220,6 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public void setFinish(TimePoint stop) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
     public DynamicTrack<Competitor, GPSFixMoving> getTrack(Competitor competitor) {
         // TODO Auto-generated method stub
         return null;
@@ -247,6 +235,30 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     public TimePoint getTimePointOfLastEvent() {
         // TODO Auto-generated method stub
         return null;
+    }
+
+    @Override
+    public void setMillisecondsOverWhichToAverageSpeed(long millisecondsOverWhichToAverageSpeed) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void setMillisecondsOverWhichToAverageWind(long millisecondsOverWhichToAverageWind) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public long getMillisecondsOverWhichToAverageSpeed() {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    @Override
+    public long getMillisecondsOverWhichToAverageWind() {
+        // TODO Auto-generated method stub
+        return 0;
     }
 
 }

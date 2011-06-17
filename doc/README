@@ -254,6 +254,17 @@ through the /moderator servlet. We may want to consider merging both
 into one in the future.
 
 /admin
+  action=listracesinevent: outputs a JSON object describing the
+  		  races and their paramURLs available for tracking in
+		  the following form:
+		    [ { "name": ...,	       // race name
+		        "ID": ...,	       // a UUID for the race
+			"paramURL": ...,       // the paramURL to use for addrace
+			"replayURL": ... } ...]// URL to use for TracTrac 2D view
+    eventJSONURL: the URL from where metadata about the entire regatta
+                  can be obtained; the resulting document includes the
+		  parameter and simulation URLs for the individual
+ 		  races that are part of the event/regatta.
   action=addevent: starts tracking all races described in the document received
   		  from the eventJSONURL to the server instance.
     eventJSONURL: the URL from where metadata about the entire regatta
@@ -437,25 +448,17 @@ into one in the future.
 			"start": ...,   // race start time as millisecond
 				 	// timestamp, Integer.MAX_VALUE
 					// if not started yet
-			"finish": ...,  // optional; if race finish time
-				  	// is known, this is the
-					// milliseconds timestamp of
-					// when the race finished
 		        "legs": [ {     // legs in the course's order
                           "start": ..., // name of the leg start mark
 			  "end": ... }  // name of the leg end mark
                           ... ]
                       ... ]
-  action=[        // list of races in the event
+  action=listracesinevent:        // list of races in the event
 		        "name": ...,
 			"boatclass": ...,
 			"start": ...,   // race start time as millisecond
 				 	// timestamp, Integer.MAX_VALUE
 					// if not started yet
-			"finish": ...,  // optional; if race finish time
-				  	// is known, this is the
-					// milliseconds timestamp of
-					// when the race finished
 		        "legs": [ {     // legs in the course's order
                           "start": ..., // name of the leg start mark
 			  "end": ... }  // name of the leg end mark
@@ -524,7 +527,6 @@ into one in the future.
 		    { "name": ...,             // race name
 		      "startoftracking": ...,  // millisecond timestamp
 		      "start": ...,	       // millisecond timestamp
-		      "finish": ..., 	       // millisecond timestamp
 		      "timeofnewestevent": ...,// greatest millisecond timestamp
 		      			       // of any event received so far
 		      "timeoflastevent": ...,  // millisecond timestamp

@@ -198,13 +198,13 @@ public class ModeratorApp extends Servlet {
                 jsonRace.put("startoftracking", trackedRace.getStartOfTracking() == null ? 0l : trackedRace
                         .getStartOfTracking().asMillis());
                 jsonRace.put("start", trackedRace.getStart() == null ? 0l : trackedRace.getStart().asMillis());
-                jsonRace.put("finish", trackedRace.getFinish() == null ? 0l : trackedRace.getFinish()
-                        .asMillis());
                 jsonRace.put("timeofnewestevent", trackedRace.getTimePointOfNewestEvent() == null ? 0l : trackedRace
                         .getTimePointOfNewestEvent().asMillis());
                 jsonRace.put("timeoflastevent", trackedRace.getTimePointOfLastEvent() == null ? 0l : trackedRace
                         .getTimePointOfLastEvent().asMillis());
                 jsonRace.put("updatecount", trackedRace.getUpdateCount());
+                jsonRace.put("windaveragingintervalmillis", trackedRace.getMillisecondsOverWhichToAverageWind());
+                jsonRace.put("speedaveragingintervalmillis", trackedRace.getMillisecondsOverWhichToAverageSpeed());
                 Position positionForWind = null;
                 TrackedLeg currentLeg = trackedRace.getCurrentLeg(timePoint);
                 if (currentLeg != null) {
@@ -371,9 +371,6 @@ public class ModeratorApp extends Servlet {
                 TrackedRace trackedRace = getService().getDomainFactory().getOrCreateTrackedEvent(event).getTrackedRace(race);
                 TimePoint start = trackedRace.getStart();
                 jsonRace.put("start", start==null?Long.MAX_VALUE:start.asMillis());
-                if (trackedRace.getFinish() != null) {
-                    jsonRace.put("finish", trackedRace.getFinish().asMillis());
-                }
                 JSONArray jsonLegs = new JSONArray();
                 for (Leg leg : race.getCourse().getLegs()) {
                     JSONObject jsonLeg = new JSONObject();

@@ -289,6 +289,20 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     public int getNumberOfDirectionChanges(TimePoint timePoint) {
         return getNumberOfTacks(timePoint)+getNumberOfJibes(timePoint);
     }
+    
+    @Override
+    public Distance getWindwardDistanceToOverallLeader(TimePoint timePoint) throws NoWindException {
+        Competitor leader = getTrackedLeg().getRanks(timePoint).keySet().iterator().next();
+        TrackedLegOfCompetitor leaderLeg = getTrackedRace().getCurrentLeg(leader, timePoint);
+        if (leaderLeg.getLeg() == getLeg()) {
+            // we're still in the same leg with leader; compute windward distance to leader
+            return getWindwardDistance(getTrackedRace().getTrack(leader).getEstimatedPosition(timePoint, /* extrapolate */ false),
+                    getTrackedRace().getTrack(getCompetitor()).getEstimatedPosition(timePoint, /* extrapolate */ false), timePoint);
+        } else {
+            return null;
+            // TODO special case leader has finished race already
+        }
+    }
 
     @Override
     public Double getGapToLeaderInSeconds(TimePoint timePoint) throws NoWindException {

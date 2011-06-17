@@ -1,6 +1,6 @@
 package com.sap.sailing.domain.tracking;
 
-import java.util.Map;
+import java.util.LinkedHashMap;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
@@ -29,7 +29,9 @@ public interface TrackedLeg {
      * <li>no incoming events can influence ranks between separate calls to
      * {@link TrackedLegOfCompetitor#getRank(TimePoint)}</li>
      * </ol>
+     * 
+     * The iteration order of the linked hash map returned is leader to last.
      */
-    Map<Competitor, Integer> getRanks(TimePoint timePoint);
+    LinkedHashMap<Competitor, Integer> getRanks(TimePoint timePoint);
 
 }

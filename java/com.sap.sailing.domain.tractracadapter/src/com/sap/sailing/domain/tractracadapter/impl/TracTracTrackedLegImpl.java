@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.tractracadapter.impl;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import com.sap.sailing.domain.base.Competitor;
@@ -52,8 +53,8 @@ public class TracTracTrackedLegImpl implements TrackedLeg {
     }
 
     @Override
-    public Map<Competitor, Integer> getRanks(TimePoint timePoint) {
-        Map<Competitor, Integer> result = new HashMap<Competitor, Integer>();
+    public LinkedHashMap<Competitor, Integer> getRanks(TimePoint timePoint) {
+        LinkedHashMap<Competitor, Integer> result = new LinkedHashMap<Competitor, Integer>();
         for (Competitor c : getTrackedRace().getRace().getCompetitors()) {
             result.put(c, getTrackedLeg(c).getRank(timePoint));
         }

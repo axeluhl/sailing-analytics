@@ -69,6 +69,13 @@ public class ReceiveTrackingDataTest extends AbstractTracTracLiveTest {
             @Override
             public void windDataRemoved(Wind wind) {
             }
+            @Override
+            public void speedAveragingChanged(long oldMillisecondsOverWhichToAverage, long newMillisecondsOverWhichToAverage) {
+            }
+            @Override
+            public void windAveragingChanged(long oldMillisecondsOverWhichToAverage,
+                    long newMillisecondsOverWhichToAverage) {
+            }
         };
         List<TypeController> listeners = new ArrayList<TypeController>();
         Event event = domainFactory.createEvent(getEvent());

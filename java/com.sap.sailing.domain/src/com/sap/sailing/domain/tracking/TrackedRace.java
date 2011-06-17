@@ -32,8 +32,6 @@ public interface TrackedRace {
     
     TimePoint getStart();
     
-    TimePoint getFinish();
-    
     Iterable<TrackedLeg> getTrackedLegs();
     
     TrackedLeg getTrackedLeg(Leg leg);
@@ -154,4 +152,9 @@ public interface TrackedRace {
      * Note that these times may not increase monotonically.
      */
     TimePoint getTimePointOfLastEvent();
+
+    long getMillisecondsOverWhichToAverageSpeed();
+
+    long getMillisecondsOverWhichToAverageWind();
+
 }

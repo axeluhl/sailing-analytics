@@ -1,19 +1,19 @@
 Axel
 ====
 
- - consolidate time point defaulting for servlet REST APIs
+ - when a race for an event arrives with a different boat class, open up a new Event
 
- - Set up two Expedition machines with RF and UMTS transmission, test killing one
+ - Pass final production instance URL information to BeTomorrow for wind integration
+
+ - Consider making averaging intervals configurable
+
+ - consolidate time point defaulting for servlet REST APIs
 
  - Test fail-over in case one of the two Java VM fails
 
  - enable switching between our and TracTrac-provided leaderboard information
 
  - implement missing pieces of TracTrac Result API-based TrackedLegOfCompetitor
-
- - Pass final production instance URL information to BeTomorrow for wind integration
-
- - Display gain/loss for next-best competitor (green/red arrow up/down) based on VMG comparison
 
  - Now that we can update Course's waypoints, consider creating a RaceDefinition right upon
    receiving the Event/Race from TracTrac, using an empty list of waypoints. This may simplify
