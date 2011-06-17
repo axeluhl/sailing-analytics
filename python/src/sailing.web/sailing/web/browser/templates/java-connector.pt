@@ -22,6 +22,12 @@ When <i>stopping listener</i> it will trigger two methods: If you select a race 
                 <option host="localhost" port="8889">PROD2-INTERN ${view.serverStatus('localhost', '8889')}</option>
             </select>
         </div>
+
+        <div class="field">
+            <span>Use given delay (UTCnow() - n Minutes) for loading race data</span><br/>
+            <input type="text" name="delay" value="" />
+        </div>
+
         <input type="submit" name="listener-event-refresh" value="Connect to already running server" /><br/><br/>
     </fieldset>
 

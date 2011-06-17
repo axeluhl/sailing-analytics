@@ -17,11 +17,13 @@ log = logging.getLogger('sailing.connector.run#main')
 
 class LiveDataReceiver(threading.Thread):
 
-    def __init__(self, host, port, eventname, racename):
+    def __init__(self, host, port, eventname, racename, delay):
         self.host = host
         self.port = port
         self.eventname = eventname
         self.racename = racename
+
+        self.delay = delay
 
         self.last_update = None
         self.updatecount = 0
@@ -51,8 +53,17 @@ class LiveDataReceiver(threading.Thread):
             conf.setRace(model.RaceImpl.queryOneBy(event=self.eventname, name=self.racename))
 
             # blocking call by updatecount setting
-            conf.setParameters(dict(eventname=self.eventname, racename=self.racename, sinceupdate=self.updatecount))
-            conf.setLogging(False)
+            if self.delay:
+
+                # ask for race information in the past - not suitable for tests
+                utcnow = datetime.datetime.utcnow() - datetime.timedelta(minutes=int(self.delay))
+                delayed = time.mktime( utcnow.timetuple() ) * 1000
+                conf.setParameters(dict(eventname=self.eventname, racename=self.racename, timeasmillis='%.f' % delayed))
+
+            else:
+                conf.setParameters(dict(eventname=self.eventname, racename=self.racename, sinceupdate=self.updatecount))
+
+            conf.setLogging(True)
 
             try:
                 # need to lock because other threads could overwrite information
@@ -78,8 +89,8 @@ class LiveDataReceiver(threading.Thread):
                 # avoid filling console with errors
                 time.sleep(5)
 
-            # avoid hammering java server - can occur if call does not block correctly
-            time.sleep(2)
+            # avoid hammering java server - can occur if call does not block correctly or by using a delayed call
+            time.sleep(4)
 
         log.info('STOP listener for %s:%s (%s, %s)' % (self.host, self.port, self.eventname, self.racename))
 
