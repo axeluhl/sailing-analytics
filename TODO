@@ -1,6 +1,8 @@
 Axel
 ====
 
+ - when a race for an event arrives with a different boat class, open up a new Event
+
  - Pass final production instance URL information to BeTomorrow for wind integration
 
  - Consider making averaging intervals configurable
