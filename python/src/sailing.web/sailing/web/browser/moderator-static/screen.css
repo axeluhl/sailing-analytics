@@ -222,9 +222,9 @@ span.race-count {
 #main-interface {
   height: 100%; }
   #main-interface .sort-asc {
-    background: url(/moderator-static/sort-none.png) 0 0 no-repeat #151515; }
+    background: url(/moderator-static/sort-none.png) right 0 no-repeat #151515; }
   #main-interface .sort-desc {
-    background: url(/moderator-static/sort-none.png) 0 0 no-repeat #151515; }
+    background: url(/moderator-static/sort-none.png) right 0 no-repeat #151515; }
   #main-interface .blue-table {
     padding: 0 10px 0 0;
     font-size: 14px;
@@ -241,6 +241,10 @@ span.race-count {
       display: block;
       height: 39px;
       margin: 15px 0 13px 0; }
+    #main-interface .blue-table .sort-asc {
+      background: url(/moderator-static/sort-none.png) left 0 no-repeat #151515; }
+    #main-interface .blue-table .sort-desc {
+      background: url(/moderator-static/sort-none.png) left 0 no-repeat #151515; }
     #main-interface .blue-table #table-scrolling li {
       float: left;
       width: 94px;
@@ -366,13 +370,15 @@ span.race-count {
         padding: 13px 10px;
         color: #151515;
         font-weight: bold;
-        width: 110px; }
+        width: 90px;
+        text-align: right; }
         #main-interface .race table.race-table th:first-child {
-          padding-left: 20px; }
+          padding-left: 0px; }
         #main-interface .race table.race-table th:last-child {
           padding-right: 20px; }
       #main-interface .race table.race-table tr td {
-        padding: 5px; }
+        padding: 5px;
+        text-align: right; }
         #main-interface .race table.race-table tr td span {
           padding: 2px 0; }
         #main-interface .race table.race-table tr td:first-child {

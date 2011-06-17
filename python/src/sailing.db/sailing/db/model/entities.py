@@ -64,8 +64,10 @@ class Competitor(BaseDocument):
         'name': unicode,
         'event': unicode,
         'nationality': unicode,
+        'nationality_short': unicode,
 
-        'current_leg' : int, # denotes the current leg the competitor is in
+        'current_leg' : int, # denotes the current leg the competitor is in (position)
+        'current_race' : int,
 
         'total_points': int,
         'net_points' : int,
