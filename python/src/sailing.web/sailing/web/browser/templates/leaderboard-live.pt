@@ -19,27 +19,12 @@
                 <ul class='function-btn'>
                   <li class='function-1 ${request.params.get("c", "F1") == "F1" and "active" or ""}'>
                   <a href='/@@/leaderboard-live?c=F1&r=${request.params.get("r", 0)}'>
-                      CUR
+                      SPDDST
                     </a>
                   </li>
                   <li class='function-1 ${request.params.get("c", "F1") == "F2" and "active" or ""}'>
                   <a href='/@@/leaderboard-live?c=F2&r=${request.params.get("r", 0)}'>
-                      TV
-                    </a>
-                  </li>
-                  <li class='function-1 ${request.params.get("c", "F1") == "F3" and "active" or ""}'>
-                  <a href='/@@/leaderboard-live?c=F3&r=${request.params.get("r", 0)}'>
-                      ETA
-                    </a>
-                  </li>
-                  <li class='function-1 ${request.params.get("c", "F1") == "F4" and "active" or ""}'>
-                  <a href='/@@/leaderboard-live?c=F4&r=${request.params.get("r", 0)}'>
-                      SPEED
-                    </a>
-                  </li>
-                  <li class='function-1 ${request.params.get("c", "F1") == "F5" and "active" or ""}'>
-                  <a href='/@@/leaderboard-live?c=F5&r=${request.params.get("r", 0)}'>
-                      DST
+                      GAPETA
                     </a>
                   </li>
                 </ul>
@@ -133,23 +118,69 @@
               <a class='main-box-sort sort-asc' href='javascript:;' onclick='sortBy("${raceid}", $(this))'></a>
             </div>
 
-            <tal:for repeat="leg event.marks[int(raceid)-1]">
-            <div class='leg-wrap' id="leg-${repeat['leg'].number}" tal:define='markid repeat["leg"].number' style="display:none;">
-              <!-- / SECOND ELEMENT WITH LIST -->
+            <!-- START POINT -->
+            <div class='leg-wrap' id="leg-start" style="display:none;" tal:define="markid 1">
               <div class='leg-box'>
-              <span tal:condition="markid != 1">M${markid-1}</span>
-              <span tal:condition="markid == 1">S</span>
+              <span>S</span>
 
-              <a class='leg-box-sort sort-desc' href='javascript:;' onclick='sortBy("${raceid},${markid}", $(this))'></a>
+              <a class='leg-box-sort sort-desc' href='javascript:;' onclick=''></a>
                 <a class='leg-box-active' href='javascript:;' onclick='$(this).closest(".leg-wrap").find(".race-table").toggle();'>
                   <ul>
                       <tal:for repeat="markrow range(1,21)">
-                      <li id='race-${raceid}-mark-${markid}-row-${markrow}'>&nbsp;</li>
+                      <li id='race-${raceid}-markstart-row-${markrow}'>&nbsp;</li>
                       </tal:for>
                   </ul>
                 </a>
               </div>
               <table class='race-table' id='r1-m1' style="display:none;">
+                <thead>
+                  <tr>
+                    <tal:for repeat="column columns">
+                    <th colid='${repeat["column"].number}'>
+                        <span>${column[1]}</span>
+                    </th>
+                    </tal:for>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr rowid='0'>
+                    <tal:for repeat="column columns">
+                    <td class='table-sorting' colid='${repeat["column"].number}'>
+                        <a class='sort-desc' href='javascript:;' onclick='sortBy("${raceid},${markid},${repeat["column"].number}", $(this))'></a>
+                    </td>
+                    </tal:for>
+                  </tr>
+                  <tal:for repeat="valrow range(1,21)">
+                  <tr class='${repeat["valrow"].even and "odd" or "even"}' id='race-${raceid}-valrow-${valrow}'>
+                    <tal:for repeat="valrowpos range(len(columns))">
+                    <td id='race-${raceid}-mark-${markid}-valrow-${valrow}-pos-${valrowpos}' >
+                      <span>&nbsp;</span>
+                    </td>
+                    </tal:for>
+                  </tr>
+                  </tal:for>
+                </tbody>
+              </table>
+            </div>
+
+            <tal:for repeat="leg event.marks[int(raceid)-1]">
+            <div class='leg-wrap' id="leg-${repeat['leg'].number}" tal:define='markid repeat["leg"].number+1' style="display:none;">
+              <!-- / SECOND ELEMENT WITH LIST -->
+              <div class='leg-box'>
+                  <span tal:condition="not repeat['leg'].end">M${markid-1}</span>
+                  <span tal:condition="repeat['leg'].end">E</span>
+
+              <a class='leg-box-sort sort-desc' href='javascript:;' onclick='sortBy("${raceid},${markid}", $(this))'></a>
+                <a tal:omit-tag="repeat['leg'].end" class='leg-box-active' href='javascript:;' onclick='$(this).closest(".leg-wrap").find(".race-table").toggle();'>
+                  <ul>
+                      <tal:for repeat="markrow range(1,21)">
+                          <li id='race-${raceid}-mark-${markid}-row-${markrow}'>&nbsp;</li>
+                      </tal:for>
+                  </ul>
+                </a>
+              </div>
+
+              <table class='race-table' id='r1-m1' style="display:none;" tal:condition="not repeat['leg'].end">
                 <thead>
                   <tr>
                     <tal:for repeat="column columns">

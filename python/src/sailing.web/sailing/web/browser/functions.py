@@ -39,7 +39,7 @@ def dropDB(context, request):
 
     return HTTPFound(location='/')
 
-def startListenerThreads(conf, eventlist):
+def startListenerThreads(conf, eventlist, delay=None):
     # now we should have an event configuration
     # read this configuration and for each event and race
     # start a listener thread
@@ -62,7 +62,7 @@ def startListenerThreads(conf, eventlist):
 
                 # now there should be only running threads left
                 if not threaded_listener.has_key(key):
-                    t = provider.LiveDataReceiver(conf.host, conf.port, event['name'], racename) 
+                    t = provider.LiveDataReceiver(conf.host, conf.port, event['name'], racename, delay) 
                     threaded_listener[key] = t
                     t.start()
 
@@ -153,7 +153,8 @@ def configureListener(context, request):
                 if len(eventlist) == 0:
                     raise Exception, 'No events configured.'
 
-                startListenerThreads(conf, eventlist)
+                delay = request.POST.get('delay', '')
+                startListenerThreads(conf, eventlist, delay)
 
             except Exception, ex:
                 return view.yieldMessage('Could not gather any data! Seems that Java listener is not ready yet. Please reconnect. Error: %s' % str(ex))
@@ -219,7 +220,8 @@ def configureListener(context, request):
             return view.yieldMessage('Seems that java server (listener) is not initialized correctly. Yields no events and/or races! Try to reconfigure...')
 
         # start listener thread if it is not yet active
-        startListenerThreads(conf, eventlist)
+        delay = request.POST.get('delay', '')
+        startListenerThreads(conf, eventlist, delay)
 
         view.session['listener-started'] = True
         view.session['listener-conf'] = conf
@@ -613,7 +615,7 @@ def moderatorLiveData(context, request):
 
             dc = {}
             dc.update({'name': competitor.name[:9], 'raceranks': racedata, 'markranks': markranks, 'legvalues': legvalues, 
-                'nationality': competitor.nationality, 'global_rank': competitor.total, 'current_race': '', 'current_legs' : [],
+                'nationality': competitor.nationality, 'nationality_short': competitor.nationality_short.lower(), 'global_rank': competitor.total, 'current_race': '', 'current_legs' : [],
                 'current_rank' : competitor.current_rank, 'total_points' : getattr(competitor, 'total_points', 0),
                 'net_points': getattr(competitor, 'net_points', 0), 'races_shown' : range(int(race_start_index), int(race_end_index))})
 

@@ -223,8 +223,12 @@ class BaseView(object):
             if len(val.split(':')[-1]) == 1:
                 val = '%s0' % val
 
-        if name[0] == 'GLP' and value > 0:
-            val = '+%s' % value
+        if name[0] == 'GLP':
+            if value > 0:
+                val = '<img src="/moderator-static/arrow-gain.png"/>%s' % value
+            elif value < 0:
+                val = '<img src="/moderator-static/arrow-loss.png"/>%s' % abs(value)
+            else: val = '0'
 
         return val
 
