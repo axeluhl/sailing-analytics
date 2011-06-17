@@ -19,27 +19,12 @@
                 <ul class='function-btn'>
                   <li class='function-1 ${request.params.get("c", "F1") == "F1" and "active" or ""}'>
                   <a href='/@@/leaderboard-live?c=F1&r=${request.params.get("r", 0)}'>
-                      CUR
+                      SPDDST
                     </a>
                   </li>
                   <li class='function-1 ${request.params.get("c", "F1") == "F2" and "active" or ""}'>
                   <a href='/@@/leaderboard-live?c=F2&r=${request.params.get("r", 0)}'>
-                      TV
-                    </a>
-                  </li>
-                  <li class='function-1 ${request.params.get("c", "F1") == "F3" and "active" or ""}'>
-                  <a href='/@@/leaderboard-live?c=F3&r=${request.params.get("r", 0)}'>
-                      ETA
-                    </a>
-                  </li>
-                  <li class='function-1 ${request.params.get("c", "F1") == "F4" and "active" or ""}'>
-                  <a href='/@@/leaderboard-live?c=F4&r=${request.params.get("r", 0)}'>
-                      SPEED
-                    </a>
-                  </li>
-                  <li class='function-1 ${request.params.get("c", "F1") == "F5" and "active" or ""}'>
-                  <a href='/@@/leaderboard-live?c=F5&r=${request.params.get("r", 0)}'>
-                      DST
+                      GAPETA
                     </a>
                   </li>
                 </ul>

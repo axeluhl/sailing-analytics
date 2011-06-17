@@ -54,8 +54,8 @@ COLUMN_MODE_NAMES = {
         'LEADERBOARD-STATIC': 
             [VN['RANK'], VN['CSPDMS'], VN['DSTTRV'], VN['VMGMS'], VN['GLP']],
         'LEADERBOARD-F1':
-        [VN['RANK'], VN['GAPSEC'], VN['ASPDKNOT'], VN['DSTTRV'], VN['GLP']], # TODO: rank, speed, distance (rank, gap, eta)
+            [VN['RANK'], VN['CSPDMS'], VN['DSTTRV']],
         'LEADERBOARD-F2':
-            [VN['RANK'], VN['GAPSEC'], VN['GLP']],
+            [VN['RANK'], VN['GAPSEC'], VN['ETA']],
         }
 
