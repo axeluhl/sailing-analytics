@@ -45,12 +45,6 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public TimePoint getFinish() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
     public Iterable<TrackedLeg> getTrackedLegs() {
         // TODO Auto-generated method stub
         return null;
@@ -221,12 +215,6 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
     @Override
     public void setStart(TimePoint start) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    public void setFinish(TimePoint stop) {
         // TODO Auto-generated method stub
         
     }

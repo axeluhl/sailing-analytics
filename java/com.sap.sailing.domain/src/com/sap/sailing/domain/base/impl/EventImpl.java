@@ -1,7 +1,6 @@
 package com.sap.sailing.domain.base.impl;
 
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 
 import com.sap.sailing.domain.base.BoatClass;
@@ -11,10 +10,12 @@ import com.sap.sailing.domain.base.RaceDefinition;
 
 public class EventImpl extends NamedImpl implements Event {
     private final Set<RaceDefinition> races;
+    private final BoatClass boatClass;
     
-    public EventImpl(String name) {
+    public EventImpl(String name, BoatClass boatClass) {
         super(name);
         races = new HashSet<RaceDefinition>();
+        this.boatClass = boatClass;
     }
 
     @Override
@@ -32,12 +33,7 @@ public class EventImpl extends NamedImpl implements Event {
 
     @Override
     public BoatClass getBoatClass() {
-        Iterator<RaceDefinition> raceIter = getAllRaces().iterator();
-        if (raceIter.hasNext()) {
-            return raceIter.next().getBoatClass();
-        } else {
-            return null;
-        }
+        return boatClass;
     }
 
     @Override

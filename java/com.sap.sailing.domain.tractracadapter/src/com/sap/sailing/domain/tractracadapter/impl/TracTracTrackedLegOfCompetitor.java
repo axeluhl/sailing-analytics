@@ -150,4 +150,10 @@ public class TracTracTrackedLegOfCompetitor implements TrackedLegOfCompetitor {
         }
     }
 
+    @Override
+    public Distance getWindwardDistanceToOverallLeader(TimePoint timePoint) throws NoWindException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }

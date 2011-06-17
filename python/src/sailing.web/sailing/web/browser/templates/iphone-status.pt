@@ -18,9 +18,9 @@
         <li class='current-race'>
           <select>
             <tal:for repeat="racename event.races">
-                <tal:do define="race view.raceBy(event.name, racename)">
-                <option>${race.name} {len(race.current_legs)&gt;0 and '(Running)' or ''}</option>
-                </tal:do>
+            <tal:do define="race view.raceBy(event.name, racename)">
+                <option>${race.name} ${len(getattr(race, 'current_legs', []) or [])&gt;0 and '(Running)' or ''}</option>
+            </tal:do>
             </tal:for>
           </select>
         </li>
@@ -41,11 +41,11 @@
         </tr>
       </thead>
       <tbody>
-        <tal:for repeat="">
-        <tr class='odd' rowid='1'>
-          <td>1</td>
-          <td>EVANS</td>
-          <td>20</td>
+        <tal:for repeat="competitor range(len(event.competitors))">
+        <tr class='${repeat["competitor"].even and "even" or "odd"}' rowid='1'>
+          <td>&nbsp;</td>
+          <td>${event.competitors[competitor]}</td>
+          <td>&nbsp;</td>
         </tr>
         </tal:for>
       </tbody>

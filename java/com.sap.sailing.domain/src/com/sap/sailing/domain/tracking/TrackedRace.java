@@ -32,8 +32,6 @@ public interface TrackedRace {
     
     TimePoint getStart();
     
-    TimePoint getFinish();
-    
     Iterable<TrackedLeg> getTrackedLegs();
     
     TrackedLeg getTrackedLeg(Leg leg);

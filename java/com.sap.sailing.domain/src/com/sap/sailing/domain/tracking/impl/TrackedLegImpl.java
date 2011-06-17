@@ -2,6 +2,7 @@ package com.sap.sailing.domain.tracking.impl;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -91,9 +92,9 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener<Competitor
     }
     
     @Override
-    public Map<Competitor, Integer> getRanks(TimePoint timePoint) {
+    public LinkedHashMap<Competitor, Integer> getRanks(TimePoint timePoint) {
         SortedSet<TrackedLegOfCompetitor> orderedTrackedLegsOfCompetitors = getCompetitorTracksOrderedByRank(timePoint);
-        Map<Competitor, Integer> result = new HashMap<Competitor, Integer>();
+        LinkedHashMap<Competitor, Integer> result = new LinkedHashMap<Competitor, Integer>();
         for (TrackedLegOfCompetitor tloc : orderedTrackedLegsOfCompetitors) {
             result.put(tloc.getCompetitor(), orderedTrackedLegsOfCompetitors.headSet(tloc).size()+1);
         }
