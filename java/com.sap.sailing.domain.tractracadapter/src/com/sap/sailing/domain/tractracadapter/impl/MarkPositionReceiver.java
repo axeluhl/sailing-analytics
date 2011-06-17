@@ -47,6 +47,12 @@ public class MarkPositionReceiver extends AbstractReceiverWithQueue<ControlPoint
         super(domainFactory);
         this.tractracEvent = tractracEvent;
         // assumption: there is currently only one race per TracTrac Event object
+        if (tractracEvent.getRaceList().isEmpty()) {
+            throw new IllegalArgumentException("Can't receive mark positions from event "+tractracEvent.getName()+" that has no race");
+        }
+        if (tractracEvent.getRaceList().size() > 1) {
+            logger.warning("Received event "+tractracEvent.getName()+" that has more than one race ("+tractracEvent.getRaceList().size()+")");
+        }
         final Race race = tractracEvent.getRaceList().iterator().next();
         new Thread("MarkPositionReceiver waiting for RaceDefinition for "+race.getName()) {
             public void run() {

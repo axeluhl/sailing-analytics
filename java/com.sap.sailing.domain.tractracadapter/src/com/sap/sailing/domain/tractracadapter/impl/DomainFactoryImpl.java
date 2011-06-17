@@ -61,6 +61,7 @@ import com.sap.sailing.domain.tractracadapter.JSONService;
 import com.sap.sailing.domain.tractracadapter.RaceTracker;
 import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
+import com.sap.sailing.util.Util.Pair;
 import com.tractrac.clientmodule.CompetitorClass;
 import com.tractrac.clientmodule.ControlPoint;
 import com.tractrac.clientmodule.Race;
@@ -99,10 +100,10 @@ public class DomainFactoryImpl implements DomainFactory {
     private final Map<CompetitorClass, BoatClass> classCache = new HashMap<CompetitorClass, BoatClass>();
     
     /**
-     * Caches events by their name
+     * Caches events by their name and their boat class's name
      */
-    private final Map<String, com.sap.sailing.domain.base.Event> eventCache =
-            new HashMap<String, com.sap.sailing.domain.base.Event>();
+    private final Map<Pair<String, String>, com.sap.sailing.domain.base.Event> eventCache =
+            new HashMap<Pair<String, String>, com.sap.sailing.domain.base.Event>();
     
     private final Map<com.tractrac.clientmodule.Event, RaceDefinition> tractracEventToRaceDefinitionMap = new HashMap<com.tractrac.clientmodule.Event, RaceDefinition>();
     
@@ -292,10 +293,26 @@ public class DomainFactoryImpl implements DomainFactory {
     @Override
     public Event createEvent(com.tractrac.clientmodule.Event event) {
         synchronized (eventCache) {
-            Event result = eventCache.get(event.getName());
+            // FIXME Dialog with Lasse by Skype on 2011-06-17:
+            //            [6:20:04 PM] Axel Uhl: Lasse, can Event.getCompetitorClassList() ever produce more than one result?
+            //            [6:20:20 PM] Axel Uhl: Or is it similar to Event.getRaceList() which always delivers one Race?
+            //            [6:22:19 PM] Lasse Staffensen: It can deliver several classes, if more classes are present in a race.
+            //            [6:27:20 PM] Axel Uhl: Will that happen at Kiel Week?
+            //            [6:27:58 PM] Lasse Staffensen: No
+            //            [6:28:34 PM] Axel Uhl: Good :)
+            // This means that currently it is permissible to assume that we'll get at most one
+            // boat class per TracTrac event. Generally, however, we have to assume that
+            // one TracTrac event may map to multiple domain Event objects with one BoatClass each
+            Collection<CompetitorClass> competitorClassList = event.getCompetitorClassList();
+            BoatClass boatClass = null;
+            if (competitorClassList != null && !competitorClassList.isEmpty()) {
+                boatClass = getBoatClass(competitorClassList.iterator().next());
+            }
+            Pair<String, String> key = new Pair<String, String>(event.getName(), boatClass==null?null:boatClass.getName());
+            Event result = eventCache.get(key);
             if (result == null) {
-                result = new EventImpl(event.getName());
-                eventCache.put(event.getName(), result);
+                result = new EventImpl(event.getName(), boatClass);
+                eventCache.put(key, result);
             }
             return result;
         }

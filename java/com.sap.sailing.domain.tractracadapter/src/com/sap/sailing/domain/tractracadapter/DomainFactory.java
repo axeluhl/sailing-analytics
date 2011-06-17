@@ -24,8 +24,12 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedEvent;
+import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindStore;
+import com.sap.sailing.domain.tracking.WindTrack;
+import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tractracadapter.impl.DomainFactoryImpl;
+import com.sap.sailing.domain.tractracadapter.impl.RaceCourseReceiver;
 import com.tractrac.clientmodule.Competitor;
 import com.tractrac.clientmodule.CompetitorClass;
 import com.tractrac.clientmodule.ControlPoint;
@@ -70,9 +74,34 @@ public interface DomainFactory {
     /**
      * Creates an {@link com.sap.sailing.domain.base.Event event} from a
      * TracTrac event description. It doesn't have {@link RaceDefinition}s yet.
+     * A new {@link com.sap.sailing.domain.base.Event} is created if no event by
+     * an equal name with a boat class with an equal name as the <code>event</code>'s
+     * boat class exists yet.
      */
     com.sap.sailing.domain.base.Event createEvent(Event event);
     
+    /**
+     * Creates a race tracked for the specified URL/URIs and starts receiving all available existing and future push
+     * data from there. Receiving continues until {@link RaceTracker#stop()} is called.
+     * <p>
+     * 
+     * A race tracker uses the <code>paramURL</code> for the TracTrac Java client to register for push data about one
+     * race. The {@link RaceDefinition} for that race, however, isn't created until the {@link Course} has been
+     * received. Therefore, the {@link RaceCourseReceiver} will create the {@link RaceDefinition} and will add it to the
+     * {@link com.sap.sailing.domain.base.Event}.
+     * <p>
+     * 
+     * The link to the {@link RaceDefinition} is created in the {@link DomainFactory} when the
+     * {@link RaceCourseReceiver} creates the {@link TrackedRace} object. Starting then, the {@link DomainFactory} will
+     * respond with the {@link RaceDefinition} when its {@link DomainFactory#getRace(Event)} is called with the TracTrac
+     * {@link Event} as argument that is used for its tracking.
+     * <p>
+     * 
+     * @param windStore
+     *            Provides the capability to obtain the {@link WindTrack}s for the different wind sources. A trivial
+     *            implementation is {@link EmptyWindStore} which simply provides new, empty tracks. This is always
+     *            available but loses track of the wind, e.g., during server restarts.
+     */
     RaceTracker createRaceTracker(URL paramURL, URI liveURI, URI storedURI, WindStore windStore) throws MalformedURLException,
             FileNotFoundException, URISyntaxException;
 
