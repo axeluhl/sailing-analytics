@@ -232,6 +232,20 @@ def configureListener(context, request):
     elif request.POST.get('leaderboard-default-event', None):
         core.current_leaderboard_event = request.POST.get('event')
 
+    elif request.POST.get('set-averaging', None):
+        conf.setContext(config.ADMIN)
+        conf.setCommand(config.SET_AVERAGING)
+
+        eventname = request.POST.get('event', None)
+        racename = request.POST.get('race', None)
+
+        aWind = request.POST.get('averagingWind')
+        aSpeed = request.POST.get('averagingSpeed')
+        conf.setParameters(dict(eventname=eventname, racename=racename, windaveragingintervalmillis=aWind, speedaveragingintervalmillis=aSpeed))
+
+        conf.trigger()
+        return view.yieldMessage('Averaging set!')
+
     return HTTPFound(location='/')
 
 @jsonize

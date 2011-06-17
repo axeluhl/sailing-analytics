@@ -6,7 +6,7 @@ When <i>stopping listener</i> it will trigger two methods: If you select a race 
     <tal:if condition="not view.listenerStarted()">
 
     <fieldset>
-        <legend>1. Listener Configuration</legend>
+        <legend>1. Connection</legend>
         <div class="field">
             <span>Host and Port:</span><br/>
             <input type="text" id="serverhost" name="host"/>&nbsp;<input id="serverport" type="text" name="port"/>&nbsp;
@@ -124,5 +124,14 @@ When <i>stopping listener</i> it will trigger two methods: If you select a race 
         <input type="submit" name="disconnect-server" value="Disconnect your session"/>&nbsp;&nbsp;&nbsp;
 
         <input type="submit" name="listener-stop" value="Stop Server" style="background-color: #cc3300;"/>
+
+        <br/><br/>
+        <div class="field">
+            <span>Set averaging interval (in millis) for</span><br/>
+            Speed: <input type="text" name="averagingSpeed" value="20000"/>&nbsp;Wind: <input type="text" name="averagingWind" value="20000"/>
+        </div>
+
+        <input type="submit" name="set-averaging" value="Set Averaging (for selected race)"/>
+
     </tal:if>
 </form>
