@@ -110,28 +110,44 @@ When <i>stopping listener</i> it will trigger two methods: If you select a race 
         &nbsp;
         Race: 
         <select name="race">
+            <option value=""></option>
             <tal:for repeat="race view.allRacesFor()">
             <option value="${race}">${race}</option>
             </tal:for>
         </select>
-        &nbsp;
-        Leaderboard-Default: ${view.currentLeaderboardEvent() and view.currentLeaderboardEvent().name or 'N/A'}&nbsp;
-        <a target="_blank" href="${request.application_url}/@@/leaderboard-live">Show Leaderboard</a>
         <br/><br/>
-
-        <input type="submit" name="leaderboard-default-event" style="background-color: green; color: white;" value="Set event as Leaderboard default"/>&nbsp;
+        <fieldset>
+            <legend>Handling</legend>
         <input type="submit" name="listener-event-refresh" value="(Re) load event data"/>&nbsp;
         <input type="submit" name="disconnect-server" value="Disconnect your session"/>&nbsp;&nbsp;&nbsp;
 
         <input type="submit" name="listener-stop" value="Stop Server" style="background-color: #cc3300;"/>
 
-        <br/><br/>
-        <div class="field">
-            <span>Set averaging interval (in millis) for</span><br/>
-            Speed: <input type="text" name="averagingSpeed" value="20000"/>&nbsp;Wind: <input type="text" name="averagingWind" value="20000"/>
-        </div>
+        </fieldset>
+        <br/>
+        <fieldset>
+            <legend>Leaderboard</legend>
+        <input type="submit" name="leaderboard-default-event" style="background-color: green; color: white;" value="Set event as Leaderboard default"/>&nbsp;
+        Leaderboard-Default: ${view.currentLeaderboardEvent() and view.currentLeaderboardEvent().name or 'N/A'}&nbsp;
+        <a target="_blank" href="${request.application_url}/@@/leaderboard-live">&raquo;&nbsp;Show Leaderboard</a>
+        <br/>
 
-        <input type="submit" name="set-averaging" value="Set Averaging (for selected race)"/>
+        </fieldset>
+
+        <br/>
+        <fieldset>
+            <legend>Averaging</legend>
+            <div>
+                Current Averaging: <span id="averaging">...</span>
+            </div>
+            <div class="field">
+                <span>Set averaging interval (in millis) for</span><br/>
+                Speed: <input type="text" name="averagingSpeed" value="20000"/>&nbsp;Wind: <input type="text" name="averagingWind" value="20000"/>
+            </div>
+
+            <input type="button" value="Load Averaging (needs unpaused listener for the selected race)" onclick="GET('showAveraging', {eventname: $('select[name=event] option:selected').val(), racename: $('select[name=race] option:selected').val()}, function(data) {$('#averaging').html(data)});"/>&nbsp;&nbsp;
+            <input type="submit" name="set-averaging" value="Set Averaging (for selected race)"/>
+        </fieldset>
 
     </tal:if>
 </form>

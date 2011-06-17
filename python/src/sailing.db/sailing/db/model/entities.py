@@ -39,6 +39,8 @@ class Race(BaseDocument):
         'start': float,
         'finish' : float,
         'timeofnewestevent': float,
+        'averagingspeed': float,
+        'averagingwind' : float,
         'updatecount': float,
         'wind_source': unicode,
         'wind_bearing': float,

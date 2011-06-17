@@ -391,7 +391,9 @@ def liveRaceInformation(configurator):
         mdup = dict(startoftracking=data['startoftracking'],
                         start=data['start'],
                         timeofnewestevent=data['timeofnewestevent'],
-                        updatecount=data['updatecount'])
+                        updatecount=data['updatecount'],
+                        averagingwind=data['windaveragingintervalmillis'],
+                        averagingspeed=data['speedaveragingintervalmillis'])
 
         if data.get('wind'):
             mdup['wind_source'] = data['wind']['source']

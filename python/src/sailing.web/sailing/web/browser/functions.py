@@ -663,3 +663,11 @@ def loadRacesForEvent(context, request):
 
     return render_to_response('templates/java-connector-select-races.pt', {'races' : data, 'view': view}, request=request)
 
+@jsonize
+def showAveraging(context, request):
+    eventname = request.params.get('eventname')
+    racename = request.params.get('racename')
+
+    race = model.RaceImpl.queryOneBy(event=eventname, name=racename)
+    return 'Wind: %s, Speed: %s' % (getattr(race, 'averagingwind', 'n/a'), getattr(race, 'averagingspeed', 'n/a'))
+
