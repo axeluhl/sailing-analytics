@@ -34,7 +34,7 @@ public class DynamicTrackImpl<ItemType, FixType extends GPSFix> extends
         long oldMillis = getMillisecondsOverWhichToAverage();
         super.setMillisecondsOverWhichToAverage(millisecondsOverWhichToAverage);
         for (RaceChangeListener<ItemType> listener : listeners) {
-            listener.averagingChanged(oldMillis, millisecondsOverWhichToAverage);
+            listener.speedAveragingChanged(oldMillis, millisecondsOverWhichToAverage);
         }
     }
     

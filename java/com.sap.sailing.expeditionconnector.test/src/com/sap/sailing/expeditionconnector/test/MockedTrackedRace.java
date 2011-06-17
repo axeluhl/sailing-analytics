@@ -255,4 +255,10 @@ public class MockedTrackedRace implements DynamicTrackedRace {
         
     }
 
+    @Override
+    public void setMillisecondsOverWhichToAverageWind(long millisecondsOverWhichToAverageWind) {
+        // TODO Auto-generated method stub
+        
+    }
+
 }

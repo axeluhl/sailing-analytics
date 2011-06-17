@@ -66,6 +66,14 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     }
 
     @Override
+    public void setMillisecondsOverWhichToAverageWind(long millisecondsOverWhichToAverageWind) {
+        for (WindSource windSource : WindSource.values()) {
+            getWindTrack(windSource).setMillisecondsOverWhichToAverage(millisecondsOverWhichToAverageWind);
+        }
+        updated(MillisecondsTimePoint.now());
+    }
+
+    @Override
     public DynamicTrack<Competitor, GPSFixMoving> getTrack(Competitor competitor) {
         return (DynamicTrack<Competitor, GPSFixMoving>) super.getTrack(competitor);
     }
@@ -109,13 +117,24 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
         }
     }
 
-    private void notifyListeners(long oldMillisecondsOverWhichToAverageSpeed, long newMillisecondsOverWhichToAverageSpeed) {
+    private void notifyListenersSpeedAveragingChanged(long oldMillisecondsOverWhichToAverageSpeed, long newMillisecondsOverWhichToAverageSpeed) {
         for (RaceChangeListener<Competitor> listener : getListeners()) {
             try {
-                listener.averagingChanged(oldMillisecondsOverWhichToAverageSpeed, newMillisecondsOverWhichToAverageSpeed);
+                listener.speedAveragingChanged(oldMillisecondsOverWhichToAverageSpeed, newMillisecondsOverWhichToAverageSpeed);
             } catch (Throwable t) {
                 logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + t.getMessage());
-                logger.throwing(DynamicTrackedRaceImpl.class.getName(), "notifyListeners(long, long)", t);
+                logger.throwing(DynamicTrackedRaceImpl.class.getName(), "notifyListenersSpeedAveragingChanged(long, long)", t);
+            }
+        }
+    }
+
+    private void notifyListenersWindAveragingChanged(long oldMillisecondsOverWhichToAverageWind, long newMillisecondsOverWhichToAverageWind) {
+        for (RaceChangeListener<Competitor> listener : getListeners()) {
+            try {
+                listener.windAveragingChanged(oldMillisecondsOverWhichToAverageWind, newMillisecondsOverWhichToAverageWind);
+            } catch (Throwable t) {
+                logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + t.getMessage());
+                logger.throwing(DynamicTrackedRaceImpl.class.getName(), "notifyListenersWindAveragingChanged(long, long)", t);
             }
         }
     }
@@ -199,8 +218,13 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     }
 
     @Override
-    public void averagingChanged(long oldMillisecondsOverWhichToAverage, long newMillisecondsOverWhichToAverage) {
-        notifyListeners(oldMillisecondsOverWhichToAverage, newMillisecondsOverWhichToAverage);
+    public void speedAveragingChanged(long oldMillisecondsOverWhichToAverage, long newMillisecondsOverWhichToAverage) {
+        notifyListenersSpeedAveragingChanged(oldMillisecondsOverWhichToAverage, newMillisecondsOverWhichToAverage);
+    }
+
+    @Override
+    public void windAveragingChanged(long oldMillisecondsOverWhichToAverage, long newMillisecondsOverWhichToAverage) {
+        notifyListenersWindAveragingChanged(oldMillisecondsOverWhichToAverage, newMillisecondsOverWhichToAverage);        
     }
 
     @Override

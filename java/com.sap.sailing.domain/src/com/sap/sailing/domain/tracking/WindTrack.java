@@ -26,4 +26,6 @@ public interface WindTrack extends Track<Wind> {
     void addListener(WindListener listener);
 
     void remove(Wind wind);
+
+    void setMillisecondsOverWhichToAverage(long millisecondsOverWhichToAverage);
 }

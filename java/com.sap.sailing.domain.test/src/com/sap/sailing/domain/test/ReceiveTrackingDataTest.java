@@ -70,7 +70,11 @@ public class ReceiveTrackingDataTest extends AbstractTracTracLiveTest {
             public void windDataRemoved(Wind wind) {
             }
             @Override
-            public void averagingChanged(long oldMillisecondsOverWhichToAverage, long newMillisecondsOverWhichToAverage) {
+            public void speedAveragingChanged(long oldMillisecondsOverWhichToAverage, long newMillisecondsOverWhichToAverage) {
+            }
+            @Override
+            public void windAveragingChanged(long oldMillisecondsOverWhichToAverage,
+                    long newMillisecondsOverWhichToAverage) {
             }
         };
         List<TypeController> listeners = new ArrayList<TypeController>();

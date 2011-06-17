@@ -37,6 +37,13 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
     }
     
     @Override
+    public void setMillisecondsOverWhichToAverage(long millisecondsOverWhichToAverage) {
+        long oldMillis = millisecondsOverWhichToAverage;
+        this.millisecondsOverWhichToAverage = millisecondsOverWhichToAverage;
+        notifyListenersAboutAveragingChange(oldMillis, millisecondsOverWhichToAverage);
+    }
+    
+    @Override
     public void add(Wind wind) {
         getInternalFixes().add(wind);
         notifyListenersAboutReceive(wind);
@@ -49,6 +56,17 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
             } catch (Throwable t) {
                 logger.log(Level.SEVERE, "WindListener "+listener+" threw exception "+t.getMessage());
                 logger.throwing(WindTrackImpl.class.getName(), "notifyListenersAboutReceive(Wind)", t);
+            }
+        }
+    }
+
+    private void notifyListenersAboutAveragingChange(long oldMillisecondsOverWhichToAverage, long newMillisecondsOverWhichToAverage) {
+        for (WindListener listener : listeners) {
+            try {
+                listener.windAveragingChanged(oldMillisecondsOverWhichToAverage, newMillisecondsOverWhichToAverage);
+            } catch (Throwable t) {
+                logger.log(Level.SEVERE, "WindListener "+listener+" threw exception "+t.getMessage());
+                logger.throwing(WindTrackImpl.class.getName(), "notifyListenersAboutAveragingChange(long, long)", t);
             }
         }
     }
