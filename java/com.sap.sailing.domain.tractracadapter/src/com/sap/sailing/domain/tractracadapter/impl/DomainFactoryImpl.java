@@ -349,7 +349,7 @@ public class DomainFactoryImpl implements DomainFactory {
         synchronized (eventTrackingCache) {
             DynamicTrackedEvent result = eventTrackingCache.get(event);
             if (result == null) {
-                result = new DynamicTrackedEventImpl(event, millisecondsOverWhichToAverageSpeed);
+                result = new DynamicTrackedEventImpl(event);
                 eventTrackingCache.put(event, result);
             }
             return result;

@@ -154,4 +154,9 @@ public interface TrackedRace {
      * Note that these times may not increase monotonically.
      */
     TimePoint getTimePointOfLastEvent();
+
+    long getMillisecondsOverWhichToAverageSpeed();
+
+    long getMillisecondsOverWhichToAverageWind();
+
 }

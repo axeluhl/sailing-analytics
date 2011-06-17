@@ -148,6 +148,16 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener<Competitor
     }
 
     @Override
+    public void speedAveragingChanged(long oldMillisecondsOverWhichToAverage, long newMillisecondsOverWhichToAverage) {
+        clearCaches();
+    }
+
+    @Override
+    public void windAveragingChanged(long oldMillisecondsOverWhichToAverage, long newMillisecondsOverWhichToAverage) {
+        clearCaches();
+    }
+
+    @Override
     public void markPassingReceived(MarkPassing markPassing) {
         clearCaches();
     }

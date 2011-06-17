@@ -29,4 +29,13 @@ public class DynamicTrackImpl<ItemType, FixType extends GPSFix> extends
         listeners.add(listener);
     }
 
+    @Override
+    public void setMillisecondsOverWhichToAverage(long millisecondsOverWhichToAverage) {
+        long oldMillis = getMillisecondsOverWhichToAverage();
+        super.setMillisecondsOverWhichToAverage(millisecondsOverWhichToAverage);
+        for (RaceChangeListener<ItemType> listener : listeners) {
+            listener.speedAveragingChanged(oldMillis, millisecondsOverWhichToAverage);
+        }
+    }
+    
 }

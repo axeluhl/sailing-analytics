@@ -38,4 +38,9 @@ public class MongoWindListener implements com.sap.sailing.domain.tracking.WindLi
         windTracksCollection.remove(windTrackEntry);
     }
 
+    @Override
+    public void windAveragingChanged(long oldMillisecondsOverWhichToAverage, long newMillisecondsOverWhichToAverage) {
+        // no need to change anything in MongoDB because MongoDB only keeps track of the fixes, not their averaging
+    }
+
 }

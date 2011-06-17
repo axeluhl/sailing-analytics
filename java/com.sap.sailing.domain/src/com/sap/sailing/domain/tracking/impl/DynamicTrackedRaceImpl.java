@@ -8,11 +8,13 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.tracking.DynamicTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFix;
@@ -24,6 +26,7 @@ import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindSource;
 import com.sap.sailing.domain.tracking.WindStore;
+import com.sap.sailing.domain.tracking.WindTrack;
 
 public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
         DynamicTrackedRace, RaceChangeListener<Competitor> {
@@ -49,10 +52,36 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
         track.addGPSFix(fix); // the track notifies this tracked race which in turn notifies its listeners
         updated(fix.getTimePoint());
     }
+    
+    @Override
+    public void setMillisecondsOverWhichToAverageSpeed(long millisecondsOverWhichToAverageSpeed) {
+        for (Competitor competitor : getRace().getCompetitors()) {
+            getTrack(competitor).setMillisecondsOverWhichToAverage(millisecondsOverWhichToAverageSpeed);
+        }
+        for (Waypoint waypoint : getRace().getCourse().getWaypoints()) {
+            for (Buoy buoy : waypoint.getBuoys()) {
+                getTrack(buoy).setMillisecondsOverWhichToAverage(millisecondsOverWhichToAverageSpeed);
+            }
+        }
+        updated(MillisecondsTimePoint.now());
+    }
+
+    @Override
+    public void setMillisecondsOverWhichToAverageWind(long millisecondsOverWhichToAverageWind) {
+        for (WindSource windSource : WindSource.values()) {
+            getWindTrack(windSource).setMillisecondsOverWhichToAverage(millisecondsOverWhichToAverageWind);
+        }
+        updated(MillisecondsTimePoint.now());
+    }
 
     @Override
     public DynamicTrack<Competitor, GPSFixMoving> getTrack(Competitor competitor) {
         return (DynamicTrack<Competitor, GPSFixMoving>) super.getTrack(competitor);
+    }
+    
+    @Override
+    public DynamicTrack<Buoy, GPSFix> getTrack(Buoy buoy) {
+        return (DynamicTrack<Buoy, GPSFix>) super.getTrack(buoy);
     }
     
     private synchronized Set<RaceChangeListener<Competitor>> getListeners() {
@@ -85,6 +114,28 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
             } catch (Throwable t) {
                 logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + t.getMessage());
                 logger.throwing(DynamicTrackedRaceImpl.class.getName(), "notifyListeners(Wind)", t);
+            }
+        }
+    }
+
+    private void notifyListenersSpeedAveragingChanged(long oldMillisecondsOverWhichToAverageSpeed, long newMillisecondsOverWhichToAverageSpeed) {
+        for (RaceChangeListener<Competitor> listener : getListeners()) {
+            try {
+                listener.speedAveragingChanged(oldMillisecondsOverWhichToAverageSpeed, newMillisecondsOverWhichToAverageSpeed);
+            } catch (Throwable t) {
+                logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + t.getMessage());
+                logger.throwing(DynamicTrackedRaceImpl.class.getName(), "notifyListenersSpeedAveragingChanged(long, long)", t);
+            }
+        }
+    }
+
+    private void notifyListenersWindAveragingChanged(long oldMillisecondsOverWhichToAverageWind, long newMillisecondsOverWhichToAverageWind) {
+        for (RaceChangeListener<Competitor> listener : getListeners()) {
+            try {
+                listener.windAveragingChanged(oldMillisecondsOverWhichToAverageWind, newMillisecondsOverWhichToAverageWind);
+            } catch (Throwable t) {
+                logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + t.getMessage());
+                logger.throwing(DynamicTrackedRaceImpl.class.getName(), "notifyListenersWindAveragingChanged(long, long)", t);
             }
         }
     }
@@ -168,6 +219,16 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     }
 
     @Override
+    public void speedAveragingChanged(long oldMillisecondsOverWhichToAverage, long newMillisecondsOverWhichToAverage) {
+        notifyListenersSpeedAveragingChanged(oldMillisecondsOverWhichToAverage, newMillisecondsOverWhichToAverage);
+    }
+
+    @Override
+    public void windAveragingChanged(long oldMillisecondsOverWhichToAverage, long newMillisecondsOverWhichToAverage) {
+        notifyListenersWindAveragingChanged(oldMillisecondsOverWhichToAverage, newMillisecondsOverWhichToAverage);        
+    }
+
+    @Override
     public void markPassingReceived(MarkPassing markPassing) {
         notifyListeners(markPassing);
         
@@ -188,4 +249,26 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     protected TrackedLeg createTrackedLeg(Leg leg) {
         return new TrackedLegImpl(this, leg, getRace().getCompetitors());
     }
+
+    @Override
+    public long getMillisecondsOverWhichToAverageSpeed() {
+        long result = 0; // default in case there is no competitor
+        Iterator<Competitor> compIter = getRace().getCompetitors().iterator();
+        if (compIter.hasNext()) {
+            DynamicTrack<Competitor, GPSFixMoving> someTrack = getTrack(compIter.next());
+            result = someTrack.getMillisecondsOverWhichToAverageSpeed();
+        }
+        return result;
+    }
+
+    @Override
+    public long getMillisecondsOverWhichToAverageWind() {
+        long result = 0; // default in case there is no competitor
+        for (WindSource windSource : WindSource.values()) {
+            WindTrack someTrack = getWindTrack(windSource);
+            result = someTrack.getMillisecondsOverWhichToAverageWind();
+        }
+        return result;
+    }
+
 }

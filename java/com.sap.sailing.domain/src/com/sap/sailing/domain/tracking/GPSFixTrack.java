@@ -44,4 +44,7 @@ public interface GPSFixTrack<ItemType, FixType extends GPSFix> extends Track<Fix
      * by the GPS fixes in this track at time point <code>at</code>.
      */
     SpeedWithBearing getEstimatedSpeed(TimePoint at);
+
+    long getMillisecondsOverWhichToAverageSpeed();
+
 }

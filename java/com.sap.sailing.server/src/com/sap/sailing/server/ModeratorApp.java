@@ -205,6 +205,8 @@ public class ModeratorApp extends Servlet {
                 jsonRace.put("timeoflastevent", trackedRace.getTimePointOfLastEvent() == null ? 0l : trackedRace
                         .getTimePointOfLastEvent().asMillis());
                 jsonRace.put("updatecount", trackedRace.getUpdateCount());
+                jsonRace.put("windaveragingintervalmillis", trackedRace.getMillisecondsOverWhichToAverageWind());
+                jsonRace.put("speedaveragingintervalmillis", trackedRace.getMillisecondsOverWhichToAverageSpeed());
                 Position positionForWind = null;
                 TrackedLeg currentLeg = trackedRace.getCurrentLeg(timePoint);
                 if (currentLeg != null) {
