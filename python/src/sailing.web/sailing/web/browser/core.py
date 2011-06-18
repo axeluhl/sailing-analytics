@@ -113,7 +113,7 @@ class BaseView(object):
 
     def currentRace(self):
         if not self.session.has_key('current-race'):
-            raise Exception, 'No current race could be determined'
+            return None
 
         return model.RaceImpl.queryOneBy(event=self.session['current-event'], name=self.session['current-race'])
 
