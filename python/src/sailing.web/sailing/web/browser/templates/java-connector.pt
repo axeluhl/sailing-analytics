@@ -47,7 +47,7 @@ When <i>stopping listener</i> it will trigger two methods: If you select a race 
         </div>
 
         <input type="button" onclick="displayLoader('#race-loader');GET('loadRacesForEvent', {eventJSONURL: $('#eventJSONURL').val(), host: $('#serverhost').val(), port: $('#serverport').val()}, function(data) {$('#race-loader').html(data)});$('#extended-conf').show()" value="List Races"/>&nbsp;
-        <input type="button" onclick="displayLoader('#race-loader');template('java-connector-custom-race', {}, function(data) {$('#race-loader').html(data)});$('#extended-conf').show();$('#eventJSONURL').val('');" value="Customize Race Configuration"/>
+        <input type="button" onclick="displayLoader('#race-loader');template('java-connector-custom-race', {}, function(data) {$('#race-loader').html(data)});$('#extended-conf').show();$('#eventJSONURL').val('');" value="Customized Race Configuration"/>
     </fieldset>
 
     <div id="extended-conf" style="display:none;">
@@ -95,7 +95,7 @@ When <i>stopping listener</i> it will trigger two methods: If you select a race 
                 <span>Drop Database before connect (Dangerous!! Better use the selective DROP in DB tab)</span><br/>
             </div>
 
-            <input type="submit" name="listener-start" value="Start listener"/>&nbsp;
+            <input type="submit" name="listener-start" value="Connect to TracTrac"/>&nbsp;
     </fieldset>
     </div>
     </tal:if>

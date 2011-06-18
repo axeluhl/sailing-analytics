@@ -22,7 +22,8 @@ class CompetitorImpl(ModelBase):
     default_values = {
         'races': [],
         'marks': [[]],
-        'marknames': [[]]
+        'marknames': [[]],
+        'in_race': False
     }
 
     @classmethod
@@ -31,50 +32,39 @@ class CompetitorImpl(ModelBase):
         is None no sorting is performed on this index. If all index
         params are None sorting is performed by total. """
 
-        def sorter(x, y):
-            xval = x.total
-            yval = y.total
+        def matchDirection(v):
+            if direction == 'desc' and v is None:
+                return 0.0
+            elif direction == 'asc' and v is None:
+                return 10000.0
+            return v
 
-            if valueindex is not None:
-                valuekey = columns[valueindex][-1]
-                xval = x.values[raceindex][markindex].get(valuekey, None)
-                yval = y.values[raceindex][markindex].get(valuekey, None)
+        def legValueOf(c):
+            valuekey = columns[valueindex][-1]
+            return (matchDirection(c.values[raceindex][markindex].get(valuekey, None)), c)
 
-                # 9 to 0: so lets put invalid values to the end
-                if direction == 'desc':
-                    if xval is None: xval = 0
-                    if yval is None: yval = 0
-                else: # 0 to 9
-                    if xval is None: xval = 100000
-                    if yval is None: yval = 100000
+        def markRankOf(c):
+            return (matchDirection(c.marks[raceindex][markindex]), c)
 
-            elif markindex is not None:
-                xval = x.marks[raceindex][markindex]
-                yval = y.marks[raceindex][markindex]
+        def raceRankOf(c):
+            return (matchDirection(c.races[raceindex]), c)
 
-                # 9 to 0: so lets put invalid values to the end
-                if direction == 'desc':
-                    if xval is None: xval = 0
-                    if yval is None: yval = 0
-                else: # 0 to 9
-                    if xval is None: xval = 100000
-                    if yval is None: yval = 100000
-
-            elif raceindex is not None:
-                xval = x.races[raceindex]
-                yval = y.races[raceindex]
-
-                # 9 to 0: so lets put invalid values to the end
-                if direction == 'desc':
-                    if xval is None: xval = 0
-                    if yval is None: yval = 0
-                else: # 0 to 9
-                    if xval is None: xval = 100000
-                    if yval is None: yval = 100000
-
-            return cmp(xval, yval)
+        def currentOf(c):
+            return (matchDirection(c.current_rank), c)
 
         competitors = cls.queryBy(event=eventname)
-        competitors.sort(sorter)
-        return competitors
+        if valueindex is not None:
+            intermediate = map(legValueOf, competitors)
+
+        elif markindex is not None:
+            intermediate = map(markRankOf, competitors)
+
+        elif raceindex is not None:
+            intermediate = map(raceRankOf, competitors)
+
+        else:
+            intermediate = map(currentOf, competitors)
+
+        intermediate.sort(lambda x,y:cmp(x[0], y[0]))
+        return [cp[1] for cp in intermediate]
 

@@ -80,13 +80,13 @@
                 <tal:for repeat="clpos range(1,21)">
                 <tr class='${repeat["clpos"].even and "odd" or "even"}' id='clipping-${clpos}'>
                   <td id='clipping-${clpos}-1'>
-                    <span></span>
+                    <span>&nbsp;</span>
                   </td>
                   <td id='clipping-${clpos}-2'>
-                    <span></span>
+                    <span>&nbsp;</span>
                   </td>
                   <td id='clipping-${clpos}-3'>
-                    <span></span>
+                    <span>&nbsp;</span>
                   </td>
                 </tr>
                 </tal:for>
@@ -168,7 +168,7 @@
               <!-- / SECOND ELEMENT WITH LIST -->
               <div class='leg-box'>
                   <span tal:condition="not repeat['leg'].end">M${markid-1}</span>
-                  <span tal:condition="repeat['leg'].end">E</span>
+                  <span tal:condition="repeat['leg'].end">F</span>
 
               <a class='leg-box-sort sort-desc' href='javascript:;' onclick='sortBy("${raceid},${markid}", $(this))'></a>
                 <a tal:omit-tag="repeat['leg'].end" class='leg-box-active' href='javascript:;' onclick='$(this).closest(".leg-wrap").find(".race-table").toggle();'>

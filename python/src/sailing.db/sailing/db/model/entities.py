@@ -68,6 +68,8 @@ class Competitor(BaseDocument):
         'nationality': unicode,
         'nationality_short': unicode,
 
+        'in_race' : bool, # this is false by default and only set if competitor is in race currently
+
         'current_leg' : int, # denotes the current leg the competitor is in (position)
         'current_race' : int,
 

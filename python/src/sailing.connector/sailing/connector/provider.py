@@ -281,7 +281,7 @@ def liveRaceInformation(configurator):
                     continue
 
                 else:
-                    comp.update(dict(current_leg=lcount, current_race=raceindex))
+                    comp.update(dict(current_leg=lcount, current_race=raceindex, in_race=True))
 
                 mark_name = leg['to']
 
@@ -309,6 +309,9 @@ def liveRaceInformation(configurator):
                             # for the last race just update total rank
                             if raceindex+1 == len(c_races):
                                 c_total_rank = computeRank(competitor['rank'], c_total_rank)
+
+                            # if finished then indicate the fact that competitor has finished racing
+                            comp.update(dict(in_race=False))
 
                     else:
                         c_marks[raceindex][lcount] = 0.0
