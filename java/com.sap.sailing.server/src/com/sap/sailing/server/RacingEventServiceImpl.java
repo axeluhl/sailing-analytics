@@ -113,6 +113,7 @@ public class RacingEventServiceImpl implements RacingEventService {
             trackers.add(tracker);
             String eventName = tracker.getEvent().getName();
             Event eventWithName = eventsByName.get(eventName);
+            // TODO we assume here that the event name is unique which necessesitates adding the boat class name to it in EventImpl constructor
             if (eventWithName != null) {
                 if (eventWithName != tracker.getEvent()) {
                     throw new RuntimeException("Internal error. Two Event objects with equal name "+eventName);
