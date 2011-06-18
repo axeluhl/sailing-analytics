@@ -24,7 +24,9 @@ public class UnicodeCharactersInCompetitorNamesTest {
     }
     
     public static void main(String[] args) throws MalformedURLException, FileNotFoundException, URISyntaxException {
-        new UnicodeCharactersInCompetitorNamesTest().testFindUnicodeCharactersInCompetitorNames();
+        UnicodeCharactersInCompetitorNamesTest t = new UnicodeCharactersInCompetitorNamesTest();
+        t.setUp();
+        t.testFindUnicodeCharactersInCompetitorNames();
     }
     
     @Test
