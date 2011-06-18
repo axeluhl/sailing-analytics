@@ -6,6 +6,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Bearing;
 import com.sap.sailing.domain.base.Buoy;
@@ -21,8 +22,11 @@ import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
+import com.sap.sailing.util.Util;
 
 public class TrackedLegImpl implements TrackedLeg, RaceChangeListener<Competitor> {
+    private final static Logger logger = Logger.getLogger(TrackedLegImpl.class.getName());
+    
     private final static double UPWIND_DOWNWIND_TOLERANCE_IN_DEG = 40; // TracTrac does 22.5, Marcus Baur suggest 40
 
     private final Leg leg;
@@ -79,6 +83,11 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener<Competitor
      */
     protected SortedSet<TrackedLegOfCompetitor> getCompetitorTracksOrderedByRank(TimePoint timePoint) {
         synchronized (competitorTracksOrderedByRank) {
+            if (Util.size(getTrackedLegsOfCompetitors()) != Util.size(getTrackedRace().getRace().getCompetitors())) {
+                logger.warning("Number of competitors in leg (" + Util.size(getTrackedLegsOfCompetitors())
+                        + ") differs from number of competitors in race ("
+                        + Util.size(getTrackedRace().getRace().getCompetitors()) + ")");
+            }
             SortedSet<TrackedLegOfCompetitor> treeSet = competitorTracksOrderedByRank.get(timePoint);
             if (treeSet == null) {
                 treeSet = new TreeSet<TrackedLegOfCompetitor>(new WindwardToGoComparator(this, timePoint));

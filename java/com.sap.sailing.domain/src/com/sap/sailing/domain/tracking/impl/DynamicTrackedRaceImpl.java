@@ -50,6 +50,10 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     public void recordFix(Competitor competitor, GPSFixMoving fix) {
         DynamicTrack<Competitor, GPSFixMoving> track = getTrack(competitor);
         track.addGPSFix(fix); // the track notifies this tracked race which in turn notifies its listeners
+        if (getStart() == null || getStart().compareTo(fix.getTimePoint())>0) {
+            // infer race start time from fix; earliest fix received defines start if earlier than assumed start so far
+            setStart(fix.getTimePoint());
+        }
         updated(fix.getTimePoint());
     }
     
