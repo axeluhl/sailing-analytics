@@ -8,6 +8,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.Charset;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -50,7 +51,13 @@ public class UnicodeCharactersInCompetitorNamesTest {
     
     @Test
     public void readJSONURLAndCheckCompetitorNames() throws MalformedURLException, IOException {
-        BufferedReader localBufferedReader = new BufferedReader(new InputStreamReader(new URL("http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/clientparams.php?event=event_20110609_KielerWoch&race=5b08a9ee-9933-11e0-85be-406186cbf87c").openStream()));
+        System.out.println("Default charset: " + Charset.defaultCharset().name() + ". Supported: "
+                + Charset.isSupported(Charset.defaultCharset().name()));
+        BufferedReader localBufferedReader = new BufferedReader(
+                new InputStreamReader(
+                        new URL(
+                                "http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/clientparams.php?event=event_20110609_KielerWoch&race=5b08a9ee-9933-11e0-85be-406186cbf87c")
+                                .openStream()));
         String line;
         while ((line=localBufferedReader.readLine()) != null) {
             System.out.println(line);
