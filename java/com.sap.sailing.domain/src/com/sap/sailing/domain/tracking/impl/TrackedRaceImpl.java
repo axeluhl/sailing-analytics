@@ -1,10 +1,12 @@
 package com.sap.sailing.domain.tracking.impl;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
-import java.util.TreeSet;
 import java.util.concurrent.ConcurrentSkipListSet;
 
 import com.sap.sailing.domain.base.Buoy;
@@ -48,7 +50,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     private TimePoint timePointOfLastEvent;
     private long updateCount;
     
-    private final Map<TimePoint, TreeSet<Competitor>> competitorRankings; 
+    private final Map<TimePoint, List<Competitor>> competitorRankings; 
     
     /**
      * legs appear in the order in which they appear in the race's course
@@ -114,7 +116,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             windTracks.put(windSource, windStore.getWindTrack(trackedEvent, this, windSource, millisecondsOverWhichToAverageWind));
         }
         currentWindSource = WindSource.EXPEDITION;
-        competitorRankings = new HashMap<TimePoint, TreeSet<Competitor>>();
+        competitorRankings = new HashMap<TimePoint, List<Competitor>>();
         getRace().getCourse().addCourseListener(this);
     }
 
@@ -233,16 +235,17 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     public int getRank(Competitor competitor, TimePoint timePoint) throws NoWindException {
         try {
             synchronized (competitorRankings) {
-                TreeSet<Competitor> rankedCompetitors = competitorRankings.get(timePoint);
+                List<Competitor> rankedCompetitors = competitorRankings.get(timePoint);
                 if (rankedCompetitors == null) {
                     RaceRankComparator comparator = new RaceRankComparator(this, timePoint);
-                    rankedCompetitors = new TreeSet<Competitor>(comparator);
+                    rankedCompetitors = new ArrayList<Competitor>();
                     for (Competitor c : getRace().getCompetitors()) {
                         rankedCompetitors.add(c);
                     }
+                    Collections.sort(rankedCompetitors, comparator);
                     competitorRankings.put(timePoint, rankedCompetitors);
                 }
-                return rankedCompetitors.headSet(competitor, /* inclusive */true).size();
+                return rankedCompetitors.indexOf(competitor)+1;
             }
         } catch (NoWindError e) {
             throw e.getCause();
