@@ -123,6 +123,7 @@ public class AdminApp extends Servlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         try {
+            resp.setCharacterEncoding("UTF-8");
             String action = req.getParameter(PARAM_ACTION);
             if (action != null) {
                 if (ACTION_NAME_ADD_EVENT.equals(action)) {
