@@ -23,8 +23,12 @@ public class UnicodeCharactersInCompetitorNamesTest {
         domainFactory = new DomainFactoryImpl();
     }
     
+    public static void main(String[] args) throws MalformedURLException, FileNotFoundException, URISyntaxException {
+        new UnicodeCharactersInCompetitorNamesTest().testFindUnicodeCharactersInCompetitorNames();
+    }
+    
     @Test
-    public void testFindUNicodeCharactersInCompetitorNames() throws MalformedURLException, FileNotFoundException, URISyntaxException {
+    public void testFindUnicodeCharactersInCompetitorNames() throws MalformedURLException, FileNotFoundException, URISyntaxException {
         RaceTracker fourtyninerYellow_2 = domainFactory
                 .createRaceTracker(
                         new URL(
