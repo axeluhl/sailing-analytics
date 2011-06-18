@@ -1,6 +1,9 @@
 package com.sap.sailing.domain.test;
 
+import java.io.BufferedReader;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -23,9 +26,10 @@ public class UnicodeCharactersInCompetitorNamesTest {
         domainFactory = new DomainFactoryImpl();
     }
     
-    public static void main(String[] args) throws MalformedURLException, FileNotFoundException, URISyntaxException {
+    public static void main(String[] args) throws URISyntaxException, IOException {
         UnicodeCharactersInCompetitorNamesTest t = new UnicodeCharactersInCompetitorNamesTest();
         t.setUp();
+        t.readJSONURLAndCheckCompetitorNames();
         t.testFindUnicodeCharactersInCompetitorNames();
     }
     
@@ -42,5 +46,15 @@ public class UnicodeCharactersInCompetitorNamesTest {
         for (Competitor competitor : competitors) {
             System.out.println(competitor.getName());
         }
+    }
+    
+    @Test
+    public void readJSONURLAndCheckCompetitorNames() throws MalformedURLException, IOException {
+        BufferedReader localBufferedReader = new BufferedReader(new InputStreamReader(new URL("http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/clientparams.php?event=event_20110609_KielerWoch&race=5b08a9ee-9933-11e0-85be-406186cbf87c").openStream()));
+        String line;
+        while ((line=localBufferedReader.readLine()) != null) {
+            System.out.println(line);
+        }
+        localBufferedReader.close();
     }
 }
