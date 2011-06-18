@@ -136,9 +136,8 @@ class ModelBase(object):
         if not fields.get('typename', None):
             fields['typename'] = cls.linked_model.__name__
 
-        fields['atomic'] = True
         klass = queryContent(cls.linked_model.__name__)
-        klass.collection.remove(**fields)
+        klass.collection.remove(spec_or_id=fields, atomic=True)
 
         # assuming that we clean all objects
         klass.collection.drop_indexes()

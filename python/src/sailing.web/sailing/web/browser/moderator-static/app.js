@@ -1,6 +1,6 @@
 
-var global_sortkey = 'name';
-var global_direction = 'desc';
+var global_sortkey = 'current_rank';
+var global_direction = 'asc';
 var global_race = '1:3';
 var global_competitors = '1:20';
 
@@ -16,8 +16,6 @@ var listener_paused = false;
  * competitors: Slice indicating which competitors to show (e.g. "1:20")
  */
 function loadLeaderboard(races, sortby, competitors, direction, colmode) {
-    listener_paused = true;
-
     showLoader();
     $.getJSON('/++/moderatorLiveData', 
                 {races:races, sortby:sortby, competitors:competitors, direction:direction,colmode:colmode}, 
@@ -30,7 +28,6 @@ function loadLeaderboard(races, sortby, competitors, direction, colmode) {
             global_direction = direction;
 
             hideLoader();
-            listener_paused = false;
         }
     );
 }
@@ -90,6 +87,8 @@ function switchRace(block) {
 }
 
 function sortBy(param, element) {
+    listener_paused = true;
+
     $('.sort-asc, .sort-desc').css('background-image', 'url(/moderator-static/sort-none.png)');
 
     element.toggleClass('sort-asc').toggleClass('sort-desc');
@@ -104,25 +103,35 @@ function sortBy(param, element) {
 
     global_sortkey = param;
     loadLeaderboard(global_race, param, global_competitors, global_direction, global_colmode);
+
+    listener_paused = false;
 }
 
 function yieldValue(element, newvalue, ignore_zeros, alternate_value) {
-    if (element.html() != newvalue && newvalue != '' && newvalue != 'None') {
+    if (element.html() != newvalue) {
         if (ignore_zeros == true && (newvalue == '0' || newvalue == 0)) {
 
             // show alternate value
             if (alternate_value != undefined && alternate_value != '' && alternate_value != 'None') {
                 element.html(alternate_value);
+            } else {
+                element.html('&nbsp;');
             }
-
             return;
         }
 
         // special handling for minute shown
-        if (isNaN(newvalue) && newvalue.indexOf(':') == -1 && newvalue.indexOf('img') == -1)
+        if (isNaN(newvalue) && newvalue.indexOf(':') == -1 && newvalue.indexOf('img') == -1) {
+            if (newvalue == '')
+                element.html('&nbsp;');
             return;
+        }
 
-        element.html(newvalue);
+        if (newvalue == null || newvalue == '')
+            element.html('&nbsp;');
+        else
+            element.html(newvalue);
+
     } else {
         if (alternate_value != undefined && alternate_value != '' && alternate_value != 'None') {
             element.html(alternate_value);
@@ -134,6 +143,7 @@ function yieldValue(element, newvalue, ignore_zeros, alternate_value) {
  * Puts data into the right context for the leaderboard
  */
 function displayLeaderboard(data) {
+    listener_paused = true;
     rowid = 1;
 
     displayRaceAndLeg(data[0].current_race, data[0].current_legs);
@@ -152,58 +162,33 @@ function displayLeaderboard(data) {
         $('#competitor-global-net-'+rowid).html(competitor.net_points);
 
         name_element = $('#clipping-'+rowid+'-3 span');
-        if (name_element.html() != competitor.name) {
-            /* competitor position has changed - refresh whole line */
 
-            name_element.html(competitor.name);
+        name_element.html(competitor.name);
+        $('#clipping-'+rowid+'-2 span').html('<img src="/moderator-static/flags/' + competitor.nationality_short + '.png"/>');
 
-            $('#clipping-'+rowid+'-2 span').html('<img src="/moderator-static/flags/' + competitor.nationality_short + '.png"/>');
+        /* now set values independent what has been there before */
+        racepos = 1;
+        for (racerank in competitor.raceranks) {
+            yieldValue($('#race-'+racepos+'-rankrow-'+rowid), competitor.raceranks[racerank], true, undefined);
 
-            /* now set values independent what has been there before */
-            racepos = 1;
-            for (racerank in competitor.raceranks) {
-                yieldValue($('#race-'+racepos+'-rankrow-'+rowid), competitor.raceranks[racerank], true, undefined);
+            markpos = 1;
+            for (markrank in competitor.markranks[racepos-1]) {
+                yieldValue($('#race-'+racepos+'-mark-'+(markpos+1)+'-row-'+rowid), competitor.markranks[racepos-1][markrank], true, undefined);
 
-                markpos = 1;
-                for (markrank in competitor.markranks[racepos-1]) {
-                    //yieldValue($('#race-'+racepos+'-mark-'+markpos+'-row-'+rowid), competitor.markranks[racepos-1][markrank], true, competitor.legvalues[racepos-1][markpos-1][0]);
-                    yieldValue($('#race-'+racepos+'-mark-'+(markpos+1)+'-row-'+rowid), competitor.markranks[racepos-1][markrank], true, undefined);
-
-                    legpos = 1;
-                    for (legvalue in competitor.legvalues[racepos-1][markpos-1]) {
-                        yieldValue($('#race-'+racepos+'-mark-'+markpos+'-valrow-'+rowid+'-pos-'+(legpos-1)+' span'), competitor.legvalues[racepos-1][markpos-1][legvalue], false, undefined);
-                        legpos += 1;
-                    }
-
-                    markpos += 1;
+                legpos = 1;
+                for (legvalue in competitor.legvalues[racepos-1][markpos-1]) {
+                    yieldValue($('#race-'+racepos+'-mark-'+markpos+'-valrow-'+rowid+'-pos-'+(legpos-1)+' span'), competitor.legvalues[racepos-1][markpos-1][legvalue], false, undefined);
+                    legpos += 1;
                 }
-            }
-        } else {
-            /* check if values have changed */
-            name_element.html(competitor.name);
-            $('#clipping-'+rowid+'-2 span').html('<img src="/moderator-static/flags/' + competitor.nationality_short + '.png"/>');
 
-            for (racerank in competitor.raceranks) {
-                yieldValue($('#race-'+racepos+'-rankrow-'+rowid), competitor.raceranks[racerank], true);
-
-                markpos = 1;
-                for (markrank in competitor.markranks[racepos-1]) {
-                    //yieldValue($('#race-'+racepos+'-mark-'+markpos+'-row-'+rowid), competitor.markranks[racepos-1][markrank], true, competitor.legvalues[racepos-1][markpos-1][0]);
-                    yieldValue($('#race-'+racepos+'-mark-'+(markpos+1)+'-row-'+rowid), competitor.markranks[racepos-1][markrank], true, undefined);
-
-                    legpos = 1;
-                    for (legvalue in competitor.legvalues[racepos-1][markpos-1]) {
-                        yieldValue($('#race-'+racepos+'-mark-'+markpos+'-valrow-'+rowid+'-pos-'+(legpos-1)+' span'), competitor.legvalues[racepos-1][markpos-1][legvalue], false, undefined);
-                        legpos += 1;
-                    }
-
-                    markpos += 1;
-                }
+                markpos += 1;
             }
         }
 
         rowid += 1;
     }
+
+    listener_paused = false;
 }
 
 function resizeDocument() {

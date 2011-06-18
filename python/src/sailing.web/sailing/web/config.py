@@ -12,7 +12,9 @@ STOP_RACE = 'stoprace'
 
 SHOW_WIND = 'showwind'
 SET_WIND = 'setwind'
+
 SET_WIND_SOURCE = 'selectwindsource'
+SET_AVERAGING = 'setaveraging'
 
 LIST_EVENTS = 'listevents'
 LIST_RACES_IN_EVENT = 'listracesinevent'
