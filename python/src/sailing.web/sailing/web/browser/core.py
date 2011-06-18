@@ -184,8 +184,7 @@ class BaseView(object):
             competitors.sort(lambda x,y: cmp(x.name, y.name))
 
         elif param == 'current_rank':
-            competitors = model.CompetitorImpl.sortedBy(eventname=eventname, direction=direction)
-            competitors.sort(lambda x,y: cmp(x.current_rank, y.current_rank))
+            competitors = model.CompetitorImpl.sortedBy(eventname=eventname, direction=direction, current_rank=True)
 
         elif param == 'total':
             competitors = model.CompetitorImpl.sortedBy(eventname=eventname, direction=direction)
