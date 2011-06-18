@@ -13,7 +13,7 @@ public class EventImpl extends NamedImpl implements Event {
     private final BoatClass boatClass;
     
     public EventImpl(String name, BoatClass boatClass) {
-        super(name);
+        super(name+(boatClass==null?"":" ("+boatClass.getName()+")"));
         races = new HashSet<RaceDefinition>();
         this.boatClass = boatClass;
     }
