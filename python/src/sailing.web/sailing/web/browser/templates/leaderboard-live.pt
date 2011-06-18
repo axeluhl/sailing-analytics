@@ -7,7 +7,8 @@
   <body class='race-1' tal:define="event view.currentLeaderboardEvent(); 
                                     racebundles [event.races[i:i+3] for i in xrange(0, len(event.races), 3)];
                                     firstbundle racebundles[:3]; lastbundle racebundles[3:];
-                                    columns view.configuredColumns('LEADERBOARD-%s' % request.params.get('c', 'F1'))">
+                                    columns view.configuredColumns('LEADERBOARD-%s' % request.params.get('c', 'F1'))"
+                        tal:on-error="'No current leaderboard event is set!'">
     <div id='rootwrapper'>
       <div id='header'>
         <ul class='systeminfo'>
