@@ -517,6 +517,9 @@ def adminLiveData(context, request):
     view = core.BaseView(context, request)
     
     race = view.currentRace()
+    if race is None:
+        return 'No current configured race found'
+
     event = model.EventImpl.queryOneBy(name=race.event)
     racepos = event.races.index(race.name)
 
@@ -558,7 +561,7 @@ def adminLiveData(context, request):
             results += '\n'
 
     if not results:
-        return 'This race seems to be finished!'
+        return 'This race seems to be finished or not yet started!'
 
     return results
 
