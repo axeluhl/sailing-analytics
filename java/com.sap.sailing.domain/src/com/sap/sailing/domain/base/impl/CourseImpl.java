@@ -59,7 +59,7 @@ public class CourseImpl extends NamedImpl implements Course {
     }
     
     @Override
-    public synchronized void addWaypoint(int zeroBasedPosition, Waypoint waypointToAdd) {
+    public void addWaypoint(int zeroBasedPosition, Waypoint waypointToAdd) {
         waypoints.add(zeroBasedPosition, waypointToAdd);
         int legStartWaypointIndex;
         if (zeroBasedPosition == waypoints.size()-1) {   // added to end
@@ -72,7 +72,7 @@ public class CourseImpl extends NamedImpl implements Course {
     }
 
     @Override
-    public synchronized void removeWaypoint(int zeroBasedPosition) {
+    public void removeWaypoint(int zeroBasedPosition) {
         if (zeroBasedPosition >= 0) {
             boolean isLast = zeroBasedPosition == waypoints.size()-1;
             Waypoint removedWaypoint = waypoints.remove(zeroBasedPosition);
@@ -111,17 +111,17 @@ public class CourseImpl extends NamedImpl implements Course {
     }
 
     @Override
-    public synchronized List<Leg> getLegs() {
+    public List<Leg> getLegs() {
         return Collections.unmodifiableList(legs);
     }
 
     @Override
-    public synchronized Iterable<Waypoint> getWaypoints() {
+    public Iterable<Waypoint> getWaypoints() {
         return new ArrayList<Waypoint>(waypoints);
     }
 
     @Override
-    public synchronized String toString() {
+    public String toString() {
         StringBuilder result = new StringBuilder(getName());
         result.append(": ");
         boolean first = true;
@@ -162,12 +162,12 @@ public class CourseImpl extends NamedImpl implements Course {
     }
 
     @Override
-    public synchronized Waypoint getFirstWaypoint() {
+    public Waypoint getFirstWaypoint() {
         return waypoints.get(0);
     }
 
     @Override
-    public synchronized Waypoint getLastWaypoint() {
+    public Waypoint getLastWaypoint() {
         return waypoints.get(waypoints.size()-1);
     }
 
