@@ -1,7 +1,9 @@
 package com.sap.sailing.domain.tracking.impl;
 
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.NavigableSet;
+import java.util.SortedSet;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.TimePoint;
@@ -13,11 +15,12 @@ import com.sap.sailing.domain.tracking.TrackedRace;
  * Compares two competitors by their ranking in the overall race for a given time point. Competitors who haven't started
  * the first leg are all equally ranked last. Competitors in different legs are ranked by inverse leg index: the higher
  * the number of the leg the lesser (better) the rank. Competitors in the same leg are ranked by their windward distance
- * to go in that leg, requiring wind data or estimates to be available for the given time point.<p>
+ * to go in that leg, requiring wind data or estimates to be available for the given time point.
+ * <p>
  * 
- * Two different competitors are never ranked equal. They would collapse when inserted into an {@link OrderedSet}.
- * Instead, if all other things are ranked equal, two different competitors are ranked by their name in alphabetical
- * order.
+ * Two different competitors may end up being ranked equal by this comparator. So take care and don't use this
+ * comparator class when inserting into an {@link SortedSet} when you want something like a ranking. It may overwrite
+ * existing entries. Use {@link Collections#sort(java.util.List, Comparator)} instead.
  * 
  * @author Axel Uhl (d043530)
  * 
@@ -59,10 +62,6 @@ public class RaceRankComparator implements Comparator<Competitor> {
                     result = new WindwardToGoComparator(trackedRace.getTrackedLeg(o1Leg.getLeg()), timePoint).compare(
                             o1Leg, o2Leg);
                 }
-            }
-            if (result == 0) {
-                // sort by name:
-                result = o1.getName().compareTo(o2.getName());
             }
         }
         return result;
