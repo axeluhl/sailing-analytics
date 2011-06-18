@@ -161,7 +161,9 @@ public class DomainFactoryImpl implements DomainFactory {
         }
         Patch<Waypoint> patch = DiffUtils.diff(courseWaypoints, newWaypointList);
         CourseAsWaypointList courseAsWaypointList = new CourseAsWaypointList(courseToUpdate);
-        patch.applyToInPlace(courseAsWaypointList);
+        synchronized (courseToUpdate) {
+            patch.applyToInPlace(courseAsWaypointList);
+        }
     }
 
     @Override
