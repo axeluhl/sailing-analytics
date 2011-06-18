@@ -3,6 +3,7 @@ package com.sap.sailing.server;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -35,6 +36,8 @@ import com.sap.sailing.server.util.InvalidDateException;
 import com.sap.sailing.util.CountryCode;
 
 public class ModeratorApp extends Servlet {
+    private static final Logger logger = Logger.getLogger(ModeratorApp.class.getName());
+    
     private static final long serialVersionUID = 1333207389294903999L;
 
     private static final String ACTION_NAME_LIST_EVENTS = "listevents";
@@ -282,6 +285,10 @@ public class ModeratorApp extends Servlet {
                                 // well, we don't know the wind direction... then no average VMG will be shown...
                             }
                             try {
+                                Integer rank = ranks.get(competitor);
+                                if (rank == null) {
+                                    logger.warning("Can't find rank of competitor "+competitor+" in leg "+leg);
+                                }
                                 jsonCompetitorInLeg.put("rank", ranks.get(competitor));
                             } catch (RuntimeException re) {
                                 if (re.getCause() != null && re.getCause() instanceof NoWindException) {

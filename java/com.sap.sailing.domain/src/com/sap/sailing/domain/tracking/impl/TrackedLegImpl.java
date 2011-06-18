@@ -1,11 +1,12 @@
 package com.sap.sailing.domain.tracking.impl;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Bearing;
 import com.sap.sailing.domain.base.Buoy;
@@ -21,14 +22,17 @@ import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
+import com.sap.sailing.util.Util;
 
 public class TrackedLegImpl implements TrackedLeg, RaceChangeListener<Competitor> {
+    private final static Logger logger = Logger.getLogger(TrackedLegImpl.class.getName());
+    
     private final static double UPWIND_DOWNWIND_TOLERANCE_IN_DEG = 40; // TracTrac does 22.5, Marcus Baur suggest 40
 
     private final Leg leg;
     private final Map<Competitor, TrackedLegOfCompetitor> trackedLegsOfCompetitors;
     private TrackedRaceImpl trackedRace;
-    private final Map<TimePoint, SortedSet<TrackedLegOfCompetitor>> competitorTracksOrderedByRank;
+    private final Map<TimePoint, List<TrackedLegOfCompetitor>> competitorTracksOrderedByRank;
     
     public TrackedLegImpl(DynamicTrackedRaceImpl trackedRace, Leg leg, Iterable<Competitor> competitors) {
         super();
@@ -39,7 +43,7 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener<Competitor
             trackedLegsOfCompetitors.put(competitor, new TrackedLegOfCompetitorImpl(this, competitor));
         }
         trackedRace.addListener(this);
-        competitorTracksOrderedByRank = new HashMap<TimePoint, SortedSet<TrackedLegOfCompetitor>>();
+        competitorTracksOrderedByRank = new HashMap<TimePoint, List<TrackedLegOfCompetitor>>();
     }
     
     @Override
@@ -63,8 +67,8 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener<Competitor
     }
 
     protected Competitor getLeader(TimePoint timePoint) {
-        SortedSet<TrackedLegOfCompetitor> byRank = getCompetitorTracksOrderedByRank(timePoint);
-        return byRank.first().getCompetitor();
+        List<TrackedLegOfCompetitor> byRank = getCompetitorTracksOrderedByRank(timePoint);
+        return byRank.get(0).getCompetitor();
     }
 
     /**
@@ -77,26 +81,33 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener<Competitor
      * Note that this does not reflect overall race standings. For that, the ordering would have to
      * consider the order of the boats not currently in this leg, too.
      */
-    protected SortedSet<TrackedLegOfCompetitor> getCompetitorTracksOrderedByRank(TimePoint timePoint) {
+    protected List<TrackedLegOfCompetitor> getCompetitorTracksOrderedByRank(TimePoint timePoint) {
         synchronized (competitorTracksOrderedByRank) {
-            SortedSet<TrackedLegOfCompetitor> treeSet = competitorTracksOrderedByRank.get(timePoint);
-            if (treeSet == null) {
-                treeSet = new TreeSet<TrackedLegOfCompetitor>(new WindwardToGoComparator(this, timePoint));
+            List<TrackedLegOfCompetitor> rankecCompetitorList = competitorTracksOrderedByRank.get(timePoint);
+            if (rankecCompetitorList == null) {
+                rankecCompetitorList = new ArrayList<TrackedLegOfCompetitor>();
                 for (TrackedLegOfCompetitor competitorLeg : getTrackedLegsOfCompetitors()) {
-                    treeSet.add(competitorLeg);
+                    rankecCompetitorList.add(competitorLeg);
                 }
-                competitorTracksOrderedByRank.put(timePoint, Collections.unmodifiableSortedSet(treeSet));
+                Collections.sort(rankecCompetitorList, new WindwardToGoComparator(this, timePoint));
+                competitorTracksOrderedByRank.put(timePoint, Collections.unmodifiableList(rankecCompetitorList));
+                if (Util.size(getTrackedLegsOfCompetitors()) != rankecCompetitorList.size()) {
+                    logger.warning("Number of competitors in leg (" + Util.size(getTrackedLegsOfCompetitors())
+                            + ") differs from number of competitors in race ("
+                            + Util.size(getTrackedRace().getRace().getCompetitors()) + ")");
+                }
             }
-            return treeSet;
+            return rankecCompetitorList;
         }
     }
     
     @Override
     public LinkedHashMap<Competitor, Integer> getRanks(TimePoint timePoint) {
-        SortedSet<TrackedLegOfCompetitor> orderedTrackedLegsOfCompetitors = getCompetitorTracksOrderedByRank(timePoint);
+        List<TrackedLegOfCompetitor> orderedTrackedLegsOfCompetitors = getCompetitorTracksOrderedByRank(timePoint);
         LinkedHashMap<Competitor, Integer> result = new LinkedHashMap<Competitor, Integer>();
+        int i=1;
         for (TrackedLegOfCompetitor tloc : orderedTrackedLegsOfCompetitors) {
-            result.put(tloc.getCompetitor(), orderedTrackedLegsOfCompetitors.headSet(tloc).size()+1);
+            result.put(tloc.getCompetitor(), i++);
         }
         return result;
     }
