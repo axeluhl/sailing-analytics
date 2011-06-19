@@ -83,21 +83,22 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener<Competitor
      */
     protected List<TrackedLegOfCompetitor> getCompetitorTracksOrderedByRank(TimePoint timePoint) {
         synchronized (competitorTracksOrderedByRank) {
-            List<TrackedLegOfCompetitor> rankecCompetitorList = competitorTracksOrderedByRank.get(timePoint);
-            if (rankecCompetitorList == null) {
-                rankecCompetitorList = new ArrayList<TrackedLegOfCompetitor>();
+            List<TrackedLegOfCompetitor> rankedCompetitorList = competitorTracksOrderedByRank.get(timePoint);
+            if (rankedCompetitorList == null) {
+                rankedCompetitorList = new ArrayList<TrackedLegOfCompetitor>();
                 for (TrackedLegOfCompetitor competitorLeg : getTrackedLegsOfCompetitors()) {
-                    rankecCompetitorList.add(competitorLeg);
+                    rankedCompetitorList.add(competitorLeg);
                 }
-                Collections.sort(rankecCompetitorList, new WindwardToGoComparator(this, timePoint));
-                competitorTracksOrderedByRank.put(timePoint, Collections.unmodifiableList(rankecCompetitorList));
-                if (Util.size(getTrackedLegsOfCompetitors()) != rankecCompetitorList.size()) {
+                Collections.sort(rankedCompetitorList, new WindwardToGoComparator(this, timePoint));
+                rankedCompetitorList = Collections.unmodifiableList(rankedCompetitorList);
+                competitorTracksOrderedByRank.put(timePoint, rankedCompetitorList);
+                if (Util.size(getTrackedLegsOfCompetitors()) != rankedCompetitorList.size()) {
                     logger.warning("Number of competitors in leg (" + Util.size(getTrackedLegsOfCompetitors())
                             + ") differs from number of competitors in race ("
                             + Util.size(getTrackedRace().getRace().getCompetitors()) + ")");
                 }
             }
-            return rankecCompetitorList;
+            return rankedCompetitorList;
         }
     }
     

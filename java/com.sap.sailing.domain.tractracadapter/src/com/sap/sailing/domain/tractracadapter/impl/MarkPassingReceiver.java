@@ -2,11 +2,13 @@ package com.sap.sailing.domain.tractracadapter.impl;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
 import com.maptrack.client.io.TypeController;
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.TimePoint;
@@ -15,6 +17,7 @@ import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.MarkPassing;
+import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.util.Util.Triple;
 import com.tractrac.clientmodule.ControlPoint;
@@ -64,24 +67,26 @@ public class MarkPassingReceiver extends AbstractReceiverWithQueue<RaceCompetito
         DynamicTrackedRace trackedRace = trackedEvent.getTrackedRace(getDomainFactory().getRaceDefinition(event
                 .getA().getRace()));
         Course course = trackedRace.getRace().getCourse();
-        Iterable<Waypoint> waypoints = course.getWaypoints();
-        Map<com.sap.sailing.domain.base.ControlPoint, MarkPassing> passingsByControlPoint = new HashMap<com.sap.sailing.domain.base.ControlPoint, MarkPassing>();
+        Iterator<Waypoint> waypointsIter = course.getWaypoints().iterator();
+        Map<Waypoint, MarkPassing> passingsByWaypoint = new HashMap<Waypoint, MarkPassing>();
         // Note: the entries always describe all mark passings for the competitor so far in the current race in order
         for (MarkPassingsData.Entry passing : event.getB().getPassings()) {
             ControlPoint controlPointPassed = passing.getControlPoint();
             com.sap.sailing.domain.base.ControlPoint domainControlPoint = getDomainFactory().getControlPoint(controlPointPassed);
-            Waypoint passed = findWaypointForControlPoint(waypoints, domainControlPoint);
+            Waypoint passed = findWaypointForControlPoint(trackedRace, waypointsIter, domainControlPoint,
+                    getDomainFactory().getCompetitor(event.getA().getCompetitor()));
             if (passed != null) {
-            TimePoint time = new MillisecondsTimePoint(passing.getTimestamp());
-            MarkPassing markPassing = getDomainFactory().createMarkPassing(event.getA().getCompetitor(), passed, time);
-            passingsByControlPoint.put(domainControlPoint, markPassing);
+                TimePoint time = new MillisecondsTimePoint(passing.getTimestamp());
+                MarkPassing markPassing = getDomainFactory().createMarkPassing(event.getA().getCompetitor(), passed,
+                        time);
+                passingsByWaypoint.put(passed, markPassing);
             } else {
                 logger.warning("Didn't find waypoint in course "+course+" for mark passing around "+passing.getControlPoint());
             }
         }
         List<MarkPassing> markPassings = new ArrayList<MarkPassing>();
-        for (Waypoint waypoint : waypoints) {
-            MarkPassing passing = passingsByControlPoint.get(waypoint.getControlPoint());
+        for (Waypoint waypoint : course.getWaypoints()) {
+            MarkPassing passing = passingsByWaypoint.get(waypoint);
             if (passing != null) {
                 markPassings.add(passing);
             }
@@ -89,8 +94,14 @@ public class MarkPassingReceiver extends AbstractReceiverWithQueue<RaceCompetito
         trackedRace.updateMarkPassings(getDomainFactory().getCompetitor(event.getA().getCompetitor()), markPassings);
     }
 
-    private Waypoint findWaypointForControlPoint(Iterable<Waypoint> waypoints, com.sap.sailing.domain.base.ControlPoint domainControlPoint) {
-        for (Waypoint waypoint : waypoints) {
+    /**
+     * Starts searching in <code>waypointsIter</code> for a waypoint that has the given <code>controlPoint</code>.
+     * The <code>waypointsIter</code> is advanced to that point.
+     */
+    private Waypoint findWaypointForControlPoint(TrackedRace trackedRace, Iterator<Waypoint> waypointsIter,
+            com.sap.sailing.domain.base.ControlPoint domainControlPoint, Competitor competitor) {
+        while (waypointsIter.hasNext()) {
+            Waypoint waypoint = waypointsIter.next();
             if (waypoint.getControlPoint() == domainControlPoint) {
                 return waypoint;
             }
