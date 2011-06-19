@@ -557,6 +557,11 @@ into one in the future.
 			  "averageSpeedOverGroundInKnots": ...,
 			  "averageSpeedOverGroundInMetersPerSecond": ...,
 			                       // distance traveled is optional
+			  // next comes the speed over ground if the competitor is still in the
+			  // leg, or the average speed over ground if the competitor has already
+			  // finished the leg, but only if the respective value is defined
+			  "currentSpeedOverGroundOrAverageSpeedOverGroundIfLegFinishedInKnots": ...,
+			  "currentSpeedOverGroundOrAverageSpeedOverGroundIfLegFinishedInMetersPerSecond": ...,
 			  "distanceTraveledOverGroundInMeters": ...,
 			                       // VMG info is optional
 			  "velocityMadeGoodInKnots": ...,

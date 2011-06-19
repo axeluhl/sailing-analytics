@@ -260,6 +260,15 @@ public class ModeratorApp extends Servlet {
                                 jsonCompetitorInLeg.put("averageSpeedOverGroundInMetersPerSecond",
                                         averageSpeedOverGround.getMetersPerSecond());
                             }
+                            Speed currentSpeedOverGroundOrAverageSpeedOverGroundIfLegFinished =
+                                    trackedLegOfCompetitor.hasFinishedLeg(timePoint) ?
+                                            averageSpeedOverGround : currentSpeedOverGround;
+                            if (currentSpeedOverGroundOrAverageSpeedOverGroundIfLegFinished != null) {
+                                jsonCompetitorInLeg.put("currentSpeedOverGroundOrAverageSpeedOverGroundIfLegFinishedInKnots",
+                                        currentSpeedOverGroundOrAverageSpeedOverGroundIfLegFinished.getKnots());
+                                jsonCompetitorInLeg.put("currentSpeedOverGroundOrAverageSpeedOverGroundIfLegFinishedInMetersPerSecond",
+                                        currentSpeedOverGroundOrAverageSpeedOverGroundIfLegFinished.getMetersPerSecond());
+                            }
                             Distance distanceTraveled = trackedLegOfCompetitor.getDistanceTraveled(timePoint);
                             if (distanceTraveled != null) {
                                 jsonCompetitorInLeg.put("distanceTraveledOverGroundInMeters",
@@ -375,21 +384,24 @@ public class ModeratorApp extends Servlet {
             jsonEvent.put("competitors", jsonCompetitors);
             JSONArray jsonRaces = new JSONArray();
             for (RaceDefinition race : event.getAllRaces()) {
-                JSONObject jsonRace = new JSONObject();
-                jsonRace.put("name", race.getName());
-                jsonRace.put("boatclass", race.getBoatClass()==null?"":race.getBoatClass().getName());
-                TrackedRace trackedRace = getService().getDomainFactory().getOrCreateTrackedEvent(event).getTrackedRace(race);
-                TimePoint start = trackedRace.getStart();
-                jsonRace.put("start", start==null?Long.MAX_VALUE:start.asMillis());
-                JSONArray jsonLegs = new JSONArray();
-                for (Leg leg : race.getCourse().getLegs()) {
-                    JSONObject jsonLeg = new JSONObject();
-                    jsonLeg.put("start", leg.getFrom().getName());
-                    jsonLeg.put("end", leg.getTo().getName());
-                    jsonLegs.add(jsonLeg);
+                // don't wait for the arrival of a tracked race; just ignore it if it's not currently being tracked
+                TrackedRace trackedRace = getService().getDomainFactory().getOrCreateTrackedEvent(event).getExistingTrackedRace(race);
+                if (trackedRace != null) {
+                    JSONObject jsonRace = new JSONObject();
+                    jsonRace.put("name", race.getName());
+                    jsonRace.put("boatclass", race.getBoatClass() == null ? "" : race.getBoatClass().getName());
+                    TimePoint start = trackedRace.getStart();
+                    jsonRace.put("start", start == null ? Long.MAX_VALUE : start.asMillis());
+                    JSONArray jsonLegs = new JSONArray();
+                    for (Leg leg : race.getCourse().getLegs()) {
+                        JSONObject jsonLeg = new JSONObject();
+                        jsonLeg.put("start", leg.getFrom().getName());
+                        jsonLeg.put("end", leg.getTo().getName());
+                        jsonLegs.add(jsonLeg);
+                    }
+                    jsonRace.put("legs", jsonLegs);
+                    jsonRaces.add(jsonRace);
                 }
-                jsonRace.put("legs", jsonLegs);
-                jsonRaces.add(jsonRace);
             }
             jsonEvent.put("races", jsonRaces);
             eventList.add(jsonEvent);
