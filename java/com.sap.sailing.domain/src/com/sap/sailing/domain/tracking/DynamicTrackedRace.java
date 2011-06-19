@@ -26,7 +26,12 @@ public interface DynamicTrackedRace extends TrackedRace {
      */
     void updateMarkPassings(Competitor competitor, Iterable<MarkPassing> markPassings);
 
-    void setStart(TimePoint start);
+    /**
+     * Sets the start time as received from the tracking infrastructure. This isn't necessarily
+     * what {@link #getStart()} will deliver which assumes that the time announced here may be
+     * significantly off.
+     */
+    void setStartTimeReceived(TimePoint start);
 
     void setMillisecondsOverWhichToAverageSpeed(long millisecondsOverWhichToAverageSpeed);
 

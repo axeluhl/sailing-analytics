@@ -1,9 +1,9 @@
 Axel
 ====
 
-- Axel liefert stabiles (zumindest im Bezug auf druckbetankte Daten) start und finish basierend auf MarkPassings + threshold (30)
+ - sort mark passing using Collections.sort and don't use a TreeSet
 
- - when a race for an event arrives with a different boat class, open up a new Event
+ - Distribute wind data to their respective races
 
  - Pass final production instance URL information to BeTomorrow for wind integration
 

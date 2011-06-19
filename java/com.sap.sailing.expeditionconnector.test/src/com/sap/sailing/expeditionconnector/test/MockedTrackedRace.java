@@ -214,7 +214,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public void setStart(TimePoint start) {
+    public void setStartTimeReceived(TimePoint start) {
         // TODO Auto-generated method stub
         
     }

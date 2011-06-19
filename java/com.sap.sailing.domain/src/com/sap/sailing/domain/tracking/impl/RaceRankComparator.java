@@ -59,8 +59,12 @@ public class RaceRankComparator implements Comparator<Competitor> {
                     result = o1MarkPassings.last().getTimePoint().compareTo(o2MarkPassings.last().getTimePoint());
                 } else {
                     TrackedLegOfCompetitor o2Leg = trackedRace.getCurrentLeg(o2, timePoint);
-                    result = new WindwardToGoComparator(trackedRace.getTrackedLeg(o1Leg.getLeg()), timePoint).compare(
-                            o1Leg, o2Leg);
+                    if (o2Leg == null) {
+                        result = 1; // o1Leg != null, so o1 has started leg already, o2 hasn't
+                    } else {
+                        result = new WindwardToGoComparator(trackedRace.getTrackedLeg(o1Leg.getLeg()), timePoint)
+                                .compare(o1Leg, o2Leg);
+                    }
                 }
             }
         }
