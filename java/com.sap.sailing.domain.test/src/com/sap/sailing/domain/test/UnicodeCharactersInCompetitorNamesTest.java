@@ -53,11 +53,13 @@ public class UnicodeCharactersInCompetitorNamesTest {
     public void readJSONURLAndCheckCompetitorNames() throws MalformedURLException, IOException {
         System.out.println("Default charset: " + Charset.defaultCharset().name() + ". Supported: "
                 + Charset.isSupported(Charset.defaultCharset().name()));
+        String charsetname = System.getProperty("test.charset", "UTF-8");
+        System.out.println("Using "+charsetname+" for input stream reader");
         BufferedReader localBufferedReader = new BufferedReader(
                 new InputStreamReader(
                         new URL(
                                 "http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/clientparams.php?event=event_20110609_KielerWoch&race=5b08a9ee-9933-11e0-85be-406186cbf87c")
-                                .openStream()));
+                                .openStream(), charsetname));
         String line;
         while ((line=localBufferedReader.readLine()) != null) {
             System.out.println(line);
