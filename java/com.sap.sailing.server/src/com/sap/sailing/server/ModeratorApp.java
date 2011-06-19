@@ -260,6 +260,15 @@ public class ModeratorApp extends Servlet {
                                 jsonCompetitorInLeg.put("averageSpeedOverGroundInMetersPerSecond",
                                         averageSpeedOverGround.getMetersPerSecond());
                             }
+                            Speed currentSpeedOverGroundOrAverageSpeedOverGroundIfLegFinished =
+                                    trackedLegOfCompetitor.hasFinishedLeg(timePoint) ?
+                                            averageSpeedOverGround : currentSpeedOverGround;
+                            if (currentSpeedOverGroundOrAverageSpeedOverGroundIfLegFinished != null) {
+                                jsonCompetitorInLeg.put("currentSpeedOverGroundOrAverageSpeedOverGroundIfLegFinishedInKnots",
+                                        currentSpeedOverGroundOrAverageSpeedOverGroundIfLegFinished.getKnots());
+                                jsonCompetitorInLeg.put("currentSpeedOverGroundOrAverageSpeedOverGroundIfLegFinishedInMetersPerSecond",
+                                        currentSpeedOverGroundOrAverageSpeedOverGroundIfLegFinished.getMetersPerSecond());
+                            }
                             Distance distanceTraveled = trackedLegOfCompetitor.getDistanceTraveled(timePoint);
                             if (distanceTraveled != null) {
                                 jsonCompetitorInLeg.put("distanceTraveledOverGroundInMeters",
