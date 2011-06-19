@@ -207,5 +207,6 @@ $(document).ready(function() {
   $.ajaxSetup({cache:false});
 
   loadLeaderboard(global_race, global_sortkey, global_competitors, global_direction, global_colmode);
-  //window.setInterval('liveRefresh()', 5000);
+  window.setInterval('liveRefresh()', 5000);
 });
+

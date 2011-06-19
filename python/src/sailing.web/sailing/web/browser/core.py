@@ -224,9 +224,9 @@ class BaseView(object):
 
         if name[0] == 'GLP':
             if value > 0:
-                val = '<img src="/moderator-static/arrow-gain.png"/>%s' % value
+                val = '<img height="9" src="/moderator-static/arrow-gain.png"/>%s' % value
             elif value < 0:
-                val = '<img src="/moderator-static/arrow-loss.png"/>%s' % abs(value)
+                val = '<img height="9" src="/moderator-static/arrow-loss.png"/>%s' % abs(value)
             else: val = '0'
 
         return val
