@@ -3,6 +3,7 @@ package com.sap.sailing.server;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -35,6 +36,8 @@ import com.sap.sailing.server.util.InvalidDateException;
 import com.sap.sailing.util.CountryCode;
 
 public class ModeratorApp extends Servlet {
+    private static final Logger logger = Logger.getLogger(ModeratorApp.class.getName());
+    
     private static final long serialVersionUID = 1333207389294903999L;
 
     private static final String ACTION_NAME_LIST_EVENTS = "listevents";
@@ -59,6 +62,7 @@ public class ModeratorApp extends Servlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         try {
             String action = req.getParameter(PARAM_ACTION);
+            resp.setCharacterEncoding("UTF-8");
             if (action != null) {
                 if (ACTION_NAME_LIST_EVENTS.equals(action)) {
                     listEvents(resp);
@@ -184,8 +188,11 @@ public class ModeratorApp extends Servlet {
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Race not found");
         } else {
             try {
+                // TODO decide what makes for a good default; some recorded races send notifications about early events late 
                 TimePoint timePoint = getTimePoint(req, PARAM_NAME_TIME, PARAM_NAME_TIME_MILLIS,
-                        trackedRace.getTimePointOfLastEvent()==null?MillisecondsTimePoint.now():trackedRace.getTimePointOfLastEvent());
+                        trackedRace.getTimePointOfLastEvent()==null?MillisecondsTimePoint.now():trackedRace.getTimePointOfNewestEvent());
+//                TimePoint timePoint = getTimePoint(req, PARAM_NAME_TIME, PARAM_NAME_TIME_MILLIS,
+//                        trackedRace.getTimePointOfLastEvent()==null?MillisecondsTimePoint.now():trackedRace.getTimePointOfLastEvent());
                 String sinceUpdateString = req.getParameter(PARAM_NAME_SINCE_UPDATE);
                 if (sinceUpdateString != null) {
                     int sinceUpdate = Integer.valueOf(sinceUpdateString);
@@ -281,6 +288,10 @@ public class ModeratorApp extends Servlet {
                                 // well, we don't know the wind direction... then no average VMG will be shown...
                             }
                             try {
+                                Integer rank = ranks.get(competitor);
+                                if (rank == null) {
+                                    logger.warning("Can't find rank of competitor "+competitor+" in leg "+leg);
+                                }
                                 jsonCompetitorInLeg.put("rank", ranks.get(competitor));
                             } catch (RuntimeException re) {
                                 if (re.getCause() != null && re.getCause() instanceof NoWindException) {

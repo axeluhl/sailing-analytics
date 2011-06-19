@@ -117,7 +117,7 @@ public class CourseImpl extends NamedImpl implements Course {
 
     @Override
     public Iterable<Waypoint> getWaypoints() {
-        return waypoints;
+        return new ArrayList<Waypoint>(waypoints);
     }
 
     @Override

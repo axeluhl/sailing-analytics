@@ -1,7 +1,7 @@
 package com.sap.sailing.domain.tracking.impl;
 
 import java.util.Iterator;
-import java.util.SortedSet;
+import java.util.List;
 
 import com.sap.sailing.domain.base.Bearing;
 import com.sap.sailing.domain.base.Buoy;
@@ -244,8 +244,8 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
 
     @Override
     public int getRank(TimePoint timePoint) {
-        SortedSet<TrackedLegOfCompetitor> competitorTracksByRank = getTrackedLeg().getCompetitorTracksOrderedByRank(timePoint);
-        return competitorTracksByRank.headSet(this).size()+1;
+        List<TrackedLegOfCompetitor> competitorTracksByRank = getTrackedLeg().getCompetitorTracksOrderedByRank(timePoint);
+        return competitorTracksByRank.indexOf(this)+1;
     }
 
     @Override
