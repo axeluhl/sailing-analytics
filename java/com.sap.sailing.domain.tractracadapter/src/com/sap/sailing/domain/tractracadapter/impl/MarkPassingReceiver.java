@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 import com.maptrack.client.io.TypeController;
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.TimePoint;
@@ -15,6 +16,7 @@ import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.MarkPassing;
+import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.util.Util.Triple;
 import com.tractrac.clientmodule.ControlPoint;
@@ -70,7 +72,8 @@ public class MarkPassingReceiver extends AbstractReceiverWithQueue<RaceCompetito
         for (MarkPassingsData.Entry passing : event.getB().getPassings()) {
             ControlPoint controlPointPassed = passing.getControlPoint();
             com.sap.sailing.domain.base.ControlPoint domainControlPoint = getDomainFactory().getControlPoint(controlPointPassed);
-            Waypoint passed = findWaypointForControlPoint(waypoints, domainControlPoint);
+            Waypoint passed = findWaypointForControlPoint(trackedRace, waypoints, domainControlPoint,
+                    getDomainFactory().getCompetitor(event.getA().getCompetitor()));
             if (passed != null) {
             TimePoint time = new MillisecondsTimePoint(passing.getTimestamp());
             MarkPassing markPassing = getDomainFactory().createMarkPassing(event.getA().getCompetitor(), passed, time);
@@ -89,10 +92,15 @@ public class MarkPassingReceiver extends AbstractReceiverWithQueue<RaceCompetito
         trackedRace.updateMarkPassings(getDomainFactory().getCompetitor(event.getA().getCompetitor()), markPassings);
     }
 
-    private Waypoint findWaypointForControlPoint(Iterable<Waypoint> waypoints, com.sap.sailing.domain.base.ControlPoint domainControlPoint) {
+    private Waypoint findWaypointForControlPoint(TrackedRace trackedRace, Iterable<Waypoint> waypoints,
+            com.sap.sailing.domain.base.ControlPoint domainControlPoint, Competitor competitor) {
         for (Waypoint waypoint : waypoints) {
+            MarkPassing oldMarkPassing = trackedRace.getMarkPassing(competitor, waypoint);
             if (waypoint.getControlPoint() == domainControlPoint) {
-                return waypoint;
+                if (oldMarkPassing == null) {
+                    // didn't yet go around this waypoint; this must be the one
+                    return waypoint;
+                }
             }
         }
         return null;

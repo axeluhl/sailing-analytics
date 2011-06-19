@@ -182,7 +182,6 @@ public class ModeratorApp extends Servlet {
 
     private void showRace(HttpServletRequest req, HttpServletResponse resp) throws IOException, InterruptedException {
         long start = System.currentTimeMillis();
-        Event event = getEvent(req);
         TrackedRace trackedRace = getTrackedRace(req);
         if (trackedRace == null) {
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Race not found");
@@ -242,7 +241,7 @@ public class ModeratorApp extends Servlet {
                     }
                     JSONArray jsonCompetitors = new JSONArray();
                     Map<Competitor, Integer> ranks = leg.getRanks(timePoint);
-                    for (Competitor competitor : event.getCompetitors()) {
+                    for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
                         JSONObject jsonCompetitorInLeg = new JSONObject();
                         TrackedLegOfCompetitor trackedLegOfCompetitor = leg.getTrackedLeg(competitor);
                         if (trackedLegOfCompetitor != null) {
