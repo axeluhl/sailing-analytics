@@ -1,6 +1,6 @@
 
 <div class="info">
-    Selected Race: <b>${view.currentRace().name}</b>&nbsp;Started: <b>${view.millisToDatetime(view.currentRace().start)} (${view.currentRace().start})</b>&nbsp;Finish: <b>${view.millisToDatetime(view.currentRace().finish)} (${view.currentRace().finish})</b>&nbsp;Last Update: <b>${view.millisToDatetime(view.currentRace().timeofnewestevent)} (${view.currentRace().timeofnewestevent})</b><br/><br/>
+    Selected Race: <b>${view.currentRace().name}</b>&nbsp;Started: <b>${view.millisToDatetime(view.currentRace().start)} (${view.currentRace().start})</b>&nbsp;Last Update: <b>${view.millisToDatetime(view.currentRace().timeofnewestevent)} (${view.currentRace().timeofnewestevent})</b><br/><br/>
 
     <div>
         Timepoint: <span id="wind-timepoint">...</span>&nbsp;
@@ -15,7 +15,6 @@
             <span>Timepoint:</span>&nbsp;&nbsp;<input type="text" name="at" value="${view.millisToDatetime(view.currentRace().start).strftime('%m/%d/%Y %H:%M:%S')}" />&nbsp;
             <input style="width:50px;" type="button" value="Start" onclick="dateSet('${view.millisToDatetime(view.currentRace().start).strftime('%m/%d/%Y %H:%M:%S')}');"/>&nbsp;
             <input style="width:40px;" type="button" value="Now" onclick="dateSet('now');"/>&nbsp;
-            <input style="width:50px;" type="button" value="End" onclick="dateSet('${view.millisToDatetime(view.currentRace().finish).strftime('%m/%d/%Y %H:%M:%S')}');"/>&nbsp;
             <input style="width:40px;" type="button" value="-5M" onclick="dateBackward(5*60);"/>&nbsp;
             <input style="width: 40px;" type="button" value="-1M" onclick="dateBackward(60);"/>&nbsp;
             <input style="width: 40px;" type="button" value="-10s" onclick="dateBackward(10)"/>&nbsp;
@@ -83,8 +82,11 @@
         }
 
         function dateSet(dt) {
+            utcshift_in_seconds = 60*60*2;
             if (dt == 'now') {
-                $('input[name=at]').datetimepicker('setDate', new Date());
+                datenow = new Date();
+                datenow = new Date(datenow.valueOf() - (utcshift_in_seconds*1000));
+                $('input[name=at]').datetimepicker('setDate', datenow);
             } else {
                 $('input[name=at]').attr('value', dt);
             }

@@ -87,6 +87,7 @@ function switchRace(block) {
 }
 
 function sortBy(param, element) {
+    listener_old = listener_paused;
     listener_paused = true;
 
     $('.sort-asc, .sort-desc').css('background-image', 'url(/moderator-static/sort-none.png)');
@@ -104,7 +105,7 @@ function sortBy(param, element) {
     global_sortkey = param;
     loadLeaderboard(global_race, param, global_competitors, global_direction, global_colmode);
 
-    listener_paused = false;
+    listener_paused = listener_old;
 }
 
 function yieldValue(element, newvalue, ignore_zeros, alternate_value) {
@@ -183,6 +184,8 @@ function displayLeaderboard(data) {
 
                 markpos += 1;
             }
+
+            racepos += 1;
         }
 
         rowid += 1;
@@ -206,3 +209,4 @@ $(document).ready(function() {
   loadLeaderboard(global_race, global_sortkey, global_competitors, global_direction, global_colmode);
   window.setInterval('liveRefresh()', 5000);
 });
+

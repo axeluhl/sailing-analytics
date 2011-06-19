@@ -371,7 +371,10 @@ def liveRaceInformation(configurator):
                 # compute total and net points of competitor
 
                 # net points: sum'd ranks of all races WITH discarded races
-                net_points = sum(c_races)
+                try:
+                    net_points = sum(c_races)
+                # XXX fix this
+                except: net_points = 0
 
                 # total points: sum'd over ranks of all races but
                 # but for more than ten races discard some values

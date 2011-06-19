@@ -674,3 +674,25 @@ def showAveraging(context, request):
     race = model.RaceImpl.queryOneBy(event=eventname, name=racename)
     return 'Wind: %s, Speed: %s' % (getattr(race, 'averagingwind', 'n/a'), getattr(race, 'averagingspeed', 'n/a'))
 
+def reloadData(context, request):
+    # drops all data in database and reload all running listeners
+
+    view = core.BaseView(context, request)
+    event = view.currentEvent()
+
+    if event:
+
+        # pause all listener threads
+        for listener in threaded_listener.values():
+            if listener.paused == False:
+                listener.paused = True
+
+        # remove competitors matching the event 
+        model.CompetitorImpl.removeAllBy(event=event.name)
+
+        # reload event data completely
+        configurator = view.listenerConf()
+        configurator.setContext(config.MODERATOR)
+        configurator.setCommand(config.LIST_EVENTS)
+        provider.eventConfiguration(configurator) 
+
