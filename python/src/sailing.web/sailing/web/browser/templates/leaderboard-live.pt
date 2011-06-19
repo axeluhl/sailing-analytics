@@ -116,7 +116,7 @@
                 </ul>
                 <span id="race-">${raceid}</span>
               </a>
-              <a class='main-box-sort sort-asc' href='javascript:;' onclick='sortBy("${raceid}", $(this))'></a>
+              <a class='main-box-sort sort-desc' href='javascript:;' onclick='sortBy("${raceid}", $(this))'></a>
             </div>
 
             <!-- START POINT -->
@@ -124,7 +124,7 @@
               <div class='leg-box'>
               <span>S</span>
 
-              <a class='leg-box-sort sort-desc' href='javascript:;' onclick=''></a>
+              <a class='leg-box-sort sort-desc' href='javascript:;'></a>
                 <a class='leg-box-active' href='javascript:;' onclick='$(this).closest(".leg-wrap").find(".race-table").toggle();'>
                   <ul>
                       <tal:for repeat="markrow range(1,21)">
@@ -171,7 +171,7 @@
                   <span tal:condition="not repeat['leg'].end">M${markid-1}</span>
                   <span tal:condition="repeat['leg'].end">F</span>
 
-              <a class='leg-box-sort sort-desc' href='javascript:;' onclick='sortBy("${raceid},${markid}", $(this))'></a>
+              <a class='leg-box-sort sort-desc' href='javascript:;' onclick='sortBy("${raceid},${markid-1}", $(this))'></a>
                 <a tal:omit-tag="repeat['leg'].end" class='leg-box-active' href='javascript:;' onclick='$(this).closest(".leg-wrap").find(".race-table").toggle();'>
                   <ul>
                       <tal:for repeat="markrow range(1,21)">

@@ -83,9 +83,9 @@ public class TrackedEventImpl implements TrackedEvent {
 
     @Override
     public TrackedRace getTrackedRace(RaceDefinition race) {
-        TrackedRace result = trackedRaces.get(race);
         boolean interrupted = false;
         synchronized (trackedRaces) {
+            TrackedRace result = trackedRaces.get(race);
             while (!interrupted && result == null) {
                 try {
                     trackedRaces.wait();
@@ -94,8 +94,8 @@ public class TrackedEventImpl implements TrackedEvent {
                     interrupted = true;
                 }
             }
+            return result;
         }
-        return result;
     }
     
     @Override

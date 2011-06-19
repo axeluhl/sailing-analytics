@@ -1,6 +1,8 @@
 Axel
 ====
 
+- Axel liefert stabiles (zumindest im Bezug auf druckbetankte Daten) start und finish basierend auf MarkPassings + threshold (30)
+
  - when a race for an event arrives with a different boat class, open up a new Event
 
  - Pass final production instance URL information to BeTomorrow for wind integration
@@ -25,8 +27,18 @@ Axel
 Simon
 =====
 
-+ Wind correction einbauen
++ Wind expedition listener bei addrace automatisch konfigurieren
++ Wind tracking einschalten für prod für laufende Rennen
++ Einstellbar: Threads sofort starten (Wunsch: Checked=True)
++ Sortierung prüfen lokal und dann DEV (gelb) 
+
++ Leaderboard umbauen auf Timeslider support (dazu liefert Axel stabiles start und finsh)
+
 + Total Points einbauen
+
++ Animation Mode (3 sekunden, ...)
+
++ Wind sofort anzeigen
 
 + Current Race speichern damit iPhone das nutzen kann
 + iPhone UI implementieren
