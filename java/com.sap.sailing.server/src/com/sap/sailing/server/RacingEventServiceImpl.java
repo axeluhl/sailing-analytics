@@ -111,6 +111,7 @@ public class RacingEventServiceImpl implements RacingEventService {
                 raceTrackersByEvent.put(tracker.getEvent(), trackers);
             }
             trackers.add(tracker);
+            // TODO we assume here that the event name is unique which necessesitates adding the boat class name to it in EventImpl constructor
             String eventName = tracker.getEvent().getName();
             Event eventWithName = eventsByName.get(eventName);
             // TODO we assume here that the event name is unique which necessesitates adding the boat class name to it in EventImpl constructor
