@@ -97,7 +97,7 @@ class LiveDataReceiver(threading.Thread):
 def computeRank(newvalue, oldvalue):
     return newvalue
 
-def eventConfiguration(configurator):
+def eventConfiguration(configurator, competitor_refresh=False):
     """ Reads current event configuration from server """
 
     # this can block if there are no tracked races available
@@ -106,6 +106,7 @@ def eventConfiguration(configurator):
     for event in events:
         # erroneous data
         if not event.has_key('boatclass'):
+            log.error('Event %s has no name' % event)
             continue
 
         dbevent = model.EventImpl.queryOneBy(name=event['name'])
@@ -118,9 +119,16 @@ def eventConfiguration(configurator):
             cpnames.append(cp['name'])
 
             cfound = model.CompetitorImpl.queryOneBy(name=cp['name'], event=event['name'])
-            if not cfound:
-                competitor = model.CompetitorImpl()
-                competitor.update(dict(name=cp['name'], nationality=cp['nationality'], event=event['name'], nationality_short=cp['nationalityISO2']))
+            if not cfound or competitor_refresh is True:
+                if not cfound:
+                    competitor = model.CompetitorImpl()
+                else: competitor = cfound
+
+                competitor.update(dict(name=cp['name'], nationality=cp['nationality'], 
+                                        event=event['name'], nationality_short=cp['nationalityISO2'],
+                                        in_race=False, total_points=0, net_points=0, total=0,
+                                        current_rank=0, races=[], marks=[[]], marknames=[[]],
+                                        values=[[{}]]))
                 cobjects.append(competitor)
             else:
                 cobjects.append(cfound)
@@ -128,7 +136,12 @@ def eventConfiguration(configurator):
         # prepare race and mark names
         rcnames = []; rcmarks = []
         raceindex = 0;
-        for rc in event['races']:
+        
+        # sort races by start time
+        eventraces_given = event['races']
+        eventraces_given.sort(lambda x,y:cmp(x['start'], y['start']))
+
+        for rc in eventraces_given:
             rcnames.append( (rc['name'], rc['start']) )
             raceindex += 1
 
@@ -240,11 +253,11 @@ def liveRaceInformation(configurator):
                 # this can lead to competitors that loose data
                 configurator.setContext(config.MODERATOR)
                 configurator.setCommand(config.LIST_EVENTS)
-                eventConfiguration(configurator)
+                eventConfiguration(configurator, competitor_refresh=True)
 
                 # refresh event from database
                 event = model.EventImpl.queryOneBy(name=eventname)
-                log.error('Refreshed event %s information because legs (Old: %s New: %s) seem to have changed.' % (eventname, known_leg_count, legcount))
+                log.error('Refreshed event %s (%s) information because legs (Old: %s New: %s) seem to have changed.' % (eventname, racename, known_leg_count, legcount))
 
         lcount = 0; current_legs = {}
         for leg in data['legs']:
