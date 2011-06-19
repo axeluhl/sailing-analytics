@@ -3,6 +3,7 @@ package com.sap.sailing.domain.tracking.impl;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,7 +46,11 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
      */
     private TimePoint startOfTracking;
     
-    private TimePoint start;
+    /**
+     * Race start time as announced by the tracking infrastructure
+     */
+    private TimePoint startTimeReceived;
+    
     private TimePoint timePointOfNewestEvent;
     private TimePoint timePointOfLastEvent;
     private long updateCount;
@@ -142,11 +147,30 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     @Override
     public TimePoint getStart() {
-        return start;
+        TimePoint result;
+        Iterator<MarkPassing> markPassingsFirstMarkIter = getMarkPassingsInOrder(getRace().getCourse().getWaypoints().iterator().next()).iterator();
+        if (markPassingsFirstMarkIter.hasNext()) {
+            MarkPassing firstMarkPassingFirstMark = markPassingsFirstMarkIter.next();
+            TimePoint timeOfFirstMarkPassingFirstMark = firstMarkPassingFirstMark.getTimePoint();
+            if (startTimeReceived != null) {
+                long startTimeReceived2timeOfFirstMarkPassingFirstMark = timeOfFirstMarkPassingFirstMark.asMillis() -
+                        startTimeReceived.asMillis();
+                if (startTimeReceived2timeOfFirstMarkPassingFirstMark > MAX_TIME_BETWEEN_START_AND_FIRST_MARK_PASSING_IN_MILLISECONDS) {
+                    result = new MillisecondsTimePoint(timeOfFirstMarkPassingFirstMark.asMillis() - MAX_TIME_BETWEEN_START_AND_FIRST_MARK_PASSING_IN_MILLISECONDS);
+                } else {
+                    result = startTimeReceived;
+                }
+            } else {
+                result = timeOfFirstMarkPassingFirstMark;
+            }
+        } else {
+            result = startTimeReceived;
+        }
+        return result;
     }
 
-    protected void setStart(TimePoint start) {
-        this.start = start;
+    protected void setStartTimeReceived(TimePoint start) {
+        this.startTimeReceived = start;
     }
 
     @Override

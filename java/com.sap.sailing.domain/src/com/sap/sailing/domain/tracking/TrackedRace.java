@@ -28,8 +28,18 @@ import com.sap.sailing.domain.base.Waypoint;
  * 
  */
 public interface TrackedRace {
+    final long MAX_TIME_BETWEEN_START_AND_FIRST_MARK_PASSING_IN_MILLISECONDS = 30000;
+    
     RaceDefinition getRace();
     
+    /**
+     * Computes the estimated start time for this race. When there are no {@link MarkPassing}s for the first mark, the
+     * start time received from the tracking infrastructure is used. This is also used if there are mark passings for
+     * the first mark and the start time is less than
+     * {@link #MAX_TIME_BETWEEN_START_AND_FIRST_MARK_PASSING_IN_MILLISECONDS} before the first mark passing for the
+     * first mark. Otherwise, the first mark passing for the first mark minus
+     * {@link #MAX_TIME_BETWEEN_START_AND_FIRST_MARK_PASSING_IN_MILLISECONDS} is returned as the race start time.
+     */
     TimePoint getStart();
     
     Iterable<TrackedLeg> getTrackedLegs();

@@ -52,7 +52,7 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
         track.addGPSFix(fix); // the track notifies this tracked race which in turn notifies its listeners
         if (getStart() == null || getStart().compareTo(fix.getTimePoint())>0) {
             // infer race start time from fix; earliest fix received defines start if earlier than assumed start so far
-            setStart(fix.getTimePoint());
+            setStartTimeReceived(fix.getTimePoint());
         }
         updated(fix.getTimePoint());
     }
@@ -196,8 +196,8 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     }
 
     @Override
-    public void setStart(TimePoint start) {
-        super.setStart(start);
+    public void setStartTimeReceived(TimePoint start) {
+        super.setStartTimeReceived(start);
     }
 
     @Override

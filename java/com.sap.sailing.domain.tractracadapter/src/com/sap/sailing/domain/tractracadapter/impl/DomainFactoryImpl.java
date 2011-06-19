@@ -380,16 +380,28 @@ public class DomainFactoryImpl implements DomainFactory {
         synchronized (raceCache) {
             RaceDefinition result = raceCache.get(race);
             if (result == null) {
-                BoatClass boatClass = null;
                 final List<Competitor> competitors = new ArrayList<Competitor>();
+                Map<BoatClass, Integer> countsPerBoatClass = new HashMap<BoatClass, Integer>();
+                BoatClass dominantBoatClass = null;
+                int numberOfCompetitorsInDominantBoatClass = 0;
                 for (RaceCompetitor rc : race.getRaceCompetitorList()) {
                     com.tractrac.clientmodule.Competitor competitor = rc.getCompetitor();
+                    BoatClass boatClass = getBoatClass(competitor.getCompetitorClass());
+                    Integer boatClassCount = countsPerBoatClass.get(boatClass);
+                    if (boatClassCount == null) {
+                        boatClassCount = 0;
+                    }
+                    countsPerBoatClass.put(boatClass, boatClassCount++);
+                    if (boatClassCount > numberOfCompetitorsInDominantBoatClass) {
+                        numberOfCompetitorsInDominantBoatClass = boatClassCount;
+                        dominantBoatClass = boatClass;
+                    }
                     if (boatClass == null) {
                         boatClass = getBoatClass(competitor.getCompetitorClass());
                     }
                     competitors.add(getCompetitor(rc.getCompetitor()));
                 }
-                result = new RaceDefinitionImpl(race.getName(), course, boatClass, competitors);
+                result = new RaceDefinitionImpl(race.getName(), course, dominantBoatClass, competitors);
                 synchronized (raceCache) {
                     raceCache.put(race, result);
                     raceCache.notifyAll();

@@ -1,7 +1,9 @@
 Axel
 ====
 
- - when a race for an event arrives with a different boat class, open up a new Event
+ - sort mark passing using Collections.sort and don't use a TreeSet
+
+ - Distribute wind data to their respective races
 
  - Pass final production instance URL information to BeTomorrow for wind integration
 
