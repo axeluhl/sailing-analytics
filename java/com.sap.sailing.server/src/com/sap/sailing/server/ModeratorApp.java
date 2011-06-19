@@ -62,7 +62,7 @@ public class ModeratorApp extends Servlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         try {
             String action = req.getParameter(PARAM_ACTION);
-            resp.setCharacterEncoding("UTF-8");
+            resp.setCharacterEncoding("ISO-8859-15");
             if (action != null) {
                 if (ACTION_NAME_LIST_EVENTS.equals(action)) {
                     listEvents(resp);
