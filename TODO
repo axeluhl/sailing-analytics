@@ -1,21 +1,13 @@
 Axel
 ====
 
- - sort mark passing using Collections.sort and don't use a TreeSet
+ - Solve character encoding issue
 
  - Distribute wind data to their respective races
 
  - Pass final production instance URL information to BeTomorrow for wind integration
 
- - Consider making averaging intervals configurable
-
  - consolidate time point defaulting for servlet REST APIs
-
- - Test fail-over in case one of the two Java VM fails
-
- - enable switching between our and TracTrac-provided leaderboard information
-
- - implement missing pieces of TracTrac Result API-based TrackedLegOfCompetitor
 
  - Now that we can update Course's waypoints, consider creating a RaceDefinition right upon
    receiving the Event/Race from TracTrac, using an empty list of waypoints. This may simplify
@@ -26,6 +18,8 @@ Axel
 
 Simon
 =====
+
++ Build wizard page for initial configuration
 
 + Wind expedition listener bei addrace automatisch konfigurieren
 + Wind tracking einschalten für prod für laufende Rennen
