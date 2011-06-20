@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
 import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Competitor;
@@ -37,6 +38,8 @@ import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.util.Util;
 
 public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
+    private static final Logger logger = Logger.getLogger(TrackedRaceImpl.class.getName());
+    
     // TODO observe the race course; if it changes, update leg structures; consider fine-grained update events that tell what changed
     private final RaceDefinition race;
     
@@ -353,7 +356,20 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     @Override
     public Wind getWind(Position p, TimePoint at) {
-        return getWindTrack(currentWindSource).getEstimatedWind(p, at);
+        Wind result = getWindTrack(currentWindSource).getEstimatedWind(p, at);
+        if (result == null) {
+            logger.warning("Couldn't find any wind information for race "+getRace()+" from currently selected source "+currentWindSource);
+            for (WindSource alternativeWindSource : WindSource.values()) {
+                if (alternativeWindSource != currentWindSource) {
+                    result = getWindTrack(alternativeWindSource).getEstimatedWind(p, at);
+                    if (result != null) {
+                        logger.warning("Found wind settings in alternative wind source "+alternativeWindSource+" which will be used as a fallback");
+                        break;
+                    }
+                }
+            }
+        }
+        return result;
     }
     
     @Override
