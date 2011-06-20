@@ -31,8 +31,8 @@ STOP_EXP_WIND = 'stopreceivingexpeditionwind'
 START_EXP_WIND = 'receiveexpeditionwind'
 
 VN = {
-        'CSPDKNOT': ('CSPEEDKN', 'Speed (kn)', '%.1f', 'currentSpeedOverGroundInKnots'),
-        'CSPDMS' : ('CSPDMS', 'Speed (m/s)', '%.1f', 'currentSpeedOverGroundInMetersPerSecond'),
+        'CSPDKNOT': ('CSPEEDKN', 'Speed (kn)', '%.1f', 'currentSpeedOverGroundOrAverageSpeedOverGroundIfLegFinishedInKnots'),
+        'CSPDMS' : ('CSPDMS', 'Speed (m/s)', '%.1f', 'currentSpeedOverGroundOrAverageSpeedOverGroundIfLegFinishedInMetersPerSecond'),
         'ASPDKNOT': ('ASPDKN', 'Avg Speed (kn)', '%.2f', 'averageSpeedOverGroundInKnots'),
         'ASPDMS' : ('ASPDMS', 'Avg Speed (m/s)', '%.1f', 'averageSpeedOverGroundInMetersPerSecond'),
         'DSTTRV' : ('DSTTRV', 'Dist. Trav. (m)', '%.f', 'distanceTraveledOverGroundInMeters'),
@@ -58,6 +58,6 @@ COLUMN_MODE_NAMES = {
         'LEADERBOARD-F1':
             [VN['RANK'], VN['CSPDMS'], VN['DSTTRV'], VN['GLP']],
         'LEADERBOARD-F2':
-            [VN['RANK'], VN['GAPSEC'], VN['ETA']],
+            [VN['RANK'], VN['CSPDMS'], VN['GAPSEC'], VN['ETA']],
         }
 

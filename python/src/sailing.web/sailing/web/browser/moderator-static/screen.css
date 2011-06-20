@@ -430,13 +430,13 @@ span.race-count {
 #race-2 div.main-box {
   background: #fec631; }
 
-#race-3 div.main-box {
+#race-5 div.main-box {
   background: #9c277b; }
 
 #race-4 div.main-box {
   background: #95aa31; }
 
-#race-5 div.main-box {
+#race-3 div.main-box {
   background: #d83c3c; }
 
 body.race-1 #race-1 table th {
@@ -449,9 +449,9 @@ body.race-2 #race-2 table th {
 body.race-2 #race-2 div.leg-box {
   background: #d9b85e; }
 
-body.race-3 #race-3 table th {
+body.race-5 #race-5 table th {
   background: #a76394; }
-body.race-3 #race-3 div.leg-box {
+body.race-5 #race-5 div.leg-box {
   background: #a76394; }
 
 body.race-4 #race-4 table th {
@@ -459,10 +459,11 @@ body.race-4 #race-4 table th {
 body.race-4 #race-4 div.leg-box {
   background: #b1be72; }
 
-body.race-5 #race-5 table th {
+body.race-3 #race-3 table th {
   background: #da8585; }
-body.race-5 #race-5 div.leg-box {
+body.race-3 #race-3 div.leg-box {
   background: #da8585; }
 
 .border-activity {
   background: url(/moderator-static/border-activity.png) 0 0 no-repeat; }
+
