@@ -14,7 +14,6 @@ import com.sap.sailing.domain.tracking.DynamicTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
-import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.NoWindException;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
@@ -135,7 +134,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public GPSFixTrack<Buoy, GPSFix> getTrack(Buoy buoy) {
+    public DynamicTrack<Buoy, GPSFix> getTrack(Buoy buoy) {
         // TODO Auto-generated method stub
         return null;
     }

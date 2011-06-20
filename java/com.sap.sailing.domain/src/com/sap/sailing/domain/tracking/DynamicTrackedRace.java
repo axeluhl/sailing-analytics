@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.tracking;
 
+import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.TimePoint;
 
@@ -13,6 +14,12 @@ public interface DynamicTrackedRace extends TrackedRace {
      */
     DynamicTrack<Competitor, GPSFixMoving> getTrack(Competitor competitor);
     
+    /**
+     * Yields the track describing <code>buoy</code>'s movement over time; never <code>null</code> because a
+     * new track will be created in case no track was present for <code>buoy</code> so far.
+     */
+    DynamicTrack<Buoy, GPSFix> getTrack(Buoy buoy);
+
     void addListener(RaceChangeListener<Competitor> listener);
     
     // TODO need another listener protocol for general changes in ranking and leg completion

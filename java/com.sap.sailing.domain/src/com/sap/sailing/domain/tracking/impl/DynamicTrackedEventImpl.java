@@ -22,4 +22,9 @@ public class DynamicTrackedEventImpl extends TrackedEventImpl implements Dynamic
         super.addTrackedRace((DynamicTrackedRace) trackedRace);
     }
 
+    @Override
+    public DynamicTrackedRace getExistingTrackedRace(RaceDefinition race) {
+        return (DynamicTrackedRace) super.getExistingTrackedRace(race);
+    }
+
 }
