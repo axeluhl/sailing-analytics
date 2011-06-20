@@ -9,6 +9,11 @@ import java.net.URL;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 
 import com.maptrack.client.io.TypeController;
 import com.sap.sailing.domain.base.Course;
@@ -23,12 +28,21 @@ import com.sap.sailing.domain.tractracadapter.RaceHandle;
 import com.sap.sailing.domain.tractracadapter.RaceTracker;
 import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sailing.util.Util.Triple;
+import com.tractrac.clientmodule.ControlPoint;
 import com.tractrac.clientmodule.Event;
 import com.tractrac.clientmodule.data.DataController;
 import com.tractrac.clientmodule.data.DataController.Listener;
 import com.tractrac.clientmodule.setup.KeyValue;
 
 public class RaceTrackerImpl implements Listener, RaceTracker {
+    private static final Logger logger = Logger.getLogger(RaceTrackerImpl.class.getName());
+    
+    /**
+     * A scheduler for the periodic checks of the paramURL documents for the advent of {@link ControlPoint}s
+     * with static position information otherwise not available through {@link MarkPassingReceiver}'s events.
+     */
+    private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+    
     private final Event tractracEvent;
     private final com.sap.sailing.domain.base.Event domainEvent;
     private final Thread ioThread;
@@ -38,6 +52,7 @@ public class RaceTrackerImpl implements Listener, RaceTracker {
     private final DynamicTrackedEvent trackedEvent;
     private final WindStore windStore;
     private final Triple<URL, URI, URI> urls;
+    private final ScheduledFuture<?> controlPointPositionPoller;
 
     /**
      * Creates a race tracked for the specified URL/URIs and starts receiving all available existing and future push
@@ -68,6 +83,7 @@ public class RaceTrackerImpl implements Listener, RaceTracker {
         this.domainFactory = domainFactory;
         // Read event data from configuration file
         tractracEvent = KeyValue.setup(paramURL);
+        controlPointPositionPoller = scheduleControlPointPositionPoller(paramURL);
         
         // can happen that tractrac event is null (occurs when there is no internet connection)
         // so lets raise some meaningful exception
@@ -92,6 +108,26 @@ public class RaceTrackerImpl implements Listener, RaceTracker {
         addListenersForStoredDataAndStartController(typeControllers);
     }
     
+    /**
+     * Control points may get added late in the race. If they don't have a tracker installed, their position
+     * will be static. This position can be retrieved from {@link ControlPoint#getLat1()} etc. This method registers
+     * a task with {@link #scheduler} that regularly polls the <code>paramURL</code> to see if any new control points
+     * have arrived or positions for existing control points have been received. Any new information in this
+     * direction will be entered into the {@link TrackedRace} for the {@link #getRace() race} tracked by this
+     * tracker.
+     * 
+     * @param paramURL points to the document describing the race's metadata which will periodically be downloaded
+     * @return 
+     */
+    private ScheduledFuture<?> scheduleControlPointPositionPoller(URL paramURL) {
+        ScheduledFuture<?> task = scheduler.scheduleWithFixedDelay(new Runnable() {
+            @Override public void run() {
+                logger.info("TODO fetching paramURL to check for new ControlPoint positions...");
+            }
+        }, /* initialDelay */ 30000, /* delay */ 15000, /* unit */ TimeUnit.MILLISECONDS);
+        return task;
+    }
+
     @Override
     public Triple<URL, URI, URI> getURLs() {
         return urls;
@@ -145,11 +181,13 @@ public class RaceTrackerImpl implements Listener, RaceTracker {
     
     @Override
     public void stop() throws MalformedURLException, IOException, InterruptedException {
+        controlPointPositionPoller.cancel(/* mayInterruptIfRunning */ false);
         controller.stop(/* abortStored */ true);
         for (Receiver receiver : receivers) {
             receiver.stop();
         }
         ioThread.join(3000); // wait no more than three seconds
+        logger.info("Joined TracTrac IO thread for race "+getRace());
         RaceDefinition race = getRace();
         if (race != null) {
             TrackedRace trackedRace = trackedEvent.getExistingTrackedRace(race);
@@ -165,42 +203,42 @@ public class RaceTrackerImpl implements Listener, RaceTracker {
 
     @Override
     public void liveDataConnected() {
-        System.out.println("Live data connected for race "+getRace());
+        logger.info("Live data connected for race "+getRace());
     }
 
     @Override
     public void liveDataDisconnected() {
-        System.out.println("Live data disconnected for race "+getRace());
+        logger.info("Live data disconnected for race "+getRace());
     }
 
     @Override
     public void stopped() {
-        System.out.println("stopped TracTrac tracking for "+getRace());
+        logger.info("stopped TracTrac tracking for "+getRace());
     }
 
     @Override
     public void storedDataBegin() {
-        System.out.println("Stored data begin for race "+getRace());
+        logger.info("Stored data begin for race "+getRace());
     }
 
     @Override
     public void storedDataEnd() {
-        System.out.println("Stored data end for race "+getRace());
+        logger.info("Stored data end for race "+getRace());
     }
 
     @Override
     public void storedDataProgress(float progress) {
-        System.out.println("Stored data progress for race "+getRace()+": "+progress);
+        logger.info("Stored data progress for race "+getRace()+": "+progress);
         
     }
 
     @Override
     public void storedDataError(String arg0) {
-        System.err.println("Error with stored data for race "+getRace()+": "+arg0);
+        logger.warning("Error with stored data for race "+getRace()+": "+arg0);
     }
 
     @Override
     public void liveDataConnectError(String arg0) {
-        System.err.println("Error with live data for race "+getRace()+": "+arg0);
+        logger.warning("Error with live data for race "+getRace()+": "+arg0);
     }
 }

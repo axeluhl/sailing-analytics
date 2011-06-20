@@ -151,16 +151,20 @@ public class RacingEventServiceImpl implements RacingEventService {
 
     @Override
     public void stopTracking(Event event, RaceDefinition race) throws MalformedURLException, IOException, InterruptedException {
+        logger.info("Stopping tracking for "+race+"...");
         if (raceTrackersByEvent.containsKey(event)) {
             Iterator<RaceTracker> trackerIter = raceTrackersByEvent.get(event).iterator();
             while (trackerIter.hasNext()) {
                 RaceTracker raceTracker = trackerIter.next();
                 if (raceTracker.getRace() == race) {
+                    System.out.println("Found tracker to stop...");
                     raceTracker.stop(); // this also removes the TrackedRace from trackedEvent
                     trackerIter.remove();
                     raceTrackersByURLs.remove(raceTracker.getURLs());
                 }
             }
+        } else {
+            logger.warning("Didn't find any trackers for event "+event);
         }
         // if the last tracked race was removed, remove the entire event
         if (raceTrackersByEvent.get(event).isEmpty()) {
