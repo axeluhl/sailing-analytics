@@ -391,7 +391,8 @@ public class DomainFactoryImpl implements DomainFactory {
                     if (boatClassCount == null) {
                         boatClassCount = 0;
                     }
-                    countsPerBoatClass.put(boatClass, boatClassCount++);
+                    boatClassCount = boatClassCount + 1;
+                    countsPerBoatClass.put(boatClass, boatClassCount);
                     if (boatClassCount > numberOfCompetitorsInDominantBoatClass) {
                         numberOfCompetitorsInDominantBoatClass = boatClassCount;
                         dominantBoatClass = boatClass;
