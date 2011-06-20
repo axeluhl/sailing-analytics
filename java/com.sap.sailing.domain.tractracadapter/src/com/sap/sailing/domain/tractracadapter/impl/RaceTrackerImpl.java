@@ -165,42 +165,42 @@ public class RaceTrackerImpl implements Listener, RaceTracker {
 
     @Override
     public void liveDataConnected() {
-        System.out.println("Live data connected");
+        System.out.println("Live data connected for race "+getRace());
     }
 
     @Override
     public void liveDataDisconnected() {
-        System.out.println("Live data disconnected");
+        System.out.println("Live data disconnected for race "+getRace());
     }
 
     @Override
     public void stopped() {
-        System.out.println("stopped");
+        System.out.println("stopped TracTrac tracking for "+getRace());
     }
 
     @Override
     public void storedDataBegin() {
-        System.out.println("Stored data begin");
+        System.out.println("Stored data begin for race "+getRace());
     }
 
     @Override
     public void storedDataEnd() {
-        System.out.println("Stored data end");
+        System.out.println("Stored data end for race "+getRace());
     }
 
     @Override
     public void storedDataProgress(float progress) {
-        System.out.println("Stored data progress: "+progress);
+        System.out.println("Stored data progress for race "+getRace()+": "+progress);
         
     }
 
     @Override
     public void storedDataError(String arg0) {
-        System.err.println("Error with stored data "+arg0);
+        System.err.println("Error with stored data for race "+getRace()+": "+arg0);
     }
 
     @Override
     public void liveDataConnectError(String arg0) {
-        System.err.println("Error with live data "+arg0);
+        System.err.println("Error with live data for race "+getRace()+": "+arg0);
     }
 }
