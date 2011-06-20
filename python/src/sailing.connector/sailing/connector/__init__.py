@@ -14,6 +14,7 @@ class URIConfigurator(object):
         self.host = host
         self.port = port
         self.do_log = log
+        self.expedition = None
 
     def copy(self):
         inst = URIConfigurator(self.host, self.port)
