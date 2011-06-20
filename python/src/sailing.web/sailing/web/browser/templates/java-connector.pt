@@ -24,7 +24,7 @@ When <i>stopping listener</i> it will trigger two methods: If you select a race 
         </div>
 
         <div class="field">
-            <span>Use given delay (UTCnow() - n Minutes) for loading race data</span><br/>
+            <span>Use given delay (UTCnow() - n Seconds) for loading race data</span><br/>
             <input type="text" name="delay" value="" />
         </div>
 

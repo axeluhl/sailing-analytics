@@ -8,7 +8,7 @@
                                     racebundles [event.races[i:i+3] for i in xrange(0, len(event.races), 3)];
                                     firstbundle racebundles[:3]; lastbundle racebundles[3:];
                                     columns view.configuredColumns('LEADERBOARD-%s' % request.params.get('c', 'F1'))"
-                        tal:on-error="'No current leaderboard event is set!'">
+                        tal:on-error="'No current leaderboard event defined!'">
     <div id='rootwrapper'>
       <div id='header'>
         <ul class='systeminfo'>
@@ -114,7 +114,7 @@
                   <li id='race-${raceid}-rankrow-${rankrow}'></li>
                   </tal:for>
                 </ul>
-                <span id="race-">${raceid}</span>
+                <span id="race-">${racebundles[int(request.params.get('r', 0))].index(bundle)+1+(int(request.params.get('r', 0))*3)}</span>
               </a>
               <a class='main-box-sort sort-desc' href='javascript:;' onclick='sortBy("${raceid}", $(this))'></a>
             </div>

@@ -56,7 +56,7 @@ class LiveDataReceiver(threading.Thread):
             if self.delay:
 
                 # ask for race information in the past - not suitable for tests
-                now = datetime.datetime.now() - datetime.timedelta(minutes=int(self.delay))
+                now = datetime.datetime.now() - datetime.timedelta(seconds=int(self.delay))
                 delayed = time.mktime( now.timetuple() ) * 1000
                 conf.setParameters(dict(eventname=self.eventname, racename=self.racename, timeasmillis='%.f' % delayed))
 
