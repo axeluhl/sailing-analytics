@@ -5,14 +5,14 @@
 <form>
     <br/>
     Event: 
-    <select name="event">
+    <select name="mapevent">
         <tal:for repeat="event view.allEvents()">
         <option value="${event.name}">${event.name}</option>
         </tal:for>
     </select>
     &nbsp;
     Race: 
-    <select name="racename">
+    <select name="mapracename">
         <tal:for repeat="racename view.allRacesFor()">
         <option value="${racename}">${racename}</option>
         </tal:for>
@@ -28,8 +28,8 @@
         function loadMap() {
             displayLoader('#map-data');
             GET('saveEventRace', {template: 'map-overview-details', 
-                eventname: $('select[name=event] option:selected').val(), 
-                racename: $('select[name=racename] option:selected').val()}, 
+                eventname: $('select[name=mapevent] option:selected').val(), 
+                racename: $('select[name=mapracename] option:selected').val()}, 
             function(data) {
                 $('#map-data').html(data)
             });
