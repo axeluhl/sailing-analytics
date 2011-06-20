@@ -127,7 +127,8 @@ public interface TrackedRace {
     MarkPassing getMarkPassing(Competitor competitor, Waypoint waypoint);
 
     /**
-     * Yields the track describing <code>buoy</code>'s movement over time
+     * Yields the track describing <code>buoy</code>'s movement over time; never <code>null</code> because a
+     * new track will be created in case no track was present for <code>buoy</code> so far.
      */
     GPSFixTrack<Buoy, GPSFix> getTrack(Buoy buoy);
 

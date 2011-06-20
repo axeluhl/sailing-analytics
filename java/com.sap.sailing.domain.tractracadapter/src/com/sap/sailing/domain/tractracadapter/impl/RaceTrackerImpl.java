@@ -16,13 +16,20 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import com.maptrack.client.io.TypeController;
+import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.impl.DegreePosition;
+import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.tracking.DynamicTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
+import com.sap.sailing.domain.tracking.DynamicTrackedRace;
+import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
+import com.sap.sailing.domain.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.RaceHandle;
 import com.sap.sailing.domain.tractracadapter.RaceTracker;
@@ -119,10 +126,27 @@ public class RaceTrackerImpl implements Listener, RaceTracker {
      * @param paramURL points to the document describing the race's metadata which will periodically be downloaded
      * @return 
      */
-    private ScheduledFuture<?> scheduleControlPointPositionPoller(URL paramURL) {
+    private ScheduledFuture<?> scheduleControlPointPositionPoller(final URL paramURL) {
         ScheduledFuture<?> task = scheduler.scheduleWithFixedDelay(new Runnable() {
             @Override public void run() {
-                logger.info("TODO fetching paramURL to check for new ControlPoint positions...");
+                DynamicTrackedRace trackedRace = getTrackedEvent().getExistingTrackedRace(getRace());
+                if (trackedRace != null) {
+                    logger.info("fetching paramURL to check for new ControlPoint positions...");
+                    Event event = KeyValue.setup(paramURL);
+                    for (ControlPoint controlPoint : event.getControlPointList()) {
+                        com.sap.sailing.domain.base.ControlPoint domainControlPoint = domainFactory.getControlPoint(controlPoint);
+                        boolean first = true;
+                        for (Buoy buoy : domainControlPoint.getBuoys()) {
+                            DynamicTrack<Buoy, GPSFix> buoyTrack = trackedRace.getTrack(buoy);
+                            if (buoyTrack.getFirstFix() == null) {
+                                buoyTrack.addGPSFix(new GPSFixImpl(new DegreePosition(
+                                        first ? controlPoint.getLat1() : controlPoint.getLat2(),
+                                        first ? controlPoint.getLon1() : controlPoint.getLon2()), MillisecondsTimePoint.now()));
+                            }
+                            first = false;
+                        }
+                    }
+                }
             }
         }, /* initialDelay */ 30000, /* delay */ 15000, /* unit */ TimeUnit.MILLISECONDS);
         return task;
