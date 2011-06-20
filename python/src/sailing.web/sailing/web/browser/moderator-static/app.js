@@ -1,7 +1,6 @@
 
 var global_sortkey = 'current_rank';
 var global_direction = 'asc';
-var global_race = '1:3';
 var global_competitors = '1:20';
 
 var loader_image = "<img style='margin: 3px 0px 3px 3px' src='/static/images/ajax-loader-greybg.gif'/>";

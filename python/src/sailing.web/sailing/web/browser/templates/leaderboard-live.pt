@@ -13,7 +13,8 @@
       <div id='header'>
         <ul class='systeminfo'>
           <li id="eventline" class='message-0 active' style="font-size: 16px;">
-            Kiel Week 2011, ${event.boatclass}
+          Kiel Week 2011, ${event.boatclass}<br/>
+          <div id="Racenames" style="padding: 3px 0px 0px 0px;">${','.join(racebundles[int(request.params.get('r', 0))]).replace(event.boatclass, '').replace(' ', '').replace(',', ', ')}</div>
           </li>
           <li>
               <div class='function-btn-wrapper'>
@@ -267,6 +268,7 @@
 
   <script>
       global_colmode = 'LEADERBOARD-${request.params.get('c', 'F1')}';
+      global_race = '${(int(request.params.get('r', 0))*3)+1}:${((int(request.params.get('r', 3))*3)+1)+2}';
   </script>
 
   <script src='/moderator-static/jquery.js' type='text/javascript'></script>
