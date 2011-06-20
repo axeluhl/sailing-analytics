@@ -19,25 +19,26 @@
         </div>
 
         <div style="text-align: right;margin: 13px 1px 13px 1px;">
-        <form method="POST" action="/++/configureListener">
-            <div id="listeners-container">
-                <select id="listeners">
-                    <option>Loading....</option>
-                </select>&nbsp;&nbsp;<br/>
-                <div align="right">
-                <input type="button" value="UnPause" onclick="GET('unPauseListener', {tid:$('#listeners option:selected').val()}, loadListeners)"/>
-                &nbsp;
-                <input type="button" value="Pause" onclick="GET('pauseListener', {tid:$('#listeners option:selected').val()}, loadListeners)"/>
-                &nbsp;
-                <input type="button" value="UnPause ALL" onclick="GET('unPauseListener', {all: true, tid:$('#listeners option:selected').val()}, loadListeners)"/>
-                &nbsp;
-                <input type="button" value="Pause ALL" onclick="GET('pauseListener', {all: true, tid:$('#listeners option:selected').val()}, loadListeners)"/>
-                &nbsp;
-                <input type="button" value="Stop" onclick="GET('stopListener', {tid: $('#listeners option:selected').val()}, loadListeners)"/>
-                &nbsp;&nbsp;
+
+            <form method="POST" action="/++/configureListener">
+                <div id="listeners-container">
+                    <select id="listeners">
+                        <option>Loading....</option>
+                    </select>&nbsp;&nbsp;<br/>
+                    <div align="right">
+                    <input type="button" value="UnPause" onclick="GET('unPauseListener', {tid:$('#listeners option:selected').val()}, loadListeners)"/>
+                    &nbsp;
+                    <input type="button" value="Pause" onclick="GET('pauseListener', {tid:$('#listeners option:selected').val()}, loadListeners)"/>
+                    &nbsp;
+                    <input type="button" value="UnPause ALL" onclick="GET('unPauseListener', {all: true, tid:$('#listeners option:selected').val()}, loadListeners)"/>
+                    &nbsp;
+                    <input type="button" value="Pause ALL" onclick="GET('pauseListener', {all: true, tid:$('#listeners option:selected').val()}, loadListeners)"/>
+                    &nbsp;
+                    <input type="button" value="Stop" onclick="GET('stopListener', {tid: $('#listeners option:selected').val()}, loadListeners)"/>
+                    &nbsp;&nbsp;
+                    </div>
                 </div>
-            </div>
-        </form>
+            </form>
         </div>
 
         <div id="tabs">
@@ -52,7 +53,18 @@
                 <li><a href="/@@/leaderboard"><span>Leaderboard</span></a></li>
                 <li><a href="/@@/live-info"><span>Live Info</span></a></li>
                 <li><a href="/@@/database-stats"><span>DB</span></a></li>
+                <li><a href="#tab-error"><span>Errors</span></a></li>
             </ul>
+
+        <div id="tab-error">
+            <div class="help">
+                If any errors occur then they will show up here.
+            </div>
+
+            <div style="margin: 10px;font-size: 14px;" id="errors">
+                &nbsp;
+            </div>
+        </div>
 
         <div id="tab-simulator">
             <div class="help">
@@ -84,9 +96,18 @@
             function loadListeners() {
                 if (run_listener == true)
                     $('#listeners').html('<option>Checking server...</option>');
+                    $('#errors').html('&nbsp;');
+
                     GET('configuredListeners', {}, function(data) {
                         options = '';
+
+                        $('#listeners').css('color', '');
+
                         for (d in data) {
+                            if (data[d].error) {
+                                $('#listeners').css('color', 'red');
+                                $('#errors').html($('#errors').html() + '<br/><b>' + data[d].eventname + ' ' + data[d].racename + '</b><br/><pre>' + data[d].error + '</pre>');
+                            }
                             options += format('<option value="'+data[d].xid+'">{host}:{port} | {eventname} | {racename} | U: {last_update} P: {paused}</option>', data[d]);
                         }
 

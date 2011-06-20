@@ -29,10 +29,9 @@ class LiveDataReceiver(threading.Thread):
         self.updatecount = 0
 
         self.running = False
+        self.paused = False
 
-        # start thread paused - in real life there should only
-        # be one race running and therefore we only need one running listener
-        self.paused = True
+        self.error = ''
 
         threading.Thread.__init__(self)
 
@@ -75,10 +74,13 @@ class LiveDataReceiver(threading.Thread):
 
                 self.last_update = datetime.datetime.now()
                 self.updatecount = updatecount
+                self.error = ''
 
             except Exception, ex:
                 # print error but do not kill thread as this could be recoverable (connection problems, ...)
                 log.error('Error in thread for %s %s' % (self.eventname, self.racename), exc_info=True)
+
+                self.error = str(ex)
 
                 if str(ex).find('Race not found')>=0:
                     # if race is not found then pause
@@ -90,7 +92,7 @@ class LiveDataReceiver(threading.Thread):
                 time.sleep(5)
 
             # avoid hammering java server - can occur if call does not block correctly or by using a delayed call
-            time.sleep(4)
+            time.sleep(5)
 
         log.info('STOP listener for %s:%s (%s, %s)' % (self.host, self.port, self.eventname, self.racename))
 

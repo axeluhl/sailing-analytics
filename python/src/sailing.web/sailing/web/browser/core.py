@@ -111,6 +111,17 @@ class BaseView(object):
             return self.session['listener-conf'].copy()
         return None
 
+    def expeditionPort(self):
+        conf = self.listenerConf()
+        if conf.host.startswith('test') or conf.port == '8887':
+            return '2011'
+        elif conf.host.startswith('dev') or conf.port == '8886':
+            return '2010'
+        elif conf.host.startswith('prod1') or conf.port == '8888':
+            return '2013'
+        elif conf.host.startswith('prod2') or conf.port == '8889':
+            return '2014'
+
     def currentRace(self):
         if not self.session.has_key('current-race'):
             return None

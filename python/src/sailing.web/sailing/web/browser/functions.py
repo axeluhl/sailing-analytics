@@ -156,6 +156,23 @@ def configureListener(context, request):
                 delay = request.POST.get('delay', '')
                 startListenerThreads(conf, eventlist, delay)
 
+                if request.POST.get('expedition_port'):
+                    expedition_port = request.POST.get('expedition_port')
+
+                    # persist expedition port
+                    view.session['listener-conf'].expedition = expedition_port
+
+                    for event in eventlist:
+                        eventname = event['name']
+                        for race in event['races']:
+                            racename = race['name']
+
+                            conf.setContext(config.ADMIN)
+                            conf.setCommand(config.START_EXP_WIND)
+                            conf.setParameters(dict(port=expedition_port, eventname=eventname, racename=racename))
+                            conf.trigger()
+                            log.info('Configured expedition wind for event %s, race %s on port %s' % (eventname, racename, expedition_port))
+
             except Exception, ex:
                 return view.yieldMessage('Could not gather any data! Seems that Java listener is not ready yet. Please reconnect. Error: %s' % str(ex))
 
@@ -256,7 +273,7 @@ def configuredListeners(context, request):
         out.append( {'host': listener.host, 'port': listener.port,
                         'eventname': listener.eventname, 'last_update': listener.last_update and listener.last_update.strftime('%d.%m %H:%M:%S') or '-',
                         'paused' : listener.paused, 'running': listener.running, 'xid' : str(key),
-                        'racename': listener.racename} )
+                        'racename': listener.racename, 'error': listener.error} )
 
     return out
 
@@ -664,6 +681,7 @@ def loadRacesForEvent(context, request):
 
     data = jsonByUrl(conf)
 
+    races = data.sort(lambda x,y:cmp(x['name'], y['name']))
     return render_to_response('templates/java-connector-select-races.pt', {'races' : data, 'view': view}, request=request)
 
 @jsonize
