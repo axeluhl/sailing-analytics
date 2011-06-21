@@ -51,7 +51,11 @@ class CompetitorImpl(ModelBase):
             return (matchDirection(c.values[raceindex][markindex].get(valuekey, None)), c)
 
         def markRankOf(c):
-            return (matchDirection(c.marks[raceindex][markindex], ignore_zeros=True), c)
+            try:
+                val = (matchDirection(c.marks[raceindex][markindex], ignore_zeros=True), c)
+            except:
+                val = (0, c)
+            return val
 
         def raceRankOf(c):
             return (matchDirection(c.races[raceindex], ignore_zeros=True), c)
