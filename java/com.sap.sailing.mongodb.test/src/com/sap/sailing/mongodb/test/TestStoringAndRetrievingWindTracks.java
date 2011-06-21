@@ -69,7 +69,7 @@ public class TestStoringAndRetrievingWindTracks extends AbstractTracTracLiveTest
         RaceDefinition race = domainFactory.getRaceDefinition(getEvent().getRaceList().iterator().next());
         DynamicTrackedRace trackedRace = domainFactory.trackRace(trackedEvent, race, /* millisecondsOverWhichToAverageWind */
                 EmptyWindStore.INSTANCE, /* millisecondsOverWhichToAverageSpeed */
-                30000, 10000, getEvent());
+                30000, 10000, getEvent(), this);
         WindSource windSource = WindSource.WEB;
         MongoObjectFactory.INSTANCE.addWindTrackDumper(trackedEvent, trackedRace, windSource, db);
         WindTrack windTrack = trackedRace.getWindTrack(windSource);

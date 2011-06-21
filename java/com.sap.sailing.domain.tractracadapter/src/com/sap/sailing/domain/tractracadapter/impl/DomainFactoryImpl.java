@@ -105,7 +105,12 @@ public class DomainFactoryImpl implements DomainFactory {
     private final Map<Pair<String, String>, com.sap.sailing.domain.base.Event> eventCache =
             new HashMap<Pair<String, String>, com.sap.sailing.domain.base.Event>();
     
-    private final Map<com.tractrac.clientmodule.Event, RaceDefinition> tractracEventToRaceDefinitionMap = new HashMap<com.tractrac.clientmodule.Event, RaceDefinition>();
+    /**
+     * Keyed by an object that the client that started the {@link RaceCourseReceiver} which then provided the
+     * {@link RaceDefinition} has provided to retrieve the {@link RaceDefinition} again using
+     * {@link #getRace}.
+     */
+    private final Map<Object, RaceDefinition> tractracEventToRaceDefinitionMap = new HashMap<Object, RaceDefinition>();
     
     private final Map<Race, RaceDefinition> raceCache = new HashMap<Race, RaceDefinition>();
     
@@ -321,13 +326,15 @@ public class DomainFactoryImpl implements DomainFactory {
     }
     
     @Override
-    public Iterable<Receiver> getUpdateReceivers(DynamicTrackedEvent trackedEvent, com.tractrac.clientmodule.Event tractracEvent, WindStore windStore, ReceiverType... types) {
+    public Iterable<Receiver> getUpdateReceivers(DynamicTrackedEvent trackedEvent, com.tractrac.clientmodule.Event tractracEvent,
+            WindStore windStore, Object tokenToRetrieveAssociatedRace, ReceiverType... types) {
         Collection<Receiver> result = new ArrayList<Receiver>();
         for (ReceiverType type : types) {
             switch (type) {
             case RACECOURSE:
                 result.add(new RaceCourseReceiver(
-                        this, trackedEvent, tractracEvent, windStore, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed));
+                        this, trackedEvent, tractracEvent, windStore,
+                        tokenToRetrieveAssociatedRace, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed));
                 break;
             case MARKPOSITIONS:
                 result.add(new MarkPositionReceiver(
@@ -352,8 +359,8 @@ public class DomainFactoryImpl implements DomainFactory {
 
     @Override
     public Iterable<Receiver> getUpdateReceivers(DynamicTrackedEvent trackedEvent,
-            com.tractrac.clientmodule.Event tractracEvent, WindStore windStore) {
-        return getUpdateReceivers(trackedEvent, tractracEvent, windStore, ReceiverType.RACECOURSE,
+            com.tractrac.clientmodule.Event tractracEvent, WindStore windStore, Object tokenToRetrieveAssociatedRace) {
+        return getUpdateReceivers(trackedEvent, tractracEvent, windStore, tokenToRetrieveAssociatedRace, ReceiverType.RACECOURSE,
                 ReceiverType.MARKPASSINGS, ReceiverType.MARKPOSITIONS, ReceiverType.RACESTARTFINISH,
                 ReceiverType.RAWPOSITIONS);
     }
@@ -445,18 +452,24 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public RaceDefinition getRace(com.tractrac.clientmodule.Event tractracEvent) {
-        return tractracEventToRaceDefinitionMap.get(tractracEvent);
+    public RaceDefinition getRace(Object tokenToRetrieveAssociatedRace) {
+        return tractracEventToRaceDefinitionMap.get(tokenToRetrieveAssociatedRace);
     }
 
     @Override
     public DynamicTrackedRace trackRace(TrackedEvent trackedEvent, RaceDefinition raceDefinition,
             WindStore windStore, long millisecondsOverWhichToAverageWind,
-            long millisecondsOverWhichToAverageSpeed, com.tractrac.clientmodule.Event tractracEvent) {
+            long millisecondsOverWhichToAverageSpeed, com.tractrac.clientmodule.Event tractracEvent, Object tokenToRetrieveAssociatedRace) {
         logger.log(Level.INFO, "Creating DynamicTrackedRaceImpl for RaceDefinition "+raceDefinition.getName());
         DynamicTrackedRaceImpl result = new DynamicTrackedRaceImpl(trackedEvent, raceDefinition,
                 windStore, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed);
-        tractracEventToRaceDefinitionMap.put(tractracEvent, raceDefinition);
+        if (!tractracEventToRaceDefinitionMap.containsKey(tokenToRetrieveAssociatedRace)) {
+            tractracEventToRaceDefinitionMap.put(tokenToRetrieveAssociatedRace, raceDefinition);
+        } else {
+            logger.severe("There is already something ("+tokenToRetrieveAssociatedRace+") tracking "+
+                        tractracEventToRaceDefinitionMap.get(tokenToRetrieveAssociatedRace)+" while trying to start tracking for race "+
+                    raceDefinition);
+        }
         return result;
     }
 
