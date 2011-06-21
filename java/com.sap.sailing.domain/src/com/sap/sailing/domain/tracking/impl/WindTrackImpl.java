@@ -138,7 +138,7 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
                 } else {
                     beforeWind = null;
                 }
-            } else {
+            } else if (afterWind != null) {
                 if (afterIntervalStart == null) {
                     afterIntervalStart = afterWind.getTimePoint();
                 }
@@ -154,8 +154,12 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
                 }
             }
         } while (beforeIntervalLength + afterIntervalLength < millisecondsOverWhichToAverage && (beforeWind != null || afterWind != null));
-        SpeedWithBearing avgWindSpeed = new KnotSpeedWithBearingImpl(knotSum / count, new DegreeBearingImpl(bearingDegSum/count));
-        return new WindImpl(p, at, avgWindSpeed);
+        if (count == 0) {
+            return null;
+        } else {
+            SpeedWithBearing avgWindSpeed = new KnotSpeedWithBearingImpl(knotSum / count, new DegreeBearingImpl(bearingDegSum/count));
+            return new WindImpl(p, at, avgWindSpeed);
+        }
     }
     
     @Override
