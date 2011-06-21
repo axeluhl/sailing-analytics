@@ -40,10 +40,21 @@ public class WindwardToGoComparator implements Comparator<TrackedLegOfCompetitor
             } else if (o2.hasFinishedLeg(timePoint)) {
                 result = 1; // o1 > o2 because o2 already finished the leg but o1 didn't
             } else {
-                // both didn't finish the leg yet:
-                Distance o1d = o1.getWindwardDistanceToGo(timePoint);
-                Distance o2d = o2.getWindwardDistanceToGo(timePoint);
-                result = o1d.compareTo(o2d); // smaller distance to go means smaller rank
+                // both didn't finish the leg yet; check which one has started:
+                if (o1.hasStartedLeg(timePoint)) {
+                    if (o2.hasStartedLeg(timePoint)) {
+                        Distance o1d = o1.getWindwardDistanceToGo(timePoint);
+                        Distance o2d = o2.getWindwardDistanceToGo(timePoint);
+                        result = o1d.compareTo(o2d); // smaller distance to go means smaller rank
+                    } else {
+                        result = 1;
+                    }
+                } else if (o2.hasStartedLeg(timePoint)) {
+                    result = -1;
+                } else {
+                    // both did not start the leg:
+                    result = 0;
+                }
             }
             return result;
         } catch (NoWindException e) {
