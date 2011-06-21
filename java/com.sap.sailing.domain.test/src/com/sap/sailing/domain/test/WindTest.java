@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -19,6 +20,12 @@ import com.sap.sailing.domain.tracking.impl.WindTrackImpl;
 
 public class WindTest {
     private static final int AVERAGING_INTERVAL_MILLIS = 30000 /* 30s averaging interval */;
+    
+    @Test
+    public void testEmptyTrackYieldsNullAsWindEstimate() {
+        WindTrack track = new WindTrackImpl(AVERAGING_INTERVAL_MILLIS);
+        assertNull(track.getEstimatedWind(new DegreePosition(0, 0), MillisecondsTimePoint.now()));
+    }
 
     /**
      * If the wind track has areas with no data, and wind information is requested for such an interval,
