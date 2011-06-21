@@ -106,7 +106,7 @@ public class RaceTrackerImpl implements Listener, RaceTracker {
         trackedEvent = domainFactory.getOrCreateTrackedEvent(domainEvent);
         receivers = new HashSet<Receiver>();
         Set<TypeController> typeControllers = new HashSet<TypeController>();
-        for (Receiver receiver : domainFactory.getUpdateReceivers(trackedEvent, tractracEvent, windStore)) {
+        for (Receiver receiver : domainFactory.getUpdateReceivers(trackedEvent, tractracEvent, windStore, this)) {
             receivers.add(receiver);
             for (TypeController typeController : receiver.getTypeControllers()) {
                 typeControllers.add(typeController);

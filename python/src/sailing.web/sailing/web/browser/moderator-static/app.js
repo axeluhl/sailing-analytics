@@ -108,14 +108,13 @@ function sortBy(param, element) {
 }
 
 function yieldValue(element, newvalue, ignore_zeros, alternate_value) {
-    if (element.html() != newvalue) {
         if (ignore_zeros == true && (newvalue == '0' || newvalue == 0)) {
 
             // show alternate value
             if (alternate_value != undefined && alternate_value != '' && alternate_value != 'None') {
                 element.html(alternate_value);
             } else {
-                element.html('&nbsp;');
+                element.html('&mdash;');
             }
             return;
         }
@@ -132,11 +131,6 @@ function yieldValue(element, newvalue, ignore_zeros, alternate_value) {
         else
             element.html(newvalue);
 
-    } else {
-        if (alternate_value != undefined && alternate_value != '' && alternate_value != 'None') {
-            element.html(alternate_value);
-        }
-    }
 }
 
 /**

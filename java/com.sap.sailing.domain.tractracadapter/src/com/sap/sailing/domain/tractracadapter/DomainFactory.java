@@ -114,23 +114,22 @@ public interface DomainFactory {
     BoatClass getBoatClass(CompetitorClass competitorClass);
 
     /**
-     * For each race listed by the <code>tractracEvent</code>, produces
-     * {@link TypeController listeners} that, when
-     * {@link DataController#add(TypeController) registered} with the
-     * controller, create a {@link RaceDefinition} with the {@link Course}
-     * defined in proper order, and
-     * {@link com.sap.sailing.domain.base.Event#addRace(RaceDefinition) add} it
-     * to the <code>event</code>. Other listeners of those returned will listen
-     * for raw position and aggregated position data and update the
-     * {@link TrackedEvent}'s content accordingly.
+     * For each race listed by the <code>tractracEvent</code>, produces {@link TypeController listeners} that, when
+     * {@link DataController#add(TypeController) registered} with the controller, create a {@link RaceDefinition} with
+     * the {@link Course} defined in proper order, and {@link com.sap.sailing.domain.base.Event#addRace(RaceDefinition)
+     * add} it to the <code>event</code>. Other listeners of those returned will listen for raw position and aggregated
+     * position data and update the {@link TrackedEvent}'s content accordingly.
      * 
      * @param trackedEvent
      *            must have been created before through
-     *            {@link #getOrCreateTrackedEvent(com.sap.sailing.domain.base.Event)} because
-     *            otherwise the link to the {@link Event} can't be established
-     * @param windStore TODO
+     *            {@link #getOrCreateTrackedEvent(com.sap.sailing.domain.base.Event)} because otherwise the link to the
+     *            {@link Event} can't be established
+     * @param tokenToRetrieveAssociatedRace
+     *            used in {@link #getRace} to retrieve the {@link RaceDefinition} received by the
+     *            {@link RaceCourseReceiver} created by this call
      */
-    Iterable<Receiver> getUpdateReceivers(DynamicTrackedEvent trackedEvent, Event tractracEvent, WindStore windStore);
+    Iterable<Receiver> getUpdateReceivers(DynamicTrackedEvent trackedEvent, Event tractracEvent, WindStore windStore,
+            Object tokenToRetrieveAssociatedRace);
 
     RaceDefinition createRaceDefinition(Race race, Course course);
 
@@ -145,17 +144,19 @@ public interface DomainFactory {
 
     MarkPassing createMarkPassing(com.tractrac.clientmodule.Competitor competitor, Waypoint passed, TimePoint time);
 
-    Iterable<Receiver> getUpdateReceivers(DynamicTrackedEvent trackedEvent, Event tractracEvent, WindStore windStore, ReceiverType... types);
+    Iterable<Receiver> getUpdateReceivers(DynamicTrackedEvent trackedEvent, Event tractracEvent, WindStore windStore,
+            Object tokenToRetrieveAssociatedRace, ReceiverType... types);
 
-    DynamicTrackedRace trackRace(TrackedEvent trackedEvent, RaceDefinition raceDefinition,
-            WindStore windStore, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed, Event tractracEvent);
+    DynamicTrackedRace trackRace(TrackedEvent trackedEvent, RaceDefinition raceDefinition, WindStore windStore,
+            long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed, Event tractracEvent,
+            Object tokenToRetrieveAssociatedRace);
 
     /**
-     * Non-blocking call that returns <code>null</code> if the {@link RaceDefinition} for the TracTrac Event
+     * Non-blocking call that returns <code>null</code> if the {@link RaceDefinition} for the token
      * hasn't been created yet, e.g., because the course definition hasn't been received yet or the listener
      * for receiving course information hasn't been registered (yet).
      */
-    RaceDefinition getRace(Event tractracEvent);
+    RaceDefinition getRace(Object tokenToRetrieveAssociatedRace);
 
     JSONService parseJSONURL(URL jsonURL) throws IOException, ParseException, org.json.simple.parser.ParseException;
 
