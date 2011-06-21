@@ -231,7 +231,7 @@ class BaseView(object):
         if name[0] == 'ETASEC':
             val = '%.f:%d' % (int(value) / 60, int(value)-( (int(value)/60)*60 ))
             if len(val.split(':')[-1]) == 1:
-                val = '0%s' % val
+                val = '%s:0%s' % tuple(val.split(':'))
 
             if val == '00:0':
                 val = '0:0'
