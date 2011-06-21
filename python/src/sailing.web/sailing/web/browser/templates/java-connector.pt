@@ -29,8 +29,9 @@ When <i>stopping listener</i> it will trigger two methods: If you select a race 
         <fieldset>
             <legend>Handling</legend>
         <input type="submit" name="listener-event-refresh" value="(Re) load event data"/>&nbsp;
-        <input type="submit" name="disconnect-server" value="Disconnect your session"/>&nbsp;&nbsp;&nbsp;
+        <input type="submit" name="disconnect-server" value="Disconnect your browser session"/>&nbsp;&nbsp;&nbsp;
 
+        <input type="submit" name="emergency-reload" value="Emergency reload" style="background-color: orange;"/>&nbsp;&nbsp;&nbsp;
         <input type="submit" name="listener-stop" value="Stop Server (for whole event or single race)" style="background-color: #cc3300;"/>
 
         </fieldset>

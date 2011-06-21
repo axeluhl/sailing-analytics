@@ -73,7 +73,7 @@
         </div>
         <!-- / YIELD THE MAIN INTERFACE -->
         <!-- / MAIN INTERFACE -->
-        <div id='main-interface'>
+        <div id='main-interface' tal:define="indexbase int(request.params.get('r', 0))*3">
           <div class='blue-table'>
               <a id="refresh-button" class='pause-btn' href='javascript:;' onclick='toggleListener($(this));'><img src='/static/images/ajax-loader-greybg.gif'/></a>
             <a class='sort-rank sort-desc' href='javascript:;' onclick='sortBy("current_rank", $(this))'></a>
@@ -117,7 +117,7 @@
                 </ul>
                 <span id="race-">${racebundles[int(request.params.get('r', 0))].index(bundle)+1+(int(request.params.get('r', 0))*3)}</span>
               </a>
-              <a class='main-box-sort sort-desc' href='javascript:;' onclick='sortBy("${raceid}", $(this))'></a>
+              <a class='main-box-sort sort-desc' href='javascript:;' onclick='sortBy("${indexbase+raceid}", $(this))'></a>
             </div>
 
             <!-- START POINT -->
@@ -148,7 +148,7 @@
                   <tr rowid='0'>
                     <tal:for repeat="column columns">
                     <td class='table-sorting' colid='${repeat["column"].number}'>
-                        <a class='sort-desc' href='javascript:;' onclick='sortBy("${raceid},${markid},${repeat["column"].number}", $(this))'></a>
+                        <a class='sort-desc' href='javascript:;' onclick='sortBy("${indexbase+raceid},${markid},${repeat["column"].number}", $(this))'></a>
                     </td>
                     </tal:for>
                   </tr>
@@ -172,7 +172,7 @@
                   <span tal:condition="not repeat['leg'].end">M${markid-1}</span>
                   <span tal:condition="repeat['leg'].end">F</span>
 
-              <a class='leg-box-sort sort-desc' href='javascript:;' onclick='sortBy("${raceid},${markid-1}", $(this))'></a>
+              <a class='leg-box-sort sort-desc' href='javascript:;' onclick='sortBy("${indexbase+raceid},${markid-1}", $(this))'></a>
                 <a tal:omit-tag="repeat['leg'].end" class='leg-box-active' href='javascript:;' onclick='$(this).closest(".leg-wrap").find(".race-table").toggle();'>
                   <ul>
                       <tal:for repeat="markrow range(1,21)">
@@ -196,7 +196,7 @@
                   <tr rowid='0'>
                     <tal:for repeat="column columns">
                     <td class='table-sorting' colid='${repeat["column"].number}'>
-                        <a class='sort-desc' href='javascript:;' onclick='sortBy("${raceid},${markid},${repeat["column"].number}", $(this))'></a>
+                        <a class='sort-desc' href='javascript:;' onclick='sortBy("${indexbase+raceid},${markid},${repeat["column"].number}", $(this))'></a>
                     </td>
                     </tal:for>
                   </tr>

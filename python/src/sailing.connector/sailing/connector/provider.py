@@ -43,7 +43,9 @@ class LiveDataReceiver(threading.Thread):
 
             # make it possible to pause listener
             if self.paused is True:
-                time.sleep(1)
+                print >>sys.stderr, '#',
+                sys.stderr.flush()
+                time.sleep(5)
                 continue
 
             conf = URIConfigurator(self.host, self.port)
@@ -62,7 +64,7 @@ class LiveDataReceiver(threading.Thread):
             else:
                 conf.setParameters(dict(eventname=self.eventname, racename=self.racename, sinceupdate=self.updatecount))
 
-            conf.setLogging(True)
+            conf.setLogging(False)
 
             try:
                 # need to lock because other threads could overwrite information
