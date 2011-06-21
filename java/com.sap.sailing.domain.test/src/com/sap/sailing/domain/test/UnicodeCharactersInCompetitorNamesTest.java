@@ -20,6 +20,7 @@ import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.RaceTracker;
 import com.sap.sailing.domain.tractracadapter.impl.DomainFactoryImpl;
 
+@Ignore
 public class UnicodeCharactersInCompetitorNamesTest {
     private DomainFactory domainFactory;
     
