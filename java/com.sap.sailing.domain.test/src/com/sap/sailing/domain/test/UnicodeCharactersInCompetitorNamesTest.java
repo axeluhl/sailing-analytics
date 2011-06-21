@@ -11,6 +11,7 @@ import java.net.URL;
 import java.nio.charset.Charset;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.Competitor;
@@ -19,6 +20,7 @@ import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.RaceTracker;
 import com.sap.sailing.domain.tractracadapter.impl.DomainFactoryImpl;
 
+@Ignore
 public class UnicodeCharactersInCompetitorNamesTest {
     private DomainFactory domainFactory;
     
@@ -34,6 +36,7 @@ public class UnicodeCharactersInCompetitorNamesTest {
         t.testFindUnicodeCharactersInCompetitorNames();
     }
     
+    @Ignore
     @Test
     public void testFindUnicodeCharactersInCompetitorNames() throws MalformedURLException, FileNotFoundException, URISyntaxException {
         RaceTracker fourtyninerYellow_2 = domainFactory
