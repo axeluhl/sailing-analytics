@@ -180,6 +180,12 @@ def configureListener(context, request):
         view.session['listener-started'] = True
         view.session.save()
 
+    elif request.POST.get('emergency-reload', None):
+        state = reloadData(context, request)
+        if state is True:
+            return view.yieldMessage('Data refreshed! Can take a while until listener threads recover. Make sure to also reload running Leaderboards!')
+        return view.yieldMessage('Could not refresh data - this should NEVER happen :-)')
+
     elif request.POST.get('disconnect-server', None):
         # disconnect does not stop listeners but just disconnects the
         # session of the user from server
@@ -696,21 +702,28 @@ def reloadData(context, request):
     # drops all data in database and reload all running listeners
 
     view = core.BaseView(context, request)
-    event = view.currentEvent()
 
-    if event:
+    # pause all listener threads
+    for listener in threaded_listener.values():
+        if listener.paused == False:
+            listener.paused = True
 
-        # pause all listener threads
-        for listener in threaded_listener.values():
-            if listener.paused == False:
-                listener.paused = True
+    # give threads time to pause
+    time.sleep(10)
 
-        # remove competitors matching the event 
-        model.CompetitorImpl.removeAllBy(event=event.name)
+    # drop DB with all data in it
+    from sailing.db.monitoring import dropDB
+    dropDB()
 
-        # reload event data completely
-        configurator = view.listenerConf()
-        configurator.setContext(config.MODERATOR)
-        configurator.setCommand(config.LIST_EVENTS)
-        provider.eventConfiguration(configurator) 
+    # reload event data completely
+    configurator = view.listenerConf()
+    configurator.setContext(config.MODERATOR)
+    configurator.setCommand(config.LIST_EVENTS)
+    provider.eventConfiguration(configurator) 
 
+    # start threads again
+    for listener in threaded_listener.values():
+        if listener.paused == True:
+            listener.paused = False
+
+    return True
