@@ -167,14 +167,18 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     }
 
     @Override
-    public void updateMarkPassings(Competitor competitor, Iterable<MarkPassing> markPassings) {
+    public synchronized void updateMarkPassings(Competitor competitor, Iterable<MarkPassing> markPassings) {
         clearMarkPassings(competitor);
         NavigableSet<MarkPassing> competitorMarkPassings = getMarkPassings(competitor);
+        TimePoint timePointOfLatestEvent = new MillisecondsTimePoint(0);
         for (MarkPassing markPassing : markPassings) {
             competitorMarkPassings.add(markPassing);
             getMarkPassingsInOrder(markPassing.getWaypoint()).add(markPassing);
-            updated(markPassing.getTimePoint());
+            if (markPassing.getTimePoint().compareTo(timePointOfLatestEvent) > 0) {
+                timePointOfLatestEvent = markPassing.getTimePoint();
+            }
         }
+        updated(timePointOfLatestEvent);
         // notify *after* all mark passings have been re-established; should avoid flicker
         for (MarkPassing markPassing : markPassings) {
             notifyListeners(markPassing);
