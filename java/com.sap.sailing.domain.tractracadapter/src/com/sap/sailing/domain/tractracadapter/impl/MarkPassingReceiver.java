@@ -96,7 +96,8 @@ public class MarkPassingReceiver extends AbstractReceiverWithQueue<RaceCompetito
 
     /**
      * Starts searching in <code>waypointsIter</code> for a waypoint that has the given <code>controlPoint</code>.
-     * The <code>waypointsIter</code> is advanced to that point.
+     * The <code>waypointsIter</code> is advanced to that point or to the point where <code>waypointsIter.hasNext()</code>
+     * returns <code>false</code>.
      */
     private Waypoint findWaypointForControlPoint(TrackedRace trackedRace, Iterator<Waypoint> waypointsIter,
             com.sap.sailing.domain.base.ControlPoint domainControlPoint, Competitor competitor) {
