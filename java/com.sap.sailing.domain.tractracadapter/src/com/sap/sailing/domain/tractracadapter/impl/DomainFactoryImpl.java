@@ -385,16 +385,14 @@ public class DomainFactoryImpl implements DomainFactory {
             RaceDefinition result = raceCache.get(race);
             if (result == null) {
                 Collection<CompetitorClass> competitorClasses = new ArrayList<CompetitorClass>();
+                final List<Competitor> competitors = new ArrayList<Competitor>();
                 for (RaceCompetitor rc : race.getRaceCompetitorList()) {
+                    // also add those whose race class doesn't match the dominant one (such as camera boats)
+                    // because they may still send data that we would like to record in some tracks
+                    competitors.add(getCompetitor(rc.getCompetitor()));
                     competitorClasses.add(rc.getCompetitor().getCompetitorClass());
                 }
                 BoatClass dominantBoatClass = getDominantBoatClass(competitorClasses);
-                final List<Competitor> competitors = new ArrayList<Competitor>();
-                for (RaceCompetitor raceCompetitor : race.getRaceCompetitorList()) {
-                    if (getBoatClass(raceCompetitor.getCompetitor().getCompetitorClass()) == dominantBoatClass) {
-                        competitors.add(getCompetitor(raceCompetitor.getCompetitor()));
-                    }
-                }
                 result = new RaceDefinitionImpl(race.getName(), course, dominantBoatClass, competitors);
                 synchronized (raceCache) {
                     raceCache.put(race, result);
