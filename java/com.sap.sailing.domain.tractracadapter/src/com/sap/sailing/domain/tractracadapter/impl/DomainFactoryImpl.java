@@ -310,7 +310,10 @@ public class DomainFactoryImpl implements DomainFactory {
             // This means that currently it is permissible to assume that we'll get at most one
             // boat class per TracTrac event. Generally, however, we have to assume that
             // one TracTrac event may map to multiple domain Event objects with one BoatClass each
-            Collection<CompetitorClass> competitorClassList = event.getCompetitorClassList();
+            Collection<CompetitorClass> competitorClassList = new ArrayList<CompetitorClass>();
+            for (com.tractrac.clientmodule.Competitor c : event.getCompetitorList()) {
+                competitorClassList.add(c.getCompetitorClass());
+            }
             BoatClass boatClass = getDominantBoatClass(competitorClassList);
             Pair<String, String> key = new Pair<String, String>(event.getName(), boatClass==null?null:boatClass.getName());
             Event result = eventCache.get(key);
