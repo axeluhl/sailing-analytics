@@ -47,7 +47,7 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     }
 
     @Override
-    public void recordFix(Competitor competitor, GPSFixMoving fix) {
+    public synchronized void recordFix(Competitor competitor, GPSFixMoving fix) {
         DynamicTrack<Competitor, GPSFixMoving> track = getTrack(competitor);
         track.addGPSFix(fix); // the track notifies this tracked race which in turn notifies its listeners
         if (getStart() == null || getStart().compareTo(fix.getTimePoint())>0) {
@@ -205,13 +205,13 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     }
 
     @Override
-    public void recordWind(Wind wind, WindSource windSource) {
+    public synchronized void recordWind(Wind wind, WindSource windSource) {
         getWindTrack(windSource).add(wind);
         updated(wind.getTimePoint());
     }
     
     @Override
-    public void removeWind(Wind wind, WindSource windSource) {
+    public synchronized void removeWind(Wind wind, WindSource windSource) {
         getWindTrack(windSource).remove(wind);
         updated(wind.getTimePoint());
     }
@@ -234,7 +234,6 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     @Override
     public void markPassingReceived(MarkPassing markPassing) {
         notifyListeners(markPassing);
-        
     }
 
     @Override

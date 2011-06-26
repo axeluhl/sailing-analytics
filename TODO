@@ -1,7 +1,8 @@
 Axel
 ====
 
- - Solve character encoding issue
+ - smoothen GPSTracks; if a particular fix seems really off, producing a speed that is beyond
+   what the boat class could possibly do, ignore the fix because it is obviously a mis-read.
 
  - Distribute wind data to their respective races
 
@@ -18,6 +19,10 @@ Axel
 
 Simon
 =====
+
++ Make "Stop" button work such that race and thread disappear from the Python runtime
+
++ Allow users to override net points / total points; enter disqualifications etc.
 
 + Leaderboard umbauen auf Timeslider support (dazu liefert Axel stabiles start und finsh)
 

@@ -89,13 +89,16 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener<Competitor
                 for (TrackedLegOfCompetitor competitorLeg : getTrackedLegsOfCompetitors()) {
                     rankedCompetitorList.add(competitorLeg);
                 }
-                Collections.sort(rankedCompetitorList, new WindwardToGoComparator(this, timePoint));
-                rankedCompetitorList = Collections.unmodifiableList(rankedCompetitorList);
-                competitorTracksOrderedByRank.put(timePoint, rankedCompetitorList);
-                if (Util.size(getTrackedLegsOfCompetitors()) != rankedCompetitorList.size()) {
-                    logger.warning("Number of competitors in leg (" + Util.size(getTrackedLegsOfCompetitors())
-                            + ") differs from number of competitors in race ("
-                            + Util.size(getTrackedRace().getRace().getCompetitors()) + ")");
+                // ensure that race isn't updated by events as we're tying to sort the competitors
+                synchronized (getTrackedRace()) {
+                    Collections.sort(rankedCompetitorList, new WindwardToGoComparator(this, timePoint));
+                    rankedCompetitorList = Collections.unmodifiableList(rankedCompetitorList);
+                    competitorTracksOrderedByRank.put(timePoint, rankedCompetitorList);
+                    if (Util.size(getTrackedLegsOfCompetitors()) != rankedCompetitorList.size()) {
+                        logger.warning("Number of competitors in leg (" + Util.size(getTrackedLegsOfCompetitors())
+                                + ") differs from number of competitors in race ("
+                                + Util.size(getTrackedRace().getRace().getCompetitors()) + ")");
+                    }
                 }
             }
             return rankedCompetitorList;

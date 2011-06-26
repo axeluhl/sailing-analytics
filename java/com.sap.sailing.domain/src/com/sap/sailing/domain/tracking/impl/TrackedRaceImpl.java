@@ -254,12 +254,12 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     }
     
     @Override
-    public int getRank(Competitor competitor) throws NoWindException {
+    public synchronized int getRank(Competitor competitor) throws NoWindException {
         return getRank(competitor, MillisecondsTimePoint.now());
     }
 
     @Override
-    public int getRank(Competitor competitor, TimePoint timePoint) throws NoWindException {
+    public synchronized int getRank(Competitor competitor, TimePoint timePoint) throws NoWindException {
         try {
             synchronized (competitorRankings) {
                 List<Competitor> rankedCompetitors = competitorRankings.get(timePoint);
