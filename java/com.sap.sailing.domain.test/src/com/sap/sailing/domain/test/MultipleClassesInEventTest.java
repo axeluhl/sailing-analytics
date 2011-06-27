@@ -28,29 +28,37 @@ public class MultipleClassesInEventTest {
     
     @Test
     public void testLoadTwoRacesWithEqualEventNameButDifferentClasses() throws MalformedURLException, FileNotFoundException, URISyntaxException {
+        String httpAndHost = "http://germanmaster.traclive.dk";
+        String liveURI = "tcp://germanmaster.traclive.dk:4400";
+        String storedURI = "tcp://germanmaster.traclive.dk:4401";
+        if (Boolean.valueOf(System.getProperty("tractrac.tunnel", "false"))) {
+            httpAndHost = "http://localhost:12348";
+            liveURI   = "tcp://localhost:4412";
+            storedURI = "tcp://localhost:4413";
+        }
         RaceTracker kiwotest1 = domainFactory
                 .createRaceTracker(
                         new URL(
-                                "http://germanmaster.traclive.dk/events/event_20110505_SailingTea/clientparams.php?event=event_20110505_SailingTea&race=cce678c8-97e6-11e0-9aed-406186cbf87c"),
-                        new URI("tcp://germanmaster.traclive.dk:4400"), new URI("tcp://germanmaster.traclive.dk:4401"),
+                                httpAndHost+"/events/event_20110505_SailingTea/clientparams.php?event=event_20110505_SailingTea&race=cce678c8-97e6-11e0-9aed-406186cbf87c"),
+                        new URI(liveURI), new URI(storedURI),
                         EmptyWindStore.INSTANCE);
         RaceTracker kiwotest2 = domainFactory
                 .createRaceTracker(
                         new URL(
-                                "http://germanmaster.traclive.dk/events/event_20110505_SailingTea/clientparams.php?event=event_20110505_SailingTea&race=11290bd6-97e7-11e0-9aed-406186cbf87c"),
-                        new URI("tcp://germanmaster.traclive.dk:4400"), new URI("tcp://germanmaster.traclive.dk:4401"),
+                                httpAndHost+"/events/event_20110505_SailingTea/clientparams.php?event=event_20110505_SailingTea&race=11290bd6-97e7-11e0-9aed-406186cbf87c"),
+                        new URI(liveURI), new URI(storedURI),
                         EmptyWindStore.INSTANCE);
         RaceTracker kiwotest3 = domainFactory
                 .createRaceTracker(
                         new URL(
-                                "http://germanmaster.traclive.dk/events/event_20110505_SailingTea/clientparams.php?event=event_20110505_SailingTea&race=39635b24-97e7-11e0-9aed-406186cbf87c"),
-                        new URI("tcp://germanmaster.traclive.dk:4400"), new URI("tcp://germanmaster.traclive.dk:4401"),
+                                httpAndHost+"/events/event_20110505_SailingTea/clientparams.php?event=event_20110505_SailingTea&race=39635b24-97e7-11e0-9aed-406186cbf87c"),
+                        new URI(liveURI), new URI(storedURI),
                         EmptyWindStore.INSTANCE);
         RaceTracker weym470may112014_2 = domainFactory
                 .createRaceTracker(
                         new URL(
-                                "http://germanmaster.traclive.dk/events/event_20110505_SailingTea/clientparams.php?event=event_20110505_SailingTea&race=04498426-7dfd-11e0-8236-406186cbf87c"),
-                        new URI("tcp://germanmaster.traclive.dk:4400"), new URI("tcp://germanmaster.traclive.dk:4401"),
+                                httpAndHost+"/events/event_20110505_SailingTea/clientparams.php?event=event_20110505_SailingTea&race=04498426-7dfd-11e0-8236-406186cbf87c"),
+                        new URI(liveURI), new URI(storedURI),
                         EmptyWindStore.INSTANCE);
         
         assertEquals("STG", kiwotest1.getEvent().getBoatClass().getName());

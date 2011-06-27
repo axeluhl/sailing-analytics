@@ -174,7 +174,7 @@ public class RaceTrackerImpl implements Listener, RaceTracker {
     
     @Override
     public RaceDefinition getRace() {
-        return domainFactory.getRace(tractracEvent);
+        return domainFactory.getRace(this);
     }
     
     protected void addListenersForStoredDataAndStartController(Iterable<TypeController> listenersForStoredData) {

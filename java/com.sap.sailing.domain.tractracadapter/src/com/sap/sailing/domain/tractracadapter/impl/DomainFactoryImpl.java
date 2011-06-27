@@ -310,11 +310,11 @@ public class DomainFactoryImpl implements DomainFactory {
             // This means that currently it is permissible to assume that we'll get at most one
             // boat class per TracTrac event. Generally, however, we have to assume that
             // one TracTrac event may map to multiple domain Event objects with one BoatClass each
-            Collection<CompetitorClass> competitorClassList = event.getCompetitorClassList();
-            BoatClass boatClass = null;
-            if (competitorClassList != null && !competitorClassList.isEmpty()) {
-                boatClass = getBoatClass(competitorClassList.iterator().next());
+            Collection<CompetitorClass> competitorClassList = new ArrayList<CompetitorClass>();
+            for (com.tractrac.clientmodule.Competitor c : event.getCompetitorList()) {
+                competitorClassList.add(c.getCompetitorClass());
             }
+            BoatClass boatClass = getDominantBoatClass(competitorClassList);
             Pair<String, String> key = new Pair<String, String>(event.getName(), boatClass==null?null:boatClass.getName());
             Event result = eventCache.get(key);
             if (result == null) {
@@ -387,28 +387,15 @@ public class DomainFactoryImpl implements DomainFactory {
         synchronized (raceCache) {
             RaceDefinition result = raceCache.get(race);
             if (result == null) {
+                Collection<CompetitorClass> competitorClasses = new ArrayList<CompetitorClass>();
                 final List<Competitor> competitors = new ArrayList<Competitor>();
-                Map<BoatClass, Integer> countsPerBoatClass = new HashMap<BoatClass, Integer>();
-                BoatClass dominantBoatClass = null;
-                int numberOfCompetitorsInDominantBoatClass = 0;
                 for (RaceCompetitor rc : race.getRaceCompetitorList()) {
-                    com.tractrac.clientmodule.Competitor competitor = rc.getCompetitor();
-                    BoatClass boatClass = getBoatClass(competitor.getCompetitorClass());
-                    Integer boatClassCount = countsPerBoatClass.get(boatClass);
-                    if (boatClassCount == null) {
-                        boatClassCount = 0;
-                    }
-                    boatClassCount = boatClassCount + 1;
-                    countsPerBoatClass.put(boatClass, boatClassCount);
-                    if (boatClassCount > numberOfCompetitorsInDominantBoatClass) {
-                        numberOfCompetitorsInDominantBoatClass = boatClassCount;
-                        dominantBoatClass = boatClass;
-                    }
-                    if (boatClass == null) {
-                        boatClass = getBoatClass(competitor.getCompetitorClass());
-                    }
+                    // also add those whose race class doesn't match the dominant one (such as camera boats)
+                    // because they may still send data that we would like to record in some tracks
                     competitors.add(getCompetitor(rc.getCompetitor()));
+                    competitorClasses.add(rc.getCompetitor().getCompetitorClass());
                 }
+                BoatClass dominantBoatClass = getDominantBoatClass(competitorClasses);
                 result = new RaceDefinitionImpl(race.getName(), course, dominantBoatClass, competitors);
                 synchronized (raceCache) {
                     raceCache.put(race, result);
@@ -419,6 +406,26 @@ public class DomainFactoryImpl implements DomainFactory {
             }
             return result;
         }
+    }
+
+    private BoatClass getDominantBoatClass(Collection<CompetitorClass> competitorClasses) {
+        Map<BoatClass, Integer> countsPerBoatClass = new HashMap<BoatClass, Integer>();
+        BoatClass dominantBoatClass = null;
+        int numberOfCompetitorsInDominantBoatClass = 0;
+        for (CompetitorClass cc : competitorClasses) {
+            BoatClass boatClass = getBoatClass(cc);
+            Integer boatClassCount = countsPerBoatClass.get(boatClass);
+            if (boatClassCount == null) {
+                boatClassCount = 0;
+            }
+            boatClassCount = boatClassCount + 1;
+            countsPerBoatClass.put(boatClass, boatClassCount);
+            if (boatClassCount > numberOfCompetitorsInDominantBoatClass) {
+                numberOfCompetitorsInDominantBoatClass = boatClassCount;
+                dominantBoatClass = boatClass;
+            }
+        }
+        return dominantBoatClass;
     }
 
     @Override
