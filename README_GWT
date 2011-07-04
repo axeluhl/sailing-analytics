@@ -27,3 +27,12 @@ using a @RemoteServiceRelativePath annotation, such as
 No GWT path library in the Eclipse project settings seems to be required to make
 the project GWT-compilable and executable within an OSGi container with Jetty
 support.
+
+Next, create a new "Web Application" launch configuration, specifying in the "Server"
+tab to not "Run built-in server." Instead, the running OSGi container's Jetty with the
+registered servlet will be used. In the "GWT" tab I chose "Automatically select an unused
+port" instead of providing a fixed Code Server Port.
+
+With this, when I launch the new Web Application configuration, my Firefox opens,
+e.g., with the URL http://127.0.0.1:8888/Com_sap_sailing_gwt_ui.html?gwt.codesvr=127.0.0.1:56824
+and displays the web app. I can set breakpoints in the client part as well as in the servlet.
