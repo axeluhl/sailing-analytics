@@ -25,8 +25,8 @@ public class Com_sap_sailing_gwt_ui implements EntryPoint {
      * The message displayed to the user when the server cannot be reached or
      * returns an error.
      */
-    private static final String SERVER_ERROR = "An error occurred while "
-            + "attempting to contact the server. Please check your network " + "connection and try again.";
+    private static final String SERVER_ERROR = "An error occurred while " //$NON-NLS-1$
+            + "attempting to contact the server. Please check your network " + "connection and try again."; //$NON-NLS-1$ //$NON-NLS-2$
 
     /**
      * Create a remote service proxy to talk to the server-side Greeting service.
@@ -37,19 +37,19 @@ public class Com_sap_sailing_gwt_ui implements EntryPoint {
      * This is the entry point method.
      */
     public void onModuleLoad() {
-        final Button sendButton = new Button("Send");
+        final Button sendButton = new Button("Send"); //$NON-NLS-1$
         final TextBox nameField = new TextBox();
-        nameField.setText("GWT User");
+        nameField.setText(Messages.getString("Com_sap_sailing_gwt_ui.HelloWorld")); //$NON-NLS-1$
         final Label errorLabel = new Label();
 
         // We can add style names to widgets
-        sendButton.addStyleName("sendButton");
+        sendButton.addStyleName("sendButton"); //$NON-NLS-1$
 
         // Add the nameField and sendButton to the RootPanel
         // Use RootPanel.get() to get the entire body element
-        RootPanel.get("nameFieldContainer").add(nameField);
-        RootPanel.get("sendButtonContainer").add(sendButton);
-        RootPanel.get("errorLabelContainer").add(errorLabel);
+        RootPanel.get("nameFieldContainer").add(nameField); //$NON-NLS-1$
+        RootPanel.get("sendButtonContainer").add(sendButton); //$NON-NLS-1$
+        RootPanel.get("errorLabelContainer").add(errorLabel); //$NON-NLS-1$
 
         // Focus the cursor on the name field when the app loads
         nameField.setFocus(true);
@@ -57,18 +57,18 @@ public class Com_sap_sailing_gwt_ui implements EntryPoint {
 
         // Create the popup dialog box
         final DialogBox dialogBox = new DialogBox();
-        dialogBox.setText("Remote Procedure Call");
+        dialogBox.setText("Remote Procedure Call"); //$NON-NLS-1$
         dialogBox.setAnimationEnabled(true);
-        final Button closeButton = new Button("Close");
+        final Button closeButton = new Button("Close"); //$NON-NLS-1$
         // We can set the id of a widget by accessing its Element
-        closeButton.getElement().setId("closeButton");
+        closeButton.getElement().setId("closeButton"); //$NON-NLS-1$
         final Label textToServerLabel = new Label();
         final HTML serverResponseLabel = new HTML();
         VerticalPanel dialogVPanel = new VerticalPanel();
-        dialogVPanel.addStyleName("dialogVPanel");
-        dialogVPanel.add(new HTML("<b>Sending name to the server:</b>"));
+        dialogVPanel.addStyleName("dialogVPanel"); //$NON-NLS-1$
+        dialogVPanel.add(new HTML("<b>Sending name to the server:</b>")); //$NON-NLS-1$
         dialogVPanel.add(textToServerLabel);
-        dialogVPanel.add(new HTML("<br><b>Server replies:</b>"));
+        dialogVPanel.add(new HTML("<br><b>Server replies:</b>")); //$NON-NLS-1$
         dialogVPanel.add(serverResponseLabel);
         dialogVPanel.setHorizontalAlignment(VerticalPanel.ALIGN_RIGHT);
         dialogVPanel.add(closeButton);
@@ -106,30 +106,30 @@ public class Com_sap_sailing_gwt_ui implements EntryPoint {
              */
             private void sendNameToServer() {
                 // First, we validate the input.
-                errorLabel.setText("");
+                errorLabel.setText(""); //$NON-NLS-1$
                 String textToServer = nameField.getText();
                 if (!FieldVerifier.isValidName(textToServer)) {
-                    errorLabel.setText("Please enter at least four characters");
+                    errorLabel.setText("Please enter at least four characters"); //$NON-NLS-1$
                     return;
                 }
 
                 // Then, we send the input to the server.
                 sendButton.setEnabled(false);
                 textToServerLabel.setText(textToServer);
-                serverResponseLabel.setText("");
+                serverResponseLabel.setText(""); //$NON-NLS-1$
                 greetingService.greetServer(textToServer, new AsyncCallback<String>() {
                     public void onFailure(Throwable caught) {
                         // Show the RPC error message to the user
-                        dialogBox.setText("Remote Procedure Call - Failure");
-                        serverResponseLabel.addStyleName("serverResponseLabelError");
+                        dialogBox.setText("Remote Procedure Call - Failure"); //$NON-NLS-1$
+                        serverResponseLabel.addStyleName("serverResponseLabelError"); //$NON-NLS-1$
                         serverResponseLabel.setHTML(SERVER_ERROR);
                         dialogBox.center();
                         closeButton.setFocus(true);
                     }
 
                     public void onSuccess(String result) {
-                        dialogBox.setText("Remote Procedure Call");
-                        serverResponseLabel.removeStyleName("serverResponseLabelError");
+                        dialogBox.setText("Remote Procedure Call"); //$NON-NLS-1$
+                        serverResponseLabel.removeStyleName("serverResponseLabelError"); //$NON-NLS-1$
                         serverResponseLabel.setHTML(result);
                         dialogBox.center();
                         closeButton.setFocus(true);
