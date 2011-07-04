@@ -36,3 +36,7 @@ port" instead of providing a fixed Code Server Port.
 With this, when I launch the new Web Application configuration, my Firefox opens,
 e.g., with the URL http://127.0.0.1:8888/Com_sap_sailing_gwt_ui.html?gwt.codesvr=127.0.0.1:56824
 and displays the web app. I can set breakpoints in the client part as well as in the servlet.
+
+When you want to compile mulitple GWT modules in one project in one go, the GWT library
+has to be on the project's build path and has to be the first in the Order and Exports tab.
+See also http://arrogantprogrammer.blogspot.com/2010/04/projects-using-gwt-15-or-lower-may-only.html.

@@ -39,7 +39,8 @@ public class Com_sap_sailing_gwt_ui implements EntryPoint {
     public void onModuleLoad() {
         final Button sendButton = new Button("Send"); //$NON-NLS-1$
         final TextBox nameField = new TextBox();
-        nameField.setText(Messages.getString("Com_sap_sailing_gwt_ui.HelloWorld")); //$NON-NLS-1$
+        StringConstants messages = GWT.create(StringConstants.class);
+        nameField.setText(messages.helloWorld()); //$NON-NLS-1$
         final Label errorLabel = new Label();
 
         // We can add style names to widgets
