@@ -19,4 +19,11 @@ Otherwise, the cast of the GreetingsServletImpl to an HttpServlet would have bee
 unsuccessful.
 
 Adjust the servlet URL alias in plugin.xml such that it corresponds to
-/<application-name>/<service-name>
+/<application-name>/<service-name>. The <service-name> is usually specified
+using a @RemoteServiceRelativePath annotation, such as
+
+@RemoteServiceRelativePath("greet")
+
+No GWT path library in the Eclipse project settings seems to be required to make
+the project GWT-compilable and executable within an OSGi container with Jetty
+support.
