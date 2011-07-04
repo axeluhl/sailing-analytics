@@ -1,0 +1,2 @@
+serviceClass: com.sap.sailing.gwt.ui.client.GreetingService
+path: 82043305890EB51D0A982181ECFF233C.gwt.rpc

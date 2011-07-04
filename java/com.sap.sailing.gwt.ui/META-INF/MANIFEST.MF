@@ -1,8 +1,12 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Sailing App GWT UI
-Bundle-SymbolicName: com.sap.sailing.gwt.ui
+Bundle-SymbolicName: com.sap.sailing.gwt.ui;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Require-Bundle: com.google.gwt.osgi;bundle-version="2.3.0"
+Eclipse-RegisterBuddy: com.google.gwt.osgi
+Require-Bundle: javax.servlet;bundle-version="2.5.0",
+ com.google.gwt.osgi;bundle-version="2.3.0"
+Bundle-ClassPath: war/WEB-INF/classes/,
+ .

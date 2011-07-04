@@ -1,5 +1,11 @@
 package com.sap.sailing.gwt.ui.server;
 
+import java.io.IOException;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import com.sap.sailing.gwt.ui.client.GreetingService;
 import com.sap.sailing.gwt.ui.shared.FieldVerifier;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
@@ -9,6 +15,11 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
  */
 @SuppressWarnings("serial")
 public class GreetingServiceImpl extends RemoteServiceServlet implements GreetingService {
+
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        // TODO Auto-generated method stub
+        super.doGet(req, resp);
+    }
 
     public String greetServer(String input) throws IllegalArgumentException {
         // Verify that the input is valid. 

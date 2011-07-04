@@ -10,3 +10,13 @@ Create a sample project using "File - New - Project" and choose Google / Web App
 The resulting project can be "Run As"ed using "Web Application" as launcher. This
 pops up your default browser (e.g., Firefox), perhaps asking the user to install a
 missing GWT plugin.
+
+I wrapped the GWT JARs in a separate com.google.gwt.osgi bundle, exporting all but
+the javax.servlet packages, as described in http://wiki.eclipse.org/Google_Web_Toolkit_and_Equinox.
+
+I had to explicitly add the javax.servlet dependency to the new com.google.gwt.osgi bundle.
+Otherwise, the cast of the GreetingsServletImpl to an HttpServlet would have been
+unsuccessful.
+
+Adjust the servlet URL alias in plugin.xml such that it corresponds to
+/<application-name>/<service-name>
