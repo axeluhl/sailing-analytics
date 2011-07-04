@@ -1,0 +1,12 @@
+Installing GWT and related stuff:
+---------------------------------
+
+Add http://dl.google.com/eclipse/plugin/3.7 as update site to your Eclipse Indigo.
+Ensure that you have your proxy settings activated when installing from within the
+SAP network and if necessary "Reload" the default Indigo and GWT update sites to
+ensure all necessary features are found.
+
+Create a sample project using "File - New - Project" and choose Google / Web Application.
+The resulting project can be "Run As"ed using "Web Application" as launcher. This
+pops up your default browser (e.g., Firefox), perhaps asking the user to install a
+missing GWT plugin.

@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Osgi
+Bundle-SymbolicName: com.google.gwt.osgi
+Bundle-Version: 2.3.0.qualifier
+Bundle-Vendor: GOOGLE
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-ClassPath: lib/gwt-dev.jar,
+ lib/gwt-user.jar,
+ lib/validation-api-1.0.0.GA-sources.jar,
+ lib/validation-api-1.0.0.GA.jar,
+ .
