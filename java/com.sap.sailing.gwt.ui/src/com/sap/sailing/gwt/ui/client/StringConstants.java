@@ -7,4 +7,6 @@ public interface StringConstants extends Constants {
     String kielWeel2011();
     String stgAccount();
     String tracTracEvents();
+    String trackedBefore();
+    String listRaces();
 }

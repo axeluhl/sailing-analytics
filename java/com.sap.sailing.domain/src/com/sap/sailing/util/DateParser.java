@@ -2,7 +2,7 @@
 // $Id: DateParser.java,v 1.5 2005/05/14 15:53:00 dbarashev Exp $
 // (c) COPYRIGHT MIT, INRIA and Keio, 2000.
 // Please first read the full copyright statement in file COPYRIGHT.html
-package com.sap.sailing.server.util;
+package com.sap.sailing.util;
 
 import java.util.Calendar;
 import java.util.Date;

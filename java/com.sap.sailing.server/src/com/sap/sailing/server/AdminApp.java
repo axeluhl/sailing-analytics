@@ -43,7 +43,7 @@ import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tractracadapter.RaceRecord;
 import com.sap.sailing.mongodb.MongoObjectFactory;
 import com.sap.sailing.mongodb.MongoWindStoreFactory;
-import com.sap.sailing.server.util.InvalidDateException;
+import com.sap.sailing.util.InvalidDateException;
 import com.sap.sailing.util.Util.Triple;
 
 public class AdminApp extends Servlet {

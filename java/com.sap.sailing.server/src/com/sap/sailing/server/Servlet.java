@@ -10,8 +10,8 @@ import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
-import com.sap.sailing.server.util.DateParser;
-import com.sap.sailing.server.util.InvalidDateException;
+import com.sap.sailing.util.DateParser;
+import com.sap.sailing.util.InvalidDateException;
 
 public abstract class Servlet extends HttpServlet {
     private static final long serialVersionUID = -6514453597593669376L;

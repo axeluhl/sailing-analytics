@@ -32,8 +32,8 @@ import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
-import com.sap.sailing.server.util.InvalidDateException;
 import com.sap.sailing.util.CountryCode;
+import com.sap.sailing.util.InvalidDateException;
 
 public class ModeratorApp extends Servlet {
     private static final Logger logger = Logger.getLogger(ModeratorApp.class.getName());

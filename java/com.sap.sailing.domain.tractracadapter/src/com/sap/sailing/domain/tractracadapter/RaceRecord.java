@@ -2,18 +2,57 @@ package com.sap.sailing.domain.tractracadapter;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.logging.Logger;
+
+import com.sap.sailing.domain.base.TimePoint;
+import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.util.DateParser;
+import com.sap.sailing.util.InvalidDateException;
 
 public class RaceRecord {
+    private static final Logger logger = Logger.getLogger(RaceRecord.class.getName());
+    
     private final String name;
     private final String replayURL;
     private final String ID;
     private final URL paramURL;
+    private final TimePoint trackingstarttime;
+    private final TimePoint trackingendtime;
+    private final TimePoint racestarttime;
     
-    public RaceRecord(URL jsonURL, String name, String replayURL, String ID) throws MalformedURLException {
+    public RaceRecord(URL jsonURL, String name, String replayURL, String ID, String trackingstarttime,
+            String trackingendtime, String racestarttime) throws MalformedURLException {
         super();
         this.name = name;
         this.replayURL = replayURL;
         this.ID = ID;
+        TimePoint tp = null;
+        if (trackingstarttime != null) {
+            try {
+                tp = new MillisecondsTimePoint(DateParser.parse(trackingstarttime).getTime());
+            } catch (InvalidDateException e) {
+                logger.warning("Unable to parse trackingstarttime of race "+name+": "+trackingstarttime+". Leaving null.");
+            }
+        }
+        this.trackingstarttime = tp;
+        tp = null;
+        if (trackingendtime != null) {
+            try {
+                tp = new MillisecondsTimePoint(DateParser.parse(trackingendtime).getTime());
+            } catch (InvalidDateException e) {
+                logger.warning("Unable to parse trackingendtime of race "+name+": "+trackingendtime+". Leaving null.");
+            }
+        }
+        this.trackingendtime = tp;
+        tp = null;
+        if (racestarttime != null) {
+            try {
+                tp = new MillisecondsTimePoint(DateParser.parse(racestarttime).getTime());
+            } catch (InvalidDateException e) {
+                logger.warning("Unable to parse racestarttime of race "+name+": "+racestarttime+". Leaving null.");
+            }
+        }
+        this.racestarttime = tp;
         
         String jsonURLAsString = jsonURL.toString();
         int indexOfLastSlash = jsonURLAsString.lastIndexOf('/');
@@ -37,6 +76,18 @@ public class RaceRecord {
 
     public URL getParamURL() {
         return paramURL;
+    }
+
+    public TimePoint getTrackingStartTime() {
+        return trackingstarttime;
+    }
+
+    public TimePoint getTrackingEndTime() {
+        return trackingendtime;
+    }
+
+    public TimePoint getRaceStartTime() {
+        return racestarttime;
     }
     
 }
