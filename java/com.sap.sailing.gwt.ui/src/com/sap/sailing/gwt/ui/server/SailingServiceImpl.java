@@ -139,4 +139,5 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         mongoObjectFactory.storeTracTracConfiguration(DomainObjectFactory.INSTANCE.getDefaultDatabase(),
                 domainFactory.createTracTracConfiguration(name, jsonURL, liveDataURI, storedDataURI));
     }
+    
 }

@@ -88,13 +88,13 @@ public class EventManagementPanel extends FormPanel {
         previousConfigurationsComboBox.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
-                TracTracConfigurationDAO ttConfig = previousConfigurations.get(
-                        previousConfigurationsComboBox.getItemText(previousConfigurationsComboBox.getSelectedIndex()));
-                if (ttConfig != null) {
-                    jsonURLBox.setValue(ttConfig.jsonURL);
-                    liveURIBox.setValue(ttConfig.liveDataURI);
-                    storedURIBox.setValue(ttConfig.storedDataURI);
-                }
+                updatePanelFromSelectedStoredConfiguration();
+            }
+        });
+        previousConfigurationsComboBox.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                updatePanelFromSelectedStoredConfiguration();
             }
         });
         fillConfigurations();
@@ -395,6 +395,20 @@ public class EventManagementPanel extends FormPanel {
                     public void onSuccess(Void result) {}
                 });
             }
+        }
+    }
+
+    private void updatePanelFromSelectedStoredConfiguration() {
+        TracTracConfigurationDAO ttConfig = previousConfigurations.get(
+                previousConfigurationsComboBox.getItemText(previousConfigurationsComboBox.getSelectedIndex()));
+        if (ttConfig != null) {
+            hostnameTextbox.setValue("");
+            eventNameTextbox.setValue("");
+            livePortIntegerbox.setText("");
+            storedPortIntegerbox.setText("");
+            jsonURLBox.setValue(ttConfig.jsonURL);
+            liveURIBox.setValue(ttConfig.liveDataURI);
+            storedURIBox.setValue(ttConfig.storedDataURI);
         }
     }
 }
