@@ -21,4 +21,6 @@ public interface SailingServiceAsync {
 
     void storeTracTracConfiguration(String name, String jsonURL, String liveDataURI, String storedDataURI,
             AsyncCallback<Void> callback);
+
+    void stopTrackingEvent(String eventName, AsyncCallback<Void> callback);
 }

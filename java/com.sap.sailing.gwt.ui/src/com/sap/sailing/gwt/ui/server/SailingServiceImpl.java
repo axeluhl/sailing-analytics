@@ -35,6 +35,7 @@ import com.sap.sailing.mongodb.DomainObjectFactory;
 import com.sap.sailing.mongodb.MongoObjectFactory;
 import com.sap.sailing.mongodb.MongoWindStoreFactory;
 import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.util.CountryCode;
 
 /**
  * The server side implementation of the RPC service.
@@ -94,8 +95,9 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     private List<CompetitorDAO> getCompetitorDAOs(Iterable<Competitor> competitors) {
         List<CompetitorDAO> result = new ArrayList<CompetitorDAO>();
         for (Competitor c : competitors) {
-            result.add(new CompetitorDAO(c.getName(), c.getTeam().getNationality().getCountryCode().getTwoLetterISOCode(),
-                    c.getTeam().getNationality().getCountryCode().getThreeLetterIOCCode()));
+            CountryCode countryCode = c.getTeam().getNationality().getCountryCode();
+            result.add(new CompetitorDAO(c.getName(), countryCode==null?"":countryCode.getTwoLetterISOCode(),
+                    countryCode==null?"":countryCode.getThreeLetterIOCCode()));
         }
         return result;
     }
@@ -138,6 +140,11 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         MongoObjectFactory mongoObjectFactory = MongoObjectFactory.INSTANCE;
         mongoObjectFactory.storeTracTracConfiguration(DomainObjectFactory.INSTANCE.getDefaultDatabase(),
                 domainFactory.createTracTracConfiguration(name, jsonURL, liveDataURI, storedDataURI));
+    }
+    
+    @Override
+    public void stopTrackingEvent(String eventName) throws Exception {
+        service.stopTracking(service.getEventByName(eventName));
     }
     
 }

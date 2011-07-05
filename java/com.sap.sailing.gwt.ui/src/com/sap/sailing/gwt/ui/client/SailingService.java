@@ -22,4 +22,6 @@ public interface SailingService extends RemoteService {
     void track(RaceRecordDAO rr, String liveURI, String storedURI) throws Exception;
 
     void storeTracTracConfiguration(String name, String jsonURL, String liveDataURI, String storedDataURI) throws Exception;
+
+    void stopTrackingEvent(String eventName) throws Exception;
 }

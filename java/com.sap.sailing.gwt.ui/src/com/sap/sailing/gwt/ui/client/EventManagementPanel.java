@@ -259,10 +259,11 @@ public class EventManagementPanel extends FormPanel {
             public void onClick(ClickEvent click) {
                 for (EventDAO event : eventsCellList.getVisibleItems()) {
                     if (eventsCellList.getSelectionModel().isSelected(event)) {
-                        GWT.log("Event "+event.name+" was selected and would be removed");
+                        stopTrackingEvent(event);
                     }
                 }
             }
+
         });
         grid.setWidget(8, 1, btnRemove);
         btnRemove.setWidth("100%");
@@ -274,6 +275,17 @@ public class EventManagementPanel extends FormPanel {
         updateLiveURI();
         updateStoredURI();
         updateJsonUrl();
+    }
+
+    private void stopTrackingEvent(final EventDAO event) {
+        sailingService.stopTrackingEvent(event.name, new AsyncCallback<Void>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                errorReporter.reportError("Exception trying to stop tracking event "+event.name+": "+caught.getMessage());
+            }
+            @Override
+            public void onSuccess(Void result) {}
+        });
     }
 
     private ListHandler<RaceRecordDAO> getRaceTableColumnSortHandler(List<RaceRecordDAO> raceRecords,
@@ -313,7 +325,6 @@ public class EventManagementPanel extends FormPanel {
     
     private void fillConfigurations() {
         sailingService.getPreviousConfigurations(new AsyncCallback<List<TracTracConfigurationDAO>>() {
-
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError("Remote Procedure Call getPreviousConfigurations() - Failure: "+caught.getMessage());
@@ -327,6 +338,9 @@ public class EventManagementPanel extends FormPanel {
                 for (TracTracConfigurationDAO ttConfig : result) {
                     previousConfigurations.put(ttConfig.name, ttConfig);
                     previousConfigurationsComboBox.addItem(ttConfig.name);
+                }
+                if (!result.isEmpty()) {
+                    updatePanelFromSelectedStoredConfiguration();
                 }
             }
         });
