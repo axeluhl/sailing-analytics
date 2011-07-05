@@ -17,6 +17,7 @@ import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellList;
 import com.google.gwt.user.cellview.client.CellTable;
+import com.google.gwt.user.cellview.client.CellTree;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.Handler;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
@@ -75,7 +76,7 @@ public class EventManagementPanel extends FormPanel {
         this.setWidget(verticalPanel);
         verticalPanel.setSize("100%", "100%");
         
-        Grid grid = new Grid(9, 2);
+        Grid grid = new Grid(10, 2);
         verticalPanel.add(grid);
         verticalPanel.setCellWidth(grid, "100%");
         
@@ -244,13 +245,19 @@ public class EventManagementPanel extends FormPanel {
                 sb.appendEscaped(value.name);
             }
         };
+
+        eventsList = new ListDataProvider<EventDAO>();
+
+        TrackedEventsTreeModel trackedEventsModel = new TrackedEventsTreeModel(eventsList);
+        final CellTree eventsCellTree = new CellTree(trackedEventsModel, trackedEventsModel.getRoot());
+        grid.setWidget(8, 0, eventsCellTree);
+        
         final CellList<EventDAO> eventsCellList = new CellList<EventDAO>(eventCell);
-        grid.setWidget(8, 0, eventsCellList);
+        grid.setWidget(9, 0, eventsCellList);
         grid.getCellFormatter().setHeight(6, 0, "100%");
         eventsCellList.setWidth("100%");
         eventsCellList.setVisibleRange(0, 5);
         eventsCellList.setSelectionModel(new MultiSelectionModel<EventDAO>() {});
-        eventsList = new ListDataProvider<EventDAO>();
         eventsList.addDataDisplay(eventsCellList);
         
         Button btnRemove = new Button("Remove");
