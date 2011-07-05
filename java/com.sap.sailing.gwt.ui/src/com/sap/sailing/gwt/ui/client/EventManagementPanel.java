@@ -284,7 +284,9 @@ public class EventManagementPanel extends FormPanel {
                 errorReporter.reportError("Exception trying to stop tracking event "+event.name+": "+caught.getMessage());
             }
             @Override
-            public void onSuccess(Void result) {}
+            public void onSuccess(Void result) {
+                fillEvents();
+            }
         });
     }
 
@@ -387,6 +389,8 @@ public class EventManagementPanel extends FormPanel {
 
                                 @Override
                                 public void onSuccess(Void result) {
+                                    // refresh list of previous configurations
+                                    fillConfigurations();
                                 }
                             });
                 }
@@ -406,7 +410,9 @@ public class EventManagementPanel extends FormPanel {
                         errorReporter.reportError("Error trying to register race "+rr.name+" for tracking: "+caught.getMessage());
                     }
                     @Override
-                    public void onSuccess(Void result) {}
+                    public void onSuccess(Void result) {
+                        fillEvents();
+                    }
                 });
             }
         }
