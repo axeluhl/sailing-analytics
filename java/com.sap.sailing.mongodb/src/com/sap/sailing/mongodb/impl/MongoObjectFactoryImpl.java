@@ -16,6 +16,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindSource;
 import com.sap.sailing.domain.tracking.WindTrack;
+import com.sap.sailing.domain.tractracadapter.TracTracConfiguration;
 import com.sap.sailing.mongodb.MongoObjectFactory;
 
 public class MongoObjectFactoryImpl implements MongoObjectFactory {
@@ -73,6 +74,20 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         result.put(FieldNames.WIND_SOURCE_NAME.name(), windSource.name());
         result.put(FieldNames.WIND.name(), storeWind(wind));
         return result;
+    }
+
+    @Override
+    public void storeTracTracConfiguration(DB database, TracTracConfiguration tracTracConfiguration) {
+        DBCollection ttConfigCollection = database.getCollection(CollectionNames.TRACTRAC_CONFIGURATIONS.name());
+        BasicDBObject result = new BasicDBObject();
+        result.put(FieldNames.TT_CONFIG_NAME.name(), tracTracConfiguration.getName());
+        for (DBObject equallyNamedConfig : ttConfigCollection.find(result)) {
+            ttConfigCollection.remove(equallyNamedConfig);
+        }
+        result.put(FieldNames.TT_CONFIG_JSON_URL.name(), tracTracConfiguration.getJSONURL());
+        result.put(FieldNames.TT_CONFIG_LIVE_DATA_URI.name(), tracTracConfiguration.getLiveDataURI());
+        result.put(FieldNames.TT_CONFIG_STORED_DATA_URI.name(), tracTracConfiguration.getStoredDataURI());
+        ttConfigCollection.insert(result);
     }
 
 }

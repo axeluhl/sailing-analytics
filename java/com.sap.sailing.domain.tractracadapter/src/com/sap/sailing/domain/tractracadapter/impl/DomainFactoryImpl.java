@@ -61,6 +61,7 @@ import com.sap.sailing.domain.tractracadapter.JSONService;
 import com.sap.sailing.domain.tractracadapter.RaceTracker;
 import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
+import com.sap.sailing.domain.tractracadapter.TracTracConfiguration;
 import com.sap.sailing.util.Util.Pair;
 import com.tractrac.clientmodule.CompetitorClass;
 import com.tractrac.clientmodule.ControlPoint;
@@ -483,6 +484,11 @@ public class DomainFactoryImpl implements DomainFactory {
     @Override
     public JSONService parseJSONURL(URL jsonURL) throws IOException, ParseException, org.json.simple.parser.ParseException {
         return new JSONServiceImpl(jsonURL);
+    }
+
+    @Override
+    public TracTracConfiguration createTracTracConfiguration(String name, String jsonURL, String liveDataURI, String storedDataURI) {
+        return new TracTracConfigurationImpl(name, jsonURL, liveDataURI, storedDataURI);
     }
 
 }

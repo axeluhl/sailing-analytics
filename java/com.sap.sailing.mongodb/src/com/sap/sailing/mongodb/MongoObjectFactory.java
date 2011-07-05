@@ -9,6 +9,7 @@ import com.sap.sailing.domain.tracking.TrackedEvent;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindSource;
+import com.sap.sailing.domain.tractracadapter.TracTracConfiguration;
 import com.sap.sailing.mongodb.impl.MongoObjectFactoryImpl;
 
 /**
@@ -35,4 +36,12 @@ public interface MongoObjectFactory {
     DBCollection getWindTrackCollection(DB database);
 
     DBObject storeWindTrackEntry(Event event, RaceDefinition race, WindSource windSource, Wind wind);
+    
+    /**
+     * Inserts/updates based on the {@link TracTracConfiguration#getName() name}. Any equally-named
+     * config previously contained in the DB will be replaced / updated. Afterwards,
+     * {@link DomainObjectFactory#getTracTracConfigurations(DB)} called for the same <code>database</code>
+     * will return an equal <code>tracTracConfiguration</code> in its results.
+     */
+    void storeTracTracConfiguration(DB database, TracTracConfiguration tracTracConfiguration);
 }

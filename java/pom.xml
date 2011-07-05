@@ -101,12 +101,12 @@
 				<artifactId>maven-osgi-test-plugin</artifactId>
 				<configuration>
 <!-- non-debug -->
-<!-- proxy
-					<argLine>-Dhttp.proxyHost=proxy -Dhttp.proxyPort=8080 -Xmx1024m -XX:PermSize=256m -XX:-UseGCOverheadLimit -XX:+UseParallelGC</argLine>
--->
-<!-- no proxy -->
-					<argLine>-Dmongo.port=10200 -Xmx1024m -XX:PermSize=256m -XX:-UseGCOverheadLimit -XX:+UseParallelGC</argLine>
+<!-- proxy -->
+					<argLine>-Dhttp.proxyHost=proxy -Dhttp.proxyPort=8080 -Dtractrac.tunnel=true -Xmx1024m -XX:PermSize=256m -XX:-UseGCOverheadLimit -XX:+UseParallelGC</argLine>
 <!-- -->
+<!-- no proxy 
+					<argLine>-Dmongo.port=10200 -Xmx1024m -XX:PermSize=256m -XX:-UseGCOverheadLimit -XX:+UseParallelGC</argLine>
+ -->
 <!-- -->
 <!-- debug
 					<argLine>-Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=y -Dhttp.proxyHost=proxy -Dhttp.proxyPort=8080 -Xmx1024m -XX:PermSize=256m -XX:-UseGCOverheadLimit -XX:+UseParallelGC</argLine>

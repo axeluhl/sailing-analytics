@@ -7,6 +7,8 @@ import java.util.logging.Logger;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
+import com.mongodb.DB;
+import com.mongodb.Mongo;
 import com.mongodb.MongoException;
 import com.sap.sailing.mongodb.MongoObjectFactory;
 import com.sap.sailing.mongodb.MongoWindStore;
@@ -38,20 +40,18 @@ public class MongoWindStoreFactoryImpl implements MongoWindStoreFactory, BundleA
         return getMongoWindStore(defaultHostName, defaultPort, defaultDatabaseName, mongoObjectFactory);
     }
 
-    @Override
-    public MongoWindStore getMongoWindStore(String dbName, MongoObjectFactory mongoObjectFactory) throws UnknownHostException, MongoException {
-        return getMongoWindStore(defaultHostName, defaultPort, dbName, mongoObjectFactory);
+    private MongoWindStore getMongoWindStore(String hostname, int port, String dbName,
+            MongoObjectFactory mongoObjectFactory) throws UnknownHostException, MongoException {
+        return new MongoWindStoreImpl(getDB(hostname, port, dbName), mongoObjectFactory);
     }
 
     @Override
-    public MongoWindStore getMongoWindStore(int port, String dbName, MongoObjectFactory mongoObjectFactory) throws UnknownHostException, MongoException {
-        return getMongoWindStore(defaultHostName, port, dbName, mongoObjectFactory);
+    public DB getDB() throws UnknownHostException {
+        return getDB(defaultHostName, defaultPort, defaultDatabaseName);
     }
-
-    @Override
-    public MongoWindStore getMongoWindStore(String hostname, int port, String dbName, MongoObjectFactory mongoObjectFactory) throws UnknownHostException,
-            MongoException {
-        return new MongoWindStoreImpl(hostname, port, dbName, mongoObjectFactory);
+    
+    private DB getDB(String hostname, int port, String dbName) throws UnknownHostException {
+        return new Mongo(hostname, port).getDB(dbName);
     }
 
     @Override

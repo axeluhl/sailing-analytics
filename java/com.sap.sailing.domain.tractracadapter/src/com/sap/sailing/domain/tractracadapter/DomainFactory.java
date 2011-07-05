@@ -178,4 +178,7 @@ public interface DomainFactory {
      * immediately. See also {@link #getOrCreateTrackedEvent(com.sap.sailing.domain.base.Event)}.
      */
     DynamicTrackedEvent getTrackedEvent(com.sap.sailing.domain.base.Event event);
+
+    TracTracConfiguration createTracTracConfiguration(String name, String jsonURL, String liveDataURI,
+            String storedDataURI);
 }

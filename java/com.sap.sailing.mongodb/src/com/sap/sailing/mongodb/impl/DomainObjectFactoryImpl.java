@@ -1,5 +1,8 @@
 package com.sap.sailing.mongodb.impl;
 
+import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -21,6 +24,8 @@ import com.sap.sailing.domain.tracking.WindSource;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tracking.impl.WindTrackImpl;
+import com.sap.sailing.domain.tractracadapter.DomainFactory;
+import com.sap.sailing.domain.tractracadapter.TracTracConfiguration;
 import com.sap.sailing.mongodb.DomainObjectFactory;
 
 public class DomainObjectFactoryImpl implements DomainObjectFactory {
@@ -70,6 +75,35 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             logger.throwing(DomainObjectFactoryImpl.class.getName(), "loadWindTrack", t);
         }
         return result;
+    }
+
+    @Override
+    public Iterable<TracTracConfiguration> getTracTracConfigurations(DB database) {
+        List<TracTracConfiguration> result = new ArrayList<TracTracConfiguration>();
+        try {
+            DBCollection ttConfigs = database.getCollection(CollectionNames.TRACTRAC_CONFIGURATIONS.name());
+            for (DBObject o : ttConfigs.find()) {
+                TracTracConfiguration ttConfig = loadTracTracConfiguration(o);
+                result.add(ttConfig);
+            }
+        } catch (Throwable t) {
+             // something went wrong during DB access; report, then use empty new wind track
+            logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load recorded TracTrac configurations. Check MongoDB settings.");
+            logger.throwing(DomainObjectFactoryImpl.class.getName(), "getTracTracConfigurations", t);
+        }
+        return result;
+    }
+    
+    private TracTracConfiguration loadTracTracConfiguration(DBObject object) {
+        return DomainFactory.INSTANCE.createTracTracConfiguration((String) object.get(FieldNames.TT_CONFIG_NAME.name()),
+                (String) object.get(FieldNames.TT_CONFIG_JSON_URL.name()),
+                (String) object.get(FieldNames.TT_CONFIG_LIVE_DATA_URI.name()),
+                (String) object.get(FieldNames.TT_CONFIG_STORED_DATA_URI.name()));
+    }
+
+    @Override
+    public DB getDefaultDatabase() throws UnknownHostException {
+        return MongoWindStoreFactoryImpl.getDefaultInstance().getDB();
     }
 
 }
