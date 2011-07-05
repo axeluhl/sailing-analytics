@@ -6,4 +6,5 @@ public interface StringConstants extends Constants {
     String helloWorld();
     String kielWeel2011();
     String stgAccount();
+    String tracTracEvents();
 }
