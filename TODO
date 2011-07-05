@@ -1,6 +1,10 @@
 Axel
 ====
 
+ - Add stopEvent/stopRace logic
+
+ - use tree control to visualize currently tracked races/regattas/events
+
  - Finish a first draft version of a GWT admin UI
 
    * add event / race; stop race (store previous configurations in Mongo); stepwise completion
