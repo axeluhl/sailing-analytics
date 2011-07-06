@@ -345,7 +345,16 @@ public class EventManagementPanel extends FormPanel {
             @Override
             public void onSuccess(List<EventDAO> result) {
                 grid.setWidget(8, 0, null);
-                grid.setWidget(8, 1, null);
+                VerticalPanel buttonPanel = new VerticalPanel();
+                Button btnRefresh = new Button("Refresh");
+                btnRefresh.addClickHandler(new ClickHandler() {
+                    @Override
+                    public void onClick(ClickEvent event) {
+                        fillEvents();
+                    }
+                });
+                buttonPanel.add(btnRefresh);
+                grid.setWidget(8, 1, buttonPanel);
                 if (!result.isEmpty()) {
                     final ListDataProvider<EventDAO> eventsList = new ListDataProvider<EventDAO>(result);
                     final TrackedEventsTreeModel trackedEventsModel = new TrackedEventsTreeModel(eventsList);
@@ -374,7 +383,7 @@ public class EventManagementPanel extends FormPanel {
                         }
                     });
                     btnRemove.setWidth("100%");
-                    grid.setWidget(8, 1, btnRemove);
+                    buttonPanel.add(btnRemove);
                 }
             }
 
@@ -459,4 +468,5 @@ public class EventManagementPanel extends FormPanel {
             storedURIBox.setValue(ttConfig.storedDataURI);
         }
     }
+
 }
