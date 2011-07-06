@@ -373,7 +373,8 @@ public class EventManagementPanel extends FormPanel {
                                     // scan event's races:
                                     for (RegattaDAO regatta : event.regattas) {
                                         for (RaceDAO race : regatta.races) {
-                                            if (trackedEventsModel.getSelectionModel().isSelected(race)) {
+                                            if (trackedEventsModel.getSelectionModel().isSelected(regatta) ||
+                                                    trackedEventsModel.getSelectionModel().isSelected(race)) {
                                                 stopTrackingRace(event, race);
                                             }
                                         }
