@@ -28,22 +28,15 @@ public abstract class Servlet extends HttpServlet {
 
     private ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
     
-    private RacingEventService service;
-    
     protected Servlet() {
         BundleContext context = Activator.getDefault();
         racingEventServiceTracker = new ServiceTracker<RacingEventService, RacingEventService>(context, RacingEventService.class.getName(), null);
         racingEventServiceTracker.open();
         // grab the service
-        service = (RacingEventService) racingEventServiceTracker.getService();
     }
 
     protected RacingEventService getService() {
-        return service;
-    }
-
-    protected void setService(RacingEventService service) {
-        this.service = service;
+        return (RacingEventService) racingEventServiceTracker.getService();
     }
 
     protected Event getEvent(HttpServletRequest req) {

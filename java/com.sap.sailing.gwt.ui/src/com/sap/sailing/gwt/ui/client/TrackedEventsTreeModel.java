@@ -22,7 +22,7 @@ public class TrackedEventsTreeModel implements TreeViewModel {
     }
     
     @SuppressWarnings("unchecked")
-    private <T> MultiSelectionModel<T> getSelectionModel() {
+    public <T> MultiSelectionModel<T> getSelectionModel() {
         return (MultiSelectionModel<T>) selectionModel;
     }
 
@@ -60,7 +60,7 @@ public class TrackedEventsTreeModel implements TreeViewModel {
     public Object getRoot() {
         return root;
     }
-
+    
     private class EventCell extends AbstractCell<EventDAO> {
         @Override
         public void render(com.google.gwt.cell.client.Cell.Context context, EventDAO value, SafeHtmlBuilder sb) {

@@ -40,17 +40,17 @@ import com.sap.sailing.gwt.ui.shared.RaceRecordDAO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDAO;
 
 /**
- * Allows the user to start and stop tracking of events, regattas and races using the TracTrac connector.
- * In particular, previously configured connections can be retrieved from a drop-down list which then
- * pre-populates all connection parameters. The user can also choose to enter connection information
- * manually. Using a "hierarchical" entry system comparable to that of, e.g., the Eclipse CVS connection
- * setup wizard, components entered will be used to automatically assemble the full URL which can still
- * be overwritten manually. There is a propagation order across the fields. Hostname propagates to
- * JSON URL, Live URI and Stored URI. Port Live Data propagates to Port Stored Data, incremented by one.
- * The ports propagate to Live URI and Stored URI, respectively. The event name propagates to the JSON URL.
+ * Allows the user to start and stop tracking of events, regattas and races using the TracTrac connector. In particular,
+ * previously configured connections can be retrieved from a drop-down list which then pre-populates all connection
+ * parameters. The user can also choose to enter connection information manually. Using a "hierarchical" entry system
+ * comparable to that of, e.g., the Eclipse CVS connection setup wizard, components entered will be used to
+ * automatically assemble the full URL which can still be overwritten manually. There is a propagation order across the
+ * fields. Hostname propagates to JSON URL, Live URI and Stored URI. Port Live Data propagates to Port Stored Data,
+ * incremented by one. The ports propagate to Live URI and Stored URI, respectively. The event name propagates to the
+ * JSON URL.
  * 
  * @author Axel Uhl (D043530)
- *
+ * 
  */
 public class EventManagementPanel extends FormPanel {
     private final ListDataProvider<EventDAO> eventsList;
@@ -67,7 +67,7 @@ public class EventManagementPanel extends FormPanel {
     private final CellTable<RaceRecordDAO> raceTable;
     private final Map<String, TracTracConfigurationDAO> previousConfigurations;
     private final ListBox previousConfigurationsComboBox;
-    
+
     public EventManagementPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter) {
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
@@ -264,6 +264,7 @@ public class EventManagementPanel extends FormPanel {
         btnRemove.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent click) {
+//                trackedEventsModel.
                 for (EventDAO event : eventsCellList.getVisibleItems()) {
                     if (eventsCellList.getSelectionModel().isSelected(event)) {
                         stopTrackingEvent(event);
@@ -288,8 +289,10 @@ public class EventManagementPanel extends FormPanel {
         sailingService.stopTrackingEvent(event.name, new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
-                errorReporter.reportError("Exception trying to stop tracking event "+event.name+": "+caught.getMessage());
+                errorReporter.reportError("Exception trying to stop tracking event " + event.name + ": "
+                        + caught.getMessage());
             }
+
             @Override
             public void onSuccess(Void result) {
                 fillEvents();
@@ -315,28 +318,30 @@ public class EventManagementPanel extends FormPanel {
         });
         return result;
     }
-    
+
     private void updatePortStoredData() {
-        storedPortIntegerbox.setValue(livePortIntegerbox.getValue()+1);
+        storedPortIntegerbox.setValue(livePortIntegerbox.getValue() + 1);
     }
-    
+
     private void updateLiveURI() {
-        liveURIBox.setValue("tcp://"+hostnameTextbox.getValue()+":"+livePortIntegerbox.getValue());
+        liveURIBox.setValue("tcp://" + hostnameTextbox.getValue() + ":" + livePortIntegerbox.getValue());
     }
 
     private void updateStoredURI() {
-        storedURIBox.setValue("tcp://"+hostnameTextbox.getValue()+":"+storedPortIntegerbox.getValue());
+        storedURIBox.setValue("tcp://" + hostnameTextbox.getValue() + ":" + storedPortIntegerbox.getValue());
     }
-    
+
     private void updateJsonUrl() {
-        jsonURLBox.setValue("http://"+hostnameTextbox.getValue()+"/events/"+eventNameTextbox.getValue()+"/jsonservice.php");
+        jsonURLBox.setValue("http://" + hostnameTextbox.getValue() + "/events/" + eventNameTextbox.getValue()
+                + "/jsonservice.php");
     }
-    
+
     private void fillConfigurations() {
         sailingService.getPreviousConfigurations(new AsyncCallback<List<TracTracConfigurationDAO>>() {
             @Override
             public void onFailure(Throwable caught) {
-                errorReporter.reportError("Remote Procedure Call getPreviousConfigurations() - Failure: "+caught.getMessage());
+                errorReporter.reportError("Remote Procedure Call getPreviousConfigurations() - Failure: "
+                        + caught.getMessage());
             }
 
             @Override
@@ -362,14 +367,14 @@ public class EventManagementPanel extends FormPanel {
                 eventsList.getList().clear();
                 eventsList.getList().addAll(result);
             }
-            
+
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError("Remote Procedure Call listEvents() - Failure");
             }
         });
     }
-    
+
     private void fillRaces(final SailingServiceAsync sailingService) {
         final String jsonURL = jsonURLBox.getValue();
         final String liveDataURI = liveURIBox.getValue();
@@ -377,7 +382,8 @@ public class EventManagementPanel extends FormPanel {
         sailingService.listRacesInEvent(jsonURL, new AsyncCallback<List<RaceRecordDAO>>() {
             @Override
             public void onFailure(Throwable caught) {
-                EventManagementPanel.this.errorReporter.reportError("Error trying to list races: "+caught.getMessage());
+                EventManagementPanel.this.errorReporter.reportError("Error trying to list races: "
+                        + caught.getMessage());
             }
 
             @Override
@@ -404,7 +410,6 @@ public class EventManagementPanel extends FormPanel {
             }
         });
     }
-    
 
     private void trackSelectedRaces() {
         String liveURI = liveURIBox.getValue();
@@ -414,8 +419,10 @@ public class EventManagementPanel extends FormPanel {
                 sailingService.track(rr, liveURI, storedURI, new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
-                        errorReporter.reportError("Error trying to register race "+rr.name+" for tracking: "+caught.getMessage());
+                        errorReporter.reportError("Error trying to register race " + rr.name + " for tracking: "
+                                + caught.getMessage());
                     }
+
                     @Override
                     public void onSuccess(Void result) {
                         fillEvents();
@@ -426,8 +433,8 @@ public class EventManagementPanel extends FormPanel {
     }
 
     private void updatePanelFromSelectedStoredConfiguration() {
-        TracTracConfigurationDAO ttConfig = previousConfigurations.get(
-                previousConfigurationsComboBox.getItemText(previousConfigurationsComboBox.getSelectedIndex()));
+        TracTracConfigurationDAO ttConfig = previousConfigurations.get(previousConfigurationsComboBox
+                .getItemText(previousConfigurationsComboBox.getSelectedIndex()));
         if (ttConfig != null) {
             hostnameTextbox.setValue("");
             eventNameTextbox.setValue("");
