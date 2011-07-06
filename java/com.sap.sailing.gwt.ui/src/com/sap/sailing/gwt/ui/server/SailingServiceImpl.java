@@ -60,7 +60,9 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             List<CompetitorDAO> competitorList = getCompetitorDAOs(event.getCompetitors());
             List<RegattaDAO> regattasList = getRegattaDAOs(event);
             EventDAO eventDAO = new EventDAO(event.getName(), regattasList, competitorList);
-            result.add(eventDAO);
+            if (!eventDAO.regattas.isEmpty()) {
+                result.add(eventDAO);
+            }
         }
         return result;
     }
@@ -78,8 +80,10 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         List<RegattaDAO> result = new ArrayList<RegattaDAO>();
         for (Map.Entry<BoatClass, Set<RaceDefinition>> e : racesByBoatClass.entrySet()) {
             List<RaceDAO> raceDAOsInBoatClass = getRaceDAOs(e.getValue());
-            RegattaDAO regatta = new RegattaDAO(new BoatClassDAO(e.getKey().getName()), raceDAOsInBoatClass);
-            result.add(regatta);
+            if (!raceDAOsInBoatClass.isEmpty()) {
+                RegattaDAO regatta = new RegattaDAO(new BoatClassDAO(e.getKey().getName()), raceDAOsInBoatClass);
+                result.add(regatta);
+            }
         }
         return result;
     }
