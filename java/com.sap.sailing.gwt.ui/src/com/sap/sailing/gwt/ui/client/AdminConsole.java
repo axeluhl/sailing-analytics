@@ -44,6 +44,9 @@ public class AdminConsole implements EntryPoint, ErrorReporter {
         EventManagementPanel eventManagementPanel = new EventManagementPanel(sailingService, this);
         eventManagementPanel.setSize("90%", "90%");
         tabPanel.add(eventManagementPanel, stringConstants.tracTracEvents(), false);
+        WindPanel windPanel = new WindPanel(sailingService, this);
+        windPanel.setSize("90%", "90%");
+        tabPanel.add(windPanel, stringConstants.wind(), false);
         tabPanel.selectTab(0);
 
     }

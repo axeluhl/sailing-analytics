@@ -9,4 +9,6 @@ public interface StringConstants extends Constants {
     String tracTracEvents();
     String trackedBefore();
     String listRaces();
+    String wind();
+    String windPanelLabel();
 }
