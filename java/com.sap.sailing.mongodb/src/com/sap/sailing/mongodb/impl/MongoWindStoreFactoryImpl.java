@@ -1,6 +1,8 @@
 package com.sap.sailing.mongodb.impl;
 
 import java.net.UnknownHostException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -13,6 +15,7 @@ import com.mongodb.MongoException;
 import com.sap.sailing.mongodb.MongoObjectFactory;
 import com.sap.sailing.mongodb.MongoWindStore;
 import com.sap.sailing.mongodb.MongoWindStoreFactory;
+import com.sap.sailing.util.Util.Pair;
 
 public class MongoWindStoreFactoryImpl implements MongoWindStoreFactory, BundleActivator {
     private static final String MONGO_PORT = "mongo.port";
@@ -28,11 +31,13 @@ public class MongoWindStoreFactoryImpl implements MongoWindStoreFactory, BundleA
     private String defaultHostName;
     private int defaultPort;
     private String defaultDatabaseName;
+    private final Map<Pair<String, Integer>, Mongo> mongos;
     
     public MongoWindStoreFactoryImpl() {
         defaultHostName = System.getProperty(MONGO_HOSTNAME, "127.0.0.1");
         defaultPort = Integer.valueOf(System.getProperty(MONGO_PORT, "27017"));
         defaultDatabaseName = System.getProperty(MONGO_DB_NAME, DEFAULT_DB_NAME);
+        mongos = new HashMap<Pair<String, Integer>, Mongo>();
     }
     
     @Override
@@ -50,8 +55,14 @@ public class MongoWindStoreFactoryImpl implements MongoWindStoreFactory, BundleA
         return getDB(defaultHostName, defaultPort, defaultDatabaseName);
     }
     
-    private DB getDB(String hostname, int port, String dbName) throws UnknownHostException {
-        return new Mongo(hostname, port).getDB(dbName);
+    private synchronized DB getDB(String hostname, int port, String dbName) throws UnknownHostException {
+        Pair<String, Integer> key = new Pair<String, Integer>(hostname, port);
+        Mongo mongo = mongos.get(key);
+        if (mongo == null) {
+            mongo = new Mongo(hostname, port);
+            mongos.put(key, mongo);
+        }
+        return mongo.getDB(dbName);
     }
 
     @Override
