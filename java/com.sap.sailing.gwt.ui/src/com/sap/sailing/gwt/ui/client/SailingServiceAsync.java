@@ -23,4 +23,6 @@ public interface SailingServiceAsync {
             AsyncCallback<Void> callback);
 
     void stopTrackingEvent(String eventName, AsyncCallback<Void> callback);
+
+    void stopTrackingRace(String eventName, String raceName, AsyncCallback<Void> asyncCallback);
 }

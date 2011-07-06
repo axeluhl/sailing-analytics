@@ -5,8 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.google.gwt.cell.client.AbstractCell;
-import com.google.gwt.cell.client.Cell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
@@ -14,8 +12,6 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
-import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
-import com.google.gwt.user.cellview.client.CellList;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.CellTree;
 import com.google.gwt.user.cellview.client.Column;
@@ -36,7 +32,9 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.sap.sailing.gwt.ui.shared.EventDAO;
+import com.sap.sailing.gwt.ui.shared.RaceDAO;
 import com.sap.sailing.gwt.ui.shared.RaceRecordDAO;
+import com.sap.sailing.gwt.ui.shared.RegattaDAO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDAO;
 
 /**
@@ -53,7 +51,6 @@ import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDAO;
  * 
  */
 public class EventManagementPanel extends FormPanel {
-    private final ListDataProvider<EventDAO> eventsList;
     private final SailingServiceAsync sailingService;
     private final ErrorReporter errorReporter;
     private final IntegerBox storedPortIntegerbox;
@@ -67,6 +64,7 @@ public class EventManagementPanel extends FormPanel {
     private final CellTable<RaceRecordDAO> raceTable;
     private final Map<String, TracTracConfigurationDAO> previousConfigurations;
     private final ListBox previousConfigurationsComboBox;
+    private final Grid grid;
 
     public EventManagementPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter) {
         this.sailingService = sailingService;
@@ -76,7 +74,7 @@ public class EventManagementPanel extends FormPanel {
         this.setWidget(verticalPanel);
         verticalPanel.setSize("100%", "100%");
         
-        Grid grid = new Grid(10, 2);
+        grid = new Grid(9, 2);
         verticalPanel.add(grid);
         verticalPanel.setCellWidth(grid, "100%");
         
@@ -236,47 +234,14 @@ public class EventManagementPanel extends FormPanel {
                 trackSelectedRaces();
             }
         });
-        
-        Label lblEventsConnectedTo = new Label("Events Currently Tracked");
-        grid.setWidget(7, 0, lblEventsConnectedTo);
-        Cell<EventDAO> eventCell = new AbstractCell<EventDAO>() {
-            @Override
-            public void render(com.google.gwt.cell.client.Cell.Context context, EventDAO value, SafeHtmlBuilder sb) {
-                sb.appendEscaped(value.name);
-            }
-        };
-
-        eventsList = new ListDataProvider<EventDAO>();
-
-        TrackedEventsTreeModel trackedEventsModel = new TrackedEventsTreeModel(eventsList);
-        final CellTree eventsCellTree = new CellTree(trackedEventsModel, trackedEventsModel.getRoot());
-        grid.setWidget(8, 0, eventsCellTree);
-        
-        final CellList<EventDAO> eventsCellList = new CellList<EventDAO>(eventCell);
-        grid.setWidget(9, 0, eventsCellList);
-        grid.getCellFormatter().setHeight(6, 0, "100%");
-        eventsCellList.setWidth("100%");
-        eventsCellList.setVisibleRange(0, 5);
-        eventsCellList.setSelectionModel(new MultiSelectionModel<EventDAO>() {});
-        eventsList.addDataDisplay(eventsCellList);
-        
-        Button btnRemove = new Button("Remove");
-        btnRemove.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent click) {
-//                trackedEventsModel.
-                for (EventDAO event : eventsCellList.getVisibleItems()) {
-                    if (eventsCellList.getSelectionModel().isSelected(event)) {
-                        stopTrackingEvent(event);
-                    }
-                }
-            }
-
-        });
-        grid.setWidget(8, 1, btnRemove);
-        btnRemove.setWidth("100%");
         grid.getCellFormatter().setVerticalAlignment(6, 1, HasVerticalAlignment.ALIGN_TOP);
         grid.getCellFormatter().setVerticalAlignment(6, 0, HasVerticalAlignment.ALIGN_TOP);
+
+        Label lblEventsConnectedTo = new Label("Events Currently Tracked");
+        grid.setWidget(7, 0, lblEventsConnectedTo);
+
+        grid.getCellFormatter().setVerticalAlignment(8, 1, HasVerticalAlignment.ALIGN_TOP);
+        grid.getCellFormatter().setVerticalAlignment(8, 0, HasVerticalAlignment.ALIGN_TOP);
         
         fillEvents();
         updatePortStoredData();
@@ -290,6 +255,21 @@ public class EventManagementPanel extends FormPanel {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError("Exception trying to stop tracking event " + event.name + ": "
+                        + caught.getMessage());
+            }
+
+            @Override
+            public void onSuccess(Void result) {
+                fillEvents();
+            }
+        });
+    }
+
+    private void stopTrackingRace(final EventDAO event, final RaceDAO race) {
+        sailingService.stopTrackingRace(event.name, race.name, new AsyncCallback<Void>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                errorReporter.reportError("Exception trying to stop tracking race " + race.name + "in event "+event.name+": "
                         + caught.getMessage());
             }
 
@@ -364,8 +344,38 @@ public class EventManagementPanel extends FormPanel {
         sailingService.listEvents(new AsyncCallback<List<EventDAO>>() {
             @Override
             public void onSuccess(List<EventDAO> result) {
-                eventsList.getList().clear();
-                eventsList.getList().addAll(result);
+                grid.setWidget(8, 0, null);
+                grid.setWidget(8, 1, null);
+                if (!result.isEmpty()) {
+                    final ListDataProvider<EventDAO> eventsList = new ListDataProvider<EventDAO>(result);
+                    final TrackedEventsTreeModel trackedEventsModel = new TrackedEventsTreeModel(eventsList);
+                    // When the following line is uncommented, the race table contents don't show anymore...???!!!
+                    CellTree eventsCellTree = new CellTree(trackedEventsModel, /* root */null);
+                    grid.setWidget(8, 0, eventsCellTree);
+
+                    Button btnRemove = new Button("Remove");
+                    btnRemove.addClickHandler(new ClickHandler() {
+                        @Override
+                        public void onClick(ClickEvent click) {
+                            for (EventDAO event : eventsList.getList()) {
+                                if (trackedEventsModel.getSelectionModel().isSelected(event)) {
+                                    stopTrackingEvent(event);
+                                } else {
+                                    // scan event's races:
+                                    for (RegattaDAO regatta : event.regattas) {
+                                        for (RaceDAO race : regatta.races) {
+                                            if (trackedEventsModel.getSelectionModel().isSelected(race)) {
+                                                stopTrackingRace(event, race);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                    btnRemove.setWidth("100%");
+                    grid.setWidget(8, 1, btnRemove);
+                }
             }
 
             @Override
@@ -387,7 +397,7 @@ public class EventManagementPanel extends FormPanel {
             }
 
             @Override
-            public void onSuccess(List<RaceRecordDAO> result) {
+            public void onSuccess(final List<RaceRecordDAO> result) {
                 raceList.getList().clear();
                 raceList.getList().addAll(result);
                 if (!result.isEmpty()) {
@@ -401,9 +411,13 @@ public class EventManagementPanel extends FormPanel {
                                 }
 
                                 @Override
-                                public void onSuccess(Void result) {
+                                public void onSuccess(Void voidResult) {
                                     // refresh list of previous configurations
-                                    fillConfigurations();
+                                    TracTracConfigurationDAO ttConfig = new TracTracConfigurationDAO(result.iterator().next().eventName,
+                                            jsonURL, liveDataURI, storedDataURI);
+                                    if (previousConfigurations.put(ttConfig.name, ttConfig) == null) {
+                                        previousConfigurationsComboBox.addItem(ttConfig.name);
+                                    }
                                 }
                             });
                 }

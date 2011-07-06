@@ -1,9 +1,9 @@
 Axel
 ====
 
- - use tree control to visualize currently tracked races/regattas/events
-
- - Add stopRace logic
+ - The "Remove" button has different meanings: stop tracking a race if it's currently being
+   tracked. But nothing will be removed unless it's the last race in an event. When "removing"
+   an entire event, all races will have their trackers stopped, eventually removing the event.
 
  - Finish a first draft version of a GWT admin UI
 

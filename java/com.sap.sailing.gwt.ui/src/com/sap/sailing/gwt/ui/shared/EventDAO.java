@@ -15,5 +15,6 @@ public class EventDAO implements IsSerializable {
         super();
         this.name = name;
         this.regattas = regattas;
+        this.competitors = competitors;
     }
 }

@@ -10,9 +10,7 @@ import com.sap.sailing.gwt.ui.shared.RaceDAO;
 import com.sap.sailing.gwt.ui.shared.RegattaDAO;
 
 public class TrackedEventsTreeModel implements TreeViewModel {
-    private final String root = "Events";
-    
-    private MultiSelectionModel<?> selectionModel;
+    private final MultiSelectionModel<?> selectionModel;
     
     private final ListDataProvider<EventDAO> events;
     
@@ -28,7 +26,7 @@ public class TrackedEventsTreeModel implements TreeViewModel {
 
     @Override
     public <T> NodeInfo<?> getNodeInfo(T value) {
-        if (value == root) {
+        if (value == null) {
             return new DefaultNodeInfo<EventDAO>(events, new EventCell(),
                     getSelectionModel(), /* valueUpdater */ null);
         } else if (value instanceof EventDAO) {
@@ -46,7 +44,7 @@ public class TrackedEventsTreeModel implements TreeViewModel {
 
     @Override
     public boolean isLeaf(Object value) {
-        if (value == root) {
+        if (value == null) { // root
             return false;
         } else if (value instanceof EventDAO) {
             return false;
@@ -58,7 +56,7 @@ public class TrackedEventsTreeModel implements TreeViewModel {
     }
 
     public Object getRoot() {
-        return root;
+        return null;
     }
     
     private class EventCell extends AbstractCell<EventDAO> {

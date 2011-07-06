@@ -81,7 +81,7 @@ public class RacingEventServiceImpl implements RacingEventService {
     }
 
     @Override
-    public Event addEvent(URL jsonURL, URI liveURI, URI storedURI, WindStore windStore) throws URISyntaxException, IOException, ParseException, org.json.simple.parser.ParseException {
+    public synchronized Event addEvent(URL jsonURL, URI liveURI, URI storedURI, WindStore windStore) throws URISyntaxException, IOException, ParseException, org.json.simple.parser.ParseException {
         JSONService jsonService = getDomainFactory().parseJSONURL(jsonURL);
         Event event = null;
         for (RaceRecord rr : jsonService.getRaceRecords()) {
@@ -98,7 +98,7 @@ public class RacingEventServiceImpl implements RacingEventService {
     }
 
     @Override
-    public RaceHandle addRace(URL paramURL, URI liveURI, URI storedURI, WindStore windStore) throws MalformedURLException, FileNotFoundException,
+    public synchronized RaceHandle addRace(URL paramURL, URI liveURI, URI storedURI, WindStore windStore) throws MalformedURLException, FileNotFoundException,
             URISyntaxException {
         Triple<URL, URI, URI> key = new Triple<URL, URI, URI>(paramURL, liveURI, storedURI);
         RaceTracker tracker = raceTrackersByURLs.get(key);
@@ -133,7 +133,7 @@ public class RacingEventServiceImpl implements RacingEventService {
     }
 
     @Override
-    public void stopTracking(Event event) throws MalformedURLException, IOException, InterruptedException {
+    public synchronized void stopTracking(Event event) throws MalformedURLException, IOException, InterruptedException {
         if (raceTrackersByEvent.containsKey(event)) {
             for (RaceTracker raceTracker : raceTrackersByEvent.get(event)) {
                 raceTracker.stop(); // this also removes the TrackedRace from trackedEvent
@@ -141,16 +141,18 @@ public class RacingEventServiceImpl implements RacingEventService {
             }
             raceTrackersByEvent.remove(event);
         }
-        if (event != null && event.getName() != null) {
-            eventsByName.remove(event.getName());
-        }
-        for (RaceDefinition race : event.getAllRaces()) {
-            stopTrackingWind(event, race);
+        if (event != null) {
+            if (event.getName() != null) {
+                eventsByName.remove(event.getName());
+            }
+            for (RaceDefinition race : event.getAllRaces()) {
+                stopTrackingWind(event, race);
+            }
         }
     }
 
     @Override
-    public void stopTracking(Event event, RaceDefinition race) throws MalformedURLException, IOException, InterruptedException {
+    public synchronized void stopTracking(Event event, RaceDefinition race) throws MalformedURLException, IOException, InterruptedException {
         logger.info("Stopping tracking for "+race+"...");
         if (raceTrackersByEvent.containsKey(event)) {
             Iterator<RaceTracker> trackerIter = raceTrackersByEvent.get(event).iterator();
@@ -217,7 +219,7 @@ public class RacingEventServiceImpl implements RacingEventService {
     }
 
     @Override
-    public Iterable<Triple<Event, RaceDefinition, Integer>> getWindTrackedRaces() {
+    public synchronized Iterable<Triple<Event, RaceDefinition, Integer>> getWindTrackedRaces() {
         List<Triple<Event, RaceDefinition, Integer>> result = new ArrayList<Triple<Event, RaceDefinition, Integer>>();
         for (Event event : eventsByName.values()) {
             for (RaceDefinition race : event.getAllRaces()) {

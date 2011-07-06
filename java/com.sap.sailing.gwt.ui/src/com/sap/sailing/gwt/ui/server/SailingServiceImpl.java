@@ -146,5 +146,15 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     public void stopTrackingEvent(String eventName) throws Exception {
         service.stopTracking(service.getEventByName(eventName));
     }
+
+    @Override
+    public void stopTrackingRace(String eventName, String raceName) throws Exception {
+        Event event = service.getEventByName(eventName);
+        for (RaceDefinition r : event.getAllRaces()) {
+            if (r.getName().equals(raceName)) {
+                service.stopTracking(event,  r);
+            }
+        }
+    }
     
 }
