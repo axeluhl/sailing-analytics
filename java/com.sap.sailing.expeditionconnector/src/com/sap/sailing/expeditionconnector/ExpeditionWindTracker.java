@@ -12,6 +12,7 @@ import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindSource;
+import com.sap.sailing.domain.tracking.WindTracker;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 
 /**
@@ -21,25 +22,54 @@ import com.sap.sailing.domain.tracking.impl.WindImpl;
  * @author Axel Uhl (d043530)
  *
  */
-public class WindTracker implements ExpeditionListener {
-    private static final Logger logger = Logger.getLogger(WindTracker.class.getName());
+public class ExpeditionWindTracker implements ExpeditionListener, WindTracker {
+    private static final Logger logger = Logger.getLogger(ExpeditionWindTracker.class.getName());
     
     private final DynamicTrackedRace race;
     
     private final DeclinationService declinationService;
     
     private Position lastKnownPosition;
+    
+    private final UDPExpeditionReceiver receiver;
+    
+    private final ExpeditionWindTrackerFactory factory;
 
     /**
      * @param declinationService
-     *            An optional service to convert the Expedition-provided wind bearings (which Expedition
-     *            believes to be true bearings) from magnetic to true bearings. Can be <code>null</code>
-     *            in which case the Expedition true bearings are used as true bearings.
+     *            An optional service to convert the Expedition-provided wind bearings (which Expedition believes to be
+     *            true bearings) from magnetic to true bearings. Can be <code>null</code> in which case the Expedition
+     *            true bearings are used as true bearings.
+     * @param receiver
+     *            receive wind data from this receiver by adding the new object as a listener to the receiver; when
+     *            calling {@link #stop}, this subscription will be removed again.
+     * @param factory TODO
      */
-    public WindTracker(DynamicTrackedRace race, DeclinationService declinationService) {
+    public ExpeditionWindTracker(DynamicTrackedRace race, DeclinationService declinationService,
+            UDPExpeditionReceiver receiver, ExpeditionWindTrackerFactory factory) {
         super();
         this.race = race;
         this.declinationService = declinationService;
+        this.receiver = receiver;
+        this.factory = factory;
+        receiver.addListener(this, /* validMessagesOnly */ true);
+    }
+    
+    @Override
+    public void stop() {
+        synchronized (factory) {
+            receiver.removeListener(this);
+            factory.windTrackerStopped(race.getRace(), this);
+        }
+    }
+    
+    UDPExpeditionReceiver getReceiver() {
+        return receiver;
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName()+" on UDP port "+getReceiver().getPort();
     }
 
     @Override
@@ -70,7 +100,7 @@ public class WindTracker implements ExpeditionListener {
                         logger.log(Level.INFO,
                                 "Unable to correct wind bearing by declination. Exception while computing declination: "
                                         + e.getMessage());
-                        logger.throwing(WindTracker.class.getName(), "received", e);
+                        logger.throwing(ExpeditionWindTracker.class.getName(), "received", e);
                         windSpeed = null;
                     }
                 } else {

@@ -36,8 +36,9 @@ import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.expeditionconnector.ExpeditionListener;
 import com.sap.sailing.expeditionconnector.ExpeditionMessage;
+import com.sap.sailing.expeditionconnector.ExpeditionWindTracker;
+import com.sap.sailing.expeditionconnector.ExpeditionWindTrackerFactory;
 import com.sap.sailing.expeditionconnector.UDPExpeditionReceiver;
-import com.sap.sailing.expeditionconnector.WindTracker;
 import com.sap.sailing.util.Util;
 
 public class UDPExpeditionReceiverTest {
@@ -226,7 +227,8 @@ public class UDPExpeditionReceiverTest {
     public void testWindTrackerWithDeclination() throws IOException, InterruptedException, ClassNotFoundException, ParseException {
         MockedTrackedRace race = new MockedTrackedRace();
         DeclinationService declinationService = DeclinationService.INSTANCE;
-        WindTracker windTracker = new WindTracker(race, declinationService);
+        ExpeditionWindTracker windTracker = new ExpeditionWindTracker(race, declinationService, receiver,
+                (ExpeditionWindTrackerFactory) ExpeditionWindTrackerFactory.getInstance());
         receiver.addListener(listener, /* validMessagesOnly */ true);
         receiver.addListener(windTracker, /* validMessagesOnly */ true);
         String[] lines = new String[validLines.length+1];

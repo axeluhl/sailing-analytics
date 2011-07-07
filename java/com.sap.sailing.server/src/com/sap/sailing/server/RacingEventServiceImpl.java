@@ -18,26 +18,25 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
-import com.sap.sailing.declination.DeclinationService;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
-import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
-import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.WindStore;
+import com.sap.sailing.domain.tracking.WindTracker;
+import com.sap.sailing.domain.tracking.WindTrackerFactory;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.JSONService;
 import com.sap.sailing.domain.tractracadapter.RaceHandle;
 import com.sap.sailing.domain.tractracadapter.RaceRecord;
 import com.sap.sailing.domain.tractracadapter.RaceTracker;
-import com.sap.sailing.expeditionconnector.UDPExpeditionReceiver;
-import com.sap.sailing.expeditionconnector.WindTracker;
-import com.sap.sailing.util.Util.Pair;
+import com.sap.sailing.expeditionconnector.ExpeditionWindTrackerFactory;
 import com.sap.sailing.util.Util.Triple;
 
 public class RacingEventServiceImpl implements RacingEventService {
     private static final Logger logger = Logger.getLogger(RacingEventServiceImpl.class.getName());
     
     private final DomainFactory domainFactory;
+    
+    private final WindTrackerFactory windTrackerFactory;
     
     private final Map<String, Event> eventsByName;
     
@@ -47,22 +46,20 @@ public class RacingEventServiceImpl implements RacingEventService {
      * Remembers the wind tracker and the port on which the UDP receiver with which the wind tracker is
      * registers is listening for incoming Expedition messages.
      */
-    private final Map<RaceDefinition, Pair<WindTracker, Integer>> windTrackers;
+    private final Map<RaceDefinition, WindTracker> windTrackers;
     
     /**
      * Remembers the trackers by paramURL/liveURI/storedURI to avoid duplication
      */
     private final Map<Triple<URL, URI, URI>, RaceTracker> raceTrackersByURLs;
     
-    private final Map<Integer, UDPExpeditionReceiver> windReceivers;
-
     public RacingEventServiceImpl() {
         domainFactory = DomainFactory.INSTANCE;
+        windTrackerFactory = ExpeditionWindTrackerFactory.getInstance();
         eventsByName = new HashMap<String, Event>();
         raceTrackersByEvent = new HashMap<Event, Set<RaceTracker>>();
-        windTrackers = new HashMap<RaceDefinition, Pair<WindTracker, Integer>>();
+        windTrackers = new HashMap<RaceDefinition, WindTracker>();
         raceTrackersByURLs = new HashMap<Triple<URL, URI, URI>, RaceTracker>();
-        windReceivers = new HashMap<Integer, UDPExpeditionReceiver>();
     }
     
     @Override
@@ -180,6 +177,7 @@ public class RacingEventServiceImpl implements RacingEventService {
         } else {
             logger.warning("Didn't find any trackers for event "+event);
         }
+        stopTrackingWind(event, race);
         // if the last tracked race was removed, remove the entire event
         if (raceTrackersByEvent.get(event).isEmpty()) {
             stopTracking(event);
@@ -187,56 +185,27 @@ public class RacingEventServiceImpl implements RacingEventService {
     }
 
     @Override
-    public synchronized void startTrackingWind(Event event, RaceDefinition race, int port,
-            DeclinationService declinationService) throws SocketException {
-        if (!windTrackers.containsKey(race)) {
-            DynamicTrackedEvent trackedEvent = getDomainFactory().getOrCreateTrackedEvent(event);
-            DynamicTrackedRace trackedRace = trackedEvent.getTrackedRace(race);
-            WindTracker windTracker = new WindTracker(trackedRace, declinationService);
-            UDPExpeditionReceiver receiver = getOrCreateWindReceiverForPort(port);
-            windTrackers.put(race, new Pair<WindTracker, Integer>(windTracker, port));
-            receiver.addListener(windTracker, /* validMessagesOnly */ true);
-        }
-    }
-
-    private synchronized UDPExpeditionReceiver getOrCreateWindReceiverForPort(int port) throws SocketException {
-        UDPExpeditionReceiver receiver = windReceivers.get(port);
-        if (receiver == null) {
-            receiver = new UDPExpeditionReceiver(port);
-            windReceivers.put(port, receiver);
-            new Thread(receiver, "Expedition Wind Receiver on port "+port).start();
-        }
-        return receiver;
+    public synchronized void startTrackingWind(Event event, RaceDefinition race,
+            boolean correctByDeclination) throws SocketException {
+        windTrackerFactory.createWindTracker(getDomainFactory().getOrCreateTrackedEvent(event), race, correctByDeclination);
     }
 
     @Override
     public synchronized void stopTrackingWind(Event event, RaceDefinition race) throws SocketException, IOException {
-        Pair<WindTracker, Integer> windTrackerPair = windTrackers.get(race);
-        if (windTrackerPair != null) {
-            WindTracker windTracker = windTrackerPair.getA();
-            if (windTracker != null) {
-                for (UDPExpeditionReceiver receiver : windReceivers.values()) {
-                    receiver.removeListener(windTracker);
-                }
-            }
+        WindTracker windTracker = windTrackers.get(race);
+        if (windTracker != null) {
+            windTracker.stop();
             windTrackers.remove(race);
-            // if there is no more tracker we can also stop and remove the receiver(s) we created
-            if (windTrackers.isEmpty()) {
-                for (UDPExpeditionReceiver receiver : windReceivers.values()) {
-                    receiver.stop();
-                }
-                windReceivers.clear();
-            }
         }
     }
 
     @Override
-    public synchronized Iterable<Triple<Event, RaceDefinition, Integer>> getWindTrackedRaces() {
-        List<Triple<Event, RaceDefinition, Integer>> result = new ArrayList<Triple<Event, RaceDefinition, Integer>>();
+    public synchronized Iterable<Triple<Event, RaceDefinition, String>> getWindTrackedRaces() {
+        List<Triple<Event, RaceDefinition, String>> result = new ArrayList<Triple<Event, RaceDefinition, String>>();
         for (Event event : eventsByName.values()) {
             for (RaceDefinition race : event.getAllRaces()) {
                 if (windTrackers.containsKey(race)) {
-                    result.add(new Triple<Event, RaceDefinition, Integer>(event, race, windTrackers.get(race).getB()));
+                    result.add(new Triple<Event, RaceDefinition, String>(event, race, windTrackers.get(race).toString()));
                 }
             }
         }

@@ -16,7 +16,6 @@ import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
-import com.sap.sailing.declination.DeclinationService;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Event;
@@ -122,9 +121,12 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
 
     @Override
-    public void track(RaceRecordDAO rr, String liveURI, String storedURI) throws Exception {
+    public void track(RaceRecordDAO rr, String liveURI, String storedURI, boolean trackWind, boolean correctWindByDeclination) throws Exception {
         service.addRace(new URL(rr.paramURL), new URI(liveURI), new URI(storedURI),
                 MongoWindStoreFactory.INSTANCE.getMongoWindStore(MongoObjectFactory.INSTANCE));
+        if (trackWind) {
+            startTrackingWind(rr.eventName, rr.name, correctWindByDeclination);
+        }
     }
 
     @Override
@@ -170,12 +172,10 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         }
     }
     
-    @Override
-    public void startTrackingWind(String eventName, String raceName, int port, boolean correctByDeclination) throws Exception {
+    private void startTrackingWind(String eventName, String raceName, boolean correctByDeclination) throws Exception {
         Event event = service.getEventByName(eventName);
         RaceDefinition race = getRaceByName(event, raceName);
-        service.startTrackingWind(event, race, port,
-                correctByDeclination ? DeclinationService.INSTANCE : null);
+        service.startTrackingWind(event, race, correctByDeclination);
     }
     
 }

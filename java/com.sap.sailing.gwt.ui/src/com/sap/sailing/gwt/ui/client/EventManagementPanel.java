@@ -20,6 +20,7 @@ import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
@@ -226,12 +227,21 @@ public class EventManagementPanel extends FormPanel {
         Handler columnSortHandler = getRaceTableColumnSortHandler(raceList.getList(), raceNameColumn, raceStartTrackingColumn);
         raceTable.addColumnSortHandler(columnSortHandler);
         
+        VerticalPanel trackPanel = new VerticalPanel();
+        grid.setWidget(6, 1, trackPanel);
+        final CheckBox trackWindCheckbox = new CheckBox("Track Wind");
+        trackWindCheckbox.setValue(true);
+        trackPanel.add(trackWindCheckbox);
+        final CheckBox declinationCheckbox = new CheckBox("Correct Wind Bearing by Declination");
+        declinationCheckbox.setValue(true);
+        trackPanel.add(declinationCheckbox);
+        
         Button btnTrack = new Button("Track");
-        grid.setWidget(6, 1, btnTrack);
+        trackPanel.add(btnTrack);
         btnTrack.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                trackSelectedRaces();
+                trackSelectedRaces(trackWindCheckbox.getValue(), declinationCheckbox.getValue());
             }
         });
         grid.getCellFormatter().setVerticalAlignment(6, 1, HasVerticalAlignment.ALIGN_TOP);
@@ -435,12 +445,12 @@ public class EventManagementPanel extends FormPanel {
         });
     }
 
-    private void trackSelectedRaces() {
+    private void trackSelectedRaces(boolean trackWind, boolean correctWindByDeclination) {
         String liveURI = liveURIBox.getValue();
         String storedURI = storedURIBox.getValue();
         for (final RaceRecordDAO rr : raceList.getList()) {
             if (raceTable.getSelectionModel().isSelected(rr)) {
-                sailingService.track(rr, liveURI, storedURI, new AsyncCallback<Void>() {
+                sailingService.track(rr, liveURI, storedURI, trackWind, correctWindByDeclination, new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         errorReporter.reportError("Error trying to register race " + rr.name + " for tracking: "

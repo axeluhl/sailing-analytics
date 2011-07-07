@@ -41,7 +41,7 @@ public class Activator implements BundleActivator, ServiceListener {
         racingEventServiceTracker.open();
         // grab the service
         RacingEventService service = (RacingEventService) racingEventServiceTracker.getService();
-        for (Triple<Event, RaceDefinition, Integer> windTracker : service.getWindTrackedRaces()) {
+        for (Triple<Event, RaceDefinition, String> windTracker : service.getWindTrackedRaces()) {
             service.stopTrackingWind(windTracker.getA(), windTracker.getB());
         }
         for (Event event : service.getAllEvents()) {

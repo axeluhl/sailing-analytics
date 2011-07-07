@@ -19,7 +19,6 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import com.mongodb.MongoException;
-import com.sap.sailing.declination.DeclinationService;
 import com.sap.sailing.domain.base.Bearing;
 import com.sap.sailing.domain.base.Distance;
 import com.sap.sailing.domain.base.Event;
@@ -421,11 +420,11 @@ public class AdminApp extends Servlet {
 
     private void listWindTrackers(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         JSONArray windTrackers = new JSONArray();
-        for (Triple<Event, RaceDefinition, Integer> eventAndRaceAndPort : getService().getWindTrackedRaces()) {
+        for (Triple<Event, RaceDefinition, String> eventAndRaceAndPort : getService().getWindTrackedRaces()) {
             JSONObject windTracker = new JSONObject();
             windTracker.put("eventname", eventAndRaceAndPort.getA().getName());
             windTracker.put("racename", eventAndRaceAndPort.getB().getName());
-            windTracker.put("port", eventAndRaceAndPort.getC());
+            windTracker.put("windtrackerinfo", eventAndRaceAndPort.getC());
             windTrackers.add(windTracker);
         }
         windTrackers.writeJSONString(resp.getWriter());
@@ -458,11 +457,9 @@ public class AdminApp extends Servlet {
                 if (portParam == null) {
                     resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "No port parameter provided");
                 } else {
-                    int port = Integer.valueOf(portParam);
                     String correctByDeclination = req
                             .getParameter(PARAM_NAME_CORRECT_EXPEDITION_WIND_BEARING_BY_DECLINATION);
-                    getService().startTrackingWind(event, race, port,
-                            Boolean.valueOf(correctByDeclination) ? DeclinationService.INSTANCE : null);
+                    getService().startTrackingWind(event, race, Boolean.valueOf(correctByDeclination));
                 }
             }
         }

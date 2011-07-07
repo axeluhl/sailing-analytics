@@ -81,6 +81,23 @@ public class UDPExpeditionReceiver implements Runnable {
             udpSocket.close();
         }
     }
+    
+    /**
+     * If there are currently no listeners subscribed (see {@link #addListener(ExpeditionListener, boolean)} and
+     * {@link #removeListener(ExpeditionListener)}), this receiver is {@link #stop() stopped} and <code>true</code>
+     * is returned; otherwise, <code>false</code> is returned.
+     */
+    public synchronized boolean stopIfNoListeners() throws SocketException, IOException {
+        boolean result = listeners.isEmpty();
+        if (result) {
+            stop();
+        }
+        return result;
+    }
+    
+    public boolean isStopped() {
+        return stopped;
+    }
 
     public void run() {
         byte[] buf = new byte[MAX_PACKET_SIZE];
@@ -161,12 +178,16 @@ public class UDPExpeditionReceiver implements Runnable {
         return b == checksum;
     }
 
-    public void addListener(ExpeditionListener listener, boolean validMessagesOnly) {
+    public synchronized void addListener(ExpeditionListener listener, boolean validMessagesOnly) {
         listeners.put(listener, validMessagesOnly);
     }
 
-    public void removeListener(ExpeditionListener listener) {
+    public synchronized void removeListener(ExpeditionListener listener) {
         listeners.remove(listener);
+    }
+
+    public int getPort() {
+        return listeningOnPort;
     }
 
 }

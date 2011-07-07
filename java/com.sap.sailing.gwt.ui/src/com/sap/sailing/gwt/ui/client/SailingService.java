@@ -19,13 +19,11 @@ public interface SailingService extends RemoteService {
 
     List<RaceRecordDAO> listRacesInEvent(String eventJsonURL) throws Exception;
 
-    void track(RaceRecordDAO rr, String liveURI, String storedURI) throws Exception;
+    void track(RaceRecordDAO rr, String liveURI, String storedURI, boolean trackWind, boolean correctWindByDeclination) throws Exception;
 
     void storeTracTracConfiguration(String name, String jsonURL, String liveDataURI, String storedDataURI) throws Exception;
 
     void stopTrackingEvent(String eventName) throws Exception;
 
     void stopTrackingRace(String eventName, String raceName) throws Exception;
-
-    void startTrackingWind(String eventName, String raceName, int port, boolean correctByDeclination) throws Exception;
 }

@@ -10,7 +10,6 @@ import java.net.URL;
 import java.text.ParseException;
 import java.util.List;
 
-import com.sap.sailing.declination.DeclinationService;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.tracking.TrackedEvent;
@@ -93,25 +92,30 @@ public interface RacingEventService {
     
     /**
      * Stops tracking a single race. Other races of the same event that are currently tracked will continue to be
-     * tracked.
+     * tracked. If wind tracking for the race is currently running, it will be stopped (see also
+     * {@link #stopTrackingWind(Event, RaceDefinition)}).
      */
     void stopTracking(Event event, RaceDefinition race) throws MalformedURLException, IOException, InterruptedException;
 
     /**
      * @param port
      *            the UDP port on which to listen for incoming messages from Expedition clients
-     * @param declinationService
-     *            An optional service to convert the Expedition-provided wind bearings (which Expedition
-     *            believes to be true bearings) from magnetic to true bearings. Can be <code>null</code>
-     *            in which case the Expedition true bearings are used as true bearings.
+     * @param correctByDeclination
+     *            An optional service to convert the wind bearings (which the receiver may
+     *            believe to be true bearings) from magnetic to true bearings.
      * @throws SocketException
      *             thrown, e.g., in case there is already another listener on the port requested
      */
-    void startTrackingWind(Event event, RaceDefinition race, int port, DeclinationService declinationService) throws SocketException;
+    void startTrackingWind(Event event, RaceDefinition race, boolean correctByDeclination) throws SocketException;
 
     void stopTrackingWind(Event event, RaceDefinition race) throws SocketException, IOException;
 
-    Iterable<Triple<Event, RaceDefinition, Integer>> getWindTrackedRaces();
+    /**
+     * The {@link Triple#getC() third component} of the triples returned is a wind tracker-specific
+     * comment where a wind tracker may provide information such as its type name or, if applicable,
+     * connectivity information such as the network port on which it receives wind information.
+     */
+    Iterable<Triple<Event, RaceDefinition, String>> getWindTrackedRaces();
 
     /**
      * For the JSON URL of an account / event, lists the paramURLs that can be used for {@link #addRace(URL, URI, URI, WindStore)}

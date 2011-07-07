@@ -15,7 +15,8 @@ public interface SailingServiceAsync {
 
     void listRacesInEvent(String eventJsonURL, AsyncCallback<List<RaceRecordDAO>> callback);
 
-    void track(RaceRecordDAO rr, String liveURI, String storedURI, AsyncCallback<Void> callback);
+    void track(RaceRecordDAO rr, String liveURI, String storedURI, boolean trackWind, boolean correctWindByDeclination,
+            AsyncCallback<Void> callback);
 
     void getPreviousConfigurations(AsyncCallback<List<TracTracConfigurationDAO>> callback);
 
@@ -26,6 +27,4 @@ public interface SailingServiceAsync {
 
     void stopTrackingRace(String eventName, String raceName, AsyncCallback<Void> asyncCallback);
 
-    void startTrackingWind(String eventName, String raceName, int port, boolean correctDeclination,
-            AsyncCallback<Void> callback);
 }
