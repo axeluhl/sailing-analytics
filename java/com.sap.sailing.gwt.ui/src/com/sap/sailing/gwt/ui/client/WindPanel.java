@@ -11,6 +11,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.CellTree;
+import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.Handler;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.ColumnSortList;
@@ -94,6 +95,7 @@ public class WindPanel extends FormPanel implements EventDisplayer, RaceSelectio
         grid.setWidget(0, 1, btnRefresh);
         windSettingPanel = new WindSettingPanel(sailingService, errorReporter, this, this);
         grid.setWidget(1, 1, windSettingPanel);
+        grid.getCellFormatter().setVerticalAlignment(1, 1, HasVerticalAlignment.ALIGN_TOP);
         this.setWidget(grid);
     }
 
@@ -195,6 +197,7 @@ public class WindPanel extends FormPanel implements EventDisplayer, RaceSelectio
                 for (ColumnSortInfo sortInfo : sortedColumnList) {
                     columnSortList.push(sortInfo);
                 }
+                ColumnSortEvent.fire(windTable, columnSortList);
             }
             windDisplay.add(windTable);
         }
