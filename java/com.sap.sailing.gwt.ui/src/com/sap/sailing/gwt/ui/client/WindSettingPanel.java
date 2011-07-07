@@ -19,6 +19,7 @@ import com.sap.sailing.gwt.ui.shared.RaceDAO;
 import com.sap.sailing.gwt.ui.shared.WindDAO;
 
 public class WindSettingPanel extends FormPanel {
+    private final Button setWindButton;
     
     public WindSettingPanel(final SailingServiceAsync sailingService, final ErrorReporter errorReporter,
             final RaceSelectionProvider raceSelectionProvider, final WindShower windShower) {
@@ -37,7 +38,7 @@ public class WindSettingPanel extends FormPanel {
         grid.setWidget(4, 0, new Label("Longitude (optional)"));
         final DoubleBox lngDegBox = new DoubleBox();
         grid.setWidget(4, 1, lngDegBox);
-        Button setWindButton = new Button("Set");
+        setWindButton = new Button("Set");
         grid.setWidget(5, 0, setWindButton);
         linkEnterToButton(setWindButton, speedInKnotsBox, fromInDegBox, latDegBox, lngDegBox);
         setWindButton.addClickHandler(new ClickHandler() {
@@ -76,6 +77,10 @@ public class WindSettingPanel extends FormPanel {
                 }
             });
         }
+    }
+
+    public void setEnabled(boolean enabled) {
+        setWindButton.setEnabled(enabled);
     }
 
 }

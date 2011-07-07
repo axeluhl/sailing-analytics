@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.json.simple.JSONObject;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
@@ -209,8 +208,6 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         TrackedRace trackedRace = service.getDomainFactory().getTrackedEvent(event).getExistingTrackedRace(race);
         TimePoint from = new MillisecondsTimePoint(fromAsMilliseconds);
         TimePoint to = new MillisecondsTimePoint(toAsMilliseconds);
-        JSONObject jsonWindTracks = new JSONObject();
-        jsonWindTracks.put("currentwindsource", trackedRace.getWindSource().toString());
         Map<String, WindTrackInfoDAO> windTrackInfoDAOs = new HashMap<String, WindTrackInfoDAO>();
         result.windTrackInfoByWindSourceName = windTrackInfoDAOs;
         for (WindSource windSource : WindSource.values()) {
@@ -228,7 +225,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 WindDAO windDAO = new WindDAO();
                 windDAO.trueWindBearingDeg = wind.getBearing().getDegrees();
                 windDAO.trueWindFromDeg = wind.getBearing().reverse().getDegrees();
-                windDAO.trueWindSpeedInKnots = wind.getBearing().getDegrees();
+                windDAO.trueWindSpeedInKnots = wind.getKnots();
                 windDAO.trueWindSpeedInMetersPerSecond = wind.getMetersPerSecond();
                 if (wind.getPosition() != null) {
                     windDAO.position = new PositionDAO(wind.getPosition().getLatDeg(), wind.getPosition().getLngDeg());
@@ -238,6 +235,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                     windDAO.timepoint = wind.getTimePoint().asMillis();
                     Wind estimatedWind = windTrack.getEstimatedWind(wind.getPosition(), wind.getTimePoint());
                     windDAO.dampenedTrueWindBearingDeg = estimatedWind.getBearing().getDegrees();
+                    windDAO.dampenedTrueWindFromDeg = estimatedWind.getBearing().reverse().getDegrees();
                     windDAO.dampenedTrueWindSpeedInKnots = estimatedWind.getKnots();
                     windDAO.dampenedTrueWindSpeedInMetersPerSecond = estimatedWind.getMetersPerSecond();
                 }

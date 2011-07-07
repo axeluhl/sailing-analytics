@@ -71,15 +71,23 @@ public class WindPanel extends FormPanel implements EventDisplayer, RaceSelectio
             trackedEventsModel.getSelectionModel().addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
                 @Override
                 public void onSelectionChange(SelectionChangeEvent selectionChangeEvent) {
+                    selectedEventAndRace = null;
                     for (EventDAO event : eventsList.getList()) {
                         for (RegattaDAO regatta : event.regattas) {
                             for (RaceDAO race : regatta.races) {
                                 if (trackedEventsModel.getSelectionModel().isSelected(race)) {
                                     selectedEventAndRace = new Pair<EventDAO, RaceDAO>(event, race);
-                                    showWind(event, race);
+                                    if (race.currentlyTracked) {
+                                        showWind(event, race);
+                                    } else {
+                                        clearWindDisplay(); // no wind known for untracked race
+                                    }
                                 }
                             }
                         }
+                    }
+                    if (selectedEventAndRace == null) {
+                        clearWindDisplay();
                     }
                 }
             });
@@ -95,6 +103,7 @@ public class WindPanel extends FormPanel implements EventDisplayer, RaceSelectio
                     @Override
                     public void onSuccess(WindInfoForRaceDAO result) {
                         showWindForRace(result);
+                        windSettingPanel.setEnabled(true);
                     }
 
                     @Override
@@ -103,6 +112,11 @@ public class WindPanel extends FormPanel implements EventDisplayer, RaceSelectio
                                 + caught.getMessage());
                     }
                 });
+    }
+    
+    private void clearWindDisplay() {
+        grid.setWidget(1, 0, null);
+        windSettingPanel.setEnabled(false);
     }
 
     private void showWindForRace(WindInfoForRaceDAO result) {
@@ -135,8 +149,8 @@ public class WindPanel extends FormPanel implements EventDisplayer, RaceSelectio
             speedInKnotsColumn.setSortable(true);
             windDirectionInDegColumn.setSortable(true);
             CellTable<WindDAO> windTable = new CellTable<WindDAO>(/* pageSize */ 100);
-            windTable.addColumn(timeColumn, "Name");
-            windTable.addColumn(speedInKnotsColumn, "Tracking Started");
+            windTable.addColumn(timeColumn, "Time");
+            windTable.addColumn(speedInKnotsColumn, "Speed (kn)");
             windTable.addColumn(windDirectionInDegColumn, "From (deg)");
             ListDataProvider<WindDAO> windList = new ListDataProvider<WindDAO>(e.getValue().windFixes);
             windList.addDataDisplay(windTable);

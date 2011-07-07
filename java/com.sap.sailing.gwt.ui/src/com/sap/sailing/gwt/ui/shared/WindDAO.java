@@ -10,6 +10,7 @@ public class WindDAO implements IsSerializable {
     public Double dampenedTrueWindSpeedInMetersPerSecond;
     public Double dampenedTrueWindSpeedInKnots;
     public Double dampenedTrueWindBearingDeg;
+    public Double dampenedTrueWindFromDeg;
     public PositionDAO position;
     public Long timepoint;
     
