@@ -8,10 +8,12 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.json.simple.JSONObject;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
@@ -19,7 +21,22 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.Speed;
+import com.sap.sailing.domain.base.SpeedWithBearing;
+import com.sap.sailing.domain.base.TimePoint;
+import com.sap.sailing.domain.base.impl.DegreeBearingImpl;
+import com.sap.sailing.domain.base.impl.DegreePosition;
+import com.sap.sailing.domain.base.impl.KilometersPerHourSpeedImpl;
+import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
+import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
+import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.Wind;
+import com.sap.sailing.domain.tracking.WindSource;
+import com.sap.sailing.domain.tracking.WindTrack;
+import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.RaceRecord;
 import com.sap.sailing.domain.tractracadapter.TracTracConfiguration;
@@ -27,10 +44,14 @@ import com.sap.sailing.gwt.ui.client.SailingService;
 import com.sap.sailing.gwt.ui.shared.BoatClassDAO;
 import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
 import com.sap.sailing.gwt.ui.shared.EventDAO;
+import com.sap.sailing.gwt.ui.shared.PositionDAO;
 import com.sap.sailing.gwt.ui.shared.RaceDAO;
 import com.sap.sailing.gwt.ui.shared.RaceRecordDAO;
 import com.sap.sailing.gwt.ui.shared.RegattaDAO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDAO;
+import com.sap.sailing.gwt.ui.shared.WindDAO;
+import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDAO;
+import com.sap.sailing.gwt.ui.shared.WindTrackInfoDAO;
 import com.sap.sailing.mongodb.DomainObjectFactory;
 import com.sap.sailing.mongodb.MongoObjectFactory;
 import com.sap.sailing.mongodb.MongoWindStoreFactory;
@@ -174,8 +195,89 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     
     private void startTrackingWind(String eventName, String raceName, boolean correctByDeclination) throws Exception {
         Event event = service.getEventByName(eventName);
+        if (event != null) {
+            RaceDefinition race = getRaceByName(event, raceName);
+            service.startTrackingWind(event, race, correctByDeclination);
+        }
+    }
+    
+    @Override
+    public WindInfoForRaceDAO getWindInfo(String eventName, String raceName, long fromAsMilliseconds, long toAsMilliseconds) {
+        Event event = service.getEventByName(eventName);
         RaceDefinition race = getRaceByName(event, raceName);
-        service.startTrackingWind(event, race, correctByDeclination);
+        WindInfoForRaceDAO result = new WindInfoForRaceDAO();
+        TrackedRace trackedRace = service.getDomainFactory().getTrackedEvent(event).getExistingTrackedRace(race);
+        TimePoint from = new MillisecondsTimePoint(fromAsMilliseconds);
+        TimePoint to = new MillisecondsTimePoint(toAsMilliseconds);
+        JSONObject jsonWindTracks = new JSONObject();
+        jsonWindTracks.put("currentwindsource", trackedRace.getWindSource().toString());
+        Map<String, WindTrackInfoDAO> windTrackInfoDAOs = new HashMap<String, WindTrackInfoDAO>();
+        result.windTrackInfoByWindSourceName = windTrackInfoDAOs;
+        for (WindSource windSource : WindSource.values()) {
+            WindTrackInfoDAO windTrackInfoDAO = new WindTrackInfoDAO();
+            windTrackInfoDAO.windFixes = new ArrayList<WindDAO>();
+            windTrackInfoDAOs.put(windSource.name(), windTrackInfoDAO);
+            WindTrack windTrack = trackedRace.getWindTrack(windSource);
+            windTrackInfoDAO.dampeningIntervalInMilliseconds = windTrack.getMillisecondsOverWhichToAverageWind();
+            Iterator<Wind> windIter = windTrack.getFixesIterator(from, /* inclusive */true);
+            while (windIter.hasNext()) {
+                Wind wind = windIter.next();
+                if (wind.getTimePoint().compareTo(to) > 0) {
+                    break;
+                }
+                WindDAO windDAO = new WindDAO();
+                windDAO.trueWindBearingDeg = wind.getBearing().getDegrees();
+                windDAO.trueWindFromDeg = wind.getBearing().reverse().getDegrees();
+                windDAO.trueWindSpeedInKnots = wind.getBearing().getDegrees();
+                windDAO.trueWindSpeedInMetersPerSecond = wind.getMetersPerSecond();
+                if (wind.getPosition() != null) {
+                    windDAO.position = new PositionDAO(wind.getPosition().getLatDeg(), wind.getPosition().getLngDeg());
+                }
+                windTrackInfoDAO.windFixes.add(windDAO);
+                if (wind.getTimePoint() != null) {
+                    windDAO.timepoint = wind.getTimePoint().asMillis();
+                    Wind estimatedWind = windTrack.getEstimatedWind(wind.getPosition(), wind.getTimePoint());
+                    windDAO.dampenedTrueWindBearingDeg = estimatedWind.getBearing().getDegrees();
+                    windDAO.dampenedTrueWindSpeedInKnots = estimatedWind.getKnots();
+                    windDAO.dampenedTrueWindSpeedInMetersPerSecond = estimatedWind.getMetersPerSecond();
+                }
+            }
+        }
+        return result;
+    }
+    
+    @Override
+    public void setWind(String eventName, String raceName, WindDAO windDAO) {
+        Event event = service.getEventByName(eventName);
+        RaceDefinition race = getRaceByName(event, raceName);
+        Position p = null;
+        if (windDAO.position != null) {
+            p = new DegreePosition(windDAO.position.latDeg, windDAO.position.lngDeg);
+        }
+        TimePoint at = null;
+        if (windDAO.timepoint != null) {
+            at = new MillisecondsTimePoint(windDAO.timepoint);
+        }
+        SpeedWithBearing speedWithBearing = null;
+        Speed speed = null;
+        if (windDAO.trueWindSpeedInKnots != null) {
+            speed = new KnotSpeedImpl(windDAO.trueWindSpeedInKnots);
+        } else if (windDAO.trueWindSpeedInMetersPerSecond != null) {
+            speed = new KilometersPerHourSpeedImpl(windDAO.trueWindSpeedInMetersPerSecond * 3600. / 1000.);
+        } else if (windDAO.dampenedTrueWindSpeedInKnots != null) {
+            speed = new KnotSpeedImpl(windDAO.dampenedTrueWindSpeedInKnots);
+        } else if (windDAO.dampenedTrueWindSpeedInMetersPerSecond != null) {
+            speed = new KilometersPerHourSpeedImpl(windDAO.dampenedTrueWindSpeedInMetersPerSecond * 3600. / 1000.);
+        }
+        if (speed != null) {
+            if (windDAO.trueWindBearingDeg != null) {
+                speedWithBearing = new KnotSpeedWithBearingImpl(speed.getKnots(), new DegreeBearingImpl(windDAO.trueWindBearingDeg));
+            } else if (windDAO.trueWindFromDeg != null) {
+                speedWithBearing = new KnotSpeedWithBearingImpl(speed.getKnots(), new DegreeBearingImpl(windDAO.trueWindFromDeg).reverse());
+            }
+        }
+        Wind wind = new WindImpl(p, at, speedWithBearing);
+        service.getDomainFactory().getTrackedEvent(event).getTrackedRace(race).recordWind(wind, WindSource.WEB);
     }
     
 }

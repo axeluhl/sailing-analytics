@@ -4,24 +4,26 @@ import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
+import com.google.gwt.view.client.SelectionModel;
+import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.gwt.view.client.TreeViewModel;
 import com.sap.sailing.gwt.ui.shared.EventDAO;
 import com.sap.sailing.gwt.ui.shared.RaceDAO;
 import com.sap.sailing.gwt.ui.shared.RegattaDAO;
 
 public class TrackedEventsTreeModel implements TreeViewModel {
-    private final MultiSelectionModel<?> selectionModel;
+    private final SelectionModel<?> selectionModel;
     
     private final ListDataProvider<EventDAO> events;
     
-    public TrackedEventsTreeModel(ListDataProvider<EventDAO> eventsList) {
+    public TrackedEventsTreeModel(ListDataProvider<EventDAO> eventsList, boolean multiSelection) {
         this.events = eventsList;
-        selectionModel = new MultiSelectionModel<Object>();
+        selectionModel = multiSelection ? new MultiSelectionModel<Object>() : new SingleSelectionModel<Object>();
     }
     
     @SuppressWarnings("unchecked")
-    public <T> MultiSelectionModel<T> getSelectionModel() {
-        return (MultiSelectionModel<T>) selectionModel;
+    public <T> SelectionModel<T> getSelectionModel() {
+        return (SelectionModel<T>) selectionModel;
     }
 
     @Override

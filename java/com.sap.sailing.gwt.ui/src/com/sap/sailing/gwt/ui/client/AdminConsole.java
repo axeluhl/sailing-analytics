@@ -1,9 +1,14 @@
 package com.sap.sailing.gwt.ui.client;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HTML;
@@ -11,8 +16,9 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.sap.sailing.gwt.ui.shared.EventDAO;
 
-public class AdminConsole implements EntryPoint, ErrorReporter {
+public class AdminConsole implements EntryPoint, ErrorReporter, EventRefresher {
     /**
      * Create a remote service proxy to talk to the server-side sailing service.
      */
@@ -20,6 +26,7 @@ public class AdminConsole implements EntryPoint, ErrorReporter {
     private DialogBox errorDialogBox;
     private HTML serverResponseLabel;
     private Button dialogCloseButton;
+    private Set<EventDisplayer> eventDisplayers;
     
     /**
      * The message displayed to the user when the server cannot be reached or
@@ -33,18 +40,21 @@ public class AdminConsole implements EntryPoint, ErrorReporter {
     public void onModuleLoad() {
         StringConstants stringConstants = GWT.create(StringConstants.class);
         RootPanel rootPanel = RootPanel.get();
-        rootPanel.setSize("100%", "100%");
+        rootPanel.setSize("95%", "95%");
         errorDialogBox = createErrorDialog();
         
         TabPanel tabPanel = new TabPanel();
         tabPanel.setAnimationEnabled(true);
         rootPanel.add(tabPanel, 10, 10);
-        tabPanel.setSize("100%", "100%");
+        tabPanel.setSize("95%", "95%");
 
-        EventManagementPanel eventManagementPanel = new EventManagementPanel(sailingService, this);
+        eventDisplayers = new HashSet<EventDisplayer>();
+        EventManagementPanel eventManagementPanel = new EventManagementPanel(sailingService, this, this);
+        eventDisplayers.add(eventManagementPanel);
         eventManagementPanel.setSize("90%", "90%");
         tabPanel.add(eventManagementPanel, stringConstants.tracTracEvents(), false);
-        WindPanel windPanel = new WindPanel(sailingService, this);
+        WindPanel windPanel = new WindPanel(sailingService, this, this);
+        eventDisplayers.add(windPanel);
         windPanel.setSize("90%", "90%");
         tabPanel.add(windPanel, stringConstants.wind(), false);
         tabPanel.selectTab(0);
@@ -88,4 +98,21 @@ public class AdminConsole implements EntryPoint, ErrorReporter {
         dialogCloseButton.setFocus(true);
     }
     
+    @Override
+    public void fillEvents() {
+        sailingService.listEvents(new AsyncCallback<List<EventDAO>>() {
+            @Override
+            public void onSuccess(List<EventDAO> result) {
+                for (EventDisplayer eventDisplayer : eventDisplayers) {
+                    eventDisplayer.fillEvents(result);
+                }
+            }
+
+            @Override
+            public void onFailure(Throwable caught) {
+                reportError("Remote Procedure Call listEvents() - Failure");
+            }
+        });
+    }
+
 }

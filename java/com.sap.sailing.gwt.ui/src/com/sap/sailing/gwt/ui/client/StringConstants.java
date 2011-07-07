@@ -11,4 +11,6 @@ public interface StringConstants extends Constants {
     String listRaces();
     String wind();
     String windPanelLabel();
+    String refresh();
+    String remove();
 }

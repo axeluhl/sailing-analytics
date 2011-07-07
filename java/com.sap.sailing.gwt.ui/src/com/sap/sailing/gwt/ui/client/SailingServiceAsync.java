@@ -6,6 +6,8 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.ui.shared.EventDAO;
 import com.sap.sailing.gwt.ui.shared.RaceRecordDAO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDAO;
+import com.sap.sailing.gwt.ui.shared.WindDAO;
+import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDAO;
 
 /**
  * The async counterpart of {@link SailingService}
@@ -26,5 +28,10 @@ public interface SailingServiceAsync {
     void stopTrackingEvent(String eventName, AsyncCallback<Void> callback);
 
     void stopTrackingRace(String eventName, String raceName, AsyncCallback<Void> asyncCallback);
+
+    void getWindInfo(String eventName, String raceName, long fromAsMilliseconds, long toAsMilliseconds,
+            AsyncCallback<WindInfoForRaceDAO> callback);
+
+    void setWind(String eventName, String raceName, WindDAO wind, AsyncCallback<Void> callback);
 
 }

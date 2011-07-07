@@ -7,6 +7,8 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import com.sap.sailing.gwt.ui.shared.EventDAO;
 import com.sap.sailing.gwt.ui.shared.RaceRecordDAO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDAO;
+import com.sap.sailing.gwt.ui.shared.WindDAO;
+import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDAO;
 
 /**
  * The client side stub for the RPC service.
@@ -26,4 +28,8 @@ public interface SailingService extends RemoteService {
     void stopTrackingEvent(String eventName) throws Exception;
 
     void stopTrackingRace(String eventName, String raceName) throws Exception;
+
+    WindInfoForRaceDAO getWindInfo(String eventName, String raceName, long fromAsMilliseconds, long toAsMilliseconds);
+
+    void setWind(String eventName, String raceName, WindDAO wind);
 }

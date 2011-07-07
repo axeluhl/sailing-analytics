@@ -19,6 +19,8 @@ public class ExpeditionWindTrackerFactory implements WindTrackerFactory, BundleA
     private static Logger logger = Logger.getLogger(ExpeditionWindTrackerFactory.class.getName());
     
     private static WindTrackerFactory defaultInstance;
+    
+    private static BundleContext defaultBundleContext;
 
     private static final String EXPEDITION_UDP_PORT_PROPERTY_NAME = "expedition.udp.port";
     /**
@@ -43,6 +45,10 @@ public class ExpeditionWindTrackerFactory implements WindTrackerFactory, BundleA
             defaultInstance = new ExpeditionWindTrackerFactory();
         }
         return defaultInstance;
+    }
+    
+    public static BundleContext getBundleContext() {
+        return defaultBundleContext;
     }
 
     @Override
@@ -91,14 +97,12 @@ public class ExpeditionWindTrackerFactory implements WindTrackerFactory, BundleA
 
     @Override
     public void start(BundleContext context) throws Exception {
-        // TODO Auto-generated method stub
-        
+        defaultBundleContext = context;
+        defaultInstance = this;
     }
 
     @Override
     public void stop(BundleContext context) throws Exception {
-        // TODO Auto-generated method stub
-        
     }
     
 }
