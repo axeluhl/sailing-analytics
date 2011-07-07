@@ -284,14 +284,12 @@ public class DomainFactoryImpl implements DomainFactory {
         synchronized (raceCache) {
             RaceDefinition result = raceCache.get(race);
             boolean interrupted = false;
-            synchronized (raceCache) {
-                while (!interrupted && result == null) {
-                    try {
-                        raceCache.wait();
-                        result = raceCache.get(race);
-                    } catch (InterruptedException e) {
-                        interrupted = true;
-                    }
+            while (!interrupted && result == null) {
+                try {
+                    raceCache.wait();
+                    result = raceCache.get(race);
+                } catch (InterruptedException e) {
+                    interrupted = true;
                 }
             }
             return result;

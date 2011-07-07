@@ -185,7 +185,7 @@ public class RacingEventServiceImpl implements RacingEventService {
     }
 
     @Override
-    public synchronized void startTrackingWind(Event event, RaceDefinition race,
+    public void startTrackingWind(Event event, RaceDefinition race,
             boolean correctByDeclination) throws SocketException {
         windTrackerFactory.createWindTracker(getDomainFactory().getOrCreateTrackedEvent(event), race, correctByDeclination);
     }

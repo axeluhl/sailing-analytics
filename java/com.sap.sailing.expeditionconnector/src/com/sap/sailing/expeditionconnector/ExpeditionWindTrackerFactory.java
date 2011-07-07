@@ -52,7 +52,7 @@ public class ExpeditionWindTrackerFactory implements WindTrackerFactory, BundleA
     }
 
     @Override
-    public synchronized WindTracker createWindTracker(DynamicTrackedEvent trackedEvent, RaceDefinition race,
+    public WindTracker createWindTracker(DynamicTrackedEvent trackedEvent, RaceDefinition race,
             boolean correctByDeclination) throws SocketException {
         WindTracker result = windTrackers.get(race);
         if (result == null) {
