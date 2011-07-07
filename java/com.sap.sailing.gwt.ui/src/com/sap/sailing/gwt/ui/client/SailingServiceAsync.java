@@ -25,4 +25,7 @@ public interface SailingServiceAsync {
     void stopTrackingEvent(String eventName, AsyncCallback<Void> callback);
 
     void stopTrackingRace(String eventName, String raceName, AsyncCallback<Void> asyncCallback);
+
+    void startTrackingWind(String eventName, String raceName, int port, boolean correctDeclination,
+            AsyncCallback<Void> callback);
 }

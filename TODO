@@ -1,11 +1,6 @@
 Axel
 ====
 
- - The "Remove" button has different meanings: stop tracking a race if it's currently being
-   tracked. But nothing will be removed unless it's the last race in an event. When "removing"
-   an entire event, all races will have their trackers stopped, eventually removing the event.
-   At least enrich race display by a note / icon that shows whether the race is still being tracked.
-
  - Finish a first draft version of a GWT admin UI
 
    * Wind tracking, manual wind entry

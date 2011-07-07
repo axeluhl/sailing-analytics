@@ -16,6 +16,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
+import com.sap.sailing.declination.DeclinationService;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Event;
@@ -91,7 +92,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     private List<RaceDAO> getRaceDAOs(Set<RaceDefinition> races) {
         List<RaceDAO> result = new ArrayList<RaceDAO>();
         for (RaceDefinition r : races) {
-            result.add(new RaceDAO(r.getName(), getCompetitorDAOs(r.getCompetitors())));
+            result.add(new RaceDAO(r.getName(), getCompetitorDAOs(r.getCompetitors()), service.isRaceBeingTracked(r)));
         }
         return result;
     }
@@ -151,14 +152,30 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         service.stopTracking(service.getEventByName(eventName));
     }
 
+    private RaceDefinition getRaceByName(Event event, String raceName) {
+        for (RaceDefinition r : event.getAllRaces()) {
+            if (r.getName().equals(raceName)) {
+                return r;
+            }
+        }
+        return null;
+    }
+    
     @Override
     public void stopTrackingRace(String eventName, String raceName) throws Exception {
         Event event = service.getEventByName(eventName);
-        for (RaceDefinition r : event.getAllRaces()) {
-            if (r.getName().equals(raceName)) {
-                service.stopTracking(event,  r);
-            }
+        RaceDefinition r = getRaceByName(event, raceName);
+        if (r != null) {
+            service.stopTracking(event, r);
         }
+    }
+    
+    @Override
+    public void startTrackingWind(String eventName, String raceName, int port, boolean correctByDeclination) throws Exception {
+        Event event = service.getEventByName(eventName);
+        RaceDefinition race = getRaceByName(event, raceName);
+        service.startTrackingWind(event, race, port,
+                correctByDeclination ? DeclinationService.INSTANCE : null);
     }
     
 }

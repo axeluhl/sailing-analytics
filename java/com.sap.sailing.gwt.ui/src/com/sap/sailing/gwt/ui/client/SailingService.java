@@ -26,4 +26,6 @@ public interface SailingService extends RemoteService {
     void stopTrackingEvent(String eventName) throws Exception;
 
     void stopTrackingRace(String eventName, String raceName) throws Exception;
+
+    void startTrackingWind(String eventName, String raceName, int port, boolean correctByDeclination) throws Exception;
 }

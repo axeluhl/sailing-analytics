@@ -120,4 +120,6 @@ public interface RacingEventService {
      */
     List<RaceRecord> getRaceRecords(URL jsonURL) throws IOException, ParseException, org.json.simple.parser.ParseException;
 
+    boolean isRaceBeingTracked(RaceDefinition r);
+
 }

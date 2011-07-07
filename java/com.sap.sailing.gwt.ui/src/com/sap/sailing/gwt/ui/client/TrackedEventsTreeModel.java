@@ -77,6 +77,9 @@ public class TrackedEventsTreeModel implements TreeViewModel {
         @Override
         public void render(com.google.gwt.cell.client.Cell.Context context, RaceDAO value, SafeHtmlBuilder sb) {
             sb.appendEscaped(value.name);
+            if (value.currentlyTracked) {
+                sb.appendEscaped(" (tracked)");
+            }
         }
     }
 }

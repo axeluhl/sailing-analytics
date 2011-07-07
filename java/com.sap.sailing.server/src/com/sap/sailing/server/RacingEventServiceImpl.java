@@ -74,6 +74,18 @@ public class RacingEventServiceImpl implements RacingEventService {
     public Iterable<Event> getAllEvents() {
         return Collections.unmodifiableCollection(eventsByName.values());
     }
+    
+    @Override
+    public boolean isRaceBeingTracked(RaceDefinition r) {
+        for (Set<RaceTracker> trackers : raceTrackersByEvent.values()) {
+            for (RaceTracker tracker : trackers) {
+                if (tracker.getRace() == r) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 
     @Override
     public Event getEventByName(String name) {
