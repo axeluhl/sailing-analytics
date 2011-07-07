@@ -145,24 +145,41 @@ public class WindPanel extends FormPanel implements EventDisplayer, RaceSelectio
                     return ""+object.trueWindFromDeg;
                 }
             };
+            TextColumn<WindDAO> dampenedSpeedInKnotsColumn = new TextColumn<WindDAO>() {
+                @Override
+                public String getValue(WindDAO object) {
+                    return ""+object.dampenedTrueWindSpeedInKnots;
+                }
+            };
+            TextColumn<WindDAO> dampenedWindDirectionInDegColumn = new TextColumn<WindDAO>() {
+                @Override
+                public String getValue(WindDAO object) {
+                    return ""+object.dampenedTrueWindFromDeg;
+                }
+            };
             timeColumn.setSortable(true);
             speedInKnotsColumn.setSortable(true);
             windDirectionInDegColumn.setSortable(true);
+            dampenedSpeedInKnotsColumn.setSortable(true);
+            dampenedWindDirectionInDegColumn.setSortable(true);
             CellTable<WindDAO> windTable = new CellTable<WindDAO>(/* pageSize */ 100);
             windTable.addColumn(timeColumn, "Time");
             windTable.addColumn(speedInKnotsColumn, "Speed (kn)");
             windTable.addColumn(windDirectionInDegColumn, "From (deg)");
+            windTable.addColumn(dampenedSpeedInKnotsColumn, "Avg Speed (kn)");
+            windTable.addColumn(dampenedWindDirectionInDegColumn, "Avg From (deg)");
             ListDataProvider<WindDAO> windList = new ListDataProvider<WindDAO>(e.getValue().windFixes);
             windList.addDataDisplay(windTable);
             Handler columnSortHandler = getWindTableColumnSortHandler(windList.getList(), timeColumn,
-                    speedInKnotsColumn, windDirectionInDegColumn);
+                    speedInKnotsColumn, windDirectionInDegColumn, dampenedSpeedInKnotsColumn, dampenedWindDirectionInDegColumn);
             windTable.addColumnSortHandler(columnSortHandler);
             windDisplay.add(windTable);
         }
     }
     
     private Handler getWindTableColumnSortHandler(List<WindDAO> list, TextColumn<WindDAO> timeColumn,
-            TextColumn<WindDAO> speedInKnotsColumn, TextColumn<WindDAO> windDirectionInDegColumn) {
+            TextColumn<WindDAO> speedInKnotsColumn, TextColumn<WindDAO> windDirectionInDegColumn,
+            TextColumn<WindDAO> dampenedSpeedInKnotsColumn, TextColumn<WindDAO> dampenedWindDirectionInDegColumn) {
         ListHandler<WindDAO> result = new ListHandler<WindDAO>(list);
         result.setComparator(timeColumn, new Comparator<WindDAO>() {
             @Override
@@ -182,6 +199,20 @@ public class WindPanel extends FormPanel implements EventDisplayer, RaceSelectio
             public int compare(WindDAO o1, WindDAO o2) {
                 return o1.trueWindFromDeg < o2.trueWindFromDeg ? -1 :
                     o1.trueWindFromDeg == o2.trueWindFromDeg ? 0 : 1;
+            }
+        });
+        result.setComparator(dampenedSpeedInKnotsColumn, new Comparator<WindDAO>() {
+            @Override
+            public int compare(WindDAO o1, WindDAO o2) {
+                return o1.dampenedTrueWindSpeedInKnots < o2.dampenedTrueWindSpeedInKnots ? -1 :
+                    o1.dampenedTrueWindSpeedInKnots == o2.dampenedTrueWindSpeedInKnots ? 0 : 1;
+            }
+        });
+        result.setComparator(dampenedWindDirectionInDegColumn, new Comparator<WindDAO>() {
+            @Override
+            public int compare(WindDAO o1, WindDAO o2) {
+                return o1.dampenedTrueWindFromDeg < o2.dampenedTrueWindFromDeg ? -1 :
+                    o1.dampenedTrueWindFromDeg == o2.dampenedTrueWindFromDeg ? 0 : 1;
             }
         });
         return result;
