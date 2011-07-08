@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -69,11 +68,12 @@ public class EventManagementPanel extends FormPanel implements EventDisplayer {
     private final EventRefresher eventRefresher;
     private final StringConstants stringConstants;
 
-    public EventManagementPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter, EventRefresher eventRefresher) {
+    public EventManagementPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
+            EventRefresher eventRefresher, StringConstants stringConstants) {
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.eventRefresher = eventRefresher;
-        stringConstants = GWT.create(StringConstants.class);
+        this.stringConstants = stringConstants;
         VerticalPanel verticalPanel = new VerticalPanel();
         this.setWidget(verticalPanel);
         verticalPanel.setSize("100%", "100%");

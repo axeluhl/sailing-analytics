@@ -4,14 +4,6 @@
    <extension
          point="org.eclipse.equinox.http.registry.servlets">
       <servlet
-            alias="/com_sap_sailing_gwt_ui/greet"
-            class="com.sap.sailing.gwt.ui.server.GreetingServiceImpl"
-            load-on-startup="true">
-      </servlet>
-   </extension>
-   <extension
-         point="org.eclipse.equinox.http.registry.servlets">
-      <servlet
             alias="/com.sap.sailing.gwt.ui.AdminConsole/sailing"
             class="com.sap.sailing.gwt.ui.server.SailingServiceImpl"
             load-on-startup="true">

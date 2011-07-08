@@ -6,7 +6,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.cellview.client.CellTable;
@@ -49,11 +48,11 @@ public class WindPanel extends FormPanel implements EventDisplayer, RaceSelectio
     private final TextColumn<WindDAO> dampenedSpeedInKnotsColumn;
     private final TextColumn<WindDAO> dampenedWindDirectionInDegColumn;
 
-    public WindPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter, EventRefresher eventRefresher) {
+    public WindPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter, EventRefresher eventRefresher, StringConstants stringConstants) {
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.eventRefresher = eventRefresher;
-        stringConstants = GWT.create(StringConstants.class);
+        this.stringConstants = stringConstants;
         timeColumn = new TextColumn<WindDAO>() {
             @Override
             public String getValue(WindDAO object) {
@@ -165,8 +164,8 @@ public class WindPanel extends FormPanel implements EventDisplayer, RaceSelectio
         VerticalPanel windDisplay = new VerticalPanel();
         grid.setWidget(1, 0, windDisplay);
         for (Map.Entry<String, WindTrackInfoDAO> e : result.windTrackInfoByWindSourceName.entrySet()) {
-            Label windSourceLabel = new Label("Wind Source: "+e.getKey()+
-                    ", Dampening Interval: "+e.getValue().dampeningIntervalInMilliseconds+"ms");
+            Label windSourceLabel = new Label(stringConstants.windSource()+": "+e.getKey()+
+                    ", "+stringConstants.dampeningInterval()+e.getValue().dampeningIntervalInMilliseconds+"ms");
             windDisplay.add(windSourceLabel);
             timeColumn.setSortable(true);
             speedInKnotsColumn.setSortable(true);

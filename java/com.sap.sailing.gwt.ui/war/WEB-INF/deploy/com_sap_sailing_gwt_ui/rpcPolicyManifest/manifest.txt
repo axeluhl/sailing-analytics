@@ -1,2 +1,0 @@
-# Module com_sap_sailing_gwt_ui
-# RPC service class, partial path of RPC policy file

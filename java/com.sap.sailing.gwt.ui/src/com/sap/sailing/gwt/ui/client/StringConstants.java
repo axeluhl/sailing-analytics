@@ -13,4 +13,7 @@ public interface StringConstants extends Constants {
     String windPanelLabel();
     String refresh();
     String remove();
+    String windSource();
+    String dampeningInterval();
+    String map();
 }
