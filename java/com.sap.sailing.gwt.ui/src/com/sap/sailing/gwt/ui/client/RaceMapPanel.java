@@ -52,7 +52,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         vp.add(new Label(stringConstants.races()));
         vp.add(raceListBox);
         grid.setWidget(0,  0, vp);
-        timePanel = new TimePanel(stringConstants);
+        timePanel = new TimePanel(stringConstants, /* delayBetweenAutoAdvancesInMilliseconds */ 3000);
         grid.setWidget(0, 1, timePanel);
     }
 

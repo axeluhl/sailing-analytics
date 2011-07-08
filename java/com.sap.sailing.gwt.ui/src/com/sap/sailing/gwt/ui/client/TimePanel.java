@@ -4,8 +4,14 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.RepeatingCommand;
+import com.google.gwt.event.dom.client.BlurEvent;
+import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.FocusEvent;
+import com.google.gwt.event.dom.client.FocusHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DoubleBox;
 import com.google.gwt.user.client.ui.FormPanel;
@@ -21,14 +27,19 @@ public class TimePanel extends FormPanel {
     private final Set<TimeListener> listeners;
     private final Button playPauseButton;
     private final DoubleBox accelerationBox;
+    private final DoubleBox delayBox;
+    private boolean delayBoxHasFocus;
     private final Label timeLabel;
     private Date time;
     private boolean playing;
+    private final long delayBetweenAutoAdvancesInMilliseconds;
     
-    public TimePanel(StringConstants stringConstants) {
+    public TimePanel(StringConstants stringConstants, long delayBetweenAutoAdvancesInMilliseconds) {
+        this.delayBetweenAutoAdvancesInMilliseconds = delayBetweenAutoAdvancesInMilliseconds;
         listeners = new HashSet<TimeListener>();
         VerticalPanel vp = new VerticalPanel();
         vp.setSize("100%", "100%");
+        vp.setSpacing(5);
         HorizontalPanel hp = new HorizontalPanel();
         hp.setSize("100%", "100%");
         vp.add(hp);
@@ -50,6 +61,7 @@ public class TimePanel extends FormPanel {
         });
         hp.add(slowDownButton);
         accelerationBox = new DoubleBox();
+        accelerationBox.setVisibleLength(3);
         accelerationBox.setValue(1.0);
         accelerationBox.setTitle(stringConstants.accelerationHelp());
         hp.add(new Label(stringConstants.acceleration()));
@@ -62,11 +74,29 @@ public class TimePanel extends FormPanel {
             }
         });
         hp.add(speedUpButton);
+        hp.add(new Label(stringConstants.delay()));
+        delayBox = new DoubleBox();
+        delayBox.setVisibleLength(10);
+        delayBox.setText("");
+        delayBox.setTitle(stringConstants.delayHelp());
+        delayBox.addFocusHandler(new FocusHandler() {
+            @Override
+            public void onFocus(FocusEvent e) {
+                delayBoxHasFocus = true;
+            }
+        });
+        delayBox.addBlurHandler(new BlurHandler() {
+            @Override
+            public void onBlur(BlurEvent event) {
+                delayBoxHasFocus = false;
+                delayChanged();
+            }
+        });
+        hp.add(delayBox);
         hp.add(new Label(stringConstants.time()));
         timeLabel = new Label();
         hp.add(timeLabel);
         slider = new SliderWidget();
-        slider.setStepLabels(true);
         slider.setTotalUnits(10);
         EventListener sliderListener = new EventListener() {
             @Override
@@ -92,6 +122,9 @@ public class TimePanel extends FormPanel {
     private void setTime(long timePointAsMillis) {
         time = new Date(timePointAsMillis);
         timeLabel.setText(time.toString());
+        if (!delayBoxHasFocus) {
+            delayBox.setValue((double) Math.round((double) (new Date().getTime() - timePointAsMillis)/1000.));
+        }
         for (TimeListener listener : listeners) {
             listener.timeChanged(time);
         }
@@ -101,8 +134,7 @@ public class TimePanel extends FormPanel {
     public void setMin(Date min) {
         slider.setMin(min.getTime());
         if (time == null || time.before(min)) {
-            slider.setValue((long) min.getTime());
-            setTime((long) min.getTime());
+            setTimeIncludingSlider(min);
         }
     }
 
@@ -110,15 +142,41 @@ public class TimePanel extends FormPanel {
     public void setMax(Date max) {
         slider.setMax(max.getTime());
         if (time == null || time.after(max)) {
-            slider.setValue((long) max.getTime());
-            setTime((long) max.getTime());
+            setTimeIncludingSlider(max);
         }
+    }
+
+    private void setTimeIncludingSlider(Date t) {
+        slider.setValue((long) t.getTime());
+        setTime((long) t.getTime());
     }
 
 
     private void togglePlay() {
         playing = !playing;
         playPauseButton.setText(playing ? "||" : ">");
+        if (playing) {
+            startAutoAdvance();
+        }
+    }
+
+    private void startAutoAdvance() {
+        RepeatingCommand command = new RepeatingCommand( ) {
+            @Override
+            public boolean execute() {
+                setTimeIncludingSlider(new Date((long) (time.getTime() + accelerationBox.getValue()
+                        * delayBetweenAutoAdvancesInMilliseconds)));
+                return playing;
+            }
+        };
+        Scheduler.get().scheduleFixedPeriod(command, (int) delayBetweenAutoAdvancesInMilliseconds);
+    }
+    
+    private void delayChanged() {
+        Double delay = delayBox.getValue();
+        if (delay != null) {
+            setTimeIncludingSlider(new Date(System.currentTimeMillis()-delayBox.getValue().longValue()*1000));
+        }
     }
     
 }

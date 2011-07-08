@@ -21,4 +21,6 @@ public interface StringConstants extends Constants {
     String time();
     String acceleration();
     String accelerationHelp();
+    String delay();
+    String delayHelp();
 }
