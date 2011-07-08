@@ -1,39 +1,66 @@
 package com.sap.sailing.gwt.ui.client;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.maps.client.InfoWindowContent;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.Maps;
 import com.google.gwt.maps.client.control.Control;
-import com.google.gwt.maps.client.control.LargeMapControl;
 import com.google.gwt.maps.client.control.LargeMapControl3D;
-import com.google.gwt.maps.client.control.SmallZoomControl3D;
 import com.google.gwt.maps.client.geom.LatLng;
 import com.google.gwt.maps.client.overlay.Marker;
 import com.google.gwt.user.client.ui.FormPanel;
+import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.gwt.ui.shared.EventDAO;
+import com.sap.sailing.gwt.ui.shared.RaceDAO;
+import com.sap.sailing.gwt.ui.shared.RegattaDAO;
+import com.sap.ui.commons.client.SliderWidget;
 
 public class RaceMapPanel extends FormPanel implements EventDisplayer {
     private final StringConstants stringConstants;
     private final SailingServiceAsync sailingService;
     private final ErrorReporter errorReporter;
-    private final EventRefresher eventRefresher;
-    private final VerticalPanel verticalPanel;
+    private final Grid grid;
     private MapWidget map;
+    private final List<RaceDAO> raceList;
+    private final ListBox raceListBox;
     
     private final String mapsAPIKey = "ABQIAAAAmvjPh3ZpHbnwuX3a66lDqRTB4YHzt9A9TZNGGB87gEPRa24TnRQjCq1hRMRvlUmR4K97fo_4LwER6A";
     
-    public RaceMapPanel(SailingServiceAsync sailingService, ErrorReporter errorReporter, EventRefresher eventRefresher, StringConstants stringConstants) {
+    public RaceMapPanel(SailingServiceAsync sailingService, ErrorReporter errorReporter, StringConstants stringConstants) {
         this.sailingService = sailingService;
         this.stringConstants = stringConstants;
         this.errorReporter = errorReporter;
-        this.eventRefresher = eventRefresher;
-        this.verticalPanel = new VerticalPanel();
-        setWidget(verticalPanel);
-        verticalPanel.setSize("100%", "100%");
-        
+        this.grid = new Grid(2, 2);
+        setWidget(grid);
+        grid.setSize("100%", "100%");
+        grid.getColumnFormatter().setWidth(0, "20%");
+        grid.getColumnFormatter().setWidth(1, "80%");
+        loadMapsAPI();
+        raceListBox = new ListBox();
+        raceList = new ArrayList<RaceDAO>();
+        VerticalPanel vp = new VerticalPanel();
+        vp.add(new Label(stringConstants.races()));
+        vp.add(raceListBox);
+        grid.setWidget(0,  0, vp);
+        SliderWidget slider = new SliderWidget();
+        slider.setMin(0);
+        slider.setMax(10000000);
+        slider.setStepLabels(true);
+        slider.setTitle(stringConstants.time());
+        slider.setTotalUnits(10);
+        grid.setWidget(0, 1, slider);
+    }
+
+    private void loadMapsAPI() {
         Maps.loadMapsApi(mapsAPIKey, "2", false, new Runnable() {
             public void run() {
                 LatLng cawkerCity = LatLng.newInstance(39.509, -98.434);
@@ -48,8 +75,8 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer {
                     new InfoWindowContent("World's Largest Ball of Sisal Twine"));
 
                 // Add the map to the HTML host page
-                verticalPanel.add(map);
-                map.setSize("75%", "768px");
+                grid.setWidget(1, 1, map);
+                map.setSize("100%", "500px");
                 map.setScrollWheelZoomEnabled(true);
                 map.setContinuousZoom(true);
           }
@@ -58,7 +85,42 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer {
 
     @Override
     public void fillEvents(List<EventDAO> result) {
-        // TODO Auto-generated method stub
+        raceList.clear();
+        raceListBox.clear();
+        for (EventDAO event : result) {
+            for (RegattaDAO regatta : event.regattas) {
+                for (RaceDAO race : regatta.races) {
+                    raceList.add(race);
+                    raceListBox.addItem(event.name+" - "+race.name+(race.currentlyTracked ? " ("+stringConstants.tracked()+")" : ""));
+                }
+            }
+        }
+        raceListBox.addChangeHandler(new ChangeHandler() {
+            @Override
+            public void onChange(ChangeEvent event) {
+                updateMapFromSelectedRace();
+            }
+        });
+        raceListBox.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                updateMapFromSelectedRace();
+            }
+        });
+    }
+
+
+    private void updateMapFromSelectedRace() {
+        RaceDAO selectedRace = getSelectedRace();
         
+    }
+
+    private RaceDAO getSelectedRace() {
+        int i = raceListBox.getSelectedIndex();
+        RaceDAO result = null;
+        if (i >= 0) {
+            result = raceList.get(i);
+        }
+        return result;
     }
 }

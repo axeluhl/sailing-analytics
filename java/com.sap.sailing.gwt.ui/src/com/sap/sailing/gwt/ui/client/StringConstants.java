@@ -16,4 +16,7 @@ public interface StringConstants extends Constants {
     String windSource();
     String dampeningInterval();
     String map();
+    String races();
+    String tracked();
+    String time();
 }
