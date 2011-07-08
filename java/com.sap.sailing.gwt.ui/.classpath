@@ -4,5 +4,15 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="lib" path="lib/gwt-maps.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/C:/data/SAP/sailing/workspace/java/com.sap.sailing.gwt.ui/lib/gwt-maps-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="lib/gwt-visualization.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/C:/data/SAP/sailing/workspace/java/com.sap.sailing.gwt.ui/lib/gwt-visualization-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>

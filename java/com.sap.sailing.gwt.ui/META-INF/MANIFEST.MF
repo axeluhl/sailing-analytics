@@ -17,6 +17,8 @@ Require-Bundle: javax.servlet;bundle-version="2.5.0",
  com.mongodb.driver;bundle-version="2.6.2",
  com.sap.sailing.declination
 Bundle-ClassPath: war/WEB-INF/classes/,
- .
+ .,
+ lib/gwt-maps.jar,
+ lib/gwt-visualization.jar
 Bundle-Activator: com.sap.sailing.gwt.ui.server.Activator
 Bundle-ActivationPolicy: lazy

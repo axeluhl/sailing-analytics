@@ -165,7 +165,7 @@ public class WindPanel extends FormPanel implements EventDisplayer, RaceSelectio
         grid.setWidget(1, 0, windDisplay);
         for (Map.Entry<String, WindTrackInfoDAO> e : result.windTrackInfoByWindSourceName.entrySet()) {
             Label windSourceLabel = new Label(stringConstants.windSource()+": "+e.getKey()+
-                    ", "+stringConstants.dampeningInterval()+e.getValue().dampeningIntervalInMilliseconds+"ms");
+                    ", "+stringConstants.dampeningInterval()+" "+e.getValue().dampeningIntervalInMilliseconds+"ms");
             windDisplay.add(windSourceLabel);
             timeColumn.setSortable(true);
             speedInKnotsColumn.setSortable(true);
