@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.ui.shared;
 
+import java.util.Date;
+
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tractracadapter.RaceTracker;
@@ -14,6 +16,11 @@ public class RaceDAO implements IsSerializable {
      * accordingly.
      */
     public boolean currentlyTracked;
+
+    public Date startOfRace;
+    public Date startOfTracking;
+    public Date timePointOfLastEvent;
+    public Date timePointOfNewestEvent;
     
     public RaceDAO() {}
 

@@ -1,0 +1,2 @@
+serviceClass: com.sap.sailing.gwt.ui.client.SailingService
+path: 4F5B285D334CF9AF08B53D8597EA2EE4.gwt.rpc

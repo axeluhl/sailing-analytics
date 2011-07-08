@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.client;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -22,9 +23,8 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.gwt.ui.shared.EventDAO;
 import com.sap.sailing.gwt.ui.shared.RaceDAO;
 import com.sap.sailing.gwt.ui.shared.RegattaDAO;
-import com.sap.ui.commons.client.SliderWidget;
 
-public class RaceMapPanel extends FormPanel implements EventDisplayer {
+public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListener {
     private final StringConstants stringConstants;
     private final SailingServiceAsync sailingService;
     private final ErrorReporter errorReporter;
@@ -32,7 +32,8 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer {
     private MapWidget map;
     private final List<RaceDAO> raceList;
     private final ListBox raceListBox;
-    
+    private final TimePanel timePanel;
+
     private final String mapsAPIKey = "ABQIAAAAmvjPh3ZpHbnwuX3a66lDqRTB4YHzt9A9TZNGGB87gEPRa24TnRQjCq1hRMRvlUmR4K97fo_4LwER6A";
     
     public RaceMapPanel(SailingServiceAsync sailingService, ErrorReporter errorReporter, StringConstants stringConstants) {
@@ -51,13 +52,8 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer {
         vp.add(new Label(stringConstants.races()));
         vp.add(raceListBox);
         grid.setWidget(0,  0, vp);
-        SliderWidget slider = new SliderWidget();
-        slider.setMin(0);
-        slider.setMax(10000000);
-        slider.setStepLabels(true);
-        slider.setTitle(stringConstants.time());
-        slider.setTotalUnits(10);
-        grid.setWidget(0, 1, slider);
+        timePanel = new TimePanel(stringConstants);
+        grid.setWidget(0, 1, timePanel);
     }
 
     private void loadMapsAPI() {
@@ -82,7 +78,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer {
           }
         });
     }
-
+    
     @Override
     public void fillEvents(List<EventDAO> result) {
         raceList.clear();
@@ -107,12 +103,18 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer {
                 updateMapFromSelectedRace();
             }
         });
+        updateMapFromSelectedRace();
     }
 
 
     private void updateMapFromSelectedRace() {
         RaceDAO selectedRace = getSelectedRace();
-        
+        updateSlider(selectedRace);
+    }
+
+    private void updateSlider(RaceDAO selectedRace) {
+        timePanel.setMin(selectedRace.startOfTracking);
+        timePanel.setMax(selectedRace.timePointOfNewestEvent);
     }
 
     private RaceDAO getSelectedRace() {
@@ -122,5 +124,10 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer {
             result = raceList.get(i);
         }
         return result;
+    }
+
+    @Override
+    public void timeChanged(Date date) {
+        // TODO implement timeChanged such that race display is advanced to date
     }
 }

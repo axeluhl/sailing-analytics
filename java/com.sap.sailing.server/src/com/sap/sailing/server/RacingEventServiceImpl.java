@@ -20,6 +20,7 @@ import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTracker;
 import com.sap.sailing.domain.tracking.WindTrackerFactory;
@@ -210,6 +211,11 @@ public class RacingEventServiceImpl implements RacingEventService {
             }
         }
         return result;
+    }
+
+    @Override
+    public TrackedRace getTrackedRace(Event e, RaceDefinition r) {
+        return getDomainFactory().getTrackedEvent(e).getTrackedRace(r);
     }
     
 }

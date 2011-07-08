@@ -19,4 +19,6 @@ public interface StringConstants extends Constants {
     String races();
     String tracked();
     String time();
+    String acceleration();
+    String accelerationHelp();
 }

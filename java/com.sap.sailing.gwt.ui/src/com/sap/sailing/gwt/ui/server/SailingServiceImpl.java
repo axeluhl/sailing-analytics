@@ -100,7 +100,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         }
         List<RegattaDAO> result = new ArrayList<RegattaDAO>();
         for (Map.Entry<BoatClass, Set<RaceDefinition>> e : racesByBoatClass.entrySet()) {
-            List<RaceDAO> raceDAOsInBoatClass = getRaceDAOs(e.getValue());
+            List<RaceDAO> raceDAOsInBoatClass = getRaceDAOs(event, e.getValue());
             if (!raceDAOsInBoatClass.isEmpty()) {
                 RegattaDAO regatta = new RegattaDAO(new BoatClassDAO(e.getKey().getName()), raceDAOsInBoatClass);
                 result.add(regatta);
@@ -109,10 +109,18 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         return result;
     }
 
-    private List<RaceDAO> getRaceDAOs(Set<RaceDefinition> races) {
+    private List<RaceDAO> getRaceDAOs(Event event, Set<RaceDefinition> races) {
         List<RaceDAO> result = new ArrayList<RaceDAO>();
         for (RaceDefinition r : races) {
-            result.add(new RaceDAO(r.getName(), getCompetitorDAOs(r.getCompetitors()), service.isRaceBeingTracked(r)));
+            RaceDAO raceDAO = new RaceDAO(r.getName(), getCompetitorDAOs(r.getCompetitors()), service.isRaceBeingTracked(r));
+            if (raceDAO.currentlyTracked) {
+                TrackedRace trackedRace = service.getTrackedRace(event, r);
+                raceDAO.startOfRace = trackedRace.getStart() == null ? null : trackedRace.getStart().asDate();
+                raceDAO.startOfTracking = trackedRace.getStartOfTracking() == null ? null : trackedRace.getStartOfTracking().asDate();
+                raceDAO.timePointOfLastEvent = trackedRace.getTimePointOfLastEvent() == null ? null : trackedRace.getTimePointOfLastEvent().asDate();
+                raceDAO.timePointOfNewestEvent = trackedRace.getTimePointOfNewestEvent() == null ? null : trackedRace.getTimePointOfNewestEvent().asDate();
+            }
+            result.add(raceDAO);
         }
         return result;
     }

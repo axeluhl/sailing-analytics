@@ -62,7 +62,7 @@ public class AdminConsole implements EntryPoint, ErrorReporter, EventRefresher {
         raceMapPanel.setSize("90%", "90%");
         tabPanel.add(raceMapPanel, stringConstants.map(), false);
         tabPanel.selectTab(0);
-
+        fillEvents();
     }
 
     private DialogBox createErrorDialog() {

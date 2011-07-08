@@ -126,4 +126,6 @@ public interface RacingEventService {
 
     boolean isRaceBeingTracked(RaceDefinition r);
 
+    TrackedRace getTrackedRace(Event event, RaceDefinition r);
+
 }

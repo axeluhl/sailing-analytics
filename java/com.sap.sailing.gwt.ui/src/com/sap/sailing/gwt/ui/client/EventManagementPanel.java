@@ -256,7 +256,6 @@ public class EventManagementPanel extends FormPanel implements EventDisplayer {
         grid.getCellFormatter().setVerticalAlignment(8, 1, HasVerticalAlignment.ALIGN_TOP);
         grid.getCellFormatter().setVerticalAlignment(8, 0, HasVerticalAlignment.ALIGN_TOP);
         
-        eventRefresher.fillEvents();
         updatePortStoredData();
         updateLiveURI();
         updateStoredURI();
