@@ -15,8 +15,10 @@ import com.google.gwt.maps.client.control.Control;
 import com.google.gwt.maps.client.control.LargeMapControl3D;
 import com.google.gwt.maps.client.geom.LatLng;
 import com.google.gwt.maps.client.overlay.Marker;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -36,7 +38,8 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
 
     private final String mapsAPIKey = "ABQIAAAAmvjPh3ZpHbnwuX3a66lDqRTB4YHzt9A9TZNGGB87gEPRa24TnRQjCq1hRMRvlUmR4K97fo_4LwER6A";
     
-    public RaceMapPanel(SailingServiceAsync sailingService, ErrorReporter errorReporter, StringConstants stringConstants) {
+    public RaceMapPanel(SailingServiceAsync sailingService, ErrorReporter errorReporter,
+            final EventRefresher eventRefresher, StringConstants stringConstants) {
         this.sailingService = sailingService;
         this.stringConstants = stringConstants;
         this.errorReporter = errorReporter;
@@ -49,8 +52,19 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         raceListBox = new ListBox();
         raceList = new ArrayList<RaceDAO>();
         VerticalPanel vp = new VerticalPanel();
-        vp.add(new Label(stringConstants.races()));
+        HorizontalPanel labelAndRefreshButton = new HorizontalPanel();
+        labelAndRefreshButton.setSpacing(20);
+        vp.add(labelAndRefreshButton);
+        labelAndRefreshButton.add(new Label(stringConstants.races()));
         vp.add(raceListBox);
+        Button btnRefresh = new Button(stringConstants.refresh());
+        btnRefresh.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                eventRefresher.fillEvents();
+            }
+        });
+        labelAndRefreshButton.add(btnRefresh);
         grid.setWidget(0,  0, vp);
         timePanel = new TimePanel(stringConstants, /* delayBetweenAutoAdvancesInMilliseconds */ 3000);
         grid.setWidget(0, 1, timePanel);
@@ -109,7 +123,9 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
 
     private void updateMapFromSelectedRace() {
         RaceDAO selectedRace = getSelectedRace();
-        updateSlider(selectedRace);
+        if (selectedRace != null) {
+            updateSlider(selectedRace);
+        }
     }
 
     private void updateSlider(RaceDAO selectedRace) {
