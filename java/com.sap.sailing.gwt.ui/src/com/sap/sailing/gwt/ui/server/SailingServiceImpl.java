@@ -19,6 +19,7 @@ import org.osgi.util.tracker.ServiceTracker;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Position;
@@ -26,12 +27,14 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Speed;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.TimePoint;
+import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.base.impl.DegreePosition;
 import com.sap.sailing.domain.base.impl.KilometersPerHourSpeedImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -48,6 +51,7 @@ import com.sap.sailing.gwt.ui.shared.BoatClassDAO;
 import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
 import com.sap.sailing.gwt.ui.shared.EventDAO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDAO;
+import com.sap.sailing.gwt.ui.shared.MarkDAO;
 import com.sap.sailing.gwt.ui.shared.PositionDAO;
 import com.sap.sailing.gwt.ui.shared.RaceDAO;
 import com.sap.sailing.gwt.ui.shared.RaceRecordDAO;
@@ -331,6 +335,28 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                     }
                 }
             }
+        }
+        return result;
+    }
+
+    @Override
+    public List<MarkDAO> getMarkPositions(String eventName, String raceName, Date date) {
+        Event event = service.getEventByName(eventName);
+        RaceDefinition race = getRaceByName(event, raceName);
+        TimePoint dateAsTimePoint = new MillisecondsTimePoint(date);
+        TrackedRace trackedRace = service.getDomainFactory().getTrackedEvent(event).getTrackedRace(race);
+        Set<Buoy> buoys = new HashSet<Buoy>();
+        for (Waypoint waypoint : trackedRace.getRace().getCourse().getWaypoints()) {
+            for (Buoy b : waypoint.getBuoys()) {
+                buoys.add(b);
+            }
+        }
+        List<MarkDAO> result = new ArrayList<MarkDAO>();
+        for (Buoy buoy : buoys) {
+            GPSFixTrack<Buoy, GPSFix> track = trackedRace.getTrack(buoy);
+            Position positionAtDate = track.getEstimatedPosition(dateAsTimePoint, /* extrapolate */ false);
+            MarkDAO markDAO = new MarkDAO(buoy.getName(), positionAtDate.getLatDeg(), positionAtDate.getLngDeg());
+            result.add(markDAO);
         }
         return result;
     }

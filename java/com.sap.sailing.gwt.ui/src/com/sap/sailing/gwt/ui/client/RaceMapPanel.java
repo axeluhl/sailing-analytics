@@ -5,8 +5,10 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
@@ -15,8 +17,8 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.maps.client.InfoWindowContent;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.Maps;
-import com.google.gwt.maps.client.control.Control;
 import com.google.gwt.maps.client.control.LargeMapControl3D;
+import com.google.gwt.maps.client.control.MenuMapTypeControl;
 import com.google.gwt.maps.client.event.MapDragEndHandler;
 import com.google.gwt.maps.client.event.MapMouseMoveHandler;
 import com.google.gwt.maps.client.event.MapZoomEndHandler;
@@ -44,6 +46,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
 import com.sap.sailing.gwt.ui.shared.EventDAO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDAO;
+import com.sap.sailing.gwt.ui.shared.MarkDAO;
 import com.sap.sailing.gwt.ui.shared.Pair;
 import com.sap.sailing.gwt.ui.shared.RaceDAO;
 import com.sap.sailing.gwt.ui.shared.RegattaDAO;
@@ -58,6 +61,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
     private final ListBox raceListBox;
     private final TimePanel timePanel;
     private Icon boatIcon;
+    private Icon buoyIcon;
     private LatLng lastMousePosition;
     
     /**
@@ -75,6 +79,8 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
      * Markers used as boat display on the map
      */
     private final Map<CompetitorDAO, Marker> boatMarkers;
+    
+    private final Map<MarkDAO, Marker> buoyMarkers;
 
     private final String mapsAPIKey = "ABQIAAAAmvjPh3ZpHbnwuX3a66lDqRTB4YHzt9A9TZNGGB87gEPRa24TnRQjCq1hRMRvlUmR4K97fo_4LwER6A";
     
@@ -84,6 +90,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         this.stringConstants = stringConstants;
         this.errorReporter = errorReporter;
         tails = new HashMap<CompetitorDAO, Polyline>();
+        buoyMarkers = new HashMap<MarkDAO, Marker>();
         boatMarkers = new HashMap<CompetitorDAO, Marker>();
         this.grid = new Grid(2, 2);
         setWidget(grid);
@@ -118,8 +125,8 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
             public void run() {
                 LatLng cawkerCity = LatLng.newInstance(39.509, -98.434);
                 map = new MapWidget(cawkerCity, 2);
-                Control newZoomControl = new LargeMapControl3D();
-                map.addControl(newZoomControl);
+                map.addControl(new LargeMapControl3D());
+                map.addControl(new MenuMapTypeControl());
                 // Add the map to the HTML host page
                 grid.setWidget(1, 1, map);
                 map.setSize("100%", "500px");
@@ -145,6 +152,8 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
                 });
                 boatIcon = Icon.newInstance("/images/boat16.png");
                 boatIcon.setIconAnchor(Point.newInstance(8, 8));
+                buoyIcon = Icon.newInstance("/images/safe-water-small.png");
+                buoyIcon.setIconAnchor(Point.newInstance(10, 19));
           }
         });
     }
@@ -239,6 +248,32 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
                     showBoatsOnMap(result);
                 }
             });
+            sailingService.getMarkPositions(event.name, race.name, date, new AsyncCallback<List<MarkDAO>>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                    errorReporter.reportError("Error trying to obtain mark positions: "+caught.getMessage());
+                }
+
+                @Override
+                public void onSuccess(List<MarkDAO> result) {
+                    Set<MarkDAO> toRemove = new HashSet<MarkDAO>(buoyMarkers.keySet());
+                    for (MarkDAO markDAO : result) {
+                        Marker buoyMarker = buoyMarkers.get(markDAO);
+                        if (buoyMarker == null) {
+                            buoyMarker = createBuoyMarker(markDAO);
+                            buoyMarkers.put(markDAO, buoyMarker);
+                            map.addOverlay(buoyMarker);
+                        } else {
+                            buoyMarker.setLatLng(LatLng.newInstance(markDAO.position.latDeg, markDAO.position.lngDeg));
+                            toRemove.remove(markDAO);
+                        }
+                    }
+                    for (MarkDAO toRemoveMarkDAO : toRemove) {
+                        Marker marker = buoyMarkers.remove(toRemoveMarkDAO);
+                        map.removeOverlay(marker);
+                    }
+                }
+            });
         }
     }
 
@@ -280,6 +315,23 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         }
     }
 
+    private Marker createBuoyMarker(final MarkDAO markDAO) {
+        MarkerOptions options = MarkerOptions.newInstance();
+        if (buoyIcon != null) {
+            options.setIcon(buoyIcon);
+        }
+        options.setTitle(markDAO.name);
+        final Marker buoyMarker = new Marker(LatLng.newInstance(markDAO.position.latDeg, markDAO.position.lngDeg), options);
+        buoyMarker.addMarkerClickHandler(new MarkerClickHandler() {
+            @Override
+            public void onClick(MarkerClickEvent event) {
+                LatLng latlng = buoyMarker.getLatLng();
+                showMarkInfoWindow(markDAO, latlng);
+            }
+        });
+        return buoyMarker;
+    }
+
     private Marker createBoatMarker(final CompetitorDAO competitorDAO, GPSFixDAO lastPos) {
         MarkerOptions options = MarkerOptions.newInstance();
         if (boatIcon != null) {
@@ -297,11 +349,23 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         return boatMarker;
     }
 
+
+    private void showMarkInfoWindow(MarkDAO markDAO, LatLng latlng) {
+        map.getInfoWindow().open(latlng,
+                new InfoWindowContent(getInfoWindowContent(markDAO)));
+    }
+
     private void showCompetitorInfoWindow(final CompetitorDAO competitorDAO, LatLng latlng) {
         map.getInfoWindow().open(latlng,
                 new InfoWindowContent(getInfoWindowContent(competitorDAO)));
     }
     
+    private Widget getInfoWindowContent(MarkDAO markDAO) {
+        VerticalPanel result = new VerticalPanel();
+        result.add(new Label("Mark "+markDAO.name));
+        return result;
+    }
+
     private Widget getInfoWindowContent(CompetitorDAO competitorDAO) {
         VerticalPanel result = new VerticalPanel();
         result.add(new Label("Competitor "+competitorDAO.name));
