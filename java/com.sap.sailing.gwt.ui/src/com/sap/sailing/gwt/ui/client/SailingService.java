@@ -10,6 +10,7 @@ import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
 import com.sap.sailing.gwt.ui.shared.EventDAO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDAO;
 import com.sap.sailing.gwt.ui.shared.MarkDAO;
+import com.sap.sailing.gwt.ui.shared.QuickRankDAO;
 import com.sap.sailing.gwt.ui.shared.RaceRecordDAO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDAO;
 import com.sap.sailing.gwt.ui.shared.WindDAO;
@@ -42,4 +43,6 @@ public interface SailingService extends RemoteService {
             long tailLengthInMilliseconds, boolean extrapolate);
 
     List<MarkDAO> getMarkPositions(String eventName, String raceName, Date date);
+
+    List<QuickRankDAO> getQuickRanks(String eventName, String raceName, Date date) throws Exception;
 }

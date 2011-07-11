@@ -6,6 +6,8 @@ import java.net.URI;
 import java.net.URL;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -37,6 +39,7 @@ import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
+import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindSource;
@@ -53,6 +56,7 @@ import com.sap.sailing.gwt.ui.shared.EventDAO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDAO;
 import com.sap.sailing.gwt.ui.shared.MarkDAO;
 import com.sap.sailing.gwt.ui.shared.PositionDAO;
+import com.sap.sailing.gwt.ui.shared.QuickRankDAO;
 import com.sap.sailing.gwt.ui.shared.RaceDAO;
 import com.sap.sailing.gwt.ui.shared.RaceRecordDAO;
 import com.sap.sailing.gwt.ui.shared.RegattaDAO;
@@ -358,6 +362,31 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             MarkDAO markDAO = new MarkDAO(buoy.getName(), positionAtDate.getLatDeg(), positionAtDate.getLngDeg());
             result.add(markDAO);
         }
+        return result;
+    }
+
+    @Override
+    public List<QuickRankDAO> getQuickRanks(String eventName, String raceName, Date date) throws Exception {
+        Event event = service.getEventByName(eventName);
+        RaceDefinition race = getRaceByName(event, raceName);
+        TimePoint dateAsTimePoint = new MillisecondsTimePoint(date);
+        TrackedRace trackedRace = service.getDomainFactory().getTrackedEvent(event).getTrackedRace(race);
+        List<QuickRankDAO> result = new ArrayList<QuickRankDAO>();
+        for (Competitor competitor : race.getCompetitors()) {
+            int rank = trackedRace.getRank(competitor, dateAsTimePoint);
+            TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(competitor, dateAsTimePoint);
+            if (trackedLeg != null) {
+                int legNumber = race.getCourse().getLegs().indexOf(trackedLeg.getLeg());
+                QuickRankDAO quickRankDAO = new QuickRankDAO(getCompetitorDAO(competitor), rank, legNumber);
+                result.add(quickRankDAO);
+            }
+        }
+        Collections.sort(result, new Comparator<QuickRankDAO>() {
+            @Override
+            public int compare(QuickRankDAO o1, QuickRankDAO o2) {
+                return o1.rank - o2.rank;
+            }
+        });
         return result;
     }
     

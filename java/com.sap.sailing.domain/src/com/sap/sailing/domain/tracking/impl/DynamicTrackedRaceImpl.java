@@ -207,7 +207,7 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     @Override
     public synchronized void recordWind(Wind wind, WindSource windSource) {
         getWindTrack(windSource).add(wind);
-        updated(wind.getTimePoint());
+        updated(null); // wind events shouldn't advance race time
     }
     
     @Override

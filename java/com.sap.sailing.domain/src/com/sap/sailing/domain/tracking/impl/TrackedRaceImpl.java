@@ -218,7 +218,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         NavigableSet<MarkPassing> roundings = markPassingsForCompetitor.get(competitor);
         MarkPassing lastBeforeOrAt = roundings.floor(new DummyMarkPassingWithTimePointOnly(at));
         TrackedLegOfCompetitor result = null;
-        if (lastBeforeOrAt != null) {
+        // already finished the race?
+        if (lastBeforeOrAt != null && getRace().getCourse().getLastWaypoint() != lastBeforeOrAt.getWaypoint()) {
             TrackedLeg trackedLeg = getTrackedLegStartingAt(lastBeforeOrAt.getWaypoint());
             result = trackedLeg.getTrackedLeg(competitor);
         }

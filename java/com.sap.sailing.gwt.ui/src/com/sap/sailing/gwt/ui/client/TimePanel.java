@@ -130,6 +130,9 @@ public class TimePanel extends FormPanel {
         }
     }
 
+    public Date getTime() {
+        return time;
+    }
 
     public void setMin(Date min) {
         slider.setMin(min.getTime());
