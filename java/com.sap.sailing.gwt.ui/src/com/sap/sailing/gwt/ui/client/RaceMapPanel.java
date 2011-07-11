@@ -26,6 +26,7 @@ import com.google.gwt.maps.client.event.PolylineMouseOutHandler;
 import com.google.gwt.maps.client.event.PolylineMouseOverHandler;
 import com.google.gwt.maps.client.geom.LatLng;
 import com.google.gwt.maps.client.geom.LatLngBounds;
+import com.google.gwt.maps.client.geom.Point;
 import com.google.gwt.maps.client.overlay.Icon;
 import com.google.gwt.maps.client.overlay.Marker;
 import com.google.gwt.maps.client.overlay.MarkerOptions;
@@ -56,6 +57,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
     private final List<Pair<EventDAO, RaceDAO>> raceList;
     private final ListBox raceListBox;
     private final TimePanel timePanel;
+    private Icon boatIcon;
     private LatLng lastMousePosition;
     
     /**
@@ -141,6 +143,8 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
                         lastMousePosition = event.getLatLng();
                     }
                 });
+                boatIcon = Icon.newInstance("/images/boat16.png");
+                boatIcon.setIconAnchor(Point.newInstance(8, 8));
           }
         });
     }
@@ -278,7 +282,9 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
 
     private Marker createBoatMarker(final CompetitorDAO competitorDAO, GPSFixDAO lastPos) {
         MarkerOptions options = MarkerOptions.newInstance();
-        options.setIcon(Icon.newInstance("/images/boat16.png"));
+        if (boatIcon != null) {
+            options.setIcon(boatIcon);
+        }
         options.setTitle(competitorDAO.name);
         final Marker boatMarker = new Marker(LatLng.newInstance(lastPos.position.latDeg, lastPos.position.lngDeg), options);
         boatMarker.addMarkerClickHandler(new MarkerClickHandler() {
