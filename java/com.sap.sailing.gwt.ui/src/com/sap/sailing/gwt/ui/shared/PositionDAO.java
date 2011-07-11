@@ -13,4 +13,8 @@ public class PositionDAO implements IsSerializable {
         this.lngDeg = lngDeg;
     }
 
+    @Override
+    public String toString() {
+        return "("+latDeg+", "+lngDeg+")";
+    }
 }

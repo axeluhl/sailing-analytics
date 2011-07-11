@@ -6,8 +6,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tractracadapter.RaceTracker;
 
-public class RaceDAO implements IsSerializable {
-    public String name;
+public class RaceDAO extends NamedDAO implements IsSerializable {
     public Iterable<CompetitorDAO> competitors;
     
     /**
@@ -25,8 +24,7 @@ public class RaceDAO implements IsSerializable {
     public RaceDAO() {}
 
     public RaceDAO(String name, Iterable<CompetitorDAO> competitors, boolean currentlyTracked) {
-        super();
-        this.name = name;
+        super(name);
         this.competitors = competitors;
         this.currentlyTracked = currentlyTracked;
     }

@@ -6,6 +6,7 @@ import java.net.URI;
 import java.net.URL;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -31,6 +32,8 @@ import com.sap.sailing.domain.base.impl.KilometersPerHourSpeedImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.tracking.GPSFixMoving;
+import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindSource;
@@ -44,6 +47,7 @@ import com.sap.sailing.gwt.ui.client.SailingService;
 import com.sap.sailing.gwt.ui.shared.BoatClassDAO;
 import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
 import com.sap.sailing.gwt.ui.shared.EventDAO;
+import com.sap.sailing.gwt.ui.shared.GPSFixDAO;
 import com.sap.sailing.gwt.ui.shared.PositionDAO;
 import com.sap.sailing.gwt.ui.shared.RaceDAO;
 import com.sap.sailing.gwt.ui.shared.RaceRecordDAO;
@@ -128,11 +132,17 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     private List<CompetitorDAO> getCompetitorDAOs(Iterable<Competitor> competitors) {
         List<CompetitorDAO> result = new ArrayList<CompetitorDAO>();
         for (Competitor c : competitors) {
-            CountryCode countryCode = c.getTeam().getNationality().getCountryCode();
-            result.add(new CompetitorDAO(c.getName(), countryCode==null?"":countryCode.getTwoLetterISOCode(),
-                    countryCode==null?"":countryCode.getThreeLetterIOCCode()));
+            CompetitorDAO competitorDAO = getCompetitorDAO(c);
+            result.add(competitorDAO);
         }
         return result;
+    }
+
+    private CompetitorDAO getCompetitorDAO(Competitor c) {
+        CountryCode countryCode = c.getTeam().getNationality().getCountryCode();
+        CompetitorDAO competitorDAO = new CompetitorDAO(c.getName(), countryCode==null?"":countryCode.getTwoLetterISOCode(),
+                countryCode==null?"":countryCode.getThreeLetterIOCCode());
+        return competitorDAO;
     }
 
     @Override
@@ -210,13 +220,13 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
     
     @Override
-    public WindInfoForRaceDAO getWindInfo(String eventName, String raceName, long fromAsMilliseconds, long toAsMilliseconds) {
+    public WindInfoForRaceDAO getWindInfo(String eventName, String raceName, Date fromDate, Date toDate) {
         Event event = service.getEventByName(eventName);
         RaceDefinition race = getRaceByName(event, raceName);
         WindInfoForRaceDAO result = new WindInfoForRaceDAO();
         TrackedRace trackedRace = service.getDomainFactory().getTrackedEvent(event).getExistingTrackedRace(race);
-        TimePoint from = new MillisecondsTimePoint(fromAsMilliseconds);
-        TimePoint to = new MillisecondsTimePoint(toAsMilliseconds);
+        TimePoint from = new MillisecondsTimePoint(fromDate);
+        TimePoint to = new MillisecondsTimePoint(toDate);
         Map<String, WindTrackInfoDAO> windTrackInfoDAOs = new HashMap<String, WindTrackInfoDAO>();
         result.windTrackInfoByWindSourceName = windTrackInfoDAOs;
         for (WindSource windSource : WindSource.values()) {
@@ -285,6 +295,44 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         }
         Wind wind = new WindImpl(p, at, speedWithBearing);
         service.getDomainFactory().getTrackedEvent(event).getTrackedRace(race).recordWind(wind, WindSource.WEB);
+    }
+
+    @Override
+    public Map<CompetitorDAO, List<GPSFixDAO>> getBoatPositions(String eventName, String raceName, Date date,
+            long tailLengthInMilliseconds, boolean extrapolate) {
+        Event event = service.getEventByName(eventName);
+        RaceDefinition race = getRaceByName(event, raceName);
+        TimePoint end = new MillisecondsTimePoint(date);
+        TrackedRace trackedRace = service.getDomainFactory().getTrackedEvent(event).getTrackedRace(race);
+        Map<CompetitorDAO, List<GPSFixDAO>> result = new HashMap<CompetitorDAO, List<GPSFixDAO>>();
+        for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
+            CompetitorDAO competitorDAO = getCompetitorDAO(competitor);
+            List<GPSFixDAO> fixesForCompetitor = new ArrayList<GPSFixDAO>();
+            result.put(competitorDAO, fixesForCompetitor);
+            GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
+            Iterator<GPSFixMoving> fixIter = track.getFixesIterator(new MillisecondsTimePoint(date.getTime()-tailLengthInMilliseconds), /* inclusive */ true);
+            if (fixIter.hasNext()) {
+                GPSFixMoving fix = fixIter.next();
+                while (fix != null && fix.getTimePoint().compareTo(end) < 0) {
+                    GPSFixDAO fixDAO = new GPSFixDAO(fix.getTimePoint().asDate(), new PositionDAO(fix.getPosition()
+                            .getLatDeg(), fix.getPosition().getLngDeg()));
+                    fixesForCompetitor.add(fixDAO);
+                    if (fixIter.hasNext()) {
+                        fix = fixIter.next();
+                    } else {
+                        // check if fix was at date and if extrapolation is requested
+                        if (!fix.getTimePoint().equals(end) && extrapolate) {
+                            Position position = track.getEstimatedPosition(end, extrapolate);
+                            GPSFixDAO extrapolated = new GPSFixDAO(date, new PositionDAO(position
+                                    .getLatDeg(), position.getLngDeg()));
+                            fixesForCompetitor.add(extrapolated);
+                        }                            
+                        fix = null;
+                    }
+                }
+            }
+        }
+        return result;
     }
     
 }

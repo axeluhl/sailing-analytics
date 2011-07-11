@@ -1,9 +1,13 @@
 package com.sap.sailing.gwt.ui.client;
 
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
 import com.sap.sailing.gwt.ui.shared.EventDAO;
+import com.sap.sailing.gwt.ui.shared.GPSFixDAO;
 import com.sap.sailing.gwt.ui.shared.RaceRecordDAO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDAO;
 import com.sap.sailing.gwt.ui.shared.WindDAO;
@@ -29,9 +33,24 @@ public interface SailingServiceAsync {
 
     void stopTrackingRace(String eventName, String raceName, AsyncCallback<Void> asyncCallback);
 
-    void getWindInfo(String eventName, String raceName, long fromAsMilliseconds, long toAsMilliseconds,
+    void getWindInfo(String eventName, String raceName, Date from, Date to,
             AsyncCallback<WindInfoForRaceDAO> callback);
 
     void setWind(String eventName, String raceName, WindDAO wind, AsyncCallback<Void> callback);
+
+    /**
+     * @param tailLengthInMilliseconds
+     *            the time interval to go back in time, starting at <code>date</code>. The result will contain all fixes
+     *            known for the respective competitor starting at <code>date-tailLengthInMilliseconds</code> up to and
+     *            including <code>date</code>.
+     * @param extrapolate
+     *            if <code>true</code> and no position is known for <code>date</code>, the last entry returned in the
+     *            list of GPS fixes will be obtained by extrapolating from the competitors last known position before
+     *            <code>date</code> and the estimated speed.
+     * @return a map where for each competitor participating in the race the list of GPS fixes in increasing
+     *         chronological order is provided. The last one is the last position at or before <code>date</code>.
+     */
+    void getBoatPositions(String eventName, String raceName, Date date, long tailLengthInMilliseconds,
+            boolean extrapolate, AsyncCallback<Map<CompetitorDAO, List<GPSFixDAO>>> callback);
 
 }

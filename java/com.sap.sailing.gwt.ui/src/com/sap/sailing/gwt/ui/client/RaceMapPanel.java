@@ -4,9 +4,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -17,7 +18,10 @@ import com.google.gwt.maps.client.Maps;
 import com.google.gwt.maps.client.control.Control;
 import com.google.gwt.maps.client.control.LargeMapControl3D;
 import com.google.gwt.maps.client.geom.LatLng;
+import com.google.gwt.maps.client.geom.LatLngBounds;
 import com.google.gwt.maps.client.overlay.Marker;
+import com.google.gwt.maps.client.overlay.Polyline;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.Grid;
@@ -25,7 +29,9 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
 import com.sap.sailing.gwt.ui.shared.EventDAO;
+import com.sap.sailing.gwt.ui.shared.GPSFixDAO;
 import com.sap.sailing.gwt.ui.shared.Pair;
 import com.sap.sailing.gwt.ui.shared.RaceDAO;
 import com.sap.sailing.gwt.ui.shared.RegattaDAO;
@@ -39,6 +45,16 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
     private final List<Pair<EventDAO, RaceDAO>> raceList;
     private final ListBox raceListBox;
     private final TimePanel timePanel;
+    
+    /**
+     * Tails of competitors currently displayed as overlays on the map.
+     */
+    private final Map<CompetitorDAO, Polyline> tails;
+    
+    /**
+     * Markers used as boat display on the map
+     */
+    private final Map<CompetitorDAO, Marker> boatMarkers;
 
     private final String mapsAPIKey = "ABQIAAAAmvjPh3ZpHbnwuX3a66lDqRTB4YHzt9A9TZNGGB87gEPRa24TnRQjCq1hRMRvlUmR4K97fo_4LwER6A";
     
@@ -47,6 +63,8 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         this.sailingService = sailingService;
         this.stringConstants = stringConstants;
         this.errorReporter = errorReporter;
+        tails = new HashMap<CompetitorDAO, Polyline>();
+        boatMarkers = new HashMap<CompetitorDAO, Marker>();
         this.grid = new Grid(2, 2);
         setWidget(grid);
         grid.setSize("100%", "100%");
@@ -161,8 +179,77 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         return result;
     }
 
+    private EventDAO getSelectedEvent() {
+        int i = raceListBox.getSelectedIndex();
+        EventDAO result = null;
+        if (i >= 0) {
+            result = raceList.get(i).getA();
+        }
+        return result;
+    }
+
     @Override
     public void timeChanged(Date date) {
-        // TODO implement RaceMapPanel.timeChanged
+        EventDAO event = getSelectedEvent();
+        RaceDAO race = getSelectedRace();
+        if (event != null && race != null) {
+            sailingService.getBoatPositions(event.name, race.name, date, /* tailLengthInMilliseconds */ 30000l,
+                    true, new AsyncCallback<Map<CompetitorDAO, List<GPSFixDAO>>>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                    errorReporter.reportError("Error obtaining boat positions: "+caught.getMessage());
+                }
+
+                @Override
+                public void onSuccess(Map<CompetitorDAO, List<GPSFixDAO>> result) {
+                    showBoatsOnMap(result);
+                }
+            });
+        }
     }
+
+
+    private void showBoatsOnMap(Map<CompetitorDAO, List<GPSFixDAO>> result) {
+        if (map != null) {
+            LatLngBounds newMapBounds = null;
+            for (Map.Entry<CompetitorDAO, Polyline> tail : tails.entrySet()) {
+                map.removeOverlay(tail.getValue());
+            }
+            for (Map.Entry<CompetitorDAO, Marker> boatMarker : boatMarkers.entrySet()) {
+                map.removeOverlay(boatMarker.getValue());
+            }
+            tails.clear();
+            boatMarkers.clear();
+            for (Map.Entry<CompetitorDAO, List<GPSFixDAO>> tail : result.entrySet()) {
+                Polyline newTail = createTail(tail.getValue());
+                map.addOverlay(newTail);
+                tails.put(tail.getKey(), newTail);
+                LatLngBounds bounds = newTail.getBounds();
+                if (newMapBounds == null) {
+                    newMapBounds = bounds;
+                } else {
+                    newMapBounds.extend(bounds.getNorthEast());
+                    newMapBounds.extend(bounds.getSouthWest());
+                }
+                if (!tail.getValue().isEmpty()) {
+                    GPSFixDAO lastPos = tail.getValue().get(tail.getValue().size() - 1);
+                    Marker boatMarker = new Marker(LatLng.newInstance(lastPos.position.latDeg, lastPos.position.lngDeg));
+                    map.addOverlay(boatMarker);
+                    boatMarkers.put(tail.getKey(), boatMarker);
+                }
+            }
+            map.setCenter(newMapBounds.getCenter());
+            map.setZoomLevel(map.getBoundsZoomLevel(newMapBounds));
+        }
+    }
+
+    private Polyline createTail(List<GPSFixDAO> value) {
+        List<LatLng> points = new ArrayList<LatLng>();
+        for (int i=0; i<value.size(); i++) {
+            points.add(LatLng.newInstance(value.get(i).position.latDeg, value.get(i).position.lngDeg));
+        }
+        Polyline result = new Polyline(points.toArray(new LatLng[0]));
+        return result;
+    }
+    
 }

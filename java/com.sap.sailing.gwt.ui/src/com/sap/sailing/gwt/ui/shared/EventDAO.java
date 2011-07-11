@@ -4,15 +4,14 @@ import java.util.List;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
-public class EventDAO implements IsSerializable {
-    public String name;
+public class EventDAO extends NamedDAO implements IsSerializable {
     public List<RegattaDAO> regattas;
     public List<CompetitorDAO> competitors;
     
     public EventDAO() {}
     
     public EventDAO(String name, List<RegattaDAO> regattas, List<CompetitorDAO> competitors) {
-        super();
+        super(name);
         this.name = name;
         this.regattas = regattas;
         this.competitors = competitors;

@@ -1,10 +1,14 @@
 package com.sap.sailing.gwt.ui.client;
 
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
+import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
 import com.sap.sailing.gwt.ui.shared.EventDAO;
+import com.sap.sailing.gwt.ui.shared.GPSFixDAO;
 import com.sap.sailing.gwt.ui.shared.RaceRecordDAO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDAO;
 import com.sap.sailing.gwt.ui.shared.WindDAO;
@@ -29,7 +33,10 @@ public interface SailingService extends RemoteService {
 
     void stopTrackingRace(String eventName, String raceName) throws Exception;
 
-    WindInfoForRaceDAO getWindInfo(String eventName, String raceName, long fromAsMilliseconds, long toAsMilliseconds);
+    WindInfoForRaceDAO getWindInfo(String eventName, String raceName, Date from, Date to);
 
     void setWind(String eventName, String raceName, WindDAO wind);
+
+    Map<CompetitorDAO, List<GPSFixDAO>> getBoatPositions(String eventName, String raceName, Date date,
+            long tailLengthInMilliseconds, boolean extrapolate);
 }
