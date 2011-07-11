@@ -17,9 +17,14 @@ import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.Maps;
 import com.google.gwt.maps.client.control.Control;
 import com.google.gwt.maps.client.control.LargeMapControl3D;
+import com.google.gwt.maps.client.event.MapDragEndHandler;
+import com.google.gwt.maps.client.event.MapZoomEndHandler;
+import com.google.gwt.maps.client.event.MarkerClickHandler;
 import com.google.gwt.maps.client.geom.LatLng;
 import com.google.gwt.maps.client.geom.LatLngBounds;
+import com.google.gwt.maps.client.overlay.Icon;
 import com.google.gwt.maps.client.overlay.Marker;
+import com.google.gwt.maps.client.overlay.MarkerOptions;
 import com.google.gwt.maps.client.overlay.Polyline;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
@@ -45,6 +50,12 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
     private final List<Pair<EventDAO, RaceDAO>> raceList;
     private final ListBox raceListBox;
     private final TimePanel timePanel;
+    
+    /**
+     * If the user explicitly zoomed or panned the map, don't adjust zoom/pan unless a new race
+     * is selected
+     */
+    private boolean mapZoomedOrPannedSinceLastRaceSelectionChange = false;
     
     /**
      * Tails of competitors currently displayed as overlays on the map.
@@ -100,18 +111,23 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
                 map = new MapWidget(cawkerCity, 2);
                 Control newZoomControl = new LargeMapControl3D();
                 map.addControl(newZoomControl);
-                // Add a marker
-                map.addOverlay(new Marker(cawkerCity));
-
-                // Add an info window to highlight a point of interest
-                map.getInfoWindow().open(map.getCenter(),
-                    new InfoWindowContent("World's Largest Ball of Sisal Twine"));
-
                 // Add the map to the HTML host page
                 grid.setWidget(1, 1, map);
                 map.setSize("100%", "500px");
                 map.setScrollWheelZoomEnabled(true);
                 map.setContinuousZoom(true);
+                map.addMapZoomEndHandler(new MapZoomEndHandler() {
+                    @Override
+                    public void onZoomEnd(MapZoomEndEvent event) {
+                        mapZoomedOrPannedSinceLastRaceSelectionChange = true;
+                    }
+                });
+                map.addMapDragEndHandler(new MapDragEndHandler() {
+                    @Override
+                    public void onDragEnd(MapDragEndEvent event) {
+                        mapZoomedOrPannedSinceLastRaceSelectionChange = true;
+                    }
+                });
           }
         });
     }
@@ -163,6 +179,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         if (selectedRace != null) {
             updateSlider(selectedRace);
         }
+        mapZoomedOrPannedSinceLastRaceSelectionChange = false;
     }
 
     private void updateSlider(RaceDAO selectedRace) {
@@ -220,26 +237,38 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
             }
             tails.clear();
             boatMarkers.clear();
-            for (Map.Entry<CompetitorDAO, List<GPSFixDAO>> tail : result.entrySet()) {
-                Polyline newTail = createTail(tail.getValue());
-                map.addOverlay(newTail);
-                tails.put(tail.getKey(), newTail);
-                LatLngBounds bounds = newTail.getBounds();
-                if (newMapBounds == null) {
-                    newMapBounds = bounds;
-                } else {
-                    newMapBounds.extend(bounds.getNorthEast());
-                    newMapBounds.extend(bounds.getSouthWest());
-                }
+            for (final Map.Entry<CompetitorDAO, List<GPSFixDAO>> tail : result.entrySet()) {
                 if (!tail.getValue().isEmpty()) {
+                    Polyline newTail = createTail(tail.getValue());
+                    map.addOverlay(newTail);
+                    tails.put(tail.getKey(), newTail);
+                    LatLngBounds bounds = newTail.getBounds();
+                    if (newMapBounds == null) {
+                        newMapBounds = bounds;
+                    } else {
+                        newMapBounds.extend(bounds.getNorthEast());
+                        newMapBounds.extend(bounds.getSouthWest());
+                    }
                     GPSFixDAO lastPos = tail.getValue().get(tail.getValue().size() - 1);
-                    Marker boatMarker = new Marker(LatLng.newInstance(lastPos.position.latDeg, lastPos.position.lngDeg));
+                    MarkerOptions options = MarkerOptions.newInstance();
+                    options.setIcon(Icon.newInstance("/images/boat16.png"));
+                    options.setTitle(tail.getKey().name);
+                    final Marker boatMarker = new Marker(LatLng.newInstance(lastPos.position.latDeg, lastPos.position.lngDeg), options);
+                    boatMarker.addMarkerClickHandler(new MarkerClickHandler() {
+                        @Override
+                        public void onClick(MarkerClickEvent event) {
+                            map.getInfoWindow().open(boatMarker.getLatLng(),
+                                    new InfoWindowContent("This is competitor "+tail.getKey().name));
+                        }
+                    });
                     map.addOverlay(boatMarker);
                     boatMarkers.put(tail.getKey(), boatMarker);
                 }
             }
-            map.setCenter(newMapBounds.getCenter());
-            map.setZoomLevel(map.getBoundsZoomLevel(newMapBounds));
+            if (!mapZoomedOrPannedSinceLastRaceSelectionChange && newMapBounds != null) {
+                map.setZoomLevel(map.getBoundsZoomLevel(newMapBounds));
+                map.setCenter(newMapBounds.getCenter());
+            }
         }
     }
 
