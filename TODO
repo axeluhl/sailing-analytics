@@ -7,7 +7,6 @@ Axel
    * configure one or more leaderboards from a selection of races, adjustable delay per leaderboard
    * each leaderboard has its own URL
    * wind display
-   * Google Maps integration
    * store net / total points separately in Mongo, making them overridable in editable copy of leaderboard
    * time slider, adjustable delay per leaderboard
    * consider a per-user preferences page where leaderboard columns can be personalized at runtime
