@@ -1,9 +1,12 @@
 package com.sap.sailing.gwt.ui.client;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -23,6 +26,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.gwt.ui.shared.EventDAO;
+import com.sap.sailing.gwt.ui.shared.Pair;
 import com.sap.sailing.gwt.ui.shared.RaceDAO;
 import com.sap.sailing.gwt.ui.shared.RegattaDAO;
 
@@ -32,7 +36,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
     private final ErrorReporter errorReporter;
     private final Grid grid;
     private MapWidget map;
-    private final List<RaceDAO> raceList;
+    private final List<Pair<EventDAO, RaceDAO>> raceList;
     private final ListBox raceListBox;
     private final TimePanel timePanel;
 
@@ -50,7 +54,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         grid.getColumnFormatter().setWidth(1, "80%");
         loadMapsAPI();
         raceListBox = new ListBox();
-        raceList = new ArrayList<RaceDAO>();
+        raceList = new ArrayList<Pair<EventDAO, RaceDAO>>();
         VerticalPanel vp = new VerticalPanel();
         HorizontalPanel labelAndRefreshButton = new HorizontalPanel();
         labelAndRefreshButton.setSpacing(20);
@@ -67,6 +71,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         labelAndRefreshButton.add(btnRefresh);
         grid.setWidget(0,  0, vp);
         timePanel = new TimePanel(stringConstants, /* delayBetweenAutoAdvancesInMilliseconds */ 3000);
+        timePanel.addTimeListener(this);
         grid.setWidget(0, 1, timePanel);
     }
 
@@ -100,10 +105,21 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         for (EventDAO event : result) {
             for (RegattaDAO regatta : event.regattas) {
                 for (RaceDAO race : regatta.races) {
-                    raceList.add(race);
-                    raceListBox.addItem(event.name+" - "+race.name+(race.currentlyTracked ? " ("+stringConstants.tracked()+")" : ""));
+                    raceList.add(new Pair<EventDAO, RaceDAO>(event, race));
                 }
             }
+        }
+        Collections.sort(raceList, new Comparator<Pair<EventDAO, RaceDAO>>() {
+            @Override
+            public int compare(Pair<EventDAO, RaceDAO> o1, Pair<EventDAO, RaceDAO> o2) {
+                String name1 = RaceMapPanel.this.toString(o1);
+                String name2 = RaceMapPanel.this.toString(o2);
+                return name1.compareTo(name2);
+            }
+
+        });
+        for (Pair<EventDAO, RaceDAO> p : raceList) {
+            raceListBox.addItem(toString(p));
         }
         raceListBox.addChangeHandler(new ChangeHandler() {
             @Override
@@ -120,6 +136,9 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         updateMapFromSelectedRace();
     }
 
+    private String toString(Pair<EventDAO, RaceDAO> pair) {
+        return pair.getA().name+" - "+pair.getB().name+(pair.getB().currentlyTracked ? " ("+stringConstants.tracked()+")" : "");
+    }
 
     private void updateMapFromSelectedRace() {
         RaceDAO selectedRace = getSelectedRace();
@@ -137,13 +156,13 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         int i = raceListBox.getSelectedIndex();
         RaceDAO result = null;
         if (i >= 0) {
-            result = raceList.get(i);
+            result = raceList.get(i).getB();
         }
         return result;
     }
 
     @Override
     public void timeChanged(Date date) {
-        // TODO implement timeChanged such that race display is advanced to date
+        // TODO implement RaceMapPanel.timeChanged
     }
 }
