@@ -11,6 +11,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -23,6 +24,8 @@ import com.sap.sailing.domain.tractracadapter.RaceHandle;
 import com.sap.sailing.server.RacingEventServiceImpl;
 
 public class RaceTrackerTest {
+    protected static final boolean tractracTunnel = Boolean.valueOf(System.getProperty("tractrac.tunnel", "false"));
+    protected static final String tractracTunnelHost = System.getProperty("tractrac.tunnel.host", "localhost");
     private final URL paramUrl;
     private final URI liveUri;
     private final URI storedUri;
@@ -37,19 +40,25 @@ public class RaceTrackerTest {
         // for stored race, non-real-time simulation:
         paramUrl  = new URL("http://germanmaster.traclive.dk/events/event_20110505_SailingTea/clientparams.php?event=event_20110505_SailingTea&race=bd8c778e-7c65-11e0-8236-406186cbf87c");
         
-        // tunneled:
-        //liveUri   = new URI("tcp://localhost:4412");
-        //storedUri = new URI("tcp://localhost:4413");
-        
-        //no tunnel:
-        liveUri   = new URI("tcp://germanmaster.traclive.dk:4400");
-        storedUri = new URI("tcp://germanmaster.traclive.dk:4401");
+        if (tractracTunnel) {
+            liveUri   = new URI("tcp://"+tractracTunnelHost+":4412");
+            storedUri = new URI("tcp://"+tractracTunnelHost+":4413");
+        } else {
+            // no tunnel:
+            liveUri = new URI("tcp://germanmaster.traclive.dk:4400");
+            storedUri = new URI("tcp://germanmaster.traclive.dk:4401");
+        }
     }
     
     @Before
     public void setUp() throws MalformedURLException, FileNotFoundException, URISyntaxException, InterruptedException {
         service = new RacingEventServiceImpl();
         raceHandle = service.addRace(paramUrl, liveUri, storedUri, EmptyWindStore.INSTANCE);
+    }
+    
+    @After
+    public void tearDown() throws MalformedURLException, IOException, InterruptedException {
+        service.stopTracking(raceHandle.getEvent());
     }
 
     private TrackedRace getTrackedRace(TrackedEvent trackedEvent) throws InterruptedException {
