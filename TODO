@@ -1,5 +1,9 @@
 Axel
 ====
+
+ - Replace ObjectOutputStream currently used for storing declinations in files by DataOutputStream.
+   Re-format existing files accordingly. This should allow for problem-free append.
+
  - Need synchronization while looping over a course's legs because the course may be updated
    as the loop executes:
 
