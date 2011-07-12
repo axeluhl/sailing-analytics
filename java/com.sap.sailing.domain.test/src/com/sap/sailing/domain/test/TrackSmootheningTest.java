@@ -13,7 +13,7 @@ import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
 
 import com.maptrack.client.io.TypeController;
 import com.sap.sailing.domain.base.Competitor;
@@ -105,7 +105,7 @@ public class TrackSmootheningTest extends AbstractTracTracLiveTest {
                 tracks.put(competitor, track);
             }
         }
-        assertTrue(tracks.size() >= 30); // TODO issue on Linux with Unicode characters in file names
+        assertEquals(36, tracks.size());
     }
 
     protected String getExpectedEventName() {
