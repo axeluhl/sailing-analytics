@@ -124,6 +124,8 @@ public class DeclinationStore {
                 double grid = Double.valueOf(args[2]);
                 NOAAImporter importer = new NOAAImporter();
                 for (int year = fromYear; year <= toYear; year++) {
+                    QuadTree<Declination> storedDeclinations = getStoredDeclinations(year);
+                    // append if file already exists
                     File fileForYear = new File(getResourceForYear(year));
                     ObjectOutput out;
                     if (fileForYear.exists()) {
