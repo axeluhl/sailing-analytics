@@ -17,7 +17,8 @@ import com.sap.sailing.gwt.ui.shared.WindDAO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDAO;
 
 /**
- * The client side stub for the RPC service.
+ * The client side stub for the RPC service. Usually, when a <code>null</code> date is passed to
+ * the time-dependent service methods, an empty (non-<code>null</code>) result is returned.
  */
 @RemoteServiceRelativePath("sailing")
 public interface SailingService extends RemoteService {

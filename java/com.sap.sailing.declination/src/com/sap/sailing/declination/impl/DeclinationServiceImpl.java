@@ -107,7 +107,7 @@ public class DeclinationServiceImpl implements DeclinationService {
      * Computes a measure for a "distance" based on time and space, between two positions and time points records. Being
      * six months off is deemed to be as bad as being sixty nautical miles off.
      */
-    private double timeAndSpaceDistance(Distance spatialDistance, TimePoint t1, TimePoint t2) {
+    static double timeAndSpaceDistance(Distance spatialDistance, TimePoint t1, TimePoint t2) {
         double nauticalMileDistance = spatialDistance.getNauticalMiles();
         long millisDistance = Math.abs(t1.asMillis()-t2.asMillis());
         return ((double) millisDistance)/1000. /*s*/ / 3600. /*h*/ / 24. /*days*/ / 186. /*six months*/ +

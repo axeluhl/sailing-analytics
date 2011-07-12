@@ -90,11 +90,8 @@ public class DeclinationStore {
         }
     }
 
-    private void fetchAndAppendDeclination(int year, int month, double lat, double lng, NOAAImporter importer,
+    private void fetchAndAppendDeclination(TimePoint timePoint, Position position, NOAAImporter importer,
             ObjectOutput out) throws IOException {
-        Position position = new DegreePosition(lat, lng);
-        Calendar cal = new GregorianCalendar(year, month, /* dayOfMonth */ 1);
-        TimePoint timePoint = new MillisecondsTimePoint(cal.getTimeInMillis());
         Declination declination = null;
         // re-try three times
         for (int i=0; i<3; i++) {
@@ -113,7 +110,7 @@ public class DeclinationStore {
         }
     }
 
-    private void run(String[] args) throws FileNotFoundException, IOException {
+    private void run(String[] args) throws FileNotFoundException, IOException, ClassNotFoundException, ParseException {
         if (args.length == 0) {
             usage();
         } else {
@@ -125,24 +122,52 @@ public class DeclinationStore {
                 double grid = Double.valueOf(args[2]);
                 NOAAImporter importer = new NOAAImporter();
                 for (int year = fromYear; year <= toYear; year++) {
-                    ObjectOutput out = new ObjectOutputStream(new FileOutputStream(getResourceForYear(year)));
+                    QuadTree<Declination> storedDeclinations = getStoredDeclinations(year);
+                    // append if file already exists
+                    ObjectOutput out = new ObjectOutputStream(new FileOutputStream(getResourceForYear(year), /* append */ true));
                     int month = 6;
+                    Calendar cal = new GregorianCalendar(year, month, /* dayOfMonth */ 1);
+                    TimePoint timePoint = new MillisecondsTimePoint(cal.getTimeInMillis());
                     for (double lat = 0; lat < 90; lat += grid) {
                         System.out.println("Date: " + year + "/" + (month + 1) + ", Latitude: " + lat);
                         for (double lng = 0; lng < 180; lng += grid) {
-                            fetchAndAppendDeclination(year, month, lat, lng, importer, out);
+                            Position point = new DegreePosition(lat, lng);
+                            Declination existingDeclinationRecord = storedDeclinations.get(point);
+                            if (DeclinationServiceImpl.timeAndSpaceDistance(existingDeclinationRecord.getPosition().getDistance(point),
+                                    timePoint, existingDeclinationRecord.getTimePoint()) > 0.1) {
+                                // less than ~6 nautical miles and/or ~.6 months off
+                                fetchAndAppendDeclination(timePoint, point, importer, out);
+                            }
                         }
                         for (double lng = -grid; lng > -180; lng -= grid) {
-                            fetchAndAppendDeclination(year, month, lat, lng, importer, out);
+                            Position point = new DegreePosition(lat, lng);
+                            Declination existingDeclinationRecord = storedDeclinations.get(point);
+                            if (DeclinationServiceImpl.timeAndSpaceDistance(existingDeclinationRecord.getPosition().getDistance(point),
+                                    timePoint, existingDeclinationRecord.getTimePoint()) > 0.1) {
+                                // less than ~6 nautical miles and/or ~.6 months off
+                                fetchAndAppendDeclination(timePoint, point, importer, out);
+                            }
                         }
                     }
                     for (double lat = -grid; lat > -90; lat -= grid) {
                         System.out.println("Date: " + year + "/" + (month + 1) + ", Latitude: " + lat);
                         for (double lng = 0; lng < 180; lng += grid) {
-                            fetchAndAppendDeclination(year, month, lat, lng, importer, out);
+                            Position point = new DegreePosition(lat, lng);
+                            Declination existingDeclinationRecord = storedDeclinations.get(point);
+                            if (DeclinationServiceImpl.timeAndSpaceDistance(existingDeclinationRecord.getPosition().getDistance(point),
+                                    timePoint, existingDeclinationRecord.getTimePoint()) > 0.1) {
+                                // less than ~6 nautical miles and/or ~.6 months off
+                                fetchAndAppendDeclination(timePoint, point, importer, out);
+                            }
                         }
                         for (double lng = -grid; lng > -180; lng -= grid) {
-                            fetchAndAppendDeclination(year, month, lat, lng, importer, out);
+                            Position point = new DegreePosition(lat, lng);
+                            Declination existingDeclinationRecord = storedDeclinations.get(point);
+                            if (DeclinationServiceImpl.timeAndSpaceDistance(existingDeclinationRecord.getPosition().getDistance(point),
+                                    timePoint, existingDeclinationRecord.getTimePoint()) > 0.1) {
+                                // less than ~6 nautical miles and/or ~.6 months off
+                                fetchAndAppendDeclination(timePoint, point, importer, out);
+                            }
                         }
                     }
                     out.close();
@@ -156,8 +181,10 @@ public class DeclinationStore {
      * values are stored in the file) the declinations downloaded online for the years <code>args[0]</code> to
      * <code>args[1]</code> (inclusive) for all positions with a grid of <code>args[2]</code> degrees each, starting at
      * 0&deg;0.0'N and 0&deg;0.0'E.
+     * @throws ParseException 
+     * @throws ClassNotFoundException 
      */
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, ClassNotFoundException, ParseException {
         DeclinationStore store = new DeclinationStore();
         store.run(args);
     }
