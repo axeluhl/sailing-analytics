@@ -32,7 +32,6 @@ public class MultipleClassesInEventTest {
         String liveURI = "tcp://germanmaster.traclive.dk:4400";
         String storedURI = "tcp://germanmaster.traclive.dk:4401";
         if (Boolean.valueOf(System.getProperty("tractrac.tunnel", "false"))) {
-            httpAndHost = "http://localhost:12348";
             liveURI   = "tcp://localhost:4412";
             storedURI = "tcp://localhost:4413";
         }
