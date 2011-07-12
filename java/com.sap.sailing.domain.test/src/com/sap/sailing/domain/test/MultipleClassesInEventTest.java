@@ -19,6 +19,8 @@ import com.sap.sailing.domain.tractracadapter.RaceTracker;
 import com.sap.sailing.domain.tractracadapter.impl.DomainFactoryImpl;
 
 public class MultipleClassesInEventTest {
+    private static final boolean tractracTunnel = Boolean.valueOf(System.getProperty("tractrac.tunnel", "false"));
+    private static final String tractracTunnelHost = System.getProperty("tractrac.tunnel.host", "localhost");
     private DomainFactory domainFactory;
     
     @Before
@@ -31,9 +33,9 @@ public class MultipleClassesInEventTest {
         String httpAndHost = "http://germanmaster.traclive.dk";
         String liveURI = "tcp://germanmaster.traclive.dk:4400";
         String storedURI = "tcp://germanmaster.traclive.dk:4401";
-        if (Boolean.valueOf(System.getProperty("tractrac.tunnel", "false"))) {
-            liveURI   = "tcp://localhost:4412";
-            storedURI = "tcp://localhost:4413";
+        if (tractracTunnel) {
+            liveURI   = "tcp://"+tractracTunnelHost+":4412";
+            storedURI = "tcp://"+tractracTunnelHost+":4413";
         }
         RaceTracker kiwotest1 = domainFactory
                 .createRaceTracker(
