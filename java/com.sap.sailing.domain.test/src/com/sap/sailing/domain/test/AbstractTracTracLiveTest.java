@@ -25,6 +25,15 @@ import com.tractrac.clientmodule.data.DataController;
 import com.tractrac.clientmodule.data.DataController.Listener;
 import com.tractrac.clientmodule.setup.KeyValue;
 
+/**
+ * Subclassing tests have to call {@link #addListenersForStoredDataAndStartController(Iterable)} to kick off
+ * the data receiving process. If subclasses use this class's default constructor, a connection to the
+ * STG default account with a few test races is established. Subclasses may also choose to configure other
+ * races / events using the {@link #AbstractTracTracLiveTest(URL, URI, URI)} constructor variant.
+ * 
+ * @author Axel Uhl (D043530)
+ *
+ */
 public abstract class AbstractTracTracLiveTest implements Listener {
 
     private static final String START_SIMULATOR_URL = "http://sapsimulation.tracdev.dk/start.php";
@@ -39,23 +48,21 @@ public abstract class AbstractTracTracLiveTest implements Listener {
     private DataController controller;
 
     protected AbstractTracTracLiveTest() throws URISyntaxException, MalformedURLException {
+        this(Boolean.valueOf(System.getProperty("tractrac.tunnel", "false")) ? new URL("http://localhost:12348/events/event_20110505_SailingTea/clientparams.php?event=event_20110505_SailingTea&race=bd8c778e-7c65-11e0-8236-406186cbf87c") :
+            new URL("http://germanmaster.traclive.dk/events/event_20110505_SailingTea/clientparams.php?event=event_20110505_SailingTea&race=bd8c778e-7c65-11e0-8236-406186cbf87c"),
+            Boolean.valueOf(System.getProperty("tractrac.tunnel", "false")) ? new URI("tcp://localhost:4412") : new URI("tcp://germanmaster.traclive.dk:4400"),
+                    Boolean.valueOf(System.getProperty("tractrac.tunnel", "false")) ? new URI("tcp://localhost:4413") : new URI("tcp://germanmaster.traclive.dk:4401"));
         // for live simulation:
         //   paramUrl  = new URL("http://sapsimulation.tracdev.dk/simulateconf/j80race12.txt");
         //   liveUri   = new URI("tcp://sapsimulation.tracdev.dk:4420"); // or with tunneling: tcp://localhost:4420
         //   storedUri = new URI("tcp://sapsimulation.tracdev.dk:4421"); // or with tunneling: tcp://localhost:4421
         // for stored race, non-real-time simulation:
-        
-        if (Boolean.valueOf(System.getProperty("tractrac.tunnel", "false"))) {
-            // tunnel
-            paramUrl  = new URL("http://localhost:12348/events/event_20110505_SailingTea/clientparams.php?event=event_20110505_SailingTea&race=bd8c778e-7c65-11e0-8236-406186cbf87c");
-            liveUri   = new URI("tcp://localhost:4412");
-            storedUri = new URI("tcp://localhost:4413");
-        } else {
-            //no tunnel:
-            paramUrl  = new URL("http://germanmaster.traclive.dk/events/event_20110505_SailingTea/clientparams.php?event=event_20110505_SailingTea&race=bd8c778e-7c65-11e0-8236-406186cbf87c");
-            liveUri   = new URI("tcp://germanmaster.traclive.dk:4400");
-            storedUri = new URI("tcp://germanmaster.traclive.dk:4401");
-        }
+    }
+
+    protected AbstractTracTracLiveTest(URL paramUrl, URI liveUri, URI storedUri) {
+        this.paramUrl = paramUrl;
+        this.liveUri = liveUri;
+        this.storedUri = storedUri;
         receivers = new HashSet<Receiver>();
     }
 
@@ -64,13 +71,17 @@ public abstract class AbstractTracTracLiveTest implements Listener {
         // Read event data from configuration file
         event = KeyValue.setup(paramUrl);
         assertNotNull(event);
-        assertEquals("Sailing Team Germany", event.getName());
+        assertEquals(getExpectedEventName(), event.getName());
         // Initialize data controller using live and stored data sources
         controller = new DataController(liveUri, storedUri, this);
         // Start live and stored data streams
         ioThread = new Thread(controller, "io");
         // test cases need to start the thread calling startController
         // after adding their listeners
+    }
+
+    protected String getExpectedEventName() {
+        return "Sailing Team Germany";
     }
     
     protected void addListenersForStoredDataAndStartController(Iterable<Receiver> receivers) {
