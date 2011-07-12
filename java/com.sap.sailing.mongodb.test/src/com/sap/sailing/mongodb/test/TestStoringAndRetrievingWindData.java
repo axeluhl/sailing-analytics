@@ -31,7 +31,8 @@ public class TestStoringAndRetrievingWindData implements MongoDBTest {
     private DB db;
     
     private Mongo newMongo() throws UnknownHostException, MongoException {
-        return new Mongo("127.0.0.1", ((MongoWindStoreFactoryImpl) MongoWindStoreFactoryImpl.getDefaultInstance()).getDefaultPort());
+        return new Mongo(System.getProperty("mongo.host", "127.0.0.1"),
+                ((MongoWindStoreFactoryImpl) MongoWindStoreFactoryImpl.getDefaultInstance()).getDefaultPort());
     }
     
     @Before
