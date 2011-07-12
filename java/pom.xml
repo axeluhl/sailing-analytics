@@ -152,7 +152,6 @@
     </repository>
   </distributionManagement>
 
-<!--
 	<repositories>
 		<repository>
 			<layout>p2</layout>
@@ -160,5 +159,4 @@
 			<url>http://download.eclipse.org/releases/indigo/</url>
 		</repository>
 	</repositories>
--->
 </project>
