@@ -1,6 +1,7 @@
 package com.sap.sailing.declination.impl;
 
 import java.io.EOFException;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -107,6 +108,7 @@ public class DeclinationStore {
         }
         if (declination != null) {
             writeExternal(declination, out);
+            out.flush();
         }
     }
 
@@ -122,9 +124,18 @@ public class DeclinationStore {
                 double grid = Double.valueOf(args[2]);
                 NOAAImporter importer = new NOAAImporter();
                 for (int year = fromYear; year <= toYear; year++) {
-                    QuadTree<Declination> storedDeclinations = getStoredDeclinations(year);
-                    // append if file already exists
-                    ObjectOutput out = new ObjectOutputStream(new FileOutputStream(getResourceForYear(year), /* append */ true));
+                    File fileForYear = new File(getResourceForYear(year));
+                    ObjectOutput out;
+                    if (fileForYear.exists()) {
+                        out = new ObjectOutputStream(new FileOutputStream(getResourceForYear(year), /* append */ true)) {
+                            @Override
+                            protected void writeStreamHeader() throws IOException {
+                                // no header in append mode
+                            }
+                        };
+                    } else {
+                        out = new ObjectOutputStream(new FileOutputStream(getResourceForYear(year)));
+                    }
                     int month = 6;
                     Calendar cal = new GregorianCalendar(year, month, /* dayOfMonth */ 1);
                     TimePoint timePoint = new MillisecondsTimePoint(cal.getTimeInMillis());
