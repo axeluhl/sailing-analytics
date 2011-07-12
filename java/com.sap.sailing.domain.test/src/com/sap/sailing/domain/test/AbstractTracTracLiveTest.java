@@ -56,7 +56,8 @@ import com.tractrac.clientmodule.setup.KeyValue;
  *
  */
 public abstract class AbstractTracTracLiveTest implements Listener {
-
+    protected static final boolean tractracTunnel = Boolean.valueOf(System.getProperty("tractrac.tunnel", "false"));
+    protected static final String tractracTunnelHost = System.getProperty("tractrac.tunnel.host", "localhost");
     private static final String START_SIMULATOR_URL = "http://sapsimulation.tracdev.dk/start.php";
     private static final String KILL_URL = "http://sapsimulation.tracdev.dk/kill.php";
     private final URL paramUrl;
@@ -69,10 +70,10 @@ public abstract class AbstractTracTracLiveTest implements Listener {
     private DataController controller;
 
     protected AbstractTracTracLiveTest() throws URISyntaxException, MalformedURLException {
-        this(Boolean.valueOf(System.getProperty("tractrac.tunnel", "false")) ? new URL("http://localhost:12348/events/event_20110505_SailingTea/clientparams.php?event=event_20110505_SailingTea&race=bd8c778e-7c65-11e0-8236-406186cbf87c") :
+        this(tractracTunnel ? new URL("http://"+tractracTunnelHost+":12348/events/event_20110505_SailingTea/clientparams.php?event=event_20110505_SailingTea&race=bd8c778e-7c65-11e0-8236-406186cbf87c") :
             new URL("http://germanmaster.traclive.dk/events/event_20110505_SailingTea/clientparams.php?event=event_20110505_SailingTea&race=bd8c778e-7c65-11e0-8236-406186cbf87c"),
-            Boolean.valueOf(System.getProperty("tractrac.tunnel", "false")) ? new URI("tcp://localhost:4412") : new URI("tcp://germanmaster.traclive.dk:4400"),
-                    Boolean.valueOf(System.getProperty("tractrac.tunnel", "false")) ? new URI("tcp://localhost:4413") : new URI("tcp://germanmaster.traclive.dk:4401"));
+            tractracTunnel ? new URI("tcp://"+tractracTunnelHost+":4412") : new URI("tcp://germanmaster.traclive.dk:4400"),
+                    tractracTunnel ? new URI("tcp://"+tractracTunnelHost+":4413") : new URI("tcp://germanmaster.traclive.dk:4401"));
         // for live simulation:
         //   paramUrl  = new URL("http://sapsimulation.tracdev.dk/simulateconf/j80race12.txt");
         //   liveUri   = new URI("tcp://sapsimulation.tracdev.dk:4420"); // or with tunneling: tcp://localhost:4420

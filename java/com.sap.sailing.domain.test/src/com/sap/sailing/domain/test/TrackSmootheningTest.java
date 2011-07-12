@@ -48,10 +48,10 @@ public class TrackSmootheningTest extends AbstractTracTracLiveTest {
     private DomainFactory domainFactory;
 
     public TrackSmootheningTest() throws URISyntaxException, MalformedURLException {
-        super(Boolean.valueOf(System.getProperty("tractrac.tunnel", "false")) ? new URL("http://localhost:12348/events/event_20110609_KielerWoch/clientparams.php?event=event_20110609_KielerWoch&race=357c700a-9d9a-11e0-85be-406186cbf87c") :
+        super(tractracTunnel ? new URL("http://"+tractracTunnelHost+":12348/events/event_20110609_KielerWoch/clientparams.php?event=event_20110609_KielerWoch&race=357c700a-9d9a-11e0-85be-406186cbf87c") :
             new URL("http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/clientparams.php?event=event_20110609_KielerWoch&race=357c700a-9d9a-11e0-85be-406186cbf87c"),
-            Boolean.valueOf(System.getProperty("tractrac.tunnel", "false")) ? new URI("tcp://localhost:1520") : new URI("tcp://germanmaster.traclive.dk:1520"),
-                    Boolean.valueOf(System.getProperty("tractrac.tunnel", "false")) ? new URI("tcp://localhost:1521") : new URI("tcp://germanmaster.traclive.dk:1521"));
+            tractracTunnel ? new URI("tcp://"+tractracTunnelHost+":1520") : new URI("tcp://germanmaster.traclive.dk:1520"),
+                    tractracTunnel ? new URI("tcp://"+tractracTunnelHost+":1521") : new URI("tcp://germanmaster.traclive.dk:1521"));
         tracks = new HashMap<Competitor, DynamicTrack<Competitor,GPSFixMoving>>();
     }
     
