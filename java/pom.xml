@@ -5,13 +5,13 @@
 	<modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <artifactId>root</artifactId>
+    <artifactId>workspace</artifactId>
     <groupId>com.sap.sailing</groupId>
     <version>0.0.1-SNAPSHOT</version>
   </parent>
 
 	<groupId>com.sap.sailing</groupId>
-	<artifactId>java</artifactId>
+	<artifactId>root</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
