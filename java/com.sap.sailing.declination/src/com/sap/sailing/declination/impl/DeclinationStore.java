@@ -79,7 +79,7 @@ public class DeclinationStore {
         try {
             String line = in.readLine();
             if (line != null && line.length() > 0) {
-                String[] fields = line.split("|");
+                String[] fields = line.split("\\|");
                 TimePoint timePoint = new MillisecondsTimePoint(dateFormatter.parse(fields[0]).getTime());
                 double lat = Double.valueOf(fields[1]);
                 double lng = Double.valueOf(fields[2]);
