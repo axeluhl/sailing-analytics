@@ -7,6 +7,7 @@ import java.util.NavigableSet;
 
 import com.sap.sailing.domain.base.Distance;
 import com.sap.sailing.domain.base.Position;
+import com.sap.sailing.domain.base.Speed;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.impl.DegreeBearingImpl;
@@ -76,6 +77,28 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
                 }
             }
         }
+    }
+
+    @Override
+    public Speed getMaximumSpeedOverGround(TimePoint from, TimePoint to) {
+        // fetch all fixes on this leg so far and determine their maximum speed
+        Iterator<FixType> iter = getFixesIterator(from, /* inclusive */ true);
+        Speed max = Speed.NULL;
+        if (iter.hasNext()) {
+            Position lastPos = getEstimatedPosition(from, false);
+            while (iter.hasNext()) {
+                FixType fix = iter.next();
+                Speed fixSpeed = getSpeed(fix, lastPos, from);
+                if (fixSpeed.compareTo(max) > 0) {
+                    max = fixSpeed;
+                }
+            }
+        }
+        return max;
+    }
+
+    protected Speed getSpeed(FixType fix, Position lastPos, TimePoint timePointOfLastPos) {
+        return lastPos.getDistance(fix.getPosition()).inTime(fix.getTimePoint().asMillis()-timePointOfLastPos.asMillis());
     }
 
     private SpeedWithBearing estimateSpeed(FixType fix1, FixType fix2) {

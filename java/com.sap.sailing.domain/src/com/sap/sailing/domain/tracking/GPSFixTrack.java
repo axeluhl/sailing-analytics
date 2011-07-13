@@ -2,6 +2,7 @@ package com.sap.sailing.domain.tracking;
 
 import com.sap.sailing.domain.base.Distance;
 import com.sap.sailing.domain.base.Position;
+import com.sap.sailing.domain.base.Speed;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.TimePoint;
 
@@ -18,6 +19,10 @@ import com.sap.sailing.domain.base.TimePoint;
 public interface GPSFixTrack<ItemType, FixType extends GPSFix> extends Track<FixType> {
     ItemType getTrackedItem();
 
+    /**
+     * Computes the distance traveled between the {@link #getEstimatedPosition(TimePoint, boolean) estimated positions}
+     * at <code>from</code> and <code>to</code>.
+     */
     Distance getDistanceTraveled(TimePoint from, TimePoint to);
 
     /**
@@ -38,6 +43,8 @@ public interface GPSFixTrack<ItemType, FixType extends GPSFix> extends Track<Fix
      *            used instead.
      */
     Position getEstimatedPosition(TimePoint timePoint, boolean extrapolate);
+    
+    Speed getMaximumSpeedOverGround(TimePoint from, TimePoint to);
 
     /**
      * Using an averaging / smoothening algorithm, computes the estimated speed determined

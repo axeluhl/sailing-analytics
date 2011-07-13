@@ -125,25 +125,6 @@ public class TrackSmootheningTest extends AbstractTracTracLiveTest {
         return null;
     }
 
-    @Test
-    public void checkLoadedTracksCount() throws InterruptedException, FileNotFoundException, IOException {
-        assertEquals(36, tracks.size());
-    }
-    
-    @Test
-    public void assertBirknersEquatorJump() {
-        DynamicTrack<Competitor, GPSFixMoving> track = getTrackByCompetitorName("Birkner");
-        assertNotNull(track);
-        assertOutlierInTrack(track);
-    }
-
-    @Test
-    public void assertPlattnersKielerFoerdeJump() {
-        DynamicTrack<Competitor, GPSFixMoving> track = getTrackByCompetitorName("Dr.Plattner");
-        assertNotNull(track);
-        assertOutlierInTrack(track);
-    }
-
     protected void assertOutlierInTrack(DynamicTrack<Competitor, GPSFixMoving> track) {
         TimePoint lastTimePoint = null;
         GPSFixMoving lastFix = null;
@@ -163,6 +144,25 @@ public class TrackSmootheningTest extends AbstractTracTracLiveTest {
             lastFix = fix;
         }
         assertNotNull(outlier); // assert that we found an outlier
+    }
+
+    @Test
+    public void checkLoadedTracksCount() throws InterruptedException, FileNotFoundException, IOException {
+        assertEquals(36, tracks.size());
+    }
+    
+    @Test
+    public void assertBirknersEquatorJump() {
+        DynamicTrack<Competitor, GPSFixMoving> track = getTrackByCompetitorName("Birkner");
+        assertNotNull(track);
+        assertOutlierInTrack(track);
+    }
+
+    @Test
+    public void assertPlattnersKielerFoerdeJump() {
+        DynamicTrack<Competitor, GPSFixMoving> track = getTrackByCompetitorName("Dr.Plattner");
+        assertNotNull(track);
+        assertOutlierInTrack(track);
     }
 
 }

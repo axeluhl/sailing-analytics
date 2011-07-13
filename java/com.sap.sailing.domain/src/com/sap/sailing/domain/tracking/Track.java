@@ -12,6 +12,10 @@ import com.sap.sailing.domain.base.Timed;
  * @author Axel Uhl (d043530)
  */
 public interface Track<FixType extends Timed> {
+    /**
+     * @return the raw fixes as recorded by this track; in particular, no smoothening or dampening of any kind is
+     *         applied to the fixes returned by this method.
+     */
     Iterable<FixType> getFixes();
 
     FixType getLastFixAtOrBefore(TimePoint timePoint);
@@ -33,8 +37,9 @@ public interface Track<FixType extends Timed> {
     FixType getLastFix();
     
     /**
-     * Returns an iterator starting at the first fix after <code>startingAt</code> (or
-     * "at or after" in case <code>inclusive</code> is <code>true</code>).
+     * Returns an iterator starting at the first fix after <code>startingAt</code> (or "at or after" in case
+     * <code>inclusive</code> is <code>true</code>). The fixes returned by the iterator are the raw fixes (see also
+     * {@link #getFixes()}, without any smoothening or dampening applied.
      */
     Iterator<FixType> getFixesIterator(TimePoint startingAt, boolean inclusive);
 }
