@@ -4,14 +4,10 @@ import java.io.BufferedReader;
 import java.io.EOFException;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.ObjectInput;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutput;
-import java.io.ObjectOutputStream;
-import java.io.UTFDataFormatException;
+import java.io.InputStreamReader;
 import java.io.Writer;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -47,7 +43,7 @@ public class DeclinationStore {
         InputStream is = getInputStreamForYear(year);
         if (is != null) {
             result = new QuadTree<Declination>();
-            ObjectInput in = new ObjectInputStream(is);
+            BufferedReader in = new BufferedReader(new InputStreamReader(is));
             while ((record = readExternal(in)) != null) {
                 result.put(record.getPosition(), record);
             }
@@ -61,7 +57,7 @@ public class DeclinationStore {
     }
 
     private String getFilenameForYear(int year) {
-        String filename = "declination-"+year+".txt";
+        String filename = "declination-"+year;
         return filename;
     }
     
@@ -69,14 +65,6 @@ public class DeclinationStore {
         return getClass().getResourceAsStream("/"+getFilenameForYear(year));
     }
     
-    public void writeExternal(Declination record, ObjectOutput out) throws IOException {
-        out.writeUTF(dateFormatter.format(record.getTimePoint().asDate()));
-        out.writeDouble(record.getPosition().getLatDeg());
-        out.writeDouble(record.getPosition().getLngDeg());
-        out.writeDouble(record.getBearing().getDegrees());
-        out.writeDouble(record.getAnnualChange().getDegrees());
-    }
-
     public void writeExternal(Declination record, Writer out) throws IOException {
         out.write(dateFormatter.format(record.getTimePoint().asDate()));
         out.write("|"+record.getPosition().getLatDeg());
@@ -87,43 +75,27 @@ public class DeclinationStore {
     }
     
     public Declination readExternal(BufferedReader in) throws IOException, ParseException {
+        Declination result = null;
         try {
             String line = in.readLine();
-            String[] fields = line.split("|");
-            TimePoint timePoint = new MillisecondsTimePoint(dateFormatter.parse(fields[0]).getTime());
-            double lat = Double.valueOf(fields[1]);
-            double lng = Double.valueOf(fields[2]);
-            Position position = new DegreePosition(lat, lng);
-            Bearing bearing = new DegreeBearingImpl(Double.valueOf(fields[3]));
-            Bearing annualChange = new DegreeBearingImpl(Double.valueOf(fields[4]));
-            return new DeclinationRecordImpl(position, timePoint, bearing, annualChange);
+            if (line != null && line.length() > 0) {
+                String[] fields = line.split("|");
+                TimePoint timePoint = new MillisecondsTimePoint(dateFormatter.parse(fields[0]).getTime());
+                double lat = Double.valueOf(fields[1]);
+                double lng = Double.valueOf(fields[2]);
+                Position position = new DegreePosition(lat, lng);
+                Bearing bearing = new DegreeBearingImpl(Double.valueOf(fields[3]));
+                Bearing annualChange = new DegreeBearingImpl(Double.valueOf(fields[4]));
+                return new DeclinationRecordImpl(position, timePoint, bearing, annualChange);
+            }
         } catch (EOFException eof) {
-            return null;
+            // leave result as null
         }
+        return result;
     }
     
-    /**
-     * @return <code>null</code> if EOF has been reached
-     */
-    public Declination readExternal(ObjectInput in) throws IOException, ClassNotFoundException, ParseException {
-        try {
-            TimePoint timePoint = new MillisecondsTimePoint(dateFormatter.parse(in.readUTF()).getTime());
-            double lat = in.readDouble();
-            double lng = in.readDouble();
-            Position position = new DegreePosition(lat, lng);
-            Bearing bearing = new DegreeBearingImpl(in.readDouble());
-            Bearing annualChange = new DegreeBearingImpl(in.readDouble());
-            return new DeclinationRecordImpl(position, timePoint, bearing, annualChange);
-        } catch (EOFException e) {
-            return null;
-        } catch (UTFDataFormatException dfe) {
-            // this probably means that a previous write was aborted
-            return null;
-        }
-    }
-
     private void fetchAndAppendDeclination(TimePoint timePoint, Position position, NOAAImporter importer,
-            ObjectOutput out) throws IOException {
+            Writer out) throws IOException {
         Declination declination = null;
         // re-try three times
         for (int i=0; i<3; i++) {
@@ -158,16 +130,11 @@ public class DeclinationStore {
                     QuadTree<Declination> storedDeclinations = getStoredDeclinations(year);
                     // append if file already exists
                     File fileForYear = new File(getResourceForYear(year));
-                    ObjectOutput out;
+                    Writer out;
                     if (fileForYear.exists()) {
-                        out = new ObjectOutputStream(new FileOutputStream(getResourceForYear(year), /* append */ true)) {
-                            @Override
-                            protected void writeStreamHeader() throws IOException {
-                                // no header in append mode
-                            }
-                        };
+                        out = new FileWriter(getResourceForYear(year), /* append */ true);
                     } else {
-                        out = new ObjectOutputStream(new FileOutputStream(getResourceForYear(year)));
+                        out = new FileWriter(getResourceForYear(year));
                     }
                     int month = 6;
                     Calendar cal = new GregorianCalendar(year, month, /* dayOfMonth */ 1);

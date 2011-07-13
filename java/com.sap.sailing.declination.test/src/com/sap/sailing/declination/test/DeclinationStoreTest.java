@@ -18,20 +18,29 @@ import java.io.ObjectInput;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.StreamCorruptedException;
+import java.io.UTFDataFormatException;
 import java.io.Writer;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sap.sailing.declination.Declination;
+import com.sap.sailing.declination.impl.DeclinationRecordImpl;
 import com.sap.sailing.declination.impl.DeclinationStore;
+import com.sap.sailing.domain.base.Bearing;
+import com.sap.sailing.domain.base.Position;
+import com.sap.sailing.domain.base.TimePoint;
+import com.sap.sailing.domain.base.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.base.impl.DegreePosition;
+import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.util.QuadTree;
 
 public class DeclinationStoreTest extends AbstractDeclinationTest {
     private DeclinationStore store;
+    private static final SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
     
     @Before
     public void setUp() {
@@ -321,7 +330,7 @@ public class DeclinationStoreTest extends AbstractDeclinationTest {
                 ObjectInput in = new ObjectInputStream(new FileInputStream(f));
                 Writer out = new FileWriter(new File(f.getParentFile(), f.getName().replace(".txt", "")));
                 Declination record;
-                while ((record = store.readExternal(in)) != null) {
+                while ((record = readExternal(in)) != null) {
                     store.writeExternal(record, out);
                 }
                 in.close();
@@ -330,5 +339,22 @@ public class DeclinationStoreTest extends AbstractDeclinationTest {
         }
     }
     
+    private Declination readExternal(ObjectInput in) throws IOException, ClassNotFoundException, ParseException {
+        try {
+            TimePoint timePoint = new MillisecondsTimePoint(dateFormatter.parse(in.readUTF()).getTime());
+            double lat = in.readDouble();
+            double lng = in.readDouble();
+            Position position = new DegreePosition(lat, lng);
+            Bearing bearing = new DegreeBearingImpl(in.readDouble());
+            Bearing annualChange = new DegreeBearingImpl(in.readDouble());
+            return new DeclinationRecordImpl(position, timePoint, bearing, annualChange);
+        } catch (EOFException e) {
+            return null;
+        } catch (UTFDataFormatException dfe) {
+            // this probably means that a previous write was aborted
+            return null;
+        }
+    }
+
     
 }
