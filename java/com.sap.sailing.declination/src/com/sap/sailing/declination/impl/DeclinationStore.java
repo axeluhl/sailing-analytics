@@ -1,5 +1,6 @@
 package com.sap.sailing.declination.impl;
 
+import java.io.BufferedReader;
 import java.io.EOFException;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -10,6 +11,8 @@ import java.io.ObjectInput;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
+import java.io.UTFDataFormatException;
+import java.io.Writer;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -34,7 +37,7 @@ import com.sap.sailing.util.QuadTree;
  */
 public class DeclinationStore {
     private static final SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
-
+    
     /**
      * Returns <code>null</code> if no stored declinations exist for the <code>year</code> requested.
      */
@@ -74,6 +77,31 @@ public class DeclinationStore {
         out.writeDouble(record.getAnnualChange().getDegrees());
     }
 
+    public void writeExternal(Declination record, Writer out) throws IOException {
+        out.write(dateFormatter.format(record.getTimePoint().asDate()));
+        out.write("|"+record.getPosition().getLatDeg());
+        out.write("|"+record.getPosition().getLngDeg());
+        out.write("|"+record.getBearing().getDegrees());
+        out.write("|"+record.getAnnualChange().getDegrees());
+        out.write("\n");
+    }
+    
+    public Declination readExternal(BufferedReader in) throws IOException, ParseException {
+        try {
+            String line = in.readLine();
+            String[] fields = line.split("|");
+            TimePoint timePoint = new MillisecondsTimePoint(dateFormatter.parse(fields[0]).getTime());
+            double lat = Double.valueOf(fields[1]);
+            double lng = Double.valueOf(fields[2]);
+            Position position = new DegreePosition(lat, lng);
+            Bearing bearing = new DegreeBearingImpl(Double.valueOf(fields[3]));
+            Bearing annualChange = new DegreeBearingImpl(Double.valueOf(fields[4]));
+            return new DeclinationRecordImpl(position, timePoint, bearing, annualChange);
+        } catch (EOFException eof) {
+            return null;
+        }
+    }
+    
     /**
      * @return <code>null</code> if EOF has been reached
      */
@@ -87,6 +115,9 @@ public class DeclinationStore {
             Bearing annualChange = new DegreeBearingImpl(in.readDouble());
             return new DeclinationRecordImpl(position, timePoint, bearing, annualChange);
         } catch (EOFException e) {
+            return null;
+        } catch (UTFDataFormatException dfe) {
+            // this probably means that a previous write was aborted
             return null;
         }
     }
