@@ -8,6 +8,8 @@ import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.SelectionEvent;
+import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
@@ -57,11 +59,19 @@ public class AdminConsole implements EntryPoint, ErrorReporter, EventRefresher {
         eventDisplayers.add(windPanel);
         windPanel.setSize("90%", "90%");
         tabPanel.add(windPanel, stringConstants.wind(), false);
-        RaceMapPanel raceMapPanel = new RaceMapPanel(sailingService, this, this, stringConstants);
+        final RaceMapPanel raceMapPanel = new RaceMapPanel(sailingService, this, this, stringConstants);
         eventDisplayers.add(raceMapPanel);
         raceMapPanel.setSize("90%", "90%");
         tabPanel.add(raceMapPanel, stringConstants.map(), false);
         tabPanel.selectTab(0);
+        tabPanel.addSelectionHandler(new SelectionHandler<Integer>() {
+			@Override
+			public void onSelection(SelectionEvent<Integer> event) {
+				if(raceMapPanel.isVisible()) {
+					raceMapPanel.onResize();
+				}				
+			}
+		});
         fillEvents();
     }
 

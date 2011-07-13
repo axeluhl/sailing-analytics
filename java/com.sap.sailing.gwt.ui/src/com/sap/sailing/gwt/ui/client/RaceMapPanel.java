@@ -43,6 +43,8 @@ import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.ProvidesResize;
+import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
@@ -54,7 +56,7 @@ import com.sap.sailing.gwt.ui.shared.QuickRankDAO;
 import com.sap.sailing.gwt.ui.shared.RaceDAO;
 import com.sap.sailing.gwt.ui.shared.RegattaDAO;
 
-public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListener {
+public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListener, ProvidesResize, RequiresResize {
     private final StringConstants stringConstants;
     private final SailingServiceAsync sailingService;
     private final ErrorReporter errorReporter;
@@ -105,6 +107,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         grid.setSize("100%", "100%");
         grid.getColumnFormatter().setWidth(0, "20%");
         grid.getColumnFormatter().setWidth(1, "80%");
+        grid.getCellFormatter().setHeight(1, 1, "100%");
         loadMapsAPI();
         raceListBox = new ListBox();
         raceList = new ArrayList<Pair<EventDAO, RaceDAO>>();
@@ -187,7 +190,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
                 map.addControl(new MenuMapTypeControl());
                 // Add the map to the HTML host page
                 grid.setWidget(1, 1, map);
-                map.setSize("100%", "500px");
+                map.setSize("100%", "100%");
                 map.setScrollWheelZoomEnabled(true);
                 map.setContinuousZoom(true);
                 map.addMapZoomEndHandler(new MapZoomEndHandler() {
@@ -520,5 +523,20 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         });
         return result;
     }
-    
+
+	/* (non-Javadoc)
+	 * @see com.google.gwt.user.client.ui.RequiresResize#onResize()
+	 */
+	@Override
+	public void onResize() {
+		//handle what is required by @link{ProvidesResize}
+		Widget child = getWidget();
+		if (child instanceof RequiresResize)
+			((RequiresResize) child).onResize();
+		//and ensure the map (indirect child) is also informed about resize
+		if(this.map != null){
+			this.map.onResize();
+		}
+	} 
+	
 }
