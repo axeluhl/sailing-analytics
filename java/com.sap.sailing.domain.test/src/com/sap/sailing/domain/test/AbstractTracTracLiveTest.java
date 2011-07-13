@@ -232,7 +232,10 @@ public abstract class AbstractTracTracLiveTest implements Listener {
             track = new DynamicGPSFixMovingTrackImpl<Competitor>(competitor, /* millisecondsOverWhichToAverage */
                     40000);
             try {
-                track.addGPSFix(readGPSFixMoving(oi));
+                GPSFixMoving fix;
+                while ((fix = readGPSFixMoving(oi)) != null) {
+                    track.addGPSFix(fix);
+                }
             } catch (EOFException eof) {
                 oi.close();
             }

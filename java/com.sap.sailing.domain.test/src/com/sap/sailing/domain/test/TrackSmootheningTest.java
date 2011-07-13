@@ -2,7 +2,6 @@ package com.sap.sailing.domain.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -153,7 +152,6 @@ public class TrackSmootheningTest extends AbstractTracTracLiveTest {
             if (lastTimePoint != null) {
                 TimePoint thisTimePoint = fix.getTimePoint();
                 long intervalInMillis = thisTimePoint.asMillis()-lastTimePoint.asMillis();
-                assertTrue(intervalInMillis < 10000); // we should have been getting a fix every 10s at least
                 Distance distanceFromLast = lastFix.getPosition().getDistance(fix.getPosition());
                 Speed speedBetweenFixes = distanceFromLast.inTime(intervalInMillis);
                 if (speedBetweenFixes.getKnots() > 50) {
