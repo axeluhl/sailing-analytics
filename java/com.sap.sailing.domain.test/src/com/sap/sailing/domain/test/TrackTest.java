@@ -93,16 +93,16 @@ public class TrackTest {
                 assertTrue(millis > lastMillis);
                 TimePoint inBetweenTimePoint = new MillisecondsTimePoint((millis+lastMillis)/2);
                 assertEquals(lastFix, track.getLastRawFixBefore(inBetweenTimePoint));
-                assertEquals(lastFix, track.getLastFixAtOrBefore(inBetweenTimePoint));
-                assertEquals(fix, track.getFirstFixAfter(inBetweenTimePoint));
+                assertEquals(lastFix, track.getLastRawFixAtOrBefore(inBetweenTimePoint));
+                assertEquals(fix, track.getFirstRawFixAfter(inBetweenTimePoint));
                 assertEquals(fix, track.getFirstRawFixAtOrAfter(inBetweenTimePoint));
 
                 assertEquals(lastFix, track.getLastFixAtOrBefore(lastFix.getTimePoint()));
                 assertEquals(fix, track.getFirstRawFixAtOrAfter(fix.getTimePoint()));
 
                 assertEquals(lastFix, track.getLastRawFixBefore(fix.getTimePoint()));
-                assertEquals(fix, track.getLastFixAtOrBefore(fix.getTimePoint()));
-                assertEquals(fix, track.getFirstFixAfter(lastFix.getTimePoint()));
+                assertEquals(fix, track.getLastRawFixAtOrBefore(fix.getTimePoint()));
+                assertEquals(fix, track.getFirstRawFixAfter(lastFix.getTimePoint()));
                 assertEquals(lastFix, track.getFirstRawFixAtOrAfter(lastFix.getTimePoint()));
             }
             lastMillis = millis;

@@ -125,4 +125,10 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends DynamicTrackImpl<Ite
         return new KilometersPerHourSpeedImpl(sumInKMH/count);
     }
 
+    @Override
+    protected NavigableSet<GPSFixMoving> getInternalFixes() {
+        // TODO perform even better smoothening than GPSFixTrackImpl because here we additionally have the speeds/bearings on the fixes as a hint
+        return super.getInternalFixes();
+    }
+
 }

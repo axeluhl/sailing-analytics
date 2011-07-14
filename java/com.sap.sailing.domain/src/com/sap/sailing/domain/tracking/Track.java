@@ -22,10 +22,16 @@ public interface Track<FixType extends Timed> {
 
     FixType getLastFixAtOrBefore(TimePoint timePoint);
 
+    FixType getLastRawFixAtOrBefore(TimePoint timePoint);
+
+    FixType getFirstFixAtOrAfter(TimePoint timePoint);
+
     FixType getFirstRawFixAtOrAfter(TimePoint timePoint);
 
     FixType getLastRawFixBefore(TimePoint timePoint);
 
+    FixType getFirstRawFixAfter(TimePoint timePoint);
+    
     FixType getFirstFixAfter(TimePoint timePoint);
     
     /**

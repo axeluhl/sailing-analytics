@@ -54,7 +54,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
     @Override
     public Position getEstimatedPosition(TimePoint timePoint, boolean extrapolate) {
         FixType lastFixAtOrBefore = getLastFixAtOrBefore(timePoint);
-        FixType firstFixAtOrAfter = getFirstRawFixAtOrAfter(timePoint);
+        FixType firstFixAtOrAfter = getFirstFixAtOrAfter(timePoint);
         if (lastFixAtOrBefore != null && lastFixAtOrBefore == firstFixAtOrAfter) {
             return lastFixAtOrBefore.getPosition(); // exact match; how unlikely is that?
         } else {
@@ -208,6 +208,15 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
 
     protected long getMillisecondsOverWhichToAverage() {
         return millisecondsOverWhichToAverage;
+    }
+
+    /**
+     * Smoothens the track based on a max-speed assumption.
+     */
+    @Override
+    protected NavigableSet<FixType> getInternalFixes() {
+        // TODO implement getInternalFixes with a smart smoothening algorithm
+        return super.getInternalFixes();
     }
 
 }
