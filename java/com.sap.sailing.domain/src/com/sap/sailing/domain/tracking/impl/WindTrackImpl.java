@@ -51,7 +51,7 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
 
     @Override
     public void add(Wind wind) {
-        getInternalFixes().add(wind);
+        getInternalRawFixes().add(wind);
         notifyListenersAboutReceive(wind);
     }
 
@@ -165,7 +165,7 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
     @Override
     public String toString() {
         StringBuilder result = new StringBuilder();
-        for (Wind wind : getFixes()) {
+        for (Wind wind : getRawFixes()) {
             result.append(wind);
             result.append(" avg(");
             result.append(millisecondsOverWhichToAverage);
@@ -178,7 +178,7 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
     
     public String toCSV() {
         StringBuilder result = new StringBuilder();
-        for (Wind wind : getFixes()) {
+        for (Wind wind : getRawFixes()) {
             append(result, wind);
             Wind estimate = getEstimatedWind(wind.getPosition(), wind.getTimePoint());
             append(result, estimate);
@@ -245,7 +245,8 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
 
     @Override
     public void remove(Wind wind) {
-        getInternalFixes().remove(wind);
+        getInternalRawFixes().remove(wind);
         notifyListenersAboutRemoval(wind);
     }
+
 }

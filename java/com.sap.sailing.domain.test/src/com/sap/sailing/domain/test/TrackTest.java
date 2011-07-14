@@ -73,7 +73,7 @@ public class TrackTest {
 
     @Test
     public void testIterate() {
-        Iterator<GPSFixMoving> i = track.getFixes().iterator();
+        Iterator<GPSFixMoving> i = track.getRawFixes().iterator();
         int count;
         for (count=0; i.hasNext(); count++) {
             i.next();
@@ -86,24 +86,24 @@ public class TrackTest {
         long lastMillis = 0;
         GPSFix lastFix = null;
         boolean first = true;
-        for (Iterator<GPSFixMoving> i = track.getFixes().iterator(); i.hasNext(); first = false) {
+        for (Iterator<GPSFixMoving> i = track.getRawFixes().iterator(); i.hasNext(); first = false) {
             GPSFixMoving fix = i.next();
             long millis = fix.getTimePoint().asMillis();
             if (!first) {
                 assertTrue(millis > lastMillis);
                 TimePoint inBetweenTimePoint = new MillisecondsTimePoint((millis+lastMillis)/2);
-                assertEquals(lastFix, track.getLastFixBefore(inBetweenTimePoint));
+                assertEquals(lastFix, track.getLastRawFixBefore(inBetweenTimePoint));
                 assertEquals(lastFix, track.getLastFixAtOrBefore(inBetweenTimePoint));
                 assertEquals(fix, track.getFirstFixAfter(inBetweenTimePoint));
-                assertEquals(fix, track.getFirstFixAtOrAfter(inBetweenTimePoint));
+                assertEquals(fix, track.getFirstRawFixAtOrAfter(inBetweenTimePoint));
 
                 assertEquals(lastFix, track.getLastFixAtOrBefore(lastFix.getTimePoint()));
-                assertEquals(fix, track.getFirstFixAtOrAfter(fix.getTimePoint()));
+                assertEquals(fix, track.getFirstRawFixAtOrAfter(fix.getTimePoint()));
 
-                assertEquals(lastFix, track.getLastFixBefore(fix.getTimePoint()));
+                assertEquals(lastFix, track.getLastRawFixBefore(fix.getTimePoint()));
                 assertEquals(fix, track.getLastFixAtOrBefore(fix.getTimePoint()));
                 assertEquals(fix, track.getFirstFixAfter(lastFix.getTimePoint()));
-                assertEquals(lastFix, track.getFirstFixAtOrAfter(lastFix.getTimePoint()));
+                assertEquals(lastFix, track.getFirstRawFixAtOrAfter(lastFix.getTimePoint()));
             }
             lastMillis = millis;
             lastFix = fix;
@@ -112,7 +112,7 @@ public class TrackTest {
     
     @Test
     public void assertEstimatedPositionBeforeStartIsStart() {
-        GPSFixMoving start = track.getFixes().iterator().next();
+        GPSFixMoving start = track.getRawFixes().iterator().next();
         TimePoint oneNanoBeforeStart = new MillisecondsTimePoint(start.getTimePoint().asMillis()-1);
         assertEquals(start.getPosition(), track.getEstimatedPosition(oneNanoBeforeStart, false));
     }
@@ -122,7 +122,7 @@ public class TrackTest {
         long lastMillis = 0;
         GPSFix lastFix = null;
         boolean first = true;
-        for (Iterator<GPSFixMoving> i = track.getFixes().iterator(); i.hasNext(); first = false) {
+        for (Iterator<GPSFixMoving> i = track.getRawFixes().iterator(); i.hasNext(); first = false) {
             GPSFixMoving fix = i.next();
             long millis = fix.getTimePoint().asMillis();
             if (!first) {
@@ -143,9 +143,9 @@ public class TrackTest {
     
     @Test
     public void testSimpleExtrapolation() {
-        GPSFix fix = track.getLastFix();
+        GPSFix fix = track.getLastRawFix();
         long millis = fix.getTimePoint().asMillis();
-        GPSFix lastFix = track.getLastFixBefore(fix.getTimePoint());
+        GPSFix lastFix = track.getLastRawFixBefore(fix.getTimePoint());
         long lastMillis = lastFix.getTimePoint().asMillis();
         TimePoint afterTimePoint = new MillisecondsTimePoint(millis + (millis-lastMillis));
         Position extrapolatedPosition = track.getEstimatedPosition(afterTimePoint, true);
@@ -155,9 +155,9 @@ public class TrackTest {
     
     @Test
     public void testExtrapolationDoesntHappenIfSuppressed() {
-        GPSFix fix = track.getLastFix();
+        GPSFix fix = track.getLastRawFix();
         long millis = fix.getTimePoint().asMillis();
-        GPSFix lastFix = track.getLastFixBefore(fix.getTimePoint());
+        GPSFix lastFix = track.getLastRawFixBefore(fix.getTimePoint());
         long lastMillis = lastFix.getTimePoint().asMillis();
         TimePoint afterTimePoint = new MillisecondsTimePoint(millis + (millis-lastMillis));
         Position extrapolatedPosition = track.getEstimatedPosition(afterTimePoint, false);
@@ -170,7 +170,7 @@ public class TrackTest {
         List<GPSFixMoving> fixes = new ArrayList<GPSFixMoving>();
         boolean first = true;
         GPSFixMoving oldFix = null;
-        for (GPSFixMoving fix : track.getFixes()) {
+        for (GPSFixMoving fix : track.getRawFixes()) {
             fixes.add(fix);
             if (first) {
                 first = false;
@@ -228,7 +228,7 @@ public class TrackTest {
     @Test
     public void testDistanceTraveledOnInBetweenSectionFromFixToFix() {
         // take second and third fix and compute distance between them
-        Iterator<GPSFixMoving> iter = track.getFixes().iterator();
+        Iterator<GPSFixMoving> iter = track.getRawFixes().iterator();
         iter.next(); // skip first;
         GPSFix second = iter.next();
         GPSFix third = iter.next();

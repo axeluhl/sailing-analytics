@@ -17,24 +17,28 @@ public interface Track<FixType extends Timed> {
      *         applied to the fixes returned by this method.
      */
     Iterable<FixType> getFixes();
+    
+    Iterable<FixType> getRawFixes();
 
     FixType getLastFixAtOrBefore(TimePoint timePoint);
 
-    FixType getFirstFixAtOrAfter(TimePoint timePoint);
+    FixType getFirstRawFixAtOrAfter(TimePoint timePoint);
 
-    FixType getLastFixBefore(TimePoint timePoint);
+    FixType getLastRawFixBefore(TimePoint timePoint);
 
     FixType getFirstFixAfter(TimePoint timePoint);
     
     /**
-     * The first fix in this track or <code>null</code> if the track is empty
+     * The first fix in this track or <code>null</code> if the track is empty. The fix returned may
+     * be an outlier that is not returned by calls operating on the smoothened version of the track.
      */
-    FixType getFirstFix();
+    FixType getFirstRawFix();
     
     /**
-     * The last fix in this track or <code>null</code> if the track is empty
+     * The last fix in this track or <code>null</code> if the track is empty. The fix returned may
+     * be an outlier that is not returned by calls operating on the smoothened version of the track.
      */
-    FixType getLastFix();
+    FixType getLastRawFix();
     
     /**
      * Returns an iterator starting at the first fix after <code>startingAt</code> (or "at or after" in case

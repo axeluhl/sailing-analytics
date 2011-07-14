@@ -107,7 +107,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
                 timePointToUse = getMarkPassingForLegEnd().getTimePoint();
             } else {
                 // use time point of latest fix
-                GPSFixMoving lastFix = getTrackedRace().getTrack(getCompetitor()).getLastFix();
+                GPSFixMoving lastFix = getTrackedRace().getTrack(getCompetitor()).getLastRawFix();
                 if (lastFix != null) {
                     timePointToUse = lastFix.getTimePoint();
                 } else {

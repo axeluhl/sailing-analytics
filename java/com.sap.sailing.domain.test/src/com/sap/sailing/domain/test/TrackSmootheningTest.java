@@ -129,7 +129,7 @@ public class TrackSmootheningTest extends AbstractTracTracLiveTest {
         TimePoint lastTimePoint = null;
         GPSFixMoving lastFix = null;
         GPSFixMoving outlier = null;
-        for (GPSFixMoving fix : track.getFixes()) {
+        for (GPSFixMoving fix : track.getRawFixes()) {
             if (lastTimePoint != null) {
                 TimePoint thisTimePoint = fix.getTimePoint();
                 long intervalInMillis = thisTimePoint.asMillis()-lastTimePoint.asMillis();

@@ -32,18 +32,38 @@ public abstract class TrackImpl<FixType extends Timed> implements Track<FixType>
         this.fixes = new ConcurrentSkipListSet<Timed>(TimedComparator.INSTANCE);
     }
     
+    protected NavigableSet<FixType> getInternalRawFixes() {
+        @SuppressWarnings("unchecked")
+        NavigableSet<FixType> result = (NavigableSet<FixType>) fixes;
+        return result;
+    }
+    
+    /**
+     * @return the smoothened fixes
+     */
     protected NavigableSet<FixType> getInternalFixes() {
+        // TODO smoothen the track before returning it, or construct a smoothening "view" onto it
         @SuppressWarnings("unchecked")
         NavigableSet<FixType> result = (NavigableSet<FixType>) fixes;
         return result;
     }
 
     /**
-     * Iterates the fixes in the order of their time points
+     * Iterates the fixes with outliers getting skipped, in the order of their time points
      */
     @SuppressWarnings("unchecked")
     @Override
     public Iterable<FixType> getFixes() {
+        // TODO skip outliers in iterable returned
+        return (Iterable<FixType>) Collections.unmodifiableSet(fixes);
+    }
+
+    /**
+     * Iterates over the raw sequence of fixes, all potential outliers included
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    public Iterable<FixType> getRawFixes() {
         return (Iterable<FixType>) Collections.unmodifiableSet(fixes);
     }
 
@@ -55,13 +75,13 @@ public abstract class TrackImpl<FixType extends Timed> implements Track<FixType>
 
     @SuppressWarnings("unchecked")
     @Override
-    public FixType getFirstFixAtOrAfter(TimePoint timePoint) {
+    public FixType getFirstRawFixAtOrAfter(TimePoint timePoint) {
         return (FixType) fixes.ceiling(new DummyTimed(timePoint));
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public FixType getLastFixBefore(TimePoint timePoint) {
+    public FixType getLastRawFixBefore(TimePoint timePoint) {
         return (FixType) fixes.lower(new DummyTimed(timePoint));
     }
 
@@ -73,7 +93,7 @@ public abstract class TrackImpl<FixType extends Timed> implements Track<FixType>
 
     @SuppressWarnings("unchecked")
     @Override
-    public FixType getFirstFix() {
+    public FixType getFirstRawFix() {
         if (fixes.isEmpty()) {
             return null;
         } else {
@@ -83,7 +103,7 @@ public abstract class TrackImpl<FixType extends Timed> implements Track<FixType>
     
     @SuppressWarnings("unchecked")
     @Override
-    public FixType getLastFix() {
+    public FixType getLastRawFix() {
         if (fixes.isEmpty()) {
             return null;
         } else {
