@@ -181,6 +181,38 @@ public class PartialNavigableSetViewTest {
     }
     
     @Test
+    public void testEvenSetDescendingIterator() {
+        set.add(1);
+        set.add(2);
+        set.add(3);
+        set.add(4);
+        set.add(5);
+        set.add(6);
+        Iterator<Integer> iter = evenSet.descendingIterator();
+        for (int i=6; i>=1; i-=2) {
+            assertTrue(iter.hasNext());
+            assertEquals(Integer.valueOf(i), iter.next());
+        }
+        assertFalse(iter.hasNext());
+    }
+    
+    @Test
+    public void testOddSetDescendingIterator() {
+        set.add(1);
+        set.add(2);
+        set.add(3);
+        set.add(4);
+        set.add(5);
+        set.add(6);
+        Iterator<Integer> iter = oddSet.descendingIterator();
+        for (int i=5; i>=1; i-=2) {
+            assertTrue(iter.hasNext());
+            assertEquals(Integer.valueOf(i), iter.next());
+        }
+        assertFalse(iter.hasNext());
+    }
+    
+    @Test
     public void testThatRejectingNoneAlwaysReturnsFullSize() {
         set.add(1);
         set.add(2);
@@ -221,11 +253,31 @@ public class PartialNavigableSetViewTest {
         set.add(3);
         set.add(4);
         set.add(5);
+        assertTrue(oddSet.headSet(1).isEmpty());
+        assertEquals(0, oddSet.headSet(1).size());
+        assertEquals(1, oddSet.headSet(2).size());
         assertEquals(1, oddSet.headSet(3).size());
         assertEquals(2, oddSet.headSet(4).size());
         assertEquals(2, oddSet.headSet(5).size());
         assertEquals(3, oddSet.headSet(6).size());
         assertEquals(3, oddSet.headSet(7).size());
+    }
+
+    @Test
+    public void testOddTailSetSize() {
+        set.add(1);
+        set.add(2);
+        set.add(3);
+        set.add(4);
+        set.add(5);
+        assertEquals(3, oddSet.tailSet(0).size());
+        assertEquals(3, oddSet.tailSet(1).size());
+        assertEquals(2, oddSet.tailSet(2).size());
+        assertEquals(2, oddSet.tailSet(3).size());
+        assertEquals(1, oddSet.tailSet(4).size());
+        assertEquals(1, oddSet.tailSet(5).size());
+        assertEquals(0, oddSet.tailSet(6).size());
+        assertTrue(oddSet.tailSet(6).isEmpty());
     }
 
 }
