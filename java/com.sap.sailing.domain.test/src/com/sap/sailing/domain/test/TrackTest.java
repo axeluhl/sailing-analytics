@@ -97,7 +97,7 @@ public class TrackTest {
                 assertEquals(fix, track.getFirstRawFixAfter(inBetweenTimePoint));
                 assertEquals(fix, track.getFirstRawFixAtOrAfter(inBetweenTimePoint));
 
-                assertEquals(lastFix, track.getLastFixAtOrBefore(lastFix.getTimePoint()));
+                assertEquals(lastFix, track.getLastRawFixAtOrBefore(lastFix.getTimePoint()));
                 assertEquals(fix, track.getFirstRawFixAtOrAfter(fix.getTimePoint()));
 
                 assertEquals(lastFix, track.getLastRawFixBefore(fix.getTimePoint()));
@@ -127,7 +127,7 @@ public class TrackTest {
             long millis = fix.getTimePoint().asMillis();
             if (!first) {
                 TimePoint inBetweenTimePoint = new MillisecondsTimePoint((millis+lastMillis)/2);
-                Position interpolatedPosition = track.getEstimatedPosition(inBetweenTimePoint, false);
+                Position interpolatedPosition = track.getEstimatedRawPosition(inBetweenTimePoint, false);
                 Distance d1 = lastFix.getPosition().getDistance(interpolatedPosition);
                 Distance d2 = interpolatedPosition.getDistance(fix.getPosition());
                 // the interpolated point should be on the great circle, not open a "triangle"
@@ -187,33 +187,33 @@ public class TrackTest {
                     distanceSumInNauticalMiles += distances.get(k).getNauticalMiles();
                 }
                 // travel fully from fix #i to fix #j and require the segment distances to sum up equal
-                double nauticalMilesFromIToJ = track.getDistanceTraveled(fixes.get(i).getTimePoint(), fixes.get(j).getTimePoint())
+                double nauticalMilesFromIToJ = track.getRawDistanceTraveled(fixes.get(i).getTimePoint(), fixes.get(j).getTimePoint())
                         .getNauticalMiles();
                 assertEquals(distanceSumInNauticalMiles, nauticalMilesFromIToJ, 0.0000001);
                 if (j > i) {
                     // now skip half a segment at the beginning:
-                    double nauticalMilesFromHalfAfterIToJ = track.getDistanceTraveled(
+                    double nauticalMilesFromHalfAfterIToJ = track.getRawDistanceTraveled(
                             new MillisecondsTimePoint((fixes.get(i).getTimePoint().asMillis() + fixes.get(i + 1)
                                     .getTimePoint().asMillis()) / 2), fixes.get(j).getTimePoint()).getNauticalMiles();
                     assertTrue("for i=" + i + ", j=" + j + ": " + nauticalMilesFromHalfAfterIToJ + "<"
                             + distanceSumInNauticalMiles, nauticalMilesFromHalfAfterIToJ < distanceSumInNauticalMiles);
                     if (i > 0) {
                         // now skip half a segment before the beginning:
-                        double nauticalMilesFromHalfBeforeIToJ = track.getDistanceTraveled(
+                        double nauticalMilesFromHalfBeforeIToJ = track.getRawDistanceTraveled(
                                 new MillisecondsTimePoint((fixes.get(i).getTimePoint().asMillis() + fixes.get(i - 1)
                                         .getTimePoint().asMillis()) / 2), fixes.get(j).getTimePoint())
                                 .getNauticalMiles();
                         assertTrue(nauticalMilesFromHalfBeforeIToJ > distanceSumInNauticalMiles);
                     }
                     // now skip half a segment at the end:
-                    double nauticalMilesFromIToHalfBeforeJ = track.getDistanceTraveled(
+                    double nauticalMilesFromIToHalfBeforeJ = track.getRawDistanceTraveled(
                             fixes.get(i).getTimePoint(),
                             new MillisecondsTimePoint((fixes.get(j).getTimePoint().asMillis() + fixes.get(j - 1)
                                     .getTimePoint().asMillis()) / 2)).getNauticalMiles();
                     assertTrue(nauticalMilesFromIToHalfBeforeJ < distanceSumInNauticalMiles);
                     if (j < fixes.size() - 1) {
                         // now skip half a segment before the beginning:
-                        double nauticalMilesFromIToHalfAfterJ = track.getDistanceTraveled(
+                        double nauticalMilesFromIToHalfAfterJ = track.getRawDistanceTraveled(
                                 fixes.get(i).getTimePoint(),
                                 new MillisecondsTimePoint((fixes.get(j).getTimePoint().asMillis() + fixes.get(j + 1)
                                         .getTimePoint().asMillis()) / 2)).getNauticalMiles();
@@ -233,6 +233,6 @@ public class TrackTest {
         GPSFix second = iter.next();
         GPSFix third = iter.next();
         assertEquals(second.getPosition().getDistance(third.getPosition()),
-                track.getDistanceTraveled(second.getTimePoint(), third.getTimePoint()));
+                track.getRawDistanceTraveled(second.getTimePoint(), third.getTimePoint()));
     }
 }

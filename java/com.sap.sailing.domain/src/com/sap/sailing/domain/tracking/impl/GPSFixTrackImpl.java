@@ -56,6 +56,18 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
     public Position getEstimatedPosition(TimePoint timePoint, boolean extrapolate) {
         FixType lastFixAtOrBefore = getLastFixAtOrBefore(timePoint);
         FixType firstFixAtOrAfter = getFirstFixAtOrAfter(timePoint);
+        return getEstimatedPosition(timePoint, extrapolate, lastFixAtOrBefore, firstFixAtOrAfter);
+    }
+
+    @Override
+    public Position getEstimatedRawPosition(TimePoint timePoint, boolean extrapolate) {
+        FixType lastFixAtOrBefore = getLastRawFixAtOrBefore(timePoint);
+        FixType firstFixAtOrAfter = getFirstRawFixAtOrAfter(timePoint);
+        return getEstimatedPosition(timePoint, extrapolate, lastFixAtOrBefore, firstFixAtOrAfter);
+    }
+
+    private Position getEstimatedPosition(TimePoint timePoint, boolean extrapolate, FixType lastFixAtOrBefore,
+            FixType firstFixAtOrAfter) {
         if (lastFixAtOrBefore != null && lastFixAtOrBefore == firstFixAtOrAfter) {
             return lastFixAtOrBefore.getPosition(); // exact match; how unlikely is that?
         } else {
@@ -156,6 +168,30 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
                 fromPos = fix.getPosition();
             }
             Position toPos = getEstimatedPosition(to, false);
+            distanceInNauticalMiles += fromPos.getDistance(toPos).getNauticalMiles();
+            return new NauticalMileDistance(distanceInNauticalMiles);
+        } else {
+            return Distance.NULL;
+        }
+    }
+
+    @Override
+    public Distance getRawDistanceTraveled(TimePoint from, TimePoint to) {
+        double distanceInNauticalMiles = 0;
+        if (from.compareTo(to) < 0) {
+            Position fromPos = getEstimatedRawPosition(from, false);
+            if (fromPos == null) {
+                return Distance.NULL;
+            }
+            @SuppressWarnings("unchecked")
+            NavigableSet<GPSFix> subset = (NavigableSet<GPSFix>) getInternalRawFixes().subSet((FixType) new DummyGPSFix(from),
+            /* fromInclusive */false, (FixType) new DummyGPSFix(to),
+            /* toInclusive */false);
+            for (GPSFix fix : subset) {
+                distanceInNauticalMiles += fromPos.getDistance(fix.getPosition()).getNauticalMiles();
+                fromPos = fix.getPosition();
+            }
+            Position toPos = getEstimatedRawPosition(to, false);
             distanceInNauticalMiles += fromPos.getDistance(toPos).getNauticalMiles();
             return new NauticalMileDistance(distanceInNauticalMiles);
         } else {

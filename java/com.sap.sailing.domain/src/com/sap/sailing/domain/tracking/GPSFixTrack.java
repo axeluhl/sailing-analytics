@@ -20,10 +20,17 @@ public interface GPSFixTrack<ItemType, FixType extends GPSFix> extends Track<Fix
     ItemType getTrackedItem();
 
     /**
-     * Computes the distance traveled between the {@link #getEstimatedPosition(TimePoint, boolean) estimated positions}
-     * at <code>from</code> and <code>to</code>.
+     * Computes the distance traveled on the smoothened track between the
+     * {@link #getEstimatedPosition(TimePoint, boolean) estimated positions} at <code>from</code> and <code>to</code>.
      */
     Distance getDistanceTraveled(TimePoint from, TimePoint to);
+
+    /**
+     * Computes the distance traveled on the raw, unsmoothened track between the
+     * {@link #getEstimatedPosition(TimePoint, boolean) estimated positions} at <code>from</code> and <code>to</code>.
+     * This includes all zig-zagging caused by imprecise GPS measurements.
+     */
+    Distance getRawDistanceTraveled(TimePoint from, TimePoint to);
 
     /**
      * If the time point lies before the first fix recorded by this track, the first fix is returned, or
@@ -43,6 +50,12 @@ public interface GPSFixTrack<ItemType, FixType extends GPSFix> extends Track<Fix
      *            used instead.
      */
     Position getEstimatedPosition(TimePoint timePoint, boolean extrapolate);
+    
+    /**
+     * Same as {@link #getEstimatedPosition(TimePoint, boolean)}, only that it works on the raw track
+     * that has not been subject to smoothening.
+     */
+    Position getEstimatedRawPosition(TimePoint timePoint, boolean extrapolate);
     
     Speed getMaximumSpeedOverGround(TimePoint from, TimePoint to);
 
