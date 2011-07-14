@@ -11,6 +11,7 @@ import com.sap.sailing.domain.base.Speed;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.impl.DegreeBearingImpl;
+import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.NauticalMileDistance;
 import com.sap.sailing.domain.tracking.GPSFix;
@@ -215,8 +216,25 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
      */
     @Override
     protected NavigableSet<FixType> getInternalFixes() {
-        // TODO implement getInternalFixes with a smart smoothening algorithm
-        return super.getInternalFixes();
+        return new PartialNavigableSetView<FixType>(super.getInternalFixes()) {
+            private final Speed maxSpeed = new KnotSpeedImpl(50);
+            @Override
+            protected boolean isValid(FixType e) {
+                FixType previous = lowerInternal(e);
+                FixType next = higherInternal(e);
+                Speed speedToPrevious = Speed.NULL;
+                if (previous != null) {
+                    speedToPrevious = previous.getPosition().getDistance(e.getPosition())
+                            .inTime(e.getTimePoint().asMillis() - previous.getTimePoint().asMillis());
+                }
+                Speed speedToNext = Speed.NULL;
+                if (next != null) {
+                    speedToNext = e.getPosition().getDistance(next.getPosition())
+                            .inTime(next.getTimePoint().asMillis() - e.getTimePoint().asMillis());
+                }
+                return (speedToPrevious.compareTo(maxSpeed) <= 0 || speedToNext.compareTo(maxSpeed) <= 0); 
+            }
+        };
     }
 
 }

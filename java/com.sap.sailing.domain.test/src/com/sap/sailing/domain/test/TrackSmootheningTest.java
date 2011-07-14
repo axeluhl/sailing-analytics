@@ -2,6 +2,7 @@ package com.sap.sailing.domain.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -126,16 +127,27 @@ public class TrackSmootheningTest extends AbstractTracTracLiveTest {
     }
 
     protected void assertOutlierInTrack(DynamicTrack<Competitor, GPSFixMoving> track) {
+        GPSFixMoving outlier = getAnyOutlier(track.getRawFixes());
+        assertNotNull(outlier); // assert that we found an outlier
+    }
+
+    protected void assertNoOutlierInSmoothenedTrack(DynamicTrack<Competitor, GPSFixMoving> track) {
+        Iterable<GPSFixMoving> fixes = track.getFixes();
+        GPSFixMoving outlier = getAnyOutlier(fixes);
+        assertNull("Found unexpected outlier "+outlier+" in smoothened track", outlier); // assert that we did not find an outlier
+    }
+
+    protected GPSFixMoving getAnyOutlier(Iterable<GPSFixMoving> fixes) {
         TimePoint lastTimePoint = null;
         GPSFixMoving lastFix = null;
         GPSFixMoving outlier = null;
-        for (GPSFixMoving fix : track.getRawFixes()) {
+        for (GPSFixMoving fix : fixes) {
             if (lastTimePoint != null) {
                 TimePoint thisTimePoint = fix.getTimePoint();
                 long intervalInMillis = thisTimePoint.asMillis()-lastTimePoint.asMillis();
                 Distance distanceFromLast = lastFix.getPosition().getDistance(fix.getPosition());
                 Speed speedBetweenFixes = distanceFromLast.inTime(intervalInMillis);
-                if (speedBetweenFixes.getKnots() > 50) {
+                if (speedBetweenFixes.getKnots() > 100) {
                     // then it's not an olympic-class sports boat but a GPS jump
                     outlier = fix;
                 }
@@ -143,7 +155,7 @@ public class TrackSmootheningTest extends AbstractTracTracLiveTest {
             lastTimePoint = fix.getTimePoint();
             lastFix = fix;
         }
-        assertNotNull(outlier); // assert that we found an outlier
+        return outlier;
     }
 
     @Test
@@ -156,6 +168,7 @@ public class TrackSmootheningTest extends AbstractTracTracLiveTest {
         DynamicTrack<Competitor, GPSFixMoving> track = getTrackByCompetitorName("Birkner");
         assertNotNull(track);
         assertOutlierInTrack(track);
+        assertNoOutlierInSmoothenedTrack(track);
     }
 
     @Test
@@ -163,6 +176,7 @@ public class TrackSmootheningTest extends AbstractTracTracLiveTest {
         DynamicTrack<Competitor, GPSFixMoving> track = getTrackByCompetitorName("Dr.Plattner");
         assertNotNull(track);
         assertOutlierInTrack(track);
+        assertNoOutlierInSmoothenedTrack(track);
     }
 
 }

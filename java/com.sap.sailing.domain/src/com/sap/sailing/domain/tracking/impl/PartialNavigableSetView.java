@@ -243,6 +243,22 @@ public abstract class PartialNavigableSetView<E> implements NavigableSet<E> {
         }
         return result;
     }
+    
+    /**
+     * goes one left on the raw, unfiltered set and therefore may return fixes that have {@link #isValid(Object)}==
+     * <code>false</code>
+     */
+    protected E lowerInternal(E e) {
+        return set.lower(e);
+    }
+
+    /**
+     * goes one right on the raw, unfiltered set and therefore may return fixes that have {@link #isValid(Object)}==
+     * <code>false</code>
+     */
+    protected E higherInternal(E e) {
+        return set.higher(e);
+    }
 
     @Override
     public E floor(E e) {
