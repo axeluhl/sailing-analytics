@@ -1,8 +1,10 @@
 Axel
 ====
 
- - Replace ObjectOutputStream currently used for storing declinations in files by DataOutputStream.
-   Re-format existing files accordingly. This should allow for problem-free append.
+ - Make threshold for track smoothening configurable
+
+ - Implement refined version of isValid in GPSFixMovingTrack taking into account the
+   speed as contained by each individual fix
 
  - Need synchronization while looping over a course's legs because the course may be updated
    as the loop executes:
