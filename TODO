@@ -6,6 +6,12 @@ Axel
  - Implement refined version of isValid in GPSFixMovingTrack taking into account the
    speed as contained by each individual fix
 
+ - consider an array-based implementation of TrackImpl, sorted ascending by time point; inserting
+   with a not-maximal time point requires some shifting but should be the rare exception in all our
+   use cases.
+
+ - Need to adjust PartialNavigableSetView to work on any ordered sequential structure
+
  - Need synchronization while looping over a course's legs because the course may be updated
    as the loop executes:
 
