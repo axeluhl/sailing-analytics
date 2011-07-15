@@ -128,8 +128,10 @@ public class WindPanel extends FormPanel implements EventDisplayer, RaceSelectio
                 new AsyncCallback<WindInfoForRaceDAO>() {
                     @Override
                     public void onSuccess(WindInfoForRaceDAO result) {
-                        showWindForRace(result);
-                        windSettingPanel.setEnabled(true);
+                        if (result != null) {
+                            showWindForRace(result);
+                            windSettingPanel.setEnabled(true);
+                        }
                     }
 
                     @Override

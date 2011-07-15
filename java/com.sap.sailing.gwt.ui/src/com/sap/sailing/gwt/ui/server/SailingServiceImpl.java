@@ -236,43 +236,46 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         if (event != null) {
             RaceDefinition race = getRaceByName(event, raceName);
             if (race != null) {
-                result = new WindInfoForRaceDAO();
                 TrackedRace trackedRace = service.getDomainFactory().getTrackedEvent(event)
                         .getExistingTrackedRace(race);
-                TimePoint from = new MillisecondsTimePoint(fromDate);
-                TimePoint to = new MillisecondsTimePoint(toDate);
-                Map<String, WindTrackInfoDAO> windTrackInfoDAOs = new HashMap<String, WindTrackInfoDAO>();
-                result.windTrackInfoByWindSourceName = windTrackInfoDAOs;
-                for (WindSource windSource : WindSource.values()) {
-                    WindTrackInfoDAO windTrackInfoDAO = new WindTrackInfoDAO();
-                    windTrackInfoDAO.windFixes = new ArrayList<WindDAO>();
-                    windTrackInfoDAOs.put(windSource.name(), windTrackInfoDAO);
-                    WindTrack windTrack = trackedRace.getWindTrack(windSource);
-                    windTrackInfoDAO.dampeningIntervalInMilliseconds = windTrack
-                            .getMillisecondsOverWhichToAverageWind();
-                    Iterator<Wind> windIter = windTrack.getFixesIterator(from, /* inclusive */true);
-                    while (windIter.hasNext()) {
-                        Wind wind = windIter.next();
-                        if (wind.getTimePoint().compareTo(to) > 0) {
-                            break;
-                        }
-                        WindDAO windDAO = new WindDAO();
-                        windDAO.trueWindBearingDeg = wind.getBearing().getDegrees();
-                        windDAO.trueWindFromDeg = wind.getBearing().reverse().getDegrees();
-                        windDAO.trueWindSpeedInKnots = wind.getKnots();
-                        windDAO.trueWindSpeedInMetersPerSecond = wind.getMetersPerSecond();
-                        if (wind.getPosition() != null) {
-                            windDAO.position = new PositionDAO(wind.getPosition().getLatDeg(), wind.getPosition()
-                                    .getLngDeg());
-                        }
-                        windTrackInfoDAO.windFixes.add(windDAO);
-                        if (wind.getTimePoint() != null) {
-                            windDAO.timepoint = wind.getTimePoint().asMillis();
-                            Wind estimatedWind = windTrack.getEstimatedWind(wind.getPosition(), wind.getTimePoint());
-                            windDAO.dampenedTrueWindBearingDeg = estimatedWind.getBearing().getDegrees();
-                            windDAO.dampenedTrueWindFromDeg = estimatedWind.getBearing().reverse().getDegrees();
-                            windDAO.dampenedTrueWindSpeedInKnots = estimatedWind.getKnots();
-                            windDAO.dampenedTrueWindSpeedInMetersPerSecond = estimatedWind.getMetersPerSecond();
+                if (trackedRace != null) {
+                    result = new WindInfoForRaceDAO();
+                    TimePoint from = new MillisecondsTimePoint(fromDate);
+                    TimePoint to = new MillisecondsTimePoint(toDate);
+                    Map<String, WindTrackInfoDAO> windTrackInfoDAOs = new HashMap<String, WindTrackInfoDAO>();
+                    result.windTrackInfoByWindSourceName = windTrackInfoDAOs;
+                    for (WindSource windSource : WindSource.values()) {
+                        WindTrackInfoDAO windTrackInfoDAO = new WindTrackInfoDAO();
+                        windTrackInfoDAO.windFixes = new ArrayList<WindDAO>();
+                        windTrackInfoDAOs.put(windSource.name(), windTrackInfoDAO);
+                        WindTrack windTrack = trackedRace.getWindTrack(windSource);
+                        windTrackInfoDAO.dampeningIntervalInMilliseconds = windTrack
+                                .getMillisecondsOverWhichToAverageWind();
+                        Iterator<Wind> windIter = windTrack.getFixesIterator(from, /* inclusive */true);
+                        while (windIter.hasNext()) {
+                            Wind wind = windIter.next();
+                            if (wind.getTimePoint().compareTo(to) > 0) {
+                                break;
+                            }
+                            WindDAO windDAO = new WindDAO();
+                            windDAO.trueWindBearingDeg = wind.getBearing().getDegrees();
+                            windDAO.trueWindFromDeg = wind.getBearing().reverse().getDegrees();
+                            windDAO.trueWindSpeedInKnots = wind.getKnots();
+                            windDAO.trueWindSpeedInMetersPerSecond = wind.getMetersPerSecond();
+                            if (wind.getPosition() != null) {
+                                windDAO.position = new PositionDAO(wind.getPosition().getLatDeg(), wind.getPosition()
+                                        .getLngDeg());
+                            }
+                            windTrackInfoDAO.windFixes.add(windDAO);
+                            if (wind.getTimePoint() != null) {
+                                windDAO.timepoint = wind.getTimePoint().asMillis();
+                                Wind estimatedWind = windTrack
+                                        .getEstimatedWind(wind.getPosition(), wind.getTimePoint());
+                                windDAO.dampenedTrueWindBearingDeg = estimatedWind.getBearing().getDegrees();
+                                windDAO.dampenedTrueWindFromDeg = estimatedWind.getBearing().reverse().getDegrees();
+                                windDAO.dampenedTrueWindSpeedInKnots = estimatedWind.getKnots();
+                                windDAO.dampenedTrueWindSpeedInMetersPerSecond = estimatedWind.getMetersPerSecond();
+                            }
                         }
                     }
                 }
