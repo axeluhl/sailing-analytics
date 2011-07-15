@@ -219,7 +219,7 @@ public abstract class AbstractTracTracLiveTest implements Listener {
 
     protected void storeTrack(Competitor competitor, DynamicTrack<Competitor, GPSFixMoving> track) throws FileNotFoundException, IOException {
         ObjectOutput oo = getOutputStream(competitor);
-        for (GPSFixMoving fix : track.getFixes()) {
+        for (GPSFixMoving fix : track.getRawFixes()) {
             writeGPSFixMoving(fix, oo);
         }
         oo.close();
@@ -232,7 +232,10 @@ public abstract class AbstractTracTracLiveTest implements Listener {
             track = new DynamicGPSFixMovingTrackImpl<Competitor>(competitor, /* millisecondsOverWhichToAverage */
                     40000);
             try {
-                track.addGPSFix(readGPSFixMoving(oi));
+                GPSFixMoving fix;
+                while ((fix = readGPSFixMoving(oi)) != null) {
+                    track.addGPSFix(fix);
+                }
             } catch (EOFException eof) {
                 oi.close();
             }

@@ -138,7 +138,7 @@ public class RaceTrackerImpl implements Listener, RaceTracker {
                         boolean first = true;
                         for (Buoy buoy : domainControlPoint.getBuoys()) {
                             DynamicTrack<Buoy, GPSFix> buoyTrack = trackedRace.getTrack(buoy);
-                            if (buoyTrack.getFirstFix() == null) {
+                            if (buoyTrack.getFirstRawFix() == null) {
                                 buoyTrack.addGPSFix(new GPSFixImpl(new DegreePosition(
                                         first ? controlPoint.getLat1() : controlPoint.getLat2(),
                                         first ? controlPoint.getLon1() : controlPoint.getLon2()), MillisecondsTimePoint.now()));

@@ -1,5 +1,9 @@
 package com.sap.sailing.domain.test;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -13,11 +17,13 @@ import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
-import static org.junit.Assert.assertEquals;
 
 import com.maptrack.client.io.TypeController;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.Distance;
 import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.Speed;
+import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.tracking.DynamicTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
@@ -43,7 +49,7 @@ import com.sap.sailing.domain.tractracadapter.impl.DomainFactoryImpl;
 public class TrackSmootheningTest extends AbstractTracTracLiveTest {
     final private Object semaphor = new Object();
     private final Map<Competitor, DynamicTrack<Competitor, GPSFixMoving>> tracks;
-    private boolean raceReceived;
+    private boolean tracksLoaded;
     private DomainFactory domainFactory;
 
     public TrackSmootheningTest() throws URISyntaxException, MalformedURLException {
@@ -60,7 +66,7 @@ public class TrackSmootheningTest extends AbstractTracTracLiveTest {
      * objects and appended to the {@link DynamicTrackedRace}s.
      */
     @Before
-    public void setupListener() {
+    public void setupListener() throws InterruptedException {
         domainFactory = new DomainFactoryImpl();
         List<TypeController> listeners = new ArrayList<TypeController>();
         Event event = domainFactory.createEvent(getEvent());
@@ -68,9 +74,14 @@ public class TrackSmootheningTest extends AbstractTracTracLiveTest {
         trackedEvent.addRaceListener(new RaceListener() {
             @Override
             public void raceAdded(TrackedRace trackedRace) {
-                raceReceived = true;
-                synchronized (semaphor) {
-                    semaphor.notifyAll();
+                try {
+                    loadTracks();
+                    tracksLoaded = true;
+                    synchronized (semaphor) {
+                        semaphor.notifyAll();
+                    }
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
                 }
             }
             @Override
@@ -85,18 +96,13 @@ public class TrackSmootheningTest extends AbstractTracTracLiveTest {
         Iterable<Receiver> updateReceivers = domainFactory.getUpdateReceivers(trackedEvent, getEvent(),
                 EmptyWindStore.INSTANCE, this, ReceiverType.RACECOURSE, ReceiverType.RACESTARTFINISH);
         addListenersForStoredDataAndStartController(updateReceivers);
-    }
-
-    @Test
-    public void loadReceivedTracks() throws InterruptedException, FileNotFoundException, IOException {
         synchronized (semaphor) {
-            while (!raceReceived) {
+            while (!tracksLoaded) {
                 semaphor.wait();
             }
         }
-        loadTracks();
     }
-    
+
     private void loadTracks() throws FileNotFoundException, IOException {
         for (com.tractrac.clientmodule.Competitor c : getEvent().getCompetitorList()) {
             Competitor competitor = domainFactory.getCompetitor(c);
@@ -105,10 +111,72 @@ public class TrackSmootheningTest extends AbstractTracTracLiveTest {
                 tracks.put(competitor, track);
             }
         }
-        assertEquals(36, tracks.size());
     }
 
     protected String getExpectedEventName() {
         return "Kieler Woche";
     }
+
+    private DynamicTrack<Competitor, GPSFixMoving> getTrackByCompetitorName(String name) {
+        for (Map.Entry<Competitor, DynamicTrack<Competitor, GPSFixMoving>> e : tracks.entrySet()) {
+            if (e.getKey().getName().equals(name)) {
+                return e.getValue();
+            }
+        }
+        return null;
+    }
+
+    protected void assertOutlierInTrack(DynamicTrack<Competitor, GPSFixMoving> track) {
+        GPSFixMoving outlier = getAnyOutlier(track.getRawFixes());
+        assertNotNull(outlier); // assert that we found an outlier
+    }
+
+    protected void assertNoOutlierInSmoothenedTrack(DynamicTrack<Competitor, GPSFixMoving> track) {
+        Iterable<GPSFixMoving> fixes = track.getFixes();
+        GPSFixMoving outlier = getAnyOutlier(fixes);
+        assertNull("Found unexpected outlier "+outlier+" in smoothened track", outlier); // assert that we did not find an outlier
+    }
+
+    protected GPSFixMoving getAnyOutlier(Iterable<GPSFixMoving> fixes) {
+        TimePoint lastTimePoint = null;
+        GPSFixMoving lastFix = null;
+        GPSFixMoving outlier = null;
+        for (GPSFixMoving fix : fixes) {
+            if (lastTimePoint != null) {
+                TimePoint thisTimePoint = fix.getTimePoint();
+                long intervalInMillis = thisTimePoint.asMillis()-lastTimePoint.asMillis();
+                Distance distanceFromLast = lastFix.getPosition().getDistance(fix.getPosition());
+                Speed speedBetweenFixes = distanceFromLast.inTime(intervalInMillis);
+                if (speedBetweenFixes.getKnots() > 100) {
+                    // then it's not an olympic-class sports boat but a GPS jump
+                    outlier = fix;
+                }
+            }
+            lastTimePoint = fix.getTimePoint();
+            lastFix = fix;
+        }
+        return outlier;
+    }
+
+    @Test
+    public void checkLoadedTracksCount() throws InterruptedException, FileNotFoundException, IOException {
+        assertEquals(36, tracks.size());
+    }
+    
+    @Test
+    public void assertBirknersEquatorJump() {
+        DynamicTrack<Competitor, GPSFixMoving> track = getTrackByCompetitorName("Birkner");
+        assertNotNull(track);
+        assertOutlierInTrack(track);
+        assertNoOutlierInSmoothenedTrack(track);
+    }
+
+    @Test
+    public void assertPlattnersKielerFoerdeJump() {
+        DynamicTrack<Competitor, GPSFixMoving> track = getTrackByCompetitorName("Dr.Plattner");
+        assertNotNull(track);
+        assertOutlierInTrack(track);
+        assertNoOutlierInSmoothenedTrack(track);
+    }
+
 }

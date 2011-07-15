@@ -12,29 +12,44 @@ import com.sap.sailing.domain.base.Timed;
  * @author Axel Uhl (d043530)
  */
 public interface Track<FixType extends Timed> {
+    /**
+     * @return the raw fixes as recorded by this track; in particular, no smoothening or dampening of any kind is
+     *         applied to the fixes returned by this method.
+     */
     Iterable<FixType> getFixes();
+    
+    Iterable<FixType> getRawFixes();
 
     FixType getLastFixAtOrBefore(TimePoint timePoint);
 
+    FixType getLastRawFixAtOrBefore(TimePoint timePoint);
+
     FixType getFirstFixAtOrAfter(TimePoint timePoint);
 
-    FixType getLastFixBefore(TimePoint timePoint);
+    FixType getFirstRawFixAtOrAfter(TimePoint timePoint);
 
+    FixType getLastRawFixBefore(TimePoint timePoint);
+
+    FixType getFirstRawFixAfter(TimePoint timePoint);
+    
     FixType getFirstFixAfter(TimePoint timePoint);
     
     /**
-     * The first fix in this track or <code>null</code> if the track is empty
+     * The first fix in this track or <code>null</code> if the track is empty. The fix returned may
+     * be an outlier that is not returned by calls operating on the smoothened version of the track.
      */
-    FixType getFirstFix();
+    FixType getFirstRawFix();
     
     /**
-     * The last fix in this track or <code>null</code> if the track is empty
+     * The last fix in this track or <code>null</code> if the track is empty. The fix returned may
+     * be an outlier that is not returned by calls operating on the smoothened version of the track.
      */
-    FixType getLastFix();
+    FixType getLastRawFix();
     
     /**
-     * Returns an iterator starting at the first fix after <code>startingAt</code> (or
-     * "at or after" in case <code>inclusive</code> is <code>true</code>).
+     * Returns an iterator starting at the first fix after <code>startingAt</code> (or "at or after" in case
+     * <code>inclusive</code> is <code>true</code>). The fixes returned by the iterator are the raw fixes (see also
+     * {@link #getFixes()}, without any smoothening or dampening applied.
      */
     Iterator<FixType> getFixesIterator(TimePoint startingAt, boolean inclusive);
 }

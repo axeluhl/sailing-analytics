@@ -32,6 +32,17 @@ public abstract class TrackImpl<FixType extends Timed> implements Track<FixType>
         this.fixes = new ConcurrentSkipListSet<Timed>(TimedComparator.INSTANCE);
     }
     
+    protected NavigableSet<FixType> getInternalRawFixes() {
+        @SuppressWarnings("unchecked")
+        NavigableSet<FixType> result = (NavigableSet<FixType>) fixes;
+        return result;
+    }
+    
+    /**
+     * @return the smoothened fixes; this implementation simply delegates to {@link #getFixes()} because for only
+     *         {@link Timed} fixes we can't know how to smoothen anything. Subclasses that constrain the
+     *         <code>FixType</code> may provide smoothening implementations.
+     */
     protected NavigableSet<FixType> getInternalFixes() {
         @SuppressWarnings("unchecked")
         NavigableSet<FixType> result = (NavigableSet<FixType>) fixes;
@@ -39,41 +50,68 @@ public abstract class TrackImpl<FixType extends Timed> implements Track<FixType>
     }
 
     /**
-     * Iterates the fixes in the order of their time points
+     * Iterates the fixes with outliers getting skipped, in the order of their time points.
+     * Relies on {@link #getInternalFixes()} to smoothen the track.
+     */
+    @Override
+    public Iterable<FixType> getFixes() {
+        return (Iterable<FixType>) Collections.unmodifiableSet(getInternalFixes());
+    }
+
+    /**
+     * Iterates over the raw sequence of fixes, all potential outliers included
      */
     @SuppressWarnings("unchecked")
     @Override
-    public Iterable<FixType> getFixes() {
+    public Iterable<FixType> getRawFixes() {
         return (Iterable<FixType>) Collections.unmodifiableSet(fixes);
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public FixType getLastFixAtOrBefore(TimePoint timePoint) {
+        return (FixType) getInternalFixes().floor((FixType) new DummyTimed(timePoint));
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public FixType getLastRawFixAtOrBefore(TimePoint timePoint) {
         return (FixType) fixes.floor(new DummyTimed(timePoint));
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public FixType getFirstFixAtOrAfter(TimePoint timePoint) {
+    public FixType getFirstRawFixAtOrAfter(TimePoint timePoint) {
         return (FixType) fixes.ceiling(new DummyTimed(timePoint));
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public FixType getLastFixBefore(TimePoint timePoint) {
+    public FixType getFirstFixAtOrAfter(TimePoint timePoint) {
+        return (FixType) getInternalFixes().ceiling((FixType) new DummyTimed(timePoint));
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public FixType getLastRawFixBefore(TimePoint timePoint) {
         return (FixType) fixes.lower(new DummyTimed(timePoint));
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public FixType getFirstFixAfter(TimePoint timePoint) {
+        return (FixType) getInternalFixes().higher((FixType) new DummyTimed(timePoint));
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public FixType getFirstRawFixAfter(TimePoint timePoint) {
         return (FixType) fixes.higher(new DummyTimed(timePoint));
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public FixType getFirstFix() {
+    public FixType getFirstRawFix() {
         if (fixes.isEmpty()) {
             return null;
         } else {
@@ -83,7 +121,7 @@ public abstract class TrackImpl<FixType extends Timed> implements Track<FixType>
     
     @SuppressWarnings("unchecked")
     @Override
-    public FixType getLastFix() {
+    public FixType getLastRawFix() {
         if (fixes.isEmpty()) {
             return null;
         } else {

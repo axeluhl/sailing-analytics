@@ -12,7 +12,6 @@ import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.Speed;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.TimePoint;
-import com.sap.sailing.domain.base.impl.KilometersPerHourSpeedImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
@@ -108,7 +107,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
                 timePointToUse = getMarkPassingForLegEnd().getTimePoint();
             } else {
                 // use time point of latest fix
-                GPSFixMoving lastFix = getTrackedRace().getTrack(getCompetitor()).getLastFix();
+                GPSFixMoving lastFix = getTrackedRace().getTrack(getCompetitor()).getLastRawFix();
                 if (lastFix != null) {
                     timePointToUse = lastFix.getTimePoint();
                 } else {
@@ -129,34 +128,15 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
         if (legStart == null) {
             return null;
         }
+        MarkPassing legEnd = getMarkPassingForLegEnd();
+        TimePoint to;
+        if (legEnd == null || legEnd.getTimePoint().compareTo(timePoint) >= 0) {
+            to = timePoint;
+        } else {
+            to = legEnd.getTimePoint();
+        }
         GPSFixTrack<Competitor, GPSFixMoving> track = getTrackedRace().getTrack(getCompetitor());
-        Iterator<GPSFixMoving> iter = track.getFixesIterator(legStart.getTimePoint(), /* inclusive */ false);
-        Speed max = Speed.NULL;
-        if (iter.hasNext()) {
-            TimePoint markPassingTimeMillis = getMarkPassingForLegStart().getTimePoint();
-            Position lastPos = track.getEstimatedPosition(markPassingTimeMillis, false);
-            long lastTimeMillis = markPassingTimeMillis.asMillis();
-            while (iter.hasNext()) {
-                GPSFixMoving fix = iter.next();
-                Speed fixSpeed = fix.getSpeed();
-                Speed calculatedSpeed = lastPos.getDistance(fix.getPosition()).inTime(fix.getTimePoint().asMillis()-lastTimeMillis);
-                Speed averaged = averageSpeed(fixSpeed, calculatedSpeed);
-                if (averaged.compareTo(max) > 0) {
-                    max = averaged;
-                }
-            }
-        }
-        return max;
-    }
-
-    private Speed averageSpeed(Speed... speeds) {
-        double sumInKMH = 0;
-        int count = 0;
-        for (Speed speed : speeds) {
-            sumInKMH += speed.getKilometersPerHour();
-            count++;
-        }
-        return new KilometersPerHourSpeedImpl(sumInKMH/count);
+        return track.getMaximumSpeedOverGround(legStart.getTimePoint(), to);
     }
 
     @Override

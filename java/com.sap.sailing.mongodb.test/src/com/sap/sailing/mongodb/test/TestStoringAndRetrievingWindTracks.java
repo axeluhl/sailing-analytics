@@ -86,7 +86,7 @@ public class TestStoringAndRetrievingWindTracks extends AbstractTracTracLiveTest
         WindTrack result = DomainObjectFactory.INSTANCE.loadWindTrack(domainEvent, race, windSource, /* millisecondsOverWhichToAverage */
                 30000, database);
         double myBearingDeg = 123.4;
-        for (Wind wind : result.getFixes()) {
+        for (Wind wind : result.getRawFixes()) {
             assertEquals(pos, wind.getPosition());
             assertEquals(10., wind.getKnots(), 0.000000000001);
             assertEquals(myBearingDeg, wind.getBearing().getDegrees(), 0.000000001);
