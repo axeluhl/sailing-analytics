@@ -18,22 +18,6 @@ Axel
  - Implement refined version of isValid in GPSFixMovingTrack taking into account the
    speed as contained by each individual fix
 
- - Need synchronization while looping over a course's legs because the course may be updated
-   as the loop executes:
-
-   Exception in thread "com.sap.sailing.domain.test.CourseUpdateTest$1" java.util.ConcurrentModificationException
-	at java.util.AbstractList$Itr.checkForComodification(AbstractList.java:372)
-	at java.util.AbstractList$Itr.next(AbstractList.java:343)
-	at java.util.Collections$UnmodifiableCollection$1.next(Collections.java:1010)
-	at com.sap.sailing.domain.tracking.impl.TrackedRaceImpl.<init>(TrackedRaceImpl.java:109)
-	at com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl.<init>(DynamicTrackedRaceImpl.java:39)
-	at com.sap.sailing.domain.tractracadapter.impl.DomainFactoryImpl.trackRace(DomainFactoryImpl.java:470)
-	at com.sap.sailing.domain.tractracadapter.impl.RaceCourseReceiver.createTrackedRace(RaceCourseReceiver.java:114)
-	at com.sap.sailing.domain.tractracadapter.impl.RaceCourseReceiver.handleEvent(RaceCourseReceiver.java:104)
-	at com.sap.sailing.domain.test.CourseUpdateTest$1.handleEvent(CourseUpdateTest.java:80)
-	at com.sap.sailing.domain.tractracadapter.impl.AbstractReceiverWithQueue.run(AbstractReceiverWithQueue.java:50)
-	at java.lang.Thread.run(Thread.java:619)
-
  - Finish a first draft version of a GWT admin UI
 
    * "top" display, with time slider
