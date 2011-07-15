@@ -531,10 +531,11 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
 	public void onResize() {
 		//handle what is required by @link{ProvidesResize}
 		Widget child = getWidget();
-		if (child instanceof RequiresResize)
+		if (child instanceof RequiresResize) {
 			((RequiresResize) child).onResize();
+		}
 		//and ensure the map (indirect child) is also informed about resize
-		if(this.map != null){
+		if (this.map != null) {
 			this.map.onResize();
 		}
 	} 
