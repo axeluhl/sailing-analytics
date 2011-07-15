@@ -1,16 +1,22 @@
 Axel
 ====
 
- - Make threshold for track smoothening configurable
-
- - Implement refined version of isValid in GPSFixMovingTrack taking into account the
-   speed as contained by each individual fix
-
  - consider an array-based implementation of TrackImpl, sorted ascending by time point; inserting
    with a not-maximal time point requires some shifting but should be the rare exception in all our
    use cases.
 
  - Need to adjust PartialNavigableSetView to work on any ordered sequential structure
+
+ - Make threshold for track smoothening configurable. Currently, we have millisecondsOverWhichToAverage.
+   This is also used as response to getMillisecondsOverWhichToAverageSpeed. Probably, we should at least
+   additionally have a common way to eliminate impossible or highly unlikely fixes. This could rather be
+   a configurable speed threshold. Once the outliers have been eliminated, smoothening in terms of
+   weighted averaging around the time point requested should happen, based on an acceleration model
+   that eventually could be specific to the boat class. The acceleration model would tell us how to,
+   e.g., based on splines, interpolate and smoothen what remains from the fixes.
+
+ - Implement refined version of isValid in GPSFixMovingTrack taking into account the
+   speed as contained by each individual fix
 
  - Need synchronization while looping over a course's legs because the course may be updated
    as the loop executes:
@@ -31,24 +37,14 @@ Axel
  - Finish a first draft version of a GWT admin UI
 
    * "top" display, with time slider
+   * leaderboard page (scrollable!)
    * configure one or more leaderboards from a selection of races, adjustable delay per leaderboard
    * each leaderboard has its own URL
    * wind display
+   * edit mode for disqualifications / net / total point adjustments
    * store net / total points separately in Mongo, making them overridable in editable copy of leaderboard
-   * time slider, adjustable delay per leaderboard
    * consider a per-user preferences page where leaderboard columns can be personalized at runtime
    * mark position entry capability, supporting "lost mark tracker" use case
-
- - New GWT-based leaderboard draft
-
-   * generally based on existing leaderboard
-   * scrollable!
-   * edit mode for disqualifications / net / total point adjustments
-   * Google Map integration
-   * time slider, adjustable delay per leaderboard
-
- - smoothen GPSTracks; if a particular fix seems really off, producing a speed that is beyond
-   what the boat class could possibly do, ignore the fix because it is obviously a mis-read.
 
  - Distribute wind data to their respective races; capture expedition wind not by race/event anymore because
    wind is already recorded by time and position; when seeking wind information, look for information

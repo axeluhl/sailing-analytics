@@ -106,8 +106,11 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             }
         }
         trackedLegs = new LinkedHashMap<Leg, TrackedLeg>();
-        for (Leg leg : race.getCourse().getLegs()) {
-            trackedLegs.put(leg, createTrackedLeg(leg));
+        synchronized (race.getCourse()) {
+            for (Leg leg : race.getCourse().getLegs()) {
+                trackedLegs.put(leg, createTrackedLeg(leg));
+            }
+            getRace().getCourse().addCourseListener(this);
         }
         markPassingsForCompetitor = new HashMap<Competitor, NavigableSet<MarkPassing>>();
         tracks = new HashMap<Competitor, GPSFixTrack<Competitor, GPSFixMoving>>();
@@ -125,7 +128,6 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         }
         currentWindSource = WindSource.EXPEDITION;
         competitorRankings = new HashMap<TimePoint, List<Competitor>>();
-        getRace().getCourse().addCourseListener(this);
     }
 
     /**
