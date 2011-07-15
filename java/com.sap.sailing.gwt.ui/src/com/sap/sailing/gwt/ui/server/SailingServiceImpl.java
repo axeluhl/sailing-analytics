@@ -202,9 +202,11 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
 
     private RaceDefinition getRaceByName(Event event, String raceName) {
-        for (RaceDefinition r : event.getAllRaces()) {
-            if (r.getName().equals(raceName)) {
-                return r;
+        if (event != null) {
+            for (RaceDefinition r : event.getAllRaces()) {
+                if (r.getName().equals(raceName)) {
+                    return r;
+                }
             }
         }
         return null;
@@ -311,33 +313,35 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         Map<CompetitorDAO, List<GPSFixDAO>> result = new HashMap<CompetitorDAO, List<GPSFixDAO>>();
         if (date != null) {
             Event event = service.getEventByName(eventName);
-            RaceDefinition race = getRaceByName(event, raceName);
-            TimePoint end = new MillisecondsTimePoint(date);
-            TrackedRace trackedRace = service.getDomainFactory().getTrackedEvent(event).getTrackedRace(race);
-            for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
-                CompetitorDAO competitorDAO = getCompetitorDAO(competitor);
-                List<GPSFixDAO> fixesForCompetitor = new ArrayList<GPSFixDAO>();
-                result.put(competitorDAO, fixesForCompetitor);
-                GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
-                Iterator<GPSFixMoving> fixIter = track.getFixesIterator(new MillisecondsTimePoint(date.getTime()
-                        - tailLengthInMilliseconds), /* inclusive */true);
-                if (fixIter.hasNext()) {
-                    GPSFixMoving fix = fixIter.next();
-                    while (fix != null && fix.getTimePoint().compareTo(end) < 0) {
-                        GPSFixDAO fixDAO = new GPSFixDAO(fix.getTimePoint().asDate(), new PositionDAO(fix.getPosition()
-                                .getLatDeg(), fix.getPosition().getLngDeg()));
-                        fixesForCompetitor.add(fixDAO);
-                        if (fixIter.hasNext()) {
-                            fix = fixIter.next();
-                        } else {
-                            // check if fix was at date and if extrapolation is requested
-                            if (!fix.getTimePoint().equals(end) && extrapolate) {
-                                Position position = track.getEstimatedPosition(end, extrapolate);
-                                GPSFixDAO extrapolated = new GPSFixDAO(date, new PositionDAO(position.getLatDeg(),
-                                        position.getLngDeg()));
-                                fixesForCompetitor.add(extrapolated);
+            if (event != null) {
+                RaceDefinition race = getRaceByName(event, raceName);
+                TimePoint end = new MillisecondsTimePoint(date);
+                TrackedRace trackedRace = service.getDomainFactory().getTrackedEvent(event).getTrackedRace(race);
+                for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
+                    CompetitorDAO competitorDAO = getCompetitorDAO(competitor);
+                    List<GPSFixDAO> fixesForCompetitor = new ArrayList<GPSFixDAO>();
+                    result.put(competitorDAO, fixesForCompetitor);
+                    GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
+                    Iterator<GPSFixMoving> fixIter = track.getFixesIterator(new MillisecondsTimePoint(date.getTime()
+                            - tailLengthInMilliseconds), /* inclusive */true);
+                    if (fixIter.hasNext()) {
+                        GPSFixMoving fix = fixIter.next();
+                        while (fix != null && fix.getTimePoint().compareTo(end) < 0) {
+                            GPSFixDAO fixDAO = new GPSFixDAO(fix.getTimePoint().asDate(), new PositionDAO(fix
+                                    .getPosition().getLatDeg(), fix.getPosition().getLngDeg()));
+                            fixesForCompetitor.add(fixDAO);
+                            if (fixIter.hasNext()) {
+                                fix = fixIter.next();
+                            } else {
+                                // check if fix was at date and if extrapolation is requested
+                                if (!fix.getTimePoint().equals(end) && extrapolate) {
+                                    Position position = track.getEstimatedPosition(end, extrapolate);
+                                    GPSFixDAO extrapolated = new GPSFixDAO(date, new PositionDAO(position.getLatDeg(),
+                                            position.getLngDeg()));
+                                    fixesForCompetitor.add(extrapolated);
+                                }
+                                fix = null;
                             }
-                            fix = null;
                         }
                     }
                 }
@@ -351,20 +355,23 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         List<MarkDAO> result = new ArrayList<MarkDAO>();
         if (date != null) {
             Event event = service.getEventByName(eventName);
-            RaceDefinition race = getRaceByName(event, raceName);
-            TimePoint dateAsTimePoint = new MillisecondsTimePoint(date);
-            TrackedRace trackedRace = service.getDomainFactory().getTrackedEvent(event).getTrackedRace(race);
-            Set<Buoy> buoys = new HashSet<Buoy>();
-            for (Waypoint waypoint : trackedRace.getRace().getCourse().getWaypoints()) {
-                for (Buoy b : waypoint.getBuoys()) {
-                    buoys.add(b);
+            if (event != null) {
+                RaceDefinition race = getRaceByName(event, raceName);
+                TimePoint dateAsTimePoint = new MillisecondsTimePoint(date);
+                TrackedRace trackedRace = service.getDomainFactory().getTrackedEvent(event).getTrackedRace(race);
+                Set<Buoy> buoys = new HashSet<Buoy>();
+                for (Waypoint waypoint : trackedRace.getRace().getCourse().getWaypoints()) {
+                    for (Buoy b : waypoint.getBuoys()) {
+                        buoys.add(b);
+                    }
                 }
-            }
-            for (Buoy buoy : buoys) {
-                GPSFixTrack<Buoy, GPSFix> track = trackedRace.getTrack(buoy);
-                Position positionAtDate = track.getEstimatedPosition(dateAsTimePoint, /* extrapolate */false);
-                MarkDAO markDAO = new MarkDAO(buoy.getName(), positionAtDate.getLatDeg(), positionAtDate.getLngDeg());
-                result.add(markDAO);
+                for (Buoy buoy : buoys) {
+                    GPSFixTrack<Buoy, GPSFix> track = trackedRace.getTrack(buoy);
+                    Position positionAtDate = track.getEstimatedPosition(dateAsTimePoint, /* extrapolate */false);
+                    MarkDAO markDAO = new MarkDAO(buoy.getName(), positionAtDate.getLatDeg(),
+                            positionAtDate.getLngDeg());
+                    result.add(markDAO);
+                }
             }
         }
         return result;

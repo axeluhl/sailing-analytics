@@ -100,8 +100,15 @@ public class RacesListBoxPanel extends FormPanel implements RaceSelectionProvide
 
     @Override
     public List<Triple<EventDAO, RegattaDAO, RaceDAO>> getSelectedEventAndRace() {
-        // TODO Auto-generated method stub
-        return null;
+        int i=0;
+        List<Triple<EventDAO, RegattaDAO, RaceDAO>> result = new ArrayList<Triple<EventDAO,RegattaDAO,RaceDAO>>();
+        for (Triple<EventDAO, RegattaDAO, RaceDAO> triple : raceList) {
+            if (raceListBox.isItemSelected(i)) {
+                result.add(triple);
+            }
+            i++;
+        }
+        return result;
     }
 
     @Override
