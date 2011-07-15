@@ -1,8 +1,6 @@
 package com.sap.sailing.gwt.ui.client;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -37,10 +35,8 @@ import com.google.gwt.maps.client.overlay.MarkerOptions;
 import com.google.gwt.maps.client.overlay.Polyline;
 import com.google.gwt.maps.client.overlay.PolylineOptions;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.Grid;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.ProvidesResize;
@@ -51,19 +47,17 @@ import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
 import com.sap.sailing.gwt.ui.shared.EventDAO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDAO;
 import com.sap.sailing.gwt.ui.shared.MarkDAO;
-import com.sap.sailing.gwt.ui.shared.Pair;
 import com.sap.sailing.gwt.ui.shared.QuickRankDAO;
 import com.sap.sailing.gwt.ui.shared.RaceDAO;
 import com.sap.sailing.gwt.ui.shared.RegattaDAO;
+import com.sap.sailing.gwt.ui.shared.Triple;
 
-public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListener, ProvidesResize, RequiresResize {
-    private final StringConstants stringConstants;
+public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListener, ProvidesResize, RequiresResize, RaceSelectionChangeListener {
     private final SailingServiceAsync sailingService;
     private final ErrorReporter errorReporter;
     private final Grid grid;
     private MapWidget map;
-    private final List<Pair<EventDAO, RaceDAO>> raceList;
-    private final ListBox raceListBox;
+    private final RacesListBoxPanel newRaceListBox;
     private final ListBox quickRanksBox;
     private final List<CompetitorDAO> quickRanksList;
     private final TimePanel timePanel;
@@ -96,7 +90,6 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
     public RaceMapPanel(SailingServiceAsync sailingService, ErrorReporter errorReporter,
             final EventRefresher eventRefresher, StringConstants stringConstants) {
         this.sailingService = sailingService;
-        this.stringConstants = stringConstants;
         this.errorReporter = errorReporter;
         competitorsSelectedInMap = new HashSet<CompetitorDAO>();
         tails = new HashMap<CompetitorDAO, Polyline>();
@@ -109,23 +102,9 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         grid.getColumnFormatter().setWidth(1, "80%");
         grid.getCellFormatter().setHeight(1, 1, "100%");
         loadMapsAPI();
-        raceListBox = new ListBox();
-        raceList = new ArrayList<Pair<EventDAO, RaceDAO>>();
-        VerticalPanel vp = new VerticalPanel();
-        HorizontalPanel labelAndRefreshButton = new HorizontalPanel();
-        labelAndRefreshButton.setSpacing(20);
-        vp.add(labelAndRefreshButton);
-        labelAndRefreshButton.add(new Label(stringConstants.races()));
-        vp.add(raceListBox);
-        Button btnRefresh = new Button(stringConstants.refresh());
-        btnRefresh.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                eventRefresher.fillEvents();
-            }
-        });
-        labelAndRefreshButton.add(btnRefresh);
-        grid.setWidget(0,  0, vp);
+        newRaceListBox = new RacesListBoxPanel(eventRefresher, stringConstants);
+        newRaceListBox.addRaceSelectionChangeListener(this);
+        grid.setWidget(0,  0, newRaceListBox);
         quickRanksList = new ArrayList<CompetitorDAO>();
         quickRanksBox = new ListBox(/* isMultipleSelect */ true);
         quickRanksBox.setVisibleItemCount(20);
@@ -223,51 +202,14 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
     
     @Override
     public void fillEvents(List<EventDAO> result) {
-        raceList.clear();
-        raceListBox.clear();
-        for (EventDAO event : result) {
-            for (RegattaDAO regatta : event.regattas) {
-                for (RaceDAO race : regatta.races) {
-                    raceList.add(new Pair<EventDAO, RaceDAO>(event, race));
-                }
-            }
-        }
-        Collections.sort(raceList, new Comparator<Pair<EventDAO, RaceDAO>>() {
-            @Override
-            public int compare(Pair<EventDAO, RaceDAO> o1, Pair<EventDAO, RaceDAO> o2) {
-                String name1 = RaceMapPanel.this.toString(o1);
-                String name2 = RaceMapPanel.this.toString(o2);
-                return name1.compareTo(name2);
-            }
-
-        });
-        for (Pair<EventDAO, RaceDAO> p : raceList) {
-            raceListBox.addItem(toString(p));
-        }
-        raceListBox.addChangeHandler(new ChangeHandler() {
-            @Override
-            public void onChange(ChangeEvent event) {
-                updateMapFromSelectedRace();
-            }
-        });
-        raceListBox.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                updateMapFromSelectedRace();
-            }
-        });
-        updateMapFromSelectedRace();
+        newRaceListBox.fillEvents(result);
     }
 
-    private String toString(Pair<EventDAO, RaceDAO> pair) {
-        return pair.getA().name+" - "+pair.getB().name+(pair.getB().currentlyTracked ? " ("+stringConstants.tracked()+")" : "");
-    }
-
-    private void updateMapFromSelectedRace() {
-        RaceDAO selectedRace = getSelectedRace();
+    @Override
+    public void onRaceSelectionChange(List<Triple<EventDAO, RegattaDAO, RaceDAO>> selectedRaces) {
         mapZoomedOrPannedSinceLastRaceSelectionChange = false;
-        if (selectedRace != null) {
-            updateSlider(selectedRace);
+        if (!selectedRaces.isEmpty()) {
+            updateSlider(selectedRaces.get(selectedRaces.size()-1).getC());
         }
         // force display of currently selected race
         timeChanged(timePanel.getTime());
@@ -282,28 +224,11 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         }
     }
 
-    private RaceDAO getSelectedRace() {
-        int i = raceListBox.getSelectedIndex();
-        RaceDAO result = null;
-        if (i >= 0) {
-            result = raceList.get(i).getB();
-        }
-        return result;
-    }
-
-    private EventDAO getSelectedEvent() {
-        int i = raceListBox.getSelectedIndex();
-        EventDAO result = null;
-        if (i >= 0) {
-            result = raceList.get(i).getA();
-        }
-        return result;
-    }
-
     @Override
     public void timeChanged(Date date) {
-        EventDAO event = getSelectedEvent();
-        RaceDAO race = getSelectedRace();
+        List<Triple<EventDAO, RegattaDAO, RaceDAO>> selection = newRaceListBox.getSelectedEventAndRace();
+        EventDAO event = selection.get(selection.size()-1).getA();
+        RaceDAO race = selection.get(selection.size()-1).getC();
         if (event != null && race != null) {
             sailingService.getBoatPositions(event.name, race.name, date, /* tailLengthInMilliseconds */ 30000l,
                     true, new AsyncCallback<Map<CompetitorDAO, List<GPSFixDAO>>>() {
@@ -524,20 +449,22 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         return result;
     }
 
-	/* (non-Javadoc)
-	 * @see com.google.gwt.user.client.ui.RequiresResize#onResize()
-	 */
-	@Override
-	public void onResize() {
-		//handle what is required by @link{ProvidesResize}
-		Widget child = getWidget();
-		if (child instanceof RequiresResize) {
-			((RequiresResize) child).onResize();
-		}
-		//and ensure the map (indirect child) is also informed about resize
-		if (this.map != null) {
-			this.map.onResize();
-		}
-	} 
-	
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.google.gwt.user.client.ui.RequiresResize#onResize()
+     */
+    @Override
+    public void onResize() {
+        // handle what is required by @link{ProvidesResize}
+        Widget child = getWidget();
+        if (child instanceof RequiresResize) {
+            ((RequiresResize) child).onResize();
+        }
+        // and ensure the map (indirect child) is also informed about resize
+        if (this.map != null) {
+            this.map.onResize();
+        }
+    }
+
 }

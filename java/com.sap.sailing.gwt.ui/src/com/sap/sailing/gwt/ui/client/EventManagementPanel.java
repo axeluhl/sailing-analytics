@@ -12,7 +12,6 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.user.cellview.client.CellTable;
-import com.google.gwt.user.cellview.client.CellTree;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.Handler;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
@@ -36,6 +35,7 @@ import com.sap.sailing.gwt.ui.shared.RaceDAO;
 import com.sap.sailing.gwt.ui.shared.RaceRecordDAO;
 import com.sap.sailing.gwt.ui.shared.RegattaDAO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDAO;
+import com.sap.sailing.gwt.ui.shared.Triple;
 
 /**
  * Allows the user to start and stop tracking of events, regattas and races using the TracTrac connector. In particular,
@@ -65,15 +65,14 @@ public class EventManagementPanel extends FormPanel implements EventDisplayer {
     private final Map<String, TracTracConfigurationDAO> previousConfigurations;
     private final ListBox previousConfigurationsComboBox;
     private final Grid grid;
+    private final RaceTreeView trackedRacesTreeView;
     private final EventRefresher eventRefresher;
-    private final StringConstants stringConstants;
 
     public EventManagementPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
             EventRefresher eventRefresher, StringConstants stringConstants) {
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.eventRefresher = eventRefresher;
-        this.stringConstants = stringConstants;
         VerticalPanel verticalPanel = new VerticalPanel();
         this.setWidget(verticalPanel);
         verticalPanel.setSize("100%", "100%");
@@ -252,7 +251,32 @@ public class EventManagementPanel extends FormPanel implements EventDisplayer {
 
         Label lblEventsConnectedTo = new Label("Events Currently Tracked");
         grid.setWidget(7, 0, lblEventsConnectedTo);
-
+        trackedRacesTreeView = new RaceTreeView(stringConstants, /* multiselection */ true);
+        grid.setWidget(8, 0, trackedRacesTreeView);
+        VerticalPanel buttonPanel = new VerticalPanel();
+        Button btnRefresh = new Button(stringConstants.refresh());
+        btnRefresh.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                EventManagementPanel.this.eventRefresher.fillEvents();
+            }
+        });
+        buttonPanel.add(btnRefresh);
+        Button btnRemove = new Button(stringConstants.remove());
+        btnRemove.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent click) {
+                for (Triple<EventDAO, RegattaDAO, RaceDAO> selection : trackedRacesTreeView.getSelectedEventAndRace()) {
+                    if (selection.getC().currentlyTracked) {
+                        stopTrackingRace(selection.getA(), selection.getC());
+                    }
+                }
+            }
+        });
+        btnRemove.setWidth("100%");
+        buttonPanel.add(btnRemove);
+        grid.setWidget(8, 1, buttonPanel);
+        
         grid.getCellFormatter().setVerticalAlignment(8, 1, HasVerticalAlignment.ALIGN_TOP);
         grid.getCellFormatter().setVerticalAlignment(8, 0, HasVerticalAlignment.ALIGN_TOP);
         
@@ -260,21 +284,6 @@ public class EventManagementPanel extends FormPanel implements EventDisplayer {
         updateLiveURI();
         updateStoredURI();
         updateJsonUrl();
-    }
-
-    private void stopTrackingEvent(final EventDAO event) {
-        sailingService.stopTrackingEvent(event.name, new AsyncCallback<Void>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                errorReporter.reportError("Exception trying to stop tracking event " + event.name + ": "
-                        + caught.getMessage());
-            }
-
-            @Override
-            public void onSuccess(Void result) {
-                eventRefresher.fillEvents();
-            }
-        });
     }
 
     private void stopTrackingRace(final EventDAO event, final RaceDAO race) {
@@ -429,49 +438,7 @@ public class EventManagementPanel extends FormPanel implements EventDisplayer {
 
     @Override
     public void fillEvents(List<EventDAO> result) {
-        grid.setWidget(8, 0, null);
-        VerticalPanel buttonPanel = new VerticalPanel();
-        Button btnRefresh = new Button(stringConstants.refresh());
-        btnRefresh.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                eventRefresher.fillEvents();
-            }
-        });
-        buttonPanel.add(btnRefresh);
-        grid.setWidget(8, 1, buttonPanel);
-        if (!result.isEmpty()) {
-            final ListDataProvider<EventDAO> eventsList = new ListDataProvider<EventDAO>(result);
-            final TrackedEventsTreeModel trackedEventsModel = new TrackedEventsTreeModel(eventsList, /* multiSelection */ true);
-            // When the following line is uncommented, the race table contents don't show anymore
-            // if there are no events yet...???!!!
-            CellTree eventsCellTree = new CellTree(trackedEventsModel, /* root */null);
-            grid.setWidget(8, 0, eventsCellTree);
-
-            Button btnRemove = new Button(stringConstants.remove());
-            btnRemove.addClickHandler(new ClickHandler() {
-                @Override
-                public void onClick(ClickEvent click) {
-                    for (EventDAO event : eventsList.getList()) {
-                        if (trackedEventsModel.getSelectionModel().isSelected(event)) {
-                            stopTrackingEvent(event);
-                        } else {
-                            // scan event's races:
-                            for (RegattaDAO regatta : event.regattas) {
-                                for (RaceDAO race : regatta.races) {
-                                    if (trackedEventsModel.getSelectionModel().isSelected(regatta) ||
-                                            trackedEventsModel.getSelectionModel().isSelected(race)) {
-                                        stopTrackingRace(event, race);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-            btnRemove.setWidth("100%");
-            buttonPanel.add(btnRemove);
-        }
+        trackedRacesTreeView.fillEvents(result);
     }
 
 }

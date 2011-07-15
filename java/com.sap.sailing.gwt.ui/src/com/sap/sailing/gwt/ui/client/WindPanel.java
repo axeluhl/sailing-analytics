@@ -1,15 +1,17 @@
 package com.sap.sailing.gwt.ui.client;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.cellview.client.CellTable;
-import com.google.gwt.user.cellview.client.CellTree;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.Handler;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
@@ -24,11 +26,10 @@ import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
-import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.gwt.ui.shared.EventDAO;
-import com.sap.sailing.gwt.ui.shared.Pair;
 import com.sap.sailing.gwt.ui.shared.RaceDAO;
 import com.sap.sailing.gwt.ui.shared.RegattaDAO;
+import com.sap.sailing.gwt.ui.shared.Triple;
 import com.sap.sailing.gwt.ui.shared.WindDAO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDAO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDAO;
@@ -40,19 +41,22 @@ public class WindPanel extends FormPanel implements EventDisplayer, RaceSelectio
     private final Grid grid;
     private final StringConstants stringConstants;
     private final WindSettingPanel windSettingPanel;
-    private Pair<EventDAO, RaceDAO> selectedEventAndRace;
+    private Triple<EventDAO, RegattaDAO, RaceDAO> selectedEventAndRace;
     private ColumnSortList columnSortList;
     private final TextColumn<WindDAO> timeColumn;
     private final TextColumn<WindDAO> speedInKnotsColumn;
     private final TextColumn<WindDAO> windDirectionInDegColumn;
     private final TextColumn<WindDAO> dampenedSpeedInKnotsColumn;
     private final TextColumn<WindDAO> dampenedWindDirectionInDegColumn;
+    private final Set<RaceSelectionChangeListener> raceSelectionChangeListeners;
+    private final RaceTreeView trackedRacesTree;
 
     public WindPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter, EventRefresher eventRefresher, StringConstants stringConstants) {
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.eventRefresher = eventRefresher;
         this.stringConstants = stringConstants;
+        raceSelectionChangeListeners = new HashSet<RaceSelectionChangeListener>();
         timeColumn = new TextColumn<WindDAO>() {
             @Override
             public String getValue(WindDAO object) {
@@ -84,6 +88,19 @@ public class WindPanel extends FormPanel implements EventDisplayer, RaceSelectio
             }
         };
         grid = new Grid(2, 2); // first row: event/race selection; second row: wind display
+        trackedRacesTree = new RaceTreeView(stringConstants, /* multiselection */ false);
+        trackedRacesTree.addRaceSelectionChangeListener(new RaceSelectionChangeListener() {
+            @Override
+            public void onRaceSelectionChange(List<Triple<EventDAO, RegattaDAO, RaceDAO>> selectedRaces) {
+                if (selectedRaces.isEmpty()) {
+                    clearWindDisplay(); // no wind known for untracked race
+                } else {
+                    showWind(selectedRaces.get(0).getA(), selectedRaces.get(0).getC());
+                }
+                fireRaceSelectionChanged(selectedRaces);
+            }
+        });
+        grid.setWidget(0, 0, trackedRacesTree);
         Button btnRefresh = new Button(stringConstants.refresh());
         btnRefresh.addClickHandler(new ClickHandler() {
             @Override
@@ -100,38 +117,7 @@ public class WindPanel extends FormPanel implements EventDisplayer, RaceSelectio
 
     @Override
     public void fillEvents(List<EventDAO> result) {
-        grid.setWidget(0, 0, null); // remove tree view; important in case event list is empty
-        grid.getCellFormatter().setVerticalAlignment(0, 1, HasVerticalAlignment.ALIGN_TOP);
-        if (!result.isEmpty()) {
-            final ListDataProvider<EventDAO> eventsList = new ListDataProvider<EventDAO>(result);
-            final TrackedEventsTreeModel trackedEventsModel = new TrackedEventsTreeModel(eventsList, /* multiSelection */ false);
-            CellTree eventsCellTree = new CellTree(trackedEventsModel, /* root */null);
-            grid.setWidget(0, 0, eventsCellTree);
-
-            trackedEventsModel.getSelectionModel().addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
-                @Override
-                public void onSelectionChange(SelectionChangeEvent selectionChangeEvent) {
-                    selectedEventAndRace = null;
-                    for (EventDAO event : eventsList.getList()) {
-                        for (RegattaDAO regatta : event.regattas) {
-                            for (RaceDAO race : regatta.races) {
-                                if (trackedEventsModel.getSelectionModel().isSelected(race)) {
-                                    selectedEventAndRace = new Pair<EventDAO, RaceDAO>(event, race);
-                                    if (race.currentlyTracked) {
-                                        showWind(event, race);
-                                    } else {
-                                        clearWindDisplay(); // no wind known for untracked race
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    if (selectedEventAndRace == null) {
-                        clearWindDisplay();
-                    }
-                }
-            });
-        }
+        trackedRacesTree.fillEvents(result);
     }
 
     @Override
@@ -244,8 +230,23 @@ public class WindPanel extends FormPanel implements EventDisplayer, RaceSelectio
     }
 
     @Override
-    public Pair<EventDAO, RaceDAO> getSelectedEventAndRace() {
-        return selectedEventAndRace;
+    public List<Triple<EventDAO, RegattaDAO, RaceDAO>> getSelectedEventAndRace() {
+        return Collections.singletonList(selectedEventAndRace);
     }
 
+    @Override
+    public void addRaceSelectionChangeListener(RaceSelectionChangeListener listener) {
+        raceSelectionChangeListeners.add(listener);
+    }
+
+    @Override
+    public void removeRaceSelectionChangeListener(RaceSelectionChangeListener listener) {
+        raceSelectionChangeListeners.remove(listener);
+    }
+
+    private void fireRaceSelectionChanged(List<Triple<EventDAO, RegattaDAO, RaceDAO>> selectedRaces) {
+        for (RaceSelectionChangeListener listener : raceSelectionChangeListeners) {
+            listener.onRaceSelectionChange(selectedRaces);
+        }
+    }
 }

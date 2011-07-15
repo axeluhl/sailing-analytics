@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.ui.client;
 
+import java.util.List;
+
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
@@ -13,10 +15,11 @@ import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.sap.sailing.gwt.ui.shared.EventDAO;
-import com.sap.sailing.gwt.ui.shared.Pair;
 import com.sap.sailing.gwt.ui.shared.PositionDAO;
 import com.sap.sailing.gwt.ui.shared.RaceDAO;
+import com.sap.sailing.gwt.ui.shared.RegattaDAO;
 import com.sap.sailing.gwt.ui.shared.WindDAO;
+import com.sap.sailing.gwt.ui.shared.Triple;
 
 public class WindSettingPanel extends FormPanel {
     private final Button setWindButton;
@@ -51,15 +54,17 @@ public class WindSettingPanel extends FormPanel {
                 if (latDegBox.getValue() != null && lngDegBox.getValue() != null) {
                     wind.position = new PositionDAO(latDegBox.getValue(), lngDegBox.getValue());
                 }
-                final Pair<EventDAO, RaceDAO> eventAndRace = raceSelectionProvider.getSelectedEventAndRace();
-                sailingService.setWind(eventAndRace.getA().name, eventAndRace.getB().name, wind, new AsyncCallback<Void>() {
+                List<Triple<EventDAO, RegattaDAO, RaceDAO>> eventAndRaces = raceSelectionProvider.getSelectedEventAndRace();
+                // TODO can we be sure of single selection?
+                final Triple<EventDAO, RegattaDAO, RaceDAO> eventAndRace = eventAndRaces.get(eventAndRaces.size()-1);
+                sailingService.setWind(eventAndRace.getA().name, eventAndRace.getC().name, wind, new AsyncCallback<Void>() {
                     @Override
                     public void onSuccess(Void result) {
-                        windShower.showWind(eventAndRace.getA(), eventAndRace.getB());
+                        windShower.showWind(eventAndRace.getA(), eventAndRace.getC());
                     }
                     @Override
                     public void onFailure(Throwable caught) {
-                        errorReporter.reportError("Error setting wind for race "+eventAndRace.getB().name+": "+caught.getMessage());
+                        errorReporter.reportError("Error setting wind for race "+eventAndRace.getC().name+": "+caught.getMessage());
                     }
                 });
             }

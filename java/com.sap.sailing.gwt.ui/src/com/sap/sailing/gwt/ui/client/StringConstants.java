@@ -23,4 +23,7 @@ public interface StringConstants extends Constants {
     String accelerationHelp();
     String delay();
     String delayHelp();
+    String speedInKnots();
+    String fromDeg();
+    String noRacesYet();
 }
