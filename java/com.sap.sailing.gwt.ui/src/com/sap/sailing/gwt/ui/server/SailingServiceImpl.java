@@ -380,25 +380,29 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     @Override
     public List<QuickRankDAO> getQuickRanks(String eventName, String raceName, Date date) throws Exception {
         Event event = service.getEventByName(eventName);
-        RaceDefinition race = getRaceByName(event, raceName);
-        TimePoint dateAsTimePoint = new MillisecondsTimePoint(date);
-        TrackedRace trackedRace = service.getDomainFactory().getTrackedEvent(event).getTrackedRace(race);
         List<QuickRankDAO> result = new ArrayList<QuickRankDAO>();
-        for (Competitor competitor : race.getCompetitors()) {
-            int rank = trackedRace.getRank(competitor, dateAsTimePoint);
-            TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(competitor, dateAsTimePoint);
-            if (trackedLeg != null) {
-                int legNumber = race.getCourse().getLegs().indexOf(trackedLeg.getLeg());
-                QuickRankDAO quickRankDAO = new QuickRankDAO(getCompetitorDAO(competitor), rank, legNumber);
-                result.add(quickRankDAO);
+        if (event != null) {
+            RaceDefinition race = getRaceByName(event, raceName);
+            if (race != null) {
+                TimePoint dateAsTimePoint = new MillisecondsTimePoint(date);
+                TrackedRace trackedRace = service.getDomainFactory().getTrackedEvent(event).getTrackedRace(race);
+                for (Competitor competitor : race.getCompetitors()) {
+                    int rank = trackedRace.getRank(competitor, dateAsTimePoint);
+                    TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(competitor, dateAsTimePoint);
+                    if (trackedLeg != null) {
+                        int legNumber = race.getCourse().getLegs().indexOf(trackedLeg.getLeg());
+                        QuickRankDAO quickRankDAO = new QuickRankDAO(getCompetitorDAO(competitor), rank, legNumber);
+                        result.add(quickRankDAO);
+                    }
+                }
+                Collections.sort(result, new Comparator<QuickRankDAO>() {
+                    @Override
+                    public int compare(QuickRankDAO o1, QuickRankDAO o2) {
+                        return o1.rank - o2.rank;
+                    }
+                });
             }
         }
-        Collections.sort(result, new Comparator<QuickRankDAO>() {
-            @Override
-            public int compare(QuickRankDAO o1, QuickRankDAO o2) {
-                return o1.rank - o2.rank;
-            }
-        });
         return result;
     }
     
