@@ -226,45 +226,47 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
 
     @Override
     public void timeChanged(Date date) {
-        List<Triple<EventDAO, RegattaDAO, RaceDAO>> selection = newRaceListBox.getSelectedEventAndRace();
-        if (!selection.isEmpty()) {
-            EventDAO event = selection.get(selection.size() - 1).getA();
-            RaceDAO race = selection.get(selection.size() - 1).getC();
-            if (event != null && race != null) {
-                sailingService.getBoatPositions(event.name, race.name, date, /* tailLengthInMilliseconds */30000l,
-                        true, new AsyncCallback<Map<CompetitorDAO, List<GPSFixDAO>>>() {
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                errorReporter.reportError("Error obtaining boat positions: " + caught.getMessage());
-                            }
+        if (date != null) {
+            List<Triple<EventDAO, RegattaDAO, RaceDAO>> selection = newRaceListBox.getSelectedEventAndRace();
+            if (!selection.isEmpty()) {
+                EventDAO event = selection.get(selection.size() - 1).getA();
+                RaceDAO race = selection.get(selection.size() - 1).getC();
+                if (event != null && race != null) {
+                    sailingService.getBoatPositions(event.name, race.name, date, /* tailLengthInMilliseconds */30000l,
+                            true, new AsyncCallback<Map<CompetitorDAO, List<GPSFixDAO>>>() {
+                                @Override
+                                public void onFailure(Throwable caught) {
+                                    errorReporter.reportError("Error obtaining boat positions: " + caught.getMessage());
+                                }
 
-                            @Override
-                            public void onSuccess(Map<CompetitorDAO, List<GPSFixDAO>> result) {
-                                showBoatsOnMap(result);
-                            }
-                        });
-                sailingService.getMarkPositions(event.name, race.name, date, new AsyncCallback<List<MarkDAO>>() {
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        errorReporter.reportError("Error trying to obtain mark positions: " + caught.getMessage());
-                    }
+                                @Override
+                                public void onSuccess(Map<CompetitorDAO, List<GPSFixDAO>> result) {
+                                    showBoatsOnMap(result);
+                                }
+                            });
+                    sailingService.getMarkPositions(event.name, race.name, date, new AsyncCallback<List<MarkDAO>>() {
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            errorReporter.reportError("Error trying to obtain mark positions: " + caught.getMessage());
+                        }
 
-                    @Override
-                    public void onSuccess(List<MarkDAO> result) {
-                        showMarksOnMap(result);
-                    }
-                });
-                sailingService.getQuickRanks(event.name, race.name, date, new AsyncCallback<List<QuickRankDAO>>() {
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        errorReporter.reportError("Error obtaining quick rankings: " + caught.getMessage());
-                    }
+                        @Override
+                        public void onSuccess(List<MarkDAO> result) {
+                            showMarksOnMap(result);
+                        }
+                    });
+                    sailingService.getQuickRanks(event.name, race.name, date, new AsyncCallback<List<QuickRankDAO>>() {
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            errorReporter.reportError("Error obtaining quick rankings: " + caught.getMessage());
+                        }
 
-                    @Override
-                    public void onSuccess(List<QuickRankDAO> result) {
-                        showQuickRanks(result);
-                    }
-                });
+                        @Override
+                        public void onSuccess(List<QuickRankDAO> result) {
+                            showQuickRanks(result);
+                        }
+                    });
+                }
             }
         }
     }

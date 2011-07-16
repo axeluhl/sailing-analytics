@@ -392,7 +392,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     public List<QuickRankDAO> getQuickRanks(String eventName, String raceName, Date date) throws Exception {
         Event event = service.getEventByName(eventName);
         List<QuickRankDAO> result = new ArrayList<QuickRankDAO>();
-        if (event != null) {
+        if (date != null && event != null) {
             RaceDefinition race = getRaceByName(event, raceName);
             if (race != null) {
                 TimePoint dateAsTimePoint = new MillisecondsTimePoint(date);

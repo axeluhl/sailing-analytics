@@ -167,8 +167,10 @@ public class TimePanel extends FormPanel {
         RepeatingCommand command = new RepeatingCommand( ) {
             @Override
             public boolean execute() {
-                setTimeIncludingSlider(new Date((long) (time.getTime() + accelerationBox.getValue()
-                        * delayBetweenAutoAdvancesInMilliseconds)));
+                if (time != null) {
+                    setTimeIncludingSlider(new Date((long) (time.getTime() + accelerationBox.getValue()
+                            * delayBetweenAutoAdvancesInMilliseconds)));
+                }
                 return playing;
             }
         };

@@ -132,6 +132,14 @@ public abstract class TrackImpl<FixType extends Timed> implements Track<FixType>
     @Override
     public Iterator<FixType> getFixesIterator(TimePoint startingAt, boolean inclusive) {
         @SuppressWarnings("unchecked")
+        Iterator<FixType> result = (Iterator<FixType>) getInternalFixes().tailSet(
+                (FixType) new DummyTimed(startingAt), inclusive).iterator();
+        return result;
+    }
+
+    @Override
+    public Iterator<FixType> getRawFixesIterator(TimePoint startingAt, boolean inclusive) {
+        @SuppressWarnings("unchecked")
         Iterator<FixType> result = (Iterator<FixType>) fixes.tailSet(
                 new DummyTimed(startingAt), inclusive).iterator();
         return result;

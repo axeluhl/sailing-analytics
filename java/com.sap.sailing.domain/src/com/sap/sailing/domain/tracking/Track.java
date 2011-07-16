@@ -48,8 +48,15 @@ public interface Track<FixType extends Timed> {
     
     /**
      * Returns an iterator starting at the first fix after <code>startingAt</code> (or "at or after" in case
-     * <code>inclusive</code> is <code>true</code>). The fixes returned by the iterator are the raw fixes (see also
-     * {@link #getFixes()}, without any smoothening or dampening applied.
+     * <code>inclusive</code> is <code>true</code>). The fixes returned by the iterator are the smoothened fixes (see
+     * also {@link #getFixes()}, without any smoothening or dampening applied.
      */
     Iterator<FixType> getFixesIterator(TimePoint startingAt, boolean inclusive);
+
+    /**
+     * Returns an iterator starting at the first raw fix after <code>startingAt</code> (or "at or after" in case
+     * <code>inclusive</code> is <code>true</code>). The fixes returned by the iterator are the raw fixes (see also
+     * {@link #getRawFixes()}, without any smoothening or dampening applied.
+     */
+    Iterator<FixType> getRawFixesIterator(TimePoint startingAt, boolean inclusive);
 }

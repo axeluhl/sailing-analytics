@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.ui.client;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
@@ -41,7 +40,6 @@ public class WindPanel extends FormPanel implements EventDisplayer, RaceSelectio
     private final Grid grid;
     private final StringConstants stringConstants;
     private final WindSettingPanel windSettingPanel;
-    private Triple<EventDAO, RegattaDAO, RaceDAO> selectedEventAndRace;
     private ColumnSortList columnSortList;
     private final TextColumn<WindDAO> timeColumn;
     private final TextColumn<WindDAO> speedInKnotsColumn;
@@ -131,6 +129,8 @@ public class WindPanel extends FormPanel implements EventDisplayer, RaceSelectio
                         if (result != null) {
                             showWindForRace(result);
                             windSettingPanel.setEnabled(true);
+                        } else {
+                            clearWindDisplay(); // no wind known for untracked race
                         }
                     }
 
@@ -233,7 +233,7 @@ public class WindPanel extends FormPanel implements EventDisplayer, RaceSelectio
 
     @Override
     public List<Triple<EventDAO, RegattaDAO, RaceDAO>> getSelectedEventAndRace() {
-        return Collections.singletonList(selectedEventAndRace);
+        return trackedRacesTree.getSelectedEventAndRace();
     }
 
     @Override

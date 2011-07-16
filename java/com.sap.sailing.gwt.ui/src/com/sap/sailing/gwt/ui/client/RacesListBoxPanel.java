@@ -61,6 +61,7 @@ public class RacesListBoxPanel extends FormPanel implements RaceSelectionProvide
             }
         });
         labelAndRefreshButton.add(btnRefresh);
+        setWidget(vp);
     }
 
     private Triple<EventDAO, RegattaDAO, RaceDAO> getSelectedRace() {
