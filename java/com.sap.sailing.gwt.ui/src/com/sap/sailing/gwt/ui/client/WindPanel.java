@@ -183,7 +183,7 @@ public class WindPanel extends FormPanel implements EventDisplayer, RaceSelectio
     }
 
     private void clearWindDisplay() {
-        grid.setWidget(1, 0, null);
+        grid.setWidget(2, 0, null);
         windSettingPanel.setEnabled(false);
     }
 

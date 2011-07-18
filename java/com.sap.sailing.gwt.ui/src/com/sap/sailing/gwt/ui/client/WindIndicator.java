@@ -146,8 +146,9 @@ public class WindIndicator extends Composite {
     private void setTitle() {
         int speedInKnotsTimes10 = (int) (speedInKnots*10);
         int forceTimes10 = (int) (getSpeedInBeaufort()*10);
+        int intFromDeg = (int) getFromDeg();
         setTitle(""+speedInKnotsTimes10/10+"."+speedInKnotsTimes10%10+"kn ("+
-                forceTimes10/10+"."+forceTimes10%10+"bft) from "+((int) getFromDeg())+" deg");
+                forceTimes10/10+"."+forceTimes10%10+"bft) from "+(intFromDeg<10?"00":intFromDeg<100?"0":"")+intFromDeg+" deg");
     }
 
     private void drawTick(Context2d ctx, int i, double dirRad) {
@@ -170,7 +171,7 @@ public class WindIndicator extends Composite {
     }
 
     private int getTickLength(int i) {
-        int bft = (int) getSpeedInBeaufort();
+        int bft = (int) (getSpeedInBeaufort()+0.5); // round
         int zeroOneOrTwo = (bft == 1 ? (i == 1 ? 1 : 0) : 2*(i+1)<=bft ? 2 : 2*i+1 == bft ? 1 : 0);
         return zeroOneOrTwo;
     }

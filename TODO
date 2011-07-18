@@ -15,6 +15,11 @@ Axel
    that eventually could be specific to the boat class. The acceleration model would tell us how to,
    e.g., based on splines, interpolate and smoothen what remains from the fixes.
 
+ - When a getTrackedRace(...) call is launched for an event/race where it becomes evident that
+   the race won't show up (e.g., because the event is removed or no longer tracked), unblock
+   any calls to TrackedEventImpl.getTrackedRace(...), e.g., by allowing for a check on the TrackedEvent
+   that indicates that the race being waited for won't show up anymore.
+
  - Implement refined version of isValid in GPSFixMovingTrack taking into account the
    speed as contained by each individual fix
 
