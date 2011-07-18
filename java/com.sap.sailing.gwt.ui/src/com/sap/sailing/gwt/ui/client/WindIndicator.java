@@ -42,7 +42,7 @@ public class WindIndicator extends Composite {
                 }
             }
         });
-        setSize("50px", "50px");
+        setSize("75px", "75px");
     }
 
     /**

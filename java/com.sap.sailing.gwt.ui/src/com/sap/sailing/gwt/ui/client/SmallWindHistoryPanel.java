@@ -8,6 +8,7 @@ import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.gwt.ui.shared.EventDAO;
 import com.sap.sailing.gwt.ui.shared.PositionDAO;
 import com.sap.sailing.gwt.ui.shared.RaceDAO;
@@ -53,17 +54,19 @@ public class SmallWindHistoryPanel extends FormPanel implements TimeListener, Ra
         this.errorReporter = errorReporter;
         windSpeedAndDirectionLabels = new HTML[numberOfTimepoints];
         windIndicators = new WindIndicator[numberOfTimepoints];
-        Grid grid = new Grid(4, numberOfTimepoints+1);
+        VerticalPanel vp = new VerticalPanel();
+        setWidget(vp);
+        Grid grid = new Grid(3, numberOfTimepoints);
         selectedWindSourceLabel = new Label();
-        setWidget(grid);
-        grid.setWidget(0, 0, selectedWindSourceLabel);
+        vp.add(selectedWindSourceLabel);
         for (int i=0; i<numberOfTimepoints; i++) {
             windSpeedAndDirectionLabels[i] = new HTML();
             windIndicators[i] = new WindIndicator();
-            grid.setWidget(0, i+1, new Label("t-"+((numberOfTimepoints-i)*millisecondStepsPerLabel/1000)+"s"));
-            grid.setWidget(1, i+1, windSpeedAndDirectionLabels[i]);
-            grid.setWidget(2, i+1, windIndicators[i]);
+            grid.setWidget(0, i, new Label("t-"+((numberOfTimepoints-i-1)*millisecondStepsPerLabel/1000)+"s"));
+            grid.setWidget(1, i, windSpeedAndDirectionLabels[i]);
+            grid.setWidget(2, i, windIndicators[i]);
         }
+        vp.add(grid);
     }
     
     private void updateWindDisplay() {
@@ -76,14 +79,9 @@ public class SmallWindHistoryPanel extends FormPanel implements TimeListener, Ra
                             @Override
                             public void onSuccess(WindInfoForRaceDAO result) {
                                 // expecting to find windIndicators.length fixes
-                                if (result.windTrackInfoByWindSourceName.get(result.selectedWindSourceName).windFixes
+                                if (result == null || result.windTrackInfoByWindSourceName.get(result.selectedWindSourceName).windFixes
                                         .size() != windIndicators.length) {
-                                    throw new RuntimeException(
-                                            "Unexpected number of wind fixes. Expected "
-                                                    + windIndicators.length
-                                                    + " but received "
-                                                    + result.windTrackInfoByWindSourceName
-                                                            .get(result.selectedWindSourceName).windFixes.size());
+                                    clearWindDisplay();
                                 } else {
                                     setSelectedWindSource(result.selectedWindSourceName);
                                     int i = 0;
@@ -91,6 +89,7 @@ public class SmallWindHistoryPanel extends FormPanel implements TimeListener, Ra
                                             .get(result.selectedWindSourceName).windFixes) {
                                         updateLabel(i, fix);
                                         updateWindIndicator(i, fix);
+                                        i++;
                                     }
                                 }
                             }
@@ -105,6 +104,13 @@ public class SmallWindHistoryPanel extends FormPanel implements TimeListener, Ra
         }
     }
     
+    private void clearWindDisplay() {
+        for (int i=0; i<windIndicators.length; i++) {
+            windIndicators[i].setFromDeg(0);
+            windSpeedAndDirectionLabels[i].setHTML("?");
+        }
+    }
+
     private void updateWindIndicator(int i, WindDAO fix) {
         windIndicators[i].setFromDeg(fix.dampenedTrueWindFromDeg);
         windIndicators[i].setSpeedInKnots(fix.dampenedTrueWindSpeedInKnots);
@@ -112,7 +118,8 @@ public class SmallWindHistoryPanel extends FormPanel implements TimeListener, Ra
 
     private void updateLabel(int i, WindDAO fix) {
         HTML l = windSpeedAndDirectionLabels[i];
-        l.setHTML(fix.dampenedTrueWindSpeedInKnots+"kn from "+fix.dampenedTrueWindFromDeg.intValue()+"&deg;");
+        int knTimes10 = (int) (fix.dampenedTrueWindSpeedInKnots*10);
+        l.setHTML(knTimes10/10 + "."+knTimes10%10 + "kn from "+fix.dampenedTrueWindFromDeg.intValue()+"&deg;");
     }
 
     private void setSelectedWindSource(String selectedWindSourceName) {
