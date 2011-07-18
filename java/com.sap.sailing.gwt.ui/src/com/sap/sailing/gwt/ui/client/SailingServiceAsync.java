@@ -38,6 +38,9 @@ public interface SailingServiceAsync {
     void getWindInfo(String eventName, String raceName, Date from, Date to,
             AsyncCallback<WindInfoForRaceDAO> callback);
 
+    void getWindInfo(String eventName, String raceName, Date from, long millisecondsStepWidth, int numberOfFixes,
+            double latDeg, double lngDeg, AsyncCallback<WindInfoForRaceDAO> callback);
+
     void setWind(String eventName, String raceName, WindDAO wind, AsyncCallback<Void> callback);
 
     /**
@@ -58,5 +61,7 @@ public interface SailingServiceAsync {
     void getMarkPositions(String eventName, String raceName, Date date, AsyncCallback<List<MarkDAO>> asyncCallback);
 
     void getQuickRanks(String eventName, String raceName, Date date, AsyncCallback<List<QuickRankDAO>> callback);
+
+    void setWindSource(String eventName, String raceName, String windSourceName, AsyncCallback<Void> callback);
 
 }

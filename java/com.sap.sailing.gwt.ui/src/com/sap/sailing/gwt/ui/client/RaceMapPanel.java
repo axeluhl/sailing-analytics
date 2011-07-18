@@ -47,6 +47,7 @@ import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
 import com.sap.sailing.gwt.ui.shared.EventDAO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDAO;
 import com.sap.sailing.gwt.ui.shared.MarkDAO;
+import com.sap.sailing.gwt.ui.shared.PositionDAO;
 import com.sap.sailing.gwt.ui.shared.QuickRankDAO;
 import com.sap.sailing.gwt.ui.shared.RaceDAO;
 import com.sap.sailing.gwt.ui.shared.RegattaDAO;
@@ -95,16 +96,26 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         tails = new HashMap<CompetitorDAO, Polyline>();
         buoyMarkers = new HashMap<MarkDAO, Marker>();
         boatMarkers = new HashMap<CompetitorDAO, Marker>();
-        this.grid = new Grid(2, 2);
+        this.grid = new Grid(3, 2);
         setWidget(grid);
         grid.setSize("100%", "100%");
         grid.getColumnFormatter().setWidth(0, "20%");
         grid.getColumnFormatter().setWidth(1, "80%");
-        grid.getCellFormatter().setHeight(1, 1, "100%");
+        grid.getCellFormatter().setHeight(2, 1, "100%");
         loadMapsAPI();
         newRaceListBox = new RacesListBoxPanel(eventRefresher, stringConstants);
         newRaceListBox.addRaceSelectionChangeListener(this);
         grid.setWidget(0,  0, newRaceListBox);
+        PositionDAO pos = new PositionDAO();
+        if (!boatMarkers.isEmpty()) {
+            LatLng latLng = boatMarkers.values().iterator().next().getLatLng();
+            pos.latDeg = latLng.getLatitude();
+            pos.lngDeg = latLng.getLongitude();
+        }
+        SmallWindHistoryPanel windHistory = new SmallWindHistoryPanel(sailingService, pos, /* number of wind displays */ 5,
+                /* time interval between displays in milliseconds */ 5000, stringConstants, errorReporter);
+        newRaceListBox.addRaceSelectionChangeListener(windHistory);
+        grid.setWidget(1, 0, windHistory);
         quickRanksList = new ArrayList<CompetitorDAO>();
         quickRanksBox = new ListBox(/* isMultipleSelect */ true);
         quickRanksBox.setVisibleItemCount(20);
@@ -120,10 +131,11 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
                 updateBoatSelection();
             }
         });
-        grid.setWidget(1, 0, quickRanksBox);
+        grid.setWidget(2, 0, quickRanksBox);
         timePanel = new TimePanel(stringConstants, /* delayBetweenAutoAdvancesInMilliseconds */ 3000);
         timePanel.addTimeListener(this);
-        grid.setWidget(0, 1, timePanel);
+        timePanel.addTimeListener(windHistory);
+        grid.setWidget(1, 1, timePanel);
     }
 
     private void updateBoatSelection() {
@@ -168,7 +180,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
                 map.addControl(new LargeMapControl3D());
                 map.addControl(new MenuMapTypeControl());
                 // Add the map to the HTML host page
-                grid.setWidget(1, 1, map);
+                grid.setWidget(2, 1, map);
                 map.setSize("100%", "100%");
                 map.setScrollWheelZoomEnabled(true);
                 map.setContinuousZoom(true);

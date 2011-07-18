@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.cellview.client.CellTable;
@@ -22,7 +24,9 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sailing.gwt.ui.shared.EventDAO;
@@ -48,6 +52,7 @@ public class WindPanel extends FormPanel implements EventDisplayer, RaceSelectio
     private final TextColumn<WindDAO> dampenedWindDirectionInDegColumn;
     private final Set<RaceSelectionChangeListener> raceSelectionChangeListeners;
     private final RaceTreeView trackedRacesTree;
+    private final ListBox windSourceSelection;
 
     public WindPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter, EventRefresher eventRefresher, StringConstants stringConstants) {
         this.sailingService = sailingService;
@@ -55,6 +60,13 @@ public class WindPanel extends FormPanel implements EventDisplayer, RaceSelectio
         this.eventRefresher = eventRefresher;
         this.stringConstants = stringConstants;
         raceSelectionChangeListeners = new HashSet<RaceSelectionChangeListener>();
+        windSourceSelection = new ListBox();
+        windSourceSelection.addChangeHandler(new ChangeHandler() {
+            @Override
+            public void onChange(ChangeEvent event) {
+                setWindSource();
+            }
+        });
         timeColumn = new TextColumn<WindDAO>() {
             @Override
             public String getValue(WindDAO object) {
@@ -85,7 +97,7 @@ public class WindPanel extends FormPanel implements EventDisplayer, RaceSelectio
                 return ""+object.dampenedTrueWindFromDeg;
             }
         };
-        grid = new Grid(2, 2); // first row: event/race selection; second row: wind display
+        grid = new Grid(3, 2); // first row: event/race selection; second row: wind source selection; third row: wind display
         trackedRacesTree = new RaceTreeView(stringConstants, /* multiselection */ false);
         trackedRacesTree.addRaceSelectionChangeListener(new RaceSelectionChangeListener() {
             @Override
@@ -108,7 +120,12 @@ public class WindPanel extends FormPanel implements EventDisplayer, RaceSelectio
         });
         grid.setWidget(0, 1, btnRefresh);
         windSettingPanel = new WindSettingPanel(sailingService, errorReporter, this, this);
-        grid.setWidget(1, 1, windSettingPanel);
+        HorizontalPanel windSourceSelectionPanel = new HorizontalPanel();
+        windSourceSelectionPanel.setSpacing(10);
+        windSourceSelectionPanel.add(new Label(stringConstants.windSource()));
+        windSourceSelectionPanel.add(windSourceSelection);
+        grid.setWidget(1, 0, windSourceSelectionPanel);
+        grid.setWidget(2, 1, windSettingPanel);
         grid.getCellFormatter().setVerticalAlignment(1, 1, HasVerticalAlignment.ALIGN_TOP);
         this.setWidget(grid);
     }
@@ -129,6 +146,7 @@ public class WindPanel extends FormPanel implements EventDisplayer, RaceSelectio
                         if (result != null) {
                             showWindForRace(result);
                             windSettingPanel.setEnabled(true);
+                            updateWindSources(result);
                         } else {
                             clearWindDisplay(); // no wind known for untracked race
                         }
@@ -142,15 +160,37 @@ public class WindPanel extends FormPanel implements EventDisplayer, RaceSelectio
                 });
     }
     
+    private void updateWindSources(WindInfoForRaceDAO result) {
+        int selectedIndex = -1;
+        for (String windSourceName : result.windTrackInfoByWindSourceName.keySet()) {
+            boolean found = false;
+            int i=0;
+            while (!found && i<windSourceSelection.getItemCount()) {
+                if (windSourceName.equals(windSourceSelection.getItemText(i))) {
+                    found = true;
+                } else {
+                    i++;
+                }
+            }
+            if (!found) {
+                windSourceSelection.addItem(windSourceName);
+            }
+            if (windSourceName.equals(result.selectedWindSourceName)) {
+                selectedIndex = i;
+            }
+        }
+        windSourceSelection.setSelectedIndex(selectedIndex);
+    }
+
     private void clearWindDisplay() {
         grid.setWidget(1, 0, null);
         windSettingPanel.setEnabled(false);
     }
 
     private void showWindForRace(WindInfoForRaceDAO result) {
-        grid.setWidget(1, 0, null);
+        grid.setWidget(2, 0, null);
         VerticalPanel windDisplay = new VerticalPanel();
-        grid.setWidget(1, 0, windDisplay);
+        grid.setWidget(2, 0, windDisplay);
         for (Map.Entry<String, WindTrackInfoDAO> e : result.windTrackInfoByWindSourceName.entrySet()) {
             Label windSourceLabel = new Label(stringConstants.windSource()+": "+e.getKey()+
                     ", "+stringConstants.dampeningInterval()+" "+e.getValue().dampeningIntervalInMilliseconds+"ms");
@@ -249,6 +289,26 @@ public class WindPanel extends FormPanel implements EventDisplayer, RaceSelectio
     private void fireRaceSelectionChanged(List<Triple<EventDAO, RegattaDAO, RaceDAO>> selectedRaces) {
         for (RaceSelectionChangeListener listener : raceSelectionChangeListeners) {
             listener.onRaceSelectionChange(selectedRaces);
+        }
+    }
+
+    private void setWindSource() {
+        List<Triple<EventDAO, RegattaDAO, RaceDAO>> selection = trackedRacesTree.getSelectedEventAndRace();
+        if (selection != null && !selection.isEmpty()) {
+            final Triple<EventDAO, RegattaDAO, RaceDAO> selectedRace = selection.get(0);
+            final String windSourceName = windSourceSelection.getItemText(windSourceSelection.getSelectedIndex());
+            sailingService.setWindSource(selectedRace.getA().name, selectedRace.getC().name,
+                    windSourceName, new AsyncCallback<Void>() {
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            errorReporter.reportError("Error while trying to set wind source for race "+
+                                    selectedRace.getC().name+" in event "+selectedRace.getA().name+" to "+
+                                    windSourceName+": "+caught.getMessage());
+                        }
+                        @Override
+                        public void onSuccess(Void result) {
+                        }
+                    });
         }
     }
 }

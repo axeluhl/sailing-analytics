@@ -46,4 +46,9 @@ public interface SailingService extends RemoteService {
     List<MarkDAO> getMarkPositions(String eventName, String raceName, Date date);
 
     List<QuickRankDAO> getQuickRanks(String eventName, String raceName, Date date) throws Exception;
+
+    WindInfoForRaceDAO getWindInfo(String eventName, String raceName, Date from, long millisecondsStepWidth,
+            int numberOfFixes, double latDeg, double lngDeg);
+
+    void setWindSource(String eventName, String raceName, String windSourceName);
 }
