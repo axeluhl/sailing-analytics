@@ -107,6 +107,7 @@ public class SmallWindHistoryPanel extends FormPanel implements TimeListener, Ra
     private void clearWindDisplay() {
         for (int i=0; i<windIndicators.length; i++) {
             windIndicators[i].setFromDeg(0);
+            windIndicators[i].setSpeedInKnots(0.0);
             windSpeedAndDirectionLabels[i].setHTML("?");
         }
     }

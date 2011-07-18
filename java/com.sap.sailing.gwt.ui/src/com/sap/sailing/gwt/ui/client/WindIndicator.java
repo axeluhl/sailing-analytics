@@ -11,8 +11,13 @@ import com.google.gwt.user.client.ui.Composite;
  */
 public class WindIndicator extends Composite {
 
+    private static final int CIRCLE_RADIUS_RATIO = 12;
+    private static final double STROKE_LENGTH_RATIO = 2.2;
+    private static final double RATIO_OF_STROKE_TO_USE_FOR_TICKS = 0.7;
+    private static final double TICK_LENGTH_RATIO = 15;
     private static final String RGB_WHITE = "rgb(255,255,255)";
     private static final String RGB_BLACK = "rgb(0,0,0)";
+    private static final int MAX_NUMBER_OF_TICKS = 6;
 
     private Canvas canvas;
     /**
@@ -22,7 +27,7 @@ public class WindIndicator extends Composite {
     /**
      * wind speed in knots
      */
-    private double speed = 0.0;
+    private double speedInKnots = 0.0;
     /**
      * cloud coverage from 0.0 to 1.0
      */
@@ -106,23 +111,25 @@ public class WindIndicator extends Composite {
         Context2d ctx = canvas.getContext2d();
 
         // draw the line
-        ctx.setLineWidth(4);
-        ctx.setLineCap(LineCap.ROUND);
+        ctx.setLineWidth(2);
+        ctx.setLineCap(LineCap.SQUARE);
         ctx.beginPath();
         ctx.moveTo(minSize / 2, minSize / 2);
         double dirRad = (fromDeg - 90) * Math.PI / 180;
-        ctx.arc(minSize / 2, minSize / 2, minSize / 3, dirRad, dirRad + 0.001 /* ok, not nice, but works */, false);
+        double strokeTipX = minSize/2 + (((double) minSize) / STROKE_LENGTH_RATIO)*Math.cos(dirRad);
+        double strokeTipY = minSize/2 + (((double) minSize) / STROKE_LENGTH_RATIO)*Math.sin(dirRad);
+        ctx.lineTo(strokeTipX, strokeTipY);
         ctx.stroke();
-        ctx.fill();
-        ctx.setStrokeStyle(RGB_BLACK);
-        ctx.closePath();
-        ctx.stroke();
-
+        for (int i=0; i<MAX_NUMBER_OF_TICKS; i++) {
+            drawTick(ctx, i, dirRad);
+        }
+        // move back to center
+        ctx.moveTo(minSize / 2, minSize / 2);
         // draw the circle
         ctx.setFillStyle(RGB_WHITE);
         ctx.setStrokeStyle(RGB_BLACK);
         // ctx.beginPath();
-        ctx.arc(minSize / 2, minSize / 2, minSize / 10, 0, 2 * Math.PI, true);
+        ctx.arc(minSize / 2, minSize / 2, minSize / CIRCLE_RADIUS_RATIO, 0, 2 * Math.PI, true);
         ctx.stroke();
         ctx.fill();
         // draw the cloud coverage
@@ -130,11 +137,55 @@ public class WindIndicator extends Composite {
         ctx.beginPath();
         ctx.moveTo(minSize / 2, minSize / 2);
         double cc = Math.max(0.0, Math.min(1.0, cloudCoverage));
-        ctx.arc(minSize / 2, minSize / 2, minSize / 10, -0.5 * Math.PI, (-0.5 + cc * 2) * Math.PI, false);
+        ctx.arc(minSize / 2, minSize / 2, minSize / CIRCLE_RADIUS_RATIO, -0.5 * Math.PI, (-0.5 + cc * 2) * Math.PI, false);
         ctx.fill();
 
-        // TODO render wind speed
-        double bf = getBeaufortFromKnots(this.speed);
+        setTitle();
+    }
+
+    private void setTitle() {
+        int speedInKnotsTimes10 = (int) (speedInKnots*10);
+        int forceTimes10 = (int) (getSpeedInBeaufort()*10);
+        setTitle(""+speedInKnotsTimes10/10+"."+speedInKnotsTimes10%10+"kn ("+
+                forceTimes10/10+"."+forceTimes10%10+"bft) from "+((int) getFromDeg())+" deg");
+    }
+
+    private void drawTick(Context2d ctx, int i, double dirRad) {
+        if (hasTick(i)) {
+            double[] tickStart = getTickStart(i, dirRad);
+            ctx.moveTo(tickStart[0], tickStart[1]);
+            double[] tickOffset = getTickOffset(i, dirRad);
+            ctx.lineTo(tickStart[0]+tickOffset[0], tickStart[1]+tickOffset[1]);
+            ctx.stroke();
+        }
+    }
+
+    private double[] getTickOffset(int i, double dirRad) {
+        double dirRadPlus90Deg = dirRad + Math.PI/2.;
+        int minSize = Math.min(canvas.getCoordinateSpaceWidth(), canvas.getCoordinateSpaceHeight());
+        double singleLength = minSize / TICK_LENGTH_RATIO;
+        int zeroOneOrTwo = getTickLength(i);
+        double length = singleLength * zeroOneOrTwo;
+        return new double[] { length*Math.cos(dirRadPlus90Deg), length*Math.sin(dirRadPlus90Deg) };
+    }
+
+    private int getTickLength(int i) {
+        int bft = (int) getSpeedInBeaufort();
+        int zeroOneOrTwo = (bft == 1 ? (i == 1 ? 1 : 0) : 2*(i+1)<=bft ? 2 : 2*i+1 == bft ? 1 : 0);
+        return zeroOneOrTwo;
+    }
+
+    private double[] getTickStart(int i, double dirRad) {
+        double minSize = (double) Math.min(canvas.getCoordinateSpaceWidth(), canvas.getCoordinateSpaceHeight());
+        double radius = minSize / STROKE_LENGTH_RATIO - i * minSize / 
+                STROKE_LENGTH_RATIO*RATIO_OF_STROKE_TO_USE_FOR_TICKS/MAX_NUMBER_OF_TICKS;
+        double tickStartX = minSize/2 + radius*Math.cos(dirRad);
+        double tickStartY = minSize/2 + radius*Math.sin(dirRad);
+        return new double[] { tickStartX, tickStartY };
+    }
+
+    private boolean hasTick(int i) {
+        return getTickLength(i) > 0;
     }
 
     /**
@@ -145,12 +196,12 @@ public class WindIndicator extends Composite {
      * @param knots speed in knots
      * @return wind speed in Beaufort
      */
-    private double getBeaufortFromKnots(double knots) {
-        return Math.exp(Math.log(knots*1.852/3.6 / 0.8360)*2/3);
+    private double getSpeedInBeaufort() {
+        return Math.exp(Math.log(speedInKnots*1.852/3.6 / 0.8360)*2/3);
     }
 
     public void setSpeedInKnots(Double speed) {
-        this.speed = speed;
+        this.speedInKnots = speed;
         this.updateRendering();
     }
 }
