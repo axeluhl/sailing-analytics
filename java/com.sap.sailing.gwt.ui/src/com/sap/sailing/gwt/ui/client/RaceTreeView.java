@@ -38,8 +38,8 @@ public class RaceTreeView extends FormPanel implements EventDisplayer, RaceSelec
             // scan event's races:
             for (RegattaDAO regatta : event.regattas) {
                 for (RaceDAO race : regatta.races) {
-                    if (trackedEventsModel.getSelectionModel().isSelected(event)
-                            || trackedEventsModel.getSelectionModel().isSelected(regatta)
+                    if ((multiSelection && trackedEventsModel.getSelectionModel().isSelected(event))
+                            || (multiSelection && trackedEventsModel.getSelectionModel().isSelected(regatta))
                             || trackedEventsModel.getSelectionModel().isSelected(race)) {
                         result.add(new Triple<EventDAO, RegattaDAO, RaceDAO>(event, regatta, race));
                     }
