@@ -7,6 +7,8 @@ import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.TimePoint;
 
 public interface TrackedLeg {
+    enum LegType { UPWIND, DOWNWIND, REACHING };
+    
     Leg getLeg();
     
     Iterable<TrackedLegOfCompetitor> getTrackedLegsOfCompetitors();
@@ -20,6 +22,8 @@ public interface TrackedLeg {
      * collinear with the current wind's bearing.
      */
     boolean isUpOrDownwindLeg(TimePoint at) throws NoWindException;
+    
+    LegType getLegType(TimePoint at) throws NoWindException;
 
     /**
      * Computes the ranks of all competitors in this leg in one sweep. There are two advantages of this operation over

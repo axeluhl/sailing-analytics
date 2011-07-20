@@ -39,6 +39,7 @@ import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
+import com.sap.sailing.domain.tracking.NoWindException;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
@@ -292,7 +293,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     
     @Override
     public WindInfoForRaceDAO getWindInfo(String eventName, String raceName, Date from,
-            long millisecondsStepWidth, int numberOfFixes, double latDeg, double lngDeg) {
+            long millisecondsStepWidth, int numberOfFixes, double latDeg, double lngDeg) throws NoWindException {
         Position position = new DegreePosition(latDeg, lngDeg);
         WindInfoForRaceDAO result = null;
         Event event = service.getEventByName(eventName);
@@ -317,6 +318,8 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                     TimePoint timePoint = fromTimePoint;
                     for (int i=0; i<numberOfFixes; i++) {
                         Wind wind = windTrack.getEstimatedWind(position, timePoint);
+                        // TODO compare to see how close we get
+                        Wind windEstimatedFromBoatCoarses = trackedRace.getEstimatedWindDirection(position, timePoint);
                         if (wind != null) {
                             WindDAO windDAO = createWindDAO(wind, windTrack);
                             windTrackInfoDAO.windFixes.add(windDAO);

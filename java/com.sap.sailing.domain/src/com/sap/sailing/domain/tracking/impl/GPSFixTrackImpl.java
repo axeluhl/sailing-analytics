@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.NavigableSet;
 
+import com.sap.sailing.domain.base.Bearing;
 import com.sap.sailing.domain.base.Distance;
 import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.Speed;
@@ -13,6 +14,7 @@ import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
+import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.base.impl.NauticalMileDistance;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
@@ -271,6 +273,15 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
                 return (speedToPrevious.compareTo(maxSpeed) <= 0 || speedToNext.compareTo(maxSpeed) <= 0); 
             }
         };
+    }
+
+    @Override
+    public boolean hasDirectionChange(TimePoint at, double minimumDegreeDifference) {
+        TimePoint start = new MillisecondsTimePoint(at.asMillis()-getMillisecondsOverWhichToAverageSpeed()/2);
+        TimePoint end = new MillisecondsTimePoint(at.asMillis()+getMillisecondsOverWhichToAverageSpeed()/2);
+        Bearing bearingAtStart = getEstimatedSpeed(start).getBearing();
+        Bearing bearingAtEnd = getEstimatedSpeed(end).getBearing();
+        return Math.abs(bearingAtStart.getDegrees() - bearingAtEnd.getDegrees()) > minimumDegreeDifference;
     }
 
 }

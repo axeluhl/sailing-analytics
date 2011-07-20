@@ -115,9 +115,9 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener<Competitor
         }
         return result;
     }
-
+    
     @Override
-    public boolean isUpOrDownwindLeg(TimePoint at) throws NoWindException {
+    public LegType getLegType(TimePoint at) throws NoWindException {
         Wind wind = getWindOnLeg(at);
         if (wind == null) {
             throw new NoWindException("Need to know wind direction to determine whether leg "+getLeg()+
@@ -130,13 +130,22 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener<Competitor
                 Position endBuoyPos = getTrackedRace().getTrack(endBuoy).getEstimatedPosition(at, false);
                 Bearing legBearing = startBuoyPos.getBearingGreatCircle(endBuoyPos);
                 double deltaDeg = legBearing.getDegrees() - wind.getBearing().getDegrees();
-                double deltaDegOpposite = legBearing.getDegrees() - wind.getBearing().reverse().getDegrees();
-                if (Math.min(Math.abs(deltaDeg), Math.abs(deltaDegOpposite)) < UPWIND_DOWNWIND_TOLERANCE_IN_DEG) {
-                    return true;
+                if (Math.abs(deltaDeg) < UPWIND_DOWNWIND_TOLERANCE_IN_DEG) {
+                    return LegType.DOWNWIND;
+                } else {
+                    double deltaDegOpposite = legBearing.getDegrees() - wind.getBearing().reverse().getDegrees();
+                    if (Math.abs(deltaDegOpposite) < UPWIND_DOWNWIND_TOLERANCE_IN_DEG) {
+                        return LegType.UPWIND;
+                    }
                 }
             }
         }
-        return false;
+        return LegType.REACHING;
+    }
+
+    @Override
+    public boolean isUpOrDownwindLeg(TimePoint at) throws NoWindException {
+        return getLegType(at) != LegType.REACHING;
     }
 
     private Wind getWindOnLeg(TimePoint at) {

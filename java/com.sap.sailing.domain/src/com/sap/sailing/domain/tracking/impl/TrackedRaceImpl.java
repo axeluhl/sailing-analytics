@@ -11,6 +11,7 @@ import java.util.NavigableSet;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.logging.Logger;
 
+import com.sap.sailing.domain.base.Bearing;
 import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseListener;
@@ -18,6 +19,7 @@ import com.sap.sailing.domain.base.Distance;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
@@ -29,6 +31,7 @@ import com.sap.sailing.domain.tracking.NoWindError;
 import com.sap.sailing.domain.tracking.NoWindException;
 import com.sap.sailing.domain.tracking.TrackedEvent;
 import com.sap.sailing.domain.tracking.TrackedLeg;
+import com.sap.sailing.domain.tracking.TrackedLeg.LegType;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
@@ -38,6 +41,8 @@ import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.util.Util;
 
 public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
+    private static final double MANEUVER_ANGLE_THRESHOLD = /* minimumDegreeDifference */ 30.;
+
     private static final Logger logger = Logger.getLogger(TrackedRaceImpl.class.getName());
     
     // TODO observe the race course; if it changes, update leg structures; consider fine-grained update events that tell what changed
@@ -475,4 +480,29 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         trackedLegs.remove(toRemove);
         updated(/* time point*/ null);
     }
+
+    @Override
+    public Wind getEstimatedWindDirection(Position position, TimePoint timePoint) throws NoWindException {
+        Map<LegType, List<Bearing>> bearings = new HashMap<TrackedLeg.LegType, List<Bearing>>();
+        for (LegType legType : LegType.values()) {
+            bearings.put(legType, new ArrayList<Bearing>());
+        }
+        for (Competitor competitor : getRace().getCompetitors()) {
+            TrackedLegOfCompetitor leg = getTrackedLeg(competitor, timePoint);
+            if (leg != null) {
+                TrackedLeg trackedLeg = getTrackedLeg(leg.getLeg());
+                LegType legType = trackedLeg.getLegType(timePoint);
+                if (legType != LegType.REACHING) {
+                    GPSFixTrack<Competitor, GPSFixMoving> track = getTrack(competitor);
+                    if (!track.hasDirectionChange(timePoint, MANEUVER_ANGLE_THRESHOLD)) {
+                        SpeedWithBearing speedWithBearing = track.getEstimatedSpeed(timePoint);
+                        bearings.get(legType).add(speedWithBearing.getBearing());
+                    }
+                }
+            }
+        }
+        return null;
+    }
+    
+    
 }

@@ -66,5 +66,12 @@ public interface GPSFixTrack<ItemType, FixType extends GPSFix> extends Track<Fix
     SpeedWithBearing getEstimatedSpeed(TimePoint at);
 
     long getMillisecondsOverWhichToAverageSpeed();
+    
+    /**
+     * If and only if the {@link #getFixesIterator(TimePoint, boolean) smoothened track} has a direction change of at
+     * least <code>minimumDegreeDifference</code> degrees within {@link #getMillisecondsOverWhichToAverageSpeed()}
+     * milliseconds around the <code>at</code> time point, this method returns <code>true</code>.
+     */
+    boolean hasDirectionChange(TimePoint at, double minimumDegreeDifference);
 
 }

@@ -5,6 +5,13 @@ Axel
    with a not-maximal time point requires some shifting but should be the rare exception in all our
    use cases.
 
+ - allow for tail length customization
+
+ - display advantage line in Google map
+
+ - calculate wind based on boat angles: find two boats that are either both on an upwind
+   or both on a downwind leg; then average their courses.
+
  - Need to adjust PartialNavigableSetView to work on any ordered sequential structure
 
  - Make threshold for track smoothening configurable. Currently, we have millisecondsOverWhichToAverage.

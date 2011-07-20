@@ -323,6 +323,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
             for (Map.Entry<CompetitorDAO, Marker> boatMarker : boatMarkers.entrySet()) {
                 map.removeOverlay(boatMarker.getValue());
             }
+            // TODO instead of clearing the tails entirely, try to incrementally update
             tails.clear();
             boatMarkers.clear();
             for (final Map.Entry<CompetitorDAO, List<GPSFixDAO>> tail : result.entrySet()) {
