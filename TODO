@@ -42,6 +42,16 @@ Axel
    * consider a per-user preferences page where leaderboard columns can be personalized at runtime
    * mark position entry capability, supporting "lost mark tracker" use case
 
+ - Refactor the way the DomainFactory concept works, under the assumption that we'll have another
+   connector for VirtualEye. Our domain model including the Tracked... stuff should remain in place.
+   Therefore, the link between the domain objects RaceDefinition, Leg, Course and Event with their
+   tracking counterparts such as TrackedRace, TrackedLeg, TrackedLegOfCompetitor etc. should remain
+   unchanged. However, the TracTrac-specific things such as the mapping from TracTrac's client objects
+   (Competitor, Race, Event, Route, ControlPoint) to our domain model counterparts needs to be specific
+   to the connector. Ideally, the SailingServiceImpl wouldn't have to know anything about TracTrac.
+   Clarify also, where in the com.sap.sailing.server bundle we need dependencies on particular
+   tracking connectors.
+
  - Distribute wind data to their respective races; capture expedition wind not by race/event anymore because
    wind is already recorded by time and position; when seeking wind information, look for information
    closest in time/space; consider throwing NoWindException if certain thresholds are crossed
