@@ -19,9 +19,10 @@ import com.sap.sailing.domain.base.Distance;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.RaceDefinition;
-import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.base.impl.DegreeBearingImpl;
+import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
@@ -483,9 +484,9 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     @Override
     public Wind getEstimatedWindDirection(Position position, TimePoint timePoint) throws NoWindException {
-        Map<LegType, List<Bearing>> bearings = new HashMap<TrackedLeg.LegType, List<Bearing>>();
+        Map<LegType, BearingCluster[]> bearings = new HashMap<TrackedLeg.LegType, BearingCluster[]>();
         for (LegType legType : LegType.values()) {
-            bearings.put(legType, new ArrayList<Bearing>());
+            bearings.put(legType, new BearingCluster[2]);
         }
         for (Competitor competitor : getRace().getCompetitors()) {
             TrackedLegOfCompetitor leg = getTrackedLeg(competitor, timePoint);
@@ -495,13 +496,25 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                 if (legType != LegType.REACHING) {
                     GPSFixTrack<Competitor, GPSFixMoving> track = getTrack(competitor);
                     if (!track.hasDirectionChange(timePoint, MANEUVER_ANGLE_THRESHOLD)) {
-                        SpeedWithBearing speedWithBearing = track.getEstimatedSpeed(timePoint);
-                        bearings.get(legType).add(speedWithBearing.getBearing());
+                        Bearing bearing = track.getEstimatedSpeed(timePoint).getBearing();
+                        BearingCluster[] bearingClusters = bearings.get(legType);
+                        // add to the cluster "closest" to the fix
+                        if (bearingClusters[0].getDifferenceFromAverage(bearing) <= bearingClusters[1].getDifferenceFromAverage(bearing)) {
+                            bearingClusters[0].add(bearing);
+                        } else {
+                            bearingClusters[1].add(bearing);
+                        }
                     }
                 }
             }
         }
-        return null;
+        Bearing upwindAverage = new DegreeBearingImpl((bearings.get(LegType.UPWIND)[0].getAverage().getDegrees() + bearings
+                .get(LegType.UPWIND)[1].getAverage().getDegrees()) / 2.0);
+        Bearing downwindAverage = new DegreeBearingImpl((bearings.get(LegType.DOWNWIND)[0].getAverage().getDegrees() + bearings
+                .get(LegType.DOWNWIND)[1].getAverage().getDegrees()) / 2.0);
+        return new WindImpl(null, timePoint,
+                new KnotSpeedWithBearingImpl(/* speedInKnots */ 1,
+                        new DegreeBearingImpl((downwindAverage.getDegrees() + upwindAverage.reverse().getDegrees())/2.0)));
     }
     
     
