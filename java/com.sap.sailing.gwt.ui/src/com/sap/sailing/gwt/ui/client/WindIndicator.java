@@ -147,7 +147,7 @@ public class WindIndicator extends Composite {
         int speedInKnotsTimes10 = (int) (speedInKnots*10);
         int forceTimes10 = (int) (getSpeedInBeaufort()*10);
         int intFromDeg = (int) getFromDeg();
-        setTitle(""+speedInKnotsTimes10/10+"."+speedInKnotsTimes10%10+"kn ("+
+        setTitle(""+speedInKnotsTimes10/10+"."+speedInKnotsTimes10%10+"kts ("+
                 forceTimes10/10+"."+forceTimes10%10+"bft) from "+(intFromDeg<10?"00":intFromDeg<100?"0":"")+intFromDeg+" deg");
     }
 
