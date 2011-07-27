@@ -7,9 +7,7 @@ import static org.junit.Assert.assertNull;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -37,13 +35,10 @@ import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
  * @author Axel Uhl (D043530)
  *
  */
-public class TrackSmootheningTest extends AbstractTracTracLiveTest {
+public class TrackSmootheningTest extends StoredTrackBasedTest {
     private final Map<Competitor, DynamicTrack<Competitor, GPSFixMoving>> tracks;
 
     public TrackSmootheningTest() throws URISyntaxException, MalformedURLException {
-        super(new URL("http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/clientparams.php?event=event_20110609_KielerWoch&race=357c700a-9d9a-11e0-85be-406186cbf87c"),
-            tractracTunnel ? new URI("tcp://"+tractracTunnelHost+":1520") : new URI("tcp://germanmaster.traclive.dk:1520"),
-                    tractracTunnel ? new URI("tcp://"+tractracTunnelHost+":1521") : new URI("tcp://germanmaster.traclive.dk:1521"));
         tracks = new HashMap<Competitor, DynamicTrack<Competitor,GPSFixMoving>>();
     }
     
@@ -66,7 +61,7 @@ public class TrackSmootheningTest extends AbstractTracTracLiveTest {
                 "Saugmann", "Schomäker", "van Wonterghem" }) {
             Competitor c = new CompetitorImpl(competitorName, competitorName, /* team */ null, new BoatImpl(competitorName,
                     new BoatClassImpl("505")));
-            DynamicTrack<Competitor, GPSFixMoving> track = readTrack(c);
+            DynamicTrack<Competitor, GPSFixMoving> track = readTrack(c, "Kieler Woche");
             if (track != null) {
                 tracks.put(c, track);
             }

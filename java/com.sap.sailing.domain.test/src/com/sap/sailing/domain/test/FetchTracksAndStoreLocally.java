@@ -140,7 +140,7 @@ public class FetchTracksAndStoreLocally extends AbstractTracTracLiveTest {
         for (Map.Entry<Competitor, DynamicTrack<Competitor, GPSFixMoving>> competitorAndTrack : tracks.entrySet()) {
             Competitor competitor = competitorAndTrack.getKey();
             DynamicTrack<Competitor, GPSFixMoving> track = competitorAndTrack.getValue();
-            storeTrack(competitor, track);
+            storeTrack(competitor, track, getEvent().getName());
         }
     }
 
