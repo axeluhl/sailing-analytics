@@ -10,32 +10,23 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
 
-import com.maptrack.client.io.TypeController;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Distance;
-import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Speed;
 import com.sap.sailing.domain.base.TimePoint;
+import com.sap.sailing.domain.base.impl.BoatClassImpl;
+import com.sap.sailing.domain.base.impl.BoatImpl;
+import com.sap.sailing.domain.base.impl.CompetitorImpl;
 import com.sap.sailing.domain.tracking.DynamicTrack;
-import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
-import com.sap.sailing.domain.tracking.RaceListener;
-import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
-import com.sap.sailing.domain.tractracadapter.DomainFactory;
-import com.sap.sailing.domain.tractracadapter.Receiver;
-import com.sap.sailing.domain.tractracadapter.ReceiverType;
-import com.sap.sailing.domain.tractracadapter.impl.DomainFactoryImpl;
 
 /**
  * Receives GPS tracks from a race. One test (if not ignored) stores these tracks in the resources/
@@ -47,10 +38,7 @@ import com.sap.sailing.domain.tractracadapter.impl.DomainFactoryImpl;
  *
  */
 public class TrackSmootheningTest extends AbstractTracTracLiveTest {
-    final private Object semaphor = new Object();
     private final Map<Competitor, DynamicTrack<Competitor, GPSFixMoving>> tracks;
-    private boolean tracksLoaded;
-    private DomainFactory domainFactory;
 
     public TrackSmootheningTest() throws URISyntaxException, MalformedURLException {
         super(new URL("http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/clientparams.php?event=event_20110609_KielerWoch&race=357c700a-9d9a-11e0-85be-406186cbf87c"),
@@ -66,49 +54,21 @@ public class TrackSmootheningTest extends AbstractTracTracLiveTest {
      * objects and appended to the {@link DynamicTrackedRace}s.
      */
     @Before
-    public void setupListener() throws InterruptedException {
-        domainFactory = new DomainFactoryImpl();
-        List<TypeController> listeners = new ArrayList<TypeController>();
-        Event event = domainFactory.createEvent(getEvent());
-        DynamicTrackedEvent trackedEvent = domainFactory.getOrCreateTrackedEvent(event);
-        trackedEvent.addRaceListener(new RaceListener() {
-            @Override
-            public void raceAdded(TrackedRace trackedRace) {
-                try {
-                    loadTracks();
-                    tracksLoaded = true;
-                    synchronized (semaphor) {
-                        semaphor.notifyAll();
-                    }
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            }
-            @Override
-            public void raceRemoved(TrackedRace trackedRace) {
-            }
-        });
-        for (Receiver receiver : domainFactory.getUpdateReceivers(trackedEvent, getEvent(), EmptyWindStore.INSTANCE, this)) {
-            for (TypeController raceListener : receiver.getTypeControllers()) {
-                listeners.add(raceListener);
-            }
-        }
-        Iterable<Receiver> updateReceivers = domainFactory.getUpdateReceivers(trackedEvent, getEvent(),
-                EmptyWindStore.INSTANCE, this, ReceiverType.RACECOURSE, ReceiverType.RACESTARTFINISH);
-        addListenersForStoredDataAndStartController(updateReceivers);
-        synchronized (semaphor) {
-            while (!tracksLoaded) {
-                semaphor.wait();
-            }
-        }
+    public void setupListener() throws InterruptedException, FileNotFoundException, IOException {
+        loadTracks();
     }
 
     private void loadTracks() throws FileNotFoundException, IOException {
-        for (com.tractrac.clientmodule.Competitor c : getEvent().getCompetitorList()) {
-            Competitor competitor = domainFactory.getCompetitor(c);
-            DynamicTrack<Competitor, GPSFixMoving> track = readTrack(competitor);
+        for (String competitorName : new String[] { "Achterberg", "Anton", "Barop", "Birkner", "Böger", "Böhm",
+                "boite", "Bøjland", "Brill", "Broise", "Buhl", "Dasenbrook", "de Lisle", "Dr.Plattner", "Feldmann",
+                "Findel", "Fischer", "Goedeking", "Gosch", "Hastenpflug", "Henge", "Hunger", "Kellner", "Kevin",
+                "Köchlin", "Kraft", "Lehmann", "Lietz", "Menge", "Neulen", "Pleßmann", "Rasenack", "Reincke",
+                "Saugmann", "Schomäker", "van Wonterghem" }) {
+            Competitor c = new CompetitorImpl(competitorName, competitorName, /* team */ null, new BoatImpl(competitorName,
+                    new BoatClassImpl("505")));
+            DynamicTrack<Competitor, GPSFixMoving> track = readTrack(c);
             if (track != null) {
-                tracks.put(competitor, track);
+                tracks.put(c, track);
             }
         }
     }
