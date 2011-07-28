@@ -486,7 +486,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     public Wind getEstimatedWindDirection(Position position, TimePoint timePoint) throws NoWindException {
         Map<LegType, BearingCluster[]> bearings = new HashMap<TrackedLeg.LegType, BearingCluster[]>();
         for (LegType legType : LegType.values()) {
-            bearings.put(legType, new BearingCluster[2]);
+            bearings.put(legType, new BearingCluster[] { new BearingCluster(), new BearingCluster() });
         }
         for (Competitor competitor : getRace().getCompetitors()) {
             TrackedLegOfCompetitor leg = getTrackedLeg(competitor, timePoint);

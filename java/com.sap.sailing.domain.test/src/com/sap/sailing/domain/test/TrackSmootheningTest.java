@@ -18,9 +18,6 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Distance;
 import com.sap.sailing.domain.base.Speed;
 import com.sap.sailing.domain.base.TimePoint;
-import com.sap.sailing.domain.base.impl.BoatClassImpl;
-import com.sap.sailing.domain.base.impl.BoatImpl;
-import com.sap.sailing.domain.base.impl.CompetitorImpl;
 import com.sap.sailing.domain.tracking.DynamicTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
@@ -50,22 +47,7 @@ public class TrackSmootheningTest extends StoredTrackBasedTest {
      */
     @Before
     public void setupListener() throws InterruptedException, FileNotFoundException, IOException {
-        loadTracks();
-    }
-
-    private void loadTracks() throws FileNotFoundException, IOException {
-        for (String competitorName : new String[] { "Achterberg", "Anton", "Barop", "Birkner", "Böger", "Böhm",
-                "boite", "Bøjland", "Brill", "Broise", "Buhl", "Dasenbrook", "de Lisle", "Dr.Plattner", "Feldmann",
-                "Findel", "Fischer", "Goedeking", "Gosch", "Hastenpflug", "Henge", "Hunger", "Kellner", "Kevin",
-                "Köchlin", "Kraft", "Lehmann", "Lietz", "Menge", "Neulen", "Pleßmann", "Rasenack", "Reincke",
-                "Saugmann", "Schomäker", "van Wonterghem" }) {
-            Competitor c = new CompetitorImpl(competitorName, competitorName, /* team */ null, new BoatImpl(competitorName,
-                    new BoatClassImpl("505")));
-            DynamicTrack<Competitor, GPSFixMoving> track = readTrack(c, "Kieler Woche");
-            if (track != null) {
-                tracks.put(c, track);
-            }
-        }
+        tracks.putAll(loadTracks());
     }
 
     protected String getExpectedEventName() {

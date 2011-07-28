@@ -35,6 +35,6 @@ public class BearingCluster {
      * If there is no bearing stored in this cluster yet, 0.0 is returned.
      */
     public double getDifferenceFromAverage(Bearing bearing) {
-        return Math.abs(sumDegrees / bearings.size() - bearing.getDegrees());
+        return bearings.size() == 0 ? 0.0 : Math.abs(sumDegrees / bearings.size() - bearing.getDegrees());
     }
 }

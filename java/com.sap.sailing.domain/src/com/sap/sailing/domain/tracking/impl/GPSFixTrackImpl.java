@@ -281,6 +281,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         TimePoint end = new MillisecondsTimePoint(at.asMillis()+getMillisecondsOverWhichToAverageSpeed()/2);
         Bearing bearingAtStart = getEstimatedSpeed(start).getBearing();
         Bearing bearingAtEnd = getEstimatedSpeed(end).getBearing();
+        // TODO also need to analyze the (smoothened) directions in between; example: two tacks within averaging interval
         return Math.abs(bearingAtStart.getDegrees() - bearingAtEnd.getDegrees()) > minimumDegreeDifference;
     }
 
