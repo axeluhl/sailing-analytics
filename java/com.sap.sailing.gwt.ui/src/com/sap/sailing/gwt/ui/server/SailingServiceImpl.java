@@ -318,8 +318,6 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                     TimePoint timePoint = fromTimePoint;
                     for (int i=0; i<numberOfFixes; i++) {
                         Wind wind = windTrack.getEstimatedWind(position, timePoint);
-                        // TODO compare to see how close we get
-                        Wind windEstimatedFromBoatCoarses = trackedRace.getEstimatedWindDirection(position, timePoint);
                         if (wind != null) {
                             WindDAO windDAO = createWindDAO(wind, windTrack);
                             windTrackInfoDAO.windFixes.add(windDAO);
