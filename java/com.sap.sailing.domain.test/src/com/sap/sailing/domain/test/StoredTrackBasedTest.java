@@ -11,6 +11,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,9 +21,11 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.Person;
 import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.SpeedWithBearing;
+import com.sap.sailing.domain.base.Team;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
@@ -36,7 +39,9 @@ import com.sap.sailing.domain.base.impl.EventImpl;
 import com.sap.sailing.domain.base.impl.GateImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
+import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.tracking.DynamicTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
@@ -149,7 +154,9 @@ public abstract class StoredTrackBasedTest {
                 "Findel", "Fischer", "Goedeking", "Gosch", "Hastenpflug", "Henge", "Hunger", "Kellner", "Kevin",
                 "Köchlin", "Kraft", "Lehmann", "Lietz", "Menge", "Neulen", "Pleßmann", "Rasenack", "Reincke",
                 "Saugmann", "Schomäker", "van Wonterghem" }) {
-            Competitor c = new CompetitorImpl(competitorName, competitorName, /* team */ null, new BoatImpl(competitorName,
+            Person p = new PersonImpl(competitorName, /* nationality */ null, /* dateOfBirth */ null, /* description */ null);
+            Team t = new TeamImpl(competitorName, Collections.singleton(p), /* coach */ null);
+            Competitor c = new CompetitorImpl(competitorName, competitorName, t, new BoatImpl(competitorName,
                     new BoatClassImpl("505")));
             DynamicTrack<Competitor, GPSFixMoving> track = readTrack(c, "Kieler Woche");
             if (track != null) {
