@@ -58,14 +58,25 @@ public class LeaderboardTests {
     
     @Test
     public void simpleLeaderboardTest() throws NoWindException {
-        setupRaces(4, 9);
+        testLeaderboard(0, 9, 3, 6);
+        testLeaderboard(2, 9, 3, 6);
+        testLeaderboard(3, 9, 3, 6);
+        testLeaderboard(4, 9, 3, 6);
+        testLeaderboard(6, 9, 3, 6);
+        testLeaderboard(7, 9, 3, 6);
+        testLeaderboard(8, 9, 3, 6);
+    }
+
+    protected void testLeaderboard(int numberOfStartedRaces, int numberOfNotStartedRaces, int firstDiscardingThreshold,
+            int secondDiscardingThreshold) throws NoWindException {
+        setupRaces(numberOfStartedRaces, numberOfNotStartedRaces);
         Leaderboard leaderboard = new LeaderboardImpl(new ScoreCorrection() {
             @Override
             public int getCorrectedScore(int uncorrectedScore, Competitor competitor, TrackedRace trackedRace,
                     TimePoint timePoint) {
                 return uncorrectedScore;
             }
-        }, new ResultDiscardingRuleImpl(new int[] { 3, 6 }));
+        }, new ResultDiscardingRuleImpl(new int[] { firstDiscardingThreshold, secondDiscardingThreshold }));
         for (TrackedRace race : testRaces) {
             leaderboard.addRace(race);
         }
@@ -77,7 +88,10 @@ public class LeaderboardTests {
                 assertEquals(rank, leaderboard.getNetPoints(competitor, race, now));
                 // One race is discarded because four races were started, and for [3-6) there can be one race discarded.
                 // The discarded race is the worst from those started, so the one with rank 4.
-                assertEquals(rank == 4 ? 0 : rank, leaderboard.getTotalPoints(competitor, race, now));
+                int expectedNumberOfDiscardedRaces =
+                        numberOfStartedRaces < firstDiscardingThreshold ? 0 : numberOfStartedRaces < secondDiscardingThreshold ? 1 : 2;
+                assertEquals(rank > numberOfStartedRaces - expectedNumberOfDiscardedRaces ? 0 : rank,
+                        leaderboard.getTotalPoints(competitor, race, now));
             } else {
                 assertEquals(0, leaderboard.getTrackedPoints(competitor, race, now));
                 assertEquals(0, leaderboard.getNetPoints(competitor, race, now));

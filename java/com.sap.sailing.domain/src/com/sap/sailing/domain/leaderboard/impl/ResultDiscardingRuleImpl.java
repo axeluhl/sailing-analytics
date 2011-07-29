@@ -71,7 +71,7 @@ public class ResultDiscardingRuleImpl implements ResultDiscardingRule {
         }
         numberOfResultsToDiscard = 0;
         while (numberOfResultsToDiscard < discardIndexResultsStartingWithHowManyRaces.length
-                && discardIndexResultsStartingWithHowManyRaces[numberOfResultsToDiscard] < numberOfStartedRaces) {
+                && discardIndexResultsStartingWithHowManyRaces[numberOfResultsToDiscard] <= numberOfStartedRaces) {
             numberOfResultsToDiscard++;
         }
         return numberOfResultsToDiscard;
