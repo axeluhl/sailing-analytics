@@ -27,7 +27,6 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         this.database = database;
     }
 
-    @Override
     public DBObject storeWind(Wind wind) {
         DBObject result = new BasicDBObject();
         storePositioned(wind, result);
@@ -67,12 +66,10 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         windTrack.addListener(new MongoWindListener(trackedEvent, trackedRace, windSource, this, database));
     }
 
-    @Override
     public DBCollection getWindTrackCollection() {
         return database.getCollection(CollectionNames.WIND_TRACKS.name());
     }
 
-    @Override
     public DBObject storeWindTrackEntry(Event event, RaceDefinition race, WindSource windSource, Wind wind) {
         BasicDBObject result = new BasicDBObject();
         result.put(FieldNames.EVENT_NAME.name(), event.getName());

@@ -13,7 +13,7 @@ public class MongoWindListener implements com.sap.sailing.domain.tracking.WindLi
     private final TrackedEvent trackedEvent;
     private final TrackedRace trackedRace;
     private final WindSource windSource;
-    private final MongoObjectFactory mongoObjectFactory;
+    private final MongoObjectFactoryImpl mongoObjectFactory;
     private final DBCollection windTracksCollection;
 
     public MongoWindListener(TrackedEvent trackedEvent, TrackedRace trackedRace, WindSource windSource,
@@ -22,8 +22,8 @@ public class MongoWindListener implements com.sap.sailing.domain.tracking.WindLi
         this.trackedEvent = trackedEvent;
         this.trackedRace = trackedRace;
         this.windSource = windSource;
-        this.mongoObjectFactory = mongoObjectFactory;
-        this.windTracksCollection = mongoObjectFactory.getWindTrackCollection();
+        this.mongoObjectFactory = (MongoObjectFactoryImpl) mongoObjectFactory;
+        this.windTracksCollection = this.mongoObjectFactory.getWindTrackCollection();
     }
 
     @Override

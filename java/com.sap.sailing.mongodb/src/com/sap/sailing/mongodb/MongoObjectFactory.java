@@ -1,12 +1,10 @@
 package com.sap.sailing.mongodb;
 
-import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.tracking.TrackedEvent;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindSource;
 import com.sap.sailing.domain.tractracadapter.TracTracConfiguration;
 import com.sap.sailing.mongodb.impl.MongoObjectFactoryImpl;
@@ -21,8 +19,6 @@ import com.sap.sailing.mongodb.impl.MongoWindStoreFactoryImpl;
 public interface MongoObjectFactory {
     MongoObjectFactory INSTANCE = new MongoObjectFactoryImpl(MongoWindStoreFactoryImpl.getDefaultInstance().getDB());
 
-    DBObject storeWind(Wind wind);
-
     /**
      * Registers for changes of the wind coming from <code>windSource</code> on the <code>trackedRace</code>. Each
      * update received will be appended to the MongoDB and can later be retrieved. The key used to identify the race is
@@ -30,10 +26,6 @@ public interface MongoObjectFactory {
      */
     void addWindTrackDumper(TrackedEvent trackedEvent, TrackedRace trackedRace, WindSource windSource);
 
-    DBCollection getWindTrackCollection();
-
-    DBObject storeWindTrackEntry(Event event, RaceDefinition race, WindSource windSource, Wind wind);
-    
     /**
      * Inserts/updates based on the {@link TracTracConfiguration#getName() name}. Any equally-named
      * config previously contained in the DB will be replaced / updated. Afterwards,

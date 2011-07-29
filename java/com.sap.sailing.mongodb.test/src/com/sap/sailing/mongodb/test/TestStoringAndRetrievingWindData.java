@@ -24,6 +24,7 @@ import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.mongodb.DomainObjectFactory;
 import com.sap.sailing.mongodb.MongoObjectFactory;
 import com.sap.sailing.mongodb.impl.DomainObjectFactoryImpl;
+import com.sap.sailing.mongodb.impl.MongoObjectFactoryImpl;
 import com.sap.sailing.mongodb.impl.MongoWindStoreFactoryImpl;
 
 public class TestStoringAndRetrievingWindData implements MongoDBTest {
@@ -86,7 +87,7 @@ public class TestStoringAndRetrievingWindData implements MongoDBTest {
         Wind wind = new WindImpl(new DegreePosition(123, 45), now, new KnotSpeedWithBearingImpl(10.4,
                 new DegreeBearingImpl(355.5)));
         {
-            DBObject windForMongo = MongoObjectFactory.INSTANCE.storeWind(wind);
+            DBObject windForMongo = ((MongoObjectFactoryImpl) MongoObjectFactory.INSTANCE).storeWind(wind);
             DBCollection coll = db.getCollection(WIND_TEST_COLLECTION);
             coll.insert(windForMongo);
         }
