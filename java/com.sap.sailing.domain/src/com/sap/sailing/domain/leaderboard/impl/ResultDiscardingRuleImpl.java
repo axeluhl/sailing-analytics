@@ -48,6 +48,9 @@ public class ResultDiscardingRuleImpl implements ResultDiscardingRule {
                     }
                 }
             });
+            for (TrackedRace race : races) {
+                sortedRaces.add(race);
+            }
             int i=0;
             Iterator<TrackedRace> badRacesIter = sortedRaces.descendingIterator();
             while (badRacesIter.hasNext() && i<resultsToDiscard) {
@@ -66,14 +69,10 @@ public class ResultDiscardingRuleImpl implements ResultDiscardingRule {
                 numberOfStartedRaces++;
             }
         }
-        if (numberOfStartedRaces >= discardIndexResultsStartingWithHowManyRaces.length) {
-            numberOfResultsToDiscard = discardIndexResultsStartingWithHowManyRaces.length;
-        } else {
-             numberOfResultsToDiscard = 0;
-            while (numberOfResultsToDiscard < discardIndexResultsStartingWithHowManyRaces.length
-                    && discardIndexResultsStartingWithHowManyRaces[numberOfResultsToDiscard] < numberOfStartedRaces) {
-                 numberOfResultsToDiscard++;
-             }
+        numberOfResultsToDiscard = 0;
+        while (numberOfResultsToDiscard < discardIndexResultsStartingWithHowManyRaces.length
+                && discardIndexResultsStartingWithHowManyRaces[numberOfResultsToDiscard] < numberOfStartedRaces) {
+            numberOfResultsToDiscard++;
         }
         return numberOfResultsToDiscard;
     }

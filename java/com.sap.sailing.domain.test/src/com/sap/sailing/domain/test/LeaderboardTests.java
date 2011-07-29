@@ -41,7 +41,7 @@ public class LeaderboardTests {
     public void setupRaces(int numberOfStartedRaces, int numberOfNotStartedRaces) {
         testRaces = new HashSet<TrackedRace>();
         for (int i=0; i<numberOfStartedRaces; i++) {
-            TrackedRace r = new MockedTrackedRaceWithFixedRank(i, /* started */ true);
+            TrackedRace r = new MockedTrackedRaceWithFixedRank(i+1, /* started */ true);
             testRaces.add(r); // hash set should take care of more or less randomly permuting the races
         }
         for (int i=0; i<numberOfNotStartedRaces; i++) {
@@ -58,7 +58,7 @@ public class LeaderboardTests {
     
     @Test
     public void simpleLeaderboardTest() throws NoWindException {
-        setupRaces(2, 9);
+        setupRaces(4, 9);
         Leaderboard leaderboard = new LeaderboardImpl(new ScoreCorrection() {
             @Override
             public int getCorrectedScore(int uncorrectedScore, Competitor competitor, TrackedRace trackedRace,
@@ -72,8 +72,12 @@ public class LeaderboardTests {
         TimePoint now = MillisecondsTimePoint.now();
         for (TrackedRace race : testRaces) {
             if (race.hasStarted(now)) {
-                assertEquals(race.getRank(competitor, now), leaderboard.getTrackedPoints(competitor, race, now));
-                assertEquals(race.getRank(competitor, now), leaderboard.getNetPoints(competitor, race, now));
+                int rank = race.getRank(competitor, now);
+                assertEquals(rank, leaderboard.getTrackedPoints(competitor, race, now));
+                assertEquals(rank, leaderboard.getNetPoints(competitor, race, now));
+                // One race is discarded because four races were started, and for [3-6) there can be one race discarded.
+                // The discarded race is the worst from those started, so the one with rank 4.
+                assertEquals(rank == 4 ? 0 : rank, leaderboard.getTotalPoints(competitor, race, now));
             } else {
                 assertEquals(0, leaderboard.getTrackedPoints(competitor, race, now));
                 assertEquals(0, leaderboard.getNetPoints(competitor, race, now));
