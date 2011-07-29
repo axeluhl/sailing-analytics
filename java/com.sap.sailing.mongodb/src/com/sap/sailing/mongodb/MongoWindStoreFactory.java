@@ -22,6 +22,6 @@ public interface MongoWindStoreFactory {
      * system properties and/or OSGi bundle properties, respectively. See also
      * {@link #getMongoWindStore(MongoObjectFactory)}.
      */
-    DB getDB() throws UnknownHostException;
+    DB getDB();
 
 }

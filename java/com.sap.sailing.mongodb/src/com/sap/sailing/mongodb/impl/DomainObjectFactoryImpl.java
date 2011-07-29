@@ -1,6 +1,5 @@
 package com.sap.sailing.mongodb.impl;
 
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -31,7 +30,13 @@ import com.sap.sailing.mongodb.DomainObjectFactory;
 public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private static final Logger logger = Logger.getLogger(DomainObjectFactoryImpl.class.getName());
 
-    @Override
+    private final DB database;
+    
+    public DomainObjectFactoryImpl(DB db) {
+        super();
+        this.database = db;
+    }
+
     public Wind loadWind(DBObject object) {
         return new WindImpl(loadPosition(object), loadTimePoint(object), loadSpeedWithBearing(object));
     }
@@ -56,8 +61,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
     @Override
-    public WindTrack loadWindTrack(Event event, RaceDefinition race, WindSource windSource, long millisecondsOverWhichToAverage,
-            DB database) {
+    public WindTrack loadWindTrack(Event event, RaceDefinition race, WindSource windSource, long millisecondsOverWhichToAverage) {
         WindTrack result = new WindTrackImpl(millisecondsOverWhichToAverage);
         try {
             BasicDBObject query = new BasicDBObject();
@@ -78,7 +82,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
     @Override
-    public Iterable<TracTracConfiguration> getTracTracConfigurations(DB database) {
+    public Iterable<TracTracConfiguration> getTracTracConfigurations() {
         List<TracTracConfiguration> result = new ArrayList<TracTracConfiguration>();
         try {
             DBCollection ttConfigs = database.getCollection(CollectionNames.TRACTRAC_CONFIGURATIONS.name());
@@ -99,11 +103,6 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 (String) object.get(FieldNames.TT_CONFIG_JSON_URL.name()),
                 (String) object.get(FieldNames.TT_CONFIG_LIVE_DATA_URI.name()),
                 (String) object.get(FieldNames.TT_CONFIG_STORED_DATA_URI.name()));
-    }
-
-    @Override
-    public DB getDefaultDatabase() throws UnknownHostException {
-        return MongoWindStoreFactoryImpl.getDefaultInstance().getDB();
     }
 
 }

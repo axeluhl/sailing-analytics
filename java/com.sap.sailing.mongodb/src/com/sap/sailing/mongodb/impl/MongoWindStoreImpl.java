@@ -29,7 +29,7 @@ public class MongoWindStoreImpl implements MongoWindStore {
     public WindTrack getWindTrack(TrackedEvent trackedEvent, TrackedRace trackedRace, WindSource windSource,
             long millisecondsOverWhichToAverage) {
         WindTrack result = DomainObjectFactoryImpl.INSTANCE.loadWindTrack(trackedEvent.getEvent(),
-                trackedRace.getRace(), windSource, millisecondsOverWhichToAverage, db);
+                trackedRace.getRace(), windSource, millisecondsOverWhichToAverage);
         result.addListener(new MongoWindListener(trackedEvent, trackedRace, windSource, mongoObjectFactory, db));
         return result;
     }

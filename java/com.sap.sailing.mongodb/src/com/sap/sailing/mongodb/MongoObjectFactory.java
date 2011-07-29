@@ -1,6 +1,5 @@
 package com.sap.sailing.mongodb;
 
-import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import com.sap.sailing.domain.base.Event;
@@ -11,6 +10,7 @@ import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindSource;
 import com.sap.sailing.domain.tractracadapter.TracTracConfiguration;
 import com.sap.sailing.mongodb.impl.MongoObjectFactoryImpl;
+import com.sap.sailing.mongodb.impl.MongoWindStoreFactoryImpl;
 
 /**
  * Offers methods to construct {@link DBObject MongoDB objects} from domain objects.
@@ -19,7 +19,7 @@ import com.sap.sailing.mongodb.impl.MongoObjectFactoryImpl;
  * 
  */
 public interface MongoObjectFactory {
-    MongoObjectFactory INSTANCE = new MongoObjectFactoryImpl();
+    MongoObjectFactory INSTANCE = new MongoObjectFactoryImpl(MongoWindStoreFactoryImpl.getDefaultInstance().getDB());
 
     DBObject storeWind(Wind wind);
 
@@ -27,21 +27,18 @@ public interface MongoObjectFactory {
      * Registers for changes of the wind coming from <code>windSource</code> on the <code>trackedRace</code>. Each
      * update received will be appended to the MongoDB and can later be retrieved. The key used to identify the race is
      * the {@link RaceDefinition#getName() race name} and the {@link Event#getName() event name}.
-     * 
-     * @param database
-     *            the MongoDB database to dump the wind received by the {@link TrackedRace}'s <code>windSource</code> to
      */
-    void addWindTrackDumper(TrackedEvent trackedEvent, TrackedRace trackedRace, WindSource windSource, DB database);
+    void addWindTrackDumper(TrackedEvent trackedEvent, TrackedRace trackedRace, WindSource windSource);
 
-    DBCollection getWindTrackCollection(DB database);
+    DBCollection getWindTrackCollection();
 
     DBObject storeWindTrackEntry(Event event, RaceDefinition race, WindSource windSource, Wind wind);
     
     /**
      * Inserts/updates based on the {@link TracTracConfiguration#getName() name}. Any equally-named
      * config previously contained in the DB will be replaced / updated. Afterwards,
-     * {@link DomainObjectFactory#getTracTracConfigurations(DB)} called for the same <code>database</code>
+     * {@link DomainObjectFactory#getTracTracConfigurations()} called for the same <code>database</code>
      * will return an equal <code>tracTracConfiguration</code> in its results.
      */
-    void storeTracTracConfiguration(DB database, TracTracConfiguration tracTracConfiguration);
+    void storeTracTracConfiguration(TracTracConfiguration tracTracConfiguration);
 }

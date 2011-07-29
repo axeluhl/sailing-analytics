@@ -23,6 +23,7 @@ import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.mongodb.DomainObjectFactory;
 import com.sap.sailing.mongodb.MongoObjectFactory;
+import com.sap.sailing.mongodb.impl.DomainObjectFactoryImpl;
 import com.sap.sailing.mongodb.impl.MongoWindStoreFactoryImpl;
 
 public class TestStoringAndRetrievingWindData implements MongoDBTest {
@@ -99,7 +100,7 @@ public class TestStoringAndRetrievingWindData implements MongoDBTest {
             DBCollection coll = db.getCollection(WIND_TEST_COLLECTION);
             assertNotNull(coll);
             DBObject object = coll.findOne();
-            Wind readWind = DomainObjectFactory.INSTANCE.loadWind(object);
+            Wind readWind = ((DomainObjectFactoryImpl) DomainObjectFactory.INSTANCE).loadWind(object);
             assertEquals(wind.getPosition(), readWind.getPosition());
             assertEquals(wind.getKnots(), readWind.getKnots(), 0.00000001);
             assertEquals(wind.getBearing().getDegrees(), readWind.getBearing().getDegrees(), 0.00000001);

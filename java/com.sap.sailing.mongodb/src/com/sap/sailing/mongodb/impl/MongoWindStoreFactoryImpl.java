@@ -51,8 +51,12 @@ public class MongoWindStoreFactoryImpl implements MongoWindStoreFactory, BundleA
     }
 
     @Override
-    public DB getDB() throws UnknownHostException {
-        return getDB(defaultHostName, defaultPort, defaultDatabaseName);
+    public DB getDB() {
+        try {
+            return getDB(defaultHostName, defaultPort, defaultDatabaseName);
+        } catch (UnknownHostException e) {
+            throw new RuntimeException(e);
+        }
     }
     
     private synchronized DB getDB(String hostname, int port, String dbName) throws UnknownHostException {

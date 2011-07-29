@@ -32,8 +32,8 @@ import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
-import com.sap.sailing.mongodb.DomainObjectFactory;
 import com.sap.sailing.mongodb.MongoObjectFactory;
+import com.sap.sailing.mongodb.impl.DomainObjectFactoryImpl;
 import com.sap.sailing.mongodb.impl.MongoWindStoreFactoryImpl;
 
 public class TestStoringAndRetrievingWindTracks extends AbstractTracTracLiveTest implements MongoDBTest {
@@ -72,7 +72,7 @@ public class TestStoringAndRetrievingWindTracks extends AbstractTracTracLiveTest
                 EmptyWindStore.INSTANCE, /* millisecondsOverWhichToAverageSpeed */
                 30000, 10000, getEvent(), this);
         WindSource windSource = WindSource.WEB;
-        MongoObjectFactory.INSTANCE.addWindTrackDumper(trackedEvent, trackedRace, windSource, db);
+        MongoObjectFactory.INSTANCE.addWindTrackDumper(trackedEvent, trackedRace, windSource);
         WindTrack windTrack = trackedRace.getWindTrack(windSource);
         Position pos = new DegreePosition(54, 9);
         for (double bearingDeg = 123.4; bearingDeg<140; bearingDeg += 1.1) {
@@ -83,8 +83,8 @@ public class TestStoringAndRetrievingWindTracks extends AbstractTracTracLiveTest
         
         Mongo myMongo = newMongo();
         DB database = myMongo.getDB(WIND_TEST_DB);
-        WindTrack result = DomainObjectFactory.INSTANCE.loadWindTrack(domainEvent, race, windSource, /* millisecondsOverWhichToAverage */
-                30000, database);
+        WindTrack result = new DomainObjectFactoryImpl(database).loadWindTrack(domainEvent, race, windSource, /* millisecondsOverWhichToAverage */
+                30000);
         double myBearingDeg = 123.4;
         for (Wind wind : result.getRawFixes()) {
             assertEquals(pos, wind.getPosition());

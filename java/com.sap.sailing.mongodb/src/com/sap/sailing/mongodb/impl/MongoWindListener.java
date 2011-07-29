@@ -23,7 +23,7 @@ public class MongoWindListener implements com.sap.sailing.domain.tracking.WindLi
         this.trackedRace = trackedRace;
         this.windSource = windSource;
         this.mongoObjectFactory = mongoObjectFactory;
-        this.windTracksCollection = mongoObjectFactory.getWindTrackCollection(database);
+        this.windTracksCollection = mongoObjectFactory.getWindTrackCollection();
     }
 
     @Override

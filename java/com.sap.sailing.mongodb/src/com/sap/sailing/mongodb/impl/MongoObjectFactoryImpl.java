@@ -20,7 +20,13 @@ import com.sap.sailing.domain.tractracadapter.TracTracConfiguration;
 import com.sap.sailing.mongodb.MongoObjectFactory;
 
 public class MongoObjectFactoryImpl implements MongoObjectFactory {
+    private final DB database;
     
+    public MongoObjectFactoryImpl(DB database) {
+        super();
+        this.database = database;
+    }
+
     @Override
     public DBObject storeWind(Wind wind) {
         DBObject result = new BasicDBObject();
@@ -56,13 +62,13 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     }
 
     @Override
-    public void addWindTrackDumper(TrackedEvent trackedEvent, TrackedRace trackedRace, WindSource windSource, DB database) {
+    public void addWindTrackDumper(TrackedEvent trackedEvent, TrackedRace trackedRace, WindSource windSource) {
         WindTrack windTrack = trackedRace.getWindTrack(windSource);
         windTrack.addListener(new MongoWindListener(trackedEvent, trackedRace, windSource, this, database));
     }
 
     @Override
-    public DBCollection getWindTrackCollection(DB database) {
+    public DBCollection getWindTrackCollection() {
         return database.getCollection(CollectionNames.WIND_TRACKS.name());
     }
 
@@ -77,7 +83,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     }
 
     @Override
-    public void storeTracTracConfiguration(DB database, TracTracConfiguration tracTracConfiguration) {
+    public void storeTracTracConfiguration(TracTracConfiguration tracTracConfiguration) {
         DBCollection ttConfigCollection = database.getCollection(CollectionNames.TRACTRAC_CONFIGURATIONS.name());
         BasicDBObject result = new BasicDBObject();
         result.put(FieldNames.TT_CONFIG_NAME.name(), tracTracConfiguration.getName());

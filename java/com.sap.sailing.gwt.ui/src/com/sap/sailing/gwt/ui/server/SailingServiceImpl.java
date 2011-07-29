@@ -180,7 +180,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     @Override
     public List<TracTracConfigurationDAO> getPreviousConfigurations() throws Exception {
         DomainObjectFactory domainObjectFactory = DomainObjectFactory.INSTANCE;
-        Iterable<TracTracConfiguration> configs = domainObjectFactory.getTracTracConfigurations(domainObjectFactory.getDefaultDatabase());
+        Iterable<TracTracConfiguration> configs = domainObjectFactory.getTracTracConfigurations();
         List<TracTracConfigurationDAO> result = new ArrayList<TracTracConfigurationDAO>();
         for (TracTracConfiguration ttConfig : configs) {
             result.add(new TracTracConfigurationDAO(ttConfig.getName(), ttConfig.getJSONURL().toString(),
@@ -193,8 +193,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     public void storeTracTracConfiguration(String name, String jsonURL, String liveDataURI, String storedDataURI) throws Exception {
         DomainFactory domainFactory = DomainFactory.INSTANCE;
         MongoObjectFactory mongoObjectFactory = MongoObjectFactory.INSTANCE;
-        mongoObjectFactory.storeTracTracConfiguration(DomainObjectFactory.INSTANCE.getDefaultDatabase(),
-                domainFactory.createTracTracConfiguration(name, jsonURL, liveDataURI, storedDataURI));
+        mongoObjectFactory.storeTracTracConfiguration(domainFactory.createTracTracConfiguration(name, jsonURL, liveDataURI, storedDataURI));
     }
     
     @Override
