@@ -5,17 +5,17 @@ import com.sap.sailing.domain.base.Person;
 import com.sap.sailing.domain.base.Team;
 
 public class TeamImpl extends NamedImpl implements Team {
-    private final Iterable<Person> sailors;
+    private final Iterable<? extends Person> sailors;
     private final Person coach;
     
-    public TeamImpl(String name, Iterable<Person> sailors, Person coach) {
+    public TeamImpl(String name, Iterable<? extends Person> sailors, Person coach) {
         super(name);
         this.sailors = sailors;
         this.coach = coach;
     }
 
     @Override
-    public Iterable<Person> getSailors() {
+    public Iterable<? extends Person> getSailors() {
         return sailors;
     }
     

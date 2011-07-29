@@ -42,6 +42,11 @@ public interface TrackedRace {
      */
     TimePoint getStart();
     
+    /**
+     * Shorthand for <code>{@link #getStart()}.{@link TimePoint#compareTo(TimePoint) compareTo(at)} &lt;= 0</code>
+     */
+    boolean hasStarted(TimePoint at);
+    
     Iterable<TrackedLeg> getTrackedLegs();
     
     TrackedLeg getTrackedLeg(Leg leg);
@@ -101,7 +106,8 @@ public interface TrackedRace {
      * Computes the rank of <code>competitor</code> in this race. A competitor is ahead of all
      * competitors that are one or more legs behind. Within the same leg, the rank is determined
      * by the windward distance to go and therefore depends on the assumptions of the wind direction
-     * for the given <code>timePoint</code>.
+     * for the given <code>timePoint</code>. If the race hasn't {@link #hasStarted(TimePoint) started}
+     * yet, the result is undefined.
      */
     int getRank(Competitor competitor, TimePoint timePoint) throws NoWindException;
     

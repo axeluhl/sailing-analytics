@@ -179,6 +179,11 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         }
         return result;
     }
+    
+    @Override
+    public boolean hasStarted(TimePoint at) {
+        return getStart().compareTo(at) <= 0;
+    }
 
     protected void setStartTimeReceived(TimePoint start) {
         this.startTimeReceived = start;

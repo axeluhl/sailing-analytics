@@ -2,6 +2,7 @@ package com.sap.sailing.domain.leaderboard;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.TimePoint;
+import com.sap.sailing.domain.tracking.NoWindException;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
 /**
@@ -24,14 +25,16 @@ public interface Leaderboard {
     Iterable<Competitor> getCompetitors();
 
     /**
-     * Shorthand for {@link TrackedRace#getRank(Competitor, com.sap.sailing.domain.base.TimePoint)}.
+     * Shorthand for {@link TrackedRace#getRank(Competitor, com.sap.sailing.domain.base.TimePoint)} with the
+     * additional logic that in case the <code>race</code> hasn't {@link TrackedRace#hasStarted(TimePoint) started}
+     * yet, 0 points will be allotted to the race for all competitors.
      * 
      * @param competitor
      *            a competitor contained in the {@link #getCompetitors()} result
      * @param race
      *            a race that is contained in the {@link #getRaces()} result
      */
-    int getTrackedPoints(Competitor competitor, TrackedRace race, TimePoint timePoint);
+    int getTrackedPoints(Competitor competitor, TrackedRace race, TimePoint timePoint) throws NoWindException;
 
     /**
      * A possibly corrected number of points for the race specified. Defaults to the result of calling
@@ -43,7 +46,7 @@ public interface Leaderboard {
      * @param race
      *            a race that is contained in the {@link #getRaces()} result
      */
-    int getNetPoints(Competitor competitor, TrackedRace race, TimePoint timePoint);
+    int getNetPoints(Competitor competitor, TrackedRace race, TimePoint timePoint) throws NoWindException;
 
     /**
      * A possibly corrected number of points for the race specified. Defaults to the result of calling
@@ -55,5 +58,9 @@ public interface Leaderboard {
      * @param race
      *            a race that is contained in the {@link #getRaces()} result
      */
-    int getTotalPoints(Competitor competitor, TrackedRace race, TimePoint timePoint);
+    int getTotalPoints(Competitor competitor, TrackedRace race, TimePoint timePoint) throws NoWindException;
+
+    boolean isDiscarded(Competitor competitor, TrackedRace race, TimePoint timePoint);
+
+    void addRace(TrackedRace race);
 }

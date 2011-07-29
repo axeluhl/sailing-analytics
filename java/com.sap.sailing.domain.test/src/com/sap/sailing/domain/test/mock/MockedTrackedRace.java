@@ -1,4 +1,4 @@
-package com.sap.sailing.expeditionconnector.test;
+package com.sap.sailing.domain.test.mock;
 
 import java.util.NavigableSet;
 
@@ -264,6 +264,12 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     public Wind getEstimatedWindDirection(Position position, TimePoint timePoint) throws NoWindException {
         // TODO Auto-generated method stub
         return null;
+    }
+
+    @Override
+    public boolean hasStarted(TimePoint at) {
+        // TODO Auto-generated method stub
+        return false;
     }
 
 }
