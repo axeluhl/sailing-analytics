@@ -19,7 +19,7 @@ import com.sap.sailing.domain.base.impl.NationalityImpl;
 import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
-import com.sap.sailing.domain.leaderboard.ScoreCorrection;
+import com.sap.sailing.domain.leaderboard.impl.AbstractScoreCorrection;
 import com.sap.sailing.domain.leaderboard.impl.LeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.ResultDiscardingRuleImpl;
 import com.sap.sailing.domain.test.mock.MockedTrackedRace;
@@ -70,13 +70,8 @@ public class LeaderboardTests {
     protected void testLeaderboard(int numberOfStartedRaces, int numberOfNotStartedRaces, int firstDiscardingThreshold,
             int secondDiscardingThreshold) throws NoWindException {
         setupRaces(numberOfStartedRaces, numberOfNotStartedRaces);
-        Leaderboard leaderboard = new LeaderboardImpl(new ScoreCorrection() {
-            @Override
-            public int getCorrectedScore(int uncorrectedScore, Competitor competitor, TrackedRace trackedRace,
-                    TimePoint timePoint) {
-                return uncorrectedScore;
-            }
-        }, new ResultDiscardingRuleImpl(new int[] { firstDiscardingThreshold, secondDiscardingThreshold }));
+        Leaderboard leaderboard = new LeaderboardImpl(new AbstractScoreCorrection(), new ResultDiscardingRuleImpl(
+                new int[] { firstDiscardingThreshold, secondDiscardingThreshold }));
         for (TrackedRace race : testRaces) {
             leaderboard.addRace(race);
         }
