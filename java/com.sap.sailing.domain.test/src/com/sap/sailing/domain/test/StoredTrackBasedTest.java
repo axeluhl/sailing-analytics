@@ -13,8 +13,10 @@ import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Competitor;
@@ -57,6 +59,8 @@ import com.sap.sailing.domain.tracking.impl.TrackedEventImpl;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 
 public abstract class StoredTrackBasedTest {
+    private static final String RESOURCES = "resources/";
+
     protected DynamicTrack<Competitor, GPSFixMoving> readTrack(Competitor competitor, String eventName) throws FileNotFoundException, IOException {
         DynamicTrack<Competitor, GPSFixMoving> track = null;
         if (getFile(competitor, eventName).exists()) {
@@ -120,7 +124,19 @@ public abstract class StoredTrackBasedTest {
     }
 
     private File getFile(Competitor competitor, String eventName) {
-        return new File("resources/"+eventName+"-"+competitor.getName());
+        return new File(RESOURCES+eventName+"-"+competitor.getName());
+    }
+    
+    private Set<String> getCompetitorNamesOfStoredTracks(String eventName) {
+        Set<String> result = new HashSet<String>();
+        File d = new File(RESOURCES);
+        final String separator = "-";
+        for (String s : d.list()) {
+            if (s.startsWith(eventName+separator)) {
+                result.add(s.substring(eventName.length()+separator.length()));
+            }
+        }
+        return result;
     }
 
     private void writeGPSFixMoving(GPSFixMoving fix, ObjectOutput oo) throws IOException {
@@ -149,16 +165,13 @@ public abstract class StoredTrackBasedTest {
 
     protected Map<Competitor, DynamicTrack<Competitor, GPSFixMoving>> loadTracks() throws FileNotFoundException, IOException {
         Map<Competitor, DynamicTrack<Competitor, GPSFixMoving>> tracks = new HashMap<Competitor, DynamicTrack<Competitor,GPSFixMoving>>();
-        for (String competitorName : new String[] { "Achterberg", "Anton", "Barop", "Birkner", "Böger", "Böhm",
-                "boite", "Bøjland", "Brill", "Broise", "Buhl", "Dasenbrook", "de Lisle", "Dr.Plattner", "Feldmann",
-                "Findel", "Fischer", "Goedeking", "Gosch", "Hastenpflug", "Henge", "Hunger", "Kellner", "Kevin",
-                "Köchlin", "Kraft", "Lehmann", "Lietz", "Menge", "Neulen", "Pleßmann", "Rasenack", "Reincke",
-                "Saugmann", "Schomäker", "van Wonterghem" }) {
+        final String KIELER_WOCHE = "Kieler Woche";
+        for (String competitorName : getCompetitorNamesOfStoredTracks(KIELER_WOCHE)) {
             Person p = new PersonImpl(competitorName, /* nationality */ null, /* dateOfBirth */ null, /* description */ null);
             Team t = new TeamImpl(competitorName, Collections.singleton(p), /* coach */ null);
             Competitor c = new CompetitorImpl(competitorName, competitorName, t, new BoatImpl(competitorName,
                     new BoatClassImpl("505")));
-            DynamicTrack<Competitor, GPSFixMoving> track = readTrack(c, "Kieler Woche");
+            DynamicTrack<Competitor, GPSFixMoving> track = readTrack(c, KIELER_WOCHE);
             if (track != null) {
                 tracks.put(c, track);
             }
