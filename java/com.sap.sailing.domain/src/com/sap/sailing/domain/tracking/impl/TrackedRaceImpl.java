@@ -518,14 +518,33 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                 }
             }
         }
-        Bearing upwindAverage = new DegreeBearingImpl((bearings.get(LegType.UPWIND)[0].getAverage().getDegrees() + bearings
+        Bearing upwindAverage = null;
+        if (!bearings.get(LegType.UPWIND)[0].isEmpty() && !bearings.get(LegType.UPWIND)[1].isEmpty()) {
+            upwindAverage = new DegreeBearingImpl((bearings.get(LegType.UPWIND)[0].getAverage().getDegrees() + bearings
                 .get(LegType.UPWIND)[1].getAverage().getDegrees()) / 2.0);
-        Bearing downwindAverage = new DegreeBearingImpl((bearings.get(LegType.DOWNWIND)[0].getAverage().getDegrees() + bearings
+        }
+        Bearing downwindAverage = null;
+        if (!bearings.get(LegType.DOWNWIND)[0].isEmpty() && !bearings.get(LegType.DOWNWIND)[1].isEmpty()) {
+            downwindAverage = new DegreeBearingImpl((bearings.get(LegType.DOWNWIND)[0].getAverage().getDegrees() + bearings
                 .get(LegType.DOWNWIND)[1].getAverage().getDegrees()) / 2.0);
+        }
+        double bearingDeg;
+        if (upwindAverage == null) {
+            if (downwindAverage == null) {
+                throw new NoWindException(
+                        "Can't determine estimated wind direction because no two distinct direction clusted found upwind nor downwind");
+            } else {
+                bearingDeg = downwindAverage.getDegrees();
+            }
+        } else {
+            if (downwindAverage == null) {
+                bearingDeg = upwindAverage.reverse().getDegrees();
+            } else {
+                bearingDeg = (downwindAverage.getDegrees() + upwindAverage.reverse().getDegrees())/2.0;
+            }
+        }
         return new WindImpl(null, timePoint,
-                new KnotSpeedWithBearingImpl(/* speedInKnots */ 1,
-                        new DegreeBearingImpl((downwindAverage.getDegrees() + upwindAverage.reverse().getDegrees())/2.0)));
+                new KnotSpeedWithBearingImpl(/* speedInKnots */ 1, new DegreeBearingImpl(bearingDeg)));
     }
-    
     
 }

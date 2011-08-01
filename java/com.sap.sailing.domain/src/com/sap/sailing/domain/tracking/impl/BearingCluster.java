@@ -22,6 +22,10 @@ public class BearingCluster {
         sumDegrees = 0.0;
     }
     
+    public boolean isEmpty() {
+        return bearings.isEmpty();
+    }
+    
     public void add(Bearing bearing) {
         bearings.add(bearing);
         sumDegrees += bearing.getDegrees();
