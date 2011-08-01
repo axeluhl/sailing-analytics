@@ -25,7 +25,7 @@ import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
 import com.sap.sailing.util.Util;
 
-public class WindEstimationTest extends StoredTrackBasedTest {
+public class WindEstimationOnStoredTracksTest extends StoredTrackBasedTest {
     private DynamicTrackedRace trackedRace;
     
     @Before

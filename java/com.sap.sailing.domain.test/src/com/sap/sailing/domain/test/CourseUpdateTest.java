@@ -2,6 +2,7 @@ package com.sap.sailing.domain.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
@@ -54,12 +55,10 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
     private Event domainEvent;
     private DynamicTrackedEvent trackedEvent;
     private final RouteData[] routeData = new RouteData[1];
-    private final List<Receiver> receivers;
     private DomainFactory domainFactory;
 
     public CourseUpdateTest() throws URISyntaxException, MalformedURLException {
         super();
-        receivers = new ArrayList<Receiver>();
     }
 
     @Before
@@ -68,6 +67,7 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
         domainFactory = new DomainFactoryImpl();
         domainEvent = domainFactory.createEvent(getEvent());
         trackedEvent = domainFactory.getOrCreateTrackedEvent(domainEvent);
+        ArrayList<Receiver> receivers = new ArrayList<Receiver>();
         receivers.add(new RaceCourseReceiver(domainFactory, trackedEvent, getEvent(), /* millisecondsOverWhichToAverageWind */
                 EmptyWindStore.INSTANCE, this,
                 30000, /* millisecondsOverWhichToAverageSpeed */30000) {
@@ -92,11 +92,6 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
         // make sure leg is initialized correctly in CourseImpl
         assertEquals("start/finish", course.getLegs().get(0).getFrom().getName());
         assertEquals("top", course.getLegs().get(1).getFrom().getName());
-    }
-
-    private void assertNull(RaceDefinition existingRaceDefinitionForRace) {
-        // TODO Auto-generated method stub
-        
     }
 
     /**
