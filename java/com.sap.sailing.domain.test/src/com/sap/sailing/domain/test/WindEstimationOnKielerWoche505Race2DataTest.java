@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.test;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -13,7 +14,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.Buoy;
-import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.Waypoint;
@@ -21,8 +21,6 @@ import com.sap.sailing.domain.base.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.base.impl.DegreePosition;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.tracking.GPSFixMoving;
-import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.NoWindException;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindSource;
@@ -80,12 +78,12 @@ public class WindEstimationOnKielerWoche505Race2DataTest extends KielerWoche2011
 
     @Test
     public void testSimpleWindEstimation() throws NoWindException {
-        Competitor hasso = getCompetitorByName("Dr.Plattner");
-        GPSFixTrack<Competitor, GPSFixMoving> hassosTrack = getTrackedRace().getTrack(hasso);
-        TimePoint start = hassosTrack.getFirstRawFix().getTimePoint();
-        TimePoint stop = hassosTrack.getLastRawFix().getTimePoint();
-        TimePoint middle = new MillisecondsTimePoint(start.asMillis() + (stop.asMillis()-start.asMillis())*3/4);
+        // at this point in time, a few boats are still going downwind, a few have passed the downwind
+        // mark and are already going upwind again, and Lehmann is tacking, hence has a direction change.
+        TimePoint middle = new MillisecondsTimePoint(1308839250105l);
+        assertTrue(getTrackedRace().getTrack(getCompetitorByName("Lehmann")).hasDirectionChange(middle, /* minimumDegreeDifference */ 30.));
         Wind estimatedWindDirection = getTrackedRace().getEstimatedWindDirection(/* position */ null, middle);
         assertNotNull(estimatedWindDirection);
+        assertEquals(241., estimatedWindDirection.getFrom().getDegrees(), 3.); // expect wind from 241 +/- 3 degrees
     }
 }

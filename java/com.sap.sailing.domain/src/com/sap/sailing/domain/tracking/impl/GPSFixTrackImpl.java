@@ -221,7 +221,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
             relevantFixes.add(0, beforeFix);
         }
         for (GPSFix afterFix : afterSet) {
-            if (at.asMillis() - afterFix.getTimePoint().asMillis() > getMillisecondsOverWhichToAverage()/2) {
+            if (afterFix.getTimePoint().asMillis() - at.asMillis() > getMillisecondsOverWhichToAverage()/2) {
                 break;
             }
             relevantFixes.add(afterFix);

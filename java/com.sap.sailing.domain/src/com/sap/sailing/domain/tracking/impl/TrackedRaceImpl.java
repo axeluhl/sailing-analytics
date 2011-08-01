@@ -42,7 +42,12 @@ import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.util.Util;
 
 public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
-    private static final double MANEUVER_ANGLE_THRESHOLD = /* minimumDegreeDifference */ 30.;
+    /**
+     * If the averaged courses over ground differ by at least this degree angle, a maneuver will
+     * be assumed. Note that this should be much less than the tack angle because averaging may
+     * span across the actual maneuver.
+     */
+    private static final double MANEUVER_DEGREE_ANGLE_THRESHOLD = /* minimumDegreeDifference */ 30.;
 
     private static final Logger logger = Logger.getLogger(TrackedRaceImpl.class.getName());
     
@@ -500,7 +505,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                 LegType legType = trackedLeg.getLegType(timePoint);
                 if (legType != LegType.REACHING) {
                     GPSFixTrack<Competitor, GPSFixMoving> track = getTrack(competitor);
-                    if (!track.hasDirectionChange(timePoint, MANEUVER_ANGLE_THRESHOLD)) {
+                    if (!track.hasDirectionChange(timePoint, MANEUVER_DEGREE_ANGLE_THRESHOLD)) {
                         Bearing bearing = track.getEstimatedSpeed(timePoint).getBearing();
                         BearingCluster[] bearingClusters = bearings.get(legType);
                         // add to the cluster "closest" to the fix

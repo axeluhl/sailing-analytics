@@ -42,7 +42,7 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends DynamicTrackImpl<Ite
             relevantFixes.add(0, beforeFix);
         }
         for (GPSFixMoving afterFix : afterSet) {
-            if (at.asMillis() - afterFix.getTimePoint().asMillis() > getMillisecondsOverWhichToAverage()/2) {
+            if (afterFix.getTimePoint().asMillis() - at.asMillis() > getMillisecondsOverWhichToAverage()/2) {
                 break;
             }
             relevantFixes.add(afterFix);
