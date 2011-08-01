@@ -49,7 +49,7 @@ public class FetchTracksAndStoreLocallyTest extends KielerWoche2011BasedTest {
     private boolean trackComplete;
 
     public FetchTracksAndStoreLocallyTest() throws URISyntaxException, MalformedURLException {
-        super();
+        super("357c700a-9d9a-11e0-85be-406186cbf87c");
         tracks = new HashMap<Competitor, DynamicTrack<Competitor,GPSFixMoving>>();
     }
     

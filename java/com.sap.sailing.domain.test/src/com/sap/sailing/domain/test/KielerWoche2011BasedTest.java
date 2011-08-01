@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.test;
 
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
 import java.io.IOException;
@@ -9,8 +10,11 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
+import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
@@ -30,6 +34,9 @@ public abstract class KielerWoche2011BasedTest extends AbstractTracTracLiveTest 
     private DomainFactoryImpl domainFactory;
     private Event domainEvent;
     private DynamicTrackedEvent trackedEvent;
+    private RaceDefinition race;
+    private DynamicTrackedRace trackedRace;
+
     private final Object semaphor = new Object();
     
     /**
@@ -38,10 +45,9 @@ public abstract class KielerWoche2011BasedTest extends AbstractTracTracLiveTest 
      */
     private boolean storedDataLoaded;
 
-    public KielerWoche2011BasedTest() throws MalformedURLException, URISyntaxException {
-        // 505 Race 2: ID = 357c700a-9d9a-11e0-85be-406186cbf87c
-        super(Boolean.valueOf(System.getProperty("tractrac.tunnel", "false")) ? new URL("http://localhost:12348/events/event_20110609_KielerWoch/clientparams.php?event=event_20110609_KielerWoch&race=357c700a-9d9a-11e0-85be-406186cbf87c") :
-            new URL("http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/clientparams.php?event=event_20110609_KielerWoch&race=357c700a-9d9a-11e0-85be-406186cbf87c"),
+    protected KielerWoche2011BasedTest(String raceId) throws MalformedURLException, URISyntaxException {
+        super(Boolean.valueOf(System.getProperty("tractrac.tunnel", "false")) ? new URL("http://localhost:12348/events/event_20110609_KielerWoch/clientparams.php?event=event_20110609_KielerWoch&race="+raceId) :
+            new URL("http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/clientparams.php?event=event_20110609_KielerWoch&race="+raceId),
             Boolean.valueOf(System.getProperty("tractrac.tunnel", "false")) ? new URI("tcp://localhost:1520") : new URI("tcp://germanmaster.traclive.dk:1520"),
                     Boolean.valueOf(System.getProperty("tractrac.tunnel", "false")) ? new URI("tcp://localhost:1521") : new URI("tcp://germanmaster.traclive.dk:1521"));
     }
@@ -60,8 +66,33 @@ public abstract class KielerWoche2011BasedTest extends AbstractTracTracLiveTest 
         Race tractracRace = getEvent().getRaceList().iterator().next();
         // now we expect that there is no 
         assertNull(domainFactory.getExistingRaceDefinitionForRace(tractracRace));
+        race = getDomainFactory().getRaceDefinition(tractracRace);
+        assertNotNull(race);
+        synchronized (getSemaphor()) {
+            while (!isStoredDataLoaded()) {
+                getSemaphor().wait();
+            }
+        }
+        trackedRace = getTrackedEvent().getTrackedRace(race);
     }
     
+    protected Competitor getCompetitorByName(String name) {
+        for (Competitor c : getTrackedRace().getRace().getCompetitors()) {
+            if (c.getName().equals(name)) {
+                return c;
+            }
+        }
+        return null;
+    }
+
+    protected RaceDefinition getRace() {
+        return race;
+    }
+
+    protected DynamicTrackedRace getTrackedRace() {
+        return trackedRace;
+    }
+
     /**
      * When all stored data has been transmitted, notify the semaphor for tests to start processing
      */
