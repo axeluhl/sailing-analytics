@@ -86,4 +86,17 @@ public class WindEstimationOnKielerWoche505Race2DataTest extends KielerWoche2011
         assertNotNull(estimatedWindDirection);
         assertEquals(241., estimatedWindDirection.getFrom().getDegrees(), 3.); // expect wind from 241 +/- 3 degrees
     }
+    
+    @Test
+    public void testAnotherSimpleWindEstimation() throws NoWindException {
+        // at this point in time, most boats are already going upwind again, and Köchlin, Neulen and Findel are tacking,
+        // hence have a direction change.
+        TimePoint middle = new MillisecondsTimePoint(1308839492322l);
+        assertTrue(getTrackedRace().getTrack(getCompetitorByName("Köchlin")).hasDirectionChange(middle, /* minimumDegreeDifference */ 30.));
+        assertTrue(getTrackedRace().getTrack(getCompetitorByName("Neulen")).hasDirectionChange(middle, /* minimumDegreeDifference */ 30.));
+        assertTrue(getTrackedRace().getTrack(getCompetitorByName("Findel")).hasDirectionChange(middle, /* minimumDegreeDifference */ 30.));
+        Wind estimatedWindDirection = getTrackedRace().getEstimatedWindDirection(/* position */ null, middle);
+        assertNotNull(estimatedWindDirection);
+        assertEquals(241., estimatedWindDirection.getFrom().getDegrees(), 3.); // expect wind from 241 +/- 3 degrees
+    }
 }

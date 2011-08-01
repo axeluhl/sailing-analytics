@@ -48,8 +48,8 @@ public abstract class KielerWoche2011BasedTest extends AbstractTracTracLiveTest 
     protected KielerWoche2011BasedTest(String raceId) throws MalformedURLException, URISyntaxException {
         super(Boolean.valueOf(System.getProperty("tractrac.tunnel", "false")) ? new URL("http://localhost:12348/events/event_20110609_KielerWoch/clientparams.php?event=event_20110609_KielerWoch&race="+raceId) :
             new URL("http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/clientparams.php?event=event_20110609_KielerWoch&race="+raceId),
-            Boolean.valueOf(System.getProperty("tractrac.tunnel", "false")) ? new URI("tcp://localhost:1520") : new URI("tcp://germanmaster.traclive.dk:1520"),
-                    Boolean.valueOf(System.getProperty("tractrac.tunnel", "false")) ? new URI("tcp://localhost:1521") : new URI("tcp://germanmaster.traclive.dk:1521"));
+            Boolean.valueOf(System.getProperty("tractrac.tunnel", "false")) ? new URI("tcp://localhost:4412") : new URI("tcp://germanmaster.traclive.dk:4400"),
+                    Boolean.valueOf(System.getProperty("tractrac.tunnel", "false")) ? new URI("tcp://localhost:4413") : new URI("tcp://germanmaster.traclive.dk:4401"));
     }
 
     protected void setUp(ReceiverType[] receiverTypes) throws MalformedURLException, IOException, InterruptedException {
