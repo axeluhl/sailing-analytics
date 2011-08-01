@@ -51,4 +51,6 @@ public interface SailingService extends RemoteService {
             int numberOfFixes, double latDeg, double lngDeg) throws Exception;
 
     void setWindSource(String eventName, String raceName, String windSourceName);
+
+    void removeWind(String eventName, String raceName, WindDAO windDAO);
 }

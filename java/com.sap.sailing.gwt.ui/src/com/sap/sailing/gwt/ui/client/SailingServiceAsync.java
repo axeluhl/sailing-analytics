@@ -42,6 +42,8 @@ public interface SailingServiceAsync {
             double latDeg, double lngDeg, AsyncCallback<WindInfoForRaceDAO> callback);
 
     void setWind(String eventName, String raceName, WindDAO wind, AsyncCallback<Void> callback);
+    
+    void removeWind(String eventName, String raceName, WindDAO wind, AsyncCallback<Void> callback);
 
     /**
      * @param tailLengthInMilliseconds

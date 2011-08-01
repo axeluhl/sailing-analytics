@@ -476,4 +476,38 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         return result;
     }
 
+    @Override
+    public void removeWind(String eventName, String raceName, WindDAO windDAO) {
+        Event event = service.getEventByName(eventName);
+        RaceDefinition race = getRaceByName(event, raceName);
+        Position p = null;
+        if (windDAO.position != null) {
+            p = new DegreePosition(windDAO.position.latDeg, windDAO.position.lngDeg);
+        }
+        TimePoint at = null;
+        if (windDAO.timepoint != null) {
+            at = new MillisecondsTimePoint(windDAO.timepoint);
+        }
+        SpeedWithBearing speedWithBearing = null;
+        Speed speed = null;
+        if (windDAO.trueWindSpeedInKnots != null) {
+            speed = new KnotSpeedImpl(windDAO.trueWindSpeedInKnots);
+        } else if (windDAO.trueWindSpeedInMetersPerSecond != null) {
+            speed = new KilometersPerHourSpeedImpl(windDAO.trueWindSpeedInMetersPerSecond * 3600. / 1000.);
+        } else if (windDAO.dampenedTrueWindSpeedInKnots != null) {
+            speed = new KnotSpeedImpl(windDAO.dampenedTrueWindSpeedInKnots);
+        } else if (windDAO.dampenedTrueWindSpeedInMetersPerSecond != null) {
+            speed = new KilometersPerHourSpeedImpl(windDAO.dampenedTrueWindSpeedInMetersPerSecond * 3600. / 1000.);
+        }
+        if (speed != null) {
+            if (windDAO.trueWindBearingDeg != null) {
+                speedWithBearing = new KnotSpeedWithBearingImpl(speed.getKnots(), new DegreeBearingImpl(windDAO.trueWindBearingDeg));
+            } else if (windDAO.trueWindFromDeg != null) {
+                speedWithBearing = new KnotSpeedWithBearingImpl(speed.getKnots(), new DegreeBearingImpl(windDAO.trueWindFromDeg).reverse());
+            }
+        }
+        Wind wind = new WindImpl(p, at, speedWithBearing);
+        service.getDomainFactory().getTrackedEvent(event).getTrackedRace(race).removeWind(wind, WindSource.WEB);
+   }
+
 }

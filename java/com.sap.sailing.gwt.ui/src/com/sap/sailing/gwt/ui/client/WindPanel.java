@@ -3,11 +3,14 @@ package com.sap.sailing.gwt.ui.client;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.gwt.cell.client.ActionCell;
+import com.google.gwt.cell.client.ActionCell.Delegate;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -18,6 +21,7 @@ import com.google.gwt.user.cellview.client.ColumnSortEvent.Handler;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.ColumnSortList;
 import com.google.gwt.user.cellview.client.ColumnSortList.ColumnSortInfo;
+import com.google.gwt.user.cellview.client.IdentityColumn;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
@@ -38,6 +42,7 @@ import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDAO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDAO;
 
 public class WindPanel extends FormPanel implements EventDisplayer, RaceSelectionProvider, WindShower {
+    private static final String WEB_WIND_SOURCE_NAME = "WEB";
     private final SailingServiceAsync sailingService;
     private final ErrorReporter errorReporter;
     private EventRefresher eventRefresher;
@@ -45,6 +50,7 @@ public class WindPanel extends FormPanel implements EventDisplayer, RaceSelectio
     private final StringConstants stringConstants;
     private final WindSettingPanel windSettingPanel;
     private ColumnSortList columnSortList;
+    private final IdentityColumn<WindDAO> removeColumn;
     private final TextColumn<WindDAO> timeColumn;
     private final TextColumn<WindDAO> speedInKnotsColumn;
     private final TextColumn<WindDAO> windDirectionInDegColumn;
@@ -53,6 +59,7 @@ public class WindPanel extends FormPanel implements EventDisplayer, RaceSelectio
     private final Set<RaceSelectionChangeListener> raceSelectionChangeListeners;
     private final RaceTreeView trackedRacesTree;
     private final ListBox windSourceSelection;
+    private final Map<String, ListDataProvider<WindDAO>> windLists;
 
     public WindPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter, EventRefresher eventRefresher, StringConstants stringConstants) {
         this.sailingService = sailingService;
@@ -60,6 +67,7 @@ public class WindPanel extends FormPanel implements EventDisplayer, RaceSelectio
         this.eventRefresher = eventRefresher;
         this.stringConstants = stringConstants;
         raceSelectionChangeListeners = new HashSet<RaceSelectionChangeListener>();
+        windLists = new HashMap<String, ListDataProvider<WindDAO>>();
         windSourceSelection = new ListBox();
         windSourceSelection.addChangeHandler(new ChangeHandler() {
             @Override
@@ -67,6 +75,24 @@ public class WindPanel extends FormPanel implements EventDisplayer, RaceSelectio
                 setWindSource();
             }
         });
+        removeColumn = new IdentityColumn<WindDAO>(new ActionCell<WindDAO>("Remove", new Delegate<WindDAO>() {
+            @Override
+            public void execute(final WindDAO wind) {
+                List<Triple<EventDAO, RegattaDAO, RaceDAO>> eventAndRaces = getSelectedEventAndRace();
+                final Triple<EventDAO, RegattaDAO, RaceDAO> eventAndRace = eventAndRaces.get(eventAndRaces.size()-1);
+                sailingService.removeWind(eventAndRace.getA().name, eventAndRace.getC().name, wind, new AsyncCallback<Void>() {
+                    @Override
+                    public void onSuccess(Void result) {
+                        // remove row from underlying list:
+                        windLists.get(WEB_WIND_SOURCE_NAME).getList().remove(wind);
+                    }
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        WindPanel.this.errorReporter.reportError("Error setting wind for race "+eventAndRace.getC().name+": "+caught.getMessage());
+                    }
+                });
+            }
+        }));
         timeColumn = new TextColumn<WindDAO>() {
             @Override
             public String getValue(WindDAO object) {
@@ -185,6 +211,7 @@ public class WindPanel extends FormPanel implements EventDisplayer, RaceSelectio
     private void clearWindDisplay() {
         grid.setWidget(2, 0, null);
         windSettingPanel.setEnabled(false);
+        windLists.clear();
     }
 
     private void showWindForRace(WindInfoForRaceDAO result) {
@@ -201,12 +228,17 @@ public class WindPanel extends FormPanel implements EventDisplayer, RaceSelectio
             dampenedSpeedInKnotsColumn.setSortable(true);
             dampenedWindDirectionInDegColumn.setSortable(true);
             CellTable<WindDAO> windTable = new CellTable<WindDAO>(/* pageSize */ 100);
+            if (e.getKey().equals(WEB_WIND_SOURCE_NAME)) {
+                // only the WEB wind source is editable, hence has a "Remove" column
+                windTable.addColumn(removeColumn, "Remove");
+            }
             windTable.addColumn(timeColumn, "Time");
             windTable.addColumn(speedInKnotsColumn, "Speed (kn)");
             windTable.addColumn(windDirectionInDegColumn, "From (deg)");
             windTable.addColumn(dampenedSpeedInKnotsColumn, "Avg Speed (kn)");
             windTable.addColumn(dampenedWindDirectionInDegColumn, "Avg From (deg)");
             ListDataProvider<WindDAO> windList = new ListDataProvider<WindDAO>(e.getValue().windFixes);
+            windLists.put(e.getKey(), windList);
             windList.addDataDisplay(windTable);
             Handler columnSortHandler = getWindTableColumnSortHandler(windList.getList(), timeColumn,
                     speedInKnotsColumn, windDirectionInDegColumn, dampenedSpeedInKnotsColumn, dampenedWindDirectionInDegColumn);
