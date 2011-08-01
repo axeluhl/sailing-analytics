@@ -414,18 +414,20 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
 
     private void showCompetitorInfoWindow(final CompetitorDAO competitorDAO, LatLng latlng) {
         map.getInfoWindow().open(latlng,
-                new InfoWindowContent(getInfoWindowContent(competitorDAO)));
+                new InfoWindowContent(getInfoWindowContent(competitorDAO, latlng)));
     }
     
     private Widget getInfoWindowContent(MarkDAO markDAO) {
         VerticalPanel result = new VerticalPanel();
         result.add(new Label("Mark "+markDAO.name));
+        result.add(new Label(""+markDAO.position));
         return result;
     }
 
-    private Widget getInfoWindowContent(CompetitorDAO competitorDAO) {
+    private Widget getInfoWindowContent(CompetitorDAO competitorDAO, LatLng latlng) {
         VerticalPanel result = new VerticalPanel();
         result.add(new Label("Competitor "+competitorDAO.name));
+        result.add(new Label(""+latlng));
         return result;
     }
     
