@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
@@ -13,6 +14,7 @@ import org.junit.Test;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Distance;
 import com.sap.sailing.domain.base.Position;
+import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.BoatImpl;
@@ -234,5 +236,25 @@ public class TrackTest {
         GPSFix third = iter.next();
         assertEquals(second.getPosition().getDistance(third.getPosition()),
                 track.getRawDistanceTraveled(second.getTimePoint(), third.getTimePoint()));
+    }
+    
+    @Test
+    public void testFarFutureFixNotUsedDuringEstimation() {
+        GPSFixMovingImpl gpsFixFarInTheFuture = new GPSFixMovingImpl(
+                new DegreePosition(89, 180), new MillisecondsTimePoint(
+                        System.currentTimeMillis()+10000000l), new KnotSpeedWithBearingImpl(200000, new DegreeBearingImpl(0)));
+        track.addGPSFix(gpsFixFarInTheFuture);
+        TimePoint normalFixesTime = null;
+        Iterator<GPSFixMoving> iter = track.getRawFixes().iterator();
+        for (int i=0; i<2; i++) {
+            normalFixesTime = iter.next().getTimePoint();
+        }
+        assertNotNull(normalFixesTime);
+        Position estimatedPos = track.getEstimatedPosition(normalFixesTime, /* extrapolate */ false);
+        assertEquals(1., estimatedPos.getLatDeg(), 0.5);
+        assertEquals(2, estimatedPos.getLngDeg(), 0.5);
+        SpeedWithBearing estimatedSpeed = track.getEstimatedSpeed(normalFixesTime);
+        assertEquals(1., estimatedSpeed.getKnots(), 0.001);
+        assertEquals(90., estimatedSpeed.getBearing().getDegrees(), 0.001);
     }
 }
