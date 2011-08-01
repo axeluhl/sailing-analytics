@@ -45,12 +45,12 @@ import com.sap.sailing.domain.tractracadapter.ReceiverType;
  *
  */
 @Ignore("Un-ignore when you need to fetch new tracks")
-public class FetchTracksAndStoreLocally extends AbstractTracTracLiveTest {
+public class FetchTracksAndStoreLocallyTest extends AbstractTracTracLiveTest {
     final private Object semaphor = new Object();
     private final Map<Competitor, DynamicTrack<Competitor, GPSFixMoving>> tracks;
     private boolean trackComplete;
 
-    public FetchTracksAndStoreLocally() throws URISyntaxException, MalformedURLException {
+    public FetchTracksAndStoreLocallyTest() throws URISyntaxException, MalformedURLException {
         super(Boolean.valueOf(System.getProperty("tractrac.tunnel", "false")) ? new URL("http://localhost:12348/events/event_20110609_KielerWoch/clientparams.php?event=event_20110609_KielerWoch&race=357c700a-9d9a-11e0-85be-406186cbf87c") :
             new URL("http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/clientparams.php?event=event_20110609_KielerWoch&race=357c700a-9d9a-11e0-85be-406186cbf87c"),
             Boolean.valueOf(System.getProperty("tractrac.tunnel", "false")) ? new URI("tcp://localhost:1520") : new URI("tcp://germanmaster.traclive.dk:1520"),

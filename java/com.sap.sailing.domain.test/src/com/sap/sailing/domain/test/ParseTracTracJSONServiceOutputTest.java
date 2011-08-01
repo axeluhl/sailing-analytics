@@ -21,7 +21,7 @@ import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.JSONService;
 import com.sap.sailing.domain.tractracadapter.RaceRecord;
 
-public class ParseTracTracJSONServiceOutput {
+public class ParseTracTracJSONServiceOutputTest {
     @Test
     public void testWaymouth() throws IOException, ParseException {
         JSONObject result = parseJSONObject("/jsonservice_weymouth.php.txt");

@@ -36,12 +36,12 @@ import com.sap.sailing.mongodb.impl.DomainObjectFactoryImpl;
 import com.sap.sailing.mongodb.impl.MongoObjectFactoryImpl;
 import com.sap.sailing.mongodb.impl.MongoWindStoreFactoryImpl;
 
-public class TestStoringAndRetrievingWindTracks extends AbstractTracTracLiveTest implements MongoDBTest {
+public class TestStoringAndRetrievingWindTracksTest extends AbstractTracTracLiveTest implements MongoDBTest {
 
     private Mongo mongo;
     private DB db;
 
-    public TestStoringAndRetrievingWindTracks() throws URISyntaxException, MalformedURLException {
+    public TestStoringAndRetrievingWindTracksTest() throws URISyntaxException, MalformedURLException {
         super();
     }
     

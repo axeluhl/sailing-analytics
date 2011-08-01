@@ -26,7 +26,7 @@ import com.sap.sailing.domain.test.mock.MockedTrackedRace;
 import com.sap.sailing.domain.tracking.NoWindException;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
-public class LeaderboardTests {
+public class LeaderboardTest {
     private Set<TrackedRace> testRaces;
     private Competitor competitor;
     
