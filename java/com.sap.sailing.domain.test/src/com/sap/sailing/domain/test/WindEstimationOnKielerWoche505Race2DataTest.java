@@ -92,8 +92,7 @@ public class WindEstimationOnKielerWoche505Race2DataTest extends KielerWoche2011
         // at this point in time, most boats are already going upwind again, and Köchlin, Neulen and Findel are tacking,
         // hence have a direction change.
         TimePoint middle = new MillisecondsTimePoint(1308839492322l);
-        // Köchlin causes trouble because of the ö which is not properly resolved on our central Jenkins machine currently
-//        assertTrue(getTrackedRace().getTrack(getCompetitorByName("Köchlin")).hasDirectionChange(middle, /* minimumDegreeDifference */ 30.));
+        assertTrue(getTrackedRace().getTrack(getCompetitorByName("K.chlin")).hasDirectionChange(middle, /* minimumDegreeDifference */ 30.));
         assertTrue(getTrackedRace().getTrack(getCompetitorByName("Neulen")).hasDirectionChange(middle, /* minimumDegreeDifference */ 30.));
         assertTrue(getTrackedRace().getTrack(getCompetitorByName("Findel")).hasDirectionChange(middle, /* minimumDegreeDifference */ 30.));
         Wind estimatedWindDirection = getTrackedRace().getEstimatedWindDirection(/* position */ null, middle);

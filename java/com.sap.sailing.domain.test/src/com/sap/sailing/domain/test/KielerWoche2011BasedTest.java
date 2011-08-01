@@ -9,6 +9,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.regex.Pattern;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Event;
@@ -75,9 +76,10 @@ public abstract class KielerWoche2011BasedTest extends AbstractTracTracLiveTest 
         trackedRace = getTrackedEvent().getTrackedRace(race);
     }
     
-    protected Competitor getCompetitorByName(String name) {
+    protected Competitor getCompetitorByName(String nameRegexp) {
+        Pattern p = Pattern.compile(nameRegexp);
         for (Competitor c : getTrackedRace().getRace().getCompetitors()) {
-            if (c.getName().equals(name)) {
+            if (p.matcher(c.getName()).matches()) {
                 return c;
             }
         }
