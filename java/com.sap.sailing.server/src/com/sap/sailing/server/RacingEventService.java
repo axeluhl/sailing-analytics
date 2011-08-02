@@ -12,6 +12,7 @@ import java.util.List;
 
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.tracking.TrackedEvent;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindStore;
@@ -127,5 +128,9 @@ public interface RacingEventService {
     boolean isRaceBeingTracked(RaceDefinition r);
 
     TrackedRace getTrackedRace(Event event, RaceDefinition r);
+
+    void removeLeaderboard(Leaderboard leaderboard);
+
+    void addLeaderboard(Leaderboard leaderboard);
 
 }

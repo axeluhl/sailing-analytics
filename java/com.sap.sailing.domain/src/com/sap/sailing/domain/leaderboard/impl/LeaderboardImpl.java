@@ -8,18 +8,20 @@ import java.util.Set;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.TimePoint;
+import com.sap.sailing.domain.base.impl.NamedImpl;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.ScoreCorrection;
 import com.sap.sailing.domain.tracking.NoWindException;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
-public class LeaderboardImpl implements Leaderboard {
+public class LeaderboardImpl extends NamedImpl implements Leaderboard {
     private final List<TrackedRace> races;
     private final ScoreCorrection scoreCorrection;
     private final ResultDiscardingRule resultDiscardingRule;
 
-    public LeaderboardImpl(ScoreCorrection scoreCorrection, ResultDiscardingRule resultDiscardingRule) {
+    public LeaderboardImpl(String name, ScoreCorrection scoreCorrection, ResultDiscardingRule resultDiscardingRule) {
+        super(name);
         this.races = new ArrayList<TrackedRace>();
         this.scoreCorrection = scoreCorrection;
         this.resultDiscardingRule = resultDiscardingRule;

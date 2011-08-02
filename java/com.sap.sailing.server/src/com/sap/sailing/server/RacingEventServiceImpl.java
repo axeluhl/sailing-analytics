@@ -20,6 +20,7 @@ import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTracker;
@@ -54,6 +55,11 @@ public class RacingEventServiceImpl implements RacingEventService {
      */
     private final Map<Triple<URL, URI, URI>, RaceTracker> raceTrackersByURLs;
     
+    /**
+     * Leaderboards managed by this racing event service
+     */
+    private final Map<String, Leaderboard> leaderboardsByName;
+    
     public RacingEventServiceImpl() {
         domainFactory = DomainFactory.INSTANCE;
         windTrackerFactory = ExpeditionWindTrackerFactory.getInstance();
@@ -61,6 +67,17 @@ public class RacingEventServiceImpl implements RacingEventService {
         raceTrackersByEvent = new HashMap<Event, Set<RaceTracker>>();
         windTrackers = new HashMap<RaceDefinition, WindTracker>();
         raceTrackersByURLs = new HashMap<Triple<URL, URI, URI>, RaceTracker>();
+        leaderboardsByName = new HashMap<String, Leaderboard>();
+    }
+    
+    @Override
+    public void addLeaderboard(Leaderboard leaderboard) {
+        leaderboards.add(leaderboard);
+    }
+    
+    @Override
+    public void removeLeaderboard(Leaderboard leaderboard) {
+        leaderboards.remove(leaderboard);
     }
     
     @Override

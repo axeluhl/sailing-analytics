@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.leaderboard;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.Named;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.tracking.NoWindException;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -19,7 +20,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
  * @author Axel Uhl (d043530)
  * 
  */
-public interface Leaderboard {
+public interface Leaderboard extends Named {
     Iterable<TrackedRace> getRaces();
 
     Iterable<Competitor> getCompetitors();

@@ -30,7 +30,7 @@ public class LeaderboardForKielWeekTest extends KielWeek2011BasedTest {
 
     @Test
     public void LeaderboardWithOneRaceTest() throws URISyntaxException, NoWindException, IOException, InterruptedException {
-        leaderboard = new LeaderboardImpl(new ScoreCorrectionImpl(), new ResultDiscardingRuleImpl(new int[] { 3, 6 }));
+        leaderboard = new LeaderboardImpl("Kiel Week 2011 505s", new ScoreCorrectionImpl(), new ResultDiscardingRuleImpl(new int[] { 3, 6 }));
         MillisecondsTimePoint now = MillisecondsTimePoint.now();
         loadRace("357c700a-9d9a-11e0-85be-406186cbf87c"); // 505 Race 2
         Competitor hasso = getCompetitorByName("Dr.Plattner");

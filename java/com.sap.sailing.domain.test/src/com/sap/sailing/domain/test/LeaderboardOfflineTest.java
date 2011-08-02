@@ -70,7 +70,7 @@ public class LeaderboardOfflineTest {
     protected void testLeaderboard(int numberOfStartedRaces, int numberOfNotStartedRaces, int firstDiscardingThreshold,
             int secondDiscardingThreshold) throws NoWindException {
         setupRaces(numberOfStartedRaces, numberOfNotStartedRaces);
-        Leaderboard leaderboard = new LeaderboardImpl(new ScoreCorrectionImpl(), new ResultDiscardingRuleImpl(
+        Leaderboard leaderboard = new LeaderboardImpl("Test Leaderboard", new ScoreCorrectionImpl(), new ResultDiscardingRuleImpl(
                 new int[] { firstDiscardingThreshold, secondDiscardingThreshold }));
         for (TrackedRace race : testRaces) {
             leaderboard.addRace(race);
