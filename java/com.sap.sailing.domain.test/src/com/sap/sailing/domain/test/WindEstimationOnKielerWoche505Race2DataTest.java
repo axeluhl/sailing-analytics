@@ -33,12 +33,12 @@ import com.sap.sailing.util.Util;
 public class WindEstimationOnKielerWoche505Race2DataTest extends KielerWoche2011BasedTest {
 
     public WindEstimationOnKielerWoche505Race2DataTest() throws MalformedURLException, URISyntaxException {
-        super("357c700a-9d9a-11e0-85be-406186cbf87c");  // 505 Race 2: ID = 357c700a-9d9a-11e0-85be-406186cbf87c
     }
     
     @Before
-    public void setUp() throws MalformedURLException, IOException, InterruptedException {
-        super.setUp(new ReceiverType[] { ReceiverType.MARKPASSINGS, ReceiverType.RACECOURSE, ReceiverType.RAWPOSITIONS });
+    public void setUp() throws MalformedURLException, IOException, InterruptedException, URISyntaxException {
+        super.setUp(/* raceId */ "357c700a-9d9a-11e0-85be-406186cbf87c",
+                new ReceiverType[] { ReceiverType.MARKPASSINGS, ReceiverType.RACECOURSE, ReceiverType.RAWPOSITIONS });
         fixApproximateMarkPositionsForWindReadOut();
         getTrackedRace().setWindSource(WindSource.WEB);
         getTrackedRace().recordWind(new WindImpl(/* position */ null, MillisecondsTimePoint.now(),

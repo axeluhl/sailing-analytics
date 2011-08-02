@@ -33,11 +33,11 @@ public class RouteAssemblyTest extends AbstractTracTracLiveTest {
         
         Receiver receiver = new Receiver() {
             @Override
-            public void stop() {
+            public void stopPreemptively() {
             }
 
             @Override
-            public Iterable<TypeController> getTypeControllers() {
+            public Iterable<TypeController> getTypeControllersAndStart() {
                 TypeController routeListener = RouteData.subscribe(getEvent().getRaceList().iterator().next(),
                         new ICallbackData<Route, RouteData>() {
                             private boolean first = true;
@@ -55,6 +55,18 @@ public class RouteAssemblyTest extends AbstractTracTracLiveTest {
                             }
                         });
                 return Collections.singleton(routeListener);
+            }
+
+            @Override
+            public void stopAfterProcessingQueuedEvents() {
+            }
+
+            @Override
+            public void join() {
+            }
+
+            @Override
+            public void join(long timeoutInMilliseconds) {
             }
         };
         addListenersForStoredDataAndStartController(Collections.singleton(receiver));

@@ -91,7 +91,7 @@ public class ReceiveTrackingDataTest extends AbstractTracTracLiveTest {
             }
         });
         for (Receiver receiver : domainFactory.getUpdateReceivers(trackedEvent, getEvent(), EmptyWindStore.INSTANCE, this)) {
-            for (TypeController raceListener : receiver.getTypeControllers()) {
+            for (TypeController raceListener : receiver.getTypeControllersAndStart()) {
                 listeners.add(raceListener);
             }
         }

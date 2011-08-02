@@ -47,7 +47,7 @@ public class ReceiveMarkPassingDataTest extends AbstractTracTracLiveTest {
         final Race race = getEvent().getRaceList().iterator().next();
         Receiver receiver = new Receiver() {
             @Override
-            public Iterable<TypeController> getTypeControllers() {
+            public Iterable<TypeController> getTypeControllersAndStart() {
                 TypeController markPassingsListener = MarkPassingsData.subscribe(race,
                         new ICallbackData<RaceCompetitor, MarkPassingsData>() {
                             private boolean first = true;
@@ -67,7 +67,19 @@ public class ReceiveMarkPassingDataTest extends AbstractTracTracLiveTest {
             }
 
             @Override
-            public void stop() {
+            public void stopPreemptively() {
+            }
+
+            @Override
+            public void stopAfterProcessingQueuedEvents() {
+            }
+
+            @Override
+            public void join() {
+            }
+
+            @Override
+            public void join(long timeoutInMilliseconds) {
             }
         };
         List<Receiver> receivers = new ArrayList<Receiver>();

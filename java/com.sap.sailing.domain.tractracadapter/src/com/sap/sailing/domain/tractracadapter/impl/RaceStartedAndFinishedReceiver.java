@@ -43,7 +43,7 @@ public class RaceStartedAndFinishedReceiver extends AbstractReceiverWithQueue<Ra
      * created with the respective {@link Course} and added to the {@link #event event}.
      */
     @Override
-    public Iterable<TypeController> getTypeControllers() {
+    public Iterable<TypeController> getTypeControllersAndStart() {
         List<TypeController> result = new ArrayList<TypeController>();
         for (final Race race : tractracEvent.getRaceList()) {
             TypeController startStopListener = StartStopTimesData.subscribeRace(race, new ICallbackData<Race, StartStopTimesData>() {
@@ -54,7 +54,7 @@ public class RaceStartedAndFinishedReceiver extends AbstractReceiverWithQueue<Ra
             });
             result.add(startStopListener);
         }
-        new Thread(this, getClass().getName()).start();
+        setAndStartThread(new Thread(this, getClass().getName()));
         return result;
     }
 

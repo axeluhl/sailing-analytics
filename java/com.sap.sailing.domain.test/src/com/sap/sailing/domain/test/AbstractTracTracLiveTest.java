@@ -3,6 +3,7 @@ package com.sap.sailing.domain.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -39,9 +40,6 @@ public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest impl
     protected static final String tractracTunnelHost = System.getProperty("tractrac.tunnel.host", "localhost");
     private static final String START_SIMULATOR_URL = "http://sapsimulation.tracdev.dk/start.php";
     private static final String KILL_URL = "http://sapsimulation.tracdev.dk/kill.php";
-    private final URL paramUrl;
-    private final URI liveUri;
-    private final URI storedUri;
     private Event event;
     private final Collection<Receiver> receivers;
     
@@ -49,25 +47,20 @@ public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest impl
     private DataController controller;
 
     protected AbstractTracTracLiveTest() throws URISyntaxException, MalformedURLException {
-        this(new URL("http://germanmaster.traclive.dk/events/event_20110505_SailingTea/clientparams.php?event=event_20110505_SailingTea&race=bd8c778e-7c65-11e0-8236-406186cbf87c"),
-            tractracTunnel ? new URI("tcp://"+tractracTunnelHost+":4412") : new URI("tcp://germanmaster.traclive.dk:4400"),
-                    tractracTunnel ? new URI("tcp://"+tractracTunnelHost+":4413") : new URI("tcp://germanmaster.traclive.dk:4401"));
-        // for live simulation:
-        //   paramUrl  = new URL("http://sapsimulation.tracdev.dk/simulateconf/j80race12.txt");
-        //   liveUri   = new URI("tcp://sapsimulation.tracdev.dk:4420"); // or with tunneling: tcp://localhost:4420
-        //   storedUri = new URI("tcp://sapsimulation.tracdev.dk:4421"); // or with tunneling: tcp://localhost:4421
-        // for stored race, non-real-time simulation:
-    }
-
-    protected AbstractTracTracLiveTest(URL paramUrl, URI liveUri, URI storedUri) {
-        this.paramUrl = paramUrl;
-        this.liveUri = liveUri;
-        this.storedUri = storedUri;
         receivers = new HashSet<Receiver>();
     }
 
+    /**
+     * Default set-up for an STG training session in Weymouth, 2011
+     */
     @Before
-    public void setUp() throws MalformedURLException, IOException, InterruptedException {
+    public void setUp() throws MalformedURLException, IOException, InterruptedException, URISyntaxException {
+        setUp(new URL("http://germanmaster.traclive.dk/events/event_20110505_SailingTea/clientparams.php?event=event_20110505_SailingTea&race=bd8c778e-7c65-11e0-8236-406186cbf87c"),
+            tractracTunnel ? new URI("tcp://"+tractracTunnelHost+":4412") : new URI("tcp://germanmaster.traclive.dk:4400"),
+                    tractracTunnel ? new URI("tcp://"+tractracTunnelHost+":4413") : new URI("tcp://germanmaster.traclive.dk:4401"));
+    }
+    
+    protected void setUp(URL paramUrl, URI liveUri, URI storedUri) throws FileNotFoundException, MalformedURLException {
         // Read event data from configuration file
         event = KeyValue.setup(paramUrl);
         assertNotNull(event);
@@ -87,7 +80,7 @@ public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest impl
     protected void addListenersForStoredDataAndStartController(Iterable<Receiver> receivers) {
         for (Receiver receiver : receivers) {
             this.receivers.add(receiver);
-            for (TypeController typeController : receiver.getTypeControllers()) {
+            for (TypeController typeController : receiver.getTypeControllersAndStart()) {
                 getController().add(typeController);
             }
         }
@@ -118,7 +111,7 @@ public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest impl
             Assert.fail(ex.getMessage());
         }
         for (Receiver receiver : receivers) {
-            receiver.stop();
+            receiver.stopPreemptively();
         }
     }
 

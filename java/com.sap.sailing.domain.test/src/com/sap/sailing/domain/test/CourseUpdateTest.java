@@ -62,7 +62,7 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
     }
 
     @Before
-    public void setUp() throws MalformedURLException, IOException, InterruptedException {
+    public void setUp() throws MalformedURLException, IOException, InterruptedException, URISyntaxException {
         super.setUp();
         domainFactory = new DomainFactoryImpl();
         domainEvent = domainFactory.createEvent(getEvent());

@@ -37,11 +37,11 @@ public class PositionConversionTest extends AbstractTracTracLiveTest {
         
         Receiver receiver = new Receiver() {
             @Override
-            public void stop() {
+            public void stopPreemptively() {
             }
 
             @Override
-            public Iterable<TypeController> getTypeControllers() {
+            public Iterable<TypeController> getTypeControllersAndStart() {
                 TypeController listener = ControlPointPositionData.subscribe(getEvent(),
                         new ICallbackData<ControlPoint, ControlPointPositionData>() {
                             private boolean first = true;
@@ -59,6 +59,18 @@ public class PositionConversionTest extends AbstractTracTracLiveTest {
                             }
                         }, /* fromTime */0 /* means ALL */, /* toTime */Long.MAX_VALUE);
                 return Collections.singleton(listener);
+            }
+
+            @Override
+            public void stopAfterProcessingQueuedEvents() {
+            }
+
+            @Override
+            public void join() {
+            }
+
+            @Override
+            public void join(long timeoutInMilliseconds) {
             }
         };
         addListenersForStoredDataAndStartController(Collections.singleton(receiver));

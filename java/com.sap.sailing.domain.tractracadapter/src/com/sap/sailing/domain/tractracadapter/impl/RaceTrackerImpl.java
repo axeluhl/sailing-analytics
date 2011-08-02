@@ -108,7 +108,7 @@ public class RaceTrackerImpl implements Listener, RaceTracker {
         Set<TypeController> typeControllers = new HashSet<TypeController>();
         for (Receiver receiver : domainFactory.getUpdateReceivers(trackedEvent, tractracEvent, windStore, this)) {
             receivers.add(receiver);
-            for (TypeController typeController : receiver.getTypeControllers()) {
+            for (TypeController typeController : receiver.getTypeControllersAndStart()) {
                 typeControllers.add(typeController);
             }
         }
@@ -208,7 +208,7 @@ public class RaceTrackerImpl implements Listener, RaceTracker {
         controlPointPositionPoller.cancel(/* mayInterruptIfRunning */ false);
         controller.stop(/* abortStored */ true);
         for (Receiver receiver : receivers) {
-            receiver.stop();
+            receiver.stopPreemptively();
         }
         ioThread.join(3000); // wait no more than three seconds
         logger.info("Joined TracTrac IO thread for race "+getRace());
