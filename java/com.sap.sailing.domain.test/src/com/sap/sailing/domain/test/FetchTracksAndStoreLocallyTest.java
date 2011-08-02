@@ -35,7 +35,7 @@ import com.sap.sailing.domain.tractracadapter.ReceiverType;
  * @author Axel Uhl (D043530)
  *
  */
-//@Ignore("Un-ignore when you need to fetch new tracks")
+@Ignore("Un-ignore when you need to fetch new tracks")
 public class FetchTracksAndStoreLocallyTest extends KielerWoche2011BasedTest {
     private final Map<Competitor, DynamicTrack<Competitor, GPSFixMoving>> tracks;
     private TrackedRace trackedRace;
