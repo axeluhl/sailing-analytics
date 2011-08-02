@@ -1,0 +1,937 @@
+{
+  "event": 
+  {
+    "id":"f34b232a-934e-11e0-b3bb-406186cbf87c",
+    "name":"Kieler Woche"
+  },
+  "races":
+  [
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=72aaa082-9674-11e0-9aed-406186cbf87c",
+      "id":"72aaa082-9674-11e0-9aed-406186cbf87c",
+      "name":"Test",
+      "tracking_starttime":"2011-06-14 10:00:00",
+      "tracking_endtime":"2011-06-14 12:00:00",
+      "race_starttime":"",
+      "status":"HIDDEN"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=7dce540a-98e4-11e0-85be-406186cbf87c",
+      "id":"7dce540a-98e4-11e0-85be-406186cbf87c",
+      "name":"Friday test",
+      "tracking_starttime":"2011-06-17 13:20:00",
+      "tracking_endtime":"2011-06-17 14:52:48",
+      "race_starttime":"",
+      "status":"HIDDEN"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=6659efe8-98f1-11e0-85be-406186cbf87c",
+      "id":"6659efe8-98f1-11e0-85be-406186cbf87c",
+      "name":"Friday test 2",
+      "tracking_starttime":"2011-06-17 14:52:54",
+      "tracking_endtime":"2011-06-17 15:09:00",
+      "race_starttime":"",
+      "status":"HIDDEN"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=be1dc2fe-98fb-11e0-85be-406186cbf87c",
+      "id":"be1dc2fe-98fb-11e0-85be-406186cbf87c",
+      "name":"Friday test 3",
+      "tracking_starttime":"2011-06-17 15:11:00",
+      "tracking_endtime":"2011-06-17 15:30:00",
+      "race_starttime":"",
+      "status":"HIDDEN"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=c3ec93e4-98fc-11e0-85be-406186cbf87c",
+      "id":"c3ec93e4-98fc-11e0-85be-406186cbf87c",
+      "name":"Friday test 4",
+      "tracking_starttime":"2011-06-17 15:31:00",
+      "tracking_endtime":"2011-06-17 18:00:00",
+      "race_starttime":"",
+      "status":"HIDDEN"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=bb214cfc-996d-11e0-85be-406186cbf87c",
+      "id":"bb214cfc-996d-11e0-85be-406186cbf87c",
+      "name":"test 49er",
+      "tracking_starttime":"2011-06-18 05:40:00",
+      "tracking_endtime":"2011-06-18 06:20:00",
+      "race_starttime":"",
+      "status":"HIDDEN"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=648cf310-9930-11e0-85be-406186cbf87c",
+      "id":"648cf310-9930-11e0-85be-406186cbf87c",
+      "name":"IDM",
+      "tracking_starttime":"2011-06-18 07:00:00",
+      "tracking_endtime":"2011-06-18 16:00:00",
+      "race_starttime":"",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=4074674e-9933-11e0-85be-406186cbf87c",
+      "id":"4074674e-9933-11e0-85be-406186cbf87c",
+      "name":"49er Yellow 1",
+      "tracking_starttime":"2011-06-18 09:01:08",
+      "tracking_endtime":"2011-06-18 09:54:12",
+      "race_starttime":"",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=ba251890-9933-11e0-85be-406186cbf87c",
+      "id":"ba251890-9933-11e0-85be-406186cbf87c",
+      "name":"Star 1",
+      "tracking_starttime":"2011-06-18 09:01:42",
+      "tracking_endtime":"2011-06-18 10:36:21",
+      "race_starttime":"",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=5b08a9ee-9933-11e0-85be-406186cbf87c",
+      "id":"5b08a9ee-9933-11e0-85be-406186cbf87c",
+      "name":"49er Yellow 2",
+      "tracking_starttime":"2011-06-18 09:55:55",
+      "tracking_endtime":"2011-06-18 10:36:03",
+      "race_starttime":"",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=d6e18ba8-9933-11e0-85be-406186cbf87c",
+      "id":"d6e18ba8-9933-11e0-85be-406186cbf87c",
+      "name":"Star 2",
+      "tracking_starttime":"2011-06-18 10:36:41",
+      "tracking_endtime":"2011-06-18 12:25:08",
+      "race_starttime":"",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=b9962c58-9932-11e0-85be-406186cbf87c",
+      "id":"b9962c58-9932-11e0-85be-406186cbf87c",
+      "name":"49er Blue 1",
+      "tracking_starttime":"2011-06-18 10:51:41",
+      "tracking_endtime":"2011-06-18 11:33:40",
+      "race_starttime":"",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=d287c316-9932-11e0-85be-406186cbf87c",
+      "id":"d287c316-9932-11e0-85be-406186cbf87c",
+      "name":"49er Blue 2",
+      "tracking_starttime":"2011-06-18 11:35:02",
+      "tracking_endtime":"2011-06-18 12:38:17",
+      "race_starttime":"",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=774b7942-9933-11e0-85be-406186cbf87c",
+      "id":"774b7942-9933-11e0-85be-406186cbf87c",
+      "name":"49er Yellow 3",
+      "tracking_starttime":"2011-06-18 12:38:49",
+      "tracking_endtime":"2011-06-18 13:22:42",
+      "race_starttime":"",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=06c1e6d8-9934-11e0-85be-406186cbf87c",
+      "id":"06c1e6d8-9934-11e0-85be-406186cbf87c",
+      "name":"Tornado 1",
+      "tracking_starttime":"2011-06-18 13:20:38",
+      "tracking_endtime":"2011-06-18 14:12:38",
+      "race_starttime":"2011-06-18 13:55:00",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=9cd8ce58-9933-11e0-85be-406186cbf87c",
+      "id":"9cd8ce58-9933-11e0-85be-406186cbf87c",
+      "name":"49er Yellow 4",
+      "tracking_starttime":"2011-06-18 13:22:48",
+      "tracking_endtime":"2011-06-18 15:22:00",
+      "race_starttime":"",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=1e68237e-9934-11e0-85be-406186cbf87c",
+      "id":"1e68237e-9934-11e0-85be-406186cbf87c",
+      "name":"Tornado 2",
+      "tracking_starttime":"2011-06-18 14:15:11",
+      "tracking_endtime":"2011-06-18 14:57:29",
+      "race_starttime":"2011-06-18 14:41:00",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=047248b0-9933-11e0-85be-406186cbf87c",
+      "id":"047248b0-9933-11e0-85be-406186cbf87c",
+      "name":"49er Blue 3",
+      "tracking_starttime":"2011-06-18 14:20:00",
+      "tracking_endtime":"2011-06-18 14:50:00",
+      "race_starttime":"",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=1ecdea8e-9933-11e0-85be-406186cbf87c",
+      "id":"1ecdea8e-9933-11e0-85be-406186cbf87c",
+      "name":"49er Blue 4",
+      "tracking_starttime":"2011-06-18 14:51:00",
+      "tracking_endtime":"2011-06-18 15:30:00",
+      "race_starttime":"",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=367ae104-9934-11e0-85be-406186cbf87c",
+      "id":"367ae104-9934-11e0-85be-406186cbf87c",
+      "name":"Tornado 3",
+      "tracking_starttime":"2011-06-18 15:00:57",
+      "tracking_endtime":"2011-06-18 15:18:37",
+      "race_starttime":"2011-06-18 15:04:00",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=5291b3ea-9934-11e0-85be-406186cbf87c",
+      "id":"5291b3ea-9934-11e0-85be-406186cbf87c",
+      "name":"Tornado 4",
+      "tracking_starttime":"2011-06-18 15:23:02",
+      "tracking_endtime":"2011-06-18 15:38:38",
+      "race_starttime":"2011-06-18 15:30:00",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=46b8c1c0-99ee-11e0-85be-406186cbf87c",
+      "id":"46b8c1c0-99ee-11e0-85be-406186cbf87c",
+      "name":"49er Yellow Race5",
+      "tracking_starttime":"2011-06-19 09:00:00",
+      "tracking_endtime":"2011-06-19 09:54:13",
+      "race_starttime":"2011-06-19 09:12:00",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=d0f23cdc-99ed-11e0-85be-406186cbf87c",
+      "id":"d0f23cdc-99ed-11e0-85be-406186cbf87c",
+      "name":"Star Race3",
+      "tracking_starttime":"2011-06-19 09:10:00",
+      "tracking_endtime":"2011-06-19 10:45:24",
+      "race_starttime":"2011-06-19 09:15:00",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=65f5ea4a-99ee-11e0-85be-406186cbf87c",
+      "id":"65f5ea4a-99ee-11e0-85be-406186cbf87c",
+      "name":"49er Yellow Race6",
+      "tracking_starttime":"2011-06-19 09:54:24",
+      "tracking_endtime":"2011-06-19 10:44:56",
+      "race_starttime":"2011-06-19 10:00:00",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=a7405cce-99ee-11e0-85be-406186cbf87c",
+      "id":"a7405cce-99ee-11e0-85be-406186cbf87c",
+      "name":"49er Blue Race5",
+      "tracking_starttime":"2011-06-19 10:35:28",
+      "tracking_endtime":"2011-06-19 11:40:30",
+      "race_starttime":"2011-06-19 10:55:00",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=f5f531ec-99ed-11e0-85be-406186cbf87c",
+      "id":"f5f531ec-99ed-11e0-85be-406186cbf87c",
+      "name":"Star Race4",
+      "tracking_starttime":"2011-06-19 10:46:18",
+      "tracking_endtime":"2011-06-19 12:40:02",
+      "race_starttime":"2011-06-19 11:12:00",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=bfe5f5cc-99ee-11e0-85be-406186cbf87c",
+      "id":"bfe5f5cc-99ee-11e0-85be-406186cbf87c",
+      "name":"49er Blue Race6",
+      "tracking_starttime":"2011-06-19 11:40:38",
+      "tracking_endtime":"2011-06-19 12:30:42",
+      "race_starttime":"2011-06-19 11:49:00",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=7a4e6206-99ee-11e0-85be-406186cbf87c",
+      "id":"7a4e6206-99ee-11e0-85be-406186cbf87c",
+      "name":"49er Yellow Race7",
+      "tracking_starttime":"2011-06-19 13:00:00",
+      "tracking_endtime":"2011-06-19 13:53:54",
+      "race_starttime":"2011-06-19 13:11:00",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=92abc794-99ee-11e0-85be-406186cbf87c",
+      "id":"92abc794-99ee-11e0-85be-406186cbf87c",
+      "name":"49er Yellow Race8",
+      "tracking_starttime":"2011-06-19 13:56:05",
+      "tracking_endtime":"2011-06-19 14:53:14",
+      "race_starttime":"2011-06-19 14:01:00",
+      "status":"HIDDEN"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=e9557aea-99ee-11e0-85be-406186cbf87c",
+      "id":"e9557aea-99ee-11e0-85be-406186cbf87c",
+      "name":"49er Blue Race7",
+      "tracking_starttime":"2011-06-19 15:30:01",
+      "tracking_endtime":"2011-06-19 16:17:07",
+      "race_starttime":"2011-06-19 15:49:00",
+      "status":"HIDDEN"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=d5924a4c-99ee-11e0-85be-406186cbf87c",
+      "id":"d5924a4c-99ee-11e0-85be-406186cbf87c",
+      "name":"49er Blue Race8",
+      "tracking_starttime":"2011-06-19 16:17:30",
+      "tracking_endtime":"2011-06-19 20:00:00",
+      "race_starttime":"",
+      "status":"HIDDEN"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=eaca658e-9a39-11e0-85be-406186cbf87c",
+      "id":"eaca658e-9a39-11e0-85be-406186cbf87c",
+      "name":"test2 49er",
+      "tracking_starttime":"2011-06-20 06:00:00",
+      "tracking_endtime":"2011-06-20 07:51:06",
+      "race_starttime":"",
+      "status":"HIDDEN"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=413b43f8-9a8e-11e0-85be-406186cbf87c",
+      "id":"413b43f8-9a8e-11e0-85be-406186cbf87c",
+      "name":"Star Race5",
+      "tracking_starttime":"2011-06-20 08:20:00",
+      "tracking_endtime":"2011-06-20 11:48:23",
+      "race_starttime":"2011-06-20 10:11:30",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=b3f37dee-9a8d-11e0-85be-406186cbf87c",
+      "id":"b3f37dee-9a8d-11e0-85be-406186cbf87c",
+      "name":"49er Gold Race9",
+      "tracking_starttime":"2011-06-20 08:50:00",
+      "tracking_endtime":"2011-06-20 09:55:27",
+      "race_starttime":"2011-06-20 09:12:00",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=ca9e510e-9a8d-11e0-85be-406186cbf87c",
+      "id":"ca9e510e-9a8d-11e0-85be-406186cbf87c",
+      "name":"49er Gold Race10",
+      "tracking_starttime":"2011-06-20 09:57:11",
+      "tracking_endtime":"2011-06-20 10:47:15",
+      "race_starttime":"2011-06-20 10:14:00",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=0d21dc62-9a8e-11e0-85be-406186cbf87c",
+      "id":"0d21dc62-9a8e-11e0-85be-406186cbf87c",
+      "name":"49er Silver Race9",
+      "tracking_starttime":"2011-06-20 10:47:36",
+      "tracking_endtime":"2011-06-20 11:43:27",
+      "race_starttime":"2011-06-20 11:04:00",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=2be15c2c-9a8e-11e0-85be-406186cbf87c",
+      "id":"2be15c2c-9a8e-11e0-85be-406186cbf87c",
+      "name":"49er Silver Race X",
+      "tracking_starttime":"2011-06-20 11:43:47",
+      "tracking_endtime":"2011-06-20 12:22:52",
+      "race_starttime":"2011-06-20 11:47:00",
+      "status":"HIDDEN"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=5b71b374-9a8e-11e0-85be-406186cbf87c",
+      "id":"5b71b374-9a8e-11e0-85be-406186cbf87c",
+      "name":"Star Race6",
+      "tracking_starttime":"2011-06-20 11:49:11",
+      "tracking_endtime":"2011-06-20 13:20:50",
+      "race_starttime":"2011-06-20 12:04:00",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=a0679eda-9a8e-11e0-85be-406186cbf87c",
+      "id":"a0679eda-9a8e-11e0-85be-406186cbf87c",
+      "name":"49er Silver Race 10",
+      "tracking_starttime":"2011-06-20 12:25:00",
+      "tracking_endtime":"2011-06-20 13:13:57",
+      "race_starttime":"2011-06-20 12:28:00",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=7837359c-9a8e-11e0-85be-406186cbf87c",
+      "id":"7837359c-9a8e-11e0-85be-406186cbf87c",
+      "name":"49er Gold Race11",
+      "tracking_starttime":"2011-06-20 13:20:00",
+      "tracking_endtime":"2011-06-20 14:16:37",
+      "race_starttime":"2011-06-20 13:43:00",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=8dc9feee-9a8e-11e0-85be-406186cbf87c",
+      "id":"8dc9feee-9a8e-11e0-85be-406186cbf87c",
+      "name":"49er Gold Race12",
+      "tracking_starttime":"2011-06-20 14:16:43",
+      "tracking_endtime":"2011-06-20 15:12:02",
+      "race_starttime":"2011-06-20 14:36:00",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=9690d0ee-9b69-11e0-85be-406186cbf87c",
+      "id":"9690d0ee-9b69-11e0-85be-406186cbf87c",
+      "name":"470W Race9",
+      "tracking_starttime":"2011-06-21 08:32:58",
+      "tracking_endtime":"2011-06-21 10:32:37",
+      "race_starttime":"2011-06-21 09:21:00",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=77db2f88-9b7c-11e0-85be-406186cbf87c",
+      "id":"77db2f88-9b7c-11e0-85be-406186cbf87c",
+      "name":"Star Race7",
+      "tracking_starttime":"2011-06-21 08:45:41",
+      "tracking_endtime":"2011-06-21 10:59:42",
+      "race_starttime":"2011-06-21 09:22:00",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=65f746fa-9b7f-11e0-85be-406186cbf87c",
+      "id":"65f746fa-9b7f-11e0-85be-406186cbf87c",
+      "name":"49er Gold Race13",
+      "tracking_starttime":"2011-06-21 08:50:22",
+      "tracking_endtime":"2011-06-21 09:54:46",
+      "race_starttime":"2011-06-21 09:14:00",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=7d52a25e-9b7f-11e0-85be-406186cbf87c",
+      "id":"7d52a25e-9b7f-11e0-85be-406186cbf87c",
+      "name":"49er Gold Race14",
+      "tracking_starttime":"2011-06-21 09:57:47",
+      "tracking_endtime":"2011-06-21 11:22:04",
+      "race_starttime":"2011-06-21 10:53:00",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=962d13fe-9b7f-11e0-85be-406186cbf87c",
+      "id":"962d13fe-9b7f-11e0-85be-406186cbf87c",
+      "name":"49er Gold Race15",
+      "tracking_starttime":"2011-06-21 11:23:40",
+      "tracking_endtime":"2011-06-21 12:15:06",
+      "race_starttime":"2011-06-21 11:34:00",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=2aca1908-9c34-11e0-85be-406186cbf87c",
+      "id":"2aca1908-9c34-11e0-85be-406186cbf87c",
+      "name":"Lommy-test",
+      "tracking_starttime":"2011-06-21 13:00:00",
+      "tracking_endtime":"2011-06-21 18:00:00",
+      "race_starttime":"",
+      "status":"HIDDEN"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=8981ee52-9b7c-11e0-85be-406186cbf87c",
+      "id":"8981ee52-9b7c-11e0-85be-406186cbf87c",
+      "name":"Star Race8",
+      "tracking_starttime":"2011-06-21 20:08:00",
+      "tracking_endtime":"2011-06-21 20:09:00",
+      "race_starttime":"",
+      "status":"HIDDEN"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=70acfbe2-9b81-11e0-85be-406186cbf87c",
+      "id":"70acfbe2-9b81-11e0-85be-406186cbf87c",
+      "name":"470W Race10",
+      "tracking_starttime":"2011-06-21 20:10:00",
+      "tracking_endtime":"2011-06-21 20:11:00",
+      "race_starttime":"",
+      "status":"HIDDEN"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=85c505d8-9b81-11e0-85be-406186cbf87c",
+      "id":"85c505d8-9b81-11e0-85be-406186cbf87c",
+      "name":"470W Race11",
+      "tracking_starttime":"2011-06-21 20:11:00",
+      "tracking_endtime":"2011-06-21 20:12:00",
+      "race_starttime":"",
+      "status":"HIDDEN"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=ffd33b76-9b7f-11e0-85be-406186cbf87c",
+      "id":"ffd33b76-9b7f-11e0-85be-406186cbf87c",
+      "name":"49er Silver Race11",
+      "tracking_starttime":"2011-06-21 20:11:00",
+      "tracking_endtime":"2011-06-21 20:12:00",
+      "race_starttime":"",
+      "status":"HIDDEN"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=2036421a-9a8f-11e0-85be-406186cbf87c",
+      "id":"2036421a-9a8f-11e0-85be-406186cbf87c",
+      "name":"49er Silver Race12",
+      "tracking_starttime":"2011-06-21 20:12:00",
+      "tracking_endtime":"2011-06-21 20:13:00",
+      "race_starttime":"",
+      "status":"HIDDEN"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=2b0d3990-9b80-11e0-85be-406186cbf87c",
+      "id":"2b0d3990-9b80-11e0-85be-406186cbf87c",
+      "name":"49er Silver Race13",
+      "tracking_starttime":"2011-06-21 20:13:00",
+      "tracking_endtime":"2011-06-21 20:14:00",
+      "race_starttime":"",
+      "status":"HIDDEN"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=49a95a00-9b80-11e0-85be-406186cbf87c",
+      "id":"49a95a00-9b80-11e0-85be-406186cbf87c",
+      "name":"49er Silver Race14",
+      "tracking_starttime":"2011-06-21 20:14:00",
+      "tracking_endtime":"2011-06-21 20:15:00",
+      "race_starttime":"",
+      "status":"HIDDEN"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=9d686a32-9c48-11e0-85be-406186cbf87c",
+      "id":"9d686a32-9c48-11e0-85be-406186cbf87c",
+      "name":"Laser Medal",
+      "tracking_starttime":"2011-06-22 08:00:00",
+      "tracking_endtime":"2011-06-22 08:38:50",
+      "race_starttime":"2011-06-22 08:05:00",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=b0f20cf2-9c48-11e0-85be-406186cbf87c",
+      "id":"b0f20cf2-9c48-11e0-85be-406186cbf87c",
+      "name":"470W Medal",
+      "tracking_starttime":"2011-06-22 08:55:02",
+      "tracking_endtime":"2011-06-22 10:07:16",
+      "race_starttime":"2011-06-22 09:35:00",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=c489a63a-9c48-11e0-85be-406186cbf87c",
+      "id":"c489a63a-9c48-11e0-85be-406186cbf87c",
+      "name":"49er Medal",
+      "tracking_starttime":"2011-06-22 10:07:39",
+      "tracking_endtime":"2011-06-22 11:07:34",
+      "race_starttime":"2011-06-22 10:37:00",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=d591d808-9c48-11e0-85be-406186cbf87c",
+      "id":"d591d808-9c48-11e0-85be-406186cbf87c",
+      "name":"Star Medal",
+      "tracking_starttime":"2011-06-22 11:08:29",
+      "tracking_endtime":"2011-06-22 11:59:06",
+      "race_starttime":"2011-06-22 11:25:00",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=07a91aca-9cdc-11e0-85be-406186cbf87c",
+      "id":"07a91aca-9cdc-11e0-85be-406186cbf87c",
+      "name":"StarFind",
+      "tracking_starttime":"2011-06-22 14:27:00",
+      "tracking_endtime":"2011-06-22 16:00:00",
+      "race_starttime":"",
+      "status":"HIDDEN"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=c5053bba-9c98-11e0-85be-406186cbf87c",
+      "id":"c5053bba-9c98-11e0-85be-406186cbf87c",
+      "name":"totalentrytest",
+      "tracking_starttime":"2011-06-23 09:45:00",
+      "tracking_endtime":"2011-06-23 10:30:00",
+      "race_starttime":"",
+      "status":"HIDDEN"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=be3e0862-9d14-11e0-85be-406186cbf87c",
+      "id":"be3e0862-9d14-11e0-85be-406186cbf87c",
+      "name":"5O5 Race1",
+      "tracking_starttime":"2011-06-23 10:42:52",
+      "tracking_endtime":"2011-06-23 13:14:15",
+      "race_starttime":"2011-06-23 11:20:00",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=357c700a-9d9a-11e0-85be-406186cbf87c",
+      "id":"357c700a-9d9a-11e0-85be-406186cbf87c",
+      "name":"505 Race 2",
+      "tracking_starttime":"2011-06-23 13:14:31",
+      "tracking_endtime":"2011-06-23 14:58:23",
+      "race_starttime":"2011-06-23 13:25:00",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=71c9c288-9d9f-11e0-85be-406186cbf87c",
+      "id":"71c9c288-9d9f-11e0-85be-406186cbf87c",
+      "name":"Tornado Race10",
+      "tracking_starttime":"2011-06-23 13:49:59",
+      "tracking_endtime":"2011-06-23 14:32:03",
+      "race_starttime":"2011-06-23 13:50:00",
+      "status":"HIDDEN"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=5e11c318-9d76-11e0-85be-406186cbf87c",
+      "id":"5e11c318-9d76-11e0-85be-406186cbf87c",
+      "name":"29erXX Race1",
+      "tracking_starttime":"2011-06-23 14:15:00",
+      "tracking_endtime":"2011-06-23 14:58:50",
+      "race_starttime":"2011-06-23 14:25:00",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=16edbf04-9d77-11e0-85be-406186cbf87c",
+      "id":"16edbf04-9d77-11e0-85be-406186cbf87c",
+      "name":"Musto Race1",
+      "tracking_starttime":"2011-06-23 14:20:00",
+      "tracking_endtime":"2011-06-23 15:10:00",
+      "race_starttime":"",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=78991504-9da5-11e0-85be-406186cbf87c",
+      "id":"78991504-9da5-11e0-85be-406186cbf87c",
+      "name":"Tornado Race 11",
+      "tracking_starttime":"2011-06-23 14:32:10",
+      "tracking_endtime":"2011-06-23 20:12:00",
+      "race_starttime":"2011-06-23 14:36:00",
+      "status":"HIDDEN"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=e876c3a0-9da8-11e0-85be-406186cbf87c",
+      "id":"e876c3a0-9da8-11e0-85be-406186cbf87c",
+      "name":"505 Race 3",
+      "tracking_starttime":"2011-06-23 14:58:33",
+      "tracking_endtime":"2011-06-23 17:00:00",
+      "race_starttime":"2011-06-23 15:13:00",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=7b8423e4-9d91-11e0-85be-406186cbf87c",
+      "id":"7b8423e4-9d91-11e0-85be-406186cbf87c",
+      "name":"29erXX Race2",
+      "tracking_starttime":"2011-06-23 14:58:57",
+      "tracking_endtime":"2011-06-23 15:58:55",
+      "race_starttime":"2011-06-23 15:22:00",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=b3e9082e-9d11-11e0-85be-406186cbf87c",
+      "id":"b3e9082e-9d11-11e0-85be-406186cbf87c",
+      "name":"Silbernes Band I",
+      "tracking_starttime":"2011-06-23 15:01:35",
+      "tracking_endtime":"2011-06-24 08:45:48",
+      "race_starttime":"",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=fe8d9dc6-9dda-11e0-85be-406186cbf87c",
+      "id":"fe8d9dc6-9dda-11e0-85be-406186cbf87c",
+      "name":"Musto Race2",
+      "tracking_starttime":"2011-06-23 15:20:00",
+      "tracking_endtime":"2011-06-23 16:00:00",
+      "race_starttime":"",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=56a61922-9da7-11e0-85be-406186cbf87c",
+      "id":"56a61922-9da7-11e0-85be-406186cbf87c",
+      "name":"Silbernes Band II",
+      "tracking_starttime":"2011-06-23 15:33:42",
+      "tracking_endtime":"2011-06-24 08:45:53",
+      "race_starttime":"",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=bf0f3188-9db1-11e0-85be-406186cbf87c",
+      "id":"bf0f3188-9db1-11e0-85be-406186cbf87c",
+      "name":"29erXX race 3",
+      "tracking_starttime":"2011-06-23 15:59:56",
+      "tracking_endtime":"2011-06-23 16:58:24",
+      "race_starttime":"2011-06-23 16:10:00",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=68f793e6-9d91-11e0-85be-406186cbf87c",
+      "id":"68f793e6-9d91-11e0-85be-406186cbf87c",
+      "name":"Musto Race3",
+      "tracking_starttime":"2011-06-23 16:02:41",
+      "tracking_endtime":"2011-06-23 16:59:27",
+      "race_starttime":"",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=7c666e50-9dde-11e0-85be-406186cbf87c",
+      "id":"7c666e50-9dde-11e0-85be-406186cbf87c",
+      "name":"505 race 4",
+      "tracking_starttime":"2011-06-24 08:39:54",
+      "tracking_endtime":"2011-06-24 10:47:32",
+      "race_starttime":"2011-06-24 09:15:00",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=88152c2e-9ddd-11e0-85be-406186cbf87c",
+      "id":"88152c2e-9ddd-11e0-85be-406186cbf87c",
+      "name":"29'er Yellow Race 4",
+      "tracking_starttime":"2011-06-24 09:40:07",
+      "tracking_endtime":"2011-06-24 11:00:53",
+      "race_starttime":"2011-06-24 10:07:00",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=92d1755e-9dde-11e0-85be-406186cbf87c",
+      "id":"92d1755e-9dde-11e0-85be-406186cbf87c",
+      "name":"505 race 5",
+      "tracking_starttime":"2011-06-24 10:47:49",
+      "tracking_endtime":"2011-06-24 12:17:22",
+      "race_starttime":"",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=97eaedaa-9ddd-11e0-85be-406186cbf87c",
+      "id":"97eaedaa-9ddd-11e0-85be-406186cbf87c",
+      "name":"29'er Yellow Race 5",
+      "tracking_starttime":"2011-06-24 11:00:55",
+      "tracking_endtime":"2011-06-24 11:58:13",
+      "race_starttime":"2011-06-24 11:06:00",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=a7893608-9dde-11e0-85be-406186cbf87c",
+      "id":"a7893608-9dde-11e0-85be-406186cbf87c",
+      "name":"505 race 6",
+      "tracking_starttime":"2011-06-24 12:17:41",
+      "tracking_endtime":"2011-06-24 14:05:26",
+      "race_starttime":"",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=c31b099c-9ddd-11e0-85be-406186cbf87c",
+      "id":"c31b099c-9ddd-11e0-85be-406186cbf87c",
+      "name":"29'er Yellow Race 6",
+      "tracking_starttime":"2011-06-24 12:22:31",
+      "tracking_endtime":"2011-06-24 14:28:59",
+      "race_starttime":"",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=ee09d080-9e59-11e0-85be-406186cbf87c",
+      "id":"ee09d080-9e59-11e0-85be-406186cbf87c",
+      "name":"Tornado Race12",
+      "tracking_starttime":"2011-06-24 12:22:45",
+      "tracking_endtime":"2011-06-24 13:31:22",
+      "race_starttime":"",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=081307ee-9e5a-11e0-85be-406186cbf87c",
+      "id":"081307ee-9e5a-11e0-85be-406186cbf87c",
+      "name":"Tornado Race13",
+      "tracking_starttime":"2011-06-24 13:33:02",
+      "tracking_endtime":"2011-06-24 13:48:03",
+      "race_starttime":"",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=20382b9c-9e5a-11e0-85be-406186cbf87c",
+      "id":"20382b9c-9e5a-11e0-85be-406186cbf87c",
+      "name":"Tornado Race14",
+      "tracking_starttime":"2011-06-24 13:48:44",
+      "tracking_endtime":"2011-06-24 14:13:23",
+      "race_starttime":"",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=eb4ef344-9e67-11e0-85be-406186cbf87c",
+      "id":"eb4ef344-9e67-11e0-85be-406186cbf87c",
+      "name":"Tornado Race15",
+      "tracking_starttime":"2011-06-24 14:13:35",
+      "tracking_endtime":"2011-06-24 14:35:11",
+      "race_starttime":"",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=f54d922c-9ddd-11e0-85be-406186cbf87c",
+      "id":"f54d922c-9ddd-11e0-85be-406186cbf87c",
+      "name":"29'er Yellow Race 7",
+      "tracking_starttime":"2011-06-24 14:30:22",
+      "tracking_endtime":"2011-06-24 15:08:38",
+      "race_starttime":"",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=04687b2a-9e68-11e0-85be-406186cbf87c",
+      "id":"04687b2a-9e68-11e0-85be-406186cbf87c",
+      "name":"Tornado Race16",
+      "tracking_starttime":"2011-06-24 14:35:38",
+      "tracking_endtime":"2011-06-24 14:54:46",
+      "race_starttime":"2011-06-24 14:42:00",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=dffb64de-9e6a-11e0-85be-406186cbf87c",
+      "id":"dffb64de-9e6a-11e0-85be-406186cbf87c",
+      "name":"Tornado Race17",
+      "tracking_starttime":"2011-06-24 14:55:02",
+      "tracking_endtime":"2011-06-24 15:16:21",
+      "race_starttime":"",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=797f28de-9e8e-11e0-85be-406186cbf87c",
+      "id":"797f28de-9e8e-11e0-85be-406186cbf87c",
+      "name":"totalentrytest2",
+      "tracking_starttime":"2011-06-24 18:15:00",
+      "tracking_endtime":"2011-06-24 20:15:00",
+      "race_starttime":"",
+      "status":"HIDDEN"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=af33e03c-9e93-11e0-85be-406186cbf87c",
+      "id":"af33e03c-9e93-11e0-85be-406186cbf87c",
+      "name":"X-99 - race 6",
+      "tracking_starttime":"2011-06-25 09:10:00",
+      "tracking_endtime":"2011-06-25 10:43:43",
+      "race_starttime":"2011-06-25 09:20:00",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=cb043bb4-9e92-11e0-85be-406186cbf87c",
+      "id":"cb043bb4-9e92-11e0-85be-406186cbf87c",
+      "name":"505 race 7",
+      "tracking_starttime":"2011-06-25 09:10:00",
+      "tracking_endtime":"2011-06-25 10:31:16",
+      "race_starttime":"2011-06-25 09:17:00",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=10a4757c-9e92-11e0-85be-406186cbf87c",
+      "id":"10a4757c-9e92-11e0-85be-406186cbf87c",
+      "name":"Farr30 - race 7",
+      "tracking_starttime":"2011-06-25 09:20:00",
+      "tracking_endtime":"2011-06-25 10:48:27",
+      "race_starttime":"2011-06-25 09:30:00",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=de822656-9e92-11e0-85be-406186cbf87c",
+      "id":"de822656-9e92-11e0-85be-406186cbf87c",
+      "name":"505 race 8",
+      "tracking_starttime":"2011-06-25 10:31:43",
+      "tracking_endtime":"2011-06-25 11:58:08",
+      "race_starttime":"2011-06-25 10:50:00",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=c071401a-9e93-11e0-85be-406186cbf87c",
+      "id":"c071401a-9e93-11e0-85be-406186cbf87c",
+      "name":"X-99 - race 7",
+      "tracking_starttime":"2011-06-25 10:47:53",
+      "tracking_endtime":"2011-06-25 12:15:13",
+      "race_starttime":"",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=36ed21ca-9e92-11e0-85be-406186cbf87c",
+      "id":"36ed21ca-9e92-11e0-85be-406186cbf87c",
+      "name":"Farr30 - race 8",
+      "tracking_starttime":"2011-06-25 10:48:39",
+      "tracking_endtime":"2011-06-25 12:17:19",
+      "race_starttime":"",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=33851320-9e93-11e0-85be-406186cbf87c",
+      "id":"33851320-9e93-11e0-85be-406186cbf87c",
+      "name":"505 race 9",
+      "tracking_starttime":"2011-06-25 12:01:23",
+      "tracking_endtime":"2011-06-25 13:55:23",
+      "race_starttime":"2011-06-25 12:10:00",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=d9fd357a-9e93-11e0-85be-406186cbf87c",
+      "id":"d9fd357a-9e93-11e0-85be-406186cbf87c",
+      "name":"X-99 - race 8",
+      "tracking_starttime":"2011-06-25 12:15:31",
+      "tracking_endtime":"2011-06-25 13:54:53",
+      "race_starttime":"2011-06-25 12:35:00",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=496a5458-9e92-11e0-85be-406186cbf87c",
+      "id":"496a5458-9e92-11e0-85be-406186cbf87c",
+      "name":"Farr30 - race 9",
+      "tracking_starttime":"2011-06-25 12:17:46",
+      "tracking_endtime":"2011-06-25 13:55:31",
+      "race_starttime":"",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=a75dca04-9f55-11e0-85be-406186cbf87c",
+      "id":"a75dca04-9f55-11e0-85be-406186cbf87c",
+      "name":"29erXX Race12",
+      "tracking_starttime":"2011-06-26 08:45:13",
+      "tracking_endtime":"2011-06-26 10:28:30",
+      "race_starttime":"",
+      "status":"OFFLINE"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=c9b627b4-9f54-11e0-85be-406186cbf87c",
+      "id":"c9b627b4-9f54-11e0-85be-406186cbf87c",
+      "name":"420 Gold Race9",
+      "tracking_starttime":"2011-06-26 09:29:00",
+      "tracking_endtime":"2011-06-26 10:51:39",
+      "race_starttime":"2011-06-26 09:39:00",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=829bd366-9f53-11e0-85be-406186cbf87c",
+      "id":"829bd366-9f53-11e0-85be-406186cbf87c",
+      "name":"5O5 Race10",
+      "tracking_starttime":"2011-06-26 09:57:00",
+      "tracking_endtime":"2011-06-26 10:55:47",
+      "race_starttime":"2011-06-26 10:07:00",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=bc78290c-9f55-11e0-85be-406186cbf87c",
+      "id":"bc78290c-9f55-11e0-85be-406186cbf87c",
+      "name":"29erXX Race13",
+      "tracking_starttime":"2011-06-26 10:30:00",
+      "tracking_endtime":"2011-06-26 11:05:21",
+      "race_starttime":"",
+      "status":"OFFLINE"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=d62d4288-9f55-11e0-85be-406186cbf87c",
+      "id":"d62d4288-9f55-11e0-85be-406186cbf87c",
+      "name":"29erXX Race14",
+      "tracking_starttime":"2011-06-26 11:05:51",
+      "tracking_endtime":"2011-06-26 20:15:00",
+      "race_starttime":"",
+      "status":"OFFLINE"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=972c4d74-9f53-11e0-85be-406186cbf87c",
+      "id":"972c4d74-9f53-11e0-85be-406186cbf87c",
+      "name":"5O5 Race11",
+      "tracking_starttime":"2011-06-26 11:08:00",
+      "tracking_endtime":"2011-06-26 13:18:00",
+      "race_starttime":"2011-06-26 11:18:00",
+      "status":"REPLAY"
+    },
+    {
+      "url":"http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/index.php?raceid=c3ab8bcc-a17d-11e0-aeec-406186cbf87c",
+      "id":"c3ab8bcc-a17d-11e0-aeec-406186cbf87c",
+      "name":"505 Test",
+      "tracking_starttime":"2011-06-26 23:00:00",
+      "tracking_endtime":"2011-06-26 23:01:00",
+      "race_starttime":"",
+      "status":"OFFLINE"
+    }
+  ]
+}

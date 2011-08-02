@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.leaderboard.impl;
 
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -36,8 +37,9 @@ public class ResultDiscardingRuleImpl implements ResultDiscardingRule {
     @Override
     public Set<TrackedRace> getDiscardedRaces(final Competitor competitor, Iterable<TrackedRace> races, final TimePoint timePoint) {
         int resultsToDiscard = getNumberOfResultsToDiscard(races, timePoint);
-        Set<TrackedRace> result = new HashSet<TrackedRace>();
+        Set<TrackedRace> result;
         if (resultsToDiscard > 0) {
+            result = new HashSet<TrackedRace>();
             TreeSet<TrackedRace> sortedRaces = new TreeSet<TrackedRace>(new Comparator<TrackedRace>() {
                 @Override
                 public int compare(TrackedRace o1, TrackedRace o2) {
@@ -57,6 +59,8 @@ public class ResultDiscardingRuleImpl implements ResultDiscardingRule {
                 result.add(badRacesIter.next());
                 i++;
             }
+        } else {
+            result = Collections.emptySet();
         }
         return result;
     }

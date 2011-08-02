@@ -1,10 +1,16 @@
 package com.sap.sailing.domain.leaderboard.impl;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.leaderboard.ScoreCorrection;
+import com.sap.sailing.domain.leaderboard.ScoreCorrection.MaxPointsReason;
+import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.util.Util;
+import com.sap.sailing.util.Util.Pair;
 
 /**
  * Implements the basic logic of assigning a maximum score to a competitor in a race if that competitor was
@@ -12,21 +18,41 @@ import com.sap.sailing.util.Util;
  * listed in the event to which the race belongs.
  * <p>
  * 
- * Subclasses should consider redefining {@link #getMaxPointsReason(Competitor, TrackedRace)} and
- * {@link #getCorrectedNonMaxedScore(Competitor, TrackedRace, int)} if they want to manage, e.g., disqualifications and
- * jury overruling of tracking results.
- * <p>
- * 
- * To allow tests to use a trivial implementation of the {@link ScoreCorrection} interface, this class which carries
- * "Abstract" in its name is non-abstract.
- * 
  * @author Axel Uhl (d043530)
  * 
  */
-public class AbstractScoreCorrection implements ScoreCorrection {
+public class ScoreCorrectionImpl implements SettableScoreCorrection {
+    /**
+     * If no max point reason is provided for a competitor/race, {@link MaxPointsReason#NONE} should be the default.
+     */
+    private final Map<Pair<Competitor, TrackedRace>, MaxPointsReason> maxPointsReasons;
+
+    /**
+     * If no score correction is provided here, the uncorrected points are the default.
+     */
+    private final Map<Pair<Competitor, TrackedRace>, Integer> correctedScores;
     
+    public ScoreCorrectionImpl() {
+        this.maxPointsReasons = new HashMap<Util.Pair<Competitor,TrackedRace>, ScoreCorrection.MaxPointsReason>();
+        this.correctedScores = new HashMap<Util.Pair<Competitor,TrackedRace>, Integer>();
+    }
+
+    @Override
+    public void setMaxPointsReason(Competitor competitor, TrackedRace race, MaxPointsReason reason) {
+        maxPointsReasons.put(new Pair<Competitor, TrackedRace>(competitor, race), reason);
+    }
+
+    @Override
+    public void correctScore(Competitor competitor, TrackedRace race, int points) {
+        correctedScores.put(new Pair<Competitor, TrackedRace>(competitor, race), points);
+    }
+
     protected MaxPointsReason getMaxPointsReason(Competitor competitor, TrackedRace trackedRace) {
-        return MaxPointsReason.NONE;
+        MaxPointsReason result = maxPointsReasons.get(new Pair<Competitor, TrackedRace>(competitor, trackedRace));
+        if (result == null) {
+            result = MaxPointsReason.NONE;
+        }
+        return result;
     }
     
     /**
@@ -43,7 +69,7 @@ public class AbstractScoreCorrection implements ScoreCorrection {
         } else {
             result = getMaxPoints(trackedRace);
         }
-        return getCorrectedNonMaxedScore(competitor, trackedRace, result);
+        return result;
     }
 
     /**
@@ -53,7 +79,12 @@ public class AbstractScoreCorrection implements ScoreCorrection {
      * differences between what the tracking results suggest and what the jury or race committee decided.
      */
     protected int getCorrectedNonMaxedScore(Competitor competitor, TrackedRace trackedRace, int uncorrectedScore) {
-        return uncorrectedScore;
+        Integer correctedNonMaxedScore = correctedScores.get(new Pair<Competitor, TrackedRace>(competitor, trackedRace));
+        if (correctedNonMaxedScore == null) {
+            return uncorrectedScore;
+        } else {
+            return correctedNonMaxedScore;
+        }
     }
 
     private int getMaxPoints(TrackedRace trackedRace) {

@@ -75,5 +75,14 @@ public class LeaderboardImpl implements Leaderboard {
     public int getTotalPoints(Competitor competitor, TrackedRace race, TimePoint timePoint) throws NoWindException {
         return isDiscarded(competitor, race, timePoint) ? 0 : getNetPoints(competitor, race, timePoint);
     }
+    
+    @Override
+    public int getTotalPoints(Competitor competitor, TimePoint timePoint) throws NoWindException {
+        int result = 0;
+        for (TrackedRace r : getRaces()) {
+            result += getTotalPoints(competitor, r, timePoint);
+        }
+        return result;
+    }
 
 }

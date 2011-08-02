@@ -63,4 +63,10 @@ public interface Leaderboard {
     boolean isDiscarded(Competitor competitor, TrackedRace race, TimePoint timePoint);
 
     void addRace(TrackedRace race);
+
+    /**
+     * Sums up the {@link #getTotalPoints(Competitor, TrackedRace, TimePoint) total points} of <code>competitor</code>
+     * across all races tracked by this leaderboard.
+     */
+    int getTotalPoints(Competitor competitor, TimePoint timePoint) throws NoWindException;
 }

@@ -546,5 +546,9 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         return new WindImpl(null, timePoint,
                 new KnotSpeedWithBearingImpl(/* speedInKnots */ 1, new DegreeBearingImpl(bearingDeg)));
     }
-    
+
+    @Override
+    public String toString() {
+        return "TrackedRace for "+getRace();
+    }
 }

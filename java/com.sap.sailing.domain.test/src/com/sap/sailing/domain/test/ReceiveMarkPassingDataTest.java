@@ -48,7 +48,8 @@ public class ReceiveMarkPassingDataTest extends AbstractTracTracLiveTest {
         Receiver receiver = new Receiver() {
             @Override
             public Iterable<TypeController> getTypeControllersAndStart() {
-                TypeController markPassingsListener = MarkPassingsData.subscribe(race,
+                final TypeController[] markPassingsListener = new TypeController[1];
+                markPassingsListener[0] = MarkPassingsData.subscribe(race,
                         new ICallbackData<RaceCompetitor, MarkPassingsData>() {
                             private boolean first = true;
 
@@ -58,12 +59,13 @@ public class ReceiveMarkPassingDataTest extends AbstractTracTracLiveTest {
                                     synchronized (semaphor) {
                                         firstData[0] = record;
                                         semaphor.notifyAll();
+                                        getController().remove(markPassingsListener[0]);
                                     }
                                     first = false;
                                 }
                             }
                         });
-                return Collections.singleton(markPassingsListener);
+                return Collections.singleton(markPassingsListener[0]);
             }
 
             @Override

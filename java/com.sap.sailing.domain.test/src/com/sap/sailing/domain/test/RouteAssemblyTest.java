@@ -38,7 +38,8 @@ public class RouteAssemblyTest extends AbstractTracTracLiveTest {
 
             @Override
             public Iterable<TypeController> getTypeControllersAndStart() {
-                TypeController routeListener = RouteData.subscribe(getEvent().getRaceList().iterator().next(),
+                final TypeController routeListener[] = new TypeController[1];
+                routeListener[0] = RouteData.subscribe(getEvent().getRaceList().iterator().next(),
                         new ICallbackData<Route, RouteData>() {
                             private boolean first = true;
 
@@ -49,12 +50,13 @@ public class RouteAssemblyTest extends AbstractTracTracLiveTest {
                                         firstRoute[0] = route;
                                         firstData[0] = record;
                                         semaphor.notifyAll();
+                                        getController().remove(routeListener[0]);
                                     }
                                     first = false;
                                 }
                             }
                         });
-                return Collections.singleton(routeListener);
+                return Collections.singleton(routeListener[0]);
             }
 
             @Override
