@@ -21,6 +21,9 @@ import java.util.logging.Logger;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.impl.LeaderboardImpl;
+import com.sap.sailing.domain.leaderboard.impl.ResultDiscardingRuleImpl;
+import com.sap.sailing.domain.leaderboard.impl.ScoreCorrectionImpl;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTracker;
@@ -71,20 +74,27 @@ public class RacingEventServiceImpl implements RacingEventService {
     }
     
     @Override
-    public void addLeaderboard(Leaderboard leaderboard) {
-        leaderboards.add(leaderboard);
+    public Leaderboard addLeaderboard(String name, int[] discardThresholds) {
+        Leaderboard result = new LeaderboardImpl(name, new ScoreCorrectionImpl(), new ResultDiscardingRuleImpl(discardThresholds));
+        leaderboardsByName.put(name, result);
+        return result;
     }
     
     @Override
-    public void removeLeaderboard(Leaderboard leaderboard) {
-        leaderboards.remove(leaderboard);
+    public void removeLeaderboard(String leaderboardName) {
+        leaderboardsByName.remove(leaderboardName);
     }
     
+    @Override
+    public Leaderboard getLeaderboardByName(String name) {
+        return leaderboardsByName.get(name);
+    }
+
     @Override
     public DomainFactory getDomainFactory() {
         return domainFactory;
     }
-
+    
     @Override
     public Iterable<Event> getAllEvents() {
         return Collections.unmodifiableCollection(eventsByName.values());

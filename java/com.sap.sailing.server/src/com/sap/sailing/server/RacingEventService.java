@@ -129,8 +129,20 @@ public interface RacingEventService {
 
     TrackedRace getTrackedRace(Event event, RaceDefinition r);
 
-    void removeLeaderboard(Leaderboard leaderboard);
+    /**
+     * Creates a new leaderboard with the <code>name</code> specified.
+     * 
+     * @param discardThresholds
+     *            Tells the thresholds from which on a next higher number of worst races will be discarded per
+     *            competitor. Example: <code>[3, 6]</code> means that starting from three races the single worst race
+     *            will be discarded; starting from six races, the two worst races per competitor are discarded.
+     * 
+     * @return the leaderboard created
+     */
+    Leaderboard addLeaderboard(String name, int[] discardThresholds);
 
-    void addLeaderboard(Leaderboard leaderboard);
+    void removeLeaderboard(String leaderboardName);
+    
+    Leaderboard getLeaderboardByName(String name);
 
 }
