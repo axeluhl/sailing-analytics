@@ -9,6 +9,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.ParseException;
 import java.util.List;
+import java.util.Map;
 
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -144,5 +145,10 @@ public interface RacingEventService {
     void removeLeaderboard(String leaderboardName);
     
     Leaderboard getLeaderboardByName(String name);
+
+    /**
+     * Obtains an unmodifiable map of the leaderboard configured in this service keyed by their names.
+     */
+    Map<String, Leaderboard> getLeaderboards();
 
 }

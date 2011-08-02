@@ -61,15 +61,27 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
      * score} is computed for the competitor. Otherwise, the <code>uncorrectedScore</code> is returned.<p>
      */
     @Override
-    public int getCorrectedScore(int uncorrectedScore, Competitor competitor, TrackedRace trackedRace,
+    public Result getCorrectedScore(int uncorrectedScore, Competitor competitor, TrackedRace trackedRace,
             TimePoint timePoint) {
         int result;
-        if (getMaxPointsReason(competitor, trackedRace) == MaxPointsReason.NONE) {
+        final MaxPointsReason maxPointsReason = getMaxPointsReason(competitor, trackedRace);
+        if (maxPointsReason == MaxPointsReason.NONE) {
             result = getCorrectedNonMaxedScore(competitor, trackedRace, uncorrectedScore);
         } else {
             result = getMaxPoints(trackedRace);
         }
-        return result;
+        final int correctedScore = result;
+        return new Result() {
+            @Override
+            public MaxPointsReason getMaxPointsReason() {
+                return maxPointsReason;
+            }
+            
+            @Override
+            public int getCorrectedScore() {
+                return correctedScore;
+            }
+        };
     }
 
     /**

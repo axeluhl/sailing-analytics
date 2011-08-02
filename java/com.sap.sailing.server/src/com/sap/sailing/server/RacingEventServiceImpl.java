@@ -89,6 +89,11 @@ public class RacingEventServiceImpl implements RacingEventService {
     public Leaderboard getLeaderboardByName(String name) {
         return leaderboardsByName.get(name);
     }
+    
+    @Override
+    public Map<String, Leaderboard> getLeaderboards() {
+        return Collections.unmodifiableMap(leaderboardsByName);
+    }
 
     @Override
     public DomainFactory getDomainFactory() {

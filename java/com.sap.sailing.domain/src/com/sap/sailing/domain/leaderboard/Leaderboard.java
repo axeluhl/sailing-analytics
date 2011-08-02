@@ -1,10 +1,14 @@
 package com.sap.sailing.domain.leaderboard;
 
+import java.util.Map;
+
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Named;
 import com.sap.sailing.domain.base.TimePoint;
+import com.sap.sailing.domain.leaderboard.ScoreCorrection.MaxPointsReason;
 import com.sap.sailing.domain.tracking.NoWindException;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.util.Util.Pair;
 
 /**
  * A leader-board is used to display the results of one or more {@link TrackedRace races}. It manages the competitors'
@@ -21,9 +25,26 @@ import com.sap.sailing.domain.tracking.TrackedRace;
  * 
  */
 public interface Leaderboard extends Named {
+    /**
+     * If the leaderboard is a "matrix" with the cells being defined by a competitor / race "coordinate,"
+     * then this interface defines the structure of the "cells."
+     * 
+     * @author Axel Uhl (d043530)
+     *
+     */
+    public interface Entry {
+        int getTrackedPoints();
+        int getNetPoints() throws NoWindException;
+        int getTotalPoints() throws NoWindException;
+        MaxPointsReason getMaxPointsReason();
+        boolean isDiscarded() throws NoWindException;
+    }
+    
     Iterable<TrackedRace> getRaces();
 
     Iterable<Competitor> getCompetitors();
+    
+    Entry getEntry(Competitor competitor, TrackedRace race, TimePoint timePoint) throws NoWindException;
 
     /**
      * Shorthand for {@link TrackedRace#getRank(Competitor, com.sap.sailing.domain.base.TimePoint)} with the
@@ -50,6 +71,11 @@ public interface Leaderboard extends Named {
     int getNetPoints(Competitor competitor, TrackedRace race, TimePoint timePoint) throws NoWindException;
 
     /**
+     * Tells if and why a competitor received maximum points for a race.
+     */
+    MaxPointsReason getMaxPointsReason(Competitor competitor, TrackedRace race, TimePoint timePoint) throws NoWindException;
+
+    /**
      * A possibly corrected number of points for the race specified. Defaults to the result of calling
      * {@link #getNetPoints(Competitor, TrackedRace, TimePoint)} but may be corrected by the regatta
      * rules for discarding results.
@@ -70,4 +96,12 @@ public interface Leaderboard extends Named {
      * across all races tracked by this leaderboard.
      */
     int getTotalPoints(Competitor competitor, TimePoint timePoint) throws NoWindException;
+
+    /**
+     * Fetches all entries for all competitors of all races tracked by this leaderboard in one sweep. This saves some
+     * computational effort compared to fetching all entries separately, particularly because all
+     * {@link #isDiscarded(Competitor, TrackedRace, TimePoint) discarded races} of a competitor are computed in one
+     * sweep using {@link ResultDiscardingRule#getDiscardedRaces(Competitor, Iterable, TimePoint)} only once.
+     */
+    Map<Pair<Competitor, TrackedRace>, Entry> getContent(TimePoint timePoint) throws NoWindException;
 }

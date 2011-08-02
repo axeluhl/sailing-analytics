@@ -33,5 +33,10 @@ public interface ScoreCorrection {
         DSQ
     };
     
-    int getCorrectedScore(int uncorrectedScore, Competitor competitor, TrackedRace trackedRace, TimePoint timePoint);
+    public interface Result {
+        int getCorrectedScore();
+        MaxPointsReason getMaxPointsReason();
+    }
+    
+    Result getCorrectedScore(int uncorrectedScore, Competitor competitor, TrackedRace trackedRace, TimePoint timePoint);
 }
