@@ -63,6 +63,8 @@ public class RacingEventServiceImpl implements RacingEventService {
      */
     private final Map<String, Leaderboard> leaderboardsByName;
     
+    private static final String DEFAULT_LEADERBOARD_NAME = "DEFAULT";
+    
     public RacingEventServiceImpl() {
         domainFactory = DomainFactory.INSTANCE;
         windTrackerFactory = ExpeditionWindTrackerFactory.getInstance();
@@ -71,28 +73,55 @@ public class RacingEventServiceImpl implements RacingEventService {
         windTrackers = new HashMap<RaceDefinition, WindTracker>();
         raceTrackersByURLs = new HashMap<Triple<URL, URI, URI>, RaceTracker>();
         leaderboardsByName = new HashMap<String, Leaderboard>();
+        // Add one default leaderboard that aggregates all races currently tracked by this service.
+        // This is more for debugging purposes than for anything else.
+        addLeaderboard(DEFAULT_LEADERBOARD_NAME, new int[] { 3, 6 });
     }
     
     @Override
     public Leaderboard addLeaderboard(String name, int[] discardThresholds) {
-        Leaderboard result = new LeaderboardImpl(name, new ScoreCorrectionImpl(), new ResultDiscardingRuleImpl(discardThresholds));
-        leaderboardsByName.put(name, result);
+        Leaderboard result = new LeaderboardImpl(name, new ScoreCorrectionImpl(), new ResultDiscardingRuleImpl(
+                discardThresholds));
+        synchronized (leaderboardsByName) {
+            leaderboardsByName.put(name, result);
+        }
         return result;
     }
     
     @Override
+    public void renameLeaderboard(String oldName, String newName) {
+        synchronized (leaderboardsByName) {
+            if (!leaderboardsByName.containsKey(oldName)) {
+                throw new IllegalArgumentException("No leaderboard with name "+oldName+" found");
+            }
+            if (leaderboardsByName.containsKey(newName)) {
+                throw new IllegalArgumentException("Leaderboard with name "+newName+" already exists");
+            }
+            Leaderboard toRename = leaderboardsByName.remove(oldName);
+            toRename.setName(newName);
+            leaderboardsByName.put(newName, toRename);
+        }
+    }
+    
+    @Override
     public void removeLeaderboard(String leaderboardName) {
-        leaderboardsByName.remove(leaderboardName);
+        synchronized (leaderboardsByName) {
+            leaderboardsByName.remove(leaderboardName);
+        }
     }
     
     @Override
     public Leaderboard getLeaderboardByName(String name) {
-        return leaderboardsByName.get(name);
+        synchronized (leaderboardsByName) {
+            return leaderboardsByName.get(name);
+        }
     }
     
     @Override
     public Map<String, Leaderboard> getLeaderboards() {
-        return Collections.unmodifiableMap(leaderboardsByName);
+        synchronized (leaderboardsByName) {
+            return Collections.unmodifiableMap(new HashMap<String, Leaderboard>(leaderboardsByName));
+        }
     }
 
     @Override
