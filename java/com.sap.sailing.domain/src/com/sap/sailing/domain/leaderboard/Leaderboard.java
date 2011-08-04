@@ -96,7 +96,13 @@ public interface Leaderboard extends Named {
 
     boolean isDiscarded(Competitor competitor, TrackedRace race, TimePoint timePoint);
 
-    void addRace(TrackedRace race);
+    /**
+     * Adds a tracked race to this leaderboard. If a {@link RaceInLeaderboard} with name <code>columnName</code> already
+     * exists in this leaderboard, <code>race</code> is {@link RaceInLeaderboard#setTrackedRace(TrackedRace) set as its
+     * tracked race}. Otherwise, a new {@link RaceInLeaderboard} column, with <code>race</code> as its tracked race, is
+     * created and added to this leaderboard.
+     */
+    void addRace(TrackedRace race, String columnName);
 
     /**
      * Sums up the {@link #getTotalPoints(Competitor, TrackedRace, TimePoint) total points} of <code>competitor</code>
@@ -121,4 +127,9 @@ public interface Leaderboard extends Named {
      * structure's consistency and invokes this method.
      */
     void setName(String newName);
+
+    /**
+     * Adds a new {@link RaceInLeaderboard} that has no {@link TrackedRace} associated yet to this leaderboard.
+     */
+    void addRaceColumn(String name);
 }

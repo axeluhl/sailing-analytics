@@ -36,20 +36,20 @@ public class LeaderboardForKielWeekTest extends KielWeek2011BasedTest {
         MillisecondsTimePoint now = MillisecondsTimePoint.now();
         loadRace("357c700a-9d9a-11e0-85be-406186cbf87c"); // 505 Race 2
         Competitor hasso = getCompetitorByName("Dr.Plattner");
-        leaderboard.addRace(getTrackedRace());
+        leaderboard.addRace(getTrackedRace(), "Test Race 1");
         assertEquals(21, leaderboard.getTotalPoints(hasso, now));
         Pair<Competitor, TrackedRace> key = new Pair<Competitor, TrackedRace>(hasso, getTrackedRace());
         assertEquals(21, leaderboard.getContent(now).get(key).getTotalPoints());
         assertEquals(21, leaderboard.getEntry(hasso, getTrackedRace(), now).getTotalPoints());
         loadRace("e876c3a0-9da8-11e0-85be-406186cbf87c"); // 505 Race 3
-        leaderboard.addRace(getTrackedRace());
+        leaderboard.addRace(getTrackedRace(), "Test Race 2");
         key = new Pair<Competitor, TrackedRace>(hasso, getTrackedRace());
         // In Race 3, Hasso ranked 33th
         assertEquals(54, leaderboard.getTotalPoints(hasso, now));
         assertEquals(33, leaderboard.getContent(now).get(key).getTotalPoints());
         assertEquals(33, leaderboard.getEntry(hasso, getTrackedRace(), now).getTotalPoints());
         loadRace("7c666e50-9dde-11e0-85be-406186cbf87c"); // 505 Race 4
-        leaderboard.addRace(getTrackedRace());
+        leaderboard.addRace(getTrackedRace(), "Test Race 3");
         key = new Pair<Competitor, TrackedRace>(hasso, getTrackedRace());
         // now the second race is discarded because Hasso ranked worst compared to the other two; in race 4 he ranked 11th
         assertEquals(32, leaderboard.getTotalPoints(hasso, now));

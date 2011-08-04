@@ -76,8 +76,9 @@ public class LeaderboardOfflineTest {
         setupRaces(numberOfStartedRaces, numberOfNotStartedRaces);
         Leaderboard leaderboard = new LeaderboardImpl("Test Leaderboard", new ScoreCorrectionImpl(), new ResultDiscardingRuleImpl(
                 new int[] { firstDiscardingThreshold, secondDiscardingThreshold }));
+        int i=0;
         for (TrackedRace race : testRaces) {
-            leaderboard.addRace(race);
+            leaderboard.addRace(race, "Test Race "+(++i));
         }
         TimePoint now = MillisecondsTimePoint.now();
         for (TrackedRace race : testRaces) {

@@ -12,6 +12,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Named;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
 import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.ScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ScoreCorrection.MaxPointsReason;
@@ -21,7 +22,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.util.Util.Pair;
 
 public class LeaderboardImpl implements Named, Leaderboard {
-    private final List<TrackedRace> races;
+    private final List<RaceInLeaderboard> races;
     private final ScoreCorrection scoreCorrection;
     private final ResultDiscardingRule resultDiscardingRule;
     private String name;
@@ -74,21 +75,49 @@ public class LeaderboardImpl implements Named, Leaderboard {
             throw new IllegalArgumentException("A leaderboard's name must not be null");
         }
         this.name = name;
-        this.races = new ArrayList<TrackedRace>();
+        this.races = new ArrayList<RaceInLeaderboard>();
         this.scoreCorrection = scoreCorrection;
         this.resultDiscardingRule = resultDiscardingRule;
     }
     
     @Override
-    public void addRace(TrackedRace race) {
-        if (!races.contains(race)) {
-            races.add(race);
+    public void addRaceColumn(String name) {
+        RaceInLeaderboardImpl column = new RaceInLeaderboardImpl(this, name);
+        races.add(column);
+    }
+    
+    private RaceInLeaderboard getRaceColumnByName(String columnName) {
+        RaceInLeaderboard result = null;
+        for (RaceInLeaderboard r : races) {
+            if (r.getName().equals(columnName)) {
+                result = r;
+                break;
+            }
         }
+        return result;
+    }
+    
+    @Override
+    public void addRace(TrackedRace race, String columnName) {
+        RaceInLeaderboard column = getRaceColumnByName(columnName);
+        if (column == null) {
+            column = new RaceInLeaderboardImpl(this, columnName);
+            column.setTrackedRace(race);
+            races.add(column);
+        }
+        column.setTrackedRace(race);
     }
 
     @Override
     public Iterable<TrackedRace> getRaces() {
-        return Collections.unmodifiableList(races);
+        Set<TrackedRace> trackedRaces = new HashSet<TrackedRace>();
+        for (RaceInLeaderboard r : races) {
+            TrackedRace trackedRace = r.getTrackedRace();
+            if (trackedRace != null) {
+                trackedRaces.add(trackedRace);
+            }
+        }
+        return Collections.unmodifiableSet(trackedRaces);
     }
 
     @Override
@@ -129,7 +158,8 @@ public class LeaderboardImpl implements Named, Leaderboard {
     
     @Override
     public boolean isDiscarded(Competitor competitor, TrackedRace race, TimePoint timePoint) {
-        return getResultDiscardingRule().getDiscardedRaces(competitor, races, timePoint).contains(race);
+        Iterable<TrackedRace> trackedRaces = getRaces();
+        return getResultDiscardingRule().getDiscardedRaces(competitor, trackedRaces, timePoint).contains(race);
     }
 
     @Override
@@ -168,7 +198,7 @@ public class LeaderboardImpl implements Named, Leaderboard {
                 Result correctedResults = getScoreCorrection().getCorrectedScore(trackedPoints, competitor, race, timePoint);
                 Set<TrackedRace> discardedRacesForCompetitor = discardedRaces.get(competitor);
                 if (discardedRacesForCompetitor == null) {
-                    discardedRacesForCompetitor = getResultDiscardingRule().getDiscardedRaces(competitor, races, timePoint);
+                    discardedRacesForCompetitor = getResultDiscardingRule().getDiscardedRaces(competitor, getRaces(), timePoint);
                     discardedRaces.put(competitor, discardedRacesForCompetitor);
                 }
                 boolean discarded = discardedRacesForCompetitor.contains(race);
