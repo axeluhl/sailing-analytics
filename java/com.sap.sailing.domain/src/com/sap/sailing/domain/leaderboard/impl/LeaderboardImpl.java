@@ -9,8 +9,8 @@ import java.util.Map;
 import java.util.Set;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.Named;
 import com.sap.sailing.domain.base.TimePoint;
-import com.sap.sailing.domain.base.impl.NamedImpl;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.ScoreCorrection;
@@ -20,10 +20,11 @@ import com.sap.sailing.domain.tracking.NoWindException;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.util.Util.Pair;
 
-public class LeaderboardImpl extends NamedImpl implements Leaderboard {
+public class LeaderboardImpl implements Named, Leaderboard {
     private final List<TrackedRace> races;
     private final ScoreCorrection scoreCorrection;
     private final ResultDiscardingRule resultDiscardingRule;
+    private String name;
     
     /**
      * A leaderboard entry representing a snapshot of a cell at a given time point for a single race/competitor.
@@ -65,8 +66,14 @@ public class LeaderboardImpl extends NamedImpl implements Leaderboard {
         }
     }
 
+    /**
+     * @param name must not be <code>null</code>
+     */
     public LeaderboardImpl(String name, ScoreCorrection scoreCorrection, ResultDiscardingRule resultDiscardingRule) {
-        super(name);
+        if (name == null) {
+            throw new IllegalArgumentException("A leaderboard's name must not be null");
+        }
+        this.name = name;
         this.races = new ArrayList<TrackedRace>();
         this.scoreCorrection = scoreCorrection;
         this.resultDiscardingRule = resultDiscardingRule;
@@ -170,6 +177,21 @@ public class LeaderboardImpl extends NamedImpl implements Leaderboard {
             }
         }
         return result;
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * @param newName must not be <code>null</code>
+     */
+    public void setName(String newName) {
+        if (newName == null) {
+            throw new IllegalArgumentException("A leaderboard's name must not be null");
+        }
+        this.name = newName;
     }
 
 }
