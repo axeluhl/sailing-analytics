@@ -15,7 +15,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 public class LeaderboardDAO implements IsSerializable {
     public String name;
     public List<CompetitorDAO> competitors;
-    public List<RaceDAO> races;
-    public Map<Pair<CompetitorDAO, RaceDAO>, LeaderboardEntryDAO> fields;
-    public Map<CompetitorDAO, Integer> totalPoints;
+    public List<String> races;
+    public Map<Pair<CompetitorDAO, String>, LeaderboardEntryDAO> fields;
+    public Map<CompetitorDAO, Integer> carryPoints;
 }

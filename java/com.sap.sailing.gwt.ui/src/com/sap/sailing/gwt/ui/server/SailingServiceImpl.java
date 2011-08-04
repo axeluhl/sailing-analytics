@@ -36,6 +36,9 @@ import com.sap.sailing.domain.base.impl.KilometersPerHourSpeedImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.Leaderboard.Entry;
+import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
@@ -55,7 +58,10 @@ import com.sap.sailing.gwt.ui.shared.BoatClassDAO;
 import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
 import com.sap.sailing.gwt.ui.shared.EventDAO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDAO;
+import com.sap.sailing.gwt.ui.shared.LeaderboardDAO;
+import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDAO;
 import com.sap.sailing.gwt.ui.shared.MarkDAO;
+import com.sap.sailing.gwt.ui.shared.Pair;
 import com.sap.sailing.gwt.ui.shared.PositionDAO;
 import com.sap.sailing.gwt.ui.shared.QuickRankDAO;
 import com.sap.sailing.gwt.ui.shared.RaceDAO;
@@ -77,20 +83,45 @@ import com.sap.sailing.util.CountryCode;
 public class SailingServiceImpl extends RemoteServiceServlet implements SailingService {
     private static final long serialVersionUID = 9031688830194537489L;
 
-    private RacingEventService service;
+    private final ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
 
     public SailingServiceImpl() {
         BundleContext context = Activator.getDefault();
-        ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker = new ServiceTracker<RacingEventService, RacingEventService>(
+        racingEventServiceTracker = new ServiceTracker<RacingEventService, RacingEventService>(
                 context, RacingEventService.class.getName(), null);
         racingEventServiceTracker.open();
-        // grab the service
-        service = (RacingEventService) racingEventServiceTracker.getService();
+    }
+    
+    public LeaderboardDAO getLeaderboardByName(String leaderboardName, Date date) throws Exception {
+        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        LeaderboardDAO result = new LeaderboardDAO();
+        TimePoint timePoint = new MillisecondsTimePoint(date);
+        result.competitors = new ArrayList<CompetitorDAO>();
+        result.carryPoints = new HashMap<CompetitorDAO, Integer>();
+        result.name = leaderboard.getName();
+        result.races = new ArrayList<String>();
+        result.fields = new HashMap<Pair<CompetitorDAO,String>, LeaderboardEntryDAO>();
+        for (Competitor competitor : leaderboard.getCompetitors()) {
+            CompetitorDAO competitorDAO = getCompetitorDAO(competitor);
+            result.carryPoints.put(competitorDAO, leaderboard.getCarriedPoints(competitor));
+            result.competitors.add(competitorDAO);
+            for (RaceInLeaderboard raceColumn : leaderboard.getColumns()) {
+                Entry entry = leaderboard.getEntry(competitor, raceColumn, timePoint);
+                LeaderboardEntryDAO entryDAO = new LeaderboardEntryDAO();
+                entryDAO.netPoints = entry.getNetPoints();
+                entryDAO.totalPoints = entry.getTotalPoints();
+                entryDAO.reasonForMaxPoints = entry.getMaxPointsReason().name();
+                entryDAO.discarded = entry.isDiscarded();
+                result.races.add(raceColumn.getName());
+                result.fields.put(new Pair<CompetitorDAO, String>(competitorDAO, raceColumn.getName()), entryDAO);
+            }
+        }
+        return result;
     }
 
     public List<EventDAO> listEvents() throws IllegalArgumentException {
         List<EventDAO> result = new ArrayList<EventDAO>();
-        for (Event event : service.getAllEvents()) {
+        for (Event event : getService().getAllEvents()) {
             List<CompetitorDAO> competitorList = getCompetitorDAOs(event.getCompetitors());
             List<RegattaDAO> regattasList = getRegattaDAOs(event);
             EventDAO eventDAO = new EventDAO(event.getName(), regattasList, competitorList);
@@ -125,9 +156,9 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     private List<RaceDAO> getRaceDAOs(Event event, Set<RaceDefinition> races) {
         List<RaceDAO> result = new ArrayList<RaceDAO>();
         for (RaceDefinition r : races) {
-            RaceDAO raceDAO = new RaceDAO(r.getName(), getCompetitorDAOs(r.getCompetitors()), service.isRaceBeingTracked(r));
+            RaceDAO raceDAO = new RaceDAO(r.getName(), getCompetitorDAOs(r.getCompetitors()), getService().isRaceBeingTracked(r));
             if (raceDAO.currentlyTracked) {
-                TrackedRace trackedRace = service.getTrackedRace(event, r);
+                TrackedRace trackedRace = getService().getTrackedRace(event, r);
                 raceDAO.startOfRace = trackedRace.getStart() == null ? null : trackedRace.getStart().asDate();
                 raceDAO.startOfTracking = trackedRace.getStartOfTracking() == null ? null : trackedRace.getStartOfTracking().asDate();
                 raceDAO.timePointOfLastEvent = trackedRace.getTimePointOfLastEvent() == null ? null : trackedRace.getTimePointOfLastEvent().asDate();
@@ -158,7 +189,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     public List<RaceRecordDAO> listRacesInEvent(String eventJsonURL) throws MalformedURLException, IOException,
             ParseException, org.json.simple.parser.ParseException {
         List<RaceRecord> raceRecords;
-        raceRecords = service.getRaceRecords(new URL(eventJsonURL));
+        raceRecords = getService().getRaceRecords(new URL(eventJsonURL));
         List<RaceRecordDAO> result = new ArrayList<RaceRecordDAO>();
         for (RaceRecord raceRecord : raceRecords) {
             result.add(new RaceRecordDAO(raceRecord.getID(), raceRecord.getEventName(), raceRecord.getName(),
@@ -170,7 +201,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
 
     @Override
     public void track(RaceRecordDAO rr, String liveURI, String storedURI, boolean trackWind, boolean correctWindByDeclination) throws Exception {
-        RaceHandle raceHandle = service.addRace(new URL(rr.paramURL), new URI(liveURI), new URI(storedURI),
+        RaceHandle raceHandle = getService().addRace(new URL(rr.paramURL), new URI(liveURI), new URI(storedURI),
                 MongoWindStoreFactory.INSTANCE.getMongoWindStore(MongoObjectFactory.INSTANCE));
         if (trackWind) {
             startTrackingWind(raceHandle.getEvent().getName(), raceHandle.getRace().getName(), correctWindByDeclination);
@@ -198,7 +229,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     
     @Override
     public void stopTrackingEvent(String eventName) throws Exception {
-        service.stopTracking(service.getEventByName(eventName));
+        getService().stopTracking(getService().getEventByName(eventName));
     }
 
     private RaceDefinition getRaceByName(Event event, String raceName) {
@@ -214,29 +245,29 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     
     @Override
     public void stopTrackingRace(String eventName, String raceName) throws Exception {
-        Event event = service.getEventByName(eventName);
+        Event event = getService().getEventByName(eventName);
         RaceDefinition r = getRaceByName(event, raceName);
         if (r != null) {
-            service.stopTracking(event, r);
+            getService().stopTracking(event, r);
         }
     }
     
     private void startTrackingWind(String eventName, String raceName, boolean correctByDeclination) throws Exception {
-        Event event = service.getEventByName(eventName);
+        Event event = getService().getEventByName(eventName);
         if (event != null) {
             RaceDefinition race = getRaceByName(event, raceName);
-            service.startTrackingWind(event, race, correctByDeclination);
+            getService().startTrackingWind(event, race, correctByDeclination);
         }
     }
     
     @Override
     public WindInfoForRaceDAO getWindInfo(String eventName, String raceName, Date fromDate, Date toDate) {
         WindInfoForRaceDAO result = null;
-        Event event = service.getEventByName(eventName);
+        Event event = getService().getEventByName(eventName);
         if (event != null) {
             RaceDefinition race = getRaceByName(event, raceName);
             if (race != null) {
-                TrackedRace trackedRace = service.getDomainFactory().getTrackedEvent(event)
+                TrackedRace trackedRace = getService().getDomainFactory().getTrackedEvent(event)
                         .getExistingTrackedRace(race);
                 if (trackedRace != null) {
                     result = new WindInfoForRaceDAO();
@@ -295,11 +326,11 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             long millisecondsStepWidth, int numberOfFixes, double latDeg, double lngDeg) throws NoWindException {
         Position position = new DegreePosition(latDeg, lngDeg);
         WindInfoForRaceDAO result = null;
-        Event event = service.getEventByName(eventName);
+        Event event = getService().getEventByName(eventName);
         if (event != null) {
             RaceDefinition race = getRaceByName(event, raceName);
             if (race != null) {
-                TrackedRace trackedRace = service.getDomainFactory().getTrackedEvent(event)
+                TrackedRace trackedRace = getService().getDomainFactory().getTrackedEvent(event)
                         .getExistingTrackedRace(race);
                 if (trackedRace != null) {
                     result = new WindInfoForRaceDAO();
@@ -331,7 +362,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     
     @Override
     public void setWind(String eventName, String raceName, WindDAO windDAO) {
-        Event event = service.getEventByName(eventName);
+        Event event = getService().getEventByName(eventName);
         RaceDefinition race = getRaceByName(event, raceName);
         Position p = null;
         if (windDAO.position != null) {
@@ -360,16 +391,16 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             }
         }
         Wind wind = new WindImpl(p, at, speedWithBearing);
-        service.getDomainFactory().getTrackedEvent(event).getTrackedRace(race).recordWind(wind, WindSource.WEB);
+        getService().getDomainFactory().getTrackedEvent(event).getTrackedRace(race).recordWind(wind, WindSource.WEB);
     }
     
     @Override
     public void setWindSource(String eventName, String raceName, String windSourceName) {
-        Event event = service.getEventByName(eventName);
+        Event event = getService().getEventByName(eventName);
         if (event != null) {
             RaceDefinition race = getRaceByName(event, raceName);
             if (race != null) {
-                TrackedRace trackedRace = service.getDomainFactory().getTrackedEvent(event).getTrackedRace(race);
+                TrackedRace trackedRace = getService().getDomainFactory().getTrackedEvent(event).getTrackedRace(race);
                 if (trackedRace != null) {
                     trackedRace.setWindSource(WindSource.valueOf(windSourceName));
                 }
@@ -382,11 +413,11 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             long tailLengthInMilliseconds, boolean extrapolate) {
         Map<CompetitorDAO, List<GPSFixDAO>> result = new HashMap<CompetitorDAO, List<GPSFixDAO>>();
         if (date != null) {
-            Event event = service.getEventByName(eventName);
+            Event event = getService().getEventByName(eventName);
             if (event != null) {
                 RaceDefinition race = getRaceByName(event, raceName);
                 TimePoint end = new MillisecondsTimePoint(date);
-                TrackedRace trackedRace = service.getDomainFactory().getTrackedEvent(event).getTrackedRace(race);
+                TrackedRace trackedRace = getService().getDomainFactory().getTrackedEvent(event).getTrackedRace(race);
                 for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
                     CompetitorDAO competitorDAO = getCompetitorDAO(competitor);
                     List<GPSFixDAO> fixesForCompetitor = new ArrayList<GPSFixDAO>();
@@ -424,11 +455,11 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     public List<MarkDAO> getMarkPositions(String eventName, String raceName, Date date) {
         List<MarkDAO> result = new ArrayList<MarkDAO>();
         if (date != null) {
-            Event event = service.getEventByName(eventName);
+            Event event = getService().getEventByName(eventName);
             if (event != null) {
                 RaceDefinition race = getRaceByName(event, raceName);
                 TimePoint dateAsTimePoint = new MillisecondsTimePoint(date);
-                TrackedRace trackedRace = service.getDomainFactory().getTrackedEvent(event).getTrackedRace(race);
+                TrackedRace trackedRace = getService().getDomainFactory().getTrackedEvent(event).getTrackedRace(race);
                 Set<Buoy> buoys = new HashSet<Buoy>();
                 for (Waypoint waypoint : trackedRace.getRace().getCourse().getWaypoints()) {
                     for (Buoy b : waypoint.getBuoys()) {
@@ -449,13 +480,13 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
 
     @Override
     public List<QuickRankDAO> getQuickRanks(String eventName, String raceName, Date date) throws Exception {
-        Event event = service.getEventByName(eventName);
+        Event event = getService().getEventByName(eventName);
         List<QuickRankDAO> result = new ArrayList<QuickRankDAO>();
         if (date != null && event != null) {
             RaceDefinition race = getRaceByName(event, raceName);
             if (race != null) {
                 TimePoint dateAsTimePoint = new MillisecondsTimePoint(date);
-                TrackedRace trackedRace = service.getDomainFactory().getTrackedEvent(event).getTrackedRace(race);
+                TrackedRace trackedRace = getService().getDomainFactory().getTrackedEvent(event).getTrackedRace(race);
                 for (Competitor competitor : race.getCompetitors()) {
                     int rank = trackedRace.getRank(competitor, dateAsTimePoint);
                     TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(competitor, dateAsTimePoint);
@@ -478,7 +509,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
 
     @Override
     public void removeWind(String eventName, String raceName, WindDAO windDAO) {
-        Event event = service.getEventByName(eventName);
+        Event event = getService().getEventByName(eventName);
         RaceDefinition race = getRaceByName(event, raceName);
         Position p = null;
         if (windDAO.position != null) {
@@ -507,7 +538,11 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             }
         }
         Wind wind = new WindImpl(p, at, speedWithBearing);
-        service.getDomainFactory().getTrackedEvent(event).getTrackedRace(race).removeWind(wind, WindSource.WEB);
+        getService().getDomainFactory().getTrackedEvent(event).getTrackedRace(race).removeWind(wind, WindSource.WEB);
    }
+
+    private RacingEventService getService() {
+        return (RacingEventService) racingEventServiceTracker.getService(); // grab the service
+    }
 
 }

@@ -94,6 +94,11 @@ public class LeaderboardImpl implements Named, Leaderboard {
         races.add(column);
     }
     
+    @Override
+    public Iterable<RaceInLeaderboard> getColumns() {
+        return Collections.unmodifiableCollection(races);
+    }
+    
     private RaceInLeaderboard getRaceColumnByName(String columnName) {
         RaceInLeaderboard result = null;
         for (RaceInLeaderboard r : races) {
@@ -189,6 +194,22 @@ public class LeaderboardImpl implements Named, Leaderboard {
         int trackedPoints = getTrackedPoints(competitor, race, timePoint);
         Result correctedResults = getScoreCorrection().getCorrectedScore(trackedPoints, competitor, race, timePoint);
         return new EntryImpl(trackedPoints, correctedResults, isDiscarded(competitor, race, timePoint));
+    }
+    
+    @Override
+    public Entry getEntry(Competitor competitor, RaceInLeaderboard race, TimePoint timePoint) throws NoWindException {
+        Entry result;
+        if (race.getTrackedRace() != null) {
+            result = getEntry(competitor, race.getTrackedRace(), timePoint);
+        } else {
+            result = new EntryImpl(/* trackedPoints */ 0, /* scoreCorrectionResult */ new Result() {
+                @Override
+                public MaxPointsReason getMaxPointsReason() { return MaxPointsReason.NONE; }
+                @Override
+                public int getCorrectedScore() { return 0; }
+            }, /* discarded */ false);
+        }
+        return result;
     }
     
     @Override

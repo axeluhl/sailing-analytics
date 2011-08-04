@@ -9,6 +9,7 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
 import com.sap.sailing.gwt.ui.shared.EventDAO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDAO;
+import com.sap.sailing.gwt.ui.shared.LeaderboardDAO;
 import com.sap.sailing.gwt.ui.shared.MarkDAO;
 import com.sap.sailing.gwt.ui.shared.QuickRankDAO;
 import com.sap.sailing.gwt.ui.shared.RaceRecordDAO;
@@ -53,4 +54,6 @@ public interface SailingService extends RemoteService {
     void setWindSource(String eventName, String raceName, String windSourceName);
 
     void removeWind(String eventName, String raceName, WindDAO windDAO);
+
+    public LeaderboardDAO getLeaderboardByName(String leaderboardName, Date date) throws Exception;
 }

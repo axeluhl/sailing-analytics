@@ -40,6 +40,24 @@ public interface ScoreCorrection {
         MaxPointsReason getMaxPointsReason();
     }
     
+    /**
+     * Returns the effective score for the <code>competitor</code> scored in race <code>trackedRace</code>. If no
+     * explicit correction has been recorded in this score correction object, the uncorrected score will be returned,
+     * and {@link MaxPointsReason#NONE} will be listed as the {@link Result#getMaxPointsReason() correction reason}.
+     * Note, though, that {@link MaxPointsReason#NONE} can also be the reason for an explicit score correction, e.g., if
+     * the tracking results were overruled by the jury. Clients may use
+     * {@link #isScoreCorrected(Competitor, TrackedRace)} to detect the difference.
+     */
     Result getCorrectedScore(int uncorrectedScore, Competitor competitor, TrackedRace trackedRace, TimePoint timePoint);
+
+    /**
+     * Note the difference between what this method does and a more naive comparison of uncorrected and corrected score.
+     * Should, for some reason, the uncorrected score change later, an existing score correction would still remain in
+     * place whereas if no score correction exists for the competitor/race combination, the resulting score after
+     * "correction" will still be the uncorrected value.
+     * 
+     * @return if an explicit score correction was made for the combination of <code>competitor</code> and <code>race</code>
+     */
+    boolean isScoreCorrected(Competitor competitor, TrackedRace race);
 
 }

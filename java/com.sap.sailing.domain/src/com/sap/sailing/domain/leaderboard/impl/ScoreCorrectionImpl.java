@@ -48,6 +48,11 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
     }
     
     @Override
+    public boolean isScoreCorrected(Competitor competitor, TrackedRace race) {
+        return correctedScores.containsKey(new Pair<Competitor, TrackedRace>(competitor, race));
+    }
+    
+    @Override
     public void uncorrectScore(Competitor competitor, TrackedRace race) {
         correctedScores.remove(new Pair<Competitor, TrackedRace>(competitor, race));
     }

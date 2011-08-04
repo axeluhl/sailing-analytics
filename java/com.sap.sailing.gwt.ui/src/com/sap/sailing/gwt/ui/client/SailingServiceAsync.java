@@ -8,6 +8,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
 import com.sap.sailing.gwt.ui.shared.EventDAO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDAO;
+import com.sap.sailing.gwt.ui.shared.LeaderboardDAO;
 import com.sap.sailing.gwt.ui.shared.MarkDAO;
 import com.sap.sailing.gwt.ui.shared.QuickRankDAO;
 import com.sap.sailing.gwt.ui.shared.RaceRecordDAO;
@@ -65,5 +66,7 @@ public interface SailingServiceAsync {
     void getQuickRanks(String eventName, String raceName, Date date, AsyncCallback<List<QuickRankDAO>> callback);
 
     void setWindSource(String eventName, String raceName, String windSourceName, AsyncCallback<Void> callback);
+
+    void getLeaderboardByName(String leaderboardName, Date date, AsyncCallback<LeaderboardDAO> callback);
 
 }

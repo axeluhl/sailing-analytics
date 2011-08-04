@@ -47,6 +47,8 @@ public interface Leaderboard extends Named {
     
     Entry getEntry(Competitor competitor, TrackedRace race, TimePoint timePoint) throws NoWindException;
     
+    Entry getEntry(Competitor competitor, RaceInLeaderboard race, TimePoint timePoint) throws NoWindException;
+    
     /**
      * Tells the number of points carried over from previous races not tracked by this leaderboard for
      * the <code>competitor</code>
@@ -132,6 +134,12 @@ public interface Leaderboard extends Named {
      * Adds a new {@link RaceInLeaderboard} that has no {@link TrackedRace} associated yet to this leaderboard.
      */
     void addRaceColumn(String name);
+    
+    /**
+     * Retrieves all race columns that were added, either by {@link #addRace(TrackedRace, String)} or
+     * {@link #addRaceColumn(String)}.
+     */
+    Iterable<RaceInLeaderboard> getColumns();
 
     /**
      * A leaderboard can carry over points from races that are not tracked by this leaderboard in detail,
