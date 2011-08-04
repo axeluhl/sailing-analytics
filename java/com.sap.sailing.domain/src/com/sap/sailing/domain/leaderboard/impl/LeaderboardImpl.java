@@ -139,7 +139,7 @@ public class LeaderboardImpl implements Named, Leaderboard {
     
     @Override
     public int getTotalPoints(Competitor competitor, TimePoint timePoint) throws NoWindException {
-        int result = 0;
+        int result = getCarriedPoints(competitor);
         for (TrackedRace r : getRaces()) {
             result += getTotalPoints(competitor, r, timePoint);
         }
@@ -192,6 +192,11 @@ public class LeaderboardImpl implements Named, Leaderboard {
             throw new IllegalArgumentException("A leaderboard's name must not be null");
         }
         this.name = newName;
+    }
+
+    @Override
+    public int getCarriedPoints(Competitor competitor) {
+        return 0;
     }
 
 }

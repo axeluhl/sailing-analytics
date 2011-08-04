@@ -60,7 +60,7 @@ public class LeaderboardForKielWeekTest extends KielWeek2011BasedTest {
     private void loadRace(String raceId) throws MalformedURLException, IOException, InterruptedException,
             URISyntaxException {
         setUp(raceId, ReceiverType.RACECOURSE, ReceiverType.RACESTARTFINISH,
-                ReceiverType.MARKPASSINGS, ReceiverType.RAWPOSITIONS);
+                ReceiverType.MARKPASSINGS /*, ReceiverType.RAWPOSITIONS */);
         getTrackedRace().setWindSource(WindSource.WEB);
         getTrackedRace().recordWind(new WindImpl(/* position */ null, MillisecondsTimePoint.now(),
                 new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(70))), WindSource.WEB);

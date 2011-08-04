@@ -46,6 +46,11 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
     public void correctScore(Competitor competitor, TrackedRace race, int points) {
         correctedScores.put(new Pair<Competitor, TrackedRace>(competitor, race), points);
     }
+    
+    @Override
+    public void uncorrectScore(Competitor competitor, TrackedRace race) {
+        correctedScores.remove(new Pair<Competitor, TrackedRace>(competitor, race));
+    }
 
     protected MaxPointsReason getMaxPointsReason(Competitor competitor, TrackedRace trackedRace) {
         MaxPointsReason result = maxPointsReasons.get(new Pair<Competitor, TrackedRace>(competitor, trackedRace));

@@ -11,12 +11,13 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.util.Util.Pair;
 
 /**
- * A leader-board is used to display the results of one or more {@link TrackedRace races}. It manages the competitors'
- * scores and can aggregate them, e.g., to show the overall regatta standings.
+ * A leaderboard is used to display the results of one or more {@link TrackedRace races}. It manages the competitors'
+ * scores and can aggregate them, e.g., to show the overall regatta standings. In addition to the races, a "carry" column
+ * may be used to carry results of races not displayed in the leaderboard into the calculations.
  * <p>
  * 
  * While a single {@link TrackedRace} can tell about the ranks in which according to the tracking information the
- * competitors crossed the finish line, the leader-board may overlay this information with disqualifications, changes in
+ * competitors crossed the finish line, the leaderboard may overlay this information with disqualifications, changes in
  * results because the finish-line tracking was inaccurate, jury penalties and discarded results (depending on the
  * regatta rules, the worst zero, one or more races of each competitor are discarded from the aggregated points).
  * <p>
@@ -45,6 +46,12 @@ public interface Leaderboard extends Named {
     Iterable<Competitor> getCompetitors();
     
     Entry getEntry(Competitor competitor, TrackedRace race, TimePoint timePoint) throws NoWindException;
+    
+    /**
+     * Tells the number of points carried over from previous races not tracked by this leaderboard for
+     * the <code>competitor</code>
+     */
+    int getCarriedPoints(Competitor competitor);
 
     /**
      * Shorthand for {@link TrackedRace#getRank(Competitor, com.sap.sailing.domain.base.TimePoint)} with the
@@ -102,6 +109,8 @@ public interface Leaderboard extends Named {
      * computational effort compared to fetching all entries separately, particularly because all
      * {@link #isDiscarded(Competitor, TrackedRace, TimePoint) discarded races} of a competitor are computed in one
      * sweep using {@link ResultDiscardingRule#getDiscardedRaces(Competitor, Iterable, TimePoint)} only once.
+     * Note that in order to get the {@link #getTotalPoints(Competitor, TimePoint) total points} for a competitor
+     * for the entire leaderboard, the {@link #getCarriedPoints(Competitor) carried-over points} need to be added.
      */
     Map<Pair<Competitor, TrackedRace>, Entry> getContent(TimePoint timePoint) throws NoWindException;
 

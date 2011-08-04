@@ -30,7 +30,9 @@ public interface ScoreCorrection {
         /** Did Not Finish */
         DNF,
         /** DiSQualified */
-        DSQ
+        DSQ,
+        /** On Course Side (jumped the gun) */
+        OCS
     };
     
     public interface Result {
@@ -39,4 +41,5 @@ public interface ScoreCorrection {
     }
     
     Result getCorrectedScore(int uncorrectedScore, Competitor competitor, TrackedRace trackedRace, TimePoint timePoint);
+
 }
