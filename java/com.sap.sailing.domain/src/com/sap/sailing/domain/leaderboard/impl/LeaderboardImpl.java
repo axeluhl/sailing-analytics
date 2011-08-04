@@ -28,6 +28,13 @@ public class LeaderboardImpl implements Named, Leaderboard {
     private String name;
     
     /**
+     * Backs the {@link #getCarriedPoints(Competitor)} API with data. Can be used to prime this leaderboard
+     * with aggregated results of races not tracked / displayed by this leaderboard in detail. The points
+     * provided by this map are considered by {@link #getTotalPoints(Competitor, TimePoint)}.
+     */
+    private final Map<Competitor, Integer> carriedPoints;
+    
+    /**
      * A leaderboard entry representing a snapshot of a cell at a given time point for a single race/competitor.
      * 
      * @author Axel Uhl (d043530)
@@ -75,6 +82,7 @@ public class LeaderboardImpl implements Named, Leaderboard {
             throw new IllegalArgumentException("A leaderboard's name must not be null");
         }
         this.name = name;
+        this.carriedPoints = new HashMap<Competitor, Integer>();
         this.races = new ArrayList<RaceInLeaderboard>();
         this.scoreCorrection = scoreCorrection;
         this.resultDiscardingRule = resultDiscardingRule;
@@ -223,10 +231,26 @@ public class LeaderboardImpl implements Named, Leaderboard {
         }
         this.name = newName;
     }
+    
+    @Override
+    public void setCarriedPoints(Competitor competitor, int carriedPoints) {
+        this.carriedPoints.put(competitor, carriedPoints);
+    }
 
     @Override
     public int getCarriedPoints(Competitor competitor) {
-        return 0;
+        Integer result = carriedPoints.get(competitor);
+        return result == null ? 0 : result;
+    }
+
+    @Override
+    public void unsetCarriedPoints(Competitor competitor) {
+        carriedPoints.remove(competitor);
+    }
+
+    @Override
+    public boolean hasCarriedPoints() {
+        return !carriedPoints.isEmpty();
     }
 
 }

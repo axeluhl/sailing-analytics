@@ -62,17 +62,19 @@ public class LeaderboardOfflineTest {
     
     @Test
     public void simpleLeaderboardTest() throws NoWindException {
-        testLeaderboard(0, 9, 3, 6);
-        testLeaderboard(2, 9, 3, 6);
-        testLeaderboard(3, 9, 3, 6);
-        testLeaderboard(4, 9, 3, 6);
-        testLeaderboard(6, 9, 3, 6);
-        testLeaderboard(7, 9, 3, 6);
-        testLeaderboard(8, 9, 3, 6);
+        for (Integer carry : new Integer[] { null, 0, 1, 2, 3 }) {
+            testLeaderboard(0, 9, 3, 6, carry);
+            testLeaderboard(2, 9, 3, 6, carry);
+            testLeaderboard(3, 9, 3, 6, carry);
+            testLeaderboard(4, 9, 3, 6, carry);
+            testLeaderboard(6, 9, 3, 6, carry);
+            testLeaderboard(7, 9, 3, 6, carry);
+            testLeaderboard(8, 9, 3, 6, carry);
+        }
     }
 
     protected void testLeaderboard(int numberOfStartedRaces, int numberOfNotStartedRaces, int firstDiscardingThreshold,
-            int secondDiscardingThreshold) throws NoWindException {
+            int secondDiscardingThreshold, Integer carry) throws NoWindException {
         setupRaces(numberOfStartedRaces, numberOfNotStartedRaces);
         Leaderboard leaderboard = new LeaderboardImpl("Test Leaderboard", new ScoreCorrectionImpl(), new ResultDiscardingRuleImpl(
                 new int[] { firstDiscardingThreshold, secondDiscardingThreshold }));
@@ -80,7 +82,16 @@ public class LeaderboardOfflineTest {
         for (TrackedRace race : testRaces) {
             leaderboard.addRace(race, "Test Race "+(++i));
         }
+        // add a few race columns not yet connected to a tracked race
+        for (int j=0; j<3; j++) {
+            leaderboard.addRaceColumn("Test Race "+(++i));
+        }
+        if (carry != null) {
+            leaderboard.setCarriedPoints(competitor, carry);
+        }
         TimePoint now = MillisecondsTimePoint.now();
+        int carryInt = (carry == null ? 0 : carry);
+        int totalPoints = carryInt;
         for (TrackedRace race : testRaces) {
             Pair<Competitor, TrackedRace> key = new Pair<Competitor, TrackedRace>(competitor, race);
             if (race.hasStarted(now)) {
@@ -101,6 +112,7 @@ public class LeaderboardOfflineTest {
                         leaderboard.getContent(now).get(key).getTotalPoints());
                 assertEquals(rank > numberOfStartedRaces - expectedNumberOfDiscardedRaces ? 0 : rank,
                         leaderboard.getEntry(competitor, race, now).getTotalPoints());
+                totalPoints += leaderboard.getContent(now).get(key).getTotalPoints();
             } else {
                 assertEquals(0, leaderboard.getTrackedPoints(competitor, race, now));
                 assertEquals(0, leaderboard.getNetPoints(competitor, race, now));
@@ -108,8 +120,10 @@ public class LeaderboardOfflineTest {
                 assertEquals(0, leaderboard.getContent(now).get(key).getNetPoints());
                 assertEquals(0, leaderboard.getEntry(competitor, race, now).getTrackedPoints());
                 assertEquals(0, leaderboard.getEntry(competitor, race, now).getNetPoints());
+                // no increment on totalPoints
             }
         }
+        assertEquals(totalPoints, leaderboard.getTotalPoints(competitor, now));
     }
     
     private class MockedTrackedRaceWithFixedRank extends MockedTrackedRace {

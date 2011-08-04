@@ -132,4 +132,26 @@ public interface Leaderboard extends Named {
      * Adds a new {@link RaceInLeaderboard} that has no {@link TrackedRace} associated yet to this leaderboard.
      */
     void addRaceColumn(String name);
+
+    /**
+     * A leaderboard can carry over points from races that are not tracked by this leaderboard in detail,
+     * so for which no {@link RaceInLeaderboard} column is present in this leaderboard. These scores are
+     * simply added to the scores tracked by this leaderboard in the {@link #getTotalPoints(Competitor, TimePoint)}
+     * method.
+     */
+    void setCarriedPoints(Competitor competitor, int carriedPoints);
+    
+    /**
+     * Reverses the effect of {@link #setCarriedPoints(Competitor, int)}, i.e., afterwards, asking {@link #getCarriedPoints(Competitor)}
+     * will return <code>0</code>. Furthermore, other than invoking {@link #setCarriedPoints(Competitor, int) setCarriedPoints(c, 0)},
+     * this will, when executed for all competitors of this leaderboard, have {@link #hasCarriedPoints} return <code>false</code>.
+     */
+    void unsetCarriedPoints(Competitor competitor);
+    
+    /**
+     * Tells if a carry-column shall be displayed. If the result is <code>false</code>, then no
+     * {@link #setCarriedPoints(Competitor, int) scores are carried} into this leaderboard, and
+     * only the race columns will be accumulated by the board.
+     */
+    boolean hasCarriedPoints();
 }
