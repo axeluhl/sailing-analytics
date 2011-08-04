@@ -16,6 +16,7 @@ public interface StringConstants extends Constants {
     String windSource();
     String dampeningInterval();
     String map();
+    String race();
     String races();
     String tracked();
     String time();
@@ -26,4 +27,7 @@ public interface StringConstants extends Constants {
     String speedInKnots();
     String fromDeg();
     String noRacesYet();
+    String total();
+    String carry();
+    String competitor();
 }

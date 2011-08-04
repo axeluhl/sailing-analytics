@@ -60,8 +60,8 @@ import com.sap.sailing.gwt.ui.shared.EventDAO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDAO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDAO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDAO;
+import com.sap.sailing.gwt.ui.shared.LeaderboardRowDAO;
 import com.sap.sailing.gwt.ui.shared.MarkDAO;
-import com.sap.sailing.gwt.ui.shared.Pair;
 import com.sap.sailing.gwt.ui.shared.PositionDAO;
 import com.sap.sailing.gwt.ui.shared.QuickRankDAO;
 import com.sap.sailing.gwt.ui.shared.RaceDAO;
@@ -97,13 +97,16 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         LeaderboardDAO result = new LeaderboardDAO();
         TimePoint timePoint = new MillisecondsTimePoint(date);
         result.competitors = new ArrayList<CompetitorDAO>();
-        result.carryPoints = new HashMap<CompetitorDAO, Integer>();
         result.name = leaderboard.getName();
-        result.races = new ArrayList<String>();
-        result.fields = new HashMap<Pair<CompetitorDAO,String>, LeaderboardEntryDAO>();
+        result.raceNames = new ArrayList<String>();
+        result.rows = new HashMap<CompetitorDAO, LeaderboardRowDAO>();
+        result.hasCarriedPoints = leaderboard.hasCarriedPoints();
         for (Competitor competitor : leaderboard.getCompetitors()) {
             CompetitorDAO competitorDAO = getCompetitorDAO(competitor);
-            result.carryPoints.put(competitorDAO, leaderboard.getCarriedPoints(competitor));
+            LeaderboardRowDAO row = new LeaderboardRowDAO();
+            row.competitor = competitorDAO;
+            row.fieldsByRaceName = new HashMap<String, LeaderboardEntryDAO>();
+            row.carriedPoints = leaderboard.getCarriedPoints(competitor);
             result.competitors.add(competitorDAO);
             for (RaceInLeaderboard raceColumn : leaderboard.getColumns()) {
                 Entry entry = leaderboard.getEntry(competitor, raceColumn, timePoint);
@@ -112,8 +115,9 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 entryDAO.totalPoints = entry.getTotalPoints();
                 entryDAO.reasonForMaxPoints = entry.getMaxPointsReason().name();
                 entryDAO.discarded = entry.isDiscarded();
-                result.races.add(raceColumn.getName());
-                result.fields.put(new Pair<CompetitorDAO, String>(competitorDAO, raceColumn.getName()), entryDAO);
+                result.raceNames.add(raceColumn.getName());
+                row.fieldsByRaceName.put(raceColumn.getName(), entryDAO);
+                result.rows.put(competitorDAO, row);
             }
         }
         return result;
