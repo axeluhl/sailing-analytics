@@ -24,6 +24,7 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.impl.LeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.ResultDiscardingRuleImpl;
 import com.sap.sailing.domain.leaderboard.impl.ScoreCorrectionImpl;
+import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTracker;
@@ -63,7 +64,7 @@ public class RacingEventServiceImpl implements RacingEventService {
      */
     private final Map<String, Leaderboard> leaderboardsByName;
     
-    private static final String DEFAULT_LEADERBOARD_NAME = "DEFAULT";
+    private static final String DEFAULT_LEADERBOARD_NAME = "Default Leaderboard";
     
     public RacingEventServiceImpl() {
         domainFactory = DomainFactory.INSTANCE;
@@ -75,7 +76,7 @@ public class RacingEventServiceImpl implements RacingEventService {
         leaderboardsByName = new HashMap<String, Leaderboard>();
         // Add one default leaderboard that aggregates all races currently tracked by this service.
         // This is more for debugging purposes than for anything else.
-        addLeaderboard(DEFAULT_LEADERBOARD_NAME, new int[] { 3, 6 });
+        addLeaderboard(DEFAULT_LEADERBOARD_NAME, new int[] { 5, 8 });
     }
     
     @Override
@@ -200,6 +201,15 @@ public class RacingEventServiceImpl implements RacingEventService {
                         ". Wind store in use by existing tracker: "+existingTrackersWindStore);
             }
         }
+        // FIXME don't register multiple such listeners on the same event!
+        tracker.getTrackedEvent().addRaceListener(new RaceListener() {
+            @Override
+            public void raceRemoved(TrackedRace trackedRace) {}
+            @Override
+            public void raceAdded(TrackedRace trackedRace) {
+                leaderboardsByName.get(DEFAULT_LEADERBOARD_NAME).addRace(trackedRace, trackedRace.getRace().getName());
+            }
+        });
         return tracker.getRaceHandle();
     }
 

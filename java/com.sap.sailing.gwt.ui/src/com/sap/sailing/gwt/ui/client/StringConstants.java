@@ -30,4 +30,5 @@ public interface StringConstants extends Constants {
     String total();
     String carry();
     String competitor();
+    String defaultLeaderboard();
 }

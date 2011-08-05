@@ -6,12 +6,18 @@ import java.util.Date;
 import java.util.List;
 
 import com.google.gwt.cell.client.Cell.Context;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FormPanel;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDAO;
@@ -63,9 +69,9 @@ public class LeaderboardPanel extends FormPanel {
 
         @Override
         public void render(Context context, LeaderboardRowDAO object, SafeHtmlBuilder sb) {
-            sb.appendHtmlConstant("<img src=\"");
-            sb.appendHtmlConstant(getFlagURL(object.competitor.twoLetterIsoCountryCode));
-            sb.appendHtmlConstant("\"/>&nbsp;");
+            sb.appendHtmlConstant("<img src=\""+
+                    getFlagURL(object.competitor.twoLetterIsoCountryCode)+
+                    "\"/>&nbsp;");
             sb.appendHtmlConstant(object.competitor.name);
         }
 
@@ -92,7 +98,6 @@ public class LeaderboardPanel extends FormPanel {
 
         public RaceColumn(String raceName) {
             this.raceName = raceName;
-            setSortable(true);
         }
         
         public String getRaceName() {
@@ -218,6 +223,20 @@ public class LeaderboardPanel extends FormPanel {
         listHandler = new ListHandler<LeaderboardRowDAO>(data.getList());
         leaderboardTable.addColumnSortHandler(listHandler);
         loadCompleteLeaderboard(new Date());
+        VerticalPanel vp = new VerticalPanel();
+        HorizontalPanel hp = new HorizontalPanel();
+        hp.add(new Label(leaderboardName));
+        Button refreshButton = new Button(stringConstants.refresh());
+        hp.add(refreshButton);
+        refreshButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                loadCompleteLeaderboard(new Date());
+            }
+        });
+        vp.add(hp);
+        vp.add(leaderboardTable);
+        setWidget(vp);
     }
     
     private void addColumn(SortableColumn<LeaderboardRowDAO> column) {
@@ -289,7 +308,7 @@ public class LeaderboardPanel extends FormPanel {
         if (leaderboardTable.getColumn(leaderboardTable.getColumnCount()-1) instanceof TotalsColumn) {
             leaderboardTable.removeColumn(leaderboardTable.getColumnCount()-1);
         }
-        leaderboardTable.addColumn(raceColumn, raceColumn.getHeaderName());
+        addColumn(raceColumn);
     }
 
     private void ensureCompetitorColumn() {
@@ -323,7 +342,7 @@ public class LeaderboardPanel extends FormPanel {
                 addColumn(new CarryColumn());
             }
         } else {
-            if (leaderboardTable.getColumn(1) instanceof CarryColumn) {
+            if (leaderboardTable.getColumnCount() >= 2 && leaderboardTable.getColumn(1) instanceof CarryColumn) {
                 leaderboardTable.removeColumn(1);
             }
         }

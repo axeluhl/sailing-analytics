@@ -58,11 +58,15 @@ public class AdminConsole implements EntryPoint, ErrorReporter, EventRefresher {
         WindPanel windPanel = new WindPanel(sailingService, this, this, stringConstants);
         eventDisplayers.add(windPanel);
         windPanel.setSize("90%", "90%");
-        tabPanel.add(windPanel, stringConstants.wind(), false);
+        tabPanel.add(windPanel, stringConstants.wind(), /* asHTML */ false);
         final RaceMapPanel raceMapPanel = new RaceMapPanel(sailingService, this, this, stringConstants);
         eventDisplayers.add(raceMapPanel);
         raceMapPanel.setSize("90%", "90%");
-        tabPanel.add(raceMapPanel, stringConstants.map(), false);
+        tabPanel.add(raceMapPanel, stringConstants.map(), /* asHTML */ false);
+        LeaderboardPanel defaultLeaderboardPanel = new LeaderboardPanel(sailingService, stringConstants.defaultLeaderboard(), this, stringConstants);
+        defaultLeaderboardPanel.setSize("90%", "90%");
+        tabPanel.add(defaultLeaderboardPanel, stringConstants.defaultLeaderboard(), /* asHTML */ false);
+        
         tabPanel.selectTab(0);
         tabPanel.addSelectionHandler(new SelectionHandler<Integer>() {
 			@Override
