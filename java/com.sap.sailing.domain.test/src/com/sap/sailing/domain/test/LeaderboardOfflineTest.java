@@ -80,11 +80,11 @@ public class LeaderboardOfflineTest {
                 new int[] { firstDiscardingThreshold, secondDiscardingThreshold }));
         int i=0;
         for (TrackedRace race : testRaces) {
-            leaderboard.addRace(race, "Test Race "+(++i));
+            leaderboard.addRace(race, "Test Race "+(++i), /* medalRace */ false);
         }
         // add a few race columns not yet connected to a tracked race
         for (int j=0; j<3; j++) {
-            leaderboard.addRaceColumn("Test Race "+(++i));
+            leaderboard.addRaceColumn("Test Race "+(++i), /* medalRace */ false);
         }
         if (carry != null) {
             leaderboard.setCarriedPoints(competitor, carry);

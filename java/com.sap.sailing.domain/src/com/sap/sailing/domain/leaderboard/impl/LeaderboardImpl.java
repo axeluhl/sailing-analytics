@@ -89,9 +89,14 @@ public class LeaderboardImpl implements Named, Leaderboard {
     }
     
     @Override
-    public void addRaceColumn(String name) {
-        RaceInLeaderboardImpl column = new RaceInLeaderboardImpl(this, name);
+    public void addRaceColumn(String name, boolean medalRace) {
+        RaceInLeaderboardImpl column = new RaceInLeaderboardImpl(this, name, medalRace);
         races.add(column);
+    }
+    
+    @Override
+    public void removeRaceColumn(String name) {
+        races.remove(getRaceColumnByName(name));
     }
     
     @Override
@@ -111,10 +116,10 @@ public class LeaderboardImpl implements Named, Leaderboard {
     }
     
     @Override
-    public void addRace(TrackedRace race, String columnName) {
+    public void addRace(TrackedRace race, String columnName, boolean medalRace) {
         RaceInLeaderboard column = getRaceColumnByName(columnName);
         if (column == null) {
-            column = new RaceInLeaderboardImpl(this, columnName);
+            column = new RaceInLeaderboardImpl(this, columnName, medalRace);
             column.setTrackedRace(race);
             races.add(column);
         }
@@ -122,7 +127,7 @@ public class LeaderboardImpl implements Named, Leaderboard {
     }
 
     @Override
-    public Iterable<TrackedRace> getRaces() {
+    public Iterable<TrackedRace> getTrackedRaces() {
         Set<TrackedRace> trackedRaces = new HashSet<TrackedRace>();
         for (RaceInLeaderboard r : races) {
             TrackedRace trackedRace = r.getTrackedRace();
@@ -136,7 +141,7 @@ public class LeaderboardImpl implements Named, Leaderboard {
     @Override
     public Iterable<Competitor> getCompetitors() {
         Set<Competitor> result = new HashSet<Competitor>();
-        for (TrackedRace r : getRaces()) {
+        for (TrackedRace r : getTrackedRaces()) {
             for (Competitor c : r.getRace().getCompetitors()) {
                 result.add(c);
             }
@@ -171,7 +176,7 @@ public class LeaderboardImpl implements Named, Leaderboard {
     
     @Override
     public boolean isDiscarded(Competitor competitor, TrackedRace race, TimePoint timePoint) {
-        Iterable<TrackedRace> trackedRaces = getRaces();
+        Iterable<TrackedRace> trackedRaces = getTrackedRaces();
         return getResultDiscardingRule().getDiscardedRaces(competitor, trackedRaces, timePoint).contains(race);
     }
 
@@ -183,7 +188,7 @@ public class LeaderboardImpl implements Named, Leaderboard {
     @Override
     public int getTotalPoints(Competitor competitor, TimePoint timePoint) throws NoWindException {
         int result = getCarriedPoints(competitor);
-        for (TrackedRace r : getRaces()) {
+        for (TrackedRace r : getTrackedRaces()) {
             result += getTotalPoints(competitor, r, timePoint);
         }
         return result;
@@ -216,7 +221,7 @@ public class LeaderboardImpl implements Named, Leaderboard {
     public Map<Pair<Competitor, TrackedRace>, Entry> getContent(TimePoint timePoint) throws NoWindException {
         Map<Pair<Competitor, TrackedRace>, Entry> result = new HashMap<Pair<Competitor, TrackedRace>, Entry>();
         Map<Competitor, Set<TrackedRace>> discardedRaces = new HashMap<Competitor, Set<TrackedRace>>();
-        for (TrackedRace race : getRaces()) {
+        for (TrackedRace race : getTrackedRaces()) {
             for (Competitor competitor : race.getRace().getCompetitors()) {
                 int trackedPoints;
                 if (race.hasStarted(timePoint)) {
@@ -227,7 +232,7 @@ public class LeaderboardImpl implements Named, Leaderboard {
                 Result correctedResults = getScoreCorrection().getCorrectedScore(trackedPoints, competitor, race, timePoint);
                 Set<TrackedRace> discardedRacesForCompetitor = discardedRaces.get(competitor);
                 if (discardedRacesForCompetitor == null) {
-                    discardedRacesForCompetitor = getResultDiscardingRule().getDiscardedRaces(competitor, getRaces(), timePoint);
+                    discardedRacesForCompetitor = getResultDiscardingRule().getDiscardedRaces(competitor, getTrackedRaces(), timePoint);
                     discardedRaces.put(competitor, discardedRacesForCompetitor);
                 }
                 boolean discarded = discardedRacesForCompetitor.contains(race);

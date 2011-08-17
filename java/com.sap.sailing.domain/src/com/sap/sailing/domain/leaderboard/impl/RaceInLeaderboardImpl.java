@@ -11,10 +11,12 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 public class RaceInLeaderboardImpl extends NamedImpl implements RaceInLeaderboard {
     private TrackedRace trackedRace;
     private final Leaderboard leaderboard;
+    private final boolean medalRace;
     
-    public RaceInLeaderboardImpl(Leaderboard leaderboard, String name) {
+    public RaceInLeaderboardImpl(Leaderboard leaderboard, String name, boolean medalRace) {
         super(name);
         this.leaderboard = leaderboard;
+        this.medalRace = medalRace;
     }
 
     @Override
@@ -24,6 +26,11 @@ public class RaceInLeaderboardImpl extends NamedImpl implements RaceInLeaderboar
         } else {
             return 0;
         }
+    }
+    
+    @Override
+    public boolean isMedalRace() {
+        return medalRace;
     }
 
     @Override
@@ -35,6 +42,5 @@ public class RaceInLeaderboardImpl extends NamedImpl implements RaceInLeaderboar
     public void setTrackedRace(TrackedRace trackedRace) {
         this.trackedRace = trackedRace;
     }
-
 
 }

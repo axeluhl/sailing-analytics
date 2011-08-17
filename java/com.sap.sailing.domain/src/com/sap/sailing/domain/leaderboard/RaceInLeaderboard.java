@@ -14,4 +14,9 @@ public interface RaceInLeaderboard extends LeaderboardColumn {
     void setTrackedRace(TrackedRace race);
 
     TrackedRace getTrackedRace();
+    
+    /**
+     * A "medal race" cannot be discarded. It's score is doubled during score aggregation.
+     */
+    boolean isMedalRace();
 }

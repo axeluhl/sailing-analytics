@@ -4,7 +4,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 
 public class LeaderboardEntryDAO implements IsSerializable {
     /**
-     * Either <code>null</code> in case no max points, or one of "DNS", "DNF", "OCS", or "DSQ"
+     * Either <code>null</code> in case no max points, or one of "DNS", "DNF", "OCS", "DND", "RAF", "BFD", "DNC", or "DSQ"
      */
     public String reasonForMaxPoints;
     

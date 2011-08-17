@@ -32,7 +32,15 @@ public interface ScoreCorrection {
         /** DiSQualified */
         DSQ,
         /** On Course Side (jumped the gun) */
-        OCS
+        OCS,
+        /** Disqualified, non-discardable */
+        DND,
+        /** Black Flag Disqualified */
+        BFD,
+        /** Did Not Compete */
+        DNC,
+        /** Retired After Finishing */
+        RAF
     };
     
     public interface Result {

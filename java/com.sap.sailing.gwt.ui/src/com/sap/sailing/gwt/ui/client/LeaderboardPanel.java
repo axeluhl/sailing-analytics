@@ -81,7 +81,7 @@ public class LeaderboardPanel extends FormPanel {
 
         @Override
         public String getValue(LeaderboardRowDAO object) {
-            throw new RuntimeException("Method CompetitorColumn.getValue not implemented. It should not have been called in the first place.");
+            return object.competitor.name;
         }
         
     }
@@ -112,7 +112,7 @@ public class LeaderboardPanel extends FormPanel {
             }
             html.append(entry.totalPoints);
             if (entry.netPoints != entry.totalPoints) {
-                html.appendHtmlConstant("("+entry.netPoints+")");
+                html.appendHtmlConstant(" ("+entry.netPoints+")");
             }
             if (!entry.reasonForMaxPoints.equals("NONE")) {
                 html.appendEscapedLines("\n("+entry.reasonForMaxPoints+")");
@@ -134,7 +134,7 @@ public class LeaderboardPanel extends FormPanel {
 
         @Override
         public String getValue(LeaderboardRowDAO object) {
-            throw new RuntimeException("Method not implemented: RaceColumn.getValue(). It should not have been called in the first place.");
+            return ""+object.fieldsByRaceName.get(raceName).totalPoints;
         }
         
         @Override
@@ -225,6 +225,7 @@ public class LeaderboardPanel extends FormPanel {
         loadCompleteLeaderboard(new Date());
         VerticalPanel vp = new VerticalPanel();
         HorizontalPanel hp = new HorizontalPanel();
+        hp.setSpacing(10);
         hp.add(new Label(leaderboardName));
         Button refreshButton = new Button(stringConstants.refresh());
         hp.add(refreshButton);

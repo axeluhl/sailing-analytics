@@ -41,7 +41,7 @@ public interface Leaderboard extends Named {
         boolean isDiscarded() throws NoWindException;
     }
     
-    Iterable<TrackedRace> getRaces();
+    Iterable<TrackedRace> getTrackedRaces();
 
     Iterable<Competitor> getCompetitors();
     
@@ -63,7 +63,7 @@ public interface Leaderboard extends Named {
      * @param competitor
      *            a competitor contained in the {@link #getCompetitors()} result
      * @param race
-     *            a race that is contained in the {@link #getRaces()} result
+     *            a race that is contained in the {@link #getTrackedRaces()} result
      */
     int getTrackedPoints(Competitor competitor, TrackedRace race, TimePoint timePoint) throws NoWindException;
 
@@ -75,7 +75,7 @@ public interface Leaderboard extends Named {
      * @param competitor
      *            a competitor contained in the {@link #getCompetitors()} result
      * @param race
-     *            a race that is contained in the {@link #getRaces()} result
+     *            a race that is contained in the {@link #getTrackedRaces()} result
      */
     int getNetPoints(Competitor competitor, TrackedRace race, TimePoint timePoint) throws NoWindException;
 
@@ -92,7 +92,7 @@ public interface Leaderboard extends Named {
      * @param competitor
      *            a competitor contained in the {@link #getCompetitors()} result
      * @param race
-     *            a race that is contained in the {@link #getRaces()} result
+     *            a race that is contained in the {@link #getTrackedRaces()} result
      */
     int getTotalPoints(Competitor competitor, TrackedRace race, TimePoint timePoint) throws NoWindException;
 
@@ -103,8 +103,11 @@ public interface Leaderboard extends Named {
      * exists in this leaderboard, <code>race</code> is {@link RaceInLeaderboard#setTrackedRace(TrackedRace) set as its
      * tracked race}. Otherwise, a new {@link RaceInLeaderboard} column, with <code>race</code> as its tracked race, is
      * created and added to this leaderboard.
+     * 
+     * @param medalRace
+     *            tells if the column to add represents a medal race which has double score and cannot be discarded
      */
-    void addRace(TrackedRace race, String columnName);
+    void addRace(TrackedRace race, String columnName, boolean medalRace);
 
     /**
      * Sums up the {@link #getTotalPoints(Competitor, TrackedRace, TimePoint) total points} of <code>competitor</code>
@@ -132,12 +135,15 @@ public interface Leaderboard extends Named {
 
     /**
      * Adds a new {@link RaceInLeaderboard} that has no {@link TrackedRace} associated yet to this leaderboard.
+     * 
+     * @param medalRace
+     *            tells if the column to add represents a medal race which has double score and cannot be discarded
      */
-    void addRaceColumn(String name);
+    void addRaceColumn(String name, boolean medalRace);
     
     /**
-     * Retrieves all race columns that were added, either by {@link #addRace(TrackedRace, String)} or
-     * {@link #addRaceColumn(String)}.
+     * Retrieves all race columns that were added, either by {@link #addRace(TrackedRace, String, boolean)} or
+     * {@link #addRaceColumn(String, boolean)}.
      */
     Iterable<RaceInLeaderboard> getColumns();
 
@@ -162,4 +168,6 @@ public interface Leaderboard extends Named {
      * only the race columns will be accumulated by the board.
      */
     boolean hasCarriedPoints();
+
+    void removeRaceColumn(String name);
 }

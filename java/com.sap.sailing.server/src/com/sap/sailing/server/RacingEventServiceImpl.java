@@ -24,6 +24,7 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.impl.LeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.ResultDiscardingRuleImpl;
 import com.sap.sailing.domain.leaderboard.impl.ScoreCorrectionImpl;
+import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindStore;
@@ -66,6 +67,8 @@ public class RacingEventServiceImpl implements RacingEventService {
     
     private static final String DEFAULT_LEADERBOARD_NAME = "Default Leaderboard";
     
+    private Set<DynamicTrackedEvent> eventsObservedForDefaultLeaderboard = new HashSet<DynamicTrackedEvent>();
+
     public RacingEventServiceImpl() {
         domainFactory = DomainFactory.INSTANCE;
         windTrackerFactory = ExpeditionWindTrackerFactory.getInstance();
@@ -201,16 +204,28 @@ public class RacingEventServiceImpl implements RacingEventService {
                         ". Wind store in use by existing tracker: "+existingTrackersWindStore);
             }
         }
-        // FIXME don't register multiple such listeners on the same event!
-        tracker.getTrackedEvent().addRaceListener(new RaceListener() {
-            @Override
-            public void raceRemoved(TrackedRace trackedRace) {}
-            @Override
-            public void raceAdded(TrackedRace trackedRace) {
-                leaderboardsByName.get(DEFAULT_LEADERBOARD_NAME).addRace(trackedRace, trackedRace.getRace().getName());
-            }
-        });
+        DynamicTrackedEvent trackedEvent = tracker.getTrackedEvent();
+        ensureEventIsObservedForDefaultLeaderboard(trackedEvent);
         return tracker.getRaceHandle();
+    }
+
+    private void ensureEventIsObservedForDefaultLeaderboard(DynamicTrackedEvent trackedEvent) {
+        synchronized (eventsObservedForDefaultLeaderboard) {
+            if (!eventsObservedForDefaultLeaderboard.contains(trackedEvent)) {
+                trackedEvent.addRaceListener(new RaceListener() {
+                    @Override
+                    public void raceRemoved(TrackedRace trackedRace) {
+                    }
+
+                    @Override
+                    public void raceAdded(TrackedRace trackedRace) {
+                        leaderboardsByName.get(DEFAULT_LEADERBOARD_NAME).addRace(trackedRace,
+                                trackedRace.getRace().getName(), /* medalRace */ false);
+                    }
+                });
+                eventsObservedForDefaultLeaderboard.add(trackedEvent);
+            }
+        }
     }
 
     @Override
@@ -228,6 +243,9 @@ public class RacingEventServiceImpl implements RacingEventService {
             }
             for (RaceDefinition race : event.getAllRaces()) {
                 stopTrackingWind(event, race);
+                // remove from default leaderboard
+                Leaderboard defaultLeaderboard = getLeaderboardByName(DEFAULT_LEADERBOARD_NAME);
+                defaultLeaderboard.removeRaceColumn(race.getName());
             }
         }
     }
