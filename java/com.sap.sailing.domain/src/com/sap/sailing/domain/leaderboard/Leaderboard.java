@@ -92,7 +92,12 @@ public interface Leaderboard extends Named {
      */
     int getTotalPoints(Competitor competitor, RaceInLeaderboard race, TimePoint timePoint) throws NoWindException;
 
-    boolean isDiscarded(Competitor competitor, RaceInLeaderboard race, TimePoint timePoint);
+    /**
+     * Tells whether the contribution of <code>raceColumn</code> is discarded in the current leaderboard's
+     * standings for <code>competitor</code>. A column representing a {@link RaceInLeaderboard#isMedalRace() medal race}
+     * cannot be discarded.
+     */
+    boolean isDiscarded(Competitor competitor, RaceInLeaderboard raceColumn, TimePoint timePoint);
 
     /**
      * Adds a tracked race to this leaderboard. If a {@link RaceInLeaderboard} with name <code>columnName</code> already

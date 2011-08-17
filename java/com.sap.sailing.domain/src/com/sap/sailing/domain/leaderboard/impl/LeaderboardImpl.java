@@ -182,13 +182,15 @@ public class LeaderboardImpl implements Named, Leaderboard {
     }
     
     @Override
-    public boolean isDiscarded(Competitor competitor, RaceInLeaderboard race, TimePoint timePoint) {
-        return getResultDiscardingRule().getDiscardedRaceColumns(competitor, getRaceColumns(), timePoint).contains(race);
+    public boolean isDiscarded(Competitor competitor, RaceInLeaderboard raceColumn, TimePoint timePoint) {
+        return !raceColumn.isMedalRace()
+                && getResultDiscardingRule().getDiscardedRaceColumns(competitor, getRaceColumns(), timePoint).contains(
+                        raceColumn);
     }
 
     @Override
-    public int getTotalPoints(Competitor competitor, RaceInLeaderboard race, TimePoint timePoint) throws NoWindException {
-        return isDiscarded(competitor, race, timePoint) ? 0 : getNetPoints(competitor, race, timePoint);
+    public int getTotalPoints(Competitor competitor, RaceInLeaderboard raceColumn, TimePoint timePoint) throws NoWindException {
+        return isDiscarded(competitor, raceColumn, timePoint) ? 0 : getNetPoints(competitor, raceColumn, timePoint);
     }
     
     @Override

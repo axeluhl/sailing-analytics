@@ -67,29 +67,43 @@ public class LeaderboardOfflineTest {
     
     @Test
     public void simpleLeaderboardTest() throws NoWindException {
-        for (Integer carry : new Integer[] { null, 0, 1, 2, 3 }) {
-            testLeaderboard(0, 9, 3, 6, carry);
-            testLeaderboard(2, 9, 3, 6, carry);
-            testLeaderboard(3, 9, 3, 6, carry);
-            testLeaderboard(4, 9, 3, 6, carry);
-            testLeaderboard(6, 9, 3, 6, carry);
-            testLeaderboard(7, 9, 3, 6, carry);
-            testLeaderboard(8, 9, 3, 6, carry);
+        for (int numberOfUntrackedRaces : new int[] { 0, 1, 2, 3 }) {
+            for (boolean addOneMedalRace : new boolean[] { false, true }) {
+                for (Integer carry : new Integer[] { null, 0, 1, 2, 3 }) {
+                    testLeaderboard(0, 9, 3, 6, carry, addOneMedalRace, numberOfUntrackedRaces);
+                    testLeaderboard(2, 9, 3, 6, carry, addOneMedalRace, numberOfUntrackedRaces);
+                    testLeaderboard(3, 9, 3, 6, carry, addOneMedalRace, numberOfUntrackedRaces);
+                    testLeaderboard(4, 9, 3, 6, carry, addOneMedalRace, numberOfUntrackedRaces);
+                    testLeaderboard(6, 9, 3, 6, carry, addOneMedalRace, numberOfUntrackedRaces);
+                    testLeaderboard(7, 9, 3, 6, carry, addOneMedalRace, numberOfUntrackedRaces);
+                    testLeaderboard(8, 9, 3, 6, carry, addOneMedalRace, numberOfUntrackedRaces);
+                    testLeaderboard(0, 0, 3, 6, carry, addOneMedalRace, numberOfUntrackedRaces);
+                    testLeaderboard(2, 0, 3, 6, carry, addOneMedalRace, numberOfUntrackedRaces);
+                    testLeaderboard(3, 0, 3, 6, carry, addOneMedalRace, numberOfUntrackedRaces);
+                    testLeaderboard(4, 0, 3, 6, carry, addOneMedalRace, numberOfUntrackedRaces);
+                    testLeaderboard(6, 0, 3, 6, carry, addOneMedalRace, numberOfUntrackedRaces);
+                    testLeaderboard(7, 0, 3, 6, carry, addOneMedalRace, numberOfUntrackedRaces);
+                    testLeaderboard(8, 0, 3, 6, carry, addOneMedalRace, numberOfUntrackedRaces);
+                }
+            }
         }
     }
 
     protected void testLeaderboard(int numberOfStartedRaces, int numberOfNotStartedRaces, int firstDiscardingThreshold,
-            int secondDiscardingThreshold, Integer carry) throws NoWindException {
+            int secondDiscardingThreshold, Integer carry, boolean addOneMedalRace, int numberOfUntrackedRaces) throws NoWindException {
         setupRaces(numberOfStartedRaces, numberOfNotStartedRaces);
         Leaderboard leaderboard = new LeaderboardImpl("Test Leaderboard", new ScoreCorrectionImpl(), new ResultDiscardingRuleImpl(
                 new int[] { firstDiscardingThreshold, secondDiscardingThreshold }));
         int i=0;
         for (TrackedRace race : testRaces) {
-            raceColumnsInLeaderboard.put(race, leaderboard.addRace(race, "Test Race "+(++i), /* medalRace */ false));
+            i++;
+            raceColumnsInLeaderboard.put(race, leaderboard.addRace(race, "Test Race "+i,
+                    /* medalRace */ numberOfUntrackedRaces == 0 && addOneMedalRace && i == testRaces.size()));
         }
         // add a few race columns not yet connected to a tracked race
-        for (int j=0; j<3; j++) {
-            leaderboard.addRaceColumn("Test Race "+(++i), /* medalRace */ false);
+        for (int j=0; j<numberOfUntrackedRaces; j++) {
+            i++;
+            leaderboard.addRaceColumn("Test Race "+i, /* medalRace */ addOneMedalRace && j == numberOfUntrackedRaces-1);
         }
         if (carry != null) {
             leaderboard.setCarriedPoints(competitor, carry);
@@ -97,6 +111,7 @@ public class LeaderboardOfflineTest {
         TimePoint now = MillisecondsTimePoint.now();
         int carryInt = (carry == null ? 0 : carry);
         int totalPoints = carryInt;
+        int medalRacePoints = getMedalRacePoints(competitor, now);
         for (TrackedRace race : testRaces) {
             RaceInLeaderboard raceColumn = raceColumnsInLeaderboard.get(race);
             Pair<Competitor, RaceInLeaderboard> key = new Pair<Competitor, RaceInLeaderboard>(competitor, raceColumn);
@@ -108,16 +123,17 @@ public class LeaderboardOfflineTest {
                 assertEquals(rank, leaderboard.getNetPoints(competitor, raceColumn, now));
                 assertEquals(rank, leaderboard.getContent(now).get(key).getNetPoints());
                 assertEquals(rank, leaderboard.getEntry(competitor, raceColumn, now).getNetPoints());
-                // One race is discarded because four races were started, and for [3-6) there can be one race discarded.
-                // The discarded race is the worst from those started, so the one with rank 4.
+                // One race is discarded because four races were started, and for [3-6) one race can be discarded.
+                // The discarded race is the worst of those started, so the one with rank 4.
                 int expectedNumberOfDiscardedRaces =
                         numberOfStartedRaces < firstDiscardingThreshold ? 0 : numberOfStartedRaces < secondDiscardingThreshold ? 1 : 2;
-                assertEquals(rank > numberOfStartedRaces - expectedNumberOfDiscardedRaces ? 0 : rank,
-                        leaderboard.getTotalPoints(competitor, raceColumn, now));
-                assertEquals(rank > numberOfStartedRaces - expectedNumberOfDiscardedRaces ? 0 : rank,
-                        leaderboard.getContent(now).get(key).getTotalPoints());
-                assertEquals(rank > numberOfStartedRaces - expectedNumberOfDiscardedRaces ? 0 : rank,
-                        leaderboard.getEntry(competitor, raceColumn, now).getTotalPoints());
+                int expected = !raceColumn.isMedalRace()
+                        // FIXME with the medal race scoring worse than one of the races to discard, rank cannot simply be compared to numberOfStartedRaces-expectedNumberOfDiscardedRaces
+                        && rank > numberOfStartedRaces - expectedNumberOfDiscardedRaces
+                                - (addOneMedalRace && numberOfStartedRaces-medalRacePoints<expectedNumberOfDiscardedRaces ? 1 : 0) ? 0 : rank;
+                assertEquals(expected, leaderboard.getTotalPoints(competitor, raceColumn, now));
+                assertEquals(expected, leaderboard.getContent(now).get(key).getTotalPoints());
+                assertEquals(expected, leaderboard.getEntry(competitor, raceColumn, now).getTotalPoints());
                 totalPoints += leaderboard.getContent(now).get(key).getTotalPoints();
             } else {
                 assertEquals(0, leaderboard.getTrackedPoints(competitor, raceColumn, now));
@@ -132,6 +148,16 @@ public class LeaderboardOfflineTest {
         assertEquals(totalPoints, leaderboard.getTotalPoints(competitor, now));
     }
     
+    private int getMedalRacePoints(Competitor competitor, TimePoint at) throws NoWindException {
+        for (TrackedRace r : testRaces) {
+            if (raceColumnsInLeaderboard.get(r) != null && raceColumnsInLeaderboard.get(r).isMedalRace() &&
+                    raceColumnsInLeaderboard.get(r).getTrackedRace().hasStarted(at)) {
+                return raceColumnsInLeaderboard.get(r).getTrackedRace().getRank(competitor, at);
+            }
+        }
+        return 0;
+    }
+
     private class MockedTrackedRaceWithFixedRank extends MockedTrackedRace {
         private final int rank;
         private final boolean started;
