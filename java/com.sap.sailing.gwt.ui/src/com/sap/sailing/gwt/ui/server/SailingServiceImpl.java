@@ -108,7 +108,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             row.fieldsByRaceName = new HashMap<String, LeaderboardEntryDAO>();
             row.carriedPoints = leaderboard.getCarriedPoints(competitor);
             result.competitors.add(competitorDAO);
-            for (RaceInLeaderboard raceColumn : leaderboard.getColumns()) {
+            for (RaceInLeaderboard raceColumn : leaderboard.getRaceColumns()) {
                 Entry entry = leaderboard.getEntry(competitor, raceColumn, timePoint);
                 LeaderboardEntryDAO entryDAO = new LeaderboardEntryDAO();
                 entryDAO.netPoints = entry.getNetPoints();

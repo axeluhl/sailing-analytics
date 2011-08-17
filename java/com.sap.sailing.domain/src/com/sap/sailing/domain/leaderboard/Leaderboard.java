@@ -41,8 +41,6 @@ public interface Leaderboard extends Named {
         boolean isDiscarded() throws NoWindException;
     }
     
-    Iterable<TrackedRace> getTrackedRaces();
-
     Iterable<Competitor> getCompetitors();
     
     Entry getEntry(Competitor competitor, TrackedRace race, TimePoint timePoint) throws NoWindException;
@@ -145,7 +143,7 @@ public interface Leaderboard extends Named {
      * Retrieves all race columns that were added, either by {@link #addRace(TrackedRace, String, boolean)} or
      * {@link #addRaceColumn(String, boolean)}.
      */
-    Iterable<RaceInLeaderboard> getColumns();
+    Iterable<RaceInLeaderboard> getRaceColumns();
 
     /**
      * A leaderboard can carry over points from races that are not tracked by this leaderboard in detail,

@@ -100,7 +100,7 @@ public class LeaderboardImpl implements Named, Leaderboard {
     }
     
     @Override
-    public Iterable<RaceInLeaderboard> getColumns() {
+    public Iterable<RaceInLeaderboard> getRaceColumns() {
         return Collections.unmodifiableCollection(races);
     }
     
@@ -126,8 +126,7 @@ public class LeaderboardImpl implements Named, Leaderboard {
         column.setTrackedRace(race);
     }
 
-    @Override
-    public Iterable<TrackedRace> getTrackedRaces() {
+    private Iterable<TrackedRace> getTrackedRaces() {
         Set<TrackedRace> trackedRaces = new HashSet<TrackedRace>();
         for (RaceInLeaderboard r : races) {
             TrackedRace trackedRace = r.getTrackedRace();
