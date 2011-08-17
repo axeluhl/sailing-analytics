@@ -43,13 +43,15 @@ public class LeaderboardImpl implements Named, Leaderboard {
     private class EntryImpl implements Entry {
         private final int trackedPoints;
         private final int netPoints;
+        private final int totalPoints;
         private final MaxPointsReason maxPointsReason;
         private final boolean discarded;
-        private EntryImpl(int trackedPoints, Result scoreCorrectionResult, boolean discarded) {
+        private EntryImpl(int trackedPoints, int netPoints, int totalPoints, MaxPointsReason maxPointsReason, boolean discarded) {
             super();
             this.trackedPoints = trackedPoints;
-            this.netPoints = scoreCorrectionResult.getCorrectedScore();
-            this.maxPointsReason = scoreCorrectionResult.getMaxPointsReason();
+            this.netPoints = netPoints;
+            this.totalPoints = totalPoints;
+            this.maxPointsReason = maxPointsReason;
             this.discarded = discarded;
         }
         @Override
@@ -62,7 +64,7 @@ public class LeaderboardImpl implements Named, Leaderboard {
         }
         @Override
         public int getTotalPoints() {
-            return discarded ? 0 : getNetPoints();
+            return totalPoints;
         }
         @Override
         public MaxPointsReason getMaxPointsReason() {
@@ -190,7 +192,9 @@ public class LeaderboardImpl implements Named, Leaderboard {
 
     @Override
     public int getTotalPoints(Competitor competitor, RaceInLeaderboard raceColumn, TimePoint timePoint) throws NoWindException {
-        return isDiscarded(competitor, raceColumn, timePoint) ? 0 : getNetPoints(competitor, raceColumn, timePoint);
+        return isDiscarded(competitor, raceColumn, timePoint) ?
+                0 :
+                (raceColumn.isMedalRace() ? 2 : 1) * getNetPoints(competitor, raceColumn, timePoint);
     }
     
     @Override
@@ -207,15 +211,13 @@ public class LeaderboardImpl implements Named, Leaderboard {
         Entry result;
         if (race.getTrackedRace() != null) {
             int trackedPoints = getTrackedPoints(competitor, race, timePoint);
-            Result correctedResults = getScoreCorrection().getCorrectedScore(trackedPoints, competitor, race, timePoint);
-            return new EntryImpl(trackedPoints, correctedResults, isDiscarded(competitor, race, timePoint));
+            final Result correctedResults = getScoreCorrection().getCorrectedScore(trackedPoints, competitor, race, timePoint);
+            boolean discarded = isDiscarded(competitor, race, timePoint);
+            return new EntryImpl(trackedPoints, correctedResults.getCorrectedScore(),
+                    discarded ? 0 : correctedResults.getCorrectedScore() * (race.isMedalRace()?2:1),
+                            correctedResults.getMaxPointsReason(), discarded);
         } else {
-            result = new EntryImpl(/* trackedPoints */ 0, /* scoreCorrectionResult */ new Result() {
-                @Override
-                public MaxPointsReason getMaxPointsReason() { return MaxPointsReason.NONE; }
-                @Override
-                public int getCorrectedScore() { return 0; }
-            }, /* discarded */ false);
+            result = new EntryImpl(/* trackedPoints */ 0, /* net points */ 0, /* total points */ 0, MaxPointsReason.NONE, /* discarded */ false);
         }
         return result;
     }
@@ -239,7 +241,9 @@ public class LeaderboardImpl implements Named, Leaderboard {
                     discardedRaces.put(competitor, discardedRacesForCompetitor);
                 }
                 boolean discarded = discardedRacesForCompetitor.contains(raceColumn);
-                Entry entry = new EntryImpl(trackedPoints, correctedResults, discarded);
+                Entry entry = new EntryImpl(trackedPoints, correctedResults.getCorrectedScore(),
+                        discarded ? 0 : correctedResults.getCorrectedScore() * (raceColumn.isMedalRace() ? 2 : 1),
+                                correctedResults.getMaxPointsReason(), discarded);
                 result.put(new Pair<Competitor, RaceInLeaderboard>(competitor, raceColumn), entry);
             }
         }

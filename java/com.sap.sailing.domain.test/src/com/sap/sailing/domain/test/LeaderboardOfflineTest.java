@@ -130,7 +130,8 @@ public class LeaderboardOfflineTest {
                 int expected = !raceColumn.isMedalRace()
                         // FIXME with the medal race scoring worse than one of the races to discard, rank cannot simply be compared to numberOfStartedRaces-expectedNumberOfDiscardedRaces
                         && rank > numberOfStartedRaces - expectedNumberOfDiscardedRaces
-                                - (addOneMedalRace && numberOfStartedRaces-medalRacePoints<expectedNumberOfDiscardedRaces ? 1 : 0) ? 0 : rank;
+                                - (addOneMedalRace && numberOfStartedRaces-medalRacePoints<expectedNumberOfDiscardedRaces ? 1 : 0) ? 0 :
+                                    rank==medalRacePoints?2*rank:rank;
                 assertEquals(expected, leaderboard.getTotalPoints(competitor, raceColumn, now));
                 assertEquals(expected, leaderboard.getContent(now).get(key).getTotalPoints());
                 assertEquals(expected, leaderboard.getEntry(competitor, raceColumn, now).getTotalPoints());
