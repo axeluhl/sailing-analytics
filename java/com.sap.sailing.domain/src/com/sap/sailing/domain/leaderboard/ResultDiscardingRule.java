@@ -4,7 +4,6 @@ import java.util.Set;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.TimePoint;
-import com.sap.sailing.domain.tracking.TrackedRace;
 
 /**
  * A result discarding rule is used to determine for a competitor those races from a list of
@@ -15,5 +14,5 @@ import com.sap.sailing.domain.tracking.TrackedRace;
  *
  */
 public interface ResultDiscardingRule {
-    Set<TrackedRace> getDiscardedRaces(Competitor competitor, Iterable<TrackedRace> races, TimePoint timePoint);
+    Set<RaceInLeaderboard> getDiscardedRaceColumns(Competitor competitor, Iterable<RaceInLeaderboard> raceColumns, TimePoint timePoint);
 }

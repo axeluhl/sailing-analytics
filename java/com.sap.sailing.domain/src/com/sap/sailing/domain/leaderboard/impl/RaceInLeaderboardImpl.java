@@ -22,7 +22,7 @@ public class RaceInLeaderboardImpl extends NamedImpl implements RaceInLeaderboar
     @Override
     public int getTotalPoints(Competitor competitor, TimePoint timePoint) throws NoWindException {
         if (getTrackedRace() != null) {
-            return leaderboard.getTotalPoints(competitor, getTrackedRace(), timePoint);
+            return leaderboard.getTotalPoints(competitor, this, timePoint);
         } else {
             return 0;
         }

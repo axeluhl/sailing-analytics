@@ -12,11 +12,11 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
 import com.sap.sailing.domain.leaderboard.impl.LeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.ResultDiscardingRuleImpl;
 import com.sap.sailing.domain.leaderboard.impl.ScoreCorrectionImpl;
 import com.sap.sailing.domain.tracking.NoWindException;
-import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindSource;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
@@ -36,25 +36,25 @@ public class LeaderboardForKielWeekTest extends KielWeek2011BasedTest {
         MillisecondsTimePoint now = MillisecondsTimePoint.now();
         loadRace("357c700a-9d9a-11e0-85be-406186cbf87c"); // 505 Race 2
         Competitor hasso = getCompetitorByName("Dr.Plattner");
-        leaderboard.addRace(getTrackedRace(), "Test Race 1", /* medalRace */ false);
+        RaceInLeaderboard column = leaderboard.addRace(getTrackedRace(), "Test Race 1", /* medalRace */ false);
         assertEquals(21, leaderboard.getTotalPoints(hasso, now));
-        Pair<Competitor, TrackedRace> key = new Pair<Competitor, TrackedRace>(hasso, getTrackedRace());
+        Pair<Competitor, RaceInLeaderboard> key = new Pair<Competitor, RaceInLeaderboard>(hasso, column);
         assertEquals(21, leaderboard.getContent(now).get(key).getTotalPoints());
-        assertEquals(21, leaderboard.getEntry(hasso, getTrackedRace(), now).getTotalPoints());
+        assertEquals(21, leaderboard.getEntry(hasso, column, now).getTotalPoints());
         loadRace("e876c3a0-9da8-11e0-85be-406186cbf87c"); // 505 Race 3
-        leaderboard.addRace(getTrackedRace(), "Test Race 2", /* medalRace */ false);
-        key = new Pair<Competitor, TrackedRace>(hasso, getTrackedRace());
+        column = leaderboard.addRace(getTrackedRace(), "Test Race 2", /* medalRace */ false);
+        key = new Pair<Competitor, RaceInLeaderboard>(hasso, column);
         // In Race 3, Hasso ranked 33th
         assertEquals(54, leaderboard.getTotalPoints(hasso, now));
         assertEquals(33, leaderboard.getContent(now).get(key).getTotalPoints());
-        assertEquals(33, leaderboard.getEntry(hasso, getTrackedRace(), now).getTotalPoints());
+        assertEquals(33, leaderboard.getEntry(hasso, column, now).getTotalPoints());
         loadRace("7c666e50-9dde-11e0-85be-406186cbf87c"); // 505 Race 4
-        leaderboard.addRace(getTrackedRace(), "Test Race 3", /* medalRace */ false);
-        key = new Pair<Competitor, TrackedRace>(hasso, getTrackedRace());
+        column = leaderboard.addRace(getTrackedRace(), "Test Race 3", /* medalRace */ false);
+        key = new Pair<Competitor, RaceInLeaderboard>(hasso, column);
         // now the second race is discarded because Hasso ranked worst compared to the other two; in race 4 he ranked 11th
         assertEquals(32, leaderboard.getTotalPoints(hasso, now));
         assertEquals(11, leaderboard.getContent(now).get(key).getTotalPoints());
-        assertEquals(11, leaderboard.getEntry(hasso, getTrackedRace(), now).getTotalPoints());
+        assertEquals(11, leaderboard.getEntry(hasso, column, now).getTotalPoints());
     }
 
     private void loadRace(String raceId) throws MalformedURLException, IOException, InterruptedException,

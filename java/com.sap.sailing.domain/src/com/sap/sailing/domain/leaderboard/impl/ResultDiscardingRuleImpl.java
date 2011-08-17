@@ -9,10 +9,10 @@ import java.util.TreeSet;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.TimePoint;
+import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
 import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
 import com.sap.sailing.domain.tracking.NoWindError;
 import com.sap.sailing.domain.tracking.NoWindException;
-import com.sap.sailing.domain.tracking.TrackedRace;
 
 /**
  * Discards <code>i</code> results if the TODO TODO number of races started is greater or equal to
@@ -35,26 +35,28 @@ public class ResultDiscardingRuleImpl implements ResultDiscardingRule {
     }
 
     @Override
-    public Set<TrackedRace> getDiscardedRaces(final Competitor competitor, Iterable<TrackedRace> races, final TimePoint timePoint) {
-        int resultsToDiscard = getNumberOfResultsToDiscard(races, timePoint);
-        Set<TrackedRace> result;
+    public Set<RaceInLeaderboard> getDiscardedRaceColumns(final Competitor competitor, Iterable<RaceInLeaderboard> raceColumns, final TimePoint timePoint) {
+        int resultsToDiscard = getNumberOfResultsToDiscard(raceColumns, timePoint);
+        Set<RaceInLeaderboard> result;
         if (resultsToDiscard > 0) {
-            result = new HashSet<TrackedRace>();
-            TreeSet<TrackedRace> sortedRaces = new TreeSet<TrackedRace>(new Comparator<TrackedRace>() {
+            result = new HashSet<RaceInLeaderboard>();
+            TreeSet<RaceInLeaderboard> sortedRaces = new TreeSet<RaceInLeaderboard>(new Comparator<RaceInLeaderboard>() {
                 @Override
-                public int compare(TrackedRace o1, TrackedRace o2) {
+                public int compare(RaceInLeaderboard o1, RaceInLeaderboard o2) {
                     try {
-                        return o1.getRank(competitor, timePoint) - o2.getRank(competitor, timePoint);
+                        return o1.getTrackedRace().getRank(competitor, timePoint) - o2.getTrackedRace().getRank(competitor, timePoint);
                     } catch (NoWindException e) {
                         throw new NoWindError(e);
                     }
                 }
             });
-            for (TrackedRace race : races) {
-                sortedRaces.add(race);
+            for (RaceInLeaderboard raceColumn : raceColumns) {
+                if (raceColumn.getTrackedRace() != null && !raceColumn.isMedalRace()) {
+                    sortedRaces.add(raceColumn);
+                }
             }
             int i=0;
-            Iterator<TrackedRace> badRacesIter = sortedRaces.descendingIterator();
+            Iterator<RaceInLeaderboard> badRacesIter = sortedRaces.descendingIterator();
             while (badRacesIter.hasNext() && i<resultsToDiscard) {
                 result.add(badRacesIter.next());
                 i++;
@@ -65,11 +67,11 @@ public class ResultDiscardingRuleImpl implements ResultDiscardingRule {
         return result;
     }
 
-    private int getNumberOfResultsToDiscard(Iterable<TrackedRace> races, TimePoint timePoint) {
+    private int getNumberOfResultsToDiscard(Iterable<RaceInLeaderboard> raceColumns, TimePoint timePoint) {
         int numberOfResultsToDiscard;
         int numberOfStartedRaces = 0;
-        for (TrackedRace r : races) {
-            if (r.hasStarted(timePoint)) {
+        for (RaceInLeaderboard raceInLeaderboard : raceColumns) {
+            if (raceInLeaderboard.getTrackedRace() != null && raceInLeaderboard.getTrackedRace().hasStarted(timePoint)) {
                 numberOfStartedRaces++;
             }
         }

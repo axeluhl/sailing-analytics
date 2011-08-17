@@ -89,9 +89,10 @@ public class LeaderboardImpl implements Named, Leaderboard {
     }
     
     @Override
-    public void addRaceColumn(String name, boolean medalRace) {
+    public RaceInLeaderboard addRaceColumn(String name, boolean medalRace) {
         RaceInLeaderboardImpl column = new RaceInLeaderboardImpl(this, name, medalRace);
         races.add(column);
+        return column;
     }
     
     @Override
@@ -104,7 +105,8 @@ public class LeaderboardImpl implements Named, Leaderboard {
         return Collections.unmodifiableCollection(races);
     }
     
-    private RaceInLeaderboard getRaceColumnByName(String columnName) {
+    @Override
+    public RaceInLeaderboard getRaceColumnByName(String columnName) {
         RaceInLeaderboard result = null;
         for (RaceInLeaderboard r : races) {
             if (r.getName().equals(columnName)) {
@@ -116,7 +118,7 @@ public class LeaderboardImpl implements Named, Leaderboard {
     }
     
     @Override
-    public void addRace(TrackedRace race, String columnName, boolean medalRace) {
+    public RaceInLeaderboard addRace(TrackedRace race, String columnName, boolean medalRace) {
         RaceInLeaderboard column = getRaceColumnByName(columnName);
         if (column == null) {
             column = new RaceInLeaderboardImpl(this, columnName, medalRace);
@@ -124,6 +126,7 @@ public class LeaderboardImpl implements Named, Leaderboard {
             races.add(column);
         }
         column.setTrackedRace(race);
+        return column;
     }
 
     private Iterable<TrackedRace> getTrackedRaces() {
@@ -157,54 +160,53 @@ public class LeaderboardImpl implements Named, Leaderboard {
     }
 
     @Override
-    public int getTrackedPoints(Competitor competitor, TrackedRace race, TimePoint timePoint) throws NoWindException {
-        return race.hasStarted(timePoint) ? race.getRank(competitor, timePoint) : 0;
+    public int getTrackedPoints(Competitor competitor, RaceInLeaderboard race, TimePoint timePoint) throws NoWindException {
+        return race.getTrackedRace() == null ? 0 : race.getTrackedRace().hasStarted(timePoint) ? race.getTrackedRace()
+                .getRank(competitor, timePoint) : 0;
     }
 
     @Override
-    public int getNetPoints(Competitor competitor, TrackedRace race, TimePoint timePoint) throws NoWindException {
-        return getScoreCorrection().getCorrectedScore(getTrackedPoints(competitor, race, timePoint), competitor, race,
-                timePoint).getCorrectedScore();
+    public int getNetPoints(Competitor competitor, RaceInLeaderboard raceColumn, TimePoint timePoint) throws NoWindException {
+        return raceColumn.getTrackedRace() == null ? 0 : getScoreCorrection().getCorrectedScore(
+                getTrackedPoints(competitor, raceColumn, timePoint), competitor, raceColumn, timePoint)
+                .getCorrectedScore();
+    }
+    
+    
+    @Override
+    public MaxPointsReason getMaxPointsReason(Competitor competitor, RaceInLeaderboard raceColumn, TimePoint timePoint)
+            throws NoWindException {
+        return raceColumn.getTrackedRace() == null ? MaxPointsReason.NONE : getScoreCorrection().getCorrectedScore(
+                getTrackedPoints(competitor, raceColumn, timePoint), competitor, raceColumn, timePoint)
+                .getMaxPointsReason();
     }
     
     @Override
-    public MaxPointsReason getMaxPointsReason(Competitor competitor, TrackedRace race, TimePoint timePoint) throws NoWindException {
-        return getScoreCorrection().getCorrectedScore(getTrackedPoints(competitor, race, timePoint), competitor, race,
-                timePoint).getMaxPointsReason();
-    }
-    
-    @Override
-    public boolean isDiscarded(Competitor competitor, TrackedRace race, TimePoint timePoint) {
-        Iterable<TrackedRace> trackedRaces = getTrackedRaces();
-        return getResultDiscardingRule().getDiscardedRaces(competitor, trackedRaces, timePoint).contains(race);
+    public boolean isDiscarded(Competitor competitor, RaceInLeaderboard race, TimePoint timePoint) {
+        return getResultDiscardingRule().getDiscardedRaceColumns(competitor, getRaceColumns(), timePoint).contains(race);
     }
 
     @Override
-    public int getTotalPoints(Competitor competitor, TrackedRace race, TimePoint timePoint) throws NoWindException {
+    public int getTotalPoints(Competitor competitor, RaceInLeaderboard race, TimePoint timePoint) throws NoWindException {
         return isDiscarded(competitor, race, timePoint) ? 0 : getNetPoints(competitor, race, timePoint);
     }
     
     @Override
     public int getTotalPoints(Competitor competitor, TimePoint timePoint) throws NoWindException {
         int result = getCarriedPoints(competitor);
-        for (TrackedRace r : getTrackedRaces()) {
+        for (RaceInLeaderboard r : getRaceColumns()) {
             result += getTotalPoints(competitor, r, timePoint);
         }
         return result;
     }
 
     @Override
-    public Entry getEntry(Competitor competitor, TrackedRace race, TimePoint timePoint) throws NoWindException {
-        int trackedPoints = getTrackedPoints(competitor, race, timePoint);
-        Result correctedResults = getScoreCorrection().getCorrectedScore(trackedPoints, competitor, race, timePoint);
-        return new EntryImpl(trackedPoints, correctedResults, isDiscarded(competitor, race, timePoint));
-    }
-    
-    @Override
     public Entry getEntry(Competitor competitor, RaceInLeaderboard race, TimePoint timePoint) throws NoWindException {
         Entry result;
         if (race.getTrackedRace() != null) {
-            result = getEntry(competitor, race.getTrackedRace(), timePoint);
+            int trackedPoints = getTrackedPoints(competitor, race, timePoint);
+            Result correctedResults = getScoreCorrection().getCorrectedScore(trackedPoints, competitor, race, timePoint);
+            return new EntryImpl(trackedPoints, correctedResults, isDiscarded(competitor, race, timePoint));
         } else {
             result = new EntryImpl(/* trackedPoints */ 0, /* scoreCorrectionResult */ new Result() {
                 @Override
@@ -217,26 +219,26 @@ public class LeaderboardImpl implements Named, Leaderboard {
     }
     
     @Override
-    public Map<Pair<Competitor, TrackedRace>, Entry> getContent(TimePoint timePoint) throws NoWindException {
-        Map<Pair<Competitor, TrackedRace>, Entry> result = new HashMap<Pair<Competitor, TrackedRace>, Entry>();
-        Map<Competitor, Set<TrackedRace>> discardedRaces = new HashMap<Competitor, Set<TrackedRace>>();
-        for (TrackedRace race : getTrackedRaces()) {
-            for (Competitor competitor : race.getRace().getCompetitors()) {
+    public Map<Pair<Competitor, RaceInLeaderboard>, Entry> getContent(TimePoint timePoint) throws NoWindException {
+        Map<Pair<Competitor, RaceInLeaderboard>, Entry> result = new HashMap<Pair<Competitor, RaceInLeaderboard>, Entry>();
+        Map<Competitor, Set<RaceInLeaderboard>> discardedRaces = new HashMap<Competitor, Set<RaceInLeaderboard>>();
+        for (RaceInLeaderboard raceColumn : getRaceColumns()) {
+            for (Competitor competitor : getCompetitors()) {
                 int trackedPoints;
-                if (race.hasStarted(timePoint)) {
-                    trackedPoints = race.getRank(competitor, timePoint);
+                if (raceColumn.getTrackedRace() != null && raceColumn.getTrackedRace().hasStarted(timePoint)) {
+                    trackedPoints = raceColumn.getTrackedRace().getRank(competitor, timePoint);
                 } else {
                     trackedPoints = 0;
                 }
-                Result correctedResults = getScoreCorrection().getCorrectedScore(trackedPoints, competitor, race, timePoint);
-                Set<TrackedRace> discardedRacesForCompetitor = discardedRaces.get(competitor);
+                Result correctedResults = getScoreCorrection().getCorrectedScore(trackedPoints, competitor, raceColumn, timePoint);
+                Set<RaceInLeaderboard> discardedRacesForCompetitor = discardedRaces.get(competitor);
                 if (discardedRacesForCompetitor == null) {
-                    discardedRacesForCompetitor = getResultDiscardingRule().getDiscardedRaces(competitor, getTrackedRaces(), timePoint);
+                    discardedRacesForCompetitor = getResultDiscardingRule().getDiscardedRaceColumns(competitor, getRaceColumns(), timePoint);
                     discardedRaces.put(competitor, discardedRacesForCompetitor);
                 }
-                boolean discarded = discardedRacesForCompetitor.contains(race);
+                boolean discarded = discardedRacesForCompetitor.contains(raceColumn);
                 Entry entry = new EntryImpl(trackedPoints, correctedResults, discarded);
-                result.put(new Pair<Competitor, TrackedRace>(competitor, race), entry);
+                result.put(new Pair<Competitor, RaceInLeaderboard>(competitor, raceColumn), entry);
             }
         }
         return result;
