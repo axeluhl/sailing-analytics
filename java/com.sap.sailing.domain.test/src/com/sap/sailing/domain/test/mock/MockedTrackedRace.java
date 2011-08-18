@@ -11,6 +11,7 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.tracking.DynamicTrack;
+import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
@@ -270,6 +271,12 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     public boolean hasStarted(TimePoint at) {
         // TODO Auto-generated method stub
         return false;
+    }
+
+    @Override
+    public DynamicTrackedEvent getTrackedEvent() {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }
