@@ -1,5 +1,5 @@
 package com.sap.sailing.mongodb.impl;
 
 public enum CollectionNames {
-    WIND_TRACKS, TRACTRAC_CONFIGURATIONS;
+    WIND_TRACKS, TRACTRAC_CONFIGURATIONS, LEADERBOARDS;
 }

@@ -16,6 +16,7 @@ import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.tracking.DynamicTrack;
+import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
@@ -273,4 +274,8 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
         return result;
     }
 
+    @Override
+    public DynamicTrackedEvent getTrackedEvent() {
+        return (DynamicTrackedEvent) super.getTrackedEvent();
+    }
 }

@@ -3,6 +3,7 @@ package com.sap.sailing.mongodb;
 import com.mongodb.DBObject;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.tracking.TrackedEvent;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindSource;
@@ -33,4 +34,10 @@ public interface MongoObjectFactory {
      * will return an equal <code>tracTracConfiguration</code> in its results.
      */
     void storeTracTracConfiguration(TracTracConfiguration tracTracConfiguration);
+    
+    /**
+     * Stores the configuration data of <code>leaderboard</code> in the Mongo DB associated with this
+     * factory. 
+     */
+    void storeLeaderboard(Leaderboard leaderboard);
 }

@@ -190,4 +190,5 @@ public interface TrackedRace {
      */
     Wind getEstimatedWindDirection(Position position, TimePoint timePoint) throws NoWindException;
 
+    TrackedEvent getTrackedEvent();
 }

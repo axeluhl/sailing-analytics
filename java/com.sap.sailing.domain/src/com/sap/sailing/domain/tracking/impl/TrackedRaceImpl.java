@@ -54,6 +54,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     // TODO observe the race course; if it changes, update leg structures; consider fine-grained update events that tell what changed
     private final RaceDefinition race;
     
+    private final TrackedEvent trackedEvent;
+    
     /**
      * Keeps the oldest timestamp that is fed into this tracked race, either from a boat fix, a buoy
      * fix, a race start/finish or a coarse definition.
@@ -137,6 +139,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         for (WindSource windSource : WindSource.values()) {
             windTracks.put(windSource, windStore.getWindTrack(trackedEvent, this, windSource, millisecondsOverWhichToAverageWind));
         }
+        this.trackedEvent = trackedEvent;
         currentWindSource = WindSource.EXPEDITION;
         competitorRankings = new HashMap<TimePoint, List<Competitor>>();
     }
@@ -490,6 +493,11 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         }
         trackedLegs.remove(toRemove);
         updated(/* time point*/ null);
+    }
+    
+    @Override
+    public TrackedEvent getTrackedEvent() {
+        return trackedEvent;
     }
 
     @Override

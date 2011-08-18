@@ -1,15 +1,19 @@
 package com.sap.sailing.mongodb.impl;
 
+import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import com.sap.sailing.domain.base.Bearing;
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Speed;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.Timed;
+import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
 import com.sap.sailing.domain.tracking.Positioned;
 import com.sap.sailing.domain.tracking.TrackedEvent;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -82,6 +86,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     @Override
     public void storeTracTracConfiguration(TracTracConfiguration tracTracConfiguration) {
         DBCollection ttConfigCollection = database.getCollection(CollectionNames.TRACTRAC_CONFIGURATIONS.name());
+        ttConfigCollection.ensureIndex(CollectionNames.TRACTRAC_CONFIGURATIONS.name());
         BasicDBObject result = new BasicDBObject();
         result.put(FieldNames.TT_CONFIG_NAME.name(), tracTracConfiguration.getName());
         for (DBObject equallyNamedConfig : ttConfigCollection.find(result)) {
@@ -91,6 +96,36 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         result.put(FieldNames.TT_CONFIG_LIVE_DATA_URI.name(), tracTracConfiguration.getLiveDataURI());
         result.put(FieldNames.TT_CONFIG_STORED_DATA_URI.name(), tracTracConfiguration.getStoredDataURI());
         ttConfigCollection.insert(result);
+    }
+
+    @Override
+    public void storeLeaderboard(Leaderboard leaderboard) {
+        DBCollection leaderboardCollection = database.getCollection(CollectionNames.LEADERBOARDS.name());
+        leaderboardCollection.ensureIndex(FieldNames.LEADERBOARD_NAME.name());
+        BasicDBObject result = new BasicDBObject();
+        result.put(FieldNames.LEADERBOARD_NAME.name(), leaderboard.getName());
+        BasicDBList dbRaceColumns = new BasicDBList();
+        result.put(FieldNames.LEADERBOARD_COLUMNS.name(), dbRaceColumns);
+        for (RaceInLeaderboard raceColumn : leaderboard.getRaceColumns()) {
+            BasicDBObject dbRaceColumn = new BasicDBObject();
+            dbRaceColumn.put(FieldNames.LEADERBOARD_COLUMN_NAME.name(), raceColumn.getName());
+            dbRaceColumn.put(FieldNames.LEADERBOARD_IS_MEDAL_RACE_COLUMN.name(), raceColumn.isMedalRace());
+            TrackedRace trackedRace = raceColumn.getTrackedRace();
+            // if a column is not (yet) connected to a tracked race, event name and race name remain empty
+            if (trackedRace != null) {
+                dbRaceColumn.put(FieldNames.EVENT_NAME.name(), trackedRace.getTrackedEvent().getEvent().getName());
+                dbRaceColumn.put(FieldNames.RACE_NAME.name(), trackedRace.getRace().getName());
+            }
+            dbRaceColumns.add(dbRaceColumn);
+        }
+        if (leaderboard.hasCarriedPoints()) {
+            BasicDBObject dbCarriedPoints = new BasicDBObject();
+            result.put(FieldNames.LEADERBOARD_CARRIED_POINTS.name(), dbCarriedPoints);
+            for (Competitor competitor : leaderboard.getCompetitors()) {
+                dbCarriedPoints.put(competitor.getName(), leaderboard.getCarriedPoints(competitor));
+            }
+        }
+        leaderboardCollection.insert(result);
     }
 
 }

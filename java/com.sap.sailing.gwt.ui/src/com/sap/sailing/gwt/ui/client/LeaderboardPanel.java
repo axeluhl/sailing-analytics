@@ -76,7 +76,7 @@ public class LeaderboardPanel extends FormPanel {
         }
 
         private String getFlagURL(String twoLetterIsoCountryCode) {
-            return "/images/flags/"+twoLetterIsoCountryCode+".png";
+            return "/images/flags/"+twoLetterIsoCountryCode.toLowerCase()+".png";
         }
 
         @Override
