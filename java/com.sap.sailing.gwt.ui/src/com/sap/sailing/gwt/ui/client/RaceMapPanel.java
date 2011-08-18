@@ -86,7 +86,8 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
     
     private final Map<MarkDAO, Marker> buoyMarkers;
 
-    private final String mapsAPIKey = "ABQIAAAAmvjPh3ZpHbnwuX3a66lDqRTB4YHzt9A9TZNGGB87gEPRa24TnRQjCq1hRMRvlUmR4K97fo_4LwER6A";
+    // private final String mapsAPIKey = "ABQIAAAAmvjPh3ZpHbnwuX3a66lDqRTB4YHzt9A9TZNGGB87gEPRa24TnRQjCq1hRMRvlUmR4K97fo_4LwER6A";
+    private final String mapsAPIKey = "ABQIAAAAmvjPh3ZpHbnwuX3a66lDqRRiEiLkRdNM65UiQxTihnXsLjxfdBRactup7bnv-fZbq5QELXUtgt9JVw";
     
     public RaceMapPanel(SailingServiceAsync sailingService, ErrorReporter errorReporter,
             final EventRefresher eventRefresher, StringConstants stringConstants) {
