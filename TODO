@@ -1,6 +1,12 @@
 Axel
 ====
 
+ - Estimate wind not only based on a snapshot in time but also on a time interval, looking for
+   maneuvers. Assuming that the wind doesn't change radically, averaging over an n seconds interval
+   with n, e.g., being 30s, maneuvers should help in detecting wind direction.
+
+ - Use wind estimator to feed another wind track
+
  - consider an array-based implementation of TrackImpl, sorted ascending by time point; inserting
    with a not-maximal time point requires some shifting but should be the rare exception in all our
    use cases.
