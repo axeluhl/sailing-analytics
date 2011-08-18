@@ -6,20 +6,7 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/gwt-maps.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/gwt-visualization.jar"/>
-	<classpathentry kind="lib" path="lib/pwt-sap.ui.commons-0.18.0-20110817.025846-27.jar">
-		<attributes>
-			<attribute name="javadoc_location" value="jar:platform:/resource/com.sap.sailing.gwt.ui/lib/pwt-sap.ui.commons-0.18.0-20110817.025846-27-javadoc.jar!/"/>
-		</attributes>
-	</classpathentry>
-	<classpathentry kind="lib" path="lib/pwt-sap.ui.core-0.18.0-20110817.025846-27.jar">
-		<attributes>
-			<attribute name="javadoc_location" value="jar:platform:/resource/com.sap.sailing.gwt.ui/lib/pwt-sap.ui.core-0.18.0-20110817.025846-27-javadoc.jar!/"/>
-		</attributes>
-	</classpathentry>
-	<classpathentry kind="lib" path="lib/pwt-sap.ui.table-0.18.0-20110817.025846-27.jar">
-		<attributes>
-			<attribute name="javadoc_location" value="jar:platform:/resource/com.sap.sailing.gwt.ui/lib/pwt-sap.ui.table-0.18.0-20110817.025846-27-javadoc.jar!/"/>
-		</attributes>
-	</classpathentry>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/pwt-sap.ui.commons-0.18.0-20110817.025846-27.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/pwt-sap.ui.core-0.18.0-20110817.025846-27.jar"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>
