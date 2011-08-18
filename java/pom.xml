@@ -22,6 +22,8 @@
 		<module>com.sap.sailing.expeditionconnector</module>
 		<module>com.sap.sailing.expeditionconnector.test</module>
 		<module>com.sap.sailing.server</module>
+		<module>com.sap.sailing.gwt.ui</module>
+		<module>com.google.gwt.osgi</module>
 		<module>com.sap.sailing.server.test</module>
 		<module>com.sap.sailing.mongodb</module>
 		<module>com.sap.sailing.mongodb.test</module>
