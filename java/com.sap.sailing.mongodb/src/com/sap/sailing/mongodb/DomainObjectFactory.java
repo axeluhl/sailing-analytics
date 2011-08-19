@@ -2,6 +2,7 @@ package com.sap.sailing.mongodb;
 
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.tracking.WindSource;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tractracadapter.TracTracConfiguration;
@@ -20,4 +21,6 @@ public interface DomainObjectFactory {
     WindTrack loadWindTrack(Event event, RaceDefinition race, WindSource windSource, long millisecondsOverWhichToAverage);
 
     Iterable<TracTracConfiguration> getTracTracConfigurations();
+    
+    Leaderboard loadLeaderboard(String name);
 }
