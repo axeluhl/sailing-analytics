@@ -34,6 +34,7 @@ import com.google.gwt.maps.client.overlay.Marker;
 import com.google.gwt.maps.client.overlay.MarkerOptions;
 import com.google.gwt.maps.client.overlay.Polyline;
 import com.google.gwt.maps.client.overlay.PolylineOptions;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.Grid;
@@ -174,6 +175,8 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
     }
 
     private void loadMapsAPI() {
+        String host = Window.Location.getHost();
+        errorReporter.reportError("Host is "+host);
         Maps.loadMapsApi(mapsAPIKey, "2", false, new Runnable() {
             public void run() {
                 map = new MapWidget();
