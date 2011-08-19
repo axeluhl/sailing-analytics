@@ -127,7 +127,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             }
         }
         BasicDBObject dbScoreCorrections = new BasicDBObject();
-        storeScoreCorrections(leaderboard.getCompetitors(), leaderboard.getScoreCorrection(), dbScoreCorrections);
+        storeScoreCorrections(leaderboard, dbScoreCorrections);
         result.put(FieldNames.LEADERBOARD_SCORE_CORRECTIONS.name(), dbScoreCorrections);
         BasicDBList dbResultDiscardingThresholds = new BasicDBList();
         for (int threshold : leaderboard.getResultDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces()) {
@@ -137,9 +137,9 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         leaderboardCollection.insert(result);
     }
 
-    private void storeScoreCorrections(Iterable<Competitor> competitors, ScoreCorrection scoreCorrection, BasicDBObject dbScoreCorrections) {
-        for (Competitor competitor : competitors) {
-            
+    private void storeScoreCorrections(Leaderboard leaderboard, BasicDBObject dbScoreCorrections) {
+        for (Competitor competitor : leaderboard.getCompetitors()) {
+            // if (leaderboard.getScoreCorrection().isScoreCorrected(competitor, race))
         }
     }
 
