@@ -180,4 +180,8 @@ public interface Leaderboard extends Named {
     boolean hasCarriedPoints();
 
     void removeRaceColumn(String name);
+
+    ScoreCorrection getScoreCorrection();
+
+    ThresholdBasedResultDiscardingRule getResultDiscardingRule();
 }
