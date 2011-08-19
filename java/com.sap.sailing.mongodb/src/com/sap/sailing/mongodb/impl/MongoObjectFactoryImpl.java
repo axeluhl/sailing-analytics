@@ -14,6 +14,7 @@ import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.Timed;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
+import com.sap.sailing.domain.leaderboard.ScoreCorrection;
 import com.sap.sailing.domain.tracking.Positioned;
 import com.sap.sailing.domain.tracking.TrackedEvent;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -125,7 +126,21 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
                 dbCarriedPoints.put(competitor.getName(), leaderboard.getCarriedPoints(competitor));
             }
         }
+        BasicDBObject dbScoreCorrections = new BasicDBObject();
+        storeScoreCorrections(leaderboard, dbScoreCorrections);
+        result.put(FieldNames.LEADERBOARD_SCORE_CORRECTIONS.name(), dbScoreCorrections);
+        BasicDBList dbResultDiscardingThresholds = new BasicDBList();
+        for (int threshold : leaderboard.getResultDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces()) {
+            dbResultDiscardingThresholds.add(threshold);
+        }
+        result.put(FieldNames.LEADERBOARD_DISCARDING_THRESHOLDS.name(), dbResultDiscardingThresholds);
         leaderboardCollection.insert(result);
+    }
+
+    private void storeScoreCorrections(Leaderboard leaderboard, BasicDBObject dbScoreCorrections) {
+        for (Competitor competitor : leaderboard.getCompetitors()) {
+            // if (leaderboard.getScoreCorrection().isScoreCorrected(competitor, race))
+        }
     }
 
 }

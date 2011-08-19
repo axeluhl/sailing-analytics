@@ -10,7 +10,7 @@ import java.util.TreeSet;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
-import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
+import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.tracking.NoWindError;
 import com.sap.sailing.domain.tracking.NoWindException;
 
@@ -24,7 +24,7 @@ import com.sap.sailing.domain.tracking.NoWindException;
  * @author Axel Uhl (d043530)
  * 
  */
-public class ResultDiscardingRuleImpl implements ResultDiscardingRule {
+public class ResultDiscardingRuleImpl implements ThresholdBasedResultDiscardingRule {
     private final int[] discardIndexResultsStartingWithHowManyRaces;
     
     public ResultDiscardingRuleImpl(int[] discardIndexResultsStartingWithHowManyRaces) {
@@ -83,4 +83,8 @@ public class ResultDiscardingRuleImpl implements ResultDiscardingRule {
         return numberOfResultsToDiscard;
     }
 
+    @Override
+    public int[] getDiscardIndexResultsStartingWithHowManyRaces() {
+        return discardIndexResultsStartingWithHowManyRaces;
+    }
 }
