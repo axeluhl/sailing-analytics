@@ -181,7 +181,7 @@ public interface Leaderboard extends Named {
 
     void removeRaceColumn(String name);
 
-    ScoreCorrection getScoreCorrection();
+    SettableScoreCorrection getScoreCorrection();
 
     ThresholdBasedResultDiscardingRule getResultDiscardingRule();
 }
