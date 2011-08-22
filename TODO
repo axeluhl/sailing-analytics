@@ -1,6 +1,8 @@
 Axel
 ====
 
+ - why doesn't the event list in Wind panel refresh properly when new events got added?
+
  - clean up tracked races automatically if no connection can be established; currently, these
    tracked races never show up because they wait forever for their race course definition
 
