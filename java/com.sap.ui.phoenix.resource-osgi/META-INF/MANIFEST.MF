@@ -8,5 +8,4 @@ Fragment-Host: com.sap.ui.phoenix.resource
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Require-Bundle: org.eclipse.osgi,
  javax.servlet,
- com.sap.sailing.gwt.ui,
- com.sap.ui.phoenix.pwt-sap.ui.commons
+ com.sap.sailing.gwt.ui
