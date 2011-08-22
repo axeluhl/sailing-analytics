@@ -19,8 +19,7 @@ Require-Bundle: javax.servlet;bundle-version="2.5.0",
  com.sap.ui.phoenix.pwt-sap.ui.commons,
  com.sap.ui.phoenix.pwt-sap.ui.core,
  com.sap.ui.phoenix.commons,
- com.sap.ui.phoenix.core,
- com.sap.ui.phoenix.resource
+ com.sap.ui.phoenix.core
 Bundle-ClassPath: lib/resource-0.18.0-20110822.000513-32.jar,
  lib/gwt-visualization.jar,
  lib/gwt-maps.jar,

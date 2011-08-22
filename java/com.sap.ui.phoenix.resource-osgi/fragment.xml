@@ -1,0 +1,13 @@
+<fragment>
+   <extension
+         point="org.eclipse.equinox.http.registry.servlets">
+      <servlet
+            alias="/resources"
+            class="com.sap.phx.resource.ResourceServlet"
+            load-on-startup="true">
+            <init-param
+                  name="com.sap.phx.resource.DEV_MODE" value="true">
+            </init-param>
+      </servlet>
+   </extension>
+</fragment>

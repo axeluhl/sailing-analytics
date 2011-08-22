@@ -33,6 +33,7 @@
 		<module>com.mongodb.driver</module>
 		<module>com.googlecode.java-diff-utils</module>
 		<module>com.googlecode.java-diff-utils.test</module>
+		<module>com.sap.ui.phoenix.resource-osgi</module>
 	</modules>
 	
 	<properties>
