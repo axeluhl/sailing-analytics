@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Resource-osgi
+Bundle-SymbolicName: com.sap.ui.phoenix.resource-osgi
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: SAP
+Fragment-Host: com.sap.ui.phoenix.resource
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Require-Bundle: org.eclipse.osgi;bundle-version="3.7.0",
+ javax.servlet;bundle-version="2.5.0",
+ com.sap.sailing.gwt.ui;bundle-version="1.0.0"
