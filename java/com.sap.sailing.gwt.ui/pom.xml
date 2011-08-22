@@ -63,6 +63,10 @@
           <execution>
 	        <configuration>
 		      <module>com.sap.sailing.gwt.ui.AdminConsole</module>
+		      <gen>${basedir}/.generated</gen>
+		      <localWorkers>4</localWorkers>
+		      <webappDirectory>war</webappDirectory>
+		      <warSourceDirectory>${basedir}/src/main/resources</warSourceDirectory>
 	        </configuration>
             <goals>
               <goal>compile</goal>
