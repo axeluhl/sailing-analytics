@@ -1,4 +1,4 @@
-<fragment>
+<plugin>
    <extension
          point="org.eclipse.equinox.http.registry.servlets">
       <servlet
@@ -10,4 +10,4 @@
             </init-param>
       </servlet>
    </extension>
-</fragment>
+</plugin>
