@@ -1,6 +1,10 @@
 Axel
 ====
 
+ - why isn't all memory released when the last race of a series is untracked? Does this have to
+   do with the new leaderboard design? It probably should; a tracked race should only be eliminiated
+   if no more leaderboard is referencing it; but then it should mercilessly be GCed.
+
  - Estimate wind not only based on a snapshot in time but also on a time interval, looking for
    maneuvers. Assuming that the wind doesn't change radically, averaging over an n seconds interval
    with n, e.g., being 30s, maneuvers should help in detecting wind direction.
