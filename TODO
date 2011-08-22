@@ -1,6 +1,9 @@
 Axel
 ====
 
+ - clean up tracked races automatically if no connection can be established; currently, these
+   tracked races never show up because they wait forever for their race course definition
+
  - why isn't all memory released when the last race of a series is untracked? Does this have to
    do with the new leaderboard design? It probably should; a tracked race should only be eliminiated
    if no more leaderboard is referencing it; but then it should mercilessly be GCed.
