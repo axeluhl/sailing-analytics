@@ -14,7 +14,8 @@ import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.Timed;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
-import com.sap.sailing.domain.leaderboard.ScoreCorrection;
+import com.sap.sailing.domain.leaderboard.ScoreCorrection.MaxPointsReason;
+import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.tracking.Positioned;
 import com.sap.sailing.domain.tracking.TrackedEvent;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -138,8 +139,29 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     }
 
     private void storeScoreCorrections(Leaderboard leaderboard, BasicDBObject dbScoreCorrections) {
-        for (Competitor competitor : leaderboard.getCompetitors()) {
-            // if (leaderboard.getScoreCorrection().isScoreCorrected(competitor, race))
+        SettableScoreCorrection scoreCorrection = leaderboard.getScoreCorrection();
+        for (RaceInLeaderboard raceColumn : leaderboard.getRaceColumns()) {
+            BasicDBObject dbCorrectionForRace = new BasicDBObject();
+            for (Competitor competitor : leaderboard.getCompetitors()) {
+                if (raceColumn.getTrackedRace() != null && scoreCorrection.isScoreCorrected(competitor, raceColumn)) {
+                    BasicDBObject dbCorrectionForCompetitor = new BasicDBObject();
+                    MaxPointsReason maxPointsReason = scoreCorrection.getMaxPointsReason(competitor, raceColumn);
+                    if (maxPointsReason != null) {
+                        dbCorrectionForCompetitor.put(FieldNames.LEADERBOARD_SCORE_CORRECTION_MAX_POINTS_REASON.name(),
+                                maxPointsReason);
+                    }
+                    Integer explicitScoreCorrection = scoreCorrection
+                            .getExplicitScoreCorrection(competitor, raceColumn);
+                    if (explicitScoreCorrection != null) {
+                        dbCorrectionForCompetitor.put(FieldNames.LEADERBOARD_CORRECTED_SCORE.name(),
+                                explicitScoreCorrection);
+                    }
+                    dbCorrectionForRace.put(competitor.getName(), dbCorrectionForCompetitor);
+                }
+            }
+            if (!dbCorrectionForRace.isEmpty()) {
+                dbScoreCorrections.put(raceColumn.getName(), dbCorrectionForRace);
+            }
         }
     }
 

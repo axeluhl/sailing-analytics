@@ -18,6 +18,7 @@ import com.sap.sailing.domain.base.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.base.impl.DegreePosition;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindSource;
 import com.sap.sailing.domain.tracking.WindTrack;
@@ -103,6 +104,12 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 (String) object.get(FieldNames.TT_CONFIG_JSON_URL.name()),
                 (String) object.get(FieldNames.TT_CONFIG_LIVE_DATA_URI.name()),
                 (String) object.get(FieldNames.TT_CONFIG_STORED_DATA_URI.name()));
+    }
+
+    @Override
+    public Leaderboard loadLeaderboard(String name) {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

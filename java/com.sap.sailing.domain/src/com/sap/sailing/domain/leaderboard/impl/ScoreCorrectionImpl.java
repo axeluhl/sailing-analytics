@@ -7,7 +7,6 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
 import com.sap.sailing.domain.leaderboard.ScoreCorrection;
-import com.sap.sailing.domain.leaderboard.ScoreCorrection.MaxPointsReason;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.util.Util;
@@ -49,16 +48,18 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
     }
     
     @Override
-    public boolean isScoreCorrected(Competitor competitor, TrackedRace race) {
-        return correctedScores.containsKey(new Pair<Competitor, TrackedRace>(competitor, race));
+    public boolean isScoreCorrected(Competitor competitor, RaceInLeaderboard raceColumn) {
+        Pair<Competitor, RaceInLeaderboard> key = new Pair<Competitor, RaceInLeaderboard>(competitor, raceColumn);
+        return correctedScores.containsKey(key) || maxPointsReasons.containsKey(key);
     }
     
     @Override
-    public void uncorrectScore(Competitor competitor, TrackedRace race) {
-        correctedScores.remove(new Pair<Competitor, TrackedRace>(competitor, race));
+    public void uncorrectScore(Competitor competitor, RaceInLeaderboard raceColumn) {
+        correctedScores.remove(new Pair<Competitor, RaceInLeaderboard>(competitor, raceColumn));
     }
 
-    protected MaxPointsReason getMaxPointsReason(Competitor competitor, RaceInLeaderboard raceColumn) {
+    @Override
+    public MaxPointsReason getMaxPointsReason(Competitor competitor, RaceInLeaderboard raceColumn) {
         MaxPointsReason result = maxPointsReasons.get(new Pair<Competitor, RaceInLeaderboard>(competitor, raceColumn));
         if (result == null) {
             result = MaxPointsReason.NONE;
@@ -114,6 +115,11 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
 
     private int getMaxPoints(TrackedRace trackedRace) {
         return Util.size(trackedRace.getRace().getCompetitors())+1;
+    }
+
+    @Override
+    public Integer getExplicitScoreCorrection(Competitor competitor, RaceInLeaderboard raceColumn) {
+        return correctedScores.get(new Pair<Competitor, RaceInLeaderboard>(competitor, raceColumn));
     }
 
 }

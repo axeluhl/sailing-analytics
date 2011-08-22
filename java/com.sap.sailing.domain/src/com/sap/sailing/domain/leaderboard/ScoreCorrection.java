@@ -56,16 +56,17 @@ public interface ScoreCorrection {
      * the tracking results were overruled by the jury. Clients may use
      * {@link #isScoreCorrected(Competitor, TrackedRace)} to detect the difference.
      */
-    Result getCorrectedScore(int uncorrectedScore, Competitor competitor, RaceInLeaderboard trackedRace, TimePoint timePoint);
+    Result getCorrectedScore(int uncorrectedScore, Competitor competitor, RaceInLeaderboard raceColumn, TimePoint timePoint);
 
     /**
      * Note the difference between what this method does and a more naive comparison of uncorrected and corrected score.
      * Should, for some reason, the uncorrected score change later, an existing score correction would still remain in
      * place whereas if no score correction exists for the competitor/race combination, the resulting score after
-     * "correction" will still be the uncorrected value.
+     * "correction" will still be the uncorrected value.<p>
      * 
-     * @return if an explicit score correction was made for the combination of <code>competitor</code> and <code>race</code>
+     * @return if an explicit score correction was made for the combination of <code>competitor</code> and
+     *         <code>raceColumn</code>
      */
-    boolean isScoreCorrected(Competitor competitor, TrackedRace race);
+    boolean isScoreCorrected(Competitor competitor, RaceInLeaderboard raceColumn);
 
 }

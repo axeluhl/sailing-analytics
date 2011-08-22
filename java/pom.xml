@@ -33,6 +33,7 @@
 		<module>com.mongodb.driver</module>
 		<module>com.googlecode.java-diff-utils</module>
 		<module>com.googlecode.java-diff-utils.test</module>
+		<module>com.sap.ui.phoenix.resource-osgi</module>
 	</modules>
 	
 	<properties>
@@ -101,6 +102,7 @@
 							<arch>x86_64</arch>
 						</environment>
 					</environments>
+					<pomDependencies>consider</pomDependencies>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -159,6 +161,12 @@
 			<id>eclipse</id>
 			<url>http://download.eclipse.org/releases/indigo/</url>
 		</repository>
+<!--
+		<repository>
+			<id>sap-nexus</id>
+			<url>http://nexus.wdf.sap.corp:8081/nexus</url>
+		</repository>
+-->
 <!-- 
 		<repository>
 			<id>central</id>

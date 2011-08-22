@@ -13,9 +13,9 @@ import com.sap.sailing.domain.base.Named;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
-import com.sap.sailing.domain.leaderboard.ScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ScoreCorrection.MaxPointsReason;
 import com.sap.sailing.domain.leaderboard.ScoreCorrection.Result;
+import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.tracking.NoWindException;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -23,7 +23,7 @@ import com.sap.sailing.util.Util.Pair;
 
 public class LeaderboardImpl implements Named, Leaderboard {
     private final List<RaceInLeaderboard> races;
-    private final ScoreCorrection scoreCorrection;
+    private final SettableScoreCorrection scoreCorrection;
     private final ThresholdBasedResultDiscardingRule resultDiscardingRule;
     private String name;
     
@@ -79,7 +79,7 @@ public class LeaderboardImpl implements Named, Leaderboard {
     /**
      * @param name must not be <code>null</code>
      */
-    public LeaderboardImpl(String name, ScoreCorrection scoreCorrection, ThresholdBasedResultDiscardingRule resultDiscardingRule) {
+    public LeaderboardImpl(String name, SettableScoreCorrection scoreCorrection, ThresholdBasedResultDiscardingRule resultDiscardingRule) {
         if (name == null) {
             throw new IllegalArgumentException("A leaderboard's name must not be null");
         }
@@ -154,7 +154,7 @@ public class LeaderboardImpl implements Named, Leaderboard {
     }
 
     @Override
-    public ScoreCorrection getScoreCorrection() {
+    public SettableScoreCorrection getScoreCorrection() {
         return scoreCorrection;
     }
     
