@@ -45,7 +45,7 @@
     	<version>0.18.0-SNAPSHOT</version>
     </dependency>
     <dependency>
-    	<groupId>com.google.gwt.google-apis</groupId>
+    	<groupId>com.google.code</groupId>
     	<artifactId>gwt-maps</artifactId>
     	<version>1.1.0</version>
     	<scope>provided</scope>
