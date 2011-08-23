@@ -433,6 +433,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
     }
     
     private String getColorString(CompetitorDAO competitorDAO) {
+        // TODO try to avoid colors close to the light blue water display color of the underlying 2D map
         return "#"+Integer.toHexString(competitorDAO.hashCode()).substring(0, 6).toUpperCase();
     }
 
