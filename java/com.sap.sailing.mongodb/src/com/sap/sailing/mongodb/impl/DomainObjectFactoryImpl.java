@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
@@ -19,6 +20,12 @@ import com.sap.sailing.domain.base.impl.DegreePosition;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
+import com.sap.sailing.domain.leaderboard.ScoreCorrection.MaxPointsReason;
+import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
+import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
+import com.sap.sailing.domain.leaderboard.impl.ResultDiscardingRuleImpl;
+import com.sap.sailing.domain.leaderboard.impl.ScoreCorrectionImpl;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindSource;
 import com.sap.sailing.domain.tracking.WindTrack;
@@ -108,8 +115,70 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
 
     @Override
     public Leaderboard loadLeaderboard(String name) {
-        // TODO Auto-generated method stub
-        return null;
+        DBCollection leaderboardCollection = database.getCollection(CollectionNames.LEADERBOARDS.name());
+        Leaderboard result = null;
+        try {
+            BasicDBObject query = new BasicDBObject();
+            query.put(FieldNames.LEADERBOARD_NAME.name(), name);
+            for (DBObject o : leaderboardCollection.find(query)) {
+                result = loadLeaderboard(name, o);
+            }
+        } catch (Throwable t) {
+             // something went wrong during DB access; report, then use empty new wind track
+            logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load leaderboard "+name+".");
+            logger.throwing(DomainObjectFactoryImpl.class.getName(), "loadLeaderboard", t);
+        }
+        return result;
+
+    }
+
+    private Leaderboard loadLeaderboard(String name, DBObject o) {
+        SettableScoreCorrection scoreCorrection = new ScoreCorrectionImpl();
+        BasicDBList dbDiscardIndexResultsStartingWithHowManyRaces = (BasicDBList) o.get(FieldNames.LEADERBOARD_DISCARDING_THRESHOLDS.name());
+        int[] discardIndexResultsStartingWithHowManyRaces = new int[dbDiscardIndexResultsStartingWithHowManyRaces.size()];
+        int i=0;
+        for (Object discardingThresholdAsObject : dbDiscardIndexResultsStartingWithHowManyRaces) {
+            discardIndexResultsStartingWithHowManyRaces[i++] = (Integer) discardingThresholdAsObject;
+        }
+        ThresholdBasedResultDiscardingRule resultDiscardingRule = new ResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces);
+        LeaderboardImplWithDelayedCarriedPoints result = new LeaderboardImplWithDelayedCarriedPoints(name, scoreCorrection, resultDiscardingRule);
+        BasicDBList dbRaceColumns = (BasicDBList) o.get(FieldNames.LEADERBOARD_COLUMNS.name());
+        for (Object dbRaceColumnAsObject : dbRaceColumns) {
+            BasicDBObject dbRaceColumn = (BasicDBObject) dbRaceColumnAsObject;
+            result.addRaceColumn((String) dbRaceColumn.get(FieldNames.LEADERBOARD_COLUMN_NAME.name()),
+                    (Boolean) dbRaceColumn.get(FieldNames.LEADERBOARD_IS_MEDAL_RACE_COLUMN.name()));
+            String eventName = (String) dbRaceColumn.get(FieldNames.EVENT_NAME.name());
+            String raceName = (String) dbRaceColumn.get(FieldNames.RACE_NAME.name());
+            if (eventName != null && raceName != null) {
+                // TODO look up tracked race by names; if found, link to leaderboard column
+            }
+        }
+        DBObject carriedPoints = (DBObject) o.get(FieldNames.LEADERBOARD_CARRIED_POINTS.name());
+        if (carriedPoints != null) {
+            for (String competitorName : carriedPoints.keySet()) {
+                Integer carriedPointsForCompetitor = (Integer) carriedPoints.get(competitorName);
+                if (carriedPointsForCompetitor != null) {
+                    result.setCarriedPoints(competitorName, carriedPointsForCompetitor);
+                }
+            }
+        }
+        DBObject dbScoreCorrection = (DBObject) o.get(FieldNames.LEADERBOARD_SCORE_CORRECTIONS.name());
+        for (String competitorName : dbScoreCorrection.keySet()) {
+            DBObject dbScoreCorrectionForCompetitor = (DBObject) dbScoreCorrection.get(competitorName);
+            for (String raceName : dbScoreCorrectionForCompetitor.keySet()) {
+                RaceInLeaderboard raceColumn = result.getRaceColumnByName(raceName);
+                DBObject dbScoreCorrectionForCompetitorInRace = (DBObject) dbScoreCorrectionForCompetitor.get(raceName);
+                if (dbScoreCorrectionForCompetitorInRace.containsField(FieldNames.LEADERBOARD_SCORE_CORRECTION_MAX_POINTS_REASON.name())) {
+                    result.setMaxPointsReason(competitorName, raceColumn, MaxPointsReason
+                            .valueOf((String) dbScoreCorrectionForCompetitorInRace
+                                    .get(FieldNames.LEADERBOARD_SCORE_CORRECTION_MAX_POINTS_REASON.name())));
+                } else if (dbScoreCorrectionForCompetitorInRace.containsField(FieldNames.LEADERBOARD_CORRECTED_SCORE.name())) {
+                    result.correctScore(competitorName, raceColumn, (Integer) dbScoreCorrectionForCompetitorInRace
+                                    .get(FieldNames.LEADERBOARD_CORRECTED_SCORE.name()));
+                }
+            }
+        }
+        return result;
     }
 
 }
