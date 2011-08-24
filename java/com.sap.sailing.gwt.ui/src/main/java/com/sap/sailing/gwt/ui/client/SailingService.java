@@ -55,5 +55,7 @@ public interface SailingService extends RemoteService {
 
     void removeWind(String eventName, String raceName, WindDAO windDAO);
 
+    public List<String> getLeaderboardNames() throws Exception;
+    
     public LeaderboardDAO getLeaderboardByName(String leaderboardName, Date date) throws Exception;
 }
