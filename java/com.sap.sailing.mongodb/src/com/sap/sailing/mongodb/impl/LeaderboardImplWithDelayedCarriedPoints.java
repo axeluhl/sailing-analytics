@@ -105,7 +105,7 @@ public class LeaderboardImplWithDelayedCarriedPoints extends LeaderboardImpl {
             java.util.Map.Entry<String, Map<RaceInLeaderboard, Integer>> correctedScoresEntries = correctedScoresEntryIter.next();
             if (competitorsByName.containsKey(correctedScoresEntries.getKey())) {
                 for (java.util.Map.Entry<RaceInLeaderboard, Integer> correctedScoreEntry : correctedScoresEntries.getValue().entrySet()) {
-                    getScoreCorrection().correctScore(competitorsByName.get(correctedScoreEntry.getKey()),
+                    getScoreCorrection().correctScore(competitorsByName.get(correctedScoresEntries.getKey()),
                             correctedScoreEntry.getKey(), correctedScoreEntry.getValue());
                 }
                 correctedScoresEntryIter.remove();
