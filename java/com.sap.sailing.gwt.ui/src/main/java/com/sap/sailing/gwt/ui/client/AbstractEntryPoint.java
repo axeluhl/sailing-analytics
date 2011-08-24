@@ -4,9 +4,15 @@ import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.dom.client.KeyPressEvent;
+import com.google.gwt.event.dom.client.KeyPressHandler;
+import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
+import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -60,8 +66,7 @@ public abstract class AbstractEntryPoint implements EntryPoint, ErrorReporter {
         final Label textToServerLabel = new Label();
         serverResponseLabel = new HTML();
         VerticalPanel dialogVPanel = new VerticalPanel();
-        dialogVPanel.addStyleName("dialogVPanel"); //$NON-NLS-1$
-        dialogVPanel.add(new HTML("<b>Sending name to the server:</b>")); //$NON-NLS-1$
+        dialogVPanel.add(new HTML("<b>Error communicating with server</b>")); //$NON-NLS-1$
         dialogVPanel.add(textToServerLabel);
         dialogVPanel.add(new HTML("<br><b>Server replies:</b>")); //$NON-NLS-1$
         dialogVPanel.add(serverResponseLabel);
@@ -75,6 +80,43 @@ public abstract class AbstractEntryPoint implements EntryPoint, ErrorReporter {
             }
         });
         return myErrorDialogBox;
+    }
+
+    public static void linkEnterToButton(final Button button, FocusWidget... widgets) {
+        for (FocusWidget widget : widgets) {
+            widget.addKeyPressHandler(new KeyPressHandler() {
+                @Override
+                public void onKeyPress(KeyPressEvent event) {
+                    if (event.getNativeEvent().getKeyCode() == KeyCodes.KEY_ENTER) {
+                        button.click();
+                    }
+                }
+            });
+        }
+    }
+
+    public static void linkEscapeToButton(final Button button, FocusWidget... widgets) {
+        for (FocusWidget widget : widgets) {
+            widget.addKeyPressHandler(new KeyPressHandler() {
+                @Override
+                public void onKeyPress(KeyPressEvent event) {
+                    if (event.getNativeEvent().getKeyCode() == KeyCodes.KEY_ESCAPE) {
+                        button.click();
+                    }
+                }
+            });
+        }
+    }
+
+    public static void addFocusUponKeyUpToggler(final FocusWidget focusable) {
+        focusable.addKeyUpHandler(new KeyUpHandler() {
+            @Override
+            public void onKeyUp(KeyUpEvent event) {
+                focusable.setFocus(false);
+                // this ensures that the value is copied into the TextBox.getValue() result and a ChangeEvent is fired
+                focusable.setFocus(true);
+            }
+        });
     }
 
 }

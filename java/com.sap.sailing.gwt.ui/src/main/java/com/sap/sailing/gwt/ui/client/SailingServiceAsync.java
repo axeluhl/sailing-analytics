@@ -71,4 +71,6 @@ public interface SailingServiceAsync {
 
     void getLeaderboardNames(AsyncCallback<List<String>> callback);
 
+    void createLeaderboard(String leaderboardName, int[] discardThresholds, AsyncCallback<Void> asyncCallback);
+
 }

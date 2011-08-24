@@ -32,4 +32,21 @@ public interface StringConstants extends Constants {
     String competitor();
     String defaultLeaderboard();
     String noSuchLeaderboard();
+    String leaderboardConfiguration();
+    String newDotDotDot();
+    String editScores();
+    String columnNamesInSelectedLeaderboard();
+    String addDotDotDot();
+    String renameDotDotDot();
+    String trackedRaceConnectedToSelectedRaceName();
+    String linkToColumn();
+    String unlink();
+    String createNewLeaderboard();
+    String leaderboardName();
+    String cancel();
+    String pleaseEnterNonEmptyName();
+    String discardRacesFromHowManyStartedRacesOn();
+    String leaderboardWithThisNameAlreadyExists();
+    String discardThresholdsMustBeNumeric();
+    String discardThresholdsMustBeAscending();
 }
