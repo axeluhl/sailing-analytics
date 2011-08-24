@@ -4,7 +4,7 @@
    <extension
          point="org.eclipse.equinox.http.registry.servlets">
       <servlet
-            alias="/com.sap.sailing.gwt.ui.AdminConsole/sailing"
+            alias="/sailing"
             class="com.sap.sailing.gwt.ui.server.SailingServiceImpl"
             load-on-startup="true">
       </servlet>

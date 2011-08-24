@@ -262,7 +262,9 @@ public class LeaderboardPanel extends FormPanel {
     private void updateLeaderboard(LeaderboardDAO leaderboard) {
         adjustColumnLayout(leaderboard);
         data.getList().clear();
-        data.getList().addAll(leaderboard.rows.values());
+        if (leaderboard != null) {
+            data.getList().addAll(leaderboard.rows.values());
+        }
     }
     
     private void adjustColumnLayout(LeaderboardDAO leaderboard) {
@@ -270,8 +272,10 @@ public class LeaderboardPanel extends FormPanel {
         updateCarryColumn(leaderboard);
         // first remove race columns no longer needed:
         removeUnusedRaceColumns(leaderboard);
-        createMissingRaceColumns(leaderboard);
-        ensureTotalsColumn();
+        if (leaderboard != null) {
+            createMissingRaceColumns(leaderboard);
+            ensureTotalsColumn();
+        }
     }
 
     private void createMissingRaceColumns(LeaderboardDAO leaderboard) {
@@ -293,7 +297,7 @@ public class LeaderboardPanel extends FormPanel {
         List<Column<LeaderboardRowDAO, ?>> columnsToRemove = new ArrayList<Column<LeaderboardRowDAO,?>>();
         for (int i=0; i<leaderboardTable.getColumnCount(); i++) {
             Column<LeaderboardRowDAO, ?> c = leaderboardTable.getColumn(i);
-            if (c instanceof RaceColumn && !leaderboard.raceNames.contains(((RaceColumn) c).getRaceName())) {
+            if (c instanceof RaceColumn && (leaderboard == null || !leaderboard.raceNames.contains(((RaceColumn) c).getRaceName()))) {
                 columnsToRemove.add(c);
             }
         }
@@ -335,7 +339,7 @@ public class LeaderboardPanel extends FormPanel {
      * all columns starting from #1 will be removed and a {@link CarryColumn} will be added.
      */
     private void updateCarryColumn(LeaderboardDAO leaderboard) {
-        if (leaderboard.hasCarriedPoints) {
+        if (leaderboard != null && leaderboard.hasCarriedPoints) {
             if (!(leaderboardTable.getColumn(1) instanceof CarryColumn)) {
                 while (leaderboardTable.getColumnCount() > 1) {
                     leaderboardTable.removeColumn(1);

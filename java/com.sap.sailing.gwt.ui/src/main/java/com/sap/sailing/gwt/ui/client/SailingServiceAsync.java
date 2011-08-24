@@ -69,4 +69,6 @@ public interface SailingServiceAsync {
 
     void getLeaderboardByName(String leaderboardName, Date date, AsyncCallback<LeaderboardDAO> callback);
 
+    void getLeaderboardNames(AsyncCallback<List<String>> callback);
+
 }

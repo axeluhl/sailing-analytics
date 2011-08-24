@@ -62,7 +62,10 @@
           <!-- GWT version detected from dependencyManagement -->
           <execution>
 	        <configuration>
-		      <module>com.sap.sailing.gwt.ui.AdminConsole</module>
+	          <modules>
+		        <module>com.sap.sailing.gwt.ui.AdminConsole</module>
+		        <module>com.sap.sailing.gwt.ui.Leaderboard</module>
+		      </modules>
 		      <gen>${basedir}/.generated</gen>
 		      <localWorkers>4</localWorkers>
 		      <webappDirectory>war</webappDirectory>

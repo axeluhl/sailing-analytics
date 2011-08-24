@@ -93,31 +93,34 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
     
     public LeaderboardDAO getLeaderboardByName(String leaderboardName, Date date) throws Exception {
+        LeaderboardDAO result = null;
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
-        LeaderboardDAO result = new LeaderboardDAO();
-        TimePoint timePoint = new MillisecondsTimePoint(date);
-        result.competitors = new ArrayList<CompetitorDAO>();
-        result.name = leaderboard.getName();
-        result.raceNames = new ArrayList<String>();
-        result.rows = new HashMap<CompetitorDAO, LeaderboardRowDAO>();
-        result.hasCarriedPoints = leaderboard.hasCarriedPoints();
-        for (Competitor competitor : leaderboard.getCompetitors()) {
-            CompetitorDAO competitorDAO = getCompetitorDAO(competitor);
-            LeaderboardRowDAO row = new LeaderboardRowDAO();
-            row.competitor = competitorDAO;
-            row.fieldsByRaceName = new HashMap<String, LeaderboardEntryDAO>();
-            row.carriedPoints = leaderboard.getCarriedPoints(competitor);
-            result.competitors.add(competitorDAO);
-            for (RaceInLeaderboard raceColumn : leaderboard.getRaceColumns()) {
-                Entry entry = leaderboard.getEntry(competitor, raceColumn, timePoint);
-                LeaderboardEntryDAO entryDAO = new LeaderboardEntryDAO();
-                entryDAO.netPoints = entry.getNetPoints();
-                entryDAO.totalPoints = entry.getTotalPoints();
-                entryDAO.reasonForMaxPoints = entry.getMaxPointsReason().name();
-                entryDAO.discarded = entry.isDiscarded();
-                result.raceNames.add(raceColumn.getName());
-                row.fieldsByRaceName.put(raceColumn.getName(), entryDAO);
-                result.rows.put(competitorDAO, row);
+        if (leaderboard != null) {
+            result = new LeaderboardDAO();
+            TimePoint timePoint = new MillisecondsTimePoint(date);
+            result.competitors = new ArrayList<CompetitorDAO>();
+            result.name = leaderboard.getName();
+            result.raceNames = new ArrayList<String>();
+            result.rows = new HashMap<CompetitorDAO, LeaderboardRowDAO>();
+            result.hasCarriedPoints = leaderboard.hasCarriedPoints();
+            for (Competitor competitor : leaderboard.getCompetitors()) {
+                CompetitorDAO competitorDAO = getCompetitorDAO(competitor);
+                LeaderboardRowDAO row = new LeaderboardRowDAO();
+                row.competitor = competitorDAO;
+                row.fieldsByRaceName = new HashMap<String, LeaderboardEntryDAO>();
+                row.carriedPoints = leaderboard.getCarriedPoints(competitor);
+                result.competitors.add(competitorDAO);
+                for (RaceInLeaderboard raceColumn : leaderboard.getRaceColumns()) {
+                    Entry entry = leaderboard.getEntry(competitor, raceColumn, timePoint);
+                    LeaderboardEntryDAO entryDAO = new LeaderboardEntryDAO();
+                    entryDAO.netPoints = entry.getNetPoints();
+                    entryDAO.totalPoints = entry.getTotalPoints();
+                    entryDAO.reasonForMaxPoints = entry.getMaxPointsReason().name();
+                    entryDAO.discarded = entry.isDiscarded();
+                    result.raceNames.add(raceColumn.getName());
+                    row.fieldsByRaceName.put(raceColumn.getName(), entryDAO);
+                    result.rows.put(competitorDAO, row);
+                }
             }
         }
         return result;
@@ -547,6 +550,16 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
 
     private RacingEventService getService() {
         return (RacingEventService) racingEventServiceTracker.getService(); // grab the service
+    }
+
+    @Override
+    public List<String> getLeaderboardNames() throws Exception {
+        Map<String, Leaderboard> leaderboards = getService().getLeaderboards();
+        List<String> result = new ArrayList<String>(leaderboards.size());
+        for (Leaderboard leaderboard : leaderboards.values()) {
+            result.add(leaderboard.getName());
+        }
+        return result;
     }
 
 }
