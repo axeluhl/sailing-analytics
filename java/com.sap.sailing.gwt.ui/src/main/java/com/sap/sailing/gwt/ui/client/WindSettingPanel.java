@@ -4,13 +4,9 @@ import java.util.List;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.KeyCodes;
-import com.google.gwt.event.dom.client.KeyPressEvent;
-import com.google.gwt.event.dom.client.KeyPressHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DoubleBox;
-import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
@@ -18,8 +14,8 @@ import com.sap.sailing.gwt.ui.shared.EventDAO;
 import com.sap.sailing.gwt.ui.shared.PositionDAO;
 import com.sap.sailing.gwt.ui.shared.RaceDAO;
 import com.sap.sailing.gwt.ui.shared.RegattaDAO;
-import com.sap.sailing.gwt.ui.shared.WindDAO;
 import com.sap.sailing.gwt.ui.shared.Triple;
+import com.sap.sailing.gwt.ui.shared.WindDAO;
 
 public class WindSettingPanel extends FormPanel {
     private final Button setWindButton;
@@ -43,7 +39,7 @@ public class WindSettingPanel extends FormPanel {
         grid.setWidget(4, 1, lngDegBox);
         setWindButton = new Button("Set");
         grid.setWidget(5, 0, setWindButton);
-        linkEnterToButton(setWindButton, speedInKnotsBox, fromInDegBox, latDegBox, lngDegBox);
+        AbstractEntryPoint.linkEnterToButton(setWindButton, speedInKnotsBox, fromInDegBox, latDegBox, lngDegBox);
         setWindButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent clickEvent) {
@@ -71,19 +67,6 @@ public class WindSettingPanel extends FormPanel {
         });
     }
     
-    private void linkEnterToButton(final Button button, FocusWidget... widgets) {
-        for (FocusWidget widget : widgets) {
-            widget.addKeyPressHandler(new KeyPressHandler() {
-                @Override
-                public void onKeyPress(KeyPressEvent event) {
-                    if (event.getNativeEvent().getKeyCode() == KeyCodes.KEY_ENTER) {
-                        button.click();
-                    }
-                }
-            });
-        }
-    }
-
     public void setEnabled(boolean enabled) {
         setWindButton.setEnabled(enabled);
     }
