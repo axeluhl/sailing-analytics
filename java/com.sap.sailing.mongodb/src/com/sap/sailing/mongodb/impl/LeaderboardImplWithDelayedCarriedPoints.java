@@ -94,7 +94,7 @@ public class LeaderboardImplWithDelayedCarriedPoints extends LeaderboardImpl {
             java.util.Map.Entry<String, Map<RaceInLeaderboard, MaxPointsReason>> maxPointsReasonEntries = maxPointsReasonsEntryIter.next();
             if (competitorsByName.containsKey(maxPointsReasonEntries.getKey())) {
                 for (Map.Entry<RaceInLeaderboard, MaxPointsReason> maxPointsReasonEntry : maxPointsReasonEntries.getValue().entrySet()) {
-                    getScoreCorrection().setMaxPointsReason(competitorsByName.get(maxPointsReasonEntry.getKey()),
+                    getScoreCorrection().setMaxPointsReason(competitorsByName.get(maxPointsReasonEntries.getKey()),
                             maxPointsReasonEntry.getKey(), maxPointsReasonEntry.getValue());
                 }
                 maxPointsReasonsEntryIter.remove();
