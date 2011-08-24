@@ -11,10 +11,7 @@ import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.Course;
-import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.BoatImpl;
@@ -28,7 +25,6 @@ import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
 import com.sap.sailing.domain.leaderboard.impl.LeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.ResultDiscardingRuleImpl;
 import com.sap.sailing.domain.leaderboard.impl.ScoreCorrectionImpl;
-import com.sap.sailing.domain.test.mock.MockedTrackedRace;
 import com.sap.sailing.domain.tracking.NoWindException;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.util.Util.Pair;
@@ -50,11 +46,11 @@ public class LeaderboardOfflineTest {
         testRaces = new HashSet<TrackedRace>();
         raceColumnsInLeaderboard = new HashMap<TrackedRace, RaceInLeaderboard>();
         for (int i=0; i<numberOfStartedRaces; i++) {
-            TrackedRace r = new MockedTrackedRaceWithFixedRank(i+1, /* started */ true);
+            TrackedRace r = new MockedTrackedRaceWithFixedRank(competitor, i+1, /* started */ true);
             testRaces.add(r); // hash set should take care of more or less randomly permuting the races
         }
         for (int i=0; i<numberOfNotStartedRaces; i++) {
-            TrackedRace r = new MockedTrackedRaceWithFixedRank(-1, /* started */ false);
+            TrackedRace r = new MockedTrackedRaceWithFixedRank(competitor, -1, /* started */ false);
             testRaces.add(r); // hash set should take care of more or less randomly permuting the races
         }
     }
@@ -157,55 +153,5 @@ public class LeaderboardOfflineTest {
             }
         }
         return 0;
-    }
-
-    private class MockedTrackedRaceWithFixedRank extends MockedTrackedRace {
-        private final int rank;
-        private final boolean started;
-        private final RaceDefinition raceDefinition;
-        
-        public MockedTrackedRaceWithFixedRank(int rank, boolean started) {
-            this.rank = rank;
-            this.started = started;
-            this.raceDefinition = new RaceDefinition() {
-                @Override
-                public String getName() {
-                    return null;
-                }
-                @Override
-                public Course getCourse() {
-                    return null;
-                }
-                @Override
-                public Iterable<Competitor> getCompetitors() {
-                    return Collections.singleton(competitor);
-                }
-                @Override
-                public BoatClass getBoatClass() {
-                    return null;
-                }
-            };
-
-        }
-
-        @Override
-        public boolean hasStarted(TimePoint at) {
-            return started;
-        }
-
-        @Override
-        public int getRank(Competitor competitor, TimePoint timePoint) throws NoWindException {
-            return rank;
-        }
-
-        @Override
-        public int getRank(Competitor competitor) throws NoWindException {
-            return rank;
-        }
-
-        @Override
-        public RaceDefinition getRace() {
-            return raceDefinition;
-        }
     }
 }

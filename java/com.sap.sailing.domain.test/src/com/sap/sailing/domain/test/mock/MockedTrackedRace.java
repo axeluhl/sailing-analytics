@@ -2,9 +2,11 @@ package com.sap.sailing.domain.test.mock;
 
 import java.util.NavigableSet;
 
+import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Distance;
+import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -18,8 +20,10 @@ import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.NoWindException;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
+import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
+import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindSource;
 import com.sap.sailing.domain.tracking.WindTrack;
@@ -275,8 +279,90 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
     @Override
     public DynamicTrackedEvent getTrackedEvent() {
-        // TODO Auto-generated method stub
-        return null;
+        return new DynamicTrackedEvent() {
+            @Override
+            public Event getEvent() {
+                return new Event() {
+                    @Override
+                    public String getName() {
+                        return "A Mocked Test Event";
+                    }
+
+                    @Override
+                    public Iterable<RaceDefinition> getAllRaces() {
+                        // TODO Auto-generated method stub
+                        return null;
+                    }
+
+                    @Override
+                    public BoatClass getBoatClass() {
+                        // TODO Auto-generated method stub
+                        return null;
+                    }
+
+                    @Override
+                    public Iterable<Competitor> getCompetitors() {
+                        // TODO Auto-generated method stub
+                        return null;
+                    }
+
+                    @Override
+                    public void addRace(RaceDefinition race) {
+                        // TODO Auto-generated method stub
+                        
+                    }
+                };
+            }
+
+            @Override
+            public Iterable<TrackedRace> getTrackedRaces() {
+                // TODO Auto-generated method stub
+                return null;
+            }
+
+            @Override
+            public Iterable<TrackedRace> getTrackedRaces(BoatClass boatClass) {
+                // TODO Auto-generated method stub
+                return null;
+            }
+
+            @Override
+            public void addTrackedRace(TrackedRace trackedRace) {
+                // TODO Auto-generated method stub
+                
+            }
+
+            @Override
+            public void removedTrackedRace(TrackedRace trackedRace) {
+                // TODO Auto-generated method stub
+                
+            }
+
+            @Override
+            public void addRaceListener(RaceListener listener) {
+                // TODO Auto-generated method stub
+                
+            }
+
+            @Override
+            public int getNetPoints(Competitor competitor, TimePoint timePoint) throws NoWindException {
+                // TODO Auto-generated method stub
+                return 0;
+            }
+
+            @Override
+            public DynamicTrackedRace getTrackedRace(RaceDefinition race) {
+                // TODO Auto-generated method stub
+                return null;
+            }
+
+            @Override
+            public DynamicTrackedRace getExistingTrackedRace(RaceDefinition race) {
+                // TODO Auto-generated method stub
+                return null;
+            }
+            
+        };
     }
 
 }

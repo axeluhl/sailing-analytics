@@ -106,11 +106,13 @@ public interface Leaderboard extends Named {
     /**
      * Adds a tracked race to this leaderboard. If a {@link RaceInLeaderboard} with name <code>columnName</code> already
      * exists in this leaderboard, <code>race</code> is {@link RaceInLeaderboard#setTrackedRace(TrackedRace) set as its
-     * tracked race}. Otherwise, a new {@link RaceInLeaderboard} column, with <code>race</code> as its tracked race, is
-     * created and added to this leaderboard.
+     * tracked race} and <code>medalRace</code> is ignored. Otherwise, a new
+     * {@link RaceInLeaderboard} column, with <code>race</code> as its tracked race, is created and added to this
+     * leaderboard.
      * 
      * @param medalRace
-     *            tells if the column to add represents a medal race which has double score and cannot be discarded
+     *            tells if the column to add represents a medal race which has double score and cannot be discarded;
+     *            ignored if the column named <code>columnName</code> already exists
      * 
      * @return the race column in the leaderboard used to represent the tracked <code>race</code>
      */
