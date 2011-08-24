@@ -28,6 +28,4 @@ public abstract class AbstractMongoDBTest implements MongoDBTest {
         db = mongo.getDB(WIND_TEST_DB);
         assertNotNull(db);
     }
-    
-
 }
