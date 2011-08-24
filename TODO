@@ -1,11 +1,8 @@
 Axel
 ====
 
- - add a column to the leaderboard showing the overall rank in that leaderboard
-
- - add a tooltip for the competitor column in the leaderboard showing nationality
-
- - what are the initial error messages shown in the GWT UI when registering several 505 races?
+ - allow a user to set a display name for a competitor that may differ from the name that
+   the tracking provider uses for the competitor
 
  - why doesn't the event list in Wind panel refresh properly when new events got added?
 

@@ -148,7 +148,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
                     MaxPointsReason maxPointsReason = scoreCorrection.getMaxPointsReason(competitor, raceColumn);
                     if (maxPointsReason != null) {
                         dbCorrectionForCompetitor.put(FieldNames.LEADERBOARD_SCORE_CORRECTION_MAX_POINTS_REASON.name(),
-                                maxPointsReason);
+                                maxPointsReason.name());
                     }
                     Integer explicitScoreCorrection = scoreCorrection
                             .getExplicitScoreCorrection(competitor, raceColumn);

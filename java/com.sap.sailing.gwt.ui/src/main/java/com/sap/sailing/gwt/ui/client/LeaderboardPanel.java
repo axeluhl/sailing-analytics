@@ -127,7 +127,7 @@ public class LeaderboardPanel extends FormPanel {
             return new Comparator<LeaderboardRowDAO>() {
                 @Override
                 public int compare(LeaderboardRowDAO o1, LeaderboardRowDAO o2) {
-                    return o1.fieldsByRaceName.get(raceName).netPoints - o2.fieldsByRaceName.get(raceName).netPoints;
+                    return o1.fieldsByRaceName.get(raceName).totalPoints - o2.fieldsByRaceName.get(raceName).totalPoints;
                 }
             };
         }
