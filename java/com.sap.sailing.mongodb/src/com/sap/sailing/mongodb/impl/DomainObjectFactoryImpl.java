@@ -163,16 +163,17 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             }
         }
         DBObject dbScoreCorrection = (DBObject) o.get(FieldNames.LEADERBOARD_SCORE_CORRECTIONS.name());
-        for (String competitorName : dbScoreCorrection.keySet()) {
-            DBObject dbScoreCorrectionForCompetitor = (DBObject) dbScoreCorrection.get(competitorName);
-            for (String raceName : dbScoreCorrectionForCompetitor.keySet()) {
+        for (String raceName : dbScoreCorrection.keySet()) {
+            DBObject dbScoreCorrectionForRace = (DBObject) dbScoreCorrection.get(raceName);
+            for (String competitorName : dbScoreCorrectionForRace.keySet()) {
                 RaceInLeaderboard raceColumn = result.getRaceColumnByName(raceName);
-                DBObject dbScoreCorrectionForCompetitorInRace = (DBObject) dbScoreCorrectionForCompetitor.get(raceName);
+                DBObject dbScoreCorrectionForCompetitorInRace = (DBObject) dbScoreCorrectionForRace.get(competitorName);
                 if (dbScoreCorrectionForCompetitorInRace.containsField(FieldNames.LEADERBOARD_SCORE_CORRECTION_MAX_POINTS_REASON.name())) {
                     result.setMaxPointsReason(competitorName, raceColumn, MaxPointsReason
                             .valueOf((String) dbScoreCorrectionForCompetitorInRace
                                     .get(FieldNames.LEADERBOARD_SCORE_CORRECTION_MAX_POINTS_REASON.name())));
-                } else if (dbScoreCorrectionForCompetitorInRace.containsField(FieldNames.LEADERBOARD_CORRECTED_SCORE.name())) {
+                }
+                if (dbScoreCorrectionForCompetitorInRace.containsField(FieldNames.LEADERBOARD_CORRECTED_SCORE.name())) {
                     result.correctScore(competitorName, raceColumn, (Integer) dbScoreCorrectionForCompetitorInRace
                                     .get(FieldNames.LEADERBOARD_CORRECTED_SCORE.name()));
                 }
