@@ -118,6 +118,35 @@ public class TestStoringAndRetrievingLeaderboards extends AbstractMongoDBTest {
         assertEquals(maxPointsReason, loadedLeaderboard.getScoreCorrection().getMaxPointsReason(competitor, loadedColumn2));
     }
 
+    @Test
+    public void testStoreAndRetrieveLeaderboardWithMaxPointsReasonAndScoreCorrection() {
+        final String leaderboardName = "TestLeaderboard";
+        final String raceColumnName1 = "My First Race 1";
+        final String raceColumnName2 = "My First Race 2";
+        final int correctedPoints = 2;
+        final ScoreCorrection.MaxPointsReason maxPointsReason = ScoreCorrection.MaxPointsReason.DNF;
+        final int[] discardIndexResultsStartingWithHowManyRaces = new int[] { 5, 8 };
+        LeaderboardImpl leaderboard = new LeaderboardImpl(leaderboardName, new ScoreCorrectionImpl(),
+                new ResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces));
+        Competitor competitor = createCompetitor();
+        TrackedRace raceWithOneCompetitor1 = new MockedTrackedRaceWithFixedRank(competitor, /* rank */ 1, /* started */ true);
+        TrackedRace raceWithOneCompetitor2 = new MockedTrackedRaceWithFixedRank(competitor, /* rank */ 2, /* started */ true);
+        leaderboard.addRace(raceWithOneCompetitor1, raceColumnName1, /* medalRace */ false);
+        leaderboard.addRace(raceWithOneCompetitor2, raceColumnName2, /* medalRace */ true);
+        leaderboard.getScoreCorrection().correctScore(competitor, leaderboard.getRaceColumnByName(raceColumnName1), correctedPoints);
+        leaderboard.getScoreCorrection().setMaxPointsReason(competitor, leaderboard.getRaceColumnByName(raceColumnName2), maxPointsReason);
+        new MongoObjectFactoryImpl(db).storeLeaderboard(leaderboard);
+        Leaderboard loadedLeaderboard = new DomainObjectFactoryImpl(db).loadLeaderboard(leaderboardName);
+        // attach tracked race to leaderboard to ensure that competitor object is assigned properly
+        RaceInLeaderboard loadedColumn1 = loadedLeaderboard.addRace(raceWithOneCompetitor1, raceColumnName1, /* medalRace, ignored */ false);
+        RaceInLeaderboard loadedColumn2 = loadedLeaderboard.addRace(raceWithOneCompetitor2, raceColumnName2, /* medalRace, ignored */ false);
+        assertEquals(leaderboardName, loadedLeaderboard.getName());
+        assertTrue(loadedLeaderboard.getScoreCorrection().isScoreCorrected(competitor, loadedColumn1));
+        assertEquals(correctedPoints, (int) loadedLeaderboard.getScoreCorrection().getExplicitScoreCorrection(competitor, loadedColumn1));
+        assertTrue(loadedLeaderboard.getScoreCorrection().isScoreCorrected(competitor, loadedColumn2));
+        assertEquals(maxPointsReason, loadedLeaderboard.getScoreCorrection().getMaxPointsReason(competitor, loadedColumn2));
+    }
+
     private Competitor createCompetitor() {
         Competitor competitor = new CompetitorImpl(123, "Wolfgang Hunger", new TeamImpl("STG", Collections.singleton(
                 new PersonImpl("Wolfgang Hunger", new NationalityImpl("Germany", "GER"),
