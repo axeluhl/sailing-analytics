@@ -21,19 +21,19 @@ import com.sap.sailing.domain.leaderboard.impl.ResultDiscardingRuleImpl;
 import com.sap.sailing.domain.leaderboard.impl.ScoreCorrectionImpl;
 import com.sap.sailing.domain.test.MockedTrackedRaceWithFixedRank;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.mongodb.DomainObjectFactory;
-import com.sap.sailing.mongodb.MongoObjectFactory;
+import com.sap.sailing.mongodb.impl.DomainObjectFactoryImpl;
+import com.sap.sailing.mongodb.impl.MongoObjectFactoryImpl;
 import com.sap.sailing.util.Util;
 
 public class TestStoringAndRetrievingLeaderboards extends AbstractMongoDBTest {
     @Test
     public void testStoreAndRetrieveSimpleLeaderboard() {
-        String leaderboardName = "TestLeaderboard";
-        int[] discardIndexResultsStartingWithHowManyRaces = new int[] { 5, 8 };
+        final String leaderboardName = "TestLeaderboard";
+        final int[] discardIndexResultsStartingWithHowManyRaces = new int[] { 5, 8 };
         LeaderboardImpl leaderboard = new LeaderboardImpl(leaderboardName, new ScoreCorrectionImpl(),
                 new ResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces));
-        MongoObjectFactory.INSTANCE.storeLeaderboard(leaderboard);
-        Leaderboard loadedLeaderboard = DomainObjectFactory.INSTANCE.loadLeaderboard(leaderboardName);
+        new MongoObjectFactoryImpl(db).storeLeaderboard(leaderboard);
+        Leaderboard loadedLeaderboard = new DomainObjectFactoryImpl(db).loadLeaderboard(leaderboardName);
         assertEquals(leaderboardName, loadedLeaderboard.getName());
         assertTrue(Arrays.equals(discardIndexResultsStartingWithHowManyRaces, loadedLeaderboard.getResultDiscardingRule()
                 .getDiscardIndexResultsStartingWithHowManyRaces()));
@@ -44,18 +44,15 @@ public class TestStoringAndRetrievingLeaderboards extends AbstractMongoDBTest {
         final String leaderboardName = "TestLeaderboard";
         final String raceColumnName = "My First Race";
         final int carriedPointsForWolfgangHunger = 3;
-        int[] discardIndexResultsStartingWithHowManyRaces = new int[] { 5, 8 };
+        final int[] discardIndexResultsStartingWithHowManyRaces = new int[] { 5, 8 };
         LeaderboardImpl leaderboard = new LeaderboardImpl(leaderboardName, new ScoreCorrectionImpl(),
                 new ResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces));
-        Competitor competitor = new CompetitorImpl(123, "Wolfgang Hunger", new TeamImpl("STG", Collections.singleton(
-                new PersonImpl("Wolfgang Hunger", new NationalityImpl("Germany", "GER"),
-                /* dateOfBirth */ null, "This is famous Wolfgang Hunger")), new PersonImpl("Rigo van Maas", new NationalityImpl("The Netherlands", "NED"),
-                        /* dateOfBirth */ null, "This is Rigo, the coach")), new BoatImpl("Wolfgang Hunger's boat", new BoatClassImpl("505")));
+        Competitor competitor = createCompetitor();
         TrackedRace raceWithOneCompetitor = new MockedTrackedRaceWithFixedRank(competitor, /* rank */ 1, /* started */ true);
         leaderboard.addRace(raceWithOneCompetitor, raceColumnName, /* medalRace */ false);
         leaderboard.setCarriedPoints(competitor, carriedPointsForWolfgangHunger);
-        MongoObjectFactory.INSTANCE.storeLeaderboard(leaderboard);
-        Leaderboard loadedLeaderboard = DomainObjectFactory.INSTANCE.loadLeaderboard(leaderboardName);
+        new MongoObjectFactoryImpl(db).storeLeaderboard(leaderboard);
+        Leaderboard loadedLeaderboard = new DomainObjectFactoryImpl(db).loadLeaderboard(leaderboardName);
         // attach tracked race to leaderboard to ensure that competitor object is assigned properly
         loadedLeaderboard.addRace(raceWithOneCompetitor, raceColumnName, /* medalRace, ignored */ false);
         assertEquals(leaderboardName, loadedLeaderboard.getName());
@@ -66,8 +63,12 @@ public class TestStoringAndRetrievingLeaderboards extends AbstractMongoDBTest {
         assertEquals(carriedPointsForWolfgangHunger, loadedLeaderboard.getCarriedPoints(competitor));
     }
 
-    @Test
-    public void testMedalRaceParamIgnoredIfColumnAlreadyExists() {
-        // TODO
+    private Competitor createCompetitor() {
+        Competitor competitor = new CompetitorImpl(123, "Wolfgang Hunger", new TeamImpl("STG", Collections.singleton(
+                new PersonImpl("Wolfgang Hunger", new NationalityImpl("Germany", "GER"),
+                /* dateOfBirth */ null, "This is famous Wolfgang Hunger")), new PersonImpl("Rigo van Maas", new NationalityImpl("The Netherlands", "NED"),
+                        /* dateOfBirth */ null, "This is Rigo, the coach")), new BoatImpl("Wolfgang Hunger's boat", new BoatClassImpl("505")));
+        return competitor;
     }
+
 }

@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -83,6 +84,17 @@ public class LeaderboardOfflineTest {
                 }
             }
         }
+    }
+    
+    @Test
+    public void ensureMedalRaceParamIsIgnoredIfRaceColumnAlreadyExists() {
+        Leaderboard leaderboard = new LeaderboardImpl("Test Leaderboard", new ScoreCorrectionImpl(), new ResultDiscardingRuleImpl(
+                new int[] { 5, 8 }));
+        final String columnName = "abc";
+        setupRaces(1, 0);
+        leaderboard.addRaceColumn(columnName, /* medalRace */ true);
+        leaderboard.addRace(testRaces.iterator().next(), columnName, /* medalRace */ false);
+        assertTrue(leaderboard.getRaceColumnByName(columnName).isMedalRace());
     }
 
     protected void testLeaderboard(int numberOfStartedRaces, int numberOfNotStartedRaces, int firstDiscardingThreshold,
