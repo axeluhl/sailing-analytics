@@ -2,7 +2,6 @@ package com.sap.sailing.gwt.ui.client;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Pattern;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
@@ -59,7 +58,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer 
         Label lblLeaderboards = new Label("Leaderboards");
         grid.setWidget(0, 0, lblLeaderboards);
         
-        leaderboardsListBox = new ListBox();
+        leaderboardsListBox = new ListBox(/* isMultipleSelect */ false);
         grid.setWidget(1, 0, leaderboardsListBox);
         leaderboardsListBox.setVisibleItemCount(10);
         
@@ -76,9 +75,21 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer 
         });
         Button btnEditScores = new Button(stringConstants.editScores());
         verticalPanel.add(btnEditScores);
+        btnEditScores.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent arg0) {
+                // TODO Auto-generated method stub
+            }
+        });
         
         Button btnRemove = new Button(stringConstants.remove());
         verticalPanel.add(btnRemove);
+        btnRemove.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                removeSelectedLeaderboard();
+            }
+        });
         
         Label lblRaceNamesIn = new Label(stringConstants.columnNamesInSelectedLeaderboard());
         grid.setWidget(2, 0, lblRaceNamesIn);
@@ -207,7 +218,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer 
         boolean unique = !leaderboardNames.contains(leaderboardNameField.getValue());
         boolean discardThresholdsAscending = true;
         boolean discardThresholdsAreNumeric = discardThresholdBoxes[0].getValue() == null ||
-                Pattern.matches("[0-9]*", discardThresholdBoxes[0].getValue());
+                discardThresholdBoxes[0].getValue().matches("[0-9]*");
         for (int i=1; i<discardThresholdBoxes.length; i++) {
             if (discardThresholdBoxes[i].getValue() != null && discardThresholdBoxes[i].getValue().length() > 0) {
                 try {
@@ -243,6 +254,24 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer 
             public void onSuccess(Void result) {
                 leaderboardNames.add(leaderboardName);
                 leaderboardsListBox.addItem(leaderboardName);
+            }
+        });
+    }
+
+
+    private void removeSelectedLeaderboard() {
+        final int selectedIndex = leaderboardsListBox.getSelectedIndex();
+        final String leaderboardName = leaderboardsListBox.getItemText(selectedIndex);    
+        sailingService.removeLeaderboard(leaderboardName, new AsyncCallback<Void>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                errorReporter.reportError("Error trying to remove leaderboard "+leaderboardName+": "+caught.getMessage());
+            }
+
+            @Override
+            public void onSuccess(Void result) {
+                leaderboardNames.remove(selectedIndex);
+                leaderboardsListBox.removeItem(selectedIndex);
             }
         });
     }

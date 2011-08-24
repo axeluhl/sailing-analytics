@@ -567,4 +567,8 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         getService().addLeaderboard(leaderboardName, discardThresholds);
     }
 
+    @Override
+    public void removeLeaderboard(String leaderboardName) {
+        getService().removeLeaderboard(leaderboardName);
+    }
 }

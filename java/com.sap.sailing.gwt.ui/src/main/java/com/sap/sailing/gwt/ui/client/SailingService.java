@@ -60,4 +60,6 @@ public interface SailingService extends RemoteService {
     public LeaderboardDAO getLeaderboardByName(String leaderboardName, Date date) throws Exception;
 
     void createLeaderboard(String leaderboardName, int[] discardThresholds);
+
+    void removeLeaderboard(String leaderboardName);
 }
