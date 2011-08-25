@@ -6,4 +6,6 @@ public interface SwissTimingMessageParser {
     SwissTimingMessageParser INSTANCE = new SwissTimingMessageParserImpl();
     
     SwissTimingMessage parse(byte[] message) throws SwissTimingFormatException;
+
+    SwissTimingMessage parse(byte[] message, int offset) throws SwissTimingFormatException;
 }
