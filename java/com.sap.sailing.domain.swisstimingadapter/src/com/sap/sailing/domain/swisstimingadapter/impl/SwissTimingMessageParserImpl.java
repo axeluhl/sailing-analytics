@@ -13,6 +13,12 @@ public class SwissTimingMessageParserImpl implements SwissTimingMessageParser {
     @Override
     public SwissTimingMessage parse(byte[] message) throws SwissTimingFormatException {
         int i=0;
+        return parse(message, i);
+    }
+    
+    @Override
+    public SwissTimingMessage parse(byte[] message, int offset) throws SwissTimingFormatException {
+        int i = offset;
         if (message[i] != 0x10 || message[i+1] != 0x00) {
             throw new SwissTimingFormatException("Didn't find start marker 0x1000", message);
         }
@@ -48,7 +54,7 @@ public class SwissTimingMessageParserImpl implements SwissTimingMessageParser {
         return new SwissTimingMessageImpl(raceID, packetID, new MillisecondsTimePoint(timestamp), gpsID,
                 new DegreePosition((double) latitude / 10000000., (double) longitude / 10000000.),
                 new KilometersPerHourSpeedWithBearingImpl(0.36*speedInDecimetersPerSecond, new DegreeBearingImpl(course)),
-                numberOfSatellites, batteryPercent);
+                numberOfSatellites, batteryPercent, i-offset);
     }
 
     private short parseShort(byte[] message, int offset) {

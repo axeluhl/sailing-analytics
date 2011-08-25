@@ -5,6 +5,8 @@ import static org.junit.Assert.assertNotNull;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.Test;
 
@@ -25,4 +27,23 @@ public class ParseSingleSwissTimingPacketFromFileTest {
         assertEquals((double) lat / 10000000., swissTimingMessage.getPosition().getLatDeg(), 0.0000000001);
         assertEquals((double) lng / 10000000., swissTimingMessage.getPosition().getLngDeg(), 0.0000000001);
     }
+    
+    @Test
+    public void readAllPacketsFromFile() throws IOException, SwissTimingFormatException {
+        byte[] message = new byte[65536];
+        List<SwissTimingMessage> messages = new ArrayList<SwissTimingMessage>();
+        InputStream is = getClass().getResourceAsStream("/SwissTimingExampleTrack.bin");
+        int bytesRead = is.read(message);
+        int offset = 0;
+        int messageLength = 0;
+        while (offset < bytesRead) {
+            SwissTimingMessage swissTimingMessage = SwissTimingMessageParser.INSTANCE.parse(message, offset);
+            assertNotNull(swissTimingMessage);
+            messages.add(swissTimingMessage);
+            messageLength = swissTimingMessage.length();
+            offset += messageLength;
+        }
+        assertEquals(bytesRead/messageLength, messages.size());
+    }
+    
 }

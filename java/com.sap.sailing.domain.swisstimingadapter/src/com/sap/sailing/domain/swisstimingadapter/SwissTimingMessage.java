@@ -20,4 +20,9 @@ public interface SwissTimingMessage {
     int getNumberOfSatellites();
 
     int getBatteryPercent();
+    
+    /**
+     * @return the number of bytes that were used to encode this message
+     */
+    int length();
 }
