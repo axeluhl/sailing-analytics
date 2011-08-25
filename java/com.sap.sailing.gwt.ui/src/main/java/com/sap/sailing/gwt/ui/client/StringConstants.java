@@ -49,4 +49,6 @@ public interface StringConstants extends Constants {
     String leaderboardWithThisNameAlreadyExists();
     String discardThresholdsMustBeNumeric();
     String discardThresholdsMustBeAscending();
+    String discarding();
+    String startingFromNumberOfRaces();
 }

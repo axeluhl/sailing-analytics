@@ -107,18 +107,20 @@ public class LeaderboardPanel extends FormPanel {
         @Override
         public void render(Context context, LeaderboardRowDAO object, SafeHtmlBuilder html) {
             LeaderboardEntryDAO entry = object.fieldsByRaceName.get(raceName);
-            if (entry.discarded) {
-                html.appendHtmlConstant("<del>");
-            }
-            html.append(entry.totalPoints);
-            if (entry.netPoints != entry.totalPoints) {
-                html.appendHtmlConstant(" ("+entry.netPoints+")");
-            }
-            if (!entry.reasonForMaxPoints.equals("NONE")) {
-                html.appendEscapedLines("\n("+entry.reasonForMaxPoints+")");
-            }
-            if (entry.discarded) {
-                html.appendHtmlConstant("</del>");
+            if (entry != null) {
+                if (entry.discarded) {
+                    html.appendHtmlConstant("<del>");
+                }
+                html.append(entry.totalPoints);
+                if (entry.netPoints != entry.totalPoints) {
+                    html.appendHtmlConstant(" (" + entry.netPoints + ")");
+                }
+                if (!entry.reasonForMaxPoints.equals("NONE")) {
+                    html.appendEscapedLines("\n(" + entry.reasonForMaxPoints + ")");
+                }
+                if (entry.discarded) {
+                    html.appendHtmlConstant("</del>");
+                }
             }
         }
         
