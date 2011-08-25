@@ -18,4 +18,5 @@ public class LeaderboardDAO implements IsSerializable {
     public List<String> raceNames;
     public Map<CompetitorDAO, LeaderboardRowDAO> rows;
     public boolean hasCarriedPoints;
+    public int[] discardThresholds;
 }

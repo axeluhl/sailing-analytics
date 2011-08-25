@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.client;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -18,8 +19,11 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.gwt.ui.shared.EventDAO;
+import com.sap.sailing.gwt.ui.shared.LeaderboardDAO;
 
 public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer {
+
+    private static final int MAX_NUMBER_OF_DISCARDED_RESULTS = 4;
 
     private RaceTreeView raceTree;
     
@@ -32,6 +36,10 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer 
     private final ErrorReporter errorReporter;
 
     private final ListBox leaderboardsListBox;
+    
+    private final Label[] discardThresholdLabelsForSelectedLeaderboard;
+
+    private final ListBox columnNamesInSelectedLeaderboardListBox;
 
     public LeaderboardConfigPanel(SailingServiceAsync sailingService, AdminConsole adminConsole,
             ErrorReporter errorReporter, StringConstants stringConstants) {
@@ -45,7 +53,6 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer 
                 LeaderboardConfigPanel.this.leaderboardNames.addAll(leaderboardNames);
                 updateLeaderboardNamesListBox();
             }
-            
             @Override
             public void onFailure(Throwable t) {
                 LeaderboardConfigPanel.this.errorReporter.reportError("Error trying to obtain list of leaderboard names: "+t.getMessage());
@@ -54,17 +61,34 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer 
         Grid grid = new Grid(6, 2);
         setWidget(grid);
         grid.setSize("100%", "100%");
-        
         Label lblLeaderboards = new Label("Leaderboards");
         grid.setWidget(0, 0, lblLeaderboards);
         
+        // ----------- leaderboard creation / removal ----------- 
+        HorizontalPanel leaderboardInfoPanel = new HorizontalPanel();
         leaderboardsListBox = new ListBox(/* isMultipleSelect */ false);
-        grid.setWidget(1, 0, leaderboardsListBox);
         leaderboardsListBox.setVisibleItemCount(10);
-        
+        leaderboardsListBox.addChangeHandler(new ChangeHandler() {
+            @Override
+            public void onChange(ChangeEvent e) {
+                leaderboardSelectionChanged();
+            }
+        });
+        leaderboardInfoPanel.add(leaderboardsListBox);
+        Grid discardThresholdsGrid = new Grid(3, MAX_NUMBER_OF_DISCARDED_RESULTS+1);
+        discardThresholdsGrid.setWidget(0, 0, new Label(stringConstants.discardRacesFromHowManyStartedRacesOn()));
+        discardThresholdLabelsForSelectedLeaderboard = new Label[MAX_NUMBER_OF_DISCARDED_RESULTS];
+        discardThresholdsGrid.setWidget(1, 0, new Label(stringConstants.discarding()));
+        discardThresholdsGrid.setWidget(2, 0, new Label(stringConstants.startingFromNumberOfRaces()));
+        for (int i=0; i<MAX_NUMBER_OF_DISCARDED_RESULTS; i++) {
+            discardThresholdsGrid.setWidget(1, i+1, new Label(""+(i+1)));
+            discardThresholdLabelsForSelectedLeaderboard[i] = new Label();
+            discardThresholdsGrid.setWidget(2, i+1, discardThresholdLabelsForSelectedLeaderboard[i]);
+        }
+        leaderboardInfoPanel.add(discardThresholdsGrid);
+        grid.setWidget(1, 0, leaderboardInfoPanel);
         VerticalPanel verticalPanel = new VerticalPanel();
         grid.setWidget(1, 1, verticalPanel);
-        
         Button btnNew = new Button(stringConstants.newDotDotDot());
         verticalPanel.add(btnNew);
         btnNew.addClickHandler(new ClickHandler() {
@@ -81,7 +105,6 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer 
                 // TODO Auto-generated method stub
             }
         });
-        
         Button btnRemove = new Button(stringConstants.remove());
         verticalPanel.add(btnRemove);
         btnRemove.addClickHandler(new ClickHandler() {
@@ -91,24 +114,43 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer 
             }
         });
         
+        // ------------ specific to selected leaderboard ----------------
         Label lblRaceNamesIn = new Label(stringConstants.columnNamesInSelectedLeaderboard());
         grid.setWidget(2, 0, lblRaceNamesIn);
         
-        ListBox listBox_1 = new ListBox();
-        grid.setWidget(3, 0, listBox_1);
-        listBox_1.setVisibleItemCount(5);
+        columnNamesInSelectedLeaderboardListBox = new ListBox();
+        grid.setWidget(3, 0, columnNamesInSelectedLeaderboardListBox);
+        columnNamesInSelectedLeaderboardListBox.setVisibleItemCount(5);
         
         VerticalPanel verticalPanel_1 = new VerticalPanel();
         grid.setWidget(3, 1, verticalPanel_1);
         
         Button btnAdd = new Button(stringConstants.addDotDotDot());
         verticalPanel_1.add(btnAdd);
+        btnAdd.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                // TODO Auto-generated method stub
+            }
+        });
         
         Button btnRename = new Button(stringConstants.renameDotDotDot());
         verticalPanel_1.add(btnRename);
+        btnRename.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                // TODO Auto-generated method stub
+            }
+        });
         
         Button btnRemove_1 = new Button(stringConstants.remove());
         verticalPanel_1.add(btnRemove_1);
+        btnRemove_1.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                // TODO Auto-generated method stub
+            }
+        });
         
         Label lblTrackedRaceConnected = new Label(stringConstants.trackedRaceConnectedToSelectedRaceName());
         grid.setWidget(4, 0, lblTrackedRaceConnected);
@@ -121,9 +163,50 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer 
         
         Button btnLinkToColumn = new Button(stringConstants.linkToColumn());
         verticalPanel_2.add(btnLinkToColumn);
+        btnLinkToColumn.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                // TODO Auto-generated method stub
+            }
+        });
         
         Button btnUnlink = new Button(stringConstants.unlink());
         verticalPanel_2.add(btnUnlink);
+        btnUnlink.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                // TODO Auto-generated method stub
+            }
+        });
+    }
+
+    protected void leaderboardSelectionChanged() {
+        final String leaderboardName = leaderboardsListBox.getItemText(leaderboardsListBox.getSelectedIndex());
+        sailingService.getLeaderboardByName(leaderboardName,
+                new Date(), new AsyncCallback<LeaderboardDAO>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        errorReporter.reportError("Error trying to fetch leaderboard "+leaderboardName+" from the server: "+caught.getMessage());
+                    }
+                    @Override
+                    public void onSuccess(LeaderboardDAO result) {
+                        updateLeaderboardDisplays(result);
+                    }
+                });
+    }
+
+    protected void updateLeaderboardDisplays(LeaderboardDAO result) {
+        int i=0;
+        for (int discardThreshold : result.discardThresholds) {
+            discardThresholdLabelsForSelectedLeaderboard[i++].setText(""+discardThreshold);
+        }
+        while (i<MAX_NUMBER_OF_DISCARDED_RESULTS) {
+            discardThresholdLabelsForSelectedLeaderboard[i++].setText("");
+        }
+        columnNamesInSelectedLeaderboardListBox.clear();
+        for (String columnName : result.raceNames) {
+            columnNamesInSelectedLeaderboardListBox.addItem(columnName);
+        }
     }
 
     private void updateLeaderboardNamesListBox() {
@@ -147,7 +230,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer 
         VerticalPanel dialogVPanel = new VerticalPanel();
         final Label statusLabel = new Label(stringConstants.pleaseEnterNonEmptyName());
         dialogVPanel.add(statusLabel);
-        final TextBox[] discardThresholdBoxes = new TextBox[4];
+        final TextBox[] discardThresholdBoxes = new TextBox[MAX_NUMBER_OF_DISCARDED_RESULTS];
         dialogVPanel.add(new Label(stringConstants.leaderboardName()));
         final TextBox leaderboardNameField = new TextBox();
         AbstractEntryPoint.addFocusUponKeyUpToggler(leaderboardNameField);
@@ -193,8 +276,13 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer 
                 myErrorDialogBox.hide();
                 List<Integer> discardThresholds = new ArrayList<Integer>();
                 for (int i=0; i<discardThresholdBoxes.length; i++) {
-                    if (discardThresholdBoxes[i].getValue() != null && discardThresholdBoxes[i].getValue().length() > 0) {
-                        discardThresholds.add(Integer.valueOf(discardThresholdBoxes[i].getValue()));
+                    if (discardThresholdBoxes[i].getValue() != null && discardThresholdBoxes[i].getValue().trim().length() > 0) {
+                        try {
+                            discardThresholds.add(Integer.valueOf(discardThresholdBoxes[i].getValue().trim()));
+                        } catch (NumberFormatException e) {
+                            errorReporter.reportError("Internal error; NumberFormatException for "+discardThresholdBoxes[i].getValue()+
+                                    " which should have been caught by validation before");
+                        }
                     }
                 }
                 int[] discanrdThresholdsAsIntArray = new int[discardThresholds.size()];
@@ -220,11 +308,11 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer 
         boolean discardThresholdsAreNumeric = discardThresholdBoxes[0].getValue() == null ||
                 discardThresholdBoxes[0].getValue().matches("[0-9]*");
         for (int i=1; i<discardThresholdBoxes.length; i++) {
-            if (discardThresholdBoxes[i].getValue() != null && discardThresholdBoxes[i].getValue().length() > 0) {
+            if (discardThresholdBoxes[i].getValue() != null && discardThresholdBoxes[i].getValue().trim().length() > 0) {
                 try {
                     discardThresholdsAscending = discardThresholdsAscending &&
-                            discardThresholdBoxes[i-1].getValue() != null && discardThresholdBoxes[i-1].getValue().length() > 0 &&
-                            Integer.valueOf(discardThresholdBoxes[i-1].getValue()) < Integer.valueOf(discardThresholdBoxes[i].getValue());
+                            discardThresholdBoxes[i-1].getValue() != null && discardThresholdBoxes[i-1].getValue().trim().length() > 0 &&
+                            Integer.valueOf(discardThresholdBoxes[i-1].getValue().trim()) < Integer.valueOf(discardThresholdBoxes[i].getValue().trim());
                 } catch (NumberFormatException e) {
                     discardThresholdsAreNumeric = false;
                 }
