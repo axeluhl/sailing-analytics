@@ -1,21 +1,22 @@
-package com.sap.sailing.domain.swisstimingadapter;
+package com.sap.sailing.domain.swisstimingadapter.impl;
 
 import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.Speed;
 import com.sap.sailing.domain.base.TimePoint;
+import com.sap.sailing.domain.swisstimingadapter.SwissTimingMessage;
 
-public class GPSFix {
+public class SwissTimingMessageImpl implements SwissTimingMessage {
     private final String raceID;
     private final int packetID;
     private final TimePoint timestamp;
-    private final short gpsID;
+    private final int gpsID;
     private final Position position;
     private final Speed speed;
-    private final byte numberOfSatellites;
-    private final byte batteryPercent;
+    private final int numberOfSatellites;
+    private final int batteryPercent;
     
-    public GPSFix(String raceID, int packetID, TimePoint timestamp, short gpsID, Position position, Speed speed,
-            byte numberOfSatellites, byte batteryPercent) {
+    public SwissTimingMessageImpl(String raceID, int packetID, TimePoint timestamp, int gpsID, Position position, Speed speed,
+            int numberOfSatellites, int batteryPercent) {
         super();
         this.raceID = raceID;
         this.packetID = packetID;
@@ -39,7 +40,7 @@ public class GPSFix {
         return timestamp;
     }
 
-    public short getGpsID() {
+    public int getGpsID() {
         return gpsID;
     }
 
@@ -51,11 +52,11 @@ public class GPSFix {
         return speed;
     }
 
-    public byte getNumberOfSatellites() {
+    public int getNumberOfSatellites() {
         return numberOfSatellites;
     }
 
-    public byte getBatteryPercent() {
+    public int getBatteryPercent() {
         return batteryPercent;
     }
     
