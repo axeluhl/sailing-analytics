@@ -12,7 +12,7 @@ import com.sap.sailing.domain.swisstimingadapter.SwissTimingFormatException;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingMessage;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingMessageParser;
 
-public class ParseSingleSwissTimingPacketFromFile {
+public class ParseSingleSwissTimingPacketFromFileTest {
     @Test
     public void readSinglePacketFromFile() throws IOException, SwissTimingFormatException {
         byte[] message = new byte[65536];
