@@ -178,7 +178,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer 
         columnRenameButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                // TODO implement rename column
+                renameSelectedLeaderboardColumn();
             }
         });
         
@@ -187,7 +187,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer 
         columnRemoveButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                // TODO Auto-generated method stub
+                removeSelectedLeaderboardColumn();
             }
         });
         
@@ -221,10 +221,84 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer 
         leaderboardRaceColumnSelectionChanged();
     }
 
-    private void leaderboardRaceColumnSelectionChanged() {
-        int selectedIndex = columnNamesInSelectedLeaderboardListBox.getSelectedIndex();
+    protected void removeSelectedLeaderboardColumn() {
+        final int selectedIndex = columnNamesInSelectedLeaderboardListBox.getSelectedIndex();
         if (selectedIndex >= 0) {
-            String selectedRaceColumnName = columnNamesInSelectedLeaderboardListBox.getItemText(selectedIndex);
+            final String selectedRaceColumnName = columnNamesInSelectedLeaderboardListBox.getItemText(selectedIndex);
+            sailingService.removeLeaderboardColumn(getSelectedLeaderboardName(), selectedRaceColumnName, new AsyncCallback<Void>() {
+                @Override
+                public void onFailure(Throwable t) {
+                    errorReporter
+                    .reportError("Error trying to remove leaderboard race column "
+                            + selectedRaceColumnName + " in leaderboard "
+                            + getSelectedLeaderboardName()+": "+
+                            t.getMessage());
+                }
+
+                @Override
+                public void onSuccess(Void arg0) {
+                    columnNamesInSelectedLeaderboardListBox.removeItem(selectedIndex);
+                    selectedLeaderboard.raceNamesAndMedalRace.remove(selectedRaceColumnName);
+                }
+            });
+        }
+    }
+
+    protected void renameSelectedLeaderboardColumn() {
+        final int selectedIndex = columnNamesInSelectedLeaderboardListBox.getSelectedIndex();
+        if (selectedIndex >= 0) {
+            final String selectedRaceColumnName = columnNamesInSelectedLeaderboardListBox.getItemText(selectedIndex);
+            TextfieldEntryDialog newNameDialog = new TextfieldEntryDialog(stringConstants.renameRace(),
+                    stringConstants.renameRace(), stringConstants.ok(), stringConstants.cancel(),
+                    selectedRaceColumnName, new Validator<String>() {
+                        @Override
+                        public String getErrorMessage(String valueToValidate) {
+                            if (valueToValidate == null || valueToValidate.trim().length() == 0) {
+                                return stringConstants.pleaseEnterNonEmptyName();
+                            } else {
+                                return null;
+                            }
+                        }
+                    }, new AsyncCallback<String>() {
+                        @Override
+                        public void onFailure(Throwable t) {
+                        }
+
+                        @Override
+                        public void onSuccess(final String newColumnName) {
+                            if (!selectedRaceColumnName.equals(newColumnName)) {
+                                sailingService.renameLeaderboardColumn(getSelectedLeaderboardName(),
+                                        selectedRaceColumnName, newColumnName, new AsyncCallback<Void>() {
+                                            @Override
+                                            public void onFailure(Throwable t) {
+                                                errorReporter
+                                                        .reportError("Error trying to rename leaderboard race column "
+                                                                + selectedRaceColumnName + " in leaderboard "
+                                                                + getSelectedLeaderboardName() + " to " + newColumnName+": "+
+                                                                t.getMessage());
+                                            }
+
+                                            @Override
+                                            public void onSuccess(Void v) {
+                                                columnNamesInSelectedLeaderboardListBox.setItemText(selectedIndex,
+                                                        newColumnName);
+                                                selectedLeaderboard.raceNamesAndMedalRace.put(newColumnName,
+                                                        selectedLeaderboard.raceNamesAndMedalRace
+                                                                .get(selectedRaceColumnName));
+                                                selectedLeaderboard.raceNamesAndMedalRace
+                                                        .remove(selectedRaceColumnName);
+                                            }
+                                        });
+                            }
+                        }
+                    });
+            newNameDialog.show();
+        }
+    }
+
+    private void leaderboardRaceColumnSelectionChanged() {
+        String selectedRaceColumnName = getSelectedRaceColumnName();
+        if (selectedRaceColumnName != null) {
             medalRaceCheckBox.setValue(selectedLeaderboard.raceNamesAndMedalRace.get(selectedRaceColumnName));
             columnRenameButton.setEnabled(true);
             columnRemoveButton.setEnabled(true);
@@ -232,6 +306,11 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer 
             columnRenameButton.setEnabled(false);
             columnRemoveButton.setEnabled(false);
         }
+    }
+    
+    private String getSelectedRaceColumnName() {
+        int selectedIndex = columnNamesInSelectedLeaderboardListBox.getSelectedIndex();
+        return selectedIndex >= 0 ? columnNamesInSelectedLeaderboardListBox.getItemText(selectedIndex) : null;
     }
 
     protected void addColumnToSelectedLeaderboard() {
@@ -365,10 +444,13 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer 
                 }
             });
         } else {
+            selectedLeaderboard = null;
             addColumnButton.setEnabled(false);
             editLeaderboardScoresButton.setEnabled(false);
             renameLeaderboardButton.setEnabled(false);
             removeLeaderboardButton.setEnabled(false);
+            columnNamesInSelectedLeaderboardListBox.clear();
+            leaderboardRaceColumnSelectionChanged();
         }
     }
 
@@ -456,6 +538,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer 
             public void onSuccess(Void result) {
                 leaderboardNames.remove(selectedIndex);
                 leaderboardsListBox.removeItem(selectedIndex);
+                leaderboardSelectionChanged();
             }
         });
     }

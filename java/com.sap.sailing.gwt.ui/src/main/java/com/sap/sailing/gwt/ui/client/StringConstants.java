@@ -56,4 +56,5 @@ public interface StringConstants extends Constants {
     String pleaseEnterNameForNewRaceColumn();
     String ok();
     String medalRace();
+    String renameRace();
 }
