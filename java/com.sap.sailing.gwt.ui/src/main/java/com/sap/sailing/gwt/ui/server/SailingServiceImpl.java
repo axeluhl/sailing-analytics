@@ -63,6 +63,7 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardDAO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDAO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDAO;
 import com.sap.sailing.gwt.ui.shared.MarkDAO;
+import com.sap.sailing.gwt.ui.shared.Pair;
 import com.sap.sailing.gwt.ui.shared.PositionDAO;
 import com.sap.sailing.gwt.ui.shared.QuickRankDAO;
 import com.sap.sailing.gwt.ui.shared.RaceDAO;
@@ -192,7 +193,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     private CompetitorDAO getCompetitorDAO(Competitor c) {
         CountryCode countryCode = c.getTeam().getNationality().getCountryCode();
         CompetitorDAO competitorDAO = new CompetitorDAO(c.getName(), countryCode==null?"":countryCode.getTwoLetterISOCode(),
-                countryCode==null?"":countryCode.getThreeLetterIOCCode());
+                countryCode==null?"":countryCode.getThreeLetterIOCCode(), countryCode==null?"":countryCode.getName());
         return competitorDAO;
     }
 
@@ -270,41 +271,45 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             getService().startTrackingWind(event, race, correctByDeclination);
         }
     }
-    
-    @Override
-    public WindInfoForRaceDAO getWindInfo(String eventName, String raceName, Date fromDate, Date toDate) {
-        WindInfoForRaceDAO result = null;
+
+    private TrackedRace getTrackedRace(String eventName, String raceName) {
+        TrackedRace result = null;
         Event event = getService().getEventByName(eventName);
         if (event != null) {
             RaceDefinition race = getRaceByName(event, raceName);
             if (race != null) {
-                TrackedRace trackedRace = getService().getDomainFactory().getTrackedEvent(event)
+                result = getService().getDomainFactory().getTrackedEvent(event)
                         .getExistingTrackedRace(race);
-                if (trackedRace != null) {
-                    result = new WindInfoForRaceDAO();
-                    result.selectedWindSourceName = trackedRace.getWindSource().name();
-                    TimePoint from = new MillisecondsTimePoint(fromDate);
-                    TimePoint to = new MillisecondsTimePoint(toDate);
-                    Map<String, WindTrackInfoDAO> windTrackInfoDAOs = new HashMap<String, WindTrackInfoDAO>();
-                    result.windTrackInfoByWindSourceName = windTrackInfoDAOs;
-                    for (WindSource windSource : WindSource.values()) {
-                        WindTrackInfoDAO windTrackInfoDAO = new WindTrackInfoDAO();
-                        windTrackInfoDAO.windFixes = new ArrayList<WindDAO>();
-                        WindTrack windTrack = trackedRace.getWindTrack(windSource);
-                        windTrackInfoDAO.dampeningIntervalInMilliseconds = windTrack
-                                .getMillisecondsOverWhichToAverageWind();
-                        Iterator<Wind> windIter = windTrack.getFixesIterator(from, /* inclusive */true);
-                        while (windIter.hasNext()) {
-                            Wind wind = windIter.next();
-                            if (wind.getTimePoint().compareTo(to) > 0) {
-                                break;
-                            }
-                            WindDAO windDAO = createWindDAO(wind, windTrack);
-                            windTrackInfoDAO.windFixes.add(windDAO);
-                        }
-                        windTrackInfoDAOs.put(windSource.name(), windTrackInfoDAO);
+            }
+        }
+        return result;       
+    }
+    @Override
+    public WindInfoForRaceDAO getWindInfo(String eventName, String raceName, Date fromDate, Date toDate) {
+        WindInfoForRaceDAO result = null;
+        TrackedRace trackedRace = getTrackedRace(eventName, raceName);
+        if (trackedRace != null) {
+            result = new WindInfoForRaceDAO();
+            result.selectedWindSourceName = trackedRace.getWindSource().name();
+            TimePoint from = new MillisecondsTimePoint(fromDate);
+            TimePoint to = new MillisecondsTimePoint(toDate);
+            Map<String, WindTrackInfoDAO> windTrackInfoDAOs = new HashMap<String, WindTrackInfoDAO>();
+            result.windTrackInfoByWindSourceName = windTrackInfoDAOs;
+            for (WindSource windSource : WindSource.values()) {
+                WindTrackInfoDAO windTrackInfoDAO = new WindTrackInfoDAO();
+                windTrackInfoDAO.windFixes = new ArrayList<WindDAO>();
+                WindTrack windTrack = trackedRace.getWindTrack(windSource);
+                windTrackInfoDAO.dampeningIntervalInMilliseconds = windTrack.getMillisecondsOverWhichToAverageWind();
+                Iterator<Wind> windIter = windTrack.getFixesIterator(from, /* inclusive */true);
+                while (windIter.hasNext()) {
+                    Wind wind = windIter.next();
+                    if (wind.getTimePoint().compareTo(to) > 0) {
+                        break;
                     }
+                    WindDAO windDAO = createWindDAO(wind, windTrack);
+                    windTrackInfoDAO.windFixes.add(windDAO);
                 }
+                windTrackInfoDAOs.put(windSource.name(), windTrackInfoDAO);
             }
         }
         return result;
@@ -608,6 +613,50 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             leaderboard.getRaceColumnByName(oldColumnName).setName(newColumnName);
         } else {
             throw new IllegalArgumentException("Leaderboard named "+leaderboardName+" not found");
+        }
+    }
+
+    @Override
+    public void connectTrackedRaceToLeaderboardColumn(String leaderboardName, String raceColumnName, String eventName,
+            String raceName) {
+        TrackedRace trackedRace = getTrackedRace(eventName, raceName);
+        if (trackedRace != null) {
+            Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+            if (leaderboard != null) {
+                RaceInLeaderboard raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
+                if (raceColumn != null) {
+                    raceColumn.setTrackedRace(trackedRace);
+                }
+            }
+        }
+    }
+
+    @Override
+    public Pair<String, String> getEventAndRaceNameOfTrackedRaceConnectedToLeaderboardColumn(String leaderboardName,
+            String raceColumnName) {
+        Pair<String, String> result = null;
+        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        if (leaderboard != null) {
+            RaceInLeaderboard raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
+            if (raceColumn != null) {
+                TrackedRace trackedRace = raceColumn.getTrackedRace();
+                if (trackedRace != null) {
+                    result = new Pair<String, String>(trackedRace.getTrackedEvent().getEvent().getName(),
+                            trackedRace.getRace().getName());
+                }
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public void disconnectLeaderboardColumnFromTrackedRace(String leaderboardName, String raceColumnName) {
+        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        if (leaderboard != null) {
+            RaceInLeaderboard raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
+            if (raceColumn != null) {
+                raceColumn.setTrackedRace(null);
+            }
         }
     }
 }

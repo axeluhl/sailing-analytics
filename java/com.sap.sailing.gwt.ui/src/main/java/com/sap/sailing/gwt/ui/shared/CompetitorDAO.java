@@ -5,13 +5,15 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 public class CompetitorDAO extends NamedDAO implements IsSerializable {
     public String twoLetterIsoCountryCode;
     public String threeLetterIocCountryCode;
+    public String countryName;
 
     public CompetitorDAO() {}
 
-    public CompetitorDAO(String name, String twoLetterIsoCountryCode, String threeLetterIocCountryCode) {
+    public CompetitorDAO(String name, String twoLetterIsoCountryCode, String threeLetterIocCountryCode, String countryName) {
         super(name);
         this.twoLetterIsoCountryCode = twoLetterIsoCountryCode;
         this.threeLetterIocCountryCode = threeLetterIocCountryCode;
+        this.countryName = countryName;
     }
 
     @Override

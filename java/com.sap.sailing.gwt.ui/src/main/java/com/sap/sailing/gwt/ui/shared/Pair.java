@@ -16,6 +16,11 @@ public class Pair<A, B> implements IsSerializable {
         this.b = b;
         hashCode = 0;
     }
+    
+    /**
+     * package-protected default constructor for GWT RPC serialization
+     */
+    Pair() {}
 
     public void setA( A a ) {
 

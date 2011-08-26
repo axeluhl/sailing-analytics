@@ -48,6 +48,34 @@ public class RaceTreeView extends FormPanel implements EventDisplayer, RaceSelec
         }
         return result;
     }
+    
+    public void selectRaceByName(String eventName, String raceName) {
+        if (eventsList != null) {
+            for (EventDAO event : eventsList.getList()) {
+                for (RegattaDAO regatta : event.regattas) {
+                    for (RaceDAO race : regatta.races) {
+                        if (event.name.equals(eventName) && race.name.equals(raceName)) {
+                            trackedEventsModel.getSelectionModel().setSelected(race, true);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    public void clearSelection() {
+        if (eventsList != null) {
+            for (EventDAO event : eventsList.getList()) {
+                trackedEventsModel.getSelectionModel().setSelected(event, false);
+                for (RegattaDAO regatta : event.regattas) {
+                    trackedEventsModel.getSelectionModel().setSelected(regatta, false);
+                    for (RaceDAO race : regatta.races) {
+                        trackedEventsModel.getSelectionModel().setSelected(race, false);
+                    }
+                }
+            }
+        }
+    }
 
     @Override
     public void addRaceSelectionChangeListener(RaceSelectionChangeListener listener) {
@@ -73,6 +101,7 @@ public class RaceTreeView extends FormPanel implements EventDisplayer, RaceSelec
             // When the following line is uncommented, the race table contents don't show anymore
             // if there are no events yet...???!!!
             CellTree eventsCellTree = new CellTree(trackedEventsModel, /* root */null);
+            eventsCellTree.setAnimationEnabled(true);
             trackedEventsModel.getSelectionModel().addSelectionChangeHandler(new Handler() {
                 @Override
                 public void onSelectionChange(SelectionChangeEvent event) {

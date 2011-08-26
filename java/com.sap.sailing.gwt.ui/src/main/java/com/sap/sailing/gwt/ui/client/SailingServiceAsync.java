@@ -10,6 +10,7 @@ import com.sap.sailing.gwt.ui.shared.EventDAO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDAO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDAO;
 import com.sap.sailing.gwt.ui.shared.MarkDAO;
+import com.sap.sailing.gwt.ui.shared.Pair;
 import com.sap.sailing.gwt.ui.shared.QuickRankDAO;
 import com.sap.sailing.gwt.ui.shared.RaceRecordDAO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDAO;
@@ -83,4 +84,13 @@ public interface SailingServiceAsync {
     void renameLeaderboardColumn(String leaderboardName, String oldColumnName, String newColumnName, AsyncCallback<Void> callback);
 
     void removeLeaderboardColumn(String leaderboardName, String columnName, AsyncCallback<Void> callback);
+
+    void connectTrackedRaceToLeaderboardColumn(String selectedLeaderboardName, String selectedRaceColumnName,
+            String name, String name2, AsyncCallback<Void> asyncCallback);
+
+    void getEventAndRaceNameOfTrackedRaceConnectedToLeaderboardColumn(String leaderboardName, String raceColumnName,
+            AsyncCallback<Pair<String, String>> callback);
+
+    void disconnectLeaderboardColumnFromTrackedRace(String leaderboardName, String raceColumnName,
+            AsyncCallback<Void> callback);
 }

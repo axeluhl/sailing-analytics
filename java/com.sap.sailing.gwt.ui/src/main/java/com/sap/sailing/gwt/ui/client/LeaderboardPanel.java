@@ -69,7 +69,7 @@ public class LeaderboardPanel extends FormPanel {
 
         @Override
         public void render(Context context, LeaderboardRowDAO object, SafeHtmlBuilder sb) {
-            sb.appendHtmlConstant("<img src=\""+
+            sb.appendHtmlConstant("<img title=\""+object.competitor.countryName+"\" src=\""+
                     getFlagURL(object.competitor.twoLetterIsoCountryCode)+
                     "\"/>&nbsp;");
             sb.appendHtmlConstant(object.competitor.name);
