@@ -100,9 +100,9 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             TimePoint timePoint = new MillisecondsTimePoint(date);
             result.competitors = new ArrayList<CompetitorDAO>();
             result.name = leaderboard.getName();
-            result.raceNames = new ArrayList<String>();
+            result.raceNamesAndMedalRace = new HashMap<String, Boolean>();
             for (RaceInLeaderboard raceColumn : leaderboard.getRaceColumns()) {
-                result.raceNames.add(raceColumn.getName());
+                result.raceNamesAndMedalRace.put(raceColumn.getName(), raceColumn.isMedalRace());
             }
             result.rows = new HashMap<CompetitorDAO, LeaderboardRowDAO>();
             result.hasCarriedPoints = leaderboard.hasCarriedPoints();
@@ -578,5 +578,35 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     @Override
     public void renameLeaderboard(String leaderboardName, String newLeaderboardName) {
         getService().renameLeaderboard(leaderboardName, newLeaderboardName);
+    }
+
+    @Override
+    public void addColumnToLeaderboard(String columnName, String leaderboardName, boolean medalRace) {
+        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        if (leaderboard != null) {
+            leaderboard.addRaceColumn(columnName, medalRace);
+        } else {
+            throw new IllegalArgumentException("Leaderboard named "+leaderboardName+" not found");
+        }
+    }
+
+    @Override
+    public void removeLeaderboardColumn(String leaderboardName, String columnName) {
+        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        if (leaderboard != null) {
+            leaderboard.removeRaceColumn(columnName);
+        } else {
+            throw new IllegalArgumentException("Leaderboard named "+leaderboardName+" not found");
+        }
+    }
+
+    @Override
+    public void renameLeaderboardColumn(String leaderboardName, String oldColumnName, String newColumnName) {
+        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        if (leaderboard != null) {
+            leaderboard.getRaceColumnByName(oldColumnName).setName(newColumnName);
+        } else {
+            throw new IllegalArgumentException("Leaderboard named "+leaderboardName+" not found");
+        }
     }
 }

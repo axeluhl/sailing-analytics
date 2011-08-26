@@ -1,6 +1,8 @@
 Axel
 ====
 
+ - clarify how to marshal exceptions across a GWT/RPC call properly
+
  - allow a user to set a display name for a competitor that may differ from the name that
    the tracking provider uses for the competitor
 
