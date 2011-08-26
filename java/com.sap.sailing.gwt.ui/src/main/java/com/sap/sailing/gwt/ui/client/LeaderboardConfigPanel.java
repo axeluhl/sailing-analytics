@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.client;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -399,114 +400,32 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer 
     }
 
     private void addNewLeaderboard() {
-        final DialogBox leaderboardCreationDialogBox = new DialogBox();
-        leaderboardCreationDialogBox.setText(stringConstants.createNewLeaderboard());
-        leaderboardCreationDialogBox.setAnimationEnabled(true);
-        final Button okButton = new Button("OK");
-        okButton.setEnabled(false);
-        VerticalPanel dialogVPanel = new VerticalPanel();
-        final Label statusLabel = new Label(stringConstants.pleaseEnterNonEmptyName());
-        dialogVPanel.add(statusLabel);
-        final TextBox[] discardThresholdBoxes = new TextBox[MAX_NUMBER_OF_DISCARDED_RESULTS];
-        dialogVPanel.add(new Label(stringConstants.leaderboardName()));
-        final TextBox leaderboardNameField = new TextBox();
-        AbstractEntryPoint.addFocusUponKeyUpToggler(leaderboardNameField);
-        leaderboardNameField.addChangeHandler(new ChangeHandler() {
-            @Override
-            public void onChange(ChangeEvent event) {
-                enableOkButtonIfValid(okButton, leaderboardNameField, discardThresholdBoxes, statusLabel);
-            }
-        });
-        dialogVPanel.add(leaderboardNameField);
-        dialogVPanel.add(new Label(stringConstants.discardRacesFromHowManyStartedRacesOn()));
-        HorizontalPanel hp = new HorizontalPanel();
-        for (int i=0; i<discardThresholdBoxes.length; i++) {
-            hp.add(new Label(""+(i+1)+"."));
-            TextBox tb = new TextBox();
-            tb.setVisibleLength(2);
-            AbstractEntryPoint.addFocusUponKeyUpToggler(tb);
-            tb.addChangeHandler(new ChangeHandler() {
-                @Override
-                public void onChange(ChangeEvent event) {
-                    enableOkButtonIfValid(okButton, leaderboardNameField, discardThresholdBoxes, statusLabel);
-                }
-            });
-            discardThresholdBoxes[i] = tb;
-            hp.add(tb);
-        }
-        dialogVPanel.add(hp);
-        dialogVPanel.setHorizontalAlignment(VerticalPanel.ALIGN_RIGHT);
-        HorizontalPanel buttonPanel = new HorizontalPanel();
-        dialogVPanel.add(buttonPanel);
-        buttonPanel.add(okButton);
-        Button cancelButton = new Button(stringConstants.cancel());
-        buttonPanel.add(cancelButton);
-        cancelButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                leaderboardCreationDialogBox.hide();
-            }
-        });
-        leaderboardCreationDialogBox.setWidget(dialogVPanel);
-        okButton.addClickHandler(new ClickHandler() {
-            public void onClick(ClickEvent event) {
-                leaderboardCreationDialogBox.hide();
-                List<Integer> discardThresholds = new ArrayList<Integer>();
-                for (int i=0; i<discardThresholdBoxes.length; i++) {
-                    if (discardThresholdBoxes[i].getValue() != null && discardThresholdBoxes[i].getValue().trim().length() > 0) {
-                        try {
-                            discardThresholds.add(Integer.valueOf(discardThresholdBoxes[i].getValue().trim()));
-                        } catch (NumberFormatException e) {
-                            errorReporter.reportError("Internal error; NumberFormatException for "+discardThresholdBoxes[i].getValue()+
-                                    " which should have been caught by validation before");
+        LeaderboardCreationDialog dialog = new LeaderboardCreationDialog(Collections.unmodifiableCollection(leaderboardNames),
+                stringConstants, errorReporter, new AsyncCallback<Pair<String,String[]>>() {
+                    @Override
+                    public void onFailure(Throwable arg0) {}
+                    @Override
+                    public void onSuccess(Pair<String, String[]> result) {
+                        List<Integer> discardThresholds = new ArrayList<Integer>();
+                        for (int i=0; i<result.getB().length; i++) {
+                            if (result.getB()[i] != null && result.getB()[i].trim().length() > 0) {
+                                try {
+                                    discardThresholds.add(Integer.valueOf(result.getB()[i].trim()));
+                                } catch (NumberFormatException e) {
+                                    errorReporter.reportError("Internal error; NumberFormatException for "+result.getB()[i]+
+                                            " which should have been caught by validation before");
+                                }
+                            }
                         }
+                        int[] discanrdThresholdsAsIntArray = new int[discardThresholds.size()];
+                        int i=0;
+                        for (Integer integer : discardThresholds) {
+                            discanrdThresholdsAsIntArray[i++] = integer;
+                        }
+                        createNewLeaderboard(result.getA(), discanrdThresholdsAsIntArray);
                     }
-                }
-                int[] discanrdThresholdsAsIntArray = new int[discardThresholds.size()];
-                int i=0;
-                for (Integer integer : discardThresholds) {
-                    discanrdThresholdsAsIntArray[i++] = integer;
-                }
-                createNewLeaderboard(leaderboardNameField.getText(), discanrdThresholdsAsIntArray);
-            }
-        });
-        AbstractEntryPoint.linkEnterToButton(okButton, leaderboardNameField);
-        AbstractEntryPoint.linkEnterToButton(okButton, discardThresholdBoxes);
-        AbstractEntryPoint.linkEscapeToButton(cancelButton, leaderboardNameField);
-        AbstractEntryPoint.linkEscapeToButton(cancelButton, discardThresholdBoxes);
-        leaderboardCreationDialogBox.center();
-        leaderboardNameField.setFocus(true);
-    }
-
-    private void enableOkButtonIfValid(final Button okButton, final TextBox leaderboardNameField, TextBox[] discardThresholdBoxes, Label statusLabel) {
-        boolean nonEmpty = leaderboardNameField.getValue() != null && leaderboardNameField.getValue().trim().length() > 0;
-        boolean unique = !leaderboardNames.contains(leaderboardNameField.getValue());
-        boolean discardThresholdsAscending = true;
-        boolean discardThresholdsAreNumeric = discardThresholdBoxes[0].getValue() == null ||
-                discardThresholdBoxes[0].getValue().matches("[0-9]*");
-        for (int i=1; i<discardThresholdBoxes.length; i++) {
-            if (discardThresholdBoxes[i].getValue() != null && discardThresholdBoxes[i].getValue().trim().length() > 0) {
-                try {
-                    discardThresholdsAscending = discardThresholdsAscending &&
-                            discardThresholdBoxes[i-1].getValue() != null && discardThresholdBoxes[i-1].getValue().trim().length() > 0 &&
-                            Integer.valueOf(discardThresholdBoxes[i-1].getValue().trim()) < Integer.valueOf(discardThresholdBoxes[i].getValue().trim());
-                } catch (NumberFormatException e) {
-                    discardThresholdsAreNumeric = false;
-                }
-            }
-        }
-        if (!nonEmpty) {
-            statusLabel.setText(stringConstants.pleaseEnterNonEmptyName());
-        } else if (!unique) {
-            statusLabel.setText(stringConstants.leaderboardWithThisNameAlreadyExists());
-        } else if (!discardThresholdsAreNumeric) {
-            statusLabel.setText(stringConstants.discardThresholdsMustBeNumeric());
-        } else if (!discardThresholdsAscending) {
-            statusLabel.setText(stringConstants.discardThresholdsMustBeAscending());
-        } else {
-            statusLabel.setText(" ");
-        }
-        okButton.setEnabled(nonEmpty && unique && discardThresholdsAreNumeric && discardThresholdsAscending);
+                });
+        dialog.show();
     }
 
     private void createNewLeaderboard(final String leaderboardName, int[] discardThresholds) {

@@ -38,7 +38,7 @@ public abstract class DataEntryDialog<T> {
     }
     
     public DataEntryDialog(String title, String message, String okButtonName, String cancelButtonName,
-            String initialValue, Validator<T> validator, final AsyncCallback<T> callback) {
+            Validator<T> validator, final AsyncCallback<T> callback) {
         dateEntryDialog = new DialogBox();
         dateEntryDialog.setText(title);
         dateEntryDialog.setAnimationEnabled(true);
@@ -77,8 +77,11 @@ public abstract class DataEntryDialog<T> {
         String errorMessage = validator.getErrorMessage(getResult());
         if (errorMessage == null) {
             getStatusLabel().setText("");
+            getOkButton().setEnabled(true);
         } else {
             getStatusLabel().setText(errorMessage);
+            getStatusLabel().setStyleName("errorLabel");
+            getOkButton().setEnabled(false);
         }
         return errorMessage == null;
     }

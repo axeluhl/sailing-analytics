@@ -13,7 +13,7 @@ public class TextfieldEntryDialogWithCheckbox extends DataEntryDialog<Pair<Strin
 
     public TextfieldEntryDialogWithCheckbox(String title, String message, String okButtonName, String cancelButtonName,
             String checkboxLabel, String initialValue, Validator<Pair<String, Boolean>> validator, AsyncCallback<Pair<String, Boolean>> callback) {
-        super(title, message, okButtonName, cancelButtonName, initialValue, validator, callback);
+        super(title, message, okButtonName, cancelButtonName, validator, callback);
         checkbox = createCheckbox(checkboxLabel);
         entryField = createTextBox(initialValue);
     }

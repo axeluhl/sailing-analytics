@@ -16,7 +16,7 @@ public class TextfieldEntryDialog extends DataEntryDialog<String> {
     
     public TextfieldEntryDialog(String title, String message, String okButtonName, String cancelButtonName,
             String initialValue, final Validator<String> validator, final AsyncCallback<String> callback) {
-        super(title, message, okButtonName, cancelButtonName, initialValue, validator, callback);
+        super(title, message, okButtonName, cancelButtonName, validator, callback);
         entryField = createTextBox(initialValue);
     }
     
