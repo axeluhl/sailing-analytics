@@ -520,6 +520,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer 
             public void onSuccess(Void result) {
                 leaderboardNames.add(leaderboardName);
                 leaderboardsListBox.addItem(leaderboardName);
+                leaderboardsListBox.setSelectedIndex(leaderboardsListBox.getItemCount()-1);
             }
         });
     }
