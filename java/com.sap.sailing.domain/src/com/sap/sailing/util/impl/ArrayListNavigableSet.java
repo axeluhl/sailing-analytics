@@ -280,8 +280,8 @@ public class ArrayListNavigableSet<E> implements NavigableSet<E> {
         if (to < 0) {
             to = -to-1;
         } else {
-            if (!toInclusive) {
-                to--;
+            if (toInclusive) {
+                to++;
             }
         }
         if (to < from) {
@@ -296,8 +296,8 @@ public class ArrayListNavigableSet<E> implements NavigableSet<E> {
         if (to < 0) {
             to = -to-1;
         } else {
-            if (!inclusive) {
-                to--;
+            if (inclusive) {
+                to++;
             }
         }
         if (to < 0) {
