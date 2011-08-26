@@ -62,4 +62,6 @@ public interface SailingService extends RemoteService {
     void createLeaderboard(String leaderboardName, int[] discardThresholds);
 
     void removeLeaderboard(String leaderboardName);
+
+    void renameLeaderboard(String leaderboardName, String newLeaderboardName);
 }

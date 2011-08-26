@@ -75,4 +75,6 @@ public interface SailingServiceAsync {
 
     void removeLeaderboard(String leaderboardName, AsyncCallback<Void> asyncCallback);
 
+    void renameLeaderboard(String leaderboardName, String newLeaderboardName, AsyncCallback<Void> asyncCallback);
+
 }
