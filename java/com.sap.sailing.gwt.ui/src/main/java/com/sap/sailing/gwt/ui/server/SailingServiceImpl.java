@@ -12,6 +12,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -100,7 +101,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             TimePoint timePoint = new MillisecondsTimePoint(date);
             result.competitors = new ArrayList<CompetitorDAO>();
             result.name = leaderboard.getName();
-            result.raceNamesAndMedalRace = new HashMap<String, Boolean>();
+            result.raceNamesAndMedalRace = new LinkedHashMap<String, Boolean>();
             for (RaceInLeaderboard raceColumn : leaderboard.getRaceColumns()) {
                 result.raceNamesAndMedalRace.put(raceColumn.getName(), raceColumn.isMedalRace());
             }

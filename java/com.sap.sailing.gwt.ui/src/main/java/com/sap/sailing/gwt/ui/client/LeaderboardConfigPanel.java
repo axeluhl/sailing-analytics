@@ -48,6 +48,18 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer 
     
     private LeaderboardDAO selectedLeaderboard;
 
+    private final Button renameLeaderboardButton;
+
+    private final Button editLeaderboardScoresButton;
+
+    private final Button removeLeaderboardButton;
+
+    private final Button addColumnButton;
+
+    private final Button columnRenameButton;
+
+    private final Button columnRemoveButton;
+
     public LeaderboardConfigPanel(SailingServiceAsync sailingService, AdminConsole adminConsole,
             ErrorReporter errorReporter, StringConstants stringConstants) {
         this.stringConstants = stringConstants;
@@ -104,25 +116,25 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer 
                 addNewLeaderboard();
             }
         });
-        Button renameButton = new Button(stringConstants.renameDotDotDot());
-        verticalPanel.add(renameButton);
-        renameButton.addClickHandler(new ClickHandler() {
+        renameLeaderboardButton = new Button(stringConstants.renameDotDotDot());
+        verticalPanel.add(renameLeaderboardButton);
+        renameLeaderboardButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent arg0) {
                 renameSelectedLeaderboard();
             }
         });
-        Button btnEditScores = new Button(stringConstants.editScores());
-        verticalPanel.add(btnEditScores);
-        btnEditScores.addClickHandler(new ClickHandler() {
+        editLeaderboardScoresButton = new Button(stringConstants.editScores());
+        verticalPanel.add(editLeaderboardScoresButton);
+        editLeaderboardScoresButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent arg0) {
                 // TODO Auto-generated method stub
             }
         });
-        Button btnRemove = new Button(stringConstants.remove());
-        verticalPanel.add(btnRemove);
-        btnRemove.addClickHandler(new ClickHandler() {
+        removeLeaderboardButton = new Button(stringConstants.remove());
+        verticalPanel.add(removeLeaderboardButton);
+        removeLeaderboardButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 removeSelectedLeaderboard();
@@ -151,27 +163,27 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer 
         VerticalPanel buttonPanelForSelectedLeaderboardDetails = new VerticalPanel();
         grid.setWidget(3, 1, buttonPanelForSelectedLeaderboardDetails);
         
-        Button btnAdd = new Button(stringConstants.addDotDotDot());
-        buttonPanelForSelectedLeaderboardDetails.add(btnAdd);
-        btnAdd.addClickHandler(new ClickHandler() {
+        addColumnButton = new Button(stringConstants.addDotDotDot());
+        buttonPanelForSelectedLeaderboardDetails.add(addColumnButton);
+        addColumnButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 addColumnToSelectedLeaderboard();
             }
         });
         
-        Button btnRename = new Button(stringConstants.renameDotDotDot());
-        buttonPanelForSelectedLeaderboardDetails.add(btnRename);
-        btnRename.addClickHandler(new ClickHandler() {
+        columnRenameButton = new Button(stringConstants.renameDotDotDot());
+        buttonPanelForSelectedLeaderboardDetails.add(columnRenameButton);
+        columnRenameButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 // TODO implement rename column
             }
         });
         
-        Button btnRemove_1 = new Button(stringConstants.remove());
-        buttonPanelForSelectedLeaderboardDetails.add(btnRemove_1);
-        btnRemove_1.addClickHandler(new ClickHandler() {
+        columnRemoveButton = new Button(stringConstants.remove());
+        buttonPanelForSelectedLeaderboardDetails.add(columnRemoveButton);
+        columnRemoveButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 // TODO Auto-generated method stub
@@ -204,6 +216,8 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer 
                 // TODO Auto-generated method stub
             }
         });
+        leaderboardSelectionChanged();
+        leaderboardRaceColumnSelectionChanged();
     }
 
     private void leaderboardRaceColumnSelectionChanged() {
@@ -211,6 +225,11 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer 
         if (selectedIndex >= 0) {
             String selectedRaceColumnName = columnNamesInSelectedLeaderboardListBox.getItemText(selectedIndex);
             medalRaceCheckBox.setValue(selectedLeaderboard.raceNamesAndMedalRace.get(selectedRaceColumnName));
+            columnRenameButton.setEnabled(true);
+            columnRemoveButton.setEnabled(true);
+        } else {
+            columnRenameButton.setEnabled(false);
+            columnRemoveButton.setEnabled(false);
         }
     }
 
@@ -245,6 +264,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer 
                             @Override
                             public void onSuccess(Void v) {
                                 columnNamesInSelectedLeaderboardListBox.addItem(columnNameAndMedalRace.getA());
+                                selectedLeaderboard.raceNamesAndMedalRace.put(columnNameAndMedalRace.getA(), columnNameAndMedalRace.getB());
                             }
                         });
                     }
@@ -319,23 +339,36 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer 
     }
 
     private String getSelectedLeaderboardName() {
-        return leaderboardsListBox.getItemText(leaderboardsListBox.getSelectedIndex());
+        int selectedIndex = leaderboardsListBox.getSelectedIndex();
+        return selectedIndex >= 0 ? leaderboardsListBox.getItemText(selectedIndex) : null;
     }
 
     protected void leaderboardSelectionChanged() {
         final String leaderboardName = getSelectedLeaderboardName();
-        sailingService.getLeaderboardByName(leaderboardName,
-                new Date(), new AsyncCallback<LeaderboardDAO>() {
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        errorReporter.reportError("Error trying to fetch leaderboard "+leaderboardName+" from the server: "+caught.getMessage());
-                    }
-                    @Override
-                    public void onSuccess(LeaderboardDAO result) {
-                        selectedLeaderboard = result;
-                        updateLeaderboardDisplays();
-                    }
-                });
+        if (leaderboardName != null) {
+            sailingService.getLeaderboardByName(leaderboardName, new Date(), new AsyncCallback<LeaderboardDAO>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                    errorReporter.reportError("Error trying to fetch leaderboard " + leaderboardName
+                            + " from the server: " + caught.getMessage());
+                }
+
+                @Override
+                public void onSuccess(LeaderboardDAO result) {
+                    selectedLeaderboard = result;
+                    updateLeaderboardDisplays();
+                    addColumnButton.setEnabled(true);
+                    editLeaderboardScoresButton.setEnabled(true);
+                    renameLeaderboardButton.setEnabled(true);
+                    removeLeaderboardButton.setEnabled(true);
+                }
+            });
+        } else {
+            addColumnButton.setEnabled(false);
+            editLeaderboardScoresButton.setEnabled(false);
+            renameLeaderboardButton.setEnabled(false);
+            removeLeaderboardButton.setEnabled(false);
+        }
     }
 
     protected void updateLeaderboardDisplays() {
@@ -350,6 +383,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer 
         for (String columnName : selectedLeaderboard.raceNamesAndMedalRace.keySet()) {
             columnNamesInSelectedLeaderboardListBox.addItem(columnName);
         }
+        leaderboardRaceColumnSelectionChanged();
     }
 
     private void updateLeaderboardNamesListBox() {

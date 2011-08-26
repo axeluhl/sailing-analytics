@@ -24,10 +24,12 @@ public class TextfieldEntryDialog extends DataEntryDialog<String> {
      * Can contribute an additional widget to be displayed underneath the text entry field. If <code>null</code> is
      * returned, no additional widget will be displayed. This is the default behavior of this default implementation.
      */
+    @Override
     protected Widget getAdditionalWidget() {
        return entryField;
     }
     
+    @Override
     public void show() {
         super.show();
         entryField.setFocus(true);

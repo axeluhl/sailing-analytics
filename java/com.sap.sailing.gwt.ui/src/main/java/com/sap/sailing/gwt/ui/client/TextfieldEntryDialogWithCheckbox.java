@@ -14,14 +14,18 @@ public class TextfieldEntryDialogWithCheckbox extends DataEntryDialog<Pair<Strin
     public TextfieldEntryDialogWithCheckbox(String title, String message, String okButtonName, String cancelButtonName,
             String checkboxLabel, String initialValue, Validator<Pair<String, Boolean>> validator, AsyncCallback<Pair<String, Boolean>> callback) {
         super(title, message, okButtonName, cancelButtonName, initialValue, validator, callback);
-        checkbox = new CheckBox(checkboxLabel);
+        checkbox = createCheckbox(checkboxLabel);
         entryField = createTextBox(initialValue);
     }
 
     @Override
     protected Widget getAdditionalWidget() {
         VerticalPanel panel = new VerticalPanel();
-        panel.add(super.getAdditionalWidget());
+        Widget additionalWidget = super.getAdditionalWidget();
+        if (additionalWidget != null) {
+            panel.add(additionalWidget);
+        }
+        panel.add(entryField);
         panel.add(checkbox);
         return panel;
     }
@@ -31,4 +35,9 @@ public class TextfieldEntryDialogWithCheckbox extends DataEntryDialog<Pair<Strin
         return new Pair<String, Boolean>(entryField.getValue(), checkbox.getValue());
     }
 
+    @Override
+    public void show() {
+        super.show();
+        entryField.setFocus(true);
+    }
 }
