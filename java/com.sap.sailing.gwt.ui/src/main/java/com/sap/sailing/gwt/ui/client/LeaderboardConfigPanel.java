@@ -592,7 +592,11 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
         if (selectedRaces.isEmpty()) {
             unlinkRaceColumnFromTrackedRaceButton.setEnabled(false);
         } else {
-            linkTrackedRaceForRaceColumn(selectedRaces.iterator().next());
+            if (getSelectedRaceColumnName() != null) {
+                linkTrackedRaceForRaceColumn(selectedRaces.iterator().next());
+            } else {
+                unlinkRaceColumnFromTrackedRaceButton.setEnabled(false);
+            }
         }
     }
 
