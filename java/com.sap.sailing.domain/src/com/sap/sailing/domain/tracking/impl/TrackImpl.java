@@ -25,6 +25,10 @@ public abstract class TrackImpl<FixType extends Timed> implements Track<FixType>
         public TimePoint getTimePoint() {
             return timePoint;
         }
+        @Override
+        public String toString() {
+            return timePoint.toString();
+        }
     }
     
     public TrackImpl() {

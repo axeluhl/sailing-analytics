@@ -151,6 +151,7 @@ public class ArrayListNavigableSet<E> implements NavigableSet<E> {
         int pos = binarySearch(e);
         E result;
         if (pos >= 0) {
+            // found element equal to e
             result = list.get(pos);
         } else {
             // A negative binarySearch result represents -insertPosition-1 because no exact match for timePoint was found.
@@ -187,8 +188,8 @@ public class ArrayListNavigableSet<E> implements NavigableSet<E> {
         int pos = binarySearch(e);
         E result;
         if (pos >= 0) {
-            if (pos < list.size()) {
-                result = list.get(pos);
+            if (pos < list.size()-1) {
+                result = list.get(pos+1);
             } else {
                 result = null;
             }
