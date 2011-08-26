@@ -51,4 +51,5 @@ public interface StringConstants extends Constants {
     String discardThresholdsMustBeAscending();
     String discarding();
     String startingFromNumberOfRaces();
+    String renameLeaderboard();
 }

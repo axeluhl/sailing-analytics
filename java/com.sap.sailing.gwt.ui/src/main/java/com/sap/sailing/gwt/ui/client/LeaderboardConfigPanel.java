@@ -97,6 +97,14 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer 
                 addNewLeaderboard();
             }
         });
+        Button renameButton = new Button(stringConstants.renameDotDotDot());
+        verticalPanel.add(renameButton);
+        renameButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent arg0) {
+                renameSelectedLeaderboard();
+            }
+        });
         Button btnEditScores = new Button(stringConstants.editScores());
         verticalPanel.add(btnEditScores);
         btnEditScores.addClickHandler(new ClickHandler() {
@@ -139,7 +147,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer 
         btnRename.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                // TODO Auto-generated method stub
+                // TODO implement rename column
             }
         });
         
@@ -180,8 +188,78 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer 
         });
     }
 
+    protected void renameSelectedLeaderboard() {
+        final int selectedIndex = leaderboardsListBox.getSelectedIndex();
+        final String leaderboardName = leaderboardsListBox.getItemText(selectedIndex);
+        final DialogBox leaderboardRenameDialogBox = new DialogBox();
+        leaderboardRenameDialogBox.setText(stringConstants.renameLeaderboard());
+        leaderboardRenameDialogBox.setAnimationEnabled(true);
+        final Button okButton = new Button("OK");
+        okButton.setEnabled(leaderboardName.trim().length()>0);
+        VerticalPanel dialogVPanel = new VerticalPanel();
+        final Label statusLabel = new Label();
+        dialogVPanel.add(statusLabel);
+        dialogVPanel.add(new Label(stringConstants.leaderboardName()));
+        final TextBox leaderboardNameField = new TextBox();
+        leaderboardNameField.setText(leaderboardName);
+        AbstractEntryPoint.addFocusUponKeyUpToggler(leaderboardNameField);
+        leaderboardNameField.addChangeHandler(new ChangeHandler() {
+            @Override
+            public void onChange(ChangeEvent event) {
+                if (leaderboardNameField.getValue() != null && leaderboardNameField.getValue().trim().length() > 0) {
+                    statusLabel.setText("");
+                    okButton.setEnabled(true);
+                } else {
+                    statusLabel.setText(stringConstants.pleaseEnterNonEmptyName());
+                    okButton.setEnabled(false);
+                }
+            }
+        });
+        dialogVPanel.add(leaderboardNameField);
+        dialogVPanel.setHorizontalAlignment(VerticalPanel.ALIGN_RIGHT);
+        HorizontalPanel buttonPanel = new HorizontalPanel();
+        dialogVPanel.add(buttonPanel);
+        buttonPanel.add(okButton);
+        Button cancelButton = new Button(stringConstants.cancel());
+        buttonPanel.add(cancelButton);
+        cancelButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                leaderboardRenameDialogBox.hide();
+            }
+        });
+        leaderboardRenameDialogBox.setWidget(dialogVPanel);
+        okButton.addClickHandler(new ClickHandler() {
+            public void onClick(ClickEvent event) {
+                leaderboardRenameDialogBox.hide();
+                final String newLeaderboardName = leaderboardNameField.getText().trim();
+                sailingService.renameLeaderboard(leaderboardName, newLeaderboardName,
+                        new AsyncCallback<Void>() {
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                errorReporter.reportError("Error trying to rename leaderboard "+leaderboardName+" to "+
+                                        newLeaderboardName+": "+caught.getMessage());
+                            }
+                            @Override
+                            public void onSuccess(Void v) {
+                                leaderboardsListBox.setItemText(selectedIndex, newLeaderboardName);
+                                leaderboardNames.set(selectedIndex, newLeaderboardName);
+                            }
+                        });
+            }
+        });
+        AbstractEntryPoint.linkEnterToButton(okButton, leaderboardNameField);
+        AbstractEntryPoint.linkEscapeToButton(cancelButton, leaderboardNameField);
+        leaderboardRenameDialogBox.center();
+        leaderboardNameField.setFocus(true);
+    }
+
+    private String getSelectedLeaderboardName() {
+        return leaderboardsListBox.getItemText(leaderboardsListBox.getSelectedIndex());
+    }
+
     protected void leaderboardSelectionChanged() {
-        final String leaderboardName = leaderboardsListBox.getItemText(leaderboardsListBox.getSelectedIndex());
+        final String leaderboardName = getSelectedLeaderboardName();
         sailingService.getLeaderboardByName(leaderboardName,
                 new Date(), new AsyncCallback<LeaderboardDAO>() {
                     @Override
@@ -222,9 +300,9 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer 
     }
 
     private void addNewLeaderboard() {
-        final DialogBox myErrorDialogBox = new DialogBox();
-        myErrorDialogBox.setText(stringConstants.createNewLeaderboard());
-        myErrorDialogBox.setAnimationEnabled(true);
+        final DialogBox leaderboardCreationDialogBox = new DialogBox();
+        leaderboardCreationDialogBox.setText(stringConstants.createNewLeaderboard());
+        leaderboardCreationDialogBox.setAnimationEnabled(true);
         final Button okButton = new Button("OK");
         okButton.setEnabled(false);
         VerticalPanel dialogVPanel = new VerticalPanel();
@@ -267,13 +345,13 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer 
         cancelButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                myErrorDialogBox.hide();
+                leaderboardCreationDialogBox.hide();
             }
         });
-        myErrorDialogBox.setWidget(dialogVPanel);
+        leaderboardCreationDialogBox.setWidget(dialogVPanel);
         okButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
-                myErrorDialogBox.hide();
+                leaderboardCreationDialogBox.hide();
                 List<Integer> discardThresholds = new ArrayList<Integer>();
                 for (int i=0; i<discardThresholdBoxes.length; i++) {
                     if (discardThresholdBoxes[i].getValue() != null && discardThresholdBoxes[i].getValue().trim().length() > 0) {
@@ -297,12 +375,12 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer 
         AbstractEntryPoint.linkEnterToButton(okButton, discardThresholdBoxes);
         AbstractEntryPoint.linkEscapeToButton(cancelButton, leaderboardNameField);
         AbstractEntryPoint.linkEscapeToButton(cancelButton, discardThresholdBoxes);
-        myErrorDialogBox.center();
+        leaderboardCreationDialogBox.center();
         leaderboardNameField.setFocus(true);
     }
 
     private void enableOkButtonIfValid(final Button okButton, final TextBox leaderboardNameField, TextBox[] discardThresholdBoxes, Label statusLabel) {
-        boolean nonEmpty = leaderboardNameField.getValue() != null && leaderboardNameField.getValue().length() > 0;
+        boolean nonEmpty = leaderboardNameField.getValue() != null && leaderboardNameField.getValue().trim().length() > 0;
         boolean unique = !leaderboardNames.contains(leaderboardNameField.getValue());
         boolean discardThresholdsAscending = true;
         boolean discardThresholdsAreNumeric = discardThresholdBoxes[0].getValue() == null ||
