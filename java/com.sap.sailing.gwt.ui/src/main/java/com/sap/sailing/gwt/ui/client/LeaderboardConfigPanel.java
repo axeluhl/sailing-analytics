@@ -222,14 +222,32 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer 
     }
 
     protected void removeSelectedLeaderboardColumn() {
-        // TODO Auto-generated method stub
-        
+        final int selectedIndex = columnNamesInSelectedLeaderboardListBox.getSelectedIndex();
+        if (selectedIndex >= 0) {
+            final String selectedRaceColumnName = columnNamesInSelectedLeaderboardListBox.getItemText(selectedIndex);
+            sailingService.removeLeaderboardColumn(getSelectedLeaderboardName(), selectedRaceColumnName, new AsyncCallback<Void>() {
+                @Override
+                public void onFailure(Throwable t) {
+                    errorReporter
+                    .reportError("Error trying to remove leaderboard race column "
+                            + selectedRaceColumnName + " in leaderboard "
+                            + getSelectedLeaderboardName()+": "+
+                            t.getMessage());
+                }
+
+                @Override
+                public void onSuccess(Void arg0) {
+                    columnNamesInSelectedLeaderboardListBox.removeItem(selectedIndex);
+                    selectedLeaderboard.raceNamesAndMedalRace.remove(selectedRaceColumnName);
+                }
+            });
+        }
     }
 
     protected void renameSelectedLeaderboardColumn() {
         final int selectedIndex = columnNamesInSelectedLeaderboardListBox.getSelectedIndex();
-        final String selectedRaceColumnName = selectedIndex >= 0 ? columnNamesInSelectedLeaderboardListBox.getItemText(selectedIndex) : null;
-        if (selectedRaceColumnName != null) {
+        if (selectedIndex >= 0) {
+            final String selectedRaceColumnName = columnNamesInSelectedLeaderboardListBox.getItemText(selectedIndex);
             TextfieldEntryDialog newNameDialog = new TextfieldEntryDialog(stringConstants.renameRace(),
                     stringConstants.renameRace(), stringConstants.ok(), stringConstants.cancel(),
                     selectedRaceColumnName, new Validator<String>() {
@@ -252,11 +270,12 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer 
                                 sailingService.renameLeaderboardColumn(getSelectedLeaderboardName(),
                                         selectedRaceColumnName, newColumnName, new AsyncCallback<Void>() {
                                             @Override
-                                            public void onFailure(Throwable arg0) {
+                                            public void onFailure(Throwable t) {
                                                 errorReporter
                                                         .reportError("Error trying to rename leaderboard race column "
                                                                 + selectedRaceColumnName + " in leaderboard "
-                                                                + getSelectedLeaderboardName() + " to " + newColumnName);
+                                                                + getSelectedLeaderboardName() + " to " + newColumnName+": "+
+                                                                t.getMessage());
                                             }
 
                                             @Override
@@ -425,10 +444,13 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer 
                 }
             });
         } else {
+            selectedLeaderboard = null;
             addColumnButton.setEnabled(false);
             editLeaderboardScoresButton.setEnabled(false);
             renameLeaderboardButton.setEnabled(false);
             removeLeaderboardButton.setEnabled(false);
+            columnNamesInSelectedLeaderboardListBox.clear();
+            leaderboardRaceColumnSelectionChanged();
         }
     }
 
@@ -516,6 +538,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer 
             public void onSuccess(Void result) {
                 leaderboardNames.remove(selectedIndex);
                 leaderboardsListBox.removeItem(selectedIndex);
+                leaderboardSelectionChanged();
             }
         });
     }
