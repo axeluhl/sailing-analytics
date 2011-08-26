@@ -18,6 +18,8 @@ public interface RaceSelectionChangeListener {
 
     /**
      * The first element is the first one selected
+     * 
+     * @param selectedRaces a non-<code>null</code> list which is empty if nothing is selected
      */
     void onRaceSelectionChange(List<Triple<EventDAO, RegattaDAO, RaceDAO>> selectedRaces);
 

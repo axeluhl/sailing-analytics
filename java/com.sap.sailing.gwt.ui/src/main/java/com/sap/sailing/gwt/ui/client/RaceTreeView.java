@@ -48,6 +48,20 @@ public class RaceTreeView extends FormPanel implements EventDisplayer, RaceSelec
         }
         return result;
     }
+    
+    public void clearSelection() {
+        if (eventsList != null) {
+            for (EventDAO event : eventsList.getList()) {
+                trackedEventsModel.getSelectionModel().setSelected(event, false);
+                for (RegattaDAO regatta : event.regattas) {
+                    trackedEventsModel.getSelectionModel().setSelected(regatta, false);
+                    for (RaceDAO race : regatta.races) {
+                        trackedEventsModel.getSelectionModel().setSelected(race, false);
+                    }
+                }
+            }
+        }
+    }
 
     @Override
     public void addRaceSelectionChangeListener(RaceSelectionChangeListener listener) {

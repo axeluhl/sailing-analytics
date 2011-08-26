@@ -24,12 +24,15 @@ import com.sap.sailing.gwt.ui.client.DataEntryDialog.Validator;
 import com.sap.sailing.gwt.ui.shared.EventDAO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDAO;
 import com.sap.sailing.gwt.ui.shared.Pair;
+import com.sap.sailing.gwt.ui.shared.RaceDAO;
+import com.sap.sailing.gwt.ui.shared.RegattaDAO;
+import com.sap.sailing.gwt.ui.shared.Triple;
 
-public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer {
+public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer, RaceSelectionChangeListener {
 
     private static final int MAX_NUMBER_OF_DISCARDED_RESULTS = 4;
 
-    private RaceTreeView raceTree;
+    private final RaceTreeView raceTree;
     
     private final StringConstants stringConstants;
     
@@ -60,6 +63,10 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer 
     private final Button columnRenameButton;
 
     private final Button columnRemoveButton;
+
+    private final Button linkRaceColumnToTrackedRaceButton;
+
+    private final Button unlinkRaceColumnFromTrackedRaceButton;
 
     public LeaderboardConfigPanel(SailingServiceAsync sailingService, AdminConsole adminConsole,
             ErrorReporter errorReporter, StringConstants stringConstants) {
@@ -191,27 +198,29 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer 
             }
         });
         
+        // --------- linking columns to tracked races ------------
         Label lblTrackedRaceConnected = new Label(stringConstants.trackedRaceConnectedToSelectedRaceName());
         grid.setWidget(4, 0, lblTrackedRaceConnected);
         
         raceTree = new RaceTreeView(stringConstants, /* multiselection */ false);
         grid.setWidget(5, 0, raceTree);
+        raceTree.addRaceSelectionChangeListener(this);
         
         VerticalPanel verticalPanel_2 = new VerticalPanel();
         grid.setWidget(5, 1, verticalPanel_2);
         
-        Button btnLinkToColumn = new Button(stringConstants.linkToColumn());
-        verticalPanel_2.add(btnLinkToColumn);
-        btnLinkToColumn.addClickHandler(new ClickHandler() {
+        linkRaceColumnToTrackedRaceButton = new Button(stringConstants.linkToColumn());
+        verticalPanel_2.add(linkRaceColumnToTrackedRaceButton);
+        linkRaceColumnToTrackedRaceButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 // TODO Auto-generated method stub
             }
         });
         
-        Button btnUnlink = new Button(stringConstants.unlink());
-        verticalPanel_2.add(btnUnlink);
-        btnUnlink.addClickHandler(new ClickHandler() {
+        unlinkRaceColumnFromTrackedRaceButton = new Button(stringConstants.unlink());
+        verticalPanel_2.add(unlinkRaceColumnFromTrackedRaceButton);
+        unlinkRaceColumnFromTrackedRaceButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 // TODO Auto-generated method stub
@@ -305,6 +314,9 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer 
         } else {
             columnRenameButton.setEnabled(false);
             columnRemoveButton.setEnabled(false);
+            raceTree.clearSelection();
+            linkRaceColumnToTrackedRaceButton.setEnabled(false);
+            unlinkRaceColumnFromTrackedRaceButton.setEnabled(false);
         }
     }
     
@@ -542,5 +554,13 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer 
                 leaderboardSelectionChanged();
             }
         });
+    }
+
+    @Override
+    public void onRaceSelectionChange(List<Triple<EventDAO, RegattaDAO, RaceDAO>> selectedRaces) {
+        if (selectedRaces.isEmpty()) {
+            linkRaceColumnToTrackedRaceButton.setEnabled(false);
+            unlinkRaceColumnFromTrackedRaceButton.setEnabled(false);
+        } 
     }
 }
