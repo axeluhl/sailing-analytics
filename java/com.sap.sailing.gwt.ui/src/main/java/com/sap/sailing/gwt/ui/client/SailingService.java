@@ -11,6 +11,7 @@ import com.sap.sailing.gwt.ui.shared.EventDAO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDAO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDAO;
 import com.sap.sailing.gwt.ui.shared.MarkDAO;
+import com.sap.sailing.gwt.ui.shared.Pair;
 import com.sap.sailing.gwt.ui.shared.QuickRankDAO;
 import com.sap.sailing.gwt.ui.shared.RaceRecordDAO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDAO;
@@ -70,4 +71,11 @@ public interface SailingService extends RemoteService {
     void removeLeaderboardColumn(String leaderboardName, String columnName);
 
     void addColumnToLeaderboard(String columnName, String leaderboardName, boolean medalRace);
+
+    void connectTrackedRaceToLeaderboardColumn(String leaderboardName, String raceColumnName,
+            String eventName, String raceName);
+    
+    void disconnectLeaderboardColumnFromTrackedRace(String leaderboardName, String raceColumnName);
+    
+    Pair<String, String> getEventAndRaceNameOfTrackedRaceConnectedToLeaderboardColumn(String leaderboardName, String raceColumnName);
 }
