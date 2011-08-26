@@ -283,6 +283,9 @@ public class ArrayListNavigableSet<E> implements NavigableSet<E> {
                 to--;
             }
         }
+        if (to < from) {
+            to = from; // will still produce an empty list instead of failing with an exception
+        }
         return new ArrayListNavigableSet<E>(list.subList(from, to), comparator());
     }
 
@@ -296,6 +299,9 @@ public class ArrayListNavigableSet<E> implements NavigableSet<E> {
                 to--;
             }
         }
+        if (to < 0) {
+            to = 0; // will still produce an empty list instead of failing with an exception
+        }
         return new ArrayListNavigableSet<E>(list.subList(0, to), comparator());
     }
 
@@ -308,6 +314,9 @@ public class ArrayListNavigableSet<E> implements NavigableSet<E> {
             if (!inclusive) {
                 from++;
             }
+        }
+        if (from > list.size()) {
+            from = list.size(); // will still produce an empty list instead of failing with an exception
         }
         return new ArrayListNavigableSet<E>(list.subList(from, list.size()), comparator());
     }
@@ -331,4 +340,8 @@ public class ArrayListNavigableSet<E> implements NavigableSet<E> {
         return comparator().compare(a, b);
     }
 
+    @Override
+    public String toString() {
+        return list.toString();
+    }
 }
