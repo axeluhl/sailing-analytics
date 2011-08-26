@@ -3,11 +3,11 @@ package com.sap.sailing.domain.tracking.impl;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.NavigableSet;
-import java.util.concurrent.ConcurrentSkipListSet;
 
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.Timed;
 import com.sap.sailing.domain.tracking.Track;
+import com.sap.sailing.util.impl.ArrayListNavigableSet;
 
 public abstract class TrackImpl<FixType extends Timed> implements Track<FixType> {
     /**
@@ -25,11 +25,15 @@ public abstract class TrackImpl<FixType extends Timed> implements Track<FixType>
         public TimePoint getTimePoint() {
             return timePoint;
         }
+        @Override
+        public String toString() {
+            return timePoint.toString();
+        }
     }
     
     public TrackImpl() {
         super();
-        this.fixes = new ConcurrentSkipListSet<Timed>(TimedComparator.INSTANCE);
+        this.fixes = new ArrayListNavigableSet<Timed>(TimedComparator.INSTANCE);
     }
     
     protected NavigableSet<FixType> getInternalRawFixes() {
