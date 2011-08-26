@@ -9,6 +9,31 @@ import java.util.List;
 import java.util.NavigableSet;
 import java.util.SortedSet;
 
+/**
+ * A {@link NavigableSet} implementation that internally uses an {@link ArrayList} to represent the data structure.
+ * The elements are ordered by a mandatory {@link Comparator}, meaning that the natural element order is not considered.
+ * {@link Collections#binarySearch(List, Object, Comparator) Binary search} is used to locate elements with logarithmic
+ * effort which also results in logarithmic effort for computing subsets, head and tail sets, etc.<p>
+ * 
+ * The {@link #add} operation handles the special case that elements are added in ascending order specifically fast (O(1)),
+ * at the expense of always performing one comparison in case the collection is not empty, before resorting to
+ * binary search.<p>
+ * 
+ * Computing subsets is mapped to computing sub-lists (see {@link List#subList(int, int)}), with all the same effects
+ * on how the resulting collection is backed by the original collection.<p>
+ * 
+ * The iterators returned by {@link #iterator()} and {@link #descendingIterator()} are special in that they do not
+ * perform any checks for concurrent modifications. They consist of a single integer index pointing into the
+ * underlying list structure which is incremented/decremented when moving the iterator. The {@link Iterator#hasNext()}
+ * operation does a simple bounds check when it is invoked. This way, the iterators may skip elements, visit the same
+ * element twice or run into {@link ArrayIndexOutOfBoundsException} in case an element is removed between a
+ * {@link Iterator#hasNext()} check and the call to {@link Iterator#next()}. On the other hand, this makes the iterators
+ * very robust against the usual appending for which this entire data structure is tuned since no further
+ * synchronization is necessary. Clients even typically expect to read elements added after an iterator started through
+ * such an iterator.
+ * 
+ * @author Axel Uhl (d043530)
+ */
 public class ArrayListNavigableSet<E> implements NavigableSet<E> {
     private final List<E> list;
     private final Comparator<? super E> comparator;
@@ -106,7 +131,11 @@ public class ArrayListNavigableSet<E> implements NavigableSet<E> {
 
     @Override
     public boolean addAll(Collection<? extends E> c) {
-        return list.addAll(c);
+        boolean result = false;
+        for (E e : c) {
+            result = result || add(e);
+        }
+        return result;
     }
 
     @Override
