@@ -1,0 +1,334 @@
+package com.sap.sailing.util.impl;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.List;
+import java.util.NavigableSet;
+import java.util.SortedSet;
+
+public class ArrayListNavigableSet<E> implements NavigableSet<E> {
+    private final List<E> list;
+    private final Comparator<? super E> comparator;
+
+    public ArrayListNavigableSet(Comparator<? super E> comparator) {
+        list = new ArrayList<E>();
+        this.comparator = comparator;
+    }
+    
+    public ArrayListNavigableSet(int initialSize, Comparator<? super E> comparator) {
+        list = new ArrayList<E>(initialSize);
+        this.comparator = comparator;
+    }
+    
+    private ArrayListNavigableSet(List<E> list, Comparator<? super E> comparator) {
+        this.list = list;
+        this.comparator = comparator;
+    }
+    
+    @Override
+    public Comparator<? super E> comparator() {
+        return comparator;
+    }
+
+    @Override
+    public E first() {
+        return list.get(0);
+    }
+
+    @Override
+    public E last() {
+        return list.get(list.size()-1);
+    }
+
+    @Override
+    public int size() {
+        return list.size();
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return size() == 0;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public boolean contains(Object o) {
+        return binarySearch((E) o) >= 0;
+    }
+
+    @Override
+    public Object[] toArray() {
+        return list.toArray(); 
+    }
+
+    @Override
+    public <T> T[] toArray(T[] a) {
+        return list.toArray(a); 
+    }
+
+    @Override
+    public boolean add(E e) {
+        boolean result;
+        // assumed default case: e appends to the end
+        if (isEmpty() || compare(e, last()) > 0) {
+            list.add(e);
+            result = true;
+        } else {
+            int pos = binarySearch(e);
+            if (pos >= 0) {
+                result = false;
+            } else {
+                list.add(-pos+1, e);
+                result = true;
+            }
+        }
+        return result;
+    }
+
+    private int binarySearch(E e) {
+        int result;
+        result = Collections.binarySearch(list, e, comparator());
+        return result;
+    }
+
+    @Override
+    public boolean remove(Object o) {
+        return list.remove(o);
+    }
+
+    @Override
+    public boolean containsAll(Collection<?> c) {
+        return list.containsAll(c);
+    }
+
+    @Override
+    public boolean addAll(Collection<? extends E> c) {
+        return list.addAll(c);
+    }
+
+    @Override
+    public boolean retainAll(Collection<?> c) {
+        return list.retainAll(c);
+    }
+
+    @Override
+    public boolean removeAll(Collection<?> c) {
+        return list.removeAll(c);
+    }
+
+    @Override
+    public void clear() {
+        list.clear();
+    }
+
+    @Override
+    public E lower(E e) {
+        int pos = binarySearch(e);
+        E result;
+        if (pos >= 0) {
+            if (pos > 0) {
+                result = list.get(pos-1);
+            } else {
+                result = null; // exact match for lowest element; there is no lower element
+            }
+        } else {
+            // A negative binarySearch result represents -insertPosition-1 because no exact match for timePoint was found.
+            // Therefore, -pos = insertionPoint+1
+            if (-pos-2 >= 0) {
+                result = list.get(-pos-2);
+            } else {
+                result = null;
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public E floor(E e) {
+        int pos = binarySearch(e);
+        E result;
+        if (pos >= 0) {
+            result = list.get(pos);
+        } else {
+            // A negative binarySearch result represents -insertPosition-1 because no exact match for timePoint was found.
+            // Therefore, -pos = insertionPoint+1
+            if (-pos-2 >= 0) {
+                result = list.get(-pos-2);
+            } else {
+                result = null;
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public E ceiling(E e) {
+        int pos = binarySearch(e);
+        E result;
+        if (pos >= 0) {
+            result = list.get(pos);
+        } else {
+            // A negative binarySearch result represents -insertPosition-1 because no exact match for timePoint was found.
+            // Therefore, -pos = insertionPoint+1
+            if (-pos-1 < list.size()) {
+                result = list.get(-pos-1);
+            } else {
+                result = null;
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public E higher(E e) {
+        int pos = binarySearch(e);
+        E result;
+        if (pos >= 0) {
+            if (pos < list.size()) {
+                result = list.get(pos);
+            } else {
+                result = null;
+            }
+        } else {
+            // A negative binarySearch result represents -insertPosition-1 because no exact match for timePoint was found.
+            // Therefore, -pos = insertionPoint+1
+            if (-pos-1 < list.size()) {
+                result = list.get(-pos-1);
+            } else {
+                result = null;
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public E pollFirst() {
+        if (isEmpty()) {
+            return null;
+        } else {
+            return list.remove(0);
+        }
+    }
+
+    @Override
+    public E pollLast() {
+        if (isEmpty()) {
+            return null;
+        } else {
+            return list.remove(list.size()-1);
+        }
+    }
+
+    @Override
+    public Iterator<E> iterator() {
+        return new Iterator<E>() {
+            private int i=0;
+            @Override
+            public boolean hasNext() {
+                return i<list.size();
+            }
+            @Override
+            public E next() {
+                return list.get(i++);
+            }
+            @Override
+            public void remove() {
+                list.remove(i);
+            }
+        };
+    }
+
+    @Override
+    public NavigableSet<E> descendingSet() {
+        return new ArrayListNavigableSet<E>(new ReverseRandomAccessList<E>(list), comparator());
+    }
+
+    @Override
+    public Iterator<E> descendingIterator() {
+        return new Iterator<E>() {
+            private int i=list.size()-1;
+            @Override
+            public boolean hasNext() {
+                return i>=0;
+            }
+            @Override
+            public E next() {
+                return list.get(i--);
+            }
+            @Override
+            public void remove() {
+                list.remove(i);
+            }
+        };
+    }
+
+    @Override
+    public NavigableSet<E> subSet(E fromElement, boolean fromInclusive, E toElement, boolean toInclusive) {
+        int from = binarySearch(fromElement);
+        if (from < 0) {
+            from = -from-1;
+        } else {
+            if (!fromInclusive) {
+                from++;
+            }
+        }
+        int to = binarySearch(toElement);
+        if (to < 0) {
+            to = -to-1;
+        } else {
+            if (!toInclusive) {
+                to--;
+            }
+        }
+        return new ArrayListNavigableSet<E>(list.subList(from, to), comparator());
+    }
+
+    @Override
+    public NavigableSet<E> headSet(E toElement, boolean inclusive) {
+        int to = binarySearch(toElement);
+        if (to < 0) {
+            to = -to-1;
+        } else {
+            if (!inclusive) {
+                to--;
+            }
+        }
+        return new ArrayListNavigableSet<E>(list.subList(0, to), comparator());
+    }
+
+    @Override
+    public NavigableSet<E> tailSet(E fromElement, boolean inclusive) {
+        int from = binarySearch(fromElement);
+        if (from < 0) {
+            from = -from-1;
+        } else {
+            if (!inclusive) {
+                from++;
+            }
+        }
+        return new ArrayListNavigableSet<E>(list.subList(from, list.size()), comparator());
+    }
+
+    @Override
+    public SortedSet<E> subSet(E fromElement, E toElement) {
+        return subSet(fromElement, true, toElement, false);
+    }
+
+    @Override
+    public SortedSet<E> headSet(E toElement) {
+        return headSet(toElement, false);
+    }
+
+    @Override
+    public SortedSet<E> tailSet(E fromElement) {
+        return tailSet(fromElement, false);
+    }
+    
+    private int compare(E a, E b) {
+        return comparator().compare(a, b);
+    }
+
+}
