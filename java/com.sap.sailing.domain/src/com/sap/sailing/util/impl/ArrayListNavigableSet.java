@@ -106,7 +106,7 @@ public class ArrayListNavigableSet<E> implements NavigableSet<E> {
             if (pos >= 0) {
                 result = false;
             } else {
-                list.add(-pos+1, e);
+                list.add(-pos-1, e);
                 result = true;
             }
         }

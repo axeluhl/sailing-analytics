@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import com.google.gwt.cell.client.Cell.Context;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -12,6 +13,8 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
+import com.google.gwt.user.cellview.client.Header;
+import com.google.gwt.user.cellview.client.TextHeader;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FormPanel;
@@ -63,8 +66,8 @@ public class LeaderboardPanel extends FormPanel {
         }
 
         @Override
-        public String getHeaderName() {
-            return stringConstants.competitor();
+        public Header<String> getHeader() {
+            return new TextHeader(stringConstants.competitor());
         }
 
         @Override
@@ -95,9 +98,11 @@ public class LeaderboardPanel extends FormPanel {
      */
     private class RaceColumn extends SortableColumn<LeaderboardRowDAO> {
         private final String raceName;
+        private final boolean medalRace;
 
-        public RaceColumn(String raceName) {
+        public RaceColumn(String raceName, boolean medalRace) {
             this.raceName = raceName;
+            this.medalRace = medalRace;
         }
         
         public String getRaceName() {
@@ -140,8 +145,16 @@ public class LeaderboardPanel extends FormPanel {
         }
         
         @Override
-        public String getHeaderName() {
-            return raceName;
+        public Header<String> getHeader() {
+            return new TextHeader(raceName) {
+                @Override
+                public void render(Context context, SafeHtmlBuilder sb) {
+                    if (medalRace) {
+                        sb.appendHtmlConstant("<img src=\"/images/medal.png\">");
+                    }
+                    super.render(context, sb);
+                }
+            };
         }
 
     }
@@ -178,10 +191,9 @@ public class LeaderboardPanel extends FormPanel {
         }
 
         @Override
-        public String getHeaderName() {
-            return stringConstants.total();
+        public Header<String> getHeader() {
+            return new TextHeader(stringConstants.total());
         }
-
     }
     
     private class CarryColumn extends SortableColumn<LeaderboardRowDAO>  {
@@ -205,10 +217,9 @@ public class LeaderboardPanel extends FormPanel {
         }
 
         @Override
-        public String getHeaderName() {
-            return stringConstants.carry();
+        public Header<String> getHeader() {
+            return new TextHeader(stringConstants.carry());
         }
-
     }
     
     public LeaderboardPanel(SailingServiceAsync sailingService, String leaderboardName, ErrorReporter errorReporter,
@@ -243,7 +254,7 @@ public class LeaderboardPanel extends FormPanel {
     }
     
     private void addColumn(SortableColumn<LeaderboardRowDAO> column) {
-        leaderboardTable.addColumn(column, column.getHeaderName());
+        leaderboardTable.addColumn(column, column.getHeader());
         listHandler.setComparator(column, column.getComparator());
     }
     
@@ -281,16 +292,16 @@ public class LeaderboardPanel extends FormPanel {
     }
 
     private void createMissingRaceColumns(LeaderboardDAO leaderboard) {
-        for (String raceName : leaderboard.raceNamesAndMedalRace.keySet()) {
+        for (Map.Entry<String, Boolean> raceNameAndMedalRace : leaderboard.raceNamesAndMedalRace.entrySet()) {
             boolean foundRaceColumn = false;
             for (int i=0; !foundRaceColumn && i<leaderboardTable.getColumnCount(); i++) {
                 Column<LeaderboardRowDAO, ?> c = leaderboardTable.getColumn(i);
-                if (c instanceof RaceColumn && ((RaceColumn) c).getRaceName().equals(raceName)) {
+                if (c instanceof RaceColumn && ((RaceColumn) c).getRaceName().equals(raceNameAndMedalRace.getKey())) {
                     foundRaceColumn = true;
                 }
             }
             if (!foundRaceColumn) {
-                addRaceColumn(new RaceColumn(raceName));
+                addRaceColumn(new RaceColumn(raceNameAndMedalRace.getKey(), raceNameAndMedalRace.getValue()));
             }
         }
     }

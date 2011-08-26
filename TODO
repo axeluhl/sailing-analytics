@@ -1,10 +1,6 @@
 Axel
 ====
 
- - consider an array-based implementation of TrackImpl, sorted ascending by time point; inserting
-   with a not-maximal time point requires some shifting but should be the rare exception in all our
-   use cases.
-
  - Finish a first draft version of a GWT admin and leaderboard UI
 
    * "top" display, with time slider
