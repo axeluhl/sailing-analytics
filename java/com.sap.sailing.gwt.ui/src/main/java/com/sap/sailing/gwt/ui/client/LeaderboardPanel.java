@@ -281,7 +281,7 @@ public class LeaderboardPanel extends FormPanel {
     }
 
     private void createMissingRaceColumns(LeaderboardDAO leaderboard) {
-        for (String raceName : leaderboard.raceNames) {
+        for (String raceName : leaderboard.raceNamesAndMedalRace.keySet()) {
             boolean foundRaceColumn = false;
             for (int i=0; !foundRaceColumn && i<leaderboardTable.getColumnCount(); i++) {
                 Column<LeaderboardRowDAO, ?> c = leaderboardTable.getColumn(i);
@@ -299,7 +299,7 @@ public class LeaderboardPanel extends FormPanel {
         List<Column<LeaderboardRowDAO, ?>> columnsToRemove = new ArrayList<Column<LeaderboardRowDAO,?>>();
         for (int i=0; i<leaderboardTable.getColumnCount(); i++) {
             Column<LeaderboardRowDAO, ?> c = leaderboardTable.getColumn(i);
-            if (c instanceof RaceColumn && (leaderboard == null || !leaderboard.raceNames.contains(((RaceColumn) c).getRaceName()))) {
+            if (c instanceof RaceColumn && (leaderboard == null || !leaderboard.raceNamesAndMedalRace.keySet().contains(((RaceColumn) c).getRaceName()))) {
                 columnsToRemove.add(c);
             }
         }

@@ -19,4 +19,6 @@ public interface RaceInLeaderboard extends LeaderboardColumn {
      * A "medal race" cannot be discarded. It's score is doubled during score aggregation.
      */
     boolean isMedalRace();
+    
+    void setName(String newName);
 }

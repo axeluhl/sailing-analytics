@@ -2,19 +2,19 @@ package com.sap.sailing.domain.leaderboard.impl;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.TimePoint;
-import com.sap.sailing.domain.base.impl.NamedImpl;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
 import com.sap.sailing.domain.tracking.NoWindException;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
-public class RaceInLeaderboardImpl extends NamedImpl implements RaceInLeaderboard {
+public class RaceInLeaderboardImpl implements RaceInLeaderboard {
     private TrackedRace trackedRace;
     private final Leaderboard leaderboard;
     private final boolean medalRace;
+    private String name;
     
     public RaceInLeaderboardImpl(Leaderboard leaderboard, String name, boolean medalRace) {
-        super(name);
+        this.name = name;
         this.leaderboard = leaderboard;
         this.medalRace = medalRace;
     }
@@ -41,6 +41,16 @@ public class RaceInLeaderboardImpl extends NamedImpl implements RaceInLeaderboar
     @Override
     public void setTrackedRace(TrackedRace trackedRace) {
         this.trackedRace = trackedRace;
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public void setName(String newName) {
+        this.name = newName;
     }
 
 }
