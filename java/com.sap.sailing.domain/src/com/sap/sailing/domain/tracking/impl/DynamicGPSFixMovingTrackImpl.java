@@ -21,6 +21,15 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends DynamicTrackImpl<Ite
     }
 
     /**
+     * This redefinition packs the <code>gpsFix</code> into a more compact representation that conserves
+     * memory compared to the original, "naive" implementation. It gets along with a single object.
+     */
+    @Override
+    public void addGPSFix(GPSFixMoving gpsFix) {
+        super.addGPSFix(new CompactGPSFixMovingImpl(gpsFix));
+    }
+
+    /**
      * Here we know for sure that the GPS fixes are {@link GPSFixMoving} instances,
      * so we can use their {@link GPSFixMoving#getSpeed() speed} in averaging. We're still
      * using an interval of {@link #getMillisecondsOverWhichToAverage()} around <code>at</code>,

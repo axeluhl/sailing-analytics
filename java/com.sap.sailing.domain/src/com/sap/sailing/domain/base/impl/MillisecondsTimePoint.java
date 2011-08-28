@@ -5,6 +5,7 @@ import java.util.Date;
 
 public class MillisecondsTimePoint extends AbstractTimePoint {
     private final long millis;
+    private Date date;
     
     public static MillisecondsTimePoint now() {
         return new MillisecondsTimePoint(System.currentTimeMillis());
@@ -18,6 +19,14 @@ public class MillisecondsTimePoint extends AbstractTimePoint {
     public MillisecondsTimePoint(Date date) {
         super();
         this.millis = date.getTime();
+    }
+
+    protected Date getDateFromCache() {
+        return date;
+    }
+
+    protected void cacheDate(Date date) {
+        this.date = date;
     }
 
     @Override

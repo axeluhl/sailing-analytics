@@ -6,7 +6,6 @@ import java.util.Date;
 import com.sap.sailing.domain.base.TimePoint;
 
 public abstract class AbstractTimePoint implements TimePoint {
-    private Date date;
     private static SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
 
     @Override
@@ -15,14 +14,14 @@ public abstract class AbstractTimePoint implements TimePoint {
         return milliDiff<0 ?  -1 : milliDiff == 0 ? 0 : 1;
     }
     
-    
-
     @Override
     public Date asDate() {
-        if (date == null) {
-            date = new Date(asMillis());
+        Date result = getDateFromCache();
+        if (result == null) {
+            result = new Date(asMillis());
+            cacheDate(result);
         }
-        return date;
+        return result;
     }
     
     @Override
@@ -39,4 +38,18 @@ public abstract class AbstractTimePoint implements TimePoint {
     public String toString() {
         return dateFormatter.format(asDate());
     }
+
+    /**
+     * A subclass may implement a cache for the {@link Date} representation by overriding this method as well
+     * as {@link #cacheDate(Date)}.
+     */
+    protected Date getDateFromCache() {
+        return null;
+    }
+
+    /**
+     * A subclass may implement a cache for the {@link Date} representation by overriding this method as well
+     * as {@link #getDate()}.
+     */
+    protected void cacheDate(Date date) {}
 }
