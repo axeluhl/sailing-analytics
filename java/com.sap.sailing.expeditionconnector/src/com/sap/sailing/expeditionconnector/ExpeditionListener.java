@@ -1,5 +1,6 @@
 package com.sap.sailing.expeditionconnector;
 
-public interface ExpeditionListener {
-    void received(ExpeditionMessage message);
+import com.sap.sailing.udpconnector.UDPMessageListener;
+
+public interface ExpeditionListener extends UDPMessageListener<ExpeditionMessage> {
 }

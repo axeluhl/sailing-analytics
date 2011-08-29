@@ -7,8 +7,9 @@ import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
+import com.sap.sailing.udpconnector.UDPMessage;
 
-public interface ExpeditionMessage {
+public interface ExpeditionMessage extends UDPMessage {
     /**
      * variable ID for the GPS-measured latitude, in decimal degrees
      */

@@ -29,6 +29,11 @@ public class SwissTimingMessageImpl implements SwissTimingMessage {
         this.batteryPercent = batteryPercent;
         this.length = length;
     }
+    
+    @Override
+    public boolean isValid() {
+        return true;
+    }
 
     @Override
     public String getRaceID() {

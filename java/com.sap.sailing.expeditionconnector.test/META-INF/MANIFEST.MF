@@ -10,4 +10,5 @@ Require-Bundle: org.junit4;bundle-version="4.8.1",
  com.sap.sailing.expeditionconnector,
  com.sap.sailing.domain,
  com.sap.sailing.declination,
- com.sap.sailing.domain.test
+ com.sap.sailing.domain.test,
+ com.sap.sailing.udpconnector
