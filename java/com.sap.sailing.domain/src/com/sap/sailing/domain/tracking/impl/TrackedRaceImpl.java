@@ -113,9 +113,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         this.buoyTracks = new HashMap<Buoy, GPSFixTrack<Buoy, GPSFix>>();
         for (Waypoint waypoint : race.getCourse().getWaypoints()) {
             for (Buoy buoy : waypoint.getBuoys()) {
-                if (!buoyTracks.containsKey(buoy)) {
-                    buoyTracks.put(buoy, new DynamicTrackImpl<Buoy, GPSFix>(buoy, millisecondsOverWhichToAverageSpeed));
-                }
+                getTrack(buoy);
             }
         }
         trackedLegs = new LinkedHashMap<Leg, TrackedLeg>();
@@ -364,7 +362,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         synchronized (buoyTracks) {
             GPSFixTrack<Buoy, GPSFix> result = buoyTracks.get(buoy);
             if (result == null) {
-                result = new DynamicTrackImpl<Buoy, GPSFix>(buoy, millisecondsOverWhichToAverageSpeed);
+                result = new DynamicGPSFixTrackImpl<Buoy>(buoy, millisecondsOverWhichToAverageSpeed);
                 buoyTracks.put(buoy, result);
             }
             return result;
@@ -450,9 +448,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     public synchronized void waypointAdded(int zeroBasedIndex, Waypoint waypointThatGotAdded) {
         markPassingsForWaypoint.put(waypointThatGotAdded, new ConcurrentSkipListSet<MarkPassing>(TimedComparator.INSTANCE));
         for (Buoy buoy : waypointThatGotAdded.getBuoys()) {
-            if (!buoyTracks.containsKey(buoy)) {
-                buoyTracks.put(buoy, new DynamicTrackImpl<Buoy, GPSFix>(buoy, millisecondsOverWhichToAverageSpeed));
-            }
+            getTrack(buoy);
         }
         // a waypoint got added; this means that a leg got added as well; but we shouldn't claim we know where
         // in the leg list of the course the leg was added; that's an implementation secret of CourseImpl. So try:

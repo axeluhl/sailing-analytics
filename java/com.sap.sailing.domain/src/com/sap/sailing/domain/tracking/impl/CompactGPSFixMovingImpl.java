@@ -5,9 +5,7 @@ import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.impl.AbstractBearing;
-import com.sap.sailing.domain.base.impl.AbstractPosition;
 import com.sap.sailing.domain.base.impl.AbstractSpeedImpl;
-import com.sap.sailing.domain.base.impl.AbstractTimePoint;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 
 /**
@@ -19,10 +17,7 @@ import com.sap.sailing.domain.tracking.GPSFixMoving;
  * @author Axel Uhl (d043530)
  *
  */
-public class CompactGPSFixMovingImpl implements GPSFixMoving {
-    private final double latDeg;
-    private final double lngDeg;
-    private final long timePointAsMillis;
+public class CompactGPSFixMovingImpl extends CompactGPSFixImpl implements GPSFixMoving {
     private final double knotSpeed;
     private final double degBearing;
     
@@ -60,29 +55,8 @@ public class CompactGPSFixMovingImpl implements GPSFixMoving {
         }
     }
     
-    private class CompactPosition extends AbstractPosition {
-        @Override
-        public double getLatDeg() {
-            return latDeg;
-        }
-
-        @Override
-        public double getLngDeg() {
-            return lngDeg;
-        }
-    }
-    
-    private class CompactTimePoint extends AbstractTimePoint implements TimePoint {
-        @Override
-        public long asMillis() {
-            return timePointAsMillis;
-        }
-    }
-    
     public CompactGPSFixMovingImpl(Position position, TimePoint timePoint, SpeedWithBearing speed) {
-        latDeg = position.getLatDeg();
-        lngDeg = position.getLngDeg();
-        timePointAsMillis = timePoint.asMillis();
+        super(position, timePoint);
         knotSpeed = speed.getKnots();
         degBearing = speed.getBearing().getDegrees();
     }
@@ -98,16 +72,6 @@ public class CompactGPSFixMovingImpl implements GPSFixMoving {
 
     @Override
     public String toString() {
-        return getTimePoint() + ": " + getPosition() + " with " + getSpeed();
-    }
-
-    @Override
-    public Position getPosition() {
-        return new CompactPosition();
-    }
-
-    @Override
-    public TimePoint getTimePoint() {
-        return new CompactTimePoint();
+        return super.toString() + " with " + getSpeed();
     }
 }

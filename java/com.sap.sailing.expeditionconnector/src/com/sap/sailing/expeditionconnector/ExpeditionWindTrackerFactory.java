@@ -23,6 +23,7 @@ public class ExpeditionWindTrackerFactory implements WindTrackerFactory, BundleA
     private static BundleContext defaultBundleContext;
 
     private static final String EXPEDITION_UDP_PORT_PROPERTY_NAME = "expedition.udp.port";
+    
     /**
      * Remembers the wind tracker and the port on which the UDP receiver with which the wind tracker is
      * registers is listening for incoming Expedition messages.
