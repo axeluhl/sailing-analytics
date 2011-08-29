@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.swisstimingadapter.impl;
 
+import java.net.DatagramPacket;
+
 import com.sap.sailing.domain.base.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.base.impl.DegreePosition;
 import com.sap.sailing.domain.base.impl.KilometersPerHourSpeedWithBearingImpl;
@@ -82,6 +84,11 @@ public class SwissTimingMessageParserImpl implements SwissTimingMessageParser {
             result += (0xFF & message[offset+b]);
         }
         return result;
+    }
+
+    @Override
+    public SwissTimingMessage parse(DatagramPacket p) throws SwissTimingFormatException {
+        return parse(p.getData(), p.getOffset());
     }
 
 }

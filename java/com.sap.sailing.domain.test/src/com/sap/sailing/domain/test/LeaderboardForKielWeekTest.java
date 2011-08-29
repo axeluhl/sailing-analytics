@@ -9,12 +9,17 @@ import java.net.URISyntaxException;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.impl.DegreeBearingImpl;
+import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
 import com.sap.sailing.domain.leaderboard.impl.LeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.ResultDiscardingRuleImpl;
 import com.sap.sailing.domain.leaderboard.impl.ScoreCorrectionImpl;
 import com.sap.sailing.domain.tracking.NoWindException;
+import com.sap.sailing.domain.tracking.WindSource;
+import com.sap.sailing.domain.tracking.impl.WindImpl;
+import com.sap.sailing.domain.tractracadapter.ReceiverType;
 import com.sap.sailing.util.Util.Pair;
 
 public class LeaderboardForKielWeekTest extends KielWeek2011BasedTest {
@@ -50,5 +55,14 @@ public class LeaderboardForKielWeekTest extends KielWeek2011BasedTest {
         assertEquals(32, leaderboard.getTotalPoints(hasso, now));
         assertEquals(11, leaderboard.getContent(now).get(key).getTotalPoints());
         assertEquals(11, leaderboard.getEntry(hasso, column, now).getTotalPoints());
+    }
+
+    private void loadRace(String raceId) throws MalformedURLException, IOException, InterruptedException,
+            URISyntaxException {
+        setUp(raceId, ReceiverType.RACECOURSE, ReceiverType.RACESTARTFINISH, ReceiverType.MARKPASSINGS);
+        getTrackedRace().setWindSource(WindSource.WEB);
+        getTrackedRace().recordWind(new WindImpl(/* position */ null, MillisecondsTimePoint.now(),
+                new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(70))), WindSource.WEB);
+        fixApproximateMarkPositionsForWindReadOut(getTrackedRace());
     }
 }

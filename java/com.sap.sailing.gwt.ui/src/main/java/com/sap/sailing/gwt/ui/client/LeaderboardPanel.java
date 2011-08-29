@@ -47,7 +47,7 @@ public class LeaderboardPanel extends FormPanel {
     
     private final StringConstants stringConstants;
 
-    private CellTable<LeaderboardRowDAO> leaderboardTable;
+    private final CellTable<LeaderboardRowDAO> leaderboardTable;
 
     private ListDataProvider<LeaderboardRowDAO> data;
     
@@ -196,7 +196,7 @@ public class LeaderboardPanel extends FormPanel {
         }
     }
     
-    private class CarryColumn extends SortableColumn<LeaderboardRowDAO>  {
+    protected class CarryColumn extends SortableColumn<LeaderboardRowDAO>  {
         public CarryColumn() {
             setSortable(true);
         }
@@ -229,12 +229,12 @@ public class LeaderboardPanel extends FormPanel {
         this.errorReporter = errorReporter;
         this.stringConstants = stringConstants;
         leaderboardTable = new CellTable<LeaderboardRowDAO>(/* pageSize */ 100);
-        leaderboardTable.setWidth("100%");
-        leaderboardTable.setSelectionModel(new MultiSelectionModel<LeaderboardRowDAO>() {});
+        getLeaderboardTable().setWidth("100%");
+        getLeaderboardTable().setSelectionModel(new MultiSelectionModel<LeaderboardRowDAO>() {});
         data = new ListDataProvider<LeaderboardRowDAO>();
-        data.addDataDisplay(leaderboardTable);
+        data.addDataDisplay(getLeaderboardTable());
         listHandler = new ListHandler<LeaderboardRowDAO>(data.getList());
-        leaderboardTable.addColumnSortHandler(listHandler);
+        getLeaderboardTable().addColumnSortHandler(listHandler);
         loadCompleteLeaderboard(new Date());
         VerticalPanel vp = new VerticalPanel();
         HorizontalPanel hp = new HorizontalPanel();
@@ -249,12 +249,12 @@ public class LeaderboardPanel extends FormPanel {
             }
         });
         vp.add(hp);
-        vp.add(leaderboardTable);
+        vp.add(getLeaderboardTable());
         setWidget(vp);
     }
     
-    private void addColumn(SortableColumn<LeaderboardRowDAO> column) {
-        leaderboardTable.addColumn(column, column.getHeader());
+    protected void addColumn(SortableColumn<LeaderboardRowDAO> column) {
+        getLeaderboardTable().addColumn(column, column.getHeader());
         listHandler.setComparator(column, column.getComparator());
     }
     
@@ -294,8 +294,8 @@ public class LeaderboardPanel extends FormPanel {
     private void createMissingRaceColumns(LeaderboardDAO leaderboard) {
         for (Map.Entry<String, Boolean> raceNameAndMedalRace : leaderboard.raceNamesAndMedalRace.entrySet()) {
             boolean foundRaceColumn = false;
-            for (int i=0; !foundRaceColumn && i<leaderboardTable.getColumnCount(); i++) {
-                Column<LeaderboardRowDAO, ?> c = leaderboardTable.getColumn(i);
+            for (int i=0; !foundRaceColumn && i<getLeaderboardTable().getColumnCount(); i++) {
+                Column<LeaderboardRowDAO, ?> c = getLeaderboardTable().getColumn(i);
                 if (c instanceof RaceColumn && ((RaceColumn) c).getRaceName().equals(raceNameAndMedalRace.getKey())) {
                     foundRaceColumn = true;
                 }
@@ -308,14 +308,14 @@ public class LeaderboardPanel extends FormPanel {
 
     private void removeUnusedRaceColumns(LeaderboardDAO leaderboard) {
         List<Column<LeaderboardRowDAO, ?>> columnsToRemove = new ArrayList<Column<LeaderboardRowDAO,?>>();
-        for (int i=0; i<leaderboardTable.getColumnCount(); i++) {
-            Column<LeaderboardRowDAO, ?> c = leaderboardTable.getColumn(i);
+        for (int i=0; i<getLeaderboardTable().getColumnCount(); i++) {
+            Column<LeaderboardRowDAO, ?> c = getLeaderboardTable().getColumn(i);
             if (c instanceof RaceColumn && (leaderboard == null || !leaderboard.raceNamesAndMedalRace.keySet().contains(((RaceColumn) c).getRaceName()))) {
                 columnsToRemove.add(c);
             }
         }
         for (Column<LeaderboardRowDAO, ?> c : columnsToRemove) {
-            leaderboardTable.removeColumn(c);
+            getLeaderboardTable().removeColumn(c);
         }
     }
 
@@ -323,47 +323,61 @@ public class LeaderboardPanel extends FormPanel {
      * If the last column is the totals column, remove it. Add the race column as the last column.
      */
     private void addRaceColumn(RaceColumn raceColumn) {
-        if (leaderboardTable.getColumn(leaderboardTable.getColumnCount()-1) instanceof TotalsColumn) {
-            leaderboardTable.removeColumn(leaderboardTable.getColumnCount()-1);
+        if (getLeaderboardTable().getColumn(getLeaderboardTable().getColumnCount()-1) instanceof TotalsColumn) {
+            getLeaderboardTable().removeColumn(getLeaderboardTable().getColumnCount()-1);
         }
         addColumn(raceColumn);
     }
 
     private void ensureCompetitorColumn() {
-        if (leaderboardTable.getColumnCount() == 0) {
+        if (getLeaderboardTable().getColumnCount() == 0) {
             addColumn(new CompetitorColumn());
         } else {
-            if (!(leaderboardTable.getColumn(0) instanceof CompetitorColumn)) {
+            if (!(getLeaderboardTable().getColumn(0) instanceof CompetitorColumn)) {
                 throw new RuntimeException("The first column must always be the competitor column but it was of type "+
-                        leaderboardTable.getColumn(0).getClass().getName());
+                        getLeaderboardTable().getColumn(0).getClass().getName());
             }
         }
     }
 
     private void ensureTotalsColumn() {
         // add a totals column on the right
-        if (leaderboardTable.getColumnCount() == 0 || !(leaderboardTable.getColumn(leaderboardTable.getColumnCount()-1) instanceof TotalsColumn)) {
+        if (getLeaderboardTable().getColumnCount() == 0 || !(getLeaderboardTable().getColumn(getLeaderboardTable().getColumnCount()-1) instanceof TotalsColumn)) {
             addColumn(new TotalsColumn());
         }
     }
 
     /**
-     * If column #1 (second column, right of the competitor column) does not exist or is not of type {@link CarryColumn},
-     * all columns starting from #1 will be removed and a {@link CarryColumn} will be added.
+     * If the <code>leaderboard</code> {@link LeaderboardDAO#hasCarriedPoints has carried points} and if column #1
+     * (second column, right of the competitor column) does not exist or is not of type {@link CarryColumn}, all columns
+     * starting from #1 will be removed and a {@link CarryColumn} will be added. If the leaderboard has no carried points
+     * but the display still shows a carry column, the column is removed.
      */
-    private void updateCarryColumn(LeaderboardDAO leaderboard) {
+    protected void updateCarryColumn(LeaderboardDAO leaderboard) {
         if (leaderboard != null && leaderboard.hasCarriedPoints) {
-            if (!(leaderboardTable.getColumn(1) instanceof CarryColumn)) {
-                while (leaderboardTable.getColumnCount() > 1) {
-                    leaderboardTable.removeColumn(1);
-                }
-                addColumn(new CarryColumn());
-            }
+            ensureCarryColumn();
         } else {
-            if (leaderboardTable.getColumnCount() >= 2 && leaderboardTable.getColumn(1) instanceof CarryColumn) {
-                leaderboardTable.removeColumn(1);
-            }
+            ensureNoCarryColumn();
         }
+    }
+
+    private void ensureNoCarryColumn() {
+        if (getLeaderboardTable().getColumnCount() >= 2 && getLeaderboardTable().getColumn(1) instanceof CarryColumn) {
+            getLeaderboardTable().removeColumn(1);
+        }
+    }
+
+    protected void ensureCarryColumn() {
+        if (!(getLeaderboardTable().getColumn(1) instanceof CarryColumn)) {
+            while (getLeaderboardTable().getColumnCount() > 1) {
+                getLeaderboardTable().removeColumn(1);
+            }
+            addColumn(new CarryColumn());
+        }
+    }
+
+    protected CellTable<LeaderboardRowDAO> getLeaderboardTable() {
+        return leaderboardTable;
     }
 
 }

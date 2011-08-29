@@ -1,8 +1,9 @@
 package com.sap.sailing.domain.swisstimingadapter;
 
 import com.sap.sailing.domain.swisstimingadapter.impl.SwissTimingMessageParserImpl;
+import com.sap.sailing.udpconnector.UDPMessageParser;
 
-public interface SwissTimingMessageParser {
+public interface SwissTimingMessageParser extends UDPMessageParser<SwissTimingMessage> {
     SwissTimingMessageParser INSTANCE = new SwissTimingMessageParserImpl();
     
     SwissTimingMessage parse(byte[] message) throws SwissTimingFormatException;

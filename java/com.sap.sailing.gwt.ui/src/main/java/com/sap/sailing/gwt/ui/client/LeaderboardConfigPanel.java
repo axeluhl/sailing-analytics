@@ -162,7 +162,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
         grid.setWidget(3, 0, selectedLeaderboardPanel);
         columnNamesInSelectedLeaderboardListBox = new ListBox();
         selectedLeaderboardPanel.add(columnNamesInSelectedLeaderboardListBox);
-        columnNamesInSelectedLeaderboardListBox.setVisibleItemCount(5);
+        columnNamesInSelectedLeaderboardListBox.setVisibleItemCount(10);
         columnNamesInSelectedLeaderboardListBox.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent e) {

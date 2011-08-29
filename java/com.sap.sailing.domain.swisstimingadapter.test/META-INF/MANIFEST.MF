@@ -7,6 +7,7 @@ Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Require-Bundle: com.sap.sailing.domain.swisstimingadapter,
  com.sap.sailing.domain,
- org.junit4
+ org.junit4,
+ com.sap.sailing.udpconnector
 Bundle-ClassPath: resources/,
  .

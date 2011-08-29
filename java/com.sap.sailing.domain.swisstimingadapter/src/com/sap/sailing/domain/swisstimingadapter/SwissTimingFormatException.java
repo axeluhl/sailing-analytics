@@ -1,6 +1,6 @@
 package com.sap.sailing.domain.swisstimingadapter;
 
-public class SwissTimingFormatException extends Exception {
+public class SwissTimingFormatException extends RuntimeException {
     private static final long serialVersionUID = -1210353206288437237L;
     
     private final byte[] swissTimingMessage;

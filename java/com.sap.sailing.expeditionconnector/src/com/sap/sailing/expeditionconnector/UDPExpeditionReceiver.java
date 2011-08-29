@@ -1,18 +1,12 @@
 package com.sap.sailing.expeditionconnector;
 
 import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
 import java.net.SocketException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-import com.sap.sailing.domain.base.TimePoint;
-import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
-import com.sap.sailing.expeditionconnector.impl.ExpeditionMessageImpl;
+import com.sap.sailing.expeditionconnector.impl.ExpeditionMessageParser;
+import com.sap.sailing.udpconnector.UDPReceiver;
 
 /**
  * When run, starts receiving UDP packets expected to be in the format Expedition writes and notifies registered
@@ -21,28 +15,14 @@ import com.sap.sailing.expeditionconnector.impl.ExpeditionMessageImpl;
  * @author Axel Uhl (d043530)
  * 
  */
-public class UDPExpeditionReceiver implements Runnable {
-    private boolean stopped = false;
-
-    private final int listeningOnPort;
-
-    private final DatagramSocket udpSocket;
-
-    /**
-     * For each listener remembers if the listener is only interested in valid messages.
-     */
-    private final Map<ExpeditionListener, Boolean> listeners;
-
-    /**
-     * Maximum IP packet length
-     */
-    private static final int MAX_PACKET_SIZE = 65536;
-    
+public class UDPExpeditionReceiver extends UDPReceiver<ExpeditionMessage, ExpeditionListener> {
     /**
      * Remembers, per boat ID, the milliseconds difference between the time the message was received
      * and the GPS time stamp provided by the message.
      */
     private final Map<Integer, Long> timeStampOfLastMessageReceived;
+    
+    private final ExpeditionMessageParser parser;
 
     /**
      * Launches a listener and dumps messages received to the console
@@ -66,128 +46,17 @@ public class UDPExpeditionReceiver implements Runnable {
      * start this object in a new thread.
      */
     public UDPExpeditionReceiver(int listeningOnPort) throws SocketException {
-        udpSocket = new DatagramSocket(listeningOnPort);
-        listeners = new HashMap<ExpeditionListener, Boolean>();
-        this.listeningOnPort = listeningOnPort;
+        super(listeningOnPort);
         this.timeStampOfLastMessageReceived = new HashMap<Integer, Long>();
-    }
-
-    public void stop() throws SocketException, IOException {
-        stopped = true;
-        byte[] buf = new byte[0];
-        DatagramPacket stopPacket = new DatagramPacket(buf, 0, InetAddress.getLocalHost(), listeningOnPort);
-        new DatagramSocket().send(stopPacket);
-        if (!udpSocket.isConnected()) {
-            udpSocket.close();
-        }
+        parser = new ExpeditionMessageParser(this);
     }
     
-    /**
-     * If there are currently no listeners subscribed (see {@link #addListener(ExpeditionListener, boolean)} and
-     * {@link #removeListener(ExpeditionListener)}), this receiver is {@link #stop() stopped} and <code>true</code>
-     * is returned; otherwise, <code>false</code> is returned.
-     */
-    public synchronized boolean stopIfNoListeners() throws SocketException, IOException {
-        boolean result = listeners.isEmpty();
-        if (result) {
-            stop();
-        }
-        return result;
+    public Map<Integer, Long> getTimeStampOfLastMessageReceived() {
+        return timeStampOfLastMessageReceived;
     }
     
-    public boolean isStopped() {
-        return stopped;
-    }
-
-    public void run() {
-        byte[] buf = new byte[MAX_PACKET_SIZE];
-        DatagramPacket p = new DatagramPacket(buf, buf.length);
-        while (!stopped) {
-            try {
-                udpSocket.receive(p);
-                String packetAsString = new String(p.getData(), p.getOffset(), p.getLength()).trim();
-                if (packetAsString.length() > 0) {
-                    ExpeditionMessage msg = parse(packetAsString);
-                    if (msg != null) {
-                        for (ExpeditionListener listener : listeners.keySet()) {
-                            if (!listeners.get(listener) || msg.isValid()) {
-                                listener.received(msg);
-                            }
-                        }
-                    }
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        udpSocket.close();
-        if (udpSocket.isConnected()) {
-            udpSocket.disconnect();
-        }
-    }
-
-    private ExpeditionMessage parse(String packetAsString) {
-        Pattern completeLinePattern = Pattern
-                .compile("#([0-9]*)(( *,([0-9][0-9]*) *, *(-?[0-9]*(\\.[0-9]*)?))*)\\*([0-9a-fA-F][0-9a-fA-F]*)");
-        Matcher m = completeLinePattern.matcher(packetAsString);
-        boolean valid = m.matches();
-        if (valid) {
-            int boatID = Integer.valueOf(m.group(1));
-            String variableValuePairs = m.group(2).trim().substring(",".length()); // skip the leading ","
-            Map<Integer, Double> values = new HashMap<Integer, Double>();
-            String[] variablesAndValuesInterleaved = variableValuePairs.split(",");
-            long now = System.currentTimeMillis();
-            Long diff = timeStampOfLastMessageReceived.get(boatID);
-            TimePoint defaultForMessageTimePoint;
-            if (diff != null) {
-                // compute a reasonable default for a time stamp in case message doesn't provide one
-                // by subtracting the last diff from now
-                defaultForMessageTimePoint = new MillisecondsTimePoint(now - diff);
-            } else {
-                defaultForMessageTimePoint = null;
-            }
-            for (int i = 0; i < variablesAndValuesInterleaved.length; i++) {
-                int variableID = Integer.valueOf(variablesAndValuesInterleaved[i++]);
-                double variableValue = Double.valueOf(variablesAndValuesInterleaved[i]);
-                values.put(variableID, variableValue);
-            }
-            int checksum = Integer.valueOf(m.group(m.groupCount()), 16);
-            valid = valid && checksumOk(checksum, packetAsString);
-            ExpeditionMessageImpl result;
-            if (defaultForMessageTimePoint == null) {
-                result = new ExpeditionMessageImpl(boatID, values, valid);
-            } else {
-                result = new ExpeditionMessageImpl(boatID, values, valid, defaultForMessageTimePoint);
-            }
-            if (result.hasValue(ExpeditionMessage.ID_GPS_TIME)) {
-                // an original GPS time stamp; then remember the difference between now and the time stamp
-                timeStampOfLastMessageReceived.put(boatID, now-result.getTimePoint().asMillis());
-            }
-            return result;
-        } else {
-            System.err.println("Unparsable expedition message: " + packetAsString);
-            return null; // couldn't even parse
-        }
-    }
-
-    private boolean checksumOk(int checksum, String packetAsString) {
-        int b = 0;
-        for (byte stringByte : packetAsString.substring(0, packetAsString.lastIndexOf('*')).getBytes()) {
-            b ^= stringByte;
-        }
-        return b == checksum;
-    }
-
-    public synchronized void addListener(ExpeditionListener listener, boolean validMessagesOnly) {
-        listeners.put(listener, validMessagesOnly);
-    }
-
-    public synchronized void removeListener(ExpeditionListener listener) {
-        listeners.remove(listener);
-    }
-
-    public int getPort() {
-        return listeningOnPort;
+    protected ExpeditionMessageParser getParser() {
+        return parser;
     }
 
 }

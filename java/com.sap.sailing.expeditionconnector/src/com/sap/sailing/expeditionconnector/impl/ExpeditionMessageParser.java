@@ -1,0 +1,81 @@
+package com.sap.sailing.expeditionconnector.impl;
+
+import java.net.DatagramPacket;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import com.sap.sailing.domain.base.TimePoint;
+import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.expeditionconnector.ExpeditionMessage;
+import com.sap.sailing.expeditionconnector.UDPExpeditionReceiver;
+import com.sap.sailing.udpconnector.UDPMessageParser;
+
+public class ExpeditionMessageParser implements UDPMessageParser<ExpeditionMessage> {
+
+    private UDPExpeditionReceiver receiver;
+
+    public ExpeditionMessageParser(UDPExpeditionReceiver receiver) {
+        this.receiver = receiver;
+    }
+
+    @Override
+    public ExpeditionMessage parse(DatagramPacket p) {
+        String packetAsString = new String(p.getData(), p.getOffset(), p.getLength()).trim();
+        if (packetAsString.length() > 0) {
+            Pattern completeLinePattern = Pattern
+                    .compile("#([0-9]*)(( *,([0-9][0-9]*) *, *(-?[0-9]*(\\.[0-9]*)?))*)\\*([0-9a-fA-F][0-9a-fA-F]*)");
+            Matcher m = completeLinePattern.matcher(packetAsString);
+            boolean valid = m.matches();
+            if (valid) {
+                int boatID = Integer.valueOf(m.group(1));
+                String variableValuePairs = m.group(2).trim().substring(",".length()); // skip the leading ","
+                Map<Integer, Double> values = new HashMap<Integer, Double>();
+                String[] variablesAndValuesInterleaved = variableValuePairs.split(",");
+                long now = System.currentTimeMillis();
+                Long diff = receiver.getTimeStampOfLastMessageReceived().get(boatID);
+                TimePoint defaultForMessageTimePoint;
+                if (diff != null) {
+                    // compute a reasonable default for a time stamp in case message doesn't provide one
+                    // by subtracting the last diff from now
+                    defaultForMessageTimePoint = new MillisecondsTimePoint(now - diff);
+                } else {
+                    defaultForMessageTimePoint = null;
+                }
+                for (int i = 0; i < variablesAndValuesInterleaved.length; i++) {
+                    int variableID = Integer.valueOf(variablesAndValuesInterleaved[i++]);
+                    double variableValue = Double.valueOf(variablesAndValuesInterleaved[i]);
+                    values.put(variableID, variableValue);
+                }
+                int checksum = Integer.valueOf(m.group(m.groupCount()), 16);
+                valid = valid && checksumOk(checksum, packetAsString);
+                ExpeditionMessageImpl result;
+                if (defaultForMessageTimePoint == null) {
+                    result = new ExpeditionMessageImpl(boatID, values, valid);
+                } else {
+                    result = new ExpeditionMessageImpl(boatID, values, valid, defaultForMessageTimePoint);
+                }
+                if (result.hasValue(ExpeditionMessage.ID_GPS_TIME)) {
+                    // an original GPS time stamp; then remember the difference between now and the time stamp
+                    receiver.getTimeStampOfLastMessageReceived().put(boatID, now - result.getTimePoint().asMillis());
+                }
+                return result;
+            } else {
+                System.err.println("Unparsable expedition message: " + packetAsString);
+                return null; // couldn't even parse
+            }
+        } else {
+            return null; // empty package
+        }
+    }
+
+    private boolean checksumOk(int checksum, String packetAsString) {
+        int b = 0;
+        for (byte stringByte : packetAsString.substring(0, packetAsString.lastIndexOf('*')).getBytes()) {
+            b ^= stringByte;
+        }
+        return b == checksum;
+    }
+
+}
