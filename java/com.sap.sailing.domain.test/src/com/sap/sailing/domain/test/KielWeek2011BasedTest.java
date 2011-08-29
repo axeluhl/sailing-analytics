@@ -23,13 +23,17 @@ import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.base.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.base.impl.DegreePosition;
+import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
+import com.sap.sailing.domain.tracking.WindSource;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.tracking.impl.TrackedLegImpl;
+import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
 import com.sap.sailing.domain.tractracadapter.impl.DomainFactoryImpl;
@@ -163,6 +167,11 @@ public abstract class KielWeek2011BasedTest extends AbstractTracTracLiveTest {
         return trackedRace;
     }
 
+    
+    protected void setTrackedRace(DynamicTrackedRace trackedRace) {
+        this.trackedRace = trackedRace;
+    }
+
     /**
      * When all stored data has been transmitted, notify the semaphor for tests to start processing
      */
@@ -199,4 +208,13 @@ public abstract class KielWeek2011BasedTest extends AbstractTracTracLiveTest {
         return storedDataLoaded;
     }
     
+    protected void loadRace(String raceId) throws MalformedURLException, IOException, InterruptedException,
+            URISyntaxException {
+        setUp(raceId, ReceiverType.RACECOURSE, ReceiverType.RACESTARTFINISH, ReceiverType.MARKPASSINGS);
+        getTrackedRace().setWindSource(WindSource.WEB);
+        getTrackedRace().recordWind(
+                new WindImpl(/* position */null, MillisecondsTimePoint.now(), new KnotSpeedWithBearingImpl(12,
+                        new DegreeBearingImpl(70))), WindSource.WEB);
+        fixApproximateMarkPositionsForWindReadOut(getTrackedRace());
+    }
 }

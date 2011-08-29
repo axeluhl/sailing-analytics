@@ -48,6 +48,7 @@ import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.tracking.DynamicTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
+import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedEvent;
 import com.sap.sailing.domain.tracking.WindSource;
 import com.sap.sailing.domain.tracking.impl.DynamicGPSFixMovingTrackImpl;
@@ -55,6 +56,7 @@ import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
+import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
 import com.sap.sailing.domain.tracking.impl.TrackedEventImpl;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 
@@ -79,6 +81,20 @@ public abstract class StoredTrackBasedTest {
         return track;
     }
     
+    protected void copyTracks(Map<Competitor, DynamicTrack<Competitor, GPSFixMoving>> tracks, DynamicTrackedRace trackedRace) {
+        for (Map.Entry<Competitor, DynamicTrack<Competitor, GPSFixMoving>> e : tracks.entrySet()) {
+            DynamicTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(e.getKey());
+            for (GPSFixMoving fix : e.getValue().getRawFixes()) {
+                track.addGPSFix(fix);
+            }
+            List<MarkPassing> markPassings = new ArrayList<MarkPassing>();
+            // add a mark passing for the start gate at the very beginning to make sure everyone is on a valid leg
+            markPassings.add(new MarkPassingImpl(track.getFirstRawFix().getTimePoint(), trackedRace.getRace()
+                    .getCourse().getWaypoints().iterator().next(), e.getKey()));
+            trackedRace.updateMarkPassings(e.getKey(), markPassings);
+        }
+    }
+
     /**
      * Creates a simple two-lap upwind-downwind course for a race/event with given name and boat class name with the
      * competitors specified. The marks are laid out such that the upwind/downwind leg detection should be alright.
