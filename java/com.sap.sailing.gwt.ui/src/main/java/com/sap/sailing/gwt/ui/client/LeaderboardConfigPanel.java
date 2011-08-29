@@ -10,6 +10,7 @@ import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DialogBox;
@@ -66,6 +67,8 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
 
     private final Button unlinkRaceColumnFromTrackedRaceButton;
 
+    private final Anchor openLeaderboardLink;
+
     public LeaderboardConfigPanel(SailingServiceAsync sailingService, AdminConsole adminConsole,
             ErrorReporter errorReporter, StringConstants stringConstants) {
         this.stringConstants = stringConstants;
@@ -100,7 +103,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
             }
         });
         leaderboardInfoPanel.add(leaderboardsListBox);
-        Grid discardThresholdsGrid = new Grid(3, MAX_NUMBER_OF_DISCARDED_RESULTS+1);
+        Grid discardThresholdsGrid = new Grid(4, MAX_NUMBER_OF_DISCARDED_RESULTS+1);
         discardThresholdsGrid.setWidget(0, 0, new Label(stringConstants.discardRacesFromHowManyStartedRacesOn()));
         discardThresholdLabelsForSelectedLeaderboard = new Label[MAX_NUMBER_OF_DISCARDED_RESULTS];
         discardThresholdsGrid.setWidget(1, 0, new Label(stringConstants.discarding()));
@@ -110,6 +113,9 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
             discardThresholdLabelsForSelectedLeaderboard[i] = new Label();
             discardThresholdsGrid.setWidget(2, i+1, discardThresholdLabelsForSelectedLeaderboard[i]);
         }
+        openLeaderboardLink = new Anchor(stringConstants.openSelectedLeaderboard());
+        openLeaderboardLink.setEnabled(false);
+        discardThresholdsGrid.setWidget(3, 0, openLeaderboardLink);
         leaderboardInfoPanel.add(discardThresholdsGrid);
         grid.setWidget(1, 0, leaderboardInfoPanel);
         VerticalPanel verticalPanel = new VerticalPanel();
@@ -483,6 +489,8 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
                     editLeaderboardScoresButton.setEnabled(true);
                     renameLeaderboardButton.setEnabled(true);
                     removeLeaderboardButton.setEnabled(true);
+                    openLeaderboardLink.setEnabled(true);
+                    openLeaderboardLink.setHref("/Leaderboard.html?name="+leaderboardName);
                 }
             });
         } else {
@@ -493,6 +501,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
             removeLeaderboardButton.setEnabled(false);
             columnNamesInSelectedLeaderboardListBox.clear();
             leaderboardRaceColumnSelectionChanged();
+            openLeaderboardLink.setEnabled(false);
         }
     }
 

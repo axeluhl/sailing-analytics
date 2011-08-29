@@ -1,8 +1,6 @@
 Axel
 ====
 
- - create a button/link to open a configured leaderboard in a new window/tab
-
  - consider multi-select in race tree view to initialize set of race columns
 
  - support Up/Down buttons to fix the ordering of configured race columns
