@@ -33,7 +33,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                 @Override
                 public void update(final int rowIndex, final LeaderboardRowDAO row, final String value) {
                     getSailingService().updateLeaderboardCarryValue(getLeaderboardName(), row.competitor.name,
-                            value == null || value.length() == 0 ? null : Integer.valueOf(value),
+                            value == null || value.length() == 0 ? null : Integer.valueOf(value.trim()),
                             new AsyncCallback<Void>() {
                                 @Override
                                 public void onFailure(Throwable t) {
@@ -44,7 +44,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
 
                                 @Override
                                 public void onSuccess(Void v) {
-                                    row.carriedPoints = value==null||value.length()==0 ? null : Integer.valueOf(value);
+                                    row.carriedPoints = value==null||value.length()==0 ? null : Integer.valueOf(value.trim());
                                     List<LeaderboardRowDAO> list = EditableLeaderboardPanel.this.getData().getList();
                                     getLeaderboardTable().setRowData(rowIndex, list.subList(rowIndex, list.size()));
                                 }
