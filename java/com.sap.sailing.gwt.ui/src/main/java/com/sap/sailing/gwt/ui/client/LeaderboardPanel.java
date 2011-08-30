@@ -368,7 +368,7 @@ public class LeaderboardPanel extends FormPanel {
     }
 
     protected void ensureCarryColumn() {
-        if (!(getLeaderboardTable().getColumn(1) instanceof CarryColumn)) {
+        if (getLeaderboardTable().getColumnCount() < 2 || !(getLeaderboardTable().getColumn(1) instanceof CarryColumn)) {
             while (getLeaderboardTable().getColumnCount() > 1) {
                 getLeaderboardTable().removeColumn(1);
             }
