@@ -6,7 +6,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.Cell.Context;
+import com.google.gwt.cell.client.EditTextCell;
+import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -53,7 +56,11 @@ public class LeaderboardPanel extends FormPanel {
     
     private final ListHandler<LeaderboardRowDAO> listHandler;
 
-    private class CompetitorColumn extends SortableColumn<LeaderboardRowDAO> {
+    private class CompetitorColumn extends SortableColumn<LeaderboardRowDAO, String> {
+
+        protected CompetitorColumn() {
+            super(new TextCell());
+        }
 
         @Override
         public Comparator<LeaderboardRowDAO> getComparator() {
@@ -96,17 +103,22 @@ public class LeaderboardPanel extends FormPanel {
      * @author Axel Uhl (D043530)
      *
      */
-    private class RaceColumn extends SortableColumn<LeaderboardRowDAO> {
+    protected abstract class RaceColumn<C> extends SortableColumn<LeaderboardRowDAO, C> {
         private final String raceName;
         private final boolean medalRace;
 
-        public RaceColumn(String raceName, boolean medalRace) {
+        public RaceColumn(String raceName, boolean medalRace, Cell<C> cell) {
+            super(cell);
             this.raceName = raceName;
             this.medalRace = medalRace;
         }
         
         public String getRaceName() {
             return raceName;
+        }
+        
+        protected void defaultRender(Context context, LeaderboardRowDAO object, SafeHtmlBuilder html) {
+            super.render(context, object, html);
         }
         
         @Override
@@ -140,11 +152,6 @@ public class LeaderboardPanel extends FormPanel {
         }
 
         @Override
-        public String getValue(LeaderboardRowDAO object) {
-            return ""+object.fieldsByRaceName.get(raceName).totalPoints;
-        }
-        
-        @Override
         public Header<String> getHeader() {
             return new TextHeader(raceName) {
                 @Override
@@ -156,7 +163,17 @@ public class LeaderboardPanel extends FormPanel {
                 }
             };
         }
+    }
+    
+    private class TextRaceColumn extends RaceColumn<String> {
+        public TextRaceColumn(String raceName, boolean medalRace) {
+            super(raceName, medalRace, new TextCell());
+        }
 
+        @Override
+        public String getValue(LeaderboardRowDAO object) {
+            return ""+object.fieldsByRaceName.get(getRaceName()).totalPoints;
+        }
     }
     
     /**
@@ -165,7 +182,11 @@ public class LeaderboardPanel extends FormPanel {
      * @author Axel Uhl (D043530)
      *
      */
-    private class TotalsColumn extends SortableColumn<LeaderboardRowDAO>  {
+    private class TotalsColumn extends SortableColumn<LeaderboardRowDAO, String>  {
+        protected TotalsColumn() {
+            super(new TextCell());
+        }
+
         @Override
         public String getValue(LeaderboardRowDAO object) {
             int totalPoints = getTotalPoints(object);
@@ -173,7 +194,7 @@ public class LeaderboardPanel extends FormPanel {
         }
 
         private int getTotalPoints(LeaderboardRowDAO object) {
-            int totalPoints = object.carriedPoints;
+            int totalPoints = object.carriedPoints==null?0:object.carriedPoints;
             for (LeaderboardEntryDAO e : object.fieldsByRaceName.values()) {
                 totalPoints += e.totalPoints;
             }
@@ -185,6 +206,7 @@ public class LeaderboardPanel extends FormPanel {
             return new Comparator<LeaderboardRowDAO>() {
                 @Override
                 public int compare(LeaderboardRowDAO o1, LeaderboardRowDAO o2) {
+                    // FIXME sort medal race participants as best; non-medal race participants follow 
                     return getTotalPoints(o1) - getTotalPoints(o2);
                 }
             };
@@ -196,14 +218,20 @@ public class LeaderboardPanel extends FormPanel {
         }
     }
     
-    protected class CarryColumn extends SortableColumn<LeaderboardRowDAO>  {
+    protected class CarryColumn extends SortableColumn<LeaderboardRowDAO, String>  {
         public CarryColumn() {
+            super(new TextCell());
+            setSortable(true);
+        }
+
+        protected CarryColumn(EditTextCell editTextCell) {
+            super(editTextCell);
             setSortable(true);
         }
 
         @Override
         public String getValue(LeaderboardRowDAO object) {
-            return ""+object.carriedPoints;
+            return object.carriedPoints==null?"":""+object.carriedPoints;
         }
 
         @Override
@@ -211,7 +239,8 @@ public class LeaderboardPanel extends FormPanel {
             return new Comparator<LeaderboardRowDAO>() {
                 @Override
                 public int compare(LeaderboardRowDAO o1, LeaderboardRowDAO o2) {
-                    return o1.carriedPoints - o2.carriedPoints;
+                    return (o1.carriedPoints==null?0:o1.carriedPoints) -
+                           (o2.carriedPoints==null?0:o2.carriedPoints);
                 }
             };
         }
@@ -225,15 +254,15 @@ public class LeaderboardPanel extends FormPanel {
     public LeaderboardPanel(SailingServiceAsync sailingService, String leaderboardName, ErrorReporter errorReporter,
             StringConstants stringConstants) {
         this.sailingService = sailingService;
-        this.leaderboardName = leaderboardName;
+        this.setLeaderboardName(leaderboardName);
         this.errorReporter = errorReporter;
         this.stringConstants = stringConstants;
         leaderboardTable = new CellTable<LeaderboardRowDAO>(/* pageSize */ 100);
         getLeaderboardTable().setWidth("100%");
         getLeaderboardTable().setSelectionModel(new MultiSelectionModel<LeaderboardRowDAO>() {});
-        data = new ListDataProvider<LeaderboardRowDAO>();
-        data.addDataDisplay(getLeaderboardTable());
-        listHandler = new ListHandler<LeaderboardRowDAO>(data.getList());
+        setData(new ListDataProvider<LeaderboardRowDAO>());
+        getData().addDataDisplay(getLeaderboardTable());
+        listHandler = new ListHandler<LeaderboardRowDAO>(getData().getList());
         getLeaderboardTable().addColumnSortHandler(listHandler);
         loadCompleteLeaderboard(new Date());
         VerticalPanel vp = new VerticalPanel();
@@ -253,13 +282,13 @@ public class LeaderboardPanel extends FormPanel {
         setWidget(vp);
     }
     
-    protected void addColumn(SortableColumn<LeaderboardRowDAO> column) {
+    protected void addColumn(SortableColumn<LeaderboardRowDAO, ?> column) {
         getLeaderboardTable().addColumn(column, column.getHeader());
         listHandler.setComparator(column, column.getComparator());
     }
     
     private void loadCompleteLeaderboard(Date date) {
-        sailingService.getLeaderboardByName(leaderboardName, date, new AsyncCallback<LeaderboardDAO>() {
+        getSailingService().getLeaderboardByName(getLeaderboardName(), date, new AsyncCallback<LeaderboardDAO>() {
             @Override
             public void onSuccess(LeaderboardDAO result) {
                 updateLeaderboard(result);
@@ -267,16 +296,16 @@ public class LeaderboardPanel extends FormPanel {
             
             @Override
             public void onFailure(Throwable caught) {
-                errorReporter.reportError("Error trying to obtain leaderboard contents: "+caught.getMessage());
+                getErrorReporter().reportError("Error trying to obtain leaderboard contents: "+caught.getMessage());
             }
         });
     }
     
     private void updateLeaderboard(LeaderboardDAO leaderboard) {
         adjustColumnLayout(leaderboard);
-        data.getList().clear();
+        getData().getList().clear();
         if (leaderboard != null) {
-            data.getList().addAll(leaderboard.rows.values());
+            getData().getList().addAll(leaderboard.rows.values());
         }
     }
     
@@ -296,21 +325,27 @@ public class LeaderboardPanel extends FormPanel {
             boolean foundRaceColumn = false;
             for (int i=0; !foundRaceColumn && i<getLeaderboardTable().getColumnCount(); i++) {
                 Column<LeaderboardRowDAO, ?> c = getLeaderboardTable().getColumn(i);
-                if (c instanceof RaceColumn && ((RaceColumn) c).getRaceName().equals(raceNameAndMedalRace.getKey())) {
+                if (c instanceof RaceColumn && ((RaceColumn<?>) c).getRaceName().equals(raceNameAndMedalRace.getKey())) {
                     foundRaceColumn = true;
                 }
             }
             if (!foundRaceColumn) {
-                addRaceColumn(new RaceColumn(raceNameAndMedalRace.getKey(), raceNameAndMedalRace.getValue()));
+                addRaceColumn(createRaceColumn(raceNameAndMedalRace));
             }
         }
+    }
+
+    protected RaceColumn<?> createRaceColumn(Map.Entry<String, Boolean> raceNameAndMedalRace) {
+        return new TextRaceColumn(raceNameAndMedalRace.getKey(), raceNameAndMedalRace.getValue());
     }
 
     private void removeUnusedRaceColumns(LeaderboardDAO leaderboard) {
         List<Column<LeaderboardRowDAO, ?>> columnsToRemove = new ArrayList<Column<LeaderboardRowDAO,?>>();
         for (int i=0; i<getLeaderboardTable().getColumnCount(); i++) {
             Column<LeaderboardRowDAO, ?> c = getLeaderboardTable().getColumn(i);
-            if (c instanceof RaceColumn && (leaderboard == null || !leaderboard.raceNamesAndMedalRace.keySet().contains(((RaceColumn) c).getRaceName()))) {
+            if (c instanceof RaceColumn
+                    && (leaderboard == null || !leaderboard.raceNamesAndMedalRace.keySet().contains(
+                            ((RaceColumn<?>) c).getRaceName()))) {
                 columnsToRemove.add(c);
             }
         }
@@ -322,7 +357,7 @@ public class LeaderboardPanel extends FormPanel {
     /**
      * If the last column is the totals column, remove it. Add the race column as the last column.
      */
-    private void addRaceColumn(RaceColumn raceColumn) {
+    private void addRaceColumn(RaceColumn<?> raceColumn) {
         if (getLeaderboardTable().getColumn(getLeaderboardTable().getColumnCount()-1) instanceof TotalsColumn) {
             getLeaderboardTable().removeColumn(getLeaderboardTable().getColumnCount()-1);
         }
@@ -368,16 +403,44 @@ public class LeaderboardPanel extends FormPanel {
     }
 
     protected void ensureCarryColumn() {
-        if (!(getLeaderboardTable().getColumn(1) instanceof CarryColumn)) {
+        if (getLeaderboardTable().getColumnCount() < 2 || !(getLeaderboardTable().getColumn(1) instanceof CarryColumn)) {
             while (getLeaderboardTable().getColumnCount() > 1) {
                 getLeaderboardTable().removeColumn(1);
             }
-            addColumn(new CarryColumn());
+            addColumn(createCarryColumn());
         }
+    }
+
+    protected CarryColumn createCarryColumn() {
+        return new CarryColumn();
     }
 
     protected CellTable<LeaderboardRowDAO> getLeaderboardTable() {
         return leaderboardTable;
+    }
+
+    protected SailingServiceAsync getSailingService() {
+        return sailingService;
+    }
+
+    protected String getLeaderboardName() {
+        return leaderboardName;
+    }
+
+    protected void setLeaderboardName(String leaderboardName) {
+        this.leaderboardName = leaderboardName;
+    }
+
+    protected ErrorReporter getErrorReporter() {
+        return errorReporter;
+    }
+
+    protected ListDataProvider<LeaderboardRowDAO> getData() {
+        return data;
+    }
+
+    private void setData(ListDataProvider<LeaderboardRowDAO> data) {
+        this.data = data;
     }
 
 }

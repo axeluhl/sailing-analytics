@@ -51,7 +51,8 @@ public interface Leaderboard extends Named {
     
     /**
      * Tells the number of points carried over from previous races not tracked by this leaderboard for
-     * the <code>competitor</code>
+     * the <code>competitor</code>. Returns <code>0</code> if there is no carried points definition for
+     * <code>competitor</code>.
      */
     int getCarriedPoints(Competitor competitor);
 
@@ -184,10 +185,14 @@ public interface Leaderboard extends Named {
      * only the race columns will be accumulated by the board.
      */
     boolean hasCarriedPoints();
+    
+    boolean hasCarriedPoints(Competitor competitor);
 
     void removeRaceColumn(String name);
 
     SettableScoreCorrection getScoreCorrection();
 
     ThresholdBasedResultDiscardingRule getResultDiscardingRule();
+
+    Competitor getCompetitorByName(String competitorName);
 }

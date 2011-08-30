@@ -40,6 +40,7 @@ import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard.Entry;
 import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
+import com.sap.sailing.domain.leaderboard.ScoreCorrection.MaxPointsReason;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
@@ -114,21 +115,46 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 LeaderboardRowDAO row = new LeaderboardRowDAO();
                 row.competitor = competitorDAO;
                 row.fieldsByRaceName = new HashMap<String, LeaderboardEntryDAO>();
-                row.carriedPoints = leaderboard.getCarriedPoints(competitor);
+                row.carriedPoints = leaderboard.hasCarriedPoints(competitor) ? leaderboard.getCarriedPoints(competitor) : null;
                 result.competitors.add(competitorDAO);
                 for (RaceInLeaderboard raceColumn : leaderboard.getRaceColumns()) {
                     Entry entry = leaderboard.getEntry(competitor, raceColumn, timePoint);
-                    LeaderboardEntryDAO entryDAO = new LeaderboardEntryDAO();
-                    entryDAO.netPoints = entry.getNetPoints();
-                    entryDAO.totalPoints = entry.getTotalPoints();
-                    entryDAO.reasonForMaxPoints = entry.getMaxPointsReason().name();
-                    entryDAO.discarded = entry.isDiscarded();
+                    LeaderboardEntryDAO entryDAO = getLeaderboardEntryDAO(entry);
                     row.fieldsByRaceName.put(raceColumn.getName(), entryDAO);
                     result.rows.put(competitorDAO, row);
                 }
             }
         }
         return result;
+    }
+    
+    @Override
+    public LeaderboardEntryDAO getLeaderboardEntry(String leaderboardName, String competitorName, String raceName, Date date) throws NoWindException {
+        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        if (leaderboard != null) {
+            Competitor competitor = leaderboard.getCompetitorByName(competitorName);
+            if (competitor != null) {
+                RaceInLeaderboard raceColumn = leaderboard.getRaceColumnByName(raceName);
+                if (raceColumn != null) {
+                    return getLeaderboardEntryDAO(leaderboard.getEntry(competitor, raceColumn, new MillisecondsTimePoint(date)));
+                } else {
+                    throw new IllegalArgumentException("Didn't find race "+raceName+" in leaderboard "+leaderboardName);
+                }
+            } else {
+                throw new IllegalArgumentException("Didn't find competitor "+competitorName+" in leaderboard "+leaderboardName);
+            }
+        } else {
+            throw new IllegalArgumentException("Didn't find leaderboard "+leaderboardName);
+        }
+    }
+
+    private LeaderboardEntryDAO getLeaderboardEntryDAO(Entry entry) throws NoWindException {
+        LeaderboardEntryDAO entryDAO = new LeaderboardEntryDAO();
+        entryDAO.netPoints = entry.getNetPoints();
+        entryDAO.totalPoints = entry.getTotalPoints();
+        entryDAO.reasonForMaxPoints = entry.getMaxPointsReason().name();
+        entryDAO.discarded = entry.isDiscarded();
+        return entryDAO;
     }
 
     public List<EventDAO> listEvents() throws IllegalArgumentException {
@@ -656,7 +682,80 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             RaceInLeaderboard raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
             if (raceColumn != null) {
                 raceColumn.setTrackedRace(null);
+            } else {
+                throw new IllegalArgumentException("Didn't find race "+raceColumnName+" in leaderboard "+leaderboardName);
             }
+        } else {
+            throw new IllegalArgumentException("Didn't find leaderboard "+leaderboardName);
+        }
+    }
+
+    @Override
+    public void updateLeaderboardCarryValue(String leaderboardName, String competitorName, Integer carriedPoints) {
+        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        if (leaderboard != null) {
+            Competitor competitor = leaderboard.getCompetitorByName(competitorName);
+            if (competitor != null) {
+                if (carriedPoints == null) {
+                    leaderboard.unsetCarriedPoints(competitor);
+                } else {
+                    leaderboard.setCarriedPoints(competitor, carriedPoints);
+                }
+            } else {
+                throw new IllegalArgumentException("Didn't find competitor "+competitorName+" in leaderboard "+leaderboardName);
+            }
+        } else {
+            throw new IllegalArgumentException("Didn't find leaderboard "+leaderboardName);
+        }
+    }
+
+    @Override
+    public void updateLeaderboardMaxPointsReason(String leaderboardName, String competitorName, String raceColumnName,
+            String maxPointsReasonAsString) {
+        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        if (leaderboard != null) {
+            Competitor competitor = leaderboard.getCompetitorByName(competitorName);
+            if (competitor != null) {
+                RaceInLeaderboard raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
+                if (raceColumn == null) {
+                    throw new IllegalArgumentException("Didn't find race "+raceColumnName+" in leaderboard "+leaderboardName);
+                }
+                if (maxPointsReasonAsString == null) {
+                    leaderboard.getScoreCorrection().setMaxPointsReason(competitor, raceColumn, null); // null means "unset"
+                } else {
+                    leaderboard.getScoreCorrection().setMaxPointsReason(competitor, raceColumn, MaxPointsReason.valueOf(maxPointsReasonAsString));
+                }
+            } else {
+                throw new IllegalArgumentException("Didn't find competitor "+competitorName+" in leaderboard "+leaderboardName);
+            }
+        } else {
+            throw new IllegalArgumentException("Didn't find leaderboard "+leaderboardName);
+        }
+    }
+
+    @Override
+    public int updateLeaderboardScoreCorrection(String leaderboardName, String competitorName, String raceName,
+            Integer correctedScore, Date date) throws NoWindException {
+        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        if (leaderboard != null) {
+            Competitor competitor = leaderboard.getCompetitorByName(competitorName);
+            if (competitor != null) {
+                RaceInLeaderboard raceColumn = leaderboard.getRaceColumnByName(raceName);
+                if (raceColumn == null) {
+                    throw new IllegalArgumentException("Didn't find race "+raceName+" in leaderboard "+leaderboardName);
+                }
+                if (correctedScore == null) {
+                    leaderboard.getScoreCorrection().uncorrectScore(competitor, raceColumn);
+                    return leaderboard.getNetPoints(competitor, raceColumn, new MillisecondsTimePoint(date));
+                } else {
+                    leaderboard.getScoreCorrection().correctScore(competitor, raceColumn, correctedScore);
+                    return correctedScore;
+                }
+            } else {
+                throw new IllegalArgumentException("Didn't find competitor "+competitorName+" in leaderboard "+leaderboardName);
+            }
+        } else {
+            throw new IllegalArgumentException("Didn't find leaderboard "+leaderboardName);
         }
     }
 }

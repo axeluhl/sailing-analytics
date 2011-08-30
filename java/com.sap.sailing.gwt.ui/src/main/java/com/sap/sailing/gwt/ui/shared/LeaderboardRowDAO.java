@@ -7,5 +7,5 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 public class LeaderboardRowDAO implements IsSerializable {
     public CompetitorDAO competitor;
     public Map<String, LeaderboardEntryDAO> fieldsByRaceName;
-    public int carriedPoints;
+    public Integer carriedPoints;
 }

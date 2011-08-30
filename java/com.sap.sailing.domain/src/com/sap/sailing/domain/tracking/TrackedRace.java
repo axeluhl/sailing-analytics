@@ -139,6 +139,12 @@ public interface TrackedRace {
     GPSFixTrack<Buoy, GPSFix> getTrack(Buoy buoy);
 
     /**
+     * If the <code>waypoint</code> only has one {@link #getBuoys() buoy}, its position at time <code>timePoint</code>
+     * is returned. Otherwise, the center of gravity between the buoys' positions is computed and returned.
+     */
+    Position getApproximatePosition(Waypoint waypoint, TimePoint timePoint);
+    
+    /**
      * Obtains estimated interpolated wind information for a given position and time point.
      * The information is taken from the currently selected {@link WindSource wind source} which
      * can be selected using {@link #setWindSource}.

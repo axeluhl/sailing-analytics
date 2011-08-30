@@ -152,6 +152,16 @@ public class LeaderboardImpl implements Named, Leaderboard {
         }
         return result;
     }
+    
+    @Override
+    public Competitor getCompetitorByName(String competitorName) {
+        for (Competitor competitor : getCompetitors()) {
+            if (competitor.getName().equals(competitorName)) {
+                return competitor;
+            }
+        }
+        return null;
+    }
 
     @Override
     public SettableScoreCorrection getScoreCorrection() {
@@ -286,6 +296,11 @@ public class LeaderboardImpl implements Named, Leaderboard {
     @Override
     public boolean hasCarriedPoints() {
         return !carriedPoints.isEmpty();
+    }
+    
+    @Override
+    public boolean hasCarriedPoints(Competitor competitor) {
+        return carriedPoints.containsKey(competitor);
     }
 
 }
