@@ -30,6 +30,8 @@ Axel
 
  - Use wind estimator to feed another wind track
 
+ - Fix issue with CellTable not updating propertly after an editing fails on the server
+
  - come to a reasonable code sharing architecture between GWT client and server logic.
    Example: distances, bearings etc. which is currently handled in com.sap.sailing.domain.base
    may also be useful in the client. However, these classes are not subject to GWT compilation
