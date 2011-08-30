@@ -55,8 +55,6 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
 
     private final Button renameLeaderboardButton;
 
-    private final Button editLeaderboardScoresButton;
-
     private final Button removeLeaderboardButton;
 
     private final Button addColumnButton;
@@ -68,6 +66,8 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
     private final Button unlinkRaceColumnFromTrackedRaceButton;
 
     private final Anchor openLeaderboardLink;
+    
+    private final Anchor editLeaderboardScoresLink;
 
     public LeaderboardConfigPanel(SailingServiceAsync sailingService, AdminConsole adminConsole,
             ErrorReporter errorReporter, StringConstants stringConstants) {
@@ -103,7 +103,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
             }
         });
         leaderboardInfoPanel.add(leaderboardsListBox);
-        Grid discardThresholdsGrid = new Grid(4, MAX_NUMBER_OF_DISCARDED_RESULTS+1);
+        Grid discardThresholdsGrid = new Grid(5, MAX_NUMBER_OF_DISCARDED_RESULTS+1);
         discardThresholdsGrid.setWidget(0, 0, new Label(stringConstants.discardRacesFromHowManyStartedRacesOn()));
         discardThresholdLabelsForSelectedLeaderboard = new Label[MAX_NUMBER_OF_DISCARDED_RESULTS];
         discardThresholdsGrid.setWidget(1, 0, new Label(stringConstants.discarding()));
@@ -116,6 +116,9 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
         openLeaderboardLink = new Anchor(stringConstants.openSelectedLeaderboard());
         openLeaderboardLink.setEnabled(false);
         discardThresholdsGrid.setWidget(3, 0, openLeaderboardLink);
+        editLeaderboardScoresLink = new Anchor(stringConstants.editScores());
+        editLeaderboardScoresLink.setEnabled(false);
+        discardThresholdsGrid.setWidget(4, 0, editLeaderboardScoresLink);
         leaderboardInfoPanel.add(discardThresholdsGrid);
         grid.setWidget(1, 0, leaderboardInfoPanel);
         VerticalPanel verticalPanel = new VerticalPanel();
@@ -134,14 +137,6 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
             @Override
             public void onClick(ClickEvent arg0) {
                 renameSelectedLeaderboard();
-            }
-        });
-        editLeaderboardScoresButton = new Button(stringConstants.editScores());
-        verticalPanel.add(editLeaderboardScoresButton);
-        editLeaderboardScoresButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent arg0) {
-                // TODO Auto-generated method stub
             }
         });
         removeLeaderboardButton = new Button(stringConstants.remove());
@@ -486,22 +481,23 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
                     selectedLeaderboard = result;
                     updateLeaderboardDisplays();
                     addColumnButton.setEnabled(true);
-                    editLeaderboardScoresButton.setEnabled(true);
                     renameLeaderboardButton.setEnabled(true);
                     removeLeaderboardButton.setEnabled(true);
                     openLeaderboardLink.setEnabled(true);
                     openLeaderboardLink.setHref("/Leaderboard.html?name="+leaderboardName);
+                    editLeaderboardScoresLink.setEnabled(true);
+                    editLeaderboardScoresLink.setHref("/LeaderboardEditing.html?name="+leaderboardName);
                 }
             });
         } else {
             selectedLeaderboard = null;
             addColumnButton.setEnabled(false);
-            editLeaderboardScoresButton.setEnabled(false);
             renameLeaderboardButton.setEnabled(false);
             removeLeaderboardButton.setEnabled(false);
             columnNamesInSelectedLeaderboardListBox.clear();
             leaderboardRaceColumnSelectionChanged();
             openLeaderboardLink.setEnabled(false);
+            editLeaderboardScoresLink.setEnabled(false);
         }
     }
 
