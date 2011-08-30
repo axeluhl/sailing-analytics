@@ -185,6 +185,7 @@ public class LeaderboardPanel extends FormPanel {
             return new Comparator<LeaderboardRowDAO>() {
                 @Override
                 public int compare(LeaderboardRowDAO o1, LeaderboardRowDAO o2) {
+                    // FIXME sort medal race participants as best; non-medal race participants follow 
                     return getTotalPoints(o1) - getTotalPoints(o2);
                 }
             };
@@ -196,7 +197,7 @@ public class LeaderboardPanel extends FormPanel {
         }
     }
     
-    protected class CarryColumn extends SortableColumn<LeaderboardRowDAO>  {
+    private class CarryColumn extends SortableColumn<LeaderboardRowDAO>  {
         public CarryColumn() {
             setSortable(true);
         }
@@ -301,9 +302,13 @@ public class LeaderboardPanel extends FormPanel {
                 }
             }
             if (!foundRaceColumn) {
-                addRaceColumn(new RaceColumn(raceNameAndMedalRace.getKey(), raceNameAndMedalRace.getValue()));
+                addRaceColumn(createRaceColumn(raceNameAndMedalRace));
             }
         }
+    }
+
+    protected RaceColumn createRaceColumn(Map.Entry<String, Boolean> raceNameAndMedalRace) {
+        return new RaceColumn(raceNameAndMedalRace.getKey(), raceNameAndMedalRace.getValue());
     }
 
     private void removeUnusedRaceColumns(LeaderboardDAO leaderboard) {
