@@ -39,7 +39,12 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
 
     @Override
     public void setMaxPointsReason(Competitor competitor, RaceInLeaderboard raceColumn, MaxPointsReason reason) {
-        maxPointsReasons.put(new Pair<Competitor, RaceInLeaderboard>(competitor, raceColumn), reason);
+        Pair<Competitor, RaceInLeaderboard> key = new Pair<Competitor, RaceInLeaderboard>(competitor, raceColumn);
+        if (reason == null) {
+            maxPointsReasons.remove(key);
+        } else {
+            maxPointsReasons.put(key, reason);
+        }
     }
 
     @Override

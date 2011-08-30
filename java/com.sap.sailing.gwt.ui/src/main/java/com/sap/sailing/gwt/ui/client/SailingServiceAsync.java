@@ -9,6 +9,7 @@ import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
 import com.sap.sailing.gwt.ui.shared.EventDAO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDAO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDAO;
+import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDAO;
 import com.sap.sailing.gwt.ui.shared.MarkDAO;
 import com.sap.sailing.gwt.ui.shared.Pair;
 import com.sap.sailing.gwt.ui.shared.QuickRankDAO;
@@ -95,4 +96,13 @@ public interface SailingServiceAsync {
             AsyncCallback<Void> callback);
 
     void updateLeaderboardCarryValue(String leaderboardName, String competitorName, Integer carriedPoints, AsyncCallback<Void> callback);
+
+    void updateLeaderboardMaxPointsReason(String leaderboardName, String competitorName, String raceColumnName,
+            String maxPointsReasonAsString, AsyncCallback<Void> asyncCallback);
+
+    void updateLeaderboardScoreCorrection(String leaderboardName, String competitorName, String raceName,
+            Integer correctedScore, Date date, AsyncCallback<Integer> asyncCallback);
+
+    void getLeaderboardEntry(String leaderboardName, String competitorName, String raceName, Date date,
+            AsyncCallback<LeaderboardEntryDAO> callback);
 }

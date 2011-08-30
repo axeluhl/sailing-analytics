@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.client;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Map.Entry;
 
@@ -56,28 +57,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
     private class EditableRaceColumn extends RaceColumn<LeaderboardRowDAO> {
         public EditableRaceColumn(String raceName, boolean medalRace, List<HasCell<LeaderboardRowDAO, ?>> cellList) {
             super(raceName, medalRace, new CompositeCell<LeaderboardRowDAO>(cellList));
-            setFieldUpdater(new FieldUpdater<LeaderboardRowDAO, LeaderboardRowDAO>() {
-                @Override
-                public void update(final int rowIndex, final LeaderboardRowDAO row, final LeaderboardRowDAO value) {
-//                    getSailingService().updateLeaderboardCarryValue(getLeaderboardName(), row.competitor.name,
-//                            value == null || value.length() == 0 ? null : Integer.valueOf(value),
-//                            new AsyncCallback<Void>() {
-//                                @Override
-//                                public void onFailure(Throwable t) {
-//                                    EditableLeaderboardPanel.this.getErrorReporter().reportError("Error trying to update carry value for competitor "+
-//                                            row.competitor.name+" in leaderboard "+getLeaderboardName()+": "+t.getMessage()+
-//                                            "\nYou may have to refresh your view.");
-//                                }
-//
-//                                @Override
-//                                public void onSuccess(Void v) {
-//                                    row.carriedPoints = value==null||value.length()==0 ? null : Integer.valueOf(value);
-//                                    List<LeaderboardRowDAO> list = EditableLeaderboardPanel.this.getData().getList();
-//                                    getLeaderboardTable().setRowData(rowIndex, list.subList(rowIndex, list.size()));
-//                                }
-//                            });
-                }
-            });
+            // no field updater for the composite; individual fields are updated individually
         }
 
         @Override
@@ -91,18 +71,12 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
         }
     }
     
-    private static class MaxPointsDropDownCellProvider implements HasCell<LeaderboardRowDAO, String> {
+    private class MaxPointsDropDownCellProvider implements HasCell<LeaderboardRowDAO, String> {
         private final Cell<String> dropDownCell;
         private final String raceName;
-        private final boolean medalRace;
-        private final String leaderboardName;
-        private final SailingServiceAsync sailingService;
         
-        public MaxPointsDropDownCellProvider(String leaderboardName, String raceName, boolean medalRace, SailingServiceAsync sailingService) {
-            this.leaderboardName = leaderboardName;
+        public MaxPointsDropDownCellProvider(String raceName) {
             this.raceName = raceName;
-            this.medalRace = medalRace;
-            this.sailingService = sailingService;
             dropDownCell = new SelectionCell(Arrays.asList(new String[] { "", "DNS", "DNF", "OCS", "DND", "RAF", "BFD", "DNC", "DSQ" }));
         }
         
@@ -115,29 +89,24 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
         public FieldUpdater<LeaderboardRowDAO, String> getFieldUpdater() {
             return new FieldUpdater<LeaderboardRowDAO, String>() {
                 @Override
-                public void update(int index, final LeaderboardRowDAO row, final String value) {
-                    /*
-                  sailingService.updateLeaderboardMaxPointsReason(leaderboardName, row.competitor.name,
+                public void update(final int rowIndex, final LeaderboardRowDAO row, final String value) {
+                  getSailingService().updateLeaderboardMaxPointsReason(getLeaderboardName(), row.competitor.name, raceName,
                           value == null || value.trim().length() == 0 ? null : value.trim(),
                   new AsyncCallback<Void>() {
                       @Override
                       public void onFailure(Throwable t) {
-                          errorReporter.reportError("Error trying to update max points reason for competitor "+
-                                  row.competitor.name+" in leaderboard "+leaderboardName+": "+t.getMessage()+
+                          getErrorReporter().reportError("Error trying to update max points reason for competitor "+
+                                  row.competitor.name+" in leaderboard "+getLeaderboardName()+": "+t.getMessage()+
                                   "\nYou may have to refresh your view.");
                       }
 
                       @Override
                       public void onSuccess(Void v) {
-                          row.fieldsByRaceName.get(raceN) = value==null||value.length()==0 ? null : Integer.valueOf(value);
+                          row.fieldsByRaceName.get(raceName).reasonForMaxPoints = value==null||value.length()==0 ? null : value.trim();
                           List<LeaderboardRowDAO> list = EditableLeaderboardPanel.this.getData().getList();
                           getLeaderboardTable().setRowData(rowIndex, list.subList(rowIndex, list.size()));
                       }
                   });
-                    if (value == null || value.trim().length() == 0) {
-                        object.
-                    }
-                    */
                 }
             };
         }
@@ -149,14 +118,12 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
         }
     }
     
-    private static class NetPointsEditCellProvider implements HasCell<LeaderboardRowDAO, String> {
+    private class NetPointsEditCellProvider implements HasCell<LeaderboardRowDAO, String> {
         private final Cell<String> netPointsEditCell;
         private final String raceName;
-        private final boolean medalRace;
         
-        public NetPointsEditCellProvider(String raceName, boolean medalRace) {
+        protected NetPointsEditCellProvider(String raceName) {
             this.raceName = raceName;
-            this.medalRace = medalRace;
             netPointsEditCell = new EditTextCell();
         }
         
@@ -169,8 +136,25 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
         public FieldUpdater<LeaderboardRowDAO, String> getFieldUpdater() {
             return new FieldUpdater<LeaderboardRowDAO, String>() {
                 @Override
-                public void update(int index, LeaderboardRowDAO object, String value) {
-                    // TODO Auto-generated method stub
+                public void update(final int rowIndex, final LeaderboardRowDAO row, final String value) {
+                    getSailingService().updateLeaderboardScoreCorrection(getLeaderboardName(), row.competitor.name, raceName,
+                            value == null || value.trim().length() == 0 ? null : Integer.valueOf(value.trim()), new Date(),
+                    new AsyncCallback<Integer>() {
+                        @Override
+                        public void onFailure(Throwable t) {
+                            getErrorReporter().reportError("Error trying to update score correction for competitor "+
+                                    row.competitor.name+" in leaderboard "+getLeaderboardName()+
+                                    " for race "+raceName+": "+t.getMessage()+
+                                    "\nYou may have to refresh your view.");
+                        }
+
+                        @Override
+                        public void onSuccess(Integer newNetPoints) {
+                            row.fieldsByRaceName.get(raceName).netPoints = value==null||value.length()==0 ? newNetPoints : Integer.valueOf(value.trim());
+                            List<LeaderboardRowDAO> list = EditableLeaderboardPanel.this.getData().getList();
+                            getLeaderboardTable().setRowData(rowIndex, list.subList(rowIndex, list.size()));
+                        }
+                    });
                 }
             };
         }
@@ -209,8 +193,8 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
 
     private List<HasCell<LeaderboardRowDAO, ?>> getCellList(String raceName, boolean medalRace) {
         List<HasCell<LeaderboardRowDAO, ?>> list = new ArrayList<HasCell<LeaderboardRowDAO, ?>>();
-        list.add(new MaxPointsDropDownCellProvider(getLeaderboardName(), raceName, medalRace, getSailingService()));
-        list.add(new NetPointsEditCellProvider(raceName, medalRace));
+        list.add(new MaxPointsDropDownCellProvider(raceName));
+        list.add(new NetPointsEditCellProvider(raceName));
         return list;
     }
 
