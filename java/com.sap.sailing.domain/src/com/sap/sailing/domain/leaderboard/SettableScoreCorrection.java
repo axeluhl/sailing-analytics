@@ -4,6 +4,13 @@ import com.sap.sailing.domain.base.Competitor;
 
 public interface SettableScoreCorrection extends ScoreCorrection {
 
+    /**
+     * @param reason
+     *            if <code>null</code>, any existing max-points reason is removed; while
+     *            {@link #getMaxPointsReason(Competitor, RaceInLeaderboard)} will return {@link MaxPointsReason#NONE}, a
+     *            call to {@link #isScoreCorrected(Competitor, RaceInLeaderboard)} will return <code>false</code> if no
+     *            other explicit score correction was made for the <code>competitor</code>.
+     */
     void setMaxPointsReason(Competitor competitor, RaceInLeaderboard raceColumn, MaxPointsReason reason);
     
     MaxPointsReason getMaxPointsReason(Competitor competitor, RaceInLeaderboard raceColumn);

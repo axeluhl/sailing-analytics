@@ -6,8 +6,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.Cell.Context;
 import com.google.gwt.cell.client.EditTextCell;
+import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -54,7 +56,11 @@ public class LeaderboardPanel extends FormPanel {
     
     private final ListHandler<LeaderboardRowDAO> listHandler;
 
-    private class CompetitorColumn extends SortableColumn<LeaderboardRowDAO> {
+    private class CompetitorColumn extends SortableColumn<LeaderboardRowDAO, String> {
+
+        protected CompetitorColumn() {
+            super(new TextCell());
+        }
 
         @Override
         public Comparator<LeaderboardRowDAO> getComparator() {
@@ -97,17 +103,22 @@ public class LeaderboardPanel extends FormPanel {
      * @author Axel Uhl (D043530)
      *
      */
-    protected class RaceColumn extends SortableColumn<LeaderboardRowDAO> {
+    protected abstract class RaceColumn<C> extends SortableColumn<LeaderboardRowDAO, C> {
         private final String raceName;
         private final boolean medalRace;
 
-        public RaceColumn(String raceName, boolean medalRace) {
+        public RaceColumn(String raceName, boolean medalRace, Cell<C> cell) {
+            super(cell);
             this.raceName = raceName;
             this.medalRace = medalRace;
         }
         
         public String getRaceName() {
             return raceName;
+        }
+        
+        protected void defaultRender(Context context, LeaderboardRowDAO object, SafeHtmlBuilder html) {
+            super.render(context, object, html);
         }
         
         @Override
@@ -141,11 +152,6 @@ public class LeaderboardPanel extends FormPanel {
         }
 
         @Override
-        public String getValue(LeaderboardRowDAO object) {
-            return ""+object.fieldsByRaceName.get(raceName).totalPoints;
-        }
-        
-        @Override
         public Header<String> getHeader() {
             return new TextHeader(raceName) {
                 @Override
@@ -159,13 +165,28 @@ public class LeaderboardPanel extends FormPanel {
         }
     }
     
+    private class TextRaceColumn extends RaceColumn<String> {
+        public TextRaceColumn(String raceName, boolean medalRace) {
+            super(raceName, medalRace, new TextCell());
+        }
+
+        @Override
+        public String getValue(LeaderboardRowDAO object) {
+            return ""+object.fieldsByRaceName.get(getRaceName()).totalPoints;
+        }
+    }
+    
     /**
      * Displays the totals for a competitor for the entire leaderboard.
      * 
      * @author Axel Uhl (D043530)
      *
      */
-    private class TotalsColumn extends SortableColumn<LeaderboardRowDAO>  {
+    private class TotalsColumn extends SortableColumn<LeaderboardRowDAO, String>  {
+        protected TotalsColumn() {
+            super(new TextCell());
+        }
+
         @Override
         public String getValue(LeaderboardRowDAO object) {
             int totalPoints = getTotalPoints(object);
@@ -197,8 +218,9 @@ public class LeaderboardPanel extends FormPanel {
         }
     }
     
-    protected class CarryColumn extends SortableColumn<LeaderboardRowDAO>  {
+    protected class CarryColumn extends SortableColumn<LeaderboardRowDAO, String>  {
         public CarryColumn() {
+            super(new TextCell());
             setSortable(true);
         }
 
@@ -260,7 +282,7 @@ public class LeaderboardPanel extends FormPanel {
         setWidget(vp);
     }
     
-    protected void addColumn(SortableColumn<LeaderboardRowDAO> column) {
+    protected void addColumn(SortableColumn<LeaderboardRowDAO, ?> column) {
         getLeaderboardTable().addColumn(column, column.getHeader());
         listHandler.setComparator(column, column.getComparator());
     }
@@ -303,7 +325,7 @@ public class LeaderboardPanel extends FormPanel {
             boolean foundRaceColumn = false;
             for (int i=0; !foundRaceColumn && i<getLeaderboardTable().getColumnCount(); i++) {
                 Column<LeaderboardRowDAO, ?> c = getLeaderboardTable().getColumn(i);
-                if (c instanceof RaceColumn && ((RaceColumn) c).getRaceName().equals(raceNameAndMedalRace.getKey())) {
+                if (c instanceof RaceColumn && ((RaceColumn<?>) c).getRaceName().equals(raceNameAndMedalRace.getKey())) {
                     foundRaceColumn = true;
                 }
             }
@@ -313,15 +335,17 @@ public class LeaderboardPanel extends FormPanel {
         }
     }
 
-    protected RaceColumn createRaceColumn(Map.Entry<String, Boolean> raceNameAndMedalRace) {
-        return new RaceColumn(raceNameAndMedalRace.getKey(), raceNameAndMedalRace.getValue());
+    protected RaceColumn<?> createRaceColumn(Map.Entry<String, Boolean> raceNameAndMedalRace) {
+        return new TextRaceColumn(raceNameAndMedalRace.getKey(), raceNameAndMedalRace.getValue());
     }
 
     private void removeUnusedRaceColumns(LeaderboardDAO leaderboard) {
         List<Column<LeaderboardRowDAO, ?>> columnsToRemove = new ArrayList<Column<LeaderboardRowDAO,?>>();
         for (int i=0; i<getLeaderboardTable().getColumnCount(); i++) {
             Column<LeaderboardRowDAO, ?> c = getLeaderboardTable().getColumn(i);
-            if (c instanceof RaceColumn && (leaderboard == null || !leaderboard.raceNamesAndMedalRace.keySet().contains(((RaceColumn) c).getRaceName()))) {
+            if (c instanceof RaceColumn
+                    && (leaderboard == null || !leaderboard.raceNamesAndMedalRace.keySet().contains(
+                            ((RaceColumn<?>) c).getRaceName()))) {
                 columnsToRemove.add(c);
             }
         }
@@ -333,7 +357,7 @@ public class LeaderboardPanel extends FormPanel {
     /**
      * If the last column is the totals column, remove it. Add the race column as the last column.
      */
-    private void addRaceColumn(RaceColumn raceColumn) {
+    private void addRaceColumn(RaceColumn<?> raceColumn) {
         if (getLeaderboardTable().getColumn(getLeaderboardTable().getColumnCount()-1) instanceof TotalsColumn) {
             getLeaderboardTable().removeColumn(getLeaderboardTable().getColumnCount()-1);
         }
