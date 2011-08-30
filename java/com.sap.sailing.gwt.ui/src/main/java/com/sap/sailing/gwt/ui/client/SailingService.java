@@ -78,4 +78,6 @@ public interface SailingService extends RemoteService {
     void disconnectLeaderboardColumnFromTrackedRace(String leaderboardName, String raceColumnName);
     
     Pair<String, String> getEventAndRaceNameOfTrackedRaceConnectedToLeaderboardColumn(String leaderboardName, String raceColumnName);
+
+    void updateLeaderboardCarryValue(String leaderboardName, String competitorName, Integer carriedPoints);
 }

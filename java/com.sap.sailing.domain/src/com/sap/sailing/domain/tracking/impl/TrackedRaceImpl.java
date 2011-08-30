@@ -370,6 +370,20 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     }
 
     @Override
+    public Position getApproximatePosition(Waypoint waypoint, TimePoint timePoint) {
+        Position result = null;
+        for (Buoy buoy : waypoint.getBuoys()) {
+            Position nextPos = getTrack(buoy).getEstimatedPosition(timePoint, /* extrapolate */ false);
+            if (result == null) {
+                result = nextPos;
+            } else {
+                result = result.translateGreatCircle(result.getBearingGreatCircle(nextPos), result.getDistance(nextPos).scale(0.5));
+            }
+        }
+        return result;
+    }
+
+    @Override
     public WindTrack getWindTrack(WindSource windSource) {
         return windTracks.get(windSource);
     }
@@ -387,6 +401,13 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                         break;
                     }
                 }
+            }
+            if (result == null) {
+                logger.warning("Found no other wind settings either; using starting leg direction as guess for wind direction. Force assumed as 1 knot.");
+                Leg firstLeg = getRace().getCourse().getLegs().iterator().next();
+                Position firstLegEnd = getApproximatePosition(firstLeg.getTo(), at);
+                Position firstEndStart = getApproximatePosition(firstLeg.getFrom(), at);
+                result = new WindImpl(p, at, new KnotSpeedWithBearingImpl(1.0, firstLegEnd.getBearingGreatCircle(firstEndStart)));
             }
         }
         return result;

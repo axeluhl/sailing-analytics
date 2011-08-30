@@ -121,7 +121,14 @@ public class ArrayListNavigableSet<E> implements NavigableSet<E> {
 
     @Override
     public boolean remove(Object o) {
-        return list.remove(o);
+        @SuppressWarnings("unchecked")
+        int pos = binarySearch((E) o);
+        if (pos >= 0) {
+            list.remove(pos);
+            return true;
+        } else {
+            return false;
+        }
     }
 
     @Override

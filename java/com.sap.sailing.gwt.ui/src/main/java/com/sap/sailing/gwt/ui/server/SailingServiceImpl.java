@@ -114,7 +114,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 LeaderboardRowDAO row = new LeaderboardRowDAO();
                 row.competitor = competitorDAO;
                 row.fieldsByRaceName = new HashMap<String, LeaderboardEntryDAO>();
-                row.carriedPoints = leaderboard.getCarriedPoints(competitor);
+                row.carriedPoints = leaderboard.hasCarriedPoints(competitor) ? leaderboard.getCarriedPoints(competitor) : null;
                 result.competitors.add(competitorDAO);
                 for (RaceInLeaderboard raceColumn : leaderboard.getRaceColumns()) {
                     Entry entry = leaderboard.getEntry(competitor, raceColumn, timePoint);
@@ -657,6 +657,25 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             if (raceColumn != null) {
                 raceColumn.setTrackedRace(null);
             }
+        }
+    }
+
+    @Override
+    public void updateLeaderboardCarryValue(String leaderboardName, String competitorName, Integer carriedPoints) {
+        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        if (leaderboard != null) {
+            Competitor competitor = leaderboard.getCompetitorByName(competitorName);
+            if (competitor != null) {
+                if (carriedPoints == null) {
+                    leaderboard.unsetCarriedPoints(competitor);
+                } else {
+                    leaderboard.setCarriedPoints(competitor, carriedPoints);
+                }
+            } else {
+                throw new IllegalArgumentException("Didn't find competitor "+competitorName+" in leaderboard "+leaderboardName);
+            }
+        } else {
+            throw new IllegalArgumentException("Didn't find leaderboard "+leaderboardName);
         }
     }
 }

@@ -365,4 +365,9 @@ public class MockedTrackedRace implements DynamicTrackedRace {
         };
     }
 
+    @Override
+    public Position getApproximatePosition(Waypoint waypoint, TimePoint timePoint) {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }

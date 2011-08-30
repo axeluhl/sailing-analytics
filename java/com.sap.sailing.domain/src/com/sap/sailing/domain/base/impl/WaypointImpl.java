@@ -41,4 +41,5 @@ public class WaypointImpl implements Waypoint {
     public Integer getId() {
         return id;
     }
+    
 }

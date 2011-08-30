@@ -93,4 +93,6 @@ public interface SailingServiceAsync {
 
     void disconnectLeaderboardColumnFromTrackedRace(String leaderboardName, String raceColumnName,
             AsyncCallback<Void> callback);
+
+    void updateLeaderboardCarryValue(String leaderboardName, String competitorName, Integer carriedPoints, AsyncCallback<Void> callback);
 }
