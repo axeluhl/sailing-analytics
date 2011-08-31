@@ -36,3 +36,7 @@ h1 {
 .gwt-TabPanelBottom {
 	height: 100%;
 }
+
+.errorLabel {
+	color: #FF0000;
+}
