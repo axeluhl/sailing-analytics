@@ -40,4 +40,11 @@ public interface MongoObjectFactory {
      * factory. 
      */
     void storeLeaderboard(Leaderboard leaderboard);
+    
+    /**
+     * Removes the leaderboard named <code>name</code> from the database.
+     */
+    void removeLeaderboard(String leaderboardName);
+
+    void renameLeaderboard(String oldName, String newName);
 }

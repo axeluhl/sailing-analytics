@@ -87,12 +87,15 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     private static final long serialVersionUID = 9031688830194537489L;
 
     private final ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
+    
+    private final MongoObjectFactory mongoObjectFactory;
 
     public SailingServiceImpl() {
         BundleContext context = Activator.getDefault();
         racingEventServiceTracker = new ServiceTracker<RacingEventService, RacingEventService>(
                 context, RacingEventService.class.getName(), null);
         racingEventServiceTracker.open();
+        mongoObjectFactory = MongoObjectFactory.INSTANCE;
     }
     
     public LeaderboardDAO getLeaderboardByName(String leaderboardName, Date date) throws Exception {
@@ -240,7 +243,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     @Override
     public void track(RaceRecordDAO rr, String liveURI, String storedURI, boolean trackWind, boolean correctWindByDeclination) throws Exception {
         RaceHandle raceHandle = getService().addRace(new URL(rr.paramURL), new URI(liveURI), new URI(storedURI),
-                MongoWindStoreFactory.INSTANCE.getMongoWindStore(MongoObjectFactory.INSTANCE));
+                MongoWindStoreFactory.INSTANCE.getMongoWindStore(mongoObjectFactory));
         if (trackWind) {
             startTrackingWind(raceHandle.getEvent().getName(), raceHandle.getRace().getName(), correctWindByDeclination);
         }
@@ -261,7 +264,6 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     @Override
     public void storeTracTracConfiguration(String name, String jsonURL, String liveDataURI, String storedDataURI) throws Exception {
         DomainFactory domainFactory = DomainFactory.INSTANCE;
-        MongoObjectFactory mongoObjectFactory = MongoObjectFactory.INSTANCE;
         mongoObjectFactory.storeTracTracConfiguration(domainFactory.createTracTracConfiguration(name, jsonURL, liveDataURI, storedDataURI));
     }
     
@@ -617,6 +619,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         if (leaderboard != null) {
             leaderboard.addRaceColumn(columnName, medalRace);
+            getService().updateStoredLeaderboard(leaderboard);
         } else {
             throw new IllegalArgumentException("Leaderboard named "+leaderboardName+" not found");
         }
@@ -627,6 +630,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         if (leaderboard != null) {
             leaderboard.removeRaceColumn(columnName);
+            getService().updateStoredLeaderboard(leaderboard);
         } else {
             throw new IllegalArgumentException("Leaderboard named "+leaderboardName+" not found");
         }
@@ -637,6 +641,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         if (leaderboard != null) {
             leaderboard.getRaceColumnByName(oldColumnName).setName(newColumnName);
+            getService().updateStoredLeaderboard(leaderboard);
         } else {
             throw new IllegalArgumentException("Leaderboard named "+leaderboardName+" not found");
         }
@@ -652,6 +657,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 RaceInLeaderboard raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
                 if (raceColumn != null) {
                     raceColumn.setTrackedRace(trackedRace);
+                    getService().updateStoredLeaderboard(leaderboard);
                 }
             }
         }
@@ -682,6 +688,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             RaceInLeaderboard raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
             if (raceColumn != null) {
                 raceColumn.setTrackedRace(null);
+                getService().updateStoredLeaderboard(leaderboard);
             } else {
                 throw new IllegalArgumentException("Didn't find race "+raceColumnName+" in leaderboard "+leaderboardName);
             }
@@ -701,6 +708,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 } else {
                     leaderboard.setCarriedPoints(competitor, carriedPoints);
                 }
+                getService().updateStoredLeaderboard(leaderboard);
             } else {
                 throw new IllegalArgumentException("Didn't find competitor "+competitorName+" in leaderboard "+leaderboardName);
             }
@@ -725,6 +733,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 } else {
                     leaderboard.getScoreCorrection().setMaxPointsReason(competitor, raceColumn, MaxPointsReason.valueOf(maxPointsReasonAsString));
                 }
+                getService().updateStoredLeaderboard(leaderboard);
             } else {
                 throw new IllegalArgumentException("Didn't find competitor "+competitorName+" in leaderboard "+leaderboardName);
             }
@@ -737,6 +746,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     public int updateLeaderboardScoreCorrection(String leaderboardName, String competitorName, String raceName,
             Integer correctedScore, Date date) throws NoWindException {
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        int result;
         if (leaderboard != null) {
             Competitor competitor = leaderboard.getCompetitorByName(competitorName);
             if (competitor != null) {
@@ -746,10 +756,10 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 }
                 if (correctedScore == null) {
                     leaderboard.getScoreCorrection().uncorrectScore(competitor, raceColumn);
-                    return leaderboard.getNetPoints(competitor, raceColumn, new MillisecondsTimePoint(date));
+                    result = leaderboard.getNetPoints(competitor, raceColumn, new MillisecondsTimePoint(date));
                 } else {
                     leaderboard.getScoreCorrection().correctScore(competitor, raceColumn, correctedScore);
-                    return correctedScore;
+                    result =correctedScore;
                 }
             } else {
                 throw new IllegalArgumentException("Didn't find competitor "+competitorName+" in leaderboard "+leaderboardName);
@@ -757,5 +767,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         } else {
             throw new IllegalArgumentException("Didn't find leaderboard "+leaderboardName);
         }
+        getService().updateStoredLeaderboard(leaderboard);
+        return result;
     }
 }

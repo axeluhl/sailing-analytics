@@ -160,4 +160,6 @@ public interface RacingEventService {
      */
     void renameLeaderboard(String oldName, String newName);
 
+    void updateStoredLeaderboard(Leaderboard leaderboard);
+
 }

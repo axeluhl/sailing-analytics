@@ -36,6 +36,8 @@ import com.sap.sailing.domain.tractracadapter.RaceHandle;
 import com.sap.sailing.domain.tractracadapter.RaceRecord;
 import com.sap.sailing.domain.tractracadapter.RaceTracker;
 import com.sap.sailing.expeditionconnector.ExpeditionWindTrackerFactory;
+import com.sap.sailing.mongodb.DomainObjectFactory;
+import com.sap.sailing.mongodb.MongoObjectFactory;
 import com.sap.sailing.util.Util.Triple;
 
 public class RacingEventServiceImpl implements RacingEventService {
@@ -68,9 +70,15 @@ public class RacingEventServiceImpl implements RacingEventService {
     private static final String DEFAULT_LEADERBOARD_NAME = "Default Leaderboard";
     
     private Set<DynamicTrackedEvent> eventsObservedForDefaultLeaderboard = new HashSet<DynamicTrackedEvent>();
+    
+    private final MongoObjectFactory mongoObjectFactory;
+    
+    private final DomainObjectFactory domainObjectFactory;
 
     public RacingEventServiceImpl() {
         domainFactory = DomainFactory.INSTANCE;
+        domainObjectFactory = DomainObjectFactory.INSTANCE;
+        mongoObjectFactory = MongoObjectFactory.INSTANCE;
         windTrackerFactory = ExpeditionWindTrackerFactory.getInstance();
         eventsByName = new HashMap<String, Event>();
         raceTrackersByEvent = new HashMap<Event, Set<RaceTracker>>();
@@ -80,6 +88,13 @@ public class RacingEventServiceImpl implements RacingEventService {
         // Add one default leaderboard that aggregates all races currently tracked by this service.
         // This is more for debugging purposes than for anything else.
         addLeaderboard(DEFAULT_LEADERBOARD_NAME, new int[] { 5, 8 });
+        loadStoredLeaderboards();
+    }
+    
+    private void loadStoredLeaderboards() {
+        for (Leaderboard leaderboard : domainObjectFactory.getAllLeaderboards()) {
+            leaderboardsByName.put(leaderboard.getName(), leaderboard);
+        }
     }
     
     @Override
@@ -89,6 +104,7 @@ public class RacingEventServiceImpl implements RacingEventService {
         synchronized (leaderboardsByName) {
             leaderboardsByName.put(name, result);
         }
+        mongoObjectFactory.storeLeaderboard(result);
         return result;
     }
     
@@ -104,7 +120,14 @@ public class RacingEventServiceImpl implements RacingEventService {
             Leaderboard toRename = leaderboardsByName.remove(oldName);
             toRename.setName(newName);
             leaderboardsByName.put(newName, toRename);
+            mongoObjectFactory.renameLeaderboard(oldName, newName);
         }
+    }
+    
+    @Override
+    public void updateStoredLeaderboard(Leaderboard leaderboard) {
+        // TODO this is very brute force; consider updating more fine-grained
+        mongoObjectFactory.storeLeaderboard(leaderboard);
     }
     
     @Override
@@ -112,6 +135,7 @@ public class RacingEventServiceImpl implements RacingEventService {
         synchronized (leaderboardsByName) {
             leaderboardsByName.remove(leaderboardName);
         }
+        mongoObjectFactory.removeLeaderboard(leaderboardName);
     }
     
     @Override
