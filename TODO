@@ -3,7 +3,6 @@ Axel
 
  - Finish a first draft version of a GWT admin and leaderboard UI
 
-   * add Rank column
    * leaderboard page (scrollable!) (still missing the leg details; add a +/- button at the top
      of each column to expand/collapse; implement a smart incremental update capability for leaderboard)
    * adjustable delay and time per leaderboard
@@ -22,6 +21,8 @@ Axel
  - support Up/Down buttons to fix the ordering of configured race columns
 
  - clarify how to marshal exceptions across a GWT/RPC call properly
+
+ - refactor DAOs to use getters/setters and encapsulate LeaderboardDAO ranking logic so it's safe
 
  - allow a user to set a display name for a competitor that may differ from the name that
    the tracking provider uses for the competitor
