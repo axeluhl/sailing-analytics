@@ -451,6 +451,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
                             public void onSuccess(Void v) {
                                 leaderboardsListBox.setItemText(selectedIndex, newLeaderboardName);
                                 leaderboardNames.set(selectedIndex, newLeaderboardName);
+                                updateLeaderboardDependentLinks(newLeaderboardName);
                             }
                         });
             }
@@ -464,6 +465,16 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
     private String getSelectedLeaderboardName() {
         int selectedIndex = leaderboardsListBox.getSelectedIndex();
         return selectedIndex >= 0 ? leaderboardsListBox.getItemText(selectedIndex) : null;
+    }
+
+    private void updateLeaderboardDependentLinks(final String leaderboardName) {
+        openLeaderboardLink.setHref("/Leaderboard.html?name="+leaderboardName);
+        editLeaderboardScoresLink.setHref("/LeaderboardEditing.html?name="+leaderboardName);
+    }
+
+    private void setLeaderboardDependentLinksEnabled(boolean enabled) {
+        openLeaderboardLink.setEnabled(enabled);
+        editLeaderboardScoresLink.setEnabled(enabled);
     }
 
     private void leaderboardSelectionChanged() {
@@ -483,10 +494,8 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
                     addColumnButton.setEnabled(true);
                     renameLeaderboardButton.setEnabled(true);
                     removeLeaderboardButton.setEnabled(true);
-                    openLeaderboardLink.setEnabled(true);
-                    openLeaderboardLink.setHref("/Leaderboard.html?name="+leaderboardName);
-                    editLeaderboardScoresLink.setEnabled(true);
-                    editLeaderboardScoresLink.setHref("/LeaderboardEditing.html?name="+leaderboardName);
+                    setLeaderboardDependentLinksEnabled(true);
+                    updateLeaderboardDependentLinks(leaderboardName);
                 }
             });
         } else {
@@ -496,8 +505,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
             removeLeaderboardButton.setEnabled(false);
             columnNamesInSelectedLeaderboardListBox.clear();
             leaderboardRaceColumnSelectionChanged();
-            openLeaderboardLink.setEnabled(false);
-            editLeaderboardScoresLink.setEnabled(false);
+            setLeaderboardDependentLinksEnabled(false);
         }
     }
 
