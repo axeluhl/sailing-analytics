@@ -1,7 +1,9 @@
 package com.sap.sailing.mongodb.impl;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -121,7 +123,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             BasicDBObject query = new BasicDBObject();
             query.put(FieldNames.LEADERBOARD_NAME.name(), name);
             for (DBObject o : leaderboardCollection.find(query)) {
-                result = loadLeaderboard(name, o);
+                result = loadLeaderboard(o);
             }
         } catch (Throwable t) {
              // something went wrong during DB access; report, then use empty new wind track
@@ -129,10 +131,25 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             logger.throwing(DomainObjectFactoryImpl.class.getName(), "loadLeaderboard", t);
         }
         return result;
-
+    }
+    
+    @Override
+    public Iterable<Leaderboard> getAllLeaderboards() {
+        DBCollection leaderboardCollection = database.getCollection(CollectionNames.LEADERBOARDS.name());
+        Set<Leaderboard> result = new HashSet<Leaderboard>();
+        try {
+            for (DBObject o : leaderboardCollection.find()) {
+                result.add(loadLeaderboard(o));
+            }
+        } catch (Throwable t) {
+             // something went wrong during DB access; report, then use empty new wind track
+            logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load leaderboards.");
+            logger.throwing(DomainObjectFactoryImpl.class.getName(), "getAllLeaderboards", t);
+        }
+        return result;
     }
 
-    private Leaderboard loadLeaderboard(String name, DBObject o) {
+    private Leaderboard loadLeaderboard(DBObject o) {
         SettableScoreCorrection scoreCorrection = new ScoreCorrectionImpl();
         BasicDBList dbDiscardIndexResultsStartingWithHowManyRaces = (BasicDBList) o.get(FieldNames.LEADERBOARD_DISCARDING_THRESHOLDS.name());
         int[] discardIndexResultsStartingWithHowManyRaces = new int[dbDiscardIndexResultsStartingWithHowManyRaces.size()];
@@ -141,7 +158,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             discardIndexResultsStartingWithHowManyRaces[i++] = (Integer) discardingThresholdAsObject;
         }
         ThresholdBasedResultDiscardingRule resultDiscardingRule = new ResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces);
-        LeaderboardImplWithDelayedCarriedPoints result = new LeaderboardImplWithDelayedCarriedPoints(name, scoreCorrection, resultDiscardingRule);
+        LeaderboardImplWithDelayedCarriedPoints result = new LeaderboardImplWithDelayedCarriedPoints(
+                (String) o.get(FieldNames.LEADERBOARD_NAME.name()), scoreCorrection, resultDiscardingRule);
         BasicDBList dbRaceColumns = (BasicDBList) o.get(FieldNames.LEADERBOARD_COLUMNS.name());
         for (Object dbRaceColumnAsObject : dbRaceColumns) {
             BasicDBObject dbRaceColumn = (BasicDBObject) dbRaceColumnAsObject;

@@ -104,6 +104,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     public void storeLeaderboard(Leaderboard leaderboard) {
         DBCollection leaderboardCollection = database.getCollection(CollectionNames.LEADERBOARDS.name());
         leaderboardCollection.ensureIndex(FieldNames.LEADERBOARD_NAME.name());
+        BasicDBObject query = new BasicDBObject(FieldNames.LEADERBOARD_NAME.name(), leaderboard.getName());
         BasicDBObject result = new BasicDBObject();
         result.put(FieldNames.LEADERBOARD_NAME.name(), leaderboard.getName());
         BasicDBList dbRaceColumns = new BasicDBList();
@@ -135,7 +136,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             dbResultDiscardingThresholds.add(threshold);
         }
         result.put(FieldNames.LEADERBOARD_DISCARDING_THRESHOLDS.name(), dbResultDiscardingThresholds);
-        leaderboardCollection.insert(result);
+        leaderboardCollection.update(query, result, /* upsrt */ true, /* multi */ false);
     }
 
     private void storeScoreCorrections(Leaderboard leaderboard, BasicDBObject dbScoreCorrections) {
@@ -163,6 +164,21 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
                 dbScoreCorrections.put(raceColumn.getName(), dbCorrectionForRace);
             }
         }
+    }
+
+    @Override
+    public void removeLeaderboard(String leaderboardName) {
+        DBCollection leaderboardCollection = database.getCollection(CollectionNames.LEADERBOARDS.name());
+        BasicDBObject query = new BasicDBObject(FieldNames.LEADERBOARD_NAME.name(), leaderboardName);
+        leaderboardCollection.remove(query);
+    }
+
+    @Override
+    public void renameLeaderboard(String oldName, String newName) {
+        DBCollection leaderboardCollection = database.getCollection(CollectionNames.LEADERBOARDS.name());
+        BasicDBObject query = new BasicDBObject(FieldNames.LEADERBOARD_NAME.name(), oldName);
+        BasicDBObject renameUpdate = new BasicDBObject("$set", new BasicDBObject(FieldNames.LEADERBOARD_NAME.name(), newName));
+        leaderboardCollection.update(query, renameUpdate);
     }
 
 }

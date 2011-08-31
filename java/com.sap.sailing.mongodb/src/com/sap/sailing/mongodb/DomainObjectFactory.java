@@ -23,4 +23,6 @@ public interface DomainObjectFactory {
     Iterable<TracTracConfiguration> getTracTracConfigurations();
     
     Leaderboard loadLeaderboard(String name);
+
+    Iterable<Leaderboard> getAllLeaderboards();
 }
