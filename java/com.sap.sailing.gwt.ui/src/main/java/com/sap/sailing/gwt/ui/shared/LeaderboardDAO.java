@@ -25,7 +25,7 @@ public class LeaderboardDAO implements IsSerializable {
     
     private boolean competitorsOrderedAccordingToTotalRank;
     
-    private final TotalRankingComparator totalRankingComparator;
+    private final transient TotalRankingComparator totalRankingComparator;
     
     public LeaderboardDAO() {
         totalRankingComparator = new TotalRankingComparator();
@@ -90,7 +90,7 @@ public class LeaderboardDAO implements IsSerializable {
             });
             competitorsOrderedAccordingToTotalRank = true;
         }
-        return competitors.indexOf(competitor);
+        return competitors.indexOf(competitor)+1;
     };
 
 }
