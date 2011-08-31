@@ -252,6 +252,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
                 public void onSuccess(Void arg0) {
                     columnNamesInSelectedLeaderboardListBox.removeItem(selectedIndex);
                     selectedLeaderboard.raceNamesAndMedalRace.remove(selectedRaceColumnName);
+                    selectedLeaderboard.invalidateCompetitorOrdering();
                 }
             });
         }
@@ -388,6 +389,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
                             public void onSuccess(Void v) {
                                 columnNamesInSelectedLeaderboardListBox.addItem(columnNameAndMedalRace.getA());
                                 selectedLeaderboard.raceNamesAndMedalRace.put(columnNameAndMedalRace.getA(), columnNameAndMedalRace.getB());
+                                selectedLeaderboard.invalidateCompetitorOrdering();
                             }
                         });
                     }
