@@ -56,6 +56,8 @@ public class LeaderboardPanel extends FormPanel {
     
     private final ListHandler<LeaderboardRowDAO> listHandler;
 
+    private LeaderboardDAO leaderboard;
+
     private class CompetitorColumn extends SortableColumn<LeaderboardRowDAO, String> {
 
         protected CompetitorColumn() {
@@ -206,8 +208,26 @@ public class LeaderboardPanel extends FormPanel {
             return new Comparator<LeaderboardRowDAO>() {
                 @Override
                 public int compare(LeaderboardRowDAO o1, LeaderboardRowDAO o2) {
-                    // FIXME sort medal race participants as best; non-medal race participants follow 
-                    return getTotalPoints(o1) - getTotalPoints(o2);
+                    int result;
+                    if (getLeaderboard().scoredInMedalRace(o1.competitor)) {
+                        if (getLeaderboard().scoredInMedalRace(o2.competitor)) {
+                            // both scored in medal race
+                            result = getTotalPoints(o1) - getTotalPoints(o2);
+                        } else {
+                            // only o1 scored in medal race, so o1 scores better = "less"
+                            result = -1;
+                        }
+                    } else {
+                        if (getLeaderboard().scoredInMedalRace(o2.competitor)) {
+                            // only o2 scored in medal race, so o2 scores better, o1 scores worse = "greater"
+                            result = 1;
+                        } else {
+                            // neither one scored in any medal race
+                            result = getTotalPoints(o1) - getTotalPoints(o2);
+                        }
+                        
+                    }
+                    return result;
                 }
             };
         }
@@ -302,6 +322,7 @@ public class LeaderboardPanel extends FormPanel {
     }
     
     private void updateLeaderboard(LeaderboardDAO leaderboard) {
+        setLeaderboard(leaderboard);
         adjustColumnLayout(leaderboard);
         getData().getList().clear();
         if (leaderboard != null) {
@@ -309,6 +330,14 @@ public class LeaderboardPanel extends FormPanel {
         }
     }
     
+    private void setLeaderboard(LeaderboardDAO leaderboard) {
+        this.leaderboard = leaderboard;
+    }
+    
+    protected LeaderboardDAO getLeaderboard() {
+        return leaderboard;
+    }
+
     private void adjustColumnLayout(LeaderboardDAO leaderboard) {
         ensureCompetitorColumn();
         updateCarryColumn(leaderboard);

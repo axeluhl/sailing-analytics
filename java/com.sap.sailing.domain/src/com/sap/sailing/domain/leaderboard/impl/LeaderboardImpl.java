@@ -104,7 +104,7 @@ public class LeaderboardImpl implements Named, Leaderboard {
     
     @Override
     public Iterable<RaceInLeaderboard> getRaceColumns() {
-        return Collections.unmodifiableCollection(races);
+        return Collections.unmodifiableCollection(new ArrayList<RaceInLeaderboard>(races));
     }
     
     @Override

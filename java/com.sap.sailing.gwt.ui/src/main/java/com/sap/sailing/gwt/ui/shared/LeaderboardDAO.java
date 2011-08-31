@@ -20,4 +20,14 @@ public class LeaderboardDAO implements IsSerializable {
     public Map<CompetitorDAO, LeaderboardRowDAO> rows;
     public boolean hasCarriedPoints;
     public int[] discardThresholds;
+    
+    public boolean scoredInMedalRace(CompetitorDAO competitor) {
+        LeaderboardRowDAO row = rows.get(competitor);
+        for (Map.Entry<String, Boolean> raceNameAndMedalRace : raceNamesAndMedalRace.entrySet()) {
+            if (raceNameAndMedalRace.getValue() && row.fieldsByRaceName.get(raceNameAndMedalRace.getKey()).totalPoints > 0) {
+                return true;
+            }
+        }
+        return false;
+    }
 }
