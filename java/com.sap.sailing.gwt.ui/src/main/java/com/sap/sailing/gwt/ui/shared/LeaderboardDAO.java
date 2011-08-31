@@ -79,6 +79,15 @@ public class LeaderboardDAO implements IsSerializable {
             return result;
         }
     }
+    
+    /**
+     * To be called after something was incrementally altered in this leaderboard that may affect the
+     * competitor ranking, in particular anything score related. Probably the only change that wouldn't
+     * affect the ordering is a name change.
+     */
+    public void invalidateCompetitorOrdering() {
+        competitorsOrderedAccordingToTotalRank = false;
+    }
 
     public int getRank(CompetitorDAO competitor) {
         if (!competitorsOrderedAccordingToTotalRank) {
