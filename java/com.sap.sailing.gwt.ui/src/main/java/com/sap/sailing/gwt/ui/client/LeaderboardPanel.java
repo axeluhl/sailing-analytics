@@ -191,45 +191,13 @@ public class LeaderboardPanel extends FormPanel {
 
         @Override
         public String getValue(LeaderboardRowDAO object) {
-            int totalPoints = getTotalPoints(object);
+            int totalPoints = getLeaderboard().getTotalPoints(object);
             return ""+totalPoints;
-        }
-
-        private int getTotalPoints(LeaderboardRowDAO object) {
-            int totalPoints = object.carriedPoints==null?0:object.carriedPoints;
-            for (LeaderboardEntryDAO e : object.fieldsByRaceName.values()) {
-                totalPoints += e.totalPoints;
-            }
-            return totalPoints;
         }
 
         @Override
         public Comparator<LeaderboardRowDAO> getComparator() {
-            return new Comparator<LeaderboardRowDAO>() {
-                @Override
-                public int compare(LeaderboardRowDAO o1, LeaderboardRowDAO o2) {
-                    int result;
-                    if (getLeaderboard().scoredInMedalRace(o1.competitor)) {
-                        if (getLeaderboard().scoredInMedalRace(o2.competitor)) {
-                            // both scored in medal race
-                            result = getTotalPoints(o1) - getTotalPoints(o2);
-                        } else {
-                            // only o1 scored in medal race, so o1 scores better = "less"
-                            result = -1;
-                        }
-                    } else {
-                        if (getLeaderboard().scoredInMedalRace(o2.competitor)) {
-                            // only o2 scored in medal race, so o2 scores better, o1 scores worse = "greater"
-                            result = 1;
-                        } else {
-                            // neither one scored in any medal race
-                            result = getTotalPoints(o1) - getTotalPoints(o2);
-                        }
-                        
-                    }
-                    return result;
-                }
-            };
+            return getLeaderboard().getTotalRankingComparator();
         }
 
         @Override
@@ -268,6 +236,33 @@ public class LeaderboardPanel extends FormPanel {
         @Override
         public Header<String> getHeader() {
             return new TextHeader(stringConstants.carry());
+        }
+    }
+    
+    private class RankColumn extends SortableColumn<LeaderboardRowDAO, String>  {
+        public RankColumn() {
+            super(new TextCell());
+            setSortable(true);
+        }
+
+        @Override
+        public String getValue(LeaderboardRowDAO object) {
+            return ""+getLeaderboard().getRank(object.competitor);
+        }
+
+        @Override
+        public Comparator<LeaderboardRowDAO> getComparator() {
+            return new Comparator<LeaderboardRowDAO>() {
+                @Override
+                public int compare(LeaderboardRowDAO o1, LeaderboardRowDAO o2) {
+                    return getLeaderboard().getRank(o1.competitor) - getLeaderboard().getRank(o2.competitor);
+                }
+            };
+        }
+
+        @Override
+        public Header<String> getHeader() {
+            return new TextHeader(stringConstants.rank());
         }
     }
     
@@ -339,6 +334,7 @@ public class LeaderboardPanel extends FormPanel {
     }
 
     private void adjustColumnLayout(LeaderboardDAO leaderboard) {
+        ensureRankColumn();
         ensureCompetitorColumn();
         updateCarryColumn(leaderboard);
         // first remove race columns no longer needed:
@@ -393,13 +389,24 @@ public class LeaderboardPanel extends FormPanel {
         addColumn(raceColumn);
     }
 
-    private void ensureCompetitorColumn() {
+    private void ensureRankColumn() {
         if (getLeaderboardTable().getColumnCount() == 0) {
+            addColumn(new RankColumn());
+        } else {
+            if (!(getLeaderboardTable().getColumn(0) instanceof RankColumn)) {
+                throw new RuntimeException("The first column must always be the rank column but it was of type "+
+                        getLeaderboardTable().getColumn(0).getClass().getName());
+            }
+        }
+    }
+
+    private void ensureCompetitorColumn() {
+        if (getLeaderboardTable().getColumnCount() < 2) {
             addColumn(new CompetitorColumn());
         } else {
-            if (!(getLeaderboardTable().getColumn(0) instanceof CompetitorColumn)) {
-                throw new RuntimeException("The first column must always be the competitor column but it was of type "+
-                        getLeaderboardTable().getColumn(0).getClass().getName());
+            if (!(getLeaderboardTable().getColumn(1) instanceof CompetitorColumn)) {
+                throw new RuntimeException("The second column must always be the competitor column but it was of type "+
+                        getLeaderboardTable().getColumn(1).getClass().getName());
             }
         }
     }
@@ -426,15 +433,15 @@ public class LeaderboardPanel extends FormPanel {
     }
 
     private void ensureNoCarryColumn() {
-        if (getLeaderboardTable().getColumnCount() >= 2 && getLeaderboardTable().getColumn(1) instanceof CarryColumn) {
-            getLeaderboardTable().removeColumn(1);
+        if (getLeaderboardTable().getColumnCount() >= 3 && getLeaderboardTable().getColumn(2) instanceof CarryColumn) {
+            getLeaderboardTable().removeColumn(2);
         }
     }
 
     protected void ensureCarryColumn() {
-        if (getLeaderboardTable().getColumnCount() < 2 || !(getLeaderboardTable().getColumn(1) instanceof CarryColumn)) {
-            while (getLeaderboardTable().getColumnCount() > 1) {
-                getLeaderboardTable().removeColumn(1);
+        if (getLeaderboardTable().getColumnCount() < 3 || !(getLeaderboardTable().getColumn(2) instanceof CarryColumn)) {
+            while (getLeaderboardTable().getColumnCount() > 2) {
+                getLeaderboardTable().removeColumn(2);
             }
             addColumn(createCarryColumn());
         }

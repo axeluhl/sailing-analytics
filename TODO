@@ -1,23 +1,28 @@
 Axel
 ====
 
- - consider multi-select in race tree view to initialize set of race columns
-
- - support Up/Down buttons to fix the ordering of configured race columns
-
  - Finish a first draft version of a GWT admin and leaderboard UI
 
-   * "top" display, with time slider
    * leaderboard page (scrollable!) (still missing the leg details; add a +/- button at the top
      of each column to expand/collapse; implement a smart incremental update capability for leaderboard)
    * adjustable delay and time per leaderboard
    * consider a per-user preferences page where leaderboard columns can be personalized at runtime
    * mark position entry capability, supporting "lost mark tracker" use case
+   * "top" display, with time slider
+
+ - Add user authentication and authorization as well as a role model. Typical roles: spectator (anonymous
+   and identified), moderator, administrator
 
  - auto-reconnect a leaderboard to its tracked races; this would require that the connector
    parameters required to track a race are encapsulated and stored with the leaderboard
 
+ - consider multi-select in race tree view to initialize set of race columns
+
+ - support Up/Down buttons to fix the ordering of configured race columns
+
  - clarify how to marshal exceptions across a GWT/RPC call properly
+
+ - refactor DAOs to use getters/setters and encapsulate LeaderboardDAO ranking logic so it's safe
 
  - allow a user to set a display name for a competitor that may differ from the name that
    the tracking provider uses for the competitor
@@ -63,9 +68,6 @@ Axel
 
  - Implement refined version of isValid in GPSFixMovingTrack taking into account the
    speed as contained by each individual fix
-
- - Add user authentication and authorization as well as a role model. Typical roles: spectator (anonymous
-   and identified), moderator, administrator
 
  - Refactor the way the DomainFactory concept works, under the assumption that we'll have another
    connector for SwissTiming and VirtualEye. Our domain model including the Tracked... stuff should remain in place.
