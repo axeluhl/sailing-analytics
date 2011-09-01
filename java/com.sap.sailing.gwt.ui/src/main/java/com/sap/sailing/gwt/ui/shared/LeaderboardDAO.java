@@ -36,6 +36,10 @@ public class LeaderboardDAO implements IsSerializable {
         return totalRankingComparator;
     }
 
+    /**
+     * Tells if the <code>competitor</code> scored (and therefore presumably participated) in a medal race
+     * represented in this leaderboard.
+     */
     public boolean scoredInMedalRace(CompetitorDAO competitor) {
         LeaderboardRowDAO row = rows.get(competitor);
         for (Map.Entry<String, Boolean> raceNameAndMedalRace : raceNamesAndMedalRace.entrySet()) {
