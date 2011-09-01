@@ -98,10 +98,10 @@ public interface SailingServiceAsync {
     void updateLeaderboardCarryValue(String leaderboardName, String competitorName, Integer carriedPoints, AsyncCallback<Void> callback);
 
     void updateLeaderboardMaxPointsReason(String leaderboardName, String competitorName, String raceColumnName,
-            String maxPointsReasonAsString, AsyncCallback<Void> asyncCallback);
+            String maxPointsReasonAsString, Date date, AsyncCallback<Pair<Integer, Integer>> asyncCallback);
 
     void updateLeaderboardScoreCorrection(String leaderboardName, String competitorName, String raceName,
-            Integer correctedScore, Date date, AsyncCallback<Integer> asyncCallback);
+            Integer correctedScore, Date date, AsyncCallback<Pair<Integer, Integer>> asyncCallback);
 
     void getLeaderboardEntry(String leaderboardName, String competitorName, String raceName, Date date,
             AsyncCallback<LeaderboardEntryDAO> callback);
