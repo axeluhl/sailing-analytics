@@ -58,6 +58,8 @@ public class LeaderboardPanel extends FormPanel {
 
     private LeaderboardDAO leaderboard;
 
+    private final RankColumn rankColumn;
+
     private class CompetitorColumn extends SortableColumn<LeaderboardRowDAO, String> {
 
         protected CompetitorColumn() {
@@ -272,6 +274,7 @@ public class LeaderboardPanel extends FormPanel {
         this.setLeaderboardName(leaderboardName);
         this.errorReporter = errorReporter;
         this.stringConstants = stringConstants;
+        rankColumn = new RankColumn();
         leaderboardTable = new CellTable<LeaderboardRowDAO>(/* pageSize */ 100);
         getLeaderboardTable().setWidth("100%");
         getLeaderboardTable().setSelectionModel(new MultiSelectionModel<LeaderboardRowDAO>() {});
@@ -323,8 +326,13 @@ public class LeaderboardPanel extends FormPanel {
         if (leaderboard != null) {
             getData().getList().addAll(leaderboard.rows.values());
         }
+        getLeaderboardTable().getColumnSortList().push(getRankColumn());
     }
     
+    private RankColumn getRankColumn() {
+        return rankColumn;
+    }
+
     private void setLeaderboard(LeaderboardDAO leaderboard) {
         this.leaderboard = leaderboard;
     }
@@ -391,7 +399,7 @@ public class LeaderboardPanel extends FormPanel {
 
     private void ensureRankColumn() {
         if (getLeaderboardTable().getColumnCount() == 0) {
-            addColumn(new RankColumn());
+            addColumn(getRankColumn());
         } else {
             if (!(getLeaderboardTable().getColumn(0) instanceof RankColumn)) {
                 throw new RuntimeException("The first column must always be the rank column but it was of type "+

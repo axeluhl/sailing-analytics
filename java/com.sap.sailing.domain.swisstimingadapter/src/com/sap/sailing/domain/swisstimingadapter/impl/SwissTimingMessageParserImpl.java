@@ -14,14 +14,16 @@ public class SwissTimingMessageParserImpl implements SwissTimingMessageParser {
 
     @Override
     public SwissTimingMessage parse(byte[] message) throws SwissTimingFormatException {
-        int i=0;
-        return parse(message, i);
+        return parse(message, 0, message.length);
     }
     
     @Override
-    public SwissTimingMessage parse(byte[] message, int offset) throws SwissTimingFormatException {
+    public SwissTimingMessage parse(byte[] message, int offset, int length) throws SwissTimingFormatException {
         int i = offset;
-        if (message[i] != 0x10 || message[i+1] != 0x00) {
+        while (i<offset+length-1 && (message[i] != 0x10 || message[i+1] != 0x00)) {
+            i++;
+        }
+        if (i>=offset+length-1 || message[i] != 0x10 || message[i+1] != 0x00) {
             throw new SwissTimingFormatException("Didn't find start marker 0x1000", message);
         }
         i+=2;
@@ -88,7 +90,7 @@ public class SwissTimingMessageParserImpl implements SwissTimingMessageParser {
 
     @Override
     public SwissTimingMessage parse(DatagramPacket p) throws SwissTimingFormatException {
-        return parse(p.getData(), p.getOffset());
+        return parse(p.getData(), p.getOffset(), p.getLength());
     }
 
 }

@@ -8,5 +8,5 @@ public interface SwissTimingMessageParser extends UDPMessageParser<SwissTimingMe
     
     SwissTimingMessage parse(byte[] message) throws SwissTimingFormatException;
 
-    SwissTimingMessage parse(byte[] message, int offset) throws SwissTimingFormatException;
+    SwissTimingMessage parse(byte[] message, int offset, int length) throws SwissTimingFormatException;
 }
