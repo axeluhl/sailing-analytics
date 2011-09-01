@@ -482,7 +482,8 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
     private void leaderboardSelectionChanged() {
         final String leaderboardName = getSelectedLeaderboardName();
         if (leaderboardName != null) {
-            sailingService.getLeaderboardByName(leaderboardName, new Date(), new AsyncCallback<LeaderboardDAO>() {
+            sailingService.getLeaderboardByName(leaderboardName, new Date(),
+                    /* namesOfRacesForWhichToLoadLegDetails */ null, new AsyncCallback<LeaderboardDAO>() {
                 @Override
                 public void onFailure(Throwable caught) {
                     errorReporter.reportError("Error trying to fetch leaderboard " + leaderboardName

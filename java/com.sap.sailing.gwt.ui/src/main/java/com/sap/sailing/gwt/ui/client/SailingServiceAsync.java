@@ -1,10 +1,13 @@
 package com.sap.sailing.gwt.ui.client;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.sap.sailing.domain.base.Course;
+import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
 import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
 import com.sap.sailing.gwt.ui.shared.EventDAO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDAO;
@@ -69,7 +72,17 @@ public interface SailingServiceAsync {
 
     void setWindSource(String eventName, String raceName, String windSourceName, AsyncCallback<Void> callback);
 
-    void getLeaderboardByName(String leaderboardName, Date date, AsyncCallback<LeaderboardDAO> callback);
+    /**
+     * @param namesOfRacesForWhichToLoadLegDetails
+     *            if <code>null</code>, no {@link LeaderboardEntryDAO#legDetails leg details} will be present in the
+     *            result ({@link LeaderboardEntryDAO#legDetails} will be <code>null</code> for all
+     *            {@link LeaderboardEntryDAO} objects contained). Otherwise, the {@link LeaderboardEntryDAO#legDetails}
+     *            list will contain one entry per leg of the race {@link Course} for those race columns whose
+     *            {@link RaceInLeaderboard#getName() name} is contained in <code>namesOfRacesForWhichToLoadLegDetails</code>.
+     *            For all other columns, {@link LeaderboardEntryDAO#legDetails} is <code>null</code>.
+     */
+    void getLeaderboardByName(String leaderboardName, Date date,
+            Collection<String> namesOfRacesForWhichToLoadLegDetails, AsyncCallback<LeaderboardDAO> callback);
 
     void getLeaderboardNames(AsyncCallback<List<String>> callback);
 

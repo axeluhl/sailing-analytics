@@ -6,6 +6,7 @@ import java.net.URI;
 import java.net.URL;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -24,7 +25,9 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.Distance;
 import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Speed;
@@ -63,6 +66,7 @@ import com.sap.sailing.gwt.ui.shared.GPSFixDAO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDAO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDAO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDAO;
+import com.sap.sailing.gwt.ui.shared.LegEntryDAO;
 import com.sap.sailing.gwt.ui.shared.MarkDAO;
 import com.sap.sailing.gwt.ui.shared.Pair;
 import com.sap.sailing.gwt.ui.shared.PositionDAO;
@@ -98,7 +102,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         mongoObjectFactory = MongoObjectFactory.INSTANCE;
     }
     
-    public LeaderboardDAO getLeaderboardByName(String leaderboardName, Date date) throws Exception {
+    public LeaderboardDAO getLeaderboardByName(String leaderboardName, Date date, Collection<String> namesOfRacesForWhichToLoadLegDetails) throws Exception {
         LeaderboardDAO result = null;
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         if (leaderboard != null) {
@@ -122,7 +126,9 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 result.competitors.add(competitorDAO);
                 for (RaceInLeaderboard raceColumn : leaderboard.getRaceColumns()) {
                     Entry entry = leaderboard.getEntry(competitor, raceColumn, timePoint);
-                    LeaderboardEntryDAO entryDAO = getLeaderboardEntryDAO(entry);
+                    LeaderboardEntryDAO entryDAO = getLeaderboardEntryDAO(entry, raceColumn.getTrackedRace(),
+                            competitor, timePoint, namesOfRacesForWhichToLoadLegDetails != null
+                                    && namesOfRacesForWhichToLoadLegDetails.contains(raceColumn.getName()));
                     row.fieldsByRaceName.put(raceColumn.getName(), entryDAO);
                     result.rows.put(competitorDAO, row);
                 }
@@ -139,7 +145,9 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             if (competitor != null) {
                 RaceInLeaderboard raceColumn = leaderboard.getRaceColumnByName(raceName);
                 if (raceColumn != null) {
-                    return getLeaderboardEntryDAO(leaderboard.getEntry(competitor, raceColumn, new MillisecondsTimePoint(date)));
+                    MillisecondsTimePoint timePoint = new MillisecondsTimePoint(date);
+                    return getLeaderboardEntryDAO(leaderboard.getEntry(competitor, raceColumn, timePoint),
+                            raceColumn.getTrackedRace(), competitor, timePoint, /* addLegDetails */ false);
                 } else {
                     throw new IllegalArgumentException("Didn't find race "+raceName+" in leaderboard "+leaderboardName);
                 }
@@ -151,13 +159,49 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         }
     }
 
-    private LeaderboardEntryDAO getLeaderboardEntryDAO(Entry entry) throws NoWindException {
+    private LeaderboardEntryDAO getLeaderboardEntryDAO(Entry entry, TrackedRace trackedRace, Competitor competitor,
+            TimePoint timePoint, boolean addLegDetails) throws NoWindException {
         LeaderboardEntryDAO entryDAO = new LeaderboardEntryDAO();
         entryDAO.netPoints = entry.getNetPoints();
         entryDAO.totalPoints = entry.getTotalPoints();
         entryDAO.reasonForMaxPoints = entry.getMaxPointsReason().name();
         entryDAO.discarded = entry.isDiscarded();
+        if (addLegDetails) {
+            entryDAO.legDetails = new ArrayList<LegEntryDAO>();
+            for (Leg leg : trackedRace.getRace().getCourse().getLegs()) {
+                TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(competitor, leg);
+                LegEntryDAO legEntry = createLegEntry(trackedLeg, timePoint);
+                entryDAO.legDetails.add(legEntry);
+            }
+        }
         return entryDAO;
+    }
+
+    private LegEntryDAO createLegEntry(TrackedLegOfCompetitor trackedLeg, TimePoint timePoint) throws NoWindException {
+        LegEntryDAO result;
+        if (trackedLeg == null) {
+            result = null;
+        } else {
+            result = new LegEntryDAO();
+            Speed averageSpeedOverGround = trackedLeg.getAverageSpeedOverGround(timePoint);
+            result.averageSpeedOverGroundInKnots = averageSpeedOverGround == null ? null : averageSpeedOverGround
+                    .getKnots();
+            SpeedWithBearing speedOverGround = trackedLeg.getSpeedOverGround(timePoint);
+            result.currentSpeedOverGroundInKnots = speedOverGround == null ? null : speedOverGround.getKnots();
+            Distance distanceTraveled = trackedLeg.getDistanceTraveled(timePoint);
+            result.distanceTraveledInMeters = distanceTraveled == null ? null : distanceTraveled.getMeters();
+            result.estimatedTimeToNextWaypointInSeconds = trackedLeg.getEstimatedTimeToNextMarkInSeconds(timePoint);
+            result.finished = trackedLeg.hasFinishedLeg(timePoint);
+            result.gapToLeaderInSeconds = trackedLeg.getGapToLeaderInSeconds(timePoint);
+            result.rank = trackedLeg.getRank(timePoint);
+            result.started = trackedLeg.hasStartedLeg(timePoint);
+            Speed velocityMadeGood = trackedLeg.getVelocityMadeGood(timePoint);
+            result.velocityMadeGoodInKnots = velocityMadeGood == null ? null : velocityMadeGood.getKnots();
+            Distance windwardDistanceToGo = trackedLeg.getWindwardDistanceToGo(timePoint);
+            result.windwardDistanceToGoInMeters = windwardDistanceToGo == null ? null : windwardDistanceToGo
+                    .getMeters();
+        }
+        return result;
     }
 
     public List<EventDAO> listEvents() throws IllegalArgumentException {
