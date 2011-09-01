@@ -297,19 +297,6 @@ public class LeaderboardPanel extends FormPanel {
                 loadCompleteLeaderboard(new Date());
             }
         });
-        
-        // TODO remove this debug code again when done
-        Button debugButton = new Button("Debug: Replace competitor name by ABC");
-        hp.add(debugButton);
-        debugButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                LeaderboardRowDAO first = getData().getList().get(0);
-                first.competitor.name = "ABC";
-                getData().getList().set(0, first);
-            }
-        });
-        
         vp.add(hp);
         vp.add(getLeaderboardTable());
         setWidget(vp);
