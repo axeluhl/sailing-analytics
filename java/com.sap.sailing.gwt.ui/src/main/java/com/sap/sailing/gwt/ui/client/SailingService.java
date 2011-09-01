@@ -82,10 +82,14 @@ public interface SailingService extends RemoteService {
 
     void updateLeaderboardCarryValue(String leaderboardName, String competitorName, Integer carriedPoints);
 
-    void updateLeaderboardMaxPointsReason(String leaderboardName, String competitorName, String raceColumnName, String maxPointsReasonAsString);
+    /**
+     * @return the new net points in {@link Pair#getA()} and the new total points in {@link Pair#getB()}
+     */
+    Pair<Integer, Integer> updateLeaderboardMaxPointsReason(String leaderboardName, String competitorName,
+            String raceColumnName, String maxPointsReasonAsString, Date date) throws Exception;
 
-    int updateLeaderboardScoreCorrection(String leaderboardName, String competitorName, String raceName,
-            Integer correctedScore, Date date) throws Exception;
+    Pair<Integer, Integer> updateLeaderboardScoreCorrection(String leaderboardName, String competitorName,
+            String raceName, Integer correctedScore, Date date) throws Exception;
 
     LeaderboardEntryDAO getLeaderboardEntry(String leaderboardName, String competitorName, String raceName, Date date) throws Exception;
 }

@@ -718,8 +718,9 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
 
     @Override
-    public void updateLeaderboardMaxPointsReason(String leaderboardName, String competitorName, String raceColumnName,
-            String maxPointsReasonAsString) {
+    public Pair<Integer, Integer> updateLeaderboardMaxPointsReason(String leaderboardName, String competitorName, String raceColumnName,
+            String maxPointsReasonAsString, Date date) throws NoWindException {
+        TimePoint timePoint = new MillisecondsTimePoint(date);
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         if (leaderboard != null) {
             Competitor competitor = leaderboard.getCompetitorByName(competitorName);
@@ -734,6 +735,8 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                     leaderboard.getScoreCorrection().setMaxPointsReason(competitor, raceColumn, MaxPointsReason.valueOf(maxPointsReasonAsString));
                 }
                 getService().updateStoredLeaderboard(leaderboard);
+                Entry updatedEntry = leaderboard.getEntry(competitor, raceColumn, timePoint);
+                return new Pair<Integer, Integer>(updatedEntry.getNetPoints(), updatedEntry.getTotalPoints());
             } else {
                 throw new IllegalArgumentException("Didn't find competitor "+competitorName+" in leaderboard "+leaderboardName);
             }
@@ -743,24 +746,27 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
 
     @Override
-    public int updateLeaderboardScoreCorrection(String leaderboardName, String competitorName, String raceName,
+    public Pair<Integer, Integer> updateLeaderboardScoreCorrection(String leaderboardName, String competitorName, String raceName,
             Integer correctedScore, Date date) throws NoWindException {
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
-        int result;
+        int newNetPoints;
+        int newTotalPoints;
         if (leaderboard != null) {
             Competitor competitor = leaderboard.getCompetitorByName(competitorName);
             if (competitor != null) {
+                MillisecondsTimePoint timePoint = new MillisecondsTimePoint(date);
                 RaceInLeaderboard raceColumn = leaderboard.getRaceColumnByName(raceName);
                 if (raceColumn == null) {
                     throw new IllegalArgumentException("Didn't find race "+raceName+" in leaderboard "+leaderboardName);
                 }
                 if (correctedScore == null) {
                     leaderboard.getScoreCorrection().uncorrectScore(competitor, raceColumn);
-                    result = leaderboard.getNetPoints(competitor, raceColumn, new MillisecondsTimePoint(date));
+                    newNetPoints = leaderboard.getNetPoints(competitor, raceColumn, timePoint);
                 } else {
                     leaderboard.getScoreCorrection().correctScore(competitor, raceColumn, correctedScore);
-                    result =correctedScore;
+                    newNetPoints = correctedScore;
                 }
+                newTotalPoints = leaderboard.getEntry(competitor, raceColumn, timePoint).getTotalPoints();
             } else {
                 throw new IllegalArgumentException("Didn't find competitor "+competitorName+" in leaderboard "+leaderboardName);
             }
@@ -768,6 +774,6 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             throw new IllegalArgumentException("Didn't find leaderboard "+leaderboardName);
         }
         getService().updateStoredLeaderboard(leaderboard);
-        return result;
+        return new Pair<Integer, Integer>(newNetPoints, newTotalPoints);
     }
 }
