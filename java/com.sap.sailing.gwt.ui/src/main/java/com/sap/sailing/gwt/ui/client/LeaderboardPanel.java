@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.ui.client;
 
-import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
