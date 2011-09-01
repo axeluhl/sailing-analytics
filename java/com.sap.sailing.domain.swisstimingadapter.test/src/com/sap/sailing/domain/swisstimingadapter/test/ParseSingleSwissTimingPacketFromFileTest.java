@@ -37,7 +37,7 @@ public class ParseSingleSwissTimingPacketFromFileTest {
         int offset = 0;
         int messageLength = 0;
         while (offset < bytesRead) {
-            SwissTimingMessage swissTimingMessage = SwissTimingMessageParser.INSTANCE.parse(message, offset);
+            SwissTimingMessage swissTimingMessage = SwissTimingMessageParser.INSTANCE.parse(message, offset, bytesRead-offset);
             assertNotNull(swissTimingMessage);
             messages.add(swissTimingMessage);
             messageLength = swissTimingMessage.length();
