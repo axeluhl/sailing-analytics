@@ -1,6 +1,11 @@
 Axel
 ====
 
+ - Check if this is a bug: when a competitor is selected on the map (e.g., with a mouse-over)
+   and the competitor does not show (yet) in the ranking list, it seems that the tool tip on
+   the map is not shown. Does the lack to find the competitor in the list result in an
+   exception?
+
  - Finish a first draft version of a GWT admin and leaderboard UI
 
    * leaderboard page (scrollable!): still missing the leg details; add a +/- button at the top
