@@ -88,7 +88,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
     }
     
     private class MaxPointsDropDownCellProvider extends AbstractRowUpdateWhiteboardProducerThatHasCell<LeaderboardRowDAO, String> {
-        private final Cell<String> dropDownCell;
+        private final SelectionCell dropDownCell;
         private final String raceName;
         
         public MaxPointsDropDownCellProvider(String raceName) {
@@ -97,7 +97,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
         }
         
         @Override
-        public Cell<String> getCell() {
+        public SelectionCell getCell() {
             return dropDownCell;
         }
 
@@ -107,7 +107,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                 @Override
                 public void update(final int rowIndex, final LeaderboardRowDAO row, final String value) {
                     final RowUpdateWhiteboard<LeaderboardRowDAO> whiteboard = new RowUpdateWhiteboard<LeaderboardRowDAO>(
-                            EditableLeaderboardPanel.this.getData().getList());
+                            EditableLeaderboardPanel.this.getData());
                     getWhiteboardOwner().whiteboardProduced(whiteboard);
                     getSailingService().updateLeaderboardMaxPointsReason(getLeaderboardName(), row.competitor.name,
                             raceName, value == null || value.trim().length() == 0 ? null : value.trim(),
@@ -126,6 +126,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                                             || value.length() == 0 ? null : value.trim();
                                     row.fieldsByRaceName.get(raceName).netPoints = newNetAndTotalPoints.getA();
                                     row.fieldsByRaceName.get(raceName).totalPoints = newNetAndTotalPoints.getB();
+                                    getCell().setViewData(row, null); // ensure that getValue() is called again
                                     whiteboard.setObjectWithWhichToUpdateRow(row);
                                 }
                             });
@@ -141,7 +142,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
     }
     
     private class NetPointsEditCellProvider extends AbstractRowUpdateWhiteboardProducerThatHasCell<LeaderboardRowDAO, String> {
-        private final Cell<String> netPointsEditCell;
+        private final EditTextCell netPointsEditCell;
         private final String raceName;
         
         protected NetPointsEditCellProvider(String raceName) {
@@ -150,7 +151,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
         }
         
         @Override
-        public Cell<String> getCell() {
+        public EditTextCell getCell() {
             return netPointsEditCell;
         }
 
@@ -160,7 +161,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                 @Override
                 public void update(final int rowIndex, final LeaderboardRowDAO row, final String value) {
                     final RowUpdateWhiteboard<LeaderboardRowDAO> whiteboard = new RowUpdateWhiteboard<LeaderboardRowDAO>(
-                            EditableLeaderboardPanel.this.getData().getList());
+                            EditableLeaderboardPanel.this.getData());
                     getWhiteboardOwner().whiteboardProduced(whiteboard);
                     getSailingService().updateLeaderboardScoreCorrection(getLeaderboardName(), row.competitor.name, raceName,
                             value == null || value.trim().length() == 0 ? null : Integer.valueOf(value.trim()), getLeaderboardDisplayDate(),
@@ -177,6 +178,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                         public void onSuccess(Pair<Integer, Integer> newNetAndTotalPoints) {
                             row.fieldsByRaceName.get(raceName).netPoints = value==null||value.length()==0 ? newNetAndTotalPoints.getA() : Integer.valueOf(value.trim());
                             row.fieldsByRaceName.get(raceName).totalPoints = newNetAndTotalPoints.getB();
+                            getCell().setViewData(row, null); // ensure that getValue() is called again
                             whiteboard.setObjectWithWhichToUpdateRow(row);
                         }
                     });

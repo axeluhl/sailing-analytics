@@ -1,10 +1,9 @@
 package com.sap.sailing.gwt.ui.client;
 
-import java.util.List;
-
 import com.google.gwt.cell.client.CompositeCell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.view.client.ListDataProvider;
 
 /**
  * Between a column that uses a {@link CompositeCell} and the cell providers with their {@link FieldUpdater}s there
@@ -24,13 +23,13 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
  *
  */
 public class RowUpdateWhiteboard<T> {
-    private final List<T> listToUpdate;
+    private final ListDataProvider<T> listToUpdate;
     
     private int indexOfRowToUpdate;
     
     private T objectWithWhichToUpdateRow;
     
-    public RowUpdateWhiteboard(List<T> listToUpdate) {
+    public RowUpdateWhiteboard(ListDataProvider<T> listToUpdate) {
         this.listToUpdate = listToUpdate;
         indexOfRowToUpdate = -1;
     }
@@ -46,7 +45,8 @@ public class RowUpdateWhiteboard<T> {
     }
 
     private void update() {
-        listToUpdate.set(indexOfRowToUpdate, objectWithWhichToUpdateRow);
+        listToUpdate.getList().set(indexOfRowToUpdate, objectWithWhichToUpdateRow);
+        listToUpdate.flush(); // in case we're being called outside the UI thread, e.g., in a server update
     }
     
     public synchronized void setIndexOfRowToUpdate(int indexOfRowToUpdate) {
