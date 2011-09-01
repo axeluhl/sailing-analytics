@@ -1,6 +1,8 @@
 package com.sap.sailing.gwt.ui.client;
 
+import java.text.Collator;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
@@ -16,6 +18,7 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
+import com.google.gwt.user.cellview.client.ColumnSortList.ColumnSortInfo;
 import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.cellview.client.TextHeader;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -71,7 +74,7 @@ public class LeaderboardPanel extends FormPanel {
             return new Comparator<LeaderboardRowDAO>() {
                 @Override
                 public int compare(LeaderboardRowDAO o1, LeaderboardRowDAO o2) {
-                    return o1.competitor.name.compareTo(o2.competitor.name);
+                    return Collator.getInstance().compare(o1.competitor.name, o2.competitor.name);
                 }
             };
         }
@@ -325,10 +328,32 @@ public class LeaderboardPanel extends FormPanel {
         getData().getList().clear();
         if (leaderboard != null) {
             getData().getList().addAll(leaderboard.rows.values());
+            Comparator<LeaderboardRowDAO> comparator = getComparatorForSelectedSorting();
+            if (comparator != null) {
+                Collections.sort(getData().getList(), comparator);
+            } else {
+                // if no sorting was selected, sort by ascending rank and mark table header so
+                Collections.sort(getData().getList(), getRankColumn().getComparator());
+                getLeaderboardTable().getColumnSortList().push(getRankColumn());
+            }
         }
-        getLeaderboardTable().getColumnSortList().push(getRankColumn());
     }
     
+    private Comparator<LeaderboardRowDAO> getComparatorForSelectedSorting() {
+        Comparator<LeaderboardRowDAO> result = null;
+        if (getLeaderboardTable().getColumnSortList().size() > 0) {
+            ColumnSortInfo columnSortInfo = getLeaderboardTable().getColumnSortList().get(0);
+            @SuppressWarnings("unchecked")
+            SortableColumn<LeaderboardRowDAO, ?> castResult = (SortableColumn<LeaderboardRowDAO, ?>) columnSortInfo.getColumn();
+            if (columnSortInfo.isAscending()) {
+                result = castResult.getComparator();
+            } else {
+                result = Collections.reverseOrder(castResult.getComparator());
+            }
+        }
+        return result;
+    }
+
     private RankColumn getRankColumn() {
         return rankColumn;
     }
