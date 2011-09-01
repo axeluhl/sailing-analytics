@@ -12,7 +12,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  */
 public class LegEntryDAO implements IsSerializable {
     public double distanceTraveledInMeters;
-    public double averageSpeedInKnots;
+    public double averageSpeedOverGroundInKnots;
     public int rank;
     public double gapToLeaderInSeconds;
     public double estimatedTimeToNextWaypointInSeconds;
