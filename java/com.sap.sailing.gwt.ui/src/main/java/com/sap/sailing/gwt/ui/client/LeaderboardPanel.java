@@ -43,7 +43,7 @@ public class LeaderboardPanel extends FormPanel {
     
     /**
      * The leaderboard name is used to
-     * {@link SailingServiceAsync#getLeaderboardByName(String, java.util.Date, com.google.gwt.user.client.rpc.AsyncCallback)
+     * {@link SailingServiceAsync#getLeaderboardByName(String, java.util.Date, String[], com.google.gwt.user.client.rpc.AsyncCallback)
      * obtain the leaderboard contents} from the server. It may change in case the leaderboard is renamed.
      */
     private String leaderboardName;
@@ -316,7 +316,10 @@ public class LeaderboardPanel extends FormPanel {
     }
     
     private void loadCompleteLeaderboard(Date date) {
-        getSailingService().getLeaderboardByName(getLeaderboardName(), date, new AsyncCallback<LeaderboardDAO>() {
+        getSailingService().getLeaderboardByName(getLeaderboardName(), date, 
+                // TODO replace by the list of expanded races once we can expand race columns
+                /* namesOfRacesForWhichToLoadLegDetails */ null,
+                new AsyncCallback<LeaderboardDAO>() {
             @Override
             public void onSuccess(LeaderboardDAO result) {
                 updateLeaderboard(result);

@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.client;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -59,7 +60,8 @@ public interface SailingService extends RemoteService {
 
     public List<String> getLeaderboardNames() throws Exception;
     
-    public LeaderboardDAO getLeaderboardByName(String leaderboardName, Date date) throws Exception;
+    LeaderboardDAO getLeaderboardByName(String leaderboardName, Date date,
+            Collection<String> namesOfRacesForWhichToLoadLegDetails) throws Exception;
 
     void createLeaderboard(String leaderboardName, int[] discardThresholds);
 
