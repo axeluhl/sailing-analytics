@@ -56,7 +56,9 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
         private RowUpdateWhiteboard<LeaderboardRowDAO> currentRowUpdateWhiteboard;
         
         public EditableRaceColumn(String raceName, boolean medalRace, List<RowUpdateWhiteboardProducerThatAlsoHasCell<LeaderboardRowDAO, ?>> cellList) {
-            super(raceName, medalRace, new CompositeCell<LeaderboardRowDAO>(new ArrayList<HasCell<LeaderboardRowDAO, ?>>(cellList)));
+            super(raceName, medalRace,
+                    /* enableLegDrillDown */ false, // we don't want leg expansion when editing scores
+                    new CompositeCell<LeaderboardRowDAO>(new ArrayList<HasCell<LeaderboardRowDAO, ?>>(cellList)));
             for (RowUpdateWhiteboardProducer<LeaderboardRowDAO> rowUpdateWhiteboardProducer : cellList) {
                 rowUpdateWhiteboardProducer.setWhiteboardOwner(this);
             }
@@ -212,9 +214,9 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
     }
 
     @Override
-    protected RaceColumn<?> createRaceColumn(Entry<String, Boolean> raceNameAndMedalRace) {
-        return new EditableRaceColumn(raceNameAndMedalRace.getKey(), raceNameAndMedalRace.getValue(),
-                getCellList(raceNameAndMedalRace.getKey(), raceNameAndMedalRace.getValue()));
+    protected RaceColumn<?> createRaceColumn(Entry<String, Pair<Boolean, Boolean>> raceNameAndMedalRace) {
+        return new EditableRaceColumn(raceNameAndMedalRace.getKey(), raceNameAndMedalRace.getValue().getA(),
+                getCellList(raceNameAndMedalRace.getKey(), raceNameAndMedalRace.getValue().getA()));
     }
 
     private List<RowUpdateWhiteboardProducerThatAlsoHasCell<LeaderboardRowDAO, ?>> getCellList(String raceName, boolean medalRace) {

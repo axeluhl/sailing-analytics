@@ -7,12 +7,24 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import com.google.gwt.cell.client.ActionCell;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.Cell.Context;
+import com.google.gwt.cell.client.CompositeCell;
 import com.google.gwt.cell.client.EditTextCell;
+import com.google.gwt.cell.client.FieldUpdater;
+import com.google.gwt.cell.client.HasCell;
+import com.google.gwt.cell.client.ImageCell;
+import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.cell.client.TextCell;
+import com.google.gwt.cell.client.ValueUpdater;
+import com.google.gwt.dom.client.DivElement;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.EventTarget;
+import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
@@ -31,6 +43,7 @@ import com.google.gwt.view.client.MultiSelectionModel;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDAO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDAO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDAO;
+import com.sap.sailing.gwt.ui.shared.Pair;
 
 /**
  * A leaderboard essentially consists of a table widget that in its columns displays the entries.
@@ -99,6 +112,133 @@ public class LeaderboardPanel extends FormPanel {
         public String getValue(LeaderboardRowDAO object) {
             return object.competitor.name;
         }
+    }
+    
+    /**
+     * A {@link CellTable} {@link Header} implementation that uses a {@link CompositeCell} containing a
+     * {@link TextCell} and optionally an {@link ActionCell} for an expand/close button and an {@link ImageCell}
+     * for a medal displayed for medal races.
+     */
+    private static class RaceColumnHeader extends Header<SafeHtml> {
+        public RaceColumnHeader(String raceName, boolean medalRace, boolean isLegDrillDownEnabled,
+                RaceColumn<?> raceColumn) {
+            super(constructCell(raceName, medalRace, isLegDrillDownEnabled, raceColumn));
+        }
+
+        private static <T> Cell<SafeHtml> constructCell(final String raceName, boolean medalRace, boolean isLegDrillDownEnabled,
+                final RaceColumn<?> raceColumn) {
+            final List<HasCell<SafeHtml, ?>> cells = new ArrayList<HasCell<SafeHtml, ?>>(3);
+            // if it's a medal race, add the cell rendering the medal image
+            if (medalRace) {
+                cells.add(new HasCell<SafeHtml, String>() {
+                    @Override
+                    public Cell<String> getCell() {
+                        return new ImageCell();
+                    }
+
+                    @Override
+                    public FieldUpdater<SafeHtml, String> getFieldUpdater() {
+                        return null; // no updates possible in a header cell
+                    }
+
+                    @Override
+                    public String getValue(SafeHtml object) {
+                        return "/images/medal.png";
+                    }
+                });
+            }
+            // add the cell rendering the race name:
+            cells.add(new HasCell<SafeHtml, SafeHtml>() {
+                @Override
+                public Cell<SafeHtml> getCell() {
+                    return new SafeHtmlCell();
+                }
+                @Override
+                public FieldUpdater<SafeHtml, SafeHtml> getFieldUpdater() {
+                    return null; // no updates possible in a header cell
+                }
+                @Override
+                public SafeHtml getValue(SafeHtml object) {
+                    return new SafeHtmlBuilder().appendEscaped(raceName).toSafeHtml();
+                }
+            });
+            // add the cell rendering the expand/collapse button:
+            cells.add(new HasCell<SafeHtml, SafeHtml>() {
+                @Override
+                public Cell<SafeHtml> getCell() {
+                    return new ActionCell<SafeHtml>("+", new ActionCell.Delegate<SafeHtml>() {
+                        @Override
+                        public void execute(SafeHtml object) {
+                            System.out.println("Hello world");
+                        }
+                    }) {
+                        /**
+                         * carry out event logic, hence call the delegate's execute(...) operation, then stop propagation
+                         * to avoid the column being sorted when the expand button is pressed
+                         */
+                        @Override
+                        public void onBrowserEvent(Context context, Element parent, SafeHtml value, NativeEvent event,
+                                ValueUpdater<SafeHtml> valueUpdater) {
+                            raceColumn.suppressSortingOnce();
+                            super.onBrowserEvent(context, parent, value, event, valueUpdater);
+                        }
+                    };
+                }
+                @Override
+                public FieldUpdater<SafeHtml, SafeHtml> getFieldUpdater() {
+                    return null; // no updates possible in a header cell
+                }
+                @Override
+                public SafeHtml getValue(SafeHtml object) {
+                    return new SafeHtmlBuilder().appendEscaped("-").toSafeHtml();
+                }
+            });
+            return new CompositeCell<SafeHtml>(cells) {
+                /**
+                 * Redefining this method because when a table column is sorted, GWT wraps a div element
+                 * around the column header. Subsequently, the div's index no longer corresponds with the
+                 * cell indexes and a isOrHasChild doesn't make sense. We need to drill into the div's
+                 * elements and skip the sort indicator
+                 */
+                @Override
+                public void onBrowserEvent(Context context, Element parent, SafeHtml value,
+                    NativeEvent event, ValueUpdater<SafeHtml> valueUpdater) {
+                  int index = 0;
+                  EventTarget eventTarget = event.getEventTarget();
+                  if (Element.is(eventTarget)) {
+                    Element target = eventTarget.cast();
+                    Element container = getContainerElement(parent);
+                    Element wrapper = container.getFirstChildElement();
+                    try {
+                        DivElement.as(wrapper);
+                        // this must be a div inserted by the table after the column was sorted;
+                        // delegate on to the div's second child's child; note that this is highly
+                        // implementation-dependant and may easily break. We should probably file
+                        // a bug with Google...
+                        wrapper = wrapper.getFirstChildElement().getNextSiblingElement().getFirstChildElement();
+                    } catch (Throwable t) {
+                        // wrapper was no div, so no action necessary
+                    }
+                    while (wrapper != null) {
+                      if (wrapper.isOrHasChild(target)) {
+                          @SuppressWarnings("unchecked")
+                          Cell<Object> cell = (Cell<Object>) cells.get(index).getCell();
+                          cell.onBrowserEvent(context, wrapper, cells.get(index).getValue(value), event,
+                                  null); // tempUpdater
+                      }
+                      index++;
+                      wrapper = wrapper.getNextSiblingElement();
+                    }
+                  }
+                }
+            };
+        }
+
+        @Override
+        public SafeHtml getValue() {
+            // TODO Auto-generated method stub
+            return null;
+        }
         
     }
     
@@ -112,17 +252,44 @@ public class LeaderboardPanel extends FormPanel {
     protected abstract class RaceColumn<C> extends SortableColumn<LeaderboardRowDAO, C> {
         private final String raceName;
         private final boolean medalRace;
+        private boolean enableLegDrillDown;
+        private boolean suppressSortingOnce;
 
-        public RaceColumn(String raceName, boolean medalRace, Cell<C> cell) {
+        public RaceColumn(String raceName, boolean medalRace, boolean enableLegDrillDown, Cell<C> cell) {
             super(cell);
             this.raceName = raceName;
             this.medalRace = medalRace;
+            this.enableLegDrillDown = enableLegDrillDown;
         }
         
+        public void suppressSortingOnce() {
+            suppressSortingOnce = true;
+        }
+
+        @Override
+        public boolean isSortable() {
+            boolean result;
+            if (suppressSortingOnce) {
+                result = false;
+                suppressSortingOnce = false;
+            } else {
+                result = super.isSortable();
+            }
+            return result;
+        }
+
         public String getRaceName() {
             return raceName;
         }
         
+        public boolean isLegDrillDownEnabled() {
+            return enableLegDrillDown;
+        }
+
+        public void setEnableLegDrillDown(boolean enableLegDrillDown) {
+            this.enableLegDrillDown = enableLegDrillDown;
+        }
+
         protected void defaultRender(Context context, LeaderboardRowDAO object, SafeHtmlBuilder html) {
             super.render(context, object, html);
         }
@@ -158,22 +325,14 @@ public class LeaderboardPanel extends FormPanel {
         }
 
         @Override
-        public Header<String> getHeader() {
-            return new TextHeader(raceName) {
-                @Override
-                public void render(Context context, SafeHtmlBuilder sb) {
-                    if (medalRace) {
-                        sb.appendHtmlConstant("<img src=\"/images/medal.png\">");
-                    }
-                    super.render(context, sb);
-                }
-            };
+        public Header<SafeHtml> getHeader() {
+            return new RaceColumnHeader(raceName, medalRace, isLegDrillDownEnabled(), this);
         }
     }
     
     private class TextRaceColumn extends RaceColumn<String> {
-        public TextRaceColumn(String raceName, boolean medalRace) {
-            super(raceName, medalRace, new TextCell());
+        public TextRaceColumn(String raceName, boolean medalRace, boolean enableLegDrillDown) {
+            super(raceName, medalRace, enableLegDrillDown, new TextCell());
         }
 
         @Override
@@ -389,7 +548,7 @@ public class LeaderboardPanel extends FormPanel {
     }
 
     private void createMissingRaceColumns(LeaderboardDAO leaderboard) {
-        for (Map.Entry<String, Boolean> raceNameAndMedalRace : leaderboard.raceNamesAndMedalRace.entrySet()) {
+        for (Map.Entry<String, Pair<Boolean, Boolean>> raceNameAndMedalRace : leaderboard.raceNamesAndMedalRaceAndTracked.entrySet()) {
             boolean foundRaceColumn = false;
             for (int i=0; !foundRaceColumn && i<getLeaderboardTable().getColumnCount(); i++) {
                 Column<LeaderboardRowDAO, ?> c = getLeaderboardTable().getColumn(i);
@@ -403,8 +562,8 @@ public class LeaderboardPanel extends FormPanel {
         }
     }
 
-    protected RaceColumn<?> createRaceColumn(Map.Entry<String, Boolean> raceNameAndMedalRace) {
-        return new TextRaceColumn(raceNameAndMedalRace.getKey(), raceNameAndMedalRace.getValue());
+    protected RaceColumn<?> createRaceColumn(Map.Entry<String, Pair<Boolean, Boolean>> raceNameAndMedalRace) {
+        return new TextRaceColumn(raceNameAndMedalRace.getKey(), raceNameAndMedalRace.getValue().getA(), raceNameAndMedalRace.getValue().getB());
     }
 
     private void removeUnusedRaceColumns(LeaderboardDAO leaderboard) {
@@ -412,7 +571,7 @@ public class LeaderboardPanel extends FormPanel {
         for (int i=0; i<getLeaderboardTable().getColumnCount(); i++) {
             Column<LeaderboardRowDAO, ?> c = getLeaderboardTable().getColumn(i);
             if (c instanceof RaceColumn
-                    && (leaderboard == null || !leaderboard.raceNamesAndMedalRace.keySet().contains(
+                    && (leaderboard == null || !leaderboard.raceNamesAndMedalRaceAndTracked.keySet().contains(
                             ((RaceColumn<?>) c).getRaceName()))) {
                 columnsToRemove.add(c);
             }

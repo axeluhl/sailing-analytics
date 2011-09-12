@@ -18,7 +18,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 public class LeaderboardDAO implements IsSerializable {
     public String name;
     public List<CompetitorDAO> competitors;
-    public LinkedHashMap<String, Boolean> raceNamesAndMedalRace;
+    public LinkedHashMap<String, Pair<Boolean, Boolean>> raceNamesAndMedalRaceAndTracked;
     public Map<CompetitorDAO, LeaderboardRowDAO> rows;
     public boolean hasCarriedPoints;
     public int[] discardThresholds;
@@ -42,8 +42,8 @@ public class LeaderboardDAO implements IsSerializable {
      */
     public boolean scoredInMedalRace(CompetitorDAO competitor) {
         LeaderboardRowDAO row = rows.get(competitor);
-        for (Map.Entry<String, Boolean> raceNameAndMedalRace : raceNamesAndMedalRace.entrySet()) {
-            if (raceNameAndMedalRace.getValue() && row.fieldsByRaceName.get(raceNameAndMedalRace.getKey()).totalPoints > 0) {
+        for (Map.Entry<String, Pair<Boolean, Boolean>> raceNameAndMedalRace : raceNamesAndMedalRaceAndTracked.entrySet()) {
+            if (raceNameAndMedalRace.getValue().getA() && row.fieldsByRaceName.get(raceNameAndMedalRace.getKey()).totalPoints > 0) {
                 return true;
             }
         }
