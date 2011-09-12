@@ -169,6 +169,7 @@ public class LeaderboardPanel extends FormPanel {
                     return new ActionCell<SafeHtml>("+", new ActionCell.Delegate<SafeHtml>() {
                         @Override
                         public void execute(SafeHtml object) {
+                            // TODO add code to expand/collapse the race column here:
                             System.out.println("Hello world");
                         }
                     }) {
@@ -190,7 +191,7 @@ public class LeaderboardPanel extends FormPanel {
                 }
                 @Override
                 public SafeHtml getValue(SafeHtml object) {
-                    return new SafeHtmlBuilder().appendEscaped("-").toSafeHtml();
+                    return null;
                 }
             });
             return new CompositeCell<SafeHtml>(cells) {
@@ -236,7 +237,6 @@ public class LeaderboardPanel extends FormPanel {
 
         @Override
         public SafeHtml getValue() {
-            // TODO Auto-generated method stub
             return null;
         }
         
