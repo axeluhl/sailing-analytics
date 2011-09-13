@@ -7,21 +7,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import com.google.gwt.cell.client.ActionCell;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.Cell.Context;
-import com.google.gwt.cell.client.CompositeCell;
 import com.google.gwt.cell.client.EditTextCell;
-import com.google.gwt.cell.client.FieldUpdater;
-import com.google.gwt.cell.client.HasCell;
-import com.google.gwt.cell.client.ImageCell;
-import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.cell.client.TextCell;
-import com.google.gwt.cell.client.ValueUpdater;
-import com.google.gwt.dom.client.DivElement;
-import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.EventTarget;
-import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SafeHtml;
@@ -115,134 +104,6 @@ public class LeaderboardPanel extends FormPanel {
     }
     
     /**
-     * A {@link CellTable} {@link Header} implementation that uses a {@link CompositeCell} containing a
-     * {@link TextCell} and optionally an {@link ActionCell} for an expand/close button and an {@link ImageCell}
-     * for a medal displayed for medal races.
-     */
-    private static class RaceColumnHeader extends Header<SafeHtml> {
-        public RaceColumnHeader(String raceName, boolean medalRace, boolean isLegDrillDownEnabled,
-                RaceColumn<?> raceColumn) {
-            super(constructCell(raceName, medalRace, isLegDrillDownEnabled, raceColumn));
-        }
-
-        private static <T> Cell<SafeHtml> constructCell(final String raceName, boolean medalRace, boolean isLegDrillDownEnabled,
-                final RaceColumn<?> raceColumn) {
-            final List<HasCell<SafeHtml, ?>> cells = new ArrayList<HasCell<SafeHtml, ?>>(3);
-            // if it's a medal race, add the cell rendering the medal image
-            if (medalRace) {
-                cells.add(new HasCell<SafeHtml, String>() {
-                    @Override
-                    public Cell<String> getCell() {
-                        return new ImageCell();
-                    }
-
-                    @Override
-                    public FieldUpdater<SafeHtml, String> getFieldUpdater() {
-                        return null; // no updates possible in a header cell
-                    }
-
-                    @Override
-                    public String getValue(SafeHtml object) {
-                        return "/images/medal.png";
-                    }
-                });
-            }
-            // add the cell rendering the race name:
-            cells.add(new HasCell<SafeHtml, SafeHtml>() {
-                @Override
-                public Cell<SafeHtml> getCell() {
-                    return new SafeHtmlCell();
-                }
-                @Override
-                public FieldUpdater<SafeHtml, SafeHtml> getFieldUpdater() {
-                    return null; // no updates possible in a header cell
-                }
-                @Override
-                public SafeHtml getValue(SafeHtml object) {
-                    return new SafeHtmlBuilder().appendEscaped(raceName).toSafeHtml();
-                }
-            });
-            // add the cell rendering the expand/collapse button:
-            cells.add(new HasCell<SafeHtml, SafeHtml>() {
-                @Override
-                public Cell<SafeHtml> getCell() {
-                    return new ActionCell<SafeHtml>("+", new ActionCell.Delegate<SafeHtml>() {
-                        @Override
-                        public void execute(SafeHtml object) {
-                            // TODO add code to expand/collapse the race column here:
-                            System.out.println("Hello world");
-                        }
-                    }) {
-                        /**
-                         * carry out event logic, hence call the delegate's execute(...) operation, then stop propagation
-                         * to avoid the column being sorted when the expand button is pressed
-                         */
-                        @Override
-                        public void onBrowserEvent(Context context, Element parent, SafeHtml value, NativeEvent event,
-                                ValueUpdater<SafeHtml> valueUpdater) {
-                            raceColumn.suppressSortingOnce();
-                            super.onBrowserEvent(context, parent, value, event, valueUpdater);
-                        }
-                    };
-                }
-                @Override
-                public FieldUpdater<SafeHtml, SafeHtml> getFieldUpdater() {
-                    return null; // no updates possible in a header cell
-                }
-                @Override
-                public SafeHtml getValue(SafeHtml object) {
-                    return null;
-                }
-            });
-            return new CompositeCell<SafeHtml>(cells) {
-                /**
-                 * Redefining this method because when a table column is sorted, GWT wraps a div element
-                 * around the column header. Subsequently, the div's index no longer corresponds with the
-                 * cell indexes and a isOrHasChild doesn't make sense. We need to drill into the div's
-                 * elements and skip the sort indicator
-                 */
-                @Override
-                public void onBrowserEvent(Context context, Element parent, SafeHtml value,
-                    NativeEvent event, ValueUpdater<SafeHtml> valueUpdater) {
-                  int index = 0;
-                  EventTarget eventTarget = event.getEventTarget();
-                  if (Element.is(eventTarget)) {
-                    Element target = eventTarget.cast();
-                    Element container = getContainerElement(parent);
-                    Element wrapper = container.getFirstChildElement();
-                    try {
-                        DivElement.as(wrapper);
-                        // this must be a div inserted by the table after the column was sorted;
-                        // delegate on to the div's second child's child; note that this is highly
-                        // implementation-dependant and may easily break. We should probably file
-                        // a bug with Google...
-                        wrapper = wrapper.getFirstChildElement().getNextSiblingElement().getFirstChildElement();
-                    } catch (Throwable t) {
-                        // wrapper was no div, so no action necessary
-                    }
-                    while (wrapper != null) {
-                      if (wrapper.isOrHasChild(target)) {
-                          @SuppressWarnings("unchecked")
-                          Cell<Object> cell = (Cell<Object>) cells.get(index).getCell();
-                          cell.onBrowserEvent(context, wrapper, cells.get(index).getValue(value), event,
-                                  null); // tempUpdater
-                      }
-                      index++;
-                      wrapper = wrapper.getNextSiblingElement();
-                    }
-                  }
-                }
-            };
-        }
-
-        @Override
-        public SafeHtml getValue() {
-            return null;
-        }
-        
-    }
-    
-    /**
      * Displays net/total points and possible max-points reasons based on a {@link LeaderboardRowDAO} and a
      * race name and makes the column sortable by the total points.
      *  
@@ -254,6 +115,12 @@ public class LeaderboardPanel extends FormPanel {
         private final boolean medalRace;
         private boolean enableLegDrillDown;
         private boolean suppressSortingOnce;
+        
+        /**
+         * Tells if this race column is currently displayed in expanded form which includes a visualization
+         * of the race's legs.
+         */
+        private boolean expanded;
 
         public RaceColumn(String raceName, boolean medalRace, boolean enableLegDrillDown, Cell<C> cell) {
             super(cell);
@@ -262,6 +129,14 @@ public class LeaderboardPanel extends FormPanel {
             this.enableLegDrillDown = enableLegDrillDown;
         }
         
+        public boolean isExpanded() {
+            return expanded;
+        }
+
+        public void setExpanded(boolean expanded) {
+            this.expanded = expanded;
+        }
+
         public void suppressSortingOnce() {
             suppressSortingOnce = true;
         }
@@ -326,7 +201,7 @@ public class LeaderboardPanel extends FormPanel {
 
         @Override
         public Header<SafeHtml> getHeader() {
-            return new RaceColumnHeader(raceName, medalRace, isLegDrillDownEnabled(), this);
+            return new RaceColumnHeader(raceName, medalRace, isLegDrillDownEnabled(), LeaderboardPanel.this, this);
         }
     }
     
@@ -679,6 +554,15 @@ public class LeaderboardPanel extends FormPanel {
 
     private void setData(ListDataProvider<LeaderboardRowDAO> data) {
         this.data = data;
+    }
+
+    public void toggleExpansion(RaceColumn<?> raceColumn) {
+        if (raceColumn.isExpanded()) {
+            // remove leg columns that are located to the right of the raceColumn
+        } else {
+            // insert leg columns to the right of the raceColumn
+        }
+        raceColumn.setExpanded(!raceColumn.isExpanded());
     }
 
 }

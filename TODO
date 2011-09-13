@@ -56,6 +56,8 @@ Axel
 
  - display advantage line in Google map
 
+ - add SailID / "Segelnummer" to Competitor domain model
+
  - Need to adjust PartialNavigableSetView to work on any ordered sequential structure
 
  - Make threshold for track smoothening configurable. Currently, we have millisecondsOverWhichToAverage.
@@ -97,6 +99,8 @@ Axel
  - Now that we can update Course's waypoints, consider creating a RaceDefinition right upon
    receiving the Event/Race from TracTrac, using an empty list of waypoints. This may simplify
    the entire life cycle of RaceDefinition objects.
+
+ - Consider renaming knotspeed field to currentSpeedOverGroundInKnots in showboatpositions service
 
  - Improve Mongo-based tests by using Mongo transactions instead of waiting for prior transactions to complete
 
