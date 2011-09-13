@@ -3,7 +3,6 @@ package com.sap.sailing.gwt.ui.client;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import com.google.gwt.cell.client.Cell;
@@ -192,9 +191,6 @@ public abstract class ExpandableSortableColumn<C> extends SortableColumn<Leaderb
         super.render(context, object, html);
     }
     
-    @Override
-    public abstract Comparator<LeaderboardRowDAO> getComparator();
-
     @Override
     public abstract Header<SafeHtml> getHeader();
 }

@@ -22,6 +22,7 @@ import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.ColumnSortList.ColumnSortInfo;
 import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.cellview.client.TextHeader;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FormPanel;
@@ -155,8 +156,11 @@ public class LeaderboardPanel extends FormPanel {
                 return new Comparator<LeaderboardRowDAO>() {
                     @Override
                     public int compare(LeaderboardRowDAO o1, LeaderboardRowDAO o2) {
-                        return o1.fieldsByRaceName.get(raceName).netPoints
-                                - o2.fieldsByRaceName.get(raceName).netPoints;
+                        boolean ascending = isSortedAscendingForThisColumn(getLeaderboardPanel().getLeaderboardTable());
+                        LeaderboardEntryDAO o1Entry = o1.fieldsByRaceName.get(raceName);
+                        LeaderboardEntryDAO o2Entry = o2.fieldsByRaceName.get(raceName);
+                        return o1Entry == null ? o2Entry == null ? 0 : ascending?1:-1
+                                               : o2Entry == null ? ascending?-1:1 : o1Entry.netPoints - o2Entry.netPoints;
                     }
                 };
             }
@@ -321,7 +325,16 @@ public class LeaderboardPanel extends FormPanel {
         VerticalPanel vp = new VerticalPanel();
         HorizontalPanel hp = new HorizontalPanel();
         hp.setSpacing(10);
-        hp.add(new Image("/images/sap_66_transparent.png"));
+        Image sapLogo = new Image("/images/sap_66_transparent.png");
+        sapLogo.setTitle(stringConstants.sapSailingAnalytics());
+        sapLogo.setAltText(stringConstants.sapSailingAnalytics());
+        sapLogo.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                Window.Location.assign("http://www.sap.com");
+            }
+        });
+        hp.add(sapLogo);
         hp.add(new Label(leaderboardName));
         Button refreshButton = new Button(stringConstants.refresh());
         hp.add(refreshButton);

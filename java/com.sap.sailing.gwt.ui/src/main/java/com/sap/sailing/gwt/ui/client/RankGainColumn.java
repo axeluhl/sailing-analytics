@@ -4,11 +4,12 @@ import com.google.gwt.cell.client.AbstractSafeHtmlCell;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.text.shared.SafeHtmlRenderer;
+import com.google.gwt.user.cellview.client.CellTable;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDAO;
 
 public class RankGainColumn extends LegDetailColumn<Integer, Integer> {
-    public RankGainColumn(String title, LegDetailField<Integer> field) {
-        super(title, field, new RankGainCell());
+    public RankGainColumn(String title, LegDetailField<Integer> field, CellTable<LeaderboardRowDAO> leaderboardTable) {
+        super(title, field, new RankGainCell(), leaderboardTable);
     }
 
     @Override

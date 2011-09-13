@@ -74,7 +74,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     public Distance getDistanceTraveled(TimePoint timePoint) {
         MarkPassing legStart = getMarkPassingForLegStart();
         if (legStart == null) {
-            return Distance.NULL;
+            return null;
         } else {
             MarkPassing legEnd = getMarkPassingForLegEnd();
             TimePoint end = timePoint;
