@@ -118,6 +118,7 @@ public class LeaderboardPanel extends FormPanel {
         
         public RaceColumn(String raceName, boolean medalRace, boolean enableExpansion, Cell<C> cell) {
             super(LeaderboardPanel.this, enableExpansion, cell);
+            setHorizontalAlignment(ALIGN_RIGHT);
             this.raceName = raceName;
             this.medalRace = medalRace;
         }
@@ -160,7 +161,7 @@ public class LeaderboardPanel extends FormPanel {
         public Header<SafeHtml> getHeader() {
             return new SortableExpandableColumnHeader(/* title */ raceName,
                     /* iconURL */ medalRace ? "/images/medal.png" : null,
-                            LeaderboardPanel.this, this);
+                            LeaderboardPanel.this, this, stringConstants);
         }
     }
     
@@ -201,7 +202,7 @@ public class LeaderboardPanel extends FormPanel {
             int legCount = getLeaderboard().getLegCount(getRaceName());
             List<SortableColumn<LeaderboardRowDAO, ?>> result = new ArrayList<SortableColumn<LeaderboardRowDAO,?>>();
             for (int i=0; i<legCount; i++) {
-                result.add(new LegColumn(LeaderboardPanel.this, getRaceName(), /* legIndex */ i));
+                result.add(new LegColumn(LeaderboardPanel.this, getRaceName(), /* legIndex */ i, stringConstants));
             }
             return result;
         }
@@ -216,6 +217,7 @@ public class LeaderboardPanel extends FormPanel {
     private class TotalsColumn extends SortableColumn<LeaderboardRowDAO, String>  {
         protected TotalsColumn() {
             super(new TextCell());
+            setHorizontalAlignment(ALIGN_RIGHT);
         }
 
         @Override
@@ -271,6 +273,7 @@ public class LeaderboardPanel extends FormPanel {
     private class RankColumn extends SortableColumn<LeaderboardRowDAO, String>  {
         public RankColumn() {
             super(new TextCell());
+            setHorizontalAlignment(ALIGN_RIGHT);
             setSortable(true);
         }
 

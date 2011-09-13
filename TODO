@@ -8,6 +8,7 @@ Axel
 
  - Finish a first draft version of a GWT admin and leaderboard UI
 
+   * allow a column to specify its preferred sorting order (ascending / descending)
    * implement a smart incremental update capability for leaderboard
    * adjustable delay and time per leaderboard
    * consider a per-user preferences page where leaderboard columns can be personalized at runtime

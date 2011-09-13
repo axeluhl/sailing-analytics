@@ -22,6 +22,7 @@ import com.sap.sailing.gwt.ui.shared.LegEntryDAO;
 public class LegColumn extends ExpandableSortableColumn<String> {
     private final String raceName;
     private final int legIndex;
+    private final StringConstants stringConstants;
     
     private abstract class AbstractLegDetailField<T> implements LegDetailField<T> {
         public T get(LeaderboardRowDAO row) {
@@ -50,10 +51,26 @@ public class LegColumn extends ExpandableSortableColumn<String> {
         }
     }
     
-    public LegColumn(LeaderboardPanel leaderboardPanel, String raceName, int legIndex) {
+    private class RankGain implements LegDetailField<Integer> {
+        @Override
+        public Integer get(LeaderboardRowDAO row) {
+            LegEntryDAO legEntry = getLegEntry(row);
+            if (legEntry == null || getLegIndex() == 0) {
+                // no gain/loss for first leg
+                return null;
+            } else {
+                LegEntryDAO previousEntry = getLegEntry(row, getLegIndex()-1);
+                return previousEntry == null ? null : previousEntry.rank - legEntry.rank;
+            }
+        }
+    }
+    
+    public LegColumn(LeaderboardPanel leaderboardPanel, String raceName, int legIndex, StringConstants stringConstants) {
         super(leaderboardPanel, /* expandable */ true /* all legs have details */, new TextCell());
+        setHorizontalAlignment(ALIGN_RIGHT);
         this.raceName = raceName;
         this.legIndex = legIndex;
+        this.stringConstants = stringConstants;
     }
     
     private int getLegIndex() {
@@ -65,10 +82,15 @@ public class LegColumn extends ExpandableSortableColumn<String> {
     }
 
     private LegEntryDAO getLegEntry(LeaderboardRowDAO row) {
+        int theLegIndex = getLegIndex();
+        return getLegEntry(row, theLegIndex);
+    }
+
+    private LegEntryDAO getLegEntry(LeaderboardRowDAO row, int theLegIndex) {
         LegEntryDAO legEntry = null;
         LeaderboardEntryDAO entry = row.fieldsByRaceName.get(getRaceName());
         if (entry != null && entry.legDetails != null) {
-            legEntry = entry.legDetails.get(getLegIndex());
+            legEntry = entry.legDetails.get(theLegIndex);
         }
         return legEntry;
     }
@@ -94,8 +116,8 @@ public class LegColumn extends ExpandableSortableColumn<String> {
 
     @Override
     public Header<SafeHtml> getHeader() {
-        return new SortableExpandableColumnHeader(/* title */ "Leg "+(legIndex+1),
-                /* iconURL */ null, getLeaderboardPanel(), this);
+        return new SortableExpandableColumnHeader(/* title */ stringConstants.leg()+" "+(legIndex+1),
+                /* iconURL */ null, getLeaderboardPanel(), this, stringConstants);
     }
     
     @Override
@@ -107,8 +129,9 @@ public class LegColumn extends ExpandableSortableColumn<String> {
     protected List<SortableColumn<LeaderboardRowDAO, ?>> createExpansionColumns() {
         List<SortableColumn<LeaderboardRowDAO, ?>> result = new ArrayList<SortableColumn<LeaderboardRowDAO,?>>();
         try {
-            result.add(new FormattedDoubleLegDetailColumn("Distance/m", new DistanceTraveledInMeters(), 1));
-            result.add(new FormattedDoubleLegDetailColumn("Average Speed/kts", new AverageSpeedOverGroundInKnots(), 2));
+            result.add(new FormattedDoubleLegDetailColumn(stringConstants.distanceInMeters(), new DistanceTraveledInMeters(), 1));
+            result.add(new FormattedDoubleLegDetailColumn(stringConstants.averageSpeedInKnots(), new AverageSpeedOverGroundInKnots(), 2));
+            result.add(new LegDetailColumn<Integer>(stringConstants.rankGain(), new RankGain()));
             return result;
         } catch (Exception e) {
             throw new RuntimeException(e);

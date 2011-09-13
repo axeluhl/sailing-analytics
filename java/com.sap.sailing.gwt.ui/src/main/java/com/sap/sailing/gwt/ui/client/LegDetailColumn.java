@@ -17,6 +17,7 @@ public class LegDetailColumn<T> extends SortableColumn<LeaderboardRowDAO, String
     
     protected LegDetailColumn(String title, LegDetailField<T> field) {
         super(new TextCell());
+        setHorizontalAlignment(ALIGN_RIGHT);
         this.title = title;
         this.field = field;
     }
