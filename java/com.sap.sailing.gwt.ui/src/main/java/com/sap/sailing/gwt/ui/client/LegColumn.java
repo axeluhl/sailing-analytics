@@ -1,11 +1,13 @@
 package com.sap.sailing.gwt.ui.client;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.cellview.client.Header;
+import com.sap.sailing.gwt.ui.client.LegDetailColumn.LegDetailField;
 import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDAO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDAO;
 import com.sap.sailing.gwt.ui.shared.LegEntryDAO;
@@ -20,6 +22,33 @@ import com.sap.sailing.gwt.ui.shared.LegEntryDAO;
 public class LegColumn extends ExpandableSortableColumn<String> {
     private final String raceName;
     private final int legIndex;
+    
+    private abstract class AbstractLegDetailField<T> implements LegDetailField<T> {
+        public T get(LeaderboardRowDAO row) {
+            LegEntryDAO entry = getLegEntry(row);
+            if (entry == null) {
+                return null;
+            } else {
+                return getFromNonNullEntry(entry);
+            }
+        }
+
+        protected abstract T getFromNonNullEntry(LegEntryDAO entry);
+    }
+    
+    private class DistanceTraveledInMeters extends AbstractLegDetailField<Double> {
+        @Override
+        protected Double getFromNonNullEntry(LegEntryDAO entry) {
+            return entry.distanceTraveledInMeters;
+        }
+    }
+    
+    private class AverageSpeedOverGroundInKnots extends AbstractLegDetailField<Double> {
+        @Override
+        protected Double getFromNonNullEntry(LegEntryDAO entry) {
+            return entry.averageSpeedOverGroundInKnots;
+        }
+    }
     
     public LegColumn(LeaderboardPanel leaderboardPanel, String raceName, int legIndex) {
         super(leaderboardPanel, /* expandable */ true /* all legs have details */, new TextCell());
@@ -76,8 +105,14 @@ public class LegColumn extends ExpandableSortableColumn<String> {
 
     @Override
     protected List<SortableColumn<LeaderboardRowDAO, ?>> createExpansionColumns() {
-        // TODO this is where dynamic column configuration will go
-        return super.createExpansionColumns();
+        List<SortableColumn<LeaderboardRowDAO, ?>> result = new ArrayList<SortableColumn<LeaderboardRowDAO,?>>();
+        try {
+            result.add(new FormattedDoubleLegDetailColumn("Distance/m", new DistanceTraveledInMeters(), 1));
+            result.add(new FormattedDoubleLegDetailColumn("Average Speed/kts", new AverageSpeedOverGroundInKnots(), 2));
+            return result;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }
 
