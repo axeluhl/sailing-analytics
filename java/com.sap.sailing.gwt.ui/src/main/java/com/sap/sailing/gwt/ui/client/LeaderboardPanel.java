@@ -313,6 +313,7 @@ public class LeaderboardPanel extends FormPanel {
         VerticalPanel vp = new VerticalPanel();
         HorizontalPanel hp = new HorizontalPanel();
         hp.setSpacing(10);
+        hp.add(new Image("/images/sap_66_transparent.png"));
         hp.add(new Label(leaderboardName));
         Button refreshButton = new Button(stringConstants.refresh());
         hp.add(refreshButton);
@@ -322,7 +323,6 @@ public class LeaderboardPanel extends FormPanel {
                 loadCompleteLeaderboard(getLeaderboardDisplayDate());
             }
         });
-        hp.add(new Image("/images/sap_300_transparent.png"));
         vp.add(hp);
         vp.add(getLeaderboardTable());
         setWidget(vp);
