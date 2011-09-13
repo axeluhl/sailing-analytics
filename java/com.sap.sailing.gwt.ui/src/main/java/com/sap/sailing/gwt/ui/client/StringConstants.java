@@ -59,4 +59,10 @@ public interface StringConstants extends Constants {
     String renameRace();
     String openSelectedLeaderboard();
     String rank();
+    String collapse();
+    String expand();
+    String leg();
+    String distanceInMeters();
+    String averageSpeedInKnots();
+    String rankGain();
 }

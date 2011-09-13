@@ -41,12 +41,12 @@ public class SortableExpandableColumnHeader extends Header<SafeHtml> {
     }
 
     public SortableExpandableColumnHeader(String title, String iconURL, LeaderboardPanel leaderboardPanel,
-            ExpandableSortableColumn<?> column) {
-        super(constructCell(title, iconURL, column.isExpansionEnabled(), leaderboardPanel, column));
+            ExpandableSortableColumn<?> column, StringConstants stringConstants) {
+        super(constructCell(title, iconURL, column.isExpansionEnabled(), leaderboardPanel, column, stringConstants));
     }
 
     private static <T> Cell<SafeHtml> constructCell(final String title, final String iconURL, boolean isExpansionEnabled,
-            final LeaderboardPanel leaderboardPanel, final ExpandableSortableColumn<?> column) {
+            final LeaderboardPanel leaderboardPanel, final ExpandableSortableColumn<?> column, final StringConstants stringConstants) {
         final List<HasCell<SafeHtml, ?>> cells = new ArrayList<HasCell<SafeHtml, ?>>(3);
         // if it's a medal race, add the cell rendering the medal image
         if (iconURL != null) {
@@ -87,7 +87,8 @@ public class SortableExpandableColumnHeader extends Header<SafeHtml> {
             cells.add(new HasCell<SafeHtml, SafeHtml>() {
                 @Override
                 public Cell<SafeHtml> getCell() {
-                    return new ActionCell<SafeHtml>(column.isExpanded() ? "-" : "+", new ExpandCollapseButtonAction(column)) {
+                    return new ActionCell<SafeHtml>(column.isExpanded() ? stringConstants.collapse() : stringConstants.expand(),
+                            new ExpandCollapseButtonAction(column)) {
                         /**
                          * carry out event logic, hence call the delegate's execute(...) operation, then stop
                          * propagation to avoid the column being sorted when the expand button is pressed
