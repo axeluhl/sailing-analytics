@@ -20,7 +20,7 @@ import com.sap.sailing.util.Util.Pair;
 public class MongoWindStoreFactoryImpl implements MongoWindStoreFactory, BundleActivator {
     private static final String MONGO_PORT = "mongo.port";
 
-    private static final String MONGO_HOSTNAME = "mongo.hostname";
+    private static final String MONGO_HOSTNAME = "mongo.host";
 
     private static final String MONGO_DB_NAME = "mongo.dbName";
 
@@ -82,7 +82,7 @@ public class MongoWindStoreFactoryImpl implements MongoWindStoreFactory, BundleA
         if (defaultHostName == null) {
             defaultHostName = "127.0.0.1";
         } else {
-            logger.log(Level.INFO, "found mongo.hostname="+defaultHostName);
+            logger.log(Level.INFO, "found "+MONGO_HOSTNAME+"="+defaultHostName);
         }
         defaultPort = context.getProperty(MONGO_PORT) != null ? Integer.valueOf(context.getProperty(MONGO_PORT)) : 27017;
         logger.log(Level.INFO, "Using port "+defaultPort+" as default for Mongo wind stores");
