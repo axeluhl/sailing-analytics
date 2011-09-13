@@ -44,7 +44,6 @@ public abstract class ExpandableSortableColumn<C> extends SortableColumn<Leaderb
         super(cell);
         this.enableExpansion = enableExpansion;
         this.leaderboardPanel = leaderboardPanel;
-        this.directChildren = new ArrayList<SortableColumn<LeaderboardRowDAO,?>>();
     }
     
     protected LeaderboardPanel getLeaderboardPanel() {
@@ -136,7 +135,7 @@ public abstract class ExpandableSortableColumn<C> extends SortableColumn<Leaderb
                     int columnIndex = table.getColumnIndex(column);
                     // remove only the children currently displayed
                     if (columnIndex >= 0) {
-                        table.removeColumn(columnIndex); 
+                        table.removeColumn(columnIndex);
                     }
                 }
                 // important: toggle expanded state after asking for all visible children
@@ -146,7 +145,7 @@ public abstract class ExpandableSortableColumn<C> extends SortableColumn<Leaderb
                 setExpanded(!isExpanded());
                 int insertIndex = table.getColumnIndex(this)+1;
                 for (SortableColumn<LeaderboardRowDAO, ?> column : getAllVisibleChildren()) {
-                    table.insertColumn(insertIndex, column); 
+                    getLeaderboardPanel().insertColumn(insertIndex++, column); 
                 }
             }
         }
@@ -175,9 +174,6 @@ public abstract class ExpandableSortableColumn<C> extends SortableColumn<Leaderb
     protected void defaultRender(Context context, LeaderboardRowDAO object, SafeHtmlBuilder html) {
         super.render(context, object, html);
     }
-    
-    @Override
-    public abstract void render(Context context, LeaderboardRowDAO object, SafeHtmlBuilder html);
     
     @Override
     public abstract Comparator<LeaderboardRowDAO> getComparator();

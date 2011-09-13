@@ -35,6 +35,20 @@ public class LeaderboardDAO implements IsSerializable {
     public TotalRankingComparator getTotalRankingComparator() {
         return totalRankingComparator;
     }
+    
+    /**
+     * If the race whose name is specified in <code>raceName</code> has any competitor who has valid {@link LeaderboardEntryDAO#legDetails}
+     * for that race, the number of entries in the leg details is returned, telling the number of legs that the race has. Otherwise,
+     * -1 is returned.
+     */
+    public int getLegCount(String raceName) {
+        for (LeaderboardRowDAO row : rows.values()) {
+            if (row.fieldsByRaceName.get(raceName) != null && row.fieldsByRaceName.get(raceName).legDetails != null) {
+                return row.fieldsByRaceName.get(raceName).legDetails.size();
+            }
+        }
+        return -1;
+    }
 
     /**
      * Tells if the <code>competitor</code> scored (and therefore presumably participated) in a medal race

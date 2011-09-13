@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.client;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -172,6 +173,17 @@ public class LeaderboardPanel extends FormPanel {
         public String getValue(LeaderboardRowDAO object) {
             return ""+object.fieldsByRaceName.get(getRaceName()).totalPoints;
         }
+
+        @Override
+        protected List<SortableColumn<LeaderboardRowDAO, ?>> createExpansionColumns() {
+            // TODO if the leg data hasn't been loaded yet, do so now; this has to happen asynchronously...
+            int legCount = getLeaderboard().getLegCount(getRaceName());
+            List<SortableColumn<LeaderboardRowDAO, ?>> result = new ArrayList<SortableColumn<LeaderboardRowDAO,?>>();
+            for (int i=0; i<legCount; i++) {
+                result.add(new LegColumn(getRaceName(), /* legIndex */ i));
+            }
+            return result;
+        }
     }
     
     /**
@@ -181,7 +193,7 @@ public class LeaderboardPanel extends FormPanel {
      * @author Axel Uhl (D043530)
      * 
      */
-    protected abstract class LegColumn extends ExpandableSortableColumn<String> {
+    protected class LegColumn extends ExpandableSortableColumn<String> {
         private final String raceName;
         private final int legIndex;
         
@@ -199,14 +211,6 @@ public class LeaderboardPanel extends FormPanel {
             return raceName;
         }
 
-        @Override
-        public void render(Context context, LeaderboardRowDAO row, SafeHtmlBuilder html) {
-            LegEntryDAO legEntry = getLegEntry(row);
-            if (legEntry != null) {
-                html.append(legEntry.rank);
-            }
-        }
-        
         private LegEntryDAO getLegEntry(LeaderboardRowDAO row) {
             LegEntryDAO legEntry = null;
             LeaderboardEntryDAO entry = row.fieldsByRaceName.get(getRaceName());
@@ -223,22 +227,27 @@ public class LeaderboardPanel extends FormPanel {
                 public int compare(LeaderboardRowDAO o1, LeaderboardRowDAO o2) {
                     return safeGetLegRank(o1) - safeGetLegRank(o2);
                 }
-                
-                private int safeGetLegRank(LeaderboardRowDAO row) {
-                    int result = 0;
-                    LegEntryDAO legEntry = getLegEntry(row);
-                    if (legEntry != null) {
-                        result = legEntry.rank;
-                    }
-                    return result;
-                }
             };
+        }
+
+        private int safeGetLegRank(LeaderboardRowDAO row) {
+            int result = 0;
+            LegEntryDAO legEntry = getLegEntry(row);
+            if (legEntry != null) {
+                result = legEntry.rank;
+            }
+            return result;
         }
 
         @Override
         public Header<SafeHtml> getHeader() {
-            return new SortableExpandableColumnHeader(/* title */ ""+legIndex,
+            return new SortableExpandableColumnHeader(/* title */ "Leg "+(legIndex+1),
                     /* iconURL */ null, LeaderboardPanel.this, this);
+        }
+
+        @Override
+        public String getValue(LeaderboardRowDAO row) {
+            return ""+safeGetLegRank(row);
         }
     }
     
@@ -375,10 +384,14 @@ public class LeaderboardPanel extends FormPanel {
         listHandler.setComparator(column, column.getComparator());
     }
     
+    protected void insertColumn(int beforeIndex, SortableColumn<LeaderboardRowDAO, ?> column) {
+        getLeaderboardTable().insertColumn(beforeIndex, column, column.getHeader());
+        listHandler.setComparator(column, column.getComparator());
+    }
+    
     private void loadCompleteLeaderboard(Date date) {
         getSailingService().getLeaderboardByName(getLeaderboardName(), date, 
-                // TODO replace by the list of expanded races once we can expand race columns
-                /* namesOfRacesForWhichToLoadLegDetails */ null,
+                /* namesOfRacesForWhichToLoadLegDetails */ getNamesOfExpandedRaces(),
                 new AsyncCallback<LeaderboardDAO>() {
             @Override
             public void onSuccess(LeaderboardDAO result) {
@@ -392,6 +405,23 @@ public class LeaderboardPanel extends FormPanel {
         });
     }
     
+    /**
+     * Determine from column expansion state which races need their leg details
+     */
+    private Collection<String> getNamesOfExpandedRaces() {
+        Collection<String> namesOfExpandedRaces = new ArrayList<String>();
+        for (int i=0; i<getLeaderboardTable().getColumnCount(); i++) {
+            Column<LeaderboardRowDAO, ?> column = getLeaderboardTable().getColumn(i);
+            if (column instanceof RaceColumn<?>) {
+                RaceColumn<?> raceColumn = (RaceColumn<?>) column;
+                if (raceColumn.isExpanded()) {
+                    namesOfExpandedRaces.add(raceColumn.getRaceName());
+                }
+            }
+        }
+        return namesOfExpandedRaces;
+    }
+
     private void updateLeaderboard(LeaderboardDAO leaderboard) {
         setLeaderboard(leaderboard);
         adjustColumnLayout(leaderboard);
