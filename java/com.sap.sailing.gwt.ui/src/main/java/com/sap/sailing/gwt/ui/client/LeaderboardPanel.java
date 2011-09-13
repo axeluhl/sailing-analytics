@@ -26,6 +26,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
@@ -178,7 +179,7 @@ public class LeaderboardPanel extends FormPanel {
             if (getLeaderboard().getLegCount(getRaceName()) != -1) {
                 callWhenExpansionDataIsLoaded.run();
             } else {
-                getSailingService().getLeaderboardByName(getLeaderboardName(), new Date(),
+                getSailingService().getLeaderboardByName(getLeaderboardName(), getLeaderboardDisplayDate(),
                         /* namesOfRacesForWhichToLoadLegDetails */ getNamesOfExpandedRaces(),
                         new AsyncCallback<LeaderboardDAO>() {
                     @Override
@@ -308,7 +309,7 @@ public class LeaderboardPanel extends FormPanel {
         getData().addDataDisplay(getLeaderboardTable());
         listHandler = new ListHandler<LeaderboardRowDAO>(getData().getList());
         getLeaderboardTable().addColumnSortHandler(listHandler);
-        loadCompleteLeaderboard(new Date());
+        loadCompleteLeaderboard(getLeaderboardDisplayDate());
         VerticalPanel vp = new VerticalPanel();
         HorizontalPanel hp = new HorizontalPanel();
         hp.setSpacing(10);
@@ -318,9 +319,10 @@ public class LeaderboardPanel extends FormPanel {
         refreshButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                loadCompleteLeaderboard(new Date());
+                loadCompleteLeaderboard(getLeaderboardDisplayDate());
             }
         });
+        hp.add(new Image("/images/sap_300_transparent.png"));
         vp.add(hp);
         vp.add(getLeaderboardTable());
         setWidget(vp);
