@@ -20,39 +20,36 @@ import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Header;
-import com.sap.sailing.gwt.ui.client.LeaderboardPanel.RaceColumn;
 
 /**
  * A {@link CellTable} {@link Header} implementation that uses a {@link CompositeCell} containing a
  * {@link TextCell} and optionally an {@link ActionCell} for an expand/close button and an {@link ImageCell}
  * for a medal displayed for medal races.
  */
-public class RaceColumnHeader extends Header<SafeHtml> {
+public class SortableExpandableColumnHeader extends Header<SafeHtml> {
     private static class ExpandCollapseButtonAction implements ActionCell.Delegate<SafeHtml> {
-        private final RaceColumn<?> raceColumn;
-        private final LeaderboardPanel leaderboardPanel;
+        private final ExpandableSortableColumn<?> column;
 
-        private ExpandCollapseButtonAction(LeaderboardPanel leaderboardPanel, RaceColumn<?> raceColumn) {
-            this.raceColumn = raceColumn;
-            this.leaderboardPanel = leaderboardPanel;
+        private ExpandCollapseButtonAction(ExpandableSortableColumn<?> column) {
+            this.column = column;
         }
 
         @Override
         public void execute(SafeHtml object) {
-            leaderboardPanel.toggleExpansion(raceColumn);
+            column.toggleExpansion();
         }
     }
 
-    public RaceColumnHeader(String raceName, boolean medalRace, boolean isLegDrillDownEnabled,
-            LeaderboardPanel leaderboardPanel, RaceColumn<?> raceColumn) {
-        super(constructCell(raceName, medalRace, isLegDrillDownEnabled, leaderboardPanel, raceColumn));
+    public SortableExpandableColumnHeader(String title, String iconURL, LeaderboardPanel leaderboardPanel,
+            ExpandableSortableColumn<?> column) {
+        super(constructCell(title, iconURL, column.isExpansionEnabled(), leaderboardPanel, column));
     }
 
-    private static <T> Cell<SafeHtml> constructCell(final String raceName, boolean medalRace, boolean isLegDrillDownEnabled,
-            final LeaderboardPanel leaderboardPanel, final RaceColumn<?> raceColumn) {
+    private static <T> Cell<SafeHtml> constructCell(final String title, final String iconURL, boolean isExpansionEnabled,
+            final LeaderboardPanel leaderboardPanel, final ExpandableSortableColumn<?> column) {
         final List<HasCell<SafeHtml, ?>> cells = new ArrayList<HasCell<SafeHtml, ?>>(3);
         // if it's a medal race, add the cell rendering the medal image
-        if (medalRace) {
+        if (iconURL != null) {
             cells.add(new HasCell<SafeHtml, String>() {
                 @Override
                 public Cell<String> getCell() {
@@ -66,7 +63,7 @@ public class RaceColumnHeader extends Header<SafeHtml> {
 
                 @Override
                 public String getValue(SafeHtml object) {
-                    return "/images/medal.png";
+                    return iconURL;
                 }
             });
         }
@@ -82,35 +79,39 @@ public class RaceColumnHeader extends Header<SafeHtml> {
             }
             @Override
             public SafeHtml getValue(SafeHtml object) {
-                return new SafeHtmlBuilder().appendEscaped(raceName).toSafeHtml();
+                return new SafeHtmlBuilder().appendEscaped(title).toSafeHtml();
             }
         });
         // add the cell rendering the expand/collapse button:
-        cells.add(new HasCell<SafeHtml, SafeHtml>() {
-            @Override
-            public Cell<SafeHtml> getCell() {
-                return new ActionCell<SafeHtml>("+", new ExpandCollapseButtonAction(leaderboardPanel, raceColumn)) {
-                    /**
-                     * carry out event logic, hence call the delegate's execute(...) operation, then stop propagation
-                     * to avoid the column being sorted when the expand button is pressed
-                     */
-                    @Override
-                    public void onBrowserEvent(Context context, Element parent, SafeHtml value, NativeEvent event,
-                            ValueUpdater<SafeHtml> valueUpdater) {
-                        raceColumn.suppressSortingOnce();
-                        super.onBrowserEvent(context, parent, value, event, valueUpdater);
-                    }
-                };
-            }
-            @Override
-            public FieldUpdater<SafeHtml, SafeHtml> getFieldUpdater() {
-                return null; // no updates possible in a header cell
-            }
-            @Override
-            public SafeHtml getValue(SafeHtml object) {
-                return null;
-            }
-        });
+        if (isExpansionEnabled) {
+            cells.add(new HasCell<SafeHtml, SafeHtml>() {
+                @Override
+                public Cell<SafeHtml> getCell() {
+                    return new ActionCell<SafeHtml>("+", new ExpandCollapseButtonAction(column)) {
+                        /**
+                         * carry out event logic, hence call the delegate's execute(...) operation, then stop
+                         * propagation to avoid the column being sorted when the expand button is pressed
+                         */
+                        @Override
+                        public void onBrowserEvent(Context context, Element parent, SafeHtml value, NativeEvent event,
+                                ValueUpdater<SafeHtml> valueUpdater) {
+                            column.suppressSortingOnce();
+                            super.onBrowserEvent(context, parent, value, event, valueUpdater);
+                        }
+                    };
+                }
+
+                @Override
+                public FieldUpdater<SafeHtml, SafeHtml> getFieldUpdater() {
+                    return null; // no updates possible in a header cell
+                }
+
+                @Override
+                public SafeHtml getValue(SafeHtml object) {
+                    return null;
+                }
+            });
+        }
         return new CompositeCell<SafeHtml>(cells) {
             /**
              * Redefining this method because when a table column is sorted, GWT wraps a div element

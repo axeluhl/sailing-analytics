@@ -50,7 +50,8 @@ Axel
  - come to a reasonable code sharing architecture between GWT client and server logic.
    Example: distances, bearings etc. which is currently handled in com.sap.sailing.domain.base
    may also be useful in the client. However, these classes are not subject to GWT compilation
-   (and may not pass...).
+   (and may not pass...). When done, clean up (among others) the CompositeCollection/CompositeIterable
+   and Pair/Triple clones.
 
  - allow for tail length customization
 
