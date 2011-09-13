@@ -2,21 +2,21 @@ package com.sap.sailing.gwt.ui.client;
 
 import java.util.Comparator;
 
-import com.google.gwt.cell.client.TextCell;
+import com.google.gwt.cell.client.Cell;
 import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.cellview.client.TextHeader;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDAO;
 
-public class LegDetailColumn<T> extends SortableColumn<LeaderboardRowDAO, String> {
+public abstract class LegDetailColumn<FieldType, RenderingType> extends SortableColumn<LeaderboardRowDAO, RenderingType> {
     private final String title;
-    private final LegDetailField<T> field;
+    private final LegDetailField<FieldType> field;
     
     public interface LegDetailField<T> {
         T get(LeaderboardRowDAO row);
     }
     
-    protected LegDetailColumn(String title, LegDetailField<T> field) {
-        super(new TextCell());
+    protected LegDetailColumn(String title, LegDetailField<FieldType> field, Cell<RenderingType> cell) {
+        super(cell);
         setHorizontalAlignment(ALIGN_RIGHT);
         this.title = title;
         this.field = field;
@@ -26,7 +26,7 @@ public class LegDetailColumn<T> extends SortableColumn<LeaderboardRowDAO, String
         return title;
     }
 
-    protected LegDetailField<T> getField() {
+    protected LegDetailField<FieldType> getField() {
         return field;
     }
 
@@ -37,8 +37,8 @@ public class LegDetailColumn<T> extends SortableColumn<LeaderboardRowDAO, String
             public int compare(LeaderboardRowDAO o1, LeaderboardRowDAO o2) {
                 try {
                     @SuppressWarnings("unchecked")
-                    Comparable<T> value1 = (Comparable<T>) field.get(o1);
-                    T value2 = field.get(o2);
+                    Comparable<FieldType> value1 = (Comparable<FieldType>) field.get(o1);
+                    FieldType value2 = field.get(o2);
                     return value1 == null ? value2 == null ? 0 : -1 : value2 == null ? 1 : value1.compareTo(value2);
                 } catch (Exception e) {
                     throw new RuntimeException(e);
@@ -52,9 +52,4 @@ public class LegDetailColumn<T> extends SortableColumn<LeaderboardRowDAO, String
         return new TextHeader(title);
     }
 
-    @Override
-    public String getValue(LeaderboardRowDAO row) {
-        T fieldValue = field.get(row);
-        return fieldValue == null ? "" : fieldValue.toString();
-    }
 }

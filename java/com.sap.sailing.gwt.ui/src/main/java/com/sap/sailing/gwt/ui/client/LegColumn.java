@@ -60,7 +60,7 @@ public class LegColumn extends ExpandableSortableColumn<String> {
                 return null;
             } else {
                 LegEntryDAO previousEntry = getLegEntry(row, getLegIndex()-1);
-                return previousEntry == null ? null : previousEntry.rank - legEntry.rank;
+                return previousEntry == null ? null : legEntry.rank - previousEntry.rank;
             }
         }
     }
@@ -131,7 +131,7 @@ public class LegColumn extends ExpandableSortableColumn<String> {
         try {
             result.add(new FormattedDoubleLegDetailColumn(stringConstants.distanceInMeters(), new DistanceTraveledInMeters(), 1));
             result.add(new FormattedDoubleLegDetailColumn(stringConstants.averageSpeedInKnots(), new AverageSpeedOverGroundInKnots(), 2));
-            result.add(new LegDetailColumn<Integer>(stringConstants.rankGain(), new RankGain()));
+            result.add(new RankGainColumn(stringConstants.rankGain(), new RankGain()));
             return result;
         } catch (Exception e) {
             throw new RuntimeException(e);
