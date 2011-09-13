@@ -1,6 +1,8 @@
 Axel
 ====
 
+ - What's with the medal race sorting? Shouldn't the non-scorers be worse than the scorers?
+
  - Check if this is a bug: when a competitor is selected on the map (e.g., with a mouse-over)
    and the competitor does not show (yet) in the ranking list, it seems that the tool tip on
    the map is not shown. Does the lack to find the competitor in the list result in an

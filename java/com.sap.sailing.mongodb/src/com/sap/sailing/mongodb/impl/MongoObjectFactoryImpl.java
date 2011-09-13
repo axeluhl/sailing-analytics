@@ -125,7 +125,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             BasicDBObject dbCarriedPoints = new BasicDBObject();
             result.put(FieldNames.LEADERBOARD_CARRIED_POINTS.name(), dbCarriedPoints);
             for (Competitor competitor : leaderboard.getCompetitors()) {
-                dbCarriedPoints.put(competitor.getName(), leaderboard.getCarriedPoints(competitor));
+                dbCarriedPoints.put(MongoUtils.escapeDollarAndDot(competitor.getName()), leaderboard.getCarriedPoints(competitor));
             }
         }
         BasicDBObject dbScoreCorrections = new BasicDBObject();
@@ -157,7 +157,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
                         dbCorrectionForCompetitor.put(FieldNames.LEADERBOARD_CORRECTED_SCORE.name(),
                                 explicitScoreCorrection);
                     }
-                    dbCorrectionForRace.put(competitor.getName(), dbCorrectionForCompetitor);
+                    dbCorrectionForRace.put(MongoUtils.escapeDollarAndDot(competitor.getName()), dbCorrectionForCompetitor);
                 }
             }
             if (!dbCorrectionForRace.isEmpty()) {
