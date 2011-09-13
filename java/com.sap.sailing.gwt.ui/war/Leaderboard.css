@@ -40,3 +40,7 @@ h1 {
 .errorLabel {
 	color: #FF0000;
 }
+
+a img {
+	border: none;
+}

@@ -22,12 +22,11 @@ import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.ColumnSortList.ColumnSortInfo;
 import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.cellview.client.TextHeader;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
@@ -325,15 +324,10 @@ public class LeaderboardPanel extends FormPanel {
         VerticalPanel vp = new VerticalPanel();
         HorizontalPanel hp = new HorizontalPanel();
         hp.setSpacing(10);
-        Image sapLogo = new Image("/images/sap_66_transparent.png");
-        sapLogo.setTitle(stringConstants.sapSailingAnalytics());
-        sapLogo.setAltText(stringConstants.sapSailingAnalytics());
-        sapLogo.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                Window.Location.assign("http://www.sap.com");
-            }
-        });
+        Anchor sapLogo = new Anchor(new SafeHtmlBuilder().appendHtmlConstant("<img src=\"/images/sap_66_transparent.png\"/>").toSafeHtml());
+        sapLogo.setHref("http://www.sap.com");
+        sapLogo.removeStyleName("a");
+        sapLogo.setStyleName("linkNoBorder");
         hp.add(sapLogo);
         hp.add(new Label(leaderboardName));
         Button refreshButton = new Button(stringConstants.refresh());
