@@ -87,7 +87,7 @@ public class SortableExpandableColumnHeader extends Header<SafeHtml> {
             cells.add(new HasCell<SafeHtml, SafeHtml>() {
                 @Override
                 public Cell<SafeHtml> getCell() {
-                    return new ActionCell<SafeHtml>("+", new ExpandCollapseButtonAction(column)) {
+                    return new ActionCell<SafeHtml>(column.isExpanded() ? "-" : "+", new ExpandCollapseButtonAction(column)) {
                         /**
                          * carry out event logic, hence call the delegate's execute(...) operation, then stop
                          * propagation to avoid the column being sorted when the expand button is pressed

@@ -129,7 +129,7 @@ public abstract class ExpandableSortableColumn<C> extends SortableColumn<Leaderb
      */
     public void toggleExpansion() {
         if (isExpansionEnabled()) {
-            CellTable<LeaderboardRowDAO> table = getLeaderboardPanel().getLeaderboardTable();
+            final CellTable<LeaderboardRowDAO> table = getLeaderboardPanel().getLeaderboardTable();
             if (isExpanded()) {
                 for (SortableColumn<LeaderboardRowDAO, ?> column : getAllVisibleChildren()) {
                     int columnIndex = table.getColumnIndex(column);
@@ -143,12 +143,29 @@ public abstract class ExpandableSortableColumn<C> extends SortableColumn<Leaderb
             } else {
                 // important: toggle expanded state before asking for all visible children
                 setExpanded(!isExpanded());
-                int insertIndex = table.getColumnIndex(this)+1;
-                for (SortableColumn<LeaderboardRowDAO, ?> column : getAllVisibleChildren()) {
-                    getLeaderboardPanel().insertColumn(insertIndex++, column); 
-                }
+                ensureExpansionDataIsLoaded(new Runnable() {
+                    public void run() {
+                        int insertIndex = table.getColumnIndex(ExpandableSortableColumn.this) + 1;
+                        for (SortableColumn<LeaderboardRowDAO, ?> column : getAllVisibleChildren()) {
+                            getLeaderboardPanel().insertColumn(insertIndex++, column);
+                        }
+                    }
+                });
             }
         }
+    }
+
+    /**
+     * Called to ensure that all data necessary to display the expanded data of this column is actually loaded.
+     * If this is not yet the case, an asynchronous call to the server may be required that subclasses have to
+     * implement. When the data has successfully been loaded, <code>callWhenExpansionDataIsLoaded</code>'s
+     * {@link Runnable#run() run} method must be called to create.<p>
+     * 
+     * This default implementation assumes that all data necessary is already loaded and therefore immediately
+     * calls <code>callWhenExpansionDataIsLoaded.run()</code>.
+     */
+    protected void ensureExpansionDataIsLoaded(Runnable callWhenExpansionDataIsLoaded) {
+        callWhenExpansionDataIsLoaded.run();
     }
 
     @Override

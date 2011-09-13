@@ -175,8 +175,29 @@ public class LeaderboardPanel extends FormPanel {
         }
 
         @Override
+        protected void ensureExpansionDataIsLoaded(final Runnable callWhenExpansionDataIsLoaded) {
+            if (getLeaderboard().getLegCount(getRaceName()) != -1) {
+                callWhenExpansionDataIsLoaded.run();
+            } else {
+                getSailingService().getLeaderboardByName(getLeaderboardName(), new Date(),
+                        /* namesOfRacesForWhichToLoadLegDetails */ getNamesOfExpandedRaces(),
+                        new AsyncCallback<LeaderboardDAO>() {
+                    @Override
+                    public void onSuccess(LeaderboardDAO result) {
+                        updateLeaderboard(result);
+                        callWhenExpansionDataIsLoaded.run();
+                    }
+                    
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        getErrorReporter().reportError("Error trying to obtain leaderboard contents: "+caught.getMessage());
+                    }
+                });
+            }
+        }
+
+        @Override
         protected List<SortableColumn<LeaderboardRowDAO, ?>> createExpansionColumns() {
-            // TODO if the leg data hasn't been loaded yet, do so now; this has to happen asynchronously...
             int legCount = getLeaderboard().getLegCount(getRaceName());
             List<SortableColumn<LeaderboardRowDAO, ?>> result = new ArrayList<SortableColumn<LeaderboardRowDAO,?>>();
             for (int i=0; i<legCount; i++) {
