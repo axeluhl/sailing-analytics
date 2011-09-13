@@ -176,7 +176,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             for (String competitorName : carriedPoints.keySet()) {
                 Integer carriedPointsForCompetitor = (Integer) carriedPoints.get(competitorName);
                 if (carriedPointsForCompetitor != null) {
-                    result.setCarriedPoints(competitorName, carriedPointsForCompetitor);
+                    result.setCarriedPoints(MongoUtils.unescapeDollarAndDot(competitorName), carriedPointsForCompetitor);
                 }
             }
         }
@@ -187,12 +187,12 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 RaceInLeaderboard raceColumn = result.getRaceColumnByName(raceName);
                 DBObject dbScoreCorrectionForCompetitorInRace = (DBObject) dbScoreCorrectionForRace.get(competitorName);
                 if (dbScoreCorrectionForCompetitorInRace.containsField(FieldNames.LEADERBOARD_SCORE_CORRECTION_MAX_POINTS_REASON.name())) {
-                    result.setMaxPointsReason(competitorName, raceColumn, MaxPointsReason
+                    result.setMaxPointsReason(MongoUtils.unescapeDollarAndDot(competitorName), raceColumn, MaxPointsReason
                             .valueOf((String) dbScoreCorrectionForCompetitorInRace
                                     .get(FieldNames.LEADERBOARD_SCORE_CORRECTION_MAX_POINTS_REASON.name())));
                 }
                 if (dbScoreCorrectionForCompetitorInRace.containsField(FieldNames.LEADERBOARD_CORRECTED_SCORE.name())) {
-                    result.correctScore(competitorName, raceColumn, (Integer) dbScoreCorrectionForCompetitorInRace
+                    result.correctScore(MongoUtils.unescapeDollarAndDot(competitorName), raceColumn, (Integer) dbScoreCorrectionForCompetitorInRace
                                     .get(FieldNames.LEADERBOARD_CORRECTED_SCORE.name()));
                 }
             }
