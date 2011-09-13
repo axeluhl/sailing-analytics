@@ -110,9 +110,10 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             TimePoint timePoint = new MillisecondsTimePoint(date);
             result.competitors = new ArrayList<CompetitorDAO>();
             result.name = leaderboard.getName();
-            result.raceNamesAndMedalRace = new LinkedHashMap<String, Boolean>();
+            result.raceNamesAndMedalRaceAndTracked = new LinkedHashMap<String, Pair<Boolean, Boolean>>();
             for (RaceInLeaderboard raceColumn : leaderboard.getRaceColumns()) {
-                result.raceNamesAndMedalRace.put(raceColumn.getName(), raceColumn.isMedalRace());
+                result.raceNamesAndMedalRaceAndTracked.put(raceColumn.getName(),
+                        new Pair<Boolean, Boolean>(raceColumn.isMedalRace(), raceColumn.getTrackedRace()!=null));
             }
             result.rows = new HashMap<CompetitorDAO, LeaderboardRowDAO>();
             result.hasCarriedPoints = leaderboard.hasCarriedPoints();

@@ -18,7 +18,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 public class LeaderboardDAO implements IsSerializable {
     public String name;
     public List<CompetitorDAO> competitors;
-    public LinkedHashMap<String, Boolean> raceNamesAndMedalRace;
+    public LinkedHashMap<String, Pair<Boolean, Boolean>> raceNamesAndMedalRaceAndTracked;
     public Map<CompetitorDAO, LeaderboardRowDAO> rows;
     public boolean hasCarriedPoints;
     public int[] discardThresholds;
@@ -35,6 +35,20 @@ public class LeaderboardDAO implements IsSerializable {
     public TotalRankingComparator getTotalRankingComparator() {
         return totalRankingComparator;
     }
+    
+    /**
+     * If the race whose name is specified in <code>raceName</code> has any competitor who has valid {@link LeaderboardEntryDAO#legDetails}
+     * for that race, the number of entries in the leg details is returned, telling the number of legs that the race has. Otherwise,
+     * -1 is returned.
+     */
+    public int getLegCount(String raceName) {
+        for (LeaderboardRowDAO row : rows.values()) {
+            if (row.fieldsByRaceName.get(raceName) != null && row.fieldsByRaceName.get(raceName).legDetails != null) {
+                return row.fieldsByRaceName.get(raceName).legDetails.size();
+            }
+        }
+        return -1;
+    }
 
     /**
      * Tells if the <code>competitor</code> scored (and therefore presumably participated) in a medal race
@@ -42,8 +56,8 @@ public class LeaderboardDAO implements IsSerializable {
      */
     public boolean scoredInMedalRace(CompetitorDAO competitor) {
         LeaderboardRowDAO row = rows.get(competitor);
-        for (Map.Entry<String, Boolean> raceNameAndMedalRace : raceNamesAndMedalRace.entrySet()) {
-            if (raceNameAndMedalRace.getValue() && row.fieldsByRaceName.get(raceNameAndMedalRace.getKey()).totalPoints > 0) {
+        for (Map.Entry<String, Pair<Boolean, Boolean>> raceNameAndMedalRace : raceNamesAndMedalRaceAndTracked.entrySet()) {
+            if (raceNameAndMedalRace.getValue().getA() && row.fieldsByRaceName.get(raceNameAndMedalRace.getKey()).totalPoints > 0) {
                 return true;
             }
         }

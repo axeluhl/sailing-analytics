@@ -73,10 +73,10 @@ public class ParseTracTracJSONServiceOutputTest {
                 "http://germanmaster.traclive.dk/events/event_20110505_SailingTea/jsonservice.php"));
         assertEquals("Sailing Team Germany", jsonService.getEventName());
         List<RaceRecord> races = jsonService.getRaceRecords();
-        assertEquals(27, races.size());
+        assertEquals(28, races.size());
         for (RaceRecord race : races) {
             assertNotNull(race.getReplayURL());
-            assertTrue(race.getName().startsWith("weym") || race.getName().startsWith("kiwo"));
+            assertTrue(race.getName().startsWith("weym") || race.getName().startsWith("kiwo") || race.getName().startsWith("schwerttest"));
         }
     }
 

@@ -14,5 +14,5 @@ public abstract class SortableColumn<T, C> extends Column<T, C> {
     
     public abstract Comparator<T> getComparator();
     
-    public abstract Header<String> getHeader();
+    public abstract Header<?> getHeader();
 }

@@ -251,7 +251,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
                 @Override
                 public void onSuccess(Void arg0) {
                     columnNamesInSelectedLeaderboardListBox.removeItem(selectedIndex);
-                    selectedLeaderboard.raceNamesAndMedalRace.remove(selectedRaceColumnName);
+                    selectedLeaderboard.raceNamesAndMedalRaceAndTracked.remove(selectedRaceColumnName);
                     selectedLeaderboard.invalidateCompetitorOrdering();
                 }
             });
@@ -296,10 +296,10 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
                                             public void onSuccess(Void v) {
                                                 columnNamesInSelectedLeaderboardListBox.setItemText(selectedIndex,
                                                         newColumnName);
-                                                selectedLeaderboard.raceNamesAndMedalRace.put(newColumnName,
-                                                        selectedLeaderboard.raceNamesAndMedalRace
+                                                selectedLeaderboard.raceNamesAndMedalRaceAndTracked.put(newColumnName,
+                                                        selectedLeaderboard.raceNamesAndMedalRaceAndTracked
                                                                 .get(selectedRaceColumnName));
-                                                selectedLeaderboard.raceNamesAndMedalRace
+                                                selectedLeaderboard.raceNamesAndMedalRaceAndTracked
                                                         .remove(selectedRaceColumnName);
                                             }
                                         });
@@ -313,7 +313,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
     private void leaderboardRaceColumnSelectionChanged() {
         String selectedRaceColumnName = getSelectedRaceColumnName();
         if (selectedRaceColumnName != null) {
-            medalRaceCheckBox.setValue(selectedLeaderboard.raceNamesAndMedalRace.get(selectedRaceColumnName));
+            medalRaceCheckBox.setValue(selectedLeaderboard.raceNamesAndMedalRaceAndTracked.get(selectedRaceColumnName).getA());
             columnRenameButton.setEnabled(true);
             columnRemoveButton.setEnabled(true);
             selectTrackedRaceInRaceTree();
@@ -388,7 +388,9 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
                             @Override
                             public void onSuccess(Void v) {
                                 columnNamesInSelectedLeaderboardListBox.addItem(columnNameAndMedalRace.getA());
-                                selectedLeaderboard.raceNamesAndMedalRace.put(columnNameAndMedalRace.getA(), columnNameAndMedalRace.getB());
+                                selectedLeaderboard.raceNamesAndMedalRaceAndTracked.put(columnNameAndMedalRace.getA(),
+                                        new Pair<Boolean, Boolean>(/* medal race */ columnNameAndMedalRace.getB(),
+                                                /* tracked */ false));
                                 selectedLeaderboard.invalidateCompetitorOrdering();
                             }
                         });
@@ -521,7 +523,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
             discardThresholdLabelsForSelectedLeaderboard[i++].setText("");
         }
         columnNamesInSelectedLeaderboardListBox.clear();
-        for (String columnName : selectedLeaderboard.raceNamesAndMedalRace.keySet()) {
+        for (String columnName : selectedLeaderboard.raceNamesAndMedalRaceAndTracked.keySet()) {
             columnNamesInSelectedLeaderboardListBox.addItem(columnName);
         }
         leaderboardRaceColumnSelectionChanged();
