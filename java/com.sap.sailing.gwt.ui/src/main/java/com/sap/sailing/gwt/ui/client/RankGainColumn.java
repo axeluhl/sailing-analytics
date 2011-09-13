@@ -29,12 +29,15 @@ public class RankGainColumn extends LegDetailColumn<Integer, Integer> {
                 @Override
                 public void render(Integer rankDelta, SafeHtmlBuilder builder) {
                     if (rankDelta != null) {
+                        builder.append(Math.abs(rankDelta));
+                        builder.appendHtmlConstant("&nbsp;");
                         if (rankDelta < 0) {
                             builder.appendHtmlConstant("<img src=\"/images/arrow-gain.png\"/>");
                         } else if (rankDelta > 0) {
                             builder.appendHtmlConstant("<img src=\"/images/arrow-loss.png\"/>");
+                        } else {
+                            builder.appendHtmlConstant("<img src=\"/images/arrow-gain-loss.png\"/>");
                         }
-                        builder.append(Math.abs(rankDelta));
                     }
                 }
             });
@@ -42,7 +45,9 @@ public class RankGainColumn extends LegDetailColumn<Integer, Integer> {
 
         @Override
         protected void render(com.google.gwt.cell.client.Cell.Context context, SafeHtml data, SafeHtmlBuilder sb) {
-            sb.append(data);
+            if (data != null) {
+                sb.append(data);
+            }
         }
     }
 
