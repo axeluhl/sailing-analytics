@@ -32,8 +32,12 @@ public class LeaderboardDAO implements IsSerializable {
         competitorsOrderedAccordingToTotalRank = false;
     }
     
-    public TotalRankingComparator getTotalRankingComparator() {
+    public Comparator<LeaderboardRowDAO> getTotalRankingComparator() {
         return totalRankingComparator;
+    }
+    
+    public Comparator<LeaderboardRowDAO> getMedalRaceComparator(String medalRaceName) {
+        return new MedalRaceComparator(medalRaceName);
     }
     
     /**
@@ -91,6 +95,38 @@ public class LeaderboardDAO implements IsSerializable {
                 } else {
                     // neither one scored in any medal race
                     result = getTotalPoints(o1) - getTotalPoints(o2);
+                }
+                
+            }
+            return result;
+        }
+    }
+    
+    private class MedalRaceComparator implements Comparator<LeaderboardRowDAO> {
+        private final String medalRaceName;
+        
+        public MedalRaceComparator(String medalRaceName) {
+            this.medalRaceName = medalRaceName;
+        }
+
+        @Override
+        public int compare(LeaderboardRowDAO o1, LeaderboardRowDAO o2) {
+            int result;
+            if (scoredInMedalRace(o1.competitor)) {
+                if (scoredInMedalRace(o2.competitor)) {
+                    // both scored in medal race
+                    result = o1.fieldsByRaceName.get(medalRaceName).netPoints - o2.fieldsByRaceName.get(medalRaceName).netPoints;
+                } else {
+                    // only o1 scored in medal race, so o1 scores better = "less"
+                    result = -1;
+                }
+            } else {
+                if (scoredInMedalRace(o2.competitor)) {
+                    // only o2 scored in medal race, so o2 scores better, o1 scores worse = "greater"
+                    result = 1;
+                } else {
+                    // neither one scored in any medal race; to be considered equal for medal race comparison
+                    result = 0;
                 }
                 
             }
