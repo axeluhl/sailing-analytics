@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.client;
 
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.i18n.client.NumberFormat;
+import com.google.gwt.user.cellview.client.CellTable;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDAO;
 
 public class FormattedDoubleLegDetailColumn extends LegDetailColumn<Double, String> {
@@ -9,8 +10,8 @@ public class FormattedDoubleLegDetailColumn extends LegDetailColumn<Double, Stri
     
     public FormattedDoubleLegDetailColumn(String title,
             com.sap.sailing.gwt.ui.client.LegDetailColumn.LegDetailField<Double> field,
-            int decimals) {
-        super(title, field, new TextCell());
+            int decimals, CellTable<LeaderboardRowDAO> leaderboardTable) {
+        super(title, field, new TextCell(), leaderboardTable);
         StringBuilder patternBuilder = new StringBuilder("0");
         if (decimals > 0) {
             patternBuilder.append('.');

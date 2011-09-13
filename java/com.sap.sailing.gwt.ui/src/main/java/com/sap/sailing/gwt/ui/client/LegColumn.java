@@ -100,18 +100,13 @@ public class LegColumn extends ExpandableSortableColumn<String> {
         return new Comparator<LeaderboardRowDAO>() {
             @Override
             public int compare(LeaderboardRowDAO o1, LeaderboardRowDAO o2) {
-                return safeGetLegRank(o1) - safeGetLegRank(o2);
+                boolean ascending = isSortedAscendingForThisColumn(getLeaderboardPanel().getLeaderboardTable());
+                LegEntryDAO o1Entry = getLegEntry(o1);
+                LegEntryDAO o2Entry = getLegEntry(o2);
+                return o1Entry == null ? o2Entry == null ? 0 : ascending?1:-1
+                                       : o2Entry == null ? ascending?-1:1 : o1Entry.rank - o2Entry.rank;
             }
         };
-    }
-
-    private int safeGetLegRank(LeaderboardRowDAO row) {
-        int result = 0;
-        LegEntryDAO legEntry = getLegEntry(row);
-        if (legEntry != null) {
-            result = legEntry.rank;
-        }
-        return result;
     }
 
     @Override
@@ -122,16 +117,21 @@ public class LegColumn extends ExpandableSortableColumn<String> {
     
     @Override
     public String getValue(LeaderboardRowDAO row) {
-        return ""+safeGetLegRank(row);
+        LegEntryDAO legEntry = getLegEntry(row);
+        if (legEntry != null) {
+            return ""+legEntry.rank;
+        } else {
+            return "";
+        }
     }
 
     @Override
     protected List<SortableColumn<LeaderboardRowDAO, ?>> createExpansionColumns() {
         List<SortableColumn<LeaderboardRowDAO, ?>> result = new ArrayList<SortableColumn<LeaderboardRowDAO,?>>();
         try {
-            result.add(new FormattedDoubleLegDetailColumn(stringConstants.distanceInMeters(), new DistanceTraveledInMeters(), 1));
-            result.add(new FormattedDoubleLegDetailColumn(stringConstants.averageSpeedInKnots(), new AverageSpeedOverGroundInKnots(), 2));
-            result.add(new RankGainColumn(stringConstants.rankGain(), new RankGain()));
+            result.add(new FormattedDoubleLegDetailColumn(stringConstants.distanceInMeters(), new DistanceTraveledInMeters(), 1, getLeaderboardPanel().getLeaderboardTable()));
+            result.add(new FormattedDoubleLegDetailColumn(stringConstants.averageSpeedInKnots(), new AverageSpeedOverGroundInKnots(), 2, getLeaderboardPanel().getLeaderboardTable()));
+            result.add(new RankGainColumn(stringConstants.rankGain(), new RankGain(), getLeaderboardPanel().getLeaderboardTable()));
             return result;
         } catch (Exception e) {
             throw new RuntimeException(e);

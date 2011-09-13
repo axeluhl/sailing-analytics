@@ -65,4 +65,5 @@ public interface StringConstants extends Constants {
     String distanceInMeters();
     String averageSpeedInKnots();
     String rankGain();
+    String sapSailingAnalytics();
 }
