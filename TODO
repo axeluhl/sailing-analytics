@@ -1,6 +1,8 @@
 Axel
 ====
 
+ - Show corrected scores in leaderboard even if race is not tracked
+
  - Finish a first draft version of a GWT admin and leaderboard UI
 
    * implement a smart incremental update capability for leaderboard

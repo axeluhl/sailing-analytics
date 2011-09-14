@@ -181,9 +181,8 @@ public class LeaderboardImpl implements Named, Leaderboard {
 
     @Override
     public int getNetPoints(Competitor competitor, RaceInLeaderboard raceColumn, TimePoint timePoint) throws NoWindException {
-        return raceColumn.getTrackedRace() == null ? 0 : getScoreCorrection().getCorrectedScore(
-                getTrackedPoints(competitor, raceColumn, timePoint), competitor, raceColumn, timePoint)
-                .getCorrectedScore();
+        return getScoreCorrection().getCorrectedScore(getTrackedPoints(competitor, raceColumn, timePoint), competitor,
+                raceColumn, timePoint).getCorrectedScore();
     }
     
     

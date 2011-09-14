@@ -534,6 +534,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                         Bearing bearing = track.getEstimatedSpeed(timePoint).getBearing();
                         BearingCluster[] bearingClusters = bearings.get(legType);
                         // add to the cluster "closest" to the fix
+                        // FIXME this would cluster the first two bearings even if on the same side; add all to the same cluster and split afterwards
                         if (bearingClusters[0].getDifferenceFromAverage(bearing) <= bearingClusters[1].getDifferenceFromAverage(bearing)) {
                             bearingClusters[0].add(bearing);
                         } else {
