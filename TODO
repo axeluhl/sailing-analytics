@@ -1,19 +1,12 @@
 Axel
 ====
 
- - Check if this is a bug: when a competitor is selected on the map (e.g., with a mouse-over)
-   and the competitor does not show (yet) in the ranking list, it seems that the tool tip on
-   the map is not shown. Does the lack to find the competitor in the list result in an
-   exception?
-
  - Finish a first draft version of a GWT admin and leaderboard UI
 
-   * allow a column to specify its preferred sorting order (ascending / descending)
    * implement a smart incremental update capability for leaderboard
    * adjustable delay and time per leaderboard
+   * allow a column to specify its preferred sorting order (ascending / descending)
    * consider a per-user preferences page where leaderboard columns can be personalized at runtime
-   * mark position entry capability, supporting "lost mark tracker" use case
-   * "top" display, with time slider
 
  - Add user authentication and authorization as well as a role model. Typical roles: spectator (anonymous
    and identified), moderator, administrator
@@ -27,6 +20,8 @@ Axel
 
  - clarify how to marshal exceptions across a GWT/RPC call properly
 
+ - mark position entry capability, supporting "lost mark tracker" use case
+
  - refactor DAOs to use getters/setters and encapsulate LeaderboardDAO ranking logic so it's safe
 
  - allow a user to set a display name for a competitor that may differ from the name that
@@ -39,6 +34,11 @@ Axel
  - Estimate wind not only based on a snapshot in time but also on a time interval, looking for
    maneuvers. Assuming that the wind doesn't change radically, averaging over an n seconds interval
    with n, e.g., being 30s, maneuvers should help in detecting wind direction.
+
+ - Check if this is a bug: when a competitor is selected on the map (e.g., with a mouse-over)
+   and the competitor does not show (yet) in the ranking list, it seems that the tool tip on
+   the map is not shown. Does the lack to find the competitor in the list result in an
+   exception?
 
  - Use wind estimator to feed another wind track
 
