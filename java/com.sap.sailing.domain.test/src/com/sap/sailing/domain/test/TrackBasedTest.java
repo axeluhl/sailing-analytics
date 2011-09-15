@@ -30,7 +30,7 @@ import com.sap.sailing.domain.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.tracking.impl.TrackedEventImpl;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 
-public class TrackBasedTest {
+public abstract class TrackBasedTest {
     private DynamicTrackedRace trackedRace;
     
     protected DynamicTrackedRace getTrackedRace() {

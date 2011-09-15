@@ -137,4 +137,16 @@ public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest 
         assertEquals(177.5, estimatedWindDirection.getBearing().getDegrees(), 0.00000001);
     }
 
+    @Test
+    public void testWindEstimationForFourBoats() throws NoWindException {
+        initRace(4, new int[] { 1, 1, 2, 2 });
+        MillisecondsTimePoint now = MillisecondsTimePoint.now();
+        setBearingForCompetitor(competitors.get(0), now, 315);
+        setBearingForCompetitor(competitors.get(1), now, 50); // on the same tack, should give no read-out
+        setBearingForCompetitor(competitors.get(2), now, 135);
+        setBearingForCompetitor(competitors.get(3), now, 220); // on the same tack, should give no read-out
+        Wind estimatedWindDirection = getTrackedRace().getEstimatedWindDirection(/* position */ null, now);
+        assertEquals(180., estimatedWindDirection.getBearing().getDegrees(), 0.00000001);
+    }
+
 }
