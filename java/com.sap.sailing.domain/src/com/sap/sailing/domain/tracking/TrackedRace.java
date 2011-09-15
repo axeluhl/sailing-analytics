@@ -201,7 +201,7 @@ public interface TrackedRace {
      * Determines whether the <code>competitor</code> is sailing on port or starboard tack at the
      * <code>timePoint</code> requested.
      */
-    Tack getTack(Competitor competitor, TimePoint timePoint) throws NoWindException;
+    Tack getTack(Competitor competitor, TimePoint timePoint);
 
     TrackedEvent getTrackedEvent();
 }

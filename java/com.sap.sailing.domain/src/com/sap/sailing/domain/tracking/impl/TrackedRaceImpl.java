@@ -597,7 +597,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
      * For the unlikely case of 0 degrees difference, {@link Tack#STARBOARD} will result.
      */
     @Override
-    public Tack getTack(Competitor competitor, TimePoint timePoint) throws NoWindException {
+    public Tack getTack(Competitor competitor, TimePoint timePoint) {
         Bearing wind = getWind(getTrack(competitor).getEstimatedPosition(timePoint, /* extrapolate */ false), timePoint).getBearing();
         Bearing boat = getTrack(competitor).getEstimatedSpeed(timePoint).getBearing();
         Bearing difference = wind.getDifferenceTo(boat);
