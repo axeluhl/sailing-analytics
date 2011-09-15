@@ -9,6 +9,7 @@ import com.sap.sailing.domain.base.Distance;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.Tack;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.Waypoint;
 
@@ -195,6 +196,12 @@ public interface TrackedRace {
      * which it has to know where the wind is comoing from.
      */
     Wind getEstimatedWindDirection(Position position, TimePoint timePoint) throws NoWindException;
+    
+    /**
+     * Determines whether the <code>competitor</code> is sailing on port or starboard tack at the
+     * <code>timePoint</code> requested.
+     */
+    Tack getTack(Competitor competitor, TimePoint timePoint) throws NoWindException;
 
     TrackedEvent getTrackedEvent();
 }

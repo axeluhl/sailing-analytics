@@ -19,6 +19,7 @@ import com.sap.sailing.domain.base.Distance;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.Tack;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.DegreeBearingImpl;
@@ -571,6 +572,36 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         }
         return new WindImpl(null, timePoint,
                 new KnotSpeedWithBearingImpl(/* speedInKnots */ 1, new DegreeBearingImpl(bearingDeg)));
+    }
+    
+    /**
+     * This is probably best explained by example. If the wind bearing is from port to starboard, the situation looks
+     * like this:
+     * 
+     * <pre>
+     *                                 ^
+     *                 Wind            | Boat
+     *               ----------->      |
+     *                                 |
+     * 
+     * </pre>
+     * 
+     * In this case, the boat's sails will be on the starboard side, so the result has to be {@link Tack#STARBOARD}. The
+     * angle between the boat's heading (which we can only approximate by the boat's bearing) and the wind bearing in
+     * this case is 90 degrees. <code>wind.{@link Bearing#getDifferenceTo(Bearing) getDifferenceTo}(boat)</code>
+     * in this case will return a bearing representing -90 degrees.<p>
+     * 
+     * If the wind is blowing the other way, the angle returned by {@link Bearing#getDifferenceTo(Bearing)} will correspond
+     * to +90 degrees. In other words, a negative angle means starboard tack, a positive angle represents port tack.<p>
+     * 
+     * For the unlikely case of 0 degrees difference, {@link Tack#STARBOARD} will result.
+     */
+    @Override
+    public Tack getTack(Competitor competitor, TimePoint timePoint) throws NoWindException {
+        Bearing wind = getWind(getTrack(competitor).getEstimatedPosition(timePoint, /* extrapolate */ false), timePoint).getBearing();
+        Bearing boat = getTrack(competitor).getEstimatedSpeed(timePoint).getBearing();
+        Bearing difference = wind.getDifferenceTo(boat);
+        return difference.getDegrees() <= 0 ? Tack.STARBOARD : Tack.PORT;
     }
 
     @Override

@@ -103,6 +103,7 @@ public abstract class StoredTrackBasedTest {
         DynamicTrackedRace trackedRace = new DynamicTrackedRaceImpl(trackedEvent, race, EmptyWindStore.INSTANCE,
                 /* millisecondsOverWhichToAverageWind */ 30000, /* millisecondsOverWhichToAverageSpeed */ 30000);
         trackedRace.setWindSource(WindSource.WEB);
+        // in this simplified artificial course, the top mark is exactly north of the right leeward gate
         DegreePosition topPosition = new DegreePosition(54.48, 10.24);
         trackedRace.getTrack(left).addGPSFix(new GPSFixImpl(new DegreePosition(54.4680424, 10.234451), new MillisecondsTimePoint(0)));
         trackedRace.getTrack(right).addGPSFix(new GPSFixImpl(new DegreePosition(54.4680424, 10.24), new MillisecondsTimePoint(0)));

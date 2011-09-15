@@ -10,6 +10,7 @@ import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.Tack;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.tracking.DynamicTrack;
@@ -370,4 +371,11 @@ public class MockedTrackedRace implements DynamicTrackedRace {
         // TODO Auto-generated method stub
         return null;
     }
+
+    @Override
+    public Tack getTack(Competitor competitor, TimePoint timePoint) throws NoWindException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }
