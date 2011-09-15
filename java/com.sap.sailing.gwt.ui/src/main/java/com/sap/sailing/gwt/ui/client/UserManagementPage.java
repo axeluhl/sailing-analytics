@@ -42,6 +42,4 @@ public class UserManagementPage extends AbstractEntryPoint {
         vp.add(ok);
         linkEnterToButton(ok, usernameField, passwordField);
     }
-
 }
-// Velum (MySQL, CSV Export); Standard fuer Regatta-Management, Ergebnisdienst
