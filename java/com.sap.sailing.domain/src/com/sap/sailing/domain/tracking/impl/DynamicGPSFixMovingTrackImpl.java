@@ -42,7 +42,7 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends DynamicTrackImpl<Ite
         // TODO factor out the obtaining of relevant fixes which should be the same in super.getEstimatedSpeed(at)
         DummyGPSFixMoving atTimed = new DummyGPSFixMoving(at);
         NavigableSet<GPSFixMoving> beforeSet = getInternalFixes().headSet(atTimed, /* inclusive */ true);
-        NavigableSet<GPSFixMoving> afterSet = getInternalFixes().tailSet(atTimed, /* inclusive */ true);
+        NavigableSet<GPSFixMoving> afterSet = getInternalFixes().tailSet(atTimed, /* inclusive */ false);
         List<GPSFixMoving> relevantFixes = new LinkedList<GPSFixMoving>();
         for (GPSFixMoving beforeFix : beforeSet.descendingSet()) {
             if (at.asMillis() - beforeFix.getTimePoint().asMillis() > getMillisecondsOverWhichToAverage()/2) {

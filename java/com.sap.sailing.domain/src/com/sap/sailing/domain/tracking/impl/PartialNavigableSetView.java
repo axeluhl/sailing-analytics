@@ -376,4 +376,8 @@ public abstract class PartialNavigableSetView<E> implements NavigableSet<E> {
         }
     }
 
+    @Override
+    public String toString() {
+        return new ArrayList<E>(this).toString();
+    }
 }

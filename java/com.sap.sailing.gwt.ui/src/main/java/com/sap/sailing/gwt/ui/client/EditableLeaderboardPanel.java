@@ -14,6 +14,7 @@ import com.google.gwt.cell.client.SelectionCell;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDAO;
+import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDAO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDAO;
 import com.sap.sailing.gwt.ui.shared.Pair;
 
@@ -137,7 +138,11 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
 
         @Override
         public String getValue(LeaderboardRowDAO object) {
-            String reasonForMaxPoints = object.fieldsByRaceName.get(raceName).reasonForMaxPoints;
+            LeaderboardEntryDAO leaderboardEntryDAO = object.fieldsByRaceName.get(raceName);
+            String reasonForMaxPoints = null;
+            if (leaderboardEntryDAO != null) {
+                reasonForMaxPoints = leaderboardEntryDAO.reasonForMaxPoints;
+            }
             return reasonForMaxPoints == null ? "" : reasonForMaxPoints;
         }
     }
@@ -189,7 +194,12 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
 
         @Override
         public String getValue(LeaderboardRowDAO object) {
-            return ""+object.fieldsByRaceName.get(raceName).netPoints;
+            LeaderboardEntryDAO leaderboardEntryDAO = object.fieldsByRaceName.get(raceName);
+            String result = "";
+            if (leaderboardEntryDAO != null) {
+                result = result+leaderboardEntryDAO.netPoints;
+            }
+            return result;
         }
     }
 

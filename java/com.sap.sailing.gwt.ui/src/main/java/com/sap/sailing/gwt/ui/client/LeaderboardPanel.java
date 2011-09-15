@@ -324,10 +324,8 @@ public class LeaderboardPanel extends FormPanel {
         VerticalPanel vp = new VerticalPanel();
         HorizontalPanel hp = new HorizontalPanel();
         hp.setSpacing(10);
-        Anchor sapLogo = new Anchor(new SafeHtmlBuilder().appendHtmlConstant("<img src=\"/images/sap_66_transparent.png\"/>").toSafeHtml());
+        Anchor sapLogo = new Anchor(new SafeHtmlBuilder().appendHtmlConstant("<img class=\"linkNoBorder\" src=\"/images/sap_66_transparent.png\"/>").toSafeHtml());
         sapLogo.setHref("http://www.sap.com");
-        sapLogo.removeStyleName("a");
-        sapLogo.setStyleName("linkNoBorder");
         hp.add(sapLogo);
         hp.add(new Label(leaderboardName));
         Button refreshButton = new Button(stringConstants.refresh());

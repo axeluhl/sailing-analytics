@@ -477,7 +477,8 @@ into one in the future.
 			  "latdeg": ...,    // boat position
 			  "lngdeg": ...,
 			  "truebearingdeg": ...,   // true boat bearing in degrees
-			  "knotspeed": ... } ... ] // boat speed in knots
+			  "knotspeed": ...,        // boat speed in knots
+                          "tack": [STARBOARD|PORT] } ... ] // side on which sails are
 		        } ... ] }
     eventname:    name of the event, as returned by the "listevents"
     		  action on the /moderator servlet

@@ -24,6 +24,17 @@ public abstract class AbstractBearing implements Bearing {
     }
 
     @Override
+    public Bearing getDifferenceTo(Bearing b) {
+        double diff = b.getDegrees() - getDegrees();
+        if (diff < -180) {
+            diff += 360;
+        } else if (diff > 180) {
+            diff -= 360;
+        }
+        return new DegreeBearingImpl(diff);
+    }
+
+    @Override
     public String toString() {
         return ""+getDegrees()+"°";
     }

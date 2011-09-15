@@ -116,6 +116,7 @@ public class ModeratorApp extends Servlet {
                         jsonFix.put("lngdeg", fix.getPosition().getLngDeg());
                         jsonFix.put("truebearingdeg", fix.getSpeed().getBearing().getDegrees());
                         jsonFix.put("knotspeed", fix.getSpeed().getKnots());
+                        jsonFix.put("tack", trackedRace.getTack(competitor, fix.getTimePoint()).name());
                         jsonFixes.add(jsonFix);
                     }
                     jsonCompetitor.put("track", jsonFixes);

@@ -181,9 +181,8 @@ public class LeaderboardImpl implements Named, Leaderboard {
 
     @Override
     public int getNetPoints(Competitor competitor, RaceInLeaderboard raceColumn, TimePoint timePoint) throws NoWindException {
-        return raceColumn.getTrackedRace() == null ? 0 : getScoreCorrection().getCorrectedScore(
-                getTrackedPoints(competitor, raceColumn, timePoint), competitor, raceColumn, timePoint)
-                .getCorrectedScore();
+        return getScoreCorrection().getCorrectedScore(getTrackedPoints(competitor, raceColumn, timePoint), competitor,
+                raceColumn, timePoint).getCorrectedScore();
     }
     
     
@@ -220,18 +219,13 @@ public class LeaderboardImpl implements Named, Leaderboard {
 
     @Override
     public Entry getEntry(Competitor competitor, RaceInLeaderboard race, TimePoint timePoint) throws NoWindException {
-        Entry result;
-        if (race.getTrackedRace() != null) {
-            int trackedPoints = getTrackedPoints(competitor, race, timePoint);
-            final Result correctedResults = getScoreCorrection().getCorrectedScore(trackedPoints, competitor, race, timePoint);
-            boolean discarded = isDiscarded(competitor, race, timePoint);
-            return new EntryImpl(trackedPoints, correctedResults.getCorrectedScore(),
-                    discarded ? 0 : correctedResults.getCorrectedScore() * (race.isMedalRace()?2:1),
-                            correctedResults.getMaxPointsReason(), discarded);
-        } else {
-            result = new EntryImpl(/* trackedPoints */ 0, /* net points */ 0, /* total points */ 0, MaxPointsReason.NONE, /* discarded */ false);
-        }
-        return result;
+        int trackedPoints = getTrackedPoints(competitor, race, timePoint);
+        final Result correctedResults = getScoreCorrection().getCorrectedScore(trackedPoints, competitor, race,
+                timePoint);
+        boolean discarded = isDiscarded(competitor, race, timePoint);
+        return new EntryImpl(trackedPoints, correctedResults.getCorrectedScore(), discarded ? 0
+                : correctedResults.getCorrectedScore() * (race.isMedalRace() ? 2 : 1),
+                correctedResults.getMaxPointsReason(), discarded);
     }
     
     @Override
