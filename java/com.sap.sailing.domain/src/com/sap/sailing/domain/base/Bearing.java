@@ -23,4 +23,11 @@ public interface Bearing {
      */
     Bearing getDifferenceTo(Bearing b);
 
+    /**
+     * Finds the middle between this bearing and the <code>other</code> bearing. For degree differences
+     * up to and including 180 degrees, the arithmetic mean between the angles is used to construct the
+     * resulting bearing. Otherwise, the reverse of the arithmetic mean is returned.
+     */
+    Bearing middle(Bearing other);
+
 }
