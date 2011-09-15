@@ -5,12 +5,16 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.NavigableSet;
 
+import com.sap.sailing.domain.base.Bearing;
 import com.sap.sailing.domain.base.Distance;
 import com.sap.sailing.domain.base.Position;
+import com.sap.sailing.domain.base.Speed;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.impl.DegreeBearingImpl;
+import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
+import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.base.impl.NauticalMileDistance;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
@@ -54,6 +58,18 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
     public Position getEstimatedPosition(TimePoint timePoint, boolean extrapolate) {
         FixType lastFixAtOrBefore = getLastFixAtOrBefore(timePoint);
         FixType firstFixAtOrAfter = getFirstFixAtOrAfter(timePoint);
+        return getEstimatedPosition(timePoint, extrapolate, lastFixAtOrBefore, firstFixAtOrAfter);
+    }
+
+    @Override
+    public Position getEstimatedRawPosition(TimePoint timePoint, boolean extrapolate) {
+        FixType lastFixAtOrBefore = getLastRawFixAtOrBefore(timePoint);
+        FixType firstFixAtOrAfter = getFirstRawFixAtOrAfter(timePoint);
+        return getEstimatedPosition(timePoint, extrapolate, lastFixAtOrBefore, firstFixAtOrAfter);
+    }
+
+    private Position getEstimatedPosition(TimePoint timePoint, boolean extrapolate, FixType lastFixAtOrBefore,
+            FixType firstFixAtOrAfter) {
         if (lastFixAtOrBefore != null && lastFixAtOrBefore == firstFixAtOrAfter) {
             return lastFixAtOrBefore.getPosition(); // exact match; how unlikely is that?
         } else {
@@ -78,6 +94,28 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         }
     }
 
+    @Override
+    public Speed getMaximumSpeedOverGround(TimePoint from, TimePoint to) {
+        // fetch all fixes on this leg so far and determine their maximum speed
+        Iterator<FixType> iter = getFixesIterator(from, /* inclusive */ true);
+        Speed max = Speed.NULL;
+        if (iter.hasNext()) {
+            Position lastPos = getEstimatedPosition(from, false);
+            while (iter.hasNext()) {
+                FixType fix = iter.next();
+                Speed fixSpeed = getSpeed(fix, lastPos, from);
+                if (fixSpeed.compareTo(max) > 0) {
+                    max = fixSpeed;
+                }
+            }
+        }
+        return max;
+    }
+
+    protected Speed getSpeed(FixType fix, Position lastPos, TimePoint timePointOfLastPos) {
+        return lastPos.getDistance(fix.getPosition()).inTime(fix.getTimePoint().asMillis()-timePointOfLastPos.asMillis());
+    }
+
     private SpeedWithBearing estimateSpeed(FixType fix1, FixType fix2) {
         if (fix1 == null) {
             if (fix2 instanceof GPSFixMoving) {
@@ -86,7 +124,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
                 return null;
             }
         } else if (fix2 == null) {
-            FixType lastBeforeFix1 = getLastFixBefore(fix1.getTimePoint());
+            FixType lastBeforeFix1 = getLastRawFixBefore(fix1.getTimePoint());
             if (lastBeforeFix1 != null) {
                 fix2 = fix1;
                 fix1 = lastBeforeFix1; // compute speed based on the last two fixes and assume constant speed
@@ -106,6 +144,10 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
     }
 
     
+    /**
+     * Returns the smoothened fixes (see {@link #getInternalFixes()}), type-cast such that it's a set of {@link GPSFix}
+     * objects
+     */
     private NavigableSet<GPSFix> getGPSFixes() {
         @SuppressWarnings("unchecked")
         NavigableSet<GPSFix> result = (NavigableSet<GPSFix>) super.getInternalFixes();
@@ -135,6 +177,30 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         }
     }
 
+    @Override
+    public Distance getRawDistanceTraveled(TimePoint from, TimePoint to) {
+        double distanceInNauticalMiles = 0;
+        if (from.compareTo(to) < 0) {
+            Position fromPos = getEstimatedRawPosition(from, false);
+            if (fromPos == null) {
+                return Distance.NULL;
+            }
+            @SuppressWarnings("unchecked")
+            NavigableSet<GPSFix> subset = (NavigableSet<GPSFix>) getInternalRawFixes().subSet((FixType) new DummyGPSFix(from),
+            /* fromInclusive */false, (FixType) new DummyGPSFix(to),
+            /* toInclusive */false);
+            for (GPSFix fix : subset) {
+                distanceInNauticalMiles += fromPos.getDistance(fix.getPosition()).getNauticalMiles();
+                fromPos = fix.getPosition();
+            }
+            Position toPos = getEstimatedRawPosition(to, false);
+            distanceInNauticalMiles += fromPos.getDistance(toPos).getNauticalMiles();
+            return new NauticalMileDistance(distanceInNauticalMiles);
+        } else {
+            return Distance.NULL;
+        }
+    }
+
     /**
      * Since we don't know for sure whether the GPS fixes are {@link GPSFixMoving} instances, here we only estimate
      * speed based on the distance and time between the fixes, averaged over an interval of
@@ -155,7 +221,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
             relevantFixes.add(0, beforeFix);
         }
         for (GPSFix afterFix : afterSet) {
-            if (at.asMillis() - afterFix.getTimePoint().asMillis() > getMillisecondsOverWhichToAverage()/2) {
+            if (afterFix.getTimePoint().asMillis() - at.asMillis() > getMillisecondsOverWhichToAverage()/2) {
                 break;
             }
             relevantFixes.add(afterFix);
@@ -181,6 +247,42 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
 
     protected long getMillisecondsOverWhichToAverage() {
         return millisecondsOverWhichToAverage;
+    }
+
+    /**
+     * Smoothens the track based on a max-speed assumption.
+     */
+    @Override
+    protected NavigableSet<FixType> getInternalFixes() {
+        return new PartialNavigableSetView<FixType>(super.getInternalFixes()) {
+            private final Speed maxSpeed = new KnotSpeedImpl(50);
+            @Override
+            protected boolean isValid(FixType e) {
+                FixType previous = lowerInternal(e);
+                FixType next = higherInternal(e);
+                Speed speedToPrevious = Speed.NULL;
+                if (previous != null) {
+                    speedToPrevious = previous.getPosition().getDistance(e.getPosition())
+                            .inTime(e.getTimePoint().asMillis() - previous.getTimePoint().asMillis());
+                }
+                Speed speedToNext = Speed.NULL;
+                if (next != null) {
+                    speedToNext = e.getPosition().getDistance(next.getPosition())
+                            .inTime(next.getTimePoint().asMillis() - e.getTimePoint().asMillis());
+                }
+                return (speedToPrevious.compareTo(maxSpeed) <= 0 || speedToNext.compareTo(maxSpeed) <= 0); 
+            }
+        };
+    }
+
+    @Override
+    public boolean hasDirectionChange(TimePoint at, double minimumDegreeDifference) {
+        TimePoint start = new MillisecondsTimePoint(at.asMillis()-getMillisecondsOverWhichToAverageSpeed()/2);
+        TimePoint end = new MillisecondsTimePoint(at.asMillis()+getMillisecondsOverWhichToAverageSpeed()/2);
+        Bearing bearingAtStart = getEstimatedSpeed(start).getBearing();
+        Bearing bearingAtEnd = getEstimatedSpeed(end).getBearing();
+        // TODO also need to analyze the (smoothened) directions in between; example: two tacks within averaging interval
+        return Math.abs(bearingAtStart.getDegrees() - bearingAtEnd.getDegrees()) > minimumDegreeDifference;
     }
 
 }

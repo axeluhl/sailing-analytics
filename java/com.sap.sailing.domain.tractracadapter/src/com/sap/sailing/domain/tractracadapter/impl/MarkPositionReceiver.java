@@ -85,7 +85,7 @@ public class MarkPositionReceiver extends AbstractReceiverWithQueue<ControlPoint
      * blocking for events received.
      */
     @Override
-    public Iterable<TypeController> getTypeControllers() {
+    public Iterable<TypeController> getTypeControllersAndStart() {
         List<TypeController> result = new ArrayList<TypeController>();
         TypeController controlPointListener = ControlPointPositionData.subscribe(tractracEvent,
                 new ICallbackData<ControlPoint, ControlPointPositionData>() {
@@ -95,7 +95,7 @@ public class MarkPositionReceiver extends AbstractReceiverWithQueue<ControlPoint
                     }
                 }, /* fromTime */0l, /* toTime */Long.MAX_VALUE);
         result.add(controlPointListener);
-        new Thread(this, getClass().getName()).start();
+        setAndStartThread(new Thread(this, getClass().getName()));
         return result;
     }
 

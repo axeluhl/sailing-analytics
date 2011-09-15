@@ -47,8 +47,9 @@ public class ReceiveMarkPassingDataTest extends AbstractTracTracLiveTest {
         final Race race = getEvent().getRaceList().iterator().next();
         Receiver receiver = new Receiver() {
             @Override
-            public Iterable<TypeController> getTypeControllers() {
-                TypeController markPassingsListener = MarkPassingsData.subscribe(race,
+            public Iterable<TypeController> getTypeControllersAndStart() {
+                final TypeController[] markPassingsListener = new TypeController[1];
+                markPassingsListener[0] = MarkPassingsData.subscribe(race,
                         new ICallbackData<RaceCompetitor, MarkPassingsData>() {
                             private boolean first = true;
 
@@ -58,16 +59,29 @@ public class ReceiveMarkPassingDataTest extends AbstractTracTracLiveTest {
                                     synchronized (semaphor) {
                                         firstData[0] = record;
                                         semaphor.notifyAll();
+                                        getController().remove(markPassingsListener[0]);
                                     }
                                     first = false;
                                 }
                             }
                         });
-                return Collections.singleton(markPassingsListener);
+                return Collections.singleton(markPassingsListener[0]);
             }
 
             @Override
-            public void stop() {
+            public void stopPreemptively() {
+            }
+
+            @Override
+            public void stopAfterProcessingQueuedEvents() {
+            }
+
+            @Override
+            public void join() {
+            }
+
+            @Override
+            public void join(long timeoutInMilliseconds) {
             }
         };
         List<Receiver> receivers = new ArrayList<Receiver>();

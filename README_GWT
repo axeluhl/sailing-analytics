@@ -1,0 +1,42 @@
+Installing GWT and related stuff:
+---------------------------------
+
+Add http://dl.google.com/eclipse/plugin/3.7 as update site to your Eclipse Indigo.
+Ensure that you have your proxy settings activated when installing from within the
+SAP network and if necessary "Reload" the default Indigo and GWT update sites to
+ensure all necessary features are found.
+
+Create a sample project using "File - New - Project" and choose Google / Web Application.
+The resulting project can be "Run As"ed using "Web Application" as launcher. This
+pops up your default browser (e.g., Firefox), perhaps asking the user to install a
+missing GWT plugin.
+
+I wrapped the GWT JARs in a separate com.google.gwt.osgi bundle, exporting all but
+the javax.servlet packages, as described in http://wiki.eclipse.org/Google_Web_Toolkit_and_Equinox.
+
+I had to explicitly add the javax.servlet dependency to the new com.google.gwt.osgi bundle.
+Otherwise, the cast of the GreetingsServletImpl to an HttpServlet would have been
+unsuccessful.
+
+Adjust the servlet URL alias in plugin.xml such that it corresponds to
+/<application-name>/<service-name>. The <service-name> is usually specified
+using a @RemoteServiceRelativePath annotation, such as
+
+@RemoteServiceRelativePath("greet")
+
+No GWT path library in the Eclipse project settings seems to be required to make
+the project GWT-compilable and executable within an OSGi container with Jetty
+support.
+
+Next, create a new "Web Application" launch configuration, specifying in the "Server"
+tab to not "Run built-in server." Instead, the running OSGi container's Jetty with the
+registered servlet will be used. In the "GWT" tab I chose "Automatically select an unused
+port" instead of providing a fixed Code Server Port.
+
+With this, when I launch the new Web Application configuration, my Firefox opens,
+e.g., with the URL http://127.0.0.1:8888/Com_sap_sailing_gwt_ui.html?gwt.codesvr=127.0.0.1:56824
+and displays the web app. I can set breakpoints in the client part as well as in the servlet.
+
+When you want to compile mulitple GWT modules in one project in one go, the GWT library
+has to be on the project's build path and has to be the first in the Order and Exports tab.
+See also http://arrogantprogrammer.blogspot.com/2010/04/projects-using-gwt-15-or-lower-may-only.html.

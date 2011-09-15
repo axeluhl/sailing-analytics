@@ -61,4 +61,10 @@ public class TracTracTrackedLegImpl implements TrackedLeg {
         return result;
     }
 
+    @Override
+    public LegType getLegType(TimePoint at) throws NoWindException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }

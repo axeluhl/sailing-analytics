@@ -3,6 +3,7 @@ package com.sap.sailing.domain.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -25,13 +26,20 @@ import com.tractrac.clientmodule.data.DataController;
 import com.tractrac.clientmodule.data.DataController.Listener;
 import com.tractrac.clientmodule.setup.KeyValue;
 
-public abstract class AbstractTracTracLiveTest implements Listener {
-
+/**
+ * Subclassing tests have to call {@link #addListenersForStoredDataAndStartController(Iterable)} to kick off
+ * the data receiving process. If subclasses use this class's default constructor, a connection to the
+ * STG default account with a few test races is established. Subclasses may also choose to configure other
+ * races / events using the {@link #AbstractTracTracLiveTest(URL, URI, URI)} constructor variant.
+ * 
+ * @author Axel Uhl (D043530)
+ *
+ */
+public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest implements Listener {
+    protected static final boolean tractracTunnel = Boolean.valueOf(System.getProperty("tractrac.tunnel", "false"));
+    protected static final String tractracTunnelHost = System.getProperty("tractrac.tunnel.host", "localhost");
     private static final String START_SIMULATOR_URL = "http://sapsimulation.tracdev.dk/start.php";
     private static final String KILL_URL = "http://sapsimulation.tracdev.dk/kill.php";
-    private final URL paramUrl;
-    private final URI liveUri;
-    private final URI storedUri;
     private Event event;
     private final Collection<Receiver> receivers;
     
@@ -39,32 +47,24 @@ public abstract class AbstractTracTracLiveTest implements Listener {
     private DataController controller;
 
     protected AbstractTracTracLiveTest() throws URISyntaxException, MalformedURLException {
-        // for live simulation:
-        //   paramUrl  = new URL("http://sapsimulation.tracdev.dk/simulateconf/j80race12.txt");
-        //   liveUri   = new URI("tcp://sapsimulation.tracdev.dk:4420"); // or with tunneling: tcp://localhost:4420
-        //   storedUri = new URI("tcp://sapsimulation.tracdev.dk:4421"); // or with tunneling: tcp://localhost:4421
-        // for stored race, non-real-time simulation:
-        
-        if (Boolean.valueOf(System.getProperty("tractrac.tunnel", "false"))) {
-            // tunnel
-            paramUrl  = new URL("http://localhost:12348/events/event_20110505_SailingTea/clientparams.php?event=event_20110505_SailingTea&race=bd8c778e-7c65-11e0-8236-406186cbf87c");
-            liveUri   = new URI("tcp://localhost:4412");
-            storedUri = new URI("tcp://localhost:4413");
-        } else {
-            //no tunnel:
-            paramUrl  = new URL("http://germanmaster.traclive.dk/events/event_20110505_SailingTea/clientparams.php?event=event_20110505_SailingTea&race=bd8c778e-7c65-11e0-8236-406186cbf87c");
-            liveUri   = new URI("tcp://germanmaster.traclive.dk:4400");
-            storedUri = new URI("tcp://germanmaster.traclive.dk:4401");
-        }
         receivers = new HashSet<Receiver>();
     }
 
+    /**
+     * Default set-up for an STG training session in Weymouth, 2011
+     */
     @Before
-    public void setUp() throws MalformedURLException, IOException, InterruptedException {
+    public void setUp() throws MalformedURLException, IOException, InterruptedException, URISyntaxException {
+        setUp(new URL("http://germanmaster.traclive.dk/events/event_20110505_SailingTea/clientparams.php?event=event_20110505_SailingTea&race=bd8c778e-7c65-11e0-8236-406186cbf87c"),
+            tractracTunnel ? new URI("tcp://"+tractracTunnelHost+":4412") : new URI("tcp://germanmaster.traclive.dk:4400"),
+                    tractracTunnel ? new URI("tcp://"+tractracTunnelHost+":4413") : new URI("tcp://germanmaster.traclive.dk:4401"));
+    }
+    
+    protected void setUp(URL paramUrl, URI liveUri, URI storedUri) throws FileNotFoundException, MalformedURLException {
         // Read event data from configuration file
         event = KeyValue.setup(paramUrl);
         assertNotNull(event);
-        assertEquals("Sailing Team Germany", event.getName());
+        assertEquals(getExpectedEventName(), event.getName());
         // Initialize data controller using live and stored data sources
         controller = new DataController(liveUri, storedUri, this);
         // Start live and stored data streams
@@ -72,11 +72,15 @@ public abstract class AbstractTracTracLiveTest implements Listener {
         // test cases need to start the thread calling startController
         // after adding their listeners
     }
+
+    protected String getExpectedEventName() {
+        return "Sailing Team Germany";
+    }
     
     protected void addListenersForStoredDataAndStartController(Iterable<Receiver> receivers) {
         for (Receiver receiver : receivers) {
             this.receivers.add(receiver);
-            for (TypeController typeController : receiver.getTypeControllers()) {
+            for (TypeController typeController : receiver.getTypeControllersAndStart()) {
                 getController().add(typeController);
             }
         }
@@ -107,7 +111,7 @@ public abstract class AbstractTracTracLiveTest implements Listener {
             Assert.fail(ex.getMessage());
         }
         for (Receiver receiver : receivers) {
-            receiver.stop();
+            receiver.stopPreemptively();
         }
     }
 
@@ -184,4 +188,5 @@ public abstract class AbstractTracTracLiveTest implements Listener {
     public void liveDataConnectError(String arg0) {
         System.err.println("Error with live data "+arg0);
     }
+
 }

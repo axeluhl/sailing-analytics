@@ -10,8 +10,8 @@ import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
-import com.sap.sailing.server.util.DateParser;
-import com.sap.sailing.server.util.InvalidDateException;
+import com.sap.sailing.util.DateParser;
+import com.sap.sailing.util.InvalidDateException;
 
 public abstract class Servlet extends HttpServlet {
     private static final long serialVersionUID = -6514453597593669376L;
@@ -28,22 +28,15 @@ public abstract class Servlet extends HttpServlet {
 
     private ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
     
-    private RacingEventService service;
-    
     protected Servlet() {
         BundleContext context = Activator.getDefault();
         racingEventServiceTracker = new ServiceTracker<RacingEventService, RacingEventService>(context, RacingEventService.class.getName(), null);
         racingEventServiceTracker.open();
         // grab the service
-        service = (RacingEventService) racingEventServiceTracker.getService();
     }
 
     protected RacingEventService getService() {
-        return service;
-    }
-
-    protected void setService(RacingEventService service) {
-        this.service = service;
+        return (RacingEventService) racingEventServiceTracker.getService();
     }
 
     protected Event getEvent(HttpServletRequest req) {

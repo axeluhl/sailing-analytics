@@ -136,4 +136,27 @@ public class PositionTest {
         assertEquals(123+345-360, sum.getDegrees(), 0.000000001);
     }
 
+    @Test
+    public void bearingDifferenceTest() {
+        Bearing b1 = new DegreeBearingImpl(340);
+        Bearing b2 = new DegreeBearingImpl(350);
+        Bearing b3 = new DegreeBearingImpl(0);
+        Bearing b4 = new DegreeBearingImpl(10);
+        Bearing b5 = new DegreeBearingImpl(20);
+        Bearing b6 = new DegreeBearingImpl(180);
+        
+        assertEquals(10., b1.getDifferenceTo(b2).getDegrees(), 0.000000001);
+        assertEquals(10., b2.getDifferenceTo(b3).getDegrees(), 0.000000001);
+        assertEquals(10., b3.getDifferenceTo(b4).getDegrees(), 0.000000001);
+        assertEquals(10., b4.getDifferenceTo(b5).getDegrees(), 0.000000001);
+
+        assertEquals(20., b2.getDifferenceTo(b4).getDegrees(), 0.000000001);
+        assertEquals(-20., b4.getDifferenceTo(b2).getDegrees(), 0.000000001);
+        assertEquals(40., b1.getDifferenceTo(b5).getDegrees(), 0.000000001);
+        assertEquals(-40., b5.getDifferenceTo(b1).getDegrees(), 0.000000001);
+
+        assertEquals(180., b3.getDifferenceTo(b6).getDegrees(), 0.000000001);
+        assertEquals(-180., b6.getDifferenceTo(b3).getDegrees(), 0.000000001);
+    }
+
 }

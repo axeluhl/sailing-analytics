@@ -59,7 +59,7 @@ public class CourseImpl extends NamedImpl implements Course {
     }
     
     @Override
-    public void addWaypoint(int zeroBasedPosition, Waypoint waypointToAdd) {
+    public synchronized void addWaypoint(int zeroBasedPosition, Waypoint waypointToAdd) {
         waypoints.add(zeroBasedPosition, waypointToAdd);
         int legStartWaypointIndex;
         if (zeroBasedPosition == waypoints.size()-1) {   // added to end
@@ -72,7 +72,7 @@ public class CourseImpl extends NamedImpl implements Course {
     }
 
     @Override
-    public void removeWaypoint(int zeroBasedPosition) {
+    public synchronized void removeWaypoint(int zeroBasedPosition) {
         if (zeroBasedPosition >= 0) {
             boolean isLast = zeroBasedPosition == waypoints.size()-1;
             Waypoint removedWaypoint = waypoints.remove(zeroBasedPosition);
@@ -147,7 +147,7 @@ public class CourseImpl extends NamedImpl implements Course {
     }
 
     @Override
-    public Waypoint getWaypointForControlPoint(ControlPoint controlPoint, int start) {
+    public synchronized Waypoint getWaypointForControlPoint(ControlPoint controlPoint, int start) {
         if (start > legs.size()) {
             throw new IllegalArgumentException("Starting to search beyond end of course: "+start+" vs. "+(legs.size()+1));
         }

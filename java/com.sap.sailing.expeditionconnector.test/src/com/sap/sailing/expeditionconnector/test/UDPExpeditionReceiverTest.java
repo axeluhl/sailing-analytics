@@ -32,12 +32,14 @@ import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.impl.DegreePosition;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.test.mock.MockedTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.expeditionconnector.ExpeditionListener;
 import com.sap.sailing.expeditionconnector.ExpeditionMessage;
+import com.sap.sailing.expeditionconnector.ExpeditionWindTracker;
+import com.sap.sailing.expeditionconnector.ExpeditionWindTrackerFactory;
 import com.sap.sailing.expeditionconnector.UDPExpeditionReceiver;
-import com.sap.sailing.expeditionconnector.WindTracker;
 import com.sap.sailing.util.Util;
 
 public class UDPExpeditionReceiverTest {
@@ -226,7 +228,8 @@ public class UDPExpeditionReceiverTest {
     public void testWindTrackerWithDeclination() throws IOException, InterruptedException, ClassNotFoundException, ParseException {
         MockedTrackedRace race = new MockedTrackedRace();
         DeclinationService declinationService = DeclinationService.INSTANCE;
-        WindTracker windTracker = new WindTracker(race, declinationService);
+        ExpeditionWindTracker windTracker = new ExpeditionWindTracker(race, declinationService, receiver,
+                (ExpeditionWindTrackerFactory) ExpeditionWindTrackerFactory.getInstance());
         receiver.addListener(listener, /* validMessagesOnly */ true);
         receiver.addListener(windTracker, /* validMessagesOnly */ true);
         String[] lines = new String[validLines.length+1];
@@ -252,7 +255,7 @@ public class UDPExpeditionReceiverTest {
             if (m.getTrueWind() != null) {
                 Declination declination = declinationService.getDeclination(m.getTimePoint(), lastKnownPosition,
                         /* timeoutForOnlineFetchInMilliseconds */5000);
-                for (Wind recordedWind : race.getWindTrack().getFixes()) {
+                for (Wind recordedWind : race.getWindTrack().getRawFixes()) {
                     if (Math.abs(m.getTrueWindBearing().getDegrees() + declination.getBearingCorrectedTo(m.getTimePoint()).getDegrees() -
                         recordedWind.getBearing().getDegrees()) <= 0.0000001) {
                         matched.add(recordedWind);

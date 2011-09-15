@@ -15,6 +15,7 @@ import com.sap.sailing.util.Util.Triple;
 public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Receiver {
     private final LinkedBlockingQueue<Triple<A, B, C>> queue;
     private final DomainFactory domainFactory;
+    private Thread thread;
 
     public AbstractReceiverWithQueue(DomainFactory domainFactory) {
         super();
@@ -22,16 +23,26 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
         this.queue = new LinkedBlockingQueue<Triple<A, B, C>>();
     }
     
+    protected synchronized void setAndStartThread(Thread thread) {
+        this.thread = thread;
+        thread.start();
+    }
+    
     protected DomainFactory getDomainFactory() {
         return domainFactory;
     }
     
-    public void stop() {
+    public void stopPreemptively() {
         // mark the end and hence terminate the thread by adding a null/null/null event to the queue
         queue.clear();
-        queue.add(new Triple<A, B, C>(null, null, null));
+        stopAfterProcessingQueuedEvents();
     }
     
+    @Override
+    public void stopAfterProcessingQueuedEvents() {
+        queue.add(new Triple<A, B, C>(null, null, null));
+    }
+
     protected void enqueue(Triple<A, B, C> event) {
         queue.add(event);
     }
@@ -52,6 +63,20 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    @Override
+    public synchronized void join() throws InterruptedException {
+        if (thread != null) {
+            thread.join();
+        }
+    }
+
+    @Override
+    public synchronized void join(long timeoutInMilliseconds) throws InterruptedException {
+        if (thread != null) {
+            thread.join(timeoutInMilliseconds);
         }
     }
 

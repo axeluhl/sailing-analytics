@@ -18,26 +18,34 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
-import com.sap.sailing.declination.DeclinationService;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.impl.LeaderboardImpl;
+import com.sap.sailing.domain.leaderboard.impl.ResultDiscardingRuleImpl;
+import com.sap.sailing.domain.leaderboard.impl.ScoreCorrectionImpl;
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
-import com.sap.sailing.domain.tracking.DynamicTrackedRace;
+import com.sap.sailing.domain.tracking.RaceListener;
+import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindStore;
+import com.sap.sailing.domain.tracking.WindTracker;
+import com.sap.sailing.domain.tracking.WindTrackerFactory;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.JSONService;
 import com.sap.sailing.domain.tractracadapter.RaceHandle;
 import com.sap.sailing.domain.tractracadapter.RaceRecord;
 import com.sap.sailing.domain.tractracadapter.RaceTracker;
-import com.sap.sailing.expeditionconnector.UDPExpeditionReceiver;
-import com.sap.sailing.expeditionconnector.WindTracker;
-import com.sap.sailing.util.Util.Pair;
+import com.sap.sailing.expeditionconnector.ExpeditionWindTrackerFactory;
+import com.sap.sailing.mongodb.DomainObjectFactory;
+import com.sap.sailing.mongodb.MongoObjectFactory;
 import com.sap.sailing.util.Util.Triple;
 
 public class RacingEventServiceImpl implements RacingEventService {
     private static final Logger logger = Logger.getLogger(RacingEventServiceImpl.class.getName());
     
     private final DomainFactory domainFactory;
+    
+    private final WindTrackerFactory windTrackerFactory;
     
     private final Map<String, Event> eventsByName;
     
@@ -47,32 +55,123 @@ public class RacingEventServiceImpl implements RacingEventService {
      * Remembers the wind tracker and the port on which the UDP receiver with which the wind tracker is
      * registers is listening for incoming Expedition messages.
      */
-    private final Map<RaceDefinition, Pair<WindTracker, Integer>> windTrackers;
+    private final Map<RaceDefinition, WindTracker> windTrackers;
     
     /**
      * Remembers the trackers by paramURL/liveURI/storedURI to avoid duplication
      */
     private final Map<Triple<URL, URI, URI>, RaceTracker> raceTrackersByURLs;
     
-    private final Map<Integer, UDPExpeditionReceiver> windReceivers;
+    /**
+     * Leaderboards managed by this racing event service
+     */
+    private final Map<String, Leaderboard> leaderboardsByName;
+    
+    private static final String DEFAULT_LEADERBOARD_NAME = "Default Leaderboard";
+    
+    private Set<DynamicTrackedEvent> eventsObservedForDefaultLeaderboard = new HashSet<DynamicTrackedEvent>();
+    
+    private final MongoObjectFactory mongoObjectFactory;
+    
+    private final DomainObjectFactory domainObjectFactory;
 
     public RacingEventServiceImpl() {
         domainFactory = DomainFactory.INSTANCE;
+        domainObjectFactory = DomainObjectFactory.INSTANCE;
+        mongoObjectFactory = MongoObjectFactory.INSTANCE;
+        windTrackerFactory = ExpeditionWindTrackerFactory.getInstance();
         eventsByName = new HashMap<String, Event>();
         raceTrackersByEvent = new HashMap<Event, Set<RaceTracker>>();
-        windTrackers = new HashMap<RaceDefinition, Pair<WindTracker, Integer>>();
+        windTrackers = new HashMap<RaceDefinition, WindTracker>();
         raceTrackersByURLs = new HashMap<Triple<URL, URI, URI>, RaceTracker>();
-        windReceivers = new HashMap<Integer, UDPExpeditionReceiver>();
+        leaderboardsByName = new HashMap<String, Leaderboard>();
+        // Add one default leaderboard that aggregates all races currently tracked by this service.
+        // This is more for debugging purposes than for anything else.
+        addLeaderboard(DEFAULT_LEADERBOARD_NAME, new int[] { 5, 8 });
+        loadStoredLeaderboards();
     }
     
+    private void loadStoredLeaderboards() {
+        for (Leaderboard leaderboard : domainObjectFactory.getAllLeaderboards()) {
+            leaderboardsByName.put(leaderboard.getName(), leaderboard);
+        }
+    }
+    
+    @Override
+    public Leaderboard addLeaderboard(String name, int[] discardThresholds) {
+        Leaderboard result = new LeaderboardImpl(name, new ScoreCorrectionImpl(), new ResultDiscardingRuleImpl(
+                discardThresholds));
+        synchronized (leaderboardsByName) {
+            leaderboardsByName.put(name, result);
+        }
+        mongoObjectFactory.storeLeaderboard(result);
+        return result;
+    }
+    
+    @Override
+    public void renameLeaderboard(String oldName, String newName) {
+        synchronized (leaderboardsByName) {
+            if (!leaderboardsByName.containsKey(oldName)) {
+                throw new IllegalArgumentException("No leaderboard with name "+oldName+" found");
+            }
+            if (leaderboardsByName.containsKey(newName)) {
+                throw new IllegalArgumentException("Leaderboard with name "+newName+" already exists");
+            }
+            Leaderboard toRename = leaderboardsByName.remove(oldName);
+            toRename.setName(newName);
+            leaderboardsByName.put(newName, toRename);
+            mongoObjectFactory.renameLeaderboard(oldName, newName);
+        }
+    }
+    
+    @Override
+    public void updateStoredLeaderboard(Leaderboard leaderboard) {
+        // TODO this is very brute force; consider updating more fine-grained
+        mongoObjectFactory.storeLeaderboard(leaderboard);
+    }
+    
+    @Override
+    public void removeLeaderboard(String leaderboardName) {
+        synchronized (leaderboardsByName) {
+            leaderboardsByName.remove(leaderboardName);
+        }
+        mongoObjectFactory.removeLeaderboard(leaderboardName);
+    }
+    
+    @Override
+    public Leaderboard getLeaderboardByName(String name) {
+        synchronized (leaderboardsByName) {
+            return leaderboardsByName.get(name);
+        }
+    }
+    
+    @Override
+    public Map<String, Leaderboard> getLeaderboards() {
+        synchronized (leaderboardsByName) {
+            return Collections.unmodifiableMap(new HashMap<String, Leaderboard>(leaderboardsByName));
+        }
+    }
+
     @Override
     public DomainFactory getDomainFactory() {
         return domainFactory;
     }
-
+    
     @Override
     public Iterable<Event> getAllEvents() {
         return Collections.unmodifiableCollection(eventsByName.values());
+    }
+    
+    @Override
+    public boolean isRaceBeingTracked(RaceDefinition r) {
+        for (Set<RaceTracker> trackers : raceTrackersByEvent.values()) {
+            for (RaceTracker tracker : trackers) {
+                if (tracker.getRace() == r) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     @Override
@@ -81,7 +180,7 @@ public class RacingEventServiceImpl implements RacingEventService {
     }
 
     @Override
-    public Event addEvent(URL jsonURL, URI liveURI, URI storedURI, WindStore windStore) throws URISyntaxException, IOException, ParseException, org.json.simple.parser.ParseException {
+    public synchronized Event addEvent(URL jsonURL, URI liveURI, URI storedURI, WindStore windStore) throws URISyntaxException, IOException, ParseException, org.json.simple.parser.ParseException {
         JSONService jsonService = getDomainFactory().parseJSONURL(jsonURL);
         Event event = null;
         for (RaceRecord rr : jsonService.getRaceRecords()) {
@@ -98,7 +197,7 @@ public class RacingEventServiceImpl implements RacingEventService {
     }
 
     @Override
-    public RaceHandle addRace(URL paramURL, URI liveURI, URI storedURI, WindStore windStore) throws MalformedURLException, FileNotFoundException,
+    public synchronized RaceHandle addRace(URL paramURL, URI liveURI, URI storedURI, WindStore windStore) throws MalformedURLException, FileNotFoundException,
             URISyntaxException {
         Triple<URL, URI, URI> key = new Triple<URL, URI, URI>(paramURL, liveURI, storedURI);
         RaceTracker tracker = raceTrackersByURLs.get(key);
@@ -129,11 +228,32 @@ public class RacingEventServiceImpl implements RacingEventService {
                         ". Wind store in use by existing tracker: "+existingTrackersWindStore);
             }
         }
+        DynamicTrackedEvent trackedEvent = tracker.getTrackedEvent();
+        ensureEventIsObservedForDefaultLeaderboard(trackedEvent);
         return tracker.getRaceHandle();
     }
 
+    private void ensureEventIsObservedForDefaultLeaderboard(DynamicTrackedEvent trackedEvent) {
+        synchronized (eventsObservedForDefaultLeaderboard) {
+            if (!eventsObservedForDefaultLeaderboard.contains(trackedEvent)) {
+                trackedEvent.addRaceListener(new RaceListener() {
+                    @Override
+                    public void raceRemoved(TrackedRace trackedRace) {
+                    }
+
+                    @Override
+                    public void raceAdded(TrackedRace trackedRace) {
+                        leaderboardsByName.get(DEFAULT_LEADERBOARD_NAME).addRace(trackedRace,
+                                trackedRace.getRace().getName(), /* medalRace */ false);
+                    }
+                });
+                eventsObservedForDefaultLeaderboard.add(trackedEvent);
+            }
+        }
+    }
+
     @Override
-    public void stopTracking(Event event) throws MalformedURLException, IOException, InterruptedException {
+    public synchronized void stopTracking(Event event) throws MalformedURLException, IOException, InterruptedException {
         if (raceTrackersByEvent.containsKey(event)) {
             for (RaceTracker raceTracker : raceTrackersByEvent.get(event)) {
                 raceTracker.stop(); // this also removes the TrackedRace from trackedEvent
@@ -141,16 +261,21 @@ public class RacingEventServiceImpl implements RacingEventService {
             }
             raceTrackersByEvent.remove(event);
         }
-        if (event != null && event.getName() != null) {
-            eventsByName.remove(event.getName());
-        }
-        for (RaceDefinition race : event.getAllRaces()) {
-            stopTrackingWind(event, race);
+        if (event != null) {
+            if (event.getName() != null) {
+                eventsByName.remove(event.getName());
+            }
+            for (RaceDefinition race : event.getAllRaces()) {
+                stopTrackingWind(event, race);
+                // remove from default leaderboard
+                Leaderboard defaultLeaderboard = getLeaderboardByName(DEFAULT_LEADERBOARD_NAME);
+                defaultLeaderboard.removeRaceColumn(race.getName());
+            }
         }
     }
 
     @Override
-    public void stopTracking(Event event, RaceDefinition race) throws MalformedURLException, IOException, InterruptedException {
+    public synchronized void stopTracking(Event event, RaceDefinition race) throws MalformedURLException, IOException, InterruptedException {
         logger.info("Stopping tracking for "+race+"...");
         if (raceTrackersByEvent.containsKey(event)) {
             Iterator<RaceTracker> trackerIter = raceTrackersByEvent.get(event).iterator();
@@ -166,6 +291,7 @@ public class RacingEventServiceImpl implements RacingEventService {
         } else {
             logger.warning("Didn't find any trackers for event "+event);
         }
+        stopTrackingWind(event, race);
         // if the last tracked race was removed, remove the entire event
         if (raceTrackersByEvent.get(event).isEmpty()) {
             stopTracking(event);
@@ -173,60 +299,36 @@ public class RacingEventServiceImpl implements RacingEventService {
     }
 
     @Override
-    public synchronized void startTrackingWind(Event event, RaceDefinition race, int port,
-            DeclinationService declinationService) throws SocketException {
-        if (!windTrackers.containsKey(race)) {
-            DynamicTrackedEvent trackedEvent = getDomainFactory().getOrCreateTrackedEvent(event);
-            DynamicTrackedRace trackedRace = trackedEvent.getTrackedRace(race);
-            WindTracker windTracker = new WindTracker(trackedRace, declinationService);
-            UDPExpeditionReceiver receiver = getOrCreateWindReceiverForPort(port);
-            windTrackers.put(race, new Pair<WindTracker, Integer>(windTracker, port));
-            receiver.addListener(windTracker, /* validMessagesOnly */ true);
-        }
-    }
-
-    private synchronized UDPExpeditionReceiver getOrCreateWindReceiverForPort(int port) throws SocketException {
-        UDPExpeditionReceiver receiver = windReceivers.get(port);
-        if (receiver == null) {
-            receiver = new UDPExpeditionReceiver(port);
-            windReceivers.put(port, receiver);
-            new Thread(receiver, "Expedition Wind Receiver on port "+port).start();
-        }
-        return receiver;
+    public void startTrackingWind(Event event, RaceDefinition race,
+            boolean correctByDeclination) throws SocketException {
+        windTrackerFactory.createWindTracker(getDomainFactory().getOrCreateTrackedEvent(event), race, correctByDeclination);
     }
 
     @Override
     public synchronized void stopTrackingWind(Event event, RaceDefinition race) throws SocketException, IOException {
-        Pair<WindTracker, Integer> windTrackerPair = windTrackers.get(race);
-        if (windTrackerPair != null) {
-            WindTracker windTracker = windTrackerPair.getA();
-            if (windTracker != null) {
-                for (UDPExpeditionReceiver receiver : windReceivers.values()) {
-                    receiver.removeListener(windTracker);
-                }
-            }
+        WindTracker windTracker = windTrackers.get(race);
+        if (windTracker != null) {
+            windTracker.stop();
             windTrackers.remove(race);
-            // if there is no more tracker we can also stop and remove the receiver(s) we created
-            if (windTrackers.isEmpty()) {
-                for (UDPExpeditionReceiver receiver : windReceivers.values()) {
-                    receiver.stop();
-                }
-                windReceivers.clear();
-            }
         }
     }
 
     @Override
-    public Iterable<Triple<Event, RaceDefinition, Integer>> getWindTrackedRaces() {
-        List<Triple<Event, RaceDefinition, Integer>> result = new ArrayList<Triple<Event, RaceDefinition, Integer>>();
+    public synchronized Iterable<Triple<Event, RaceDefinition, String>> getWindTrackedRaces() {
+        List<Triple<Event, RaceDefinition, String>> result = new ArrayList<Triple<Event, RaceDefinition, String>>();
         for (Event event : eventsByName.values()) {
             for (RaceDefinition race : event.getAllRaces()) {
                 if (windTrackers.containsKey(race)) {
-                    result.add(new Triple<Event, RaceDefinition, Integer>(event, race, windTrackers.get(race).getB()));
+                    result.add(new Triple<Event, RaceDefinition, String>(event, race, windTrackers.get(race).toString()));
                 }
             }
         }
         return result;
+    }
+
+    @Override
+    public TrackedRace getTrackedRace(Event e, RaceDefinition r) {
+        return getDomainFactory().getTrackedEvent(e).getTrackedRace(r);
     }
     
 }

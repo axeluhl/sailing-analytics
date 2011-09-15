@@ -30,7 +30,7 @@ public class RawPositionReceiver extends AbstractReceiverWithQueue<RaceCompetito
      * Obtains the listener and starts a thread of this object which will block for events received.
      */
     @Override
-    public Iterable<TypeController> getTypeControllers() {
+    public Iterable<TypeController> getTypeControllersAndStart() {
         ICallbackData<RaceCompetitor, CompetitorPositionRawData> positionListener = new ICallbackData<RaceCompetitor, CompetitorPositionRawData>() {
             public void gotData(RaceCompetitor tracked,
                     CompetitorPositionRawData record, boolean isLiveData) {
@@ -43,7 +43,7 @@ public class RawPositionReceiver extends AbstractReceiverWithQueue<RaceCompetito
                 positionListener, /* fromTime */0 /* means ALL */, /* toTime */Long.MAX_VALUE);
             listeners.add(listener);
         }
-        new Thread(this, getClass().getName()).start();
+        setAndStartThread(new Thread(this, getClass().getName()));
         return listeners;
     }
 

@@ -1,18 +1,108 @@
 Axel
 ====
 
- - smoothen GPSTracks; if a particular fix seems really off, producing a speed that is beyond
-   what the boat class could possibly do, ignore the fix because it is obviously a mis-read.
+ - Finish a first draft version of a GWT admin and leaderboard UI
 
- - Distribute wind data to their respective races
+   * implement a smart incremental update capability for leaderboard
+   * adjustable delay and time per leaderboard
+   * allow a column to specify its preferred sorting order (ascending / descending)
+   * consider a per-user preferences page where leaderboard columns can be personalized at runtime
 
- - Pass final production instance URL information to BeTomorrow for wind integration
+ - Add user authentication and authorization as well as a role model. Typical roles: spectator (anonymous
+   and identified), moderator, administrator
+
+ - auto-reconnect a leaderboard to its tracked races; this would require that the connector
+   parameters required to track a race are encapsulated and stored with the leaderboard
+
+ - consider multi-select in race tree view to initialize set of race columns
+
+ - support Up/Down buttons to fix the ordering of configured race columns
+
+ - clarify how to marshal exceptions across a GWT/RPC call properly
+
+ - mark position entry capability, supporting "lost mark tracker" use case
+
+ - refactor DAOs to use getters/setters and encapsulate LeaderboardDAO ranking logic so it's safe
+
+ - allow a user to set a display name for a competitor that may differ from the name that
+   the tracking provider uses for the competitor
+
+ - why isn't all memory released when the last race of a series is untracked? Does this have to
+   do with the new leaderboard design? It probably should; a tracked race should only be eliminiated
+   if no more leaderboard is referencing it; but then it should mercilessly be GCed.
+
+ - Estimate wind not only based on a snapshot in time but also on a time interval, looking for
+   maneuvers. Assuming that the wind doesn't change radically, averaging over an n seconds interval
+   with n, e.g., being 30s, maneuvers should help in detecting wind direction.
+
+ - Check if this is a bug: when a competitor is selected on the map (e.g., with a mouse-over)
+   and the competitor does not show (yet) in the ranking list, it seems that the tool tip on
+   the map is not shown. Does the lack to find the competitor in the list result in an
+   exception?
+
+ - Use wind estimator to feed another wind track
+
+ - Fix issue with CellTable not updating propertly after an editing fails on the server and after
+   reverting a score correction to "" which should show the uncorrected net points again
+
+ - come to a reasonable code sharing architecture between GWT client and server logic.
+   Example: distances, bearings etc. which is currently handled in com.sap.sailing.domain.base
+   may also be useful in the client. However, these classes are not subject to GWT compilation
+   (and may not pass...). When done, clean up (among others) the CompositeCollection/CompositeIterable
+   and Pair/Triple clones.
+
+ - allow for tail length customization
+
+ - display advantage line in Google map
+
+ - add SailID / "Segelnummer" to Competitor domain model
+
+ - Need to adjust PartialNavigableSetView to work on any ordered sequential structure
+
+ - Make threshold for track smoothening configurable. Currently, we have millisecondsOverWhichToAverage.
+   This is also used as response to getMillisecondsOverWhichToAverageSpeed. Probably, we should at least
+   additionally have a common way to eliminate impossible or highly unlikely fixes. This could rather be
+   a configurable speed threshold. Once the outliers have been eliminated, smoothening in terms of
+   weighted averaging around the time point requested should happen, based on an acceleration model
+   that eventually could be specific to the boat class. The acceleration model would tell us how to,
+   e.g., based on splines, interpolate and smoothen what remains from the fixes. Consider introducing
+   a configurable "Boat Model" for each boat class where rules for smoothening and maneuver detection
+   can be configured per boat class. This can become helpful when we have to decide whether what seems
+   like two contrary maneuvers following each other immediately can really have happened like this.
+
+ - When a getTrackedRace(...) call is launched for an event/race where it becomes evident that
+   the race won't show up (e.g., because the event is removed or no longer tracked), unblock
+   any calls to TrackedEventImpl.getTrackedRace(...), e.g., by allowing for a check on the TrackedEvent
+   that indicates that the race being waited for won't show up anymore.
+   Clean up tracked races automatically if no connection can be established; currently, these
+   tracked races never show up because they wait forever for their race course definition
+
+ - Implement refined version of isValid in GPSFixMovingTrack taking into account the
+   speed as contained by each individual fix
+
+ - Refactor the way the DomainFactory concept works, under the assumption that we'll have another
+   connector for SwissTiming and VirtualEye. Our domain model including the Tracked... stuff should remain in place.
+   Therefore, the link between the domain objects RaceDefinition, Leg, Course and Event with their
+   tracking counterparts such as TrackedRace, TrackedLeg, TrackedLegOfCompetitor etc. should remain
+   unchanged. However, the TracTrac-specific things such as the mapping from TracTrac's client objects
+   (Competitor, Race, Event, Route, ControlPoint) to our domain model counterparts needs to be specific
+   to the connector. Ideally, the SailingServiceImpl wouldn't have to know anything about TracTrac.
+   Clarify also, where in the com.sap.sailing.server bundle we need dependencies on particular
+   tracking connectors.
+
+ - Distribute wind data to their respective races; capture expedition wind not by race/event anymore because
+   wind is already recorded by time and position; when seeking wind information, look for information
+   closest in time/space; consider throwing NoWindException if certain thresholds are crossed
+
+ - Launch Expedition wind capturing upon startup because it should no longer be event/race-specific
 
  - consolidate time point defaulting for servlet REST APIs
 
  - Now that we can update Course's waypoints, consider creating a RaceDefinition right upon
    receiving the Event/Race from TracTrac, using an empty list of waypoints. This may simplify
    the entire life cycle of RaceDefinition objects.
+
+ - Consider renaming knotspeed field to currentSpeedOverGroundInKnots in showboatpositions service
 
  - Improve Mongo-based tests by using Mongo transactions instead of waiting for prior transactions to complete
 

@@ -8,6 +8,7 @@ import java.net.URL;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.domain.tracking.TrackedEvent;
+import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.util.Util.Triple;
 
@@ -32,7 +33,7 @@ public interface RaceTracker {
     RaceHandle getRaceHandle();
 
     DynamicTrackedEvent getTrackedEvent();
-
+    
     WindStore getWindStore();
     
     Triple<URL, URI, URI> getURLs();

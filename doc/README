@@ -303,8 +303,6 @@ into one in the future.
     		  action on the /moderator servlet
     racename:     name of the race, as returned by the "listevents"
     		  action on the /moderator servlet
-    port:         the UDP port on which to listen for incoming
-    		  Expedition messages
     correctexpeditionwindbearingbydeclination: optional; if "true",
                   the wind bearings received from Expedition will be
   		  corrected by the magnetic declination for the
@@ -318,8 +316,12 @@ into one in the future.
     		  action on the /moderator servlet
   action=listwindtrackers: lists all wind trackers currently
                   registered in the server instance. The output
-		  structure is an array of {eventname,racename,port}
-		  objects.
+		  structure is an array of {eventname,racename,windtrackerinfo}
+		  objects where "windtrackerinfo" is a tracker type-specific
+                  string field which may contain, e.g., the tracker type
+		  name or, in case of a UDP port-based tracker,
+		  the UDP port number the tracker is receiving
+		  wind information on.
   action=setwind: feeds a single wind measurement into the WEB
   		  wind track of the race specified. If no time is
 		  specified, the measurement is assumed to have been
@@ -475,7 +477,8 @@ into one in the future.
 			  "latdeg": ...,    // boat position
 			  "lngdeg": ...,
 			  "truebearingdeg": ...,   // true boat bearing in degrees
-			  "knotspeed": ... } ... ] // boat speed in knots
+			  "knotspeed": ...,        // boat speed in knots
+                          "tack": [STARBOARD|PORT] } ... ] // side on which sails are
 		        } ... ] }
     eventname:    name of the event, as returned by the "listevents"
     		  action on the /moderator servlet

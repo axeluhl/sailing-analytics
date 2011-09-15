@@ -46,7 +46,7 @@ public class MarkPassingReceiver extends AbstractReceiverWithQueue<RaceCompetito
      * asynchronously.
      */
     @Override
-    public Iterable<TypeController> getTypeControllers() {
+    public Iterable<TypeController> getTypeControllersAndStart() {
         List<TypeController> result = new ArrayList<TypeController>();
         for (final Race race : tractracEvent.getRaceList()) {
             TypeController controlPointListener = MarkPassingsData.subscribe(race,
@@ -58,7 +58,7 @@ public class MarkPassingReceiver extends AbstractReceiverWithQueue<RaceCompetito
                 });
             result.add(controlPointListener);
         }
-        new Thread(this, getClass().getName()).start();
+        setAndStartThread(new Thread(this, getClass().getName()));
         return result;
     }
     

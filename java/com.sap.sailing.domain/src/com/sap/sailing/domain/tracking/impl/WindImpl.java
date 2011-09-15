@@ -13,8 +13,8 @@ public class WindImpl extends KnotSpeedWithBearingImpl implements Wind {
     private final TimePoint timepoint;
     private final Bearing from;
 
-    public WindImpl(Position p, TimePoint at, SpeedWithBearing avgWindSpeed) {
-        super(avgWindSpeed.getKnots(), avgWindSpeed.getBearing());
+    public WindImpl(Position p, TimePoint at, SpeedWithBearing windSpeedWithBearing) {
+        super(windSpeedWithBearing.getKnots(), windSpeedWithBearing.getBearing());
         this.position = p;
         this.timepoint = at;
         double fromDeg = getBearing().getDegrees() + 180;

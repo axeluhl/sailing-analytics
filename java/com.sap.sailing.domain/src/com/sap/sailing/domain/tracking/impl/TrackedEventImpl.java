@@ -114,12 +114,6 @@ public class TrackedEventImpl implements TrackedEvent {
     }
 
     @Override
-    public int getTotalPoints(Competitor competitor, TimePoint timePoint) {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-
-    @Override
     public int getNetPoints(Competitor competitor, TimePoint timePoint) throws NoWindException {
         int result = 0;
         for (TrackedRace trackedRace : getTrackedRaces()) {

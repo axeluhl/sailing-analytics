@@ -108,7 +108,7 @@ public class RaceTrackerImpl implements Listener, RaceTracker {
         Set<TypeController> typeControllers = new HashSet<TypeController>();
         for (Receiver receiver : domainFactory.getUpdateReceivers(trackedEvent, tractracEvent, windStore, this)) {
             receivers.add(receiver);
-            for (TypeController typeController : receiver.getTypeControllers()) {
+            for (TypeController typeController : receiver.getTypeControllersAndStart()) {
                 typeControllers.add(typeController);
             }
         }
@@ -138,7 +138,7 @@ public class RaceTrackerImpl implements Listener, RaceTracker {
                         boolean first = true;
                         for (Buoy buoy : domainControlPoint.getBuoys()) {
                             DynamicTrack<Buoy, GPSFix> buoyTrack = trackedRace.getTrack(buoy);
-                            if (buoyTrack.getFirstFix() == null) {
+                            if (buoyTrack.getFirstRawFix() == null) {
                                 buoyTrack.addGPSFix(new GPSFixImpl(new DegreePosition(
                                         first ? controlPoint.getLat1() : controlPoint.getLat2(),
                                         first ? controlPoint.getLon1() : controlPoint.getLon2()), MillisecondsTimePoint.now()));
@@ -208,7 +208,7 @@ public class RaceTrackerImpl implements Listener, RaceTracker {
         controlPointPositionPoller.cancel(/* mayInterruptIfRunning */ false);
         controller.stop(/* abortStored */ true);
         for (Receiver receiver : receivers) {
-            receiver.stop();
+            receiver.stopPreemptively();
         }
         ioThread.join(3000); // wait no more than three seconds
         logger.info("Joined TracTrac IO thread for race "+getRace());

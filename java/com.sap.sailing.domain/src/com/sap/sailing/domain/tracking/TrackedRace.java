@@ -9,6 +9,7 @@ import com.sap.sailing.domain.base.Distance;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.Tack;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.Waypoint;
 
@@ -41,6 +42,11 @@ public interface TrackedRace {
      * {@link #MAX_TIME_BETWEEN_START_AND_FIRST_MARK_PASSING_IN_MILLISECONDS} is returned as the race start time.
      */
     TimePoint getStart();
+    
+    /**
+     * Shorthand for <code>{@link #getStart()}.{@link TimePoint#compareTo(TimePoint) compareTo(at)} &lt;= 0</code>
+     */
+    boolean hasStarted(TimePoint at);
     
     Iterable<TrackedLeg> getTrackedLegs();
     
@@ -101,7 +107,8 @@ public interface TrackedRace {
      * Computes the rank of <code>competitor</code> in this race. A competitor is ahead of all
      * competitors that are one or more legs behind. Within the same leg, the rank is determined
      * by the windward distance to go and therefore depends on the assumptions of the wind direction
-     * for the given <code>timePoint</code>.
+     * for the given <code>timePoint</code>. If the race hasn't {@link #hasStarted(TimePoint) started}
+     * yet, the result is undefined.
      */
     int getRank(Competitor competitor, TimePoint timePoint) throws NoWindException;
     
@@ -132,6 +139,12 @@ public interface TrackedRace {
      */
     GPSFixTrack<Buoy, GPSFix> getTrack(Buoy buoy);
 
+    /**
+     * If the <code>waypoint</code> only has one {@link #getBuoys() buoy}, its position at time <code>timePoint</code>
+     * is returned. Otherwise, the center of gravity between the buoys' positions is computed and returned.
+     */
+    Position getApproximatePosition(Waypoint waypoint, TimePoint timePoint);
+    
     /**
      * Obtains estimated interpolated wind information for a given position and time point.
      * The information is taken from the currently selected {@link WindSource wind source} which
@@ -168,4 +181,27 @@ public interface TrackedRace {
 
     long getMillisecondsOverWhichToAverageWind();
 
+    /**
+     * Estimates the wind direction based on the observed boat courses at the time given for the position provided. The
+     * estimate is based on the assumption that the boats which are on an upwind or a downwind leg sail with very
+     * similar angles on the starboard and the port side. There should be clusters of courses which are close to each
+     * other (within a threshold of, say, +/- 5 degrees), whereas for the upwind group there should be two clusters
+     * with angles about 90 degrees apart; similarly, for the downwind leg there should be two clusters, only that the
+     * general jibing angle may vary more, based on the wind speed.<p>
+     * 
+     * Boats currently maneuvering are not considered for this analysis.<p>
+     * 
+     * This wind direction should not be used directly to compute the leg's wind direction because an endless
+     * recursion may result: an implementation will need to know whether a leg is an upwind or downwind leg for
+     * which it has to know where the wind is comoing from.
+     */
+    Wind getEstimatedWindDirection(Position position, TimePoint timePoint) throws NoWindException;
+    
+    /**
+     * Determines whether the <code>competitor</code> is sailing on port or starboard tack at the
+     * <code>timePoint</code> requested.
+     */
+    Tack getTack(Competitor competitor, TimePoint timePoint);
+
+    TrackedEvent getTrackedEvent();
 }

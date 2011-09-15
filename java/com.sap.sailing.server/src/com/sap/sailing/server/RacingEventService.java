@@ -9,10 +9,11 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.ParseException;
 import java.util.List;
+import java.util.Map;
 
-import com.sap.sailing.declination.DeclinationService;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.tracking.TrackedEvent;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindStore;
@@ -93,25 +94,30 @@ public interface RacingEventService {
     
     /**
      * Stops tracking a single race. Other races of the same event that are currently tracked will continue to be
-     * tracked.
+     * tracked. If wind tracking for the race is currently running, it will be stopped (see also
+     * {@link #stopTrackingWind(Event, RaceDefinition)}).
      */
     void stopTracking(Event event, RaceDefinition race) throws MalformedURLException, IOException, InterruptedException;
 
     /**
      * @param port
      *            the UDP port on which to listen for incoming messages from Expedition clients
-     * @param declinationService
-     *            An optional service to convert the Expedition-provided wind bearings (which Expedition
-     *            believes to be true bearings) from magnetic to true bearings. Can be <code>null</code>
-     *            in which case the Expedition true bearings are used as true bearings.
+     * @param correctByDeclination
+     *            An optional service to convert the wind bearings (which the receiver may
+     *            believe to be true bearings) from magnetic to true bearings.
      * @throws SocketException
      *             thrown, e.g., in case there is already another listener on the port requested
      */
-    void startTrackingWind(Event event, RaceDefinition race, int port, DeclinationService declinationService) throws SocketException;
+    void startTrackingWind(Event event, RaceDefinition race, boolean correctByDeclination) throws SocketException;
 
     void stopTrackingWind(Event event, RaceDefinition race) throws SocketException, IOException;
 
-    Iterable<Triple<Event, RaceDefinition, Integer>> getWindTrackedRaces();
+    /**
+     * The {@link Triple#getC() third component} of the triples returned is a wind tracker-specific
+     * comment where a wind tracker may provide information such as its type name or, if applicable,
+     * connectivity information such as the network port on which it receives wind information.
+     */
+    Iterable<Triple<Event, RaceDefinition, String>> getWindTrackedRaces();
 
     /**
      * For the JSON URL of an account / event, lists the paramURLs that can be used for {@link #addRace(URL, URI, URI, WindStore)}
@@ -119,5 +125,41 @@ public interface RacingEventService {
      * is hardly ever useful.
      */
     List<RaceRecord> getRaceRecords(URL jsonURL) throws IOException, ParseException, org.json.simple.parser.ParseException;
+
+    boolean isRaceBeingTracked(RaceDefinition r);
+
+    TrackedRace getTrackedRace(Event event, RaceDefinition r);
+
+    /**
+     * Creates a new leaderboard with the <code>name</code> specified.
+     * 
+     * @param discardThresholds
+     *            Tells the thresholds from which on a next higher number of worst races will be discarded per
+     *            competitor. Example: <code>[3, 6]</code> means that starting from three races the single worst race
+     *            will be discarded; starting from six races, the two worst races per competitor are discarded.
+     * 
+     * @return the leaderboard created
+     */
+    Leaderboard addLeaderboard(String name, int[] discardThresholds);
+
+    void removeLeaderboard(String leaderboardName);
+    
+    Leaderboard getLeaderboardByName(String name);
+
+    /**
+     * Obtains an unmodifiable map of the leaderboard configured in this service keyed by their names.
+     */
+    Map<String, Leaderboard> getLeaderboards();
+
+    /**
+     * Renames a leaderboard. If a leaderboard by the name <code>oldName</code> does not exist in {@link #getLeaderboards()},
+     * or if a leaderboard with the name <code>newName</code> already exists, an {@link IllegalArgumentException} is thrown.
+     * If the method completes normally, the rename has been successful, and the leaderboard previously obtained by calling
+     * {@link #getLeaderboardByName(String) getLeaderboardByName(oldName)} can now be obtained by calling
+     * {@link #getLeaderboardByName(String) getLeaderboardByName(newName)}.
+     */
+    void renameLeaderboard(String oldName, String newName);
+
+    void updateStoredLeaderboard(Leaderboard leaderboard);
 
 }

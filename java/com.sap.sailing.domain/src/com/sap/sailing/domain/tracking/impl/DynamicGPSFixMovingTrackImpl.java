@@ -6,9 +6,11 @@ import java.util.List;
 import java.util.NavigableSet;
 
 import com.sap.sailing.domain.base.Position;
+import com.sap.sailing.domain.base.Speed;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.impl.DegreeBearingImpl;
+import com.sap.sailing.domain.base.impl.KilometersPerHourSpeedImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 
@@ -16,6 +18,15 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends DynamicTrackImpl<Ite
 
     public DynamicGPSFixMovingTrackImpl(ItemType trackedItem, long millisecondsOverWhichToAverage) {
         super(trackedItem, millisecondsOverWhichToAverage);
+    }
+
+    /**
+     * This redefinition packs the <code>gpsFix</code> into a more compact representation that conserves
+     * memory compared to the original, "naive" implementation. It gets along with a single object.
+     */
+    @Override
+    public void addGPSFix(GPSFixMoving gpsFix) {
+        super.addGPSFix(new CompactGPSFixMovingImpl(gpsFix));
     }
 
     /**
@@ -31,7 +42,7 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends DynamicTrackImpl<Ite
         // TODO factor out the obtaining of relevant fixes which should be the same in super.getEstimatedSpeed(at)
         DummyGPSFixMoving atTimed = new DummyGPSFixMoving(at);
         NavigableSet<GPSFixMoving> beforeSet = getInternalFixes().headSet(atTimed, /* inclusive */ true);
-        NavigableSet<GPSFixMoving> afterSet = getInternalFixes().tailSet(atTimed, /* inclusive */ true);
+        NavigableSet<GPSFixMoving> afterSet = getInternalFixes().tailSet(atTimed, /* inclusive */ false);
         List<GPSFixMoving> relevantFixes = new LinkedList<GPSFixMoving>();
         for (GPSFixMoving beforeFix : beforeSet.descendingSet()) {
             if (at.asMillis() - beforeFix.getTimePoint().asMillis() > getMillisecondsOverWhichToAverage()/2) {
@@ -40,7 +51,7 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends DynamicTrackImpl<Ite
             relevantFixes.add(0, beforeFix);
         }
         for (GPSFixMoving afterFix : afterSet) {
-            if (at.asMillis() - afterFix.getTimePoint().asMillis() > getMillisecondsOverWhichToAverage()/2) {
+            if (afterFix.getTimePoint().asMillis() - at.asMillis() > getMillisecondsOverWhichToAverage()/2) {
                 break;
             }
             relevantFixes.add(afterFix);
@@ -104,4 +115,29 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends DynamicTrackImpl<Ite
         }
     }
     
+    
+    @Override
+    protected Speed getSpeed(GPSFixMoving fix, Position lastPos, TimePoint timePointOfLastPos) {
+        Speed fixSpeed = fix.getSpeed();
+        Speed calculatedSpeed = super.getSpeed(fix, lastPos, timePointOfLastPos);
+        Speed averaged = averageSpeed(fixSpeed, calculatedSpeed);
+        return averaged;
+    }
+
+    private Speed averageSpeed(Speed... speeds) {
+        double sumInKMH = 0;
+        int count = 0;
+        for (Speed speed : speeds) {
+            sumInKMH += speed.getKilometersPerHour();
+            count++;
+        }
+        return new KilometersPerHourSpeedImpl(sumInKMH/count);
+    }
+
+    @Override
+    protected NavigableSet<GPSFixMoving> getInternalFixes() {
+        // TODO perform even better smoothening than GPSFixTrackImpl because here we additionally have the speeds/bearings on the fixes as a hint
+        return super.getInternalFixes();
+    }
+
 }

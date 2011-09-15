@@ -36,8 +36,6 @@ public interface TrackedEvent {
      */
     void addRaceListener(RaceListener listener);
     
-    int getTotalPoints(Competitor competitor, TimePoint timePoint);
-    
     int getNetPoints(Competitor competitor, TimePoint timePoint) throws NoWindException;
 
 }
