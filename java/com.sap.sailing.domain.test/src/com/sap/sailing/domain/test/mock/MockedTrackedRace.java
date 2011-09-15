@@ -373,7 +373,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public Tack getTack(Competitor competitor, TimePoint timePoint) throws NoWindException {
+    public Tack getTack(Competitor competitor, TimePoint timePoint) {
         // TODO Auto-generated method stub
         return null;
     }
