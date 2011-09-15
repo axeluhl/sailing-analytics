@@ -51,6 +51,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     private static final double MANEUVER_DEGREE_ANGLE_THRESHOLD = /* minimumDegreeDifference */ 30.;
 
     private static final Logger logger = Logger.getLogger(TrackedRaceImpl.class.getName());
+
+    private static final double MINIMUM_ANGLE_BETWEEN_DIFFERENT_TACKS = 45.;
     
     // TODO observe the race course; if it changes, update leg structures; consider fine-grained update events that tell what changed
     private final RaceDefinition race;
@@ -520,9 +522,9 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     @Override
     public Wind getEstimatedWindDirection(Position position, TimePoint timePoint) throws NoWindException {
-        Map<LegType, BearingCluster[]> bearings = new HashMap<TrackedLeg.LegType, BearingCluster[]>();
+        Map<LegType, BearingCluster> bearings = new HashMap<TrackedLeg.LegType, BearingCluster>();
         for (LegType legType : LegType.values()) {
-            bearings.put(legType, new BearingCluster[] { new BearingCluster(), new BearingCluster() });
+            bearings.put(legType, new BearingCluster());
         }
         for (Competitor competitor : getRace().getCompetitors()) {
             TrackedLegOfCompetitor leg = getTrackedLeg(competitor, timePoint);
@@ -533,33 +535,31 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                     GPSFixTrack<Competitor, GPSFixMoving> track = getTrack(competitor);
                     if (!track.hasDirectionChange(timePoint, MANEUVER_DEGREE_ANGLE_THRESHOLD)) {
                         Bearing bearing = track.getEstimatedSpeed(timePoint).getBearing();
-                        BearingCluster[] bearingClusters = bearings.get(legType);
-                        // add to the cluster "closest" to the fix
-                        // FIXME this would cluster the first two bearings even if on the same side; add all to the same cluster and split afterwards
-                        if (bearingClusters[0].getDifferenceFromAverage(bearing) <= bearingClusters[1].getDifferenceFromAverage(bearing)) {
-                            bearingClusters[0].add(bearing);
-                        } else {
-                            bearingClusters[1].add(bearing);
-                        }
+                        BearingCluster bearingClusters = bearings.get(legType);
+                        bearingClusters.add(bearing);
                     }
                 }
             }
         }
         Bearing upwindAverage = null;
-        if (!bearings.get(LegType.UPWIND)[0].isEmpty() && !bearings.get(LegType.UPWIND)[1].isEmpty()) {
-            upwindAverage = new DegreeBearingImpl((bearings.get(LegType.UPWIND)[0].getAverage().getDegrees() + bearings
-                .get(LegType.UPWIND)[1].getAverage().getDegrees()) / 2.0);
+        BearingCluster[] bearingClustersUpwind = bearings.get(LegType.UPWIND).splitInTwo(MINIMUM_ANGLE_BETWEEN_DIFFERENT_TACKS);
+        if (!bearingClustersUpwind[0].isEmpty() && !bearingClustersUpwind[1].isEmpty()) {
+            upwindAverage = new DegreeBearingImpl(
+                    (bearingClustersUpwind[0].getAverage().getDegrees() + bearingClustersUpwind[1].getAverage()
+                            .getDegrees()) / 2.0);
         }
         Bearing downwindAverage = null;
-        if (!bearings.get(LegType.DOWNWIND)[0].isEmpty() && !bearings.get(LegType.DOWNWIND)[1].isEmpty()) {
-            downwindAverage = new DegreeBearingImpl((bearings.get(LegType.DOWNWIND)[0].getAverage().getDegrees() + bearings
-                .get(LegType.DOWNWIND)[1].getAverage().getDegrees()) / 2.0);
+        BearingCluster[] bearingClustersDownwind = bearings.get(LegType.DOWNWIND).splitInTwo(MINIMUM_ANGLE_BETWEEN_DIFFERENT_TACKS);
+        if (!bearingClustersDownwind[0].isEmpty() && !bearingClustersDownwind[1].isEmpty()) {
+            downwindAverage = new DegreeBearingImpl(
+                    (bearingClustersDownwind[0].getAverage().getDegrees() + bearingClustersDownwind[1].getAverage()
+                            .getDegrees()) / 2.0);
         }
         double bearingDeg;
         if (upwindAverage == null) {
             if (downwindAverage == null) {
                 throw new NoWindException(
-                        "Can't determine estimated wind direction because no two distinct direction clusted found upwind nor downwind");
+                        "Can't determine estimated wind direction because no two distinct direction clusters found upwind nor downwind");
             } else {
                 bearingDeg = downwindAverage.getDegrees();
             }
