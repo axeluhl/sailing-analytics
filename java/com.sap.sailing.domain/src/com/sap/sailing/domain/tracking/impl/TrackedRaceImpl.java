@@ -544,16 +544,12 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         Bearing upwindAverage = null;
         BearingCluster[] bearingClustersUpwind = bearings.get(LegType.UPWIND).splitInTwo(MINIMUM_ANGLE_BETWEEN_DIFFERENT_TACKS);
         if (!bearingClustersUpwind[0].isEmpty() && !bearingClustersUpwind[1].isEmpty()) {
-            upwindAverage = new DegreeBearingImpl(
-                    (bearingClustersUpwind[0].getAverage().getDegrees() + bearingClustersUpwind[1].getAverage()
-                            .getDegrees()) / 2.0);
+            upwindAverage = bearingClustersUpwind[0].getAverage().middle(bearingClustersUpwind[1].getAverage());
         }
         Bearing downwindAverage = null;
         BearingCluster[] bearingClustersDownwind = bearings.get(LegType.DOWNWIND).splitInTwo(MINIMUM_ANGLE_BETWEEN_DIFFERENT_TACKS);
         if (!bearingClustersDownwind[0].isEmpty() && !bearingClustersDownwind[1].isEmpty()) {
-            downwindAverage = new DegreeBearingImpl(
-                    (bearingClustersDownwind[0].getAverage().getDegrees() + bearingClustersDownwind[1].getAverage()
-                            .getDegrees()) / 2.0);
+            downwindAverage = bearingClustersDownwind[0].getAverage().middle(bearingClustersDownwind[1].getAverage());
         }
         double bearingDeg;
         if (upwindAverage == null) {

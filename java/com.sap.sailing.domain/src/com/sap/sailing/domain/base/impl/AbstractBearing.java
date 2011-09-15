@@ -35,6 +35,15 @@ public abstract class AbstractBearing implements Bearing {
     }
 
     @Override
+    public Bearing middle(Bearing other) {
+        Bearing result = new DegreeBearingImpl((getDegrees() + other.getDegrees()) / 2.0);
+        if (Math.abs(getDegrees()-other.getDegrees()) > 180.) {
+            result = result.reverse();
+        }
+        return result;
+    }
+
+    @Override
     public String toString() {
         return ""+getDegrees()+"°";
     }

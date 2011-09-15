@@ -10,7 +10,10 @@ import com.sap.sailing.util.Util.Pair;
 /**
  * Contains a number of {@link Bearing} objects and maintains the average bearing. For a given {@link Bearing} it
  * can determine the difference to this cluster's average bearing. It can also split the cluster into two, based
- * on the two bearings farthest apart.
+ * on the two bearings farthest apart.<p>
+ * 
+ * It is assumed that bearings added to this cluster are no further than 180 degrees apart. Violating this
+ * rule will lead to unpredictable results.
  * 
  * @author Axel Uhl (d043530)
  *
@@ -71,6 +74,7 @@ public class BearingCluster {
             for (int j=i+1; j<bearings.size(); j++) {
                 if (Math.abs(bearings.get(i).getDifferenceTo(bearings.get(j)).getDegrees()) >= maxAbsDegDiff) {
                     result = new Pair<Bearing, Bearing>(bearings.get(i), bearings.get(j));
+                    assert Math.abs(result.getA().getDegrees()-result.getB().getDegrees()) <= 180.;
                 }
             }
         }
