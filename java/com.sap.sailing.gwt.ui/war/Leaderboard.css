@@ -60,3 +60,8 @@ h1 {
 .GALD-WOPD > thead {
 	background-color: #e5e5e5;
 }
+
+.boldLabel {
+	font-size-adjust: 0.7;
+	font-weight: bold;
+}
