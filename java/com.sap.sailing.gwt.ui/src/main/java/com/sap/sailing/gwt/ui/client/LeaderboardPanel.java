@@ -168,7 +168,7 @@ public class LeaderboardPanel extends FormPanel {
         @Override
         public Header<SafeHtml> getHeader() {
             return new SortableExpandableColumnHeader(/* title */ raceName,
-                    /* iconURL */ medalRace ? "/images/medal.png" : null,
+                    /* iconURL */ medalRace ? "/images/medal_small.png" : null,
                             LeaderboardPanel.this, this, stringConstants);
         }
     }
@@ -323,7 +323,6 @@ public class LeaderboardPanel extends FormPanel {
         loadCompleteLeaderboard(getLeaderboardDisplayDate());
         VerticalPanel vp = new VerticalPanel();
         HorizontalPanel hp = new HorizontalPanel();
-        hp.setSpacing(10);
         Anchor sapLogo = new Anchor(new SafeHtmlBuilder().appendHtmlConstant("<img class=\"linkNoBorder\" src=\"/images/sap_66_transparent.png\"/>").toSafeHtml());
         sapLogo.setHref("http://www.sap.com");
         hp.add(sapLogo);
@@ -337,6 +336,9 @@ public class LeaderboardPanel extends FormPanel {
             }
         });
         vp.add(hp);
+        Label leaderboardLabel = new Label(stringConstants.leaderboard());
+        leaderboardLabel.addStyleName("boldLabel");
+        vp.add(leaderboardLabel);
         vp.add(getLeaderboardTable());
         setWidget(vp);
     }

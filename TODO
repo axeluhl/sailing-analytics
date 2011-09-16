@@ -11,6 +11,8 @@ Axel
  - Add user authentication and authorization as well as a role model. Typical roles: spectator (anonymous
    and identified), moderator, administrator
 
+ - add SailID / "Segelnummer" to Competitor domain model and make editable
+
  - auto-reconnect a leaderboard to its tracked races; this would require that the connector
    parameters required to track a race are encapsulated and stored with the leaderboard
 
@@ -54,8 +56,6 @@ Axel
  - allow for tail length customization
 
  - display advantage line in Google map
-
- - add SailID / "Segelnummer" to Competitor domain model
 
  - Need to adjust PartialNavigableSetView to work on any ordered sequential structure
 

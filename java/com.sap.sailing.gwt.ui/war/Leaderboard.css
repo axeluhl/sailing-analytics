@@ -1,5 +1,10 @@
 /** Add css rules here for your application. */
 
+* {
+	font-family: Arial;
+	font-size-adjust: 0.5;
+}
+
 
 /** Example rules used by the template application (remove for your app) */
 h1 {
@@ -43,4 +48,20 @@ h1 {
 
 .linkNoBorder {
 	border: none;
+}
+
+/** v-align images in the table header */
+.GALD-WOMD > span > img:first-child {
+	position: relative;
+    vertical-align: middle;
+}
+
+/** grey background for table header */
+.GALD-WOPD > thead {
+	background-color: #e5e5e5;
+}
+
+.boldLabel {
+	font-size-adjust: 0.7;
+	font-weight: bold;
 }
