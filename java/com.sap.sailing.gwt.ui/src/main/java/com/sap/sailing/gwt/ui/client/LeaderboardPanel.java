@@ -168,7 +168,7 @@ public class LeaderboardPanel extends FormPanel {
         @Override
         public Header<SafeHtml> getHeader() {
             return new SortableExpandableColumnHeader(/* title */ raceName,
-                    /* iconURL */ medalRace ? "/images/medal.png" : null,
+                    /* iconURL */ medalRace ? "/images/medal_small.png" : null,
                             LeaderboardPanel.this, this, stringConstants);
         }
     }

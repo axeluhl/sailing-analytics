@@ -2,6 +2,7 @@
 
 * {
 	font-family: Arial;
+	font-size-adjust: 0.5;
 }
 
 
@@ -53,4 +54,9 @@ h1 {
 .GALD-WOMD > span > img:first-child {
 	position: relative;
     vertical-align: middle;
+}
+
+/** grey background for table header */
+.GALD-WOPD > thead {
+	background-color: #e5e5e5;
 }
