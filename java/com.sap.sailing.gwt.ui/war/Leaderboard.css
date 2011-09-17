@@ -50,6 +50,12 @@ h1 {
 	border: none;
 }
 
+.refreshLink {
+	border: none;
+	position: relative;
+    vertical-align: middle;
+}
+
 /** v-align images in the table header */
 .GALD-WOMD > span > img:first-child {
 	position: relative;
