@@ -24,9 +24,10 @@ import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.cellview.client.TextHeader;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
-import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.DockPanel;
 import com.google.gwt.user.client.ui.FormPanel;
-import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
@@ -322,23 +323,26 @@ public class LeaderboardPanel extends FormPanel {
         getLeaderboardTable().addColumnSortHandler(listHandler);
         loadCompleteLeaderboard(getLeaderboardDisplayDate());
         VerticalPanel vp = new VerticalPanel();
-        HorizontalPanel hp = new HorizontalPanel();
         Anchor sapLogo = new Anchor(new SafeHtmlBuilder().appendHtmlConstant("<img class=\"linkNoBorder\" src=\"/images/sap_66_transparent.png\"/>").toSafeHtml());
         sapLogo.setHref("http://www.sap.com");
-        hp.add(sapLogo);
-        hp.add(new Label(leaderboardName));
-        Button refreshButton = new Button(stringConstants.refresh());
-        hp.add(refreshButton);
-        refreshButton.addClickHandler(new ClickHandler() {
+        vp.add(sapLogo);
+        DockPanel dockPanel = new DockPanel();
+        dockPanel.setWidth("100%");
+        dockPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
+        Label leaderboardLabel = new Label(stringConstants.leaderboard()+" "+leaderboardName.toUpperCase());
+        leaderboardLabel.addStyleName("boldLabel");
+        dockPanel.add(leaderboardLabel, DockPanel.WEST);
+        Anchor refresh = new Anchor(new SafeHtmlBuilder().appendHtmlConstant(
+                "<img class=\"refreshLink\" src=\"/images/refresh.png\"/>&nbsp;"+stringConstants.refresh()).toSafeHtml());
+        dockPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
+        dockPanel.add(refresh, DockPanel.EAST);
+        refresh.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 loadCompleteLeaderboard(getLeaderboardDisplayDate());
             }
         });
-        vp.add(hp);
-        Label leaderboardLabel = new Label(stringConstants.leaderboard());
-        leaderboardLabel.addStyleName("boldLabel");
-        vp.add(leaderboardLabel);
+        vp.add(dockPanel);
         vp.add(getLeaderboardTable());
         setWidget(vp);
     }
