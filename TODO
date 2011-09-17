@@ -1,8 +1,6 @@
 Axel
 ====
 
- - Show corrected scores in leaderboard even if race is not tracked
-
  - Finish a first draft version of a GWT admin and leaderboard UI
 
    * implement a smart incremental update capability for leaderboard
@@ -12,6 +10,8 @@ Axel
 
  - Add user authentication and authorization as well as a role model. Typical roles: spectator (anonymous
    and identified), moderator, administrator
+
+ - add SailID / "Segelnummer" to Competitor domain model and make editable
 
  - auto-reconnect a leaderboard to its tracked races; this would require that the connector
    parameters required to track a race are encapsulated and stored with the leaderboard
@@ -57,8 +57,6 @@ Axel
 
  - display advantage line in Google map
 
- - add SailID / "Segelnummer" to Competitor domain model
-
  - Need to adjust PartialNavigableSetView to work on any ordered sequential structure
 
  - Make threshold for track smoothening configurable. Currently, we have millisecondsOverWhichToAverage.
@@ -67,7 +65,10 @@ Axel
    a configurable speed threshold. Once the outliers have been eliminated, smoothening in terms of
    weighted averaging around the time point requested should happen, based on an acceleration model
    that eventually could be specific to the boat class. The acceleration model would tell us how to,
-   e.g., based on splines, interpolate and smoothen what remains from the fixes.
+   e.g., based on splines, interpolate and smoothen what remains from the fixes. Consider introducing
+   a configurable "Boat Model" for each boat class where rules for smoothening and maneuver detection
+   can be configured per boat class. This can become helpful when we have to decide whether what seems
+   like two contrary maneuvers following each other immediately can really have happened like this.
 
  - When a getTrackedRace(...) call is launched for an event/race where it becomes evident that
    the race won't show up (e.g., because the event is removed or no longer tracked), unblock

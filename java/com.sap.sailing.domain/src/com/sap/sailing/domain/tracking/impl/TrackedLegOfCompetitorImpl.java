@@ -255,7 +255,13 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
 
     @Override
     public int getNumberOfTacks(TimePoint timePoint) {
-        // TODO Auto-generated method stub
+        // TODO implement getNumberOfTacks
+        // start looking at the track a bit after its beginning to skip the direction changes following the mark passing,
+        // then look for direction changes in smoothened track whose angle exceeds TrackedRaceImpl.MANEUVER_DEGREE_ANGLE_THRESHOLD.
+        // For this, enumerate all fixes in the leg and check, using an interval during which a maneuver for the current boat class
+        // would happen, if between two fixes that far apart a direction change can be observed.
+        // Keep in mind that we should keep iterations over tracks to a minimum. Perhaps, several key figures can be
+        // extracted during a single traversal.
         return 0;
     }
 
@@ -267,7 +273,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
 
     @Override
     public int getNumberOfDirectionChanges(TimePoint timePoint) {
-        return getNumberOfTacks(timePoint)+getNumberOfJibes(timePoint);
+        return getNumberOfTacks(timePoint)+getNumberOfJibes(timePoint); // FIXME non-sense; no jibes and tacks in the same leg!
     }
     
     @Override

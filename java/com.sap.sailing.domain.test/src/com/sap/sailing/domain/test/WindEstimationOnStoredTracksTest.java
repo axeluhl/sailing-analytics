@@ -17,15 +17,18 @@ import com.sap.sailing.domain.tracking.NoWindException;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.util.Util;
 
-public class WindEstimationOnStoredTracksTest extends StoredTrackedBasedTestWithTrackedRace {
+public class WindEstimationOnStoredTracksTest extends StoredTrackBasedTestWithTrackedRace {
+
     @Test
     public void testSuccessfulTrackedRaceCreation() throws FileNotFoundException, IOException {
+        super.setUp();
         assertNotNull(getTrackedRace());
         assertEquals(Util.size(getTrackedRace().getRace().getCompetitors()), loadTracks().size());
     }
 
     @Test
-    public void testSimpleWindEstimation() throws NoWindException {
+    public void testSimpleWindEstimation() throws NoWindException, FileNotFoundException, IOException {
+        super.setUp();
         Competitor hasso = getCompetitorByName("Dr.Plattner");
         GPSFixTrack<Competitor, GPSFixMoving> hassosTrack = getTrackedRace().getTrack(hasso);
         TimePoint start = hassosTrack.getFirstRawFix().getTimePoint();
@@ -34,5 +37,5 @@ public class WindEstimationOnStoredTracksTest extends StoredTrackedBasedTestWith
         Wind estimatedWindDirection = getTrackedRace().getEstimatedWindDirection(/* position */ null, middle);
         assertNotNull(estimatedWindDirection);
     }
-
+    
 }

@@ -26,7 +26,7 @@ import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 
 
-public class TackTest extends StoredTrackedBasedTestWithTrackedRace {
+public class TackTest extends StoredTrackBasedTestWithTrackedRace {
     private Competitor competitor;
     
     @Override
