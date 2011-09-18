@@ -499,7 +499,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
 
     @Override
     public Map<CompetitorDAO, List<GPSFixDAO>> getBoatPositions(String eventName, String raceName, Date date,
-            long tailLengthInMilliseconds, boolean extrapolate) {
+            long tailLengthInMilliseconds, HashMap<CompetitorDAO, GPSFixDAO> firstShownFix, HashMap<CompetitorDAO, GPSFixDAO> lastShownFix, boolean extrapolate) {
         Map<CompetitorDAO, List<GPSFixDAO>> result = new HashMap<CompetitorDAO, List<GPSFixDAO>>();
         if (date != null) {
             Event event = getService().getEventByName(eventName);
@@ -512,8 +512,15 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                     List<GPSFixDAO> fixesForCompetitor = new ArrayList<GPSFixDAO>();
                     result.put(competitorDAO, fixesForCompetitor);
                     GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
-                    Iterator<GPSFixMoving> fixIter = track.getFixesIterator(new MillisecondsTimePoint(date.getTime()
-                            - tailLengthInMilliseconds), /* inclusive */true);
+                    Iterator<GPSFixMoving> fixIter;
+                    if ( !lastShownFix.isEmpty() && lastShownFix.get(competitorDAO).timepoint.getTime() > (date.getTime()
+                            - tailLengthInMilliseconds)) {
+                    	fixIter = track.getFixesIterator(new MillisecondsTimePoint(lastShownFix.get(competitorDAO).timepoint.getTime()), /* inclusive */true);
+                    	
+                    } else {
+                    	fixIter = track.getFixesIterator(new MillisecondsTimePoint(date.getTime()
+                                - tailLengthInMilliseconds), /* inclusive */true);
+                    }
                     if (fixIter.hasNext()) {
                         GPSFixMoving fix = fixIter.next();
                         while (fix != null && fix.getTimePoint().compareTo(end) < 0) {

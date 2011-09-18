@@ -69,6 +69,8 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer,
 	private Icon buoyIcon;
 	private LatLng lastMousePosition;
 	private final Set<CompetitorDAO> competitorsSelectedInMap;
+	
+	private final long TAILLENGTHINMILLISECONDS = 30000l;
 
 	/**
 	 * If the user explicitly zoomed or panned the map, don't adjust zoom/pan
@@ -80,6 +82,12 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer,
 	 * Tails of competitors currently displayed as overlays on the map.
 	 */
 	private final Map<CompetitorDAO, Polyline> tails;
+	
+	/**
+	 * First/Last Fix of each competitors tail. lastShownFix should be the one with the boatMarker on it.
+	 */
+	private final HashMap<CompetitorDAO, GPSFixDAO> firstShownFix;
+	private final HashMap<CompetitorDAO, GPSFixDAO> lastShownFix;
 
 	/**
 	 * Markers used as boat display on the map
@@ -100,6 +108,8 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer,
 		tails = new HashMap<CompetitorDAO, Polyline>();
 		buoyMarkers = new HashMap<MarkDAO, Marker>();
 		boatMarkers = new HashMap<CompetitorDAO, Marker>();
+		firstShownFix = new HashMap<CompetitorDAO, GPSFixDAO>();
+		lastShownFix = new HashMap<CompetitorDAO, GPSFixDAO>();
 		this.grid = new Grid(3, 2);
 		setWidget(grid);
 		grid.setSize("100%", "100%");
@@ -257,14 +267,16 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer,
 					.getSelectedEventAndRace();
 			if (!selection.isEmpty()) {
 				EventDAO event = selection.get(selection.size() - 1).getA();
-				RaceDAO race = selection.get(selection.size() - 1).getC();
+				RaceDAO race = selection.get(selection.size() - 1).getC();			
 				if (event != null && race != null) {
 					sailingService
 							.getBoatPositions(
 									event.name,
 									race.name,
 									date, /* tailLengthInMilliseconds */
-									30000l,
+									TAILLENGTHINMILLISECONDS,
+									firstShownFix,
+									lastShownFix,
 									true,
 									new AsyncCallback<Map<CompetitorDAO, List<GPSFixDAO>>>() {
 										@Override
@@ -351,84 +363,8 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer,
 		// update
 		if (map != null) {
 			LatLngBounds newMapBounds = null;
-			if (!tails.isEmpty()) {
-				boolean incr = false;
-				for (Map.Entry<CompetitorDAO, Polyline> tailEntry : tails
-						.entrySet()) {
-
-					final CompetitorDAO competitorDAO = tailEntry.getKey();
-					Polyline tail = tailEntry.getValue();
-					List<GPSFixDAO> gpsFixDao = result.get(competitorDAO);
-					int oldTailLength = tail.getVertexCount();
-					int newTailLength = gpsFixDao.size();
-					if (oldTailLength == newTailLength) {
-						for (int i = 0; i < tail.getVertexCount(); i++) {
-							if (gpsFixDao.get(0).position.latDeg == tail
-									.getVertex(i).getLatitude()
-									&& gpsFixDao.get(0).position.lngDeg == tail
-											.getVertex(i).getLongitude()) {
-								for (int j = 0; j < oldTailLength; j++) {
-									if (j <= newTailLength - i) {
-										tail.insertVertex(j,
-												tail.getVertex(i + j));
-									} else {
-										tail.insertVertex(
-												j,
-												LatLng.newInstance(
-														gpsFixDao.get(j).position.latDeg,
-														gpsFixDao.get(j).position.lngDeg));
-									}
-								}
-								Marker bMarker = boatMarkers.get(competitorDAO);
-								bMarker.setLatLng(LatLng.newInstance(
-										gpsFixDao.get(gpsFixDao.size() - 1).position.latDeg,
-										gpsFixDao.get(gpsFixDao.size() - 1).position.lngDeg));
-								incr = true;
-								return;
-							}
-						}
-
-						if (!incr) {
-							for (int j = 0; j < gpsFixDao.size(); j++) {
-								tail.insertVertex(j, LatLng.newInstance(
-										gpsFixDao.get(j).position.latDeg,
-										gpsFixDao.get(j).position.lngDeg));
-
-							}
-							Marker bMarker = boatMarkers.get(competitorDAO);
-							bMarker.setLatLng(LatLng.newInstance(
-									gpsFixDao.get(gpsFixDao.size() - 1).position.latDeg,
-									gpsFixDao.get(gpsFixDao.size() - 1).position.lngDeg));
-						}
-					} else {
-						map.removeOverlay(tail);
-						tails.remove(competitorDAO);
-						Polyline newTail = createTail(competitorDAO, gpsFixDao);
-						map.addOverlay(newTail);
-						tails.put(competitorDAO, newTail);
-						Marker bMarker = boatMarkers.get(competitorDAO);
-						bMarker.setLatLng(LatLng.newInstance(
-								gpsFixDao.get(gpsFixDao.size() - 1).position.latDeg,
-								gpsFixDao.get(gpsFixDao.size() - 1).position.lngDeg));
-					}
-
-					LatLngBounds bounds = tail.getBounds();
-					if (newMapBounds == null) {
-						newMapBounds = bounds;
-					} else {
-						newMapBounds.extend(bounds.getNorthEast());
-						newMapBounds.extend(bounds.getSouthWest());
-					}
-
-					if (!mapZoomedOrPannedSinceLastRaceSelectionChange
-							&& newMapBounds != null) {
-						map.setZoomLevel(map.getBoundsZoomLevel(newMapBounds));
-						map.setCenter(newMapBounds.getCenter());
-					}
-
-				}
-			} else {
-
+			
+			if(tails.isEmpty()) {
 				tails.clear();
 				boatMarkers.clear();
 
@@ -461,8 +397,60 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer,
 					map.setZoomLevel(map.getBoundsZoomLevel(newMapBounds));
 					map.setCenter(newMapBounds.getCenter());
 				}
+			
+			} else {
+				for (Map.Entry<CompetitorDAO, Polyline> tailEntry : tails
+						.entrySet()) {
+					final CompetitorDAO competitorDAO = tailEntry.getKey();
+					Polyline tail = tailEntry.getValue();
+					List<GPSFixDAO> gpsFixDao = result.get(competitorDAO);
+					int oldTailLength = tail.getVertexCount();
+					int newPointsCount = gpsFixDao.size();
+					if (newPointsCount<=oldTailLength) {
+					for (int i = 0; i < oldTailLength; i++) {
+								if (i < oldTailLength - newPointsCount) {
+									tail.insertVertex(i,
+											tail.getVertex(i + newPointsCount));
+								} else {
+									tail.insertVertex(
+											i,
+											LatLng.newInstance(
+													gpsFixDao.get(i - (oldTailLength - newPointsCount)).position.latDeg,
+													gpsFixDao.get(i - (oldTailLength - newPointsCount)).position.lngDeg));
+								}
+					
+							Marker bMarker = boatMarkers.get(competitorDAO);
+							bMarker.setLatLng(LatLng.newInstance(
+									gpsFixDao.get(gpsFixDao.size() - 1).position.latDeg,
+									gpsFixDao.get(gpsFixDao.size() - 1).position.lngDeg));
+						}
+					} else {
+						map.removeOverlay(tail);
+						Polyline newTail = createTail(competitorDAO, gpsFixDao);
+						map.addOverlay(newTail);
+						tails.put(competitorDAO, newTail);
+						Marker bMarker = boatMarkers.get(competitorDAO);
+						bMarker.setLatLng(LatLng.newInstance(
+								gpsFixDao.get(gpsFixDao.size() - 1).position.latDeg,
+								gpsFixDao.get(gpsFixDao.size() - 1).position.lngDeg));
+					}
+					LatLngBounds bounds = tail.getBounds();
+					if (newMapBounds == null) {
+						newMapBounds = bounds;
+					} else {
+						newMapBounds.extend(bounds.getNorthEast());
+						newMapBounds.extend(bounds.getSouthWest());
+					}
+
+					if (!mapZoomedOrPannedSinceLastRaceSelectionChange
+							&& newMapBounds != null) {
+						map.setZoomLevel(map.getBoundsZoomLevel(newMapBounds));
+						map.setCenter(newMapBounds.getCenter());
+					}
+					}
+				}
 			}
-		}
+		
 	}
 
 	private Marker createBuoyMarker(final MarkDAO markDAO) {
@@ -562,6 +550,9 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer,
 
 	private Polyline createTail(final CompetitorDAO competitorDAO,
 			List<GPSFixDAO> value) {
+		firstShownFix.put(competitorDAO, value.get(0));
+		firstShownFix.put(competitorDAO, value.get(value.size()-1));
+		
 		List<LatLng> points = new ArrayList<LatLng>();
 		for (int i = 0; i < value.size(); i++) {
 			points.add(LatLng.newInstance(value.get(i).position.latDeg,

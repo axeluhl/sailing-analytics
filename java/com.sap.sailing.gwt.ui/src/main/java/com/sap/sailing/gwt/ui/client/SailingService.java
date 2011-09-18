@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.client;
 
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -45,7 +46,7 @@ public interface SailingService extends RemoteService {
     void setWind(String eventName, String raceName, WindDAO wind);
 
     Map<CompetitorDAO, List<GPSFixDAO>> getBoatPositions(String eventName, String raceName, Date date,
-            long tailLengthInMilliseconds, boolean extrapolate);
+            long tailLengthInMilliseconds, HashMap<CompetitorDAO, GPSFixDAO> firstShownFix, HashMap<CompetitorDAO, GPSFixDAO> lastShownFix, boolean extrapolate);
 
     List<MarkDAO> getMarkPositions(String eventName, String raceName, Date date);
 
