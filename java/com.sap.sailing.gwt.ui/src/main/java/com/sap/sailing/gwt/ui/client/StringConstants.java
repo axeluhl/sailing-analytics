@@ -67,4 +67,8 @@ public interface StringConstants extends Constants {
     String rankGain();
     String sapSailingAnalytics();
     String leaderboard();
+    String leaderboardSettings();
+    String selectLegDetails();
+    String settings();
+    String selectAtLeastOneLegDetail();
 }

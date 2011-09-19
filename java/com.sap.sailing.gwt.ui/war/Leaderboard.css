@@ -69,3 +69,7 @@ h1 {
 .boldAnchor {
 	font-weight: bold;
 }
+
+.gwt-ListBox {
+	font-size: 12px;
+}

@@ -1,7 +1,7 @@
 package com.sap.sailing.gwt.ui.client;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -14,6 +14,7 @@ import com.sap.sailing.gwt.ui.client.LegDetailSelectionProvider.LegDetailColumnT
 public class LegDetailSelectionPanel extends DataEntryDialog<List<LegDetailColumnType>> {
     private final LegDetailSelectionProvider selectionProvider;
     private final Map<LegDetailColumnType, CheckBox> checkboxes;
+    private CheckBox firstCheckbox;
     
     public LegDetailSelectionPanel(LegDetailSelectionProvider selectionProvider, String title,
             String message, String okButtonName, String cancelButtonName,
@@ -21,18 +22,24 @@ public class LegDetailSelectionPanel extends DataEntryDialog<List<LegDetailColum
             AsyncCallback<List<LegDetailColumnType>> callback) {
         super(title, message, okButtonName, cancelButtonName, validator, callback);
         this.selectionProvider = selectionProvider;
-        checkboxes = new HashMap<LegDetailSelectionProvider.LegDetailColumnType, CheckBox>();
+        checkboxes = new LinkedHashMap<LegDetailSelectionProvider.LegDetailColumnType, CheckBox>();
     }
 
     @Override
     protected Widget getAdditionalWidget() {
         List<LegDetailColumnType> currentSelection = selectionProvider.getLegDetailsToShow();
         VerticalPanel vp = new VerticalPanel();
+        firstCheckbox = null;
         for (LegDetailColumnType type : LegDetailColumnType.values()) {
-            CheckBox checkbox = new CheckBox(type.toString(), currentSelection.contains(type));
+            CheckBox checkbox = createCheckbox(type.toString());
+            if (firstCheckbox == null) {
+                firstCheckbox = checkbox;
+            }
+            checkbox.setValue(currentSelection.contains(type));
             checkboxes.put(type, checkbox);
             vp.add(checkbox);
         }
+        firstCheckbox.setFocus(true);
         return vp;
     }
 
@@ -46,4 +53,11 @@ public class LegDetailSelectionPanel extends DataEntryDialog<List<LegDetailColum
         }
         return result;
     }
+
+    @Override
+    public void show() {
+        super.show();
+        firstCheckbox.setFocus(true);
+    }
+    
 }

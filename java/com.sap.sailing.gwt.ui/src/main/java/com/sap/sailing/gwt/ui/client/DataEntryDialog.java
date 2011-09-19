@@ -74,7 +74,10 @@ public abstract class DataEntryDialog<T> {
     }
     
     protected boolean validate() {
-        String errorMessage = validator.getErrorMessage(getResult());
+        String errorMessage = null;
+        if (validator != null) {
+            errorMessage = validator.getErrorMessage(getResult());
+        }
         if (errorMessage == null) {
             getStatusLabel().setText("");
             getOkButton().setEnabled(true);
