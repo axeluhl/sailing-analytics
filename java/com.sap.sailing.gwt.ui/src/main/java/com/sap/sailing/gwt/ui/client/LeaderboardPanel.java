@@ -34,6 +34,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
+import com.sap.sailing.gwt.ui.client.DataEntryDialog.Validator;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDAO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDAO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDAO;
@@ -355,7 +356,16 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
             public void onClick(ClickEvent event) {
                 new LegDetailSelectionPanel(LeaderboardPanel.this,
                         stringConstants.leaderboardSettings(), stringConstants.selectLegDetails(),
-                        stringConstants.ok(), stringConstants.cancel(), null, new AsyncCallback<List<LegDetailColumnType>>() {
+                        stringConstants.ok(), stringConstants.cancel(), new Validator<List<LegDetailColumnType>>() {
+                            @Override
+                            public String getErrorMessage(List<LegDetailColumnType> valueToValidate) {
+                                if (valueToValidate.isEmpty()) {
+                                    return stringConstants.selectAtLeastOneLegDetail();
+                                } else {
+                                    return null;
+                                }
+                            }
+                }, new AsyncCallback<List<LegDetailColumnType>>() {
                             @Override
                             public void onSuccess(List<LegDetailColumnType> result) {
                                 selectedLegDetails.clear();
