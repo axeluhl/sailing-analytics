@@ -624,7 +624,12 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
      */
     private void refreshHeaders() {
         for (int i=0; i<getLeaderboardTable().getColumnCount(); i++) {
-            Column c = getLeaderboardTable().getColumn(i);
+            Column<LeaderboardRowDAO, ?> c = getLeaderboardTable().getColumn(i);
+            if (c instanceof ExpandableSortableColumn<?> &&
+                    ((ExpandableSortableColumn<?>) c).isExpanded()) {
+                ((ExpandableSortableColumn<?>) c).toggleExpansion();
+                ((ExpandableSortableColumn<?>) c).toggleExpansion();
+            }
         }
     }
 
