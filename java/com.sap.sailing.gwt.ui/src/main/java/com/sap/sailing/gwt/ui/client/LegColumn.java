@@ -151,5 +151,14 @@ public class LegColumn extends ExpandableSortableColumn<String> {
             throw new RuntimeException(e);
         }
     }
+
+    /**
+     * if {@link #directChildren} is not <code>null</code>, {@link #refreshChildren} is called recursively for all
+     * expandable children; afterwards, {@link #directChildren} is set to <code>null</code>.
+     */
+    public void refreshChildren() {
+        super.refreshChildren();
+        directChildren = null;
+    }
 }
 

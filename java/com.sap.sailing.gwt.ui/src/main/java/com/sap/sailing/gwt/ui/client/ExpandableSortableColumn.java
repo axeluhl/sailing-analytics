@@ -31,7 +31,7 @@ public abstract class ExpandableSortableColumn<C> extends SortableColumn<Leaderb
      * collection and are dynamically inserted to and removed from the {@link CellTable} to the right
      * of this column.
      */
-    private List<SortableColumn<LeaderboardRowDAO, ?>> directChildren;
+    protected List<SortableColumn<LeaderboardRowDAO, ?>> directChildren;
     
     /**
      * Tells if this race column is currently displayed in expanded form which includes a visualization
@@ -193,4 +193,18 @@ public abstract class ExpandableSortableColumn<C> extends SortableColumn<Leaderb
     
     @Override
     public abstract Header<SafeHtml> getHeader();
+
+    /**
+     * if {@link #directChildren} is not <code>null</code>, {@link #refreshChildren} is called recursively for all
+     * expandable children
+     */
+    public void refreshChildren() {
+        if (directChildren != null) {
+            for (SortableColumn<LeaderboardRowDAO, ?> c : directChildren) {
+                if (c instanceof ExpandableSortableColumn<?>) {
+                    ((ExpandableSortableColumn<?>) c).refreshChildren();
+                }
+            }
+        }
+    }
 }

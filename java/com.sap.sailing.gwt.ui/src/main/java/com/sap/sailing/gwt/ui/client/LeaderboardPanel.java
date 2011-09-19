@@ -319,7 +319,7 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
     }
     
     public LeaderboardPanel(SailingServiceAsync sailingService, String leaderboardName, ErrorReporter errorReporter,
-            StringConstants stringConstants) {
+            final StringConstants stringConstants) {
         this.sailingService = sailingService;
         this.setLeaderboardName(leaderboardName);
         this.errorReporter = errorReporter;
@@ -340,9 +340,34 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
         loadCompleteLeaderboard(getLeaderboardDisplayDate());
         VerticalPanel vp = new VerticalPanel();
         vp.setSpacing(15);
+        DockPanel logoAndSettings = new DockPanel();
+        vp.add(logoAndSettings);
         Anchor sapLogo = new Anchor(new SafeHtmlBuilder().appendHtmlConstant("<img class=\"linkNoBorder\" src=\"/images/sap_66_transparent.png\"/>").toSafeHtml());
         sapLogo.setHref("http://www.sap.com");
-        vp.add(sapLogo);
+        logoAndSettings.add(sapLogo, DockPanel.WEST);
+        Anchor settingsAnchor = new Anchor(new SafeHtmlBuilder().appendHtmlConstant("<img class=\"linkNoBorder\" src=\"/images/settings.png\"/>").toSafeHtml());
+        settingsAnchor.setTitle(stringConstants.settings());
+        logoAndSettings.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
+        logoAndSettings.add(settingsAnchor, DockPanel.EAST);
+        logoAndSettings.setWidth("100%");
+        settingsAnchor.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                new LegDetailSelectionPanel(LeaderboardPanel.this,
+                        stringConstants.leaderboardSettings(), stringConstants.selectLegDetails(),
+                        stringConstants.ok(), stringConstants.cancel(), null, new AsyncCallback<List<LegDetailColumnType>>() {
+                            @Override
+                            public void onSuccess(List<LegDetailColumnType> result) {
+                                selectedLegDetails.clear();
+                                selectedLegDetails.addAll(result);
+                                refreshHeaders();
+                            }
+                            @Override
+                            public void onFailure(Throwable caught) {
+                            }
+                        }).show();
+            }
+        });
         DockPanel dockPanel = new DockPanel();
         dockPanel.setWidth("100%");
         dockPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
@@ -627,8 +652,10 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
             Column<LeaderboardRowDAO, ?> c = getLeaderboardTable().getColumn(i);
             if (c instanceof ExpandableSortableColumn<?> &&
                     ((ExpandableSortableColumn<?>) c).isExpanded()) {
-                ((ExpandableSortableColumn<?>) c).toggleExpansion();
-                ((ExpandableSortableColumn<?>) c).toggleExpansion();
+                ExpandableSortableColumn<?> expandableSortableColumn = (ExpandableSortableColumn<?>) c;
+                expandableSortableColumn.toggleExpansion();
+                expandableSortableColumn.refreshChildren();
+                expandableSortableColumn.toggleExpansion();
             }
         }
     }
