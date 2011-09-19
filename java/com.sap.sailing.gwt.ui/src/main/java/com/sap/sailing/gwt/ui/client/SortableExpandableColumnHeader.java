@@ -98,7 +98,7 @@ public class SortableExpandableColumnHeader extends Header<SafeHtml> {
             }
             @Override
             public SafeHtml getValue(SafeHtml object) {
-                return new SafeHtmlBuilder().appendEscaped(title).toSafeHtml();
+                return new SafeHtmlBuilder().appendHtmlConstant("&nbsp;").appendEscaped(title).toSafeHtml();
             }
         });
         return new CompositeCell<SafeHtml>(cells) {
