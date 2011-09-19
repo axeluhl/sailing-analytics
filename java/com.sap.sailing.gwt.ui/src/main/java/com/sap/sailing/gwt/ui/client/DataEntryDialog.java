@@ -17,8 +17,8 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
- * An abstract data entry dialog class, capturing data of type <code>T</code>, with generic OK/Cancel buttons, title
- * and message.
+ * An abstract data entry dialog class, capturing data of type <code>T</code>, with generic OK/Cancel buttons, title and
+ * message. Subclasses may override the {@link #show()} method to set the focus on their favorable initial entry field.
  * 
  * @author Axel Uhl (d043530)
  */
