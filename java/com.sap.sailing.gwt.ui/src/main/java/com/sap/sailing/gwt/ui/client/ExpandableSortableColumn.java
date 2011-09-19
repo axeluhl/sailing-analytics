@@ -153,7 +153,7 @@ public abstract class ExpandableSortableColumn<C> extends SortableColumn<Leaderb
             }
         }
     }
-
+    
     /**
      * Called to ensure that all data necessary to display the expanded data of this column is actually loaded.
      * If this is not yet the case, an asynchronous call to the server may be required that subclasses have to
