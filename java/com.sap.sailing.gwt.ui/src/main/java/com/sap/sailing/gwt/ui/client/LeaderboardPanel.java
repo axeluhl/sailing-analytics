@@ -72,6 +72,40 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
     
     private final List<LegDetailSelectionProvider.LegDetailColumnType> selectedLegDetails;
 
+    private class SettingsClickHandler implements ClickHandler {
+        private final StringConstants stringConstants;
+
+        private SettingsClickHandler(StringConstants stringConstants) {
+            this.stringConstants = stringConstants;
+        }
+
+        @Override
+        public void onClick(ClickEvent event) {
+            new LegDetailSelectionPanel(LeaderboardPanel.this,
+                    stringConstants.leaderboardSettings(), stringConstants.selectLegDetails(),
+                    stringConstants.ok(), stringConstants.cancel(), new Validator<List<LegDetailColumnType>>() {
+                        @Override
+                        public String getErrorMessage(List<LegDetailColumnType> valueToValidate) {
+                            if (valueToValidate.isEmpty()) {
+                                return stringConstants.selectAtLeastOneLegDetail();
+                            } else {
+                                return null;
+                            }
+                        }
+            }, new AsyncCallback<List<LegDetailColumnType>>() {
+                        @Override
+                        public void onSuccess(List<LegDetailColumnType> result) {
+                            selectedLegDetails.clear();
+                            selectedLegDetails.addAll(result);
+                            refreshHeaders();
+                        }
+                        @Override
+                        public void onFailure(Throwable caught) {
+                        }
+                    }).show();
+        }
+    }
+
     public interface LeaderboardTableResources extends CellTable.Resources {
         interface TableStyle extends CellTable.Style{}
         @Override
@@ -351,33 +385,7 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
         logoAndSettings.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
         logoAndSettings.add(settingsAnchor, DockPanel.EAST);
         logoAndSettings.setWidth("100%");
-        settingsAnchor.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                new LegDetailSelectionPanel(LeaderboardPanel.this,
-                        stringConstants.leaderboardSettings(), stringConstants.selectLegDetails(),
-                        stringConstants.ok(), stringConstants.cancel(), new Validator<List<LegDetailColumnType>>() {
-                            @Override
-                            public String getErrorMessage(List<LegDetailColumnType> valueToValidate) {
-                                if (valueToValidate.isEmpty()) {
-                                    return stringConstants.selectAtLeastOneLegDetail();
-                                } else {
-                                    return null;
-                                }
-                            }
-                }, new AsyncCallback<List<LegDetailColumnType>>() {
-                            @Override
-                            public void onSuccess(List<LegDetailColumnType> result) {
-                                selectedLegDetails.clear();
-                                selectedLegDetails.addAll(result);
-                                refreshHeaders();
-                            }
-                            @Override
-                            public void onFailure(Throwable caught) {
-                            }
-                        }).show();
-            }
-        });
+        settingsAnchor.addClickHandler(new SettingsClickHandler(stringConstants));
         DockPanel dockPanel = new DockPanel();
         dockPanel.setWidth("100%");
         dockPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
@@ -660,12 +668,17 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
     private void refreshHeaders() {
         for (int i=0; i<getLeaderboardTable().getColumnCount(); i++) {
             Column<LeaderboardRowDAO, ?> c = getLeaderboardTable().getColumn(i);
-            if (c instanceof ExpandableSortableColumn<?> &&
-                    ((ExpandableSortableColumn<?>) c).isExpanded()) {
+            if (c instanceof ExpandableSortableColumn<?>) {
                 ExpandableSortableColumn<?> expandableSortableColumn = (ExpandableSortableColumn<?>) c;
-                expandableSortableColumn.toggleExpansion();
-                expandableSortableColumn.refreshChildren();
-                expandableSortableColumn.toggleExpansion();
+                if (expandableSortableColumn.isExpanded()) {
+                    expandableSortableColumn.toggleExpansion();
+                    expandableSortableColumn.refreshChildren();
+                    expandableSortableColumn.toggleExpansion();
+                } else {
+                    // if column is not currently expanded, still force children (particularly leg columns) to refresh
+                    // their list of detail columns
+                    expandableSortableColumn.refreshChildren();
+                }
             }
         }
     }
