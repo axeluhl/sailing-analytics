@@ -56,18 +56,7 @@
 	background-color: #FFFFFF;
 }
 
-.cellTableKeyboardSelectedRow {
-	border-bottom: 1px solid #e5e5e5;
-	background-color: #FFFFFF;
-}
-
 .cellTableEvenRowCell {
-	border-left: none !important;
-	border-right: none !important;
-	padding: 5px 5px 5px !important;
-}
-
-.cellTableKeyboardSelectedRowCell {
 	border-left: none !important;
 	border-right: none !important;
 	padding: 5px 5px 5px !important;
@@ -100,8 +89,3 @@
 	border-top: 2px solid #21a0e4;
 	border-bottom: 2px solid #21a0e4;
 }
-
-// TODO white background, #e5f2f9 for "mouse over"; for selection blue border 2px #21a0e4 with #e5f2f9 background
-
-// TODO linie table header weg!
-// TODO table header background color
