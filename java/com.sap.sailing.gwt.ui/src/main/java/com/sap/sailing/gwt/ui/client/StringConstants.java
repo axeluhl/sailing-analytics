@@ -71,4 +71,9 @@ public interface StringConstants extends Constants {
     String selectLegDetails();
     String settings();
     String selectAtLeastOneLegDetail();
+    String currentSpeedOverGroundInKnots();
+    String estimatedTimeToNextWaypointInSeconds();
+    String gapToLeaderInSeconds();
+    String velocityMadeGoodInKnots();
+    String windwardDistanceToGoInMeters();
 }

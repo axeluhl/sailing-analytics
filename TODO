@@ -1,6 +1,8 @@
 Axel
 ====
 
+ - bug: connecting leaderboard column to tracked race, then refresh in leaderboard doesn't display expand button
+
  - Finish a first draft version of a GWT admin and leaderboard UI
 
    * implement a smart incremental update capability for leaderboard

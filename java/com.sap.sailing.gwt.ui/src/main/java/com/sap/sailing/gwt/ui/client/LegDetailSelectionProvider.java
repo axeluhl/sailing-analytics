@@ -12,8 +12,10 @@ import java.util.List;
  */
 public interface LegDetailSelectionProvider {
     static enum LegDetailColumnType {
-        DISTANCE_TRAVELED, AVERAGE_SPEED_OVER_GROUND_IN_KNOTS, RANK_GAIN; 
+        DISTANCE_TRAVELED, AVERAGE_SPEED_OVER_GROUND_IN_KNOTS, RANK_GAIN, CURRENT_SPEED_OVER_GROUND_IN_KNOTS,
+        ESTIMATED_TIME_TO_NEXT_WAYPOINT_IN_SECONDS, VELOCITY_MADE_GOOD_IN_KNOTS, GAP_TO_LEADER_IN_SECONDS,
+        WINDWARD_DISTANCE_TO_GO_IN_METERS;
     }
-    
+
     List<LegDetailColumnType> getLegDetailsToShow();
 }

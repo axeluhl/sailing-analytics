@@ -53,6 +53,41 @@ public class LegColumn extends ExpandableSortableColumn<String> {
         }
     }
     
+    private class CurrentSpeedOverGroundInKnots extends AbstractLegDetailField<Double> {
+        @Override
+        protected Double getFromNonNullEntry(LegEntryDAO entry) {
+            return entry.currentSpeedOverGroundInKnots;
+        }
+    }
+    
+    private class EstimatedTimeToNextWaypointInSeconds extends AbstractLegDetailField<Double> {
+        @Override
+        protected Double getFromNonNullEntry(LegEntryDAO entry) {
+            return entry.estimatedTimeToNextWaypointInSeconds;
+        }
+    }
+    
+    private class GapToLeaderInSeconds extends AbstractLegDetailField<Double> {
+        @Override
+        protected Double getFromNonNullEntry(LegEntryDAO entry) {
+            return entry.gapToLeaderInSeconds;
+        }
+    }
+    
+    private class VelocityMadeGoodInKnots extends AbstractLegDetailField<Double> {
+        @Override
+        protected Double getFromNonNullEntry(LegEntryDAO entry) {
+            return entry.velocityMadeGoodInKnots;
+        }
+    }
+    
+    private class WindwardDistanceToGoInMeters extends AbstractLegDetailField<Double> {
+        @Override
+        protected Double getFromNonNullEntry(LegEntryDAO entry) {
+            return entry.windwardDistanceToGoInMeters;
+        }
+    }
+    
     private class RankGain implements LegDetailField<Integer> {
         @Override
         public Integer get(LeaderboardRowDAO row) {
@@ -143,6 +178,21 @@ public class LegColumn extends ExpandableSortableColumn<String> {
                     break;
                 case RANK_GAIN:
                     result.add(new RankGainColumn(stringConstants.rankGain(), new RankGain(), getLeaderboardPanel().getLeaderboardTable()));
+                    break;
+                case CURRENT_SPEED_OVER_GROUND_IN_KNOTS:
+                    result.add(new FormattedDoubleLegDetailColumn(stringConstants.currentSpeedOverGroundInKnots(), new CurrentSpeedOverGroundInKnots(), 1, getLeaderboardPanel().getLeaderboardTable()));
+                    break;
+                case ESTIMATED_TIME_TO_NEXT_WAYPOINT_IN_SECONDS:
+                    result.add(new FormattedDoubleLegDetailColumn(stringConstants.estimatedTimeToNextWaypointInSeconds(), new EstimatedTimeToNextWaypointInSeconds(), 1, getLeaderboardPanel().getLeaderboardTable()));
+                    break;
+                case GAP_TO_LEADER_IN_SECONDS:
+                    result.add(new FormattedDoubleLegDetailColumn(stringConstants.gapToLeaderInSeconds(), new GapToLeaderInSeconds(), 1, getLeaderboardPanel().getLeaderboardTable()));
+                    break;
+                case VELOCITY_MADE_GOOD_IN_KNOTS:
+                    result.add(new FormattedDoubleLegDetailColumn(stringConstants.velocityMadeGoodInKnots(), new VelocityMadeGoodInKnots(), 1, getLeaderboardPanel().getLeaderboardTable()));
+                    break;
+                case WINDWARD_DISTANCE_TO_GO_IN_METERS:
+                    result.add(new FormattedDoubleLegDetailColumn(stringConstants.windwardDistanceToGoInMeters(), new WindwardDistanceToGoInMeters(), 1, getLeaderboardPanel().getLeaderboardTable()));
                     break;
                 }
             }
