@@ -93,8 +93,7 @@ public class RankPerLeg extends Action {
         addColumn("" + (avgSpeed==null?"null":avgSpeed.getKnots()));
         addColumn("" + (speedOVG==null?"null":speedOVG.getKnots()));
       }
-
-      say(table);
     }
+    say(table);
   }
 }
