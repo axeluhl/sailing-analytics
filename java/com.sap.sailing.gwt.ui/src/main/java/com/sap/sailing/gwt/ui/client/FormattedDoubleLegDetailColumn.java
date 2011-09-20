@@ -36,12 +36,16 @@ public class FormattedDoubleLegDetailColumn extends LegDetailColumn<Double, Stri
     }
 
     @Override
-    public void render(Context context, LeaderboardRowDAO object, SafeHtmlBuilder sb) {
-        int percent = Random.nextInt(100);
+    public void render(Context context, LeaderboardRowDAO row, SafeHtmlBuilder sb) {
+        int percent = getPercentage(row);
         sb.appendHtmlConstant("<div style=\"left: 0px; background-image: url(/images/greyBar.png); "+
         " background-position: left; background-repeat: no-repeat; background-size: "+
                 percent+"% 14px; \">").
-        appendEscaped(getValue(object)).appendHtmlConstant("</div>");
+        appendEscaped(getValue(row)).appendHtmlConstant("</div>");
+    }
+
+    private int getPercentage(LeaderboardRowDAO row) {
+        return Random.nextInt(100);
     }
 
 }
