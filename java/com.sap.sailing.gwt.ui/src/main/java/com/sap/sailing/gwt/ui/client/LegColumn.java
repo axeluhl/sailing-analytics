@@ -150,7 +150,7 @@ public class LegColumn extends ExpandableSortableColumn<String> {
 
     @Override
     public Header<SafeHtml> getHeader() {
-        return new SortableExpandableColumnHeader(/* title */ stringConstants.leg()+" "+(legIndex+1),
+        return new SortableExpandableColumnHeader(/* title */ stringConstants.leg()+(legIndex+1),
                 /* iconURL */ null, getLeaderboardPanel(), this, stringConstants);
     }
     
