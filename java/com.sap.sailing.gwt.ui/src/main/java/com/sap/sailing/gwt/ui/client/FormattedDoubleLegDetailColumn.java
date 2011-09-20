@@ -40,8 +40,8 @@ public class FormattedDoubleLegDetailColumn extends LegDetailColumn<Double, Stri
         int percent = Random.nextInt(100);
         sb.appendHtmlConstant("<div style=\"left: 0px; background-image: url(/images/greyBar.png); "+
         " background-position: left; background-repeat: no-repeat; background-size: "+
-                percent+"% 14px; \"><p width=100% align=right>").
-        appendEscaped(getValue(object)).appendHtmlConstant("</p></div>");
+                percent+"% 14px; \">").
+        appendEscaped(getValue(object)).appendHtmlConstant("</div>");
     }
 
 }
