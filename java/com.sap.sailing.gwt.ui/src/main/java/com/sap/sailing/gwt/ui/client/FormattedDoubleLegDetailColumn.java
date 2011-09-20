@@ -5,6 +5,7 @@ import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTable;
+import com.google.gwt.user.client.Random;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDAO;
 
 public class FormattedDoubleLegDetailColumn extends LegDetailColumn<Double, String> {
@@ -36,7 +37,11 @@ public class FormattedDoubleLegDetailColumn extends LegDetailColumn<Double, Stri
 
     @Override
     public void render(Context context, LeaderboardRowDAO object, SafeHtmlBuilder sb) {
-        super.render(context, object, sb);
+        int percent = Random.nextInt(100);
+        sb.appendHtmlConstant("<div style=\"left: 0px; background-image: url(/images/greyBar.png); "+
+        " background-position: left; background-repeat: no-repeat; background-size: "+
+                percent+"% 14px; \"><p width=100% align=right>").
+        appendEscaped(getValue(object)).appendHtmlConstant("</p></div>");
     }
 
 }
