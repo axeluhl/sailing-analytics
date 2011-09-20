@@ -5,7 +5,6 @@ import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTable;
-import com.google.gwt.user.client.Random;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDAO;
 
 public class FormattedDoubleLegDetailColumn extends LegDetailColumn<Double, String> {
@@ -45,7 +44,12 @@ public class FormattedDoubleLegDetailColumn extends LegDetailColumn<Double, Stri
     }
 
     private int getPercentage(LeaderboardRowDAO row) {
-        return Random.nextInt(100);
+        Double value = getField().get(row);
+        int percentage = 0;
+        if (value != null) {
+            percentage = (int) (100.*(value-getMinimum())/(getMaximum()-getMinimum()));
+        }
+        return percentage;
     }
 
 }

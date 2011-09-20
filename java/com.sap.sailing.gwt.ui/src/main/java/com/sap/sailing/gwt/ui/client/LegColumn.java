@@ -26,7 +26,7 @@ public class LegColumn extends ExpandableSortableColumn<String> {
     private final StringConstants stringConstants;
     private final LegDetailSelectionProvider legDetailSelectionProvider;
     
-    private abstract class AbstractLegDetailField<T> implements LegDetailField<T> {
+    private abstract class AbstractLegDetailField<T extends Comparable<?>> implements LegDetailField<T> {
         public T get(LeaderboardRowDAO row) {
             LegEntryDAO entry = getLegEntry(row);
             if (entry == null) {

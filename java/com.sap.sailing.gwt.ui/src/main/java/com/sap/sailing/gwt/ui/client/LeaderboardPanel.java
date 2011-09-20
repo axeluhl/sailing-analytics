@@ -469,12 +469,19 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
         return namesOfExpandedRaces;
     }
 
+    /**
+     * Also updates the min/max values on the columns
+     */
     private void updateLeaderboard(LeaderboardDAO leaderboard) {
         setLeaderboard(leaderboard);
         adjustColumnLayout(leaderboard);
         getData().getList().clear();
         if (leaderboard != null) {
             getData().getList().addAll(leaderboard.rows.values());
+            for (int i=0; i<getLeaderboardTable().getColumnCount(); i++) {
+                SortableColumn<?, ?> c = (SortableColumn<?, ?>) getLeaderboardTable().getColumn(i);
+                c.updateMinMax(leaderboard);
+            }
             Comparator<LeaderboardRowDAO> comparator = getComparatorForSelectedSorting();
             if (comparator != null) {
                 Collections.sort(getData().getList(), comparator);

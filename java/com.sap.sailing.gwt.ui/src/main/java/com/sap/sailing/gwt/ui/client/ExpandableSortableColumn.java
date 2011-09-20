@@ -146,6 +146,7 @@ public abstract class ExpandableSortableColumn<C> extends SortableColumn<Leaderb
                     public void run() {
                         int insertIndex = table.getColumnIndex(ExpandableSortableColumn.this) + 1;
                         for (SortableColumn<LeaderboardRowDAO, ?> column : getAllVisibleChildren()) {
+                            column.updateMinMax(getLeaderboardPanel().getLeaderboard());
                             getLeaderboardPanel().insertColumn(insertIndex++, column);
                         }
                     }
