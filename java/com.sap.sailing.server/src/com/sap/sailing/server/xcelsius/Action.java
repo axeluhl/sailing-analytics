@@ -227,7 +227,7 @@ public class Action {
     el.setText(msg);
 
     doc.addContent(el);
-
+    res.setCharacterEncoding("UTF-8");
     res.getWriter().print(getXMLAsString(doc));
   }
 
