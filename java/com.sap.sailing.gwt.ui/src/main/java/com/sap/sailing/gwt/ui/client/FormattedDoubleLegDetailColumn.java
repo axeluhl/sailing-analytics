@@ -35,8 +35,21 @@ public class FormattedDoubleLegDetailColumn extends LegDetailColumn<Double, Stri
     }
 
     @Override
-    public void render(Context context, LeaderboardRowDAO object, SafeHtmlBuilder sb) {
-        super.render(context, object, sb);
+    public void render(Context context, LeaderboardRowDAO row, SafeHtmlBuilder sb) {
+        int percent = getPercentage(row);
+        sb.appendHtmlConstant("<div style=\"left: 0px; background-image: url(/images/greyBar.png); "+
+        " background-position: left; background-repeat: no-repeat; background-size: "+
+                percent+"% 14px; \">").
+        appendEscaped(getValue(row)).appendHtmlConstant("</div>");
+    }
+
+    private int getPercentage(LeaderboardRowDAO row) {
+        Double value = getField().get(row);
+        int percentage = 0;
+        if (value != null) {
+            percentage = (int) (100.*(value-getMinimum())/(getMaximum()-getMinimum()));
+        }
+        return percentage;
     }
 
 }
