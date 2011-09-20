@@ -1,6 +1,9 @@
 package com.sap.sailing.server.xcelsius;
 
-import java.net.URLEncoder;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.jdom.Document;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Event;
@@ -12,11 +15,6 @@ import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.RacingEventService;
-
-import org.jdom.Document;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 
 public class RankPerLeg extends Action {
@@ -60,7 +58,7 @@ public class RankPerLeg extends Action {
         /*
          * Get data
          */
-        final String competitorName = URLEncoder.encode(competitor.getName(), "UTF-8");
+        final String competitorName = competitor.getName();
 
         final String nationality    = competitor.getTeam().getNationality().getThreeLetterIOCAcronym();
 
