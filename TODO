@@ -1,10 +1,11 @@
 Axel
 ====
 
- - bug: connecting leaderboard column to tracked race, then refresh in leaderboard doesn't display expand button
-
  - Finish a first draft version of a GWT admin and leaderboard UI
 
+   * different header colors for race/leg/detail; problem: CellTable.createHeaders doesn't easily
+     allow us to override or manipulate the classes added to the headers; classesBuilder is only
+     filled via the Style, not the Header object; feature request to the GWT team?
    * implement a smart incremental update capability for leaderboard
    * adjustable delay and time per leaderboard
    * allow a column to specify its preferred sorting order (ascending / descending)
