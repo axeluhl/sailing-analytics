@@ -102,7 +102,7 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
                         @Override
                         public void onFailure(Throwable caught) {
                         }
-                    }).show();
+                    }, stringConstants).show();
         }
     }
 

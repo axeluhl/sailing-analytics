@@ -14,14 +14,16 @@ import com.sap.sailing.gwt.ui.client.LegDetailSelectionProvider.LegDetailColumnT
 public class LegDetailSelectionPanel extends DataEntryDialog<List<LegDetailColumnType>> {
     private final LegDetailSelectionProvider selectionProvider;
     private final Map<LegDetailColumnType, CheckBox> checkboxes;
+    private final StringConstants stringConstants;
     private CheckBox firstCheckbox;
     
     public LegDetailSelectionPanel(LegDetailSelectionProvider selectionProvider, String title,
             String message, String okButtonName, String cancelButtonName,
             com.sap.sailing.gwt.ui.client.DataEntryDialog.Validator<List<LegDetailColumnType>> validator,
-            AsyncCallback<List<LegDetailColumnType>> callback) {
+            AsyncCallback<List<LegDetailColumnType>> callback, StringConstants stringConstants) {
         super(title, message, okButtonName, cancelButtonName, validator, callback);
         this.selectionProvider = selectionProvider;
+        this.stringConstants = stringConstants;
         checkboxes = new LinkedHashMap<LegDetailSelectionProvider.LegDetailColumnType, CheckBox>();
     }
 
@@ -31,7 +33,7 @@ public class LegDetailSelectionPanel extends DataEntryDialog<List<LegDetailColum
         VerticalPanel vp = new VerticalPanel();
         firstCheckbox = null;
         for (LegDetailColumnType type : LegDetailColumnType.values()) {
-            CheckBox checkbox = createCheckbox(type.toString());
+            CheckBox checkbox = createCheckbox(type.toString(stringConstants));
             if (firstCheckbox == null) {
                 firstCheckbox = checkbox;
             }
