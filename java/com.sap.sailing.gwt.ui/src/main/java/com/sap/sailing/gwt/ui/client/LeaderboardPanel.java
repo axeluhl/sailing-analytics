@@ -205,8 +205,9 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
                         boolean ascending = isSortedAscendingForThisColumn(getLeaderboardPanel().getLeaderboardTable());
                         LeaderboardEntryDAO o1Entry = o1.fieldsByRaceName.get(raceName);
                         LeaderboardEntryDAO o2Entry = o2.fieldsByRaceName.get(raceName);
-                        return o1Entry == null ? o2Entry == null ? 0 : ascending?1:-1
-                                               : o2Entry == null ? ascending?-1:1 : o1Entry.netPoints - o2Entry.netPoints;
+                        return (o1Entry == null || o1Entry.netPoints == 0) ?
+                                (o2Entry == null || o2Entry.netPoints == 0) ? 0 : ascending?1:-1
+                                    : (o2Entry == null || o2Entry.netPoints == 0) ? ascending?-1:1 : o1Entry.netPoints - o2Entry.netPoints;
                     }
                 };
             }
