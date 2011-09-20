@@ -54,7 +54,11 @@ public class RankPerLeg extends Action {
       /*
        * Get competitor data
        */
+      int i=0;
       for (final Competitor competitor : race.getCompetitors()) {
+          if (i++ > 9) {
+              break;
+          }
         /*
          * Get data
          */
