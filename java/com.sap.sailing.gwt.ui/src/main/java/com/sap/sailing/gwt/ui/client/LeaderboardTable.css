@@ -48,6 +48,8 @@
 .cellTableOddRowCell {
 	border-right: none;
 	border-left: none;
+	border-top: none !important;
+	border-bottom: 1px solid #e5e5e5 !important;
 	padding: 5px 17px 5px !important;
 }
 
@@ -59,6 +61,8 @@
 .cellTableEvenRowCell {
 	border-left: none !important;
 	border-right: none !important;
+	border-top: none !important;
+	border-bottom: 1px solid #e5e5e5 !important;
 	padding: 5px 17px 5px !important;
 }
 
@@ -86,6 +90,6 @@
 .cellTableSelectedRowCell {
 	boder-left: none;
 	boder-right: none;
-	border-top: 2px solid #21a0e4;
-	border-bottom: 2px solid #21a0e4;
+	border-top: 2px solid #21a0e4 !important;
+	border-bottom: 2px solid #21a0e4 !important;
 }

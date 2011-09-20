@@ -398,6 +398,7 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
         HorizontalPanel refreshPanel = new HorizontalPanel();
         refreshPanel.setSpacing(5);
         refreshPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
+        refreshPanel.addStyleName("refreshPanel");
         Anchor refresh = new Anchor(new SafeHtmlBuilder().appendHtmlConstant(stringConstants.refresh()).toSafeHtml());
         refresh.addStyleName("boldAnchor");
         dockPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
