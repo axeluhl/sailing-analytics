@@ -1,9 +1,13 @@
 package com.sap.sailing.server.xcelsius;
 
+import java.net.URLEncoder;
+
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.Speed;
+import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -56,7 +60,7 @@ public class RankPerLeg extends Action {
         /*
          * Get data
          */
-        final String competitorName = competitor.getName();
+        final String competitorName = URLEncoder.encode(competitor.getName(), "UTF-8");
 
         final String nationality    = competitor.getTeam().getNationality().getThreeLetterIOCAcronym();
 
@@ -66,13 +70,13 @@ public class RankPerLeg extends Action {
 
         final int    posGL          = 0; // not yet known
 
-        final double gapToLeader    = trackedLeg.getTrackedLeg(competitor).getGapToLeaderInSeconds(time);
+        final Double gapToLeader    = trackedLeg.getTrackedLeg(competitor).getGapToLeaderInSeconds(time);
 
         final double legTime        = 0; // not yet known
 
-        final double avgSpeed       = trackedLeg.getTrackedLeg(competitor).getAverageSpeedOverGround(time).getKnots();
+        final Speed avgSpeed       = trackedLeg.getTrackedLeg(competitor).getAverageSpeedOverGround(time);
 
-        final double speedOVG       = trackedLeg.getTrackedLeg(competitor).getSpeedOverGround(time).getKnots();
+        final SpeedWithBearing speedOVG  = trackedLeg.getTrackedLeg(competitor).getSpeedOverGround(time);
 
         /*
          * Write data
@@ -88,8 +92,8 @@ public class RankPerLeg extends Action {
         addColumn("" + posGL);
         addColumn("" + gapToLeader);
         addColumn("" + legTime);
-        addColumn("" + avgSpeed);
-        addColumn("" + speedOVG);
+        addColumn("" + (avgSpeed==null?"null":avgSpeed.getKnots()));
+        addColumn("" + (speedOVG==null?"null":speedOVG.getKnots()));
       }
 
       say(table);
