@@ -186,18 +186,12 @@ public class Action {
 
   public Document getTable(String variable) {
     this.table = new Document();
-
     final Element data = new Element("data");
-
-    this.data = data;
-
     this.table.addContent(data);
-
     final Element var = new Element("variable");
     var.setAttribute("name", variable);
-
     data.addContent(var);
-
+    this.data = var;
     return this.table;
   }
 
@@ -206,7 +200,6 @@ public class Action {
     final Element row = new Element("row");
     this.currentRow = row;
     this.data.addContent(row);
-
     return row;
   }
 
