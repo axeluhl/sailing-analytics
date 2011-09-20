@@ -48,7 +48,7 @@
 .cellTableOddRowCell {
 	border-right: none;
 	border-left: none;
-	padding: 5px 5px 5px !important;
+	padding: 5px 17px 5px !important;
 }
 
 .cellTableEvenRow {
@@ -59,7 +59,7 @@
 .cellTableEvenRowCell {
 	border-left: none !important;
 	border-right: none !important;
-	padding: 5px 5px 5px !important;
+	padding: 5px 17px 5px !important;
 }
 
 .cellTableHoveredRow {

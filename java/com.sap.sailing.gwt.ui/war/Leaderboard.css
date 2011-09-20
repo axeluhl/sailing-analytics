@@ -68,8 +68,14 @@ h1 {
 
 .boldAnchor {
 	font-weight: bold;
+	vertical-align: middle;
 }
 
 .gwt-ListBox {
 	font-size: 12px;
+}
+
+.legColumnHeader {
+	background-color: #FFFFFF;
+	padding: 0 0 0 0;
 }
