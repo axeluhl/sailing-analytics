@@ -18,8 +18,8 @@ import com.sap.sailing.server.RacingEventService;
 
 
 public class RankPerLeg extends Action {
-  public RankPerLeg(HttpServletRequest req, HttpServletResponse res, RacingEventService service) {
-    super(req, res, service);
+  public RankPerLeg(HttpServletRequest req, HttpServletResponse res, RacingEventService service, int maxRows) {
+    super(req, res, service, maxRows);
   }
 
   public void perform() throws Exception {
@@ -54,11 +54,7 @@ public class RankPerLeg extends Action {
       /*
        * Get competitor data
        */
-      int i=0;
       for (final Competitor competitor : race.getCompetitors()) {
-          if (i++ > 9) {
-              break;
-          }
         /*
          * Get data
          */

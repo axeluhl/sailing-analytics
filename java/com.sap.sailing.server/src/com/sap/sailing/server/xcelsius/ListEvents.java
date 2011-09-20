@@ -13,8 +13,8 @@ import javax.servlet.http.HttpServletResponse;
 
 
 public class ListEvents extends Action {
-  public ListEvents(HttpServletRequest req, HttpServletResponse res, RacingEventService service) {
-    super(req, res, service);
+  public ListEvents(HttpServletRequest req, HttpServletResponse res, RacingEventService service, int maxRows) {
+    super(req, res, service, maxRows);
   }
 
   public void perform() throws Exception {

@@ -31,16 +31,15 @@ public class Action {
   private Document            table;
 
   private Element             data;
-
+  private final int maxRows;
+  private int rowCount;
   private Element             currentRow;
 
-  public Action() {}
-
-
-  public Action(HttpServletRequest req, HttpServletResponse res, RacingEventService service) {
+  public Action(HttpServletRequest req, HttpServletResponse res, RacingEventService service, int maxRows) {
     this.req     = req;
     this.res     = res;
     this.service = service;
+    this.maxRows = maxRows;
   }
 
   public String getAttribute(String name) {
@@ -196,20 +195,21 @@ public class Action {
   }
 
 
-  public Element addRow() {
-    final Element row = new Element("row");
-    this.currentRow = row;
-    this.data.addContent(row);
-    return row;
+  public void addRow() {
+        if (maxRows == -1 || rowCount++ < maxRows) {
+            final Element row = new Element("row");
+            this.currentRow = row;
+            this.data.addContent(row);
+        }
   }
 
 
-  public Element addColumn(String content) {
-    final Element col = new Element("column");
-    col.setText(content);
-    this.currentRow.addContent(col);
-
-    return col;
+  public void addColumn(String content) {
+        if (maxRows == -1 || rowCount <= maxRows) {
+            final Element col = new Element("column");
+            col.setText(content);
+            this.currentRow.addContent(col);
+        }
   }
 
 

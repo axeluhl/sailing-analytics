@@ -22,12 +22,12 @@ public class XcelsiusApp extends Servlet {
     try {
       if ((action != null) && !"".equals(action)) {
         if ("getRankPerLeg".equals(action)) {
-          final RankPerLeg a = new RankPerLeg(req, res, getService());
+          final RankPerLeg a = new RankPerLeg(req, res, getService(), Integer.valueOf(req.getParameter("maxrows")));
           a.perform();
 
           return;
         } else if ("listEvents".equals(action)) {
-          final ListEvents a = new ListEvents(req, res, getService());
+          final ListEvents a = new ListEvents(req, res, getService(), Integer.valueOf(req.getParameter("maxrows")));
           a.perform();
 
           return;
