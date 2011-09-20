@@ -1,7 +1,9 @@
 package com.sap.sailing.gwt.ui.client;
 
+import com.google.gwt.cell.client.Cell.Context;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.i18n.client.NumberFormat;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDAO;
 
@@ -30,6 +32,11 @@ public class FormattedDoubleLegDetailColumn extends LegDetailColumn<Double, Stri
             result = formatter.format(fieldValue);
         }
         return result;
+    }
+
+    @Override
+    public void render(Context context, LeaderboardRowDAO object, SafeHtmlBuilder sb) {
+        super.render(context, object, sb);
     }
 
 }
