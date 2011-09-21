@@ -7,6 +7,7 @@ import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortList;
 import com.google.gwt.user.cellview.client.Header;
+import com.sap.sailing.gwt.ui.shared.LeaderboardDAO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDAO;
 
 public abstract class SortableColumn<T, C> extends Column<T, C> {
@@ -14,6 +15,8 @@ public abstract class SortableColumn<T, C> extends Column<T, C> {
         super(cell);
         setSortable(true);
     }
+    
+    protected void updateMinMax(LeaderboardDAO leaderboard) {}
     
     /**
      * To enable sorting of <code>null</code> values to the end even in ascending order, the comparators provided

@@ -1,8 +1,8 @@
-/** Add css rules here for your application. */
+** Add css rules here for your application. */
 
 * {
 	font-family: Arial;
-	font-size-adjust: 0.5;
+	font-size: 12px;
 }
 
 
@@ -50,18 +50,73 @@ h1 {
 	border: none;
 }
 
-/** v-align images in the table header */
-.GALD-WOMD > span > img:first-child {
+.refreshLink {
+	border: none;
 	position: relative;
     vertical-align: middle;
 }
 
-/** grey background for table header */
-.GALD-WOPD > thead {
-	background-color: #e5e5e5;
+.valignMiddle {
+	position: relative;
+    vertical-align: middle;
 }
 
 .boldLabel {
-	font-size-adjust: 0.7;
+	font-size: 14px;
 	font-weight: bold;
+}
+
+.boldAnchor {
+	font-weight: bold;
+	vertical-align: middle;
+}
+
+.gwt-ListBox {
+	font-size: 12px;
+}
+
+.legColumnHeader {
+	background-color: #FFFFFF;
+	padding: 0 0 0 0;
+}
+
+.dialogMessageLabel {
+	font-weight: bold;
+}
+
+.gwt-DialogBox .Caption {
+	background: none repeat scroll 0 0 #e5e5e5;
+}
+
+.gwt-DialogBox .dialogTopLeft {
+	background: none repeat scroll 0 0 #e5e5e5;
+}
+
+.gwt-DialogBox .dialogTopRight {
+	background: none repeat scroll 0 0 #e5e5e5;
+}
+
+.gwt-DialogBox .dialogMiddleLeft {
+	background: none repeat scroll 0 0 #e5e5e5;
+}
+
+.gwt-DialogBox .dialogMiddleRight {
+	background: none repeat scroll 0 0 #e5e5e5;
+}
+
+.gwt-DialogBox .dialogBottomCenter {
+	background: none repeat scroll 0 0 #e5e5e5;
+}
+
+.gwt-DialogBox .dialogBottomLeft {
+	background: none repeat scroll 0 0 #e5e5e5;
+}
+
+.gwt-DialogBox .dialogBottomRight {
+	background: none repeat scroll 0 0 #e5e5e5;
+}
+
+.gwt-Button {
+	background-color: #e2e2e2;
+	border-color: #a3a3a3 !important;
 }

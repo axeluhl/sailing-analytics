@@ -67,4 +67,13 @@ public interface StringConstants extends Constants {
     String rankGain();
     String sapSailingAnalytics();
     String leaderboard();
+    String leaderboardSettings();
+    String selectLegDetails();
+    String settings();
+    String selectAtLeastOneLegDetail();
+    String currentSpeedOverGroundInKnots();
+    String estimatedTimeToNextWaypointInSeconds();
+    String gapToLeaderInSeconds();
+    String velocityMadeGoodInKnots();
+    String windwardDistanceToGoInMeters();
 }

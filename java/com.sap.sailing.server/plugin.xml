@@ -44,4 +44,12 @@
             base-name="/web/startwindtracker.html">
       </resource>
    </extension>
+   <extension
+         point="org.eclipse.equinox.http.registry.servlets">
+      <servlet
+            alias="/xcelsius"
+            class="com.sap.sailing.server.XcelsiusApp"
+            load-on-startup="true">
+      </servlet>
+   </extension>
 </plugin>

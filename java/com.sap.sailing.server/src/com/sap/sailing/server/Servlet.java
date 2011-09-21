@@ -10,6 +10,7 @@ import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.util.DateParser;
 import com.sap.sailing.util.InvalidDateException;
 
@@ -73,4 +74,14 @@ public abstract class Servlet extends HttpServlet {
         }
         return timePoint;
     }
+
+	protected TrackedRace getTrackedRace(HttpServletRequest req) {
+	    Event event = getEvent(req);
+	    RaceDefinition race = getRaceDefinition(req);
+	    TrackedRace trackedRace = null;
+	    if (event != null && race != null) {
+	        trackedRace = getService().getDomainFactory().getTrackedEvent(event).getTrackedRace(race);
+	    }
+	    return trackedRace;
+	}
 }

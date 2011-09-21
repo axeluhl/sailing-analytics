@@ -12,6 +12,7 @@ import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.Cell.Context;
 import com.google.gwt.cell.client.EditTextCell;
 import com.google.gwt.cell.client.TextCell;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SafeHtml;
@@ -24,13 +25,16 @@ import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.cellview.client.TextHeader;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
-import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.DockPanel;
 import com.google.gwt.user.client.ui.FormPanel;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
+import com.sap.sailing.gwt.ui.client.DataEntryDialog.Validator;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDAO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDAO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDAO;
@@ -42,7 +46,7 @@ import com.sap.sailing.gwt.ui.shared.Pair;
  * @author Axel Uhl (D043530)
  *
  */
-public class LeaderboardPanel extends FormPanel {
+public class LeaderboardPanel extends FormPanel implements LegDetailSelectionProvider {
     private final SailingServiceAsync sailingService;
     
     /**
@@ -65,6 +69,49 @@ public class LeaderboardPanel extends FormPanel {
     private LeaderboardDAO leaderboard;
 
     private final RankColumn rankColumn;
+    
+    private final List<LegDetailSelectionProvider.LegDetailColumnType> selectedLegDetails;
+
+    private class SettingsClickHandler implements ClickHandler {
+        private final StringConstants stringConstants;
+
+        private SettingsClickHandler(StringConstants stringConstants) {
+            this.stringConstants = stringConstants;
+        }
+
+        @Override
+        public void onClick(ClickEvent event) {
+            new LegDetailSelectionPanel(LeaderboardPanel.this,
+                    stringConstants.leaderboardSettings(), stringConstants.selectLegDetails(),
+                    stringConstants.ok(), stringConstants.cancel(), new Validator<List<LegDetailColumnType>>() {
+                        @Override
+                        public String getErrorMessage(List<LegDetailColumnType> valueToValidate) {
+                            if (valueToValidate.isEmpty()) {
+                                return stringConstants.selectAtLeastOneLegDetail();
+                            } else {
+                                return null;
+                            }
+                        }
+            }, new AsyncCallback<List<LegDetailColumnType>>() {
+                        @Override
+                        public void onSuccess(List<LegDetailColumnType> result) {
+                            selectedLegDetails.clear();
+                            selectedLegDetails.addAll(result);
+                            refreshHeaders();
+                        }
+                        @Override
+                        public void onFailure(Throwable caught) {
+                        }
+                    }, stringConstants).show();
+        }
+    }
+
+    public interface LeaderboardTableResources extends CellTable.Resources {
+        interface TableStyle extends CellTable.Style{}
+        @Override
+        @Source ({CellTable.Style.DEFAULT_CSS, "LeaderboardTable.css"})
+        TableStyle cellTableStyle();
+    }
 
     private class CompetitorColumn extends SortableColumn<LeaderboardRowDAO, String> {
 
@@ -158,8 +205,9 @@ public class LeaderboardPanel extends FormPanel {
                         boolean ascending = isSortedAscendingForThisColumn(getLeaderboardPanel().getLeaderboardTable());
                         LeaderboardEntryDAO o1Entry = o1.fieldsByRaceName.get(raceName);
                         LeaderboardEntryDAO o2Entry = o2.fieldsByRaceName.get(raceName);
-                        return o1Entry == null ? o2Entry == null ? 0 : ascending?1:-1
-                                               : o2Entry == null ? ascending?-1:1 : o1Entry.netPoints - o2Entry.netPoints;
+                        return (o1Entry == null || o1Entry.netPoints == 0) ?
+                                (o2Entry == null || o2Entry.netPoints == 0) ? 0 : ascending?1:-1
+                                    : (o2Entry == null || o2Entry.netPoints == 0) ? ascending?-1:1 : o1Entry.netPoints - o2Entry.netPoints;
                     }
                 };
             }
@@ -210,7 +258,7 @@ public class LeaderboardPanel extends FormPanel {
             int legCount = getLeaderboard().getLegCount(getRaceName());
             List<SortableColumn<LeaderboardRowDAO, ?>> result = new ArrayList<SortableColumn<LeaderboardRowDAO,?>>();
             for (int i=0; i<legCount; i++) {
-                result.add(new LegColumn(LeaderboardPanel.this, getRaceName(), /* legIndex */ i, stringConstants));
+                result.add(new LegColumn(LeaderboardPanel.this, getRaceName(), /* legIndex */ i, stringConstants, LeaderboardPanel.this));
             }
             return result;
         }
@@ -307,13 +355,18 @@ public class LeaderboardPanel extends FormPanel {
     }
     
     public LeaderboardPanel(SailingServiceAsync sailingService, String leaderboardName, ErrorReporter errorReporter,
-            StringConstants stringConstants) {
+            final StringConstants stringConstants) {
         this.sailingService = sailingService;
         this.setLeaderboardName(leaderboardName);
         this.errorReporter = errorReporter;
         this.stringConstants = stringConstants;
+        this.selectedLegDetails = new ArrayList<LegDetailSelectionProvider.LegDetailColumnType>();
+        this.selectedLegDetails.add(LegDetailColumnType.DISTANCE_TRAVELED);
+        this.selectedLegDetails.add(LegDetailColumnType.AVERAGE_SPEED_OVER_GROUND_IN_KNOTS);
+        this.selectedLegDetails.add(LegDetailColumnType.RANK_GAIN);
         rankColumn = new RankColumn();
-        leaderboardTable = new CellTable<LeaderboardRowDAO>(/* pageSize */ 100);
+        CellTable.Resources resources = GWT.create(LeaderboardTableResources.class); 
+        leaderboardTable = new CellTable<LeaderboardRowDAO>(/* pageSize */ 100, resources);
         getLeaderboardTable().setWidth("100%");
         getLeaderboardTable().setSelectionModel(new MultiSelectionModel<LeaderboardRowDAO>() {});
         setData(new ListDataProvider<LeaderboardRowDAO>());
@@ -322,23 +375,45 @@ public class LeaderboardPanel extends FormPanel {
         getLeaderboardTable().addColumnSortHandler(listHandler);
         loadCompleteLeaderboard(getLeaderboardDisplayDate());
         VerticalPanel vp = new VerticalPanel();
-        HorizontalPanel hp = new HorizontalPanel();
+        vp.setSpacing(15);
+        DockPanel logoAndSettings = new DockPanel();
+        vp.add(logoAndSettings);
         Anchor sapLogo = new Anchor(new SafeHtmlBuilder().appendHtmlConstant("<img class=\"linkNoBorder\" src=\"/images/sap_66_transparent.png\"/>").toSafeHtml());
         sapLogo.setHref("http://www.sap.com");
-        hp.add(sapLogo);
-        hp.add(new Label(leaderboardName));
-        Button refreshButton = new Button(stringConstants.refresh());
-        hp.add(refreshButton);
-        refreshButton.addClickHandler(new ClickHandler() {
+        vp.add(sapLogo);
+        DockPanel dockPanel = new DockPanel();
+        dockPanel.setWidth("100%");
+        dockPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
+        Label leaderboardLabel = new Label(stringConstants.leaderboard()+" "+leaderboardName.toUpperCase());
+        leaderboardLabel.addStyleName("boldLabel");
+        dockPanel.add(leaderboardLabel, DockPanel.WEST);
+        ClickHandler refreshHandler = new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 loadCompleteLeaderboard(getLeaderboardDisplayDate());
             }
-        });
-        vp.add(hp);
-        Label leaderboardLabel = new Label(stringConstants.leaderboard());
-        leaderboardLabel.addStyleName("boldLabel");
-        vp.add(leaderboardLabel);
+        };
+        HorizontalPanel refreshAndSettingsPanel = new HorizontalPanel();
+        refreshAndSettingsPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
+        HorizontalPanel refreshPanel = new HorizontalPanel();
+        refreshPanel.setSpacing(5);
+        refreshPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
+        refreshPanel.addStyleName("refreshPanel");
+        Anchor refresh = new Anchor(new SafeHtmlBuilder().appendHtmlConstant(stringConstants.refresh()).toSafeHtml());
+        refresh.addStyleName("boldAnchor");
+        dockPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
+        Anchor refreshLogo = new Anchor(new SafeHtmlBuilder().appendHtmlConstant("<img class=\"linkNoBorder\" src=\"/images/refresh.png\"/>").toSafeHtml());
+        refreshLogo.addClickHandler(refreshHandler);
+        refreshPanel.add(refreshLogo);
+        refreshPanel.add(refresh);
+        Anchor settingsAnchor = new Anchor(new SafeHtmlBuilder().appendHtmlConstant("<img class=\"linkNoBorder\" src=\"/images/settings.png\"/>").toSafeHtml());
+        settingsAnchor.setTitle(stringConstants.settings());
+        settingsAnchor.addClickHandler(new SettingsClickHandler(stringConstants));
+        refreshAndSettingsPanel.add(refreshPanel);
+        refreshAndSettingsPanel.add(settingsAnchor);
+        dockPanel.add(refreshAndSettingsPanel, DockPanel.EAST);
+        refresh.addClickHandler(refreshHandler);
+        vp.add(dockPanel);
         vp.add(getLeaderboardTable());
         setWidget(vp);
     }
@@ -394,12 +469,19 @@ public class LeaderboardPanel extends FormPanel {
         return namesOfExpandedRaces;
     }
 
+    /**
+     * Also updates the min/max values on the columns
+     */
     private void updateLeaderboard(LeaderboardDAO leaderboard) {
         setLeaderboard(leaderboard);
         adjustColumnLayout(leaderboard);
         getData().getList().clear();
         if (leaderboard != null) {
             getData().getList().addAll(leaderboard.rows.values());
+            for (int i=0; i<getLeaderboardTable().getColumnCount(); i++) {
+                SortableColumn<?, ?> c = (SortableColumn<?, ?>) getLeaderboardTable().getColumn(i);
+                c.updateMinMax(leaderboard);
+            }
             Comparator<LeaderboardRowDAO> comparator = getComparatorForSelectedSorting();
             if (comparator != null) {
                 Collections.sort(getData().getList(), comparator);
@@ -584,4 +666,33 @@ public class LeaderboardPanel extends FormPanel {
     private void setData(ListDataProvider<LeaderboardRowDAO> data) {
         this.data = data;
     }
+
+    @Override
+    public List<LegDetailColumnType> getLegDetailsToShow() {
+        return Collections.unmodifiableList(selectedLegDetails);
+    }
+
+    /**
+     * After the leg detail selection has changed, updates the headers accordingly. This implementation
+     * chooses to collapse all expanded race columns and then expand them again (see {@link #toggleExpansion()}).
+     * This will re-establish their expansion structure while updating the leg detail columns accordingly.
+     */
+    private void refreshHeaders() {
+        for (int i=0; i<getLeaderboardTable().getColumnCount(); i++) {
+            Column<LeaderboardRowDAO, ?> c = getLeaderboardTable().getColumn(i);
+            if (c instanceof ExpandableSortableColumn<?>) {
+                ExpandableSortableColumn<?> expandableSortableColumn = (ExpandableSortableColumn<?>) c;
+                if (expandableSortableColumn.isExpanded()) {
+                    expandableSortableColumn.toggleExpansion();
+                    expandableSortableColumn.refreshChildren();
+                    expandableSortableColumn.toggleExpansion();
+                } else {
+                    // if column is not currently expanded, still force children (particularly leg columns) to refresh
+                    // their list of detail columns
+                    expandableSortableColumn.refreshChildren();
+                }
+            }
+        }
+    }
+
 }
