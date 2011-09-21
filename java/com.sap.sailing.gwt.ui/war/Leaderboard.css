@@ -1,4 +1,4 @@
-/** Add css rules here for your application. */
+** Add css rules here for your application. */
 
 * {
 	font-family: Arial;
@@ -78,4 +78,36 @@ h1 {
 .legColumnHeader {
 	background-color: #FFFFFF;
 	padding: 0 0 0 0;
+}
+
+.gwt-DialogBox .Caption {
+	background: none repeat scroll 0 0 #e5e5e5 !important;
+}
+
+.gwt-DialogBox .dialogTopLeft {
+	background: none repeat scroll 0 0 #e5e5e5 !important;
+}
+
+.gwt-DialogBox .dialogTopRight {
+	background: none repeat scroll 0 0 #e5e5e5 !important;
+}
+
+.gwt-DialogBox .dialogMiddleLeft {
+	background: none repeat scroll 0 0 #e5e5e5 !important;
+}
+
+.gwt-DialogBox .dialogMiddleRight {
+	background: none repeat scroll 0 0 #e5e5e5 !important;
+}
+
+.gwt-DialogBox .dialogBottomCenter {
+	background: none repeat scroll 0 0 #e5e5e5 !important;
+}
+
+.gwt-DialogBox .dialogBottomLeft {
+	background: none repeat scroll 0 0 #e5e5e5 !important;
+}
+
+.gwt-DialogBox .dialogBottomRight {
+	background: none repeat scroll 0 0 #e5e5e5 !important;
 }
