@@ -2,6 +2,8 @@ package com.sap.sailing.gwt.ui.client;
 
 import java.util.List;
 
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Node;
 import com.google.gwt.dom.client.NodeList;
@@ -30,7 +32,12 @@ public class CellTableWithStylableHeaders<T> extends CellTable<T> {
     protected void renderRowValues(SafeHtmlBuilder sb, List<T> values, int start,
             SelectionModel<? super T> selectionModel) {
         super.renderRowValues(sb, values, start, selectionModel);
-        updateColumnHeaderStyles();
+        Scheduler.get().scheduleFinally(new ScheduledCommand() {
+            @Override
+            public void execute() {
+                updateColumnHeaderStyles();
+            }
+        });
     }
     
     private void updateColumnHeaderStyles() {
@@ -39,12 +46,24 @@ public class CellTableWithStylableHeaders<T> extends CellTable<T> {
         Node header = thead.getChild(0); // single tr header row
         NodeList<Node> headerColumns = header.getChildNodes();
         for (int i=0; i<headerColumns.getLength(); i++) {
-            Element headerCell = (Element) headerColumns.getItem(i);
+            Element headerCell = Element.as(headerColumns.getItem(i));
             String headerStyle = ((SortableColumn<T, ?>) getColumn(i)).getHeaderStyle();
             if (headerStyle != null) {
                 headerCell.addClassName(headerStyle);
             }
         }
+    }
+
+    @Override
+    public void redrawFooters() {
+        super.redrawFooters();
+        updateColumnHeaderStyles();
+    }
+
+    @Override
+    public void redrawHeaders() {
+        super.redrawHeaders();
+        updateColumnHeaderStyles();
     }
     
 }

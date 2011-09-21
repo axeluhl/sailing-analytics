@@ -149,6 +149,7 @@ public abstract class ExpandableSortableColumn<C> extends SortableColumn<Leaderb
                             column.updateMinMax(getLeaderboardPanel().getLeaderboard());
                             getLeaderboardPanel().insertColumn(insertIndex++, column);
                         }
+                        getLeaderboardPanel().getLeaderboardTable().redraw();
                     }
                 });
             }
