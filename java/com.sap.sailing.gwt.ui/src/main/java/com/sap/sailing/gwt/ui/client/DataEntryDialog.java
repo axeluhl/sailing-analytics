@@ -45,14 +45,18 @@ public abstract class DataEntryDialog<T> {
         this.validator = validator;
         okButton = new Button(okButtonName);
         VerticalPanel dialogVPanel = new VerticalPanel();
+        dialogVPanel.setSpacing(10);
         statusLabel = new Label();
         dialogVPanel.add(statusLabel);
-        dialogVPanel.add(new Label(message));
+        Label messageLabel = new Label(message);
+        messageLabel.addStyleName("dialogMessageLabel");
+        dialogVPanel.add(messageLabel);
         
         dialogVPanel.setHorizontalAlignment(VerticalPanel.ALIGN_RIGHT);
         panelForAdditionalWidget = new HorizontalPanel();
         dialogVPanel.add(panelForAdditionalWidget);
         HorizontalPanel buttonPanel = new HorizontalPanel();
+        buttonPanel.setSpacing(5);
         dialogVPanel.add(buttonPanel);
         buttonPanel.add(okButton);
         cancelButton = new Button(cancelButtonName);

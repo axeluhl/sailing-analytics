@@ -80,34 +80,43 @@ h1 {
 	padding: 0 0 0 0;
 }
 
+.dialogMessageLabel {
+	font-weight: bold;
+}
+
 .gwt-DialogBox .Caption {
-	background: none repeat scroll 0 0 #e5e5e5 !important;
+	background: none repeat scroll 0 0 #e5e5e5;
 }
 
 .gwt-DialogBox .dialogTopLeft {
-	background: none repeat scroll 0 0 #e5e5e5 !important;
+	background: none repeat scroll 0 0 #e5e5e5;
 }
 
 .gwt-DialogBox .dialogTopRight {
-	background: none repeat scroll 0 0 #e5e5e5 !important;
+	background: none repeat scroll 0 0 #e5e5e5;
 }
 
 .gwt-DialogBox .dialogMiddleLeft {
-	background: none repeat scroll 0 0 #e5e5e5 !important;
+	background: none repeat scroll 0 0 #e5e5e5;
 }
 
 .gwt-DialogBox .dialogMiddleRight {
-	background: none repeat scroll 0 0 #e5e5e5 !important;
+	background: none repeat scroll 0 0 #e5e5e5;
 }
 
 .gwt-DialogBox .dialogBottomCenter {
-	background: none repeat scroll 0 0 #e5e5e5 !important;
+	background: none repeat scroll 0 0 #e5e5e5;
 }
 
 .gwt-DialogBox .dialogBottomLeft {
-	background: none repeat scroll 0 0 #e5e5e5 !important;
+	background: none repeat scroll 0 0 #e5e5e5;
 }
 
 .gwt-DialogBox .dialogBottomRight {
-	background: none repeat scroll 0 0 #e5e5e5 !important;
+	background: none repeat scroll 0 0 #e5e5e5;
+}
+
+.gwt-Button {
+	background-color: #e2e2e2;
+	border-color: #a3a3a3 !important;
 }
