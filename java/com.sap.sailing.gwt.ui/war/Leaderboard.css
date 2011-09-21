@@ -1,10 +1,9 @@
-** Add css rules here for your application. */
+/** Add css rules here for your application. */
 
 * {
 	font-family: Arial;
 	font-size: 12px;
 }
-
 
 /** Example rules used by the template application (remove for your app) */
 h1 {
