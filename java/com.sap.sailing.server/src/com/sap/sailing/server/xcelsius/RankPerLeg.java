@@ -1,5 +1,8 @@
 package com.sap.sailing.server.xcelsius;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -16,84 +19,85 @@ import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.RacingEventService;
 
-
 public class RankPerLeg extends Action {
-  public RankPerLeg(HttpServletRequest req, HttpServletResponse res, RacingEventService service, int maxRows) {
-    super(req, res, service, maxRows);
-  }
+    private final Set<String> competitorNameSet;
 
-  public void perform() throws Exception {
-    /*
-     * Get data from request
-     */
-    final Event          event       = getEvent();
-
-    final RaceDefinition race        = getRace(event);
-
-    final TrackedRace    trackedRace = getTrackedRace(event, race);
-
-    final TimePoint      time        = getTimePoint(trackedRace);
-
-    /*
-     * Prepare document
-     */
-    final Document       table       = getTable("data");
-
-    /*
-     * Get Legs data
-     */
-    for (final TrackedLeg trackedLeg : trackedRace.getTrackedLegs()) {
-      final Leg    leg            = trackedLeg.getLeg();
-
-      final String legId          = "" + leg.getFrom().getId();
-
-      final String markName       = leg.getFrom().getName();
-
-      final String upOrDownwinLeg = trackedLeg.isUpOrDownwindLeg(time) ? "U" : "D";
-
-      /*
-       * Get competitor data
-       */
-      for (final Competitor competitor : race.getCompetitors()) {
-        /*
-         * Get data
-         */
-        final String competitorName = competitor.getName();
-
-        final String nationality    = competitor.getTeam().getNationality().getThreeLetterIOCAcronym();
-
-        final int    overallRank    = trackedRace.getRank(competitor);
-
-        final int    legRank        = trackedLeg.getTrackedLeg(competitor).getRank(time);
-
-        final int    posGL          = 0; // not yet known
-
-        final Double gapToLeader    = trackedLeg.getTrackedLeg(competitor).getGapToLeaderInSeconds(time);
-
-        final double legTime        = 0; // not yet known
-
-        final Speed avgSpeed       = trackedLeg.getTrackedLeg(competitor).getAverageSpeedOverGround(time);
-
-        final SpeedWithBearing speedOVG  = trackedLeg.getTrackedLeg(competitor).getSpeedOverGround(time);
-
-        /*
-         * Write data
-         */
-        addRow();
-        addColumn(legId);
-        addColumn(markName);
-        addColumn(upOrDownwinLeg);
-        addColumn(competitorName);
-        addColumn(nationality);
-        addColumn("" + overallRank);
-        addColumn("" + legRank);
-        addColumn("" + posGL);
-        addColumn("" + gapToLeader);
-        addColumn("" + legTime);
-        addColumn("" + (avgSpeed==null?"null":avgSpeed.getKnots()));
-        addColumn("" + (speedOVG==null?"null":speedOVG.getKnots()));
-      }
+    public RankPerLeg(HttpServletRequest req, HttpServletResponse res, RacingEventService service, int maxRows) {
+        super(req, res, service, maxRows);
+        String[] competitors = req.getParameterValues("competitor");
+        if (competitors == null) {
+            competitorNameSet = null;
+        } else {
+            competitorNameSet = new HashSet<String>();
+            for (String competitorName : competitors) {
+                competitorNameSet.add(competitorName);
+            }
+        }
     }
-    say(table);
-  }
+
+    public void perform() throws Exception {
+        /*
+         * Get data from request
+         */
+        final Event event = getEvent();
+
+        final RaceDefinition race = getRace(event);
+
+        final TrackedRace trackedRace = getTrackedRace(event, race);
+
+        final TimePoint time = getTimePoint(trackedRace);
+
+        /*
+         * Prepare document
+         */
+        final Document table = getTable("data");
+
+        /*
+         * Get Legs data
+         */
+        for (final TrackedLeg trackedLeg : trackedRace.getTrackedLegs()) {
+            final Leg leg = trackedLeg.getLeg();
+            final String legId = "" + leg.getFrom().getId();
+            final String markName = leg.getFrom().getName();
+            final String upOrDownwinLeg = trackedLeg.isUpOrDownwindLeg(time) ? "U" : "D";
+
+            /*
+             * Get competitor data
+             */
+            for (final Competitor competitor : race.getCompetitors()) {
+                if (competitorNameSet == null || competitorNameSet.contains(competitor.getName())) {
+                    /*
+                     * Get data
+                     */
+                    final String competitorName = competitor.getName();
+                    final String nationality = competitor.getTeam().getNationality().getThreeLetterIOCAcronym();
+                    final int overallRank = trackedRace.getRank(competitor);
+                    final int legRank = trackedLeg.getTrackedLeg(competitor).getRank(time);
+                    final int posGL = 0; // not yet known
+                    final Double gapToLeader = trackedLeg.getTrackedLeg(competitor).getGapToLeaderInSeconds(time);
+                    final double legTime = 0; // not yet known
+                    final Speed avgSpeed = trackedLeg.getTrackedLeg(competitor).getAverageSpeedOverGround(time);
+                    final SpeedWithBearing speedOVG = trackedLeg.getTrackedLeg(competitor).getSpeedOverGround(time);
+
+                    /*
+                     * Write data
+                     */
+                    addRow();
+                    addColumn(legId);
+                    addColumn(markName);
+                    addColumn(upOrDownwinLeg);
+                    addColumn(competitorName);
+                    addColumn(nationality);
+                    addColumn("" + overallRank);
+                    addColumn("" + legRank);
+                    addColumn("" + posGL);
+                    addColumn("" + gapToLeader);
+                    addColumn("" + legTime);
+                    addColumn("" + (avgSpeed == null ? "null" : avgSpeed.getKnots()));
+                    addColumn("" + (speedOVG == null ? "null" : speedOVG.getKnots()));
+                }
+            }
+        }
+        say(table);
+    }
 }

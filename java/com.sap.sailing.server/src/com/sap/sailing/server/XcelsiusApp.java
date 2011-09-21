@@ -21,13 +21,22 @@ public class XcelsiusApp extends Servlet {
 
     try {
       if ((action != null) && !"".equals(action)) {
+        int maxRows = -1;
+        try {
+            String maxRowsParam = req.getParameter("maxrows");
+            if (maxRowsParam != null) {
+                maxRows = Integer.valueOf(maxRowsParam);
+            }
+        } catch (NumberFormatException nfe) {
+            // ignore and leave at -1
+        }
         if ("getRankPerLeg".equals(action)) {
-          final RankPerLeg a = new RankPerLeg(req, res, getService(), Integer.valueOf(req.getParameter("maxrows")));
+          final RankPerLeg a = new RankPerLeg(req, res, getService(), maxRows);
           a.perform();
 
           return;
         } else if ("listEvents".equals(action)) {
-          final ListEvents a = new ListEvents(req, res, getService(), Integer.valueOf(req.getParameter("maxrows")));
+          final ListEvents a = new ListEvents(req, res, getService(), maxRows);
           a.perform();
 
           return;
