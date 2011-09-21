@@ -12,8 +12,8 @@ public class FormattedDoubleLegDetailColumn extends LegDetailColumn<Double, Stri
     
     public FormattedDoubleLegDetailColumn(String title,
             com.sap.sailing.gwt.ui.client.LegDetailColumn.LegDetailField<Double> field,
-            int decimals, CellTable<LeaderboardRowDAO> leaderboardTable) {
-        super(title, field, new TextCell(), leaderboardTable);
+            int decimals, CellTable<LeaderboardRowDAO> leaderboardTable, String headerStyle) {
+        super(title, field, new TextCell(), leaderboardTable, headerStyle);
         StringBuilder patternBuilder = new StringBuilder("0");
         if (decimals > 0) {
             patternBuilder.append('.');

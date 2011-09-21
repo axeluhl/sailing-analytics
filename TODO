@@ -1,6 +1,9 @@
 Axel
 ====
 
+ - Refresh button in leaderboard panel doesn't properly add expand/collapse buttons for
+   race columns which since the last refresh obtained their expansion enablement
+
  - Finish a first draft version of a GWT admin and leaderboard UI
 
    * different header colors for race/leg/detail; problem: CellTable.createHeaders doesn't easily
@@ -10,6 +13,9 @@ Axel
    * adjustable delay and time per leaderboard
    * allow a column to specify its preferred sorting order (ascending / descending)
    * consider a per-user preferences page where leaderboard columns can be personalized at runtime
+
+ - construct a frame/panel containing leaderboard, event/race selector and TracTrac 2D client.
+   The TracTrac time line shall influence what is shown in the leaderboard.
 
  - Add user authentication and authorization as well as a role model. Typical roles: spectator (anonymous
    and identified), moderator, administrator
