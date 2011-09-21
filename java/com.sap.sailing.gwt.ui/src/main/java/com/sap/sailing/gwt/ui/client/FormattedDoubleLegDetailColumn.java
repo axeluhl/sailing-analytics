@@ -39,7 +39,7 @@ public class FormattedDoubleLegDetailColumn extends LegDetailColumn<Double, Stri
         int percent = getPercentage(row);
         sb.appendHtmlConstant("<div style=\"left: 0px; background-image: url(/images/greyBar.png); "+
         " background-position: left; background-repeat: no-repeat; background-size: "+
-                percent+"% 14px; \">").
+                percent+"% 20px; \">").
         appendEscaped(getValue(row)).appendHtmlConstant("</div>");
     }
 
