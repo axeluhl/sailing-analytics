@@ -5,7 +5,6 @@ import java.util.List;
 
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.Cell.Context;
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -22,7 +21,6 @@ public abstract class StyledHeader<H> extends Header<H> {
     }
 
     /** {@link Template} instance. */
-    private static Template TEMPLATES = GWT.create(Template.class);
 
     /** Style classes. */
     private final List<String> styleNames;
@@ -75,11 +73,9 @@ public abstract class StyledHeader<H> extends Header<H> {
 
     @Override
     public void render(Context context, SafeHtmlBuilder sb) {
-        // create an html builder and render parent contents into it
-        SafeHtmlBuilder contents = new SafeHtmlBuilder();
-        super.render(context, contents);
-        // render wrapped contents
-        sb.append(TEMPLATES.header(getStyleName(), contents.toSafeHtml()));
+        sb.appendHtmlConstant("<div class=\""+getStyleName()+"\">");
+        super.render(context, sb);
+        sb.appendHtmlConstant("</div>");
     }
 
 }

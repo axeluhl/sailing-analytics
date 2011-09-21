@@ -59,7 +59,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
         public EditableRaceColumn(String raceName, boolean medalRace, List<RowUpdateWhiteboardProducerThatAlsoHasCell<LeaderboardRowDAO, ?>> cellList) {
             super(raceName, medalRace,
                     /* expandable */ false, // we don't want leg expansion when editing scores
-                    new CompositeCell<LeaderboardRowDAO>(new ArrayList<HasCell<LeaderboardRowDAO, ?>>(cellList)));
+                    new CompositeCell<LeaderboardRowDAO>(new ArrayList<HasCell<LeaderboardRowDAO, ?>>(cellList)), RACE_COLUMN_HEADER_STYLE);
             for (RowUpdateWhiteboardProducer<LeaderboardRowDAO> rowUpdateWhiteboardProducer : cellList) {
                 rowUpdateWhiteboardProducer.setWhiteboardOwner(this);
             }
