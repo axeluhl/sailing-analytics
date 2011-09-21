@@ -53,8 +53,7 @@ import com.sap.sailing.gwt.ui.shared.RaceDAO;
 import com.sap.sailing.gwt.ui.shared.RegattaDAO;
 import com.sap.sailing.gwt.ui.shared.Triple;
 
-public class RaceMapPanel extends FormPanel implements EventDisplayer,
-		TimeListener, ProvidesResize, RequiresResize,
+public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListener, ProvidesResize, RequiresResize,
 		RaceSelectionChangeListener {
 	private final SailingServiceAsync sailingService;
 	private final ErrorReporter errorReporter;
@@ -69,7 +68,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer,
 	private Icon buoyIcon;
 	private LatLng lastMousePosition;
 	private final Set<CompetitorDAO> competitorsSelectedInMap;
-	
+
 	private final long TAILLENGTHINMILLISECONDS = 30000l;
 
 	/**
@@ -82,9 +81,10 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer,
 	 * Tails of competitors currently displayed as overlays on the map.
 	 */
 	private final Map<CompetitorDAO, Polyline> tails;
-	
+
 	/**
-	 * First/Last Fix of each competitors tail. lastShownFix should be the one with the boatMarker on it.
+	 * First/Last Fix of each competitors tail. lastShownFix should be the one
+	 * with the boatMarker on it.
 	 */
 	private final HashMap<CompetitorDAO, GPSFixDAO> firstShownFix;
 	private final HashMap<CompetitorDAO, GPSFixDAO> lastShownFix;
@@ -99,9 +99,8 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer,
 	// key for domain web4sap.com
 	private final String mapsAPIKey = "ABQIAAAAmvjPh3ZpHbnwuX3a66lDqRRLCigyC_gRDASMpyomD2do5awpNhRCyD_q-27hwxKe_T6ivSZ_0NgbUg";
 
-	public RaceMapPanel(SailingServiceAsync sailingService,
-			ErrorReporter errorReporter, final EventRefresher eventRefresher,
-			StringConstants stringConstants) {
+	public RaceMapPanel(SailingServiceAsync sailingService, ErrorReporter errorReporter,
+			final EventRefresher eventRefresher, StringConstants stringConstants) {
 		this.sailingService = sailingService;
 		this.errorReporter = errorReporter;
 		competitorsSelectedInMap = new HashSet<CompetitorDAO>();
@@ -126,10 +125,13 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer,
 			pos.latDeg = latLng.getLatitude();
 			pos.lngDeg = latLng.getLongitude();
 		}
-		SmallWindHistoryPanel windHistory = new SmallWindHistoryPanel(
-				sailingService, pos, /* number of wind displays */5,
-				/* time interval between displays in milliseconds */5000,
-				stringConstants, errorReporter);
+		SmallWindHistoryPanel windHistory = new SmallWindHistoryPanel(sailingService, pos, /*
+																							 * number
+																							 * of
+																							 * wind
+																							 * displays
+																							 */5,
+		/* time interval between displays in milliseconds */5000, stringConstants, errorReporter);
 		newRaceListBox.addRaceSelectionChangeListener(windHistory);
 		grid.setWidget(1, 0, windHistory);
 		quickRanksList = new ArrayList<CompetitorDAO>();
@@ -149,7 +151,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer,
 		});
 		grid.setWidget(2, 0, quickRanksBox);
 		timePanel = new TimePanel(stringConstants, /* delayBetweenAutoAdvancesInMilliseconds */
-				3000);
+		3000);
 		timePanel.addTimeListener(this);
 		timePanel.addTimeListener(windHistory);
 		grid.setWidget(1, 1, timePanel);
@@ -157,19 +159,16 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer,
 
 	private void updateBoatSelection() {
 		for (int i = 0; i < quickRanksBox.getItemCount(); i++) {
-			setSelectedInMap(quickRanksList.get(i),
-					quickRanksBox.isItemSelected(i));
+			setSelectedInMap(quickRanksList.get(i), quickRanksBox.isItemSelected(i));
 		}
 	}
 
-	private void setSelectedInMap(CompetitorDAO competitorDAO,
-			boolean itemSelected) {
+	private void setSelectedInMap(CompetitorDAO competitorDAO, boolean itemSelected) {
 		if (!itemSelected && competitorsSelectedInMap.contains(competitorDAO)) {
 			// "lowlight" currently selected competitor
 			Marker highlightedMarker = boatMarkers.get(competitorDAO);
 			if (highlightedMarker != null) {
-				Marker lowlightedMarker = createBoatMarker(competitorDAO,
-						highlightedMarker.getLatLng().getLatitude(),
+				Marker lowlightedMarker = createBoatMarker(competitorDAO, highlightedMarker.getLatLng().getLatitude(),
 						highlightedMarker.getLatLng().getLongitude(), /* highlighted */
 						false);
 				map.removeOverlay(highlightedMarker);
@@ -177,12 +176,10 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer,
 				boatMarkers.put(competitorDAO, lowlightedMarker);
 				competitorsSelectedInMap.remove(competitorDAO);
 			}
-		} else if (itemSelected
-				&& !competitorsSelectedInMap.contains(competitorDAO)) {
+		} else if (itemSelected && !competitorsSelectedInMap.contains(competitorDAO)) {
 			Marker lowlightedMarker = boatMarkers.get(competitorDAO);
 			if (lowlightedMarker != null) {
-				Marker highlightedMarker = createBoatMarker(competitorDAO,
-						lowlightedMarker.getLatLng().getLatitude(),
+				Marker highlightedMarker = createBoatMarker(competitorDAO, lowlightedMarker.getLatLng().getLatitude(),
 						lowlightedMarker.getLatLng().getLongitude(), /* highlighted */
 						true);
 				map.removeOverlay(lowlightedMarker);
@@ -226,8 +223,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer,
 				});
 				boatIcon = Icon.newInstance("/images/boat16.png");
 				boatIcon.setIconAnchor(Point.newInstance(8, 8));
-				boatIconHighlighted = Icon
-						.newInstance("/images/boat-selected16.png");
+				boatIconHighlighted = Icon.newInstance("/images/boat-selected16.png");
 				boatIconHighlighted.setIconAnchor(Point.newInstance(8, 8));
 				buoyIcon = Icon.newInstance("/images/safe-water-small.png");
 				buoyIcon.setIconAnchor(Point.newInstance(10, 19));
@@ -241,8 +237,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer,
 	}
 
 	@Override
-	public void onRaceSelectionChange(
-			List<Triple<EventDAO, RegattaDAO, RaceDAO>> selectedRaces) {
+	public void onRaceSelectionChange(List<Triple<EventDAO, RegattaDAO, RaceDAO>> selectedRaces) {
 		mapZoomedOrPannedSinceLastRaceSelectionChange = false;
 		if (!selectedRaces.isEmpty()) {
 			updateSlider(selectedRaces.get(selectedRaces.size() - 1).getC());
@@ -263,62 +258,46 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer,
 	@Override
 	public void timeChanged(Date date) {
 		if (date != null) {
-			List<Triple<EventDAO, RegattaDAO, RaceDAO>> selection = newRaceListBox
-					.getSelectedEventAndRace();
+			List<Triple<EventDAO, RegattaDAO, RaceDAO>> selection = newRaceListBox.getSelectedEventAndRace();
 			if (!selection.isEmpty()) {
 				EventDAO event = selection.get(selection.size() - 1).getA();
-				RaceDAO race = selection.get(selection.size() - 1).getC();			
+				RaceDAO race = selection.get(selection.size() - 1).getC();
 				if (event != null && race != null) {
-					sailingService
-							.getBoatPositions(
-									event.name,
-									race.name,
-									date, /* tailLengthInMilliseconds */
-									TAILLENGTHINMILLISECONDS,
-									firstShownFix,
-									lastShownFix,
-									true,
-									new AsyncCallback<Map<CompetitorDAO, List<GPSFixDAO>>>() {
-										@Override
-										public void onFailure(Throwable caught) {
-											errorReporter.reportError("Error obtaining boat positions: "
-													+ caught.getMessage());
-										}
-
-										@Override
-										public void onSuccess(
-												Map<CompetitorDAO, List<GPSFixDAO>> result) {
-											showBoatsOnMap(result);
-										}
-									});
-					sailingService.getMarkPositions(event.name, race.name,
-							date, new AsyncCallback<List<MarkDAO>>() {
+					sailingService.getBoatPositions(event.name, race.name, date, /* tailLengthInMilliseconds */
+							TAILLENGTHINMILLISECONDS, firstShownFix, lastShownFix, true,
+							new AsyncCallback<Map<CompetitorDAO, List<GPSFixDAO>>>() {
 								@Override
 								public void onFailure(Throwable caught) {
-									errorReporter
-											.reportError("Error trying to obtain mark positions: "
-													+ caught.getMessage());
+									errorReporter.reportError("Error obtaining boat positions: " + caught.getMessage());
 								}
 
 								@Override
-								public void onSuccess(List<MarkDAO> result) {
-									showMarksOnMap(result);
+								public void onSuccess(Map<CompetitorDAO, List<GPSFixDAO>> result) {
+									showBoatsOnMap(result);
 								}
 							});
-					sailingService.getQuickRanks(event.name, race.name, date,
-							new AsyncCallback<List<QuickRankDAO>>() {
-								@Override
-								public void onFailure(Throwable caught) {
-									errorReporter
-											.reportError("Error obtaining quick rankings: "
-													+ caught.getMessage());
-								}
+					sailingService.getMarkPositions(event.name, race.name, date, new AsyncCallback<List<MarkDAO>>() {
+						@Override
+						public void onFailure(Throwable caught) {
+							errorReporter.reportError("Error trying to obtain mark positions: " + caught.getMessage());
+						}
 
-								@Override
-								public void onSuccess(List<QuickRankDAO> result) {
-									showQuickRanks(result);
-								}
-							});
+						@Override
+						public void onSuccess(List<MarkDAO> result) {
+							showMarksOnMap(result);
+						}
+					});
+					sailingService.getQuickRanks(event.name, race.name, date, new AsyncCallback<List<QuickRankDAO>>() {
+						@Override
+						public void onFailure(Throwable caught) {
+							errorReporter.reportError("Error obtaining quick rankings: " + caught.getMessage());
+						}
+
+						@Override
+						public void onSuccess(List<QuickRankDAO> result) {
+							showQuickRanks(result);
+						}
+					});
 				}
 			}
 		}
@@ -329,10 +308,8 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer,
 		quickRanksList.clear();
 		for (QuickRankDAO quickRank : result) {
 			quickRanksList.add(quickRank.competitor);
-			quickRanksBox.addItem("" + quickRank.rank + ". "
-					+ quickRank.competitor.name + " ("
-					+ quickRank.competitor.threeLetterIocCountryCode
-					+ ") in leg #" + (quickRank.legNumber + 1));
+			quickRanksBox.addItem("" + quickRank.rank + ". " + quickRank.competitor.name + " ("
+					+ quickRank.competitor.threeLetterIocCountryCode + ") in leg #" + (quickRank.legNumber + 1));
 		}
 	}
 
@@ -346,8 +323,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer,
 					buoyMarkers.put(markDAO, buoyMarker);
 					map.addOverlay(buoyMarker);
 				} else {
-					buoyMarker.setLatLng(LatLng.newInstance(
-							markDAO.position.latDeg, markDAO.position.lngDeg));
+					buoyMarker.setLatLng(LatLng.newInstance(markDAO.position.latDeg, markDAO.position.lngDeg));
 					toRemove.remove(markDAO);
 				}
 			}
@@ -363,17 +339,15 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer,
 		// update
 		if (map != null) {
 			LatLngBounds newMapBounds = null;
-			
-			if(tails.isEmpty()) {
+
+			if (tails.isEmpty()) {
 				tails.clear();
 				boatMarkers.clear();
 
-				for (final Map.Entry<CompetitorDAO, List<GPSFixDAO>> tail : result
-						.entrySet()) {
+				for (final Map.Entry<CompetitorDAO, List<GPSFixDAO>> tail : result.entrySet()) {
 					if (!tail.getValue().isEmpty()) {
 						final CompetitorDAO competitorDAO = tail.getKey();
-						Polyline newTail = createTail(competitorDAO,
-								tail.getValue());
+						Polyline newTail = createTail(competitorDAO, tail.getValue());
 						map.addOverlay(newTail);
 						tails.put(competitorDAO, newTail);
 						LatLngBounds bounds = newTail.getBounds();
@@ -383,57 +357,39 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer,
 							newMapBounds.extend(bounds.getNorthEast());
 							newMapBounds.extend(bounds.getSouthWest());
 						}
-						GPSFixDAO lastPos = tail.getValue().get(
-								tail.getValue().size() - 1);
-						Marker boatMarker = createBoatMarker(competitorDAO,
-								lastPos.position.latDeg,
+						GPSFixDAO lastPos = tail.getValue().get(tail.getValue().size() - 1);
+						Marker boatMarker = createBoatMarker(competitorDAO, lastPos.position.latDeg,
 								lastPos.position.lngDeg, false);
 						map.addOverlay(boatMarker);
 						boatMarkers.put(competitorDAO, boatMarker);
 					}
 				}
-				if (!mapZoomedOrPannedSinceLastRaceSelectionChange
-						&& newMapBounds != null) {
+				if (!mapZoomedOrPannedSinceLastRaceSelectionChange && newMapBounds != null) {
 					map.setZoomLevel(map.getBoundsZoomLevel(newMapBounds));
 					map.setCenter(newMapBounds.getCenter());
 				}
-			
+
 			} else {
-				for (Map.Entry<CompetitorDAO, Polyline> tailEntry : tails
-						.entrySet()) {
+				for (Map.Entry<CompetitorDAO, Polyline> tailEntry : tails.entrySet()) {
 					final CompetitorDAO competitorDAO = tailEntry.getKey();
 					Polyline tail = tailEntry.getValue();
 					List<GPSFixDAO> gpsFixDao = result.get(competitorDAO);
-					int oldTailLength = tail.getVertexCount();
 					int newPointsCount = gpsFixDao.size();
-					if (newPointsCount<=oldTailLength) {
-					for (int i = 0; i < oldTailLength; i++) {
-								if (i < oldTailLength - newPointsCount) {
-									tail.insertVertex(i,
-											tail.getVertex(i + newPointsCount));
-								} else {
-									tail.insertVertex(
-											i,
-											LatLng.newInstance(
-													gpsFixDao.get(i - (oldTailLength - newPointsCount)).position.latDeg,
-													gpsFixDao.get(i - (oldTailLength - newPointsCount)).position.lngDeg));
-								}
-					
-							Marker bMarker = boatMarkers.get(competitorDAO);
-							bMarker.setLatLng(LatLng.newInstance(
-									gpsFixDao.get(gpsFixDao.size() - 1).position.latDeg,
-									gpsFixDao.get(gpsFixDao.size() - 1).position.lngDeg));
+					int oldTailLengthForDebug = tail.getVertexCount();
+					for (int i = 0; i < newPointsCount; i++) {
+						tail.insertVertex(tail.getVertexCount(),
+								LatLng.newInstance(gpsFixDao.get(i).position.latDeg, gpsFixDao.get(i).position.lngDeg));
+						if (tail.getVertexCount() > 10) {
+							int tailLengthTooLong = tail.getVertexCount() - 10;
+							for (int j = 0; j < tailLengthTooLong; j++) {
+								tail.deleteVertex(0);
+							}								
 						}
-					} else {
-						map.removeOverlay(tail);
-						Polyline newTail = createTail(competitorDAO, gpsFixDao);
-						map.addOverlay(newTail);
-						tails.put(competitorDAO, newTail);
 						Marker bMarker = boatMarkers.get(competitorDAO);
-						bMarker.setLatLng(LatLng.newInstance(
-								gpsFixDao.get(gpsFixDao.size() - 1).position.latDeg,
+						bMarker.setLatLng(LatLng.newInstance(gpsFixDao.get(gpsFixDao.size() - 1).position.latDeg,
 								gpsFixDao.get(gpsFixDao.size() - 1).position.lngDeg));
 					}
+
 					LatLngBounds bounds = tail.getBounds();
 					if (newMapBounds == null) {
 						newMapBounds = bounds;
@@ -442,15 +398,14 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer,
 						newMapBounds.extend(bounds.getSouthWest());
 					}
 
-					if (!mapZoomedOrPannedSinceLastRaceSelectionChange
-							&& newMapBounds != null) {
+					if (!mapZoomedOrPannedSinceLastRaceSelectionChange && newMapBounds != null) {
 						map.setZoomLevel(map.getBoundsZoomLevel(newMapBounds));
 						map.setCenter(newMapBounds.getCenter());
 					}
-					}
 				}
 			}
-		
+		}
+
 	}
 
 	private Marker createBuoyMarker(final MarkDAO markDAO) {
@@ -459,8 +414,8 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer,
 			options.setIcon(buoyIcon);
 		}
 		options.setTitle(markDAO.name);
-		final Marker buoyMarker = new Marker(LatLng.newInstance(
-				markDAO.position.latDeg, markDAO.position.lngDeg), options);
+		final Marker buoyMarker = new Marker(LatLng.newInstance(markDAO.position.latDeg, markDAO.position.lngDeg),
+				options);
 		buoyMarker.addMarkerClickHandler(new MarkerClickHandler() {
 			@Override
 			public void onClick(MarkerClickEvent event) {
@@ -471,8 +426,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer,
 		return buoyMarker;
 	}
 
-	private Marker createBoatMarker(final CompetitorDAO competitorDAO,
-			double latDeg, double lngDeg, boolean highlighted) {
+	private Marker createBoatMarker(final CompetitorDAO competitorDAO, double latDeg, double lngDeg, boolean highlighted) {
 		MarkerOptions options = MarkerOptions.newInstance();
 		if (highlighted) {
 			if (boatIconHighlighted != null) {
@@ -484,8 +438,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer,
 			}
 		}
 		options.setTitle(competitorDAO.name);
-		final Marker boatMarker = new Marker(
-				LatLng.newInstance(latDeg, lngDeg), options);
+		final Marker boatMarker = new Marker(LatLng.newInstance(latDeg, lngDeg), options);
 		boatMarker.addMarkerClickHandler(new MarkerClickHandler() {
 			@Override
 			public void onClick(MarkerClickEvent event) {
@@ -497,32 +450,25 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer,
 			@Override
 			public void onMouseOver(MarkerMouseOverEvent event) {
 				setSelectedInMap(competitorDAO, true);
-				quickRanksBox.setItemSelected(
-						quickRanksList.indexOf(competitorDAO), true);
+				quickRanksBox.setItemSelected(quickRanksList.indexOf(competitorDAO), true);
 			}
 		});
 		boatMarker.addMarkerMouseOutHandler(new MarkerMouseOutHandler() {
 			@Override
 			public void onMouseOut(MarkerMouseOutEvent event) {
 				setSelectedInMap(competitorDAO, false);
-				quickRanksBox.setItemSelected(
-						quickRanksList.indexOf(competitorDAO), false);
+				quickRanksBox.setItemSelected(quickRanksList.indexOf(competitorDAO), false);
 			}
 		});
 		return boatMarker;
 	}
 
 	private void showMarkInfoWindow(MarkDAO markDAO, LatLng latlng) {
-		map.getInfoWindow().open(latlng,
-				new InfoWindowContent(getInfoWindowContent(markDAO)));
+		map.getInfoWindow().open(latlng, new InfoWindowContent(getInfoWindowContent(markDAO)));
 	}
 
-	private void showCompetitorInfoWindow(final CompetitorDAO competitorDAO,
-			LatLng latlng) {
-		map.getInfoWindow().open(
-				latlng,
-				new InfoWindowContent(getInfoWindowContent(competitorDAO,
-						latlng)));
+	private void showCompetitorInfoWindow(final CompetitorDAO competitorDAO, LatLng latlng) {
+		map.getInfoWindow().open(latlng, new InfoWindowContent(getInfoWindowContent(competitorDAO, latlng)));
 	}
 
 	private Widget getInfoWindowContent(MarkDAO markDAO) {
@@ -532,8 +478,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer,
 		return result;
 	}
 
-	private Widget getInfoWindowContent(CompetitorDAO competitorDAO,
-			LatLng latlng) {
+	private Widget getInfoWindowContent(CompetitorDAO competitorDAO, LatLng latlng) {
 		VerticalPanel result = new VerticalPanel();
 		result.add(new Label("Competitor " + competitorDAO.name));
 		result.add(new Label("" + latlng));
@@ -543,26 +488,21 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer,
 	private String getColorString(CompetitorDAO competitorDAO) {
 		// TODO try to avoid colors close to the light blue water display color
 		// of the underlying 2D map
-		return "#"
-				+ Integer.toHexString(competitorDAO.hashCode()).substring(0, 6)
-						.toUpperCase();
+		return "#" + Integer.toHexString(competitorDAO.hashCode()).substring(0, 6).toUpperCase();
 	}
 
-	private Polyline createTail(final CompetitorDAO competitorDAO,
-			List<GPSFixDAO> value) {
+	private Polyline createTail(final CompetitorDAO competitorDAO, List<GPSFixDAO> value) {
 		firstShownFix.put(competitorDAO, value.get(0));
-		firstShownFix.put(competitorDAO, value.get(value.size()-1));
-		
+		firstShownFix.put(competitorDAO, value.get(value.size() - 1));
+
 		List<LatLng> points = new ArrayList<LatLng>();
 		for (int i = 0; i < value.size(); i++) {
-			points.add(LatLng.newInstance(value.get(i).position.latDeg,
-					value.get(i).position.lngDeg));
+			points.add(LatLng.newInstance(value.get(i).position.latDeg, value.get(i).position.lngDeg));
 		}
 		PolylineOptions options = PolylineOptions.newInstance(
-				/* clickable */true, /* geodesic */true);
-		Polyline result = new Polyline(points.toArray(new LatLng[0]),
-				getColorString(competitorDAO), /* width */3,
-				/* opacity */0.5, options);
+		/* clickable */true, /* geodesic */true);
+		Polyline result = new Polyline(points.toArray(new LatLng[0]), getColorString(competitorDAO), /* width */3,
+		/* opacity */0.5, options);
 		result.addPolylineClickHandler(new PolylineClickHandler() {
 			@Override
 			public void onClick(PolylineClickEvent event) {
@@ -574,8 +514,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer,
 			public void onMouseOver(PolylineMouseOverEvent event) {
 				map.setTitle(competitorDAO.name);
 				setSelectedInMap(competitorDAO, true);
-				quickRanksBox.setItemSelected(
-						quickRanksList.indexOf(competitorDAO), true);
+				quickRanksBox.setItemSelected(quickRanksList.indexOf(competitorDAO), true);
 			}
 		});
 		result.addPolylineMouseOutHandler(new PolylineMouseOutHandler() {
@@ -583,8 +522,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer,
 			public void onMouseOut(PolylineMouseOutEvent event) {
 				map.setTitle("");
 				setSelectedInMap(competitorDAO, false);
-				quickRanksBox.setItemSelected(
-						quickRanksList.indexOf(competitorDAO), false);
+				quickRanksBox.setItemSelected(quickRanksList.indexOf(competitorDAO), false);
 			}
 		});
 		return result;
