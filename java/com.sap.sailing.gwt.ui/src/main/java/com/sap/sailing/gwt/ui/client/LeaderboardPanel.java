@@ -190,7 +190,7 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
         
         public RaceColumn(String raceName, boolean medalRace, boolean enableExpansion, Cell<C> cell, String headerStyle) {
             super(LeaderboardPanel.this, enableExpansion, cell);
-            setHorizontalAlignment(ALIGN_RIGHT);
+            setHorizontalAlignment(ALIGN_CENTER);
             this.raceName = raceName;
             this.medalRace = medalRace;
             this.headerStyle = headerStyle;
@@ -306,7 +306,7 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
     private class TotalsColumn extends SortableColumn<LeaderboardRowDAO, String>  {
         protected TotalsColumn() {
             super(new TextCell());
-            setHorizontalAlignment(ALIGN_RIGHT);
+            setHorizontalAlignment(ALIGN_CENTER);
         }
 
         @Override
@@ -362,7 +362,7 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
     private class RankColumn extends SortableColumn<LeaderboardRowDAO, String>  {
         public RankColumn() {
             super(new TextCell());
-            setHorizontalAlignment(ALIGN_RIGHT);
+            setHorizontalAlignment(ALIGN_CENTER);
             setSortable(true);
         }
 

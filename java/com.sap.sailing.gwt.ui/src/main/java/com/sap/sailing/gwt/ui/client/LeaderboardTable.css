@@ -14,6 +14,7 @@
 	border-top: none !important;
 	border-bottom: none !important;
 	padding: 3px 12px;
+	text-align: center;
 }
 
 .cellTableFirstColumnHeader {
@@ -25,6 +26,7 @@
 	border-top: none !important;
 	border-bottom: none !important;
 	padding: 3px 12px;
+	text-align: center;
 }
 
 .cellTableLastColumnHeader {
@@ -36,6 +38,7 @@
 	border-top: none !important;
 	border-bottom: none !important;
 	padding: 3px 12px;
+	text-align: center;
 }
 
 .cellTableHeader > span > img:first-child {

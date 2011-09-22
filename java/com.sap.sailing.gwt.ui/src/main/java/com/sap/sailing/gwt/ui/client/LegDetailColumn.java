@@ -24,7 +24,7 @@ public abstract class LegDetailColumn<FieldType extends Comparable<?>, Rendering
     protected LegDetailColumn(String title, LegDetailField<FieldType> field, Cell<RenderingType> cell, CellTable<LeaderboardRowDAO> leaderboardTable,
             String headerStyle) {
         super(cell);
-        setHorizontalAlignment(ALIGN_RIGHT);
+        setHorizontalAlignment(ALIGN_CENTER);
         this.title = title;
         this.field = field;
         this.leaderboardTable = leaderboardTable;
@@ -83,10 +83,10 @@ public abstract class LegDetailColumn<FieldType extends Comparable<?>, Rendering
         LeaderboardRowDAO minimumRow = null;
         LeaderboardRowDAO maximumRow = null;
         for (LeaderboardRowDAO row : leaderboard.rows.values()) {
-            if (minimumRow == null || (comparator.compare(minimumRow, row) > 0 && getField().get(row) != null)) {
+            if (getField().get(row) != null && (minimumRow == null || comparator.compare(minimumRow, row) > 0)) {
                 minimumRow = row;
             }
-            if (maximumRow == null || (comparator.compare(maximumRow, row) < 0 && getField().get(row) != null)) {
+            if (getField().get(row) != null  && (maximumRow == null || comparator.compare(maximumRow, row) < 0)) {
                 maximumRow = row;
             }
         }
