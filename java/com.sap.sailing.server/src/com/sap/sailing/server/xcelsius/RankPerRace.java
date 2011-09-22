@@ -3,6 +3,7 @@ package com.sap.sailing.server.xcelsius;
 import java.net.URLEncoder;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
@@ -12,6 +13,7 @@ import org.jdom.Document;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.tracking.TrackedLeg;
@@ -44,25 +46,25 @@ public class RankPerRace extends Action {
         final Document table = getTable("data");
 
         // Get Legs data
-        for (final TrackedLeg trackedLeg : trackedRace.getTrackedLegs()) {
-            LinkedHashMap<Competitor, Integer> ranks = trackedLeg.getRanks(time);
-            // Get competitor data
-            for (final Competitor competitor : ranks.keySet()) {
-                if (competitorNameSet == null || competitorNameSet.contains(competitor.getName())) {
-                    // Get data
-                    final String competitorName = competitor.getName();
-                    final String nationality = competitor.getTeam().getNationality().getThreeLetterIOCAcronym();
-                    final String sailID = competitor.getBoat().getSailID();
-                    final int overallRank = trackedRace.getRank(competitor);
+        List<Leg> legs = race.getCourse().getLegs();
+        TrackedLeg trackedLeg = trackedRace.getTrackedLeg(legs.get(legs.size() - 1));
+        LinkedHashMap<Competitor, Integer> ranks = trackedLeg.getRanks(time);
+        // Get competitor data
+        for (final Competitor competitor : ranks.keySet()) {
+            if (competitorNameSet == null || competitorNameSet.contains(competitor.getName())) {
+                // Get data
+                final String competitorName = competitor.getName();
+                final String nationality = competitor.getTeam().getNationality().getThreeLetterIOCAcronym();
+                final String sailID = competitor.getBoat().getSailID();
+                final int overallRank = trackedRace.getRank(competitor);
 
-                    // Write data
-                    addRow();
-                    addColumn("" + overallRank);
-                    addColumn(nationality);
-                    addColumn(sailID==null?"null":sailID);
-                    addColumn(competitorName);
-                    addColumn(URLEncoder.encode(competitorName, "UTF-8"));
-                }
+                // Write data
+                addRow();
+                addColumn("" + overallRank);
+                addColumn(nationality);
+                addColumn(sailID == null ? "null" : sailID);
+                addColumn(competitorName);
+                addColumn(URLEncoder.encode(competitorName, "UTF-8"));
             }
         }
         say(table);
