@@ -16,19 +16,21 @@ public abstract class LegDetailColumn<FieldType extends Comparable<?>, Rendering
     private FieldType minimum;
     private FieldType maximum;
     private final String headerStyle;
+    private final String columnStyle;
     
     public interface LegDetailField<T extends Comparable<?>> {
         T get(LeaderboardRowDAO row);
     }
     
     protected LegDetailColumn(String title, LegDetailField<FieldType> field, Cell<RenderingType> cell, CellTable<LeaderboardRowDAO> leaderboardTable,
-            String headerStyle) {
+            String headerStyle, String columnStyle) {
         super(cell);
         setHorizontalAlignment(ALIGN_CENTER);
         this.title = title;
         this.field = field;
         this.leaderboardTable = leaderboardTable;
         this.headerStyle = headerStyle;
+        this.columnStyle = columnStyle;
     }
 
     protected String getTitle() {
@@ -42,6 +44,11 @@ public abstract class LegDetailColumn<FieldType extends Comparable<?>, Rendering
 
     protected LegDetailField<FieldType> getField() {
         return field;
+    }
+
+    @Override
+    public String getColumnStyle() {
+        return columnStyle;
     }
 
     @Override

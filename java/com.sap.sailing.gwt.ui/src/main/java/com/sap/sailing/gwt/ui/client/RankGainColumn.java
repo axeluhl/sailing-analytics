@@ -8,8 +8,9 @@ import com.google.gwt.user.cellview.client.CellTable;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDAO;
 
 public class RankGainColumn extends LegDetailColumn<Integer, Integer> {
-    public RankGainColumn(String title, LegDetailField<Integer> field, CellTable<LeaderboardRowDAO> leaderboardTable, String headerStyle) {
-        super(title, field, new RankGainCell(), leaderboardTable, headerStyle);
+    public RankGainColumn(String title, LegDetailField<Integer> field, CellTable<LeaderboardRowDAO> leaderboardTable,
+            String headerStyle, String columnStyle) {
+        super(title, field, new RankGainCell(), leaderboardTable, headerStyle, columnStyle);
     }
 
     @Override
