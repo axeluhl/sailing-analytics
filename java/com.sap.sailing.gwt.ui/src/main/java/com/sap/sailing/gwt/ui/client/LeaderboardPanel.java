@@ -81,8 +81,14 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
     protected final String RACE_COLUMN_HEADER_STYLE;
 
     protected final String LEG_DETAIL_COLUMN_HEADER_STYLE;
+    
+    protected final String LEG_DETAIL_COLUMN_STYLE;
 
     protected final String LEG_COLUMN_HEADER_STYLE;
+
+    protected final String RACE_COLUMN_STYLE;
+
+    protected final String LEG_COLUMN_STYLE;
 
     private class SettingsClickHandler implements ClickHandler {
         private final StringConstants stringConstants;
@@ -134,6 +140,21 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
              * Applied to header cells of race columns
              */
             String cellTableLegDetailColumnHeader();
+
+            /**
+             * Applied to detail columns
+             */
+            String cellTableLegDetailColumn();
+
+            /**
+             * Applied to race columns
+             */
+            String cellTableRaceColumn();
+
+            /**
+             * Applied to leg columns
+             */
+            String cellTableLegColumn();
 
         }
         @Override
@@ -227,19 +248,26 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
         private final String raceName;
         private final boolean medalRace;
         private final String headerStyle;
+        private final String columnStyle;
         
-        public RaceColumn(String raceName, boolean medalRace, boolean enableExpansion, Cell<C> cell, String headerStyle) {
+        public RaceColumn(String raceName, boolean medalRace, boolean enableExpansion, Cell<C> cell, String headerStyle, String columnStyle) {
             super(LeaderboardPanel.this, enableExpansion, cell);
             setHorizontalAlignment(ALIGN_CENTER);
             this.raceName = raceName;
             this.medalRace = medalRace;
             this.headerStyle = headerStyle;
+            this.columnStyle = columnStyle;
         }
         
         public String getRaceName() {
             return raceName;
         }
         
+        @Override
+        public String getColumnStyle() {
+            return columnStyle;
+        }
+
         @Override
         public void render(Context context, LeaderboardRowDAO object, SafeHtmlBuilder html) {
             LeaderboardEntryDAO entry = object.fieldsByRaceName.get(raceName);
@@ -294,8 +322,8 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
     }
     
     private class TextRaceColumn extends RaceColumn<String> {
-        public TextRaceColumn(String raceName, boolean medalRace, boolean expandable, String headerStyle) {
-            super(raceName, medalRace, expandable, new TextCell(), headerStyle);
+        public TextRaceColumn(String raceName, boolean medalRace, boolean expandable, String headerStyle, String columnStyle) {
+            super(raceName, medalRace, expandable, new TextCell(), headerStyle, columnStyle);
         }
 
         @Override
@@ -331,7 +359,7 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
             List<SortableColumn<LeaderboardRowDAO, ?>> result = new ArrayList<SortableColumn<LeaderboardRowDAO,?>>();
             for (int i=0; i<legCount; i++) {
                 result.add(new LegColumn(LeaderboardPanel.this, getRaceName(), /* legIndex */ i, stringConstants, LeaderboardPanel.this,
-                        LEG_COLUMN_HEADER_STYLE, LEG_DETAIL_COLUMN_HEADER_STYLE));
+                        LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LEG_DETAIL_COLUMN_HEADER_STYLE, LEG_DETAIL_COLUMN_STYLE));
             }
             return result;
         }
@@ -442,6 +470,9 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
         RACE_COLUMN_HEADER_STYLE = resources.cellTableStyle().cellTableRaceColumnHeader();
         LEG_COLUMN_HEADER_STYLE = resources.cellTableStyle().cellTableLegColumnHeader();
         LEG_DETAIL_COLUMN_HEADER_STYLE = resources.cellTableStyle().cellTableLegDetailColumnHeader();
+        RACE_COLUMN_STYLE = resources.cellTableStyle().cellTableRaceColumn();
+        LEG_COLUMN_STYLE = resources.cellTableStyle().cellTableLegColumn();
+        LEG_DETAIL_COLUMN_STYLE = resources.cellTableStyle().cellTableLegDetailColumn();
         leaderboardTable = new CellTableWithStylableHeaders<LeaderboardRowDAO>(/* pageSize */ 100, resources);
         getLeaderboardTable().setWidth("100%");
         getLeaderboardTable().setSelectionModel(new MultiSelectionModel<LeaderboardRowDAO>() {});
@@ -505,11 +536,19 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
     protected void addColumn(SortableColumn<LeaderboardRowDAO, ?> column) {
         getLeaderboardTable().addColumn(column, column.getHeader());
         listHandler.setComparator(column, column.getComparator());
+        String columnStyle = column.getColumnStyle();
+        if (columnStyle != null) {
+            getLeaderboardTable().addColumnStyleName(getLeaderboardTable().getColumnCount()-1, columnStyle);
+        }
     }
     
     protected void insertColumn(int beforeIndex, SortableColumn<LeaderboardRowDAO, ?> column) {
         getLeaderboardTable().insertColumn(beforeIndex, column, column.getHeader());
         listHandler.setComparator(column, column.getComparator());
+        String columnStyle = column.getColumnStyle();
+        if (columnStyle != null) {
+            getLeaderboardTable().addColumnStyleName(beforeIndex, columnStyle);
+        }
     }
     
     private void loadCompleteLeaderboard(Date date) {
@@ -603,18 +642,25 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
         // first remove race columns no longer needed:
         removeUnusedRaceColumns(leaderboard);
         if (leaderboard != null) {
-            createMissingRaceColumns(leaderboard);
+            createMissingAndAdjustExistingRaceColumns(leaderboard);
             ensureTotalsColumn();
         }
     }
 
-    private void createMissingRaceColumns(LeaderboardDAO leaderboard) {
+    /**
+     * Existing and matching race columns may still need to be removed, re-created and inserted because the
+     * "tracked" property may have changed, changing the columns expandability.
+     */
+    private void createMissingAndAdjustExistingRaceColumns(LeaderboardDAO leaderboard) {
         for (Map.Entry<String, Pair<Boolean, Boolean>> raceNameAndMedalRaceAndTracked : leaderboard.raceNamesAndMedalRaceAndTracked.entrySet()) {
             boolean foundRaceColumn = false;
             for (int i=0; !foundRaceColumn && i<getLeaderboardTable().getColumnCount(); i++) {
                 Column<LeaderboardRowDAO, ?> c = getLeaderboardTable().getColumn(i);
-                if (c instanceof RaceColumn && ((RaceColumn<?>) c).getRaceName().equals(raceNameAndMedalRaceAndTracked.getKey())) {
-                    foundRaceColumn = true;
+                if (c instanceof RaceColumn) {
+                    RaceColumn<?> raceColumn = (RaceColumn<?>) c;
+                    if (raceColumn.getRaceName().equals(raceNameAndMedalRaceAndTracked.getKey())) {
+                        foundRaceColumn = true;
+                    }
                 }
             }
             if (!foundRaceColumn) {
@@ -625,7 +671,7 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
 
     protected RaceColumn<?> createRaceColumn(Map.Entry<String, Pair<Boolean, Boolean>> raceNameAndMedalRaceAndTracked) {
         return new TextRaceColumn(raceNameAndMedalRaceAndTracked.getKey(), raceNameAndMedalRaceAndTracked.getValue().getA(),
-                raceNameAndMedalRaceAndTracked.getValue().getB(), RACE_COLUMN_HEADER_STYLE);
+                raceNameAndMedalRaceAndTracked.getValue().getB(), RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE);
     }
 
     private void removeUnusedRaceColumns(LeaderboardDAO leaderboard) {

@@ -1,6 +1,9 @@
 package com.sap.sailing.server.xcelsius;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
@@ -55,16 +58,16 @@ public class RankPerLeg extends Action {
         /*
          * Get Legs data
          */
+        int i=0;
+        NumberFormat numberFormat = new DecimalFormat("00");
         for (final TrackedLeg trackedLeg : trackedRace.getTrackedLegs()) {
             final Leg leg = trackedLeg.getLeg();
-            final String legId = "" + leg.getFrom().getId();
+            final String legId = numberFormat.format(++i);
             final String markName = leg.getFrom().getName();
             final String upOrDownwinLeg = trackedLeg.isUpOrDownwindLeg(time) ? "U" : "D";
-
-            /*
-             * Get competitor data
-             */
-            for (final Competitor competitor : race.getCompetitors()) {
+            LinkedHashMap<Competitor, Integer> ranks = trackedLeg.getRanks(time);
+            // Get competitor data
+            for (final Competitor competitor : ranks.keySet()) {
                 if (competitorNameSet == null || competitorNameSet.contains(competitor.getName())) {
                     /*
                      * Get data
