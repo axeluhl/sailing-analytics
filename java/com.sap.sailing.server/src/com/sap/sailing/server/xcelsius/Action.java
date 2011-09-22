@@ -4,6 +4,7 @@ import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.util.InvalidDateException;
@@ -150,8 +151,8 @@ public class Action {
 
 
   public TrackedRace getTrackedRace(Event event, RaceDefinition race) throws IOException {
-    final TrackedRace trackedRace = getService().getDomainFactory().getTrackedEvent(event).getTrackedRace(race);
-
+    DynamicTrackedEvent trackedEvent = getService().getDomainFactory().getTrackedEvent(event);
+    TrackedRace trackedRace = trackedEvent==null?null:trackedEvent.getTrackedRace(race);
     return trackedRace;
   }
 
