@@ -2,6 +2,7 @@ package com.sap.sailing.server.xcelsius;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Set;
@@ -21,6 +22,7 @@ import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.util.Util;
 
 public class RankPerLeg extends Action {
     private final Set<String> competitorNameSet;
@@ -60,6 +62,7 @@ public class RankPerLeg extends Action {
          */
         int i=0;
         NumberFormat numberFormat = new DecimalFormat("00");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         for (final TrackedLeg trackedLeg : trackedRace.getTrackedLegs()) {
             final Leg leg = trackedLeg.getLeg();
             final String legId = numberFormat.format(++i);
@@ -87,6 +90,11 @@ public class RankPerLeg extends Action {
                      * Write data
                      */
                     addRow();
+                    addColumn(competitor.getBoat().getBoatClass().getName());
+                    addColumn(race.getName());
+                    addColumn(dateFormat.format(trackedRace.getStart().asDate()));
+                    addColumn(""+Util.size(race.getCompetitors()));
+                    
                     addColumn(legId);
                     addColumn(markName);
                     addColumn(upOrDownwinLeg);

@@ -543,14 +543,39 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
     }
     
     protected void insertColumn(int beforeIndex, SortableColumn<LeaderboardRowDAO, ?> column) {
+        // remove column styles of those columns whose index will shift right by one:
+        removeColumnStyles(beforeIndex);
         getLeaderboardTable().insertColumn(beforeIndex, column, column.getHeader());
+        addColumnStyles(beforeIndex);
         listHandler.setComparator(column, column.getComparator());
-        String columnStyle = column.getColumnStyle();
-        if (columnStyle != null) {
-            getLeaderboardTable().addColumnStyleName(beforeIndex, columnStyle);
+    }
+
+    private void addColumnStyles(int startColumn) {
+        for (int i=startColumn; i<getLeaderboardTable().getColumnCount(); i++) {
+            SortableColumn<LeaderboardRowDAO, ?> columnToRemoveStyleFor = (SortableColumn<LeaderboardRowDAO, ?>) getLeaderboardTable().getColumn(i);
+            String columnStyle = columnToRemoveStyleFor.getColumnStyle();
+            if (columnStyle != null) {
+                getLeaderboardTable().addColumnStyleName(i, columnStyle);
+            }
+        }
+    }
+
+    private void removeColumnStyles(int startColumn) {
+        for (int i=startColumn; i<getLeaderboardTable().getColumnCount(); i++) {
+            SortableColumn<LeaderboardRowDAO, ?> columnToRemoveStyleFor = (SortableColumn<LeaderboardRowDAO, ?>) getLeaderboardTable().getColumn(i);
+            String columnStyle = columnToRemoveStyleFor.getColumnStyle();
+            if (columnStyle != null) {
+                getLeaderboardTable().removeColumnStyleName(i, columnStyle);
+            }
         }
     }
     
+    protected void removeColumn(int columnIndex) {
+        removeColumnStyles(/* startColumn */ columnIndex);
+        getLeaderboardTable().removeColumn(columnIndex);
+        addColumnStyles(/* startColumn */ columnIndex);
+    }
+
     private void loadCompleteLeaderboard(Date date) {
         getSailingService().getLeaderboardByName(getLeaderboardName(), date, 
                 /* namesOfRacesForWhichToLoadLegDetails */ getNamesOfExpandedRaces(),
@@ -694,7 +719,7 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
      */
     private void addRaceColumn(RaceColumn<?> raceColumn) {
         if (getLeaderboardTable().getColumn(getLeaderboardTable().getColumnCount()-1) instanceof TotalsColumn) {
-            getLeaderboardTable().removeColumn(getLeaderboardTable().getColumnCount()-1);
+            removeColumn(getLeaderboardTable().getColumnCount()-1);
         }
         addColumn(raceColumn);
     }
@@ -747,7 +772,7 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
     private void ensureNoCarryColumn() {
         if (getLeaderboardTable().getColumnCount() > CARRY_COLUMN_INDEX
                 && getLeaderboardTable().getColumn(CARRY_COLUMN_INDEX) instanceof CarryColumn) {
-            getLeaderboardTable().removeColumn(CARRY_COLUMN_INDEX);
+            removeColumn(CARRY_COLUMN_INDEX);
         }
     }
 
@@ -755,7 +780,7 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
         if (getLeaderboardTable().getColumnCount() <= CARRY_COLUMN_INDEX
                 || !(getLeaderboardTable().getColumn(CARRY_COLUMN_INDEX) instanceof CarryColumn)) {
             while (getLeaderboardTable().getColumnCount() > CARRY_COLUMN_INDEX) {
-                getLeaderboardTable().removeColumn(CARRY_COLUMN_INDEX);
+                removeColumn(CARRY_COLUMN_INDEX);
             }
             addColumn(createCarryColumn());
         }

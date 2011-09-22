@@ -48,25 +48,6 @@ public class SortableExpandableColumnHeader extends Header<SafeHtml> {
     private static <T> Cell<SafeHtml> constructCell(final String title, final String iconURL, boolean isExpansionEnabled,
             final LeaderboardPanel leaderboardPanel, final ExpandableSortableColumn<?> column, final StringConstants stringConstants) {
         final List<HasCell<SafeHtml, ?>> cells = new ArrayList<HasCell<SafeHtml, ?>>(3);
-        // add the cell rendering the expand/collapse button:
-        if (isExpansionEnabled) {
-            cells.add(new HasCell<SafeHtml, SafeHtml>() {
-                @Override
-                public Cell<SafeHtml> getCell() {
-                    return new ExpandCollapseButtonCell(column, new ExpandCollapseButtonAction(column));
-                }
-
-                @Override
-                public FieldUpdater<SafeHtml, SafeHtml> getFieldUpdater() {
-                    return null; // no updates possible in a header cell
-                }
-
-                @Override
-                public SafeHtml getValue(SafeHtml object) {
-                    return null;
-                }
-            });
-        }
         // if it's a medal race, add the cell rendering the medal image
         if (iconURL != null) {
             cells.add(new HasCell<SafeHtml, String>() {
@@ -101,6 +82,25 @@ public class SortableExpandableColumnHeader extends Header<SafeHtml> {
                 return new SafeHtmlBuilder().appendHtmlConstant("&nbsp;").appendEscaped(title).toSafeHtml();
             }
         });
+        // add the cell rendering the expand/collapse button:
+        if (isExpansionEnabled) {
+            cells.add(new HasCell<SafeHtml, SafeHtml>() {
+                @Override
+                public Cell<SafeHtml> getCell() {
+                    return new ExpandCollapseButtonCell(column, new ExpandCollapseButtonAction(column));
+                }
+
+                @Override
+                public FieldUpdater<SafeHtml, SafeHtml> getFieldUpdater() {
+                    return null; // no updates possible in a header cell
+                }
+
+                @Override
+                public SafeHtml getValue(SafeHtml object) {
+                    return null;
+                }
+            });
+        }
         return new CompositeCell<SafeHtml>(cells) {
             /**
              * Redefining this method because when a table column is sorted, GWT wraps a div element
