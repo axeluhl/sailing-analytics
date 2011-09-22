@@ -2,7 +2,6 @@ package com.sap.sailing.server.xcelsius;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.text.SimpleDateFormat;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Set;
@@ -62,7 +61,6 @@ public class RankPerLeg extends Action {
          */
         int i=0;
         NumberFormat numberFormat = new DecimalFormat("00");
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         for (final TrackedLeg trackedLeg : trackedRace.getTrackedLegs()) {
             final Leg leg = trackedLeg.getLeg();
             final String legId = numberFormat.format(++i);
@@ -82,7 +80,7 @@ public class RankPerLeg extends Action {
                     final int legRank = trackedLeg.getTrackedLeg(competitor).getRank(time);
                     final int posGL = 0; // not yet known
                     final Double gapToLeader = trackedLeg.getTrackedLeg(competitor).getGapToLeaderInSeconds(time);
-                    final double legTime = 0; // not yet known
+                    final double legTime = 1./1000.*trackedLeg.getTrackedLeg(competitor).getTimeInMilliSeconds(time);
                     final Speed avgSpeed = trackedLeg.getTrackedLeg(competitor).getAverageSpeedOverGround(time);
                     final SpeedWithBearing speedOVG = trackedLeg.getTrackedLeg(competitor).getSpeedOverGround(time);
 
@@ -92,15 +90,15 @@ public class RankPerLeg extends Action {
                     addRow();
                     addColumn(competitor.getBoat().getBoatClass().getName());
                     addColumn(race.getName());
-                    addColumn(dateFormat.format(trackedRace.getStart().asDate()));
                     addColumn(""+Util.size(race.getCompetitors()));
                     
                     addColumn(legId);
                     addColumn(markName);
+                    addColumn(leg.getFrom().getBuoys().iterator().next().getName());
                     addColumn(upOrDownwinLeg);
                     addColumn(competitorName);
-                    addColumn(nationality);
                     addColumn(sailID==null?"null":sailID);
+                    addColumn(nationality);
                     addColumn("" + overallRank);
                     addColumn("" + legRank);
                     addColumn("" + posGL);
