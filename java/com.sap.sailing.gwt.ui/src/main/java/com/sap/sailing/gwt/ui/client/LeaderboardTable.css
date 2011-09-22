@@ -48,12 +48,13 @@
 
 .cellTableEvenRow {
 	border-bottom: 1px solid #e5e5e5;
-	background-color: none;
-/* background-color: #FFFFFF; */
+	background-color: rgba(255,255,255,0.5);
+	/* background-color: #FFFFFF; */
+	/* opacity: 0.5; */
 }
 
 .cellTableEvenRowCell {
-	border-right: none;
+	border-right: 1px solid #e5e5e5 !important;
 	border-left: none;
 	border-top: none !important;
 	border-bottom: 1px solid #e5e5e5 !important;
@@ -62,13 +63,14 @@
 
 .cellTableOddRow {
 	border-bottom: 1px solid #e5e5e5;
-	background-color: none;
 	/* background-color: #f2f2f2; */
+	background-color: rgba(242,242,242,0.5);
+	/* opacity: 0.5; */
 }
 
 .cellTableOddRowCell {
 	border-left: none !important;
-	border-right: none !important;
+	border-right: 1px solid #e5e5e5 !important;
 	border-top: none !important;
 	border-bottom: 1px solid #e5e5e5 !important;
 	padding: 5px 17px 5px !important;
@@ -97,7 +99,7 @@
 
 .cellTableSelectedRowCell {
 	border-left: none;
-	border-right: none;
+	border-right: 1px solid #e5e5e5;
 	border-top: 2px solid #21a0e4 !important;
 	border-bottom: 2px solid #21a0e4 !important;
 }
@@ -118,13 +120,13 @@
 }
 
 .cellTableRaceColumn {
-	background-color: #ff0000 !important;
+	background-color: #e0e0e0 !important;
 }
 
 .cellTableLegColumn {
-	background-color: #00ff00 !important;
+	background-color: #efefef !important;
 }
 
 .cellTableLegDetailColumn {
-	background-color: #0000ff !important;
+	background-color: #ffffff !important;
 }
