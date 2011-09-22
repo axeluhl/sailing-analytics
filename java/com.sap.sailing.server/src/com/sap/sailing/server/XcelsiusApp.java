@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.sap.sailing.server.xcelsius.Action;
 import com.sap.sailing.server.xcelsius.ListEvents;
 import com.sap.sailing.server.xcelsius.RankPerLeg;
+import com.sap.sailing.server.xcelsius.RankPerRace;
 
 
 public class XcelsiusApp extends Servlet {
@@ -38,8 +39,10 @@ public class XcelsiusApp extends Servlet {
           final ListEvents a = new ListEvents(req, res, getService(), maxRows);
           a.perform();
           return;
-        } else if ("doSomething".equals(action)) {
-          ; // do something
+        } else if ("getRankPerRace".equals(action)) {
+            final RankPerRace a = new RankPerRace(req, res, getService(), maxRows);
+            a.perform();
+            return;
         } else {}
         Action.say("Unknown action", res);
         return;
