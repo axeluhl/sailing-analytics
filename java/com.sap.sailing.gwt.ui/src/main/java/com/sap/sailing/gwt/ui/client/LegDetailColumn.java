@@ -6,31 +6,49 @@ import com.google.gwt.cell.client.Cell;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.cellview.client.TextHeader;
+import com.sap.sailing.gwt.ui.shared.LeaderboardDAO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDAO;
 
-public abstract class LegDetailColumn<FieldType, RenderingType> extends SortableColumn<LeaderboardRowDAO, RenderingType> {
+public abstract class LegDetailColumn<FieldType extends Comparable<?>, RenderingType> extends SortableColumn<LeaderboardRowDAO, RenderingType> {
     private final String title;
     private final LegDetailField<FieldType> field;
     private final CellTable<LeaderboardRowDAO> leaderboardTable;
+    private FieldType minimum;
+    private FieldType maximum;
+    private final String headerStyle;
+    private final String columnStyle;
     
-    public interface LegDetailField<T> {
+    public interface LegDetailField<T extends Comparable<?>> {
         T get(LeaderboardRowDAO row);
     }
     
-    protected LegDetailColumn(String title, LegDetailField<FieldType> field, Cell<RenderingType> cell, CellTable<LeaderboardRowDAO> leaderboardTable) {
+    protected LegDetailColumn(String title, LegDetailField<FieldType> field, Cell<RenderingType> cell, CellTable<LeaderboardRowDAO> leaderboardTable,
+            String headerStyle, String columnStyle) {
         super(cell);
-        setHorizontalAlignment(ALIGN_RIGHT);
+        setHorizontalAlignment(ALIGN_CENTER);
         this.title = title;
         this.field = field;
         this.leaderboardTable = leaderboardTable;
+        this.headerStyle = headerStyle;
+        this.columnStyle = columnStyle;
     }
 
     protected String getTitle() {
         return title;
     }
 
+    @Override
+    public String getHeaderStyle() {
+        return headerStyle;
+    }
+
     protected LegDetailField<FieldType> getField() {
         return field;
+    }
+
+    @Override
+    public String getColumnStyle() {
+        return columnStyle;
     }
 
     @Override
@@ -54,7 +72,37 @@ public abstract class LegDetailColumn<FieldType, RenderingType> extends Sortable
 
     @Override
     public Header<?> getHeader() {
-        return new TextHeader(title);
+        TextHeader header = new TextHeader(title);
+        return header;
     }
 
+    public FieldType getMinimum() {
+        return minimum;
+    }
+    
+    public FieldType getMaximum() {
+        return maximum;
+    }
+
+    @Override
+    protected void updateMinMax(LeaderboardDAO leaderboard) {
+        Comparator<LeaderboardRowDAO> comparator = getComparator();
+        LeaderboardRowDAO minimumRow = null;
+        LeaderboardRowDAO maximumRow = null;
+        for (LeaderboardRowDAO row : leaderboard.rows.values()) {
+            if (getField().get(row) != null && (minimumRow == null || comparator.compare(minimumRow, row) > 0)) {
+                minimumRow = row;
+            }
+            if (getField().get(row) != null  && (maximumRow == null || comparator.compare(maximumRow, row) < 0)) {
+                maximumRow = row;
+            }
+        }
+        if (minimumRow != null) {
+            minimum = getField().get(minimumRow);
+        }
+        if (maximumRow != null) {
+            maximum = getField().get(maximumRow);
+        }
+    }
+    
 }

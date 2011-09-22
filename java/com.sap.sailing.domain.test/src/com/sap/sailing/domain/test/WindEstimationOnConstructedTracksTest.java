@@ -74,7 +74,7 @@ public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest 
                 new PersonImpl(competitorName, new NationalityImpl("Germany", "GER"),
                 /* dateOfBirth */ null, "This is famous "+competitorName)),
                 new PersonImpl("Rigo van Maas", new NationalityImpl("The Netherlands", "NED"),
-                        /* dateOfBirth */ null, "This is Rigo, the coach")), new BoatImpl(competitorName+"'s boat", new BoatClassImpl("505")));
+                        /* dateOfBirth */ null, "This is Rigo, the coach")), new BoatImpl(competitorName+"'s boat", new BoatClassImpl("505"), null));
     }
 
     private void setBearingForCompetitor(Competitor competitor, MillisecondsTimePoint timePoint, double bearingDeg) {

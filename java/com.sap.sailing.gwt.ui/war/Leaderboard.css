@@ -1,5 +1,9 @@
 /** Add css rules here for your application. */
 
+* {
+	font-family: Arial;
+	font-size: 12px;
+}
 
 /** Example rules used by the template application (remove for your app) */
 h1 {
@@ -43,4 +47,80 @@ h1 {
 
 .linkNoBorder {
 	border: none;
+}
+
+.refreshLink {
+	border: none;
+	position: relative;
+    vertical-align: middle;
+}
+
+.valignMiddle {
+	position: relative;
+    vertical-align: middle;
+}
+
+.boldLabel {
+	font-size: 14px;
+	font-weight: bold;
+}
+
+.boldAnchor {
+	font-weight: bold;
+	vertical-align: middle;
+}
+
+.gwt-ListBox {
+	font-size: 12px;
+}
+
+.legColumnHeader {
+	background-color: #FFFFFF;
+	padding: 0 0 0 0;
+}
+
+.dialogMessageLabel {
+	font-weight: bold;
+}
+
+.gwt-DialogBox .Caption {
+	background: none repeat scroll 0 0 #e5e5e5;
+}
+
+.gwt-DialogBox .dialogTopLeft {
+	background: none repeat scroll 0 0 #e5e5e5;
+}
+
+.gwt-DialogBox .dialogTopRight {
+	background: none repeat scroll 0 0 #e5e5e5;
+}
+
+.gwt-DialogBox .dialogMiddleLeft {
+	background: none repeat scroll 0 0 #e5e5e5;
+}
+
+.gwt-DialogBox .dialogMiddleRight {
+	background: none repeat scroll 0 0 #e5e5e5;
+}
+
+.gwt-DialogBox .dialogBottomCenter {
+	background: none repeat scroll 0 0 #e5e5e5;
+}
+
+.gwt-DialogBox .dialogBottomLeft {
+	background: none repeat scroll 0 0 #e5e5e5;
+}
+
+.gwt-DialogBox .dialogBottomRight {
+	background: none repeat scroll 0 0 #e5e5e5;
+}
+
+.gwt-Button {
+	background-color: #e2e2e2;
+	border-color: #a3a3a3 !important;
+}
+
+.gwt-TextBox {
+	font-family: Arial !important;
+	font-size: 12px !important;
 }

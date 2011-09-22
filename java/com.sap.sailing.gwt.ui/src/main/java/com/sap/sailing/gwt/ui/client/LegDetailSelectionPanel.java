@@ -1,0 +1,65 @@
+package com.sap.sailing.gwt.ui.client;
+
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.CheckBox;
+import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.ui.client.LegDetailSelectionProvider.LegDetailColumnType;
+
+public class LegDetailSelectionPanel extends DataEntryDialog<List<LegDetailColumnType>> {
+    private final LegDetailSelectionProvider selectionProvider;
+    private final Map<LegDetailColumnType, CheckBox> checkboxes;
+    private final StringConstants stringConstants;
+    private CheckBox firstCheckbox;
+    
+    public LegDetailSelectionPanel(LegDetailSelectionProvider selectionProvider, String title,
+            String message, String okButtonName, String cancelButtonName,
+            com.sap.sailing.gwt.ui.client.DataEntryDialog.Validator<List<LegDetailColumnType>> validator,
+            AsyncCallback<List<LegDetailColumnType>> callback, StringConstants stringConstants) {
+        super(title, message, okButtonName, cancelButtonName, validator, callback);
+        this.selectionProvider = selectionProvider;
+        this.stringConstants = stringConstants;
+        checkboxes = new LinkedHashMap<LegDetailSelectionProvider.LegDetailColumnType, CheckBox>();
+    }
+
+    @Override
+    protected Widget getAdditionalWidget() {
+        List<LegDetailColumnType> currentSelection = selectionProvider.getLegDetailsToShow();
+        VerticalPanel vp = new VerticalPanel();
+        firstCheckbox = null;
+        for (LegDetailColumnType type : LegDetailColumnType.values()) {
+            CheckBox checkbox = createCheckbox(type.toString(stringConstants));
+            if (firstCheckbox == null) {
+                firstCheckbox = checkbox;
+            }
+            checkbox.setValue(currentSelection.contains(type));
+            checkboxes.put(type, checkbox);
+            vp.add(checkbox);
+        }
+        firstCheckbox.setFocus(true);
+        return vp;
+    }
+
+    @Override
+    protected List<LegDetailColumnType> getResult() {
+        List<LegDetailColumnType> result = new ArrayList<LegDetailSelectionProvider.LegDetailColumnType>();
+        for (Map.Entry<LegDetailColumnType, CheckBox> entry : checkboxes.entrySet()) {
+            if (entry.getValue().getValue()) {
+                result.add(entry.getKey());
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public void show() {
+        super.show();
+        firstCheckbox.setFocus(true);
+    }
+    
+}

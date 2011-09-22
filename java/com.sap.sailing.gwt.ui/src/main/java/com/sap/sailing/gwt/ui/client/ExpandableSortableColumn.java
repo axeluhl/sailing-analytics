@@ -31,7 +31,7 @@ public abstract class ExpandableSortableColumn<C> extends SortableColumn<Leaderb
      * collection and are dynamically inserted to and removed from the {@link CellTable} to the right
      * of this column.
      */
-    private List<SortableColumn<LeaderboardRowDAO, ?>> directChildren;
+    protected List<SortableColumn<LeaderboardRowDAO, ?>> directChildren;
     
     /**
      * Tells if this race column is currently displayed in expanded form which includes a visualization
@@ -134,7 +134,7 @@ public abstract class ExpandableSortableColumn<C> extends SortableColumn<Leaderb
                     int columnIndex = table.getColumnIndex(column);
                     // remove only the children currently displayed
                     if (columnIndex >= 0) {
-                        table.removeColumn(columnIndex);
+                        getLeaderboardPanel().removeColumn(columnIndex);
                     }
                 }
                 // important: toggle expanded state after asking for all visible children
@@ -146,14 +146,16 @@ public abstract class ExpandableSortableColumn<C> extends SortableColumn<Leaderb
                     public void run() {
                         int insertIndex = table.getColumnIndex(ExpandableSortableColumn.this) + 1;
                         for (SortableColumn<LeaderboardRowDAO, ?> column : getAllVisibleChildren()) {
+                            column.updateMinMax(getLeaderboardPanel().getLeaderboard());
                             getLeaderboardPanel().insertColumn(insertIndex++, column);
                         }
+                        getLeaderboardPanel().getLeaderboardTable().redraw();
                     }
                 });
             }
         }
     }
-
+    
     /**
      * Called to ensure that all data necessary to display the expanded data of this column is actually loaded.
      * If this is not yet the case, an asynchronous call to the server may be required that subclasses have to
@@ -193,4 +195,18 @@ public abstract class ExpandableSortableColumn<C> extends SortableColumn<Leaderb
     
     @Override
     public abstract Header<SafeHtml> getHeader();
+
+    /**
+     * if {@link #directChildren} is not <code>null</code>, {@link #refreshChildren} is called recursively for all
+     * expandable children
+     */
+    public void refreshChildren() {
+        if (directChildren != null) {
+            for (SortableColumn<LeaderboardRowDAO, ?> c : directChildren) {
+                if (c instanceof ExpandableSortableColumn<?>) {
+                    ((ExpandableSortableColumn<?>) c).refreshChildren();
+                }
+            }
+        }
+    }
 }

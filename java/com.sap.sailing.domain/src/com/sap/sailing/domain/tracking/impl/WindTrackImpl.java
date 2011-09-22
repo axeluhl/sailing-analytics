@@ -236,6 +236,10 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
         public Bearing getFrom() {
             return null;
         }
+        @Override
+        public double getBeaufort() {
+            return 0;
+        }
     }
 
     @Override

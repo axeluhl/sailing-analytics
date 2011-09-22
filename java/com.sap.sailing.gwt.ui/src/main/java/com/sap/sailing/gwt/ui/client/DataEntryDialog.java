@@ -17,8 +17,8 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
- * An abstract data entry dialog class, capturing data of type <code>T</code>, with generic OK/Cancel buttons, title
- * and message.
+ * An abstract data entry dialog class, capturing data of type <code>T</code>, with generic OK/Cancel buttons, title and
+ * message. Subclasses may override the {@link #show()} method to set the focus on their favorable initial entry field.
  * 
  * @author Axel Uhl (d043530)
  */
@@ -45,14 +45,18 @@ public abstract class DataEntryDialog<T> {
         this.validator = validator;
         okButton = new Button(okButtonName);
         VerticalPanel dialogVPanel = new VerticalPanel();
+        dialogVPanel.setSpacing(10);
         statusLabel = new Label();
         dialogVPanel.add(statusLabel);
-        dialogVPanel.add(new Label(message));
+        Label messageLabel = new Label(message);
+        messageLabel.addStyleName("dialogMessageLabel");
+        dialogVPanel.add(messageLabel);
         
         dialogVPanel.setHorizontalAlignment(VerticalPanel.ALIGN_RIGHT);
         panelForAdditionalWidget = new HorizontalPanel();
         dialogVPanel.add(panelForAdditionalWidget);
         HorizontalPanel buttonPanel = new HorizontalPanel();
+        buttonPanel.setSpacing(5);
         dialogVPanel.add(buttonPanel);
         buttonPanel.add(okButton);
         cancelButton = new Button(cancelButtonName);
@@ -74,7 +78,10 @@ public abstract class DataEntryDialog<T> {
     }
     
     protected boolean validate() {
-        String errorMessage = validator.getErrorMessage(getResult());
+        String errorMessage = null;
+        if (validator != null) {
+            errorMessage = validator.getErrorMessage(getResult());
+        }
         if (errorMessage == null) {
             getStatusLabel().setText("");
             getOkButton().setEnabled(true);

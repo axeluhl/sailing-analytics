@@ -8,6 +8,7 @@ import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.cellview.client.Header;
 import com.sap.sailing.gwt.ui.client.LegDetailColumn.LegDetailField;
+import com.sap.sailing.gwt.ui.client.LegDetailSelectionProvider.LegDetailColumnType;
 import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDAO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDAO;
 import com.sap.sailing.gwt.ui.shared.LegEntryDAO;
@@ -23,8 +24,13 @@ public class LegColumn extends ExpandableSortableColumn<String> {
     private final String raceName;
     private final int legIndex;
     private final StringConstants stringConstants;
+    private final LegDetailSelectionProvider legDetailSelectionProvider;
+    private final String headerStyle;
+    private final String columnStyle;
+    private final String detailHeaderStyle;
+    private final String detailColumnStyle;
     
-    private abstract class AbstractLegDetailField<T> implements LegDetailField<T> {
+    private abstract class AbstractLegDetailField<T extends Comparable<?>> implements LegDetailField<T> {
         public T get(LeaderboardRowDAO row) {
             LegEntryDAO entry = getLegEntry(row);
             if (entry == null) {
@@ -51,6 +57,41 @@ public class LegColumn extends ExpandableSortableColumn<String> {
         }
     }
     
+    private class CurrentSpeedOverGroundInKnots extends AbstractLegDetailField<Double> {
+        @Override
+        protected Double getFromNonNullEntry(LegEntryDAO entry) {
+            return entry.currentSpeedOverGroundInKnots;
+        }
+    }
+    
+    private class EstimatedTimeToNextWaypointInSeconds extends AbstractLegDetailField<Double> {
+        @Override
+        protected Double getFromNonNullEntry(LegEntryDAO entry) {
+            return entry.estimatedTimeToNextWaypointInSeconds;
+        }
+    }
+    
+    private class GapToLeaderInSeconds extends AbstractLegDetailField<Double> {
+        @Override
+        protected Double getFromNonNullEntry(LegEntryDAO entry) {
+            return entry.gapToLeaderInSeconds;
+        }
+    }
+    
+    private class VelocityMadeGoodInKnots extends AbstractLegDetailField<Double> {
+        @Override
+        protected Double getFromNonNullEntry(LegEntryDAO entry) {
+            return entry.velocityMadeGoodInKnots;
+        }
+    }
+    
+    private class WindwardDistanceToGoInMeters extends AbstractLegDetailField<Double> {
+        @Override
+        protected Double getFromNonNullEntry(LegEntryDAO entry) {
+            return entry.windwardDistanceToGoInMeters;
+        }
+    }
+    
     private class RankGain implements LegDetailField<Integer> {
         @Override
         public Integer get(LeaderboardRowDAO row) {
@@ -65,18 +106,35 @@ public class LegColumn extends ExpandableSortableColumn<String> {
         }
     }
     
-    public LegColumn(LeaderboardPanel leaderboardPanel, String raceName, int legIndex, StringConstants stringConstants) {
-        super(leaderboardPanel, /* expandable */ true /* all legs have details */, new TextCell());
-        setHorizontalAlignment(ALIGN_RIGHT);
+    public LegColumn(LeaderboardPanel leaderboardPanel, String raceName, int legIndex, StringConstants stringConstants,
+            LegDetailSelectionProvider legDetailSelectionProvider, String headerStyle, String columnStyle,
+            String detailHeaderStyle, String detailColumnStyle) {
+        super(leaderboardPanel, /* expandable */true /* all legs have details */, new TextCell());
+        setHorizontalAlignment(ALIGN_CENTER);
         this.raceName = raceName;
         this.legIndex = legIndex;
         this.stringConstants = stringConstants;
+        this.legDetailSelectionProvider = legDetailSelectionProvider;
+        this.headerStyle = headerStyle;
+        this.columnStyle = columnStyle;
+        this.detailHeaderStyle = detailHeaderStyle;
+        this.detailColumnStyle = detailColumnStyle;
     }
     
     private int getLegIndex() {
         return legIndex;
     }
     
+    @Override
+    public String getColumnStyle() {
+        return columnStyle;
+    }
+    
+    @Override
+    public String getHeaderStyle() {
+        return headerStyle;
+    }
+
     private String getRaceName() {
         return raceName;
     }
@@ -111,8 +169,9 @@ public class LegColumn extends ExpandableSortableColumn<String> {
 
     @Override
     public Header<SafeHtml> getHeader() {
-        return new SortableExpandableColumnHeader(/* title */ stringConstants.leg()+" "+(legIndex+1),
+        SortableExpandableColumnHeader result = new SortableExpandableColumnHeader(/* title */ stringConstants.leg()+(legIndex+1),
                 /* iconURL */ null, getLeaderboardPanel(), this, stringConstants);
+        return result;
     }
     
     @Override
@@ -129,13 +188,47 @@ public class LegColumn extends ExpandableSortableColumn<String> {
     protected List<SortableColumn<LeaderboardRowDAO, ?>> createExpansionColumns() {
         List<SortableColumn<LeaderboardRowDAO, ?>> result = new ArrayList<SortableColumn<LeaderboardRowDAO,?>>();
         try {
-            result.add(new FormattedDoubleLegDetailColumn(stringConstants.distanceInMeters(), new DistanceTraveledInMeters(), 1, getLeaderboardPanel().getLeaderboardTable()));
-            result.add(new FormattedDoubleLegDetailColumn(stringConstants.averageSpeedInKnots(), new AverageSpeedOverGroundInKnots(), 2, getLeaderboardPanel().getLeaderboardTable()));
-            result.add(new RankGainColumn(stringConstants.rankGain(), new RankGain(), getLeaderboardPanel().getLeaderboardTable()));
+            for (LegDetailColumnType type : legDetailSelectionProvider.getLegDetailsToShow()) {
+                switch (type) {
+                case DISTANCE_TRAVELED:
+                    result.add(new FormattedDoubleLegDetailColumn(stringConstants.distanceInMeters(), new DistanceTraveledInMeters(), 0, getLeaderboardPanel().getLeaderboardTable(), detailHeaderStyle, detailColumnStyle));
+                    break;
+                case AVERAGE_SPEED_OVER_GROUND_IN_KNOTS:
+                    result.add(new FormattedDoubleLegDetailColumn(stringConstants.averageSpeedInKnots(), new AverageSpeedOverGroundInKnots(), 2, getLeaderboardPanel().getLeaderboardTable(), detailHeaderStyle, detailColumnStyle));
+                    break;
+                case RANK_GAIN:
+                    result.add(new RankGainColumn(stringConstants.rankGain(), new RankGain(), getLeaderboardPanel().getLeaderboardTable(), detailHeaderStyle, detailColumnStyle));
+                    break;
+                case CURRENT_SPEED_OVER_GROUND_IN_KNOTS:
+                    result.add(new FormattedDoubleLegDetailColumn(stringConstants.currentSpeedOverGroundInKnots(), new CurrentSpeedOverGroundInKnots(), 1, getLeaderboardPanel().getLeaderboardTable(), detailHeaderStyle, detailColumnStyle));
+                    break;
+                case ESTIMATED_TIME_TO_NEXT_WAYPOINT_IN_SECONDS:
+                    result.add(new FormattedDoubleLegDetailColumn(stringConstants.estimatedTimeToNextWaypointInSeconds(), new EstimatedTimeToNextWaypointInSeconds(), 1, getLeaderboardPanel().getLeaderboardTable(), detailHeaderStyle, detailColumnStyle));
+                    break;
+                case GAP_TO_LEADER_IN_SECONDS:
+                    result.add(new FormattedDoubleLegDetailColumn(stringConstants.gapToLeaderInSeconds(), new GapToLeaderInSeconds(), 1, getLeaderboardPanel().getLeaderboardTable(), detailHeaderStyle, detailColumnStyle));
+                    break;
+                case VELOCITY_MADE_GOOD_IN_KNOTS:
+                    result.add(new FormattedDoubleLegDetailColumn(stringConstants.velocityMadeGoodInKnots(), new VelocityMadeGoodInKnots(), 1, getLeaderboardPanel().getLeaderboardTable(), detailHeaderStyle, detailColumnStyle));
+                    break;
+                case WINDWARD_DISTANCE_TO_GO_IN_METERS:
+                    result.add(new FormattedDoubleLegDetailColumn(stringConstants.windwardDistanceToGoInMeters(), new WindwardDistanceToGoInMeters(), 1, getLeaderboardPanel().getLeaderboardTable(), detailHeaderStyle, detailColumnStyle));
+                    break;
+                }
+            }
             return result;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    /**
+     * if {@link #directChildren} is not <code>null</code>, {@link #refreshChildren} is called recursively for all
+     * expandable children; afterwards, {@link #directChildren} is set to <code>null</code>.
+     */
+    public void refreshChildren() {
+        super.refreshChildren();
+        directChildren = null;
     }
 }
 

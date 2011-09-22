@@ -79,7 +79,7 @@ public class SortableExpandableColumnHeader extends Header<SafeHtml> {
             }
             @Override
             public SafeHtml getValue(SafeHtml object) {
-                return new SafeHtmlBuilder().appendEscaped(title).toSafeHtml();
+                return new SafeHtmlBuilder().appendHtmlConstant("&nbsp;").appendEscaped(title).toSafeHtml();
             }
         });
         // add the cell rendering the expand/collapse button:
@@ -87,19 +87,7 @@ public class SortableExpandableColumnHeader extends Header<SafeHtml> {
             cells.add(new HasCell<SafeHtml, SafeHtml>() {
                 @Override
                 public Cell<SafeHtml> getCell() {
-                    return new ActionCell<SafeHtml>(column.isExpanded() ? stringConstants.collapse() : stringConstants.expand(),
-                            new ExpandCollapseButtonAction(column)) {
-                        /**
-                         * carry out event logic, hence call the delegate's execute(...) operation, then stop
-                         * propagation to avoid the column being sorted when the expand button is pressed
-                         */
-                        @Override
-                        public void onBrowserEvent(Context context, Element parent, SafeHtml value, NativeEvent event,
-                                ValueUpdater<SafeHtml> valueUpdater) {
-                            column.suppressSortingOnce();
-                            super.onBrowserEvent(context, parent, value, event, valueUpdater);
-                        }
-                    };
+                    return new ExpandCollapseButtonCell(column, new ExpandCollapseButtonAction(column));
                 }
 
                 @Override

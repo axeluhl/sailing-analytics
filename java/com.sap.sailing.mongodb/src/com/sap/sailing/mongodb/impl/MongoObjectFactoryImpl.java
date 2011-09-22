@@ -1,5 +1,7 @@
 package com.sap.sailing.mongodb.impl;
 
+import java.util.logging.Logger;
+
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
@@ -26,6 +28,7 @@ import com.sap.sailing.domain.tractracadapter.TracTracConfiguration;
 import com.sap.sailing.mongodb.MongoObjectFactory;
 
 public class MongoObjectFactoryImpl implements MongoObjectFactory {
+    private static Logger logger = Logger.getLogger(MongoObjectFactoryImpl.class.getName());
     private final DB database;
     
     public MongoObjectFactoryImpl(DB database) {
@@ -103,7 +106,12 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     @Override
     public void storeLeaderboard(Leaderboard leaderboard) {
         DBCollection leaderboardCollection = database.getCollection(CollectionNames.LEADERBOARDS.name());
-        leaderboardCollection.ensureIndex(FieldNames.LEADERBOARD_NAME.name());
+        try {
+            leaderboardCollection.ensureIndex(FieldNames.LEADERBOARD_NAME.name());
+        } catch (NullPointerException npe) {
+            // sometimes, for reasons yet to be clarified, ensuring an index on the name field causes an NPE
+            logger.throwing(MongoObjectFactoryImpl.class.getName(), "storeLeaderboard", npe);
+        }
         BasicDBObject query = new BasicDBObject(FieldNames.LEADERBOARD_NAME.name(), leaderboard.getName());
         BasicDBObject result = new BasicDBObject();
         result.put(FieldNames.LEADERBOARD_NAME.name(), leaderboard.getName());

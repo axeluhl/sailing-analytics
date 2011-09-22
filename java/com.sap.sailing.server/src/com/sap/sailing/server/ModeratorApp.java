@@ -170,16 +170,6 @@ public class ModeratorApp extends Servlet {
         }
     }
 
-    private TrackedRace getTrackedRace(HttpServletRequest req) {
-        Event event = getEvent(req);
-        RaceDefinition race = getRaceDefinition(req);
-        TrackedRace trackedRace = null;
-        if (event != null && race != null) {
-            trackedRace = getService().getDomainFactory().getTrackedEvent(event).getTrackedRace(race);
-        }
-        return trackedRace;
-    }
-
     private void showRace(HttpServletRequest req, HttpServletResponse resp) throws IOException, InterruptedException {
         long start = System.currentTimeMillis();
         TrackedRace trackedRace = getTrackedRace(req);
