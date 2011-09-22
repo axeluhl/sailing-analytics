@@ -181,7 +181,7 @@ public class LegColumn extends ExpandableSortableColumn<String> {
             for (LegDetailColumnType type : legDetailSelectionProvider.getLegDetailsToShow()) {
                 switch (type) {
                 case DISTANCE_TRAVELED:
-                    result.add(new FormattedDoubleLegDetailColumn(stringConstants.distanceInMeters(), new DistanceTraveledInMeters(), 1, getLeaderboardPanel().getLeaderboardTable(), detailHeaderStyle));
+                    result.add(new FormattedDoubleLegDetailColumn(stringConstants.distanceInMeters(), new DistanceTraveledInMeters(), 0, getLeaderboardPanel().getLeaderboardTable(), detailHeaderStyle));
                     break;
                 case AVERAGE_SPEED_OVER_GROUND_IN_KNOTS:
                     result.add(new FormattedDoubleLegDetailColumn(stringConstants.averageSpeedInKnots(), new AverageSpeedOverGroundInKnots(), 2, getLeaderboardPanel().getLeaderboardTable(), detailHeaderStyle));

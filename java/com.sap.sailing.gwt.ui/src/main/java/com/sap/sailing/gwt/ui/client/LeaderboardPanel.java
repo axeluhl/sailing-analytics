@@ -161,6 +161,8 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
             sb.appendHtmlConstant("<img title=\""+object.competitor.countryName+"\" src=\""+
                     getFlagURL(object.competitor.twoLetterIsoCountryCode)+
                     "\"/>&nbsp;");
+            sb.appendEscaped(object.competitor.sailID);
+            sb.appendHtmlConstant("&nbsp;");
             sb.appendHtmlConstant(object.competitor.name);
         }
 

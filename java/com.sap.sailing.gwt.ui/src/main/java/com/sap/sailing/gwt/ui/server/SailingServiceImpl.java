@@ -267,7 +267,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     private CompetitorDAO getCompetitorDAO(Competitor c) {
         CountryCode countryCode = c.getTeam().getNationality().getCountryCode();
         CompetitorDAO competitorDAO = new CompetitorDAO(c.getName(), countryCode==null?"":countryCode.getTwoLetterISOCode(),
-                countryCode==null?"":countryCode.getThreeLetterIOCCode(), countryCode==null?"":countryCode.getName());
+                countryCode==null?"":countryCode.getThreeLetterIOCCode(), countryCode==null?"":countryCode.getName(), c.getBoat().getSailID());
         return competitorDAO;
     }
 

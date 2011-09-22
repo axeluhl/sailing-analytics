@@ -5,10 +5,12 @@ import com.sap.sailing.domain.base.BoatClass;
 
 public class BoatImpl extends NamedImpl implements Boat {
     private final BoatClass boatClass;
+    private final String sailID;
     
-    public BoatImpl(String name, BoatClass boatClass) {
+    public BoatImpl(String name, BoatClass boatClass, String sailID) {
         super(name);
         this.boatClass = boatClass;
+        this.sailID = sailID;
     }
 
     @Override
@@ -16,4 +18,8 @@ public class BoatImpl extends NamedImpl implements Boat {
         return boatClass;
     }
 
+    @Override
+    public String getSailID() {
+        return sailID;
+    }
 }
