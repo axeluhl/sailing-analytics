@@ -107,7 +107,7 @@ public class LegColumn extends ExpandableSortableColumn<String> {
     public LegColumn(LeaderboardPanel leaderboardPanel, String raceName, int legIndex, StringConstants stringConstants,
             LegDetailSelectionProvider legDetailSelectionProvider, String headerStyle, String detailHeaderStyle) {
         super(leaderboardPanel, /* expandable */ true /* all legs have details */, new TextCell());
-        setHorizontalAlignment(ALIGN_RIGHT);
+        setHorizontalAlignment(ALIGN_CENTER);
         this.raceName = raceName;
         this.legIndex = legIndex;
         this.stringConstants = stringConstants;

@@ -46,7 +46,7 @@ public class FormattedDoubleLegDetailColumn extends LegDetailColumn<Double, Stri
     private int getPercentage(LeaderboardRowDAO row) {
         Double value = getField().get(row);
         int percentage = 0;
-        if (value != null) {
+        if (value != null && getMinimum() != null && getMaximum() != null) {
             percentage = (int) (100.*(value-getMinimum())/(getMaximum()-getMinimum()));
         }
         return percentage;
