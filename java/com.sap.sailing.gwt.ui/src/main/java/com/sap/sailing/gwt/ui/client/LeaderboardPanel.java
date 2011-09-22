@@ -47,6 +47,12 @@ import com.sap.sailing.gwt.ui.shared.Pair;
  *
  */
 public class LeaderboardPanel extends FormPanel implements LegDetailSelectionProvider {
+    private static final int RANK_COLUMN_INDEX = 0;
+
+    private static final int SAIL_ID_COLUMN_INDEX = 1;
+
+    private static final int CARRY_COLUMN_INDEX = 3;
+
     private final SailingServiceAsync sailingService;
     
     /**
@@ -153,6 +159,42 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
 
         @Override
         public Header<String> getHeader() {
+            return new TextHeader(stringConstants.name());
+        }
+
+        @Override
+        public String getValue(LeaderboardRowDAO object) {
+            return object.competitor.name;
+        }
+    }
+    
+    /**
+     * Shows the country flag and sail ID, if present
+     * 
+     * @author Axel Uhl (d043530)
+     *
+     */
+    private class SailIDColumn extends SortableColumn<LeaderboardRowDAO, String> {
+
+        protected SailIDColumn() {
+            super(new TextCell());
+        }
+
+        @Override
+        public Comparator<LeaderboardRowDAO> getComparator() {
+            return new Comparator<LeaderboardRowDAO>() {
+                @Override
+                public int compare(LeaderboardRowDAO o1, LeaderboardRowDAO o2) {
+                    return o1.competitor.sailID == null ?
+                            o2.competitor.sailID == null ? 0 :
+                                -1 : o2.competitor.sailID == null ? 1 : 
+                                    Collator.getInstance().compare(o1.competitor.sailID, o2.competitor.sailID);
+                }
+            };
+        }
+
+        @Override
+        public Header<String> getHeader() {
             return new TextHeader(stringConstants.competitor());
         }
 
@@ -162,8 +204,6 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
                     getFlagURL(object.competitor.twoLetterIsoCountryCode)+
                     "\"/>&nbsp;");
             sb.appendEscaped(object.competitor.sailID);
-            sb.appendHtmlConstant("&nbsp;");
-            sb.appendHtmlConstant(object.competitor.name);
         }
 
         private String getFlagURL(String twoLetterIsoCountryCode) {
@@ -172,7 +212,7 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
 
         @Override
         public String getValue(LeaderboardRowDAO object) {
-            return object.competitor.name;
+            return object.competitor.sailID;
         }
     }
     
@@ -558,7 +598,7 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
 
     private void adjustColumnLayout(LeaderboardDAO leaderboard) {
         ensureRankColumn();
-        ensureCompetitorColumn();
+        ensureSailIDAndCompetitorColumn();
         updateCarryColumn(leaderboard);
         // first remove race columns no longer needed:
         removeUnusedRaceColumns(leaderboard);
@@ -614,30 +654,32 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
     }
 
     private void ensureRankColumn() {
-        if (getLeaderboardTable().getColumnCount() == 0) {
+        if (getLeaderboardTable().getColumnCount() == RANK_COLUMN_INDEX) {
             addColumn(getRankColumn());
         } else {
-            if (!(getLeaderboardTable().getColumn(0) instanceof RankColumn)) {
+            if (!(getLeaderboardTable().getColumn(RANK_COLUMN_INDEX) instanceof RankColumn)) {
                 throw new RuntimeException("The first column must always be the rank column but it was of type "+
-                        getLeaderboardTable().getColumn(0).getClass().getName());
+                        getLeaderboardTable().getColumn(RANK_COLUMN_INDEX).getClass().getName());
             }
         }
     }
 
-    private void ensureCompetitorColumn() {
-        if (getLeaderboardTable().getColumnCount() < 2) {
+    private void ensureSailIDAndCompetitorColumn() {
+        if (getLeaderboardTable().getColumnCount() <= SAIL_ID_COLUMN_INDEX) {
+            addColumn(new SailIDColumn());
             addColumn(new CompetitorColumn());
         } else {
-            if (!(getLeaderboardTable().getColumn(1) instanceof CompetitorColumn)) {
-                throw new RuntimeException("The second column must always be the competitor column but it was of type "+
-                        getLeaderboardTable().getColumn(1).getClass().getName());
+            if (!(getLeaderboardTable().getColumn(SAIL_ID_COLUMN_INDEX) instanceof SailIDColumn)) {
+                throw new RuntimeException("The second column must always be the sail ID column but it was of type "+
+                        getLeaderboardTable().getColumn(SAIL_ID_COLUMN_INDEX).getClass().getName());
             }
         }
     }
 
     private void ensureTotalsColumn() {
         // add a totals column on the right
-        if (getLeaderboardTable().getColumnCount() == 0 || !(getLeaderboardTable().getColumn(getLeaderboardTable().getColumnCount()-1) instanceof TotalsColumn)) {
+        if (getLeaderboardTable().getColumnCount() == 0
+                || !(getLeaderboardTable().getColumn(getLeaderboardTable().getColumnCount() - 1) instanceof TotalsColumn)) {
             addColumn(new TotalsColumn());
         }
     }
@@ -657,15 +699,17 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
     }
 
     private void ensureNoCarryColumn() {
-        if (getLeaderboardTable().getColumnCount() >= 3 && getLeaderboardTable().getColumn(2) instanceof CarryColumn) {
-            getLeaderboardTable().removeColumn(2);
+        if (getLeaderboardTable().getColumnCount() > CARRY_COLUMN_INDEX
+                && getLeaderboardTable().getColumn(CARRY_COLUMN_INDEX) instanceof CarryColumn) {
+            getLeaderboardTable().removeColumn(CARRY_COLUMN_INDEX);
         }
     }
 
     protected void ensureCarryColumn() {
-        if (getLeaderboardTable().getColumnCount() < 3 || !(getLeaderboardTable().getColumn(2) instanceof CarryColumn)) {
-            while (getLeaderboardTable().getColumnCount() > 2) {
-                getLeaderboardTable().removeColumn(2);
+        if (getLeaderboardTable().getColumnCount() <= CARRY_COLUMN_INDEX
+                || !(getLeaderboardTable().getColumn(CARRY_COLUMN_INDEX) instanceof CarryColumn)) {
+            while (getLeaderboardTable().getColumnCount() > CARRY_COLUMN_INDEX) {
+                getLeaderboardTable().removeColumn(CARRY_COLUMN_INDEX);
             }
             addColumn(createCarryColumn());
         }
