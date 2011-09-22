@@ -49,8 +49,6 @@
 .cellTableEvenRow {
 	border-bottom: 1px solid #e5e5e5;
 	background-color: rgba(255,255,255,0.5);
-	/* background-color: #FFFFFF; */
-	/* opacity: 0.5; */
 }
 
 .cellTableEvenRowCell {
@@ -63,9 +61,7 @@
 
 .cellTableOddRow {
 	border-bottom: 1px solid #e5e5e5;
-	/* background-color: #f2f2f2; */
 	background-color: rgba(242,242,242,0.5);
-	/* opacity: 0.5; */
 }
 
 .cellTableOddRowCell {
@@ -77,24 +73,24 @@
 }
 
 .cellTableHoveredRow {
-	background-color: #e5f2f9;
+	background-color: rgba(229,242,249,0.5);
 	border-bottom: 1px solid #e5e5e5;
 }
 
 .cellTableSelectedRow {
 	color: #000000;
-	background-color: #e5f2f9;
+	background-color: rgba(229,242,249,0.5);
 	border-right: 2px solid #21a0e4 !important;
 	border-left: 2px solid #21a0e4 !important;
 	border: 2px solid #21a0e4;
 }
 
 .cellTableSelectedRow > td:FIRST-CHILD {
-	border-left: 2px solid #21a0e4 !important;
+	border-left: 2px solid rgba(33,160,228,0.5) !important;
 }
 
 .cellTableSelectedRow > td:LAST-CHILD {
-	border-right: 2px solid #21a0e4 !important;
+	border-right: 2px solid rgba(33,160,228,0.5) !important;
 }
 
 .cellTableSelectedRowCell {
