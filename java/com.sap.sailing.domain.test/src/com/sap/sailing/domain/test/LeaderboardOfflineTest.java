@@ -40,7 +40,7 @@ public class LeaderboardOfflineTest {
         competitor = new CompetitorImpl(123, "Wolfgang Hunger", new TeamImpl("STG", Collections.singleton(
                 new PersonImpl("Wolfgang Hunger", new NationalityImpl("Germany", "GER"),
                 /* dateOfBirth */ null, "This is famous Wolfgang Hunger")), new PersonImpl("Rigo van Maas", new NationalityImpl("The Netherlands", "NED"),
-                        /* dateOfBirth */ null, "This is Rigo, the coach")), new BoatImpl("Wolfgang Hunger's boat", new BoatClassImpl("505")));
+                        /* dateOfBirth */ null, "This is Rigo, the coach")), new BoatImpl("Wolfgang Hunger's boat", new BoatClassImpl("505"), null));
     }
     
     public void setupRaces(int numberOfStartedRaces, int numberOfNotStartedRaces) {

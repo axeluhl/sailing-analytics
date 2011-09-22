@@ -34,7 +34,7 @@ public class TrackTest {
     @Before
     public void setUp() throws InterruptedException {
         track = new DynamicGPSFixMovingTrackImpl<Boat>(new BoatImpl("MyFirstBoat",
-                new BoatClassImpl("505")), /* millisecondsOverWhichToAverage */ 5000);
+                new BoatClassImpl("505"), null), /* millisecondsOverWhichToAverage */ 5000);
         GPSFixMovingImpl gpsFix1 = new GPSFixMovingImpl(
                 new DegreePosition(1, 2), new MillisecondsTimePoint(
                         System.currentTimeMillis()), new KnotSpeedWithBearingImpl(1,

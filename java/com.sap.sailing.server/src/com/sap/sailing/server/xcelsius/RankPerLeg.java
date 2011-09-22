@@ -71,6 +71,7 @@ public class RankPerLeg extends Action {
                      */
                     final String competitorName = competitor.getName();
                     final String nationality = competitor.getTeam().getNationality().getThreeLetterIOCAcronym();
+                    final String sailID = competitor.getBoat().getSailID();
                     final int overallRank = trackedRace.getRank(competitor);
                     final int legRank = trackedLeg.getTrackedLeg(competitor).getRank(time);
                     final int posGL = 0; // not yet known
@@ -88,6 +89,7 @@ public class RankPerLeg extends Action {
                     addColumn(upOrDownwinLeg);
                     addColumn(competitorName);
                     addColumn(nationality);
+                    addColumn(sailID==null?"null":sailID);
                     addColumn("" + overallRank);
                     addColumn("" + legRank);
                     addColumn("" + posGL);

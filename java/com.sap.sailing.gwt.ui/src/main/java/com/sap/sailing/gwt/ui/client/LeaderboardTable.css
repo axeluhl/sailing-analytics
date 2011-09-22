@@ -43,12 +43,12 @@
     vertical-align: middle;
 }
 
-.cellTableOddRow {
+.cellTableEvenRow {
 	border-bottom: 1px solid #e5e5e5;
 	background-color: #FFFFFF;
 }
 
-.cellTableOddRowCell {
+.cellTableEvenRowCell {
 	border-right: none;
 	border-left: none;
 	border-top: none !important;
@@ -56,12 +56,12 @@
 	padding: 5px 17px 5px !important;
 }
 
-.cellTableEvenRow {
+.cellTableOddRow {
 	border-bottom: 1px solid #e5e5e5;
 	background-color: #f2f2f2;
 }
 
-.cellTableEvenRowCell {
+.cellTableOddRowCell {
 	border-left: none !important;
 	border-right: none !important;
 	border-top: none !important;
@@ -91,8 +91,8 @@
 }
 
 .cellTableSelectedRowCell {
-	boder-left: none;
-	boder-right: none;
+	border-left: none;
+	border-right: none;
 	border-top: 2px solid #21a0e4 !important;
 	border-bottom: 2px solid #21a0e4 !important;
 }
