@@ -685,6 +685,16 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
                     RaceColumn<?> raceColumn = (RaceColumn<?>) c;
                     if (raceColumn.getRaceName().equals(raceNameAndMedalRaceAndTracked.getKey())) {
                         foundRaceColumn = true;
+                        // if tracked-ness differs, column must be updated with e new column
+                        // that is expansion-enabled
+                        if (raceColumn.isExpansionEnabled() != raceNameAndMedalRaceAndTracked.getValue().getB()) {
+                            if (raceColumn.isExpanded()) {
+                                raceColumn.toggleExpansion(); // remove children from table
+                            }
+                            int columnIndex = getLeaderboardTable().getColumnIndex(raceColumn);
+                            removeColumn(columnIndex);
+                            insertColumn(columnIndex, createRaceColumn(raceNameAndMedalRaceAndTracked));
+                        }
                     }
                 }
             }
