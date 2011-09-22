@@ -571,9 +571,9 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
     }
     
     protected void removeColumn(int columnIndex) {
+        removeColumnStyles(/* startColumn */ columnIndex);
         getLeaderboardTable().removeColumn(columnIndex);
-        // TODO Auto-generated method stub; deal with styles
-        
+        addColumnStyles(/* startColumn */ columnIndex);
     }
 
     private void loadCompleteLeaderboard(Date date) {
