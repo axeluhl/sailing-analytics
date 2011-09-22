@@ -1,9 +1,6 @@
 Axel
 ====
 
- - Refresh button in leaderboard panel doesn't properly add expand/collapse buttons for
-   race columns which since the last refresh obtained their expansion enablement
-
  - Finish a first draft version of a GWT admin and leaderboard UI
 
    * implement a smart incremental update capability for leaderboard
