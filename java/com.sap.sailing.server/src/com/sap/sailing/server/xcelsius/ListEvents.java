@@ -1,8 +1,8 @@
 package com.sap.sailing.server.xcelsius;
 
 import java.net.URLEncoder;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -22,7 +22,9 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.util.Util;
 
 public class ListEvents extends Action {
     public ListEvents(HttpServletRequest req, HttpServletResponse res, RacingEventService service, int maxRows) {
@@ -31,8 +33,8 @@ public class ListEvents extends Action {
 
     public void perform() throws Exception {
         final Document table = getTable("data");
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm zzz");
         final HashMap<String, Event> events = getEvents();
-        Calendar calendar = new GregorianCalendar();
         for (final String eventName : events.keySet()) {
             final Event event = events.get(eventName);
             final HashMap<String, RaceDefinition> races = getRaces(event);
@@ -40,13 +42,21 @@ public class ListEvents extends Action {
                 RaceDefinition race = races.get(raceName);
                 final TrackedRace trackedRace = getTrackedRace(event, race);
                 addRow();
-                calendar.setTime(trackedRace.getStart().asDate());
-                addColumn(""+calendar.get(Calendar.YEAR));
-                addColumn(eventName);
                 addColumn(race.getBoatClass().getName());
+                addColumn(eventName);
                 addColumn(raceName);
                 addColumn(URLEncoder.encode(eventName, "UTF-8"));
                 addColumn(URLEncoder.encode(raceName, "UTF-8"));
+                addColumn(trackedRace.getStart()==null?" ":dateFormat.format(trackedRace.getStart().asDate()));
+                addColumn(""+Util.size(race.getCompetitors()));
+                Iterator<Waypoint> waypointsIter = race.getCourse().getWaypoints().iterator();
+                Position startPos = trackedRace.getApproximatePosition(waypointsIter.next(),
+                        trackedRace.getStart());
+                Position secondMarkPos = trackedRace.getApproximatePosition(waypointsIter.next(),
+                        trackedRace.getStart());
+                Wind wind = trackedRace.getWind(startPos, trackedRace.getStart());
+                addColumn(""+wind.getBeaufort());
+                addColumn(""+wind.getFrom().getDegrees());
                 List<Leg> legs = race.getCourse().getLegs();
                 TrackedLeg lastTrackedLeg = trackedRace.getTrackedLeg(legs.get(legs.size()-1));
                 LinkedHashMap<Competitor, Integer> finalRanks = lastTrackedLeg.getRanks(trackedRace.getTimePointOfNewestEvent());
@@ -65,11 +75,6 @@ public class ListEvents extends Action {
                     addColumn(sailID);
                     addColumn(competitorName);
                 }
-                Iterator<Waypoint> waypointsIter= race.getCourse().getWaypoints().iterator();
-                Position startPos = trackedRace.getApproximatePosition(waypointsIter.next(),
-                        trackedRace.getStart());
-                Position secondMarkPos = trackedRace.getApproximatePosition(waypointsIter.next(),
-                        trackedRace.getStart());
                 addColumn(""+startPos.getBearingGreatCircle(secondMarkPos).getDegrees());
                 addColumn(""+startPos.getLatDeg());
                 addColumn(""+startPos.getLngDeg());
