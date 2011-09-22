@@ -8,6 +8,11 @@ import com.sap.sailing.domain.base.TimePoint;
 public abstract class AbstractSpeedImpl implements Speed {
 
     @Override
+    public double getBeaufort() {
+        return Math.exp(Math.log(getKnots()*1.852/3.6 / 0.8360)*2/3);
+    }
+
+    @Override
     public Distance travel(TimePoint t1, TimePoint t2) {
         return new NauticalMileDistance((t2.asMillis() - t1.asMillis()) / 1000. / 3600. * getKnots());
     }
