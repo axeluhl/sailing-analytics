@@ -1,5 +1,6 @@
 .cellTableWidget {
-	border: 1px solid #e5e5e5;
+	border-left: 1px solid #c9caca;
+	border-top: 1px solid #c9caca;
 }
 
 /** v-align images in the table header
@@ -9,10 +10,9 @@
 	position: relative;
     vertical-align: middle;
 	background-color: #e5e5e5;
-	border-left: 1px solid #ffffff !important;
 	border-right: 1px solid #ffffff !important;
 	border-top: none !important;
-	border-bottom: none !important;
+	border-bottom: 1px solid #c9caca !important;
 	padding: 3px 12px;
 	text-align: center;
 }
@@ -24,7 +24,7 @@
 	border-left: none !important;
 	border-right: 1px solid #ffffff !important;
 	border-top: none !important;
-	border-bottom: none !important;
+	border-bottom: 1px solid #c9caca !important;
 	padding: 3px 12px;
 	text-align: center;
 }
@@ -33,10 +33,9 @@
 	position: relative;
     vertical-align: middle;
 	background-color: #e5e5e5;
-	border-left: 1px solid #ffffff !important;
-	border-right: none !important;
+	border-right: 1px solid #c9caca !important;
 	border-top: none !important;
-	border-bottom: none !important;
+	border-bottom: 1px solid #c9caca !important;
 	padding: 3px 12px;
 	text-align: center;
 }
@@ -52,10 +51,10 @@
 }
 
 .cellTableEvenRowCell {
-	border-right: 1px solid #e5e5e5 !important;
+	border-right: 1px solid #c9caca !important;
 	border-left: none;
 	border-top: none !important;
-	border-bottom: 1px solid #e5e5e5 !important;
+	border-bottom: 1px solid #c9caca !important;
 	padding: 5px 17px 5px !important;
 }
 
@@ -66,9 +65,9 @@
 
 .cellTableOddRowCell {
 	border-left: none !important;
-	border-right: 1px solid #e5e5e5 !important;
+	border-right: 1px solid #c9caca !important;
 	border-top: none !important;
-	border-bottom: 1px solid #e5e5e5 !important;
+	border-bottom: 1px solid #c9caca !important;
 	padding: 5px 17px 5px !important;
 }
 
@@ -101,7 +100,7 @@
 }
 
 .cellTableRaceColumnHeader {
-	background-color: #e5e5e5;
+	background-color: #e0e0e0;
 	padding: 3px 12px;
 }
 
@@ -111,7 +110,7 @@
 }
 
 .cellTableLegDetailColumnHeader {
-	background-color: #f5f5f5;
+	background-color: #f4f5f6;
 	padding: 3px 12px;
 }
 
