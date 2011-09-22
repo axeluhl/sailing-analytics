@@ -89,6 +89,8 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
     protected final String RACE_COLUMN_STYLE;
 
     protected final String LEG_COLUMN_STYLE;
+    
+    protected final String TOTAL_COLUMN_STYLE;
 
     private class SettingsClickHandler implements ClickHandler {
         private final StringConstants stringConstants;
@@ -155,6 +157,11 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
              * Applied to leg columns
              */
             String cellTableLegColumn();
+
+            /**
+             * Applied to the totals columns
+             */
+            String cellTableTotalColumn();
 
         }
         @Override
@@ -372,8 +379,11 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
      *
      */
     private class TotalsColumn extends SortableColumn<LeaderboardRowDAO, String>  {
-        protected TotalsColumn() {
+        private final String columnStyle;
+        
+        protected TotalsColumn(String columnStyle) {
             super(new TextCell());
+            this.columnStyle = columnStyle;
             setHorizontalAlignment(ALIGN_CENTER);
         }
 
@@ -386,6 +396,11 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
         @Override
         public Comparator<LeaderboardRowDAO> getComparator() {
             return getLeaderboard().getTotalRankingComparator();
+        }
+
+        @Override
+        public String getColumnStyle() {
+            return columnStyle;
         }
 
         @Override
@@ -473,6 +488,7 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
         RACE_COLUMN_STYLE = resources.cellTableStyle().cellTableRaceColumn();
         LEG_COLUMN_STYLE = resources.cellTableStyle().cellTableLegColumn();
         LEG_DETAIL_COLUMN_STYLE = resources.cellTableStyle().cellTableLegDetailColumn();
+        TOTAL_COLUMN_STYLE = resources.cellTableStyle().cellTableTotalColumn();
         leaderboardTable = new CellTableWithStylableHeaders<LeaderboardRowDAO>(/* pageSize */ 100, resources);
         getLeaderboardTable().setWidth("100%");
         getLeaderboardTable().setSelectionModel(new MultiSelectionModel<LeaderboardRowDAO>() {});
@@ -761,7 +777,7 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
         // add a totals column on the right
         if (getLeaderboardTable().getColumnCount() == 0
                 || !(getLeaderboardTable().getColumn(getLeaderboardTable().getColumnCount() - 1) instanceof TotalsColumn)) {
-            addColumn(new TotalsColumn());
+            addColumn(new TotalsColumn(TOTAL_COLUMN_STYLE));
         }
     }
 

@@ -125,3 +125,7 @@
 .cellTableLegDetailColumn {
 	background-color: #ffffff !important;
 }
+
+.cellTableTotalColumn {
+	background-color: #e0e0e0 !important;
+}
