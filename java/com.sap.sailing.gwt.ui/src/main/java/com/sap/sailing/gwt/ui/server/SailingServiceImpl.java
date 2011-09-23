@@ -512,10 +512,15 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                     List<GPSFixDAO> fixesForCompetitor = new ArrayList<GPSFixDAO>();
                     result.put(competitorDAO, fixesForCompetitor);
                     GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
+                    long lastShown = 0;
+                    boolean contains = lastShownFix.containsKey(competitorDAO);
+                    if (contains) {
+                    	lastShown = lastShownFix.get(competitorDAO).timepoint.getTime();
+                    }
+                    
                     Iterator<GPSFixMoving> fixIter;
-                    if ( !lastShownFix.isEmpty() && lastShownFix.get(competitorDAO).timepoint.getTime() > (date.getTime()
-                            - tailLengthInMilliseconds)) {
-                    	fixIter = track.getFixesIterator(new MillisecondsTimePoint(lastShownFix.get(competitorDAO).timepoint.getTime()), /* inclusive */true);
+                    if (contains && lastShown > (date.getTime() - tailLengthInMilliseconds)) {
+                    	fixIter = track.getFixesIterator(new MillisecondsTimePoint(lastShown), /* inclusive */true);
                     	
                     } else {
                     	fixIter = track.getFixesIterator(new MillisecondsTimePoint(date.getTime()
@@ -528,6 +533,9 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                                     .getPosition().getLatDeg(), fix.getPosition().getLngDeg()));
                             fixesForCompetitor.add(fixDAO);
                             if (fixIter.hasNext()) {
+                            	if (!lastShownFix.isEmpty()){
+                            		lastShownFix.put(competitorDAO, fixDAO);
+                            	}
                                 fix = fixIter.next();
                             } else {
                                 // check if fix was at date and if extrapolation is requested

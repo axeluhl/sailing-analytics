@@ -493,7 +493,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
 
 	private Polyline createTail(final CompetitorDAO competitorDAO, List<GPSFixDAO> value) {
 		firstShownFix.put(competitorDAO, value.get(0));
-		firstShownFix.put(competitorDAO, value.get(value.size() - 1));
+		lastShownFix.put(competitorDAO, value.get(value.size() - 1));
 
 		List<LatLng> points = new ArrayList<LatLng>();
 		for (int i = 0; i < value.size(); i++) {
