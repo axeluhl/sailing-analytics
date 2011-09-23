@@ -371,36 +371,55 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
 
 			} else {
 				for (Map.Entry<CompetitorDAO, Polyline> tailEntry : tails.entrySet()) {
-					final CompetitorDAO competitorDAO = tailEntry.getKey();
-					Polyline tail = tailEntry.getValue();
-					List<GPSFixDAO> gpsFixDao = result.get(competitorDAO);
-					int newPointsCount = gpsFixDao.size();
-					int oldTailLengthForDebug = tail.getVertexCount();
-					for (int i = 0; i < newPointsCount; i++) {
-						tail.insertVertex(tail.getVertexCount(),
-								LatLng.newInstance(gpsFixDao.get(i).position.latDeg, gpsFixDao.get(i).position.lngDeg));
-						if (tail.getVertexCount() > 10) {
-							int tailLengthTooLong = tail.getVertexCount() - 10;
-							for (int j = 0; j < tailLengthTooLong; j++) {
-								tail.deleteVertex(0);
-							}								
+					try {
+						final CompetitorDAO competitorDAO = tailEntry.getKey();
+						Polyline tail = tailEntry.getValue();
+						List<GPSFixDAO> gpsFixDao = result.get(competitorDAO);
+						int newPointsCount = gpsFixDao.size();
+						for (int i = 0; i < newPointsCount; i++) {
+							tail.insertVertex(tail.getVertexCount(), LatLng.newInstance(
+									gpsFixDao.get(i).position.latDeg, gpsFixDao.get(i).position.lngDeg));
+							tail.deleteVertex(0);
 						}
+						GPSFixDAO lastFix = gpsFixDao.get(gpsFixDao.size() - 1);
 						Marker bMarker = boatMarkers.get(competitorDAO);
-						bMarker.setLatLng(LatLng.newInstance(gpsFixDao.get(gpsFixDao.size() - 1).position.latDeg,
-								gpsFixDao.get(gpsFixDao.size() - 1).position.lngDeg));
-					}
+						bMarker.setLatLng(LatLng.newInstance(lastFix.position.latDeg, lastFix.position.lngDeg));
+						lastShownFix.put(competitorDAO, lastFix);
 
-					LatLngBounds bounds = tail.getBounds();
-					if (newMapBounds == null) {
-						newMapBounds = bounds;
-					} else {
-						newMapBounds.extend(bounds.getNorthEast());
-						newMapBounds.extend(bounds.getSouthWest());
-					}
+						LatLngBounds bounds = tail.getBounds();
+						if (newMapBounds == null) {
+							newMapBounds = bounds;
+						} else {
+							newMapBounds.extend(bounds.getNorthEast());
+							newMapBounds.extend(bounds.getSouthWest());
+						}
 
-					if (!mapZoomedOrPannedSinceLastRaceSelectionChange && newMapBounds != null) {
-						map.setZoomLevel(map.getBoundsZoomLevel(newMapBounds));
-						map.setCenter(newMapBounds.getCenter());
+						if (!mapZoomedOrPannedSinceLastRaceSelectionChange && newMapBounds != null) {
+							map.setZoomLevel(map.getBoundsZoomLevel(newMapBounds));
+							map.setCenter(newMapBounds.getCenter());
+						}
+					} catch (Exception e) {
+						final CompetitorDAO competitorDAO = tailEntry.getKey();
+						Polyline tail = tailEntry.getValue();
+						List<GPSFixDAO> gpsFixDao = result.get(competitorDAO);
+						map.removeOverlay(tail);
+						Polyline newTail = createTail(competitorDAO, gpsFixDao);
+						map.addOverlay(newTail);
+						tails.put(competitorDAO, newTail);
+						LatLngBounds bounds = newTail.getBounds();
+						if (newMapBounds == null) {
+							newMapBounds = bounds;
+						} else {
+							newMapBounds.extend(bounds.getNorthEast());
+							newMapBounds.extend(bounds.getSouthWest());
+						}
+						GPSFixDAO lastPos = gpsFixDao.get(gpsFixDao.size() - 1);
+						Marker boatMarker = createBoatMarker(competitorDAO, lastPos.position.latDeg,
+								lastPos.position.lngDeg, false);
+						map.addOverlay(boatMarker);
+						boatMarkers.put(competitorDAO, boatMarker);
+					} finally {
+
 					}
 				}
 			}
@@ -492,8 +511,10 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
 	}
 
 	private Polyline createTail(final CompetitorDAO competitorDAO, List<GPSFixDAO> value) {
-		firstShownFix.put(competitorDAO, value.get(0));
-		lastShownFix.put(competitorDAO, value.get(value.size() - 1));
+		if (!value.isEmpty()) {
+			firstShownFix.put(competitorDAO, value.get(0));
+			lastShownFix.put(competitorDAO, value.get(value.size() - 1));
+		}
 
 		List<LatLng> points = new ArrayList<LatLng>();
 		for (int i = 0; i < value.size(); i++) {

@@ -513,18 +513,18 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                     result.put(competitorDAO, fixesForCompetitor);
                     GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
                     long lastShown = 0;
+                    long dateMinusTail = date.getTime() - tailLengthInMilliseconds;
                     boolean contains = lastShownFix.containsKey(competitorDAO);
                     if (contains) {
                     	lastShown = lastShownFix.get(competitorDAO).timepoint.getTime();
                     }
                     
                     Iterator<GPSFixMoving> fixIter;
-                    if (contains && lastShown > (date.getTime() - tailLengthInMilliseconds)) {
-                    	fixIter = track.getFixesIterator(new MillisecondsTimePoint(lastShown), /* inclusive */true);
+                    if (contains && lastShown > dateMinusTail) {
+                    	fixIter = track.getFixesIterator(new MillisecondsTimePoint(lastShown+2000), /* inclusive */true);
                     	
                     } else {
-                    	fixIter = track.getFixesIterator(new MillisecondsTimePoint(date.getTime()
-                                - tailLengthInMilliseconds), /* inclusive */true);
+                    	fixIter = track.getFixesIterator(new MillisecondsTimePoint(dateMinusTail), /* inclusive */true);
                     }
                     if (fixIter.hasNext()) {
                         GPSFixMoving fix = fixIter.next();
@@ -533,9 +533,6 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                                     .getPosition().getLatDeg(), fix.getPosition().getLngDeg()));
                             fixesForCompetitor.add(fixDAO);
                             if (fixIter.hasNext()) {
-                            	if (!lastShownFix.isEmpty()){
-                            		lastShownFix.put(competitorDAO, fixDAO);
-                            	}
                                 fix = fixIter.next();
                             } else {
                                 // check if fix was at date and if extrapolation is requested
