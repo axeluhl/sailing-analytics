@@ -1,6 +1,10 @@
 package com.sap.sailing.server.xcelsius;
 
+import java.net.URLEncoder;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
@@ -18,6 +22,7 @@ import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.util.Util;
 
 public class RankPerLeg extends Action {
     private final Set<String> competitorNameSet;
@@ -36,57 +41,49 @@ public class RankPerLeg extends Action {
     }
 
     public void perform() throws Exception {
-        /*
-         * Get data from request
-         */
+        // Get data from request
         final Event event = getEvent();
-
         final RaceDefinition race = getRace(event);
-
         final TrackedRace trackedRace = getTrackedRace(event, race);
-
         final TimePoint time = getTimePoint(trackedRace);
-
-        /*
-         * Prepare document
-         */
+        // Prepare document
         final Document table = getTable("data");
-
-        /*
-         * Get Legs data
-         */
+        // Get Legs data
+        int i=0;
+        NumberFormat numberFormat = new DecimalFormat("00");
         for (final TrackedLeg trackedLeg : trackedRace.getTrackedLegs()) {
             final Leg leg = trackedLeg.getLeg();
-            final String legId = "" + leg.getFrom().getId();
+            final String legId = numberFormat.format(++i);
             final String markName = leg.getFrom().getName();
             final String upOrDownwinLeg = trackedLeg.isUpOrDownwindLeg(time) ? "U" : "D";
-
-            /*
-             * Get competitor data
-             */
-            for (final Competitor competitor : race.getCompetitors()) {
+            LinkedHashMap<Competitor, Integer> ranks = trackedLeg.getRanks(time);
+            // Get competitor data
+            for (final Competitor competitor : ranks.keySet()) {
                 if (competitorNameSet == null || competitorNameSet.contains(competitor.getName())) {
-                    /*
-                     * Get data
-                     */
+                    // Get data
                     final String competitorName = competitor.getName();
                     final String nationality = competitor.getTeam().getNationality().getThreeLetterIOCAcronym();
+                    final String sailID = competitor.getBoat().getSailID();
                     final int overallRank = trackedRace.getRank(competitor);
                     final int legRank = trackedLeg.getTrackedLeg(competitor).getRank(time);
                     final int posGL = 0; // not yet known
                     final Double gapToLeader = trackedLeg.getTrackedLeg(competitor).getGapToLeaderInSeconds(time);
-                    final double legTime = 0; // not yet known
+                    final double legTime = 1./1000.*trackedLeg.getTrackedLeg(competitor).getTimeInMilliSeconds(time);
                     final Speed avgSpeed = trackedLeg.getTrackedLeg(competitor).getAverageSpeedOverGround(time);
                     final SpeedWithBearing speedOVG = trackedLeg.getTrackedLeg(competitor).getSpeedOverGround(time);
 
-                    /*
-                     * Write data
-                     */
+                    // Write data
                     addRow();
+                    addColumn(competitor.getBoat().getBoatClass().getName());
+                    addColumn(race.getName());
+                    addColumn(""+Util.size(race.getCompetitors()));
                     addColumn(legId);
                     addColumn(markName);
+                    addColumn(leg.getFrom().getBuoys().iterator().next().getName());
                     addColumn(upOrDownwinLeg);
                     addColumn(competitorName);
+                    addColumn(URLEncoder.encode(competitorName, "UTF-8"));
+                    addColumn(sailID==null?"null":sailID);
                     addColumn(nationality);
                     addColumn("" + overallRank);
                     addColumn("" + legRank);

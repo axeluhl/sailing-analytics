@@ -134,7 +134,7 @@ public abstract class ExpandableSortableColumn<C> extends SortableColumn<Leaderb
                     int columnIndex = table.getColumnIndex(column);
                     // remove only the children currently displayed
                     if (columnIndex >= 0) {
-                        table.removeColumn(columnIndex);
+                        getLeaderboardPanel().removeColumn(columnIndex);
                     }
                 }
                 // important: toggle expanded state after asking for all visible children
@@ -149,6 +149,7 @@ public abstract class ExpandableSortableColumn<C> extends SortableColumn<Leaderb
                             column.updateMinMax(getLeaderboardPanel().getLeaderboard());
                             getLeaderboardPanel().insertColumn(insertIndex++, column);
                         }
+                        getLeaderboardPanel().getLeaderboardTable().redraw();
                     }
                 });
             }

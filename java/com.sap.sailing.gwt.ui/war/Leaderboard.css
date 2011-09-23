@@ -1,10 +1,9 @@
-** Add css rules here for your application. */
+/** Add css rules here for your application. */
 
 * {
 	font-family: Arial;
 	font-size: 12px;
 }
-
 
 /** Example rules used by the template application (remove for your app) */
 h1 {
@@ -119,4 +118,9 @@ h1 {
 .gwt-Button {
 	background-color: #e2e2e2;
 	border-color: #a3a3a3 !important;
+}
+
+.gwt-TextBox {
+	font-family: Arial !important;
+	font-size: 12px !important;
 }

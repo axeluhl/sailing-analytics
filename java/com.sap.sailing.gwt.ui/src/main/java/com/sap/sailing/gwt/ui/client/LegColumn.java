@@ -25,6 +25,10 @@ public class LegColumn extends ExpandableSortableColumn<String> {
     private final int legIndex;
     private final StringConstants stringConstants;
     private final LegDetailSelectionProvider legDetailSelectionProvider;
+    private final String headerStyle;
+    private final String columnStyle;
+    private final String detailHeaderStyle;
+    private final String detailColumnStyle;
     
     private abstract class AbstractLegDetailField<T extends Comparable<?>> implements LegDetailField<T> {
         public T get(LeaderboardRowDAO row) {
@@ -103,19 +107,34 @@ public class LegColumn extends ExpandableSortableColumn<String> {
     }
     
     public LegColumn(LeaderboardPanel leaderboardPanel, String raceName, int legIndex, StringConstants stringConstants,
-            LegDetailSelectionProvider legDetailSelectionProvider) {
-        super(leaderboardPanel, /* expandable */ true /* all legs have details */, new TextCell());
-        setHorizontalAlignment(ALIGN_RIGHT);
+            LegDetailSelectionProvider legDetailSelectionProvider, String headerStyle, String columnStyle,
+            String detailHeaderStyle, String detailColumnStyle) {
+        super(leaderboardPanel, /* expandable */true /* all legs have details */, new TextCell());
+        setHorizontalAlignment(ALIGN_CENTER);
         this.raceName = raceName;
         this.legIndex = legIndex;
         this.stringConstants = stringConstants;
         this.legDetailSelectionProvider = legDetailSelectionProvider;
+        this.headerStyle = headerStyle;
+        this.columnStyle = columnStyle;
+        this.detailHeaderStyle = detailHeaderStyle;
+        this.detailColumnStyle = detailColumnStyle;
     }
     
     private int getLegIndex() {
         return legIndex;
     }
     
+    @Override
+    public String getColumnStyle() {
+        return columnStyle;
+    }
+    
+    @Override
+    public String getHeaderStyle() {
+        return headerStyle;
+    }
+
     private String getRaceName() {
         return raceName;
     }
@@ -152,8 +171,6 @@ public class LegColumn extends ExpandableSortableColumn<String> {
     public Header<SafeHtml> getHeader() {
         SortableExpandableColumnHeader result = new SortableExpandableColumnHeader(/* title */ stringConstants.leg()+(legIndex+1),
                 /* iconURL */ null, getLeaderboardPanel(), this, stringConstants);
-        // TODO the following may apply if we switch to StyledHeader
-        // result.addStyleName("legColumnHeader");
         return result;
     }
     
@@ -174,28 +191,28 @@ public class LegColumn extends ExpandableSortableColumn<String> {
             for (LegDetailColumnType type : legDetailSelectionProvider.getLegDetailsToShow()) {
                 switch (type) {
                 case DISTANCE_TRAVELED:
-                    result.add(new FormattedDoubleLegDetailColumn(stringConstants.distanceInMeters(), new DistanceTraveledInMeters(), 1, getLeaderboardPanel().getLeaderboardTable()));
+                    result.add(new FormattedDoubleLegDetailColumn(stringConstants.distanceInMeters(), new DistanceTraveledInMeters(), 0, getLeaderboardPanel().getLeaderboardTable(), detailHeaderStyle, detailColumnStyle));
                     break;
                 case AVERAGE_SPEED_OVER_GROUND_IN_KNOTS:
-                    result.add(new FormattedDoubleLegDetailColumn(stringConstants.averageSpeedInKnots(), new AverageSpeedOverGroundInKnots(), 2, getLeaderboardPanel().getLeaderboardTable()));
+                    result.add(new FormattedDoubleLegDetailColumn(stringConstants.averageSpeedInKnots(), new AverageSpeedOverGroundInKnots(), 2, getLeaderboardPanel().getLeaderboardTable(), detailHeaderStyle, detailColumnStyle));
                     break;
                 case RANK_GAIN:
-                    result.add(new RankGainColumn(stringConstants.rankGain(), new RankGain(), getLeaderboardPanel().getLeaderboardTable()));
+                    result.add(new RankGainColumn(stringConstants.rankGain(), new RankGain(), getLeaderboardPanel().getLeaderboardTable(), detailHeaderStyle, detailColumnStyle));
                     break;
                 case CURRENT_SPEED_OVER_GROUND_IN_KNOTS:
-                    result.add(new FormattedDoubleLegDetailColumn(stringConstants.currentSpeedOverGroundInKnots(), new CurrentSpeedOverGroundInKnots(), 1, getLeaderboardPanel().getLeaderboardTable()));
+                    result.add(new FormattedDoubleLegDetailColumn(stringConstants.currentSpeedOverGroundInKnots(), new CurrentSpeedOverGroundInKnots(), 1, getLeaderboardPanel().getLeaderboardTable(), detailHeaderStyle, detailColumnStyle));
                     break;
                 case ESTIMATED_TIME_TO_NEXT_WAYPOINT_IN_SECONDS:
-                    result.add(new FormattedDoubleLegDetailColumn(stringConstants.estimatedTimeToNextWaypointInSeconds(), new EstimatedTimeToNextWaypointInSeconds(), 1, getLeaderboardPanel().getLeaderboardTable()));
+                    result.add(new FormattedDoubleLegDetailColumn(stringConstants.estimatedTimeToNextWaypointInSeconds(), new EstimatedTimeToNextWaypointInSeconds(), 1, getLeaderboardPanel().getLeaderboardTable(), detailHeaderStyle, detailColumnStyle));
                     break;
                 case GAP_TO_LEADER_IN_SECONDS:
-                    result.add(new FormattedDoubleLegDetailColumn(stringConstants.gapToLeaderInSeconds(), new GapToLeaderInSeconds(), 1, getLeaderboardPanel().getLeaderboardTable()));
+                    result.add(new FormattedDoubleLegDetailColumn(stringConstants.gapToLeaderInSeconds(), new GapToLeaderInSeconds(), 1, getLeaderboardPanel().getLeaderboardTable(), detailHeaderStyle, detailColumnStyle));
                     break;
                 case VELOCITY_MADE_GOOD_IN_KNOTS:
-                    result.add(new FormattedDoubleLegDetailColumn(stringConstants.velocityMadeGoodInKnots(), new VelocityMadeGoodInKnots(), 1, getLeaderboardPanel().getLeaderboardTable()));
+                    result.add(new FormattedDoubleLegDetailColumn(stringConstants.velocityMadeGoodInKnots(), new VelocityMadeGoodInKnots(), 1, getLeaderboardPanel().getLeaderboardTable(), detailHeaderStyle, detailColumnStyle));
                     break;
                 case WINDWARD_DISTANCE_TO_GO_IN_METERS:
-                    result.add(new FormattedDoubleLegDetailColumn(stringConstants.windwardDistanceToGoInMeters(), new WindwardDistanceToGoInMeters(), 1, getLeaderboardPanel().getLeaderboardTable()));
+                    result.add(new FormattedDoubleLegDetailColumn(stringConstants.windwardDistanceToGoInMeters(), new WindwardDistanceToGoInMeters(), 1, getLeaderboardPanel().getLeaderboardTable(), detailHeaderStyle, detailColumnStyle));
                     break;
                 }
             }

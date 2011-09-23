@@ -6,14 +6,16 @@ public class CompetitorDAO extends NamedDAO implements IsSerializable {
     public String twoLetterIsoCountryCode;
     public String threeLetterIocCountryCode;
     public String countryName;
+    public String sailID;
 
     public CompetitorDAO() {}
 
-    public CompetitorDAO(String name, String twoLetterIsoCountryCode, String threeLetterIocCountryCode, String countryName) {
+    public CompetitorDAO(String name, String twoLetterIsoCountryCode, String threeLetterIocCountryCode, String countryName, String sailID) {
         super(name);
         this.twoLetterIsoCountryCode = twoLetterIsoCountryCode;
         this.threeLetterIocCountryCode = threeLetterIocCountryCode;
         this.countryName = countryName;
+        this.sailID = sailID;
     }
 
     @Override

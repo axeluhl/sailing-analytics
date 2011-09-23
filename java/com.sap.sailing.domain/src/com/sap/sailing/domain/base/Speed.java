@@ -11,6 +11,8 @@ public interface Speed extends Comparable<Speed> {
     double getMetersPerSecond();
 
     double getKilometersPerHour();
+    
+    double getBeaufort();
 
     /**
      * Traveling at this speed starting at time <code>from</code> until time </code>to</code>, how far have we traveled?

@@ -12,8 +12,8 @@ public class FormattedDoubleLegDetailColumn extends LegDetailColumn<Double, Stri
     
     public FormattedDoubleLegDetailColumn(String title,
             com.sap.sailing.gwt.ui.client.LegDetailColumn.LegDetailField<Double> field,
-            int decimals, CellTable<LeaderboardRowDAO> leaderboardTable) {
-        super(title, field, new TextCell(), leaderboardTable);
+            int decimals, CellTable<LeaderboardRowDAO> leaderboardTable, String headerStyle, String columnStyle) {
+        super(title, field, new TextCell(), leaderboardTable, headerStyle, columnStyle);
         StringBuilder patternBuilder = new StringBuilder("0");
         if (decimals > 0) {
             patternBuilder.append('.');
@@ -39,14 +39,14 @@ public class FormattedDoubleLegDetailColumn extends LegDetailColumn<Double, Stri
         int percent = getPercentage(row);
         sb.appendHtmlConstant("<div style=\"left: 0px; background-image: url(/images/greyBar.png); "+
         " background-position: left; background-repeat: no-repeat; background-size: "+
-                percent+"% 14px; \">").
+                percent+"% 25px; \">").
         appendEscaped(getValue(row)).appendHtmlConstant("</div>");
     }
 
     private int getPercentage(LeaderboardRowDAO row) {
         Double value = getField().get(row);
         int percentage = 0;
-        if (value != null) {
+        if (value != null && getMinimum() != null && getMaximum() != null) {
             percentage = (int) (100.*(value-getMinimum())/(getMaximum()-getMinimum()));
         }
         return percentage;
