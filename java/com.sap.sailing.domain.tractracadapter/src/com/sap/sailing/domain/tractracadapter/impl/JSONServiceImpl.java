@@ -3,6 +3,7 @@ package com.sap.sailing.domain.tractracadapter.impl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -20,7 +21,7 @@ public class JSONServiceImpl implements JSONService {
     private final String eventName;
     private final List<RaceRecord> raceRecords;
     
-    public JSONServiceImpl(URL jsonURL) throws IOException, ParseException, org.json.simple.parser.ParseException {
+    public JSONServiceImpl(URL jsonURL) throws IOException, ParseException, org.json.simple.parser.ParseException, URISyntaxException {
         JSONObject jsonObject = parseJSONObject(jsonURL.openStream());
         raceRecords = new ArrayList<RaceRecord>();
         eventName = (String) ((JSONObject) jsonObject.get("event")).get("name");

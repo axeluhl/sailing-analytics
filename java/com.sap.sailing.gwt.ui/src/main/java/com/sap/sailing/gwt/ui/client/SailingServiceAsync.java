@@ -29,6 +29,12 @@ public interface SailingServiceAsync {
 
     void listRacesInEvent(String eventJsonURL, AsyncCallback<List<RaceRecordDAO>> callback);
 
+    /**
+     * @param liveURI may be <code>null</code> or the empty string in which case the server will
+     * use the {@link RaceRecordDAO#liveURI} from the <code>rr</code> race record.
+     * @param storedURImay be <code>null</code> or the empty string in which case the server will
+     * use the {@link RaceRecordDAO#storedURI} from the <code>rr</code> race record.
+     */
     void track(RaceRecordDAO rr, String liveURI, String storedURI, boolean trackWind, boolean correctWindByDeclination,
             AsyncCallback<Void> callback);
 

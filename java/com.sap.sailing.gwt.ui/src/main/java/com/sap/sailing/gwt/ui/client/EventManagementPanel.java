@@ -184,6 +184,7 @@ public class EventManagementPanel extends FormPanel implements EventDisplayer {
         jsonURLBox.setVisibleLength(80);
         
         Label lblLiveUri = new Label("Live URI");
+        lblLiveUri.setTitle(stringConstants.leaveEmptyForDefault());
         grid_1.setWidget(4, 1, lblLiveUri);
         
         HorizontalPanel horizontalPanel = new HorizontalPanel();
@@ -191,14 +192,17 @@ public class EventManagementPanel extends FormPanel implements EventDisplayer {
         
         liveURIBox = new TextBox();
         liveURIBox.setVisibleLength(30);
+        liveURIBox.setTitle(stringConstants.leaveEmptyForDefault());
         horizontalPanel.add(liveURIBox);
         
         Label lblStoredUri = new Label("Stored URI");
+        lblStoredUri.setTitle(stringConstants.leaveEmptyForDefault());
         horizontalPanel.add(lblStoredUri);
         horizontalPanel.setCellVerticalAlignment(lblStoredUri, HasVerticalAlignment.ALIGN_MIDDLE);
         
         storedURIBox = new TextBox();
         storedURIBox.setVisibleLength(30);
+        storedURIBox.setTitle(stringConstants.leaveEmptyForDefault());
         horizontalPanel.add(storedURIBox);
         
         Label lblTrackableRaces = new Label("Trackable Races");
@@ -281,8 +285,6 @@ public class EventManagementPanel extends FormPanel implements EventDisplayer {
         grid.getCellFormatter().setVerticalAlignment(8, 0, HasVerticalAlignment.ALIGN_TOP);
         
         updatePortStoredData();
-        updateLiveURI();
-        updateStoredURI();
         updateJsonUrl();
     }
 
