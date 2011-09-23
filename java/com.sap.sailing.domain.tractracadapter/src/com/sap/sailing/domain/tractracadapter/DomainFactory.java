@@ -158,7 +158,7 @@ public interface DomainFactory {
      */
     RaceDefinition getRace(Object tokenToRetrieveAssociatedRace);
 
-    JSONService parseJSONURL(URL jsonURL) throws IOException, ParseException, org.json.simple.parser.ParseException;
+    JSONService parseJSONURL(URL jsonURL) throws IOException, ParseException, org.json.simple.parser.ParseException, URISyntaxException;
 
     /**
      * Returns a {@link RaceDefinition} for the race if it already exists, <code>null</code> otherwise.

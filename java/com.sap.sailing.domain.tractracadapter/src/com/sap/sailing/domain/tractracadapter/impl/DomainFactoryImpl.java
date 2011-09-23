@@ -480,7 +480,7 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public JSONService parseJSONURL(URL jsonURL) throws IOException, ParseException, org.json.simple.parser.ParseException {
+    public JSONService parseJSONURL(URL jsonURL) throws IOException, ParseException, org.json.simple.parser.ParseException, URISyntaxException {
         return new JSONServiceImpl(jsonURL);
     }
 

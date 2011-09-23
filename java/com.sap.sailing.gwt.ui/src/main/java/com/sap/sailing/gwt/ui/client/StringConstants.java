@@ -77,4 +77,5 @@ public interface StringConstants extends Constants {
     String velocityMadeGoodInKnots();
     String windwardDistanceToGoInMeters();
     String name();
+    String leaveEmptyForDefault();
 }

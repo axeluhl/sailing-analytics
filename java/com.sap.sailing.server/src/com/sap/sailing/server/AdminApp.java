@@ -186,7 +186,8 @@ public class AdminApp extends Servlet {
         }
     }
 
-    private void listRacesInEvent(HttpServletRequest req, HttpServletResponse resp) throws IOException, ParseException, org.json.simple.parser.ParseException {
+    private void listRacesInEvent(HttpServletRequest req, HttpServletResponse resp) throws IOException, ParseException,
+            org.json.simple.parser.ParseException, URISyntaxException {
         URL jsonURL = new URL(req.getParameter(PARAM_NAME_EVENT_JSON_URL));
         List<RaceRecord> raceRecords = getService().getRaceRecords(jsonURL);
         JSONArray result = new JSONArray();

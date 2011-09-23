@@ -46,7 +46,7 @@ import com.sap.sailing.gwt.ui.shared.Pair;
  * @author Axel Uhl (D043530)
  *
  */
-public class LeaderboardPanel extends FormPanel implements LegDetailSelectionProvider {
+public class LeaderboardPanel extends FormPanel implements LegDetailSelectionProvider, TimeListener {
     private static final int RANK_COLUMN_INDEX = 0;
 
     private static final int SAIL_ID_COLUMN_INDEX = 1;
@@ -91,6 +91,8 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
     protected final String LEG_COLUMN_STYLE;
     
     protected final String TOTAL_COLUMN_STYLE;
+    
+    private Date leaderboardDisplayDate;
 
     private class SettingsClickHandler implements ClickHandler {
         private final StringConstants stringConstants;
@@ -480,6 +482,7 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
         this.selectedLegDetails.add(LegDetailColumnType.DISTANCE_TRAVELED);
         this.selectedLegDetails.add(LegDetailColumnType.AVERAGE_SPEED_OVER_GROUND_IN_KNOTS);
         this.selectedLegDetails.add(LegDetailColumnType.RANK_GAIN);
+        leaderboardDisplayDate = new Date();
         rankColumn = new RankColumn();
         LeaderboardTableResources resources = GWT.create(LeaderboardTableResources.class); 
         RACE_COLUMN_HEADER_STYLE = resources.cellTableStyle().cellTableRaceColumnHeader();
@@ -513,7 +516,7 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
         ClickHandler refreshHandler = new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                loadCompleteLeaderboard(getLeaderboardDisplayDate());
+                timeChanged(new Date());
             }
         };
         HorizontalPanel refreshAndSettingsPanel = new HorizontalPanel();
@@ -545,8 +548,7 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
      * The time point for which the leaderboard currently shows results
      */
     protected Date getLeaderboardDisplayDate() {
-        // TODO add a notion of selectable time to the leaderboard panel
-        return new Date();
+        return leaderboardDisplayDate;
     }
     
     protected void addColumn(SortableColumn<LeaderboardRowDAO, ?> column) {
@@ -870,6 +872,12 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
                 }
             }
         }
+    }
+
+    @Override
+    public void timeChanged(Date date) {
+        leaderboardDisplayDate = date;
+        loadCompleteLeaderboard(getLeaderboardDisplayDate());
     }
 
 }
