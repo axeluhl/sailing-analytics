@@ -78,4 +78,19 @@ public interface StringConstants extends Constants {
     String windwardDistanceToGoInMeters();
     String name();
     String leaveEmptyForDefault();
+    String trackNewEvent();
+    String trackableRaces();
+    String trackWind();
+    String eventName();
+    String livePort();
+    String storedPort();
+    String liveUri();
+    String storedUri();
+    String eventsConnectedTo();
+    String btnTrack();
+    String hostname();
+    String declinationCheckbox();
+    String raceStartTrackingColumn();
 }
+
+
