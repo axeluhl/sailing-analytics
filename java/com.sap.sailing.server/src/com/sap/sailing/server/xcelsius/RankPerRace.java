@@ -63,7 +63,7 @@ public class RankPerRace extends Action {
                 addRow();
                 addColumn("" + overallRank);
                 addColumn(nationality);
-                addColumn(sailID == null ? "0" : sailID);
+                addColumn(sailID == null ? "null" : sailID);
                 addColumn(competitorName);
                 addColumn(URLEncoder.encode(competitorName, "UTF-8"));
             }
