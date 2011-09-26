@@ -67,6 +67,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
     private Icon buoyIcon;
     private LatLng lastMousePosition;
     private final Set<CompetitorDAO> competitorsSelectedInMap;
+    private final Timer timer;
     
     /**
      * If the user explicitly zoomed or panned the map, don't adjust zoom/pan unless a new race
@@ -93,6 +94,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
             final EventRefresher eventRefresher, StringConstants stringConstants) {
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
+        this.timer = new Timer(/* delayBetweenAutoAdvancesInMilliseconds */ 3000);
         competitorsSelectedInMap = new HashSet<CompetitorDAO>();
         tails = new HashMap<CompetitorDAO, Polyline>();
         buoyMarkers = new HashMap<MarkDAO, Marker>();
@@ -133,9 +135,9 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
             }
         });
         grid.setWidget(2, 0, quickRanksBox);
-        timePanel = new TimePanel(stringConstants, /* delayBetweenAutoAdvancesInMilliseconds */ 3000);
-        timePanel.addTimeListener(this);
-        timePanel.addTimeListener(windHistory);
+        timePanel = new TimePanel(stringConstants, timer);
+        timer.addTimeListener(this);
+        timer.addTimeListener(windHistory);
         grid.setWidget(1, 1, timePanel);
     }
 
@@ -225,7 +227,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
             updateSlider(selectedRaces.get(selectedRaces.size()-1).getC());
         }
         // force display of currently selected race
-        timeChanged(timePanel.getTime());
+        timeChanged(timer.getTime());
     }
 
     private void updateSlider(RaceDAO selectedRace) {

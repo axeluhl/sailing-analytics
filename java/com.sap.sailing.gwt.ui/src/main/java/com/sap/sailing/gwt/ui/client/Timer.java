@@ -106,11 +106,15 @@ public class Timer {
         this.accelerationFactor = accelerationFactor;
     }
     
-    public void setDelayBetweenAutoAdvances(long delayBetweenAutoAdvancesInMilliseconds) {
+    public void setDelayBetweenAutoAdvancesInMilliseconds(long delayBetweenAutoAdvancesInMilliseconds) {
         this.delayBetweenAutoAdvancesInMilliseconds = delayBetweenAutoAdvancesInMilliseconds;
         if (playing) {
             delayBetweenAutoAdvancesChanged = true;
         }
+    }
+    
+    public long getDelayBetweenAutoAdvancesInMilliseconds() {
+        return delayBetweenAutoAdvancesInMilliseconds;
     }
 
     public Date getTime() {
@@ -173,4 +177,13 @@ public class Timer {
     public void setDelay(long delayInMilliseconds) {
         setTime(System.currentTimeMillis()-delayInMilliseconds);
     }
+    
+    public long getDelay() {
+        return System.currentTimeMillis() - getTime().getTime();
+    }
+
+    public boolean isPlaying() {
+        return playing;
+    }
+    
 }

@@ -197,7 +197,7 @@ public class LeaderboardImpl implements Named, Leaderboard {
     @Override
     public boolean isDiscarded(Competitor competitor, RaceInLeaderboard raceColumn, TimePoint timePoint) {
         return !raceColumn.isMedalRace()
-                && getResultDiscardingRule().getDiscardedRaceColumns(competitor, getRaceColumns(), timePoint).contains(
+                && getResultDiscardingRule().getDiscardedRaceColumns(competitor, this, timePoint).contains(
                         raceColumn);
     }
 
@@ -243,7 +243,7 @@ public class LeaderboardImpl implements Named, Leaderboard {
                 Result correctedResults = getScoreCorrection().getCorrectedScore(trackedPoints, competitor, raceColumn, timePoint);
                 Set<RaceInLeaderboard> discardedRacesForCompetitor = discardedRaces.get(competitor);
                 if (discardedRacesForCompetitor == null) {
-                    discardedRacesForCompetitor = getResultDiscardingRule().getDiscardedRaceColumns(competitor, getRaceColumns(), timePoint);
+                    discardedRacesForCompetitor = getResultDiscardingRule().getDiscardedRaceColumns(competitor, this, timePoint);
                     discardedRaces.put(competitor, discardedRacesForCompetitor);
                 }
                 boolean discarded = discardedRacesForCompetitor.contains(raceColumn);
