@@ -129,7 +129,7 @@ public interface Leaderboard extends Named {
      * Fetches all entries for all competitors of all races tracked by this leaderboard in one sweep. This saves some
      * computational effort compared to fetching all entries separately, particularly because all
      * {@link #isDiscarded(Competitor, RaceInLeaderboard, TimePoint) discarded races} of a competitor are computed in one
-     * sweep using {@link ResultDiscardingRule#getDiscardedRaceColumns(Competitor, Iterable, TimePoint)} only once.
+     * sweep using {@link ResultDiscardingRule#getDiscardedRaceColumns(Competitor, Leaderboard, TimePoint)} only once.
      * Note that in order to get the {@link #getTotalPoints(Competitor, TimePoint) total points} for a competitor
      * for the entire leaderboard, the {@link #getCarriedPoints(Competitor) carried-over points} need to be added.
      */

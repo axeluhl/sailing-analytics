@@ -14,5 +14,5 @@ import com.sap.sailing.domain.base.TimePoint;
  *
  */
 public interface ResultDiscardingRule {
-    Set<RaceInLeaderboard> getDiscardedRaceColumns(Competitor competitor, Iterable<RaceInLeaderboard> raceColumns, TimePoint timePoint);
+    Set<RaceInLeaderboard> getDiscardedRaceColumns(Competitor competitor, Leaderboard leaderboard, TimePoint timePoint);
 }
