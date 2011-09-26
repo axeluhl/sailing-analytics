@@ -18,7 +18,7 @@ import com.sap.ui.commons.client.SliderWidget;
 import com.sap.ui.core.client.event.Event;
 import com.sap.ui.core.client.event.EventListener;
 
-public class TimePanel extends FormPanel implements TimeListener {
+public class TimePanel extends FormPanel implements TimeListener, PlayStateListener {
     private final Timer timer;
     private final SliderWidget slider;
     private final Button playPauseButton;
@@ -30,6 +30,7 @@ public class TimePanel extends FormPanel implements TimeListener {
     public TimePanel(StringConstants stringConstants, Timer timer) {
         this.timer = timer;
         timer.addTimeListener(this);
+        timer.addPlayStateListener(this);
         VerticalPanel vp = new VerticalPanel();
         vp.setSize("100%", "100%");
         vp.setSpacing(5);
@@ -125,7 +126,6 @@ public class TimePanel extends FormPanel implements TimeListener {
         }
     }
 
-
     public void setMax(Date max) {
         slider.setMax(max.getTime());
         if (timer.getTime().after(max)) {
@@ -138,6 +138,11 @@ public class TimePanel extends FormPanel implements TimeListener {
         if (delay != null) {
             timer.setDelay(1000l * delay.longValue());
         }
+    }
+
+    @Override
+    public void playStateChanged(boolean isPlaying) {
+        playPauseButton.setText(isPlaying ? "||" : ">");
     }
     
 }
