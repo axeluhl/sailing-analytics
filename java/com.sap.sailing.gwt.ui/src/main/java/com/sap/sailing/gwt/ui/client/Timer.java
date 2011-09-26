@@ -173,4 +173,13 @@ public class Timer {
     public void setDelay(long delayInMilliseconds) {
         setTime(System.currentTimeMillis()-delayInMilliseconds);
     }
+    
+    public long getDelay() {
+        return System.currentTimeMillis() - getTime().getTime();
+    }
+
+    public boolean isPlaying() {
+        return playing;
+    }
+    
 }
