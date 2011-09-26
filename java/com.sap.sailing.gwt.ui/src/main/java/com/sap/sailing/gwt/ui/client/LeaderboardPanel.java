@@ -46,7 +46,7 @@ import com.sap.sailing.gwt.ui.shared.Pair;
  * @author Axel Uhl (D043530)
  *
  */
-public class LeaderboardPanel extends FormPanel implements LegDetailSelectionProvider, TimeListener {
+public class LeaderboardPanel extends FormPanel implements LegDetailSelectionProvider, TimeListener, PlayStateListener {
     private static final int RANK_COLUMN_INDEX = 0;
 
     private static final int SAIL_ID_COLUMN_INDEX = 1;
@@ -92,7 +92,18 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
     
     protected final String TOTAL_COLUMN_STYLE;
     
-    private Date leaderboardDisplayDate;
+    private final Timer timer;
+
+    /**
+     * The delay with which the timer shall work. Before the timer is resumed, the delay is set to this value.
+     */
+    private long delayInMilliseconds;
+
+    /**
+     * This anchor's HTML holds the image tag for the play/pause button that needs to be updated when
+     * the {@link #timer} changes its playing state
+     */
+    private final Anchor playPause;
 
     private class SettingsClickHandler implements ClickHandler {
         private final StringConstants stringConstants;
@@ -103,28 +114,32 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
 
         @Override
         public void onClick(ClickEvent event) {
-            new LegDetailSelectionPanel(LeaderboardPanel.this,
+            new LeaderboardSettingsPanel(LeaderboardPanel.this, timer.getDelayBetweenAutoAdvancesInMilliseconds(),
                     stringConstants.leaderboardSettings(), stringConstants.selectLegDetails(),
-                    stringConstants.ok(), stringConstants.cancel(), new Validator<List<LegDetailColumnType>>() {
+                    stringConstants.ok(), stringConstants.cancel(), new Validator<LeaderboardSettingsPanel.Result>() {
                         @Override
-                        public String getErrorMessage(List<LegDetailColumnType> valueToValidate) {
-                            if (valueToValidate.isEmpty()) {
+                        public String getErrorMessage(LeaderboardSettingsPanel.Result valueToValidate) {
+                            if (valueToValidate.getLegDetailsToShow().isEmpty()) {
                                 return stringConstants.selectAtLeastOneLegDetail();
+                            } else if (valueToValidate.getDelayBetweenAutoAdvancesInMilliseconds() < 1000) {
+                                return stringConstants.chooseUpdateIntervalOfAtLeastOneSecond();
                             } else {
                                 return null;
                             }
                         }
-            }, new AsyncCallback<List<LegDetailColumnType>>() {
+            }, new AsyncCallback<LeaderboardSettingsPanel.Result>() {
                         @Override
-                        public void onSuccess(List<LegDetailColumnType> result) {
+                        public void onSuccess(LeaderboardSettingsPanel.Result result) {
                             selectedLegDetails.clear();
-                            selectedLegDetails.addAll(result);
+                            selectedLegDetails.addAll(result.getLegDetailsToShow());
+                            timer.setDelayBetweenAutoAdvancesInMilliseconds(result.getDelayBetweenAutoAdvancesInMilliseconds());
+                            setDelayInMilliseconds(result.getDelayInMilliseconds());
                             refreshHeaders();
                         }
                         @Override
                         public void onFailure(Throwable caught) {
                         }
-                    }, stringConstants).show();
+                    }, stringConstants, getDelayInMilliseconds()).show();
         }
     }
 
@@ -508,7 +523,11 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
         this.selectedLegDetails.add(LegDetailColumnType.DISTANCE_TRAVELED);
         this.selectedLegDetails.add(LegDetailColumnType.AVERAGE_SPEED_OVER_GROUND_IN_KNOTS);
         this.selectedLegDetails.add(LegDetailColumnType.RANK_GAIN);
-        leaderboardDisplayDate = new Date();
+        delayInMilliseconds = 0l;
+        timer = new Timer(/* delayBetweenAutoAdvancesInMilliseconds */ 3000l);
+        timer.setDelay(getDelayInMilliseconds()); // set time/delay before adding as listener
+        timer.addPlayStateListener(this);
+        timer.addTimeListener(this);
         rankColumn = new RankColumn();
         LeaderboardTableResources resources = GWT.create(LeaderboardTableResources.class); 
         RACE_COLUMN_HEADER_STYLE = resources.cellTableStyle().cellTableRaceColumnHeader();
@@ -539,10 +558,15 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
         Label leaderboardLabel = new Label(stringConstants.leaderboard()+" "+leaderboardName.toUpperCase());
         leaderboardLabel.addStyleName("boldLabel");
         dockPanel.add(leaderboardLabel, DockPanel.WEST);
-        ClickHandler refreshHandler = new ClickHandler() {
+        ClickHandler playPauseHandler = new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                timeChanged(new Date());
+                if (timer.isPlaying()) {
+                    timer.pause();
+                } else {
+                    timer.setDelay(getDelayInMilliseconds());
+                    timer.resume();
+                }
             }
         };
         HorizontalPanel refreshAndSettingsPanel = new HorizontalPanel();
@@ -551,30 +575,40 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
         refreshPanel.setSpacing(5);
         refreshPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
         refreshPanel.addStyleName("refreshPanel");
-        Anchor refresh = new Anchor(new SafeHtmlBuilder().appendHtmlConstant(stringConstants.refresh()).toSafeHtml());
-        refresh.addStyleName("boldAnchor");
         dockPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
-        Anchor refreshLogo = new Anchor(new SafeHtmlBuilder().appendHtmlConstant("<img class=\"linkNoBorder\" src=\"/images/refresh.png\"/>").toSafeHtml());
-        refreshLogo.addClickHandler(refreshHandler);
-        refreshPanel.add(refreshLogo);
-        refreshPanel.add(refresh);
+        playPause = new Anchor(getPlayPauseImgHtml(timer.isPlaying()));
+        playPause.addClickHandler(playPauseHandler);
+        playStateChanged(timer.isPlaying());
+        refreshPanel.add(playPause);
         Anchor settingsAnchor = new Anchor(new SafeHtmlBuilder().appendHtmlConstant("<img class=\"linkNoBorder\" src=\"/images/settings.png\"/>").toSafeHtml());
         settingsAnchor.setTitle(stringConstants.settings());
         settingsAnchor.addClickHandler(new SettingsClickHandler(stringConstants));
         refreshAndSettingsPanel.add(refreshPanel);
         refreshAndSettingsPanel.add(settingsAnchor);
         dockPanel.add(refreshAndSettingsPanel, DockPanel.EAST);
-        refresh.addClickHandler(refreshHandler);
         vp.add(dockPanel);
         vp.add(getLeaderboardTable());
         setWidget(vp);
+    }
+
+    private SafeHtml getPlayPauseImgHtml(boolean playing) {
+        return new SafeHtmlBuilder().appendHtmlConstant("<img class=\"linkNoBorder\" src=\"/images/"+
+                (playing?"pause":"play")+"_16.png\"/>").toSafeHtml();
+    }
+    
+    private long getDelayInMilliseconds() {
+        return delayInMilliseconds;
+    }
+    
+    private void setDelayInMilliseconds(long delayInMilliseconds) {
+        this.delayInMilliseconds = delayInMilliseconds;
     }
     
     /**
      * The time point for which the leaderboard currently shows results
      */
     protected Date getLeaderboardDisplayDate() {
-        return leaderboardDisplayDate;
+        return timer.getTime();
     }
     
     protected void addColumn(SortableColumn<LeaderboardRowDAO, ?> column) {
@@ -902,8 +936,13 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
 
     @Override
     public void timeChanged(Date date) {
-        leaderboardDisplayDate = date;
         loadCompleteLeaderboard(getLeaderboardDisplayDate());
+    }
+
+    @Override
+    public void playStateChanged(boolean isPlaying) {
+        playPause.setHTML(getPlayPauseImgHtml(isPlaying));
+        playPause.setTitle(isPlaying ? stringConstants.pauseAutomaticRefresh() : stringConstants.autoRefresh());
     }
 
 }

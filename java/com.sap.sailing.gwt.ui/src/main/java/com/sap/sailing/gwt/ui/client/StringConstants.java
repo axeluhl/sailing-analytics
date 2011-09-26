@@ -91,6 +91,11 @@ public interface StringConstants extends Constants {
     String hostname();
     String declinationCheckbox();
     String raceStartTrackingColumn();
+    String pauseAutomaticRefresh();
+    String autoRefresh();
+    String delayInSeconds();
+    String delayBetweenAutoAdvances();
+    String chooseUpdateIntervalOfAtLeastOneSecond();
 }
 
 

@@ -106,11 +106,15 @@ public class Timer {
         this.accelerationFactor = accelerationFactor;
     }
     
-    public void setDelayBetweenAutoAdvances(long delayBetweenAutoAdvancesInMilliseconds) {
+    public void setDelayBetweenAutoAdvancesInMilliseconds(long delayBetweenAutoAdvancesInMilliseconds) {
         this.delayBetweenAutoAdvancesInMilliseconds = delayBetweenAutoAdvancesInMilliseconds;
         if (playing) {
             delayBetweenAutoAdvancesChanged = true;
         }
+    }
+    
+    public long getDelayBetweenAutoAdvancesInMilliseconds() {
+        return delayBetweenAutoAdvancesInMilliseconds;
     }
 
     public Date getTime() {
