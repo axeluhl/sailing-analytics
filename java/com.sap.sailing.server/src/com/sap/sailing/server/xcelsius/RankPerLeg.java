@@ -83,15 +83,15 @@ public class RankPerLeg extends Action {
                     addColumn(upOrDownwinLeg);
                     addColumn(competitorName);
                     addColumn(URLEncoder.encode(competitorName, "UTF-8"));
-                    addColumn(sailID==null?"null":sailID);
+                    addColumn(sailID==null?"0":sailID);
                     addColumn(nationality);
                     addColumn("" + overallRank);
                     addColumn("" + legRank);
                     addColumn("" + posGL);
                     addColumn("" + gapToLeader);
                     addColumn("" + legTime);
-                    addColumn("" + (avgSpeed == null ? "null" : avgSpeed.getKnots()));
-                    addColumn("" + (speedOVG == null ? "null" : speedOVG.getKnots()));
+                    addColumn("" + (avgSpeed == null ? "0" : avgSpeed.getKnots()));
+                    addColumn("" + (speedOVG == null ? "0" : speedOVG.getKnots()));
                 }
             }
         }
