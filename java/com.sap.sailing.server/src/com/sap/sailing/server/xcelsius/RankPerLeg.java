@@ -88,7 +88,7 @@ public class RankPerLeg extends Action {
                     addColumn("" + overallRank);
                     addColumn("" + legRank);
                     addColumn("" + posGL);
-                    addColumn("" + gapToLeader);
+                    addColumn("" + (gapToLeader==null ? 0 : gapToLeader));
                     addColumn("" + legTime);
                     addColumn("" + (avgSpeed == null ? "0" : avgSpeed.getKnots()));
                     addColumn("" + (speedOVG == null ? "0" : speedOVG.getKnots()));
