@@ -281,6 +281,7 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
         public void render(Context context, LeaderboardRowDAO object, SafeHtmlBuilder html) {
             LeaderboardEntryDAO entry = object.fieldsByRaceName.get(raceName);
             if (entry != null) {
+                html.appendHtmlConstant("<b>");
                 if (entry.discarded) {
                     html.appendHtmlConstant("<del>");
                 }
@@ -294,6 +295,7 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
                 if (entry.discarded) {
                     html.appendHtmlConstant("</del>");
                 }
+                html.appendHtmlConstant("</b>");
             }
         }
         
@@ -393,6 +395,13 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
         public String getValue(LeaderboardRowDAO object) {
             int totalPoints = getLeaderboard().getTotalPoints(object);
             return ""+totalPoints;
+        }
+
+        @Override
+        public void render(Context context, LeaderboardRowDAO object, SafeHtmlBuilder sb) {
+            sb.appendHtmlConstant("<b>");
+            sb.appendEscaped(getValue(object));
+            sb.appendHtmlConstant("</b>");
         }
 
         @Override
