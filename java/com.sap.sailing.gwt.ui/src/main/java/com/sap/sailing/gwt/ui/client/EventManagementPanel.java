@@ -111,13 +111,13 @@ public class EventManagementPanel extends FormPanel implements EventDisplayer {
             }
         });
         
-        Label lblTrackNewEvent = new Label("Track New Event");
+        Label lblTrackNewEvent = new Label(stringConstants.trackNewEvent());
         grid.setWidget(2, 0, lblTrackNewEvent);
         
         Grid grid_1 = new Grid(5, 3);
         grid.setWidget(3, 0, grid_1);
         
-        Label lblHostname = new Label("Hostname");
+        Label lblHostname = new Label(stringConstants.hostname());
         grid_1.setWidget(0, 1, lblHostname);
         
         hostnameTextbox = new TextBox();
@@ -132,7 +132,7 @@ public class EventManagementPanel extends FormPanel implements EventDisplayer {
         });
         grid_1.setWidget(0, 2, hostnameTextbox);
         
-        Label lblEventName = new Label("Event name");
+        Label lblEventName = new Label(stringConstants.eventName());
         grid_1.setWidget(1, 1, lblEventName);
         
         eventNameTextbox = new TextBox();
@@ -145,7 +145,7 @@ public class EventManagementPanel extends FormPanel implements EventDisplayer {
         });
         grid_1.setWidget(1, 2, eventNameTextbox);
         
-        Label lblLivePort = new Label("Port Live Data");
+        Label lblLivePort = new Label(stringConstants.livePort());
         grid_1.setWidget(2, 1, lblLivePort);
         
         HorizontalPanel horizontalPanel_1 = new HorizontalPanel();
@@ -164,7 +164,7 @@ public class EventManagementPanel extends FormPanel implements EventDisplayer {
         });
         horizontalPanel_1.add(livePortIntegerbox);
         
-        Label lblStoredPort = new Label("Port Stored Data");
+        Label lblStoredPort = new Label(stringConstants.storedPort());
         horizontalPanel_1.add(lblStoredPort);
         
         storedPortIntegerbox = new IntegerBox();
@@ -183,7 +183,8 @@ public class EventManagementPanel extends FormPanel implements EventDisplayer {
         grid_1.setWidget(3, 2, jsonURLBox);
         jsonURLBox.setVisibleLength(80);
         
-        Label lblLiveUri = new Label("Live URI");
+        Label lblLiveUri = new Label(stringConstants.liveUri());
+        lblLiveUri.setTitle(stringConstants.leaveEmptyForDefault());
         grid_1.setWidget(4, 1, lblLiveUri);
         
         HorizontalPanel horizontalPanel = new HorizontalPanel();
@@ -191,17 +192,20 @@ public class EventManagementPanel extends FormPanel implements EventDisplayer {
         
         liveURIBox = new TextBox();
         liveURIBox.setVisibleLength(30);
+        liveURIBox.setTitle(stringConstants.leaveEmptyForDefault());
         horizontalPanel.add(liveURIBox);
         
-        Label lblStoredUri = new Label("Stored URI");
+        Label lblStoredUri = new Label(stringConstants.storedUri());
+        lblStoredUri.setTitle(stringConstants.leaveEmptyForDefault());
         horizontalPanel.add(lblStoredUri);
         horizontalPanel.setCellVerticalAlignment(lblStoredUri, HasVerticalAlignment.ALIGN_MIDDLE);
         
         storedURIBox = new TextBox();
         storedURIBox.setVisibleLength(30);
+        storedURIBox.setTitle(stringConstants.leaveEmptyForDefault());
         horizontalPanel.add(storedURIBox);
         
-        Label lblTrackableRaces = new Label("Trackable Races");
+        Label lblTrackableRaces = new Label(stringConstants.trackableRaces());
         grid.setWidget(5, 0, lblTrackableRaces);
         TextColumn<RaceRecordDAO> raceNameColumn = new TextColumn<RaceRecordDAO>() {
             @Override
@@ -219,7 +223,7 @@ public class EventManagementPanel extends FormPanel implements EventDisplayer {
         raceStartTrackingColumn.setSortable(true);
         raceTable = new CellTable<RaceRecordDAO>(/* pageSize */ 100);
         raceTable.addColumn(raceNameColumn, "Name");
-        raceTable.addColumn(raceStartTrackingColumn, "Tracking Started");
+        raceTable.addColumn(raceStartTrackingColumn, stringConstants.raceStartTrackingColumn());
         grid.setWidget(6, 0, raceTable);
         grid.getCellFormatter().setHeight(6, 0, "100%");
         raceTable.setWidth("100%");
@@ -231,14 +235,14 @@ public class EventManagementPanel extends FormPanel implements EventDisplayer {
         
         VerticalPanel trackPanel = new VerticalPanel();
         grid.setWidget(6, 1, trackPanel);
-        final CheckBox trackWindCheckbox = new CheckBox("Track Wind");
+        final CheckBox trackWindCheckbox = new CheckBox(stringConstants.trackWind());
         trackWindCheckbox.setValue(true);
         trackPanel.add(trackWindCheckbox);
-        final CheckBox declinationCheckbox = new CheckBox("Correct Wind Bearing by Declination");
+        final CheckBox declinationCheckbox = new CheckBox(stringConstants.declinationCheckbox());
         declinationCheckbox.setValue(true);
         trackPanel.add(declinationCheckbox);
         
-        Button btnTrack = new Button("Track");
+        Button btnTrack = new Button(stringConstants.btnTrack());
         trackPanel.add(btnTrack);
         btnTrack.addClickHandler(new ClickHandler() {
             @Override
@@ -249,7 +253,7 @@ public class EventManagementPanel extends FormPanel implements EventDisplayer {
         grid.getCellFormatter().setVerticalAlignment(6, 1, HasVerticalAlignment.ALIGN_TOP);
         grid.getCellFormatter().setVerticalAlignment(6, 0, HasVerticalAlignment.ALIGN_TOP);
 
-        Label lblEventsConnectedTo = new Label("Events Currently Tracked");
+        Label lblEventsConnectedTo = new Label(stringConstants.eventsConnectedTo());
         grid.setWidget(7, 0, lblEventsConnectedTo);
         trackedRacesTreeView = new RaceTreeView(stringConstants, /* multiselection */ true);
         grid.setWidget(8, 0, trackedRacesTreeView);
@@ -281,8 +285,6 @@ public class EventManagementPanel extends FormPanel implements EventDisplayer {
         grid.getCellFormatter().setVerticalAlignment(8, 0, HasVerticalAlignment.ALIGN_TOP);
         
         updatePortStoredData();
-        updateLiveURI();
-        updateStoredURI();
         updateJsonUrl();
     }
 

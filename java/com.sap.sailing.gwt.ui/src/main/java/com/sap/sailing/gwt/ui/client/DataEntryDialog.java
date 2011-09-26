@@ -11,6 +11,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.IntegerBox;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -114,6 +115,27 @@ public abstract class DataEntryDialog<T> {
         AbstractEntryPoint.linkEnterToButton(getOkButton(), textBox);
         AbstractEntryPoint.linkEscapeToButton(getCancelButton(), textBox);
         return textBox;
+    }
+    
+    /**
+     * Creates a text box with a key-up listener attached which ensures the value is updated after each
+     * key-up event and the entire dialog is {@link #validate() validated} in this case.
+     * 
+     * @param initialValue initial value to show in text box; <code>null</code> is permissible
+     */
+    protected IntegerBox createIntegerBox(int initialValue) {
+        IntegerBox integerBox = new IntegerBox();
+        integerBox.setValue(initialValue);
+        AbstractEntryPoint.addFocusUponKeyUpToggler(integerBox);
+        integerBox.addChangeHandler(new ChangeHandler() {
+            @Override
+            public void onChange(ChangeEvent event) {
+                validate();
+            }
+        });
+        AbstractEntryPoint.linkEnterToButton(getOkButton(), integerBox);
+        AbstractEntryPoint.linkEscapeToButton(getCancelButton(), integerBox);
+        return integerBox;
     }
     
     protected CheckBox createCheckbox(String checkboxLabel) {

@@ -4,6 +4,7 @@ import java.net.URLEncoder;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
@@ -50,13 +51,13 @@ public class RankPerRace extends Action {
         TrackedLeg trackedLeg = trackedRace.getTrackedLeg(legs.get(legs.size() - 1));
         LinkedHashMap<Competitor, Integer> ranks = trackedLeg.getRanks(time);
         // Get competitor data
-        for (final Competitor competitor : ranks.keySet()) {
-            if (competitorNameSet == null || competitorNameSet.contains(competitor.getName())) {
+        for (final Map.Entry<Competitor, Integer> competitorAndRank : ranks.entrySet()) {
+            if (competitorNameSet == null || competitorNameSet.contains(competitorAndRank.getKey().getName())) {
                 // Get data
-                final String competitorName = competitor.getName();
-                final String nationality = competitor.getTeam().getNationality().getThreeLetterIOCAcronym();
-                final String sailID = competitor.getBoat().getSailID();
-                final int overallRank = trackedRace.getRank(competitor);
+                final String competitorName = competitorAndRank.getKey().getName();
+                final String nationality = competitorAndRank.getKey().getTeam().getNationality().getThreeLetterIOCAcronym();
+                final String sailID = competitorAndRank.getKey().getBoat().getSailID();
+                final int overallRank = competitorAndRank.getValue();
 
                 // Write data
                 addRow();

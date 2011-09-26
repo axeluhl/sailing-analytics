@@ -8,6 +8,8 @@ public class RaceRecordDAO implements IsSerializable {
     public String eventName;
     public String name;
     public String replayURL;
+    public String liveURI;
+    public String storedURI;
     public String paramURL;
     public String ID;
     public Date trackingStartTime;
@@ -17,12 +19,14 @@ public class RaceRecordDAO implements IsSerializable {
     public RaceRecordDAO() {}
     
     public RaceRecordDAO(String id, String eventName, String name, String paramURL,
-            String replayURL, Date trackingStartTime, Date trackingEndTime, Date raceStartTime) {
+            String replayURL, String liveURI, String storedURI, Date trackingStartTime, Date trackingEndTime, Date raceStartTime) {
         super();
         this.eventName = eventName;
         this.name = name;
         this.replayURL = replayURL;
         this.paramURL = paramURL;
+        this.liveURI = liveURI;
+        this.storedURI = storedURI;
         ID = id;
         this.trackingStartTime = trackingStartTime;
         this.trackingEndTime = trackingEndTime;

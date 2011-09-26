@@ -191,7 +191,7 @@ public class RacingEventServiceImpl implements RacingEventService {
     }
 
     @Override
-    public List<RaceRecord> getRaceRecords(URL jsonURL) throws IOException, ParseException, org.json.simple.parser.ParseException {
+    public List<RaceRecord> getRaceRecords(URL jsonURL) throws IOException, ParseException, org.json.simple.parser.ParseException, URISyntaxException {
         JSONService jsonService = getDomainFactory().parseJSONURL(jsonURL);
         return jsonService.getRaceRecords();
     }

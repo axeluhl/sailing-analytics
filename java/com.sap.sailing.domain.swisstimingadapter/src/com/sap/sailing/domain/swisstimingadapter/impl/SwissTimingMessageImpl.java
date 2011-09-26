@@ -32,7 +32,7 @@ public class SwissTimingMessageImpl implements SwissTimingMessage {
     
     @Override
     public boolean isValid() {
-        return true;
+        return numberOfSatellites > 0 && batteryPercent > 0;
     }
 
     @Override

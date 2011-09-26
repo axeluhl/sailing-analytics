@@ -45,8 +45,6 @@ public class ListEvents extends Action {
                 addColumn(race.getBoatClass().getName());
                 addColumn(eventName);
                 addColumn(raceName);
-                addColumn(URLEncoder.encode(eventName, "UTF-8"));
-                addColumn(URLEncoder.encode(raceName, "UTF-8"));
                 addColumn(trackedRace.getStart()==null?" ":dateFormat.format(trackedRace.getStart().asDate()));
                 addColumn(""+Util.size(race.getCompetitors()));
                 Iterator<Waypoint> waypointsIter = race.getCourse().getWaypoints().iterator();
@@ -57,6 +55,7 @@ public class ListEvents extends Action {
                 Wind wind = trackedRace.getWind(startPos, trackedRace.getStart());
                 addColumn(""+wind.getBeaufort());
                 addColumn(""+wind.getFrom().getDegrees());
+                addColumn("0"); // gusts
                 List<Leg> legs = race.getCourse().getLegs();
                 TrackedLeg lastTrackedLeg = trackedRace.getTrackedLeg(legs.get(legs.size()-1));
                 LinkedHashMap<Competitor, Integer> finalRanks = lastTrackedLeg.getRanks(trackedRace.getTimePointOfNewestEvent());
@@ -78,6 +77,8 @@ public class ListEvents extends Action {
                 addColumn(""+startPos.getBearingGreatCircle(secondMarkPos).getDegrees());
                 addColumn(""+startPos.getLatDeg());
                 addColumn(""+startPos.getLngDeg());
+                addColumn(URLEncoder.encode(eventName, "UTF-8"));
+                addColumn(URLEncoder.encode(raceName, "UTF-8"));
             }
         }
         say(table);

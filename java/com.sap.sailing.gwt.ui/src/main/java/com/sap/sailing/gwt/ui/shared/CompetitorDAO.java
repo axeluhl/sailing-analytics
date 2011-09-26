@@ -7,24 +7,24 @@ public class CompetitorDAO extends NamedDAO implements IsSerializable {
     public String threeLetterIocCountryCode;
     public String countryName;
     public String sailID;
+    public String id;
 
     public CompetitorDAO() {}
 
-    public CompetitorDAO(String name, String twoLetterIsoCountryCode, String threeLetterIocCountryCode, String countryName, String sailID) {
+    public CompetitorDAO(String name, String twoLetterIsoCountryCode, String threeLetterIocCountryCode, String countryName, String sailID, String id) {
         super(name);
         this.twoLetterIsoCountryCode = twoLetterIsoCountryCode;
         this.threeLetterIocCountryCode = threeLetterIocCountryCode;
         this.countryName = countryName;
         this.sailID = sailID;
+        this.id = id;
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((name == null) ? 0 : name.hashCode());
-        result = prime * result + ((threeLetterIocCountryCode == null) ? 0 : threeLetterIocCountryCode.hashCode());
-        result = prime * result + ((twoLetterIsoCountryCode == null) ? 0 : twoLetterIsoCountryCode.hashCode());
+        result = prime * id.hashCode();
         return result;
     }
 
@@ -37,20 +37,10 @@ public class CompetitorDAO extends NamedDAO implements IsSerializable {
         if (getClass() != obj.getClass())
             return false;
         CompetitorDAO other = (CompetitorDAO) obj;
-        if (name == null) {
-            if (other.name != null)
+        if (id == null) {
+            if (other.id != null)
                 return false;
-        } else if (!name.equals(other.name))
-            return false;
-        if (threeLetterIocCountryCode == null) {
-            if (other.threeLetterIocCountryCode != null)
-                return false;
-        } else if (!threeLetterIocCountryCode.equals(other.threeLetterIocCountryCode))
-            return false;
-        if (twoLetterIsoCountryCode == null) {
-            if (other.twoLetterIsoCountryCode != null)
-                return false;
-        } else if (!twoLetterIsoCountryCode.equals(other.twoLetterIsoCountryCode))
+        } else if (!id.equals(other.id))
             return false;
         return true;
     }

@@ -9,13 +9,14 @@ import java.util.TreeSet;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.TimePoint;
+import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.tracking.NoWindError;
 import com.sap.sailing.domain.tracking.NoWindException;
 
 /**
- * Discards <code>i</code> results if the TODO TODO number of races started is greater or equal to
+ * Discards <code>i</code> results if the number of races started is greater or equal to
  * {@link #discardIndexResultsStartingWithHowManyRaces}<code>[i]</code> and
  * <code>i&lt;{@link #discardIndexResultsStartingWithHowManyRaces}.length</code>. If
  * <code>i&gt;={@link #discardIndexResultsStartingWithHowManyRaces}.length</code>, then
@@ -35,8 +36,8 @@ public class ResultDiscardingRuleImpl implements ThresholdBasedResultDiscardingR
     }
 
     @Override
-    public Set<RaceInLeaderboard> getDiscardedRaceColumns(final Competitor competitor, Iterable<RaceInLeaderboard> raceColumns, final TimePoint timePoint) {
-        int resultsToDiscard = getNumberOfResultsToDiscard(raceColumns, timePoint);
+    public Set<RaceInLeaderboard> getDiscardedRaceColumns(final Competitor competitor, final Leaderboard leaderboard, final TimePoint timePoint) {
+        int resultsToDiscard = getNumberOfResultsToDiscard(leaderboard.getRaceColumns(), timePoint);
         Set<RaceInLeaderboard> result;
         if (resultsToDiscard > 0) {
             result = new HashSet<RaceInLeaderboard>();
@@ -44,13 +45,13 @@ public class ResultDiscardingRuleImpl implements ThresholdBasedResultDiscardingR
                 @Override
                 public int compare(RaceInLeaderboard o1, RaceInLeaderboard o2) {
                     try {
-                        return o1.getTrackedRace().getRank(competitor, timePoint) - o2.getTrackedRace().getRank(competitor, timePoint);
+                        return leaderboard.getNetPoints(competitor, o1, timePoint) - leaderboard.getNetPoints(competitor, o2, timePoint);
                     } catch (NoWindException e) {
                         throw new NoWindError(e);
                     }
                 }
             });
-            for (RaceInLeaderboard raceColumn : raceColumns) {
+            for (RaceInLeaderboard raceColumn : leaderboard.getRaceColumns()) {
                 if (raceColumn.getTrackedRace() != null && !raceColumn.isMedalRace()) {
                     sortedRaces.add(raceColumn);
                 }

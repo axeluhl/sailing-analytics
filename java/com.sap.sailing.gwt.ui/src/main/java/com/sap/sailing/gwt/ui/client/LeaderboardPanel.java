@@ -46,7 +46,7 @@ import com.sap.sailing.gwt.ui.shared.Pair;
  * @author Axel Uhl (D043530)
  *
  */
-public class LeaderboardPanel extends FormPanel implements LegDetailSelectionProvider {
+public class LeaderboardPanel extends FormPanel implements LegDetailSelectionProvider, TimeListener, PlayStateListener {
     private static final int RANK_COLUMN_INDEX = 0;
 
     private static final int SAIL_ID_COLUMN_INDEX = 1;
@@ -91,6 +91,19 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
     protected final String LEG_COLUMN_STYLE;
     
     protected final String TOTAL_COLUMN_STYLE;
+    
+    private final Timer timer;
+
+    /**
+     * The delay with which the timer shall work. Before the timer is resumed, the delay is set to this value.
+     */
+    private long delayInMilliseconds;
+
+    /**
+     * This anchor's HTML holds the image tag for the play/pause button that needs to be updated when
+     * the {@link #timer} changes its playing state
+     */
+    private final Anchor playPause;
 
     private class SettingsClickHandler implements ClickHandler {
         private final StringConstants stringConstants;
@@ -101,28 +114,32 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
 
         @Override
         public void onClick(ClickEvent event) {
-            new LegDetailSelectionPanel(LeaderboardPanel.this,
+            new LeaderboardSettingsPanel(LeaderboardPanel.this, timer.getDelayBetweenAutoAdvancesInMilliseconds(),
                     stringConstants.leaderboardSettings(), stringConstants.selectLegDetails(),
-                    stringConstants.ok(), stringConstants.cancel(), new Validator<List<LegDetailColumnType>>() {
+                    stringConstants.ok(), stringConstants.cancel(), new Validator<LeaderboardSettingsPanel.Result>() {
                         @Override
-                        public String getErrorMessage(List<LegDetailColumnType> valueToValidate) {
-                            if (valueToValidate.isEmpty()) {
+                        public String getErrorMessage(LeaderboardSettingsPanel.Result valueToValidate) {
+                            if (valueToValidate.getLegDetailsToShow().isEmpty()) {
                                 return stringConstants.selectAtLeastOneLegDetail();
+                            } else if (valueToValidate.getDelayBetweenAutoAdvancesInMilliseconds() < 1000) {
+                                return stringConstants.chooseUpdateIntervalOfAtLeastOneSecond();
                             } else {
                                 return null;
                             }
                         }
-            }, new AsyncCallback<List<LegDetailColumnType>>() {
+            }, new AsyncCallback<LeaderboardSettingsPanel.Result>() {
                         @Override
-                        public void onSuccess(List<LegDetailColumnType> result) {
+                        public void onSuccess(LeaderboardSettingsPanel.Result result) {
                             selectedLegDetails.clear();
-                            selectedLegDetails.addAll(result);
+                            selectedLegDetails.addAll(result.getLegDetailsToShow());
+                            timer.setDelayBetweenAutoAdvancesInMilliseconds(result.getDelayBetweenAutoAdvancesInMilliseconds());
+                            setDelayInMilliseconds(result.getDelayInMilliseconds());
                             refreshHeaders();
                         }
                         @Override
                         public void onFailure(Throwable caught) {
                         }
-                    }, stringConstants).show();
+                    }, stringConstants, getDelayInMilliseconds()).show();
         }
     }
 
@@ -275,22 +292,41 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
             return columnStyle;
         }
 
+        /**
+         * Displays a combination of total points and maxPointsReason in bold, transparent, strike-through, depending
+         * on various criteria. Here's how:
+         * <pre>
+         *                                  total points                |    maxPointsReason
+         * -------------------------------+-----------------------------+-----------------------
+         *  not discarded, no maxPoints   | bold                        | none
+         *  not discarded, maxPoints      | bold                        | transparent
+         *  discarded, no maxPoints       | transparent, strike-through | none
+         *  discarded, maxPoints          | transparent, strike-through | transparent, strike-through
+         * </pre>
+         */
         @Override
         public void render(Context context, LeaderboardRowDAO object, SafeHtmlBuilder html) {
             LeaderboardEntryDAO entry = object.fieldsByRaceName.get(raceName);
             if (entry != null) {
-                if (entry.discarded) {
-                    html.appendHtmlConstant("<del>");
-                }
-                html.append(entry.totalPoints);
-                if (entry.netPoints != entry.totalPoints) {
-                    html.appendHtmlConstant(" (" + entry.netPoints + ")");
+                if (!entry.discarded) {
+                    html.appendHtmlConstant("<span style=\"font-weight: bold;\">");
+                    html.append(entry.totalPoints);
+                    html.appendHtmlConstant("</span>");
+                } else {
+                    html.appendHtmlConstant(" <span style=\"opacity: 0.3;\"><del>");
+                    html.append(entry.netPoints);
+                    html.appendHtmlConstant("</del></span>");
                 }
                 if (!entry.reasonForMaxPoints.equals("NONE")) {
-                    html.appendEscapedLines("\n(" + entry.reasonForMaxPoints + ")");
-                }
-                if (entry.discarded) {
-                    html.appendHtmlConstant("</del>");
+                    html.appendHtmlConstant(" <span style=\"opacity: 0.3;\">");
+                    if (entry.discarded) {
+                        html.appendHtmlConstant("<del>");
+                    }
+                    html.appendEscaped(entry.reasonForMaxPoints);
+                    if (entry.discarded) {
+                        html.appendHtmlConstant("</del>");
+                    }
+                    html.appendHtmlConstant("</span>");
                 }
             }
         }
@@ -394,6 +430,13 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
         }
 
         @Override
+        public void render(Context context, LeaderboardRowDAO object, SafeHtmlBuilder sb) {
+            sb.appendHtmlConstant("<b>");
+            sb.appendEscaped(getValue(object));
+            sb.appendHtmlConstant("</b>");
+        }
+
+        @Override
         public Comparator<LeaderboardRowDAO> getComparator() {
             return getLeaderboard().getTotalRankingComparator();
         }
@@ -480,6 +523,11 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
         this.selectedLegDetails.add(LegDetailColumnType.DISTANCE_TRAVELED);
         this.selectedLegDetails.add(LegDetailColumnType.AVERAGE_SPEED_OVER_GROUND_IN_KNOTS);
         this.selectedLegDetails.add(LegDetailColumnType.RANK_GAIN);
+        delayInMilliseconds = 0l;
+        timer = new Timer(/* delayBetweenAutoAdvancesInMilliseconds */ 3000l);
+        timer.setDelay(getDelayInMilliseconds()); // set time/delay before adding as listener
+        timer.addPlayStateListener(this);
+        timer.addTimeListener(this);
         rankColumn = new RankColumn();
         LeaderboardTableResources resources = GWT.create(LeaderboardTableResources.class); 
         RACE_COLUMN_HEADER_STYLE = resources.cellTableStyle().cellTableRaceColumnHeader();
@@ -510,10 +558,15 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
         Label leaderboardLabel = new Label(stringConstants.leaderboard()+" "+leaderboardName.toUpperCase());
         leaderboardLabel.addStyleName("boldLabel");
         dockPanel.add(leaderboardLabel, DockPanel.WEST);
-        ClickHandler refreshHandler = new ClickHandler() {
+        ClickHandler playPauseHandler = new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                loadCompleteLeaderboard(getLeaderboardDisplayDate());
+                if (timer.isPlaying()) {
+                    timer.pause();
+                } else {
+                    timer.setDelay(getDelayInMilliseconds());
+                    timer.resume();
+                }
             }
         };
         HorizontalPanel refreshAndSettingsPanel = new HorizontalPanel();
@@ -522,31 +575,40 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
         refreshPanel.setSpacing(5);
         refreshPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
         refreshPanel.addStyleName("refreshPanel");
-        Anchor refresh = new Anchor(new SafeHtmlBuilder().appendHtmlConstant(stringConstants.refresh()).toSafeHtml());
-        refresh.addStyleName("boldAnchor");
         dockPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
-        Anchor refreshLogo = new Anchor(new SafeHtmlBuilder().appendHtmlConstant("<img class=\"linkNoBorder\" src=\"/images/refresh.png\"/>").toSafeHtml());
-        refreshLogo.addClickHandler(refreshHandler);
-        refreshPanel.add(refreshLogo);
-        refreshPanel.add(refresh);
+        playPause = new Anchor(getPlayPauseImgHtml(timer.isPlaying()));
+        playPause.addClickHandler(playPauseHandler);
+        playStateChanged(timer.isPlaying());
+        refreshPanel.add(playPause);
         Anchor settingsAnchor = new Anchor(new SafeHtmlBuilder().appendHtmlConstant("<img class=\"linkNoBorder\" src=\"/images/settings.png\"/>").toSafeHtml());
         settingsAnchor.setTitle(stringConstants.settings());
         settingsAnchor.addClickHandler(new SettingsClickHandler(stringConstants));
         refreshAndSettingsPanel.add(refreshPanel);
         refreshAndSettingsPanel.add(settingsAnchor);
         dockPanel.add(refreshAndSettingsPanel, DockPanel.EAST);
-        refresh.addClickHandler(refreshHandler);
         vp.add(dockPanel);
         vp.add(getLeaderboardTable());
         setWidget(vp);
+    }
+
+    private SafeHtml getPlayPauseImgHtml(boolean playing) {
+        return new SafeHtmlBuilder().appendHtmlConstant("<img class=\"linkNoBorder\" src=\"/images/"+
+                (playing?"pause":"play")+"_16.png\"/>").toSafeHtml();
+    }
+    
+    private long getDelayInMilliseconds() {
+        return delayInMilliseconds;
+    }
+    
+    private void setDelayInMilliseconds(long delayInMilliseconds) {
+        this.delayInMilliseconds = delayInMilliseconds;
     }
     
     /**
      * The time point for which the leaderboard currently shows results
      */
     protected Date getLeaderboardDisplayDate() {
-        // TODO add a notion of selectable time to the leaderboard panel
-        return new Date();
+        return timer.getTime();
     }
     
     protected void addColumn(SortableColumn<LeaderboardRowDAO, ?> column) {
@@ -870,6 +932,17 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
                 }
             }
         }
+    }
+
+    @Override
+    public void timeChanged(Date date) {
+        loadCompleteLeaderboard(getLeaderboardDisplayDate());
+    }
+
+    @Override
+    public void playStateChanged(boolean isPlaying) {
+        playPause.setHTML(getPlayPauseImgHtml(isPlaying));
+        playPause.setTitle(isPlaying ? stringConstants.pauseAutomaticRefresh() : stringConstants.autoRefresh());
     }
 
 }

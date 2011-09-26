@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.server;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -267,26 +268,34 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     private CompetitorDAO getCompetitorDAO(Competitor c) {
         CountryCode countryCode = c.getTeam().getNationality().getCountryCode();
         CompetitorDAO competitorDAO = new CompetitorDAO(c.getName(), countryCode==null?"":countryCode.getTwoLetterISOCode(),
-                countryCode==null?"":countryCode.getThreeLetterIOCCode(), countryCode==null?"":countryCode.getName(), c.getBoat().getSailID());
+                countryCode==null?"":countryCode.getThreeLetterIOCCode(), countryCode==null?"":countryCode.getName(), c.getBoat().getSailID(),
+                        c.getId().toString());
         return competitorDAO;
     }
 
     @Override
     public List<RaceRecordDAO> listRacesInEvent(String eventJsonURL) throws MalformedURLException, IOException,
-            ParseException, org.json.simple.parser.ParseException {
+            ParseException, org.json.simple.parser.ParseException, URISyntaxException {
         List<RaceRecord> raceRecords;
         raceRecords = getService().getRaceRecords(new URL(eventJsonURL));
         List<RaceRecordDAO> result = new ArrayList<RaceRecordDAO>();
         for (RaceRecord raceRecord : raceRecords) {
             result.add(new RaceRecordDAO(raceRecord.getID(), raceRecord.getEventName(), raceRecord.getName(),
-                    raceRecord.getParamURL().toString(), raceRecord.getReplayURL(), raceRecord.getTrackingStartTime().asDate(),
-                    raceRecord.getTrackingEndTime().asDate(), raceRecord.getRaceStartTime().asDate()));
+                    raceRecord.getParamURL().toString(), raceRecord.getReplayURL(), raceRecord.getLiveURI().toString(),
+                    raceRecord.getStoredURI().toString(), raceRecord.getTrackingStartTime().asDate(), raceRecord
+                            .getTrackingEndTime().asDate(), raceRecord.getRaceStartTime().asDate()));
         }
         return result;
     }
 
     @Override
     public void track(RaceRecordDAO rr, String liveURI, String storedURI, boolean trackWind, boolean correctWindByDeclination) throws Exception {
+        if (liveURI == null || liveURI.trim().length() == 0) {
+            liveURI = rr.liveURI;
+        }
+        if (storedURI == null || storedURI.trim().length() == 0) {
+            storedURI = rr.storedURI;
+        }
         RaceHandle raceHandle = getService().addRace(new URL(rr.paramURL), new URI(liveURI), new URI(storedURI),
                 MongoWindStoreFactory.INSTANCE.getMongoWindStore(mongoObjectFactory));
         if (trackWind) {

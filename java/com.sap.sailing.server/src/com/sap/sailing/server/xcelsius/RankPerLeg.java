@@ -1,6 +1,5 @@
 package com.sap.sailing.server.xcelsius;
 
-import java.net.URLEncoder;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.HashSet;
@@ -22,7 +21,6 @@ import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.RacingEventService;
-import com.sap.sailing.util.Util;
 
 public class RankPerLeg extends Action {
     private final Set<String> competitorNameSet;
@@ -74,21 +72,17 @@ public class RankPerLeg extends Action {
 
                     // Write data
                     addRow();
-                    addColumn(competitor.getBoat().getBoatClass().getName());
-                    addColumn(race.getName());
-                    addColumn(""+Util.size(race.getCompetitors()));
                     addColumn(legId);
                     addColumn(markName);
                     addColumn(leg.getFrom().getBuoys().iterator().next().getName());
                     addColumn(upOrDownwinLeg);
                     addColumn(competitorName);
-                    addColumn(URLEncoder.encode(competitorName, "UTF-8"));
                     addColumn(sailID==null?"null":sailID);
                     addColumn(nationality);
                     addColumn("" + overallRank);
                     addColumn("" + legRank);
                     addColumn("" + posGL);
-                    addColumn("" + gapToLeader);
+                    addColumn("" + (gapToLeader==null ? "null" : gapToLeader));
                     addColumn("" + legTime);
                     addColumn("" + (avgSpeed == null ? "null" : avgSpeed.getKnots()));
                     addColumn("" + (speedOVG == null ? "null" : speedOVG.getKnots()));
