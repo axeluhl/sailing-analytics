@@ -23,11 +23,13 @@ import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
+import com.sap.sailing.domain.leaderboard.ScoreCorrection.MaxPointsReason;
 import com.sap.sailing.domain.leaderboard.impl.LeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.ResultDiscardingRuleImpl;
 import com.sap.sailing.domain.leaderboard.impl.ScoreCorrectionImpl;
 import com.sap.sailing.domain.tracking.NoWindException;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.util.Util;
 import com.sap.sailing.util.Util.Pair;
 
 public class LeaderboardOfflineTest {
@@ -37,12 +39,18 @@ public class LeaderboardOfflineTest {
     
     @Before
     public void setUp() {
-        competitor = new CompetitorImpl(123, "Wolfgang Hunger", new TeamImpl("STG", Collections.singleton(
-                new PersonImpl("Wolfgang Hunger", new NationalityImpl("Germany", "GER"),
-                /* dateOfBirth */ null, "This is famous Wolfgang Hunger")), new PersonImpl("Rigo van Maas", new NationalityImpl("The Netherlands", "NED"),
-                        /* dateOfBirth */ null, "This is Rigo, the coach")), new BoatImpl("Wolfgang Hunger's boat", new BoatClassImpl("505"), null));
+        competitor = createCompetitor("Wolfgang Hunger");
     }
     
+    private CompetitorImpl createCompetitor(String competitorName) {
+        return new CompetitorImpl(123, competitorName, new TeamImpl("STG", Collections.singleton(
+                new PersonImpl(competitorName, new NationalityImpl("Germany", "GER"),
+                /* dateOfBirth */ null, "This is famous "+competitorName)),
+                new PersonImpl("Rigo van Maas", new NationalityImpl("The Netherlands", "NED"),
+                /* dateOfBirth */null, "This is Rigo, the coach")), new BoatImpl(competitorName + "'s boat",
+                new BoatClassImpl("505"), null));
+    }
+
     public void setupRaces(int numberOfStartedRaces, int numberOfNotStartedRaces) {
         testRaces = new HashSet<TrackedRace>();
         raceColumnsInLeaderboard = new HashMap<TrackedRace, RaceInLeaderboard>();
@@ -97,6 +105,41 @@ public class LeaderboardOfflineTest {
         assertTrue(leaderboard.getRaceColumnByName(columnName).isMedalRace());
     }
 
+    @Test
+    public void testMaxPointsDiscard() throws NoWindException {
+        testRaces = new HashSet<TrackedRace>();
+        raceColumnsInLeaderboard = new HashMap<TrackedRace, RaceInLeaderboard>();
+        Competitor c2 = createCompetitor("Marcus Baur");
+        Competitor c3 = createCompetitor("Robert Stanjek");
+        for (int i=0; i<3; i++) {
+            MockedTrackedRaceWithFixedRankAndManyCompetitors r = new MockedTrackedRaceWithFixedRankAndManyCompetitors(competitor, i+1, /* started */ true);
+            r.addCompetitor(c2);
+            r.addCompetitor(c3); // this makes maxPoints==4
+            testRaces.add(r); // hash set should take care of more or less randomly permuting the races
+        }
+        ScoreCorrectionImpl scoreCorrection = new ScoreCorrectionImpl();
+        Leaderboard leaderboard = new LeaderboardImpl("Test Leaderboard", scoreCorrection, new ResultDiscardingRuleImpl(
+                new int[] { 1 }));
+        int i=0;
+        int bestScore = Integer.MAX_VALUE;
+        RaceInLeaderboard bestScoringRaceColumn = null;
+        for (TrackedRace race : testRaces) {
+            i++;
+            RaceInLeaderboard raceColumn = leaderboard.addRace(race, "Test Race " + i, /* medalRace */ false);
+            raceColumnsInLeaderboard.put(race, raceColumn);
+            if (race.getRank(competitor) < bestScore) {
+                bestScore = race.getRank(competitor);
+                bestScoringRaceColumn = raceColumn;
+            }
+        }
+        scoreCorrection.setMaxPointsReason(competitor, bestScoringRaceColumn, MaxPointsReason.DSQ);
+        // assert that best scoring but now disqualified race gets max net points because of disqualification:
+        assertEquals(Util.size(bestScoringRaceColumn.getTrackedRace().getRace().getCompetitors())+1,
+                leaderboard.getEntry(competitor, bestScoringRaceColumn, MillisecondsTimePoint.now()).getNetPoints());
+        // now assert that it gets discarded because due to disqualification it scores worse than all others:
+        assertEquals(0, leaderboard.getEntry(competitor, bestScoringRaceColumn, MillisecondsTimePoint.now()).getTotalPoints());
+    }
+    
     protected void testLeaderboard(int numberOfStartedRaces, int numberOfNotStartedRaces, int firstDiscardingThreshold,
             int secondDiscardingThreshold, Integer carry, boolean addOneMedalRace, int numberOfUntrackedRaces) throws NoWindException {
         setupRaces(numberOfStartedRaces, numberOfNotStartedRaces);
