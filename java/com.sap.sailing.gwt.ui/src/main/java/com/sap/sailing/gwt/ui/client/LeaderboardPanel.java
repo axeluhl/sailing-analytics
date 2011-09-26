@@ -282,10 +282,11 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
             LeaderboardEntryDAO entry = object.fieldsByRaceName.get(raceName);
             if (entry != null) {
                 html.appendHtmlConstant("<b>");
+                html.append(entry.totalPoints);
+                html.appendHtmlConstant("</b>");
                 if (entry.discarded) {
                     html.appendHtmlConstant("<del>");
                 }
-                html.append(entry.totalPoints);
                 if (entry.netPoints != entry.totalPoints) {
                     html.appendHtmlConstant(" (" + entry.netPoints + ")");
                 }
@@ -295,7 +296,6 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
                 if (entry.discarded) {
                     html.appendHtmlConstant("</del>");
                 }
-                html.appendHtmlConstant("</b>");
             }
         }
         
