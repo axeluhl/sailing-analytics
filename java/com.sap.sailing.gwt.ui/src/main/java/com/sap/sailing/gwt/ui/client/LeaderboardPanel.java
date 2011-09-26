@@ -277,24 +277,41 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
             return columnStyle;
         }
 
+        /**
+         * Displays a combination of total points and maxPointsReason in bold, transparent, strike-through, depending
+         * on various criteria. Here's how:
+         * <pre>
+         *                                  total points                |    maxPointsReason
+         * -------------------------------+-----------------------------+-----------------------
+         *  not discarded, no maxPoints   | bold                        | none
+         *  not discarded, maxPoints      | bold                        | transparent
+         *  discarded, no maxPoints       | transparent, strike-through | none
+         *  discarded, maxPoints          | transparent, strike-through | transparent, strike-through
+         * </pre>
+         */
         @Override
         public void render(Context context, LeaderboardRowDAO object, SafeHtmlBuilder html) {
             LeaderboardEntryDAO entry = object.fieldsByRaceName.get(raceName);
             if (entry != null) {
-                html.appendHtmlConstant("<b>");
-                html.append(entry.totalPoints);
-                html.appendHtmlConstant("</b>");
-                if (entry.discarded) {
-                    html.appendHtmlConstant("<del>");
-                }
-                if (entry.netPoints != entry.totalPoints) {
-                    html.appendHtmlConstant(" (" + entry.netPoints + ")");
+                if (!entry.discarded) {
+                    html.appendHtmlConstant("<span style=\"font-weight: bold;\">");
+                    html.append(entry.totalPoints);
+                    html.appendHtmlConstant("</span>");
+                } else {
+                    html.appendHtmlConstant(" <span style=\"opacity: 0.3;\"><del>");
+                    html.append(entry.netPoints);
+                    html.appendHtmlConstant("</del></span>");
                 }
                 if (!entry.reasonForMaxPoints.equals("NONE")) {
-                    html.appendEscapedLines("\n(" + entry.reasonForMaxPoints + ")");
-                }
-                if (entry.discarded) {
-                    html.appendHtmlConstant("</del>");
+                    html.appendHtmlConstant(" <span style=\"opacity: 0.3;\">");
+                    if (entry.discarded) {
+                        html.appendHtmlConstant("<del>");
+                    }
+                    html.appendEscaped(entry.reasonForMaxPoints);
+                    if (entry.discarded) {
+                        html.appendHtmlConstant("</del>");
+                    }
+                    html.appendHtmlConstant("</span>");
                 }
             }
         }
