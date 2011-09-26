@@ -15,30 +15,40 @@ import com.google.gwt.core.client.Scheduler.RepeatingCommand;
  * 
  */
 public class Timer {
-    private final Set<TimeListener> listeners;
+    private final Set<TimeListener> timeListeners;
+    private final Set<PlayStateListener> playStateListeners;
     private Date time;
     private boolean playing;
     private long delayBetweenAutoAdvancesInMilliseconds;
     private double accelerationFactor;
     
     public Timer() {
-        listeners = new HashSet<TimeListener>();
+        timeListeners = new HashSet<TimeListener>();
+        playStateListeners = new HashSet<PlayStateListener>();
         playing = false;
     }
     
     public void addTimeListener(TimeListener listener) {
-        listeners.add(listener);
+        timeListeners.add(listener);
     }
     
     public void removeTimeListener(TimeListener listener) {
-        listeners.remove(listener);
+        timeListeners.remove(listener);
+    }
+    
+    public void addPlayStateListener(PlayStateListener listener) {
+        playStateListeners.add(listener);
+    }
+    
+    public void removePlayStateListener(PlayStateListener listener) {
+        playStateListeners.remove(listener);
     }
     
     public void setTime(long timePointAsMillis) {
         Date oldTime = time;
         time = new Date(timePointAsMillis);
         if ((oldTime == null) != (time == null) || (oldTime != null && !oldTime.equals(time))) {
-            for (TimeListener listener : listeners) {
+            for (TimeListener listener : timeListeners) {
                 listener.timeChanged(time);
             }
         }
@@ -51,6 +61,9 @@ public class Timer {
     public void pause() {
         if (playing) {
             playing = !playing; // this will cause the repeating command to stop executing
+            for (PlayStateListener playStateListener : playStateListeners) {
+                playStateListener.playStateChanged(playing);
+            }
         }
     }
 
@@ -58,6 +71,9 @@ public class Timer {
         if (!playing) {
             playing = !playing;
             startAutoAdvance();
+            for (PlayStateListener playStateListener : playStateListeners) {
+                playStateListener.playStateChanged(playing);
+            }
         }
     }
 
