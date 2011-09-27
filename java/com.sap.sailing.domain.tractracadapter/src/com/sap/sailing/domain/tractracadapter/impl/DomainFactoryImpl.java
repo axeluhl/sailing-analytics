@@ -290,7 +290,7 @@ public class DomainFactoryImpl implements DomainFactory {
         synchronized (raceCache) {
             RaceDefinition result = raceCache.get(race);
             boolean interrupted = false;
-            while ((start == -1 || System.currentTimeMillis()-start < timeoutInMilliseconds) && !interrupted && result == null) {
+            while ((timeoutInMilliseconds == -1 || System.currentTimeMillis()-start < timeoutInMilliseconds) && !interrupted && result == null) {
                 try {
                     raceCache.wait();
                     result = raceCache.get(race);
