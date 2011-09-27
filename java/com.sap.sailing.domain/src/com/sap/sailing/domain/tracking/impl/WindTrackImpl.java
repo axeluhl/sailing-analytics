@@ -21,7 +21,9 @@ import com.sap.sailing.domain.tracking.WindTrack;
 
 /**
  * Records {@link Wind} objects over time and offers to average the last so many of them into an
- * estimated, stabilized wind bearing/direction.
+ * estimated, stabilized wind bearing/direction.<p>
+ * 
+ * TODO extend WindTrackImpl such that it can record multiple wind read-outs with equal time stamp but different position
  * 
  * @author Axel Uhl (d043530)
  *

@@ -1,18 +1,13 @@
 Axel
 ====
 
- - When a getTrackedRace(...) call is launched for an event/race where it becomes evident that
-   the race won't show up (e.g., because the event is removed or no longer tracked), unblock
-   any calls to TrackedEventImpl.getTrackedRace(...), e.g., by allowing for a check on the TrackedEvent
-   that indicates that the race being waited for won't show up anymore.
-   Clean up tracked races automatically if no connection can be established; currently, these
-   tracked races never show up because they wait forever for their race course definition
-
  - Use wind estimator to feed another wind track
 
  - Estimate wind not only based on a snapshot in time but also on a time interval, looking for
    maneuvers. Assuming that the wind doesn't change radically, averaging over an n seconds interval
    with n, e.g., being 30s, maneuvers should help in detecting wind direction.
+
+ - allow a WindTrackImpl to receive multiple Wind objects with equal time stamp but different position
 
  - Finish a first draft version of a GWT admin and leaderboard UI
 
