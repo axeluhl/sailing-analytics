@@ -402,7 +402,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         Wind result = getWindTrack(currentWindSource).getEstimatedWind(p, at);
         if (result == null) {
             if (!warnedOfNoWindFromSelectedSource) {
-                logger.warning("Couldn't find any wind information for race "+getRace()+" from currently selected source "+currentWindSource);
+                logger.warning("Couldn't find any wind information for race "+getRace()+" from currently selected source "+currentWindSource+
+                        ". Future warnings of this type will be suppressed for this race.");
                 warnedOfNoWindFromSelectedSource = true;
             }
             for (WindSource alternativeWindSource : WindSource.values()) {
@@ -410,7 +411,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                     result = getWindTrack(alternativeWindSource).getEstimatedWind(p, at);
                     if (result != null) {
                         if (!warnedOfUsingWindFromAlternativeWindSource) {
-                            logger.warning("Found wind settings in alternative wind source "+alternativeWindSource+" which will be used as a fallback");
+                            logger.warning("Found wind settings in alternative wind source "+alternativeWindSource+
+                                    " which will be used as a fallback. Future warnings of this type will be suppressed for this race.");
                             warnedOfUsingWindFromAlternativeWindSource = true;
                         }
                         break;
@@ -419,7 +421,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             }
             if (result == null) {
                 if (!warnedOfUsingLegDirectionAsWindEstimation) {
-                    logger.warning("Found no other wind settings either; using starting leg direction as guess for wind direction. Force assumed as 1 knot.");
+                    logger.warning("Found no other wind settings either; using starting leg direction as guess for wind direction. Force assumed as 1 knot."+
+                            " Future warnings of this type will be suppressed for this race.");
                     warnedOfUsingLegDirectionAsWindEstimation = true;
                 }
                 Leg firstLeg = getRace().getCourse().getLegs().iterator().next();
