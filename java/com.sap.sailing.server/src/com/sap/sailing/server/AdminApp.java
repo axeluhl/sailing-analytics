@@ -490,7 +490,7 @@ public class AdminApp extends Servlet {
         URL jsonURL = new URL(req.getParameter(PARAM_NAME_EVENT_JSON_URL));
         URI liveURI = new URI(req.getParameter(PARAM_NAME_LIVE_URI));
         URI storedURI = new URI(req.getParameter(PARAM_NAME_STORED_URI));
-        getService().addEvent(jsonURL, liveURI, storedURI, getWindStore(req));
+        getService().addEvent(jsonURL, liveURI, storedURI, getWindStore(req), /* timeoutInMilliseconds */ 60000);
     }
     
     private WindStore getWindStore(HttpServletRequest req) throws UnknownHostException, MongoException {
@@ -513,7 +513,7 @@ public class AdminApp extends Servlet {
         URL paramURL = new URL(req.getParameter(PARAM_NAME_PARAM_URL));
         URI liveURI = new URI(req.getParameter(PARAM_NAME_LIVE_URI));
         URI storedURI = new URI(req.getParameter(PARAM_NAME_STORED_URI));
-        getService().addRace(paramURL, liveURI, storedURI, getWindStore(req));
+        getService().addRace(paramURL, liveURI, storedURI, getWindStore(req), /* timeoutInMilliseconds */ 60000);
     }
 
     private void stopRace(HttpServletRequest req, HttpServletResponse resp) throws MalformedURLException, IOException, InterruptedException {

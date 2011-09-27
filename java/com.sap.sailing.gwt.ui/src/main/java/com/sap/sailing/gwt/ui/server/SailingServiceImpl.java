@@ -91,6 +91,8 @@ import com.sap.sailing.util.CountryCode;
 public class SailingServiceImpl extends RemoteServiceServlet implements SailingService {
     private static final long serialVersionUID = 9031688830194537489L;
 
+    private static final long TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS = 60000;
+
     private final ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
     
     private final MongoObjectFactory mongoObjectFactory;
@@ -297,13 +299,12 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             storedURI = rr.storedURI;
         }
         final RaceHandle raceHandle = getService().addRace(new URL(rr.paramURL), new URI(liveURI), new URI(storedURI),
-                MongoWindStoreFactory.INSTANCE.getMongoWindStore(mongoObjectFactory));
+                MongoWindStoreFactory.INSTANCE.getMongoWindStore(mongoObjectFactory), TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS);
         if (trackWind) {
-            // FIXME this thread must be stopped and cleaned up if the RaceDefinition didn't show up after some time
             new Thread("Wind tracking starter for race "+rr.eventName+"/"+rr.name) {
                 public void run() {
                     try {
-                        startTrackingWind(raceHandle, correctWindByDeclination);
+                        startTrackingWind(raceHandle, correctWindByDeclination, TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS);
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
@@ -355,11 +356,18 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         }
     }
     
-    private void startTrackingWind(RaceHandle raceHandle, boolean correctByDeclination) throws Exception {
+    /**
+     * @param timeoutInMilliseconds eventually passed to {@link RaceHandle#getRace(long)}. If the race definition
+     * can be obtained within this timeout, wind for the race will be tracked; otherwise, the method returns without
+     * taking any effect.
+     */
+    private void startTrackingWind(RaceHandle raceHandle, boolean correctByDeclination, long timeoutInMilliseconds) throws Exception {
         Event event = raceHandle.getEvent();
         if (event != null) {
-            RaceDefinition race = getRaceByName(event, raceHandle.getRace().getName());
-            getService().startTrackingWind(event, race, correctByDeclination);
+            RaceDefinition race = raceHandle.getRace(timeoutInMilliseconds);
+            if (race != null) {
+                getService().startTrackingWind(event, race, correctByDeclination);
+            }
         }
     }
 
