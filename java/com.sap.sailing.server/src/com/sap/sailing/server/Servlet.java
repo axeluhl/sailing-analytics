@@ -58,6 +58,16 @@ public abstract class Servlet extends HttpServlet {
         return null;
     }
 
+    protected RaceDefinition getRaceDefinition(Event event, HttpServletRequest req) {
+        String racename = req.getParameter(PARAM_NAME_RACENAME);
+        for (RaceDefinition race : event.getAllRaces()) {
+            if (racename.equals(race.getName())) {
+                return race;
+            }
+        }
+        return null;
+    }
+
     protected TimePoint getTimePoint(HttpServletRequest req, String nameOfISOTimeParam, String nameOfMillisTime,
             TimePoint defaultValue) throws InvalidDateException {
         String time = req.getParameter(nameOfISOTimeParam);

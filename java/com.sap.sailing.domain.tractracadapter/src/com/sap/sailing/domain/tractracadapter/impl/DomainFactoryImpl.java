@@ -281,10 +281,16 @@ public class DomainFactoryImpl implements DomainFactory {
 
     @Override
     public RaceDefinition getRaceDefinition(Race race) {
+        return getRaceDefinition(race, -1);
+    }
+
+    @Override
+    public RaceDefinition getRaceDefinition(Race race, long timeoutInMilliseconds) {
+        long start = System.currentTimeMillis();
         synchronized (raceCache) {
             RaceDefinition result = raceCache.get(race);
             boolean interrupted = false;
-            while (!interrupted && result == null) {
+            while ((timeoutInMilliseconds == -1 || System.currentTimeMillis()-start < timeoutInMilliseconds) && !interrupted && result == null) {
                 try {
                     raceCache.wait();
                     result = raceCache.get(race);

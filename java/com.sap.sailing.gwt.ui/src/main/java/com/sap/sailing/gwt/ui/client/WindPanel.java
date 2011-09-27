@@ -15,6 +15,8 @@ import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.Handler;
@@ -25,6 +27,7 @@ import com.google.gwt.user.cellview.client.IdentityColumn;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
@@ -60,6 +63,7 @@ public class WindPanel extends FormPanel implements EventDisplayer, RaceSelectio
     private final RaceTreeView trackedRacesTree;
     private final ListBox windSourceSelection;
     private final Map<String, ListDataProvider<WindDAO>> windLists;
+    private final CheckBox showEstimatedWindBox;
 
     public WindPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter, EventRefresher eventRefresher, StringConstants stringConstants) {
         this.sailingService = sailingService;
@@ -75,7 +79,7 @@ public class WindPanel extends FormPanel implements EventDisplayer, RaceSelectio
                 setWindSource();
             }
         });
-        removeColumn = new IdentityColumn<WindDAO>(new ActionCell<WindDAO>("Remove", new Delegate<WindDAO>() {
+        removeColumn = new IdentityColumn<WindDAO>(new ActionCell<WindDAO>(stringConstants.remove(), new Delegate<WindDAO>() {
             @Override
             public void execute(final WindDAO wind) {
                 List<Triple<EventDAO, RegattaDAO, RaceDAO>> eventAndRaces = getSelectedEventAndRace();
@@ -88,8 +92,10 @@ public class WindPanel extends FormPanel implements EventDisplayer, RaceSelectio
                     }
                     @Override
                     public void onFailure(Throwable caught) {
-                        WindPanel.this.errorReporter.reportError("Error setting wind for race "+eventAndRace.getC().name+": "+caught.getMessage());
-                    }
+                                        WindPanel.this.errorReporter.reportError(
+                                                WindPanel.this.stringConstants.errorSettingWindForRace()+ " "+eventAndRace.getC().name
+                                                + ": "+ caught.getMessage());
+                                    }
                 });
             }
         }));
@@ -128,13 +134,10 @@ public class WindPanel extends FormPanel implements EventDisplayer, RaceSelectio
         trackedRacesTree.addRaceSelectionChangeListener(new RaceSelectionChangeListener() {
             @Override
             public void onRaceSelectionChange(List<Triple<EventDAO, RegattaDAO, RaceDAO>> selectedRaces) {
-                if (selectedRaces.isEmpty()) {
-                    clearWindDisplay(); // no wind known for untracked race
-                } else {
-                    showWind(selectedRaces.get(0).getA(), selectedRaces.get(0).getC());
-                }
+                clearOrShowWindBasedOnRaceSelection(selectedRaces);
                 fireRaceSelectionChanged(selectedRaces);
             }
+
         });
         grid.setWidget(0, 0, trackedRacesTree);
         Button btnRefresh = new Button(stringConstants.refresh());
@@ -150,10 +153,26 @@ public class WindPanel extends FormPanel implements EventDisplayer, RaceSelectio
         windSourceSelectionPanel.setSpacing(10);
         windSourceSelectionPanel.add(new Label(stringConstants.windSource()));
         windSourceSelectionPanel.add(windSourceSelection);
+        showEstimatedWindBox = new CheckBox(stringConstants.showEstimatedWind());
+        windSourceSelectionPanel.add(showEstimatedWindBox);
+        showEstimatedWindBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<Boolean> event) {
+                clearOrShowWindBasedOnRaceSelection(trackedRacesTree.getSelectedEventAndRace());
+            }
+        });
         grid.setWidget(1, 0, windSourceSelectionPanel);
         grid.setWidget(2, 1, windSettingPanel);
         grid.getCellFormatter().setVerticalAlignment(1, 1, HasVerticalAlignment.ALIGN_TOP);
         this.setWidget(grid);
+    }
+
+    private void clearOrShowWindBasedOnRaceSelection(List<Triple<EventDAO, RegattaDAO, RaceDAO>> selectedRaces) {
+        if (selectedRaces.isEmpty()) {
+            clearWindDisplay(); // no wind known for untracked race
+        } else {
+            showWind(selectedRaces.get(0).getA(), selectedRaces.get(0).getC());
+        }
     }
 
     @Override
@@ -166,7 +185,7 @@ public class WindPanel extends FormPanel implements EventDisplayer, RaceSelectio
         sailingService.getWindInfo(event.name, race.name,
                 // TODO what about the time interval?
                                   new Date(/* fromAsMilliseconds */0), new Date(/* toAsMilliseconds */),
-                new AsyncCallback<WindInfoForRaceDAO>() {
+                showEstimatedWindBox.getValue(), new AsyncCallback<WindInfoForRaceDAO>() {
                     @Override
                     public void onSuccess(WindInfoForRaceDAO result) {
                         if (result != null) {
@@ -180,7 +199,7 @@ public class WindPanel extends FormPanel implements EventDisplayer, RaceSelectio
 
                     @Override
                     public void onFailure(Throwable caught) {
-                        errorReporter.reportError("Error fetching wind information for race " + race.name + ": "
+                        errorReporter.reportError(WindPanel.this.stringConstants.errorFetchingWindInformationForRace()+" " + race.name + ": "
                                 + caught.getMessage());
                     }
                 });
@@ -333,8 +352,9 @@ public class WindPanel extends FormPanel implements EventDisplayer, RaceSelectio
                     windSourceName, new AsyncCallback<Void>() {
                         @Override
                         public void onFailure(Throwable caught) {
-                            errorReporter.reportError("Error while trying to set wind source for race "+
-                                    selectedRace.getC().name+" in event "+selectedRace.getA().name+" to "+
+                            errorReporter.reportError(WindPanel.this.stringConstants.errorWhileTryingToSetWindSourceForRace()+
+                                    " "+selectedRace.getC().name+" "+WindPanel.this.stringConstants.inEvent()+" "+selectedRace.getA().name+
+                                    " "+WindPanel.this.stringConstants.to()+" "+
                                     windSourceName+": "+caught.getMessage());
                         }
                         @Override
