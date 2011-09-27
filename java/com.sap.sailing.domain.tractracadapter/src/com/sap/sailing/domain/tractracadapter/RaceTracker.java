@@ -35,7 +35,10 @@ public interface RaceTracker {
     DynamicTrackedEvent getTrackedEvent();
     
     WindStore getWindStore();
-    
+
+    /**
+     * returns the paramURL, liveURI and storedURI for the TracTrac connection maintained by this tracker
+     */
     Triple<URL, URI, URI> getURLs();
     
 }
