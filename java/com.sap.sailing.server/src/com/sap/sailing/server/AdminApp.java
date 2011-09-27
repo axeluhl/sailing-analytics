@@ -8,6 +8,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.text.ParseException;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -338,14 +339,22 @@ public class AdminApp extends Servlet {
     }
 
     private void setWind(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        Event event = getEvent(req);
-        if (event == null) {
-            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Event not found");
+        Event e = getEvent(req);
+        Iterable<Event> events;
+        if (e == null) {
+            events = getService().getAllEvents();
         } else {
-            RaceDefinition race = getRaceDefinition(req);
-            if (race == null) {
-                resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Race not found");
+            events = Collections.singleton(e);
+        }
+        for (Event event : events) {
+            RaceDefinition r = getRaceDefinition(event, req);
+            Iterable<RaceDefinition> races;
+            if (r == null) {
+                races = event.getAllRaces();
             } else {
+                races = Collections.singleton(r);
+            }
+            for (RaceDefinition race : races) {
                 String bearingAsString = req.getParameter(PARAM_NAME_BEARING);
                 if (bearingAsString != null) {
                     Bearing bearing = new DegreeBearingImpl(Double.valueOf(bearingAsString));
@@ -369,8 +378,8 @@ public class AdminApp extends Servlet {
                         TimePoint timePoint = getTimePoint(req, PARAM_NAME_TIME, PARAM_NAME_TIME_MILLIS, MillisecondsTimePoint.now());
                         Wind wind = new WindImpl(p, timePoint, speed);
                         getService().getDomainFactory().getTrackedEvent(event).getTrackedRace(race).recordWind(wind, WindSource.WEB);
-                    } catch (InvalidDateException e) {
-                        resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Couldn't parse time specification " + e.getMessage());
+                    } catch (InvalidDateException ex) {
+                        resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Couldn't parse time specification " + ex.getMessage());
                     }
                 } else {
                     resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "wind bearing parameter "+PARAM_NAME_BEARING+" missing");

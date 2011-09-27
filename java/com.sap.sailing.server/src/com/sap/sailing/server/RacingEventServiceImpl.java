@@ -243,7 +243,7 @@ public class RacingEventServiceImpl implements RacingEventService {
         DynamicTrackedEvent trackedEvent = tracker.getTrackedEvent();
         ensureEventIsObservedForDefaultLeaderboard(trackedEvent);
         // wait for 60s to receive race before killing tracker
-        scheduleAbortTrackerAfterInitialTimeout(tracker, /* timeoutInMilliseconds */ 60000);
+        scheduleAbortTrackerAfterInitialTimeout(tracker, /* timeoutInMilliseconds */ /* TODO re-enable after debugging: 60000 */ 1000);
         return tracker.getRaceHandle();
     }
 

@@ -64,10 +64,9 @@ public interface DomainFactory {
     Team getTeam(String name, Nationality nationality);
 
     /**
-     * Fetch a race definition previously created by a call to
-     * {@link #createRaceDefinition(Race, Course)}. If no such race
-     * definition was created so far, the call blocks until such a definition
-     * is provided by another call.
+     * Fetch a race definition previously created by a call to {@link #createRaceDefinition(Race, Course)}. If no such
+     * race definition was created so far, the call blocks until such a definition is provided by a call to
+     * {@link #createRaceDefinition(Race, Course)}.
      */
     RaceDefinition getRaceDefinition(Race race);
 
@@ -181,4 +180,17 @@ public interface DomainFactory {
 
     TracTracConfiguration createTracTracConfiguration(String name, String jsonURL, String liveDataURI,
             String storedDataURI);
+
+    /**
+     * Fetch the race definition for <code>race</code>. If the race definition hasn't been created yet, the call blocks
+     * until such a definition is provided by a call to {@link #createRaceDefinition(Race, Course)}. If
+     * <code>timeoutInMilliseconds</code> milliseconds have passed and the race definition is found not to have shown up
+     * until then, <code>null</code> is returned. The unblocking may be deferred even beyond
+     * <code>timeoutInMilliseconds</code> in case no modifications happen on the set of races cached by this factory.
+     * 
+     * @param timeoutInMilliseconds
+     *            passing -1 means an infinite timeout; 0 means return immediately with <code>null</code> result if no
+     *            race definition is found for <code>race</code>.
+     */
+    RaceDefinition getRaceDefinition(Race race, long timeoutInMilliseconds);
 }
