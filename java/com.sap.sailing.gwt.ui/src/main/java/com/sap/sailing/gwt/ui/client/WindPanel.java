@@ -75,7 +75,7 @@ public class WindPanel extends FormPanel implements EventDisplayer, RaceSelectio
                 setWindSource();
             }
         });
-        removeColumn = new IdentityColumn<WindDAO>(new ActionCell<WindDAO>("Remove", new Delegate<WindDAO>() {
+        removeColumn = new IdentityColumn<WindDAO>(new ActionCell<WindDAO>(stringConstants.remove(), new Delegate<WindDAO>() {
             @Override
             public void execute(final WindDAO wind) {
                 List<Triple<EventDAO, RegattaDAO, RaceDAO>> eventAndRaces = getSelectedEventAndRace();
@@ -88,8 +88,10 @@ public class WindPanel extends FormPanel implements EventDisplayer, RaceSelectio
                     }
                     @Override
                     public void onFailure(Throwable caught) {
-                        WindPanel.this.errorReporter.reportError("Error setting wind for race "+eventAndRace.getC().name+": "+caught.getMessage());
-                    }
+                                        WindPanel.this.errorReporter.reportError(
+                                                WindPanel.this.stringConstants.errorSettingWindForRace()+ " "+eventAndRace.getC().name
+                                                + ": "+ caught.getMessage());
+                                    }
                 });
             }
         }));
@@ -180,7 +182,7 @@ public class WindPanel extends FormPanel implements EventDisplayer, RaceSelectio
 
                     @Override
                     public void onFailure(Throwable caught) {
-                        errorReporter.reportError("Error fetching wind information for race " + race.name + ": "
+                        errorReporter.reportError(WindPanel.this.stringConstants.errorFetchingWindInformationForRace()+" " + race.name + ": "
                                 + caught.getMessage());
                     }
                 });
@@ -333,8 +335,9 @@ public class WindPanel extends FormPanel implements EventDisplayer, RaceSelectio
                     windSourceName, new AsyncCallback<Void>() {
                         @Override
                         public void onFailure(Throwable caught) {
-                            errorReporter.reportError("Error while trying to set wind source for race "+
-                                    selectedRace.getC().name+" in event "+selectedRace.getA().name+" to "+
+                            errorReporter.reportError(WindPanel.this.stringConstants.errorWhileTryingToSetWindSourceForRace()+
+                                    " "+selectedRace.getC().name+" "+WindPanel.this.stringConstants.inEvent()+" "+selectedRace.getA().name+
+                                    " "+WindPanel.this.stringConstants.to()+" "+
                                     windSourceName+": "+caught.getMessage());
                         }
                         @Override

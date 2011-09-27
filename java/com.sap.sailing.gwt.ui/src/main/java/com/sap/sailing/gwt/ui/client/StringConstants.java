@@ -96,6 +96,9 @@ public interface StringConstants extends Constants {
     String delayInSeconds();
     String delayBetweenAutoAdvances();
     String chooseUpdateIntervalOfAtLeastOneSecond();
+    String errorSettingWindForRace();
+    String errorFetchingWindInformationForRace();
+    String errorWhileTryingToSetWindSourceForRace();
+    String inEvent();
+    String to();
 }
-
-
