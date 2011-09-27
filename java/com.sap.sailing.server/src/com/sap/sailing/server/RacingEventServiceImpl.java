@@ -16,8 +16,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
+import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -35,6 +40,7 @@ import com.sap.sailing.domain.tractracadapter.JSONService;
 import com.sap.sailing.domain.tractracadapter.RaceHandle;
 import com.sap.sailing.domain.tractracadapter.RaceRecord;
 import com.sap.sailing.domain.tractracadapter.RaceTracker;
+import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sailing.expeditionconnector.ExpeditionWindTrackerFactory;
 import com.sap.sailing.mongodb.DomainObjectFactory;
 import com.sap.sailing.mongodb.MongoObjectFactory;
@@ -42,6 +48,12 @@ import com.sap.sailing.util.Util.Triple;
 
 public class RacingEventServiceImpl implements RacingEventService {
     private static final Logger logger = Logger.getLogger(RacingEventServiceImpl.class.getName());
+
+    /**
+     * A scheduler for the periodic checks of the paramURL documents for the advent of {@link ControlPoint}s
+     * with static position information otherwise not available through {@link MarkPassingReceiver}'s events.
+     */
+    private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     
     private final DomainFactory domainFactory;
     
@@ -230,6 +242,8 @@ public class RacingEventServiceImpl implements RacingEventService {
         }
         DynamicTrackedEvent trackedEvent = tracker.getTrackedEvent();
         ensureEventIsObservedForDefaultLeaderboard(trackedEvent);
+        // wait for 60s to receive race before killing tracker
+        scheduleAbortTrackerAfterInitialTimeout(tracker, /* timeoutInMilliseconds */ /* TODO re-enable after debugging: 60000 */ 1000);
         return tracker.getRaceHandle();
     }
 
@@ -272,6 +286,40 @@ public class RacingEventServiceImpl implements RacingEventService {
                 defaultLeaderboard.removeRaceColumn(race.getName());
             }
         }
+    }
+
+    /**
+     * The tracker will initially try to connect to the TracTrac infrastructure to obtain basic race master data. If
+     * this fails after some timeout, to avoid garbage and lingering threads, the task scheduled by this method will
+     * check after the timeout expires if race master data was successfully received. If so, the tracker continues
+     * normally. Otherwise, the tracker is shut down orderly by {@link Receiver#stopPreemptively() stopping} all
+     * receivers and {@link DataController#stop(boolean) stopping} the TracTrac controller for this tracker.
+     * 
+     * @return the scheduled task, in case the caller wants to {@link ScheduledFuture#cancel(boolean) cancel} it, e.g.,
+     *         when the tracker is stopped or has successfully received the race
+     */
+    private ScheduledFuture<?> scheduleAbortTrackerAfterInitialTimeout(final RaceTracker tracker, final long timeoutInMilliseconds) {
+        ScheduledFuture<?> task = scheduler.schedule(new Runnable() {
+            @Override public void run() {
+                if (tracker.getRace() == null) {
+                    try {
+                        Event event = tracker.getEvent();
+                        Set<RaceTracker> trackersForEvent = raceTrackersByEvent.get(event);
+                        if (trackersForEvent != null) {
+                            trackersForEvent.remove(tracker);
+                        }
+                        tracker.stop();
+                        raceTrackersByURLs.remove(tracker.getURLs());
+                        if (trackersForEvent.isEmpty()) {
+                            stopTracking(event);
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }, /* delay */ timeoutInMilliseconds, /* unit */ TimeUnit.MILLISECONDS);
+        return task;
     }
 
     @Override

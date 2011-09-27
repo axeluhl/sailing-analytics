@@ -27,7 +27,7 @@ public class RaceHandleImpl implements RaceHandle {
 
     @Override
     public RaceDefinition getRace() {
-        // we assume there is exactly one Race per TracTrac event
+        // FIXME we assume there is exactly one Race per TracTrac event but during match racing there may be many
         return domainFactory.getRaceDefinition(tractracEvent.getRaceList().iterator().next());
     }
     
@@ -39,6 +39,12 @@ public class RaceHandleImpl implements RaceHandle {
     @Override
     public RaceTracker getRaceTracker() {
         return raceTracker;
+    }
+
+    @Override
+    public RaceDefinition getRace(long timeoutInMilliseconds) {
+        // FIXME we assume there is exactly one Race per TracTrac event but during match racing there may be many
+        return domainFactory.getRaceDefinition(tractracEvent.getRaceList().iterator().next(), timeoutInMilliseconds);
     }
     
 }

@@ -289,17 +289,26 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
 
     @Override
-    public void track(RaceRecordDAO rr, String liveURI, String storedURI, boolean trackWind, boolean correctWindByDeclination) throws Exception {
+    public void track(RaceRecordDAO rr, String liveURI, String storedURI, boolean trackWind, final boolean correctWindByDeclination) throws Exception {
         if (liveURI == null || liveURI.trim().length() == 0) {
             liveURI = rr.liveURI;
         }
         if (storedURI == null || storedURI.trim().length() == 0) {
             storedURI = rr.storedURI;
         }
-        RaceHandle raceHandle = getService().addRace(new URL(rr.paramURL), new URI(liveURI), new URI(storedURI),
+        final RaceHandle raceHandle = getService().addRace(new URL(rr.paramURL), new URI(liveURI), new URI(storedURI),
                 MongoWindStoreFactory.INSTANCE.getMongoWindStore(mongoObjectFactory));
         if (trackWind) {
-            startTrackingWind(raceHandle.getEvent().getName(), raceHandle.getRace().getName(), correctWindByDeclination);
+            // FIXME this thread must be stopped and cleaned up if the RaceDefinition didn't show up after some time
+            new Thread("Wind tracking starter for race "+rr.eventName+"/"+rr.name) {
+                public void run() {
+                    try {
+                        startTrackingWind(raceHandle, correctWindByDeclination);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            }.start();
         }
     }
 
@@ -346,10 +355,10 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         }
     }
     
-    private void startTrackingWind(String eventName, String raceName, boolean correctByDeclination) throws Exception {
-        Event event = getService().getEventByName(eventName);
+    private void startTrackingWind(RaceHandle raceHandle, boolean correctByDeclination) throws Exception {
+        Event event = raceHandle.getEvent();
         if (event != null) {
-            RaceDefinition race = getRaceByName(event, raceName);
+            RaceDefinition race = getRaceByName(event, raceHandle.getRace().getName());
             getService().startTrackingWind(event, race, correctByDeclination);
         }
     }

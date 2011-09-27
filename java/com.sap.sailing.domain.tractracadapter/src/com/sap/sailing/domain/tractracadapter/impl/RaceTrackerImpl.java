@@ -58,6 +58,10 @@ public class RaceTrackerImpl implements Listener, RaceTracker {
     private final DomainFactory domainFactory;
     private final DynamicTrackedEvent trackedEvent;
     private final WindStore windStore;
+    
+    /**
+     * paramURL, liveURI and storedURI for TracTrac connection
+     */
     private final Triple<URL, URI, URI> urls;
     private final ScheduledFuture<?> controlPointPositionPoller;
 
@@ -91,11 +95,10 @@ public class RaceTrackerImpl implements Listener, RaceTracker {
         // Read event data from configuration file
         tractracEvent = KeyValue.setup(paramURL);
         controlPointPositionPoller = scheduleControlPointPositionPoller(paramURL);
-        
-        // can happen that tractrac event is null (occurs when there is no internet connection)
+        // can happen that TracTrac event is null (occurs when there is no Internet connection)
         // so lets raise some meaningful exception
         if (tractracEvent == null) {
-        	throw new RuntimeException("Connection failed. Could not connect to " + paramURL);
+            throw new RuntimeException("Connection failed. Could not connect to " + paramURL);
         }
         
         // Initialize data controller using live and stored data sources
@@ -124,7 +127,7 @@ public class RaceTrackerImpl implements Listener, RaceTracker {
      * tracker.
      * 
      * @param paramURL points to the document describing the race's metadata which will periodically be downloaded
-     * @return 
+     * @return the task to cancel in case the tracker wants to terminate the poller
      */
     private ScheduledFuture<?> scheduleControlPointPositionPoller(final URL paramURL) {
         ScheduledFuture<?> task = scheduler.scheduleWithFixedDelay(new Runnable() {
