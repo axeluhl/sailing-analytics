@@ -8,6 +8,7 @@ import java.util.Map;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
+import com.sap.sailing.domain.tracking.WindSource;
 import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
 import com.sap.sailing.gwt.ui.shared.EventDAO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDAO;
@@ -47,8 +48,14 @@ public interface SailingServiceAsync {
 
     void stopTrackingRace(String eventName, String raceName, AsyncCallback<Void> asyncCallback);
 
+    /**
+     * @param includeTrackBasedWindEstimation if <code>true</code>, for each time point for which an
+     * {@link WindSource#EXPEDITION} estimation exists for the event/race requested, a wind estimation
+     * based on the GPS tracks will be performed and included in the result. In this case, the
+     * result will contain a so far non-existing wind source name "ESTIMATION".
+     */
     void getWindInfo(String eventName, String raceName, Date from, Date to,
-            AsyncCallback<WindInfoForRaceDAO> callback);
+            boolean includeTrackBasedWindEstimation, AsyncCallback<WindInfoForRaceDAO> callback);
 
     void getWindInfo(String eventName, String raceName, Date from, long millisecondsStepWidth, int numberOfFixes,
             double latDeg, double lngDeg, AsyncCallback<WindInfoForRaceDAO> callback);

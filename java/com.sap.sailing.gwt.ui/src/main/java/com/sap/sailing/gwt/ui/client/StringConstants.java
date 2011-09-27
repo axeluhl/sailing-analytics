@@ -101,4 +101,5 @@ public interface StringConstants extends Constants {
     String errorWhileTryingToSetWindSourceForRace();
     String inEvent();
     String to();
+    String showEstimatedWind();
 }

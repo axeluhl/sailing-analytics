@@ -40,7 +40,8 @@ public interface SailingService extends RemoteService {
 
     void stopTrackingRace(String eventName, String raceName) throws Exception;
 
-    WindInfoForRaceDAO getWindInfo(String eventName, String raceName, Date from, Date to);
+    WindInfoForRaceDAO getWindInfo(String eventName, String raceName, Date from, Date to,
+            boolean includeTrackBasedWindEstimation);
 
     void setWind(String eventName, String raceName, WindDAO wind);
 
