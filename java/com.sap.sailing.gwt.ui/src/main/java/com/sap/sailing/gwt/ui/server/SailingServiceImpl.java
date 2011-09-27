@@ -367,6 +367,9 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             RaceDefinition race = raceHandle.getRace(timeoutInMilliseconds);
             if (race != null) {
                 getService().startTrackingWind(event, race, correctByDeclination);
+            } else {
+                log("RaceDefinition wasn't received within "+timeoutInMilliseconds+"ms for a race in event "+event.getName()+
+                        ". Aborting wait; no wind tracking for this race.");
             }
         }
     }
