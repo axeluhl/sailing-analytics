@@ -55,6 +55,7 @@ import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindSource;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
+import com.sap.sailing.domain.tracking.impl.WindTrackImpl;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.RaceHandle;
 import com.sap.sailing.domain.tractracadapter.RaceRecord;
@@ -367,6 +368,9 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             RaceDefinition race = raceHandle.getRace(timeoutInMilliseconds);
             if (race != null) {
                 getService().startTrackingWind(event, race, correctByDeclination);
+            } else {
+                log("RaceDefinition wasn't received within "+timeoutInMilliseconds+"ms for a race in event "+event.getName()+
+                        ". Aborting wait; no wind tracking for this race.");
             }
         }
     }
@@ -384,7 +388,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         return result;       
     }
     @Override
-    public WindInfoForRaceDAO getWindInfo(String eventName, String raceName, Date fromDate, Date toDate) {
+    public WindInfoForRaceDAO getWindInfo(String eventName, String raceName, Date fromDate, Date toDate, boolean includeTrackBasedWindEstimation) {
         WindInfoForRaceDAO result = null;
         TrackedRace trackedRace = getTrackedRace(eventName, raceName);
         if (trackedRace != null) {
@@ -393,12 +397,16 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             TimePoint from = new MillisecondsTimePoint(fromDate);
             TimePoint to = new MillisecondsTimePoint(toDate);
             Map<String, WindTrackInfoDAO> windTrackInfoDAOs = new HashMap<String, WindTrackInfoDAO>();
+            WindTrack estimatedTrack = null;
             result.windTrackInfoByWindSourceName = windTrackInfoDAOs;
             for (WindSource windSource : WindSource.values()) {
                 WindTrackInfoDAO windTrackInfoDAO = new WindTrackInfoDAO();
                 windTrackInfoDAO.windFixes = new ArrayList<WindDAO>();
                 WindTrack windTrack = trackedRace.getWindTrack(windSource);
                 windTrackInfoDAO.dampeningIntervalInMilliseconds = windTrack.getMillisecondsOverWhichToAverageWind();
+                if (includeTrackBasedWindEstimation && windSource == WindSource.EXPEDITION) {
+                    estimatedTrack = new WindTrackImpl(windTrack.getMillisecondsOverWhichToAverageWind());
+                }
                 Iterator<Wind> windIter = windTrack.getFixesIterator(from, /* inclusive */true);
                 while (windIter.hasNext()) {
                     Wind wind = windIter.next();
@@ -407,8 +415,24 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                     }
                     WindDAO windDAO = createWindDAO(wind, windTrack);
                     windTrackInfoDAO.windFixes.add(windDAO);
+                    if (includeTrackBasedWindEstimation && windSource == WindSource.EXPEDITION) {
+                        try {
+                            estimatedTrack.add(trackedRace.getEstimatedWindDirection(wind.getPosition(), wind.getTimePoint()));
+                        } catch (NoWindException e) {
+                            // no show-stopper; it would just mean that the wind estimation isn't complete which we can tolerate
+                            e.printStackTrace();
+                        }
+                    }
                 }
                 windTrackInfoDAOs.put(windSource.name(), windTrackInfoDAO);
+            }
+            if (includeTrackBasedWindEstimation && estimatedTrack != null) {
+                WindTrackInfoDAO windEstimations = new WindTrackInfoDAO();
+                windEstimations.windFixes = new ArrayList<WindDAO>();
+                for (Wind estimatedWind : estimatedTrack.getFixes()) {
+                    windEstimations.windFixes.add(createWindDAO(estimatedWind, estimatedTrack));
+                }
+                windTrackInfoDAOs.put("ESTIMATION", windEstimations);
             }
         }
         return result;

@@ -20,6 +20,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.ControlPoint;
@@ -305,6 +306,8 @@ public class RacingEventServiceImpl implements RacingEventService {
                 if (tracker.getRace() == null) {
                     try {
                         Event event = tracker.getEvent();
+                        logger.log(Level.SEVERE, "RaceDefinition for a race in event "+event.getName()+" not obtained within "+
+                                timeoutInMilliseconds+"ms. Aborting tracker for this race.");
                         Set<RaceTracker> trackersForEvent = raceTrackersByEvent.get(event);
                         if (trackersForEvent != null) {
                             trackersForEvent.remove(tracker);
