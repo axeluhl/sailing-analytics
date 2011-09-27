@@ -192,12 +192,12 @@ public class RacingEventServiceImpl implements RacingEventService {
     }
 
     @Override
-    public synchronized Event addEvent(URL jsonURL, URI liveURI, URI storedURI, WindStore windStore) throws URISyntaxException, IOException, ParseException, org.json.simple.parser.ParseException {
+    public synchronized Event addEvent(URL jsonURL, URI liveURI, URI storedURI, WindStore windStore, long timeoutInMilliseconds) throws URISyntaxException, IOException, ParseException, org.json.simple.parser.ParseException {
         JSONService jsonService = getDomainFactory().parseJSONURL(jsonURL);
         Event event = null;
         for (RaceRecord rr : jsonService.getRaceRecords()) {
             URL paramURL = rr.getParamURL();
-            event = addRace(paramURL, liveURI, storedURI, windStore).getEvent();
+            event = addRace(paramURL, liveURI, storedURI, windStore, timeoutInMilliseconds).getEvent();
         }
         return event;
     }
@@ -209,8 +209,8 @@ public class RacingEventServiceImpl implements RacingEventService {
     }
 
     @Override
-    public synchronized RaceHandle addRace(URL paramURL, URI liveURI, URI storedURI, WindStore windStore) throws MalformedURLException, FileNotFoundException,
-            URISyntaxException {
+    public synchronized RaceHandle addRace(URL paramURL, URI liveURI, URI storedURI, WindStore windStore,
+            long timeoutInMilliseconds) throws MalformedURLException, FileNotFoundException, URISyntaxException {
         Triple<URL, URI, URI> key = new Triple<URL, URI, URI>(paramURL, liveURI, storedURI);
         RaceTracker tracker = raceTrackersByURLs.get(key);
         if (tracker == null) {
@@ -242,8 +242,9 @@ public class RacingEventServiceImpl implements RacingEventService {
         }
         DynamicTrackedEvent trackedEvent = tracker.getTrackedEvent();
         ensureEventIsObservedForDefaultLeaderboard(trackedEvent);
-        // wait for 60s to receive race before killing tracker
-        scheduleAbortTrackerAfterInitialTimeout(tracker, /* timeoutInMilliseconds */ /* TODO re-enable after debugging: 60000 */ 1000);
+        if (timeoutInMilliseconds != -1) {
+            scheduleAbortTrackerAfterInitialTimeout(tracker, timeoutInMilliseconds);
+        }
         return tracker.getRaceHandle();
     }
 
