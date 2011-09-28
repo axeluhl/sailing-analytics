@@ -12,6 +12,7 @@ import org.osgi.framework.BundleContext;
 import com.mongodb.DB;
 import com.mongodb.Mongo;
 import com.mongodb.MongoException;
+import com.sap.sailing.mongodb.DomainObjectFactory;
 import com.sap.sailing.mongodb.MongoObjectFactory;
 import com.sap.sailing.mongodb.MongoWindStore;
 import com.sap.sailing.mongodb.MongoWindStoreFactory;
@@ -41,13 +42,13 @@ public class MongoWindStoreFactoryImpl implements MongoWindStoreFactory, BundleA
     }
     
     @Override
-    public MongoWindStore getMongoWindStore(MongoObjectFactory mongoObjectFactory) throws UnknownHostException, MongoException {
-        return getMongoWindStore(defaultHostName, defaultPort, defaultDatabaseName, mongoObjectFactory);
+    public MongoWindStore getMongoWindStore(MongoObjectFactory mongoObjectFactory, DomainObjectFactory domainObjectFactory) throws UnknownHostException, MongoException {
+        return getMongoWindStore(defaultHostName, defaultPort, defaultDatabaseName, mongoObjectFactory, domainObjectFactory);
     }
 
     private MongoWindStore getMongoWindStore(String hostname, int port, String dbName,
-            MongoObjectFactory mongoObjectFactory) throws UnknownHostException, MongoException {
-        return new MongoWindStoreImpl(getDB(hostname, port, dbName), mongoObjectFactory);
+            MongoObjectFactory mongoObjectFactory, DomainObjectFactory domainObjectFactory) throws UnknownHostException, MongoException {
+        return new MongoWindStoreImpl(getDB(hostname, port, dbName), mongoObjectFactory, domainObjectFactory);
     }
 
     @Override

@@ -41,6 +41,7 @@ import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tractracadapter.RaceRecord;
+import com.sap.sailing.mongodb.DomainObjectFactory;
 import com.sap.sailing.mongodb.MongoObjectFactory;
 import com.sap.sailing.mongodb.MongoWindStoreFactory;
 import com.sap.sailing.util.InvalidDateException;
@@ -499,7 +500,7 @@ public class AdminApp extends Servlet {
             if (windStore.equals(WIND_STORE_EMPTY)) {
                 return EmptyWindStore.INSTANCE;
             } else if (windStore.equals(WIND_STORE_MONGO)) {
-                return MongoWindStoreFactory.INSTANCE.getMongoWindStore(MongoObjectFactory.INSTANCE);
+                return MongoWindStoreFactory.INSTANCE.getMongoWindStore(MongoObjectFactory.INSTANCE, DomainObjectFactory.INSTANCE);
             } else {
                 log("Couldn't find wind store "+windStore+". Using EmptyWindStore instead.");
                 return EmptyWindStore.INSTANCE;

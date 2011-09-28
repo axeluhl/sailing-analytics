@@ -15,12 +15,12 @@ public interface MongoWindStoreFactory {
      * Gets the default Mongo store based on the properties mongo.hostname[=localhost], mongo.port[=27017]
      * and mongo.dbName[=&lt;contents of constant {@link #DEFAULT_DB_NAME}&gt;] specified in the bundle context
      */
-    MongoWindStore getMongoWindStore(MongoObjectFactory mongoObjectFactory) throws UnknownHostException, MongoException;
+    MongoWindStore getMongoWindStore(MongoObjectFactory mongoObjectFactory, DomainObjectFactory domainObjectFactory) throws UnknownHostException, MongoException;
 
     /**
      * Obtains a DB instance based on the default settings which can be provided by
      * system properties and/or OSGi bundle properties, respectively. See also
-     * {@link #getMongoWindStore(MongoObjectFactory)}.
+     * {@link #getMongoWindStore(MongoObjectFactory, DomainObjectFactory)}.
      */
     DB getDB();
 
