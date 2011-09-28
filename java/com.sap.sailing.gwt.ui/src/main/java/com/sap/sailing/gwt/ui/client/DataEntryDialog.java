@@ -123,8 +123,9 @@ public abstract class DataEntryDialog<T> {
      * 
      * @param initialValue initial value to show in text box; <code>null</code> is permissible
      */
-    protected IntegerBox createIntegerBox(int initialValue) {
+    protected IntegerBox createIntegerBox(int initialValue, int visibleLength) {
         IntegerBox integerBox = new IntegerBox();
+        integerBox.setVisibleLength(visibleLength);
         integerBox.setValue(initialValue);
         AbstractEntryPoint.addFocusUponKeyUpToggler(integerBox);
         integerBox.addChangeHandler(new ChangeHandler() {

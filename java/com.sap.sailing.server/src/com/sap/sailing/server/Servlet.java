@@ -50,7 +50,7 @@ public abstract class Servlet extends HttpServlet {
         if (event != null) {
             String racename = req.getParameter(PARAM_NAME_RACENAME);
             for (RaceDefinition race : event.getAllRaces()) {
-                if (racename.equals(race.getName())) {
+                if (race.getName().equals(racename)) {
                     return race;
                 }
             }
@@ -61,7 +61,7 @@ public abstract class Servlet extends HttpServlet {
     protected RaceDefinition getRaceDefinition(Event event, HttpServletRequest req) {
         String racename = req.getParameter(PARAM_NAME_RACENAME);
         for (RaceDefinition race : event.getAllRaces()) {
-            if (racename.equals(race.getName())) {
+            if (race.getName().equals(racename)) {
                 return race;
             }
         }

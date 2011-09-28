@@ -7,8 +7,6 @@ import java.util.Map;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.CheckBox;
-import com.google.gwt.user.client.ui.DockPanel;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.IntegerBox;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -56,28 +54,21 @@ public class LeaderboardSettingsPanel extends DataEntryDialog<Result> {
         this.selectionProvider = selectionProvider;
         this.stringConstants = stringConstants;
         checkboxes = new LinkedHashMap<LegDetailSelectionProvider.LegDetailColumnType, CheckBox>();
-        delayBetweenAutoAdvancesInSecondsBox = createIntegerBox((int) delayBetweenAutoAdvancesInMilliseconds/1000);
-        delayInSecondsBox = createIntegerBox((int) delayInMilliseconds/1000);
+        delayBetweenAutoAdvancesInSecondsBox = createIntegerBox((int) delayBetweenAutoAdvancesInMilliseconds/1000, 4);
+        delayInSecondsBox = createIntegerBox((int) delayInMilliseconds/1000, 4);
     }
 
     @Override
     protected Widget getAdditionalWidget() {
         List<LegDetailColumnType> currentSelection = selectionProvider.getLegDetailsToShow();
         VerticalPanel vp = new VerticalPanel();
+        vp.setSpacing(5);
         Label delayLabel = new Label(stringConstants.delayInSeconds());
-        DockPanel hpDelay = new DockPanel();
-        hpDelay.setWidth("100%");
-        hpDelay.add(delayLabel, DockPanel.WEST);
-        hpDelay.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
-        hpDelay.add(delayInSecondsBox, DockPanel.EAST);
-        vp.add(hpDelay);
+        vp.add(delayLabel);
+        vp.add(delayInSecondsBox);
         Label delayBetweenAutoAdvancesLabel = new Label(stringConstants.delayBetweenAutoAdvances());
-        DockPanel hpDelayBetweenAutoAdvances = new DockPanel();
-        hpDelayBetweenAutoAdvances.setWidth("100%");
-        hpDelayBetweenAutoAdvances.add(delayBetweenAutoAdvancesLabel, DockPanel.WEST);
-        hpDelayBetweenAutoAdvances.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
-        hpDelayBetweenAutoAdvances.add(delayBetweenAutoAdvancesInSecondsBox, DockPanel.EAST);
-        vp.add(hpDelayBetweenAutoAdvances);
+        vp.add(delayBetweenAutoAdvancesLabel);
+        vp.add(delayBetweenAutoAdvancesInSecondsBox);
         firstCheckbox = null;
         for (LegDetailColumnType type : LegDetailColumnType.values()) {
             CheckBox checkbox = createCheckbox(type.toString(stringConstants));

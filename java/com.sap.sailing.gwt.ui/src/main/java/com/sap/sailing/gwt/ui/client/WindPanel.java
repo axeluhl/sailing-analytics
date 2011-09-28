@@ -246,7 +246,7 @@ public class WindPanel extends FormPanel implements EventDisplayer, RaceSelectio
             windDirectionInDegColumn.setSortable(true);
             dampenedSpeedInKnotsColumn.setSortable(true);
             dampenedWindDirectionInDegColumn.setSortable(true);
-            CellTable<WindDAO> windTable = new CellTable<WindDAO>(/* pageSize */ 100);
+            CellTable<WindDAO> windTable = new CellTable<WindDAO>(/* pageSize */ 10000);
             if (e.getKey().equals(WEB_WIND_SOURCE_NAME)) {
                 // only the WEB wind source is editable, hence has a "Remove" column
                 windTable.addColumn(removeColumn, "Remove");
