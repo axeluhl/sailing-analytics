@@ -97,6 +97,8 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     private final ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
     
     private final MongoObjectFactory mongoObjectFactory;
+    
+    private final DomainObjectFactory domainObjectFactory;
 
     public SailingServiceImpl() {
         BundleContext context = Activator.getDefault();
@@ -104,6 +106,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 context, RacingEventService.class.getName(), null);
         racingEventServiceTracker.open();
         mongoObjectFactory = MongoObjectFactory.INSTANCE;
+        domainObjectFactory = DomainObjectFactory.INSTANCE;
     }
     
     public LeaderboardDAO getLeaderboardByName(String leaderboardName, Date date, Collection<String> namesOfRacesForWhichToLoadLegDetails) throws Exception {
@@ -300,7 +303,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             storedURI = rr.storedURI;
         }
         final RaceHandle raceHandle = getService().addRace(new URL(rr.paramURL), new URI(liveURI), new URI(storedURI),
-                MongoWindStoreFactory.INSTANCE.getMongoWindStore(mongoObjectFactory), TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS);
+                MongoWindStoreFactory.INSTANCE.getMongoWindStore(mongoObjectFactory, domainObjectFactory), TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS);
         if (trackWind) {
             new Thread("Wind tracking starter for race "+rr.eventName+"/"+rr.name) {
                 public void run() {
@@ -417,7 +420,8 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                     windTrackInfoDAO.windFixes.add(windDAO);
                     if (includeTrackBasedWindEstimation && windSource == WindSource.EXPEDITION) {
                         try {
-                            estimatedTrack.add(trackedRace.getEstimatedWindDirection(wind.getPosition(), wind.getTimePoint()));
+                            Wind estimatedWindDirection = trackedRace.getEstimatedWindDirection(wind.getPosition(), wind.getTimePoint());
+                            estimatedTrack.add(estimatedWindDirection);
                         } catch (NoWindException e) {
                             // no show-stopper; it would just mean that the wind estimation isn't complete which we can tolerate
                             e.printStackTrace();
@@ -428,6 +432,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             }
             if (includeTrackBasedWindEstimation && estimatedTrack != null) {
                 WindTrackInfoDAO windEstimations = new WindTrackInfoDAO();
+                windEstimations.dampeningIntervalInMilliseconds = estimatedTrack.getMillisecondsOverWhichToAverageWind();
                 windEstimations.windFixes = new ArrayList<WindDAO>();
                 for (Wind estimatedWind : estimatedTrack.getFixes()) {
                     windEstimations.windFixes.add(createWindDAO(estimatedWind, estimatedTrack));
