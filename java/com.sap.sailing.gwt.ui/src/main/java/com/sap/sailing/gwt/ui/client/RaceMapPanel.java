@@ -68,6 +68,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
     private LatLng lastMousePosition;
     private final Set<CompetitorDAO> competitorsSelectedInMap;
     private final Timer timer;
+    private final Map<CompetitorDAO, GPSFixDAO> latestFix;
     
     /**
      * If the user explicitly zoomed or panned the map, don't adjust zoom/pan unless a new race
@@ -97,6 +98,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         this.timer = new Timer(/* delayBetweenAutoAdvancesInMilliseconds */ 3000);
         competitorsSelectedInMap = new HashSet<CompetitorDAO>();
         tails = new HashMap<CompetitorDAO, Polyline>();
+        latestFix = new HashMap<CompetitorDAO, GPSFixDAO>();
         buoyMarkers = new HashMap<MarkDAO, Marker>();
         boatMarkers = new HashMap<CompetitorDAO, Marker>();
         this.grid = new Grid(3, 2);
@@ -256,6 +258,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
 
                                 @Override
                                 public void onSuccess(Map<CompetitorDAO, List<GPSFixDAO>> result) {
+                                    updateLastFixes(result);
                                     showBoatsOnMap(result);
                                 }
                             });
@@ -282,6 +285,14 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
                         }
                     });
                 }
+            }
+        }
+    }
+
+    private void updateLastFixes(Map<CompetitorDAO, List<GPSFixDAO>> result) {
+        for (Map.Entry<CompetitorDAO, List<GPSFixDAO>> e : result.entrySet()) {
+            if (e.getValue() != null && !e.getValue().isEmpty()) {
+                latestFix.put(e.getKey(), e.getValue().get(e.getValue().size()-1));
             }
         }
     }
@@ -415,9 +426,10 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
                 new InfoWindowContent(getInfoWindowContent(markDAO)));
     }
 
-    private void showCompetitorInfoWindow(final CompetitorDAO competitorDAO, LatLng latlng) {
-        map.getInfoWindow().open(latlng,
-                new InfoWindowContent(getInfoWindowContent(competitorDAO, latlng)));
+    private void showCompetitorInfoWindow(final CompetitorDAO competitorDAO, LatLng where) {
+        GPSFixDAO latestFixForCompetitor = latestFix.get(competitorDAO);
+        map.getInfoWindow().open(where,
+                new InfoWindowContent(getInfoWindowContent(competitorDAO, latestFixForCompetitor)));
     }
     
     private Widget getInfoWindowContent(MarkDAO markDAO) {
@@ -427,10 +439,12 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         return result;
     }
 
-    private Widget getInfoWindowContent(CompetitorDAO competitorDAO, LatLng latlng) {
+    private Widget getInfoWindowContent(CompetitorDAO competitorDAO, GPSFixDAO lastFix) {
         VerticalPanel result = new VerticalPanel();
         result.add(new Label("Competitor "+competitorDAO.name));
-        result.add(new Label(""+latlng));
+        result.add(new Label(""+lastFix.position));
+        result.add(new Label(lastFix.speedWithBearing.speedInKnots+"kts "+lastFix.speedWithBearing.bearingInDegrees+"deg"));
+        result.add(new Label("Tack: "+lastFix.tack));
         return result;
     }
     
