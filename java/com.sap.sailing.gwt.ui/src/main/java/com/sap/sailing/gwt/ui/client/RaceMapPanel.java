@@ -443,7 +443,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         VerticalPanel result = new VerticalPanel();
         result.add(new Label("Competitor "+competitorDAO.name));
         result.add(new Label(""+lastFix.position));
-        result.add(new Label(lastFix.speedWithBearing.speedInKnots+"kts "+lastFix.speedWithBearing.bearingInDegrees+"°"));
+        result.add(new Label(lastFix.speedWithBearing.speedInKnots+"kts "+lastFix.speedWithBearing.bearingInDegrees+"deg"));
         result.add(new Label("Tack: "+lastFix.tack));
         return result;
     }
