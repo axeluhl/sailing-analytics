@@ -432,16 +432,21 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 windTrackInfoDAOs.put(windSource.name(), windTrackInfoDAO);
             }
             if (includeTrackBasedWindEstimation && estimatedTrack != null) {
-                WindTrackInfoDAO windEstimations = new WindTrackInfoDAO();
-                windEstimations.dampeningIntervalInMilliseconds = estimatedTrack.getMillisecondsOverWhichToAverageWind();
-                windEstimations.windFixes = new ArrayList<WindDAO>();
-                for (Wind estimatedWind : estimatedTrack.getFixes()) {
-                    windEstimations.windFixes.add(createWindDAO(estimatedWind, estimatedTrack));
-                }
+                WindTrackInfoDAO windEstimations = createWindTrackInfoDAO(estimatedTrack);
                 windTrackInfoDAOs.put("ESTIMATION", windEstimations);
             }
         }
         return result;
+    }
+
+    private WindTrackInfoDAO createWindTrackInfoDAO(WindTrack estimatedTrack) {
+        WindTrackInfoDAO windEstimations = new WindTrackInfoDAO();
+        windEstimations.dampeningIntervalInMilliseconds = estimatedTrack.getMillisecondsOverWhichToAverageWind();
+        windEstimations.windFixes = new ArrayList<WindDAO>();
+        for (Wind estimatedWind : estimatedTrack.getFixes()) {
+            windEstimations.windFixes.add(createWindDAO(estimatedWind, estimatedTrack));
+        }
+        return windEstimations;
     }
 
     protected WindDAO createWindDAO(Wind wind, WindTrack windTrack) {
@@ -467,8 +472,9 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
     
     @Override
-    public WindInfoForRaceDAO getWindInfo(String eventName, String raceName, Date from,
-            long millisecondsStepWidth, int numberOfFixes, double latDeg, double lngDeg) throws NoWindException {
+    public WindInfoForRaceDAO getWindInfo(String eventName, String raceName, Date from, long millisecondsStepWidth,
+            int numberOfFixes, double latDeg, double lngDeg, boolean includeTrackBasedWindEstimation)
+            throws NoWindException {
         Position position = new DegreePosition(latDeg, lngDeg);
         WindInfoForRaceDAO result = null;
         Event event = getService().getEventByName(eventName);
@@ -478,6 +484,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 TrackedRace trackedRace = getService().getDomainFactory().getTrackedEvent(event)
                         .getExistingTrackedRace(race);
                 if (trackedRace != null) {
+                    WindTrack estimatedTrack = null;
                     result = new WindInfoForRaceDAO();
                     WindSource windSource = trackedRace.getWindSource();
                     result.selectedWindSourceName = windSource.name();
@@ -487,6 +494,9 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                     WindTrackInfoDAO windTrackInfoDAO = new WindTrackInfoDAO();
                     windTrackInfoDAO.windFixes = new ArrayList<WindDAO>();
                     WindTrack windTrack = trackedRace.getWindTrack(windSource);
+                    if (includeTrackBasedWindEstimation && windSource == WindSource.EXPEDITION) {
+                        estimatedTrack = new WindTrackImpl(windTrack.getMillisecondsOverWhichToAverageWind());
+                    }
                     windTrackInfoDAOs.put(windSource.name(), windTrackInfoDAO);
                     windTrackInfoDAO.dampeningIntervalInMilliseconds = windTrack
                             .getMillisecondsOverWhichToAverageWind();
@@ -497,7 +507,22 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                             WindDAO windDAO = createWindDAO(wind, windTrack);
                             windTrackInfoDAO.windFixes.add(windDAO);
                         }
+                        if (includeTrackBasedWindEstimation && windSource == WindSource.EXPEDITION) {
+                            try {
+                                Wind estimatedWindDirection = trackedRace.getEstimatedWindDirection(wind.getPosition(),
+                                        wind.getTimePoint());
+                                estimatedTrack.add(estimatedWindDirection);
+                            } catch (NoWindException e) {
+                                // no show-stopper; it would just mean that the wind estimation isn't complete which we
+                                // can tolerate
+                                e.printStackTrace();
+                            }
+                        }
                         timePoint = new MillisecondsTimePoint(timePoint.asMillis() + millisecondsStepWidth);
+                    }
+                    if (includeTrackBasedWindEstimation && estimatedTrack != null) {
+                        WindTrackInfoDAO windEstimations = createWindTrackInfoDAO(estimatedTrack);
+                        windTrackInfoDAOs.put("ESTIMATION", windEstimations);
                     }
                 }
             }

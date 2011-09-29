@@ -52,6 +52,11 @@ public interface SailingServiceAsync {
     void stopTrackingRace(String eventName, String raceName, AsyncCallback<Void> asyncCallback);
 
     /**
+     * Obtains wind data for an event/race based on the wind data as recorded in the currently
+     * selected wind track for the race, with raw and dampened numbers, for the time stamps as
+     * provided by the recording. The interval for which to retrieve wind data must be specified
+     * using <code>from</code> and <code>to</code>.
+     * 
      * @param includeTrackBasedWindEstimation if <code>true</code>, for each time point for which an
      * {@link WindSource#EXPEDITION} estimation exists for the event/race requested, a wind estimation
      * based on the GPS tracks will be performed and included in the result. In this case, the
@@ -60,8 +65,14 @@ public interface SailingServiceAsync {
     void getWindInfo(String eventName, String raceName, Date from, Date to,
             boolean includeTrackBasedWindEstimation, AsyncCallback<WindInfoForRaceDAO> callback);
 
+    /**
+     * Obtains wind information starting at <code>from</code> and stepping in intervals as specified by
+     * <code>millisecondsStepWidth</code>, delivering <code>numberOfFixes</code> fixes. Those don't have to
+     * correspond exactly with when wind measurements were taken; instead, the selected race's selected wind
+     * source is interpolated to estimate the wind for the time/position requested.
+     */
     void getWindInfo(String eventName, String raceName, Date from, long millisecondsStepWidth, int numberOfFixes,
-            double latDeg, double lngDeg, AsyncCallback<WindInfoForRaceDAO> callback);
+            double latDeg, double lngDeg, boolean includeTrackBasedWindEstimation, AsyncCallback<WindInfoForRaceDAO> callback);
 
     void setWind(String eventName, String raceName, WindDAO wind, AsyncCallback<Void> callback);
     

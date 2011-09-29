@@ -277,8 +277,9 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
 
     @Override
     public boolean hasDirectionChange(TimePoint at, double minimumDegreeDifference) {
-        TimePoint start = new MillisecondsTimePoint(at.asMillis()-getMillisecondsOverWhichToAverageSpeed()/2);
-        TimePoint end = new MillisecondsTimePoint(at.asMillis()+getMillisecondsOverWhichToAverageSpeed()/2);
+        // TODO use boat-class specific time for a maneuver
+        TimePoint start = new MillisecondsTimePoint(at.asMillis()-5000);
+        TimePoint end = new MillisecondsTimePoint(at.asMillis()+5000);
         Bearing bearingAtStart = getEstimatedSpeed(start).getBearing();
         Bearing bearingAtEnd = getEstimatedSpeed(end).getBearing();
         // TODO also need to analyze the (smoothened) directions in between; example: two tacks within averaging interval

@@ -53,7 +53,7 @@ public interface SailingService extends RemoteService {
     List<QuickRankDAO> getQuickRanks(String eventName, String raceName, Date date) throws Exception;
 
     WindInfoForRaceDAO getWindInfo(String eventName, String raceName, Date from, long millisecondsStepWidth,
-            int numberOfFixes, double latDeg, double lngDeg) throws Exception;
+            int numberOfFixes, double latDeg, double lngDeg, boolean includeTrackBasedWindEstimation) throws Exception;
 
     void setWindSource(String eventName, String raceName, String windSourceName);
 
