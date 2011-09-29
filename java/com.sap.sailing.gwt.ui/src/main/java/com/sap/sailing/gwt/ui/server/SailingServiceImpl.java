@@ -33,6 +33,7 @@ import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Speed;
 import com.sap.sailing.domain.base.SpeedWithBearing;
+import com.sap.sailing.domain.base.Tack;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.DegreeBearingImpl;
@@ -76,6 +77,7 @@ import com.sap.sailing.gwt.ui.shared.QuickRankDAO;
 import com.sap.sailing.gwt.ui.shared.RaceDAO;
 import com.sap.sailing.gwt.ui.shared.RaceRecordDAO;
 import com.sap.sailing.gwt.ui.shared.RegattaDAO;
+import com.sap.sailing.gwt.ui.shared.SpeedWithBearingDAO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDAO;
 import com.sap.sailing.gwt.ui.shared.WindDAO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDAO;
@@ -280,18 +282,18 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
 
     @Override
-    public List<RaceRecordDAO> listRacesInEvent(String eventJsonURL) throws MalformedURLException, IOException,
+    public Pair<String, List<RaceRecordDAO>> listRacesInEvent(String eventJsonURL) throws MalformedURLException, IOException,
             ParseException, org.json.simple.parser.ParseException, URISyntaxException {
-        List<RaceRecord> raceRecords;
+        com.sap.sailing.util.Util.Pair<String,List<RaceRecord>> raceRecords;
         raceRecords = getService().getRaceRecords(new URL(eventJsonURL));
         List<RaceRecordDAO> result = new ArrayList<RaceRecordDAO>();
-        for (RaceRecord raceRecord : raceRecords) {
+        for (RaceRecord raceRecord : raceRecords.getB()) {
             result.add(new RaceRecordDAO(raceRecord.getID(), raceRecord.getEventName(), raceRecord.getName(),
                     raceRecord.getParamURL().toString(), raceRecord.getReplayURL(), raceRecord.getLiveURI().toString(),
                     raceRecord.getStoredURI().toString(), raceRecord.getTrackingStartTime().asDate(), raceRecord
                             .getTrackingEndTime().asDate(), raceRecord.getRaceStartTime().asDate()));
         }
-        return result;
+        return new Pair<String, List<RaceRecordDAO>>(raceRecords.getA(), result);
     }
 
     @Override
@@ -319,7 +321,6 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
 
     @Override
     public List<TracTracConfigurationDAO> getPreviousConfigurations() throws Exception {
-        DomainObjectFactory domainObjectFactory = DomainObjectFactory.INSTANCE;
         Iterable<TracTracConfiguration> configs = domainObjectFactory.getTracTracConfigurations();
         List<TracTracConfigurationDAO> result = new ArrayList<TracTracConfigurationDAO>();
         for (TracTracConfiguration ttConfig : configs) {
@@ -572,8 +573,11 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                     if (fixIter.hasNext()) {
                         GPSFixMoving fix = fixIter.next();
                         while (fix != null && fix.getTimePoint().compareTo(end) < 0) {
+                            Tack tack = trackedRace.getTack(competitor, fix.getTimePoint());
                             GPSFixDAO fixDAO = new GPSFixDAO(fix.getTimePoint().asDate(), new PositionDAO(fix
-                                    .getPosition().getLatDeg(), fix.getPosition().getLngDeg()));
+                                    .getPosition().getLatDeg(), fix.getPosition().getLngDeg()),
+                                    new SpeedWithBearingDAO(fix.getSpeed().getKnots(), fix.getSpeed().getBearing().getDegrees()),
+                                    tack.name());
                             fixesForCompetitor.add(fixDAO);
                             if (fixIter.hasNext()) {
                                 fix = fixIter.next();
@@ -581,8 +585,12 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                                 // check if fix was at date and if extrapolation is requested
                                 if (!fix.getTimePoint().equals(end) && extrapolate) {
                                     Position position = track.getEstimatedPosition(end, extrapolate);
+                                    Tack tack2 = trackedRace.getTack(competitor, end);
+                                    SpeedWithBearing speedWithBearing = track.getEstimatedSpeed(end);
                                     GPSFixDAO extrapolated = new GPSFixDAO(date, new PositionDAO(position.getLatDeg(),
-                                            position.getLngDeg()));
+                                            position.getLngDeg()),
+                                            new SpeedWithBearingDAO(speedWithBearing.getKnots(), speedWithBearing.getBearing().getDegrees()),
+                                            tack2.name());
                                     fixesForCompetitor.add(extrapolated);
                                 }
                                 fix = null;
@@ -613,9 +621,11 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 for (Buoy buoy : buoys) {
                     GPSFixTrack<Buoy, GPSFix> track = trackedRace.getTrack(buoy);
                     Position positionAtDate = track.getEstimatedPosition(dateAsTimePoint, /* extrapolate */false);
-                    MarkDAO markDAO = new MarkDAO(buoy.getName(), positionAtDate.getLatDeg(),
-                            positionAtDate.getLngDeg());
-                    result.add(markDAO);
+                    if (positionAtDate != null) {
+                        MarkDAO markDAO = new MarkDAO(buoy.getName(), positionAtDate.getLatDeg(),
+                                positionAtDate.getLngDeg());
+                        result.add(markDAO);
+                    }
                 }
             }
         }

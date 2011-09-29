@@ -31,6 +31,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.sap.sailing.gwt.ui.shared.EventDAO;
+import com.sap.sailing.gwt.ui.shared.Pair;
 import com.sap.sailing.gwt.ui.shared.RaceDAO;
 import com.sap.sailing.gwt.ui.shared.RaceRecordDAO;
 import com.sap.sailing.gwt.ui.shared.RegattaDAO;
@@ -367,7 +368,7 @@ public class EventManagementPanel extends FormPanel implements EventDisplayer {
         final String jsonURL = jsonURLBox.getValue();
         final String liveDataURI = liveURIBox.getValue();
         final String storedDataURI = storedURIBox.getValue();
-        sailingService.listRacesInEvent(jsonURL, new AsyncCallback<List<RaceRecordDAO>>() {
+        sailingService.listRacesInEvent(jsonURL, new AsyncCallback<Pair<String, List<RaceRecordDAO>>>() {
             @Override
             public void onFailure(Throwable caught) {
                 EventManagementPanel.this.errorReporter.reportError("Error trying to list races: "
@@ -375,30 +376,30 @@ public class EventManagementPanel extends FormPanel implements EventDisplayer {
             }
 
             @Override
-            public void onSuccess(final List<RaceRecordDAO> result) {
+            public void onSuccess(final Pair<String, List<RaceRecordDAO>> result) {
                 raceList.getList().clear();
-                raceList.getList().addAll(result);
-                if (!result.isEmpty()) {
-                    // store a successful configuration in the database for later retrieval
-                    sailingService.storeTracTracConfiguration(result.iterator().next().eventName, jsonURL, liveDataURI,
-                            storedDataURI, new AsyncCallback<Void>() {
-                                @Override
-                                public void onFailure(Throwable caught) {
-                                    errorReporter.reportError("Exception trying to store configuration in DB: "
-                                            + caught.getMessage());
-                                }
-
-                                @Override
-                                public void onSuccess(Void voidResult) {
-                                    // refresh list of previous configurations
-                                    TracTracConfigurationDAO ttConfig = new TracTracConfigurationDAO(result.iterator().next().eventName,
-                                            jsonURL, liveDataURI, storedDataURI);
-                                    if (previousConfigurations.put(ttConfig.name, ttConfig) == null) {
-                                        previousConfigurationsComboBox.addItem(ttConfig.name);
-                                    }
-                                }
-                            });
+                if (result.getB() != null) {
+                    raceList.getList().addAll(result.getB());
                 }
+                // store a successful configuration in the database for later retrieval
+                sailingService.storeTracTracConfiguration(result.getA(), jsonURL, liveDataURI, storedDataURI,
+                        new AsyncCallback<Void>() {
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                errorReporter.reportError("Exception trying to store configuration in DB: "
+                                        + caught.getMessage());
+                            }
+
+                            @Override
+                            public void onSuccess(Void voidResult) {
+                                // refresh list of previous configurations
+                                TracTracConfigurationDAO ttConfig = new TracTracConfigurationDAO(result.getA(),
+                                        jsonURL, liveDataURI, storedDataURI);
+                                if (previousConfigurations.put(ttConfig.name, ttConfig) == null) {
+                                    previousConfigurationsComboBox.addItem(ttConfig.name);
+                                }
+                            }
+                        });
             }
         });
     }

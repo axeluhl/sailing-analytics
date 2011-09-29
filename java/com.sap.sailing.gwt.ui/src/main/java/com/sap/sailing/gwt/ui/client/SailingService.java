@@ -30,7 +30,7 @@ public interface SailingService extends RemoteService {
     
     List<EventDAO> listEvents();
 
-    List<RaceRecordDAO> listRacesInEvent(String eventJsonURL) throws Exception;
+    Pair<String, List<RaceRecordDAO>> listRacesInEvent(String eventJsonURL) throws Exception;
 
     void track(RaceRecordDAO rr, String liveURI, String storedURI, boolean trackWind, boolean correctWindByDeclination) throws Exception;
 

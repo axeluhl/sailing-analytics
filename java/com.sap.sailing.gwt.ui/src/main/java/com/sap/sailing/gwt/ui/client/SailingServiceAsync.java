@@ -28,7 +28,10 @@ import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDAO;
 public interface SailingServiceAsync {
     void listEvents(AsyncCallback<List<EventDAO>> callback);
 
-    void listRacesInEvent(String eventJsonURL, AsyncCallback<List<RaceRecordDAO>> callback);
+    /**
+     * The string returned in the callback's pair is the common event name
+     */
+    void listRacesInEvent(String eventJsonURL, AsyncCallback<Pair<String, List<RaceRecordDAO>>> callback);
 
     /**
      * @param liveURI may be <code>null</code> or the empty string in which case the server will
