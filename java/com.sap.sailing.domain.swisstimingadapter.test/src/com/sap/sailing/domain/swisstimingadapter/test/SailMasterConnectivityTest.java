@@ -7,13 +7,18 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.UnknownHostException;
+import java.text.ParseException;
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.Iterator;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sailing.domain.base.TimePoint;
+import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.swisstimingadapter.Competitor;
 import com.sap.sailing.domain.swisstimingadapter.Course;
 import com.sap.sailing.domain.swisstimingadapter.Mark;
@@ -88,6 +93,38 @@ public class SailMasterConnectivityTest {
                 "4712,Not such a wonderful race" }, response.getSections());
         assertArrayEquals(new Object[] { "4711", "A wonderful test race" }, response.getSections()[1].split(","));
         assertArrayEquals(new Object[] { "4712", "Not such a wonderful race" }, response.getSections()[2].split(","));
+    }
+    
+    @Test
+    public void testRaceTime() throws UnknownHostException, IOException, ParseException {
+        Iterable<Race> races = connector.getRaces();
+        Iterator<Race> i = races.iterator();
+        Race r1 = i.next();
+        TimePoint start1 = connector.getStartTime(r1.getRaceID());
+        TimePoint now = MillisecondsTimePoint.now();
+        Calendar cal = new GregorianCalendar();
+        Calendar nowCal = new GregorianCalendar();
+        nowCal.setTime(now.asDate());
+        cal.setTime(start1.asDate());
+        assertSameDay(nowCal, cal);
+        // 10:15:22
+        assertEquals(10, cal.get(Calendar.HOUR_OF_DAY));
+        assertEquals(15, cal.get(Calendar.MINUTE));
+        assertEquals(22, cal.get(Calendar.SECOND));
+        Race r2 = i.next();
+        TimePoint start2 = connector.getStartTime(r2.getRaceID());
+        cal.setTime(start2.asDate());
+        assertSameDay(nowCal, cal);
+        // 18:17:23
+        assertEquals(18, cal.get(Calendar.HOUR_OF_DAY));
+        assertEquals(17, cal.get(Calendar.MINUTE));
+        assertEquals(23, cal.get(Calendar.SECOND));
+    }
+
+    private void assertSameDay(Calendar nowCal, Calendar cal) {
+        for (int field : new int[] { Calendar.YEAR, Calendar.MONTH, Calendar.DAY_OF_MONTH }) {
+            assertEquals(nowCal.get(field), cal.get(field));
+        }
     }
     
     @Test

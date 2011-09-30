@@ -9,6 +9,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,7 +29,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiver implements Sa
     private final String host;
     private final int port;
     private Socket socket;
-    private static final DateFormat dateFormat = new SimpleDateFormat("hh:MM:ss");
+    private static final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss");
     
     public SailMasterConnectorImpl(String host, int port) {
         super();
@@ -74,6 +75,10 @@ public class SailMasterConnectorImpl extends SailMasterTransceiver implements Sa
             marks.add(new MarkImpl(markDetails[1], Integer.valueOf(markDetails[0]), Arrays.asList(markDetails).subList(2, markDetails.length)));
         }
         return new CourseImpl(raceID, marks);
+    }
+    
+    private String prefixTimeWithISOToday(String time) {
+        return dateFormat.format(new Date()).substring(0, "yyyy-mm-ddT".length())+time;
     }
 
     private void assertRaceID(String raceID, String section) {
@@ -126,7 +131,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiver implements Sa
         String[] sections = response.getSections();
         assertResponseType("RaceTime", sections[0]);
         assertRaceID(raceID, sections[1]);
-        return new MillisecondsTimePoint(dateFormat.parse(sections[2]));
+        return new MillisecondsTimePoint(dateFormat.parse(prefixTimeWithISOToday(sections[2])));
     }
 
     @Override
@@ -140,7 +145,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiver implements Sa
         for (int i=2; i<sections.length; i+=2) {
             String[] markTimeDetail = sections[i+1].split(",");
             result.put(Integer.valueOf(sections[i]), new Pair<TimePoint, String>(
-                    new MillisecondsTimePoint(dateFormat.parse(markTimeDetail[0])), markTimeDetail[1]));
+                    new MillisecondsTimePoint(dateFormat.parse(prefixTimeWithISOToday(markTimeDetail[0]))), markTimeDetail[1]));
         }
         return result;
     }
