@@ -21,6 +21,7 @@ import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.RaceHandle;
 import com.sap.sailing.domain.tractracadapter.RaceRecord;
 import com.sap.sailing.domain.tractracadapter.RaceTracker;
+import com.sap.sailing.util.Util.Pair;
 import com.sap.sailing.util.Util.Triple;
 
 /**
@@ -133,7 +134,7 @@ public interface RacingEventService {
      * calls to individually start tracking races of this event, rather than tracking <em>all</em> races in the event which
      * is hardly ever useful.
      */
-    List<RaceRecord> getRaceRecords(URL jsonURL) throws IOException, ParseException, org.json.simple.parser.ParseException, URISyntaxException;
+    Pair<String, List<RaceRecord>> getRaceRecords(URL jsonURL) throws IOException, ParseException, org.json.simple.parser.ParseException, URISyntaxException;
 
     boolean isRaceBeingTracked(RaceDefinition r);
 

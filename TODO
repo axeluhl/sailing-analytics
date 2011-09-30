@@ -3,6 +3,9 @@ Axel
 
  - Use wind estimator to feed another wind track
 
+ - make manuevering time a parameter coming from the boat class and use it in hasDirectionChange to
+   consider that some boats turn faster than others
+
  - Estimate wind not only based on a snapshot in time but also on a time interval, looking for
    maneuvers. Assuming that the wind doesn't change radically, averaging over an n seconds interval
    with n, e.g., being 30s, maneuvers should help in detecting wind direction.

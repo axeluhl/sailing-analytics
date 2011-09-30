@@ -52,7 +52,9 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     private static final Logger logger = Logger.getLogger(TrackedRaceImpl.class.getName());
 
-    private static final double MINIMUM_ANGLE_BETWEEN_DIFFERENT_TACKS = 45.;
+    // TODO make typical tack/jibe angles and the respective clustering thresholds a boat class parameter
+    private static final double MINIMUM_ANGLE_BETWEEN_DIFFERENT_TACKS_UPWIND = 45.;
+    private static final double MINIMUM_ANGLE_BETWEEN_DIFFERENT_TACKS_DOWNWIND = 15.;
     
     // TODO observe the race course; if it changes, update leg structures; consider fine-grained update events that tell what changed
     private final RaceDefinition race;
@@ -560,12 +562,12 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             }
         }
         Bearing upwindAverage = null;
-        BearingCluster[] bearingClustersUpwind = bearings.get(LegType.UPWIND).splitInTwo(MINIMUM_ANGLE_BETWEEN_DIFFERENT_TACKS);
+        BearingCluster[] bearingClustersUpwind = bearings.get(LegType.UPWIND).splitInTwo(MINIMUM_ANGLE_BETWEEN_DIFFERENT_TACKS_UPWIND);
         if (!bearingClustersUpwind[0].isEmpty() && !bearingClustersUpwind[1].isEmpty()) {
             upwindAverage = bearingClustersUpwind[0].getAverage().middle(bearingClustersUpwind[1].getAverage());
         }
         Bearing downwindAverage = null;
-        BearingCluster[] bearingClustersDownwind = bearings.get(LegType.DOWNWIND).splitInTwo(MINIMUM_ANGLE_BETWEEN_DIFFERENT_TACKS);
+        BearingCluster[] bearingClustersDownwind = bearings.get(LegType.DOWNWIND).splitInTwo(MINIMUM_ANGLE_BETWEEN_DIFFERENT_TACKS_DOWNWIND);
         if (!bearingClustersDownwind[0].isEmpty() && !bearingClustersDownwind[1].isEmpty()) {
             downwindAverage = bearingClustersDownwind[0].getAverage().middle(bearingClustersDownwind[1].getAverage());
         }

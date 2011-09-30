@@ -12,11 +12,11 @@ import javax.servlet.http.HttpServletResponse;
 import org.jdom.Document;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.Distance;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Speed;
-import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -49,6 +49,7 @@ public class RankPerLeg extends Action {
         // Get Legs data
         int i=0;
         NumberFormat numberFormat = new DecimalFormat("00");
+        TrackedLeg previousLeg = null;
         for (final TrackedLeg trackedLeg : trackedRace.getTrackedLegs()) {
             final Leg leg = trackedLeg.getLeg();
             final String legId = numberFormat.format(++i);
@@ -64,11 +65,14 @@ public class RankPerLeg extends Action {
                     final String sailID = competitor.getBoat().getSailID();
                     final int overallRank = trackedRace.getRank(competitor);
                     final int legRank = trackedLeg.getTrackedLeg(competitor).getRank(time);
-                    final int posGL = 0; // not yet known
+                    int posGL = 0;
+                    if (previousLeg != null) {
+                        posGL = legRank - previousLeg.getTrackedLeg(competitor).getRank(time);
+                    }
                     final Double gapToLeader = trackedLeg.getTrackedLeg(competitor).getGapToLeaderInSeconds(time);
                     final double legTime = 1./1000.*trackedLeg.getTrackedLeg(competitor).getTimeInMilliSeconds(time);
                     final Speed avgSpeed = trackedLeg.getTrackedLeg(competitor).getAverageSpeedOverGround(time);
-                    final SpeedWithBearing speedOVG = trackedLeg.getTrackedLeg(competitor).getSpeedOverGround(time);
+                    final Distance distanceSailed = trackedLeg.getTrackedLeg(competitor).getDistanceTraveled(time);
 
                     // Write data
                     addRow();
@@ -85,9 +89,10 @@ public class RankPerLeg extends Action {
                     addColumn("" + (gapToLeader==null ? "null" : gapToLeader));
                     addColumn("" + legTime);
                     addColumn("" + (avgSpeed == null ? "null" : avgSpeed.getKnots()));
-                    addColumn("" + (speedOVG == null ? "null" : speedOVG.getKnots()));
+                    addColumn("" + (distanceSailed == null ? "null" : distanceSailed.getMeters()));
                 }
             }
+            previousLeg = trackedLeg;
         }
         say(table);
     }
