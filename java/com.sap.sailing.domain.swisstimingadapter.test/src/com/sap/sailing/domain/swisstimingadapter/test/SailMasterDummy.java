@@ -29,6 +29,9 @@ public class SailMasterDummy implements Runnable {
             while (!stopped) {
                 Socket s = listenOn.accept();
                 processRequests(s);
+                if (stopped) {
+                    s.close();
+                }
             }
             System.out.println("Server stopped. Thread ending.");
         } catch (IOException e) {
@@ -39,8 +42,9 @@ public class SailMasterDummy implements Runnable {
     private void processRequests(Socket s) throws IOException {
         InputStream is = s.getInputStream();
         String message = transceiver.receiveMessage(is);
-        if (message != null) {
+        while (message != null) {
             respondToMessage(message, s.getOutputStream());
+            message = transceiver.receiveMessage(is);
         }
     }
     

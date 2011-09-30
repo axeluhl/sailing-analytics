@@ -10,9 +10,9 @@ import java.util.List;
 
 import org.junit.Test;
 
+import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFormatException;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingMessage;
-import com.sap.sailing.domain.swisstimingadapter.SwissTimingMessageParser;
 
 public class ParseSingleSwissTimingPacketFromFileTest {
     @Test
@@ -20,7 +20,7 @@ public class ParseSingleSwissTimingPacketFromFileTest {
         byte[] message = new byte[65536];
         InputStream is = getClass().getResourceAsStream("/SwissTimingExampleTrack.bin");
         is.read(message);
-        SwissTimingMessage swissTimingMessage = SwissTimingMessageParser.INSTANCE.parse(message);
+        SwissTimingMessage swissTimingMessage = SwissTimingFactory.INSTANCE.createMessageParser().parse(message);
         assertNotNull(swissTimingMessage);
         int lat = ((0x1e<<8 | 0x2c)<<8 | 0x31)<<8 | 0x14;
         int lng = ((0xfe << 8 | 0x97)<<8 | 0x1d)<<8 | 0x73;
@@ -37,7 +37,7 @@ public class ParseSingleSwissTimingPacketFromFileTest {
         int offset = 0;
         int messageLength = 0;
         while (offset < bytesRead) {
-            SwissTimingMessage swissTimingMessage = SwissTimingMessageParser.INSTANCE.parse(message, offset, bytesRead-offset);
+            SwissTimingMessage swissTimingMessage = SwissTimingFactory.INSTANCE.createMessageParser().parse(message, offset, bytesRead-offset);
             assertNotNull(swissTimingMessage);
             messages.add(swissTimingMessage);
             messageLength = swissTimingMessage.length();
