@@ -7,4 +7,5 @@ Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.udpconnector
-Export-Package: com.sap.sailing.domain.swisstimingadapter
+Export-Package: com.sap.sailing.domain.swisstimingadapter,
+ com.sap.sailing.domain.swisstimingadapter.impl;x-friends:="com.sap.sailing.domain.swisstimingadapter.test"

@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
 
 public class SailMasterTransceiver {
     private static final byte STX = 0x02;
@@ -11,7 +12,7 @@ public class SailMasterTransceiver {
 
     public void sendMessage(String message, OutputStream os) throws IOException {
         os.write(STX);
-        os.write(message.getBytes()); // TODO clarify which character set / encoding to use
+        os.write(message.getBytes(Charset.forName("cp1252")));
         os.write(ETX);
     }
 
@@ -38,7 +39,7 @@ public class SailMasterTransceiver {
             bos.write(read);
             read = is.read();
         }
-        String message = new String(bos.toByteArray()); // TODO clarify character set / encoding with Kai
+        String message = new String(bos.toByteArray(), Charset.forName("cp1252"));
         return message;
     }
 
