@@ -90,9 +90,9 @@ public class RankPerLeg extends Action {
                     addColumn("" + legTime);
                     addColumn("" + (avgSpeed == null ? "null" : avgSpeed.getKnots()));
                     addColumn("" + (distanceSailed == null ? "null" : distanceSailed.getMeters()));
-                    previousLeg = trackedLeg;
                 }
             }
+            previousLeg = trackedLeg;
         }
         say(table);
     }
