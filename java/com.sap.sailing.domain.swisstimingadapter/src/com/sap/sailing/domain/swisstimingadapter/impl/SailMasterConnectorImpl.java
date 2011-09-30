@@ -5,10 +5,12 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
 import com.sap.sailing.domain.base.TimePoint;
+import com.sap.sailing.domain.swisstimingadapter.Competitor;
 import com.sap.sailing.domain.swisstimingadapter.Course;
 import com.sap.sailing.domain.swisstimingadapter.Mark;
 import com.sap.sailing.domain.swisstimingadapter.Race;
@@ -45,9 +47,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiver implements Sa
     public Iterable<Race> getRaces() throws UnknownHostException, IOException {
         SailMasterMessage response = sendRequestAndGetResponse("RaceId");
         String[] sections = response.getSections();
-        if (!sections[0].equals("RaceId")) {
-            throw new RuntimeException("Expected a RaceId response for a RaceId request but got "+sections[0]);
-        }
+        assertResponseType("RaceId", sections);
         List<Race> result = new ArrayList<Race>();
         for (int i=1; i<sections.length; i++) {
             String[] idAndDescription = sections[i].split(",");
@@ -57,15 +57,44 @@ public class SailMasterConnectorImpl extends SailMasterTransceiver implements Sa
     }
 
     @Override
-    public Course getCourse(String raceID) {
-        // TODO Auto-generated method stub
-        return null;
+    public Course getCourse(String raceID) throws UnknownHostException, IOException {
+        SailMasterMessage response = sendRequestAndGetResponse("CourseConfig|"+raceID);
+        String[] sections = response.getSections();
+        assertResponseType("CourseConfig", sections);
+        assertRaceID(raceID, sections);
+        List<Mark> marks = new ArrayList<Mark>();
+        for (int i=2; i<sections.length; i++) {
+            String[] markDetails = sections[i].split(",");
+            marks.add(new MarkImpl(markDetails[1], Integer.valueOf(markDetails[0]), Arrays.asList(markDetails).subList(2, markDetails.length)));
+        }
+        return new CourseImpl(raceID, marks);
+    }
+
+    private void assertRaceID(String raceID, String[] sections) {
+        if (!sections[1].equals(raceID)) {
+            throw new RuntimeException("Expected a "+sections[0]+" response for race ID "+raceID+
+                    " but received one for "+sections[1]);
+        }
+    }
+
+    private void assertResponseType(String responseType, String[] sections) {
+        if (!sections[0].equals(responseType)) {
+            throw new RuntimeException("Expected a "+responseType+" response for a "+responseType+" request but got "+sections[0]);
+        }
     }
 
     @Override
-    public StartList getStartList(String raceID) {
-        // TODO Auto-generated method stub
-        return null;
+    public StartList getStartList(String raceID) throws UnknownHostException, IOException {
+        SailMasterMessage response = sendRequestAndGetResponse("StartList|"+raceID);
+        String[] sections = response.getSections();
+        assertResponseType("StartList", sections);
+        assertRaceID(raceID, sections);
+        ArrayList<Competitor> competitors = new ArrayList<Competitor>();
+        for (int i=2; i<sections.length; i++) {
+            String[] competitorDetails = sections[i].split(",");
+            competitors.add(new CompetitorImpl(competitorDetails[0], competitorDetails[1], competitorDetails[2]));
+        }
+        return new StartListImpl(raceID, competitors);
     }
 
     @Override

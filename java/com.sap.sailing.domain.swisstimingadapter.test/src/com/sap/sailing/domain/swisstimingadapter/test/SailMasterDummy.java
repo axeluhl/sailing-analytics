@@ -6,6 +6,7 @@ import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import com.sap.sailing.domain.swisstimingadapter.impl.SailMasterMessageImpl;
 import com.sap.sailing.domain.swisstimingadapter.impl.SailMasterTransceiver;
 
 public class SailMasterDummy implements Runnable {
@@ -54,9 +55,35 @@ public class SailMasterDummy implements Runnable {
     }
     
     private void respondToMessage(String message, OutputStream os) throws IOException {
-        if ("RaceId".equals(message)) {
+        SailMasterMessageImpl smMessage = new SailMasterMessageImpl(message);
+        String[] sections = smMessage.getSections();
+        if ("RaceId".equals(sections[0])) {
             transceiver.sendMessage("RaceId|4711,A wonderful test race|4712,Not such a wonderful race", os);
-        } else if ("StopServer".equals(message)) {
+        } else if ("CourseConfig".equals(sections[0])) {
+            if (sections[1].equals("4711")) {
+                transceiver.sendMessage("CourseConfig|"+sections[1]+"|1,Lee Gate,LG1,LG2|2,Windward,WW1", os);
+            } else if (sections[1].equals("4712")) {
+                transceiver.sendMessage("CourseConfig|"+sections[1]+"|1,Lee Gate,LG1,LG2|2,Windward,WW1|3,Offset,OS1", os);
+            }
+        } else if ("StartList".equals(sections[0])) {
+            if (sections[1].equals("4711")) {
+                transceiver.sendMessage("StartList|"+sections[1]+"|GER 8414,GER,Polgar/Koy|GER 8140,GER,Schlonski/Bohn", os);
+            } else if (sections[1].equals("4712")) {
+                transceiver.sendMessage("StartList|"+sections[1]+"|GER 8340,GER,Stanjek/Kleen|GER 8433,GER,Babendererde/Jacobs|GER 8299,GER,Elsner/Schulz", os);
+            }
+        } else if ("RaceTime".equals(sections[0])) {
+            
+        } else if ("ClockAtMark".equals(sections[0])) {
+            
+        } else if ("DistToMark".equals(sections[0])) {
+            
+        } else if ("CurrentBoatSpeed".equals(sections[0])) {
+            
+        } else if ("AverageBoatSpeed".equals(sections[0])) {
+            
+        } else if ("DistBetweenBoats".equals(sections[0])) {
+            
+        } else if ("StopServer".equals(sections[0])) {
             stopped = true;
             transceiver.sendMessage("Server stopped", os);
         } else {
