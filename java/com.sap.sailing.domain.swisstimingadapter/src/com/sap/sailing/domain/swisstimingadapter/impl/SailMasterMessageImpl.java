@@ -17,7 +17,7 @@ public class SailMasterMessageImpl implements SailMasterMessage {
 
     @Override
     public String[] getSections() {
-        return getMessage().split("|");
+        return getMessage().split("\\|");
     }
 
     @Override

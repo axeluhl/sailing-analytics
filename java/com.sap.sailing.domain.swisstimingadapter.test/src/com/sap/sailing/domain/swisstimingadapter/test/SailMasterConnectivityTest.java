@@ -1,9 +1,12 @@
 package com.sap.sailing.domain.swisstimingadapter.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.net.UnknownHostException;
+import java.util.Arrays;
 
 import org.junit.After;
 import org.junit.Before;
@@ -37,5 +40,7 @@ public class SailMasterConnectivityTest {
     public void testRaceId() throws UnknownHostException, IOException {
         SailMasterMessage response = connector.sendRequestAndGetResponse("RaceId");
         assertEquals("RaceId|4711,A wonderful test race|4712,Not such a wonderful race", response.getMessage());
+        assertArrayEquals(new String[] { "RaceId", "4711,A wonderful test race",
+                "4712,Not such a wonderful race" }, response.getSections());
     }
 }
