@@ -72,7 +72,11 @@ public class SailMasterDummy implements Runnable {
                 transceiver.sendMessage("StartList|"+sections[1]+"|GER 8340,GER,Stanjek/Kleen|GER 8433,GER,Babendererde/Jacobs|GER 8299,GER,Elsner/Schulz", os);
             }
         } else if ("RaceTime".equals(sections[0])) {
-            
+            if (sections[1].equals("4711")) {
+                transceiver.sendMessage("RaceTime|"+sections[1]+"|72498724937", os);
+            } else if (sections[1].equals("4712")) {
+                transceiver.sendMessage("RaceTime|"+sections[1]+"|61283761239", os);
+            }
         } else if ("ClockAtMark".equals(sections[0])) {
             
         } else if ("DistToMark".equals(sections[0])) {
