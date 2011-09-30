@@ -3,7 +3,9 @@ package com.sap.sailing.domain.swisstimingadapter.test;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -23,20 +25,53 @@ import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
 import com.sap.sailing.util.Util;
 
 public class SailMasterConnectivityTest {
-    private SailMasterDummy sailMaster;
     private static final int port = 50002;
     
     private SailMasterConnector connector;
     private Thread dummyServerThread;
     
+    /**
+     * Interactive test console. Reads lines from the command line until "exit" is entered, wraps those lines with
+     * STX/ETX markers and sends them to the server and displays the server's response on stdout.
+     * 
+     * @param args
+     *            [ hostname port ]; if hostname/port are provided, connects to that server; otherwise, a dummy server
+     *            is started locally and connected to
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    public static void main(String[] args) throws IOException, InterruptedException {
+        SailMasterConnectivityTest instance = new SailMasterConnectivityTest();
+        instance.runInteractively(args);
+    }
+
+    private void runInteractively(String[] args) throws IOException, UnknownHostException, InterruptedException {
+        if (args.length == 0) {
+            setUp();
+        } else {
+            connector = SwissTimingFactory.INSTANCE.createSailMasterConnector(args[0], Integer.valueOf(args[1]));
+        }
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        String line = br.readLine();
+        while (line != null && !line.equals("exit")) {
+            SailMasterMessage response = connector.sendRequestAndGetResponse(line);
+            System.out.println(response);
+            line = br.readLine();
+        }
+    }
+    
     @Before
     public void setUp() throws InterruptedException {
+        startSailMasterDummy();
+        connector = SwissTimingFactory.INSTANCE.createSailMasterConnector("localhost", port);
+    }
+
+    private void startSailMasterDummy() throws InterruptedException {
         // create a SailMaster dummy on port 50002 and launch it in a separate thread
-        sailMaster = new SailMasterDummy(port);
+        SailMasterDummy sailMaster = new SailMasterDummy(port);
         dummyServerThread = new Thread(sailMaster, "SailMasterDummy on port "+port);
         dummyServerThread.start();
         Thread.sleep(100); // give dummy sail master server a change to start listening on its socket
-        connector = SwissTimingFactory.INSTANCE.createSailMasterConnector("localhost", port);
     }
     
     @After
