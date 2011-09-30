@@ -67,15 +67,15 @@ public class SailMasterDummy implements Runnable {
             }
         } else if ("StartList".equals(sections[0])) {
             if (sections[1].equals("4711")) {
-                transceiver.sendMessage("StartList|"+sections[1]+"|GER 8414,GER,Polgar/Koy|GER 8140,GER,Schlonski/Bohn", os);
+                transceiver.sendMessage("Startlist|"+sections[1]+"|GER 8414,GER,Polgar/Koy|GER 8140,GER,Schlonski/Bohn", os);
             } else if (sections[1].equals("4712")) {
-                transceiver.sendMessage("StartList|"+sections[1]+"|GER 8340,GER,Stanjek/Kleen|GER 8433,GER,Babendererde/Jacobs|GER 8299,GER,Elsner/Schulz", os);
+                transceiver.sendMessage("Startlist|"+sections[1]+"|GER 8340,GER,Stanjek/Kleen|GER 8433,GER,Babendererde/Jacobs|GER 8299,GER,Elsner/Schulz", os);
             }
         } else if ("RaceTime".equals(sections[0])) {
             if (sections[1].equals("4711")) {
-                transceiver.sendMessage("RaceTime|"+sections[1]+"|72498724937", os);
+                transceiver.sendMessage("RaceTime|"+sections[1]+"|10:15:22", os);
             } else if (sections[1].equals("4712")) {
-                transceiver.sendMessage("RaceTime|"+sections[1]+"|61283761239", os);
+                transceiver.sendMessage("RaceTime|"+sections[1]+"|18:17:23", os);
             }
         } else if ("ClockAtMark".equals(sections[0])) {
             

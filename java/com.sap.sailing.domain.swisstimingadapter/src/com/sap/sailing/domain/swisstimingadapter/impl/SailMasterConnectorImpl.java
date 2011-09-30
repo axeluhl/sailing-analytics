@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -25,6 +28,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiver implements Sa
     private final String host;
     private final int port;
     private Socket socket;
+    private static final DateFormat dateFormat = new SimpleDateFormat("hh:MM:ss");
     
     public SailMasterConnectorImpl(String host, int port) {
         super();
@@ -106,7 +110,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiver implements Sa
     public StartList getStartList(String raceID) throws UnknownHostException, IOException {
         SailMasterMessage response = sendRequestAndGetResponse("StartList|"+raceID);
         String[] sections = response.getSections();
-        assertResponseType("StartList", sections[0]);
+        assertResponseType("Startlist", sections[0]);
         assertRaceID(raceID, sections[1]);
         ArrayList<Competitor> competitors = new ArrayList<Competitor>();
         for (int i=2; i<sections.length; i++) {
@@ -117,24 +121,26 @@ public class SailMasterConnectorImpl extends SailMasterTransceiver implements Sa
     }
 
     @Override
-    public TimePoint getStartTime(String raceID) throws UnknownHostException, IOException {
+    public TimePoint getStartTime(String raceID) throws UnknownHostException, IOException, ParseException {
         SailMasterMessage response = sendRequestAndGetResponse("RaceTime|"+raceID);
         String[] sections = response.getSections();
         assertResponseType("RaceTime", sections[0]);
         assertRaceID(raceID, sections[1]);
-        return new MillisecondsTimePoint(Long.valueOf(sections[2]));
+        return new MillisecondsTimePoint(dateFormat.parse(sections[2]));
     }
 
     @Override
-    public Map<Integer, Pair<Long, String>> getDeltaClockAtMark(String raceID, int markIndex) throws UnknownHostException, IOException {
+    public Map<Integer, Pair<TimePoint, String>> getDeltaClockAtMark(String raceID, int markIndex)
+            throws UnknownHostException, IOException, NumberFormatException, ParseException {
         SailMasterMessage response = sendRequestAndGetResponse("ClockAtMark|"+raceID+"|"+markIndex);
         String[] sections = response.getSections();
         assertResponseType("ClockAtMark", sections[0]);
         assertRaceID(raceID, sections[1]);
-        Map<Integer, Pair<Long, String>> result = new HashMap<Integer, Pair<Long,String>>();
+        Map<Integer, Pair<TimePoint, String>> result = new HashMap<Integer, Pair<TimePoint,String>>();
         for (int i=2; i<sections.length; i+=2) {
             String[] markTimeDetail = sections[i+1].split(",");
-            result.put(Integer.valueOf(sections[i]), new Pair<Long, String>(Long.valueOf(markTimeDetail[0]), markTimeDetail[1]));
+            result.put(Integer.valueOf(sections[i]), new Pair<TimePoint, String>(
+                    new MillisecondsTimePoint(dateFormat.parse(markTimeDetail[0])), markTimeDetail[1]));
         }
         return result;
     }
