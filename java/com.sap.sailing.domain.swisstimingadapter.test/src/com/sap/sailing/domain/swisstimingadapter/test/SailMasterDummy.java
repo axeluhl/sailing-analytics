@@ -33,6 +33,7 @@ public class SailMasterDummy implements Runnable {
                     s.close();
                 }
             }
+            listenOn.close();
             System.out.println("Server stopped. Thread ending.");
         } catch (IOException e) {
             e.printStackTrace();
@@ -44,7 +45,11 @@ public class SailMasterDummy implements Runnable {
         String message = transceiver.receiveMessage(is);
         while (message != null) {
             respondToMessage(message, s.getOutputStream());
-            message = transceiver.receiveMessage(is);
+            if (stopped) {
+                message = null;
+            } else {
+                message = transceiver.receiveMessage(is);
+            }
         }
     }
     
