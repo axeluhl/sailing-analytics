@@ -87,7 +87,14 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
         if (maxPointsReason == MaxPointsReason.NONE) {
             result = getCorrectedNonMaxedScore(competitor, raceColumn, uncorrectedScore);
         } else {
-            result = getMaxPoints(raceColumn.getTrackedRace(), numberOfCompetitorsInLeaderboard);
+            // allow explicit override even when max points reason is specified; calculation may be wrong,
+            // e.g., in case we have an untracked race and the number of competitors is estimated incorrectly
+            Integer correctedNonMaxedScore = correctedScores.get(new Pair<Competitor, RaceInLeaderboard>(competitor, raceColumn));
+            if (correctedNonMaxedScore == null) {
+                result = getMaxPoints(raceColumn.getTrackedRace(), numberOfCompetitorsInLeaderboard);
+            } else {
+                result = correctedNonMaxedScore;
+            }
         }
         final int correctedScore = result;
         return new Result() {
