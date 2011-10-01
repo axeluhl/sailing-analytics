@@ -134,3 +134,8 @@ button {
 	font-family: Arial !important;
 	font-size: 12px !important;
 }
+
+.leftPaddedPanel {
+	padding-left: 50px;
+	padding-right: 50px;
+}

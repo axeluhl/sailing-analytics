@@ -507,7 +507,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                             WindDAO windDAO = createWindDAO(wind, windTrack);
                             windTrackInfoDAO.windFixes.add(windDAO);
                         }
-                        if (includeTrackBasedWindEstimation && windSource == WindSource.EXPEDITION) {
+                        if (includeTrackBasedWindEstimation && windSource == WindSource.EXPEDITION && wind != null) {
                             try {
                                 Wind estimatedWindDirection = trackedRace.getEstimatedWindDirection(wind.getPosition(),
                                         wind.getTimePoint());
