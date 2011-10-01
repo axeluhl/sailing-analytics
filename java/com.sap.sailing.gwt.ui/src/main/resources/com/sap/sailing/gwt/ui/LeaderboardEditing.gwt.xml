@@ -26,6 +26,7 @@
   <entry-point class='com.sap.sailing.gwt.ui.client.LeaderboardEditPage'/>
 
   <!-- Specify the paths for translatable code                    -->
+  <extend-property name="locale" values="de"/>
   <source path='client'/>
   <source path='shared'/>
 </module>
