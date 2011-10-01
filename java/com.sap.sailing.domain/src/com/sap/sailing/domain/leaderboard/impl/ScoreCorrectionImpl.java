@@ -126,7 +126,7 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
     }
 
     private int getMaxPoints(TrackedRace trackedRace, int numberOfCompetitorsInLeaderboard) {
-        return trackedRace.getRace() == null ? numberOfCompetitorsInLeaderboard+1 : Util.size(trackedRace.getRace().getCompetitors())+1;
+        return trackedRace == null ? numberOfCompetitorsInLeaderboard+1 : Util.size(trackedRace.getRace().getCompetitors())+1;
     }
 
     @Override
