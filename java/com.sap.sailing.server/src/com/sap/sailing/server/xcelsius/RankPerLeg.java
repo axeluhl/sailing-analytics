@@ -53,7 +53,7 @@ public class RankPerLeg extends Action {
         for (final TrackedLeg trackedLeg : trackedRace.getTrackedLegs()) {
             final Leg leg = trackedLeg.getLeg();
             final String legId = numberFormat.format(++i);
-            final String markName = leg.getFrom().getName();
+            final String markName = leg.getTo().getName();
             final String upOrDownwinLeg = trackedLeg.isUpOrDownwindLeg(time) ? "U" : "D";
             LinkedHashMap<Competitor, Integer> ranks = trackedLeg.getRanks(time);
             // Get competitor data
@@ -78,7 +78,7 @@ public class RankPerLeg extends Action {
                     addRow();
                     addColumn(legId);
                     addColumn(markName);
-                    addColumn(leg.getFrom().getBuoys().iterator().next().getName());
+                    addColumn(leg.getTo().getBuoys().iterator().next().getName());
                     addColumn(upOrDownwinLeg);
                     addColumn(competitorName);
                     addColumn(sailID==null?"null":sailID);
