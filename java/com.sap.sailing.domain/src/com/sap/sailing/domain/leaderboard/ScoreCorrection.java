@@ -55,8 +55,9 @@ public interface ScoreCorrection {
      * Note, though, that {@link MaxPointsReason#NONE} can also be the reason for an explicit score correction, e.g., if
      * the tracking results were overruled by the jury. Clients may use
      * {@link #isScoreCorrected(Competitor, TrackedRace)} to detect the difference.
+     * @param numberOfCompetitors TODO
      */
-    Result getCorrectedScore(int uncorrectedScore, Competitor competitor, RaceInLeaderboard raceColumn, TimePoint timePoint);
+    Result getCorrectedScore(int uncorrectedScore, Competitor competitor, RaceInLeaderboard raceColumn, TimePoint timePoint, int numberOfCompetitors);
 
     /**
      * Note the difference between what this method does and a more naive comparison of uncorrected and corrected score.

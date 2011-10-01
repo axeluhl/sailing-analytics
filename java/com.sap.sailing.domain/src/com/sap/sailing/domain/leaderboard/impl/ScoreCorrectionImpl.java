@@ -81,13 +81,20 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
      */
     @Override
     public Result getCorrectedScore(int uncorrectedScore, Competitor competitor, RaceInLeaderboard raceColumn,
-            TimePoint timePoint) {
+            TimePoint timePoint, int numberOfCompetitorsInLeaderboard) {
         int result;
         final MaxPointsReason maxPointsReason = getMaxPointsReason(competitor, raceColumn);
         if (maxPointsReason == MaxPointsReason.NONE) {
             result = getCorrectedNonMaxedScore(competitor, raceColumn, uncorrectedScore);
         } else {
-            result = raceColumn.getTrackedRace() == null ? 0 : getMaxPoints(raceColumn.getTrackedRace());
+            // allow explicit override even when max points reason is specified; calculation may be wrong,
+            // e.g., in case we have an untracked race and the number of competitors is estimated incorrectly
+            Integer correctedNonMaxedScore = correctedScores.get(new Pair<Competitor, RaceInLeaderboard>(competitor, raceColumn));
+            if (correctedNonMaxedScore == null) {
+                result = getMaxPoints(raceColumn.getTrackedRace(), numberOfCompetitorsInLeaderboard);
+            } else {
+                result = correctedNonMaxedScore;
+            }
         }
         final int correctedScore = result;
         return new Result() {
@@ -118,8 +125,8 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
         }
     }
 
-    private int getMaxPoints(TrackedRace trackedRace) {
-        return Util.size(trackedRace.getRace().getCompetitors())+1;
+    private int getMaxPoints(TrackedRace trackedRace, int numberOfCompetitorsInLeaderboard) {
+        return trackedRace.getRace() == null ? numberOfCompetitorsInLeaderboard+1 : Util.size(trackedRace.getRace().getCompetitors())+1;
     }
 
     @Override

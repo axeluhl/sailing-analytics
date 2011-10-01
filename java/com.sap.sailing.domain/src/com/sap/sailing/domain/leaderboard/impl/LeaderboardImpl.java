@@ -19,6 +19,7 @@ import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.tracking.NoWindException;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.util.Util;
 import com.sap.sailing.util.Util.Pair;
 
 public class LeaderboardImpl implements Named, Leaderboard {
@@ -182,7 +183,7 @@ public class LeaderboardImpl implements Named, Leaderboard {
     @Override
     public int getNetPoints(Competitor competitor, RaceInLeaderboard raceColumn, TimePoint timePoint) throws NoWindException {
         return getScoreCorrection().getCorrectedScore(getTrackedPoints(competitor, raceColumn, timePoint), competitor,
-                raceColumn, timePoint).getCorrectedScore();
+                raceColumn, timePoint, Util.size(getCompetitors())).getCorrectedScore();
     }
     
     
@@ -190,7 +191,7 @@ public class LeaderboardImpl implements Named, Leaderboard {
     public MaxPointsReason getMaxPointsReason(Competitor competitor, RaceInLeaderboard raceColumn, TimePoint timePoint)
             throws NoWindException {
         return raceColumn.getTrackedRace() == null ? MaxPointsReason.NONE : getScoreCorrection().getCorrectedScore(
-                getTrackedPoints(competitor, raceColumn, timePoint), competitor, raceColumn, timePoint)
+                getTrackedPoints(competitor, raceColumn, timePoint), competitor, raceColumn, timePoint, Util.size(getCompetitors()))
                 .getMaxPointsReason();
     }
     
@@ -221,7 +222,7 @@ public class LeaderboardImpl implements Named, Leaderboard {
     public Entry getEntry(Competitor competitor, RaceInLeaderboard race, TimePoint timePoint) throws NoWindException {
         int trackedPoints = getTrackedPoints(competitor, race, timePoint);
         final Result correctedResults = getScoreCorrection().getCorrectedScore(trackedPoints, competitor, race,
-                timePoint);
+                timePoint, Util.size(getCompetitors()));
         boolean discarded = isDiscarded(competitor, race, timePoint);
         return new EntryImpl(trackedPoints, correctedResults.getCorrectedScore(), discarded ? 0
                 : correctedResults.getCorrectedScore() * (race.isMedalRace() ? 2 : 1),
@@ -240,7 +241,8 @@ public class LeaderboardImpl implements Named, Leaderboard {
                 } else {
                     trackedPoints = 0;
                 }
-                Result correctedResults = getScoreCorrection().getCorrectedScore(trackedPoints, competitor, raceColumn, timePoint);
+                Result correctedResults = getScoreCorrection().getCorrectedScore(trackedPoints, competitor, raceColumn,
+                        timePoint, Util.size(getCompetitors()));
                 Set<RaceInLeaderboard> discardedRacesForCompetitor = discardedRaces.get(competitor);
                 if (discardedRacesForCompetitor == null) {
                     discardedRacesForCompetitor = getResultDiscardingRule().getDiscardedRaceColumns(competitor, this, timePoint);
