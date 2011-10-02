@@ -195,4 +195,13 @@ public interface Leaderboard extends Named {
     ThresholdBasedResultDiscardingRule getResultDiscardingRule();
 
     Competitor getCompetitorByName(String competitorName);
+
+    /**
+     * Tells if the column represented by <code>raceInLeaderboard</code> shall be considered for discarding.
+     * If a leaderboard has corrections for a column then that column shall be considered for discarding and counts
+     * for determining the number of races so far. Also, if a tracked race is connected to the column and has
+     * started already, the column is to be considered for discarding. 
+     * @param timePoint TODO
+     */
+    boolean considerForDiscarding(RaceInLeaderboard raceInLeaderboard, TimePoint timePoint);
 }

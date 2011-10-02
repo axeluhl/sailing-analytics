@@ -303,4 +303,10 @@ public class LeaderboardImpl implements Named, Leaderboard {
         return carriedPoints.containsKey(competitor);
     }
 
+    @Override
+    public boolean considerForDiscarding(RaceInLeaderboard raceInLeaderboard, TimePoint timePoint) {
+        return (raceInLeaderboard.getTrackedRace() != null && raceInLeaderboard.getTrackedRace().hasStarted(timePoint)) ||
+            getScoreCorrection().hasCorrectionFor(raceInLeaderboard);
+    }
+
 }

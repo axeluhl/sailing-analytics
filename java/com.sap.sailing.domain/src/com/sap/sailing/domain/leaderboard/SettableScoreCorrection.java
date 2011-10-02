@@ -29,4 +29,6 @@ public interface SettableScoreCorrection extends ScoreCorrection {
      */
     Integer getExplicitScoreCorrection(Competitor competitor, RaceInLeaderboard raceColumn);
 
+    boolean hasCorrectionFor(RaceInLeaderboard raceInLeaderboard);
+
 }
