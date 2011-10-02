@@ -182,9 +182,10 @@ public class WindPanel extends FormPanel implements EventDisplayer, RaceSelectio
 
     @Override
     public void showWind(final EventDAO event, final RaceDAO race) {
+        Date now = new Date();
         sailingService.getWindInfo(event.name, race.name,
                 // TODO what about the time interval?
-                                  new Date(/* fromAsMilliseconds */0), new Date(/* toAsMilliseconds */),
+                                  new Date(now.getTime()-60000 /* one minute */), new Date(/* toAsMilliseconds */),
                 showEstimatedWindBox.getValue(), new AsyncCallback<WindInfoForRaceDAO>() {
                     @Override
                     public void onSuccess(WindInfoForRaceDAO result) {
