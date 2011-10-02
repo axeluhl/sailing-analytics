@@ -180,7 +180,12 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             entryDAO.legDetails = new ArrayList<LegEntryDAO>();
             for (Leg leg : trackedRace.getRace().getCourse().getLegs()) {
                 TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(competitor, leg);
-                LegEntryDAO legEntry = createLegEntry(trackedLeg, timePoint);
+                LegEntryDAO legEntry;
+                if (trackedLeg != null && trackedLeg.hasStartedLeg(timePoint)) {
+                    legEntry = createLegEntry(trackedLeg, timePoint);
+                } else {
+                    legEntry = null;
+                }
                 entryDAO.legDetails.add(legEntry);
             }
         }

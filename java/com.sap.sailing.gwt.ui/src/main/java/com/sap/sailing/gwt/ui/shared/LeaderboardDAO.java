@@ -84,6 +84,10 @@ public class LeaderboardDAO implements IsSerializable {
                 if (scoredInMedalRace(o2.competitor)) {
                     // both scored in medal race
                     result = getTotalPoints(o1) - getTotalPoints(o2);
+                    // in case of tie, medal race points decide:
+                    if (result == 0) {
+                        result = getMedalRaceScore(o1.competitor) - getMedalRaceScore(o2.competitor);
+                    }
                 } else {
                     // only o1 scored in medal race, so o1 scores better = "less"
                     result = -1;
@@ -95,8 +99,18 @@ public class LeaderboardDAO implements IsSerializable {
                 } else {
                     // neither one scored in any medal race
                     result = getTotalPoints(o1) - getTotalPoints(o2);
+                    // Now if both have equal points, count races won.
+                    if (result == 0) {
+                        result = getNumberOfRacesWon(o2.competitor) - getNumberOfRacesWon(o1.competitor);
+                    }
+                    // If number of races won is still equal, use rank in last race where at least one of the two competitors was assigned a score
+                    if (result == 0) {
+                        String nameOfLastRaceSoFar = getNameOfLastRaceSoFar(o1.competitor, o2.competitor);
+                        int netPoints1 = getNetPoints(o1.competitor, nameOfLastRaceSoFar);
+                        int netPoints2 = getNetPoints(o2.competitor, nameOfLastRaceSoFar);
+                        result = netPoints1==0 ? netPoints2==0 ? 0 : -1 : netPoints2==0 ? 1 : netPoints1-netPoints2;
+                    }
                 }
-                
             }
             return result;
         }
@@ -141,6 +155,66 @@ public class LeaderboardDAO implements IsSerializable {
      */
     public void invalidateCompetitorOrdering() {
         competitorsOrderedAccordingToTotalRank = false;
+    }
+
+    /**
+     * Sums up the net points <code>competitor</code> scored in any medal races
+     */
+    private int getMedalRaceScore(CompetitorDAO competitor) {
+        int result = 0;
+        LeaderboardRowDAO row = rows.get(competitor);
+        for (Map.Entry<String, Pair<Boolean, Boolean>> raceNameAndMedalRace : raceNamesAndMedalRaceAndTracked.entrySet()) {
+            if (raceNameAndMedalRace.getValue().getA() && row.fieldsByRaceName.containsKey(raceNameAndMedalRace.getKey())) {
+                result += row.fieldsByRaceName.get(raceNameAndMedalRace.getKey()).netPoints;
+            }
+        }
+        return result;
+    }
+
+    public int getNetPoints(CompetitorDAO competitor, String nameOfLastRaceSoFar) {
+        int result = 0;
+        LeaderboardRowDAO row = rows.get(competitor);
+        if (row != null) {
+            LeaderboardEntryDAO field = row.fieldsByRaceName.get(nameOfLastRaceSoFar);
+            if (field != null) {
+                result = field.netPoints;
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Find the name of the last race in {@link #raceNamesAndMedalRaceAndTracked}'s keys for which both, <code>c1</code> and
+     * <code>c2</code> have been assigned a score.
+     */
+    private String getNameOfLastRaceSoFar(CompetitorDAO c1, CompetitorDAO c2) {
+        String nameOfLastRaceSoFar = null;
+        for (String raceName : raceNamesAndMedalRaceAndTracked.keySet()) {
+            for (LeaderboardRowDAO row : rows.values()) {
+                if (row.competitor == c1 || row.competitor == c2) {
+                    LeaderboardEntryDAO leaderboardEntryDAO = row.fieldsByRaceName.get(raceName);
+                    if (leaderboardEntryDAO != null && leaderboardEntryDAO.netPoints != 0) {
+                        nameOfLastRaceSoFar = raceName;
+                        break;
+                    }
+                }
+            }
+        }
+        return nameOfLastRaceSoFar;
+    }
+
+    private int getNumberOfRacesWon(CompetitorDAO competitor) {
+        int result = 0;
+        LeaderboardRowDAO row = rows.get(competitor);
+        if (row != null) {
+            for (String raceName : raceNamesAndMedalRaceAndTracked.keySet()) {
+                LeaderboardEntryDAO field = row.fieldsByRaceName.get(raceName);
+                if (field != null && field.netPoints == 1) {
+                    result++;
+                }
+            }
+        }
+        return result;
     }
 
     public int getRank(CompetitorDAO competitor) {

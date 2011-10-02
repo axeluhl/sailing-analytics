@@ -111,7 +111,12 @@ public class TimePanel extends FormPanel implements TimeListener, PlayStateListe
     
     @Override
     public void timeChanged(Date time) {
-        slider.setValue(time.getTime());
+        long t = time.getTime();
+        // handle the case where time advances beyond slider's end
+        if (t > slider.getMax()) {
+            slider.setMax(t);
+        }
+        slider.setValue(t);
         slider.setTitle(new Date((long) slider.getValue()).toString());
         timeLabel.setText(time.toString());
         if (!delayBoxHasFocus) {
