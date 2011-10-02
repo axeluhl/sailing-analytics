@@ -98,12 +98,16 @@ public class LeaderboardDAO implements IsSerializable {
                 }
             }
             // Now if both have equal points, count races won.
+            // FIXME however, if both scored in medal race, medal takes precedence
             if (result == 0) {
                 result = getNumberOfRacesWon(o2.competitor) - getNumberOfRacesWon(o1.competitor);
             }
             // If number of races won is still equal, use rank in last race
             if (result == 0) {
-                // TODO how to find "last" race?
+                String nameOfLastRaceSoFar = getNameOfLastRaceSoFar();
+                int netPoints1 = getNetPoints(o1.competitor, nameOfLastRaceSoFar);
+                int netPoints2 = getNetPoints(o2.competitor, nameOfLastRaceSoFar);
+                result = netPoints1==0 ? netPoints2==0 ? 0 : -1 : netPoints2==0 ? 1 : netPoints1-netPoints2;
             }
             return result;
         }
@@ -148,6 +152,32 @@ public class LeaderboardDAO implements IsSerializable {
      */
     public void invalidateCompetitorOrdering() {
         competitorsOrderedAccordingToTotalRank = false;
+    }
+
+    public int getNetPoints(CompetitorDAO competitor, String nameOfLastRaceSoFar) {
+        int result = 0;
+        LeaderboardRowDAO row = rows.get(competitor);
+        if (row != null) {
+            LeaderboardEntryDAO field = row.fieldsByRaceName.get(nameOfLastRaceSoFar);
+            if (field != null) {
+                result = field.netPoints;
+            }
+        }
+        return result;
+    }
+
+    private String getNameOfLastRaceSoFar() {
+        String nameOfLastRaceSoFar = null;
+        for (String raceName : raceNamesAndMedalRaceAndTracked.keySet()) {
+            for (LeaderboardRowDAO row : rows.values()) {
+                LeaderboardEntryDAO leaderboardEntryDAO = row.fieldsByRaceName.get(raceName);
+                if (leaderboardEntryDAO != null && leaderboardEntryDAO.netPoints != 0) {
+                    nameOfLastRaceSoFar = raceName;
+                    break;
+                }
+            }
+        }
+        return nameOfLastRaceSoFar;
     }
 
     private int getNumberOfRacesWon(CompetitorDAO competitor) {
