@@ -25,6 +25,8 @@ public class RaceTreeView extends FormPanel implements EventDisplayer, RaceSelec
 
     private final boolean multiSelection;
 
+    private boolean dontFireNextSelectionChangeEvent;
+
     public RaceTreeView(StringConstants stringConstants, boolean multiSelection) {
         this.multiSelection = multiSelection;
         this.raceSelectionChangeListeners = new HashSet<RaceSelectionChangeListener>();
@@ -55,6 +57,7 @@ public class RaceTreeView extends FormPanel implements EventDisplayer, RaceSelec
                 for (RegattaDAO regatta : event.regattas) {
                     for (RaceDAO race : regatta.races) {
                         if (event.name.equals(eventName) && race.name.equals(raceName)) {
+                            dontFireNextSelectionChangeEvent = true;
                             trackedEventsModel.getSelectionModel().setSelected(race, true);
                         }
                     }
@@ -88,8 +91,12 @@ public class RaceTreeView extends FormPanel implements EventDisplayer, RaceSelec
     }
 
     private void fireRaceSelectionChanged(List<Triple<EventDAO, RegattaDAO, RaceDAO>> selectedRaces) {
-        for (RaceSelectionChangeListener listener : raceSelectionChangeListeners) {
-            listener.onRaceSelectionChange(selectedRaces);
+        if (dontFireNextSelectionChangeEvent) {
+            dontFireNextSelectionChangeEvent = false;
+        } else {
+            for (RaceSelectionChangeListener listener : raceSelectionChangeListeners) {
+                listener.onRaceSelectionChange(selectedRaces);
+            }
         }
     }
 
