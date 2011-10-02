@@ -96,7 +96,14 @@ public class LeaderboardDAO implements IsSerializable {
                     // neither one scored in any medal race
                     result = getTotalPoints(o1) - getTotalPoints(o2);
                 }
-                
+            }
+            // Now if both have equal points, count races won.
+            if (result == 0) {
+                result = getNumberOfRacesWon(o2.competitor) - getNumberOfRacesWon(o1.competitor);
+            }
+            // If number of races won is still equal, use rank in last race
+            if (result == 0) {
+                // TODO how to find "last" race?
             }
             return result;
         }
@@ -141,6 +148,20 @@ public class LeaderboardDAO implements IsSerializable {
      */
     public void invalidateCompetitorOrdering() {
         competitorsOrderedAccordingToTotalRank = false;
+    }
+
+    private int getNumberOfRacesWon(CompetitorDAO competitor) {
+        int result = 0;
+        LeaderboardRowDAO row = rows.get(competitor);
+        if (row != null) {
+            for (String raceName : raceNamesAndMedalRaceAndTracked.keySet()) {
+                LeaderboardEntryDAO field = row.fieldsByRaceName.get(raceName);
+                if (field != null && field.netPoints == 1) {
+                    result++;
+                }
+            }
+        }
+        return result;
     }
 
     public int getRank(CompetitorDAO competitor) {
