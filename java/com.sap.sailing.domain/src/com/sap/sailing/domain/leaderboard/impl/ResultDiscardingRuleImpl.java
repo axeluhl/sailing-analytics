@@ -37,7 +37,7 @@ public class ResultDiscardingRuleImpl implements ThresholdBasedResultDiscardingR
 
     @Override
     public Set<RaceInLeaderboard> getDiscardedRaceColumns(final Competitor competitor, final Leaderboard leaderboard, final TimePoint timePoint) {
-        int resultsToDiscard = getNumberOfResultsToDiscard(leaderboard.getRaceColumns(), timePoint);
+        int resultsToDiscard = getNumberOfResultsToDiscard(leaderboard.getRaceColumns(), leaderboard, timePoint);
         Set<RaceInLeaderboard> result;
         if (resultsToDiscard > 0) {
             result = new HashSet<RaceInLeaderboard>();
@@ -52,7 +52,7 @@ public class ResultDiscardingRuleImpl implements ThresholdBasedResultDiscardingR
                 }
             });
             for (RaceInLeaderboard raceColumn : leaderboard.getRaceColumns()) {
-                if (raceColumn.getTrackedRace() != null && !raceColumn.isMedalRace()) {
+                if (!raceColumn.isMedalRace()) {
                     sortedRaces.add(raceColumn);
                 }
             }
@@ -68,11 +68,11 @@ public class ResultDiscardingRuleImpl implements ThresholdBasedResultDiscardingR
         return result;
     }
 
-    private int getNumberOfResultsToDiscard(Iterable<RaceInLeaderboard> raceColumns, TimePoint timePoint) {
+    private int getNumberOfResultsToDiscard(Iterable<RaceInLeaderboard> raceColumns, Leaderboard leaderboard, TimePoint timePoint) {
         int numberOfResultsToDiscard;
         int numberOfStartedRaces = 0;
         for (RaceInLeaderboard raceInLeaderboard : raceColumns) {
-            if (raceInLeaderboard.getTrackedRace() != null && raceInLeaderboard.getTrackedRace().hasStarted(timePoint)) {
+            if (leaderboard.considerForDiscarding(raceInLeaderboard, timePoint)) {
                 numberOfStartedRaces++;
             }
         }
