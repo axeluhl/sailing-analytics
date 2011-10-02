@@ -43,7 +43,9 @@ public class LeaderboardImplWithDelayedCarriedPoints extends LeaderboardImpl {
         @Override
         public void setTrackedRace(TrackedRace trackedRace) {
             super.setTrackedRace(trackedRace);
-            assignLeftOvers(trackedRace);
+            if (trackedRace != null) {
+                assignLeftOvers(trackedRace);
+            }
         }
     }
     
