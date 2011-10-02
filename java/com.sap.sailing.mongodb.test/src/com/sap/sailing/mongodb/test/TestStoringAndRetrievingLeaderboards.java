@@ -148,8 +148,8 @@ public class TestStoringAndRetrievingLeaderboards extends AbstractMongoDBTest {
     }
 
     private Competitor createCompetitor() {
-        Competitor competitor = new CompetitorImpl(123, "$$$Dr. Wolfgang Hunger$$$", new TeamImpl("STG", Collections.singleton(
-                new PersonImpl("$$$Dr. Wolfgang Hunger$$$", new NationalityImpl("Germany", "GER"),
+        Competitor competitor = new CompetitorImpl(123, "$$$Dr. Wolfgang+Hunger$$$", new TeamImpl("STG", Collections.singleton(
+                new PersonImpl("$$$Dr. Wolfgang+Hunger$$$", new NationalityImpl("Germany", "GER"),
                 /* dateOfBirth */ null, "This is famous Dr. Wolfgang Hunger")), new PersonImpl("Rigo van Maas", new NationalityImpl("The Netherlands", "NED"),
                         /* dateOfBirth */ null, "This is Rigo, the coach")), new BoatImpl("Dr. Wolfgang Hunger's boat", new BoatClassImpl("505"), null));
         return competitor;
