@@ -152,7 +152,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         for (RaceInLeaderboard raceColumn : leaderboard.getRaceColumns()) {
             BasicDBObject dbCorrectionForRace = new BasicDBObject();
             for (Competitor competitor : leaderboard.getCompetitors()) {
-                if (raceColumn.getTrackedRace() != null && scoreCorrection.isScoreCorrected(competitor, raceColumn)) {
+                if (scoreCorrection.isScoreCorrected(competitor, raceColumn)) {
                     BasicDBObject dbCorrectionForCompetitor = new BasicDBObject();
                     MaxPointsReason maxPointsReason = scoreCorrection.getMaxPointsReason(competitor, raceColumn);
                     if (maxPointsReason != MaxPointsReason.NONE) {

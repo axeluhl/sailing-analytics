@@ -14,11 +14,9 @@ public class MongoUtils {
      *         {@link #unescapeDollarAndDot(String)}.
      */
     public static String escapeDollarAndDot(String key) {
-        String result = key.replace("%", "%25");
-        if (key.length() > 0 && key.charAt(0) == '$') {
-            result = "%24"+key.substring(1);
-        } else {
-            result = key;
+        String result = key.replace("%", "%25").replace("+", "%2B");
+        if (result.length() > 0 && result.charAt(0) == '$') {
+            result = "%24"+result.substring(1);
         }
         return result.replace(".", "%2E");
     }
