@@ -52,7 +52,7 @@ public class ResultDiscardingRuleImpl implements ThresholdBasedResultDiscardingR
                 }
             });
             for (RaceInLeaderboard raceColumn : leaderboard.getRaceColumns()) {
-                if (raceColumn.getTrackedRace() != null && !raceColumn.isMedalRace()) {
+                if (!raceColumn.isMedalRace()) {
                     sortedRaces.add(raceColumn);
                 }
             }
@@ -72,6 +72,7 @@ public class ResultDiscardingRuleImpl implements ThresholdBasedResultDiscardingR
         int numberOfResultsToDiscard;
         int numberOfStartedRaces = 0;
         for (RaceInLeaderboard raceInLeaderboard : raceColumns) {
+            // FIXME also consider columns that have no tracked race but score corrections
             if (raceInLeaderboard.getTrackedRace() != null && raceInLeaderboard.getTrackedRace().hasStarted(timePoint)) {
                 numberOfStartedRaces++;
             }
