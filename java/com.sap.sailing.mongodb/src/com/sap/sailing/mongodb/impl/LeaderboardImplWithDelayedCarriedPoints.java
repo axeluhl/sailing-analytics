@@ -1,21 +1,18 @@
 package com.sap.sailing.mongodb.impl;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.TimePoint;
+import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
 import com.sap.sailing.domain.leaderboard.ScoreCorrection.MaxPointsReason;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.impl.LeaderboardImpl;
-import com.sap.sailing.domain.tracking.NoWindException;
+import com.sap.sailing.domain.leaderboard.impl.RaceInLeaderboardImpl;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.util.Util.Pair;
 
 /**
  * Keeps a record of carried points and score corrections to be applied, keyed by the competitor names to which they
@@ -38,47 +35,15 @@ public class LeaderboardImplWithDelayedCarriedPoints extends LeaderboardImpl {
      * 
      * @author Axel Uhl (D043530)
      */
-    private class RaceInLeaderboardForDelayedCarriedPoints implements RaceInLeaderboard {
-        private final RaceInLeaderboard delegate;
-        
-        public RaceInLeaderboardForDelayedCarriedPoints(RaceInLeaderboard delegate) {
-            this.delegate = delegate;
+    private class RaceInLeaderboardForDelayedCarriedPoints extends RaceInLeaderboardImpl {
+        public RaceInLeaderboardForDelayedCarriedPoints(Leaderboard leaderboard, String name, boolean medalRace) {
+            super(leaderboard, name, medalRace);
         }
 
         @Override
         public void setTrackedRace(TrackedRace trackedRace) {
-            delegate.setTrackedRace(trackedRace);
+            super.setTrackedRace(trackedRace);
             assignLeftOvers(trackedRace);
-        }
-
-        @Override
-        public int getTotalPoints(Competitor competitor, TimePoint timePoint) throws NoWindException {
-            return delegate.getTotalPoints(competitor, timePoint);
-        }
-
-        @Override
-        public String getName() {
-            return delegate.getName();
-        }
-
-        @Override
-        public TrackedRace getTrackedRace() {
-            return delegate.getTrackedRace();
-        }
-
-        @Override
-        public boolean isMedalRace() {
-            return delegate.isMedalRace();
-        }
-
-        @Override
-        public void setName(String newName) {
-            delegate.setName(newName);
-        }
-
-        @Override
-        public Pair<Competitor, RaceInLeaderboard> getKey(Competitor competitor) {
-            return new Pair<Competitor, RaceInLeaderboard>(competitor, delegate);
         }
     }
     
@@ -88,6 +53,11 @@ public class LeaderboardImplWithDelayedCarriedPoints extends LeaderboardImpl {
         carriedPointsByCompetitorName = new HashMap<String, Integer>();
         maxPointsReasonsByCompetitorName = new HashMap<String, Map<RaceInLeaderboard,MaxPointsReason>>();
         correctedScoresByCompetitorName = new HashMap<String, Map<RaceInLeaderboard,Integer>>();
+    }
+
+    @Override
+    protected RaceInLeaderboardImpl createRaceColumn(String columnName, boolean medalRace) {
+        return new RaceInLeaderboardForDelayedCarriedPoints(this, columnName, medalRace);
     }
 
     void setCarriedPoints(String competitorName, int carriedPoints) {
@@ -122,35 +92,6 @@ public class LeaderboardImplWithDelayedCarriedPoints extends LeaderboardImpl {
         RaceInLeaderboard result = super.addRace(race, columnName, medalRace);
         assignLeftOvers(race);
         return result;
-    }
-
-    /**
-     * As {@link RaceInLeaderboard} offers {@link RaceInLeaderboard#setTrackedRace(TrackedRace)}, wrapper objects
-     * are returned by this redefinition which, when that method is called, will additionally call
-     * {@link #assignLeftOvers(TrackedRace)}.
-     * 
-     * @see RaceInLeaderboardForDelayedCarriedPoints
-     */
-    @Override
-    public Iterable<RaceInLeaderboard> getRaceColumns() {
-        List<RaceInLeaderboard> result = new ArrayList<RaceInLeaderboard>();
-        for (RaceInLeaderboard ril : super.getRaceColumns()) {
-            result.add(new RaceInLeaderboardForDelayedCarriedPoints(ril));
-        }
-        return result;
-    }
-
-    /**
-     * As {@link RaceInLeaderboard} offers {@link RaceInLeaderboard#setTrackedRace(TrackedRace)}, a wrapper object
-     * is returned by this redefinition which, when that method is called, will additionally call
-     * {@link #assignLeftOvers(TrackedRace)}.
-     * 
-     * @see RaceInLeaderboardForDelayedCarriedPoints
-     */
-    @Override
-    public RaceInLeaderboard getRaceColumnByName(String columnName) {
-        RaceInLeaderboard raceColumn = super.getRaceColumnByName(columnName);
-        return raceColumn == null ? null : new RaceInLeaderboardForDelayedCarriedPoints(raceColumn);
     }
 
     /**
