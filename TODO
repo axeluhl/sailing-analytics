@@ -4,6 +4,8 @@ Axel
  - add test cases for leaderboard columns with untracked races in conjunction with max points
    and score overriding
 
+ - add test cases for leaderboard storage regarding proper escaping of + signs
+
  - Use wind estimator to feed another wind track
 
  - make manuevering time a parameter coming from the boat class and use it in hasDirectionChange to

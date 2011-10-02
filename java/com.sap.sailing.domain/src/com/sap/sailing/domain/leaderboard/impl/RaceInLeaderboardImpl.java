@@ -6,6 +6,7 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
 import com.sap.sailing.domain.tracking.NoWindException;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.util.Util.Pair;
 
 public class RaceInLeaderboardImpl implements RaceInLeaderboard {
     private TrackedRace trackedRace;
@@ -18,7 +19,7 @@ public class RaceInLeaderboardImpl implements RaceInLeaderboard {
         this.leaderboard = leaderboard;
         this.medalRace = medalRace;
     }
-
+    
     @Override
     public int getTotalPoints(Competitor competitor, TimePoint timePoint) throws NoWindException {
         if (getTrackedRace() != null) {
@@ -53,4 +54,8 @@ public class RaceInLeaderboardImpl implements RaceInLeaderboard {
         this.name = newName;
     }
 
+    @Override
+    public Pair<Competitor, RaceInLeaderboard> getKey(Competitor competitor) {
+        return new Pair<Competitor, RaceInLeaderboard>(competitor, this);
+    }
 }

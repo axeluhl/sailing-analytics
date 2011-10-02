@@ -1,6 +1,8 @@
 package com.sap.sailing.domain.leaderboard;
 
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.util.Util.Pair;
 
 /**
  * A column in a {@link Leaderboard} that represents the data of a race. Over the life time of this object it can be
@@ -21,4 +23,9 @@ public interface RaceInLeaderboard extends LeaderboardColumn {
     boolean isMedalRace();
     
     void setName(String newName);
+    
+    /**
+     * Constructs a key for maps storing corrections such as score corrections and max points reasons.
+     */
+    Pair<Competitor, RaceInLeaderboard> getKey(Competitor competitor);
 }
