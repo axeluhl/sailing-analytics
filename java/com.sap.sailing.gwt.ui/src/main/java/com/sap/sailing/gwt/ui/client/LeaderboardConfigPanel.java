@@ -316,6 +316,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
             medalRaceCheckBox.setValue(selectedLeaderboard.raceNamesAndMedalRaceAndTracked.get(selectedRaceColumnName).getA());
             columnRenameButton.setEnabled(true);
             columnRemoveButton.setEnabled(true);
+            unlinkRaceColumnFromTrackedRaceButton.setEnabled(true);
             selectTrackedRaceInRaceTree();
         } else {
             columnRenameButton.setEnabled(false);

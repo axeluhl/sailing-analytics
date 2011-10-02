@@ -1,6 +1,11 @@
 Axel
 ====
 
+ - Fix bug: in ResultDiscardingRuleImpl.getNumberOfResultsToDiscard also consider races with
+   score corrections that have no tracked counterpart; for those it's likely that they did
+   already start but either there was no tracking or the tracked race just hasn't been connected
+   yet; still, result discarding shall consider them.
+
  - add test cases for leaderboard columns with untracked races in conjunction with max points
    and score overriding
 
