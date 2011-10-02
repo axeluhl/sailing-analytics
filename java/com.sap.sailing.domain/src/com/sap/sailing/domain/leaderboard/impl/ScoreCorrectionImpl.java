@@ -134,4 +134,19 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
         return correctedScores.get(raceColumn.getKey(competitor));
     }
 
+    @Override
+    public boolean hasCorrectionFor(RaceInLeaderboard raceInLeaderboard) {
+        for (Pair<Competitor, RaceInLeaderboard> correctedScoresKey : correctedScores.keySet()) {
+            if (correctedScoresKey.getB() == raceInLeaderboard) {
+                return true;
+            }
+        }
+        for (Pair<Competitor, RaceInLeaderboard> maxPointsReasonsKey : maxPointsReasons.keySet()) {
+            if (maxPointsReasonsKey.getB() == raceInLeaderboard) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 }
