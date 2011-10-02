@@ -133,7 +133,7 @@ public class LeaderboardImpl implements Named, Leaderboard {
     }
 
     protected RaceInLeaderboardImpl createRaceColumn(String columnName, boolean medalRace) {
-        return createRaceColumn(columnName, medalRace);
+        return new RaceInLeaderboardImpl(this, columnName, medalRace);
     }
 
     private Iterable<TrackedRace> getTrackedRaces() {
