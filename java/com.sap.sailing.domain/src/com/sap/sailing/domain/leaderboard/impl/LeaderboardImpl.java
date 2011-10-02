@@ -93,7 +93,7 @@ public class LeaderboardImpl implements Named, Leaderboard {
     
     @Override
     public RaceInLeaderboard addRaceColumn(String name, boolean medalRace) {
-        RaceInLeaderboardImpl column = new RaceInLeaderboardImpl(this, name, medalRace);
+        RaceInLeaderboardImpl column = createRaceColumn(name, medalRace);
         races.add(column);
         return column;
     }
@@ -124,12 +124,16 @@ public class LeaderboardImpl implements Named, Leaderboard {
     public RaceInLeaderboard addRace(TrackedRace race, String columnName, boolean medalRace) {
         RaceInLeaderboard column = getRaceColumnByName(columnName);
         if (column == null) {
-            column = new RaceInLeaderboardImpl(this, columnName, medalRace);
+            column = createRaceColumn(columnName, medalRace);
             column.setTrackedRace(race);
             races.add(column);
         }
         column.setTrackedRace(race);
         return column;
+    }
+
+    protected RaceInLeaderboardImpl createRaceColumn(String columnName, boolean medalRace) {
+        return new RaceInLeaderboardImpl(this, columnName, medalRace);
     }
 
     private Iterable<TrackedRace> getTrackedRaces() {
