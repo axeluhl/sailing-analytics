@@ -52,7 +52,7 @@ public class ResultDiscardingRuleImpl implements ThresholdBasedResultDiscardingR
                 }
             });
             for (RaceInLeaderboard raceColumn : leaderboard.getRaceColumns()) {
-                if (raceColumn.getTrackedRace() != null && !raceColumn.isMedalRace()) {
+                if (!raceColumn.isMedalRace()) {
                     sortedRaces.add(raceColumn);
                 }
             }
