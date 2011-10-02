@@ -224,8 +224,12 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
 
     @Override
     public int getRank(TimePoint timePoint) {
-        List<TrackedLegOfCompetitor> competitorTracksByRank = getTrackedLeg().getCompetitorTracksOrderedByRank(timePoint);
-        return competitorTracksByRank.indexOf(this)+1;
+        int result = 0;
+        if (hasStartedLeg(timePoint)) {
+            List<TrackedLegOfCompetitor> competitorTracksByRank = getTrackedLeg().getCompetitorTracksOrderedByRank(timePoint);
+            result = competitorTracksByRank.indexOf(this)+1;
+        }
+        return result;
     }
 
     @Override
