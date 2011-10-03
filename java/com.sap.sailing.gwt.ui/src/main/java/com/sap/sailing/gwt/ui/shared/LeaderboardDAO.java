@@ -191,7 +191,7 @@ public class LeaderboardDAO implements IsSerializable {
         String nameOfLastRaceSoFar = null;
         for (String raceName : raceNamesAndMedalRaceAndTracked.keySet()) {
             for (LeaderboardRowDAO row : rows.values()) {
-                if (row.competitor == c1 || row.competitor == c2) {
+                if (row.competitor.equals(c1) || row.competitor.equals(c2)) {
                     LeaderboardEntryDAO leaderboardEntryDAO = row.fieldsByRaceName.get(raceName);
                     if (leaderboardEntryDAO != null && leaderboardEntryDAO.netPoints != 0) {
                         nameOfLastRaceSoFar = raceName;
