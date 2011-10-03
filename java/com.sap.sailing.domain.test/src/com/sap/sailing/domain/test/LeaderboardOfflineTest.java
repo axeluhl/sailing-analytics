@@ -3,9 +3,11 @@ package com.sap.sailing.domain.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -159,10 +161,18 @@ public class LeaderboardOfflineTest {
         if (carry != null) {
             leaderboard.setCarriedPoints(competitor, carry);
         }
+        List<Integer> ranksOfNonMedalStartedRaces = new ArrayList<Integer>();
         TimePoint now = MillisecondsTimePoint.now();
+        for (RaceInLeaderboard column : raceColumnsInLeaderboard.values()) {
+            if (!column.isMedalRace() && column.getTrackedRace() != null && column.getTrackedRace().hasStarted(now)) {
+                ranksOfNonMedalStartedRaces.add(column.getTrackedRace().getRank(competitor, now));
+            }
+        }
+        Collections.sort(ranksOfNonMedalStartedRaces);
         int carryInt = (carry == null ? 0 : carry);
         int totalPoints = carryInt;
         int medalRacePoints = getMedalRacePoints(competitor, now);
+        int numberOfRacesFromWhichToDiscard = ranksOfNonMedalStartedRaces.size();
         for (TrackedRace race : testRaces) {
             RaceInLeaderboard raceColumn = raceColumnsInLeaderboard.get(race);
             Pair<Competitor, RaceInLeaderboard> key = new Pair<Competitor, RaceInLeaderboard>(competitor, raceColumn);
@@ -177,12 +187,9 @@ public class LeaderboardOfflineTest {
                 // One race is discarded because four races were started, and for [3-6) one race can be discarded.
                 // The discarded race is the worst of those started, so the one with rank 4.
                 int expectedNumberOfDiscardedRaces =
-                        numberOfStartedRaces < firstDiscardingThreshold ? 0 : numberOfStartedRaces < secondDiscardingThreshold ? 1 : 2;
-                int expected = !raceColumn.isMedalRace()
-                        // FIXME with the medal race scoring worse than one of the races to discard, rank cannot simply be compared to numberOfStartedRaces-expectedNumberOfDiscardedRaces
-                        && rank > numberOfStartedRaces - expectedNumberOfDiscardedRaces
-                                - (addOneMedalRace && numberOfStartedRaces-medalRacePoints<expectedNumberOfDiscardedRaces ? 1 : 0) ? 0 :
-                                    rank==medalRacePoints?2*rank:rank;
+                        numberOfRacesFromWhichToDiscard < firstDiscardingThreshold ? 0 : numberOfRacesFromWhichToDiscard < secondDiscardingThreshold ? 1 : 2;
+                boolean discarded = ranksOfNonMedalStartedRaces.indexOf(rank) >= ranksOfNonMedalStartedRaces.size()-expectedNumberOfDiscardedRaces;
+                int expected = discarded ? 0 : rank==medalRacePoints?2*rank:rank;
                 assertEquals(expected, leaderboard.getTotalPoints(competitor, raceColumn, now));
                 assertEquals(expected, leaderboard.getContent(now).get(key).getTotalPoints());
                 assertEquals(expected, leaderboard.getEntry(competitor, raceColumn, now).getTotalPoints());
