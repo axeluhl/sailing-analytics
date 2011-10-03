@@ -198,6 +198,7 @@ public interface Leaderboard extends Named {
 
     /**
      * Tells if the column represented by <code>raceInLeaderboard</code> shall be considered for discarding.
+     * Medal races are never considered for discarding (not counted as a "started race" nor discarded themselves).
      * If a leaderboard has corrections for a column then that column shall be considered for discarding and counts
      * for determining the number of races so far. Also, if a tracked race is connected to the column and has
      * started already, the column is to be considered for discarding. 
