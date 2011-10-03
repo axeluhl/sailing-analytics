@@ -103,6 +103,7 @@ public class Patch<T> {
             }
             result.append(delta);
         }
+        result.append(']');
         return result.toString();
     }
 }
