@@ -210,7 +210,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
         if (cos < 0) {
             bearing = bearing.reverse();
         }
-        SpeedWithBearing result = new KnotSpeedWithBearingImpl(Math.abs(wind.getKnots() * cos), bearing);
+        SpeedWithBearing result = new KnotSpeedWithBearingImpl(Math.abs(speed.getKnots() * cos), bearing);
         return result;
     }
 

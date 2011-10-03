@@ -35,9 +35,11 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog.Validator;
+import com.sap.sailing.gwt.ui.client.LegDetailColumn.LegDetailField;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDAO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDAO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDAO;
+import com.sap.sailing.gwt.ui.shared.LegEntryDAO;
 import com.sap.sailing.gwt.ui.shared.Pair;
 
 /**
@@ -404,7 +406,33 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
                 result.add(new LegColumn(LeaderboardPanel.this, getRaceName(), /* legIndex */ i, stringConstants, LeaderboardPanel.this,
                         LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LEG_DETAIL_COLUMN_HEADER_STYLE, LEG_DETAIL_COLUMN_STYLE));
             }
+            // TODO add race aggregation columns if selected
+//            result.add(new FormattedDoubleLegDetailColumn(stringConstants.averageSpeedInKnots(),
+//                    new RaceAverageSpeedInKnots(), 1, getLeaderboardPanel().getLeaderboardTable(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
             return result;
+        }
+        
+        /**
+         * Accumulates the average speed over all legs of a race
+         * 
+         * @author Axel Uhl (D043530)
+         */
+        private class RaceAverageSpeedInKnots implements LegDetailField<Double> {
+            @Override
+            public Double get(LeaderboardRowDAO row) {
+                Double result = null;
+                LeaderboardEntryDAO fieldsForRace = row.fieldsByRaceName.get(getRaceName());
+                if (fieldsForRace != null) {
+                    double distanceTraveledInMeters = 0;
+                    long timeInMilliseconds = 0;
+                    for (LegEntryDAO legDetail : fieldsForRace.legDetails) {
+                        distanceTraveledInMeters += legDetail.distanceTraveledInMeters;
+                        timeInMilliseconds += legDetail.timeInMilliseconds;
+                    }
+                    result = distanceTraveledInMeters / (double) timeInMilliseconds * 1000;
+                }
+                return result;
+            }
         }
     }
     
