@@ -19,6 +19,7 @@ public class LegEntryDAO implements IsSerializable {
     public Double currentSpeedOverGroundInKnots;
     public Double velocityMadeGoodInKnots;
     public Double windwardDistanceToGoInMeters;
+    public long timeInMilliseconds;
     public boolean started;
     public boolean finished;
 }

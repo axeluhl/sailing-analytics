@@ -206,6 +206,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             Distance distanceTraveled = trackedLeg.getDistanceTraveled(timePoint);
             result.distanceTraveledInMeters = distanceTraveled == null ? null : distanceTraveled.getMeters();
             result.estimatedTimeToNextWaypointInSeconds = trackedLeg.getEstimatedTimeToNextMarkInSeconds(timePoint);
+            result.timeInMilliseconds = trackedLeg.getTimeInMilliSeconds(timePoint);
             result.finished = trackedLeg.hasFinishedLeg(timePoint);
             result.gapToLeaderInSeconds = trackedLeg.getGapToLeaderInSeconds(timePoint);
             result.rank = trackedLeg.getRank(timePoint);
