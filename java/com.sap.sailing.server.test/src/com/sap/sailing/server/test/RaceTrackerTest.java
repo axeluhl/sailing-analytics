@@ -94,6 +94,7 @@ public class RaceTrackerTest {
     public void testStopTracking() throws MalformedURLException, IOException, InterruptedException, URISyntaxException {
         TrackedEvent oldTrackedEvent = raceHandle.getTrackedEvent();
         TrackedRace oldTrackedRace = getTrackedRace(oldTrackedEvent);
+        RaceDefinition oldRaceDefinition = oldTrackedRace.getRace();
         service.stopTracking(raceHandle.getEvent());
         RaceHandle myRaceHandle = service.addRace(paramUrl, liveUri, storedUri, EmptyWindStore.INSTANCE, /* timeoutInMilliseconds */ 60000);
         TrackedEvent newTrackedEvent = myRaceHandle.getTrackedEvent();
@@ -101,6 +102,7 @@ public class RaceTrackerTest {
         // expecting a new tracked race to be created when starting over with tracking
         try {
             assertNotSame(oldTrackedRace, newTrackedRace);
+            assertNotSame(oldRaceDefinition, newTrackedRace.getRace());
         } finally {
             service.stopTracking(myRaceHandle.getEvent());
         }
