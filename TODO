@@ -3,8 +3,7 @@ Axel
 
  - Test adding waypoints to an existing course using TracTrac server and see if events are transmitted.
 
- - Ensure that when disconnecting from a race and re-connecting that the competitors and course are
-   ok. This may require re-thinking the entire life cycle of Event/RaceDefinition/TrackedEvent/TrackedRace.
+ - test disconnecting/reconnecting after, say, a competitor list change
 
  - add test cases for leaderboard sorting rules in case of ties
 
