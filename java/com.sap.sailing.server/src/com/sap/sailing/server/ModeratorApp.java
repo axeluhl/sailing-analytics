@@ -149,7 +149,7 @@ public class ModeratorApp extends Servlet {
                     for (Buoy buoy : waypoint.getBuoys()) {
                         JSONObject jsonBuoy = new JSONObject();
                         jsonBuoy.put("name", buoy.getName());
-                        GPSFixTrack<Buoy, GPSFix> buoyTrack = trackedRace.getTrack(buoy);
+                        GPSFixTrack<Buoy, GPSFix> buoyTrack = trackedRace.getOrCreateTrack(buoy);
                         GPSFix lastFixAtOrBefore = buoyTrack.getLastFixAtOrBefore(timePoint);
                         if (lastFixAtOrBefore != null) {
                             Position buoyPosition = lastFixAtOrBefore.getPosition();
@@ -204,7 +204,7 @@ public class ModeratorApp extends Servlet {
                 Position positionForWind = null;
                 TrackedLeg currentLeg = trackedRace.getCurrentLeg(timePoint);
                 if (currentLeg != null) {
-                    positionForWind = trackedRace.getTrack(currentLeg.getLeg().getFrom().getBuoys().iterator().next())
+                    positionForWind = trackedRace.getOrCreateTrack(currentLeg.getLeg().getFrom().getBuoys().iterator().next())
                             .getEstimatedPosition(timePoint, false);
                 }
                 Wind currentWind = trackedRace.getWind(positionForWind, timePoint);

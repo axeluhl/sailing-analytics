@@ -61,7 +61,7 @@ public class RaceStartedAndFinishedReceiver extends AbstractReceiverWithQueue<Ra
     @Override
     protected void handleEvent(Triple<Race, StartStopTimesData, Boolean> event) {
         System.out.print("StartStop");
-        RaceDefinition raceDefinition = getDomainFactory().getRaceDefinition(event.getA());
+        RaceDefinition raceDefinition = getDomainFactory().getAndWaitForRaceDefinition(event.getA());
         DynamicTrackedRace race = trackedEvent.getTrackedRace(raceDefinition);
         MillisecondsTimePoint start = new MillisecondsTimePoint(event.getB().getStartTime());
         if (race.getStart() == null || !race.getStart().equals(start)) {

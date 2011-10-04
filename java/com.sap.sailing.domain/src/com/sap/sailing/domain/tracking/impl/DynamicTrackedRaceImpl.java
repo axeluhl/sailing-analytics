@@ -65,7 +65,7 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
         }
         for (Waypoint waypoint : getRace().getCourse().getWaypoints()) {
             for (Buoy buoy : waypoint.getBuoys()) {
-                getTrack(buoy).setMillisecondsOverWhichToAverage(millisecondsOverWhichToAverageSpeed);
+                getOrCreateTrack(buoy).setMillisecondsOverWhichToAverage(millisecondsOverWhichToAverageSpeed);
             }
         }
         updated(MillisecondsTimePoint.now());
@@ -85,8 +85,8 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     }
     
     @Override
-    public DynamicTrack<Buoy, GPSFix> getTrack(Buoy buoy) {
-        return (DynamicTrack<Buoy, GPSFix>) super.getTrack(buoy);
+    public DynamicTrack<Buoy, GPSFix> getOrCreateTrack(Buoy buoy) {
+        return (DynamicTrack<Buoy, GPSFix>) super.getOrCreateTrack(buoy);
     }
     
     private synchronized Set<RaceChangeListener<Competitor>> getListeners() {

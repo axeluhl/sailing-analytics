@@ -79,7 +79,7 @@ public class FetchTracksAndStoreLocallyTest extends KielWeek2011BasedTest {
                     long newMillisecondsOverWhichToAverage) {
             }
         };
-        Event event = getDomainFactory().createEvent(getEvent());
+        Event event = getDomainFactory().getOrCreateEvent(getEvent());
         DynamicTrackedEvent trackedEvent = getDomainFactory().getOrCreateTrackedEvent(event);
         trackedEvent.addRaceListener(new RaceListener() {
             @Override

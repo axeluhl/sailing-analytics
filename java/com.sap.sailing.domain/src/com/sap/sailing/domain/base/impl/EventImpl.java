@@ -30,6 +30,11 @@ public class EventImpl extends NamedImpl implements Event {
         }
         races.add(race);
     }
+    
+    @Override
+    public void removeRace(RaceDefinition race) {
+        races.remove(race);
+    }
 
     @Override
     public BoatClass getBoatClass() {

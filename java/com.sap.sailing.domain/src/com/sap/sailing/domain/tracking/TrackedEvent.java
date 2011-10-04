@@ -6,6 +6,15 @@ import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.TimePoint;
 
+/**
+ * Manages a set of {@link TrackedRace} objects that belong to the same {@link Event} (regatta, sailing event for a
+ * single boat class). It therefore represents the entry point into the tracking-related objects for such an
+ * event. Allows clients to find a {@link TrackedRace} by the {@link RaceDefinition} for which it holds the
+ * tracking data.
+ * 
+ * @author Axel Uhl (D043530)
+ * 
+ */
 public interface TrackedEvent {
     Event getEvent();
 
@@ -37,5 +46,7 @@ public interface TrackedEvent {
     void addRaceListener(RaceListener listener);
     
     int getNetPoints(Competitor competitor, TimePoint timePoint) throws NoWindException;
+
+    void removeTrackedRace(RaceDefinition raceDefinition);
 
 }

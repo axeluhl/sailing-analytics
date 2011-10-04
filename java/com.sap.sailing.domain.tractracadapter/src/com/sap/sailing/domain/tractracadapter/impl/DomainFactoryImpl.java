@@ -10,10 +10,12 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -62,6 +64,7 @@ import com.sap.sailing.domain.tractracadapter.RaceTracker;
 import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
 import com.sap.sailing.domain.tractracadapter.TracTracConfiguration;
+import com.sap.sailing.util.Util;
 import com.sap.sailing.util.Util.Pair;
 import com.tractrac.clientmodule.CompetitorClass;
 import com.tractrac.clientmodule.ControlPoint;
@@ -98,7 +101,7 @@ public class DomainFactoryImpl implements DomainFactory {
     
     private final Map<String, Team> teamCache = new HashMap<String, Team>();
     
-    private final Map<CompetitorClass, BoatClass> classCache = new HashMap<CompetitorClass, BoatClass>();
+    private final Map<CompetitorClass, BoatClass> boatClassCache = new HashMap<CompetitorClass, BoatClass>();
     
     /**
      * Caches events by their name and their boat class's name
@@ -111,7 +114,7 @@ public class DomainFactoryImpl implements DomainFactory {
      * {@link RaceDefinition} has provided to retrieve the {@link RaceDefinition} again using
      * {@link #getRace}.
      */
-    private final Map<Object, RaceDefinition> tractracEventToRaceDefinitionMap = new HashMap<Object, RaceDefinition>();
+    private final Map<Object, Set<RaceDefinition>> tokenToRaceDefinitionMap = new HashMap<Object, Set<RaceDefinition>>();
     
     private final Map<Race, RaceDefinition> raceCache = new HashMap<Race, RaceDefinition>();
     
@@ -206,13 +209,13 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public Competitor getCompetitor(com.tractrac.clientmodule.Competitor competitor) {
+    public Competitor getOrCreateCompetitor(com.tractrac.clientmodule.Competitor competitor) {
         synchronized (competitorCache) {
             Competitor result = competitorCache.get(competitor);
             if (result == null) {
-                BoatClass boatClass = getBoatClass(competitor.getCompetitorClass());
-                Nationality nationality = getNationality(competitor.getNationality());
-                Team team = getTeam(competitor.getName(), nationality);
+                BoatClass boatClass = getOrCreateBoatClass(competitor.getCompetitorClass());
+                Nationality nationality = getOrCreateNationality(competitor.getNationality());
+                Team team = getOrCreateTeam(competitor.getName(), nationality);
                 Boat boat = new BoatImpl(competitor.getShortName(), boatClass, competitor.getShortName());
                 result = new CompetitorImpl(competitor.getId(), competitor.getName(), team, boat);
                 competitorCache.put(competitor, result);
@@ -222,14 +225,14 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public Team getTeam(String name, Nationality nationality) {
+    public Team getOrCreateTeam(String name, Nationality nationality) {
         synchronized (teamCache) {
             Team result = teamCache.get(name);
             if (result == null) {
                 String[] sailorNames = name.split("\\b*\\+\\b*");
                 List<Person> sailors = new ArrayList<Person>();
                 for (String sailorName : sailorNames) {
-                    sailors.add(getPerson(sailorName.trim(), nationality));
+                    sailors.add(getOrCreatePerson(sailorName.trim(), nationality));
                 }
                 result = new TeamImpl(name, sailors, /* TODO coach not known */null);
                 teamCache.put(name, result);
@@ -239,7 +242,7 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public Person getPerson(String name, Nationality nationality) {
+    public Person getOrCreatePerson(String name, Nationality nationality) {
         synchronized (personCache) {
             Person result = personCache.get(name);
             if (result == null) {
@@ -251,19 +254,19 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public BoatClass getBoatClass(CompetitorClass competitorClass) {
-        synchronized (classCache) {
-            BoatClass result = classCache.get(competitorClass);
+    public BoatClass getOrCreateBoatClass(CompetitorClass competitorClass) {
+        synchronized (boatClassCache) {
+            BoatClass result = boatClassCache.get(competitorClass);
             if (result == null) {
                 result = new BoatClassImpl(competitorClass == null ? "" : competitorClass.getName());
-                classCache.put(competitorClass, result);
+                boatClassCache.put(competitorClass, result);
             }
             return result;
         }
     }
 
     @Override
-    public Nationality getNationality(String nationalityName) {
+    public Nationality getOrCreateNationality(String nationalityName) {
         synchronized (nationalityCache) {
             Nationality result = nationalityCache.get(nationalityName);
             if (result == null) {
@@ -280,12 +283,12 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public RaceDefinition getRaceDefinition(Race race) {
-        return getRaceDefinition(race, -1);
+    public RaceDefinition getAndWaitForRaceDefinition(Race race) {
+        return getAndWaitForRaceDefinition(race, -1);
     }
 
     @Override
-    public RaceDefinition getRaceDefinition(Race race, long timeoutInMilliseconds) {
+    public RaceDefinition getAndWaitForRaceDefinition(Race race, long timeoutInMilliseconds) {
         long start = System.currentTimeMillis();
         synchronized (raceCache) {
             RaceDefinition result = raceCache.get(race);
@@ -303,7 +306,7 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public Event createEvent(com.tractrac.clientmodule.Event event) {
+    public Event getOrCreateEvent(com.tractrac.clientmodule.Event event) {
         synchronized (eventCache) {
             // FIXME Dialog with Lasse by Skype on 2011-06-17:
             //            [6:20:04 PM] Axel Uhl: Lasse, can Event.getCompetitorClassList() ever produce more than one result?
@@ -388,20 +391,13 @@ public class DomainFactoryImpl implements DomainFactory {
     }
     
     @Override
-    public RaceDefinition createRaceDefinition(Race race, Course course) {
+    public RaceDefinition getOrCreateRaceDefinition(Race race, Course course) {
         synchronized (raceCache) {
             RaceDefinition result = raceCache.get(race);
             if (result == null) {
-                Collection<CompetitorClass> competitorClasses = new ArrayList<CompetitorClass>();
-                final List<Competitor> competitors = new ArrayList<Competitor>();
-                for (RaceCompetitor rc : race.getRaceCompetitorList()) {
-                    // also add those whose race class doesn't match the dominant one (such as camera boats)
-                    // because they may still send data that we would like to record in some tracks
-                    competitors.add(getCompetitor(rc.getCompetitor()));
-                    competitorClasses.add(rc.getCompetitor().getCompetitorClass());
-                }
-                BoatClass dominantBoatClass = getDominantBoatClass(competitorClasses);
-                result = new RaceDefinitionImpl(race.getName(), course, dominantBoatClass, competitors);
+                Pair<List<Competitor>, BoatClass> competitorsAndDominantBoatClass = getCompetitorsAndDominantBoatClass(race);
+                result = new RaceDefinitionImpl(race.getName(), course, competitorsAndDominantBoatClass.getB(),
+                        competitorsAndDominantBoatClass.getA());
                 synchronized (raceCache) {
                     raceCache.put(race, result);
                     raceCache.notifyAll();
@@ -413,12 +409,28 @@ public class DomainFactoryImpl implements DomainFactory {
         }
     }
 
+    @Override
+    public Pair<List<Competitor>, BoatClass> getCompetitorsAndDominantBoatClass(Race race) {
+        List<CompetitorClass> competitorClasses = new ArrayList<CompetitorClass>();
+        final List<Competitor> competitors = new ArrayList<Competitor>();
+        for (RaceCompetitor rc : race.getRaceCompetitorList()) {
+            // also add those whose race class doesn't match the dominant one (such as camera boats)
+            // because they may still send data that we would like to record in some tracks
+            competitors.add(getOrCreateCompetitor(rc.getCompetitor()));
+            competitorClasses.add(rc.getCompetitor().getCompetitorClass());
+        }
+        BoatClass dominantBoatClass = getDominantBoatClass(competitorClasses);
+        Pair<List<Competitor>, BoatClass> competitorsAndDominantBoatClass = new Pair<List<Competitor>, BoatClass>(
+                competitors, dominantBoatClass);
+        return competitorsAndDominantBoatClass;
+    }
+
     private BoatClass getDominantBoatClass(Collection<CompetitorClass> competitorClasses) {
         Map<BoatClass, Integer> countsPerBoatClass = new HashMap<BoatClass, Integer>();
         BoatClass dominantBoatClass = null;
         int numberOfCompetitorsInDominantBoatClass = 0;
         for (CompetitorClass cc : competitorClasses) {
-            BoatClass boatClass = getBoatClass(cc);
+            BoatClass boatClass = getOrCreateBoatClass(cc);
             Integer boatClassCount = countsPerBoatClass.get(boatClass);
             if (boatClassCount == null) {
                 boatClassCount = 0;
@@ -453,7 +465,7 @@ public class DomainFactoryImpl implements DomainFactory {
 
     @Override
     public MarkPassing createMarkPassing(com.tractrac.clientmodule.Competitor competitor, Waypoint passed, TimePoint time) {
-        MarkPassing result = new MarkPassingImpl(time, passed, getCompetitor(competitor));
+        MarkPassing result = new MarkPassingImpl(time, passed, getOrCreateCompetitor(competitor));
         return result;
     }
 
@@ -464,8 +476,10 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public RaceDefinition getRace(Object tokenToRetrieveAssociatedRace) {
-        return tractracEventToRaceDefinitionMap.get(tokenToRetrieveAssociatedRace);
+    public Set<RaceDefinition> getRaces(Object tokenToRetrieveAssociatedRace) {
+        synchronized (tokenToRaceDefinitionMap) {
+            return tokenToRaceDefinitionMap.get(tokenToRetrieveAssociatedRace);
+        }
     }
 
     @Override
@@ -475,12 +489,13 @@ public class DomainFactoryImpl implements DomainFactory {
         logger.log(Level.INFO, "Creating DynamicTrackedRaceImpl for RaceDefinition "+raceDefinition.getName());
         DynamicTrackedRaceImpl result = new DynamicTrackedRaceImpl(trackedEvent, raceDefinition,
                 windStore, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed);
-        if (!tractracEventToRaceDefinitionMap.containsKey(tokenToRetrieveAssociatedRace)) {
-            tractracEventToRaceDefinitionMap.put(tokenToRetrieveAssociatedRace, raceDefinition);
-        } else {
-            logger.severe("There is already something ("+tokenToRetrieveAssociatedRace+") tracking "+
-                        tractracEventToRaceDefinitionMap.get(tokenToRetrieveAssociatedRace)+" while trying to start tracking for race "+
-                    raceDefinition);
+        synchronized (tokenToRaceDefinitionMap) {
+            Set<RaceDefinition> racesForToken = tokenToRaceDefinitionMap.get(tokenToRetrieveAssociatedRace);
+            if (racesForToken == null) {
+                racesForToken = new HashSet<RaceDefinition>();
+                tokenToRaceDefinitionMap.put(tokenToRetrieveAssociatedRace, racesForToken);
+            }
+            racesForToken.add(raceDefinition);
         }
         return result;
     }
@@ -493,6 +508,49 @@ public class DomainFactoryImpl implements DomainFactory {
     @Override
     public TracTracConfiguration createTracTracConfiguration(String name, String jsonURL, String liveDataURI, String storedDataURI) {
         return new TracTracConfigurationImpl(name, jsonURL, liveDataURI, storedDataURI);
+    }
+
+    @Override
+    public void removeRace(com.tractrac.clientmodule.Event tractracEvent, Race tractracRace) {
+        RaceDefinition raceDefinition = getExistingRaceDefinitionForRace(tractracRace);
+        if (raceDefinition != null) { // otherwise, this domain factory doesn't seem to know about the race
+            synchronized (tokenToRaceDefinitionMap) {
+                Set<Object> tokensToRemove = new HashSet<Object>();
+                for (Map.Entry<Object, Set<RaceDefinition>> e : tokenToRaceDefinitionMap.entrySet()) {
+                    if (e.getValue().contains(raceDefinition)) {
+                        e.getValue().remove(raceDefinition);
+                        if (e.getValue().isEmpty()) {
+                            tokensToRemove.add(e.getKey());
+                        }
+                    }
+                }
+                for (Object tokenToRemove : tokensToRemove) {
+                    tokenToRaceDefinitionMap.remove(tokenToRemove);
+                }
+            }
+            raceCache.remove(tractracRace);
+            Collection<CompetitorClass> competitorClassList = new ArrayList<CompetitorClass>();
+            for (com.tractrac.clientmodule.Competitor c : tractracEvent.getCompetitorList()) {
+                competitorClassList.add(c.getCompetitorClass());
+            }
+            BoatClass boatClass = getDominantBoatClass(competitorClassList);
+            Pair<String, String> key = new Pair<String, String>(tractracEvent.getName(), boatClass == null ? null
+                    : boatClass.getName());
+            Event event = eventCache.get(key);
+            if (event != null) {
+                event.removeRace(raceDefinition);
+                if (Util.size(event.getAllRaces()) == 0) {
+                    eventCache.remove(key);
+                }
+                TrackedEvent trackedEvent = eventTrackingCache.get(event);
+                if (trackedEvent != null) {
+                    trackedEvent.removeTrackedRace(raceDefinition);
+                    if (Util.size(trackedEvent.getTrackedRaces()) == 0) {
+                        eventTrackingCache.remove(event);
+                    }
+                }
+            }
+        }
     }
 
 }
