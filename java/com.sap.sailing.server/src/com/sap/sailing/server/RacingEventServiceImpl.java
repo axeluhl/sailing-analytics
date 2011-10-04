@@ -180,7 +180,7 @@ public class RacingEventServiceImpl implements RacingEventService {
     public boolean isRaceBeingTracked(RaceDefinition r) {
         for (Set<RaceTracker> trackers : raceTrackersByEvent.values()) {
             for (RaceTracker tracker : trackers) {
-                if (tracker.getRaces() == r) {
+                if (tracker.getRaces() != null && tracker.getRaces().contains(r)) {
                     return true;
                 }
             }
@@ -304,7 +304,7 @@ public class RacingEventServiceImpl implements RacingEventService {
     private ScheduledFuture<?> scheduleAbortTrackerAfterInitialTimeout(final RaceTracker tracker, final long timeoutInMilliseconds) {
         ScheduledFuture<?> task = scheduler.schedule(new Runnable() {
             @Override public void run() {
-                if (tracker.getRaces() == null) {
+                if (tracker.getRaces() == null || tracker.getRaces().isEmpty()) {
                     try {
                         Event event = tracker.getEvent();
                         logger.log(Level.SEVERE, "RaceDefinition for a race in event "+event.getName()+" not obtained within "+
@@ -315,7 +315,7 @@ public class RacingEventServiceImpl implements RacingEventService {
                         }
                         tracker.stop();
                         raceTrackersByURLs.remove(tracker.getURLs());
-                        if (trackersForEvent.isEmpty()) {
+                        if (trackersForEvent == null || trackersForEvent.isEmpty()) {
                             stopTracking(event);
                         }
                     } catch (Exception e) {
@@ -334,7 +334,7 @@ public class RacingEventServiceImpl implements RacingEventService {
             Iterator<RaceTracker> trackerIter = raceTrackersByEvent.get(event).iterator();
             while (trackerIter.hasNext()) {
                 RaceTracker raceTracker = trackerIter.next();
-                if (raceTracker.getRaces() == race) {
+                if (raceTracker.getRaces() != null && raceTracker.getRaces().contains(race)) {
                     System.out.println("Found tracker to stop...");
                     raceTracker.stop(); // this also removes the TrackedRace from trackedEvent
                     trackerIter.remove();

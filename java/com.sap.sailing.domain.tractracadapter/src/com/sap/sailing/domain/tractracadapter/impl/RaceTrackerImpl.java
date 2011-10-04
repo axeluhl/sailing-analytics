@@ -223,7 +223,7 @@ public class RaceTrackerImpl implements Listener, RaceTracker {
             receiver.stopPreemptively();
         }
         ioThread.join(3000); // wait no more than three seconds
-        logger.info("Joined TracTrac IO thread for race "+getRaces());
+        logger.info("Joined TracTrac IO thread for race(s) "+getRaces());
         Set<RaceDefinition> races = getRaces();
         if (races != null && !races.isEmpty()) {
             for (RaceDefinition race: races) {
@@ -241,12 +241,12 @@ public class RaceTrackerImpl implements Listener, RaceTracker {
 
     @Override
     public void liveDataConnected() {
-        logger.info("Live data connected for race "+getRaces());
+        logger.info("Live data connected for race(s) "+getRaces());
     }
 
     @Override
     public void liveDataDisconnected() {
-        logger.info("Live data disconnected for race "+getRaces());
+        logger.info("Live data disconnected for race(s) "+getRaces());
     }
 
     @Override
@@ -256,27 +256,27 @@ public class RaceTrackerImpl implements Listener, RaceTracker {
 
     @Override
     public void storedDataBegin() {
-        logger.info("Stored data begin for race "+getRaces());
+        logger.info("Stored data begin for race(s) "+getRaces());
     }
 
     @Override
     public void storedDataEnd() {
-        logger.info("Stored data end for race "+getRaces());
+        logger.info("Stored data end for race(s) "+getRaces());
     }
 
     @Override
     public void storedDataProgress(float progress) {
-        logger.info("Stored data progress for race "+getRaces()+": "+progress);
+        logger.info("Stored data progress for race(s) "+getRaces()+": "+progress);
         
     }
 
     @Override
     public void storedDataError(String arg0) {
-        logger.warning("Error with stored data for race "+getRaces()+": "+arg0);
+        logger.warning("Error with stored data for race(s) "+getRaces()+": "+arg0);
     }
 
     @Override
     public void liveDataConnectError(String arg0) {
-        logger.warning("Error with live data for race "+getRaces()+": "+arg0);
+        logger.warning("Error with live data for race(s) "+getRaces()+": "+arg0);
     }
 }

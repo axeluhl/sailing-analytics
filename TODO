@@ -3,6 +3,9 @@ Axel
 
  - Test adding waypoints to an existing course using TracTrac server and see if events are transmitted.
 
+ - test disconnecting before the 60s are over and then let the poller run into the 60s timeout and ensure
+   it gets along with the already cleaned-out structures
+
  - test disconnecting/reconnecting after, say, a competitor list change
 
  - add test cases for leaderboard sorting rules in case of ties

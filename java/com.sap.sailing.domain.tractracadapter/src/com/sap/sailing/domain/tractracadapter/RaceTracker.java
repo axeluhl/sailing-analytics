@@ -17,7 +17,7 @@ public interface RaceTracker {
 
     /**
      * Stops tracking the race and removes the {@link TrackedRace} object one gets from calling
-     * {@link #getTrackedEvent()}.{@link TrackedEvent#getTrackedRace(RaceDefinition) getTrackedRace(}{@link #getRaces() getRace())}
+     * {@link #getTrackedEvent()}.{@link TrackedEvent#getTrackedRace(RaceDefinition) getTrackedRace(}{@link #getRaces() getRaces())}
      * from the {@link #getTrackedEvent() tracked event}.
      */
     void stop() throws MalformedURLException, IOException, InterruptedException;
