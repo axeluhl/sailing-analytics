@@ -98,7 +98,7 @@ public class DomainFactoryImpl implements DomainFactory {
     
     private final Map<String, Team> teamCache = new HashMap<String, Team>();
     
-    private final Map<CompetitorClass, BoatClass> classCache = new HashMap<CompetitorClass, BoatClass>();
+    private final Map<CompetitorClass, BoatClass> boatClassCache = new HashMap<CompetitorClass, BoatClass>();
     
     /**
      * Caches events by their name and their boat class's name
@@ -206,13 +206,13 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public Competitor getCompetitor(com.tractrac.clientmodule.Competitor competitor) {
+    public Competitor getOrCreateCompetitor(com.tractrac.clientmodule.Competitor competitor) {
         synchronized (competitorCache) {
             Competitor result = competitorCache.get(competitor);
             if (result == null) {
-                BoatClass boatClass = getBoatClass(competitor.getCompetitorClass());
-                Nationality nationality = getNationality(competitor.getNationality());
-                Team team = getTeam(competitor.getName(), nationality);
+                BoatClass boatClass = getOrCreateBoatClass(competitor.getCompetitorClass());
+                Nationality nationality = getOrCreateNationality(competitor.getNationality());
+                Team team = getOrCreateTeam(competitor.getName(), nationality);
                 Boat boat = new BoatImpl(competitor.getShortName(), boatClass, competitor.getShortName());
                 result = new CompetitorImpl(competitor.getId(), competitor.getName(), team, boat);
                 competitorCache.put(competitor, result);
@@ -222,14 +222,14 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public Team getTeam(String name, Nationality nationality) {
+    public Team getOrCreateTeam(String name, Nationality nationality) {
         synchronized (teamCache) {
             Team result = teamCache.get(name);
             if (result == null) {
                 String[] sailorNames = name.split("\\b*\\+\\b*");
                 List<Person> sailors = new ArrayList<Person>();
                 for (String sailorName : sailorNames) {
-                    sailors.add(getPerson(sailorName.trim(), nationality));
+                    sailors.add(getOrCreatePerson(sailorName.trim(), nationality));
                 }
                 result = new TeamImpl(name, sailors, /* TODO coach not known */null);
                 teamCache.put(name, result);
@@ -239,7 +239,7 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public Person getPerson(String name, Nationality nationality) {
+    public Person getOrCreatePerson(String name, Nationality nationality) {
         synchronized (personCache) {
             Person result = personCache.get(name);
             if (result == null) {
@@ -251,19 +251,19 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public BoatClass getBoatClass(CompetitorClass competitorClass) {
-        synchronized (classCache) {
-            BoatClass result = classCache.get(competitorClass);
+    public BoatClass getOrCreateBoatClass(CompetitorClass competitorClass) {
+        synchronized (boatClassCache) {
+            BoatClass result = boatClassCache.get(competitorClass);
             if (result == null) {
                 result = new BoatClassImpl(competitorClass == null ? "" : competitorClass.getName());
-                classCache.put(competitorClass, result);
+                boatClassCache.put(competitorClass, result);
             }
             return result;
         }
     }
 
     @Override
-    public Nationality getNationality(String nationalityName) {
+    public Nationality getOrCreateNationality(String nationalityName) {
         synchronized (nationalityCache) {
             Nationality result = nationalityCache.get(nationalityName);
             if (result == null) {
@@ -303,7 +303,7 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public Event createEvent(com.tractrac.clientmodule.Event event) {
+    public Event getOrCreateEvent(com.tractrac.clientmodule.Event event) {
         synchronized (eventCache) {
             // FIXME Dialog with Lasse by Skype on 2011-06-17:
             //            [6:20:04 PM] Axel Uhl: Lasse, can Event.getCompetitorClassList() ever produce more than one result?
@@ -388,7 +388,7 @@ public class DomainFactoryImpl implements DomainFactory {
     }
     
     @Override
-    public RaceDefinition createRaceDefinition(Race race, Course course) {
+    public RaceDefinition getOrCreateRaceDefinition(Race race, Course course) {
         synchronized (raceCache) {
             RaceDefinition result = raceCache.get(race);
             if (result == null) {
@@ -413,7 +413,7 @@ public class DomainFactoryImpl implements DomainFactory {
         for (RaceCompetitor rc : race.getRaceCompetitorList()) {
             // also add those whose race class doesn't match the dominant one (such as camera boats)
             // because they may still send data that we would like to record in some tracks
-            competitors.add(getCompetitor(rc.getCompetitor()));
+            competitors.add(getOrCreateCompetitor(rc.getCompetitor()));
             competitorClasses.add(rc.getCompetitor().getCompetitorClass());
         }
         BoatClass dominantBoatClass = getDominantBoatClass(competitorClasses);
@@ -427,7 +427,7 @@ public class DomainFactoryImpl implements DomainFactory {
         BoatClass dominantBoatClass = null;
         int numberOfCompetitorsInDominantBoatClass = 0;
         for (CompetitorClass cc : competitorClasses) {
-            BoatClass boatClass = getBoatClass(cc);
+            BoatClass boatClass = getOrCreateBoatClass(cc);
             Integer boatClassCount = countsPerBoatClass.get(boatClass);
             if (boatClassCount == null) {
                 boatClassCount = 0;
@@ -462,7 +462,7 @@ public class DomainFactoryImpl implements DomainFactory {
 
     @Override
     public MarkPassing createMarkPassing(com.tractrac.clientmodule.Competitor competitor, Waypoint passed, TimePoint time) {
-        MarkPassing result = new MarkPassingImpl(time, passed, getCompetitor(competitor));
+        MarkPassing result = new MarkPassingImpl(time, passed, getOrCreateCompetitor(competitor));
         return result;
     }
 

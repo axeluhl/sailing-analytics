@@ -65,7 +65,7 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
     public void setUp() throws MalformedURLException, IOException, InterruptedException, URISyntaxException {
         super.setUp();
         domainFactory = new DomainFactoryImpl();
-        domainEvent = domainFactory.createEvent(getEvent());
+        domainEvent = domainFactory.getOrCreateEvent(getEvent());
         trackedEvent = domainFactory.getOrCreateTrackedEvent(domainEvent);
         ArrayList<Receiver> receivers = new ArrayList<Receiver>();
         receivers.add(new RaceCourseReceiver(domainFactory, trackedEvent, getEvent(), /* millisecondsOverWhichToAverageWind */

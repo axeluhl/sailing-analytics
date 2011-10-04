@@ -22,7 +22,7 @@ public class RaceHandleImpl implements RaceHandle {
 
     @Override
     public com.sap.sailing.domain.base.Event getEvent() {
-        return domainFactory.createEvent(tractracEvent);
+        return domainFactory.getOrCreateEvent(tractracEvent);
     }
 
     @Override

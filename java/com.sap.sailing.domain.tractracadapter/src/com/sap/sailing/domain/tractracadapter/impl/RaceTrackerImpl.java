@@ -71,7 +71,8 @@ public class RaceTrackerImpl implements Listener, RaceTracker {
      * <p>
      * 
      * A race tracker uses the <code>paramURL</code> for the TracTrac Java client to register for push data about one
-     * race. The {@link RaceDefinition} for that race, however, isn't created until the {@link Course} has been
+     * race. The {@link DomainFactory} is asked to retrieve an existing or create a new {@link com.sap.sailing.domain.base.Event}
+     * based on the TracTrac event. The {@link RaceDefinition} for the race, however, isn't created until the {@link Course} has been
      * received. Therefore, the {@link RaceCourseReceiver} will create the {@link RaceDefinition} and will add it to the
      * {@link com.sap.sailing.domain.base.Event}.
      * <p>
@@ -105,7 +106,7 @@ public class RaceTrackerImpl implements Listener, RaceTracker {
         controller = new DataController(liveURI, storedURI, this);
         // Start live and stored data streams
         ioThread = new Thread(controller, "io");
-        domainEvent = domainFactory.createEvent(tractracEvent);
+        domainEvent = domainFactory.getOrCreateEvent(tractracEvent);
         trackedEvent = domainFactory.getOrCreateTrackedEvent(domainEvent);
         receivers = new HashSet<Receiver>();
         Set<TypeController> typeControllers = new HashSet<TypeController>();

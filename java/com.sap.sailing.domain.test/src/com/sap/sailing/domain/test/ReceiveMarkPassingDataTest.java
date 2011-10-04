@@ -87,7 +87,7 @@ public class ReceiveMarkPassingDataTest extends AbstractTracTracLiveTest {
         List<Receiver> receivers = new ArrayList<Receiver>();
         receivers.add(receiver);
         for (Receiver r : DomainFactory.INSTANCE.getUpdateReceivers(
-                DomainFactory.INSTANCE.getOrCreateTrackedEvent(DomainFactory.INSTANCE.createEvent(getEvent())),
+                DomainFactory.INSTANCE.getOrCreateTrackedEvent(DomainFactory.INSTANCE.getOrCreateEvent(getEvent())),
                 getEvent(), EmptyWindStore.INSTANCE, this, ReceiverType.RACECOURSE,
                 ReceiverType.MARKPOSITIONS, ReceiverType.RACESTARTFINISH, ReceiverType.RAWPOSITIONS)) {
             receivers.add(r);

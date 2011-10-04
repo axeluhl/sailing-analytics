@@ -54,20 +54,28 @@ public interface DomainFactory {
 
     Course createCourse(String name, Iterable<ControlPoint> controlPoints);
 
-    com.sap.sailing.domain.base.Competitor getCompetitor(Competitor competitor);
+    com.sap.sailing.domain.base.Competitor getOrCreateCompetitor(Competitor competitor);
 
-    Nationality getNationality(String nationalityName);
+    /**
+     * Looks up or, if not found, creates a {@link Nationality} object and re-uses <code>threeLetterIOCCode</code> also as the
+     * nationality's name.
+     */
+    Nationality getOrCreateNationality(String threeLetterIOCCode);
 
     GPSFixMoving createGPSFixMoving(Position position);
 
-    Person getPerson(String name, Nationality nationality);
-
-    Team getTeam(String name, Nationality nationality);
+    Person getOrCreatePerson(String name, Nationality nationality);
 
     /**
-     * Fetch a race definition previously created by a call to {@link #createRaceDefinition(Race, Course)}. If no such
+     * If a team called <code>name</code> already is known by this domain factory, it is returned. Otherwise, the team name
+     * is split along "+" signs with one {@link Person} object created for each part.
+     */
+    Team getOrCreateTeam(String name, Nationality nationality);
+
+    /**
+     * Fetch a race definition previously created by a call to {@link #getOrCreateRaceDefinition(Race, Course)}. If no such
      * race definition was created so far, the call blocks until such a definition is provided by a call to
-     * {@link #createRaceDefinition(Race, Course)}.
+     * {@link #getOrCreateRaceDefinition(Race, Course)}.
      */
     RaceDefinition getRaceDefinition(Race race);
 
@@ -78,7 +86,7 @@ public interface DomainFactory {
      * an equal name with a boat class with an equal name as the <code>event</code>'s
      * boat class exists yet.
      */
-    com.sap.sailing.domain.base.Event createEvent(Event event);
+    com.sap.sailing.domain.base.Event getOrCreateEvent(Event event);
     
     /**
      * Creates a race tracked for the specified URL/URIs and starts receiving all available existing and future push
@@ -111,7 +119,7 @@ public interface DomainFactory {
      */
     DynamicTrackedEvent getOrCreateTrackedEvent(com.sap.sailing.domain.base.Event event);
     
-    BoatClass getBoatClass(CompetitorClass competitorClass);
+    BoatClass getOrCreateBoatClass(CompetitorClass competitorClass);
 
     /**
      * For each race listed by the <code>tractracEvent</code>, produces {@link TypeController listeners} that, when
@@ -131,7 +139,7 @@ public interface DomainFactory {
     Iterable<Receiver> getUpdateReceivers(DynamicTrackedEvent trackedEvent, Event tractracEvent, WindStore windStore,
             Object tokenToRetrieveAssociatedRace);
 
-    RaceDefinition createRaceDefinition(Race race, Course course);
+    RaceDefinition getOrCreateRaceDefinition(Race race, Course course);
 
     /**
      * The record may be for a single buoy or a gate. If for a gate, the
@@ -184,7 +192,7 @@ public interface DomainFactory {
 
     /**
      * Fetch the race definition for <code>race</code>. If the race definition hasn't been created yet, the call blocks
-     * until such a definition is provided by a call to {@link #createRaceDefinition(Race, Course)}. If
+     * until such a definition is provided by a call to {@link #getOrCreateRaceDefinition(Race, Course)}. If
      * <code>timeoutInMilliseconds</code> milliseconds have passed and the race definition is found not to have shown up
      * until then, <code>null</code> is returned. The unblocking may be deferred even beyond
      * <code>timeoutInMilliseconds</code> in case no modifications happen on the set of races cached by this factory.

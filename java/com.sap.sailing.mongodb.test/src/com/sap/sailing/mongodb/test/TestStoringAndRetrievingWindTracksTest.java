@@ -62,7 +62,7 @@ public class TestStoringAndRetrievingWindTracksTest extends AbstractTracTracLive
     @Test
     public void testStoreAFewWindEntries() throws UnknownHostException, MongoException, InterruptedException {
         DomainFactory domainFactory = DomainFactory.INSTANCE;
-        Event domainEvent = domainFactory.createEvent(getEvent());
+        Event domainEvent = domainFactory.getOrCreateEvent(getEvent());
         DynamicTrackedEvent trackedEvent = domainFactory.getOrCreateTrackedEvent(domainEvent);
         Iterable<Receiver> typeControllers = domainFactory.getUpdateReceivers(trackedEvent, getEvent(),
                 EmptyWindStore.INSTANCE, ReceiverType.RACECOURSE);

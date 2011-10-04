@@ -74,7 +74,7 @@ public class MarkPassingReceiver extends AbstractReceiverWithQueue<RaceCompetito
             ControlPoint controlPointPassed = passing.getControlPoint();
             com.sap.sailing.domain.base.ControlPoint domainControlPoint = getDomainFactory().getControlPoint(controlPointPassed);
             Waypoint passed = findWaypointForControlPoint(trackedRace, waypointsIter, domainControlPoint,
-                    getDomainFactory().getCompetitor(event.getA().getCompetitor()));
+                    getDomainFactory().getOrCreateCompetitor(event.getA().getCompetitor()));
             if (passed != null) {
                 TimePoint time = new MillisecondsTimePoint(passing.getTimestamp());
                 MarkPassing markPassing = getDomainFactory().createMarkPassing(event.getA().getCompetitor(), passed,
@@ -91,7 +91,7 @@ public class MarkPassingReceiver extends AbstractReceiverWithQueue<RaceCompetito
                 markPassings.add(passing);
             }
         }
-        trackedRace.updateMarkPassings(getDomainFactory().getCompetitor(event.getA().getCompetitor()), markPassings);
+        trackedRace.updateMarkPassings(getDomainFactory().getOrCreateCompetitor(event.getA().getCompetitor()), markPassings);
     }
 
     /**

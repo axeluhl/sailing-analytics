@@ -116,7 +116,7 @@ public abstract class KielWeek2011BasedTest extends AbstractTracTracLiveTest {
         super.setUp(new URL("http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/clientparams.php?event=event_20110609_KielerWoch&race="+raceId),
                 tractracTunnel ? new URI("tcp://"+tractracTunnelHost+":4412") : new URI("tcp://germanmaster.traclive.dk:4400"),
                         tractracTunnel ? new URI("tcp://"+tractracTunnelHost+":4413") : new URI("tcp://germanmaster.traclive.dk:4401"));
-        domainEvent = domainFactory.createEvent(getEvent());
+        domainEvent = domainFactory.getOrCreateEvent(getEvent());
         trackedEvent = domainFactory.getOrCreateTrackedEvent(domainEvent);
     }
     
