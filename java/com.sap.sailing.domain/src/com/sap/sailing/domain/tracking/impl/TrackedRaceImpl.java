@@ -124,7 +124,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         this.buoyTracks = new HashMap<Buoy, GPSFixTrack<Buoy, GPSFix>>();
         for (Waypoint waypoint : race.getCourse().getWaypoints()) {
             for (Buoy buoy : waypoint.getBuoys()) {
-                getTrack(buoy);
+                getOrCreateTrack(buoy);
             }
         }
         trackedLegs = new LinkedHashMap<Leg, TrackedLeg>();
@@ -369,7 +369,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     }
 
     @Override
-    public GPSFixTrack<Buoy, GPSFix> getTrack(Buoy buoy) {
+    public GPSFixTrack<Buoy, GPSFix> getOrCreateTrack(Buoy buoy) {
         synchronized (buoyTracks) {
             GPSFixTrack<Buoy, GPSFix> result = buoyTracks.get(buoy);
             if (result == null) {
@@ -384,7 +384,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     public Position getApproximatePosition(Waypoint waypoint, TimePoint timePoint) {
         Position result = null;
         for (Buoy buoy : waypoint.getBuoys()) {
-            Position nextPos = getTrack(buoy).getEstimatedPosition(timePoint, /* extrapolate */ false);
+            Position nextPos = getOrCreateTrack(buoy).getEstimatedPosition(timePoint, /* extrapolate */ false);
             if (result == null) {
                 result = nextPos;
             } else {
@@ -492,7 +492,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     public synchronized void waypointAdded(int zeroBasedIndex, Waypoint waypointThatGotAdded) {
         markPassingsForWaypoint.put(waypointThatGotAdded, new ConcurrentSkipListSet<MarkPassing>(TimedComparator.INSTANCE));
         for (Buoy buoy : waypointThatGotAdded.getBuoys()) {
-            getTrack(buoy);
+            getOrCreateTrack(buoy);
         }
         // a waypoint got added; this means that a leg got added as well; but we shouldn't claim we know where
         // in the leg list of the course the leg was added; that's an implementation secret of CourseImpl. So try:

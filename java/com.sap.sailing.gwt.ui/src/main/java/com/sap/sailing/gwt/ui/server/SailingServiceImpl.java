@@ -650,7 +650,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                     }
                 }
                 for (Buoy buoy : buoys) {
-                    GPSFixTrack<Buoy, GPSFix> track = trackedRace.getTrack(buoy);
+                    GPSFixTrack<Buoy, GPSFix> track = trackedRace.getOrCreateTrack(buoy);
                     Position positionAtDate = track.getEstimatedPosition(dateAsTimePoint, /* extrapolate */false);
                     if (positionAtDate != null) {
                         MarkDAO markDAO = new MarkDAO(buoy.getName(), positionAtDate.getLatDeg(),

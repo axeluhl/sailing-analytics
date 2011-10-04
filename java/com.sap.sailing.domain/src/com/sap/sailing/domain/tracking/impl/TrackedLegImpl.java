@@ -131,9 +131,9 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener<Competitor
         }
         // check for all combinations of start/end waypoint buoys:
         for (Buoy startBuoy : getLeg().getFrom().getBuoys()) {
-            Position startBuoyPos = getTrackedRace().getTrack(startBuoy).getEstimatedPosition(at, false);
+            Position startBuoyPos = getTrackedRace().getOrCreateTrack(startBuoy).getEstimatedPosition(at, false);
             for (Buoy endBuoy : getLeg().getTo().getBuoys()) {
-                Position endBuoyPos = getTrackedRace().getTrack(endBuoy).getEstimatedPosition(at, false);
+                Position endBuoyPos = getTrackedRace().getOrCreateTrack(endBuoy).getEstimatedPosition(at, false);
                 Bearing legBearing = startBuoyPos.getBearingGreatCircle(endBuoyPos);
                 double deltaDeg = legBearing.getDegrees() - wind.getBearing().getDegrees();
                 if (Math.abs(deltaDeg) < UPWIND_DOWNWIND_TOLERANCE_IN_DEG) {
@@ -155,9 +155,9 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener<Competitor
     }
 
     private Wind getWindOnLeg(TimePoint at) {
-        Position approximateLegStartPosition = getTrackedRace().getTrack(
+        Position approximateLegStartPosition = getTrackedRace().getOrCreateTrack(
                 getLeg().getFrom().getBuoys().iterator().next()).getEstimatedPosition(at, false);
-        Position approximateLegEndPosition = getTrackedRace().getTrack(
+        Position approximateLegEndPosition = getTrackedRace().getOrCreateTrack(
                 getLeg().getTo().getBuoys().iterator().next()).getEstimatedPosition(at, false);
         if (approximateLegStartPosition == null || approximateLegEndPosition == null) {
             throw new RuntimeException("No mark positions received yet for leg "+getLeg()+

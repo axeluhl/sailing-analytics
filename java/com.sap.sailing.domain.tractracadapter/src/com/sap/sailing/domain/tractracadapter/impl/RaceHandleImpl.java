@@ -22,13 +22,13 @@ public class RaceHandleImpl implements RaceHandle {
 
     @Override
     public com.sap.sailing.domain.base.Event getEvent() {
-        return domainFactory.createEvent(tractracEvent);
+        return domainFactory.getOrCreateEvent(tractracEvent);
     }
 
     @Override
     public RaceDefinition getRace() {
         // FIXME we assume there is exactly one Race per TracTrac event but during match racing there may be many
-        return domainFactory.getRaceDefinition(tractracEvent.getRaceList().iterator().next());
+        return domainFactory.getAndWaitForRaceDefinition(tractracEvent.getRaceList().iterator().next());
     }
     
     @Override
@@ -44,7 +44,7 @@ public class RaceHandleImpl implements RaceHandle {
     @Override
     public RaceDefinition getRace(long timeoutInMilliseconds) {
         // FIXME we assume there is exactly one Race per TracTrac event but during match racing there may be many
-        return domainFactory.getRaceDefinition(tractracEvent.getRaceList().iterator().next(), timeoutInMilliseconds);
+        return domainFactory.getAndWaitForRaceDefinition(tractracEvent.getRaceList().iterator().next(), timeoutInMilliseconds);
     }
     
 }

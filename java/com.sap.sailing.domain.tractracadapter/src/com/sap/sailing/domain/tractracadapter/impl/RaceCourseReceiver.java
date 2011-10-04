@@ -97,7 +97,7 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
         } else {
             logger.log(Level.INFO, "Received course for non-existing race "+event.getC().getName()+". Creating RaceDefinition.");
             // create race definition
-            RaceDefinition raceDefinition = getDomainFactory().createRaceDefinition(event.getC(), course);
+            RaceDefinition raceDefinition = getDomainFactory().getOrCreateRaceDefinition(event.getC(), course);
             // add race only if boat class matches
             if (raceDefinition.getBoatClass() == trackedEvent.getEvent().getBoatClass()) {
                 trackedEvent.getEvent().addRace(raceDefinition);

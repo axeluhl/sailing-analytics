@@ -56,7 +56,7 @@ public class MarkPositionReceiver extends AbstractReceiverWithQueue<ControlPoint
         final Race race = tractracEvent.getRaceList().iterator().next();
         new Thread("MarkPositionReceiver waiting for RaceDefinition for "+race.getName()) {
             public void run() {
-                RaceDefinition raceDefinition = domainFactory.getRaceDefinition(race);
+                RaceDefinition raceDefinition = domainFactory.getAndWaitForRaceDefinition(race);
                 // the following call blocks until a tracked race for the race definition was entered into the tracked event
                 TrackedRace blockingTrackedRace = trackedEvent.getTrackedRace(raceDefinition);
                 synchronized(MarkPositionReceiver.this) {
@@ -109,7 +109,7 @@ public class MarkPositionReceiver extends AbstractReceiverWithQueue<ControlPoint
         }
         Buoy buoy = getDomainFactory().getBuoy(event.getA(), event.getB());
         // FIXME during getTrackedRaceBlocking it seems as if trackedRace gets assigned a new, invalid instance
-        ((DynamicTrack<Buoy, GPSFix>) getTrackedRaceBlocking().getTrack(buoy)).addGPSFix(getDomainFactory()
+        ((DynamicTrack<Buoy, GPSFix>) getTrackedRaceBlocking().getOrCreateTrack(buoy)).addGPSFix(getDomainFactory()
                 .createGPSFixMoving(event.getB()));
     }
 

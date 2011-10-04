@@ -102,21 +102,19 @@ public class RaceTreeView extends FormPanel implements EventDisplayer, RaceSelec
 
     @Override
     public void fillEvents(List<EventDAO> result) {
-        if (!result.isEmpty()) {
-            eventsList = new ListDataProvider<EventDAO>(result);
-            trackedEventsModel = new TrackedEventsTreeModel(eventsList, multiSelection);
-            // When the following line is uncommented, the race table contents don't show anymore
-            // if there are no events yet...???!!!
-            CellTree eventsCellTree = new CellTree(trackedEventsModel, /* root */null);
-            eventsCellTree.setAnimationEnabled(true);
-            trackedEventsModel.getSelectionModel().addSelectionChangeHandler(new Handler() {
-                @Override
-                public void onSelectionChange(SelectionChangeEvent event) {
-                    fireRaceSelectionChanged(getSelectedEventAndRace());
-                }
-            });
-            setWidget(eventsCellTree);
-        }
+        eventsList = new ListDataProvider<EventDAO>(result);
+        trackedEventsModel = new TrackedEventsTreeModel(eventsList, multiSelection);
+        // When the following line is uncommented, the race table contents don't show anymore
+        // if there are no events yet...???!!!
+        CellTree eventsCellTree = new CellTree(trackedEventsModel, /* root */null);
+        eventsCellTree.setAnimationEnabled(true);
+        trackedEventsModel.getSelectionModel().addSelectionChangeHandler(new Handler() {
+            @Override
+            public void onSelectionChange(SelectionChangeEvent event) {
+                fireRaceSelectionChanged(getSelectedEventAndRace());
+            }
+        });
+        setWidget(eventsCellTree);
     }
 
 }

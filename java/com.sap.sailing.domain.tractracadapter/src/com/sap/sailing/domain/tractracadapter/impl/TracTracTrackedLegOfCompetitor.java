@@ -66,9 +66,9 @@ public class TracTracTrackedLegOfCompetitor implements TrackedLegOfCompetitor {
 
     @Override
     public Speed getAverageVelocityMadeGood(TimePoint timePoint) throws NoWindException {
-        Position approximateLegStartPosition = getTrackedRace().getTrack(
+        Position approximateLegStartPosition = getTrackedRace().getOrCreateTrack(
                 getLeg().getFrom().getBuoys().iterator().next()).getEstimatedPosition(timePoint, false);
-        Position approximateLegEndPosition = getTrackedRace().getTrack(
+        Position approximateLegEndPosition = getTrackedRace().getOrCreateTrack(
                 getLeg().getTo().getBuoys().iterator().next()).getEstimatedPosition(timePoint, false);
         Bearing bearing = approximateLegStartPosition.getBearingGreatCircle(approximateLegEndPosition);
         return new KnotSpeedWithBearingImpl(getMarkResults(timePoint).getVMG(), bearing);
