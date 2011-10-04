@@ -10,10 +10,12 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -111,7 +113,7 @@ public class DomainFactoryImpl implements DomainFactory {
      * {@link RaceDefinition} has provided to retrieve the {@link RaceDefinition} again using
      * {@link #getRace}.
      */
-    private final Map<Object, RaceDefinition> tractracEventToRaceDefinitionMap = new HashMap<Object, RaceDefinition>();
+    private final Map<Object, Set<RaceDefinition>> tractracEventToRaceDefinitionMap = new HashMap<Object, Set<RaceDefinition>>();
     
     private final Map<Race, RaceDefinition> raceCache = new HashMap<Race, RaceDefinition>();
     
@@ -473,7 +475,7 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public RaceDefinition getRace(Object tokenToRetrieveAssociatedRace) {
+    public Set<RaceDefinition> getRaces(Object tokenToRetrieveAssociatedRace) {
         return tractracEventToRaceDefinitionMap.get(tokenToRetrieveAssociatedRace);
     }
 
@@ -484,13 +486,12 @@ public class DomainFactoryImpl implements DomainFactory {
         logger.log(Level.INFO, "Creating DynamicTrackedRaceImpl for RaceDefinition "+raceDefinition.getName());
         DynamicTrackedRaceImpl result = new DynamicTrackedRaceImpl(trackedEvent, raceDefinition,
                 windStore, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed);
-        if (!tractracEventToRaceDefinitionMap.containsKey(tokenToRetrieveAssociatedRace)) {
-            tractracEventToRaceDefinitionMap.put(tokenToRetrieveAssociatedRace, raceDefinition);
-        } else {
-            logger.severe("There is already something ("+tokenToRetrieveAssociatedRace+") tracking "+
-                        tractracEventToRaceDefinitionMap.get(tokenToRetrieveAssociatedRace)+" while trying to start tracking for race "+
-                    raceDefinition);
+        Set<RaceDefinition> racesForToken = tractracEventToRaceDefinitionMap.get(tokenToRetrieveAssociatedRace);
+        if (racesForToken == null) {
+            racesForToken = new HashSet<RaceDefinition>();
+            tractracEventToRaceDefinitionMap.put(tokenToRetrieveAssociatedRace, racesForToken);
         }
+        racesForToken.add(raceDefinition);
         return result;
     }
 

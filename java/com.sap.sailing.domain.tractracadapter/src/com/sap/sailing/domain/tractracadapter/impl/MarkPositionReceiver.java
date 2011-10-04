@@ -109,7 +109,7 @@ public class MarkPositionReceiver extends AbstractReceiverWithQueue<ControlPoint
         }
         Buoy buoy = getDomainFactory().getBuoy(event.getA(), event.getB());
         // FIXME during getTrackedRaceBlocking it seems as if trackedRace gets assigned a new, invalid instance
-        ((DynamicTrack<Buoy, GPSFix>) getTrackedRaceBlocking().getTrack(buoy)).addGPSFix(getDomainFactory()
+        ((DynamicTrack<Buoy, GPSFix>) getTrackedRaceBlocking().getOrCreateTrack(buoy)).addGPSFix(getDomainFactory()
                 .createGPSFixMoving(event.getB()));
     }
 

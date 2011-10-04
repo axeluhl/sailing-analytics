@@ -140,7 +140,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public DynamicTrack<Buoy, GPSFix> getTrack(Buoy buoy) {
+    public DynamicTrack<Buoy, GPSFix> getOrCreateTrack(Buoy buoy) {
         // TODO Auto-generated method stub
         return null;
     }

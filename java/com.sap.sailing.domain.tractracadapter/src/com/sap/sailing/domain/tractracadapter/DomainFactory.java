@@ -8,6 +8,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.ParseException;
 import java.util.List;
+import java.util.Set;
 
 import com.maptrack.client.io.TypeController;
 import com.sap.sailing.domain.base.BoatClass;
@@ -101,7 +102,7 @@ public interface DomainFactory {
      * 
      * The link to the {@link RaceDefinition} is created in the {@link DomainFactory} when the
      * {@link RaceCourseReceiver} creates the {@link TrackedRace} object. Starting then, the {@link DomainFactory} will
-     * respond with the {@link RaceDefinition} when its {@link DomainFactory#getRace(Event)} is called with the TracTrac
+     * respond with the {@link RaceDefinition} when its {@link DomainFactory#getRaces(Event)} is called with the TracTrac
      * {@link Event} as argument that is used for its tracking.
      * <p>
      * 
@@ -160,11 +161,12 @@ public interface DomainFactory {
             Object tokenToRetrieveAssociatedRace);
 
     /**
-     * Non-blocking call that returns <code>null</code> if the {@link RaceDefinition} for the token
-     * hasn't been created yet, e.g., because the course definition hasn't been received yet or the listener
-     * for receiving course information hasn't been registered (yet).
+     * Non-blocking call that returns <code>null</code> if no {@link RaceDefinition} for the token
+     * has been created yet, e.g., because no course definition has been received yet or the listener
+     * for receiving course information hasn't been registered (yet). Multiple races will be returned if
+     * the {@link Event} to which the client connected has multiple {@link Event#getRaceList() races}.
      */
-    RaceDefinition getRace(Object tokenToRetrieveAssociatedRace);
+    Set<RaceDefinition> getRaces(Object tokenToRetrieveAssociatedRace);
 
     JSONService parseJSONURL(URL jsonURL) throws IOException, ParseException, org.json.simple.parser.ParseException, URISyntaxException;
 

@@ -79,7 +79,7 @@ public class RaceTrackerImpl implements Listener, RaceTracker {
      * 
      * The link to the {@link RaceDefinition} is created in the {@link DomainFactory} when the
      * {@link RaceCourseReceiver} creates the {@link TrackedRace} object. Starting then, the {@link DomainFactory} will
-     * respond with the {@link RaceDefinition} when its {@link DomainFactory#getRace(Event)} is called with the TracTrac
+     * respond with the {@link RaceDefinition} when its {@link DomainFactory#getRaces(Event)} is called with the TracTrac
      * {@link Event} as argument that is used for its tracking.
      * <p>
      * 
@@ -124,7 +124,7 @@ public class RaceTrackerImpl implements Listener, RaceTracker {
      * will be static. This position can be retrieved from {@link ControlPoint#getLat1()} etc. This method registers
      * a task with {@link #scheduler} that regularly polls the <code>paramURL</code> to see if any new control points
      * have arrived or positions for existing control points have been received. Any new information in this
-     * direction will be entered into the {@link TrackedRace} for the {@link #getRace() race} tracked by this
+     * direction will be entered into the {@link TrackedRace} for the {@link #getRaces() race} tracked by this
      * tracker.
      * 
      * @param paramURL points to the document describing the race's metadata which will periodically be downloaded
@@ -133,19 +133,23 @@ public class RaceTrackerImpl implements Listener, RaceTracker {
     private ScheduledFuture<?> scheduleControlPointPositionPoller(final URL paramURL) {
         ScheduledFuture<?> task = scheduler.scheduleWithFixedDelay(new Runnable() {
             @Override public void run() {
-                DynamicTrackedRace trackedRace = getTrackedEvent().getExistingTrackedRace(getRace());
-                if (trackedRace != null) {
+                Set<RaceDefinition> raceDefinitions = getRaces();
+                if (raceDefinitions != null && !raceDefinitions.isEmpty()) {
                     logger.info("fetching paramURL to check for new ControlPoint positions...");
                     Event event = KeyValue.setup(paramURL);
                     for (ControlPoint controlPoint : event.getControlPointList()) {
                         com.sap.sailing.domain.base.ControlPoint domainControlPoint = domainFactory.getControlPoint(controlPoint);
                         boolean first = true;
                         for (Buoy buoy : domainControlPoint.getBuoys()) {
-                            DynamicTrack<Buoy, GPSFix> buoyTrack = trackedRace.getTrack(buoy);
-                            if (buoyTrack.getFirstRawFix() == null) {
-                                buoyTrack.addGPSFix(new GPSFixImpl(new DegreePosition(
-                                        first ? controlPoint.getLat1() : controlPoint.getLat2(),
-                                        first ? controlPoint.getLon1() : controlPoint.getLon2()), MillisecondsTimePoint.now()));
+                            for (RaceDefinition raceDefinition : raceDefinitions) {
+                                DynamicTrackedRace trackedRace = getTrackedEvent().getExistingTrackedRace(
+                                        raceDefinition);
+                                DynamicTrack<Buoy, GPSFix> buoyTrack = trackedRace.getOrCreateTrack(buoy);
+                                if (buoyTrack.getFirstRawFix() == null) {
+                                    buoyTrack.addGPSFix(new GPSFixImpl(new DegreePosition(first ? controlPoint
+                                            .getLat1() : controlPoint.getLat2(), first ? controlPoint.getLon1()
+                                            : controlPoint.getLon2()), MillisecondsTimePoint.now()));
+                                }
                             }
                             first = false;
                         }
@@ -177,8 +181,8 @@ public class RaceTrackerImpl implements Listener, RaceTracker {
     }
     
     @Override
-    public RaceDefinition getRace() {
-        return domainFactory.getRace(this);
+    public Set<RaceDefinition> getRaces() {
+        return domainFactory.getRaces(this);
     }
     
     protected void addListenersForStoredDataAndStartController(Iterable<TypeController> listenersForStoredData) {
@@ -215,12 +219,14 @@ public class RaceTrackerImpl implements Listener, RaceTracker {
             receiver.stopPreemptively();
         }
         ioThread.join(3000); // wait no more than three seconds
-        logger.info("Joined TracTrac IO thread for race "+getRace());
-        RaceDefinition race = getRace();
-        if (race != null) {
-            TrackedRace trackedRace = trackedEvent.getExistingTrackedRace(race);
-            if (trackedRace != null) {
-                trackedEvent.removedTrackedRace(trackedRace);
+        logger.info("Joined TracTrac IO thread for race "+getRaces());
+        Set<RaceDefinition> races = getRaces();
+        if (races != null && !races.isEmpty()) {
+            for (RaceDefinition race: races) {
+                TrackedRace trackedRace = trackedEvent.getExistingTrackedRace(race);
+                if (trackedRace != null) {
+                    trackedEvent.removedTrackedRace(trackedRace);
+                }
             }
         }
     }
@@ -231,42 +237,42 @@ public class RaceTrackerImpl implements Listener, RaceTracker {
 
     @Override
     public void liveDataConnected() {
-        logger.info("Live data connected for race "+getRace());
+        logger.info("Live data connected for race "+getRaces());
     }
 
     @Override
     public void liveDataDisconnected() {
-        logger.info("Live data disconnected for race "+getRace());
+        logger.info("Live data disconnected for race "+getRaces());
     }
 
     @Override
     public void stopped() {
-        logger.info("stopped TracTrac tracking for "+getRace());
+        logger.info("stopped TracTrac tracking for "+getRaces());
     }
 
     @Override
     public void storedDataBegin() {
-        logger.info("Stored data begin for race "+getRace());
+        logger.info("Stored data begin for race "+getRaces());
     }
 
     @Override
     public void storedDataEnd() {
-        logger.info("Stored data end for race "+getRace());
+        logger.info("Stored data end for race "+getRaces());
     }
 
     @Override
     public void storedDataProgress(float progress) {
-        logger.info("Stored data progress for race "+getRace()+": "+progress);
+        logger.info("Stored data progress for race "+getRaces()+": "+progress);
         
     }
 
     @Override
     public void storedDataError(String arg0) {
-        logger.warning("Error with stored data for race "+getRace()+": "+arg0);
+        logger.warning("Error with stored data for race "+getRaces()+": "+arg0);
     }
 
     @Override
     public void liveDataConnectError(String arg0) {
-        logger.warning("Error with live data for race "+getRace()+": "+arg0);
+        logger.warning("Error with live data for race "+getRaces()+": "+arg0);
     }
 }

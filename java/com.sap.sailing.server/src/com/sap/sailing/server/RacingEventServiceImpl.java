@@ -180,7 +180,7 @@ public class RacingEventServiceImpl implements RacingEventService {
     public boolean isRaceBeingTracked(RaceDefinition r) {
         for (Set<RaceTracker> trackers : raceTrackersByEvent.values()) {
             for (RaceTracker tracker : trackers) {
-                if (tracker.getRace() == r) {
+                if (tracker.getRaces() == r) {
                     return true;
                 }
             }
@@ -304,7 +304,7 @@ public class RacingEventServiceImpl implements RacingEventService {
     private ScheduledFuture<?> scheduleAbortTrackerAfterInitialTimeout(final RaceTracker tracker, final long timeoutInMilliseconds) {
         ScheduledFuture<?> task = scheduler.schedule(new Runnable() {
             @Override public void run() {
-                if (tracker.getRace() == null) {
+                if (tracker.getRaces() == null) {
                     try {
                         Event event = tracker.getEvent();
                         logger.log(Level.SEVERE, "RaceDefinition for a race in event "+event.getName()+" not obtained within "+
@@ -334,7 +334,7 @@ public class RacingEventServiceImpl implements RacingEventService {
             Iterator<RaceTracker> trackerIter = raceTrackersByEvent.get(event).iterator();
             while (trackerIter.hasNext()) {
                 RaceTracker raceTracker = trackerIter.next();
-                if (raceTracker.getRace() == race) {
+                if (raceTracker.getRaces() == race) {
                     System.out.println("Found tracker to stop...");
                     raceTracker.stop(); // this also removes the TrackedRace from trackedEvent
                     trackerIter.remove();

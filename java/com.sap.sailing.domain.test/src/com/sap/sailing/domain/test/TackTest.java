@@ -42,7 +42,7 @@ public class TackTest extends StoredTrackBasedTestWithTrackedRace {
     @Test
     public void testWindRoughlyFromNorth() {
         // as the upwind leg points roughtly north, the wind is expected to come roughly from the north
-        Wind wind = getTrackedRace().getWind(getTrackedRace().getTrack(getTrackedRace().getRace().getCourse().getFirstWaypoint().getBuoys().iterator().next()).
+        Wind wind = getTrackedRace().getWind(getTrackedRace().getOrCreateTrack(getTrackedRace().getRace().getCourse().getFirstWaypoint().getBuoys().iterator().next()).
                 getEstimatedPosition(MillisecondsTimePoint.now(), /* extrapolate */ false),
                 MillisecondsTimePoint.now());
         assertEquals(0., wind.getFrom().getDifferenceTo(new DegreeBearingImpl(0)).getDegrees(), 1.);

@@ -149,8 +149,8 @@ public abstract class KielWeek2011BasedTest extends AbstractTracTracLiveTest {
         buoyPositions.put("K Finish (right)", new DegreePosition(54.48891756, 10.170632146666675));
         for (Waypoint w : the505Race2.getRace().getCourse().getWaypoints()) {
             for (Buoy buoy : w.getBuoys()) {
-                the505Race2.getTrack(buoy).addGPSFix(new GPSFixImpl(buoyPositions.get(buoy.getName()), epoch));
-                the505Race2.getTrack(buoy).addGPSFix(new GPSFixImpl(buoyPositions.get(buoy.getName()), now));
+                the505Race2.getOrCreateTrack(buoy).addGPSFix(new GPSFixImpl(buoyPositions.get(buoy.getName()), epoch));
+                the505Race2.getOrCreateTrack(buoy).addGPSFix(new GPSFixImpl(buoyPositions.get(buoy.getName()), now));
             }
         }
     }
