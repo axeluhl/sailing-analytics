@@ -99,7 +99,11 @@ public class RaceTrackerTest {
         TrackedEvent newTrackedEvent = myRaceHandle.getTrackedEvent();
         TrackedRace newTrackedRace = getTrackedRace(newTrackedEvent);
         // expecting a new tracked race to be created when starting over with tracking
-        assertNotSame(oldTrackedRace, newTrackedRace);
+        try {
+            assertNotSame(oldTrackedRace, newTrackedRace);
+        } finally {
+            service.stopTracking(myRaceHandle.getEvent());
+        }
     }
 
     /**
@@ -114,7 +118,11 @@ public class RaceTrackerTest {
         TrackedEvent newTrackedEvent = myRaceHandle.getTrackedEvent();
         TrackedRace newTrackedRace = getTrackedRace(newTrackedEvent);
         // expecting a new tracked race to be created when starting over with tracking
-        assertSame(oldTrackedRace, newTrackedRace);
-        assertSame(raceHandle.getRaceTracker(), myRaceHandle.getRaceTracker());
+        try {
+            assertSame(oldTrackedRace, newTrackedRace);
+            assertSame(raceHandle.getRaceTracker(), myRaceHandle.getRaceTracker());
+        } finally {
+            service.stopTracking(myRaceHandle.getEvent());
+        }
     }
 }

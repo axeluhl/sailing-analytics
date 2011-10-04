@@ -107,10 +107,13 @@ public class RaceTrackerImpl implements Listener, RaceTracker {
         controller = new DataController(liveURI, storedURI, this);
         // Start live and stored data streams
         ioThread = new Thread(controller, "io");
-        domainEvent = domainFactory.getOrCreateEvent(tractracEvent);
         for (Race tractracRace : tractracEvent.getRaceList()) {
+            // removeRace may detach the domain event from the domain factory if that
+            // removed the last race; therefore, it's important to getOrCreate the
+            // domainEvent *after* calling removeRace
             domainFactory.removeRace(tractracEvent, tractracRace);
         }
+        domainEvent = domainFactory.getOrCreateEvent(tractracEvent);
         trackedEvent = domainFactory.getOrCreateTrackedEvent(domainEvent);
         receivers = new HashSet<Receiver>();
         Set<TypeController> typeControllers = new HashSet<TypeController>();
@@ -226,7 +229,7 @@ public class RaceTrackerImpl implements Listener, RaceTracker {
         logger.info("Joined TracTrac IO thread for race(s) "+getRaces());
         Set<RaceDefinition> races = getRaces();
         if (races != null && !races.isEmpty()) {
-            for (RaceDefinition race: races) {
+            for (RaceDefinition race : races) {
                 TrackedRace trackedRace = trackedEvent.getExistingTrackedRace(race);
                 if (trackedRace != null) {
                     trackedEvent.removedTrackedRace(trackedRace);
