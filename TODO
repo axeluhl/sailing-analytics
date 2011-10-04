@@ -27,11 +27,11 @@ Axel
 
  - allow a WindTrackImpl to receive multiple Wind objects with equal time stamp but different position
 
- - Finish a first draft version of a GWT admin and leaderboard UI
+ - implement a smart incremental update capability for leaderboard
 
-   * implement a smart incremental update capability for leaderboard
-   * allow a column to specify its preferred sorting order (ascending / descending)
-   * consider a per-user preferences page where leaderboard columns can be personalized at runtime
+ - allow a column to specify its preferred sorting order (ascending / descending)
+
+ - consider a per-user preferences page where leaderboard columns can be personalized at runtime
 
  - construct a frame/panel containing leaderboard, event/race selector and TracTrac 2D client.
    The TracTrac time line shall influence what is shown in the leaderboard.
