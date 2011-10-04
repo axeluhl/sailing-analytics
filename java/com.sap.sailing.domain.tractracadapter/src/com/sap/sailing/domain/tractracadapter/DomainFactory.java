@@ -207,4 +207,15 @@ public interface DomainFactory {
 
     Pair<List<com.sap.sailing.domain.base.Competitor>, BoatClass> getCompetitorsAndDominantBoatClass(Race race);
 
+    /**
+     * Removes all knowledge about <code>tractracRace</code> which includes removing it from the race cache, from the
+     * {@link com.sap.sailing.domain.base.Event} and, if a {@link TrackedRace} for the corresponding
+     * {@link RaceDefinition} exists, from the {@link TrackedEvent}. If removing the race from the event, the event is
+     * removed from the event cache such that {@link #getOrCreateEvent(Event)} will have to create a new one. Similarly,
+     * if the {@link TrackedRace} that was removed from the {@link TrackedEvent} was the last one, the
+     * {@link TrackedEvent} is removed such that {@link #getOrCreateTrackedEvent(com.sap.sailing.domain.base.Event)}
+     * will have to create a new one.
+     */
+    void removeRace(Event tractracEvent, Race tractracRace);
+
 }

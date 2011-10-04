@@ -47,4 +47,6 @@ public interface TrackedEvent {
     
     int getNetPoints(Competitor competitor, TimePoint timePoint) throws NoWindException;
 
+    void removeTrackedRace(RaceDefinition raceDefinition);
+
 }

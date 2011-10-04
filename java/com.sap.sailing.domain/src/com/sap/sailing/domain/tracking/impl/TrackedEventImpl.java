@@ -49,6 +49,13 @@ public class TrackedEventImpl implements TrackedEvent {
     }
     
     @Override
+    public void removeTrackedRace(RaceDefinition raceDefinition) {
+        synchronized (trackedRaces) {
+            trackedRaces.remove(raceDefinition);
+        }
+    }
+    
+    @Override
     public void removedTrackedRace(TrackedRace trackedRace) {
         synchronized (trackedRaces) {
             trackedRaces.remove(trackedRace.getRace());

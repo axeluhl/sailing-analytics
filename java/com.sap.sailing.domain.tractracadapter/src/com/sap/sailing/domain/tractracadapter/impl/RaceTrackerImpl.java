@@ -37,6 +37,7 @@ import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sailing.util.Util.Triple;
 import com.tractrac.clientmodule.ControlPoint;
 import com.tractrac.clientmodule.Event;
+import com.tractrac.clientmodule.Race;
 import com.tractrac.clientmodule.data.DataController;
 import com.tractrac.clientmodule.data.DataController.Listener;
 import com.tractrac.clientmodule.setup.KeyValue;
@@ -107,6 +108,9 @@ public class RaceTrackerImpl implements Listener, RaceTracker {
         // Start live and stored data streams
         ioThread = new Thread(controller, "io");
         domainEvent = domainFactory.getOrCreateEvent(tractracEvent);
+        for (Race tractracRace : tractracEvent.getRaceList()) {
+            domainFactory.removeRace(tractracEvent, tractracRace);
+        }
         trackedEvent = domainFactory.getOrCreateTrackedEvent(domainEvent);
         receivers = new HashSet<Receiver>();
         Set<TypeController> typeControllers = new HashSet<TypeController>();

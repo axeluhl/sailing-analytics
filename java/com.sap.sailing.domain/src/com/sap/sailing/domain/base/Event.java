@@ -16,5 +16,7 @@ public interface Event extends Named {
     Iterable<Competitor> getCompetitors();
 
     void addRace(RaceDefinition race);
+
+    void removeRace(RaceDefinition raceDefinition);
     
 }
