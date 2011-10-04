@@ -77,7 +77,7 @@ public interface DomainFactory {
      * race definition was created so far, the call blocks until such a definition is provided by a call to
      * {@link #getOrCreateRaceDefinition(Race, Course)}.
      */
-    RaceDefinition getRaceDefinition(Race race);
+    RaceDefinition getAndWaitForRaceDefinition(Race race);
 
     /**
      * Creates an {@link com.sap.sailing.domain.base.Event event} from a
@@ -201,7 +201,7 @@ public interface DomainFactory {
      *            passing -1 means an infinite timeout; 0 means return immediately with <code>null</code> result if no
      *            race definition is found for <code>race</code>.
      */
-    RaceDefinition getRaceDefinition(Race race, long timeoutInMilliseconds);
+    RaceDefinition getAndWaitForRaceDefinition(Race race, long timeoutInMilliseconds);
 
     Pair<List<com.sap.sailing.domain.base.Competitor>, BoatClass> getCompetitorsAndDominantBoatClass(Race race);
 

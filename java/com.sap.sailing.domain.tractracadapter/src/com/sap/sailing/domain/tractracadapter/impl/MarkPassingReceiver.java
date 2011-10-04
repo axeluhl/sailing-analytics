@@ -64,7 +64,7 @@ public class MarkPassingReceiver extends AbstractReceiverWithQueue<RaceCompetito
     
     protected void handleEvent(Triple<RaceCompetitor, MarkPassingsData, Boolean> event) {
         System.out.print("L"); // as in "Leg"
-        DynamicTrackedRace trackedRace = trackedEvent.getTrackedRace(getDomainFactory().getRaceDefinition(event
+        DynamicTrackedRace trackedRace = trackedEvent.getTrackedRace(getDomainFactory().getAndWaitForRaceDefinition(event
                 .getA().getRace()));
         Course course = trackedRace.getRace().getCourse();
         Iterator<Waypoint> waypointsIter = course.getWaypoints().iterator();

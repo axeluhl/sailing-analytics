@@ -67,7 +67,7 @@ public class TestStoringAndRetrievingWindTracksTest extends AbstractTracTracLive
         Iterable<Receiver> typeControllers = domainFactory.getUpdateReceivers(trackedEvent, getEvent(),
                 EmptyWindStore.INSTANCE, ReceiverType.RACECOURSE);
         addListenersForStoredDataAndStartController(typeControllers);
-        RaceDefinition race = domainFactory.getRaceDefinition(getEvent().getRaceList().iterator().next());
+        RaceDefinition race = domainFactory.getAndWaitForRaceDefinition(getEvent().getRaceList().iterator().next());
         DynamicTrackedRace trackedRace = domainFactory.trackRace(trackedEvent, race, /* millisecondsOverWhichToAverageWind */
                 EmptyWindStore.INSTANCE, /* millisecondsOverWhichToAverageSpeed */
                 30000, 10000, getEvent(), this);

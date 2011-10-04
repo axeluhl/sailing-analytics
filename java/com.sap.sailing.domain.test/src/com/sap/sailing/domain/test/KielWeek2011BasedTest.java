@@ -91,7 +91,7 @@ public abstract class KielWeek2011BasedTest extends AbstractTracTracLiveTest {
         Race tractracRace = getEvent().getRaceList().iterator().next();
         // now we expect that there is no 
         assertNull(domainFactory.getExistingRaceDefinitionForRace(tractracRace));
-        race = getDomainFactory().getRaceDefinition(tractracRace);
+        race = getDomainFactory().getAndWaitForRaceDefinition(tractracRace);
         assertNotNull(race);
         synchronized (getSemaphor()) {
             while (!isStoredDataLoaded()) {
