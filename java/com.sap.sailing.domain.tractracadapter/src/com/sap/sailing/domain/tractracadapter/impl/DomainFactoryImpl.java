@@ -392,16 +392,9 @@ public class DomainFactoryImpl implements DomainFactory {
         synchronized (raceCache) {
             RaceDefinition result = raceCache.get(race);
             if (result == null) {
-                Collection<CompetitorClass> competitorClasses = new ArrayList<CompetitorClass>();
-                final List<Competitor> competitors = new ArrayList<Competitor>();
-                for (RaceCompetitor rc : race.getRaceCompetitorList()) {
-                    // also add those whose race class doesn't match the dominant one (such as camera boats)
-                    // because they may still send data that we would like to record in some tracks
-                    competitors.add(getCompetitor(rc.getCompetitor()));
-                    competitorClasses.add(rc.getCompetitor().getCompetitorClass());
-                }
-                BoatClass dominantBoatClass = getDominantBoatClass(competitorClasses);
-                result = new RaceDefinitionImpl(race.getName(), course, dominantBoatClass, competitors);
+                Pair<List<Competitor>, BoatClass> competitorsAndDominantBoatClass = getCompetitorsAndDominantBoatClass(race);
+                result = new RaceDefinitionImpl(race.getName(), course, competitorsAndDominantBoatClass.getB(),
+                        competitorsAndDominantBoatClass.getA());
                 synchronized (raceCache) {
                     raceCache.put(race, result);
                     raceCache.notifyAll();
@@ -411,6 +404,22 @@ public class DomainFactoryImpl implements DomainFactory {
             }
             return result;
         }
+    }
+
+    @Override
+    public Pair<List<Competitor>, BoatClass> getCompetitorsAndDominantBoatClass(Race race) {
+        List<CompetitorClass> competitorClasses = new ArrayList<CompetitorClass>();
+        final List<Competitor> competitors = new ArrayList<Competitor>();
+        for (RaceCompetitor rc : race.getRaceCompetitorList()) {
+            // also add those whose race class doesn't match the dominant one (such as camera boats)
+            // because they may still send data that we would like to record in some tracks
+            competitors.add(getCompetitor(rc.getCompetitor()));
+            competitorClasses.add(rc.getCompetitor().getCompetitorClass());
+        }
+        BoatClass dominantBoatClass = getDominantBoatClass(competitorClasses);
+        Pair<List<Competitor>, BoatClass> competitorsAndDominantBoatClass = new Pair<List<Competitor>, BoatClass>(
+                competitors, dominantBoatClass);
+        return competitorsAndDominantBoatClass;
     }
 
     private BoatClass getDominantBoatClass(Collection<CompetitorClass> competitorClasses) {

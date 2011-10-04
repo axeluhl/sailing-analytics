@@ -30,6 +30,7 @@ import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tractracadapter.impl.DomainFactoryImpl;
 import com.sap.sailing.domain.tractracadapter.impl.RaceCourseReceiver;
+import com.sap.sailing.util.Util.Pair;
 import com.tractrac.clientmodule.Competitor;
 import com.tractrac.clientmodule.CompetitorClass;
 import com.tractrac.clientmodule.ControlPoint;
@@ -193,4 +194,7 @@ public interface DomainFactory {
      *            race definition is found for <code>race</code>.
      */
     RaceDefinition getRaceDefinition(Race race, long timeoutInMilliseconds);
+
+    Pair<List<com.sap.sailing.domain.base.Competitor>, BoatClass> getCompetitorsAndDominantBoatClass(Race race);
+
 }
