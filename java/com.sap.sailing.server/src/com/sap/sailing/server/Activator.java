@@ -41,7 +41,6 @@ public class Activator implements BundleActivator, ServiceListener {
         Map<String, Class<? extends javax.servlet.Servlet>> pathMap = new HashMap<String, Class<? extends javax.servlet.Servlet>>();
         pathMap.put("/admin", AdminApp.class);
         pathMap.put("/moderator", ModeratorApp.class);
-        pathMap.put("/xcelsius", XcelsiusApp.class);
         httpServiceTracker = new HttpServiceTracker(context, pathMap, null);
         httpServiceTracker.open();
         logger.log(Level.INFO, "Started "+context.getBundle().getSymbolicName()+". Character encoding: "+
