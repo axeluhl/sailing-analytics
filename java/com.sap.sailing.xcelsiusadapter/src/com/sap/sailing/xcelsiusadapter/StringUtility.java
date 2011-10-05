@@ -1,4 +1,4 @@
-package com.sap.sailing.server.xcelsius;
+package com.sap.sailing.xcelsiusadapter;
 
 import java.util.ArrayList;
 import java.util.List;

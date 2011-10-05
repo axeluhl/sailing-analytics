@@ -1,4 +1,15 @@
-package com.sap.sailing.server.xcelsius;
+package com.sap.sailing.xcelsiusadapter;
+
+import java.io.IOException;
+import java.util.HashMap;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.jdom.Document;
+import org.jdom.Element;
+import org.jdom.output.Format;
+import org.jdom.output.XMLOutputter;
 
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -8,19 +19,6 @@ import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.util.InvalidDateException;
-
-import org.jdom.Document;
-import org.jdom.Element;
-
-import org.jdom.output.Format;
-import org.jdom.output.XMLOutputter;
-
-import java.io.IOException;
-
-import java.util.HashMap;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 public class Action {
     private HttpServletRequest req;
