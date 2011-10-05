@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<?artifactRepository version='1.1.0'?>
+<artifacts size='1'>
+  <artifact classifier='osgi.bundle' id='com.sap.sailing.httpservicetracker' version='1.0.0.201110051450'>
+    <properties size='6'>
+      <property name='artifact.size' value='3756'/>
+      <property name='download.size' value='3756'/>
+      <property name='download.md5' value='81b106a30c24bdde0a5513ff740bf45c'/>
+      <property name='maven-groupId' value='com.sap.sailing'/>
+      <property name='maven-artifactId' value='com.sap.sailing.httpservicetracker'/>
+      <property name='maven-version' value='1.0.0-SNAPSHOT'/>
+    </properties>
+  </artifact>
+</artifacts>

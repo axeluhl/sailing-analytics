@@ -1,7 +1,9 @@
 package com.sap.sailing.server;
 
 import java.nio.charset.Charset;
+import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -14,6 +16,7 @@ import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.httpservicetracker.HttpServiceTracker;
 import com.sap.sailing.util.Util.Triple;
 
 public class Activator implements BundleActivator, ServiceListener {
@@ -21,16 +24,26 @@ public class Activator implements BundleActivator, ServiceListener {
     
     private static BundleContext fContext;
     
+    private HttpServiceTracker httpServiceTracker;
+    
     static BundleContext getDefault() {
         return fContext;
     }
-    
+
     public void start(BundleContext context) throws Exception {
         fContext = context;
         RacingEventService service = new RacingEventServiceImpl();
         Hashtable<String, ?> props = new Hashtable<String, String>();
-        // register the service
+        // register the racing service
         context.registerService(RacingEventService.class.getName(), service, props);
+        
+        // now track the HTTP service:
+        Map<String, Class<? extends javax.servlet.Servlet>> pathMap = new HashMap<String, Class<? extends javax.servlet.Servlet>>();
+        pathMap.put("/admin", AdminApp.class);
+        pathMap.put("/moderator", ModeratorApp.class);
+        pathMap.put("/xcelsius", XcelsiusApp.class);
+        httpServiceTracker = new HttpServiceTracker(context, pathMap, null);
+        httpServiceTracker.open();
         logger.log(Level.INFO, "Started "+context.getBundle().getSymbolicName()+". Character encoding: "+
                 Charset.defaultCharset());
     }
@@ -47,6 +60,9 @@ public class Activator implements BundleActivator, ServiceListener {
         for (Event event : service.getAllEvents()) {
             service.stopTracking(event);
         }
+        // stop tracking the HTTP service:
+        httpServiceTracker.close();
+        httpServiceTracker = null;
     }
 
     public void serviceChanged(ServiceEvent ev) {
