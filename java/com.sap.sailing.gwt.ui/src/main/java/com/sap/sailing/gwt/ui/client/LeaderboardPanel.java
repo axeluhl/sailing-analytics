@@ -48,7 +48,7 @@ import com.sap.sailing.gwt.ui.shared.Pair;
  * @author Axel Uhl (D043530)
  *
  */
-public class LeaderboardPanel extends FormPanel implements LegDetailSelectionProvider, TimeListener, PlayStateListener {
+public class LeaderboardPanel extends FormPanel implements LegDetailSelectionProvider, RaceDetailSelectionProvider, TimeListener, PlayStateListener {
     private static final int RANK_COLUMN_INDEX = 0;
 
     private static final int SAIL_ID_COLUMN_INDEX = 1;
@@ -79,6 +79,8 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
     private final RankColumn rankColumn;
     
     private final List<LegDetailSelectionProvider.LegDetailColumnType> selectedLegDetails;
+
+    private final List<RaceDetailSelectionProvider.RaceDetailColumnType> selectedRaceDetails;
 
     protected final String RACE_COLUMN_HEADER_STYLE;
 
@@ -116,32 +118,35 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
 
         @Override
         public void onClick(ClickEvent event) {
-            new LeaderboardSettingsPanel(LeaderboardPanel.this, timer.getDelayBetweenAutoAdvancesInMilliseconds(),
-                    stringConstants.leaderboardSettings(), stringConstants.selectLegDetails(),
-                    stringConstants.ok(), stringConstants.cancel(), new Validator<LeaderboardSettingsPanel.Result>() {
-                        @Override
-                        public String getErrorMessage(LeaderboardSettingsPanel.Result valueToValidate) {
-                            if (valueToValidate.getLegDetailsToShow().isEmpty()) {
-                                return stringConstants.selectAtLeastOneLegDetail();
-                            } else if (valueToValidate.getDelayBetweenAutoAdvancesInMilliseconds() < 1000) {
-                                return stringConstants.chooseUpdateIntervalOfAtLeastOneSecond();
-                            } else {
-                                return null;
-                            }
-                        }
-            }, new AsyncCallback<LeaderboardSettingsPanel.Result>() {
-                        @Override
-                        public void onSuccess(LeaderboardSettingsPanel.Result result) {
-                            selectedLegDetails.clear();
-                            selectedLegDetails.addAll(result.getLegDetailsToShow());
-                            timer.setDelayBetweenAutoAdvancesInMilliseconds(result.getDelayBetweenAutoAdvancesInMilliseconds());
-                            setDelayInMilliseconds(result.getDelayInMilliseconds());
-                            refreshHeaders();
-                        }
-                        @Override
-                        public void onFailure(Throwable caught) {
-                        }
-                    }, stringConstants, getDelayInMilliseconds()).show();
+            new LeaderboardSettingsPanel(LeaderboardPanel.this, LeaderboardPanel.this,
+                    timer.getDelayBetweenAutoAdvancesInMilliseconds(), stringConstants.leaderboardSettings(),
+                    stringConstants.selectLegDetails(), stringConstants.ok(), stringConstants.cancel(), new Validator<LeaderboardSettingsPanel.Result>() {
+                @Override
+                public String getErrorMessage(LeaderboardSettingsPanel.Result valueToValidate) {
+                    if (valueToValidate.getLegDetailsToShow().isEmpty()) {
+                        return stringConstants.selectAtLeastOneLegDetail();
+                    } else if (valueToValidate.getDelayBetweenAutoAdvancesInMilliseconds() < 1000) {
+                        return stringConstants.chooseUpdateIntervalOfAtLeastOneSecond();
+                    } else {
+                        return null;
+                    }
+                }
+         }, new AsyncCallback<LeaderboardSettingsPanel.Result>() {
+                                @Override
+                                public void onSuccess(LeaderboardSettingsPanel.Result result) {
+                                    // FIXME find out what changed and refresh headers carefully based on these changes
+                                    selectedLegDetails.clear();
+                                    selectedLegDetails.addAll(result.getLegDetailsToShow());
+                                    selectedRaceDetails.clear();
+                                    selectedRaceDetails.addAll(result.getRaceDetailsToShow());
+                                    timer.setDelayBetweenAutoAdvancesInMilliseconds(result.getDelayBetweenAutoAdvancesInMilliseconds());
+                                    setDelayInMilliseconds(result.getDelayInMilliseconds());
+                                    refreshHeaders();
+                                }
+                                @Override
+                                public void onFailure(Throwable caught) {
+                                }
+                            }, stringConstants, getDelayInMilliseconds()).show();
         }
     }
 
@@ -398,17 +403,39 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
             }
         }
 
+        /**
+         * if {@link #directChildren} is not <code>null</code>, {@link #refreshChildren} is called recursively for all
+         * expandable children; afterwards, {@link #directChildren} is set to <code>null</code>.
+         */
+        public void refreshChildren() {
+            super.refreshChildren();
+            directChildren = null;
+        }
+
         @Override
         protected List<SortableColumn<LeaderboardRowDAO, ?>> createExpansionColumns() {
             int legCount = getLeaderboard().getLegCount(getRaceName());
             List<SortableColumn<LeaderboardRowDAO, ?>> result = new ArrayList<SortableColumn<LeaderboardRowDAO,?>>();
+            for (RaceDetailColumnType type : getRaceDetailsToShow()) {
+                switch (type) {
+                case DISTANCE_TRAVELED:
+                    result.add(new FormattedDoubleLegDetailColumn(stringConstants.distanceInMeters(),
+                          new RaceDistanceTraveledInMeters(), 1, getLeaderboardPanel().getLeaderboardTable(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
+                    break;
+                case AVERAGE_SPEED_OVER_GROUND_IN_KNOTS:
+                    result.add(new FormattedDoubleLegDetailColumn(stringConstants.averageSpeedInKnots(),
+                          new RaceAverageSpeedInKnots(), 1, getLeaderboardPanel().getLeaderboardTable(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
+                    break;
+                case GAP_TO_LEADER_IN_SECONDS:
+                    result.add(new FormattedDoubleLegDetailColumn(stringConstants.gapToLeaderInSeconds(),
+                          new RaceGapToLeaderInSeconds(), 1, getLeaderboardPanel().getLeaderboardTable(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
+                    break;
+                }
+            }
             for (int i=0; i<legCount; i++) {
                 result.add(new LegColumn(LeaderboardPanel.this, getRaceName(), /* legIndex */ i, stringConstants, LeaderboardPanel.this,
                         LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LEG_DETAIL_COLUMN_HEADER_STYLE, LEG_DETAIL_COLUMN_STYLE));
             }
-            // TODO add race aggregation columns if selected
-//            result.add(new FormattedDoubleLegDetailColumn(stringConstants.averageSpeedInKnots(),
-//                    new RaceAverageSpeedInKnots(), 1, getLeaderboardPanel().getLeaderboardTable(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
             return result;
         }
         
@@ -422,19 +449,66 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
             public Double get(LeaderboardRowDAO row) {
                 Double result = null;
                 LeaderboardEntryDAO fieldsForRace = row.fieldsByRaceName.get(getRaceName());
-                if (fieldsForRace != null) {
+                if (fieldsForRace != null && fieldsForRace.legDetails != null) {
                     double distanceTraveledInMeters = 0;
                     long timeInMilliseconds = 0;
                     for (LegEntryDAO legDetail : fieldsForRace.legDetails) {
-                        distanceTraveledInMeters += legDetail.distanceTraveledInMeters;
-                        timeInMilliseconds += legDetail.timeInMilliseconds;
+                        if (legDetail != null) {
+                            distanceTraveledInMeters += legDetail.distanceTraveledInMeters;
+                            timeInMilliseconds += legDetail.timeInMilliseconds;
+                        }
                     }
-                    result = distanceTraveledInMeters / (double) timeInMilliseconds * 1000;
+                    if (timeInMilliseconds != 0) {
+                        result = distanceTraveledInMeters / (double) timeInMilliseconds * 1000;
+                    }
                 }
                 return result;
             }
         }
-    }
+
+        /**
+         * Accumulates the distance traveled over all legs of a race
+         * 
+         * @author Axel Uhl (D043530)
+         */
+        private class RaceDistanceTraveledInMeters implements LegDetailField<Double> {
+            @Override
+            public Double get(LeaderboardRowDAO row) {
+                Double result = null;
+                LeaderboardEntryDAO fieldsForRace = row.fieldsByRaceName.get(getRaceName());
+                if (fieldsForRace != null && fieldsForRace.legDetails != null) {
+                    for (LegEntryDAO legDetail : fieldsForRace.legDetails) {
+                        if (legDetail != null) {
+                            if (result == null) {
+                                result = 0.0;
+                            }
+                            result += legDetail.distanceTraveledInMeters;
+                        }
+                    }
+                }
+                return result;
+            }
+        }
+        /**
+         * Accumulates the average speed over all legs of a race
+         * 
+         * @author Axel Uhl (D043530)
+         */
+        private class RaceGapToLeaderInSeconds implements LegDetailField<Double> {
+            @Override
+            public Double get(LeaderboardRowDAO row) {
+                Double result = null;
+                LeaderboardEntryDAO fieldsForRace = row.fieldsByRaceName.get(getRaceName());
+                if (fieldsForRace != null && fieldsForRace.legDetails != null) {
+                    LegEntryDAO lastLegDetail = fieldsForRace.legDetails.get(fieldsForRace.legDetails.size() - 1);
+                    if (lastLegDetail != null) {
+                        result = lastLegDetail.gapToLeaderInSeconds;
+                    }
+                }
+                return result;
+            }
+        }
+}
     
     /**
      * Displays the totals for a competitor for the entire leaderboard.
@@ -551,6 +625,7 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
         this.selectedLegDetails.add(LegDetailColumnType.DISTANCE_TRAVELED);
         this.selectedLegDetails.add(LegDetailColumnType.AVERAGE_SPEED_OVER_GROUND_IN_KNOTS);
         this.selectedLegDetails.add(LegDetailColumnType.RANK_GAIN);
+        this.selectedRaceDetails = new ArrayList<RaceDetailSelectionProvider.RaceDetailColumnType>();
         delayInMilliseconds = 0l;
         timer = new Timer(/* delayBetweenAutoAdvancesInMilliseconds */ 3000l);
         timer.setDelay(getDelayInMilliseconds()); // set time/delay before adding as listener
@@ -939,9 +1014,14 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
         return Collections.unmodifiableList(selectedLegDetails);
     }
 
+    @Override
+    public List<RaceDetailColumnType> getRaceDetailsToShow() {
+        return Collections.unmodifiableList(selectedRaceDetails);
+    }
+
     /**
      * After the leg detail selection has changed, updates the headers accordingly. This implementation
-     * chooses to collapse all expanded race columns and then expand them again (see {@link #toggleExpansion()}).
+     * chooses to collapse all expanded expandable columns and then expand them again (see {@link #toggleExpansion()}).
      * This will re-establish their expansion structure while updating the leg detail columns accordingly.
      */
     private void refreshHeaders() {
