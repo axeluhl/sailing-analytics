@@ -2,13 +2,14 @@ package com.sap.sailing.gwt.ui.client;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.cellview.client.Header;
 import com.sap.sailing.gwt.ui.client.LegDetailColumn.LegDetailField;
-import com.sap.sailing.gwt.ui.client.LegDetailSelectionProvider.LegDetailColumnType;
 import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDAO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDAO;
 import com.sap.sailing.gwt.ui.shared.LegEntryDAO;
@@ -24,7 +25,7 @@ public class LegColumn extends ExpandableSortableColumn<String> {
     private final String raceName;
     private final int legIndex;
     private final StringConstants stringConstants;
-    private final LegDetailSelectionProvider legDetailSelectionProvider;
+    private final List<DetailColumnType> legDetailSelection;
     private final String headerStyle;
     private final String columnStyle;
     private final String detailHeaderStyle;
@@ -107,20 +108,60 @@ public class LegColumn extends ExpandableSortableColumn<String> {
     }
     
     public LegColumn(LeaderboardPanel leaderboardPanel, String raceName, int legIndex, StringConstants stringConstants,
-            LegDetailSelectionProvider legDetailSelectionProvider, String headerStyle, String columnStyle,
+            List<DetailColumnType> legDetailSelection, String headerStyle, String columnStyle,
             String detailHeaderStyle, String detailColumnStyle) {
-        super(leaderboardPanel, /* expandable */true /* all legs have details */, new TextCell());
+        super(leaderboardPanel, /* expandable */true /* all legs have details */, new TextCell(), stringConstants,
+                detailHeaderStyle, detailColumnStyle, legDetailSelection);
         setHorizontalAlignment(ALIGN_CENTER);
         this.raceName = raceName;
         this.legIndex = legIndex;
         this.stringConstants = stringConstants;
-        this.legDetailSelectionProvider = legDetailSelectionProvider;
+        this.legDetailSelection = legDetailSelection;
         this.headerStyle = headerStyle;
         this.columnStyle = columnStyle;
         this.detailHeaderStyle = detailHeaderStyle;
         this.detailColumnStyle = detailColumnStyle;
     }
     
+    public static DetailColumnType[] getAvailableLegDetailColumnTypes() {
+        return new DetailColumnType[] { DetailColumnType.AVERAGE_SPEED_OVER_GROUND_IN_KNOTS,
+                DetailColumnType.DISTANCE_TRAVELED, DetailColumnType.RANK_GAIN,
+                DetailColumnType.CURRENT_SPEED_OVER_GROUND_IN_KNOTS,
+                DetailColumnType.ESTIMATED_TIME_TO_NEXT_WAYPOINT_IN_SECONDS,
+                DetailColumnType.VELOCITY_MADE_GOOD_IN_KNOTS, DetailColumnType.GAP_TO_LEADER_IN_SECONDS,
+                DetailColumnType.WINDWARD_DISTANCE_TO_GO_IN_METERS };
+    }
+
+    @Override
+    protected Map<DetailColumnType, SortableColumn<LeaderboardRowDAO, ?>> getDetailColumnMap(LeaderboardPanel leaderboardPanel, StringConstants stringConstants, String detailHeaderStyle, String detailColumnStyle) {
+        Map<DetailColumnType, SortableColumn<LeaderboardRowDAO, ?>> result = new HashMap<DetailColumnType, SortableColumn<LeaderboardRowDAO, ?>>();
+        result.put(DetailColumnType.DISTANCE_TRAVELED,
+                new FormattedDoubleLegDetailColumn(stringConstants.distanceInMeters(), new DistanceTraveledInMeters(),
+                        0, leaderboardPanel.getLeaderboardTable(), detailHeaderStyle, detailColumnStyle));
+        result.put(DetailColumnType.AVERAGE_SPEED_OVER_GROUND_IN_KNOTS, new FormattedDoubleLegDetailColumn(
+                stringConstants.averageSpeedInKnots(), new AverageSpeedOverGroundInKnots(), 2, leaderboardPanel
+                        .getLeaderboardTable(), detailHeaderStyle, detailColumnStyle));
+        result.put(DetailColumnType.CURRENT_SPEED_OVER_GROUND_IN_KNOTS, new FormattedDoubleLegDetailColumn(
+                stringConstants.currentSpeedOverGroundInKnots(), new CurrentSpeedOverGroundInKnots(), 1,
+                leaderboardPanel.getLeaderboardTable(), detailHeaderStyle, detailColumnStyle));
+        result.put(DetailColumnType.ESTIMATED_TIME_TO_NEXT_WAYPOINT_IN_SECONDS, new FormattedDoubleLegDetailColumn(
+                stringConstants.estimatedTimeToNextWaypointInSeconds(), new EstimatedTimeToNextWaypointInSeconds(), 1,
+                leaderboardPanel.getLeaderboardTable(), detailHeaderStyle, detailColumnStyle));
+        result.put(DetailColumnType.GAP_TO_LEADER_IN_SECONDS,
+                new FormattedDoubleLegDetailColumn(stringConstants.gapToLeaderInSeconds(), new GapToLeaderInSeconds(),
+                        1, leaderboardPanel.getLeaderboardTable(), detailHeaderStyle, detailColumnStyle));
+        result.put(DetailColumnType.VELOCITY_MADE_GOOD_IN_KNOTS,
+                new FormattedDoubleLegDetailColumn(stringConstants.velocityMadeGoodInKnots(),
+                        new VelocityMadeGoodInKnots(), 1, leaderboardPanel.getLeaderboardTable(),
+                        detailHeaderStyle, detailColumnStyle));
+        result.put(DetailColumnType.WINDWARD_DISTANCE_TO_GO_IN_METERS, new FormattedDoubleLegDetailColumn(
+                stringConstants.windwardDistanceToGoInMeters(), new WindwardDistanceToGoInMeters(), 1,
+                leaderboardPanel.getLeaderboardTable(), detailHeaderStyle, detailColumnStyle));
+        result.put(DetailColumnType.RANK_GAIN, new RankGainColumn(stringConstants.rankGain(), new RankGain(),
+                leaderboardPanel.getLeaderboardTable(), detailHeaderStyle, detailColumnStyle));
+        return result;
+    }
+
     private int getLegIndex() {
         return legIndex;
     }
@@ -183,21 +224,18 @@ public class LegColumn extends ExpandableSortableColumn<String> {
             return "";
         }
     }
-
+    
     @Override
     protected List<SortableColumn<LeaderboardRowDAO, ?>> createExpansionColumns() {
         List<SortableColumn<LeaderboardRowDAO, ?>> result = new ArrayList<SortableColumn<LeaderboardRowDAO,?>>();
         try {
-            for (LegDetailColumnType type : legDetailSelectionProvider.getLegDetailsToShow()) {
+            for (DetailColumnType type : legDetailSelection) {
                 switch (type) {
                 case DISTANCE_TRAVELED:
                     result.add(new FormattedDoubleLegDetailColumn(stringConstants.distanceInMeters(), new DistanceTraveledInMeters(), 0, getLeaderboardPanel().getLeaderboardTable(), detailHeaderStyle, detailColumnStyle));
                     break;
                 case AVERAGE_SPEED_OVER_GROUND_IN_KNOTS:
                     result.add(new FormattedDoubleLegDetailColumn(stringConstants.averageSpeedInKnots(), new AverageSpeedOverGroundInKnots(), 2, getLeaderboardPanel().getLeaderboardTable(), detailHeaderStyle, detailColumnStyle));
-                    break;
-                case RANK_GAIN:
-                    result.add(new RankGainColumn(stringConstants.rankGain(), new RankGain(), getLeaderboardPanel().getLeaderboardTable(), detailHeaderStyle, detailColumnStyle));
                     break;
                 case CURRENT_SPEED_OVER_GROUND_IN_KNOTS:
                     result.add(new FormattedDoubleLegDetailColumn(stringConstants.currentSpeedOverGroundInKnots(), new CurrentSpeedOverGroundInKnots(), 1, getLeaderboardPanel().getLeaderboardTable(), detailHeaderStyle, detailColumnStyle));
@@ -214,6 +252,9 @@ public class LegColumn extends ExpandableSortableColumn<String> {
                 case WINDWARD_DISTANCE_TO_GO_IN_METERS:
                     result.add(new FormattedDoubleLegDetailColumn(stringConstants.windwardDistanceToGoInMeters(), new WindwardDistanceToGoInMeters(), 1, getLeaderboardPanel().getLeaderboardTable(), detailHeaderStyle, detailColumnStyle));
                     break;
+                case RANK_GAIN:
+                    result.add(new RankGainColumn(stringConstants.rankGain(), new RankGain(), getLeaderboardPanel().getLeaderboardTable(), detailHeaderStyle, detailColumnStyle));
+                    break;
                 }
             }
             return result;
@@ -222,13 +263,5 @@ public class LegColumn extends ExpandableSortableColumn<String> {
         }
     }
 
-    /**
-     * if {@link #directChildren} is not <code>null</code>, {@link #refreshChildren} is called recursively for all
-     * expandable children; afterwards, {@link #directChildren} is set to <code>null</code>.
-     */
-    public void refreshChildren() {
-        super.refreshChildren();
-        directChildren = null;
-    }
 }
 

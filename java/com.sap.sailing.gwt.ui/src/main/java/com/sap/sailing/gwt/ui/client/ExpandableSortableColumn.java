@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.Cell.Context;
@@ -23,6 +24,8 @@ public abstract class ExpandableSortableColumn<C> extends SortableColumn<Leaderb
     private boolean enableExpansion;
     private boolean suppressSortingOnce;
     private final LeaderboardPanel leaderboardPanel;
+    private final Map<DetailColumnType, SortableColumn<LeaderboardRowDAO, ?>> detailColumnsMap;
+    private final List<DetailColumnType> detailSelection;
     
     /**
      * Holds the child columns that represent expanded information for this column. If <code>null</code>,
@@ -39,12 +42,26 @@ public abstract class ExpandableSortableColumn<C> extends SortableColumn<Leaderb
      */
     private boolean expanded;
 
-    public ExpandableSortableColumn(LeaderboardPanel leaderboardPanel, boolean enableExpansion, Cell<C> cell) {
+    public ExpandableSortableColumn(LeaderboardPanel leaderboardPanel, boolean enableExpansion, Cell<C> cell,
+            StringConstants stringConstants, String detailHeaderStyle, String detailColumnStyle,
+            List<DetailColumnType> detailSelection) {
         super(cell);
         this.enableExpansion = enableExpansion;
         this.leaderboardPanel = leaderboardPanel;
+        this.detailSelection = detailSelection;
+        detailColumnsMap = getDetailColumnMap(leaderboardPanel, stringConstants, detailHeaderStyle, detailColumnStyle);
     }
     
+    /**
+     * By default, an expandable sortable column has no detail columns. Subclasses that want to offer detail columns must
+     * override this method.
+     */
+    protected Map<DetailColumnType, SortableColumn<LeaderboardRowDAO, ?>> getDetailColumnMap(
+            LeaderboardPanel leaderboardPanel, StringConstants stringConstants, String detailHeaderStyle,
+            String detailColumnStyle) {
+        return Collections.emptyMap();
+    }
+
     protected LeaderboardPanel getLeaderboardPanel() {
         return leaderboardPanel;
     }
@@ -65,11 +82,20 @@ public abstract class ExpandableSortableColumn<C> extends SortableColumn<Leaderb
      * Fetches the cached {@link #directChildren}. If <code>null</code>, the child columns are determined by calling
      * {@link #createExpansionColumns} and cached in {@link #directChildren}.
      */
-    private Iterable<SortableColumn<LeaderboardRowDAO, ?>> getDirectChildren() {
-        if (directChildren == null) {
-            directChildren = createExpansionColumns();
+    protected Iterable<SortableColumn<LeaderboardRowDAO, ?>> getDirectChildren() {
+        List<SortableColumn<LeaderboardRowDAO, ?>> result;
+        if (isExpanded()) {
+            result = new ArrayList<SortableColumn<LeaderboardRowDAO,?>>();
+            for (DetailColumnType detailColumnType : detailSelection) {
+                SortableColumn<LeaderboardRowDAO, ?> selectedColumn = detailColumnsMap.get(detailColumnType);
+                if (selectedColumn != null) {
+                    result.add(selectedColumn);
+                }
+            }
+        } else {
+            result = Collections.emptyList();
         }
-        return directChildren;
+        return result;
     }
     
     /**
@@ -80,6 +106,17 @@ public abstract class ExpandableSortableColumn<C> extends SortableColumn<Leaderb
      * @return a valid but possibly empty list
      */
     protected List<SortableColumn<LeaderboardRowDAO, ?>> createExpansionColumns() {
+        return Collections.emptyList();
+    }
+
+    protected SortableColumn<LeaderboardRowDAO, ?> createExpansionColumn(DetailColumnType detailColumnType) {
+        throw new RuntimeException("Detail column type "+detailColumnType+" not supported by column of type "+getClass().getName());
+    }
+    
+    /**
+     * @return the list of details supported by {@link #createExpansionColumn}
+     */
+    protected List<DetailColumnType> getSupportedDetails() {
         return Collections.emptyList();
     }
 
@@ -196,17 +233,4 @@ public abstract class ExpandableSortableColumn<C> extends SortableColumn<Leaderb
     @Override
     public abstract Header<SafeHtml> getHeader();
 
-    /**
-     * if {@link #directChildren} is not <code>null</code>, {@link #refreshChildren} is called recursively for all
-     * expandable children
-     */
-    public void refreshChildren() {
-        if (directChildren != null) {
-            for (SortableColumn<LeaderboardRowDAO, ?> c : directChildren) {
-                if (c instanceof ExpandableSortableColumn<?>) {
-                    ((ExpandableSortableColumn<?>) c).refreshChildren();
-                }
-            }
-        }
-    }
 }

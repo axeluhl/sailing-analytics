@@ -102,4 +102,7 @@ public interface StringConstants extends Constants {
     String inEvent();
     String to();
     String showEstimatedWind();
+    String timing();
+    String raceDetailsToShow();
+    String legDetailsToShow();
 }
