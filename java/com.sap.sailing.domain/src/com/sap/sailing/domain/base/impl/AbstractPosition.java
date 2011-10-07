@@ -90,8 +90,8 @@ public class AbstractPosition implements Position {
     
     @Override
     public Distance crossTrackError(Position pos2, Bearing bearing) {
-        return new CentralAngleDistance(Math.asin(Math.sin(pos2.getCentralAngleRad(this))
-                * Math.sin(pos2.getBearingGreatCircle(this).getRadians() - bearing.getRadians())));
+        return new CentralAngleDistance(Math.abs(Math.asin(Math.sin(pos2.getCentralAngleRad(this))
+                * Math.sin(pos2.getBearingGreatCircle(this).getRadians() - bearing.getRadians()))));
     }
 
     @Override

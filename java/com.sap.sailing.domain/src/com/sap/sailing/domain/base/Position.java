@@ -42,6 +42,9 @@ public interface Position {
      */
     Position projectToLineThrough(Position p, Bearing bearing);
 
+    /**
+     * @return an unsigned distance
+     */
     Distance crossTrackError(Position p, Bearing bearing);
 
     /**
