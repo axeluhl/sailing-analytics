@@ -90,6 +90,9 @@ public class RankPerLeg extends Action {
                     addColumn("" + legTime);
                     addColumn("" + (avgSpeed == null ? "null" : avgSpeed.getKnots()));
                     addColumn("" + (distanceSailed == null ? "null" : distanceSailed.getMeters()));
+                    
+                    // position and tracking-related columns (see Kersten's mail of 2011-10-07T11:32:00CEST)
+                    
                 }
             }
             previousLeg = trackedLeg;
