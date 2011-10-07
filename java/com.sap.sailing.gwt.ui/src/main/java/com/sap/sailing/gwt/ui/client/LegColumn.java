@@ -124,8 +124,8 @@ public class LegColumn extends ExpandableSortableColumn<String> {
     }
     
     public static DetailColumnType[] getAvailableLegDetailColumnTypes() {
-        return new DetailColumnType[] { DetailColumnType.DISTANCE_TRAVELED,
-                DetailColumnType.AVERAGE_SPEED_OVER_GROUND_IN_KNOTS, DetailColumnType.RANK_GAIN,
+        return new DetailColumnType[] { DetailColumnType.AVERAGE_SPEED_OVER_GROUND_IN_KNOTS,
+                DetailColumnType.DISTANCE_TRAVELED, DetailColumnType.RANK_GAIN,
                 DetailColumnType.CURRENT_SPEED_OVER_GROUND_IN_KNOTS,
                 DetailColumnType.ESTIMATED_TIME_TO_NEXT_WAYPOINT_IN_SECONDS,
                 DetailColumnType.VELOCITY_MADE_GOOD_IN_KNOTS, DetailColumnType.GAP_TO_LEADER_IN_SECONDS,

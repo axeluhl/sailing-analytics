@@ -502,7 +502,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                         }
                     }
                     if (timeInMilliseconds != 0) {
-                        result = distanceTraveledInMeters / (double) timeInMilliseconds * 1000;
+                        result = distanceTraveledInMeters / (double) timeInMilliseconds * 1000 * 3600 / 1852;
                     }
                 }
                 return result;
