@@ -12,37 +12,34 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.LeaderboardSettingsPanel.Result;
-import com.sap.sailing.gwt.ui.client.LegDetailSelectionProvider.LegDetailColumnType;
-import com.sap.sailing.gwt.ui.client.RaceDetailSelectionProvider.RaceDetailColumnType;
 
 public class LeaderboardSettingsPanel extends DataEntryDialog<Result> {
-    private final LegDetailSelectionProvider legDetailSelectionProvider;
-    private final RaceDetailSelectionProvider raceDetailSelectionProvider;
-    private final Map<LegDetailColumnType, CheckBox> legDetailCheckboxes;
-    private final Map<RaceDetailColumnType, CheckBox> raceDetailCheckboxes;
+    private final List<DetailColumnType> legDetailSelection;
+    private final List<DetailColumnType> raceDetailSelection;
+    private final Map<DetailColumnType, CheckBox> legDetailCheckboxes;
+    private final Map<DetailColumnType, CheckBox> raceDetailCheckboxes;
     private final StringConstants stringConstants;
     private final IntegerBox delayBetweenAutoAdvancesInSecondsBox;
     private final IntegerBox delayInSecondsBox;
     
     public static class Result {
-        private final List<LegDetailColumnType> legDetailsToShow;
-        private final List<RaceDetailColumnType> raceDetailsToShow;
+        private final List<DetailColumnType> legDetailsToShow;
+        private final List<DetailColumnType> raceDetailsToShow;
         private final long delayBetweenAutoAdvancesInMilliseconds;
         private final long delayInMilliseconds;
         
-        public Result(List<LegDetailColumnType> legDetailsToShow, List<RaceDetailColumnType> raceDetailsToShow,
-                long delayBetweenAutoAdvancesInMilliseconds, long delayInMilliseconds) {
+        public Result(List<DetailColumnType> legDetailsToShow, List<DetailColumnType> raceDetailsToShow, long delayBetweenAutoAdvancesInMilliseconds, long delayInMilliseconds) {
             this.legDetailsToShow = legDetailsToShow;
             this.raceDetailsToShow = raceDetailsToShow;
             this.delayBetweenAutoAdvancesInMilliseconds = delayBetweenAutoAdvancesInMilliseconds;
             this.delayInMilliseconds = delayInMilliseconds;
         }
 
-        public List<LegDetailColumnType> getLegDetailsToShow() {
+        public List<DetailColumnType> getLegDetailsToShow() {
             return legDetailsToShow;
         }
 
-        public List<RaceDetailColumnType> getRaceDetailsToShow() {
+        public List<DetailColumnType> getRaceDetailsToShow() {
             return raceDetailsToShow;
         }
 
@@ -55,16 +52,16 @@ public class LeaderboardSettingsPanel extends DataEntryDialog<Result> {
         }
     }
     
-    public LeaderboardSettingsPanel(LegDetailSelectionProvider legDetailSelectionProvider, RaceDetailSelectionProvider raceDetailSelectionProvider,
+    public LeaderboardSettingsPanel(List<DetailColumnType> legDetailSelection, List<DetailColumnType> raceDetailSelection,
             long delayBetweenAutoAdvancesInMilliseconds, String title, String message,
             String okButtonName,
             String cancelButtonName, com.sap.sailing.gwt.ui.client.DataEntryDialog.Validator<Result> validator, AsyncCallback<Result> callback, StringConstants stringConstants, long delayInMilliseconds) {
         super(title, message, okButtonName, cancelButtonName, validator, callback);
-        this.legDetailSelectionProvider = legDetailSelectionProvider;
-        this.raceDetailSelectionProvider = raceDetailSelectionProvider;
+        this.legDetailSelection = legDetailSelection;
+        this.raceDetailSelection = raceDetailSelection;
         this.stringConstants = stringConstants;
-        legDetailCheckboxes = new LinkedHashMap<LegDetailSelectionProvider.LegDetailColumnType, CheckBox>();
-        raceDetailCheckboxes = new LinkedHashMap<RaceDetailSelectionProvider.RaceDetailColumnType, CheckBox>();
+        legDetailCheckboxes = new LinkedHashMap<DetailColumnType, CheckBox>();
+        raceDetailCheckboxes = new LinkedHashMap<DetailColumnType, CheckBox>();
         delayBetweenAutoAdvancesInSecondsBox = createIntegerBox((int) delayBetweenAutoAdvancesInMilliseconds/1000, 4);
         delayInSecondsBox = createIntegerBox((int) delayInMilliseconds/1000, 4);
     }
@@ -81,16 +78,16 @@ public class LeaderboardSettingsPanel extends DataEntryDialog<Result> {
         vp.add(delayBetweenAutoAdvancesLabel);
         vp.add(delayBetweenAutoAdvancesInSecondsBox);
         vp.add(new Label(stringConstants.raceDetailsToShow()));
-        List<RaceDetailColumnType> currentRaceDetailSelection = raceDetailSelectionProvider.getRaceDetailsToShow();
-        for (RaceDetailColumnType type : RaceDetailColumnType.values()) {
+        List<DetailColumnType> currentRaceDetailSelection = raceDetailSelection;
+        for (DetailColumnType type : LeaderboardPanel.getAvailableRaceDetailColumnTypes()) {
             CheckBox checkbox = createCheckbox(type.toString(stringConstants));
             checkbox.setValue(currentRaceDetailSelection.contains(type));
             raceDetailCheckboxes.put(type, checkbox);
             vp.add(checkbox);
         }
         vp.add(new Label(stringConstants.legDetailsToShow()));
-        List<LegDetailColumnType> currentLegDetailSelection = legDetailSelectionProvider.getLegDetailsToShow();
-        for (LegDetailColumnType type : LegDetailColumnType.values()) {
+        List<DetailColumnType> currentLegDetailSelection = legDetailSelection;
+        for (DetailColumnType type : LegColumn.getAvailableLegDetailColumnTypes()) {
             CheckBox checkbox = createCheckbox(type.toString(stringConstants));
             checkbox.setValue(currentLegDetailSelection.contains(type));
             legDetailCheckboxes.put(type, checkbox);
@@ -101,14 +98,14 @@ public class LeaderboardSettingsPanel extends DataEntryDialog<Result> {
 
     @Override
     protected Result getResult() {
-        List<RaceDetailColumnType> raceDetailsToShow = new ArrayList<RaceDetailSelectionProvider.RaceDetailColumnType>();
-        for (Map.Entry<RaceDetailColumnType, CheckBox> entry : raceDetailCheckboxes.entrySet()) {
+        List<DetailColumnType> raceDetailsToShow = new ArrayList<DetailColumnType>();
+        for (Map.Entry<DetailColumnType, CheckBox> entry : raceDetailCheckboxes.entrySet()) {
             if (entry.getValue().getValue()) {
                 raceDetailsToShow.add(entry.getKey());
             }
         }
-        List<LegDetailColumnType> legDetailsToShow = new ArrayList<LegDetailSelectionProvider.LegDetailColumnType>();
-        for (Map.Entry<LegDetailColumnType, CheckBox> entry : legDetailCheckboxes.entrySet()) {
+        List<DetailColumnType> legDetailsToShow = new ArrayList<DetailColumnType>();
+        for (Map.Entry<DetailColumnType, CheckBox> entry : legDetailCheckboxes.entrySet()) {
             if (entry.getValue().getValue()) {
                 legDetailsToShow.add(entry.getKey());
             }
