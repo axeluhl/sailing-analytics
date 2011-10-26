@@ -19,15 +19,17 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Speed;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.TimePoint;
+import com.sap.sailing.domain.tracking.GPSFixMoving;
+import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.RacingEventService;
 
-public class RankPerLeg extends Action {
+public class GPSPerRace extends Action {
     private final Set<String> competitorNameSet;
 
-    public RankPerLeg(HttpServletRequest req, HttpServletResponse res, RacingEventService service, int maxRows) {
+    public GPSPerRace(HttpServletRequest req, HttpServletResponse res, RacingEventService service, int maxRows) {
         super(req, res, service, maxRows);
         String[] competitors = req.getParameterValues("competitor");
         if (competitors == null) {
@@ -95,6 +97,10 @@ public class RankPerLeg extends Action {
                     addColumn("" + (distanceSailed == null ? "null" : distanceSailed.getMeters()));
                     
                     // position and tracking-related columns (see Kersten's mail of 2011-10-07T11:32:00CEST)
+                    GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
+                    GPSFixMoving fix = track.getFirstFixAtOrAfter(time);
+                    addColumn(""+(fix==null?"null":fix.getPosition().getLngDeg()));
+                    addColumn(""+(fix==null?"null":fix.getPosition().getLatDeg()));
                     SpeedWithBearing speedOverGround = trackedLegOfCompetitor.getSpeedOverGround(time);
                     addColumn(""+(speedOverGround==null?"null":speedOverGround.getKnots()));
                     Double estimatedTimeToNextMarkInSeconds = trackedLegOfCompetitor.getEstimatedTimeToNextMarkInSeconds(time);
