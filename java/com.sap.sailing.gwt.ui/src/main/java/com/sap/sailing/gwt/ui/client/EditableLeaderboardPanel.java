@@ -56,6 +56,12 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
     }
     
     private class EditableCompetitorColumn extends CompetitorColumn {
+        
+        @Override
+        public EditTextCell getCell() {
+            return (EditTextCell) super.getCell();
+        }
+
         public EditableCompetitorColumn() {
             super(new EditTextCell());
             setFieldUpdater(new FieldUpdater<LeaderboardRowDAO, String>() {
@@ -76,7 +82,8 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                                     if (getLeaderboard().displayNames == null) {
                                         getLeaderboard().displayNames = new HashMap<CompetitorDAO, String>();
                                     }
-                                    getLeaderboard().displayNames.put(row.competitor, value);
+                                    getCell().setViewData(row, null); // ensure that getValue() is called again
+                                    getLeaderboard().displayNames.put(row.competitor, value == null || value.trim().length() == 0 ? null : value.trim());
                                     EditableLeaderboardPanel.this.getData().getList().set(rowIndex, row);
                                 }
                             });
@@ -100,8 +107,8 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
             setFieldUpdater(new FieldUpdater<LeaderboardRowDAO, LeaderboardRowDAO>() {
                 @Override
                 public void update(int rowIndex, LeaderboardRowDAO row, LeaderboardRowDAO value) {
-                    currentRowUpdateWhiteboard.setIndexOfRowToUpdate(rowIndex);
                     currentRowUpdateWhiteboard = null; // show that it has been consumed and updated
+                    currentRowUpdateWhiteboard.setIndexOfRowToUpdate(rowIndex);
                 }
             });
         }

@@ -222,7 +222,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             return new Comparator<LeaderboardRowDAO>() {
                 @Override
                 public int compare(LeaderboardRowDAO o1, LeaderboardRowDAO o2) {
-                    return Collator.getInstance().compare(o1.competitor.name, o2.competitor.name);
+                    return Collator.getInstance().compare(getLeaderboard().getDisplayName(o1.competitor),
+                            getLeaderboard().getDisplayName(o2.competitor));
                 }
             };
         }
