@@ -9,16 +9,18 @@ import java.util.Map;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 /**
- * Captures the serializable properties of a leaderboard which in particular has the competitors, races
- * and their net / total points as well as possible reasons for maximum points (DNS, DNF, DSQ).
+ * Captures the serializable properties of a leaderboard which in particular has the competitors, any optional display
+ * name mappings for the competitors, races and their net / total points as well as possible reasons for maximum points
+ * (DNS, DNF, DSQ).
  * 
  * @author Axel Uhl (d043530)
- *
+ * 
  */
 public class LeaderboardDAO implements IsSerializable {
     public String name;
     public List<CompetitorDAO> competitors;
     public LinkedHashMap<String, Pair<Boolean, Boolean>> raceNamesAndMedalRaceAndTracked;
+    public Map<CompetitorDAO, String> displayNames;
     public Map<CompetitorDAO, LeaderboardRowDAO> rows;
     public boolean hasCarriedPoints;
     public int[] discardThresholds;
@@ -30,6 +32,14 @@ public class LeaderboardDAO implements IsSerializable {
     public LeaderboardDAO() {
         totalRankingComparator = new TotalRankingComparator();
         competitorsOrderedAccordingToTotalRank = false;
+    }
+    
+    public String getDisplayName(CompetitorDAO competitor) {
+        if (displayNames == null || !displayNames.containsKey(competitor)) {
+            return competitor.name;
+        } else {
+            return displayNames.get(competitor);
+        }
     }
     
     public Comparator<LeaderboardRowDAO> getTotalRankingComparator() {

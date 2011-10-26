@@ -144,6 +144,14 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             dbResultDiscardingThresholds.add(threshold);
         }
         result.put(FieldNames.LEADERBOARD_DISCARDING_THRESHOLDS.name(), dbResultDiscardingThresholds);
+        BasicDBObject competitorDisplayNames = new BasicDBObject();
+        for (Competitor competitor : leaderboard.getCompetitors()) {
+            String displayNameForCompetitor = leaderboard.getDisplayName(competitor);
+            if (displayNameForCompetitor != null) {
+                competitorDisplayNames.put(MongoUtils.escapeDollarAndDot(competitor.getName()), displayNameForCompetitor);
+            }
+        }
+        result.put(FieldNames.LEADERBOARD_COMPETITOR_DISPLAY_NAMES.name(), competitorDisplayNames);
         leaderboardCollection.update(query, result, /* upsrt */ true, /* multi */ false);
     }
 

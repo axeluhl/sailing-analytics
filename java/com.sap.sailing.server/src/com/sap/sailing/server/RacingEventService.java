@@ -170,6 +170,9 @@ public interface RacingEventService {
      */
     void renameLeaderboard(String oldName, String newName);
 
+    /**
+     * Updates the leaderboard data in the persistent store
+     */
     void updateStoredLeaderboard(Leaderboard leaderboard);
 
 }

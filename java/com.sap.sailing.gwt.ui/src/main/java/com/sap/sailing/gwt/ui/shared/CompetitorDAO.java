@@ -8,7 +8,7 @@ public class CompetitorDAO extends NamedDAO implements IsSerializable {
     public String countryName;
     public String sailID;
     public String id;
-
+    
     public CompetitorDAO() {}
 
     public CompetitorDAO(String name, String twoLetterIsoCountryCode, String threeLetterIocCountryCode, String countryName, String sailID, String id) {

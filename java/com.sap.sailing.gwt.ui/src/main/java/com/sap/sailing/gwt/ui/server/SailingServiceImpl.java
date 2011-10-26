@@ -111,7 +111,8 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         domainObjectFactory = DomainObjectFactory.INSTANCE;
     }
     
-    public LeaderboardDAO getLeaderboardByName(String leaderboardName, Date date, Collection<String> namesOfRacesForWhichToLoadLegDetails) throws Exception {
+    public LeaderboardDAO getLeaderboardByName(String leaderboardName, Date date,
+            Collection<String> namesOfRacesForWhichToLoadLegDetails) throws Exception {
         LeaderboardDAO result = null;
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         if (leaderboard != null) {
@@ -119,6 +120,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             TimePoint timePoint = new MillisecondsTimePoint(date);
             result.competitors = new ArrayList<CompetitorDAO>();
             result.name = leaderboard.getName();
+            result.displayNames = new HashMap<CompetitorDAO, String>();
             result.raceNamesAndMedalRaceAndTracked = new LinkedHashMap<String, Pair<Boolean, Boolean>>();
             for (RaceInLeaderboard raceColumn : leaderboard.getRaceColumns()) {
                 result.raceNamesAndMedalRaceAndTracked.put(raceColumn.getName(),
@@ -141,6 +143,10 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                                     && namesOfRacesForWhichToLoadLegDetails.contains(raceColumn.getName()));
                     row.fieldsByRaceName.put(raceColumn.getName(), entryDAO);
                     result.rows.put(competitorDAO, row);
+                }
+                String displayName = leaderboard.getDisplayName(competitor);
+                if (displayName != null) {
+                    result.displayNames.put(competitorDAO, displayName);
                 }
             }
         }
@@ -916,5 +922,15 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         }
         getService().updateStoredLeaderboard(leaderboard);
         return new Pair<Integer, Integer>(newNetPoints, newTotalPoints);
+    }
+    
+    @Override
+    public void updateCompetitorDisplayNameInLeaderboard(String leaderboardName, String competitorName, String displayName) {
+        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        Competitor competitor = leaderboard.getCompetitorByName(competitorName);
+        if (competitor != null) {
+            leaderboard.setDisplayName(competitor, displayName);
+            getService().updateStoredLeaderboard(leaderboard);
+        }
     }
 }

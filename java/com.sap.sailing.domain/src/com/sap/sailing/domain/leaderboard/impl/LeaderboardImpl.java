@@ -29,6 +29,12 @@ public class LeaderboardImpl implements Named, Leaderboard {
     private String name;
     
     /**
+     * The optional display name mappings for competitors. This allows a user to override the tracking-provided
+     * competitor names for display in a leaderboard.
+     */
+    private final Map<Competitor, String> displayNames;
+    
+    /**
      * Backs the {@link #getCarriedPoints(Competitor)} API with data. Can be used to prime this leaderboard
      * with aggregated results of races not tracked / displayed by this leaderboard in detail. The points
      * provided by this map are considered by {@link #getTotalPoints(Competitor, TimePoint)}.
@@ -88,6 +94,7 @@ public class LeaderboardImpl implements Named, Leaderboard {
         this.carriedPoints = new HashMap<Competitor, Integer>();
         this.races = new ArrayList<RaceInLeaderboard>();
         this.scoreCorrection = scoreCorrection;
+        this.displayNames = new HashMap<Competitor, String>();
         this.resultDiscardingRule = resultDiscardingRule;
     }
     
@@ -308,6 +315,16 @@ public class LeaderboardImpl implements Named, Leaderboard {
         return !raceInLeaderboard.isMedalRace()
                 && (raceInLeaderboard.getTrackedRace() != null && raceInLeaderboard.getTrackedRace().hasStarted(
                         timePoint)) || getScoreCorrection().hasCorrectionFor(raceInLeaderboard);
+    }
+
+    @Override
+    public String getDisplayName(Competitor competitor) {
+        return displayNames.get(competitor);
+    }
+    
+    @Override
+    public void setDisplayName(Competitor competitor, String displayName) {
+        displayNames.put(competitor, displayName);
     }
 
 }

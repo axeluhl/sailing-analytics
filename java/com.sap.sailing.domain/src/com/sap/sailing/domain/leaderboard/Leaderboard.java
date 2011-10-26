@@ -195,7 +195,15 @@ public interface Leaderboard extends Named {
     ThresholdBasedResultDiscardingRule getResultDiscardingRule();
 
     Competitor getCompetitorByName(String competitorName);
+    
+    void setDisplayName(Competitor competitor, String displayName);
 
+    /**
+     * If a display name different from the competitor's {@link Competitor#getName() name} has been defined,
+     * this method returns it; otherwise, <code>null</code> is returned.
+     */
+    String getDisplayName(Competitor competitor);
+    
     /**
      * Tells if the column represented by <code>raceInLeaderboard</code> shall be considered for discarding.
      * Medal races are never considered for discarding (not counted as a "started race" nor discarded themselves).
