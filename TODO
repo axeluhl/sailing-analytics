@@ -1,15 +1,6 @@
 Axel
 ====
 
- - Allow a user to set a display name for a competitor that may differ from the name that
-   the tracking provider uses for the competitor. Design question: should the display name be a property
-   of the Competitor object or should it be a mapping managed by a leaderboard? Managing this by leaderboard
-   allows users to have the same technical competitor be displayed in different leaderboards using different
-   names. The obvious downside: name adjustments have to be repeated for each new leaderboard that the same
-   competitor appears in. For the MDM use case (Hamburg 2011) it seems most appropriate to have the mapping
-   be defined per leaderboard because we have to expect that the same competitor ID may be re-used for
-   different sailors across different parts of the overall event.
-
  - for WithID objects use their ID, particularly in Mongo  
 
  - Test adding waypoints to an existing course using TracTrac server and see if events are transmitted.
