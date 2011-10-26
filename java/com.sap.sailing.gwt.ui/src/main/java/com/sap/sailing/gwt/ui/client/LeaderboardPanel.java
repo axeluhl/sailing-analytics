@@ -207,10 +207,14 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         LeaderboardTableStyle cellTableStyle();
     }
 
-    private class CompetitorColumn extends SortableColumn<LeaderboardRowDAO, String> {
+    protected class CompetitorColumn extends SortableColumn<LeaderboardRowDAO, String> {
 
         protected CompetitorColumn() {
             super(new TextCell());
+        }
+
+        protected CompetitorColumn(EditTextCell editTextCell) {
+            super(editTextCell);
         }
 
         @Override
@@ -230,7 +234,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
 
         @Override
         public String getValue(LeaderboardRowDAO object) {
-            return object.competitor.name;
+            return getLeaderboard().getDisplayName(object.competitor);
         }
     }
     
@@ -980,13 +984,17 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     private void ensureSailIDAndCompetitorColumn() {
         if (getLeaderboardTable().getColumnCount() <= SAIL_ID_COLUMN_INDEX) {
             addColumn(new SailIDColumn());
-            addColumn(new CompetitorColumn());
+            addColumn(createCompetitorColumn());
         } else {
             if (!(getLeaderboardTable().getColumn(SAIL_ID_COLUMN_INDEX) instanceof SailIDColumn)) {
                 throw new RuntimeException("The second column must always be the sail ID column but it was of type "+
                         getLeaderboardTable().getColumn(SAIL_ID_COLUMN_INDEX).getClass().getName());
             }
         }
+    }
+
+    protected CompetitorColumn createCompetitorColumn() {
+        return new CompetitorColumn();
     }
 
     private void ensureTotalsColumn() {

@@ -197,6 +197,12 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 }
             }
         }
+        DBObject competitorDisplayNames = (DBObject) o.get(FieldNames.LEADERBOARD_COMPETITOR_DISPLAY_NAMES.name());
+        if (competitorDisplayNames != null) {
+            for (String escapedCompetitorName : competitorDisplayNames.keySet()) {
+                result.setDisplayName(MongoUtils.unescapeDollarAndDot(escapedCompetitorName), (String) competitorDisplayNames.get(escapedCompetitorName));
+            }
+        }
         return result;
     }
 

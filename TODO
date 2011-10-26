@@ -1,7 +1,16 @@
 Axel
 ====
 
- - add overall race averages for speed and total distance traveled,
+ - Allow a user to set a display name for a competitor that may differ from the name that
+   the tracking provider uses for the competitor. Design question: should the display name be a property
+   of the Competitor object or should it be a mapping managed by a leaderboard? Managing this by leaderboard
+   allows users to have the same technical competitor be displayed in different leaderboards using different
+   names. The obvious downside: name adjustments have to be repeated for each new leaderboard that the same
+   competitor appears in. For the MDM use case (Hamburg 2011) it seems most appropriate to have the mapping
+   be defined per leaderboard because we have to expect that the same competitor ID may be re-used for
+   different sailors across different parts of the overall event.
+
+ - for WithID objects use their ID, particularly in Mongo  
 
  - Test adding waypoints to an existing course using TracTrac server and see if events are transmitted.
 
@@ -51,9 +60,6 @@ Axel
  - mark position entry capability, supporting "lost mark tracker" use case
 
  - refactor DAOs to use getters/setters and encapsulate LeaderboardDAO ranking logic so it's safe
-
- - allow a user to set a display name for a competitor that may differ from the name that
-   the tracking provider uses for the competitor
 
  - why isn't all memory released when the last race of a series is untracked? Does this have to
    do with the new leaderboard design? It probably should; a tracked race should only be eliminiated

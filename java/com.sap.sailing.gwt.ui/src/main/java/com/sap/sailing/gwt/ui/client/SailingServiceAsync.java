@@ -145,4 +145,7 @@ public interface SailingServiceAsync {
 
     void getLeaderboardEntry(String leaderboardName, String competitorName, String raceName, Date date,
             AsyncCallback<LeaderboardEntryDAO> callback);
+
+    void updateCompetitorDisplayNameInLeaderboard(String leaderboardName, String competitorName, String displayName,
+            AsyncCallback<Void> callback);
 }

@@ -17,7 +17,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 /**
  * Keeps a record of carried points and score corrections to be applied, keyed by the competitor names to which they
  * apply. This allows the {@link DomainObjectFactoryImpl} to set carried points and score corrections by competitor
- * names even when the {@link TrackedRace}s haven't been associated yet with the leaderboard. The carried points and
+ * names when the {@link TrackedRace}s haven't been associated yet with the leaderboard. The carried points and
  * score corrections are then assigned to the {@link Competitor}s once they show up by
  * {@link #addRace(TrackedRace, String, boolean) adding races} to this leaderboard.
  * 
@@ -28,6 +28,7 @@ public class LeaderboardImplWithDelayedCarriedPoints extends LeaderboardImpl {
     private final Map<String, Integer> carriedPointsByCompetitorName;
     private final Map<String, Map<RaceInLeaderboard, MaxPointsReason>> maxPointsReasonsByCompetitorName;
     private final Map<String, Map<RaceInLeaderboard, Integer>> correctedScoresByCompetitorName;
+    private final Map<String, String> displayNamesByCompetitorName;
 
     /**
      * A wrapper for {@link RaceInLeaderboard} that, when its {@link #setTrackedRace(TrackedRace)} method is called,
@@ -55,6 +56,15 @@ public class LeaderboardImplWithDelayedCarriedPoints extends LeaderboardImpl {
         carriedPointsByCompetitorName = new HashMap<String, Integer>();
         maxPointsReasonsByCompetitorName = new HashMap<String, Map<RaceInLeaderboard,MaxPointsReason>>();
         correctedScoresByCompetitorName = new HashMap<String, Map<RaceInLeaderboard,Integer>>();
+        displayNamesByCompetitorName = new HashMap<String, String>();
+    }
+    
+    private void assertNoTrackedRaceAssociatedYet() {
+        for (RaceInLeaderboard raceColumn : getRaceColumns()) {
+            if (raceColumn.getTrackedRace() != null) {
+                throw new IllegalStateException("Can't enqueue competitor name-based state while tracked races are already associated with leaderboard");
+            }
+        }
     }
 
     @Override
@@ -63,10 +73,12 @@ public class LeaderboardImplWithDelayedCarriedPoints extends LeaderboardImpl {
     }
 
     void setCarriedPoints(String competitorName, int carriedPoints) {
+        assertNoTrackedRaceAssociatedYet();
         carriedPointsByCompetitorName.put(competitorName, carriedPoints);
     }
     
     void setMaxPointsReason(String competitorName, RaceInLeaderboard raceColumn, MaxPointsReason maxPointsReason) {
+        assertNoTrackedRaceAssociatedYet();
         Map<RaceInLeaderboard, MaxPointsReason> map = maxPointsReasonsByCompetitorName.get(competitorName);
         if (map == null) {
             map = new HashMap<RaceInLeaderboard, MaxPointsReason>();
@@ -76,6 +88,7 @@ public class LeaderboardImplWithDelayedCarriedPoints extends LeaderboardImpl {
     }
 
     void correctScore(String competitorName, RaceInLeaderboard raceColumn, int correctedScore) {
+        assertNoTrackedRaceAssociatedYet();
         Map<RaceInLeaderboard, Integer> map = correctedScoresByCompetitorName.get(competitorName);
         if (map == null) {
             map = new HashMap<RaceInLeaderboard, Integer>();
@@ -138,6 +151,18 @@ public class LeaderboardImplWithDelayedCarriedPoints extends LeaderboardImpl {
                 correctedScoresEntryIter.remove();
             }
         }
+        for (Iterator<java.util.Map.Entry<String, String>> displayNamesEntryIter =
+                displayNamesByCompetitorName.entrySet().iterator(); displayNamesEntryIter.hasNext();) {
+            java.util.Map.Entry<String, String> displayNamesEntry = displayNamesEntryIter.next();
+            if (competitorsByName.containsKey(displayNamesEntry.getKey())) {
+                setDisplayName(competitorsByName.get(displayNamesEntry.getKey()), displayNamesEntry.getValue());
+                displayNamesEntryIter.remove();
+            }
+        }
     }
 
+    void setDisplayName(String competitorName, String displayName) {
+        assertNoTrackedRaceAssociatedYet();
+        displayNamesByCompetitorName.put(competitorName, displayName);
+    }
 }

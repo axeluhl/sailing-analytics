@@ -95,4 +95,6 @@ public interface SailingService extends RemoteService {
             String raceName, Integer correctedScore, Date date) throws Exception;
 
     LeaderboardEntryDAO getLeaderboardEntry(String leaderboardName, String competitorName, String raceName, Date date) throws Exception;
+
+    void updateCompetitorDisplayNameInLeaderboard(String leaderboardName, String competitorName, String displayName);
 }
