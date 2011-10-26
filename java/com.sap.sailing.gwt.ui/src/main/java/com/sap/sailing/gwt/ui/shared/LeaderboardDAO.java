@@ -35,7 +35,7 @@ public class LeaderboardDAO implements IsSerializable {
     }
     
     public String getDisplayName(CompetitorDAO competitor) {
-        if (displayNames == null || !displayNames.containsKey(competitor)) {
+        if (displayNames == null || displayNames.get(competitor) == null) {
             return competitor.name;
         } else {
             return displayNames.get(competitor);
