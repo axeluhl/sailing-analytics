@@ -31,6 +31,10 @@ public class XcelsiusApp extends Servlet {
           final RankPerLeg a = new RankPerLeg(req, res, getService(), maxRows);
           a.perform();
           return;
+        } else if ("gpsPerRace".equals(action)) {
+            final GPSPerRace a = new GPSPerRace(req, res, getService(), maxRows);
+            a.perform();
+            return;
         } else if ("listEvents".equals(action)) {
           final ListEvents a = new ListEvents(req, res, getService(), maxRows);
           a.perform();
