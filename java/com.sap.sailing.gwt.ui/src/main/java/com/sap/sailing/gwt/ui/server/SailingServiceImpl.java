@@ -420,7 +420,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 windTrackInfoDAO.windFixes = new ArrayList<WindDAO>();
                 WindTrack windTrack = trackedRace.getWindTrack(windSource);
                 windTrackInfoDAO.dampeningIntervalInMilliseconds = windTrack.getMillisecondsOverWhichToAverageWind();
-                if (includeTrackBasedWindEstimation && windSource == WindSource.EXPEDITION) {
+                if (includeTrackBasedWindEstimation && windSource == trackedRace.getWindSource()) {
                     estimatedTrack = new WindTrackImpl(windTrack.getMillisecondsOverWhichToAverageWind());
                 }
                 Iterator<Wind> windIter = windTrack.getFixesIterator(from, /* inclusive */true);
@@ -431,7 +431,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                     }
                     WindDAO windDAO = createWindDAO(wind, windTrack);
                     windTrackInfoDAO.windFixes.add(windDAO);
-                    if (includeTrackBasedWindEstimation && windSource == WindSource.EXPEDITION) {
+                    if (includeTrackBasedWindEstimation && windSource == trackedRace.getWindSource()) {
                         try {
                             Wind estimatedWindDirection = trackedRace.getEstimatedWindDirection(wind.getPosition(), wind.getTimePoint());
                             estimatedTrack.add(estimatedWindDirection);
