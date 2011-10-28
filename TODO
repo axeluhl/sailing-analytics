@@ -4,6 +4,8 @@ Axel
  - migrate to Virgo; clarify use of Maven (snapshot builds vs. version builds) and the effects this has
    on the runtime's selection of bundle versions
 
+ - store tracking data in our own DB; enables historical viewing as well as cross-regatta analysis
+
  - install Bugzilla on kielweek.web4sap.com and move this file's contents to it
 
  - add visualizations to leaderboard, such as rank/distance comparison between selected set of competitors
@@ -115,6 +117,10 @@ Axel
 
  - Implement refined version of isValid in GPSFixMovingTrack taking into account the
    speed as contained by each individual fix
+
+ - SwissTiming connector
+
+ - ManyPlayers collaboration: widgets, UI integration, GPS and wind data integration
 
  - Refactor the way the DomainFactory concept works, under the assumption that we'll have another
    connector for SwissTiming and VirtualEye. Our domain model including the Tracked... stuff should remain in place.
