@@ -204,4 +204,6 @@ public interface TrackedRace {
     Tack getTack(Competitor competitor, TimePoint timePoint);
 
     TrackedEvent getTrackedEvent();
+
+    Wind getDirectionFromStartToNextMark(TimePoint at);
 }
