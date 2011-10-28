@@ -389,4 +389,10 @@ public class MockedTrackedRace implements DynamicTrackedRace {
         return null;
     }
 
+    @Override
+    public Wind getDirectionFromStartToNextMark(TimePoint at) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }
