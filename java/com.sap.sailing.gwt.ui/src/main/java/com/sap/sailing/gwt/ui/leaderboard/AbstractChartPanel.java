@@ -40,6 +40,7 @@ import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
+import com.sap.sailing.gwt.ui.adminconsole.WindChart;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.DetailTypeFormatter;
@@ -50,6 +51,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.TimeListener;
 import com.sap.sailing.gwt.ui.client.Timer;
+import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorRaceDataDTO;
 import com.sap.sailing.gwt.ui.shared.MultiCompetitorRaceDataDTO;
@@ -168,6 +170,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
                     if (ignoreTimeAdjustOnce) {
                         ignoreTimeAdjustOnce = false;
                     } else {
+                        timer.setPlayMode(PlayModes.Replay);
                         timer.setTime(chartClickEvent.getXAxisValueAsLong());
                     }
                     return true;

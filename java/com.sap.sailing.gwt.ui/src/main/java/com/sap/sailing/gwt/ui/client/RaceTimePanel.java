@@ -63,8 +63,15 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
                 break;
             case Paused:
             case Stopped:
-                autoAdjustPlayMode = false;
                 break;
+        }
+        
+        switch (playMode) {
+        case Replay:
+            autoAdjustPlayMode = false;
+            break;
+        case Live:
+            break;
         }
     }    
     
