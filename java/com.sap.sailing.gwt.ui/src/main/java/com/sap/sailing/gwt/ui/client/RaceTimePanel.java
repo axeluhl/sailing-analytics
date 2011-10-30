@@ -22,12 +22,14 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
     private long refreshIntervalTimeInfos = 3000;
     
     private RaceTimesInfoDTO lastRaceTimesInfo;
+    private boolean autoAdjustPlayMode;
     
     public RaceTimePanel(final SailingServiceAsync sailingService, Timer timer, ErrorReporter errorReporter, StringMessages stringMessages) {
         super(timer, stringMessages);
         
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
+        autoAdjustPlayMode = true;
         
         startAutoTimeInfoUpdate();
     }
@@ -61,6 +63,7 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
                 break;
             case Paused:
             case Stopped:
+                autoAdjustPlayMode = false;
                 break;
         }
     }    
@@ -97,6 +100,10 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
                 boolean liveModeToBeMadePossible = isLiveModeToBeMadePossible();
                 setLiveGenerallyPossible(liveModeToBeMadePossible);
                 setJumpToLiveEnablement(liveModeToBeMadePossible && timer.getPlayMode() != PlayModes.Live);
+                if (autoAdjustPlayMode && liveModeToBeMadePossible) {
+                    timer.setPlayMode(PlayModes.Live);
+                }
+                
                 boolean timerAlreadyInitialized = getMin() != null && getMax() != null && sliderBar.getCurrentValue() != null;
                 initMinMax(raceTimesInfo);
                 if (!timerAlreadyInitialized) {
