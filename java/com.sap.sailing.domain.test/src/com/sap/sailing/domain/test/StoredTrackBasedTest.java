@@ -66,7 +66,7 @@ public abstract class StoredTrackBasedTest extends TrackBasedTest {
     }
 
     private File getFile(Competitor competitor, String eventName) {
-        return new File(RESOURCES+eventName+"-"+competitor.getName());
+        return new File(RESOURCES+eventName+"-"+competitor.getName()+"-"+competitor.getBoat().getSailID());
     }
     
     private Set<String> getCompetitorNamesOfStoredTracks(String eventName) {
