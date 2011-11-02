@@ -14,7 +14,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -121,10 +120,10 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             result.competitors = new ArrayList<CompetitorDAO>();
             result.name = leaderboard.getName();
             result.displayNames = new HashMap<CompetitorDAO, String>();
-            result.raceNamesAndMedalRaceAndTracked = new LinkedHashMap<String, Pair<Boolean, Boolean>>();
             for (RaceInLeaderboard raceColumn : leaderboard.getRaceColumns()) {
-                result.raceNamesAndMedalRaceAndTracked.put(raceColumn.getName(),
-                        new Pair<Boolean, Boolean>(raceColumn.isMedalRace(), raceColumn.getTrackedRace()!=null));
+                //result.raceNamesAndMedalRaceAndTracked.put(raceColumn.getName(),
+                //        new Pair<Boolean, Boolean>(raceColumn.isMedalRace(), raceColumn.getTrackedRace()!=null));
+                result.addRace(raceColumn.getName(), raceColumn.isMedalRace(), raceColumn.getTrackedRace() != null);
             }
             result.rows = new HashMap<CompetitorDAO, LeaderboardRowDAO>();
             result.hasCarriedPoints = leaderboard.hasCarriedPoints();
@@ -933,4 +932,40 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             getService().updateStoredLeaderboard(leaderboard);
         }
     }
+
+	@Override
+	public void moveLeaderboardColumnUp(String leaderboardName,
+			String columnName) {
+		Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        if (leaderboard != null) {
+        	leaderboard.moveRaceColumnUp(columnName);
+            getService().updateStoredLeaderboard(leaderboard);
+        } else {
+            throw new IllegalArgumentException("Leaderboard named "+leaderboardName+" not found");
+        }
+		
+	}
+
+	@Override
+	public void moveLeaderboardColumnDown(String leaderboardName,
+			String columnName) {
+		Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        if (leaderboard != null) {
+        	leaderboard.moveRaceColumnDown(columnName);
+            getService().updateStoredLeaderboard(leaderboard);
+        } else {
+            throw new IllegalArgumentException("Leaderboard named "+leaderboardName+" not found");
+        }
+	}
+
+	@Override
+	public void updateIsMedalRace(String leaderboardName, String columnName, boolean isMedalRace) {
+		Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+		if (leaderboard != null) {
+        	leaderboard.updateIsMedalRace(columnName, isMedalRace);
+            getService().updateStoredLeaderboard(leaderboard);
+        } else {
+            throw new IllegalArgumentException("Leaderboard named "+leaderboardName+" not found");
+        }
+	}
 }

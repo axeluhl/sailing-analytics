@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map.Entry;
 
 import com.google.gwt.cell.client.Cell.Context;
 import com.google.gwt.cell.client.CompositeCell;
@@ -268,10 +267,18 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
         return new EditableCompetitorColumn();
     }
 
+    /*
     @Override
     protected RaceColumn<?> createRaceColumn(Entry<String, Pair<Boolean, Boolean>> raceNameAndMedalRace) {
         return new EditableRaceColumn(raceNameAndMedalRace.getKey(), raceNameAndMedalRace.getValue().getA(),
                 getCellList(raceNameAndMedalRace.getKey(), raceNameAndMedalRace.getValue().getA()));
+    }
+    */
+    
+    @Override
+    protected RaceColumn<?> createRaceColumn(String raceName, boolean isMedalRace, boolean isTracked) {
+        return new EditableRaceColumn(raceName, isMedalRace,
+                getCellList(raceName, isMedalRace));
     }
 
     private List<RowUpdateWhiteboardProducerThatAlsoHasCell<LeaderboardRowDAO, ?>> getCellList(String raceName, boolean medalRace) {
