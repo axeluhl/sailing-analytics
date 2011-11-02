@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.test;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
@@ -37,8 +38,8 @@ import com.tractrac.clientmodule.Race;
 
 /**
  * Connects to the Kieler Woche 2011 TracTrac data of the 505 Race 2. Subclasses should implement a @Before method which
- * calls {@link #setUp(String, ReceiverType[])} with a useful set of receiver types and the race they want to observe /
- * load, or they should call {@link #setUp(String, ReceiverType[])} at the beginning of each respective test in case
+ * calls {@link #setUp(String, String, ReceiverType[])} with a useful set of receiver types and the race they want to observe /
+ * load, or they should call {@link #setUp(String, String, ReceiverType[])} at the beginning of each respective test in case
  * they want to select/load different races for different tests. When all stored data has been received, the
  * {@link #getSemaphor() semaphor} is notified. Therefore, a typical pattern for subclasses should be to invoke
  * {@link #setUp(ReceiverType[])}, then wait on the semaphor before starting with test processing.
@@ -73,8 +74,10 @@ public abstract class KielWeek2011BasedTest extends AbstractTracTracLiveTest {
         // to select a race
     }
 
-    protected void setUp(String raceId, ReceiverType... receiverTypes) throws MalformedURLException, IOException, InterruptedException, URISyntaxException {
-        setUpWithoutLaunchingController(raceId);
+    protected void setUp(String eventName, String raceId, ReceiverType... receiverTypes) throws MalformedURLException,
+            IOException, InterruptedException, URISyntaxException {
+        setUpWithoutLaunchingController(eventName, raceId);
+        assertEquals(getExpectedEventName(), getEvent().getName());
         completeSetupLaunchingControllerAndWaitForRaceDefinition(receiverTypes);
     }
 
@@ -111,11 +114,14 @@ public abstract class KielWeek2011BasedTest extends AbstractTracTracLiveTest {
     }
 
 
-    protected void setUpWithoutLaunchingController(String raceId) throws FileNotFoundException, MalformedURLException,
+    protected void setUpWithoutLaunchingController(String eventName, String raceId) throws FileNotFoundException, MalformedURLException,
             URISyntaxException {
-        super.setUp(new URL("http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/clientparams.php?event=event_20110609_KielerWoch&race="+raceId),
+        super.setUp(new URL("http://germanmaster.traclive.dk/events/"+eventName+"/clientparams.php?event="+eventName+"&race="+raceId),
                 tractracTunnel ? new URI("tcp://"+tractracTunnelHost+":4412") : new URI("tcp://germanmaster.traclive.dk:4400"),
                         tractracTunnel ? new URI("tcp://"+tractracTunnelHost+":4413") : new URI("tcp://germanmaster.traclive.dk:4401"));
+        if (domainFactory == null) {
+            domainFactory = new DomainFactoryImpl();
+        }
         domainEvent = domainFactory.getOrCreateEvent(getEvent());
         trackedEvent = domainFactory.getOrCreateTrackedEvent(domainEvent);
     }
