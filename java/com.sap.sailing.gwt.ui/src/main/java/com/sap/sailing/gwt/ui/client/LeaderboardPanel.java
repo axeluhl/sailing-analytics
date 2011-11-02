@@ -800,15 +800,21 @@ public class LeaderboardPanel extends FormPanel implements TimeListener,
 		loadCompleteLeaderboard(getLeaderboardDisplayDate());
 		VerticalPanel vp = new VerticalPanel();
 		vp.setSpacing(15);
-		DockPanel logoAndSettings = new DockPanel();
-		vp.add(logoAndSettings);
+        HorizontalPanel logoAndTitle = new HorizontalPanel();
+        vp.add(logoAndTitle);
 		Anchor sapLogo = new Anchor(
 				new SafeHtmlBuilder()
 						.appendHtmlConstant(
 								"<img class=\"linkNoBorder\" src=\"/images/sap_66_transparent.png\"/>")
 						.toSafeHtml());
 		sapLogo.setHref("http://www.sap.com");
-		vp.add(sapLogo);
+        logoAndTitle.add(sapLogo);
+        Label sailingAnalyticsLabel = new Label(stringConstants.sapSailingAnalytics());
+        HorizontalPanel labelPanel = new HorizontalPanel();
+        labelPanel.add(sailingAnalyticsLabel);
+        labelPanel.setSpacing(10);
+        logoAndTitle.add(labelPanel);
+        sailingAnalyticsLabel.addStyleName("boldLabel");
 		DockPanel dockPanel = new DockPanel();
 		dockPanel.setWidth("100%");
 		dockPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);

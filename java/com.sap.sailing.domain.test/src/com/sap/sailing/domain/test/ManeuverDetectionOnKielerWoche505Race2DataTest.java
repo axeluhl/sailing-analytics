@@ -36,8 +36,8 @@ public class ManeuverDetectionOnKielerWoche505Race2DataTest extends KielWeek2011
     @Before
     public void setUp() throws MalformedURLException, IOException, InterruptedException, URISyntaxException {
         super.setUp();
-        super.setUp(/* raceId */ "357c700a-9d9a-11e0-85be-406186cbf87c",
-                new ReceiverType[] { ReceiverType.MARKPASSINGS, ReceiverType.RACECOURSE, ReceiverType.RAWPOSITIONS });
+        super.setUp("event_20110609_KielerWoch",
+                /* raceId */ "357c700a-9d9a-11e0-85be-406186cbf87c", new ReceiverType[] { ReceiverType.MARKPASSINGS, ReceiverType.RACECOURSE, ReceiverType.RAWPOSITIONS });
         KielWeek2011BasedTest.fixApproximateMarkPositionsForWindReadOut(getTrackedRace());
         getTrackedRace().setWindSource(WindSource.WEB);
         getTrackedRace().recordWind(new WindImpl(/* position */ null, MillisecondsTimePoint.now(),
