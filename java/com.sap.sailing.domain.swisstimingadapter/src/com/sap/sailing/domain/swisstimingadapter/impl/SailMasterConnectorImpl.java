@@ -52,12 +52,12 @@ public class SailMasterConnectorImpl extends SailMasterTransceiver implements Sa
 
     @Override
     public Iterable<Race> getRaces() throws UnknownHostException, IOException {
-        SailMasterMessage response = sendRequestAndGetResponse("RaceId");
+        SailMasterMessage response = sendRequestAndGetResponse("RAC?");
         String[] sections = response.getSections();
-        assertResponseType("RaceId", sections[0]);
+        assertResponseType("RAC!", sections[0]);
         List<Race> result = new ArrayList<Race>();
         for (int i=1; i<sections.length; i++) {
-            String[] idAndDescription = sections[i].split(",");
+            String[] idAndDescription = sections[i].split(";");
             result.add(new RaceImpl(idAndDescription[1], idAndDescription[0]));
         }
         return result;
@@ -71,7 +71,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiver implements Sa
         assertRaceID(raceID, sections[1]);
         List<Mark> marks = new ArrayList<Mark>();
         for (int i=2; i<sections.length; i++) {
-            String[] markDetails = sections[i].split(",");
+            String[] markDetails = sections[i].split(";");
             marks.add(new MarkImpl(markDetails[1], Integer.valueOf(markDetails[0]), Arrays.asList(markDetails).subList(2, markDetails.length)));
         }
         return new CourseImpl(raceID, marks);
@@ -119,7 +119,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiver implements Sa
         assertRaceID(raceID, sections[1]);
         ArrayList<Competitor> competitors = new ArrayList<Competitor>();
         for (int i=2; i<sections.length; i++) {
-            String[] competitorDetails = sections[i].split(",");
+            String[] competitorDetails = sections[i].split(";");
             competitors.add(new CompetitorImpl(competitorDetails[0], competitorDetails[1], competitorDetails[2]));
         }
         return new StartListImpl(raceID, competitors);
@@ -143,7 +143,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiver implements Sa
         assertRaceID(raceID, sections[1]);
         Map<Integer, Pair<TimePoint, String>> result = new HashMap<Integer, Pair<TimePoint,String>>();
         for (int i=2; i<sections.length; i+=2) {
-            String[] markTimeDetail = sections[i+1].split(",");
+            String[] markTimeDetail = sections[i+1].split(";");
             result.put(Integer.valueOf(sections[i]), new Pair<TimePoint, String>(
                     new MillisecondsTimePoint(dateFormat.parse(prefixTimeWithISOToday(markTimeDetail[0]))), markTimeDetail[1]));
         }

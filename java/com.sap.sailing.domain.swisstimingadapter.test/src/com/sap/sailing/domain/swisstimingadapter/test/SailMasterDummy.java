@@ -123,6 +123,9 @@ public class SailMasterDummy implements Runnable {
             // Average Boat Speed per Leg
         } else if ("TMD?".equals(sections[0])) {
             // Timing Data
+        } else if ("VER?".equals(sections[0])) {
+            // Version
+            transceiver.sendMessage("VER!|1.0", os);
         } else if ("StopServer".equals(sections[0])) {
             stopped = true;
             transceiver.sendMessage("Server stopped", os);
