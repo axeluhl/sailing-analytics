@@ -37,8 +37,6 @@ public class TestColumnSwapping {
         service = new SailingServiceImplMock();
         int[] disc = { 5, 8, 9, 0, 7, 5, 43 };
         service.createLeaderboard(LEADERBOARDNAME, disc);
-        service.addColumnToLeaderboard("Rank", LEADERBOARDNAME, false);
-        service.addColumnToLeaderboard("Competitor", LEADERBOARDNAME, false);
         service.addColumnToLeaderboard("Race1", LEADERBOARDNAME, true);
         service.addColumnToLeaderboard("Race2", LEADERBOARDNAME, true);
         service.addColumnToLeaderboard("Race3", LEADERBOARDNAME, true);
@@ -112,7 +110,7 @@ public class TestColumnSwapping {
 
     @Test
     public void testColumnSwappingFabian() {
-        service.moveLeaderboardColumnDown(LEADERBOARDNAME, "Race3");
+        service.moveLeaderboardColumnUp(LEADERBOARDNAME, "Race3");
         try {
             leaderboardDAO = service.getLeaderboardByName(LEADERBOARDNAME, leaderboardCreationDate, leglist);
         } catch (Exception e) {
@@ -122,18 +120,14 @@ public class TestColumnSwapping {
 
         // check if leaderboardDAO an dleaderboardOriginalDAO same
         List<String> leaderboardList = leaderboardDAO.getRaceList();
-        ;
         List<String> leaderboardOriginalList = leaderboardOriginalDAO.getRaceList();
 
         // ??????? assert races in list
         assertArrayEquals(leaderboardList.toArray(), leaderboardOriginalList.toArray());
 
-        System.out.println(leaderboardList.toArray().toString());
-        System.out.println(leaderboardOriginalList.toArray().toString());
-
         for (String string : leaderboardOriginalList) {
             assert leaderboardDAO.raceIsMedalRace(string) == leaderboardOriginalDAO.raceIsMedalRace(string);
-            // assert leaderboardDAO.raceIsTracked(string) == leaderboardOriginalDAO.raceIsTracked(string);
+            assert leaderboardDAO.raceIsTracked(string) == leaderboardOriginalDAO.raceIsTracked(string);
         }
     }
 }
