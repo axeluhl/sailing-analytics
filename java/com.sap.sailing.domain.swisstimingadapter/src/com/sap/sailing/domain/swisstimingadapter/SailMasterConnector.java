@@ -40,6 +40,6 @@ public interface SailMasterConnector {
      *         number of milliseconds that passed between the race start and the point in time at which the boat with ID
      *         <code>boatID</code> passed the mark.
      */
-    Map<Integer, Pair<Integer, Long>> getMarkPassingTimesInMillisecondsSinceStart(String raceID, String boatID)
+    Map<Integer, Pair<Integer, Long>> getMarkPassingTimesInMillisecondsSinceRaceStart(String raceID, String boatID)
             throws UnknownHostException, IOException;
 }
