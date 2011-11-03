@@ -91,7 +91,7 @@ public class TestColumnSwapping {
         for (int i = 0; i < lb.getRaceList().size(); i++) {
             assertTrue("Race[" + i + "] == " + raceNames[i], lb.getRaceList().get(i).equals(raceNames[i]));
             assertTrue("Race[" + i + "] is " + (medalRace[i] ? "" : "no ") + "medalrace.",
-                    lb.raceIsMedalRace(lb.getRaceList().get(i)) == medalRace[i]);
+                    lb.raceIsMedalRace(races[i]) == medalRace[i]);
         }
     }
 
