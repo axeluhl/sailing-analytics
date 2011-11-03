@@ -16,6 +16,8 @@ public class SailMasterDummy implements Runnable {
     
     private final int port;
     
+    private Socket socket;
+    
     private boolean stopped;
     
     private final SailMasterTransceiver transceiver = new SailMasterTransceiver();
@@ -29,10 +31,13 @@ public class SailMasterDummy implements Runnable {
             ServerSocket listenOn = new ServerSocket(port);
             stopped = false;
             while (!stopped) {
-                Socket s = listenOn.accept();
-                processRequests(s);
+                socket = listenOn.accept();
+                synchronized (this) {
+                    this.notifyAll();
+                }
+                processRequests();
                 if (stopped) {
-                    s.close();
+                    socket.close();
                 }
             }
             listenOn.close();
@@ -42,11 +47,11 @@ public class SailMasterDummy implements Runnable {
         }
     }
 
-    private void processRequests(Socket s) throws IOException {
-        InputStream is = s.getInputStream();
+    private void processRequests() throws IOException {
+        InputStream is = socket.getInputStream();
         String message = transceiver.receiveMessage(is);
         while (message != null) {
-            respondToMessage(message, s.getOutputStream());
+            respondToMessage(message, socket.getOutputStream());
             if (stopped) {
                 message = null;
             } else {
@@ -105,7 +110,17 @@ public class SailMasterDummy implements Runnable {
         }
     }
     
-    public void sendEvent(String message, OutputStream os) throws IOException {
-        transceiver.sendMessage(message, os);
+    public void sendEvent(String message) throws IOException, InterruptedException {
+        synchronized (this) {
+            if (socket == null) {
+                // wait a while to get notified about socket being set; could be a thread startup / synchronization
+                // problem
+                this.wait(/* timeout in milliseconds */1000l);
+            }
+        }
+        if (socket == null) {
+            throw new IllegalStateException(SailMasterDummy.class.getSimpleName()+" must be running (run() method must be executing)");
+        }
+        transceiver.sendMessage(message, socket.getOutputStream());
     }
 }
