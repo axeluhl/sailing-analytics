@@ -83,6 +83,7 @@ public class SailMasterConnectivityTest {
     public void tearDown() throws IOException, InterruptedException {
         connector.sendRequestAndGetResponse("StopServer");
         dummyServerThread.join();
+        Thread.sleep(100); // give socket subsystem a chance to free up the port
     }
     
     @Test
