@@ -83,6 +83,7 @@ public class SailMasterConnectivityTest {
     public void tearDown() throws IOException, InterruptedException {
         connector.sendRequestAndGetResponse("StopServer");
         dummyServerThread.join();
+        Thread.sleep(100); // give socket subsystem a chance to free up the port
     }
     
     @Test
@@ -93,6 +94,16 @@ public class SailMasterConnectivityTest {
                 "4712,Not such a wonderful race" }, response.getSections());
         assertArrayEquals(new Object[] { "4711", "A wonderful test race" }, response.getSections()[1].split(","));
         assertArrayEquals(new Object[] { "4712", "Not such a wonderful race" }, response.getSections()[2].split(","));
+    }
+    
+    @Test
+    public void testRAC() throws UnknownHostException, IOException {
+        SailMasterMessage response = connector.sendRequestAndGetResponse("RAC?");
+        assertEquals("RAC!|2|4711;A wonderful test race|4712;Not such a wonderful race", response.getMessage());
+        assertArrayEquals(new String[] { "RAC!", "2", "4711;A wonderful test race",
+                "4712;Not such a wonderful race" }, response.getSections());
+        assertArrayEquals(new Object[] { "4711", "A wonderful test race" }, response.getSections()[2].split(";"));
+        assertArrayEquals(new Object[] { "4712", "Not such a wonderful race" }, response.getSections()[3].split(";"));
     }
     
     @Test

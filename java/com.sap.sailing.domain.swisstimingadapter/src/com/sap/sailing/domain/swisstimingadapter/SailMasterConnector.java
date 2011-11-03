@@ -20,12 +20,10 @@ public interface SailMasterConnector {
     TimePoint getStartTime(String raceID) throws UnknownHostException, IOException, ParseException;
     
     /**
-     * @param markIndex
-     *            use -1 to obtain timings for all marks
-     * @return a map with the single mark index requested by <code>markIndex</code> or all mark indices (in case of
-     *         <code>markIndex==-1</code>) as key; pairs of gap (TODO in milliseconds?) and boat ID as values.
+     * @return a map with all indices of those marks already passed by the leading boat as key; pairs of mark passing
+     *         times and boat ID of the boat passing that mark first as values.
      */
-    Map<Integer, Pair<TimePoint, String>> getDeltaClockAtMark(String raceID, int markIndex) throws UnknownHostException, IOException, NumberFormatException, ParseException;
+    Map<Integer, Pair<TimePoint, String>> getDeltaClockAtMark(String raceID) throws UnknownHostException, IOException, NumberFormatException, ParseException;
     
     double getDistanceToMarkInMeters(String raceID, int markIndex, String boatID) throws UnknownHostException, IOException;
     
@@ -34,4 +32,20 @@ public interface SailMasterConnector {
     double getAverageBoatSpeedInMetersPerSecond(String raceID, String leg, String boatID) throws UnknownHostException, IOException;
     
     double getDistanceBetweenBoatsInMeters(String raceID, String boatID1, String boatID2) throws UnknownHostException, IOException;
+
+    /**
+     * Retrieves the mark passing times for a boat ID within a race specified by <code>raceID</code>.
+     * 
+     * @return keys are the mark indices; values are the pairs telling the requested boat's rank at the key mark and the
+     *         number of milliseconds that passed between the race start and the point in time at which the boat with ID
+     *         <code>boatID</code> passed the mark.
+     */
+    Map<Integer, Pair<Integer, Long>> getMarkPassingTimesInMillisecondsSinceRaceStart(String raceID, String boatID)
+            throws UnknownHostException, IOException;
+    
+    void addSailMasterListener(SailMasterListener listener);
+    
+    void removeSailMasterListener(SailMasterListener listener);
+
+    SailMasterMessage receiveMessage(MessageType type) throws InterruptedException;
 }

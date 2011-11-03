@@ -20,6 +20,7 @@ import com.sap.sailing.domain.base.Speed;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.tracking.TrackedLeg;
+import com.sap.sailing.domain.tracking.TrackedLeg.LegType;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.RacingEventService;
@@ -56,7 +57,7 @@ public class RankPerLeg extends Action {
             final Leg leg = trackedLeg.getLeg();
             final String legId = numberFormat.format(++i);
             final String markName = leg.getTo().getName();
-            final String upOrDownwinLeg = trackedLeg.isUpOrDownwindLeg(time) ? "U" : "D";
+            final String upOrDownwindLeg = trackedLeg.getLegType(time) == LegType.UPWIND ? "U" : "D";
             LinkedHashMap<Competitor, Integer> ranks = trackedLeg.getRanks(time);
             // Get competitor data
             for (final Competitor competitor : ranks.keySet()) {
@@ -82,7 +83,7 @@ public class RankPerLeg extends Action {
                     addColumn(legId);
                     addColumn(markName);
                     addColumn(leg.getTo().getBuoys().iterator().next().getName());
-                    addColumn(upOrDownwinLeg);
+                    addColumn(upOrDownwindLeg);
                     addColumn(competitorName);
                     addColumn(sailID==null?"null":sailID);
                     addColumn(nationality);
