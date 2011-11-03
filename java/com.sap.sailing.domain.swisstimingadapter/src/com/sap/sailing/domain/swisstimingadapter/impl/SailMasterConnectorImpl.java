@@ -210,7 +210,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiver implements Sa
     public Iterable<Race> getRaces() throws UnknownHostException, IOException, InterruptedException {
         SailMasterMessage response = sendRequestAndGetResponse(MessageType.RAC);
         String[] sections = response.getSections();
-        assertResponseType(MessageType.RAC.name()+"!", sections[0]);
+        assertResponseType(MessageType.RAC, response);
         int count = Integer.valueOf(sections[1]);
         List<Race> result = new ArrayList<Race>();
         for (int i=0; i<count; i++) {
@@ -224,7 +224,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiver implements Sa
     public Course getCourse(String raceID) throws UnknownHostException, IOException, InterruptedException {
         SailMasterMessage response = sendRequestAndGetResponse(MessageType.CCG, raceID);
         String[] sections = response.getSections();
-        assertResponseType("CCG!", sections[0]);
+        assertResponseType(MessageType.CCG, response);
         assertRaceID(raceID, sections[1]);
         int count = Integer.valueOf(sections[2]);
         List<Mark> marks = new ArrayList<Mark>();
@@ -257,9 +257,12 @@ public class SailMasterConnectorImpl extends SailMasterTransceiver implements Sa
         }
     }
 
-    private void assertResponseType(String responseType, String section) {
-        if (!section.equals(responseType)) {
-            throw new RuntimeException("Expected a "+responseType+" response for a "+responseType+" request but got "+section);
+    private void assertResponseType(MessageType responseType, SailMasterMessage message) {
+        if (!message.isResponse()) {
+            throw new RuntimeException("Expected a response message but got "+message);
+        }
+        if (message.getType() != responseType) {
+            throw new RuntimeException("Expected a "+responseType+" response for a "+responseType+" request but got "+message.getType());
         }
     }
 
@@ -273,7 +276,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiver implements Sa
     public StartList getStartList(String raceID) throws UnknownHostException, IOException, InterruptedException {
         SailMasterMessage response = sendRequestAndGetResponse(MessageType.STL, raceID);
         String[] sections = response.getSections();
-        assertResponseType(MessageType.STL+"!", sections[0]);
+        assertResponseType(MessageType.STL, response);
         assertRaceID(raceID, sections[1]);
         int count = Integer.valueOf(sections[2]);
         ArrayList<Competitor> competitors = new ArrayList<Competitor>();
@@ -288,7 +291,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiver implements Sa
     public TimePoint getStartTime(String raceID) throws UnknownHostException, IOException, ParseException, InterruptedException {
         SailMasterMessage response = sendRequestAndGetResponse(MessageType.STT, raceID);
         String[] sections = response.getSections();
-        assertResponseType(MessageType.STT+"!", sections[0]);
+        assertResponseType(MessageType.STT, response);
         assertRaceID(raceID, sections[1]);
         return new MillisecondsTimePoint(dateFormat.parse(prefixTimeWithISOToday(sections[2])));
     }
@@ -298,7 +301,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiver implements Sa
             throws UnknownHostException, IOException, NumberFormatException, ParseException, InterruptedException {
         SailMasterMessage response = sendRequestAndGetResponse(MessageType.CAM, raceID);
         String[] sections = response.getSections();
-        assertResponseType(MessageType.CAM+"!", sections[0]);
+        assertResponseType(MessageType.CAM, response);
         assertRaceID(raceID, sections[1]);
         int count = Integer.valueOf(sections[2]);
         Map<Integer, Pair<TimePoint, String>> result = new HashMap<Integer, Pair<TimePoint,String>>();
@@ -314,7 +317,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiver implements Sa
     public double getDistanceToMarkInMeters(String raceID, int markIndex, String boatID) throws UnknownHostException, IOException, InterruptedException {
         SailMasterMessage response = sendRequestAndGetResponse(MessageType.DTM, raceID, ""+markIndex, boatID);
         String[] sections = response.getSections();
-        assertResponseType(MessageType.DTM+"!", sections[0]);
+        assertResponseType(MessageType.DTM, response);
         assertRaceID(raceID, sections[1]);
         assertMarkIndex(markIndex, sections[2]);
         assertBoatID(boatID, sections[3]);
@@ -325,7 +328,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiver implements Sa
     public double getCurrentBoatSpeedInMetersPerSecond(String raceID, String boatID) throws UnknownHostException, IOException, InterruptedException {
         SailMasterMessage response = sendRequestAndGetResponse(MessageType.CBS, raceID, boatID);
         String[] sections = response.getSections();
-        assertResponseType(MessageType.CBS+"!", sections[0]);
+        assertResponseType(MessageType.CBS, response);
         assertRaceID(raceID, sections[1]);
         assertBoatID(boatID, sections[2]);
         return Double.valueOf(sections[3]);
@@ -335,7 +338,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiver implements Sa
     public double getDistanceBetweenBoatsInMeters(String raceID, String boatID1, String boatID2) throws UnknownHostException, IOException, InterruptedException {
         SailMasterMessage response = sendRequestAndGetResponse(MessageType.DBB, raceID, boatID1, boatID2);
         String[] sections = response.getSections();
-        assertResponseType(MessageType.DBB+"!", sections[0]);
+        assertResponseType(MessageType.DBB, response);
         assertRaceID(raceID, sections[1]);
         assertBoatID(boatID1, sections[2]);
         assertBoatID(boatID2, sections[3]);
@@ -346,7 +349,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiver implements Sa
     public double getAverageBoatSpeedInMetersPerSecond(String raceID, String leg, String boatID) throws UnknownHostException, IOException, InterruptedException {
         SailMasterMessage response = sendRequestAndGetResponse(MessageType.ABS, raceID, leg, boatID);
         String[] sections = response.getSections();
-        assertResponseType(MessageType.ABS+"!", sections[0]);
+        assertResponseType(MessageType.ABS, response);
         assertRaceID(raceID, sections[1]);
         assertLeg(leg, sections[2]);
         assertBoatID(boatID, sections[3]);
@@ -358,7 +361,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiver implements Sa
             throws UnknownHostException, IOException, InterruptedException {
         SailMasterMessage response = sendRequestAndGetResponse(MessageType.TMD, raceID, boatID);
         String[] sections = response.getSections();
-        assertResponseType(MessageType.TMD+"!", sections[0]);
+        assertResponseType(MessageType.TMD, response);
         assertRaceID(raceID, sections[1]);
         assertBoatID(boatID, sections[2]);
         int count = Integer.valueOf(sections[3]);
