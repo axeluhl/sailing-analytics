@@ -69,5 +69,10 @@ public enum MessageType {
     /**
      * Race Position Data
      */
-    RPD
+    RPD,
+    
+    /**
+     * internal, inofficial event, used during testing to stop a test / dummy server instance
+     */
+    _STOPSERVER
 }
