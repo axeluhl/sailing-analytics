@@ -96,6 +96,16 @@ public class SailMasterConnectivityTest {
     }
     
     @Test
+    public void testRAC() throws UnknownHostException, IOException {
+        SailMasterMessage response = connector.sendRequestAndGetResponse("RAC?");
+        assertEquals("RAC!|2|4711;A wonderful test race|4712;Not such a wonderful race", response.getMessage());
+        assertArrayEquals(new String[] { "RAC!", "2", "4711;A wonderful test race",
+                "4712;Not such a wonderful race" }, response.getSections());
+        assertArrayEquals(new Object[] { "4711", "A wonderful test race" }, response.getSections()[2].split(";"));
+        assertArrayEquals(new Object[] { "4712", "Not such a wonderful race" }, response.getSections()[3].split(";"));
+    }
+    
+    @Test
     public void testRaceTime() throws UnknownHostException, IOException, ParseException {
         Iterable<Race> races = connector.getRaces();
         Iterator<Race> i = races.iterator();
