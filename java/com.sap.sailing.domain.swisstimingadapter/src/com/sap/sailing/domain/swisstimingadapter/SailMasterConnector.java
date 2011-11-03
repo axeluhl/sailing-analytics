@@ -42,4 +42,10 @@ public interface SailMasterConnector {
      */
     Map<Integer, Pair<Integer, Long>> getMarkPassingTimesInMillisecondsSinceRaceStart(String raceID, String boatID)
             throws UnknownHostException, IOException;
+    
+    void addSailMasterListener(SailMasterListener listener);
+    
+    void removeSailMasterListener(SailMasterListener listener);
+
+    SailMasterMessage receiveMessage(MessageType type) throws InterruptedException;
 }

@@ -15,14 +15,15 @@ public class FixImpl implements Fix {
     private final SpeedWithBearing speed;
     private final int nextMarkIndex;
     private final int rank;
+    private final Speed averageSpeedOverGroundPerLeg;
     private final Speed velocityMadeGood;
     private final Distance distanceToLeader;
     private final Distance distanceToNextMark;
 
     
     public FixImpl(String boatID, TrackerType trackerType, long ageOfDataInMilliseconds, Position position,
-            SpeedWithBearing speed, int nextMarkIndex, int rank, Speed velocityMadeGood, Distance distanceToLeader,
-            Distance distanceToNextMark) {
+            SpeedWithBearing speed, int nextMarkIndex, int rank, Speed averageSpeedOverGroundPerLeg,
+            Speed velocityMadeGood, Distance distanceToLeader, Distance distanceToNextMark) {
         super();
         this.boatID = boatID;
         this.trackerType = trackerType;
@@ -31,6 +32,7 @@ public class FixImpl implements Fix {
         this.speed = speed;
         this.nextMarkIndex = nextMarkIndex;
         this.rank = rank;
+        this.averageSpeedOverGroundPerLeg = averageSpeedOverGroundPerLeg;
         this.velocityMadeGood = velocityMadeGood;
         this.distanceToLeader = distanceToLeader;
         this.distanceToNextMark = distanceToNextMark;
@@ -84,6 +86,11 @@ public class FixImpl implements Fix {
     @Override
     public Distance getDistanceToNextMark() {
         return distanceToNextMark;
+    }
+
+    @Override
+    public Speed getAverageSpeedOverGroundPerLeg() {
+        return averageSpeedOverGroundPerLeg;
     }
 
 }

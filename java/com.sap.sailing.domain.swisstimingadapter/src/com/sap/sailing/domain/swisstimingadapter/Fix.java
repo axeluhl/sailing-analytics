@@ -27,6 +27,8 @@ public interface Fix {
     
     int getRank();
     
+    Speed getAverageSpeedOverGroundPerLeg();
+    
     Speed getVelocityMadeGood();
     
     Distance getDistanceToLeader();
