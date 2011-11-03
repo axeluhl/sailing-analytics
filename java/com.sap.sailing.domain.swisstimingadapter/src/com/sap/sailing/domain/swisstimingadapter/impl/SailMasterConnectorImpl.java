@@ -55,9 +55,10 @@ public class SailMasterConnectorImpl extends SailMasterTransceiver implements Sa
         SailMasterMessage response = sendRequestAndGetResponse("RAC?");
         String[] sections = response.getSections();
         assertResponseType("RAC!", sections[0]);
+        int count = Integer.valueOf(sections[1]);
         List<Race> result = new ArrayList<Race>();
-        for (int i=1; i<sections.length; i++) {
-            String[] idAndDescription = sections[i].split(";");
+        for (int i=0; i<count; i++) {
+            String[] idAndDescription = sections[2+i].split(";");
             result.add(new RaceImpl(idAndDescription[1], idAndDescription[0]));
         }
         return result;
@@ -65,13 +66,14 @@ public class SailMasterConnectorImpl extends SailMasterTransceiver implements Sa
 
     @Override
     public Course getCourse(String raceID) throws UnknownHostException, IOException {
-        SailMasterMessage response = sendRequestAndGetResponse("CourseConfig|"+raceID);
+        SailMasterMessage response = sendRequestAndGetResponse("CCG?|"+raceID);
         String[] sections = response.getSections();
-        assertResponseType("CourseConfig", sections[0]);
+        assertResponseType("CCG!", sections[0]);
         assertRaceID(raceID, sections[1]);
+        int count = Integer.valueOf(sections[2]);
         List<Mark> marks = new ArrayList<Mark>();
-        for (int i=2; i<sections.length; i++) {
-            String[] markDetails = sections[i].split(";");
+        for (int i=0; i<count; i++) {
+            String[] markDetails = sections[3+i].split(";");
             marks.add(new MarkImpl(markDetails[1], Integer.valueOf(markDetails[0]), Arrays.asList(markDetails).subList(2, markDetails.length)));
         }
         return new CourseImpl(raceID, marks);
@@ -113,13 +115,14 @@ public class SailMasterConnectorImpl extends SailMasterTransceiver implements Sa
 
     @Override
     public StartList getStartList(String raceID) throws UnknownHostException, IOException {
-        SailMasterMessage response = sendRequestAndGetResponse("StartList|"+raceID);
+        SailMasterMessage response = sendRequestAndGetResponse("STL?|"+raceID);
         String[] sections = response.getSections();
-        assertResponseType("Startlist", sections[0]);
+        assertResponseType("STL!", sections[0]);
         assertRaceID(raceID, sections[1]);
+        int count = Integer.valueOf(sections[2]);
         ArrayList<Competitor> competitors = new ArrayList<Competitor>();
-        for (int i=2; i<sections.length; i++) {
-            String[] competitorDetails = sections[i].split(";");
+        for (int i=0; i<count; i++) {
+            String[] competitorDetails = sections[3+i].split(";");
             competitors.add(new CompetitorImpl(competitorDetails[0], competitorDetails[1], competitorDetails[2]));
         }
         return new StartListImpl(raceID, competitors);
@@ -127,34 +130,35 @@ public class SailMasterConnectorImpl extends SailMasterTransceiver implements Sa
 
     @Override
     public TimePoint getStartTime(String raceID) throws UnknownHostException, IOException, ParseException {
-        SailMasterMessage response = sendRequestAndGetResponse("RaceTime|"+raceID);
+        SailMasterMessage response = sendRequestAndGetResponse("STT?|"+raceID);
         String[] sections = response.getSections();
-        assertResponseType("RaceTime", sections[0]);
+        assertResponseType("STT!", sections[0]);
         assertRaceID(raceID, sections[1]);
         return new MillisecondsTimePoint(dateFormat.parse(prefixTimeWithISOToday(sections[2])));
     }
 
     @Override
-    public Map<Integer, Pair<TimePoint, String>> getDeltaClockAtMark(String raceID, int markIndex)
+    public Map<Integer, Pair<TimePoint, String>> getDeltaClockAtMark(String raceID)
             throws UnknownHostException, IOException, NumberFormatException, ParseException {
-        SailMasterMessage response = sendRequestAndGetResponse("ClockAtMark|"+raceID+"|"+markIndex);
+        SailMasterMessage response = sendRequestAndGetResponse("CAM?|"+raceID);
         String[] sections = response.getSections();
-        assertResponseType("ClockAtMark", sections[0]);
+        assertResponseType("CAM!", sections[0]);
         assertRaceID(raceID, sections[1]);
+        int count = Integer.valueOf(sections[2]);
         Map<Integer, Pair<TimePoint, String>> result = new HashMap<Integer, Pair<TimePoint,String>>();
-        for (int i=2; i<sections.length; i+=2) {
-            String[] markTimeDetail = sections[i+1].split(";");
-            result.put(Integer.valueOf(sections[i]), new Pair<TimePoint, String>(
-                    new MillisecondsTimePoint(dateFormat.parse(prefixTimeWithISOToday(markTimeDetail[0]))), markTimeDetail[1]));
+        for (int i=0; i<count; i++) {
+            String[] markTimeDetail = sections[3+i].split(";");
+            result.put(Integer.valueOf(markTimeDetail[0]), new Pair<TimePoint, String>(
+                    new MillisecondsTimePoint(dateFormat.parse(prefixTimeWithISOToday(markTimeDetail[1]))), markTimeDetail[2]));
         }
         return result;
     }
 
     @Override
     public double getDistanceToMarkInMeters(String raceID, int markIndex, String boatID) throws UnknownHostException, IOException {
-        SailMasterMessage response = sendRequestAndGetResponse("DistToMark|"+raceID+"|"+markIndex+"|"+boatID);
+        SailMasterMessage response = sendRequestAndGetResponse("DTM?|"+raceID+"|"+markIndex+"|"+boatID);
         String[] sections = response.getSections();
-        assertResponseType("DistToMark", sections[0]);
+        assertResponseType("DTM!", sections[0]);
         assertRaceID(raceID, sections[1]);
         assertMarkIndex(markIndex, sections[2]);
         assertBoatID(boatID, sections[3]);
@@ -163,33 +167,34 @@ public class SailMasterConnectorImpl extends SailMasterTransceiver implements Sa
 
     @Override
     public double getCurrentBoatSpeedInMetersPerSecond(String raceID, String boatID) throws UnknownHostException, IOException {
-        SailMasterMessage response = sendRequestAndGetResponse("CurrentBoatSpeed|"+raceID+"|"+boatID);
+        SailMasterMessage response = sendRequestAndGetResponse("CBS?|"+raceID+"|"+boatID);
         String[] sections = response.getSections();
-        assertResponseType("CurrentBoatSpeed", sections[0]);
+        assertResponseType("CBS!", sections[0]);
         assertRaceID(raceID, sections[1]);
         assertBoatID(boatID, sections[2]);
         return Double.valueOf(sections[3]);
     }
 
     @Override
-    public double getAverageBoatSpeedInMetersPerSecond(String raceID, String leg, String boatID) throws UnknownHostException, IOException {
-        SailMasterMessage response = sendRequestAndGetResponse("AverageBoatSpeed|"+raceID+"|"+leg+"|"+boatID);
+    public double getDistanceBetweenBoatsInMeters(String raceID, String boatID1, String boatID2) throws UnknownHostException, IOException {
+        SailMasterMessage response = sendRequestAndGetResponse("DBB?|"+raceID+"|"+boatID1+"|"+boatID2);
         String[] sections = response.getSections();
-        assertResponseType("AverageBoatSpeed", sections[0]);
+        assertResponseType("DBB!", sections[0]);
+        assertRaceID(raceID, sections[1]);
+        assertBoatID(boatID1, sections[2]);
+        assertBoatID(boatID2, sections[3]);
+        return Double.valueOf(sections[4]);
+    }
+
+    @Override
+    public double getAverageBoatSpeedInMetersPerSecond(String raceID, String leg, String boatID) throws UnknownHostException, IOException {
+        SailMasterMessage response = sendRequestAndGetResponse("ABS?|"+raceID+"|"+leg+"|"+boatID);
+        String[] sections = response.getSections();
+        assertResponseType("ABS!", sections[0]);
         assertRaceID(raceID, sections[1]);
         assertLeg(leg, sections[2]);
         assertBoatID(boatID, sections[3]);
         return Double.valueOf(sections[4]);
     }
 
-    @Override
-    public double getDistanceBetweenBoatsInMeters(String raceID, String boatID1, String boatID2) throws UnknownHostException, IOException {
-        SailMasterMessage response = sendRequestAndGetResponse("DistBetweenBoats|"+raceID+"|"+boatID1+"|"+boatID2);
-        String[] sections = response.getSections();
-        assertResponseType("DistBetweenBoats", sections[0]);
-        assertRaceID(raceID, sections[1]);
-        assertBoatID(boatID1, sections[2]);
-        assertBoatID(boatID2, sections[3]);
-        return Double.valueOf(sections[4]);
-    }
 }
