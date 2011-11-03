@@ -11,7 +11,7 @@ import com.sap.sailing.util.Util.Pair;
 public class RaceInLeaderboardImpl implements RaceInLeaderboard {
     private TrackedRace trackedRace;
     private final Leaderboard leaderboard;
-    private final boolean medalRace;
+    private boolean medalRace;
     private String name;
     
     public RaceInLeaderboardImpl(Leaderboard leaderboard, String name, boolean medalRace) {
@@ -58,4 +58,9 @@ public class RaceInLeaderboardImpl implements RaceInLeaderboard {
     public Pair<Competitor, RaceInLeaderboard> getKey(Competitor competitor) {
         return new Pair<Competitor, RaceInLeaderboard>(competitor, this);
     }
+
+	@Override
+	public void setIsMedalRace(boolean isMedalRace) {
+		this.medalRace = isMedalRace;
+	}
 }

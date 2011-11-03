@@ -327,4 +327,55 @@ public class LeaderboardImpl implements Named, Leaderboard {
         displayNames.put(competitor, displayName);
     }
 
+	@Override
+	public void moveRaceColumnUp(String name) {
+		RaceInLeaderboard race = null;
+		for (RaceInLeaderboard r : races){
+			if (r.getName().equals(name))
+				race = r;
+		}
+		if (race == null)
+			return;
+		int index = 0;
+		index = races.lastIndexOf(race);
+		index--;
+		if (index >= 0){
+			races.remove(race);
+			races.add(index, race);
+		}
+	}
+
+	@Override
+	public void moveRaceColumnDown(String name) {
+		RaceInLeaderboard race = null;
+		for (RaceInLeaderboard r : races){
+			if (r.getName().equals(name))
+				race = r;
+		}
+		if (race == null)
+			return;
+		int index = 0;
+		index = races.lastIndexOf(race);
+		if (index == -1)
+			return;
+		index++;
+		if (index < races.size()){
+			races.remove(race);
+			races.add(index, race);
+		}
+	}
+
+	@Override
+	public void updateIsMedalRace(String raceName, boolean isMedalRace) {
+		RaceInLeaderboard race = null;
+		for (RaceInLeaderboard r : races){
+			if (r.getName().equals(raceName))
+				race = r;
+		}
+		if (race == null)
+			return;
+		
+		race.setIsMedalRace(isMedalRace);
+	}
+
 }

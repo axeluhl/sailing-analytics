@@ -148,4 +148,13 @@ public interface SailingServiceAsync {
 
     void updateCompetitorDisplayNameInLeaderboard(String leaderboardName, String competitorName, String displayName,
             AsyncCallback<Void> callback);
+
+	void moveLeaderboardColumnUp(String leaderboardName, String columnName,
+			AsyncCallback<Void> callback);
+
+	void moveLeaderboardColumnDown(String leaderboardName, String columnName,
+			AsyncCallback<Void> callback);
+
+	void updateIsMedalRace(String leaderboardName, String columnName, boolean isMedalRace,
+			AsyncCallback<Void> callback);
 }
