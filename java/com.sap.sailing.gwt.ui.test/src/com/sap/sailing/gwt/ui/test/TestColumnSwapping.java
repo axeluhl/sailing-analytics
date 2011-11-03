@@ -1,6 +1,9 @@
 package com.sap.sailing.gwt.ui.test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -9,12 +12,11 @@ import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
-import junit.framework.TestCase;
 
 import com.sap.sailing.gwt.ui.server.SailingServiceImpl;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDAO;
 
-public class TestColumnSwapping extends TestCase {
+public class TestColumnSwapping {
 
     private LeaderboardDAO lb = null;
     private static final String LEADERBOARDNAME = "test";
@@ -32,7 +34,7 @@ public class TestColumnSwapping extends TestCase {
 
     @Before
     public void prepareColumnSwapping() {
-        service = new SailingServiceImpl();
+        service = new SailingServiceImplMock();
         int[] disc = { 5, 8, 9, 0, 7, 5, 43 };
         service.createLeaderboard(LEADERBOARDNAME, disc);
         service.addColumnToLeaderboard("Rank", LEADERBOARDNAME, false);
@@ -65,7 +67,7 @@ public class TestColumnSwapping extends TestCase {
 
     @Test
     public void testSailingService() {
-        sailingService = new SailingServiceImpl();
+        sailingService = new SailingServiceImplMock();
         assertNotNull("Sailingservice != NULL", sailingService);
         int td[] = { 5, 8 };
         sailingService.createLeaderboard(TEST_LEADERBOARD_NAME, td);

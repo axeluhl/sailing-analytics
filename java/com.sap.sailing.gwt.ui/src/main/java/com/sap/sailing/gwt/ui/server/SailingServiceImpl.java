@@ -103,11 +103,17 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
 
     public SailingServiceImpl() {
         BundleContext context = Activator.getDefault();
-        racingEventServiceTracker = new ServiceTracker<RacingEventService, RacingEventService>(
-                context, RacingEventService.class.getName(), null);
-        racingEventServiceTracker.open();
+        racingEventServiceTracker = createAndOpenRacingEventServiceTracker(context);
         mongoObjectFactory = MongoObjectFactory.INSTANCE;
         domainObjectFactory = DomainObjectFactory.INSTANCE;
+    }
+
+    protected ServiceTracker<RacingEventService, RacingEventService> createAndOpenRacingEventServiceTracker(
+            BundleContext context) {
+        ServiceTracker<RacingEventService, RacingEventService> result = new ServiceTracker<RacingEventService, RacingEventService>(
+                context, RacingEventService.class.getName(), null);
+        result.open();
+        return result;
     }
     
     public LeaderboardDAO getLeaderboardByName(String leaderboardName, Date date,
@@ -748,7 +754,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         getService().getDomainFactory().getTrackedEvent(event).getTrackedRace(race).removeWind(wind, WindSource.WEB);
    }
 
-    private RacingEventService getService() {
+    protected RacingEventService getService() {
         return (RacingEventService) racingEventServiceTracker.getService(); // grab the service
     }
 
