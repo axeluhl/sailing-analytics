@@ -6,16 +6,31 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
 
+/**
+ * A sender / receiver for a SwissTiming Sail Master system.
+ * 
+ * @author Axel Uhl (d043530)
+ *
+ */
 public class SailMasterTransceiver {
     private static final byte STX = 0x02;
     private static final byte ETX = 0x03;
 
+    /**
+     * Sends the string message to the output stream <code>os</code>, using the cp1252 character set
+     * for encoding and framing the message with the <code>STX</code> and <code>ETX</code> bytes.
+     */
     public void sendMessage(String message, OutputStream os) throws IOException {
         os.write(STX);
         os.write(message.getBytes(Charset.forName("cp1252")));
         os.write(ETX);
     }
 
+    /**
+     * Receives a single message from the <code>inputStream</code> specified. The surrounding
+     * <code>STX/ETX</code> marker bytes are removed from the message. The message is decoded
+     * into a string using the cp1252 character encoding.
+     */
     public String receiveMessage(InputStream inputStream) throws IOException {
         // read until an STX byte comes along
         int read = inputStream.read();
@@ -30,7 +45,8 @@ public class SailMasterTransceiver {
     }
 
     /**
-     * Read bytes until EOF or ETX is reached and turn those bytes into a string.
+     * Read bytes until <code>EOF</code> or <code>ETX</code> is reached and turn those bytes into a string
+     * using the cp1252 character encoding.
      */
     private String readMessage(InputStream is) throws IOException {
         ByteArrayOutputStream bos = new ByteArrayOutputStream(4096);

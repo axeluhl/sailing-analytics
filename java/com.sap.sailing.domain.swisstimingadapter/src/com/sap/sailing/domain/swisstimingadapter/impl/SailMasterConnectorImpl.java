@@ -11,8 +11,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
@@ -21,20 +23,40 @@ import com.sap.sailing.domain.swisstimingadapter.Course;
 import com.sap.sailing.domain.swisstimingadapter.Mark;
 import com.sap.sailing.domain.swisstimingadapter.Race;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterConnector;
+import com.sap.sailing.domain.swisstimingadapter.SailMasterListener;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterMessage;
 import com.sap.sailing.domain.swisstimingadapter.StartList;
 import com.sap.sailing.util.Util.Pair;
 
+/**
+ * Implements the connector to the SwissTiming Sail Master system. It uses a hostname and port number
+ * to establish the connecting via TCP. The connector offers a number of explicit service request
+ * methods. Additionally, the connector can receive "spontaneous" events sent by the sail master
+ * system. Clients can register for those spontaneous events (see {@link #addSailMasterListener}).
+ * 
+ * @author Axel Uhl (d043530)
+ *
+ */
 public class SailMasterConnectorImpl extends SailMasterTransceiver implements SailMasterConnector {
     private final String host;
     private final int port;
     private Socket socket;
     private static final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss");
+    private final Set<SailMasterListener> listeners;
     
     public SailMasterConnectorImpl(String host, int port) {
         super();
         this.host = host;
         this.port = port;
+        this.listeners = new HashSet<SailMasterListener>();
+    }
+    
+    public void addSailMasterListener(SailMasterListener listener) {
+        listeners.add(listener);
+    }
+    
+    public void removeSailMasterListener(SailMasterListener listener) {
+        listeners.remove(listener);
     }
     
     public SailMasterMessage sendRequestAndGetResponse(String requestMessage) throws UnknownHostException, IOException {
