@@ -197,6 +197,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiver implements Sa
         return Double.valueOf(sections[4]);
     }
     
+    @Override
     public Map<Integer, Pair<Integer, Long>> getMarkPassingTimesInMillisecondsSinceStart(String raceID, String boatID)
             throws UnknownHostException, IOException {
         SailMasterMessage response = sendRequestAndGetResponse("TMD?|"+raceID+"|"+boatID);

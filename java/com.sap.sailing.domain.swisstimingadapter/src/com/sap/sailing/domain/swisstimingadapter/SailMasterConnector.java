@@ -32,4 +32,14 @@ public interface SailMasterConnector {
     double getAverageBoatSpeedInMetersPerSecond(String raceID, String leg, String boatID) throws UnknownHostException, IOException;
     
     double getDistanceBetweenBoatsInMeters(String raceID, String boatID1, String boatID2) throws UnknownHostException, IOException;
+
+    /**
+     * Retrieves the mark passing times for a boat ID within a race specified by <code>raceID</code>.
+     * 
+     * @return keys are the mark indices; values are the pairs telling the requested boat's rank at the key mark and the
+     *         number of milliseconds that passed between the race start and the point in time at which the boat with ID
+     *         <code>boatID</code> passed the mark.
+     */
+    Map<Integer, Pair<Integer, Long>> getMarkPassingTimesInMillisecondsSinceStart(String raceID, String boatID)
+            throws UnknownHostException, IOException;
 }
