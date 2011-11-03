@@ -38,7 +38,7 @@ public class SailMasterMessageImpl implements SailMasterMessage {
         if (isEvent()) {
             typeAsString = typeAsStringWithOptionalSuffix;
         } else {
-            typeAsString = typeAsStringWithOptionalSuffix;
+            typeAsString = typeAsStringWithOptionalSuffix.substring(0, typeAsStringWithOptionalSuffix.length()-1);
         }
         return MessageType.valueOf(typeAsString);
     }
