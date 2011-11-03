@@ -1,28 +1,8 @@
 Axel
 ====
 
- - migrate to Virgo; clarify use of Maven (snapshot builds vs. version builds) and the effects this has
-   on the runtime's selection of bundle versions
-
- - store tracking data in our own DB; enables historical viewing as well as cross-regatta analysis
-
- - install Bugzilla on kielweek.web4sap.com and move this file's contents to it
-
- - add visualizations to leaderboard, such as rank/distance comparison between selected set of competitors
-
- - stripped-down race selection and live leaderboard that works well on smartphones; show marks as they
-   pass through the fleet
-
- - visualize results of Douglas-Peucker algorithm in Google Map
-
- - implement maneuver analysis, particularly counting tacks / jibes and computing maneuver loss
-
- - implement start advantage analysis including respective leaderboard visualization
-
  - implement risk assessment: 1) risk of getting too close to layline in top sector; 2) risk of getting
    passed by successors due to wind shifts; in all this consider wind patterns (how shifty / gusty is the wind?)
-
- - improve performance of Google Map
 
  - understand how to add layers on top of Google Map and use this to visualize, e.g., wind field or risk
 
