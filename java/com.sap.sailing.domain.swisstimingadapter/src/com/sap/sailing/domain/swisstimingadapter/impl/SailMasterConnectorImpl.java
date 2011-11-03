@@ -196,5 +196,25 @@ public class SailMasterConnectorImpl extends SailMasterTransceiver implements Sa
         assertBoatID(boatID, sections[3]);
         return Double.valueOf(sections[4]);
     }
+    
+    public Map<Integer, Pair<Integer, Long>> getMarkPassingTimesInMillisecondsSinceStart(String raceID, String boatID)
+            throws UnknownHostException, IOException {
+        SailMasterMessage response = sendRequestAndGetResponse("TMD?|"+raceID+"|"+boatID);
+        String[] sections = response.getSections();
+        assertResponseType("ABS!", sections[0]);
+        assertRaceID(raceID, sections[1]);
+        assertBoatID(boatID, sections[2]);
+        int count = Integer.valueOf(sections[3]);
+        Map<Integer, Pair<Integer, Long>> result = new HashMap<Integer, Pair<Integer, Long>>();
+        for (int i=0; i<count; i++) {
+            String[] markTimeDetail = sections[4+i].split(";");
+            String[] timeDetail = markTimeDetail[2].split(":");
+            long millisecondsSinceStart = 1000 * (Integer.valueOf(timeDetail[2]) + 60 * Integer.valueOf(timeDetail[1]) + 3600 * Integer
+                    .valueOf(timeDetail[0]));
+            result.put(Integer.valueOf(markTimeDetail[0]), new Pair<Integer, Long>(
+                    Integer.valueOf(markTimeDetail[1]), millisecondsSinceStart));
+        }
+        return result;
+    }
 
 }
