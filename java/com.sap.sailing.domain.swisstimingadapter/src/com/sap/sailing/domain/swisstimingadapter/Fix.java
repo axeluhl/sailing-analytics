@@ -17,15 +17,15 @@ public interface Fix {
     
     TrackerType getTrackerType();
     
-    long getAgeOfDataInMilliseconds();
+    Long getAgeOfDataInMilliseconds();
     
     Position getPosition();
     
     SpeedWithBearing getSpeed();
     
-    int getNextMarkIndex();
+    Integer getNextMarkIndex();
     
-    int getRank();
+    Integer getRank();
     
     Speed getAverageSpeedOverGroundPerLeg();
     

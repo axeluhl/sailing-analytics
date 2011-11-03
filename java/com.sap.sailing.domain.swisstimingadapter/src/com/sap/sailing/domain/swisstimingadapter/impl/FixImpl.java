@@ -10,19 +10,19 @@ import com.sap.sailing.domain.swisstimingadapter.TrackerType;
 public class FixImpl implements Fix {
     private final String boatID;
     private final TrackerType trackerType;
-    private final long ageOfDataInMilliseconds;
+    private final Long ageOfDataInMilliseconds;
     private final Position position;
     private final SpeedWithBearing speed;
-    private final int nextMarkIndex;
-    private final int rank;
+    private final Integer nextMarkIndex;
+    private final Integer rank;
     private final Speed averageSpeedOverGroundPerLeg;
     private final Speed velocityMadeGood;
     private final Distance distanceToLeader;
     private final Distance distanceToNextMark;
 
     
-    public FixImpl(String boatID, TrackerType trackerType, long ageOfDataInMilliseconds, Position position,
-            SpeedWithBearing speed, int nextMarkIndex, int rank, Speed averageSpeedOverGroundPerLeg,
+    public FixImpl(String boatID, TrackerType trackerType, Long ageOfDataInMilliseconds, Position position,
+            SpeedWithBearing speed, Integer nextMarkIndex, Integer rank, Speed averageSpeedOverGroundPerLeg,
             Speed velocityMadeGood, Distance distanceToLeader, Distance distanceToNextMark) {
         super();
         this.boatID = boatID;
@@ -49,7 +49,7 @@ public class FixImpl implements Fix {
     }
 
     @Override
-    public long getAgeOfDataInMilliseconds() {
+    public Long getAgeOfDataInMilliseconds() {
         return ageOfDataInMilliseconds;
     }
 
@@ -64,12 +64,12 @@ public class FixImpl implements Fix {
     }
 
     @Override
-    public int getNextMarkIndex() {
+    public Integer getNextMarkIndex() {
         return nextMarkIndex;
     }
 
     @Override
-    public int getRank() {
+    public Integer getRank() {
         return rank;
     }
 
