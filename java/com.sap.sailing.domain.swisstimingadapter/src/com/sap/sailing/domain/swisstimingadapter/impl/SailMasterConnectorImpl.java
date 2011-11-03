@@ -3,38 +3,184 @@ package com.sap.sailing.domain.swisstimingadapter.impl;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.logging.Logger;
 
+import com.sap.sailing.domain.base.Distance;
+import com.sap.sailing.domain.base.Position;
+import com.sap.sailing.domain.base.Speed;
+import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.TimePoint;
+import com.sap.sailing.domain.base.impl.DegreeBearingImpl;
+import com.sap.sailing.domain.base.impl.DegreePosition;
+import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
+import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
+import com.sap.sailing.domain.base.impl.MeterDistance;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.swisstimingadapter.Competitor;
 import com.sap.sailing.domain.swisstimingadapter.Course;
+import com.sap.sailing.domain.swisstimingadapter.Fix;
 import com.sap.sailing.domain.swisstimingadapter.Mark;
+import com.sap.sailing.domain.swisstimingadapter.MessageType;
 import com.sap.sailing.domain.swisstimingadapter.Race;
+import com.sap.sailing.domain.swisstimingadapter.RaceStatus;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterConnector;
+import com.sap.sailing.domain.swisstimingadapter.SailMasterListener;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterMessage;
 import com.sap.sailing.domain.swisstimingadapter.StartList;
+import com.sap.sailing.domain.swisstimingadapter.TrackerType;
 import com.sap.sailing.util.Util.Pair;
 
-public class SailMasterConnectorImpl extends SailMasterTransceiver implements SailMasterConnector {
+/**
+ * Implements the connector to the SwissTiming Sail Master system. It uses a hostname and port number
+ * to establish the connecting via TCP. The connector offers a number of explicit service request
+ * methods. Additionally, the connector can receive "spontaneous" events sent by the sail master
+ * system. Clients can register for those spontaneous events (see {@link #addSailMasterListener}).
+ * 
+ * @author Axel Uhl (d043530)
+ *
+ */
+public class SailMasterConnectorImpl extends SailMasterTransceiver implements SailMasterConnector, Runnable {
+    private static final Logger logger = Logger.getLogger(SailMasterConnectorImpl.class.getName());
+    
     private final String host;
     private final int port;
     private Socket socket;
     private static final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss");
+    private final Set<SailMasterListener> listeners;
+    private final Thread receiverThread;
+    private boolean stopped;
+    
+    private final Map<MessageType, BlockingQueue<SailMasterMessage>> unprocessedMessagesByType;
     
     public SailMasterConnectorImpl(String host, int port) {
         super();
         this.host = host;
         this.port = port;
+        this.listeners = new HashSet<SailMasterListener>();
+        this.unprocessedMessagesByType = new HashMap<MessageType, BlockingQueue<SailMasterMessage>>();
+        receiverThread = new Thread(this, "SwissTiming SailMaster Receiver");
+        receiverThread.start();
+    }
+    
+    public void run() {
+        try {
+            while (!stopped) {
+                ensureSocketIsOpen();
+                try {
+                    SailMasterMessage message = new SailMasterMessageImpl(receiveMessage(socket.getInputStream()));
+                    if (message.isResponse()) {
+                        // this is a response for an explicit request
+                        rendevouz(message);
+                    } else if (message.isEvent()) {
+                        // a spontaneous event
+                        notifyListeners(message);
+                    }
+                } catch (SocketException se) {
+                    // This occurs if the socket was closed which may mean the connector was stopped. Check in while
+                    socket = null;
+                }
+            }
+        } catch (Exception e) {
+            logger.throwing(SailMasterConnectorImpl.class.getName(), "run", e);
+        }
+        logger.info("Stopping Sail Master connector thread");
+    }
+    
+    @Override
+    public SailMasterMessage receiveMessage(MessageType type) throws InterruptedException {
+        BlockingQueue<SailMasterMessage> blockingQueue = getBlockingQueue(type);
+        SailMasterMessage result = blockingQueue.take();
+        return result;
+    }
+
+    private synchronized BlockingQueue<SailMasterMessage> getBlockingQueue(MessageType type) {
+        BlockingQueue<SailMasterMessage> blockingQueue;
+        blockingQueue = unprocessedMessagesByType.get(type);
+        if (blockingQueue == null) {
+            blockingQueue = new LinkedBlockingQueue<SailMasterMessage>();
+            unprocessedMessagesByType.put(type, blockingQueue);
+        }
+        return blockingQueue;
+    }
+    
+    private void rendevouz(SailMasterMessage message) {
+        BlockingQueue<SailMasterMessage> blockingQueue = getBlockingQueue(message.getType());
+        blockingQueue.offer(message);
+    }
+
+    private void notifyListeners(SailMasterMessage message) throws ParseException {
+        switch (message.getType()) {
+        case RPD:
+            notifyListenersRPD(message);
+            break;
+        }
+    }
+
+    private void notifyListenersRPD(SailMasterMessage message) throws ParseException {
+        assert message.getType() == MessageType.RPD;
+        String[] sections = message.getSections();
+        String raceID = sections[1];
+        RaceStatus status = RaceStatus.values()[Integer.valueOf(sections[2])];
+        TimePoint timePoint = new MillisecondsTimePoint(dateFormat.parse(prefixTimeWithISOToday(sections[3])));
+        TimePoint startTimeEstimatedStartTime = new MillisecondsTimePoint(dateFormat.parse(prefixTimeWithISOToday(sections[4])));
+        long millisecondsSinceRaceStart = parseHHMMSSToMilliseconds(sections[5]);
+        int nextMarkIndexForLeader = Integer.valueOf(sections[6]);
+        double distanceToNextMarkForLeaderInMeters = Double.valueOf(sections[7]);
+        int count = Integer.valueOf(sections[8]);
+        Collection<Fix> fixes = new ArrayList<Fix>();
+        for (int i=0; i<count; i++) {
+            String[] fixSections = sections[8+i].split(";");
+            String boatID = fixSections[0];
+            TrackerType trackerType = TrackerType.values()[Integer.valueOf(fixSections[1])];
+            long ageOfDataInMilliseconds = 1000l*Long.valueOf(fixSections[2]);
+            Position position = new DegreePosition(Double.valueOf(fixSections[3]), Double.valueOf(fixSections[4]));
+            SpeedWithBearing speed = new KnotSpeedWithBearingImpl(Double.valueOf(fixSections[5]),
+                    new DegreeBearingImpl(Double.valueOf(fixSections[8])));
+            Speed averageSpeedOverGround = new KnotSpeedImpl(Double.valueOf(fixSections[6]));
+            Speed velocityMadeGood = new KnotSpeedImpl(Double.valueOf(fixSections[7]));
+            int nextMarkIndex = Integer.valueOf(fixSections[9]);
+            int rank = Integer.valueOf(fixSections[10]);
+            Distance distanceToLeader = new MeterDistance(Double.valueOf(fixSections[11]));
+            Distance distanceToNextMark = new MeterDistance(Double.valueOf(fixSections[12]));
+            fixes.add(new FixImpl(boatID, trackerType, ageOfDataInMilliseconds, position, speed, nextMarkIndex, rank,
+                    averageSpeedOverGround, velocityMadeGood, distanceToLeader, distanceToNextMark));
+        }
+        for (SailMasterListener listener : listeners) {
+            listener.receivedRacePositionData(raceID, status, timePoint, startTimeEstimatedStartTime, millisecondsSinceRaceStart,
+                    nextMarkIndexForLeader, distanceToNextMarkForLeaderInMeters, fixes);
+        }
+    }
+
+    public void stop() throws IOException {
+        stopped = true;
+        socket.close();
+        socket = null;
+    }
+    
+    @Override
+    public void addSailMasterListener(SailMasterListener listener) {
+        listeners.add(listener);
+    }
+    
+    @Override
+    public void removeSailMasterListener(SailMasterListener listener) {
+        listeners.remove(listener);
     }
     
     public SailMasterMessage sendRequestAndGetResponse(String requestMessage) throws UnknownHostException, IOException {
@@ -44,7 +190,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiver implements Sa
         return new SailMasterMessageImpl(receiveMessage(socket.getInputStream()));
     }
 
-    private void ensureSocketIsOpen() throws UnknownHostException, IOException {
+    private synchronized void ensureSocketIsOpen() throws UnknownHostException, IOException {
         if (socket == null) {
             socket = new Socket(host, port);
         }
@@ -209,13 +355,18 @@ public class SailMasterConnectorImpl extends SailMasterTransceiver implements Sa
         Map<Integer, Pair<Integer, Long>> result = new HashMap<Integer, Pair<Integer, Long>>();
         for (int i=0; i<count; i++) {
             String[] markTimeDetail = sections[4+i].split(";");
-            String[] timeDetail = markTimeDetail[2].split(":");
-            long millisecondsSinceStart = 1000 * (Integer.valueOf(timeDetail[2]) + 60 * Integer.valueOf(timeDetail[1]) + 3600 * Integer
-                    .valueOf(timeDetail[0]));
+            long millisecondsSinceStart = parseHHMMSSToMilliseconds(markTimeDetail[2]);
             result.put(Integer.valueOf(markTimeDetail[0]), new Pair<Integer, Long>(
                     Integer.valueOf(markTimeDetail[1]), millisecondsSinceStart));
         }
         return result;
     }
 
+    private long parseHHMMSSToMilliseconds(String hhmmss) {
+        String[] timeDetail = hhmmss.split(":");
+        long millisecondsSinceStart = 1000 * (Integer.valueOf(timeDetail[2]) + 60 * Integer.valueOf(timeDetail[1]) + 3600 * Integer
+                .valueOf(timeDetail[0]));
+        return millisecondsSinceStart;
+    }
+    
 }

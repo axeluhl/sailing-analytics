@@ -75,6 +75,10 @@ public interface SailingService extends RemoteService {
     void removeLeaderboardColumn(String leaderboardName, String columnName);
 
     void addColumnToLeaderboard(String columnName, String leaderboardName, boolean medalRace);
+    
+    void moveLeaderboardColumnUp(String leaderboardName, String columnName);
+    
+    void moveLeaderboardColumnDown(String leaderboardName, String columnName);
 
     void connectTrackedRaceToLeaderboardColumn(String leaderboardName, String raceColumnName,
             String eventName, String raceName);
@@ -97,4 +101,6 @@ public interface SailingService extends RemoteService {
     LeaderboardEntryDAO getLeaderboardEntry(String leaderboardName, String competitorName, String raceName, Date date) throws Exception;
 
     void updateCompetitorDisplayNameInLeaderboard(String leaderboardName, String competitorName, String displayName);
+    
+    void updateIsMedalRace(String leaderboardName, String columnName, boolean isMedalRace);
 }
