@@ -301,6 +301,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     protected abstract class RaceColumn<C> extends ExpandableSortableColumn<C> {
         private final String raceName;
         private final boolean medalRace;
+
         private final String headerStyle;
         private final String columnStyle;
 
@@ -395,6 +396,10 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             /* title */raceName,
             /* iconURL */medalRace ? "/images/medal_small.png" : null, LeaderboardPanel.this, this, stringConstants);
             return header;
+        }
+        
+        public boolean isMedalRace() {
+            return medalRace;
         }
 
     }
@@ -965,7 +970,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                         // if tracked-ness differs, column must be updated with
                         // a new column that is expansion-enabled
                         int columnIndex = getLeaderboardTable().getColumnIndex(raceColumn);
-                        if (raceColumn.isExpansionEnabled() != leaderboard.raceIsTracked(race) || columnIndex != positionRaceColumn[indexRaceColumn]) {
+                        if (raceColumn.isExpansionEnabled() != leaderboard.raceIsTracked(race) || columnIndex != positionRaceColumn[indexRaceColumn]
+                                || leaderboard.raceIsMedalRace(race) != raceColumn.isMedalRace()) {
                             if (raceColumn.isExpanded()) {
                                 raceColumn.toggleExpansion(); // remove children from table
                             }
@@ -1134,5 +1140,4 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         playPause.setHTML(getPlayPauseImgHtml(isPlaying));
         playPause.setTitle(isPlaying ? stringConstants.pauseAutomaticRefresh() : stringConstants.autoRefresh());
     }
-
 }

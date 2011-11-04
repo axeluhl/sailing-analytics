@@ -5,7 +5,6 @@ import java.util.List;
 
 import com.sap.sailing.domain.base.Distance;
 import com.sap.sailing.domain.base.TimePoint;
-import com.sap.sailing.util.Util.Pair;
 import com.sap.sailing.util.Util.Triple;
 
 public interface SailMasterListener {
@@ -17,9 +16,9 @@ public interface SailMasterListener {
     
     void receivedClockAtMark(String raceID, List<Triple<Integer, TimePoint, String>> markIndicesTimePointsAndBoatIDs);
     
-    void receivedStartList(String raceID, List<Triple<String, String, String>> boatIDsISOCountryCodesAndNames);
+    void receivedStartList(String raceID, StartList startList);
     
-    void receivedCourseConfiguration(String raceID, List<Mark> marks);
+    void receivedCourseConfiguration(String raceID, Course course);
     
-    void receivedAvailableRaces(List<Pair<String, String>> raceIDsAndDescriptions);
+    void receivedAvailableRaces(Iterable<Race> races);
 }
