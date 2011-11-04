@@ -118,6 +118,22 @@ public class SwissTimingSailMasterLiveTest implements SailMasterListener {
             assertTrue(deltaClockAtMark.keySet().contains(i));
         }
     }
+    
+    @Test
+    public void testGetDistanceBetweenBoats() throws UnknownHostException, IOException, InterruptedException {
+        Iterable<Race> races = connector.getRaces();
+        Race race = races.iterator().next();
+        for (Competitor competitor1 : connector.getStartList(race.getRaceID()).getCompetitors()) {
+            for (Competitor competitor2 : connector.getStartList(race.getRaceID()).getCompetitors()) {
+                Distance distance = connector.getDistanceBetweenBoats(race.getRaceID(), competitor1.getBoatID(), competitor2.getBoatID());
+                //assertNotNull(distance);
+                Distance reverseDistance = connector.getDistanceBetweenBoats(race.getRaceID(), competitor2.getBoatID(), competitor1.getBoatID());
+                if (distance != null && reverseDistance != null) {
+                    assertEquals(distance.getMeters(), reverseDistance.getMeters(), 0.0001);
+                }
+            }
+        }
+    }
 
     @Override
     public void receivedRacePositionData(String raceID, RaceStatus status, TimePoint timePoint, TimePoint startTime,

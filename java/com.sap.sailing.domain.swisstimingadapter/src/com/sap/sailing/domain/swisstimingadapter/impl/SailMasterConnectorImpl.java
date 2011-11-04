@@ -417,13 +417,19 @@ public class SailMasterConnectorImpl extends SailMasterTransceiver implements Sa
 
     @Override
     public Distance getDistanceBetweenBoats(String raceID, String boatID1, String boatID2) throws UnknownHostException, IOException, InterruptedException {
-        SailMasterMessage response = sendRequestAndGetResponse(MessageType.DBB, raceID, boatID1, boatID2);
-        String[] sections = response.getSections();
-        assertResponseType(MessageType.DBB, response);
-        assertRaceID(raceID, sections[1]);
-        assertBoatID(boatID1, sections[2]);
-        assertBoatID(boatID2, sections[3]);
-        return new MeterDistance(Double.valueOf(sections[4]));
+        Distance result;
+        if (boatID1.equals(boatID2)) {
+            result = Distance.NULL;
+        } else {
+            SailMasterMessage response = sendRequestAndGetResponse(MessageType.DBB, raceID, boatID1, boatID2);
+            String[] sections = response.getSections();
+            assertResponseType(MessageType.DBB, response);
+            assertRaceID(raceID, sections[1]);
+            assertBoatID(boatID1, sections[2]);
+            assertBoatID(boatID2, sections[3]);
+            result = sections.length <= 4 || sections[4].trim().length() == 0 ? null : new MeterDistance(Double.valueOf(sections[4]));
+        }
+        return result;
     }
 
     @Override
