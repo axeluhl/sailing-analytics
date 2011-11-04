@@ -249,6 +249,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiver implements Sa
         }
     }
 
+    @Override
     public void stop() throws IOException {
         stopped = true;
         socket.close();
@@ -410,7 +411,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiver implements Sa
         assertRaceID(raceID, sections[1]);
         assertMarkIndex(markIndex, sections[2]);
         assertBoatID(boatID, sections[3]);
-        return new MeterDistance(Double.valueOf(sections[4]));
+        return sections.length <= 4 || sections[4].trim().length() == 0 ? null : new MeterDistance(Double.valueOf(sections[4]));
     }
 
     @Override
@@ -463,9 +464,11 @@ public class SailMasterConnectorImpl extends SailMasterTransceiver implements Sa
         Map<Integer, Pair<Integer, Long>> result = new HashMap<Integer, Pair<Integer, Long>>();
         for (int i=0; i<count; i++) {
             String[] markTimeDetail = sections[4+i].split(";");
-            long millisecondsSinceStart = parseHHMMSSToMilliseconds(markTimeDetail[2]);
+            Long millisecondsSinceStart = markTimeDetail.length <= 2 || markTimeDetail[2].trim().length() == 0 ? null :
+                parseHHMMSSToMilliseconds(markTimeDetail[2]);
             result.put(Integer.valueOf(markTimeDetail[0]), new Pair<Integer, Long>(
-                    Integer.valueOf(markTimeDetail[1]), millisecondsSinceStart));
+                    markTimeDetail.length <= 1 || markTimeDetail[1].trim().length() == 0 ? null :
+                        Integer.valueOf(markTimeDetail[1]), millisecondsSinceStart));
         }
         return result;
     }

@@ -12,8 +12,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.Distance;
@@ -41,6 +41,11 @@ public class SwissTimingSailMasterLiveTest implements SailMasterListener {
     @Before
     public void connect() {
         connector = SwissTimingFactory.INSTANCE.createSailMasterConnector("gps.sportresult.com", 40300);
+    }
+    
+    @After
+    public void stopConnector() throws IOException {
+        connector.stop();
     }
     
     @Test
@@ -145,7 +150,33 @@ public class SwissTimingSailMasterLiveTest implements SailMasterListener {
         for (Competitor competitor : connector.getStartList(race.getRaceID()).getCompetitors()) {
             for (int i = 0; i < Util.size(course.getMarks()); i++) {
                 Distance distance = connector.getDistanceToMark(race.getRaceID(), i, competitor.getBoatID());
-                assertNotNull(distance);
+                System.out.print("d");
+                if (distance != null) {
+                    assertTrue(distance.getMeters() > 0);
+                }
+            }
+        }
+    }
+    
+    @Test
+    public void testGetMarkPassingTimes() throws UnknownHostException, IOException, InterruptedException {
+        Iterable<Race> races = connector.getRaces();
+        Race race = races.iterator().next();
+        Course course = connector.getCourse(race.getRaceID());
+        int numberOfMarks = Util.size(course.getMarks());
+        Iterable<Competitor> competitors = connector.getStartList(race.getRaceID()).getCompetitors();
+        for (Competitor competitor : competitors) {
+            Map<Integer, Pair<Integer, Long>> markPassingTimes = connector.getMarkPassingTimesInMillisecondsSinceRaceStart(race.getRaceID(), competitor.getBoatID());
+            for (Integer markIndex : markPassingTimes.keySet()) {
+                Pair<Integer, Long> rankAndTime = markPassingTimes.get(markIndex);
+                for (int i=0; i<numberOfMarks; i++) {
+                    if (i != markIndex && markPassingTimes.containsKey(numberOfMarks)) {
+                        if (markPassingTimes.get(i).getB() != null && rankAndTime.getB() != null) {
+                            // previous marks must have been passed before subsequent marks
+                            assertTrue(markPassingTimes.get(i).getB() < rankAndTime.getB());
+                        }
+                    }
+                }
             }
         }
     }

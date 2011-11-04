@@ -77,4 +77,10 @@ public interface SailMasterConnector {
      * first passed the mark with the respective index
      */
     List<Triple<Integer, TimePoint, String>> getClockAtMark(String raceID) throws ParseException, UnknownHostException, IOException, InterruptedException;
+    
+    /**
+     * Stops this connector's thread that is started upon creation and responsible for receiving spontaneous events
+     * @throws IOException 
+     */
+    void stop() throws IOException;
 }
