@@ -201,8 +201,8 @@ public class Action {
     }
 
     public void say(Document doc) throws IOException {
+    	this.res.setCharacterEncoding("UTF-8");
         this.res.getWriter().print(getXMLAsString(doc));
-        ;
     }
 
     public void say(String msg) throws IOException {
@@ -217,12 +217,15 @@ public class Action {
         // final XMLOutputter outputter = new XMLOutputter("  ", true, encoding);
         final Format format = Format.getPrettyFormat();
         format.setIndent("  ");
+        // Despite of setting the expand true (result is <column></column> instead of <column/> browsers like firefox dont display the columns correctly
+        format.setExpandEmptyElements(true);
         format.setEncoding(encoding);
-
+        
         final XMLOutputter outputter = new XMLOutputter(format);
 
         if (context instanceof Document) {
-            return outputter.outputString((Document) context);
+        	String res = outputter.outputString((Document) context);
+            return res;
         }
 
         if (context instanceof Element) {
