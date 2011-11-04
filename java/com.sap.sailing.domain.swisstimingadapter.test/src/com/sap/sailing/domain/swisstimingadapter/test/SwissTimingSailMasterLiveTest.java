@@ -10,6 +10,7 @@ import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Ignore;
@@ -32,7 +33,7 @@ import com.sap.sailing.util.Util;
 import com.sap.sailing.util.Util.Pair;
 import com.sap.sailing.util.Util.Triple;
 
-@Ignore("This test doesn't work as long as the server doesn't play an actual race")
+//@Ignore("This test doesn't work as long as the server doesn't play an actual race")
 public class SwissTimingSailMasterLiveTest implements SailMasterListener {
     private int rpdCounter;
     private SailMasterConnector connector;
@@ -105,6 +106,16 @@ public class SwissTimingSailMasterLiveTest implements SailMasterListener {
         for (Competitor competitor : connector.getStartList(race.getRaceID()).getCompetitors()) {
             Speed currentBoatSpeed = connector.getCurrentBoatSpeed(race.getRaceID(), competitor.getBoatID());
             assertNotNull(currentBoatSpeed);
+        }
+    }
+    
+    @Test
+    public void testGetDeltaClockAtMark() throws UnknownHostException, IOException, InterruptedException, NumberFormatException, ParseException {
+        Iterable<Race> races = connector.getRaces();
+        Race race = races.iterator().next();
+        Map<Integer, Pair<TimePoint, String>> deltaClockAtMark = connector.getDeltaClockAtMark(race.getRaceID());
+        for (int i=0; i<7; i++) {
+            assertTrue(deltaClockAtMark.keySet().contains(i));
         }
     }
 

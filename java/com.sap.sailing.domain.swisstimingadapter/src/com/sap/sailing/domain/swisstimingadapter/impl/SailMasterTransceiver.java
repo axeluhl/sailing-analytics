@@ -20,7 +20,7 @@ public class SailMasterTransceiver {
      * Sends the string message to the output stream <code>os</code>, using the cp1252 character set
      * for encoding and framing the message with the <code>STX</code> and <code>ETX</code> bytes.
      */
-    public void sendMessage(String message, OutputStream os) throws IOException {
+    public synchronized void sendMessage(String message, OutputStream os) throws IOException {
         os.write(STX);
         os.write(message.getBytes(Charset.forName("cp1252")));
         os.write(ETX);

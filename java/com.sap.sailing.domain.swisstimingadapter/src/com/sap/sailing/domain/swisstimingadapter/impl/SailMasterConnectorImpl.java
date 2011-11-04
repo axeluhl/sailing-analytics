@@ -63,7 +63,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiver implements Sa
     private final String host;
     private final int port;
     private Socket socket;
-    private static final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss");
+    private final DateFormat dateFormat;
     private final Set<SailMasterListener> listeners;
     private final Thread receiverThread;
     private boolean stopped;
@@ -72,6 +72,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiver implements Sa
     
     public SailMasterConnectorImpl(String host, int port) {
         super();
+        dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss");
         this.host = host;
         this.port = port;
         this.listeners = new HashSet<SailMasterListener>();
@@ -387,7 +388,8 @@ public class SailMasterConnectorImpl extends SailMasterTransceiver implements Sa
         for (int i=0; i<count; i++) {
             String[] markTimeDetail = sections[3+i].split(";");
             result.put(Integer.valueOf(markTimeDetail[0]), new Pair<TimePoint, String>(
-                    new MillisecondsTimePoint(dateFormat.parse(prefixTimeWithISOToday(markTimeDetail[1]))), markTimeDetail[2]));
+                    markTimeDetail.length <= 1 ? null : new MillisecondsTimePoint(dateFormat.parse(prefixTimeWithISOToday(markTimeDetail[1]))),
+                    markTimeDetail.length <= 2 ? null : markTimeDetail[2]));
         }
         return result;
     }
