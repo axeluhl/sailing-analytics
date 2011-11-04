@@ -51,6 +51,7 @@ public class SwissTimingSailMasterLiveTest implements SailMasterListener {
         synchronized (this) {
             wait(10000); // receive 10s worth of events and expect to have received some data
         }
+        connector.removeSailMasterListener(this);
         assertTrue(rpdCounter > 5);
     }
     
@@ -123,14 +124,28 @@ public class SwissTimingSailMasterLiveTest implements SailMasterListener {
     public void testGetDistanceBetweenBoats() throws UnknownHostException, IOException, InterruptedException {
         Iterable<Race> races = connector.getRaces();
         Race race = races.iterator().next();
-        for (Competitor competitor1 : connector.getStartList(race.getRaceID()).getCompetitors()) {
-            for (Competitor competitor2 : connector.getStartList(race.getRaceID()).getCompetitors()) {
-                Distance distance = connector.getDistanceBetweenBoats(race.getRaceID(), competitor1.getBoatID(), competitor2.getBoatID());
-                //assertNotNull(distance);
-                Distance reverseDistance = connector.getDistanceBetweenBoats(race.getRaceID(), competitor2.getBoatID(), competitor1.getBoatID());
-                if (distance != null && reverseDistance != null) {
-                    assertEquals(distance.getMeters(), reverseDistance.getMeters(), 0.0001);
-                }
+        Competitor competitor1 = connector.getStartList(race.getRaceID()).getCompetitors().iterator().next();
+        for (Competitor competitor2 : connector.getStartList(race.getRaceID()).getCompetitors()) {
+            System.out.print("d");
+            Distance distance = connector.getDistanceBetweenBoats(race.getRaceID(), competitor1.getBoatID(),
+                    competitor2.getBoatID());
+            Distance reverseDistance = connector.getDistanceBetweenBoats(race.getRaceID(), competitor2.getBoatID(),
+                    competitor1.getBoatID());
+            if (distance != null && reverseDistance != null) {
+                assertEquals(distance.getMeters(), reverseDistance.getMeters(), 0.0001);
+            }
+        }
+    }
+    
+    @Test
+    public void testGetDistanceToMark() throws UnknownHostException, IOException, InterruptedException {
+        Iterable<Race> races = connector.getRaces();
+        Race race = races.iterator().next();
+        Course course = connector.getCourse(race.getRaceID());
+        for (Competitor competitor : connector.getStartList(race.getRaceID()).getCompetitors()) {
+            for (int i = 0; i < Util.size(course.getMarks()); i++) {
+                Distance distance = connector.getDistanceToMark(race.getRaceID(), i, competitor.getBoatID());
+                assertNotNull(distance);
             }
         }
     }

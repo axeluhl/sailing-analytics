@@ -197,9 +197,9 @@ public class SailMasterConnectorImpl extends SailMasterTransceiver implements Sa
         String[] sections = message.getSections();
         String raceID = sections[1];
         RaceStatus status = RaceStatus.values()[Integer.valueOf(sections[2])];
-        TimePoint timePoint = new MillisecondsTimePoint(dateFormat.parse(prefixTimeWithISOToday(sections[3])));
+        TimePoint timePoint = new MillisecondsTimePoint(parseTimePrefixedWithISOToday(sections[3]));
         TimePoint startTimeEstimatedStartTime = sections[4].trim().length() == 0 ? null : new MillisecondsTimePoint(
-                dateFormat.parse(prefixTimeWithISOToday(sections[4])));
+                parseTimePrefixedWithISOToday(sections[4]));
         Long millisecondsSinceRaceStart = sections[5].trim().length() == 0 ? null : parseHHMMSSToMilliseconds(sections[5]);
         Integer nextMarkIndexForLeader = sections[6].trim().length() == 0 ? null : Integer.valueOf(sections[6]);
         Distance distanceToNextMarkForLeader = sections[7].trim().length() == 0 ? null : new MeterDistance(Double.valueOf(sections[7]));
@@ -316,7 +316,9 @@ public class SailMasterConnectorImpl extends SailMasterTransceiver implements Sa
     }
     
     private String prefixTimeWithISOToday(String time) {
-        return dateFormat.format(new Date()).substring(0, "yyyy-mm-ddT".length())+time;
+        synchronized (dateFormat) {
+            return dateFormat.format(new Date()).substring(0, "yyyy-mm-ddT".length())+time;
+        }
     }
 
     private void assertRaceID(String raceID, String section) {
@@ -373,7 +375,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiver implements Sa
         String[] sections = response.getSections();
         assertResponseType(MessageType.STT, response);
         assertRaceID(raceID, sections[1]);
-        return new MillisecondsTimePoint(dateFormat.parse(prefixTimeWithISOToday(sections[2])));
+        return new MillisecondsTimePoint(parseTimePrefixedWithISOToday(sections[2]));
     }
 
     @Override
@@ -388,10 +390,16 @@ public class SailMasterConnectorImpl extends SailMasterTransceiver implements Sa
         for (int i=0; i<count; i++) {
             String[] markTimeDetail = sections[3+i].split(";");
             result.put(Integer.valueOf(markTimeDetail[0]), new Pair<TimePoint, String>(
-                    markTimeDetail.length <= 1 ? null : new MillisecondsTimePoint(dateFormat.parse(prefixTimeWithISOToday(markTimeDetail[1]))),
+                    markTimeDetail.length <= 1 ? null : new MillisecondsTimePoint(parseTimePrefixedWithISOToday(markTimeDetail[1])),
                     markTimeDetail.length <= 2 ? null : markTimeDetail[2]));
         }
         return result;
+    }
+
+    private Date parseTimePrefixedWithISOToday(String timeHHMMSS) throws ParseException {
+        synchronized(dateFormat) {
+            return dateFormat.parse(prefixTimeWithISOToday(timeHHMMSS));
+        }
     }
 
     @Override
@@ -474,7 +482,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiver implements Sa
             String[] clockAtMarkDetail = sections[3+i].split(";");
             int markIndex = Integer.valueOf(clockAtMarkDetail[0]);
             TimePoint timePoint = clockAtMarkDetail.length <= 1 || clockAtMarkDetail[1].trim().length() == 0 ? null :
-                new MillisecondsTimePoint(dateFormat.parse(prefixTimeWithISOToday(clockAtMarkDetail[1])));
+                new MillisecondsTimePoint(parseTimePrefixedWithISOToday(clockAtMarkDetail[1]));
             result.add(new Triple<Integer, TimePoint, String>(
                     markIndex, timePoint, clockAtMarkDetail.length <= 2 ? null : clockAtMarkDetail[2]));
         }
