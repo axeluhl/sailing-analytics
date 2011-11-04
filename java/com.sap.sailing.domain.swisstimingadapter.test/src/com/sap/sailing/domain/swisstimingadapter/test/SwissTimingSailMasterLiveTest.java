@@ -204,19 +204,19 @@ public class SwissTimingSailMasterLiveTest implements SailMasterListener {
     }
 
     @Override
-    public void receivedStartList(String raceID, List<Triple<String, String, String>> boatIDsISOCountryCodesAndNames) {
+    public void receivedStartList(String raceID, StartList startList) {
         // TODO Auto-generated method stub
         
     }
 
     @Override
-    public void receivedCourseConfiguration(String raceID, List<Mark> marks) {
+    public void receivedCourseConfiguration(String raceID, Course course) {
         // TODO Auto-generated method stub
         
     }
 
     @Override
-    public void receivedAvailableRaces(List<Pair<String, String>> raceIDsAndDescriptions) {
+    public void receivedAvailableRaces(Iterable<Race> races) {
         // TODO Auto-generated method stub
         
     }

@@ -34,7 +34,6 @@ import com.sap.sailing.domain.swisstimingadapter.SailMasterMessage;
 import com.sap.sailing.domain.swisstimingadapter.StartList;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
 import com.sap.sailing.util.Util;
-import com.sap.sailing.util.Util.Pair;
 import com.sap.sailing.util.Util.Triple;
 
 public class SailMasterConnectivityTest {
@@ -74,13 +73,13 @@ public class SailMasterConnectivityTest {
             @Override
             public void receivedTimingData(String raceID, String boatID, List<Triple<Integer, Integer, Long>> markIndicesRanksAndTimesSinceStartInMilliseconds) {}
             @Override
-            public void receivedStartList(String raceID, List<Triple<String, String, String>> boatIDsISOCountryCodesAndNames) {}
+            public void receivedStartList(String raceID, StartList startList) {}
             @Override
-            public void receivedCourseConfiguration(String raceID, List<Mark> marks) {}
+            public void receivedCourseConfiguration(String raceID, Course course) {}
             @Override
             public void receivedClockAtMark(String raceID, List<Triple<Integer, TimePoint, String>> markIndicesTimePointsAndBoatIDs) {}
             @Override
-            public void receivedAvailableRaces(List<Pair<String, String>> raceIDsAndDescriptions) {}
+            public void receivedAvailableRaces(Iterable<Race> races) {}
             
             @Override
             public void receivedRacePositionData(String raceID, RaceStatus status, TimePoint timePoint, TimePoint startTime,

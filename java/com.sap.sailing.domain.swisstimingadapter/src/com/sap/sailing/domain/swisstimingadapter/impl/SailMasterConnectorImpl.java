@@ -172,24 +172,32 @@ public class SailMasterConnectorImpl extends SailMasterTransceiver implements Sa
         }
     }
 
-    private void notifyListenersCAM(SailMasterMessage message) {
-        // TODO Auto-generated method stub
-        
+    private void notifyListenersCAM(SailMasterMessage message) throws ParseException {
+        List<Triple<Integer, TimePoint, String>> clockAtMarkResults = parseClockAtMarkMessage(message);
+        for (SailMasterListener listener : listeners) {
+            listener.receivedClockAtMark(message.getSections()[1], clockAtMarkResults);
+        }
     }
 
     private void notifyListenersSTL(SailMasterMessage message) {
-        // TODO Auto-generated method stub
-        
+        StartList startListMessage = parseStartListMessage(message);
+        for (SailMasterListener listener : listeners) {
+            listener.receivedStartList(message.getSections()[1], startListMessage);
+        }
     }
 
     private void notifyListenersCCG(SailMasterMessage message) {
-        // TODO Auto-generated method stub
-        
+        Course course = parseCourseConfigurationMessage(message);
+        for (SailMasterListener listener : listeners) {
+            listener.receivedCourseConfiguration(message.getSections()[1], course);
+        }
     }
 
     private void notifyListenersRAC(SailMasterMessage message) {
-        // TODO Auto-generated method stub
-        
+        Iterable<Race> races = parseAvailableRacesMessage(message);
+        for (SailMasterListener listener : listeners) {
+            listener.receivedAvailableRaces(races);
+        }
     }
 
     private void notifyListenersRPD(SailMasterMessage message) throws ParseException {
@@ -290,12 +298,17 @@ public class SailMasterConnectorImpl extends SailMasterTransceiver implements Sa
     @Override
     public Iterable<Race> getRaces() throws UnknownHostException, IOException, InterruptedException {
         SailMasterMessage response = sendRequestAndGetResponse(MessageType.RAC);
-        String[] sections = response.getSections();
         assertResponseType(MessageType.RAC, response);
-        int count = Integer.valueOf(sections[1]);
+        List<Race> result = parseAvailableRacesMessage(response);
+        return result;
+    }
+
+    private List<Race> parseAvailableRacesMessage(SailMasterMessage availableRacesMessage) {
+        assertMessageType(MessageType.RAC, availableRacesMessage);
+        int count = Integer.valueOf(availableRacesMessage.getSections()[1]);
         List<Race> result = new ArrayList<Race>();
         for (int i=0; i<count; i++) {
-            String[] idAndDescription = sections[2+i].split(";");
+            String[] idAndDescription = availableRacesMessage.getSections()[2+i].split(";");
             result.add(new RaceImpl(idAndDescription[1], idAndDescription[0]));
         }
         return result;
@@ -307,13 +320,18 @@ public class SailMasterConnectorImpl extends SailMasterTransceiver implements Sa
         String[] sections = response.getSections();
         assertResponseType(MessageType.CCG, response);
         assertRaceID(raceID, sections[1]);
-        int count = Integer.valueOf(sections[2]);
+        return parseCourseConfigurationMessage(response);
+    }
+
+    private Course parseCourseConfigurationMessage(SailMasterMessage courseConfigurationMessage) {
+        assertMessageType(MessageType.CCG, courseConfigurationMessage);
+        int count = Integer.valueOf(courseConfigurationMessage.getSections()[2]);
         List<Mark> marks = new ArrayList<Mark>();
         for (int i=0; i<count; i++) {
-            String[] markDetails = sections[3+i].split(";");
+            String[] markDetails = courseConfigurationMessage.getSections()[3+i].split(";");
             marks.add(new MarkImpl(markDetails[1], Integer.valueOf(markDetails[0]), Arrays.asList(markDetails).subList(2, markDetails.length)));
         }
-        return new CourseImpl(raceID, marks);
+        return new CourseImpl(courseConfigurationMessage.getSections()[1], marks);
     }
     
     private String prefixTimeWithISOToday(String time) {
@@ -339,6 +357,12 @@ public class SailMasterConnectorImpl extends SailMasterTransceiver implements Sa
             throw new RuntimeException("Expected boat ID " + boatID + " in response but received " + section);
         }
     }
+    
+    private void assertMessageType(MessageType expectedMessageType, SailMasterMessage message) {
+        if (message.getType() != expectedMessageType) {
+            throw new RuntimeException("Expected a "+expectedMessageType+" message type but got "+message.getType());
+        }
+    }
 
     private void assertResponseType(MessageType responseType, SailMasterMessage message) {
         if (!message.isResponse()) {
@@ -361,13 +385,18 @@ public class SailMasterConnectorImpl extends SailMasterTransceiver implements Sa
         String[] sections = response.getSections();
         assertResponseType(MessageType.STL, response);
         assertRaceID(raceID, sections[1]);
-        int count = Integer.valueOf(sections[2]);
+        return parseStartListMessage(response);
+    }
+
+    private StartList parseStartListMessage(SailMasterMessage startListMessage) {
+        assertMessageType(MessageType.STL, startListMessage);
         ArrayList<Competitor> competitors = new ArrayList<Competitor>();
+        int count = Integer.valueOf(startListMessage.getSections()[2]);
         for (int i=0; i<count; i++) {
-            String[] competitorDetails = sections[3+i].split(";");
+            String[] competitorDetails = startListMessage.getSections()[3+i].split(";");
             competitors.add(new CompetitorImpl(competitorDetails[0], competitorDetails[1], competitorDetails[2]));
         }
-        return new StartListImpl(raceID, competitors);
+        return new StartListImpl(startListMessage.getSections()[1], competitors);
     }
 
     @Override
@@ -479,10 +508,16 @@ public class SailMasterConnectorImpl extends SailMasterTransceiver implements Sa
         String[] sections = response.getSections();
         assertResponseType(MessageType.CAM, response);
         assertRaceID(raceID, sections[1]);
-        int count = Integer.valueOf(sections[2]);
+        List<Triple<Integer, TimePoint, String>> result = parseClockAtMarkMessage(response);
+        return result;
+    }
+
+    private List<Triple<Integer, TimePoint, String>> parseClockAtMarkMessage(SailMasterMessage clockAtMarkMessage) throws ParseException {
+        assertMessageType(MessageType.CAM, clockAtMarkMessage);
         List<Triple<Integer, TimePoint, String>> result = new ArrayList<Triple<Integer,TimePoint,String>>();
+        int count = Integer.valueOf(clockAtMarkMessage.getSections()[2]);
         for (int i=0; i<count; i++) {
-            String[] clockAtMarkDetail = sections[3+i].split(";");
+            String[] clockAtMarkDetail = clockAtMarkMessage.getSections()[3+i].split(";");
             int markIndex = Integer.valueOf(clockAtMarkDetail[0]);
             TimePoint timePoint = clockAtMarkDetail.length <= 1 || clockAtMarkDetail[1].trim().length() == 0 ? null :
                 new MillisecondsTimePoint(parseTimePrefixedWithISOToday(clockAtMarkDetail[1]));
