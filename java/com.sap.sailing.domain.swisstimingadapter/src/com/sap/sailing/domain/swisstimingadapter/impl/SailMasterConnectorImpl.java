@@ -453,6 +453,24 @@ public class SailMasterConnectorImpl extends SailMasterTransceiver implements Sa
         return result;
     }
 
+    @Override
+    public List<Triple<Integer, TimePoint, String>> getClockAtMark(String raceID) throws ParseException, UnknownHostException, IOException, InterruptedException {
+        SailMasterMessage response = sendRequestAndGetResponse(MessageType.CAM, raceID);
+        String[] sections = response.getSections();
+        assertResponseType(MessageType.CAM, response);
+        assertRaceID(raceID, sections[1]);
+        int count = Integer.valueOf(sections[2]);
+        List<Triple<Integer, TimePoint, String>> result = new ArrayList<Triple<Integer,TimePoint,String>>();
+        for (int i=0; i<count; i++) {
+            String[] markTimeDetail = sections[3+i].split(";");
+            int markIndex = Integer.valueOf(markTimeDetail[0]);
+            TimePoint timePoint = new MillisecondsTimePoint(dateFormat.parse(prefixTimeWithISOToday(markTimeDetail[1])));
+            result.add(new Triple<Integer, TimePoint, String>(
+                    markIndex, timePoint, markTimeDetail[2]));
+        }
+        return result;
+    }
+
     private long parseHHMMSSToMilliseconds(String hhmmss) {
         String[] timeDetail = hhmmss.split(":");
         long millisecondsSinceStart = 1000 * (Long.valueOf(timeDetail[2]) + 60 * Long.valueOf(timeDetail[1]) + 3600 * Long

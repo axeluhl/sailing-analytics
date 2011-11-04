@@ -3,10 +3,12 @@ package com.sap.sailing.domain.swisstimingadapter;
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.text.ParseException;
+import java.util.List;
 import java.util.Map;
 
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.util.Util.Pair;
+import com.sap.sailing.util.Util.Triple;
 
 public interface SailMasterConnector {
     SailMasterMessage sendRequestAndGetResponse(MessageType messageType, String... args) throws UnknownHostException, IOException, InterruptedException;
@@ -67,4 +69,10 @@ public interface SailMasterConnector {
      * Stops the server from emitting RPD (Race Position Data) events.
      */
     void disableRacePositionData() throws UnknownHostException, IOException, InterruptedException;
+
+    /**
+     * @return the list of mark index / mark time / sail number triplets telling when which leader
+     * first passed the mark with the respective index
+     */
+    List<Triple<Integer, TimePoint, String>> getClockAtMark(String raceID) throws ParseException, UnknownHostException, IOException, InterruptedException;
 }

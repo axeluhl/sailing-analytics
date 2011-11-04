@@ -1,11 +1,13 @@
 package com.sap.sailing.domain.swisstimingadapter.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.net.UnknownHostException;
+import java.text.ParseException;
 import java.util.Collection;
 import java.util.List;
 
@@ -28,7 +30,7 @@ import com.sap.sailing.util.Util;
 import com.sap.sailing.util.Util.Pair;
 import com.sap.sailing.util.Util.Triple;
 
-public class LiveTest implements SailMasterListener {
+public class SwissTimingSailMasterLiveTest implements SailMasterListener {
     private int rpdCounter;
     private SailMasterConnector connector;
 
@@ -75,6 +77,22 @@ public class LiveTest implements SailMasterListener {
         Iterable<Competitor> competitors = startList.getCompetitors();
         assertEquals(race.getRaceID(), startList.getRaceID());
         assertEquals(46, Util.size(competitors));
+    }
+    
+    @Test
+    public void testGetStartTime() throws UnknownHostException, IOException, ParseException, InterruptedException {
+        Iterable<Race> races = connector.getRaces();
+        Race race = races.iterator().next();
+        TimePoint startTime = connector.getStartTime(race.getRaceID());
+        assertNotNull(startTime);
+    }
+    
+    @Test
+    public void testGetClockAtMark() throws UnknownHostException, IOException, InterruptedException, ParseException {
+        Iterable<Race> races = connector.getRaces();
+        Race race = races.iterator().next();
+        List<Triple<Integer, TimePoint, String>> clockAtMark = connector.getClockAtMark(race.getRaceID());
+        assertFalse(clockAtMark.isEmpty());
     }
 
     @Override
