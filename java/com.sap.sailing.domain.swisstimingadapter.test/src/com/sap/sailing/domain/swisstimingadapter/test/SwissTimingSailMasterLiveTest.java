@@ -14,6 +14,7 @@ import java.util.Map;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.Distance;
@@ -33,7 +34,7 @@ import com.sap.sailing.util.Util;
 import com.sap.sailing.util.Util.Pair;
 import com.sap.sailing.util.Util.Triple;
 
-//@Ignore("This test doesn't work as long as the server doesn't play an actual race")
+@Ignore("This test doesn't work as long as the server doesn't play an actual race")
 public class SwissTimingSailMasterLiveTest implements SailMasterListener {
     private int rpdCounter;
     private SailMasterConnector connector;
