@@ -184,7 +184,7 @@ public class Util {
         @Override
         public String toString( ) {
 
-            return "[" + a.toString( ) + ", " + b.toString( ) + ", " + c.toString( ) + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+            return "[" + a + ", " + b + ", " + c + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
         }
     }
 }

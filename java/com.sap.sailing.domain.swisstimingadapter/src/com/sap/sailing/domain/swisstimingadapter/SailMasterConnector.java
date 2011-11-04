@@ -3,10 +3,12 @@ package com.sap.sailing.domain.swisstimingadapter;
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.text.ParseException;
+import java.util.List;
 import java.util.Map;
 
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.util.Util.Pair;
+import com.sap.sailing.util.Util.Triple;
 
 public interface SailMasterConnector {
     SailMasterMessage sendRequestAndGetResponse(MessageType messageType, String... args) throws UnknownHostException, IOException, InterruptedException;
@@ -45,9 +47,32 @@ public interface SailMasterConnector {
     Map<Integer, Pair<Integer, Long>> getMarkPassingTimesInMillisecondsSinceRaceStart(String raceID, String boatID)
             throws UnknownHostException, IOException, InterruptedException;
     
-    void addSailMasterListener(SailMasterListener listener);
+    /**
+     * Adds the listener and ensures that the connector is actually connected, even if no request has explicitly
+     * been sent, so that the connector will at least receive spontaneous events.
+     */
+    void addSailMasterListener(SailMasterListener listener) throws UnknownHostException, IOException;
     
     void removeSailMasterListener(SailMasterListener listener);
 
     SailMasterMessage receiveMessage(MessageType type) throws InterruptedException;
+    
+    /**
+     * Enables receiving RPD (Race Position Data) events to be emitted by the server. If such events are received, they
+     * are forwarded to {@link #addSailMasterListener(SailMasterListener) registered} listeners by calling their
+     * {@link SailMasterListener#receivedRacePositionData(String, RaceStatus, TimePoint, TimePoint, Long, Integer, com.sap.sailing.domain.base.Distance, java.util.Collection)}
+     * method.
+     */
+    void enableRacePositionData() throws UnknownHostException, IOException, InterruptedException;
+    
+    /**
+     * Stops the server from emitting RPD (Race Position Data) events.
+     */
+    void disableRacePositionData() throws UnknownHostException, IOException, InterruptedException;
+
+    /**
+     * @return the list of mark index / mark time / sail number triplets telling when which leader
+     * first passed the mark with the respective index
+     */
+    List<Triple<Integer, TimePoint, String>> getClockAtMark(String raceID) throws ParseException, UnknownHostException, IOException, InterruptedException;
 }

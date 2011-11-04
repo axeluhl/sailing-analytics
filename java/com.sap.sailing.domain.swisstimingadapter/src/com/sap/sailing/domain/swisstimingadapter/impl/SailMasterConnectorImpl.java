@@ -45,6 +45,7 @@ import com.sap.sailing.domain.swisstimingadapter.SailMasterMessage;
 import com.sap.sailing.domain.swisstimingadapter.StartList;
 import com.sap.sailing.domain.swisstimingadapter.TrackerType;
 import com.sap.sailing.util.Util.Pair;
+import com.sap.sailing.util.Util.Triple;
 
 /**
  * Implements the connector to the SwissTiming Sail Master system. It uses a hostname and port number
@@ -132,7 +133,61 @@ public class SailMasterConnectorImpl extends SailMasterTransceiver implements Sa
         case RPD:
             notifyListenersRPD(message);
             break;
+        case RAC:
+            notifyListenersRAC(message);
+            break;
+        case CCG:
+            notifyListenersCCG(message);
+            break;
+        case STL:
+            notifyListenersSTL(message);
+            break;
+        case CAM:
+            notifyListenersCAM(message);
+            break;
+        case TMD:
+            notifyListenersTMD(message);
+            break;
         }
+    }
+
+    private void notifyListenersTMD(SailMasterMessage message) {
+        // example message: TMD|W4702|NZL 75|1|4;;00:49:43
+        String raceID = message.getSections()[1];
+        String boatID = message.getSections()[2];
+        int count = Integer.valueOf(message.getSections()[3]);
+        List<Triple<Integer, Integer, Long>> markIndicesRanksAndTimesSinceStartInMilliseconds = new ArrayList<Triple<Integer,Integer,Long>>();
+        for (int i = 0; i < count; i++) {
+            String[] details = message.getSections()[4+i].split(";");
+            Integer markIndex = details.length <= 0 || details[0].trim().length() == 0 ? null : Integer.valueOf(details[0]); 
+            Integer rank = details.length <= 1 || details[1].trim().length() == 0 ? null : Integer.valueOf(details[1]); 
+            Long timeSinceStartInMilliseconds = details.length <= 2 || details[2].trim().length() == 0 ? null :
+                parseHHMMSSToMilliseconds(details[2]);
+            markIndicesRanksAndTimesSinceStartInMilliseconds.add(new Triple<Integer, Integer, Long>(markIndex, rank, timeSinceStartInMilliseconds));
+        }
+        for (SailMasterListener listener : listeners) {
+            listener.receivedTimingData(raceID, boatID, markIndicesRanksAndTimesSinceStartInMilliseconds);
+        }
+    }
+
+    private void notifyListenersCAM(SailMasterMessage message) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    private void notifyListenersSTL(SailMasterMessage message) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    private void notifyListenersCCG(SailMasterMessage message) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    private void notifyListenersRAC(SailMasterMessage message) {
+        // TODO Auto-generated method stub
+        
     }
 
     private void notifyListenersRPD(SailMasterMessage message) throws ParseException {
@@ -158,12 +213,9 @@ public class SailMasterConnectorImpl extends SailMasterTransceiver implements Sa
                 Position position = new DegreePosition(Double.valueOf(fixSections[fixDetailIndex++]),
                         Double.valueOf(fixSections[fixDetailIndex++]));
                 Double speedOverGroundInKnots = Double.valueOf(fixSections[fixDetailIndex++]);
-                Speed averageSpeedOverGround = null;
-                if (trackerType == TrackerType.COMPETITOR) {
-                    averageSpeedOverGround = fixSections[fixDetailIndex].trim().length() == 0 ? null
+                Speed averageSpeedOverGround = fixSections[fixDetailIndex].trim().length() == 0 ? null
                             : new KnotSpeedImpl(Double.valueOf(fixSections[fixDetailIndex]));
-                    fixDetailIndex++;
-                }
+                fixDetailIndex++;
                 Speed velocityMadeGood = fixSections[fixDetailIndex].trim().length() == 0 ? null : new KnotSpeedImpl(
                         Double.valueOf(fixSections[fixDetailIndex]));
                 fixDetailIndex++;
@@ -202,7 +254,8 @@ public class SailMasterConnectorImpl extends SailMasterTransceiver implements Sa
     }
     
     @Override
-    public void addSailMasterListener(SailMasterListener listener) {
+    public void addSailMasterListener(SailMasterListener listener) throws UnknownHostException, IOException {
+        ensureSocketIsOpen();
         listeners.add(listener);
     }
     
@@ -400,11 +453,40 @@ public class SailMasterConnectorImpl extends SailMasterTransceiver implements Sa
         return result;
     }
 
+    @Override
+    public List<Triple<Integer, TimePoint, String>> getClockAtMark(String raceID) throws ParseException, UnknownHostException, IOException, InterruptedException {
+        SailMasterMessage response = sendRequestAndGetResponse(MessageType.CAM, raceID);
+        String[] sections = response.getSections();
+        assertResponseType(MessageType.CAM, response);
+        assertRaceID(raceID, sections[1]);
+        int count = Integer.valueOf(sections[2]);
+        List<Triple<Integer, TimePoint, String>> result = new ArrayList<Triple<Integer,TimePoint,String>>();
+        for (int i=0; i<count; i++) {
+            String[] clockAtMarkDetail = sections[3+i].split(";");
+            int markIndex = Integer.valueOf(clockAtMarkDetail[0]);
+            TimePoint timePoint = clockAtMarkDetail.length <= 1 || clockAtMarkDetail[1].trim().length() == 0 ? null :
+                new MillisecondsTimePoint(dateFormat.parse(prefixTimeWithISOToday(clockAtMarkDetail[1])));
+            result.add(new Triple<Integer, TimePoint, String>(
+                    markIndex, timePoint, clockAtMarkDetail.length <= 2 ? null : clockAtMarkDetail[2]));
+        }
+        return result;
+    }
+
     private long parseHHMMSSToMilliseconds(String hhmmss) {
         String[] timeDetail = hhmmss.split(":");
-        long millisecondsSinceStart = 1000 * (Integer.valueOf(timeDetail[2]) + 60 * Integer.valueOf(timeDetail[1]) + 3600 * Integer
+        long millisecondsSinceStart = 1000 * (Long.valueOf(timeDetail[2]) + 60 * Long.valueOf(timeDetail[1]) + 3600 * Long
                 .valueOf(timeDetail[0]));
         return millisecondsSinceStart;
+    }
+
+    @Override
+    public void enableRacePositionData() throws UnknownHostException, IOException, InterruptedException {
+        sendRequestAndGetResponse(MessageType.RPD, "1");
+    }
+
+    @Override
+    public void disableRacePositionData() throws UnknownHostException, IOException, InterruptedException {
+        sendRequestAndGetResponse(MessageType.RPD, "0");
     }
     
 }
