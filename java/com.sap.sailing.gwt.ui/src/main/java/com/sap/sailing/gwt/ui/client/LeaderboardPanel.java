@@ -964,17 +964,17 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                         foundRaceColumn = true;
                         // if tracked-ness differs, column must be updated with
                         // a new column that is expansion-enabled
-                        if (raceColumn.isExpansionEnabled() != leaderboard.raceIsTracked(race)) {
+                        int columnIndex = getLeaderboardTable().getColumnIndex(raceColumn);
+                        if (raceColumn.isExpansionEnabled() != leaderboard.raceIsTracked(race) || columnIndex != positionRaceColumn[indexRaceColumn]) {
                             if (raceColumn.isExpanded()) {
                                 raceColumn.toggleExpansion(); // remove children from table
                             }
+                            removeColumn(columnIndex);
+                            insertColumn(
+                                    positionRaceColumn[indexRaceColumn],
+                                    createRaceColumn(race, leaderboard.raceIsMedalRace(race),
+                                            leaderboard.raceIsTracked(race)));
                         }
-                        int columnIndex = getLeaderboardTable().getColumnIndex(raceColumn);
-                        removeColumn(columnIndex);
-                        insertColumn(
-                                positionRaceColumn[indexRaceColumn],
-                                createRaceColumn(race, leaderboard.raceIsMedalRace(race),
-                                        leaderboard.raceIsTracked(race)));
                     }
                 }
             }
