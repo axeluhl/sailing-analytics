@@ -14,6 +14,7 @@ import org.junit.Test;
 
 import com.sap.sailing.domain.base.Distance;
 import com.sap.sailing.domain.base.TimePoint;
+import com.sap.sailing.domain.swisstimingadapter.Competitor;
 import com.sap.sailing.domain.swisstimingadapter.Course;
 import com.sap.sailing.domain.swisstimingadapter.Fix;
 import com.sap.sailing.domain.swisstimingadapter.Mark;
@@ -21,6 +22,7 @@ import com.sap.sailing.domain.swisstimingadapter.Race;
 import com.sap.sailing.domain.swisstimingadapter.RaceStatus;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterConnector;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterListener;
+import com.sap.sailing.domain.swisstimingadapter.StartList;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
 import com.sap.sailing.util.Util;
 import com.sap.sailing.util.Util.Pair;
@@ -62,7 +64,17 @@ public class LiveTest implements SailMasterListener {
         Course course = connector.getCourse(race.getRaceID());
         assertNotNull(course);
         Iterable<Mark> marks = course.getMarks();
-        assertEquals(4, Util.size(marks));
+        assertEquals(7, Util.size(marks));
+    }
+    
+    @Test
+    public void testGetStartList() throws UnknownHostException, IOException, InterruptedException {
+        Iterable<Race> races = connector.getRaces();
+        Race race = races.iterator().next();
+        StartList startList = connector.getStartList(race.getRaceID());
+        Iterable<Competitor> competitors = startList.getCompetitors();
+        assertEquals(race.getRaceID(), startList.getRaceID());
+        assertEquals(46, Util.size(competitors));
     }
 
     @Override
