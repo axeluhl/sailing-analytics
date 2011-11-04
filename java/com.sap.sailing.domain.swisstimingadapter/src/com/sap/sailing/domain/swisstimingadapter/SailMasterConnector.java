@@ -6,6 +6,8 @@ import java.text.ParseException;
 import java.util.List;
 import java.util.Map;
 
+import com.sap.sailing.domain.base.Distance;
+import com.sap.sailing.domain.base.Speed;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.util.Util.Pair;
 import com.sap.sailing.util.Util.Triple;
@@ -28,13 +30,13 @@ public interface SailMasterConnector {
      */
     Map<Integer, Pair<TimePoint, String>> getDeltaClockAtMark(String raceID) throws UnknownHostException, IOException, NumberFormatException, ParseException, InterruptedException;
     
-    double getDistanceToMarkInMeters(String raceID, int markIndex, String boatID) throws UnknownHostException, IOException, InterruptedException;
+    Distance getDistanceToMark(String raceID, int markIndex, String boatID) throws UnknownHostException, IOException, InterruptedException;
     
-    double getCurrentBoatSpeedInMetersPerSecond(String raceID, String boatID) throws UnknownHostException, IOException, InterruptedException;
+    Speed getCurrentBoatSpeed(String raceID, String boatID) throws UnknownHostException, IOException, InterruptedException;
     
-    double getAverageBoatSpeedInMetersPerSecond(String raceID, String leg, String boatID) throws UnknownHostException, IOException, InterruptedException;
+    Speed getAverageBoatSpeed(String raceID, String leg, String boatID) throws UnknownHostException, IOException, InterruptedException;
     
-    double getDistanceBetweenBoatsInMeters(String raceID, String boatID1, String boatID2) throws UnknownHostException, IOException, InterruptedException;
+    Distance getDistanceBetweenBoats(String raceID, String boatID1, String boatID2) throws UnknownHostException, IOException, InterruptedException;
 
     /**
      * Retrieves the mark passing times for a boat ID within a race specified by <code>raceID</code>.
