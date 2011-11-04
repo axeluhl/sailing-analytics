@@ -401,6 +401,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
         String selectedRaceColumnName = getSelectedRaceColumnName();
         if (selectedRaceColumnName != null) {
             medalRaceCheckBox.setValue(selectedLeaderboard.raceIsMedalRace(selectedRaceColumnName));
+            medalRaceCheckBox.setEnabled(true);
             columnRenameButton.setEnabled(true);
             columnRemoveButton.setEnabled(true);
             columnMoveUpButton.setEnabled(true);
@@ -408,6 +409,8 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
             unlinkRaceColumnFromTrackedRaceButton.setEnabled(true);
             selectTrackedRaceInRaceTree();
         } else {
+        	medalRaceCheckBox.setValue(false);
+        	medalRaceCheckBox.setEnabled(false);
             columnRenameButton.setEnabled(false);
             columnRemoveButton.setEnabled(false);
             columnMoveUpButton.setEnabled(false);
