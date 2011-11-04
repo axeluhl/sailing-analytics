@@ -12,6 +12,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.Distance;
@@ -39,6 +40,7 @@ public class SwissTimingSailMasterLiveTest implements SailMasterListener {
         connector = SwissTimingFactory.INSTANCE.createSailMasterConnector("gps.sportresult.com", 40300);
     }
     
+    @Ignore("This test doesn't work as long as the server doesn't play an actual race")
     @Test
     public void testReceiveRPDEvents() throws UnknownHostException, IOException, InterruptedException {
         connector.addSailMasterListener(this);
