@@ -28,6 +28,7 @@ import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.base.impl.DegreePosition;
+import com.sap.sailing.domain.base.impl.KilometersPerHourSpeedImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MeterDistance;
@@ -392,46 +393,46 @@ public class SailMasterConnectorImpl extends SailMasterTransceiver implements Sa
     }
 
     @Override
-    public double getDistanceToMarkInMeters(String raceID, int markIndex, String boatID) throws UnknownHostException, IOException, InterruptedException {
+    public Distance getDistanceToMark(String raceID, int markIndex, String boatID) throws UnknownHostException, IOException, InterruptedException {
         SailMasterMessage response = sendRequestAndGetResponse(MessageType.DTM, raceID, ""+markIndex, boatID);
         String[] sections = response.getSections();
         assertResponseType(MessageType.DTM, response);
         assertRaceID(raceID, sections[1]);
         assertMarkIndex(markIndex, sections[2]);
         assertBoatID(boatID, sections[3]);
-        return Double.valueOf(sections[4]);
+        return new MeterDistance(Double.valueOf(sections[4]));
     }
 
     @Override
-    public double getCurrentBoatSpeedInMetersPerSecond(String raceID, String boatID) throws UnknownHostException, IOException, InterruptedException {
+    public Speed getCurrentBoatSpeed(String raceID, String boatID) throws UnknownHostException, IOException, InterruptedException {
         SailMasterMessage response = sendRequestAndGetResponse(MessageType.CBS, raceID, boatID);
         String[] sections = response.getSections();
         assertResponseType(MessageType.CBS, response);
         assertRaceID(raceID, sections[1]);
         assertBoatID(boatID, sections[2]);
-        return Double.valueOf(sections[3]);
+        return new KilometersPerHourSpeedImpl(3.6*Double.valueOf(sections[3]));
     }
 
     @Override
-    public double getDistanceBetweenBoatsInMeters(String raceID, String boatID1, String boatID2) throws UnknownHostException, IOException, InterruptedException {
+    public Distance getDistanceBetweenBoats(String raceID, String boatID1, String boatID2) throws UnknownHostException, IOException, InterruptedException {
         SailMasterMessage response = sendRequestAndGetResponse(MessageType.DBB, raceID, boatID1, boatID2);
         String[] sections = response.getSections();
         assertResponseType(MessageType.DBB, response);
         assertRaceID(raceID, sections[1]);
         assertBoatID(boatID1, sections[2]);
         assertBoatID(boatID2, sections[3]);
-        return Double.valueOf(sections[4]);
+        return new MeterDistance(Double.valueOf(sections[4]));
     }
 
     @Override
-    public double getAverageBoatSpeedInMetersPerSecond(String raceID, String leg, String boatID) throws UnknownHostException, IOException, InterruptedException {
+    public Speed getAverageBoatSpeed(String raceID, String leg, String boatID) throws UnknownHostException, IOException, InterruptedException {
         SailMasterMessage response = sendRequestAndGetResponse(MessageType.ABS, raceID, leg, boatID);
         String[] sections = response.getSections();
         assertResponseType(MessageType.ABS, response);
         assertRaceID(raceID, sections[1]);
         assertLeg(leg, sections[2]);
         assertBoatID(boatID, sections[3]);
-        return Double.valueOf(sections[4]);
+        return new KilometersPerHourSpeedImpl(3.6*Double.valueOf(sections[4]));
     }
     
     @Override

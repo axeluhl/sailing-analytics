@@ -16,6 +16,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.Distance;
+import com.sap.sailing.domain.base.Speed;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.swisstimingadapter.Competitor;
 import com.sap.sailing.domain.swisstimingadapter.Course;
@@ -31,6 +32,7 @@ import com.sap.sailing.util.Util;
 import com.sap.sailing.util.Util.Pair;
 import com.sap.sailing.util.Util.Triple;
 
+@Ignore("This test doesn't work as long as the server doesn't play an actual race")
 public class SwissTimingSailMasterLiveTest implements SailMasterListener {
     private int rpdCounter;
     private SailMasterConnector connector;
@@ -40,7 +42,6 @@ public class SwissTimingSailMasterLiveTest implements SailMasterListener {
         connector = SwissTimingFactory.INSTANCE.createSailMasterConnector("gps.sportresult.com", 40300);
     }
     
-    @Ignore("This test doesn't work as long as the server doesn't play an actual race")
     @Test
     public void testReceiveRPDEvents() throws UnknownHostException, IOException, InterruptedException {
         connector.addSailMasterListener(this);
@@ -95,6 +96,16 @@ public class SwissTimingSailMasterLiveTest implements SailMasterListener {
         Race race = races.iterator().next();
         List<Triple<Integer, TimePoint, String>> clockAtMark = connector.getClockAtMark(race.getRaceID());
         assertFalse(clockAtMark.isEmpty());
+    }
+    
+    @Test
+    public void testGetCurrentBoatSpeed() throws UnknownHostException, IOException, InterruptedException {
+        Iterable<Race> races = connector.getRaces();
+        Race race = races.iterator().next();
+        for (Competitor competitor : connector.getStartList(race.getRaceID()).getCompetitors()) {
+            Speed currentBoatSpeed = connector.getCurrentBoatSpeed(race.getRaceID(), competitor.getBoatID());
+            assertNotNull(currentBoatSpeed);
+        }
     }
 
     @Override
