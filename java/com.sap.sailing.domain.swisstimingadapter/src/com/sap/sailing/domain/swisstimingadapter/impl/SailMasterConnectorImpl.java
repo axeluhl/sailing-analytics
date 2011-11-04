@@ -158,12 +158,9 @@ public class SailMasterConnectorImpl extends SailMasterTransceiver implements Sa
                 Position position = new DegreePosition(Double.valueOf(fixSections[fixDetailIndex++]),
                         Double.valueOf(fixSections[fixDetailIndex++]));
                 Double speedOverGroundInKnots = Double.valueOf(fixSections[fixDetailIndex++]);
-                Speed averageSpeedOverGround = null;
-                if (trackerType == TrackerType.COMPETITOR) {
-                    averageSpeedOverGround = fixSections[fixDetailIndex].trim().length() == 0 ? null
+                Speed averageSpeedOverGround = fixSections[fixDetailIndex].trim().length() == 0 ? null
                             : new KnotSpeedImpl(Double.valueOf(fixSections[fixDetailIndex]));
-                    fixDetailIndex++;
-                }
+                fixDetailIndex++;
                 Speed velocityMadeGood = fixSections[fixDetailIndex].trim().length() == 0 ? null : new KnotSpeedImpl(
                         Double.valueOf(fixSections[fixDetailIndex]));
                 fixDetailIndex++;
