@@ -35,5 +35,21 @@ public class MarkImpl implements Mark {
     public Iterable<String> getDevices() {
         return devices;
     }
+    
+    @Override
+    public String toString() {
+        StringBuilder result = new StringBuilder();
+        result.append(getIndex());
+        result.append(": ");
+        result.append(getDescription());
+        result.append(" [");
+        for (String device : getDevices()) {
+            result.append(device);
+            result.append(", ");
+        }
+        result.delete(result.length()-2, result.length());
+        result.append("]");
+        return result.toString();
+    }
 
 }
