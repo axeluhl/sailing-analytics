@@ -223,7 +223,7 @@ public class TracTracEventManagementPanel extends FormPanel implements EventDisp
         raceNameColumn.setSortable(true);
         raceStartTrackingColumn.setSortable(true);
         raceTable = new CellTable<RaceRecordDAO>(/* pageSize */ 100);
-        raceTable.addColumn(raceNameColumn, "Name");
+        raceTable.addColumn(raceNameColumn, stringConstants.name());
         raceTable.addColumn(raceStartTrackingColumn, stringConstants.raceStartTrackingColumn());
         grid.setWidget(6, 0, raceTable);
         grid.getCellFormatter().setHeight(6, 0, "100%");

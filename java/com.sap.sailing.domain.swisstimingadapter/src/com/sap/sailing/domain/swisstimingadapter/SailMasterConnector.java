@@ -23,13 +23,6 @@ public interface SailMasterConnector {
     
     TimePoint getStartTime(String raceID) throws UnknownHostException, IOException, ParseException, InterruptedException;
     
-    /**
-     * @return a map with all indices of those marks already passed by the leading boat as key; pairs of mark passing
-     *         times and boat ID of the boat passing that mark first as values.
-     * @throws InterruptedException 
-     */
-    Map<Integer, Pair<TimePoint, String>> getDeltaClockAtMark(String raceID) throws UnknownHostException, IOException, NumberFormatException, ParseException, InterruptedException;
-    
     Distance getDistanceToMark(String raceID, int markIndex, String boatID) throws UnknownHostException, IOException, InterruptedException;
     
     Speed getCurrentBoatSpeed(String raceID, String boatID) throws UnknownHostException, IOException, InterruptedException;

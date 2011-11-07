@@ -53,7 +53,6 @@ public class SwissTimingEventManagementPanel extends FormPanel implements EventD
     private final ErrorReporter errorReporter;
     private final IntegerBox portIntegerbox;
     private final TextBox hostnameTextbox;
-    private final TextBox eventNameTextbox;
     private final ListDataProvider<SwissTimingRaceRecordDAO> raceList;
     private final CellTable<SwissTimingRaceRecordDAO> raceTable;
     private final Map<String, SwissTimingConfigurationDAO> previousConfigurations;
@@ -115,42 +114,17 @@ public class SwissTimingEventManagementPanel extends FormPanel implements EventD
         grid_1.setWidget(0, 1, lblHostname);
         
         hostnameTextbox = new TextBox();
-        hostnameTextbox.setText("germanmaster.traclive.dk");
+        hostnameTextbox.setText("gps.sportresult.com");
         grid_1.setWidget(0, 2, hostnameTextbox);
-        
-        Label lblEventName = new Label(stringConstants.eventName());
-        grid_1.setWidget(1, 1, lblEventName);
-        
-        eventNameTextbox = new TextBox();
-        eventNameTextbox.setText("event_2011...");
-        grid_1.setWidget(1, 2, eventNameTextbox);
-        
-        Label lblLivePort = new Label(stringConstants.livePort());
-        grid_1.setWidget(2, 1, lblLivePort);
         
         HorizontalPanel horizontalPanel_1 = new HorizontalPanel();
         grid_1.setWidget(2, 2, horizontalPanel_1);
         
-        Label lblStoredPort = new Label(stringConstants.storedPort());
-        horizontalPanel_1.add(lblStoredPort);
+        Label lblPort = new Label(stringConstants.port());
+        horizontalPanel_1.add(lblPort);
         
         portIntegerbox = new IntegerBox();
         horizontalPanel_1.add(portIntegerbox);
-        
-        Label lblJsonUrl = new Label("JSON URL");
-        grid_1.setWidget(3, 1, lblJsonUrl);
-        
-        Label lblLiveUri = new Label(stringConstants.liveUri());
-        lblLiveUri.setTitle(stringConstants.leaveEmptyForDefault());
-        grid_1.setWidget(4, 1, lblLiveUri);
-        
-        HorizontalPanel horizontalPanel = new HorizontalPanel();
-        grid_1.setWidget(4, 2, horizontalPanel);
-        
-        Label lblStoredUri = new Label(stringConstants.storedUri());
-        lblStoredUri.setTitle(stringConstants.leaveEmptyForDefault());
-        horizontalPanel.add(lblStoredUri);
-        horizontalPanel.setCellVerticalAlignment(lblStoredUri, HasVerticalAlignment.ALIGN_MIDDLE);
         
         Label lblTrackableRaces = new Label(stringConstants.trackableRaces());
         grid.setWidget(5, 0, lblTrackableRaces);
@@ -169,8 +143,8 @@ public class SwissTimingEventManagementPanel extends FormPanel implements EventD
         raceNameColumn.setSortable(true);
         raceStartTrackingColumn.setSortable(true);
         raceTable = new CellTable<SwissTimingRaceRecordDAO>(/* pageSize */ 100);
-        raceTable.addColumn(raceNameColumn, "Name");
-        raceTable.addColumn(raceStartTrackingColumn, stringConstants.raceStartTrackingColumn());
+        raceTable.addColumn(raceNameColumn, stringConstants.name());
+        raceTable.addColumn(raceStartTrackingColumn, stringConstants.raceStartTimeColumn());
         grid.setWidget(6, 0, raceTable);
         grid.getCellFormatter().setHeight(6, 0, "100%");
         raceTable.setWidth("100%");
@@ -352,11 +326,13 @@ public class SwissTimingEventManagementPanel extends FormPanel implements EventD
     }
 
     private void updatePanelFromSelectedStoredConfiguration() {
-        SwissTimingConfigurationDAO stConfig = previousConfigurations.get(previousConfigurationsComboBox
-                .getItemText(previousConfigurationsComboBox.getSelectedIndex()));
-        if (stConfig != null) {
-            hostnameTextbox.setValue(stConfig.hostname);
-            portIntegerbox.setValue(stConfig.port);
+        if (previousConfigurationsComboBox.getSelectedIndex() >= 0) {
+            SwissTimingConfigurationDAO stConfig = previousConfigurations.get(previousConfigurationsComboBox
+                    .getItemText(previousConfigurationsComboBox.getSelectedIndex()));
+            if (stConfig != null) {
+                hostnameTextbox.setValue(stConfig.hostname);
+                portIntegerbox.setValue(stConfig.port);
+            }
         }
     }
 

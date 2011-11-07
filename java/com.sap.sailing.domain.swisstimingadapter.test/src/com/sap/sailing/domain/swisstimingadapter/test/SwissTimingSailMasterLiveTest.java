@@ -118,16 +118,6 @@ public class SwissTimingSailMasterLiveTest implements SailMasterListener {
     }
     
     @Test
-    public void testGetDeltaClockAtMark() throws UnknownHostException, IOException, InterruptedException, NumberFormatException, ParseException {
-        Iterable<Race> races = connector.getRaces();
-        Race race = races.iterator().next();
-        Map<Integer, Pair<TimePoint, String>> deltaClockAtMark = connector.getDeltaClockAtMark(race.getRaceID());
-        for (int i=0; i<7; i++) {
-            assertTrue(deltaClockAtMark.keySet().contains(i));
-        }
-    }
-    
-    @Test
     public void testGetDistanceBetweenBoats() throws UnknownHostException, IOException, InterruptedException {
         Iterable<Race> races = connector.getRaces();
         Race race = races.iterator().next();

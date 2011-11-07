@@ -228,7 +228,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private SwissTimingConfiguration loadSwissTimingConfiguration(DBObject object) {
         return SwissTimingFactory.INSTANCE.createSwissTimingConfiguration((String) object.get(FieldNames.ST_CONFIG_NAME.name()),
                 (String) object.get(FieldNames.ST_CONFIG_HOSTNAME.name()),
-                Integer.valueOf((String) object.get(FieldNames.ST_CONFIG_PORT.name())));
+                (Integer) object.get(FieldNames.ST_CONFIG_PORT.name()));
     }
 
 }

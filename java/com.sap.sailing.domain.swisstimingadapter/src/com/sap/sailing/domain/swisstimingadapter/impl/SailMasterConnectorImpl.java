@@ -6,6 +6,7 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.text.DateFormat;
+import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -17,6 +18,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Logger;
@@ -68,17 +70,32 @@ public class SailMasterConnectorImpl extends SailMasterTransceiver implements Sa
     private final Thread receiverThread;
     private boolean stopped;
     
+    /**
+     * Currently the SwissTiming SailMaster protocol only transmits time zone information when sending
+     * an {@link MessageType#RPD RPD} event. Other events, such as the {@link MessageType#STT STT} or
+     * {@link MessageType#CAM CAM} events/responses also carry time stamps but in hh:mm:ss format without
+     * any hint as to the time zone relative to which they are given.<p>
+     * 
+     * The only way known so far for how to find out the time zone relative to which the other time stamps
+     * are to be interpreted is to start with the current default time zone's offset and wait for an
+     * {@link MessageType#RPD RPD} event to be received. From this event, the time zone offset can be extracted
+     * and applied to all other time stamps.
+     */
+    private String lastTimeZoneSuffix;
+    
     private final Map<MessageType, BlockingQueue<SailMasterMessage>> unprocessedMessagesByType;
     
     public SailMasterConnectorImpl(String host, int port) {
         super();
-        dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss");
+        dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ssZ");
         this.host = host;
         this.port = port;
         this.listeners = new HashSet<SailMasterListener>();
         this.unprocessedMessagesByType = new HashMap<MessageType, BlockingQueue<SailMasterMessage>>();
         receiverThread = new Thread(this, "SwissTiming SailMaster Receiver");
         receiverThread.start();
+        int offset = TimeZone.getDefault().getOffset(System.currentTimeMillis())/1000/3600;
+        lastTimeZoneSuffix = (offset<0?"-":"+") + new DecimalFormat("00").format(offset)+"00";
     }
     
     public void run() {
@@ -205,7 +222,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiver implements Sa
         String[] sections = message.getSections();
         String raceID = sections[1];
         RaceStatus status = RaceStatus.values()[Integer.valueOf(sections[2])];
-        TimePoint timePoint = new MillisecondsTimePoint(parseTimePrefixedWithISOToday(sections[3]));
+        TimePoint timePoint = new MillisecondsTimePoint(parseTimeAndDateISO(sections[3]));
         TimePoint startTimeEstimatedStartTime = sections[4].trim().length() == 0 ? null : new MillisecondsTimePoint(
                 parseTimePrefixedWithISOToday(sections[4]));
         Long millisecondsSinceRaceStart = sections[5].trim().length() == 0 ? null : parseHHMMSSToMilliseconds(sections[5]);
@@ -334,9 +351,20 @@ public class SailMasterConnectorImpl extends SailMasterTransceiver implements Sa
         return new CourseImpl(courseConfigurationMessage.getSections()[1], marks);
     }
     
-    private String prefixTimeWithISOToday(String time) {
+    private String prefixTimeWithISOTodayAndSuffixWithTimezoneIndicator(String time) {
         synchronized (dateFormat) {
-            return dateFormat.format(new Date()).substring(0, "yyyy-mm-ddT".length())+time;
+            return dateFormat.format(new Date()).substring(0, "yyyy-mm-ddT".length())+time+lastTimeZoneSuffix;
+        }
+    }
+
+    private Date parseTimeAndDateISO(String timeAndDateISO) throws ParseException {
+        char timeZoneIndicator = timeAndDateISO.charAt(timeAndDateISO.length()-6);
+        if ((timeZoneIndicator == '+' || timeZoneIndicator == '-') && timeAndDateISO.charAt(timeAndDateISO.length()-3) == ':') {
+            timeAndDateISO = timeAndDateISO.substring(0, timeAndDateISO.length()-3)+timeAndDateISO.substring(timeAndDateISO.length()-2);
+            lastTimeZoneSuffix = timeAndDateISO.substring(timeAndDateISO.length()-5);
+        }
+        synchronized(dateFormat) {
+            return dateFormat.parse(timeAndDateISO);
         }
     }
 
@@ -408,27 +436,9 @@ public class SailMasterConnectorImpl extends SailMasterTransceiver implements Sa
         return new MillisecondsTimePoint(parseTimePrefixedWithISOToday(sections[2]));
     }
 
-    @Override
-    public Map<Integer, Pair<TimePoint, String>> getDeltaClockAtMark(String raceID)
-            throws UnknownHostException, IOException, NumberFormatException, ParseException, InterruptedException {
-        SailMasterMessage response = sendRequestAndGetResponse(MessageType.CAM, raceID);
-        String[] sections = response.getSections();
-        assertResponseType(MessageType.CAM, response);
-        assertRaceID(raceID, sections[1]);
-        int count = Integer.valueOf(sections[2]);
-        Map<Integer, Pair<TimePoint, String>> result = new HashMap<Integer, Pair<TimePoint,String>>();
-        for (int i=0; i<count; i++) {
-            String[] markTimeDetail = sections[3+i].split(";");
-            result.put(Integer.valueOf(markTimeDetail[0]), new Pair<TimePoint, String>(
-                    markTimeDetail.length <= 1 ? null : new MillisecondsTimePoint(parseTimePrefixedWithISOToday(markTimeDetail[1])),
-                    markTimeDetail.length <= 2 ? null : markTimeDetail[2]));
-        }
-        return result;
-    }
-
     private Date parseTimePrefixedWithISOToday(String timeHHMMSS) throws ParseException {
         synchronized(dateFormat) {
-            return dateFormat.parse(prefixTimeWithISOToday(timeHHMMSS));
+            return dateFormat.parse(prefixTimeWithISOTodayAndSuffixWithTimezoneIndicator(timeHHMMSS));
         }
     }
 

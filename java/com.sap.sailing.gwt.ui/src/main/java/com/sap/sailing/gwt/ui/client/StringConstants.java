@@ -108,4 +108,6 @@ public interface StringConstants extends Constants {
     String legDetailsToShow();
     String columnMoveUp();
     String columnMoveDown();
+    String port();
+    String raceStartTimeColumn();
 }
