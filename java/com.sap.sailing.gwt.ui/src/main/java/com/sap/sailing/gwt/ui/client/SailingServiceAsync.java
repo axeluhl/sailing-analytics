@@ -44,7 +44,7 @@ public interface SailingServiceAsync {
     void track(RaceRecordDAO rr, String liveURI, String storedURI, boolean trackWind, boolean correctWindByDeclination,
             AsyncCallback<Void> callback);
 
-    void getPreviousConfigurations(AsyncCallback<List<TracTracConfigurationDAO>> callback);
+    void getPreviousTracTracConfigurations(AsyncCallback<List<TracTracConfigurationDAO>> callback);
 
     void storeTracTracConfiguration(String name, String jsonURL, String liveDataURI, String storedDataURI,
             AsyncCallback<Void> callback);

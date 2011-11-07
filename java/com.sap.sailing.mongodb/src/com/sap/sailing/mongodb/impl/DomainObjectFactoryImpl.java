@@ -28,6 +28,8 @@ import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.impl.ResultDiscardingRuleImpl;
 import com.sap.sailing.domain.leaderboard.impl.ScoreCorrectionImpl;
+import com.sap.sailing.domain.swisstimingadapter.SwissTimingConfiguration;
+import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindSource;
 import com.sap.sailing.domain.tracking.WindTrack;
@@ -204,6 +206,29 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             }
         }
         return result;
+    }
+
+    @Override
+    public Iterable<SwissTimingConfiguration> getSwissTimingConfigurations() {
+        List<SwissTimingConfiguration> result = new ArrayList<SwissTimingConfiguration>();
+        try {
+            DBCollection stConfigs = database.getCollection(CollectionNames.SWISSTIMING_CONFIGURATIONS.name());
+            for (DBObject o : stConfigs.find()) {
+                SwissTimingConfiguration stConfig = loadSwissTimingConfiguration(o);
+                result.add(stConfig);
+            }
+        } catch (Throwable t) {
+             // something went wrong during DB access; report, then use empty new wind track
+            logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load recorded TracTrac configurations. Check MongoDB settings.");
+            logger.throwing(DomainObjectFactoryImpl.class.getName(), "getTracTracConfigurations", t);
+        }
+        return result;
+    }
+
+    private SwissTimingConfiguration loadSwissTimingConfiguration(DBObject object) {
+        return SwissTimingFactory.INSTANCE.createSwissTimingConfiguration((String) object.get(FieldNames.ST_CONFIG_NAME.name()),
+                (String) object.get(FieldNames.ST_CONFIG_HOSTNAME.name()),
+                Integer.valueOf((String) object.get(FieldNames.ST_CONFIG_PORT.name())));
     }
 
 }

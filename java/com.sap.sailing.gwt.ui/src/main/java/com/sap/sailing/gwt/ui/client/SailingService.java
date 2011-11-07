@@ -28,7 +28,7 @@ import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDAO;
  */
 @RemoteServiceRelativePath("sailing")
 public interface SailingService extends RemoteService {
-    List<TracTracConfigurationDAO> getPreviousConfigurations() throws Exception;
+    List<TracTracConfigurationDAO> getPreviousTracTracConfigurations() throws Exception;
     
     List<EventDAO> listEvents();
 

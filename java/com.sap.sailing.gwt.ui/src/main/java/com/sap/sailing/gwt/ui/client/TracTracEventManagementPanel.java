@@ -341,7 +341,7 @@ public class TracTracEventManagementPanel extends FormPanel implements EventDisp
     }
 
     private void fillConfigurations() {
-        sailingService.getPreviousConfigurations(new AsyncCallback<List<TracTracConfigurationDAO>>() {
+        sailingService.getPreviousTracTracConfigurations(new AsyncCallback<List<TracTracConfigurationDAO>>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError("Remote Procedure Call getPreviousConfigurations() - Failure: "

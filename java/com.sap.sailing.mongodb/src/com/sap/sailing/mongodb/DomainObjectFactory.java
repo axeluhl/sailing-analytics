@@ -3,6 +3,7 @@ package com.sap.sailing.mongodb;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.swisstimingadapter.SwissTimingConfiguration;
 import com.sap.sailing.domain.tracking.WindSource;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tractracadapter.TracTracConfiguration;
@@ -25,4 +26,6 @@ public interface DomainObjectFactory {
     Leaderboard loadLeaderboard(String name);
 
     Iterable<Leaderboard> getAllLeaderboards();
+
+    Iterable<SwissTimingConfiguration> getSwissTimingConfigurations();
 }
