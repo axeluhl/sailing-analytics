@@ -17,17 +17,17 @@ import org.junit.Test;
 
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
-import com.sap.sailing.domain.tractracadapter.RaceTracker;
+import com.sap.sailing.domain.tractracadapter.TracTracRaceTracker;
 import com.sap.sailing.domain.tractracadapter.impl.DomainFactoryImpl;
 
 public class MultipleClassesInEventTest {
     private static final boolean tractracTunnel = Boolean.valueOf(System.getProperty("tractrac.tunnel", "false"));
     private static final String tractracTunnelHost = System.getProperty("tractrac.tunnel.host", "localhost");
     private DomainFactory domainFactory;
-    private RaceTracker kiwotest1;
-    private RaceTracker kiwotest2;
-    private RaceTracker kiwotest3;
-    private RaceTracker weym470may112014_2;
+    private TracTracRaceTracker kiwotest1;
+    private TracTracRaceTracker kiwotest2;
+    private TracTracRaceTracker kiwotest3;
+    private TracTracRaceTracker weym470may112014_2;
     
     @Before
     public void setUp() {

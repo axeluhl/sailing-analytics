@@ -1,9 +1,7 @@
-package com.sap.sailing.domain.tractracadapter;
+package com.sap.sailing.domain.tracking;
 
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
-import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
-import com.sap.sailing.domain.tractracadapter.impl.RaceCourseReceiver;
 
 /**
  * Gives clients a way to refer to a specific race even though the {@link RaceDefinition} object may not have

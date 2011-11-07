@@ -25,14 +25,14 @@ import com.sap.sailing.domain.tracking.DynamicTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFix;
+import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
-import com.sap.sailing.domain.tractracadapter.RaceHandle;
-import com.sap.sailing.domain.tractracadapter.RaceTracker;
+import com.sap.sailing.domain.tractracadapter.TracTracRaceTracker;
 import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sailing.util.Util.Triple;
 import com.tractrac.clientmodule.ControlPoint;
@@ -42,8 +42,8 @@ import com.tractrac.clientmodule.data.DataController;
 import com.tractrac.clientmodule.data.DataController.Listener;
 import com.tractrac.clientmodule.setup.KeyValue;
 
-public class RaceTrackerImpl implements Listener, RaceTracker {
-    private static final Logger logger = Logger.getLogger(RaceTrackerImpl.class.getName());
+public class TracTracRaceTrackerImpl implements Listener, TracTracRaceTracker {
+    private static final Logger logger = Logger.getLogger(TracTracRaceTrackerImpl.class.getName());
     
     /**
      * A scheduler for the periodic checks of the paramURL documents for the advent of {@link ControlPoint}s
@@ -89,7 +89,7 @@ public class RaceTrackerImpl implements Listener, RaceTracker {
      *            implementation is {@link EmptyWindStore} which simply provides new, empty tracks. This is always
      *            available but loses track of the wind, e.g., during server restarts.
      */
-    protected RaceTrackerImpl(DomainFactory domainFactory, URL paramURL, URI liveURI, URI storedURI, WindStore windStore)
+    protected TracTracRaceTrackerImpl(DomainFactory domainFactory, URL paramURL, URI liveURI, URI storedURI, WindStore windStore)
             throws URISyntaxException, MalformedURLException, FileNotFoundException {
         urls = new Triple<URL, URI, URI>(paramURL, liveURI, storedURI);
         this.windStore = windStore;
@@ -168,7 +168,7 @@ public class RaceTrackerImpl implements Listener, RaceTracker {
     }
 
     @Override
-    public Triple<URL, URI, URI> getURLs() {
+    public Triple<URL, URI, URI> getID() {
         return urls;
     }
 

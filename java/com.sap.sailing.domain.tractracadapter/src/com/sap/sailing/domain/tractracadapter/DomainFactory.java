@@ -91,7 +91,7 @@ public interface DomainFactory {
     
     /**
      * Creates a race tracked for the specified URL/URIs and starts receiving all available existing and future push
-     * data from there. Receiving continues until {@link RaceTracker#stop()} is called.
+     * data from there. Receiving continues until {@link TracTracRaceTracker#stop()} is called.
      * <p>
      * 
      * A race tracker uses the <code>paramURL</code> for the TracTrac Java client to register for push data about one
@@ -111,7 +111,7 @@ public interface DomainFactory {
      *            implementation is {@link EmptyWindStore} which simply provides new, empty tracks. This is always
      *            available but loses track of the wind, e.g., during server restarts.
      */
-    RaceTracker createRaceTracker(URL paramURL, URI liveURI, URI storedURI, WindStore windStore) throws MalformedURLException,
+    TracTracRaceTracker createRaceTracker(URL paramURL, URI liveURI, URI storedURI, WindStore windStore) throws MalformedURLException,
             FileNotFoundException, URISyntaxException;
 
     /**
