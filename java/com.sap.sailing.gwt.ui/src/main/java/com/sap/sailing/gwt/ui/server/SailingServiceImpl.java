@@ -1023,10 +1023,9 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
 
     @Override
-    public void storeSwissTimingConfiguration(String a, String hostname, int port) {
-        // TODO Auto-generated method stub
-        
-    }
+    public void storeSwissTimingConfiguration(String configName, String hostname, int port) {
+        mongoObjectFactory.storeSwissTimingConfiguration(swissTimingFactory.createSwissTimingConfiguration(configName, hostname, port));
+   }
 
     @Override
     public void trackWithSwissTiming(SwissTimingRaceRecordDAO rr, String hostname, int port, boolean trackWind,

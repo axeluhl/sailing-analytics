@@ -18,6 +18,7 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
 import com.sap.sailing.domain.leaderboard.ScoreCorrection.MaxPointsReason;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
+import com.sap.sailing.domain.swisstimingadapter.SwissTimingConfiguration;
 import com.sap.sailing.domain.tracking.Positioned;
 import com.sap.sailing.domain.tracking.TrackedEvent;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -195,6 +196,20 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         BasicDBObject query = new BasicDBObject(FieldNames.LEADERBOARD_NAME.name(), oldName);
         BasicDBObject renameUpdate = new BasicDBObject("$set", new BasicDBObject(FieldNames.LEADERBOARD_NAME.name(), newName));
         leaderboardCollection.update(query, renameUpdate);
+    }
+
+    @Override
+    public void storeSwissTimingConfiguration(SwissTimingConfiguration swissTimingConfiguration) {
+        DBCollection stConfigCollection = database.getCollection(CollectionNames.SWISSTIMING_CONFIGURATIONS.name());
+        stConfigCollection.ensureIndex(CollectionNames.SWISSTIMING_CONFIGURATIONS.name());
+        BasicDBObject result = new BasicDBObject();
+        result.put(FieldNames.ST_CONFIG_NAME.name(), swissTimingConfiguration.getName());
+        for (DBObject equallyNamedConfig : stConfigCollection.find(result)) {
+            stConfigCollection.remove(equallyNamedConfig);
+        }
+        result.put(FieldNames.ST_CONFIG_HOSTNAME.name(), swissTimingConfiguration.getHostname());
+        result.put(FieldNames.ST_CONFIG_PORT.name(), swissTimingConfiguration.getPort());
+        stConfigCollection.insert(result);
     }
 
 }
