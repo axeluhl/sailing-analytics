@@ -8,7 +8,8 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Require-Bundle: com.mongodb.driver;bundle-version="2.6.2",
  com.sap.sailing.domain,
  org.eclipse.osgi,
- com.sap.sailing.domain.tractracadapter
+ com.sap.sailing.domain.tractracadapter,
+ com.sap.sailing.domain.swisstimingadapter
 Export-Package: com.sap.sailing.mongodb,
  com.sap.sailing.mongodb.impl;x-friends:="com.sap.sailing.mongodb.test"
 Bundle-ActivationPolicy: lazy

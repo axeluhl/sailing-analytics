@@ -51,7 +51,7 @@ import com.sap.sailing.gwt.ui.shared.Triple;
  * @author Axel Uhl (D043530)
  * 
  */
-public class EventManagementPanel extends FormPanel implements EventDisplayer {
+public class TracTracEventManagementPanel extends FormPanel implements EventDisplayer {
     private final SailingServiceAsync sailingService;
     private final ErrorReporter errorReporter;
     private final IntegerBox storedPortIntegerbox;
@@ -69,7 +69,7 @@ public class EventManagementPanel extends FormPanel implements EventDisplayer {
     private final RaceTreeView trackedRacesTreeView;
     private final EventRefresher eventRefresher;
 
-    public EventManagementPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
+    public TracTracEventManagementPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
             EventRefresher eventRefresher, StringConstants stringConstants) {
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
@@ -223,7 +223,7 @@ public class EventManagementPanel extends FormPanel implements EventDisplayer {
         raceNameColumn.setSortable(true);
         raceStartTrackingColumn.setSortable(true);
         raceTable = new CellTable<RaceRecordDAO>(/* pageSize */ 100);
-        raceTable.addColumn(raceNameColumn, "Name");
+        raceTable.addColumn(raceNameColumn, stringConstants.name());
         raceTable.addColumn(raceStartTrackingColumn, stringConstants.raceStartTrackingColumn());
         grid.setWidget(6, 0, raceTable);
         grid.getCellFormatter().setHeight(6, 0, "100%");
@@ -263,7 +263,7 @@ public class EventManagementPanel extends FormPanel implements EventDisplayer {
         btnRefresh.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                EventManagementPanel.this.eventRefresher.fillEvents();
+                TracTracEventManagementPanel.this.eventRefresher.fillEvents();
             }
         });
         buttonPanel.add(btnRefresh);
@@ -341,7 +341,7 @@ public class EventManagementPanel extends FormPanel implements EventDisplayer {
     }
 
     private void fillConfigurations() {
-        sailingService.getPreviousConfigurations(new AsyncCallback<List<TracTracConfigurationDAO>>() {
+        sailingService.getPreviousTracTracConfigurations(new AsyncCallback<List<TracTracConfigurationDAO>>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError("Remote Procedure Call getPreviousConfigurations() - Failure: "
@@ -371,7 +371,7 @@ public class EventManagementPanel extends FormPanel implements EventDisplayer {
         sailingService.listRacesInEvent(jsonURL, new AsyncCallback<Pair<String, List<RaceRecordDAO>>>() {
             @Override
             public void onFailure(Throwable caught) {
-                EventManagementPanel.this.errorReporter.reportError("Error trying to list races: "
+                TracTracEventManagementPanel.this.errorReporter.reportError("Error trying to list races: "
                         + caught.getMessage());
             }
 

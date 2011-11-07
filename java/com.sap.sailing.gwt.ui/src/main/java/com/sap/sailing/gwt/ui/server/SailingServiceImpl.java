@@ -5,6 +5,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -45,6 +46,10 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard.Entry;
 import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
 import com.sap.sailing.domain.leaderboard.ScoreCorrection.MaxPointsReason;
+import com.sap.sailing.domain.swisstimingadapter.Race;
+import com.sap.sailing.domain.swisstimingadapter.SailMasterConnector;
+import com.sap.sailing.domain.swisstimingadapter.SwissTimingConfiguration;
+import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
@@ -77,6 +82,8 @@ import com.sap.sailing.gwt.ui.shared.RaceDAO;
 import com.sap.sailing.gwt.ui.shared.RaceRecordDAO;
 import com.sap.sailing.gwt.ui.shared.RegattaDAO;
 import com.sap.sailing.gwt.ui.shared.SpeedWithBearingDAO;
+import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDAO;
+import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDAO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDAO;
 import com.sap.sailing.gwt.ui.shared.WindDAO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDAO;
@@ -100,12 +107,15 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     private final MongoObjectFactory mongoObjectFactory;
     
     private final DomainObjectFactory domainObjectFactory;
+    
+    private final SwissTimingFactory swissTimingFactory;
 
     public SailingServiceImpl() {
         BundleContext context = Activator.getDefault();
         racingEventServiceTracker = createAndOpenRacingEventServiceTracker(context);
         mongoObjectFactory = MongoObjectFactory.INSTANCE;
         domainObjectFactory = DomainObjectFactory.INSTANCE;
+        swissTimingFactory = SwissTimingFactory.INSTANCE;
     }
 
     protected ServiceTracker<RacingEventService, RacingEventService> createAndOpenRacingEventServiceTracker(
@@ -337,7 +347,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
 
     @Override
-    public List<TracTracConfigurationDAO> getPreviousConfigurations() throws Exception {
+    public List<TracTracConfigurationDAO> getPreviousTracTracConfigurations() throws Exception {
         Iterable<TracTracConfiguration> configs = domainObjectFactory.getTracTracConfigurations();
         List<TracTracConfigurationDAO> result = new ArrayList<TracTracConfigurationDAO>();
         for (TracTracConfiguration ttConfig : configs) {
@@ -956,39 +966,71 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         }
     }
 
-	@Override
-	public void moveLeaderboardColumnUp(String leaderboardName,
-			String columnName) {
-		Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+    @Override
+    public void moveLeaderboardColumnUp(String leaderboardName, String columnName) {
+        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         if (leaderboard != null) {
-        	leaderboard.moveRaceColumnUp(columnName);
+            leaderboard.moveRaceColumnUp(columnName);
             getService().updateStoredLeaderboard(leaderboard);
         } else {
-            throw new IllegalArgumentException("Leaderboard named "+leaderboardName+" not found");
+            throw new IllegalArgumentException("Leaderboard named " + leaderboardName + " not found");
         }
-		
-	}
 
-	@Override
-	public void moveLeaderboardColumnDown(String leaderboardName,
-			String columnName) {
-		Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+    }
+
+    @Override
+    public void moveLeaderboardColumnDown(String leaderboardName, String columnName) {
+        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         if (leaderboard != null) {
-        	leaderboard.moveRaceColumnDown(columnName);
+            leaderboard.moveRaceColumnDown(columnName);
             getService().updateStoredLeaderboard(leaderboard);
         } else {
-            throw new IllegalArgumentException("Leaderboard named "+leaderboardName+" not found");
+            throw new IllegalArgumentException("Leaderboard named " + leaderboardName + " not found");
         }
-	}
+    }
 
-	@Override
-	public void updateIsMedalRace(String leaderboardName, String columnName, boolean isMedalRace) {
-		Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
-		if (leaderboard != null) {
-        	leaderboard.updateIsMedalRace(columnName, isMedalRace);
+    @Override
+    public void updateIsMedalRace(String leaderboardName, String columnName, boolean isMedalRace) {
+        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        if (leaderboard != null) {
+            leaderboard.updateIsMedalRace(columnName, isMedalRace);
             getService().updateStoredLeaderboard(leaderboard);
         } else {
-            throw new IllegalArgumentException("Leaderboard named "+leaderboardName+" not found");
+            throw new IllegalArgumentException("Leaderboard named " + leaderboardName + " not found");
         }
-	}
+    }
+
+    @Override
+    public List<SwissTimingConfigurationDAO> getPreviousSwissTimingConfigurations() {
+        Iterable<SwissTimingConfiguration> configs = domainObjectFactory.getSwissTimingConfigurations();
+        List<SwissTimingConfigurationDAO> result = new ArrayList<SwissTimingConfigurationDAO>();
+        for (SwissTimingConfiguration stConfig : configs) {
+            result.add(new SwissTimingConfigurationDAO(stConfig.getName(), stConfig.getHostname(), stConfig.getPort()));
+        }
+        return result;
+   }
+
+    @Override
+    public List<SwissTimingRaceRecordDAO> listSwissTimingRaces(String hostname, int port) 
+           throws UnknownHostException, IOException, InterruptedException, ParseException {
+        List<SwissTimingRaceRecordDAO> result = new ArrayList<SwissTimingRaceRecordDAO>();
+        SailMasterConnector swissTimingConnector = swissTimingFactory.createSailMasterConnector(hostname, port);
+        for (Race race : swissTimingConnector.getRaces()) {
+            TimePoint startTime = swissTimingConnector.getStartTime(race.getRaceID());
+            result.add(new SwissTimingRaceRecordDAO(race.getRaceID(), race.getDescription(), startTime.asDate()));
+        }
+        return result;
+    }
+
+    @Override
+    public void storeSwissTimingConfiguration(String configName, String hostname, int port) {
+        mongoObjectFactory.storeSwissTimingConfiguration(swissTimingFactory.createSwissTimingConfiguration(configName, hostname, port));
+   }
+
+    @Override
+    public void trackWithSwissTiming(SwissTimingRaceRecordDAO rr, String hostname, int port, boolean trackWind,
+            boolean correctWindByDeclination) {
+        // TODO Auto-generated method stub
+        
+    }
 }

@@ -18,6 +18,8 @@ import com.sap.sailing.gwt.ui.shared.MarkDAO;
 import com.sap.sailing.gwt.ui.shared.Pair;
 import com.sap.sailing.gwt.ui.shared.QuickRankDAO;
 import com.sap.sailing.gwt.ui.shared.RaceRecordDAO;
+import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDAO;
+import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDAO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDAO;
 import com.sap.sailing.gwt.ui.shared.WindDAO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDAO;
@@ -42,7 +44,7 @@ public interface SailingServiceAsync {
     void track(RaceRecordDAO rr, String liveURI, String storedURI, boolean trackWind, boolean correctWindByDeclination,
             AsyncCallback<Void> callback);
 
-    void getPreviousConfigurations(AsyncCallback<List<TracTracConfigurationDAO>> callback);
+    void getPreviousTracTracConfigurations(AsyncCallback<List<TracTracConfigurationDAO>> callback);
 
     void storeTracTracConfiguration(String name, String jsonURL, String liveDataURI, String storedDataURI,
             AsyncCallback<Void> callback);
@@ -157,4 +159,13 @@ public interface SailingServiceAsync {
 
 	void updateIsMedalRace(String leaderboardName, String columnName, boolean isMedalRace,
 			AsyncCallback<Void> callback);
+
+    void getPreviousSwissTimingConfigurations(AsyncCallback<List<SwissTimingConfigurationDAO>> asyncCallback);
+
+    void listSwissTimingRaces(String hostname, int port, AsyncCallback<List<SwissTimingRaceRecordDAO>> asyncCallback);
+
+    void storeSwissTimingConfiguration(String a, String hostname, int port, AsyncCallback<Void> asyncCallback);
+
+    void trackWithSwissTiming(SwissTimingRaceRecordDAO rr, String hostname, int port, boolean trackWind,
+            boolean correctWindByDeclination, AsyncCallback<Void> asyncCallback);
 }

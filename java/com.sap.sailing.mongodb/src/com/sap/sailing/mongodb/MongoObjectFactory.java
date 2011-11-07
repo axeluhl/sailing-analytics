@@ -4,6 +4,7 @@ import com.mongodb.DBObject;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.swisstimingadapter.SwissTimingConfiguration;
 import com.sap.sailing.domain.tracking.TrackedEvent;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindSource;
@@ -47,4 +48,6 @@ public interface MongoObjectFactory {
     void removeLeaderboard(String leaderboardName);
 
     void renameLeaderboard(String oldName, String newName);
+
+    void storeSwissTimingConfiguration(SwissTimingConfiguration swissTimingConfiguration);
 }
