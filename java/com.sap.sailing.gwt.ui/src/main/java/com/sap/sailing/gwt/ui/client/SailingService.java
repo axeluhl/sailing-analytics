@@ -16,6 +16,8 @@ import com.sap.sailing.gwt.ui.shared.MarkDAO;
 import com.sap.sailing.gwt.ui.shared.Pair;
 import com.sap.sailing.gwt.ui.shared.QuickRankDAO;
 import com.sap.sailing.gwt.ui.shared.RaceRecordDAO;
+import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDAO;
+import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDAO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDAO;
 import com.sap.sailing.gwt.ui.shared.WindDAO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDAO;
@@ -103,4 +105,13 @@ public interface SailingService extends RemoteService {
     void updateCompetitorDisplayNameInLeaderboard(String leaderboardName, String competitorName, String displayName);
     
     void updateIsMedalRace(String leaderboardName, String columnName, boolean isMedalRace);
+
+    List<SwissTimingConfigurationDAO> getPreviousSwissTimingConfigurations();
+
+    Pair<String, List<SwissTimingRaceRecordDAO>> listSwissTimingRaces(String hostname, int port);
+
+    void storeSwissTimingConfiguration(String a, String hostname, int port);
+
+    void trackWithSwissTiming(SwissTimingRaceRecordDAO rr, String hostname, int port, boolean trackWind,
+            boolean correctWindByDeclination);
 }

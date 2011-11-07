@@ -9,8 +9,6 @@ import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.KeyUpEvent;
-import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.Handler;
@@ -33,9 +31,9 @@ import com.google.gwt.view.client.MultiSelectionModel;
 import com.sap.sailing.gwt.ui.shared.EventDAO;
 import com.sap.sailing.gwt.ui.shared.Pair;
 import com.sap.sailing.gwt.ui.shared.RaceDAO;
-import com.sap.sailing.gwt.ui.shared.RaceRecordDAO;
 import com.sap.sailing.gwt.ui.shared.RegattaDAO;
-import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDAO;
+import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDAO;
+import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDAO;
 import com.sap.sailing.gwt.ui.shared.Triple;
 
 /**
@@ -51,25 +49,21 @@ import com.sap.sailing.gwt.ui.shared.Triple;
  * @author Axel Uhl (D043530)
  * 
  */
-public class EventManagementPanel extends FormPanel implements EventDisplayer {
+public class SwissTimingEventManagementPanel extends FormPanel implements EventDisplayer {
     private final SailingServiceAsync sailingService;
     private final ErrorReporter errorReporter;
-    private final IntegerBox storedPortIntegerbox;
-    private final TextBox jsonURLBox;
-    private final TextBox liveURIBox;
-    private final TextBox storedURIBox;
-    private final IntegerBox livePortIntegerbox;
+    private final IntegerBox portIntegerbox;
     private final TextBox hostnameTextbox;
     private final TextBox eventNameTextbox;
-    private final ListDataProvider<RaceRecordDAO> raceList;
-    private final CellTable<RaceRecordDAO> raceTable;
-    private final Map<String, TracTracConfigurationDAO> previousConfigurations;
+    private final ListDataProvider<SwissTimingRaceRecordDAO> raceList;
+    private final CellTable<SwissTimingRaceRecordDAO> raceTable;
+    private final Map<String, SwissTimingConfigurationDAO> previousConfigurations;
     private final ListBox previousConfigurationsComboBox;
     private final Grid grid;
     private final RaceTreeView trackedRacesTreeView;
     private final EventRefresher eventRefresher;
 
-    public EventManagementPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
+    public SwissTimingEventManagementPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
             EventRefresher eventRefresher, StringConstants stringConstants) {
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
@@ -85,7 +79,7 @@ public class EventManagementPanel extends FormPanel implements EventDisplayer {
         Label lblPredefined = new Label(stringConstants.trackedBefore());
         grid.setWidget(0, 0, lblPredefined);
         
-        previousConfigurations = new HashMap<String, TracTracConfigurationDAO>();
+        previousConfigurations = new HashMap<String, SwissTimingConfigurationDAO>();
         previousConfigurationsComboBox = new ListBox();
         grid.setWidget(1, 0, previousConfigurationsComboBox);
         previousConfigurationsComboBox.addChangeHandler(new ChangeHandler() {
@@ -123,14 +117,6 @@ public class EventManagementPanel extends FormPanel implements EventDisplayer {
         
         hostnameTextbox = new TextBox();
         hostnameTextbox.setText("germanmaster.traclive.dk");
-        hostnameTextbox.addKeyUpHandler(new KeyUpHandler() {
-            @Override
-            public void onKeyUp(KeyUpEvent event) {
-                updateLiveURI();
-                updateStoredURI();
-                updateJsonUrl();
-            }
-        });
         grid_1.setWidget(0, 2, hostnameTextbox);
         
         Label lblEventName = new Label(stringConstants.eventName());
@@ -138,12 +124,6 @@ public class EventManagementPanel extends FormPanel implements EventDisplayer {
         
         eventNameTextbox = new TextBox();
         eventNameTextbox.setText("event_2011...");
-        eventNameTextbox.addKeyUpHandler(new KeyUpHandler() {
-            @Override
-            public void onKeyUp(KeyUpEvent event) {
-                updateJsonUrl();
-            }
-        });
         grid_1.setWidget(1, 2, eventNameTextbox);
         
         Label lblLivePort = new Label(stringConstants.livePort());
@@ -152,37 +132,14 @@ public class EventManagementPanel extends FormPanel implements EventDisplayer {
         HorizontalPanel horizontalPanel_1 = new HorizontalPanel();
         grid_1.setWidget(2, 2, horizontalPanel_1);
         
-        livePortIntegerbox = new IntegerBox();
-        livePortIntegerbox.setText("1520");
-        livePortIntegerbox.addKeyUpHandler(new KeyUpHandler() {
-            @Override
-            public void onKeyUp(KeyUpEvent event) {
-                updatePortStoredData();
-                updateStoredURI();
-                updateLiveURI();
-                updateJsonUrl();
-            }
-        });
-        horizontalPanel_1.add(livePortIntegerbox);
-        
         Label lblStoredPort = new Label(stringConstants.storedPort());
         horizontalPanel_1.add(lblStoredPort);
         
-        storedPortIntegerbox = new IntegerBox();
-        storedPortIntegerbox.addKeyUpHandler(new KeyUpHandler() {
-            @Override
-            public void onKeyUp(KeyUpEvent event) {
-                updateStoredURI();
-            }
-        });
-        horizontalPanel_1.add(storedPortIntegerbox);
+        portIntegerbox = new IntegerBox();
+        horizontalPanel_1.add(portIntegerbox);
         
         Label lblJsonUrl = new Label("JSON URL");
         grid_1.setWidget(3, 1, lblJsonUrl);
-        
-        jsonURLBox = new TextBox();
-        grid_1.setWidget(3, 2, jsonURLBox);
-        jsonURLBox.setVisibleLength(80);
         
         Label lblLiveUri = new Label(stringConstants.liveUri());
         lblLiveUri.setTitle(stringConstants.leaveEmptyForDefault());
@@ -191,45 +148,35 @@ public class EventManagementPanel extends FormPanel implements EventDisplayer {
         HorizontalPanel horizontalPanel = new HorizontalPanel();
         grid_1.setWidget(4, 2, horizontalPanel);
         
-        liveURIBox = new TextBox();
-        liveURIBox.setVisibleLength(30);
-        liveURIBox.setTitle(stringConstants.leaveEmptyForDefault());
-        horizontalPanel.add(liveURIBox);
-        
         Label lblStoredUri = new Label(stringConstants.storedUri());
         lblStoredUri.setTitle(stringConstants.leaveEmptyForDefault());
         horizontalPanel.add(lblStoredUri);
         horizontalPanel.setCellVerticalAlignment(lblStoredUri, HasVerticalAlignment.ALIGN_MIDDLE);
         
-        storedURIBox = new TextBox();
-        storedURIBox.setVisibleLength(30);
-        storedURIBox.setTitle(stringConstants.leaveEmptyForDefault());
-        horizontalPanel.add(storedURIBox);
-        
         Label lblTrackableRaces = new Label(stringConstants.trackableRaces());
         grid.setWidget(5, 0, lblTrackableRaces);
-        TextColumn<RaceRecordDAO> raceNameColumn = new TextColumn<RaceRecordDAO>() {
+        TextColumn<SwissTimingRaceRecordDAO> raceNameColumn = new TextColumn<SwissTimingRaceRecordDAO>() {
             @Override
-            public String getValue(RaceRecordDAO object) {
+            public String getValue(SwissTimingRaceRecordDAO object) {
                 return object.name;
             }
         };
-        TextColumn<RaceRecordDAO> raceStartTrackingColumn = new TextColumn<RaceRecordDAO>() {
+        TextColumn<SwissTimingRaceRecordDAO> raceStartTrackingColumn = new TextColumn<SwissTimingRaceRecordDAO>() {
             @Override
-            public String getValue(RaceRecordDAO object) {
+            public String getValue(SwissTimingRaceRecordDAO object) {
                 return object.trackingStartTime.toString();
             }
         };
         raceNameColumn.setSortable(true);
         raceStartTrackingColumn.setSortable(true);
-        raceTable = new CellTable<RaceRecordDAO>(/* pageSize */ 100);
+        raceTable = new CellTable<SwissTimingRaceRecordDAO>(/* pageSize */ 100);
         raceTable.addColumn(raceNameColumn, "Name");
         raceTable.addColumn(raceStartTrackingColumn, stringConstants.raceStartTrackingColumn());
         grid.setWidget(6, 0, raceTable);
         grid.getCellFormatter().setHeight(6, 0, "100%");
         raceTable.setWidth("100%");
-        raceTable.setSelectionModel(new MultiSelectionModel<RaceRecordDAO>() {});
-        raceList = new ListDataProvider<RaceRecordDAO>();
+        raceTable.setSelectionModel(new MultiSelectionModel<SwissTimingRaceRecordDAO>() {});
+        raceList = new ListDataProvider<SwissTimingRaceRecordDAO>();
         raceList.addDataDisplay(raceTable);
         Handler columnSortHandler = getRaceTableColumnSortHandler(raceList.getList(), raceNameColumn, raceStartTrackingColumn);
         raceTable.addColumnSortHandler(columnSortHandler);
@@ -263,7 +210,7 @@ public class EventManagementPanel extends FormPanel implements EventDisplayer {
         btnRefresh.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                EventManagementPanel.this.eventRefresher.fillEvents();
+                SwissTimingEventManagementPanel.this.eventRefresher.fillEvents();
             }
         });
         buttonPanel.add(btnRefresh);
@@ -284,9 +231,6 @@ public class EventManagementPanel extends FormPanel implements EventDisplayer {
         
         grid.getCellFormatter().setVerticalAlignment(8, 1, HasVerticalAlignment.ALIGN_TOP);
         grid.getCellFormatter().setVerticalAlignment(8, 0, HasVerticalAlignment.ALIGN_TOP);
-        
-        updatePortStoredData();
-        updateJsonUrl();
     }
 
     private void stopTrackingRace(final EventDAO event, final RaceDAO race) {
@@ -304,18 +248,18 @@ public class EventManagementPanel extends FormPanel implements EventDisplayer {
         });
     }
 
-    private ListHandler<RaceRecordDAO> getRaceTableColumnSortHandler(List<RaceRecordDAO> raceRecords,
-            Column<RaceRecordDAO, ?> nameColumn, Column<RaceRecordDAO, ?> trackingStartColumn) {
-        ListHandler<RaceRecordDAO> result = new ListHandler<RaceRecordDAO>(raceRecords);
-        result.setComparator(nameColumn, new Comparator<RaceRecordDAO>() {
+    private ListHandler<SwissTimingRaceRecordDAO> getRaceTableColumnSortHandler(List<SwissTimingRaceRecordDAO> raceRecords,
+            Column<SwissTimingRaceRecordDAO, ?> nameColumn, Column<SwissTimingRaceRecordDAO, ?> trackingStartColumn) {
+        ListHandler<SwissTimingRaceRecordDAO> result = new ListHandler<SwissTimingRaceRecordDAO>(raceRecords);
+        result.setComparator(nameColumn, new Comparator<SwissTimingRaceRecordDAO>() {
             @Override
-            public int compare(RaceRecordDAO o1, RaceRecordDAO o2) {
+            public int compare(SwissTimingRaceRecordDAO o1, SwissTimingRaceRecordDAO o2) {
                 return o1.name.compareTo(o2.name);
             }
         });
-        result.setComparator(trackingStartColumn, new Comparator<RaceRecordDAO>() {
+        result.setComparator(trackingStartColumn, new Comparator<SwissTimingRaceRecordDAO>() {
             @Override
-            public int compare(RaceRecordDAO o1, RaceRecordDAO o2) {
+            public int compare(SwissTimingRaceRecordDAO o1, SwissTimingRaceRecordDAO o2) {
                 return o1.trackingStartTime == null ? -1 : o2.trackingStartTime == null ? 1 : o1.trackingStartTime
                         .compareTo(o2.trackingStartTime);
             }
@@ -323,25 +267,8 @@ public class EventManagementPanel extends FormPanel implements EventDisplayer {
         return result;
     }
 
-    private void updatePortStoredData() {
-        storedPortIntegerbox.setValue(livePortIntegerbox.getValue() + 1);
-    }
-
-    private void updateLiveURI() {
-        liveURIBox.setValue("tcp://" + hostnameTextbox.getValue() + ":" + livePortIntegerbox.getValue());
-    }
-
-    private void updateStoredURI() {
-        storedURIBox.setValue("tcp://" + hostnameTextbox.getValue() + ":" + storedPortIntegerbox.getValue());
-    }
-
-    private void updateJsonUrl() {
-        jsonURLBox.setValue("http://" + hostnameTextbox.getValue() + "/events/" + eventNameTextbox.getValue()
-                + "/jsonservice.php");
-    }
-
     private void fillConfigurations() {
-        sailingService.getPreviousConfigurations(new AsyncCallback<List<TracTracConfigurationDAO>>() {
+        sailingService.getPreviousSwissTimingConfigurations(new AsyncCallback<List<SwissTimingConfigurationDAO>>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError("Remote Procedure Call getPreviousConfigurations() - Failure: "
@@ -349,13 +276,13 @@ public class EventManagementPanel extends FormPanel implements EventDisplayer {
             }
 
             @Override
-            public void onSuccess(List<TracTracConfigurationDAO> result) {
+            public void onSuccess(List<SwissTimingConfigurationDAO> result) {
                 while (previousConfigurationsComboBox.getItemCount() > 0) {
                     previousConfigurationsComboBox.removeItem(0);
                 }
-                for (TracTracConfigurationDAO ttConfig : result) {
-                    previousConfigurations.put(ttConfig.name, ttConfig);
-                    previousConfigurationsComboBox.addItem(ttConfig.name);
+                for (SwissTimingConfigurationDAO stConfig : result) {
+                    previousConfigurations.put(stConfig.name, stConfig);
+                    previousConfigurationsComboBox.addItem(stConfig.name);
                 }
                 if (!result.isEmpty()) {
                     updatePanelFromSelectedStoredConfiguration();
@@ -365,24 +292,23 @@ public class EventManagementPanel extends FormPanel implements EventDisplayer {
     }
 
     private void fillRaces(final SailingServiceAsync sailingService) {
-        final String jsonURL = jsonURLBox.getValue();
-        final String liveDataURI = liveURIBox.getValue();
-        final String storedDataURI = storedURIBox.getValue();
-        sailingService.listRacesInEvent(jsonURL, new AsyncCallback<Pair<String, List<RaceRecordDAO>>>() {
+        final String hostname = hostnameTextbox.getValue();
+        final int port = portIntegerbox.getValue();
+        sailingService.listSwissTimingRaces(hostname, port, new AsyncCallback<Pair<String, List<SwissTimingRaceRecordDAO>>>() {
             @Override
             public void onFailure(Throwable caught) {
-                EventManagementPanel.this.errorReporter.reportError("Error trying to list races: "
+                SwissTimingEventManagementPanel.this.errorReporter.reportError("Error trying to list races: "
                         + caught.getMessage());
             }
 
             @Override
-            public void onSuccess(final Pair<String, List<RaceRecordDAO>> result) {
+            public void onSuccess(final Pair<String, List<SwissTimingRaceRecordDAO>> result) {
                 raceList.getList().clear();
                 if (result.getB() != null) {
                     raceList.getList().addAll(result.getB());
                 }
                 // store a successful configuration in the database for later retrieval
-                sailingService.storeTracTracConfiguration(result.getA(), jsonURL, liveDataURI, storedDataURI,
+                sailingService.storeSwissTimingConfiguration(result.getA(), hostname, port,
                         new AsyncCallback<Void>() {
                             @Override
                             public void onFailure(Throwable caught) {
@@ -393,10 +319,10 @@ public class EventManagementPanel extends FormPanel implements EventDisplayer {
                             @Override
                             public void onSuccess(Void voidResult) {
                                 // refresh list of previous configurations
-                                TracTracConfigurationDAO ttConfig = new TracTracConfigurationDAO(result.getA(),
-                                        jsonURL, liveDataURI, storedDataURI);
-                                if (previousConfigurations.put(ttConfig.name, ttConfig) == null) {
-                                    previousConfigurationsComboBox.addItem(ttConfig.name);
+                                SwissTimingConfigurationDAO stConfig = new SwissTimingConfigurationDAO(result.getA(),
+                                        hostname, port);
+                                if (previousConfigurations.put(stConfig.name, stConfig) == null) {
+                                    previousConfigurationsComboBox.addItem(stConfig.name);
                                 }
                             }
                         });
@@ -405,11 +331,11 @@ public class EventManagementPanel extends FormPanel implements EventDisplayer {
     }
 
     private void trackSelectedRaces(boolean trackWind, boolean correctWindByDeclination) {
-        String liveURI = liveURIBox.getValue();
-        String storedURI = storedURIBox.getValue();
-        for (final RaceRecordDAO rr : raceList.getList()) {
+        String hostname = hostnameTextbox.getValue();
+        int port = portIntegerbox.getValue();
+        for (final SwissTimingRaceRecordDAO rr : raceList.getList()) {
             if (raceTable.getSelectionModel().isSelected(rr)) {
-                sailingService.track(rr, liveURI, storedURI, trackWind, correctWindByDeclination, new AsyncCallback<Void>() {
+                sailingService.trackWithSwissTiming(rr, hostname, port, trackWind, correctWindByDeclination, new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         errorReporter.reportError("Error trying to register race " + rr.name + " for tracking: "
@@ -426,16 +352,11 @@ public class EventManagementPanel extends FormPanel implements EventDisplayer {
     }
 
     private void updatePanelFromSelectedStoredConfiguration() {
-        TracTracConfigurationDAO ttConfig = previousConfigurations.get(previousConfigurationsComboBox
+        SwissTimingConfigurationDAO stConfig = previousConfigurations.get(previousConfigurationsComboBox
                 .getItemText(previousConfigurationsComboBox.getSelectedIndex()));
-        if (ttConfig != null) {
-            hostnameTextbox.setValue("");
-            eventNameTextbox.setValue("");
-            livePortIntegerbox.setText("");
-            storedPortIntegerbox.setText("");
-            jsonURLBox.setValue(ttConfig.jsonURL);
-            liveURIBox.setValue(ttConfig.liveDataURI);
-            storedURIBox.setValue(ttConfig.storedDataURI);
+        if (stConfig != null) {
+            hostnameTextbox.setValue(stConfig.hostname);
+            portIntegerbox.setValue(stConfig.port);
         }
     }
 

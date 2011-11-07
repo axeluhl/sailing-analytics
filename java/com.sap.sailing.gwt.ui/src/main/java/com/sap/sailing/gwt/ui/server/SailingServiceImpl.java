@@ -77,6 +77,8 @@ import com.sap.sailing.gwt.ui.shared.RaceDAO;
 import com.sap.sailing.gwt.ui.shared.RaceRecordDAO;
 import com.sap.sailing.gwt.ui.shared.RegattaDAO;
 import com.sap.sailing.gwt.ui.shared.SpeedWithBearingDAO;
+import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDAO;
+import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDAO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDAO;
 import com.sap.sailing.gwt.ui.shared.WindDAO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDAO;
@@ -991,4 +993,29 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             throw new IllegalArgumentException("Leaderboard named "+leaderboardName+" not found");
         }
 	}
+
+    @Override
+    public List<SwissTimingConfigurationDAO> getPreviousSwissTimingConfigurations() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Pair<String, List<SwissTimingRaceRecordDAO>> listSwissTimingRaces(String hostname, int port) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public void storeSwissTimingConfiguration(String a, String hostname, int port) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void trackWithSwissTiming(SwissTimingRaceRecordDAO rr, String hostname, int port, boolean trackWind,
+            boolean correctWindByDeclination) {
+        // TODO Auto-generated method stub
+        
+    }
 }
