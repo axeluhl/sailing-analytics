@@ -2,18 +2,18 @@ package com.sap.sailing.domain.tractracadapter.impl;
 
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
+import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
-import com.sap.sailing.domain.tractracadapter.RaceHandle;
-import com.sap.sailing.domain.tractracadapter.RaceTracker;
+import com.sap.sailing.domain.tractracadapter.TracTracRaceTracker;
 import com.tractrac.clientmodule.Event;
 
 public class RaceHandleImpl implements RaceHandle {
     private final Event tractracEvent;
     private final DomainFactory domainFactory;
     private final DynamicTrackedEvent trackedEvent;
-    private final RaceTracker raceTracker;
+    private final TracTracRaceTracker raceTracker;
     
-    public RaceHandleImpl(DomainFactory domainFactory, Event tractracEvent, DynamicTrackedEvent trackedEvent, RaceTracker raceTracker) {
+    public RaceHandleImpl(DomainFactory domainFactory, Event tractracEvent, DynamicTrackedEvent trackedEvent, TracTracRaceTracker raceTracker) {
         this.domainFactory = domainFactory;
         this.tractracEvent = tractracEvent;
         this.trackedEvent = trackedEvent;
@@ -37,7 +37,7 @@ public class RaceHandleImpl implements RaceHandle {
     }
 
     @Override
-    public RaceTracker getRaceTracker() {
+    public TracTracRaceTracker getRaceTracker() {
         return raceTracker;
     }
 

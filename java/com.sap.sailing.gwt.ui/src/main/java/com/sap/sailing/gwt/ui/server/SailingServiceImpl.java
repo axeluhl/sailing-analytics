@@ -54,6 +54,7 @@ import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.NoWindException;
+import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
@@ -62,7 +63,6 @@ import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tracking.impl.WindTrackImpl;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
-import com.sap.sailing.domain.tractracadapter.RaceHandle;
 import com.sap.sailing.domain.tractracadapter.RaceRecord;
 import com.sap.sailing.domain.tractracadapter.TracTracConfiguration;
 import com.sap.sailing.gwt.ui.client.SailingService;
@@ -331,7 +331,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         if (storedURI == null || storedURI.trim().length() == 0) {
             storedURI = rr.storedURI;
         }
-        final RaceHandle raceHandle = getService().addRace(new URL(rr.paramURL), new URI(liveURI), new URI(storedURI),
+        final RaceHandle raceHandle = getService().addTracTracRace(new URL(rr.paramURL), new URI(liveURI), new URI(storedURI),
                 MongoWindStoreFactory.INSTANCE.getMongoWindStore(mongoObjectFactory, domainObjectFactory), TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS);
         if (trackWind) {
             new Thread("Wind tracking starter for race "+rr.eventName+"/"+rr.name) {

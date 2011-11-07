@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.swisstimingadapter;
 
 import com.sap.sailing.domain.swisstimingadapter.impl.SwissTimingFactoryImpl;
+import com.sap.sailing.domain.tracking.WindStore;
 
 public interface SwissTimingFactory {
     SwissTimingFactory INSTANCE = new SwissTimingFactoryImpl();
@@ -10,4 +11,6 @@ public interface SwissTimingFactory {
     SailMasterConnector createSailMasterConnector(String host, int port);
 
     SwissTimingConfiguration createSwissTimingConfiguration(String name, String hostname, int port);
+
+    SwissTimingRaceTracker createRaceTracker(String raceID, String hostname, int port, WindStore windStore);
 }

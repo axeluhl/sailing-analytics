@@ -17,7 +17,7 @@ import org.junit.Test;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
-import com.sap.sailing.domain.tractracadapter.RaceTracker;
+import com.sap.sailing.domain.tractracadapter.TracTracRaceTracker;
 import com.sap.sailing.domain.tractracadapter.impl.DomainFactoryImpl;
 
 @Ignore
@@ -39,7 +39,7 @@ public class UnicodeCharactersInCompetitorNamesTest {
     @Ignore
     @Test
     public void testFindUnicodeCharactersInCompetitorNames() throws MalformedURLException, FileNotFoundException, URISyntaxException {
-        RaceTracker fourtyninerYellow_2 = domainFactory
+        TracTracRaceTracker fourtyninerYellow_2 = domainFactory
                 .createRaceTracker(
                         new URL(
                                 "http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/clientparams.php?event=event_20110609_KielerWoch&race=5b08a9ee-9933-11e0-85be-406186cbf87c"),

@@ -1,20 +1,13 @@
-package com.sap.sailing.domain.tractracadapter;
+package com.sap.sailing.domain.tracking;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URL;
+import java.util.Map;
 import java.util.Set;
 
 import com.sap.sailing.domain.base.RaceDefinition;
-import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
-import com.sap.sailing.domain.tracking.TrackedEvent;
-import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.domain.tracking.WindStore;
-import com.sap.sailing.util.Util.Triple;
 
 public interface RaceTracker {
-
     /**
      * Stops tracking the race and removes the {@link TrackedRace} object one gets from calling
      * {@link #getTrackedEvent()}.{@link TrackedEvent#getTrackedRace(RaceDefinition) getTrackedRace(}{@link #getRaces() getRaces())}
@@ -38,8 +31,8 @@ public interface RaceTracker {
     WindStore getWindStore();
 
     /**
-     * returns the paramURL, liveURI and storedURI for the TracTrac connection maintained by this tracker
+     * returns a unique key for this tracker which can, e.g., be used as a key in a {@link Map}
      */
-    Triple<URL, URI, URI> getURLs();
+    Object getID();
     
 }

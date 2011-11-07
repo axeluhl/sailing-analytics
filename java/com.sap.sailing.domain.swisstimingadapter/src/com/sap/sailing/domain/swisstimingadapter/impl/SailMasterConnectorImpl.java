@@ -92,10 +92,10 @@ public class SailMasterConnectorImpl extends SailMasterTransceiver implements Sa
         this.port = port;
         this.listeners = new HashSet<SailMasterListener>();
         this.unprocessedMessagesByType = new HashMap<MessageType, BlockingQueue<SailMasterMessage>>();
-        receiverThread = new Thread(this, "SwissTiming SailMaster Receiver");
-        receiverThread.start();
         int offset = TimeZone.getDefault().getOffset(System.currentTimeMillis())/1000/3600;
         lastTimeZoneSuffix = (offset<0?"-":"+") + new DecimalFormat("00").format(offset)+"00";
+        receiverThread = new Thread(this, "SwissTiming SailMaster Receiver");
+        receiverThread.start();
     }
     
     public void run() {

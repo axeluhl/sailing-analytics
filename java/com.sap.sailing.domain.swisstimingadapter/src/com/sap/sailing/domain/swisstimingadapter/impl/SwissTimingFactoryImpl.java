@@ -4,6 +4,8 @@ import com.sap.sailing.domain.swisstimingadapter.SailMasterConnector;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingConfiguration;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingMessageParser;
+import com.sap.sailing.domain.swisstimingadapter.SwissTimingRaceTracker;
+import com.sap.sailing.domain.tracking.WindStore;
 
 public class SwissTimingFactoryImpl implements SwissTimingFactory {
 
@@ -20,6 +22,12 @@ public class SwissTimingFactoryImpl implements SwissTimingFactory {
     @Override
     public SwissTimingConfiguration createSwissTimingConfiguration(String name, String hostname, int port) {
         return new SwissTimingConfigurationImpl(name, hostname, port);
+    }
+
+    @Override
+    public SwissTimingRaceTracker createRaceTracker(String raceID, String hostname, int port, WindStore windStore) {
+        // TODO Auto-generated method stub
+        return null;
     }
     
 }

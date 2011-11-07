@@ -14,13 +14,14 @@ import java.util.Map;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
+import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.TrackedEvent;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
-import com.sap.sailing.domain.tractracadapter.RaceHandle;
 import com.sap.sailing.domain.tractracadapter.RaceRecord;
-import com.sap.sailing.domain.tractracadapter.RaceTracker;
+import com.sap.sailing.domain.tractracadapter.TracTracRaceTracker;
 import com.sap.sailing.util.Util.Pair;
 import com.sap.sailing.util.Util.Triple;
 
@@ -28,7 +29,7 @@ import com.sap.sailing.util.Util.Triple;
  * An OSGi service that can be used to track boat races using a TracTrac connector that pushes
  * live GPS boat location, waypoint, coarse and mark passing data.<p>
  * 
- * If a race/event is already being tracked, another {@link #addRace(URL, URI, URI, WindStore, long)} or
+ * If a race/event is already being tracked, another {@link #addTracTracRace(URL, URI, URI, WindStore, long)} or
  * {@link #addEvent(URL, URI, URI, WindStore, long)} call will have no effect, even if a different
  * {@link WindStore} is requested.<p>
  * 
@@ -51,7 +52,7 @@ public interface RacingEventService {
     
     /**
      * Defines the event and for each race listed in the JSON document that is not already being tracked by this service
-     * creates a {@link RaceTracker} that starts tracking the respective race. The {@link RaceDefinition}s obtained this
+     * creates a {@link TracTracRaceTracker} that starts tracking the respective race. The {@link RaceDefinition}s obtained this
      * way are all grouped into the single {@link Event} produced for the event listed in the JSON response. Note that
      * the many race trackers will have their TracTrac <code>Event</code> each, all with the same name, meaning the same
      * event but being distinct.
@@ -77,7 +78,7 @@ public interface RacingEventService {
      * <p>
      * 
      * If this is the first race of an event, the {@link Event} is created as well. If the {@link RaceDefinition} for
-     * the race already exists, it isn't created again. Also, if a {@link RaceTracker} for the given race already
+     * the race already exists, it isn't created again. Also, if a {@link TracTracRaceTracker} for the given race already
      * exists, it is not added again.
      * <p>
      * 
@@ -90,13 +91,13 @@ public interface RacingEventService {
      *            if the race definition is not received for the race within this time, the race tracker for
      *            that race is stopped; use -1 to wait forever
      */
-    RaceHandle addRace(URL paramURL, URI liveURI, URI storedURI, WindStore windStore, long timeoutInMilliseconds)
+    RaceHandle addTracTracRace(URL paramURL, URI liveURI, URI storedURI, WindStore windStore, long timeoutInMilliseconds)
             throws MalformedURLException, FileNotFoundException, URISyntaxException;
 
     /**
      * Stops tracking all races of the event specified. This will also stop tracking wind for all races of this event.
      * See {@link #stopTrackingWind(Event, RaceDefinition)}. If there were multiple calls to
-     * {@link #addRace(URL, URI, URI, WindStore, long)} with an equal combination of URLs/URIs, the {@link RaceTracker}
+     * {@link #addTracTracRace(URL, URI, URI, WindStore, long)} with an equal combination of URLs/URIs, the {@link TracTracRaceTracker}
      * already tracking the race was re-used. The trackers will be stopped by this call regardless of how many calls
      * were made that ensured they were tracking.
      */
@@ -130,7 +131,7 @@ public interface RacingEventService {
     Iterable<Triple<Event, RaceDefinition, String>> getWindTrackedRaces();
 
     /**
-     * For the JSON URL of an account / event, lists the paramURLs that can be used for {@link #addRace(URL, URI, URI, WindStore, long)}
+     * For the JSON URL of an account / event, lists the paramURLs that can be used for {@link #addTracTracRace(URL, URI, URI, WindStore, long)}
      * calls to individually start tracking races of this event, rather than tracking <em>all</em> races in the event which
      * is hardly ever useful. The returned pair's first component is the event name.
      */
@@ -174,5 +175,9 @@ public interface RacingEventService {
      * Updates the leaderboard data in the persistent store
      */
     void updateStoredLeaderboard(Leaderboard leaderboard);
+
+    RaceHandle addSwissTimingRace(String raceID, String hostname, int port, WindStore windStore, long timeoutInMilliseconds);
+
+    SwissTimingFactory getSwissTimingFactory();
 
 }
