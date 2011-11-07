@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -130,7 +131,10 @@ public class SwissTimingSailMasterLiveTest implements SailMasterListener {
     public void testGetDistanceBetweenBoats() throws UnknownHostException, IOException, InterruptedException {
         Iterable<Race> races = connector.getRaces();
         Race race = races.iterator().next();
-        Competitor competitor1 = connector.getStartList(race.getRaceID()).getCompetitors().iterator().next();
+        Iterator<Competitor> competitorIter = connector.getStartList(race.getRaceID()).getCompetitors().iterator();
+        competitorIter.next();
+        competitorIter.next();
+        Competitor competitor1 = competitorIter.next();
         for (Competitor competitor2 : connector.getStartList(race.getRaceID()).getCompetitors()) {
             System.out.print("d");
             Distance distance = connector.getDistanceBetweenBoats(race.getRaceID(), competitor1.getBoatID(),

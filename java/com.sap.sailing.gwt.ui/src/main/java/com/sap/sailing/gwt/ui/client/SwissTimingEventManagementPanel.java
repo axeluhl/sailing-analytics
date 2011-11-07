@@ -29,7 +29,6 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.sap.sailing.gwt.ui.shared.EventDAO;
-import com.sap.sailing.gwt.ui.shared.Pair;
 import com.sap.sailing.gwt.ui.shared.RaceDAO;
 import com.sap.sailing.gwt.ui.shared.RegattaDAO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDAO;
@@ -158,13 +157,13 @@ public class SwissTimingEventManagementPanel extends FormPanel implements EventD
         TextColumn<SwissTimingRaceRecordDAO> raceNameColumn = new TextColumn<SwissTimingRaceRecordDAO>() {
             @Override
             public String getValue(SwissTimingRaceRecordDAO object) {
-                return object.name;
+                return object.ID;
             }
         };
         TextColumn<SwissTimingRaceRecordDAO> raceStartTrackingColumn = new TextColumn<SwissTimingRaceRecordDAO>() {
             @Override
             public String getValue(SwissTimingRaceRecordDAO object) {
-                return object.trackingStartTime.toString();
+                return object.raceStartTime.toString();
             }
         };
         raceNameColumn.setSortable(true);
@@ -254,14 +253,14 @@ public class SwissTimingEventManagementPanel extends FormPanel implements EventD
         result.setComparator(nameColumn, new Comparator<SwissTimingRaceRecordDAO>() {
             @Override
             public int compare(SwissTimingRaceRecordDAO o1, SwissTimingRaceRecordDAO o2) {
-                return o1.name.compareTo(o2.name);
+                return o1.ID.compareTo(o2.ID);
             }
         });
         result.setComparator(trackingStartColumn, new Comparator<SwissTimingRaceRecordDAO>() {
             @Override
             public int compare(SwissTimingRaceRecordDAO o1, SwissTimingRaceRecordDAO o2) {
-                return o1.trackingStartTime == null ? -1 : o2.trackingStartTime == null ? 1 : o1.trackingStartTime
-                        .compareTo(o2.trackingStartTime);
+                return o1.raceStartTime == null ? -1 : o2.raceStartTime == null ? 1 : o1.raceStartTime
+                        .compareTo(o2.raceStartTime);
             }
         });
         return result;
@@ -294,7 +293,7 @@ public class SwissTimingEventManagementPanel extends FormPanel implements EventD
     private void fillRaces(final SailingServiceAsync sailingService) {
         final String hostname = hostnameTextbox.getValue();
         final int port = portIntegerbox.getValue();
-        sailingService.listSwissTimingRaces(hostname, port, new AsyncCallback<Pair<String, List<SwissTimingRaceRecordDAO>>>() {
+        sailingService.listSwissTimingRaces(hostname, port, new AsyncCallback<List<SwissTimingRaceRecordDAO>>() {
             @Override
             public void onFailure(Throwable caught) {
                 SwissTimingEventManagementPanel.this.errorReporter.reportError("Error trying to list races: "
@@ -302,13 +301,14 @@ public class SwissTimingEventManagementPanel extends FormPanel implements EventD
             }
 
             @Override
-            public void onSuccess(final Pair<String, List<SwissTimingRaceRecordDAO>> result) {
+            public void onSuccess(final List<SwissTimingRaceRecordDAO> result) {
                 raceList.getList().clear();
-                if (result.getB() != null) {
-                    raceList.getList().addAll(result.getB());
+                if (result != null) {
+                    raceList.getList().addAll(result);
                 }
                 // store a successful configuration in the database for later retrieval
-                sailingService.storeSwissTimingConfiguration(result.getA(), hostname, port,
+                final String configName = hostname+":"+port;
+                sailingService.storeSwissTimingConfiguration(configName, hostname, port,
                         new AsyncCallback<Void>() {
                             @Override
                             public void onFailure(Throwable caught) {
@@ -319,7 +319,7 @@ public class SwissTimingEventManagementPanel extends FormPanel implements EventD
                             @Override
                             public void onSuccess(Void voidResult) {
                                 // refresh list of previous configurations
-                                SwissTimingConfigurationDAO stConfig = new SwissTimingConfigurationDAO(result.getA(),
+                                SwissTimingConfigurationDAO stConfig = new SwissTimingConfigurationDAO(configName,
                                         hostname, port);
                                 if (previousConfigurations.put(stConfig.name, stConfig) == null) {
                                     previousConfigurationsComboBox.addItem(stConfig.name);
@@ -338,7 +338,7 @@ public class SwissTimingEventManagementPanel extends FormPanel implements EventD
                 sailingService.trackWithSwissTiming(rr, hostname, port, trackWind, correctWindByDeclination, new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
-                        errorReporter.reportError("Error trying to register race " + rr.name + " for tracking: "
+                        errorReporter.reportError("Error trying to register race " + rr.ID + " for tracking: "
                                 + caught.getMessage());
                     }
 

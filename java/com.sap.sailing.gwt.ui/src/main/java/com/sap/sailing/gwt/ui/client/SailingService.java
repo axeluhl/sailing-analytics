@@ -108,7 +108,7 @@ public interface SailingService extends RemoteService {
 
     List<SwissTimingConfigurationDAO> getPreviousSwissTimingConfigurations();
 
-    Pair<String, List<SwissTimingRaceRecordDAO>> listSwissTimingRaces(String hostname, int port);
+    List<SwissTimingRaceRecordDAO> listSwissTimingRaces(String hostname, int port) throws Exception;
 
     void storeSwissTimingConfiguration(String a, String hostname, int port);
 

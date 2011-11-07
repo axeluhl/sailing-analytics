@@ -132,7 +132,7 @@ public interface RacingEventService {
     /**
      * For the JSON URL of an account / event, lists the paramURLs that can be used for {@link #addRace(URL, URI, URI, WindStore, long)}
      * calls to individually start tracking races of this event, rather than tracking <em>all</em> races in the event which
-     * is hardly ever useful.
+     * is hardly ever useful. The returned pair's first component is the event name.
      */
     Pair<String, List<RaceRecord>> getRaceRecords(URL jsonURL) throws IOException, ParseException, org.json.simple.parser.ParseException, URISyntaxException;
 

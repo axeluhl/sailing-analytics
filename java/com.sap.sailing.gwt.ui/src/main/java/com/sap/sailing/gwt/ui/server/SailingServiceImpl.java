@@ -5,6 +5,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -45,6 +46,8 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard.Entry;
 import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
 import com.sap.sailing.domain.leaderboard.ScoreCorrection.MaxPointsReason;
+import com.sap.sailing.domain.swisstimingadapter.Race;
+import com.sap.sailing.domain.swisstimingadapter.SailMasterConnector;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingConfiguration;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
 import com.sap.sailing.domain.tracking.GPSFix;
@@ -1008,9 +1011,15 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
    }
 
     @Override
-    public Pair<String, List<SwissTimingRaceRecordDAO>> listSwissTimingRaces(String hostname, int port) {
-        // TODO Auto-generated method stub
-        return null;
+    public List<SwissTimingRaceRecordDAO> listSwissTimingRaces(String hostname, int port) 
+           throws UnknownHostException, IOException, InterruptedException, ParseException {
+        List<SwissTimingRaceRecordDAO> result = new ArrayList<SwissTimingRaceRecordDAO>();
+        SailMasterConnector swissTimingConnector = swissTimingFactory.createSailMasterConnector(hostname, port);
+        for (Race race : swissTimingConnector.getRaces()) {
+            TimePoint startTime = swissTimingConnector.getStartTime(race.getRaceID());
+            result.add(new SwissTimingRaceRecordDAO(race.getRaceID(), race.getDescription(), startTime.asDate()));
+        }
+        return result;
     }
 
     @Override
