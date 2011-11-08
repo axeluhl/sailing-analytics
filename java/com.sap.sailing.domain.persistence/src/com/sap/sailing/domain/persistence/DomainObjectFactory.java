@@ -1,0 +1,26 @@
+package com.sap.sailing.domain.persistence;
+
+import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.persistence.impl.DomainObjectFactoryImpl;
+import com.sap.sailing.domain.tracking.WindSource;
+import com.sap.sailing.domain.tracking.WindTrack;
+import com.sap.sailing.mongodb.Activator;
+
+/**
+ * Offers methods to load domain objects from a Mongo DB
+ * 
+ * @author Axel Uhl (d043530)
+ *
+ */
+public interface DomainObjectFactory {
+    DomainObjectFactory INSTANCE = new DomainObjectFactoryImpl(Activator.getDefaultInstance().getDB());
+
+    WindTrack loadWindTrack(Event event, RaceDefinition race, WindSource windSource, long millisecondsOverWhichToAverage);
+
+    Leaderboard loadLeaderboard(String name);
+
+    Iterable<Leaderboard> getAllLeaderboards();
+
+}

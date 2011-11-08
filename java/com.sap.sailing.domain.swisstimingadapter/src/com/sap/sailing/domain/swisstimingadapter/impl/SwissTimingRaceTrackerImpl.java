@@ -2,7 +2,6 @@ package com.sap.sailing.domain.swisstimingadapter.impl;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.util.HashSet;
 import java.util.Set;
 
 import com.sap.sailing.domain.base.Event;
@@ -17,11 +16,11 @@ import com.sap.sailing.util.Util.Triple;
 
 public class SwissTimingRaceTrackerImpl implements SwissTimingRaceTracker {
     private final SailMasterConnector connector;
-    private final Set<RaceDefinition> races;
+//    private final Set<RaceDefinition> races;
     
     protected SwissTimingRaceTrackerImpl(String raceID, String hostname, int port, SwissTimingFactory factory) {
         connector = factory.createSailMasterConnector(hostname, port);
-        races = new HashSet<RaceDefinition>();
+//        races = new HashSet<RaceDefinition>();
     }
 
     @Override

@@ -18,12 +18,12 @@ import com.sap.sailing.domain.base.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.base.impl.DegreePosition;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.persistence.DomainObjectFactory;
+import com.sap.sailing.domain.persistence.MongoObjectFactory;
+import com.sap.sailing.domain.persistence.impl.DomainObjectFactoryImpl;
+import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
-import com.sap.sailing.mongodb.DomainObjectFactory;
-import com.sap.sailing.mongodb.MongoObjectFactory;
-import com.sap.sailing.mongodb.impl.DomainObjectFactoryImpl;
-import com.sap.sailing.mongodb.impl.MongoObjectFactoryImpl;
 
 public class TestStoringAndRetrievingWindData extends AbstractMongoDBTest {
     private static final String WIND_TEST_COLLECTION = "wind_test_collection";

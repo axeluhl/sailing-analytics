@@ -10,7 +10,6 @@ Require-Bundle: com.mongodb.driver;bundle-version="2.6.2",
  org.eclipse.osgi,
  com.sap.sailing.domain.tractracadapter,
  com.sap.sailing.domain.swisstimingadapter
-Export-Package: com.sap.sailing.mongodb,
- com.sap.sailing.mongodb.impl;x-friends:="com.sap.sailing.mongodb.test"
+Export-Package: com.sap.sailing.mongodb
 Bundle-ActivationPolicy: lazy
-Bundle-Activator: com.sap.sailing.mongodb.impl.Activator
+Bundle-Activator: com.sap.sailing.mongodb.Activator

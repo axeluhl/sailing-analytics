@@ -9,7 +9,7 @@ import org.junit.Before;
 import com.mongodb.DB;
 import com.mongodb.Mongo;
 import com.mongodb.MongoException;
-import com.sap.sailing.mongodb.impl.Activator;
+import com.sap.sailing.mongodb.Activator;
 
 public abstract class AbstractMongoDBTest implements MongoDBTest {
     protected Mongo mongo;
