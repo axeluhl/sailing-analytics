@@ -46,6 +46,9 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard.Entry;
 import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
 import com.sap.sailing.domain.leaderboard.ScoreCorrection.MaxPointsReason;
+import com.sap.sailing.domain.persistence.DomainObjectFactory;
+import com.sap.sailing.domain.persistence.MongoObjectFactory;
+import com.sap.sailing.domain.persistence.MongoWindStoreFactory;
 import com.sap.sailing.domain.swisstimingadapter.Race;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterConnector;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingConfiguration;
@@ -88,9 +91,6 @@ import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDAO;
 import com.sap.sailing.gwt.ui.shared.WindDAO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDAO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDAO;
-import com.sap.sailing.mongodb.DomainObjectFactory;
-import com.sap.sailing.mongodb.MongoObjectFactory;
-import com.sap.sailing.mongodb.MongoWindStoreFactory;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.util.CountryCode;
 
@@ -106,15 +106,27 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     
     private final MongoObjectFactory mongoObjectFactory;
     
+    private final com.sap.sailing.domain.swisstimingadapter.persistence.MongoObjectFactory swissTimingMongoObjectFactory;
+    
+    private final com.sap.sailing.domain.tractracadapter.persistence.MongoObjectFactory tractracMongoObjectFactory;
+
     private final DomainObjectFactory domainObjectFactory;
     
     private final SwissTimingFactory swissTimingFactory;
+
+    private final com.sap.sailing.domain.swisstimingadapter.persistence.DomainObjectFactory swissTimingDomainObjectFactory;
+
+    private final com.sap.sailing.domain.tractracadapter.persistence.DomainObjectFactory tractracDomainObjectFactory;
 
     public SailingServiceImpl() {
         BundleContext context = Activator.getDefault();
         racingEventServiceTracker = createAndOpenRacingEventServiceTracker(context);
         mongoObjectFactory = MongoObjectFactory.INSTANCE;
         domainObjectFactory = DomainObjectFactory.INSTANCE;
+        swissTimingDomainObjectFactory = com.sap.sailing.domain.swisstimingadapter.persistence.DomainObjectFactory.INSTANCE;
+        tractracDomainObjectFactory = com.sap.sailing.domain.tractracadapter.persistence.DomainObjectFactory.INSTANCE;
+        swissTimingMongoObjectFactory = com.sap.sailing.domain.swisstimingadapter.persistence.MongoObjectFactory.INSTANCE;
+        tractracMongoObjectFactory = com.sap.sailing.domain.tractracadapter.persistence.MongoObjectFactory.INSTANCE;
         swissTimingFactory = SwissTimingFactory.INSTANCE;
     }
 
@@ -348,7 +360,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
 
     @Override
     public List<TracTracConfigurationDAO> getPreviousTracTracConfigurations() throws Exception {
-        Iterable<TracTracConfiguration> configs = domainObjectFactory.getTracTracConfigurations();
+        Iterable<TracTracConfiguration> configs = tractracDomainObjectFactory.getTracTracConfigurations();
         List<TracTracConfigurationDAO> result = new ArrayList<TracTracConfigurationDAO>();
         for (TracTracConfiguration ttConfig : configs) {
             result.add(new TracTracConfigurationDAO(ttConfig.getName(), ttConfig.getJSONURL().toString(),
@@ -360,7 +372,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     @Override
     public void storeTracTracConfiguration(String name, String jsonURL, String liveDataURI, String storedDataURI) throws Exception {
         DomainFactory domainFactory = DomainFactory.INSTANCE;
-        mongoObjectFactory.storeTracTracConfiguration(domainFactory.createTracTracConfiguration(name, jsonURL, liveDataURI, storedDataURI));
+        tractracMongoObjectFactory.storeTracTracConfiguration(domainFactory.createTracTracConfiguration(name, jsonURL, liveDataURI, storedDataURI));
     }
     
     @Override
@@ -1002,7 +1014,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
 
     @Override
     public List<SwissTimingConfigurationDAO> getPreviousSwissTimingConfigurations() {
-        Iterable<SwissTimingConfiguration> configs = domainObjectFactory.getSwissTimingConfigurations();
+        Iterable<SwissTimingConfiguration> configs = swissTimingDomainObjectFactory.getSwissTimingConfigurations();
         List<SwissTimingConfigurationDAO> result = new ArrayList<SwissTimingConfigurationDAO>();
         for (SwissTimingConfiguration stConfig : configs) {
             result.add(new SwissTimingConfigurationDAO(stConfig.getName(), stConfig.getHostname(), stConfig.getPort()));
@@ -1024,7 +1036,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
 
     @Override
     public void storeSwissTimingConfiguration(String configName, String hostname, int port) {
-        mongoObjectFactory.storeSwissTimingConfiguration(swissTimingFactory.createSwissTimingConfiguration(configName, hostname, port));
+        swissTimingMongoObjectFactory.storeSwissTimingConfiguration(swissTimingFactory.createSwissTimingConfiguration(configName, hostname, port));
    }
 
     @Override

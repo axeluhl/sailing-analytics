@@ -21,7 +21,10 @@ Require-Bundle: javax.servlet;bundle-version="2.5.0",
  com.sap.ui.phoenix.core,
  org.eclipse.osgi.services,
  com.sap.sailing.httpservicetracker,
- com.sap.sailing.domain.swisstimingadapter
+ com.sap.sailing.domain.swisstimingadapter,
+ com.sap.sailing.domain.persistence,
+ com.sap.sailing.domain.swisstimingadapter.persistence,
+ com.sap.sailing.domain.tractracadapter.persistence
 Bundle-ClassPath: lib/gwt-maps.jar,
  lib/gwt-visualization.jar,
  lib/gwt-servlet.jar,
