@@ -26,8 +26,7 @@ public class SwissTimingFactoryImpl implements SwissTimingFactory {
 
     @Override
     public SwissTimingRaceTracker createRaceTracker(String raceID, String hostname, int port, WindStore windStore) {
-        // TODO Auto-generated method stub
-        return null;
+        return new SwissTimingRaceTrackerImpl(raceID, hostname, port, this);
     }
     
 }

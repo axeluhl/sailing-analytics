@@ -9,8 +9,8 @@ import com.sap.sailing.domain.tracking.TrackedEvent;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindSource;
 import com.sap.sailing.domain.tractracadapter.TracTracConfiguration;
+import com.sap.sailing.mongodb.impl.Activator;
 import com.sap.sailing.mongodb.impl.MongoObjectFactoryImpl;
-import com.sap.sailing.mongodb.impl.MongoWindStoreFactoryImpl;
 
 /**
  * Offers methods to construct {@link DBObject MongoDB objects} from domain objects.
@@ -19,7 +19,7 @@ import com.sap.sailing.mongodb.impl.MongoWindStoreFactoryImpl;
  * 
  */
 public interface MongoObjectFactory {
-    MongoObjectFactory INSTANCE = new MongoObjectFactoryImpl(MongoWindStoreFactoryImpl.getDefaultInstance().getDB());
+    MongoObjectFactory INSTANCE = new MongoObjectFactoryImpl(Activator.getDefaultInstance().getDB());
 
     /**
      * Registers for changes of the wind coming from <code>windSource</code> on the <code>trackedRace</code>. Each

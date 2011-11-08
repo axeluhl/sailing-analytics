@@ -1029,8 +1029,20 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
 
     @Override
     public void trackWithSwissTiming(SwissTimingRaceRecordDAO rr, String hostname, int port, boolean trackWind,
-            boolean correctWindByDeclination) {
-        // TODO Auto-generated method stub
-        
+            final boolean correctWindByDeclination) throws Exception {
+        final RaceHandle raceHandle = getService().addSwissTimingRace(rr.ID, hostname, port,
+                MongoWindStoreFactory.INSTANCE.getMongoWindStore(mongoObjectFactory, domainObjectFactory),
+                TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS);
+        if (trackWind) {
+            new Thread("Wind tracking starter for race "+rr.ID+"/"+rr.description) {
+                public void run() {
+                    try {
+                        startTrackingWind(raceHandle, correctWindByDeclination, TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            }.start();
+        }
     }
 }
