@@ -9,7 +9,7 @@ import org.junit.Before;
 import com.mongodb.DB;
 import com.mongodb.Mongo;
 import com.mongodb.MongoException;
-import com.sap.sailing.mongodb.impl.MongoWindStoreFactoryImpl;
+import com.sap.sailing.mongodb.impl.Activator;
 
 public abstract class AbstractMongoDBTest implements MongoDBTest {
     protected Mongo mongo;
@@ -17,7 +17,7 @@ public abstract class AbstractMongoDBTest implements MongoDBTest {
     
     protected Mongo newMongo() throws UnknownHostException, MongoException {
         return new Mongo(System.getProperty("mongo.host", "127.0.0.1"),
-                ((MongoWindStoreFactoryImpl) MongoWindStoreFactoryImpl.getDefaultInstance()).getDefaultPort());
+                Activator.getDefaultInstance().getDefaultPort());
     }
     
     @Before

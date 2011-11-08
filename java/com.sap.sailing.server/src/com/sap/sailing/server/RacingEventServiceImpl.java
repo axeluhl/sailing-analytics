@@ -221,11 +221,11 @@ public class RacingEventServiceImpl implements RacingEventService {
     
     @Override
     public synchronized RaceHandle addSwissTimingRace(String raceID, String hostname, int port, WindStore windStore, long timeoutInMilliseconds) {
-        Pair<String, Integer> key = new Pair<String, Integer>(hostname, port);
+        Triple<String, String, Integer> key = new Triple<String, String, Integer>(raceID, hostname, port);
         RaceTracker tracker = raceTrackersByID.get(key);
         if (tracker == null) {
             tracker = getSwissTimingFactory().createRaceTracker(raceID, hostname, port, windStore);
-            raceTrackersByID.put(key, tracker);
+            raceTrackersByID.put(tracker.getID(), tracker);
             Set<RaceTracker> trackers = raceTrackersByEvent.get(tracker.getEvent());
             if (trackers == null) {
                 trackers = new HashSet<RaceTracker>();
@@ -266,7 +266,7 @@ public class RacingEventServiceImpl implements RacingEventService {
         RaceTracker tracker = raceTrackersByID.get(key);
         if (tracker == null) {
             tracker = getDomainFactory().createRaceTracker(paramURL, liveURI, storedURI, windStore);
-            raceTrackersByID.put(key, tracker);
+            raceTrackersByID.put(tracker.getID(), tracker);
             Set<RaceTracker> trackers = raceTrackersByEvent.get(tracker.getEvent());
             if (trackers == null) {
                 trackers = new HashSet<RaceTracker>();

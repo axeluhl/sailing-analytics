@@ -7,8 +7,8 @@ import com.sap.sailing.domain.swisstimingadapter.SwissTimingConfiguration;
 import com.sap.sailing.domain.tracking.WindSource;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tractracadapter.TracTracConfiguration;
+import com.sap.sailing.mongodb.impl.Activator;
 import com.sap.sailing.mongodb.impl.DomainObjectFactoryImpl;
-import com.sap.sailing.mongodb.impl.MongoWindStoreFactoryImpl;
 
 /**
  * Offers methods to load domain objects from a Mongo DB
@@ -17,7 +17,7 @@ import com.sap.sailing.mongodb.impl.MongoWindStoreFactoryImpl;
  *
  */
 public interface DomainObjectFactory {
-    DomainObjectFactory INSTANCE = new DomainObjectFactoryImpl(MongoWindStoreFactoryImpl.getDefaultInstance().getDB());
+    DomainObjectFactory INSTANCE = new DomainObjectFactoryImpl(Activator.getDefaultInstance().getDB());
 
     WindTrack loadWindTrack(Event event, RaceDefinition race, WindSource windSource, long millisecondsOverWhichToAverage);
 

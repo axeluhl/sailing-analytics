@@ -113,5 +113,5 @@ public interface SailingService extends RemoteService {
     void storeSwissTimingConfiguration(String a, String hostname, int port);
 
     void trackWithSwissTiming(SwissTimingRaceRecordDAO rr, String hostname, int port, boolean trackWind,
-            boolean correctWindByDeclination);
+            boolean correctWindByDeclination) throws Exception;
 }

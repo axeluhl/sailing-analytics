@@ -8,7 +8,7 @@ public interface SwissTimingFactory {
     
     SwissTimingMessageParser createMessageParser();
     
-    SailMasterConnector createSailMasterConnector(String host, int port);
+    SailMasterConnector createSailMasterConnector(String hostname, int port);
 
     SwissTimingConfiguration createSwissTimingConfiguration(String name, String hostname, int port);
 

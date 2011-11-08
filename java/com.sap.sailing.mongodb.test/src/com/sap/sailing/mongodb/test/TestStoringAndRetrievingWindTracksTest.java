@@ -32,9 +32,9 @@ import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
+import com.sap.sailing.mongodb.impl.Activator;
 import com.sap.sailing.mongodb.impl.DomainObjectFactoryImpl;
 import com.sap.sailing.mongodb.impl.MongoObjectFactoryImpl;
-import com.sap.sailing.mongodb.impl.MongoWindStoreFactoryImpl;
 
 public class TestStoringAndRetrievingWindTracksTest extends AbstractTracTracLiveTest implements MongoDBTest {
 
@@ -47,7 +47,7 @@ public class TestStoringAndRetrievingWindTracksTest extends AbstractTracTracLive
     
     private Mongo newMongo() throws UnknownHostException, MongoException {
         return new Mongo(System.getProperty("mongo.host", "127.0.0.1"),
-                ((MongoWindStoreFactoryImpl) MongoWindStoreFactoryImpl.getDefaultInstance()).getDefaultPort());
+                Activator.getDefaultInstance().getDefaultPort());
     }
     
     @Before
