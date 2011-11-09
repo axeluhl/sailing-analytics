@@ -8,6 +8,9 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Require-Bundle: com.sap.sailing.domain.swisstimingadapter,
  com.sap.sailing.domain,
  org.junit4,
- com.sap.sailing.udpconnector
+ com.sap.sailing.udpconnector,
+ com.sap.sailing.domain.swisstimingadapter.persistence,
+ com.mongodb.driver;bundle-version="2.6.2",
+ com.sap.sailing.mongodb
 Bundle-ClassPath: resources/,
  .

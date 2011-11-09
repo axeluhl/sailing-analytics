@@ -41,6 +41,7 @@ import com.sap.sailing.domain.swisstimingadapter.Fix;
 import com.sap.sailing.domain.swisstimingadapter.Mark;
 import com.sap.sailing.domain.swisstimingadapter.MessageType;
 import com.sap.sailing.domain.swisstimingadapter.Race;
+import com.sap.sailing.domain.swisstimingadapter.RaceSpecificMessageLoader;
 import com.sap.sailing.domain.swisstimingadapter.RaceStatus;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterConnector;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterListener;
@@ -51,15 +52,25 @@ import com.sap.sailing.util.Util.Pair;
 import com.sap.sailing.util.Util.Triple;
 
 /**
- * Implements the connector to the SwissTiming Sail Master system. It uses a hostname and port number
- * to establish the connecting via TCP. The connector offers a number of explicit service request
- * methods. Additionally, the connector can receive "spontaneous" events sent by the sail master
- * system. Clients can register for those spontaneous events (see {@link #addSailMasterListener}).
+ * Implements the connector to the SwissTiming Sail Master system. It uses a hostname and port number to establish the
+ * connecting via TCP. The connector offers a number of explicit service request methods. Additionally, the connector
+ * can receive "spontaneous" events sent by the sail master system. Clients can register for those spontaneous events
+ * (see {@link #addSailMasterListener}).
+ * <p>
+ * 
+ * When the connector is used with SailMaster instances hidden behind a "bridge" / firewall, no explicit requests are
+ * possible, and the connector has to rely solely on the events it receives. It may, though, load recorded race-specific
+ * messages through a {@link RaceSpecificMessageLoader} object.
+ * <p>
+ * 
+ * Generally, the connector needs to be instructed for which races it shall handle events using calls to the
+ * {@link #trackRace} and {@link #stopTrackingRace} operations. {@link MessageType#isRaceSpecific() Race-specific
+ * messages} for other races are then ignored and not forwarded to any listener.
  * 
  * @author Axel Uhl (d043530)
- *
+ * 
  */
-public class SailMasterConnectorImpl extends SailMasterTransceiver implements SailMasterConnector, Runnable {
+public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implements SailMasterConnector, Runnable {
     private static final Logger logger = Logger.getLogger(SailMasterConnectorImpl.class.getName());
     
     private final String host;
@@ -69,6 +80,9 @@ public class SailMasterConnectorImpl extends SailMasterTransceiver implements Sa
     private final Set<SailMasterListener> listeners;
     private final Thread receiverThread;
     private boolean stopped;
+    private boolean connected;
+    
+    private final Set<String> idsOfTrackedRaces;
     
     /**
      * Currently the SwissTiming SailMaster protocol only transmits time zone information when sending
@@ -85,9 +99,10 @@ public class SailMasterConnectorImpl extends SailMasterTransceiver implements Sa
     
     private final Map<MessageType, BlockingQueue<SailMasterMessage>> unprocessedMessagesByType;
     
-    public SailMasterConnectorImpl(String host, int port) {
+    public SailMasterConnectorImpl(String host, int port) throws InterruptedException {
         super();
         dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ssZ");
+        idsOfTrackedRaces = new HashSet<String>();
         this.host = host;
         this.port = port;
         this.listeners = new HashSet<SailMasterListener>();
@@ -96,6 +111,21 @@ public class SailMasterConnectorImpl extends SailMasterTransceiver implements Sa
         lastTimeZoneSuffix = (offset<0?"-":"+") + new DecimalFormat("00").format(offset)+"00";
         receiverThread = new Thread(this, "SwissTiming SailMaster Receiver");
         receiverThread.start();
+        synchronized (this) {
+            while (!connected) {
+                wait();
+            }
+        }
+    }
+    
+    @Override
+    public void trackRace(String raceID) {
+        idsOfTrackedRaces.add(raceID);
+    }
+    
+    @Override
+    public void stopTrackingRace(String raceID) {
+        idsOfTrackedRaces.remove(raceID);
     }
     
     public void run() {
@@ -103,16 +133,22 @@ public class SailMasterConnectorImpl extends SailMasterTransceiver implements Sa
             while (!stopped) {
                 ensureSocketIsOpen();
                 try {
-                    SailMasterMessage message = new SailMasterMessageImpl(receiveMessage(socket.getInputStream()));
-                    if (message.isResponse()) {
-                        // this is a response for an explicit request
-                        rendevouz(message);
-                        if (message.getType() == MessageType._STOPSERVER) {
-                            stop();
+                    Pair<String, Long> receivedMessageAndOptionalSequenceNumber = receiveMessage(socket.getInputStream());
+                    SailMasterMessage message = new SailMasterMessageImpl(
+                            receivedMessageAndOptionalSequenceNumber.getA(),
+                            receivedMessageAndOptionalSequenceNumber.getB());
+                    // drop race-specific messages for non-tracked races
+                    if (!message.getType().isRaceSpecific() || idsOfTrackedRaces.contains(message.getRaceID())) {
+                        if (message.isResponse()) {
+                            // this is a response for an explicit request
+                            rendevouz(message);
+                        } else if (message.isEvent()) {
+                            // a spontaneous event
+                            notifyListeners(message);
                         }
-                    } else if (message.isEvent()) {
-                        // a spontaneous event
-                        notifyListeners(message);
+                    }
+                    if (message.getType() == MessageType._STOPSERVER) {
+                        stop();
                     }
                 } catch (SocketException se) {
                     // This occurs if the socket was closed which may mean the connector was stopped. Check in while
@@ -309,6 +345,10 @@ public class SailMasterConnectorImpl extends SailMasterTransceiver implements Sa
     private synchronized void ensureSocketIsOpen() throws UnknownHostException, IOException {
         if (socket == null) {
             socket = new Socket(host, port);
+            synchronized (this) {
+                connected = true;
+                notifyAll();
+            }
         }
     }
 
