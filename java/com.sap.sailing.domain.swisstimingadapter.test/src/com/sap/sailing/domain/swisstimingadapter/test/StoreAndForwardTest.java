@@ -97,7 +97,7 @@ public class StoreAndForwardTest {
         DBCollection lastMessageCountCollection = db.getCollection(CollectionNames.LAST_MESSAGE_COUNT.name());
         Long lastMessageCount = (Long) lastMessageCountCollection.findOne().get(FieldNames.LAST_MESSAGE_COUNT.name());
         assertEquals((Long) 1l, lastMessageCount);
-        List<SailMasterMessage> rawMessages = domainObjectFactory.loadMessage(0);
+        List<SailMasterMessage> rawMessages = domainObjectFactory.loadMessages(0);
         assertEquals(1, rawMessages.size());
         assertEquals(rawMessage, rawMessages.get(0).getMessage());
         assertEquals(0l, (long) rawMessages.get(0).getSequenceNumber());
