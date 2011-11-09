@@ -220,7 +220,8 @@ public class RacingEventServiceImpl implements RacingEventService {
     }
     
     @Override
-    public synchronized RaceHandle addSwissTimingRace(String raceID, String hostname, int port, WindStore windStore, long timeoutInMilliseconds) throws InterruptedException {
+    public synchronized RaceHandle addSwissTimingRace(String raceID, String hostname, int port, WindStore windStore,
+            long timeoutInMilliseconds) throws InterruptedException {
         Triple<String, String, Integer> key = new Triple<String, String, Integer>(raceID, hostname, port);
         RaceTracker tracker = raceTrackersByID.get(key);
         if (tracker == null) {
