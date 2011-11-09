@@ -76,4 +76,8 @@ public interface SailMasterConnector {
      * @throws IOException 
      */
     void stop() throws IOException;
+
+    void trackRace(String raceID);
+
+    void stopTrackingRace(String raceID);
 }

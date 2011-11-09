@@ -50,10 +50,10 @@ public class StoreAndForwardTest {
         storeAndForward = new StoreAndForward(RECEIVE_PORT, CLIENT_PORT, MongoObjectFactory.INSTANCE, SwissTimingFactory.INSTANCE);
         storeAndForwardThread = new Thread(storeAndForward, "StoreAndForward");
         storeAndForwardThread.start();
-        sendingSocket = new Socket("localhost", RECEIVE_PORT);
+        sendingSocket = new Socket("127.0.0.1", RECEIVE_PORT);
         sendingStream = sendingSocket.getOutputStream();
         transceiver = SwissTimingFactory.INSTANCE.createSailMasterTransceiver();
-        connector = SwissTimingFactory.INSTANCE.createSailMasterConnector("localhost", CLIENT_PORT);
+        connector = SwissTimingFactory.INSTANCE.createSailMasterConnector("127.0.0.1", CLIENT_PORT);
         DBCollection lastMessageCountCollection = db.getCollection(CollectionNames.LAST_MESSAGE_COUNT.name());
         lastMessageCountCollection.update(new BasicDBObject(), new BasicDBObject().append(FieldNames.LAST_MESSAGE_COUNT.name(), 0l),
                 /* upsert */ true, /* multi */ false);
