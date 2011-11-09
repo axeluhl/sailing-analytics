@@ -50,7 +50,7 @@ public class SailMasterDummy implements Runnable {
 
     private void processRequests() throws IOException {
         InputStream is = socket.getInputStream();
-        Pair<String, Integer> messageAndOptionalSequenceNumber = transceiver.receiveMessage(is);
+        Pair<String, Long> messageAndOptionalSequenceNumber = transceiver.receiveMessage(is);
         while (messageAndOptionalSequenceNumber != null) {
             respondToMessage(messageAndOptionalSequenceNumber.getA(), socket.getOutputStream());
             if (stopped) {

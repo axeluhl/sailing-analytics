@@ -21,8 +21,11 @@ import com.sap.sailing.domain.swisstimingadapter.MessageType;
 import com.sap.sailing.domain.swisstimingadapter.Race;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterAdapter;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterConnector;
+import com.sap.sailing.domain.swisstimingadapter.SailMasterMessage;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterTransceiver;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
+import com.sap.sailing.domain.swisstimingadapter.persistence.DomainObjectFactory;
+import com.sap.sailing.domain.swisstimingadapter.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.swisstimingadapter.persistence.StoreAndForward;
 import com.sap.sailing.domain.swisstimingadapter.persistence.impl.CollectionNames;
 import com.sap.sailing.domain.swisstimingadapter.persistence.impl.FieldNames;
@@ -39,11 +42,12 @@ public class StoreAndForwardTest {
     private OutputStream sendingStream;
     private SailMasterTransceiver transceiver;
     private SailMasterConnector connector;
+    private DomainObjectFactory domainObjectFactory;
     
     @Before
     public void setUp() throws UnknownHostException, IOException, InterruptedException {
         db = Activator.getDefaultInstance().getDB();
-        storeAndForward = new StoreAndForward(RECEIVE_PORT, CLIENT_PORT);
+        storeAndForward = new StoreAndForward(RECEIVE_PORT, CLIENT_PORT, MongoObjectFactory.INSTANCE, SwissTimingFactory.INSTANCE);
         storeAndForwardThread = new Thread(storeAndForward, "StoreAndForward");
         storeAndForwardThread.start();
         sendingSocket = new Socket("localhost", RECEIVE_PORT);
@@ -53,6 +57,9 @@ public class StoreAndForwardTest {
         DBCollection lastMessageCountCollection = db.getCollection(CollectionNames.LAST_MESSAGE_COUNT.name());
         lastMessageCountCollection.update(new BasicDBObject(), new BasicDBObject().append(FieldNames.LAST_MESSAGE_COUNT.name(), 0l),
                 /* upsert */ true, /* multi */ false);
+        DBCollection rawMessages = db.getCollection(CollectionNames.RAW_MESSAGES.name());
+        rawMessages.drop();
+        domainObjectFactory = DomainObjectFactory.INSTANCE;
     }
     
     @After
@@ -78,7 +85,8 @@ public class StoreAndForwardTest {
                 }
             }
         });
-        transceiver.sendMessage("RAC|2|4711;A wonderful test race|4712;Not such a wonderful race", sendingStream);
+        String rawMessage = "RAC|2|4711;A wonderful test race|4712;Not such a wonderful race";
+        transceiver.sendMessage(rawMessage, sendingStream);
         synchronized (this) {
             if (!receivedSomething[0]) {
                 wait(2000l); // wait for two seconds to receive the message
@@ -89,5 +97,9 @@ public class StoreAndForwardTest {
         DBCollection lastMessageCountCollection = db.getCollection(CollectionNames.LAST_MESSAGE_COUNT.name());
         Long lastMessageCount = (Long) lastMessageCountCollection.findOne().get(FieldNames.LAST_MESSAGE_COUNT.name());
         assertEquals((Long) 1l, lastMessageCount);
+        List<SailMasterMessage> rawMessages = domainObjectFactory.loadMessage(0);
+        assertEquals(1, rawMessages.size());
+        assertEquals(rawMessage, rawMessages.get(0).getMessage());
+        assertEquals(0l, (long) rawMessages.get(0).getSequenceNumber());
     }
 }

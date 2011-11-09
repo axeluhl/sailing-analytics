@@ -17,6 +17,6 @@ public interface SailMasterTransceiver {
      * @return the message read, or <code>null</code> if the end of the stream has been reached without finding a
      *         message start byte.
      */
-    Pair<String, Integer> receiveMessage(InputStream inputStream) throws IOException;
+    Pair<String, Long> receiveMessage(InputStream inputStream) throws IOException;
 
 }

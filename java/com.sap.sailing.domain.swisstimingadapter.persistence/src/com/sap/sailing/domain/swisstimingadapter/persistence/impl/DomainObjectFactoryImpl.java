@@ -5,9 +5,12 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
+import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
+import com.sap.sailing.domain.swisstimingadapter.SailMasterMessage;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingConfiguration;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
 import com.sap.sailing.domain.swisstimingadapter.persistence.DomainObjectFactory;
@@ -17,9 +20,14 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
 
     private final DB database;
     
-    public DomainObjectFactoryImpl(DB db) {
+    private final SwissTimingFactory swissTimingFactory;
+    
+    public DomainObjectFactoryImpl(DB db, SwissTimingFactory swissTimingFactory) {
         super();
         this.database = db;
+        this.swissTimingFactory = swissTimingFactory;
+        DBCollection rawMessages = database.getCollection(CollectionNames.RAW_MESSAGES.name());
+        rawMessages.ensureIndex(new BasicDBObject().append(FieldNames.MESSAGE_SEQUENCE_NUMBER.name(), 1));
     }
 
     @Override
@@ -40,9 +48,25 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
     private SwissTimingConfiguration loadSwissTimingConfiguration(DBObject object) {
-        return SwissTimingFactory.INSTANCE.createSwissTimingConfiguration((String) object.get(FieldNames.ST_CONFIG_NAME.name()),
+        return swissTimingFactory.createSwissTimingConfiguration((String) object.get(FieldNames.ST_CONFIG_NAME.name()),
                 (String) object.get(FieldNames.ST_CONFIG_HOSTNAME.name()),
                 (Integer) object.get(FieldNames.ST_CONFIG_PORT.name()));
+    }
+
+    @Override
+    public List<SailMasterMessage> loadMessage(int firstSequenceNumber) {
+        DBCollection rawMessages = database.getCollection(CollectionNames.RAW_MESSAGES.name());
+        BasicDBObject query = new BasicDBObject();
+        if (firstSequenceNumber != -1) {
+            query.append(FieldNames.MESSAGE_SEQUENCE_NUMBER.name(), new BasicDBObject("$gte", firstSequenceNumber));
+        }
+        DBCursor results = rawMessages.find(query);
+        List<SailMasterMessage> result = new ArrayList<SailMasterMessage>();
+        for (DBObject o : results) {
+            result.add(swissTimingFactory.createMessage((String) o.get(FieldNames.MESSAGE_CONTENT.name()),
+                    (Long) o.get(FieldNames.MESSAGE_SEQUENCE_NUMBER.name())));
+        }
+        return result;
     }
 
 }

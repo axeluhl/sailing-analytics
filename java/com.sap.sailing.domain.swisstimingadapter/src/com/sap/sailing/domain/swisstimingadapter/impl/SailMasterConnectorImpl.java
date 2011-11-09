@@ -109,7 +109,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
             while (!stopped) {
                 ensureSocketIsOpen();
                 try {
-                    Pair<String, Integer> receivedMessageAndOptionalSequenceNumber = receiveMessage(socket.getInputStream());
+                    Pair<String, Long> receivedMessageAndOptionalSequenceNumber = receiveMessage(socket.getInputStream());
                     SailMasterMessage message = new SailMasterMessageImpl(receivedMessageAndOptionalSequenceNumber.getA(),
                             receivedMessageAndOptionalSequenceNumber.getB());
                     if (message.getType() == MessageType._STOPSERVER) {

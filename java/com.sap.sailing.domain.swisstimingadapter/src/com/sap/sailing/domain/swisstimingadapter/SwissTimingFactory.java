@@ -15,4 +15,6 @@ public interface SwissTimingFactory {
     SwissTimingConfiguration createSwissTimingConfiguration(String name, String hostname, int port);
 
     SwissTimingRaceTracker createRaceTracker(String raceID, String hostname, int port, WindStore windStore) throws InterruptedException;
+    
+    SailMasterMessage createMessage(String message, Long sequenceNumber);
 }

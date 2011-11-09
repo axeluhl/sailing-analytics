@@ -14,6 +14,7 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
+import com.sap.sailing.domain.swisstimingadapter.SailMasterMessage;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterTransceiver;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
 import com.sap.sailing.domain.swisstimingadapter.persistence.impl.CollectionNames;
@@ -47,20 +48,29 @@ public class StoreAndForward implements Runnable {
 
     private final DBCollection lastMessageCountCollection;
     
+    private final MongoObjectFactory mongoObjectFactory;
+    
+    private final SwissTimingFactory swissTimingFactory;
+    
     /**
      * @param listenPort
      *            listens on this port for messages coming in from a real SwissTiming SailMaster
      * @param portForClients
      *            clients can connect to this port and will receive forwarded and sequence-numbered messages over those
      *            sockets
+     * @param mongoObjectFactory TODO
+     * @param swissTimingFactory TODO
      */
-    public StoreAndForward(int listenPort, final int portForClients) throws InterruptedException {
+    public StoreAndForward(int listenPort, final int portForClients, MongoObjectFactory mongoObjectFactory,
+            SwissTimingFactory swissTimingFactory) throws InterruptedException {
         db = Activator.getDefaultInstance().getDB();
         this.listenPort = listenPort;
         this.transceiver = SwissTimingFactory.INSTANCE.createSailMasterTransceiver();
         this.portForClients = portForClients;
         this.streamsToForwardTo = new ArrayList<OutputStream>();
         this.socketsToForwardTo = new ArrayList<Socket>();
+        this.mongoObjectFactory = mongoObjectFactory;
+        this.swissTimingFactory = swissTimingFactory;
         lastMessageCountCollection = db.getCollection(CollectionNames.LAST_MESSAGE_COUNT.name());
         DBObject lastMessageCountRecord = lastMessageCountCollection.findOne();
         lastMessageCount = lastMessageCountRecord == null ? 0 : (Long) lastMessageCountRecord.get(FieldNames.LAST_MESSAGE_COUNT.name());
@@ -110,7 +120,7 @@ public class StoreAndForward implements Runnable {
     public static void main(String[] args) throws InterruptedException {
         int listenPort = Integer.valueOf(args[0]);
         int clientPort = Integer.valueOf(args[1]);
-        StoreAndForward storeAndForward = new StoreAndForward(listenPort, clientPort);
+        StoreAndForward storeAndForward = new StoreAndForward(listenPort, clientPort, MongoObjectFactory.INSTANCE, SwissTimingFactory.INSTANCE);
         storeAndForward.run();
     }
 
@@ -121,7 +131,7 @@ public class StoreAndForward implements Runnable {
                 Socket socket = ss.accept();
                 try {
                     InputStream is = socket.getInputStream();
-                    Pair<String, Integer> messageAndOptionalSequenceNumber = transceiver.receiveMessage(is);
+                    Pair<String, Long> messageAndOptionalSequenceNumber = transceiver.receiveMessage(is);
                     // ignore any sequence number contained in the message; we'll create our own
                     DBObject emptyQuery = new BasicDBObject();
                     DBObject incrementLastMessageCountQuery = new BasicDBObject().
@@ -129,12 +139,14 @@ public class StoreAndForward implements Runnable {
                     while (messageAndOptionalSequenceNumber != null) {
                         DBObject newCountRecord = lastMessageCountCollection.findAndModify(emptyQuery, incrementLastMessageCountQuery);
                         lastMessageCount = (Long) newCountRecord.get(FieldNames.LAST_MESSAGE_COUNT.name());
+                        SailMasterMessage message = swissTimingFactory.createMessage(messageAndOptionalSequenceNumber.getA(), lastMessageCount);
+                        mongoObjectFactory.storeRawSailMasterMessage(message);
                         synchronized (this) {
                             for (OutputStream os : streamsToForwardTo) {
                                 // write the sequence number of the message into the stream before actually writing the
                                 // SwissTiming message
-                                os.write(("" + lastMessageCount).getBytes());
-                                transceiver.sendMessage(messageAndOptionalSequenceNumber.getA(), os);
+                                os.write(("" + message.getSequenceNumber()).getBytes());
+                                transceiver.sendMessage(message.getMessage(), os);
                             }
                         }
                         if (!stopped) {

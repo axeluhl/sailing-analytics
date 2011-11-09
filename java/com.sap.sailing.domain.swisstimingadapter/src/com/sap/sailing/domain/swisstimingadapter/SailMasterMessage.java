@@ -20,5 +20,5 @@ public interface SailMasterMessage {
     
     boolean isEvent();
 
-    Integer getSequenceNumber();
+    Long getSequenceNumber();
 }

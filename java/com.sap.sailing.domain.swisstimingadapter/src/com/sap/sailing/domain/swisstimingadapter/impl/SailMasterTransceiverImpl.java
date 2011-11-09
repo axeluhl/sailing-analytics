@@ -42,9 +42,9 @@ public class SailMasterTransceiverImpl implements SailMasterTransceiver {
      *         from the database starting with this number. If no sequence number was received
      *         along with the message, the pair's second component is <code>null</code>.
      */
-    public Pair<String, Integer> receiveMessage(InputStream inputStream) throws IOException {
-        Integer sequenceNumber = null;
+    public Pair<String, Long> receiveMessage(InputStream inputStream) throws IOException {
         ByteArrayOutputStream bufferForOptionalSequenceNumber = new ByteArrayOutputStream(8);
+        Long sequenceNumber = null;
         // read until an STX byte comes along
         int read = inputStream.read();
         while (read != -1 && read != STX) {
@@ -58,16 +58,16 @@ public class SailMasterTransceiverImpl implements SailMasterTransceiver {
         if (bufferForOptionalSequenceNumber.size() > 0) {
             sequenceNumber = getSequenceNumber(bufferForOptionalSequenceNumber);
         }
-        return new Pair<String, Integer>(message, sequenceNumber);
+        return new Pair<String, Long>(message, sequenceNumber);
     }
 
-    private Integer getSequenceNumber(ByteArrayOutputStream bufferForOptionalSequenceNumber) {
+    private Long getSequenceNumber(ByteArrayOutputStream bufferForOptionalSequenceNumber) {
         String s = new String(bufferForOptionalSequenceNumber.toByteArray());
         StringBuilder trailingDigits = new StringBuilder();
         for (int i=s.length()-1; i>=0 && s.charAt(i) >= '0' && s.charAt(i) <= '9'; i--) {
             trailingDigits.insert(0, s.charAt(i));
         }
-        return trailingDigits.length() > 0 ? Integer.valueOf(trailingDigits.toString()) : null;
+        return trailingDigits.length() > 0 ? Long.valueOf(trailingDigits.toString()) : null;
     }
 
     /**
