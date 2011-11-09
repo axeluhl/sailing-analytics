@@ -54,7 +54,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
     @Override
-    public List<SailMasterMessage> loadMessage(int firstSequenceNumber) {
+    public List<SailMasterMessage> loadMessages(int firstSequenceNumber) {
         DBCollection rawMessages = database.getCollection(CollectionNames.RAW_MESSAGES.name());
         BasicDBObject query = new BasicDBObject();
         if (firstSequenceNumber != -1) {

@@ -25,5 +25,5 @@ public interface DomainObjectFactory {
      * 
      * @return messages in ascending sequence number order; always a valid but perhaps empty list
      */
-    List<SailMasterMessage> loadMessage(int firstSequenceNumber);
+    List<SailMasterMessage> loadMessages(int firstSequenceNumber);
 }

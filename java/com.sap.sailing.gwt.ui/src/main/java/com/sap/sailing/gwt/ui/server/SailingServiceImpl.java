@@ -321,10 +321,10 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
 
     @Override
-    public Pair<String, List<RaceRecordDAO>> listRacesInEvent(String eventJsonURL) throws MalformedURLException, IOException,
+    public Pair<String, List<RaceRecordDAO>> listTracTracRacesInEvent(String eventJsonURL) throws MalformedURLException, IOException,
             ParseException, org.json.simple.parser.ParseException, URISyntaxException {
         com.sap.sailing.util.Util.Pair<String,List<RaceRecord>> raceRecords;
-        raceRecords = getService().getRaceRecords(new URL(eventJsonURL));
+        raceRecords = getService().getTracTracRaceRecords(new URL(eventJsonURL));
         List<RaceRecordDAO> result = new ArrayList<RaceRecordDAO>();
         for (RaceRecord raceRecord : raceRecords.getB()) {
             result.add(new RaceRecordDAO(raceRecord.getID(), raceRecord.getEventName(), raceRecord.getName(),

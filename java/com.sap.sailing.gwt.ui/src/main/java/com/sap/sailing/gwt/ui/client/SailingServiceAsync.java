@@ -33,7 +33,7 @@ public interface SailingServiceAsync {
     /**
      * The string returned in the callback's pair is the common event name
      */
-    void listRacesInEvent(String eventJsonURL, AsyncCallback<Pair<String, List<RaceRecordDAO>>> callback);
+    void listTracTracRacesInEvent(String eventJsonURL, AsyncCallback<Pair<String, List<RaceRecordDAO>>> callback);
 
     /**
      * @param liveURI may be <code>null</code> or the empty string in which case the server will
