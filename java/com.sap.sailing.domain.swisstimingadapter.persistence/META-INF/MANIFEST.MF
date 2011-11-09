@@ -9,4 +9,5 @@ Require-Bundle: com.sap.sailing.domain.swisstimingadapter,
  com.mongodb.driver;bundle-version="2.6.2",
  com.sap.sailing.mongodb,
  com.sap.sailing.domain
-Export-Package: com.sap.sailing.domain.swisstimingadapter.persistence
+Export-Package: com.sap.sailing.domain.swisstimingadapter.persistence,
+ com.sap.sailing.domain.swisstimingadapter.persistence.impl;x-friends:="com.sap.sailing.domain.swisstimingadapter.test"

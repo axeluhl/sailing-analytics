@@ -18,7 +18,7 @@ public class SwissTimingRaceTrackerImpl implements SwissTimingRaceTracker {
     private final SailMasterConnector connector;
 //    private final Set<RaceDefinition> races;
     
-    protected SwissTimingRaceTrackerImpl(String raceID, String hostname, int port, SwissTimingFactory factory) {
+    protected SwissTimingRaceTrackerImpl(String raceID, String hostname, int port, SwissTimingFactory factory) throws InterruptedException {
         connector = factory.createSailMasterConnector(hostname, port);
 //        races = new HashSet<RaceDefinition>();
     }

@@ -4,6 +4,7 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
+import com.sap.sailing.domain.swisstimingadapter.SailMasterMessage;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingConfiguration;
 import com.sap.sailing.domain.swisstimingadapter.persistence.MongoObjectFactory;
 
@@ -27,6 +28,13 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         result.put(FieldNames.ST_CONFIG_HOSTNAME.name(), swissTimingConfiguration.getHostname());
         result.put(FieldNames.ST_CONFIG_PORT.name(), swissTimingConfiguration.getPort());
         stConfigCollection.insert(result);
+    }
+
+    @Override
+    public void storeRawSailMasterMessage(SailMasterMessage message) {
+        DBCollection rawMessageCollection = database.getCollection(CollectionNames.RAW_MESSAGES.name());
+        rawMessageCollection.insert(new BasicDBObject().append(FieldNames.MESSAGE_SEQUENCE_NUMBER.name(), message.getSequenceNumber()).
+                append(FieldNames.MESSAGE_CONTENT.name(), message.getMessage()));
     }
 
 }
