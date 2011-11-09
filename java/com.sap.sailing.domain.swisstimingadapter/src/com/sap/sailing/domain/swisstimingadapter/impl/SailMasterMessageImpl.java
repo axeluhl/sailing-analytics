@@ -64,4 +64,18 @@ public class SailMasterMessageImpl implements SailMasterMessage {
     public boolean isEvent() {
         return !isRequest() && !isResponse();
     }
+
+    /**
+     * For race-specific messages, the race ID is always found in section #1
+     */
+    @Override
+    public String getRaceID() {
+        String result;
+        if (getType().isRaceSpecific()) {
+            result = getSections()[1];
+        } else {
+            result = null;
+        }
+        return result;
+    }
 }

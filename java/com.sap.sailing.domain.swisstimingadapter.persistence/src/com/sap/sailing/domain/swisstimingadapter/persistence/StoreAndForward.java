@@ -58,8 +58,6 @@ public class StoreAndForward implements Runnable {
      * @param portForClients
      *            clients can connect to this port and will receive forwarded and sequence-numbered messages over those
      *            sockets
-     * @param mongoObjectFactory TODO
-     * @param swissTimingFactory TODO
      */
     public StoreAndForward(int listenPort, final int portForClients, MongoObjectFactory mongoObjectFactory,
             SwissTimingFactory swissTimingFactory) throws InterruptedException {
@@ -159,7 +157,7 @@ public class StoreAndForward implements Runnable {
                     for (Socket socketToForwardTo : socketsToForwardTo) {
                         socketToForwardTo.close();
                     }
-                } catch (Exception e) {
+                } catch (Throwable e) {
                     logger.throwing(StoreAndForward.class.getName(), "Error during forwarding message. Continuing...", e);
                 }
             }
