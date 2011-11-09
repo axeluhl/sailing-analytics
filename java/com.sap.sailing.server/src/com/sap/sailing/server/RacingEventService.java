@@ -176,7 +176,7 @@ public interface RacingEventService {
      */
     void updateStoredLeaderboard(Leaderboard leaderboard);
 
-    RaceHandle addSwissTimingRace(String raceID, String hostname, int port, WindStore windStore, long timeoutInMilliseconds);
+    RaceHandle addSwissTimingRace(String raceID, String hostname, int port, WindStore windStore, long timeoutInMilliseconds) throws InterruptedException;
 
     SwissTimingFactory getSwissTimingFactory();
 

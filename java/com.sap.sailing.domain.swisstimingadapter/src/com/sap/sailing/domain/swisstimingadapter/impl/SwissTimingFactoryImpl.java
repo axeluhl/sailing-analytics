@@ -16,7 +16,7 @@ public class SwissTimingFactoryImpl implements SwissTimingFactory {
     }
 
     @Override
-    public SailMasterConnector createSailMasterConnector(String host, int port) {
+    public SailMasterConnector createSailMasterConnector(String host, int port) throws InterruptedException {
         return new SailMasterConnectorImpl(host, port);
     }
 
@@ -26,7 +26,7 @@ public class SwissTimingFactoryImpl implements SwissTimingFactory {
     }
 
     @Override
-    public SwissTimingRaceTracker createRaceTracker(String raceID, String hostname, int port, WindStore windStore) {
+    public SwissTimingRaceTracker createRaceTracker(String raceID, String hostname, int port, WindStore windStore) throws InterruptedException {
         return new SwissTimingRaceTrackerImpl(raceID, hostname, port, this);
     }
 

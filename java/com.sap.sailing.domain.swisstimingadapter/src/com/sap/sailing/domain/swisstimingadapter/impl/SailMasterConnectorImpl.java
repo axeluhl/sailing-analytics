@@ -69,6 +69,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
     private final Set<SailMasterListener> listeners;
     private final Thread receiverThread;
     private boolean stopped;
+    private boolean connected;
     
     /**
      * Currently the SwissTiming SailMaster protocol only transmits time zone information when sending
@@ -85,7 +86,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
     
     private final Map<MessageType, BlockingQueue<SailMasterMessage>> unprocessedMessagesByType;
     
-    public SailMasterConnectorImpl(String host, int port) {
+    public SailMasterConnectorImpl(String host, int port) throws InterruptedException {
         super();
         dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ssZ");
         this.host = host;
@@ -96,6 +97,11 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
         lastTimeZoneSuffix = (offset<0?"-":"+") + new DecimalFormat("00").format(offset)+"00";
         receiverThread = new Thread(this, "SwissTiming SailMaster Receiver");
         receiverThread.start();
+        synchronized (this) {
+            while (!connected) {
+                wait();
+            }
+        }
     }
     
     public void run() {
@@ -106,15 +112,16 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
                     Pair<String, Integer> receivedMessageAndOptionalSequenceNumber = receiveMessage(socket.getInputStream());
                     SailMasterMessage message = new SailMasterMessageImpl(receivedMessageAndOptionalSequenceNumber.getA(),
                             receivedMessageAndOptionalSequenceNumber.getB());
-                    if (message.isResponse()) {
-                        // this is a response for an explicit request
-                        rendevouz(message);
-                        if (message.getType() == MessageType._STOPSERVER) {
-                            stop();
+                    if (message.getType() == MessageType._STOPSERVER) {
+                        stop();
+                    } else {
+                        if (message.isResponse()) {
+                            // this is a response for an explicit request
+                            rendevouz(message);
+                        } else if (message.isEvent()) {
+                            // a spontaneous event
+                            notifyListeners(message);
                         }
-                    } else if (message.isEvent()) {
-                        // a spontaneous event
-                        notifyListeners(message);
                     }
                 } catch (SocketException se) {
                     // This occurs if the socket was closed which may mean the connector was stopped. Check in while
@@ -311,6 +318,10 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
     private synchronized void ensureSocketIsOpen() throws UnknownHostException, IOException {
         if (socket == null) {
             socket = new Socket(host, port);
+            synchronized (this) {
+                connected = true;
+                notifyAll();
+            }
         }
     }
 

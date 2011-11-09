@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -36,50 +37,89 @@ public class StoreAndForward implements Runnable {
     private final DB db;
     private final int listenPort;
     private final SailMasterTransceiver transceiver;
-    private final List<Pair<String, Integer>> hostnamesAndPorts;
+    private final int portForClients;
     private long lastMessageCount;
+    private boolean stopped;
+    private final Thread clientListener;
+    private final List<Socket> socketsToForwardTo;
+    private final List<OutputStream> streamsToForwardTo;
+    private boolean listeningForClients;
 
     private final DBCollection lastMessageCountCollection;
     
-    public StoreAndForward(int listenPort, List<Pair<String, Integer>> hostnamesAndPorts) {
+    /**
+     * @param listenPort
+     *            listens on this port for messages coming in from a real SwissTiming SailMaster
+     * @param portForClients
+     *            clients can connect to this port and will receive forwarded and sequence-numbered messages over those
+     *            sockets
+     */
+    public StoreAndForward(int listenPort, final int portForClients) throws InterruptedException {
         db = Activator.getDefaultInstance().getDB();
         this.listenPort = listenPort;
         this.transceiver = SwissTimingFactory.INSTANCE.createSailMasterTransceiver();
-        this.hostnamesAndPorts = hostnamesAndPorts;
+        this.portForClients = portForClients;
+        this.streamsToForwardTo = new ArrayList<OutputStream>();
+        this.socketsToForwardTo = new ArrayList<Socket>();
         lastMessageCountCollection = db.getCollection(CollectionNames.LAST_MESSAGE_COUNT.name());
         DBObject lastMessageCountRecord = lastMessageCountCollection.findOne();
-        lastMessageCount = (Long) lastMessageCountRecord.get(FieldNames.LAST_MESSAGE_COUNT.name());
+        lastMessageCount = lastMessageCountRecord == null ? 0 : (Long) lastMessageCountRecord.get(FieldNames.LAST_MESSAGE_COUNT.name());
+        clientListener = new Thread(new Runnable() {
+            public void run() {
+                ServerSocket ss;
+                try {
+                    synchronized (StoreAndForward.this) {
+                        ss = new ServerSocket(portForClients);
+                        listeningForClients = true;
+                        StoreAndForward.this.notifyAll();
+                    }
+                    while (!stopped) {
+                        Socket s = ss.accept();
+                        if (!stopped) {
+                            synchronized (StoreAndForward.this) {
+                                socketsToForwardTo.add(s);
+                                streamsToForwardTo.add(s.getOutputStream());
+                            }
+                        } else {
+                            s.close();
+                        }
+                    }
+                    logger.info("StoreAndForward client listener thread stopped.");
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }, "StoreAndForwardClientListener");
+        clientListener.start();
+        synchronized (this) {
+            while (!listeningForClients) {
+                wait();
+            }
+        }
+    }
+    
+    /**
+     * Stops execution after having received the next message
+     */
+    public void stop() throws UnknownHostException, IOException, InterruptedException {
+        stopped = true;
+        new Socket("localhost", portForClients); // this is to stop the client listener thread
+        clientListener.join();
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
         int listenPort = Integer.valueOf(args[0]);
-        List<Pair<String, Integer>> hostnamesAndPorts = new ArrayList<Pair<String,Integer>>();
-        for (int i=1; i<args.length-1; i+=2) {
-            Pair<String, Integer> hostnameAndPort = new Pair<String, Integer>(args[i], Integer.valueOf(args[i+1]));
-            hostnamesAndPorts.add(hostnameAndPort);
-        }
-        StoreAndForward storeAndForward = new StoreAndForward(listenPort, hostnamesAndPorts);
+        int clientPort = Integer.valueOf(args[1]);
+        StoreAndForward storeAndForward = new StoreAndForward(listenPort, clientPort);
         storeAndForward.run();
     }
 
     public void run() {
         try {
             ServerSocket ss = new ServerSocket(listenPort);
-            while (true) {
+            while (!stopped) {
                 Socket socket = ss.accept();
                 try {
-                    List<OutputStream> streamsToForwardTo = new ArrayList<OutputStream>();
-                    List<Socket> socketsToForwardTo = new ArrayList<Socket>();
-                    for (Pair<String, Integer> hostnameAndPort : hostnamesAndPorts) {
-                        try {
-                            Socket socketToForwardTo = new Socket(hostnameAndPort.getA(), hostnameAndPort.getB());
-                            socketsToForwardTo.add(socketToForwardTo);
-                            streamsToForwardTo.add(socketToForwardTo.getOutputStream());
-                        } catch (Exception e) {
-                            logger.throwing(StoreAndForward.class.getName(), "While trying to open a socket to forward to "+
-                                    hostnameAndPort, e);
-                        }
-                    }
                     InputStream is = socket.getInputStream();
                     Pair<String, Integer> messageAndOptionalSequenceNumber = transceiver.receiveMessage(is);
                     // ignore any sequence number contained in the message; we'll create our own
@@ -89,12 +129,17 @@ public class StoreAndForward implements Runnable {
                     while (messageAndOptionalSequenceNumber != null) {
                         DBObject newCountRecord = lastMessageCountCollection.findAndModify(emptyQuery, incrementLastMessageCountQuery);
                         lastMessageCount = (Long) newCountRecord.get(FieldNames.LAST_MESSAGE_COUNT.name());
-                        for (OutputStream os : streamsToForwardTo) {
-                            // write the sequence number of the message into the stream before actually writing the SwissTiming message
-                            os.write((""+lastMessageCount).getBytes());
-                            transceiver.sendMessage(messageAndOptionalSequenceNumber.getA(), os);
+                        synchronized (this) {
+                            for (OutputStream os : streamsToForwardTo) {
+                                // write the sequence number of the message into the stream before actually writing the
+                                // SwissTiming message
+                                os.write(("" + lastMessageCount).getBytes());
+                                transceiver.sendMessage(messageAndOptionalSequenceNumber.getA(), os);
+                            }
                         }
-                        messageAndOptionalSequenceNumber = transceiver.receiveMessage(is);
+                        if (!stopped) {
+                            messageAndOptionalSequenceNumber = transceiver.receiveMessage(is);
+                        }
                     }
                     for (OutputStream os : streamsToForwardTo) {
                         os.close();
@@ -103,9 +148,10 @@ public class StoreAndForward implements Runnable {
                         socketToForwardTo.close();
                     }
                 } catch (Exception e) {
-                    
+                    logger.throwing(StoreAndForward.class.getName(), "Error during forwarding message. Continuing...", e);
                 }
             }
+            logger.info("Stopping StoreAndForward server.");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
