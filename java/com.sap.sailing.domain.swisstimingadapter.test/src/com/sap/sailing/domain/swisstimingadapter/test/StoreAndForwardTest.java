@@ -17,7 +17,6 @@ import org.junit.Test;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
-import com.sap.sailing.domain.swisstimingadapter.MessageType;
 import com.sap.sailing.domain.swisstimingadapter.Race;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterAdapter;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterConnector;
@@ -37,7 +36,6 @@ public class StoreAndForwardTest {
     
     private DB db;
     private StoreAndForward storeAndForward;
-    private Thread storeAndForwardThread;
     private Socket sendingSocket;
     private OutputStream sendingStream;
     private SailMasterTransceiver transceiver;
@@ -48,13 +46,10 @@ public class StoreAndForwardTest {
     public void setUp() throws UnknownHostException, IOException, InterruptedException {
         db = Activator.getDefaultInstance().getDB();
         storeAndForward = new StoreAndForward(RECEIVE_PORT, CLIENT_PORT, MongoObjectFactory.INSTANCE, SwissTimingFactory.INSTANCE);
-        Thread.sleep(1000); // wait for server socket to really be established and listening
-        storeAndForwardThread = new Thread(storeAndForward, "StoreAndForward");
-        storeAndForwardThread.start();
-        sendingSocket = new Socket("127.0.0.1", RECEIVE_PORT);
+        sendingSocket = new Socket("localhost", RECEIVE_PORT);
         sendingStream = sendingSocket.getOutputStream();
         transceiver = SwissTimingFactory.INSTANCE.createSailMasterTransceiver();
-        connector = SwissTimingFactory.INSTANCE.createSailMasterConnector("127.0.0.1", CLIENT_PORT);
+        connector = SwissTimingFactory.INSTANCE.createSailMasterConnector("localhost", CLIENT_PORT);
         DBCollection lastMessageCountCollection = db.getCollection(CollectionNames.LAST_MESSAGE_COUNT.name());
         lastMessageCountCollection.update(new BasicDBObject(), new BasicDBObject().append(FieldNames.LAST_MESSAGE_COUNT.name(), 0l),
                 /* upsert */ true, /* multi */ false);
@@ -66,8 +61,6 @@ public class StoreAndForwardTest {
     @After
     public void tearDown() throws InterruptedException, IOException {
         storeAndForward.stop();
-        transceiver.sendMessage(MessageType._STOPSERVER.name(), sendingStream); // forwards to connector and hence stops it
-        storeAndForwardThread.join();
     }
     
     @Test
