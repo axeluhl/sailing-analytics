@@ -59,7 +59,7 @@ public class StoreAndForward implements Runnable {
      *            clients can connect to this port and will receive forwarded and sequence-numbered messages over those
      *            sockets
      */
-    public StoreAndForward(int listenPort, final int portForClients, MongoObjectFactory mongoObjectFactory,
+    public StoreAndForward(final int listenPort, final int portForClients, MongoObjectFactory mongoObjectFactory,
             SwissTimingFactory swissTimingFactory) throws InterruptedException {
         db = Activator.getDefaultInstance().getDB();
         this.listenPort = listenPort;
@@ -79,6 +79,8 @@ public class StoreAndForward implements Runnable {
                     synchronized (StoreAndForward.this) {
                         ss = new ServerSocket(portForClients);
                         listeningForClients = true;
+                        logger.info("StoreAndForward listening on port "+listenPort+
+                                " and listening for clients on port "+portForClients);
                         StoreAndForward.this.notifyAll();
                     }
                     while (!stopped) {
