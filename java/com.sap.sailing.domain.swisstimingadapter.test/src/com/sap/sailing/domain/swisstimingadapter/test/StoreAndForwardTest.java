@@ -48,6 +48,7 @@ public class StoreAndForwardTest {
     public void setUp() throws UnknownHostException, IOException, InterruptedException {
         db = Activator.getDefaultInstance().getDB();
         storeAndForward = new StoreAndForward(RECEIVE_PORT, CLIENT_PORT, MongoObjectFactory.INSTANCE, SwissTimingFactory.INSTANCE);
+        Thread.sleep(100); // wait for server socket to really be established and listening
         storeAndForwardThread = new Thread(storeAndForward, "StoreAndForward");
         storeAndForwardThread.start();
         sendingSocket = new Socket("127.0.0.1", RECEIVE_PORT);
