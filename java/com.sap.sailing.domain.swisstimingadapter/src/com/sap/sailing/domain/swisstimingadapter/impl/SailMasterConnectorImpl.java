@@ -110,18 +110,18 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
                 ensureSocketIsOpen();
                 try {
                     Pair<String, Long> receivedMessageAndOptionalSequenceNumber = receiveMessage(socket.getInputStream());
-                    SailMasterMessage message = new SailMasterMessageImpl(receivedMessageAndOptionalSequenceNumber.getA(),
+                    SailMasterMessage message = new SailMasterMessageImpl(
+                            receivedMessageAndOptionalSequenceNumber.getA(),
                             receivedMessageAndOptionalSequenceNumber.getB());
+                    if (message.isResponse()) {
+                        // this is a response for an explicit request
+                        rendevouz(message);
+                    } else if (message.isEvent()) {
+                        // a spontaneous event
+                        notifyListeners(message);
+                    }
                     if (message.getType() == MessageType._STOPSERVER) {
                         stop();
-                    } else {
-                        if (message.isResponse()) {
-                            // this is a response for an explicit request
-                            rendevouz(message);
-                        } else if (message.isEvent()) {
-                            // a spontaneous event
-                            notifyListeners(message);
-                        }
                     }
                 } catch (SocketException se) {
                     // This occurs if the socket was closed which may mean the connector was stopped. Check in while
