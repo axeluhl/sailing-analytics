@@ -5,9 +5,9 @@ Bundle-SymbolicName: com.sap.sailing.domain.swisstimingadapter.test
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: org.junit;version="4.8.1"
 Require-Bundle: com.sap.sailing.domain.swisstimingadapter,
  com.sap.sailing.domain,
- org.junit4,
  com.sap.sailing.udpconnector,
  com.sap.sailing.domain.swisstimingadapter.persistence,
  com.mongodb.driver;bundle-version="2.6.2",
