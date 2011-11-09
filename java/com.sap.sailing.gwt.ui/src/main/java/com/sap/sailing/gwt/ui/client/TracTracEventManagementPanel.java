@@ -368,7 +368,7 @@ public class TracTracEventManagementPanel extends FormPanel implements EventDisp
         final String jsonURL = jsonURLBox.getValue();
         final String liveDataURI = liveURIBox.getValue();
         final String storedDataURI = storedURIBox.getValue();
-        sailingService.listRacesInEvent(jsonURL, new AsyncCallback<Pair<String, List<RaceRecordDAO>>>() {
+        sailingService.listTracTracRacesInEvent(jsonURL, new AsyncCallback<Pair<String, List<RaceRecordDAO>>>() {
             @Override
             public void onFailure(Throwable caught) {
                 TracTracEventManagementPanel.this.errorReporter.reportError("Error trying to list races: "
