@@ -45,13 +45,18 @@ public class StoreAndForward implements Runnable {
     private final List<Socket> socketsToForwardTo;
     private final List<OutputStream> streamsToForwardTo;
     private boolean listeningForClients;
+    private boolean receivingFromSailMaster;
 
     private final DBCollection lastMessageCountCollection;
     
     private final MongoObjectFactory mongoObjectFactory;
     
     private final SwissTimingFactory swissTimingFactory;
-    
+
+    private final Thread storeAndForwardThread;
+
+    private Socket socket;
+
     /**
      * @param listenPort
      *            listens on this port for messages coming in from a real SwissTiming SailMaster
@@ -79,8 +84,7 @@ public class StoreAndForward implements Runnable {
                     synchronized (StoreAndForward.this) {
                         ss = new ServerSocket(portForClients);
                         listeningForClients = true;
-                        logger.info("StoreAndForward listening on port "+listenPort+
-                                " and listening for clients on port "+portForClients);
+                        logger.info("StoreAndForward listening for clients on port "+portForClients);
                         StoreAndForward.this.notifyAll();
                     }
                     while (!stopped) {
@@ -101,8 +105,13 @@ public class StoreAndForward implements Runnable {
             }
         }, "StoreAndForwardClientListener");
         clientListener.start();
+        storeAndForwardThread = new Thread(this, "StoreAndForward");
+        storeAndForwardThread.start();
         synchronized (this) {
             while (!listeningForClients) {
+                wait();
+            }
+            while (!receivingFromSailMaster) {
                 wait();
             }
         }
@@ -115,6 +124,8 @@ public class StoreAndForward implements Runnable {
         stopped = true;
         new Socket("localhost", portForClients); // this is to stop the client listener thread
         clientListener.join();
+        socket.close(); // will let a read terminate abnormally
+        storeAndForwardThread.join();
     }
 
     public static void main(String[] args) throws InterruptedException {
@@ -127,8 +138,13 @@ public class StoreAndForward implements Runnable {
     public void run() {
         try {
             ServerSocket ss = new ServerSocket(listenPort);
+            synchronized (this) {
+                receivingFromSailMaster = true;
+                logger.info("StoreAndForward receiving packages on port "+listenPort);
+                notifyAll();
+            }
             while (!stopped) {
-                Socket socket = ss.accept();
+                socket = ss.accept();
                 try {
                     InputStream is = socket.getInputStream();
                     Pair<String, Long> messageAndOptionalSequenceNumber = transceiver.receiveMessage(is);
@@ -160,7 +176,9 @@ public class StoreAndForward implements Runnable {
                         socketToForwardTo.close();
                     }
                 } catch (Throwable e) {
-                    logger.throwing(StoreAndForward.class.getName(), "Error during forwarding message. Continuing...", e);
+                    if (!stopped) {
+                        logger.throwing(StoreAndForward.class.getName(), "Error during forwarding message. Continuing...", e);
+                    }
                 }
             }
             logger.info("Stopping StoreAndForward server.");
