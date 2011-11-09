@@ -59,7 +59,7 @@ import com.sap.sailing.util.Util.Triple;
  * @author Axel Uhl (d043530)
  *
  */
-public class SailMasterConnectorImpl extends SailMasterTransceiver implements SailMasterConnector, Runnable {
+public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implements SailMasterConnector, Runnable {
     private static final Logger logger = Logger.getLogger(SailMasterConnectorImpl.class.getName());
     
     private final String host;
@@ -103,7 +103,9 @@ public class SailMasterConnectorImpl extends SailMasterTransceiver implements Sa
             while (!stopped) {
                 ensureSocketIsOpen();
                 try {
-                    SailMasterMessage message = new SailMasterMessageImpl(receiveMessage(socket.getInputStream()));
+                    Pair<String, Integer> receivedMessageAndOptionalSequenceNumber = receiveMessage(socket.getInputStream());
+                    SailMasterMessage message = new SailMasterMessageImpl(receivedMessageAndOptionalSequenceNumber.getA(),
+                            receivedMessageAndOptionalSequenceNumber.getB());
                     if (message.isResponse()) {
                         // this is a response for an explicit request
                         rendevouz(message);

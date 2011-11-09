@@ -5,17 +5,24 @@ import com.sap.sailing.domain.swisstimingadapter.SailMasterMessage;
 
 public class SailMasterMessageImpl implements SailMasterMessage {
     private final String message;
+    private final Integer sequenceNumber;
     
     private String[] sections;
 
-    public SailMasterMessageImpl(String message) {
+    public SailMasterMessageImpl(String message, Integer sequenceNumber) {
         super();
         this.message = message;
+        this.sequenceNumber = sequenceNumber;
     }
 
     @Override
     public String getMessage() {
         return message;
+    }
+    
+    @Override
+    public Integer getSequenceNumber() {
+        return sequenceNumber;
     }
 
     @Override

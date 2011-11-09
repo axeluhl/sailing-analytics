@@ -19,4 +19,6 @@ public interface SailMasterMessage {
     boolean isResponse();
     
     boolean isEvent();
+
+    Integer getSequenceNumber();
 }

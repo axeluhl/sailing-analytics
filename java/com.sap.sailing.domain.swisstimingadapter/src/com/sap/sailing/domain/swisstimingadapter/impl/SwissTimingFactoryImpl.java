@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.swisstimingadapter.impl;
 
 import com.sap.sailing.domain.swisstimingadapter.SailMasterConnector;
+import com.sap.sailing.domain.swisstimingadapter.SailMasterTransceiver;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingConfiguration;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingMessageParser;
@@ -27,6 +28,11 @@ public class SwissTimingFactoryImpl implements SwissTimingFactory {
     @Override
     public SwissTimingRaceTracker createRaceTracker(String raceID, String hostname, int port, WindStore windStore) {
         return new SwissTimingRaceTrackerImpl(raceID, hostname, port, this);
+    }
+
+    @Override
+    public SailMasterTransceiver createSailMasterTransceiver() {
+        return new SailMasterTransceiverImpl();
     }
     
 }

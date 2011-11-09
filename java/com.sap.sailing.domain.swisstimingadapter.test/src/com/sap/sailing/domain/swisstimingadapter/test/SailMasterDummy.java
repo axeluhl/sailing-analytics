@@ -8,7 +8,7 @@ import java.net.Socket;
 
 import com.sap.sailing.domain.swisstimingadapter.MessageType;
 import com.sap.sailing.domain.swisstimingadapter.impl.SailMasterMessageImpl;
-import com.sap.sailing.domain.swisstimingadapter.impl.SailMasterTransceiver;
+import com.sap.sailing.domain.swisstimingadapter.impl.SailMasterTransceiverImpl;
 
 public class SailMasterDummy implements Runnable {
     public static final byte STX = 0x02;
@@ -20,7 +20,7 @@ public class SailMasterDummy implements Runnable {
     
     private boolean stopped;
     
-    private final SailMasterTransceiver transceiver = new SailMasterTransceiver();
+    private final SailMasterTransceiverImpl transceiver = new SailMasterTransceiverImpl();
     
     public SailMasterDummy(int port) {
         this.port = port;
