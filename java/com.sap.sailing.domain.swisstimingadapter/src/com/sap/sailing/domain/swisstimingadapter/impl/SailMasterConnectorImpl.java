@@ -160,7 +160,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
             List<SailMasterMessage> messages = messageLoader.loadRaceMessages(raceID);
             long maxSequenceNumber = -1;
             for (SailMasterMessage message : messages) {
-                logger.info("notifying loaded message "+message);
+                logger.fine("notifying loaded message "+message);
                 notifyListeners(message);
                 assert message.getSequenceNumber() == null || message.getSequenceNumber() > maxSequenceNumber;
                 if (message.getSequenceNumber() != null) {
@@ -189,7 +189,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
                     }
                 }
                 if (bufferedMessage != null) {
-                    logger.info("notifying buffered message " + bufferedMessage);
+                    logger.fine("notifying buffered message " + bufferedMessage);
                     notifyListeners(bufferedMessage);
                 }
             } while (raceSpecificMessageBuffers.containsKey(raceID));
@@ -228,7 +228,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
                                 if (!message.getType().isRaceSpecific() || message.getSequenceNumber() == null ||
                                         message.getSequenceNumber() > sequenceNumberOfLastMessageForRaceID.get(message.getRaceID())) {
                                     // a spontaneous event
-                                    logger.info("notifying message " + message);
+                                    logger.fine("notifying message " + message);
                                     notifyListeners(message);
                                 } else {
                                     logger.info("discarding already notified message " + message);
@@ -251,7 +251,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
     }
     
     private synchronized void buffer(SailMasterMessage message) {
-        logger.info("buffering message "+message);
+        logger.find("buffering message "+message);
         assert message.getType().isRaceSpecific();
         List<SailMasterMessage> buffer = raceSpecificMessageBuffers.get(message.getRaceID());
         buffer.add(message);
