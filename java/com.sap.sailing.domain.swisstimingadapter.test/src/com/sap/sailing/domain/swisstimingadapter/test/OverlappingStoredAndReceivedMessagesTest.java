@@ -31,9 +31,10 @@ public class OverlappingStoredAndReceivedMessagesTest implements RaceSpecificMes
 
     private static final int PORT = 6543;
 
-    final private int COUNT = 10;
+    final private int COUNT = 15;
     final private int STORED = 5;
     final private int OVERLAP = 2;
+    final private int UNBUFFERED = 5;
 
     private ArrayList<SailMasterMessage> messagesToLoad;
     private boolean loadMessagesCalled;
@@ -104,7 +105,7 @@ public class OverlappingStoredAndReceivedMessagesTest implements RaceSpecificMes
                 }
             }
         });
-        assert STORED < COUNT && STORED-OVERLAP >= 0;
+        assert STORED < COUNT-UNBUFFERED && STORED-OVERLAP >= 0;
         final String[] rawMessage = new String[COUNT];
         for (int i=0; i<COUNT; i++) {
             rawMessage[i] = "CCG|4711|2|1;Lee Gate;LG1;LG2|"+i+";Windward;WW1";
@@ -126,7 +127,7 @@ public class OverlappingStoredAndReceivedMessagesTest implements RaceSpecificMes
                     }
                     // now transmit all messages; buffering will continue until loadMessages is
                     // unblocked by us sending the STORED-OVERLAPth message
-                    for (int i = 0; i < COUNT; i++) {
+                    for (int i = 0; i < COUNT-UNBUFFERED; i++) {
                         if (i >= STORED-OVERLAP) {
                             transceiver.sendMessage(swissTimingFactory.createMessage(rawMessage[i], (long) i), sendingStream);
                         }
@@ -143,6 +144,10 @@ public class OverlappingStoredAndReceivedMessagesTest implements RaceSpecificMes
         bufferingMessageSenderThread.start();
         connector.trackRace("4711"); // this should transitively invoke loadMessages which blocks until the first STORED messages have been sent
         assertTrue(loadMessagesCalled);
+        // send more messages after buffering
+        for (int i=COUNT-UNBUFFERED; i<COUNT; i++) {
+            transceiver.sendMessage(swissTimingFactory.createMessage(rawMessage[i], (long) i), sendingStream);
+        }
         synchronized (this) {
             int attempts = 0;
             while (coursesReceived.size() < COUNT && attempts++ < 2 * COUNT) {
@@ -153,14 +158,6 @@ public class OverlappingStoredAndReceivedMessagesTest implements RaceSpecificMes
             wait(500l); // wait another half second for spurious extra messages to be received
         }
         assertTrue(receivedSomething[0]);
-        for (Course course : coursesReceived) {
-            Iterable<Mark> marks = course.getMarks();
-            Mark lastMark = null;
-            for (Mark mark : marks) {
-                lastMark = mark;
-            }
-            System.out.println(lastMark.getIndex());
-        }
         assertEquals(COUNT, coursesReceived.size());
         for (int i=0; i<COUNT; i++) {
             Course course = coursesReceived.get(i);

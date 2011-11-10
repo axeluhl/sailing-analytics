@@ -176,6 +176,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
                         if (bufferedMessage.getSequenceNumber() != null && bufferedMessage.getSequenceNumber() > maxSequenceNumber) {
                             maxSequenceNumber = bufferedMessage.getSequenceNumber();
                         } else {
+                            logger.info("discarding already loaded buffered message " + bufferedMessage);
                             bufferedMessage = null;
                         }
                     } else {
@@ -229,6 +230,8 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
                                     // a spontaneous event
                                     logger.info("notifying message " + message);
                                     notifyListeners(message);
+                                } else {
+                                    logger.info("discarding already notified message " + message);
                                 }
                             }
                         }
