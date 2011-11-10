@@ -182,9 +182,9 @@ public abstract class ExpandableSortableColumn<C> extends SortableColumn<Leaderb
                 ensureExpansionDataIsLoaded(new Runnable() {
                     public void run() {
                         int insertIndex = table.getColumnIndex(ExpandableSortableColumn.this);
-                        // The check "insertIndex == -1" is necessary, because the child-columns might be deleted asynchronous
+                        // The check "insertIndex != -1" is necessary, because the child-columns might be deleted asynchronous
                         // while toggling the columns.
-                        if (true) {
+                        if (insertIndex != -1) {
                             insertIndex++;
                             for (SortableColumn<LeaderboardRowDAO, ?> column : getAllVisibleChildren()) {
                                 column.updateMinMax(getLeaderboardPanel().getLeaderboard());

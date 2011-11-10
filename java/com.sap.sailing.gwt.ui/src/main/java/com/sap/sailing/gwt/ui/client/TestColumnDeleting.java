@@ -148,7 +148,7 @@ public class TestColumnDeleting extends GWTTestCase {
     private void getLeaderboard(){
         ArrayList<String> al = new ArrayList<String>();
         al.add(COLUMN1_NAME);
-        service.getLeaderboardByName(LEADERBOARD_NAME, new Date(), al,
+        service.getLeaderboardByName(LEADERBOARD_NAME, new Date(), null,
                 new AsyncCallback<LeaderboardDAO>() {
 
                     @Override
@@ -193,15 +193,22 @@ public class TestColumnDeleting extends GWTTestCase {
                     public void onSuccess(Void result) {
                         System.out.println("Removed column.");
                         
-                        leaderboardPanel.removeColumn(indexOfRaceColumn);
+                        //leaderboardPanel.removeColumn(indexOfRaceColumn);
                         assertNotNull(rc);
-                        rc.toggleExpansion();
+                        try {
+                            leaderboardPanel.updateLeaderboard(leaderboard);
+                            rc.toggleExpansion();
+                        } catch (Exception e) {
+                            fail("Toggle column failed." + e.getLocalizedMessage());
+                        }
                         finishTest();
                     }
                 });
     }
 
-    
+    public void assertColumnDeleting(){
+        
+    }
     
     @Override
     protected void gwtTearDown() throws Exception {
