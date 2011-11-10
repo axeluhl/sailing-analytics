@@ -251,7 +251,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
     }
     
     private synchronized void buffer(SailMasterMessage message) {
-        logger.find("buffering message "+message);
+        logger.fine("buffering message "+message);
         assert message.getType().isRaceSpecific();
         List<SailMasterMessage> buffer = raceSpecificMessageBuffers.get(message.getRaceID());
         buffer.add(message);
