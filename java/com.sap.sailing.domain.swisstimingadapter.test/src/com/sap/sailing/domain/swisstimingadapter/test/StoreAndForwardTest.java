@@ -154,17 +154,19 @@ public class StoreAndForwardTest implements RaceSpecificMessageLoader {
         bufferingMessageSenderThread = new Thread("StoreAndForwardTest-testBufferingMessageSender") {
             public void run() {
                 try {
-                    for (int i = 0; i < COUNT; i++) {
-                        if (i >= STORED) {
-                            // now wait for loadMessages to be called; that tells us that the trackRace
-                            // call has happened and buffering should be activated
-                            synchronized (StoreAndForwardTest.this) {
-                                while (!loadMessagesCalled) {
-                                    StoreAndForwardTest.this.wait();
-                                }
-                            }
+                    // first wait for loadMessages to be called; that tells us that the trackRace
+                    // call has happened and buffering has been activated
+                    synchronized (StoreAndForwardTest.this) {
+                        while (!loadMessagesCalled) {
+                            StoreAndForwardTest.this.wait();
                         }
-                        transceiver.sendMessage(rawMessage[i], sendingStream);
+                    }
+                    // now transmit all messages; buffering will continue until loadMessages is
+                    // unblocked by us sending the STORED-OVERLAPth message
+                    for (int i = 0; i < COUNT; i++) {
+                        if (i >= STORED-OVERLAP) {
+                            transceiver.sendMessage(rawMessage[i], sendingStream);
+                        }
                         synchronized (StoreAndForwardTest.this) {
                             messagesSent++;
                             StoreAndForwardTest.this.notifyAll();
@@ -188,6 +190,14 @@ public class StoreAndForwardTest implements RaceSpecificMessageLoader {
             wait(500l); // wait another half second for spurious extra messages to be received
         }
         assertTrue(receivedSomething[0]);
+        for (Course course : coursesReceived) {
+            Iterable<Mark> marks = course.getMarks();
+            Mark lastMark = null;
+            for (Mark mark : marks) {
+                lastMark = mark;
+            }
+            System.out.println(lastMark.getIndex());
+        }
         assertEquals(COUNT, coursesReceived.size());
         for (int i=0; i<COUNT; i++) {
             Course course = coursesReceived.get(i);
@@ -203,8 +213,10 @@ public class StoreAndForwardTest implements RaceSpecificMessageLoader {
     @Override
     public List<SailMasterMessage> loadMessages(String raceID) {
         synchronized (this) {
-            // Wait until STORED-OVERLAP messages were transmitted; only then return the first STORED messages.
-            // This should produce an overlap of OVERLAP messages
+            loadMessagesCalled = true;
+            notifyAll();
+            // Wait until STORED-OVERLAP messages were sent; only then return the first STORED messages.
+            // This will produce an overlap of OVERLAP messages
             while (messagesSent < STORED-OVERLAP) {
                 try {
                     wait();
@@ -212,8 +224,6 @@ public class StoreAndForwardTest implements RaceSpecificMessageLoader {
                     throw new RuntimeException(e);
                 }
             }
-            loadMessagesCalled = true;
-            notifyAll();
         }
         // now wait until all messages have been transmitted to the receiver so that we know
         // that an overlap exists

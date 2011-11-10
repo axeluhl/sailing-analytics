@@ -107,6 +107,8 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
     
     private final Map<String, List<SailMasterMessage>> raceSpecificMessageBuffers;
     
+    private final Map<String, Long> sequenceNumberOfLastMessageForRaceID;
+    
     private final RaceSpecificMessageLoader messageLoader;
     
     public SailMasterConnectorImpl(String host, int port, RaceSpecificMessageLoader messageLoader) throws InterruptedException {
@@ -119,6 +121,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
         this.listeners = new HashSet<SailMasterListener>();
         this.unprocessedMessagesByType = new HashMap<MessageType, BlockingQueue<SailMasterMessage>>();
         raceSpecificMessageBuffers = new HashMap<String, List<SailMasterMessage>>();
+        sequenceNumberOfLastMessageForRaceID = new HashMap<String, Long>();
         int offset = TimeZone.getDefault().getOffset(System.currentTimeMillis())/1000/3600;
         lastTimeZoneSuffix = (offset<0?"-":"+") + new DecimalFormat("00").format(offset)+"00";
         receiverThread = new Thread(this, "SwissTiming SailMaster Receiver");
@@ -148,6 +151,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
         synchronized (this) {
             if (messageLoader != null) {
                 buffer = new LinkedList<SailMasterMessage>();
+                sequenceNumberOfLastMessageForRaceID.put(raceID, -1l);
                 raceSpecificMessageBuffers.put(raceID, buffer);
             }
         }
@@ -156,6 +160,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
             List<SailMasterMessage> messages = messageLoader.loadMessages(raceID);
             long maxSequenceNumber = -1;
             for (SailMasterMessage message : messages) {
+                logger.info("notifying loaded message "+message);
                 notifyListeners(message);
                 assert message.getSequenceNumber() > maxSequenceNumber;
                 maxSequenceNumber = message.getSequenceNumber();
@@ -163,18 +168,24 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
             // now process the buffered messages one by one:
             SailMasterMessage bufferedMessage;
             do {
+                // FIXME when all loaded messages have been processed but there are more from the overlap being transmitted, hold them back to avoid duplicate notifications
                 synchronized (this) {
                     if (buffer.size() > 0) {
                         bufferedMessage = buffer.remove(0);
+                        if (bufferedMessage.getSequenceNumber() > maxSequenceNumber) {
+                            maxSequenceNumber = bufferedMessage.getSequenceNumber();
+                        }
                     } else {
                         bufferedMessage = null;
                     }
                     if (buffer.isEmpty()) {
                         // buffer is empty; stop buffering
+                        sequenceNumberOfLastMessageForRaceID.put(raceID, maxSequenceNumber);
                         raceSpecificMessageBuffers.remove(raceID);
                     }
                 }
                 if (bufferedMessage != null && bufferedMessage.getSequenceNumber() > maxSequenceNumber) {
+                    logger.info("notifying buffered message "+bufferedMessage);
                     notifyListeners(bufferedMessage);
                 }
             } while (bufferedMessage != null && raceSpecificMessageBuffers.containsKey(raceID));
@@ -209,8 +220,12 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
                                 // this is a response for an explicit request
                                 rendevouz(message);
                             } else if (message.isEvent()) {
-                                // a spontaneous event
-                                notifyListeners(message);
+                                // only notify if it hasn't been loaded from a store yet
+                                if (message.getSequenceNumber() > sequenceNumberOfLastMessageForRaceID.get(message.getRaceID())) {
+                                    // a spontaneous event
+                                    logger.info("notifying message " + message);
+                                    notifyListeners(message);
+                                }
                             }
                         }
                     }
@@ -229,6 +244,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
     }
     
     private synchronized void buffer(SailMasterMessage message) {
+        logger.info("buffering message "+message);
         assert message.getType().isRaceSpecific();
         List<SailMasterMessage> buffer = raceSpecificMessageBuffers.get(message.getRaceID());
         buffer.add(message);

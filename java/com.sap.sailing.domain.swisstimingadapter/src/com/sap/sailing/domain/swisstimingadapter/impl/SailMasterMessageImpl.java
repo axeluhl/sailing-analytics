@@ -35,7 +35,7 @@ public class SailMasterMessageImpl implements SailMasterMessage {
     
     @Override
     public String toString() {
-        return getMessage();
+        return ""+getSequenceNumber()+": "+getMessage();
     }
 
     @Override
