@@ -158,14 +158,6 @@ public class OverlappingStoredAndReceivedMessagesTest implements RaceSpecificMes
             wait(500l); // wait another half second for spurious extra messages to be received
         }
         assertTrue(receivedSomething[0]);
-        for (Course course : coursesReceived) {
-            Iterable<Mark> marks = course.getMarks();
-            Mark lastMark = null;
-            for (Mark mark : marks) {
-                lastMark = mark;
-            }
-            System.out.println(lastMark.getIndex());
-        }
         assertEquals(COUNT, coursesReceived.size());
         for (int i=0; i<COUNT; i++) {
             Course course = coursesReceived.get(i);
