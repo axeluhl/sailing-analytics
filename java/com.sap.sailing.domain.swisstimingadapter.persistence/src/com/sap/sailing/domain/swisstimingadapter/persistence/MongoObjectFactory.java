@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.swisstimingadapter.persistence;
 
 import com.mongodb.DBObject;
+import com.sap.sailing.domain.swisstimingadapter.Race;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterMessage;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingConfiguration;
 import com.sap.sailing.domain.swisstimingadapter.persistence.impl.MongoObjectFactoryImpl;
@@ -18,4 +19,6 @@ public interface MongoObjectFactory {
     void storeSwissTimingConfiguration(SwissTimingConfiguration swissTimingConfiguration);
     
     void storeRawSailMasterMessage(SailMasterMessage message);
+
+    void storeRace(Race race);
 }
