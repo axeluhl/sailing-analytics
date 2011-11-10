@@ -69,4 +69,10 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return result;
     }
 
+    @Override
+    public List<SailMasterMessage> loadMessages(String raceID) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }

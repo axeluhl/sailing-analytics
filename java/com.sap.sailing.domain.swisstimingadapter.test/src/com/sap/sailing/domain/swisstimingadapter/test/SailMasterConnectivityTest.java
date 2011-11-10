@@ -33,6 +33,7 @@ import com.sap.sailing.domain.swisstimingadapter.SailMasterListener;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterMessage;
 import com.sap.sailing.domain.swisstimingadapter.StartList;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
+import com.sap.sailing.domain.swisstimingadapter.persistence.DomainObjectFactory;
 import com.sap.sailing.util.Util;
 import com.sap.sailing.util.Util.Triple;
 
@@ -46,7 +47,7 @@ public class SailMasterConnectivityTest {
     @Before
     public void setUp() throws InterruptedException {
         startSailMasterDummy();
-        connector = SwissTimingFactory.INSTANCE.createSailMasterConnector("localhost", port);
+        connector = SwissTimingFactory.INSTANCE.createSailMasterConnector("localhost", port, DomainObjectFactory.INSTANCE);
         connector.trackRace("W4702");
         connector.trackRace("4711");
         connector.trackRace("4712");

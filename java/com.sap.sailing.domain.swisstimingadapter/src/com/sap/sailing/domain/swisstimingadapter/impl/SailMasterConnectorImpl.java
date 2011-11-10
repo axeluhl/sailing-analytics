@@ -104,7 +104,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
      */
     private final Map<MessageType, BlockingQueue<SailMasterMessage>> unprocessedMessagesByType;
     
-    public SailMasterConnectorImpl(String host, int port) throws InterruptedException {
+    public SailMasterConnectorImpl(String host, int port, RaceSpecificMessageLoader messageLoader) throws InterruptedException {
         super();
         dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ssZ");
         idsOfTrackedRaces = new HashSet<String>();

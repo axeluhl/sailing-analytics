@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.swisstimingadapter.impl;
 
+import com.sap.sailing.domain.swisstimingadapter.RaceSpecificMessageLoader;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterConnector;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterMessage;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterTransceiver;
@@ -17,8 +18,8 @@ public class SwissTimingFactoryImpl implements SwissTimingFactory {
     }
 
     @Override
-    public SailMasterConnector createSailMasterConnector(String host, int port) throws InterruptedException {
-        return new SailMasterConnectorImpl(host, port);
+    public SailMasterConnector createSailMasterConnector(String host, int port, RaceSpecificMessageLoader messageLoader) throws InterruptedException {
+        return new SailMasterConnectorImpl(host, port, messageLoader);
     }
 
     @Override
@@ -27,8 +28,9 @@ public class SwissTimingFactoryImpl implements SwissTimingFactory {
     }
 
     @Override
-    public SwissTimingRaceTracker createRaceTracker(String raceID, String hostname, int port, WindStore windStore) throws InterruptedException {
-        return new SwissTimingRaceTrackerImpl(raceID, hostname, port, this);
+    public SwissTimingRaceTracker createRaceTracker(String raceID, String hostname, int port, WindStore windStore,
+            RaceSpecificMessageLoader messageLoader) throws InterruptedException {
+        return new SwissTimingRaceTrackerImpl(raceID, hostname, port, this, messageLoader);
     }
 
     @Override
