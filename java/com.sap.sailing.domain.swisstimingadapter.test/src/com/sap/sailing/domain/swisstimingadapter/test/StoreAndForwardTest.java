@@ -10,6 +10,7 @@ import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import org.junit.After;
 import org.junit.Before;
@@ -35,9 +36,15 @@ import com.sap.sailing.domain.swisstimingadapter.persistence.impl.FieldNames;
 import com.sap.sailing.mongodb.Activator;
 
 public class StoreAndForwardTest implements RaceSpecificMessageLoader {
+    private static final Logger logger = Logger.getLogger(StoreAndForwardTest.class.getName());
+    
     private static final int RECEIVE_PORT = 6543;
     private static final int CLIENT_PORT = 6544;
     
+    final int COUNT = 10;
+    final int STORED = 5;
+    final int OVERLAP = 2;
+
     private DB db;
     private StoreAndForward storeAndForward;
     private Socket sendingSocket;
@@ -48,6 +55,9 @@ public class StoreAndForwardTest implements RaceSpecificMessageLoader {
     private ArrayList<SailMasterMessage> messagesToLoad;
     private SwissTimingFactory swissTimingFactory;
     private boolean loadMessagesCalled;
+    private int messagesSent;
+
+    private Thread bufferingMessageSenderThread;
     
     @Before
     public void setUp() throws UnknownHostException, IOException, InterruptedException {
@@ -69,7 +79,9 @@ public class StoreAndForwardTest implements RaceSpecificMessageLoader {
     
     @After
     public void tearDown() throws InterruptedException, IOException {
+        logger.entering(getClass().getName(), "tearDown");
         storeAndForward.stop();
+        logger.exiting(getClass().getName(), "tearDown");
     }
     
     @Test
@@ -129,27 +141,51 @@ public class StoreAndForwardTest implements RaceSpecificMessageLoader {
                 }
             }
         });
-        final int COUNT = 10;
-        final int STORED = 5;
-        assert COUNT <= 10 && STORED < COUNT;
-        String[] rawMessage = new String[COUNT];
+        assert COUNT <= 10 && STORED < COUNT && STORED-OVERLAP >= 0;
+        final String[] rawMessage = new String[COUNT];
         for (int i=0; i<COUNT; i++) {
             rawMessage[i] = "CCG|4711|2|1;Lee Gate;LG1;LG2|"+i+";Windward;WW1";
             if (i<STORED) {
                 messagesToLoad.add(swissTimingFactory.createMessage(rawMessage[i], (long) i));
             }
         }
-        connector.trackRace("4711"); // this should transitively invoke loadMessages
+        logger.info("starting StoreAndForwardTest-testBufferingMessageSender thread");
+        messagesSent = 0;
+        bufferingMessageSenderThread = new Thread("StoreAndForwardTest-testBufferingMessageSender") {
+            public void run() {
+                try {
+                    for (int i = 0; i < COUNT; i++) {
+                        if (i >= STORED) {
+                            // now wait for loadMessages to be called; that tells us that the trackRace
+                            // call has happened and buffering should be activated
+                            synchronized (StoreAndForwardTest.this) {
+                                while (!loadMessagesCalled) {
+                                    StoreAndForwardTest.this.wait();
+                                }
+                            }
+                        }
+                        transceiver.sendMessage(rawMessage[i], sendingStream);
+                        synchronized (StoreAndForwardTest.this) {
+                            messagesSent++;
+                            StoreAndForwardTest.this.notifyAll();
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+        bufferingMessageSenderThread.start();
+        connector.trackRace("4711"); // this should transitively invoke loadMessages which blocks until the first STORED messages have been sent
         assertTrue(loadMessagesCalled);
-        // for now, don't create an overlap; an overlap should be tested separately
-        for (int i=STORED; i<COUNT; i++) {
-            transceiver.sendMessage(rawMessage[i], sendingStream);
-        }
         synchronized (this) {
             int attempts = 0;
             while (coursesReceived.size() < COUNT && attempts++ < 2 * COUNT) {
                 wait(2000l); // wait for two seconds to receive the message
             }
+        }
+        synchronized (this) {
+            wait(500l); // wait another half second for spurious extra messages to be received
         }
         assertTrue(receivedSomething[0]);
         assertEquals(COUNT, coursesReceived.size());
@@ -167,8 +203,24 @@ public class StoreAndForwardTest implements RaceSpecificMessageLoader {
     @Override
     public List<SailMasterMessage> loadRaceMessages(String raceID) {
         synchronized (this) {
+            // Wait until STORED-OVERLAP messages were transmitted; only then return the first STORED messages.
+            // This should produce an overlap of OVERLAP messages
+            while (messagesSent < STORED-OVERLAP) {
+                try {
+                    wait();
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
             loadMessagesCalled = true;
             notifyAll();
+        }
+        // now wait until all messages have been transmitted to the receiver so that we know
+        // that an overlap exists
+        try {
+            bufferingMessageSenderThread.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
         return messagesToLoad;
     }

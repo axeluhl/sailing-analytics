@@ -161,18 +161,20 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
                 maxSequenceNumber = message.getSequenceNumber();
             }
             // now process the buffered messages one by one:
-            SailMasterMessage bufferedMessage = null;
+            SailMasterMessage bufferedMessage;
             do {
                 synchronized (this) {
                     if (buffer.size() > 0) {
                         bufferedMessage = buffer.remove(0);
+                    } else {
+                        bufferedMessage = null;
                     }
                     if (buffer.isEmpty()) {
                         // buffer is empty; stop buffering
                         raceSpecificMessageBuffers.remove(raceID);
                     }
                 }
-                if (bufferedMessage != null) { // FIXME compare sequence number to maxSequenceNumber (first create failing test case)
+                if (bufferedMessage != null && bufferedMessage.getSequenceNumber() > maxSequenceNumber) {
                     notifyListeners(bufferedMessage);
                 }
             } while (bufferedMessage != null && raceSpecificMessageBuffers.containsKey(raceID));
@@ -441,7 +443,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
         List<Race> result = new ArrayList<Race>();
         for (int i=0; i<count; i++) {
             String[] idAndDescription = availableRacesMessage.getSections()[2+i].split(";");
-            result.add(new RaceImpl(idAndDescription[1], idAndDescription[0]));
+            result.add(new RaceImpl(idAndDescription[0], idAndDescription[1]));
         }
         return result;
     }
