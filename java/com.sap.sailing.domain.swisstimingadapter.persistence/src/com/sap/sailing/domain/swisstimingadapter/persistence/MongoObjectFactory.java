@@ -20,5 +20,7 @@ public interface MongoObjectFactory {
     
     void storeRawSailMasterMessage(SailMasterMessage message);
 
+    void storeSailMasterMessage(SailMasterMessage message);
+
     void storeRace(Race race);
 }

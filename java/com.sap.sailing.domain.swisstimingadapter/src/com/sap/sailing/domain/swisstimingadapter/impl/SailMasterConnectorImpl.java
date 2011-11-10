@@ -153,7 +153,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
         }
         idsOfTrackedRaces.add(raceID); // from this time on, the connector interprets messages for raceID
         if (messageLoader != null) {
-            List<SailMasterMessage> messages = messageLoader.loadMessages(raceID);
+            List<SailMasterMessage> messages = messageLoader.loadRaceMessages(raceID);
             long maxSequenceNumber = -1;
             for (SailMasterMessage message : messages) {
                 notifyListeners(message);

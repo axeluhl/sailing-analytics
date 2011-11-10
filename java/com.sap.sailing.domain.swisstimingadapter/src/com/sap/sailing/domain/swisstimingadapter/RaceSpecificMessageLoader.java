@@ -16,5 +16,5 @@ public interface RaceSpecificMessageLoader {
      * properly set. The result list is expected to be in ascending order regarding this sequence number and always
      * has to be a valid, non-<code>null</code> and perhaps empty list.
      */
-    List<SailMasterMessage> loadMessages(String raceID);
+    List<SailMasterMessage> loadRaceMessages(String raceID);
 }

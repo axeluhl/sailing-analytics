@@ -1,7 +1,6 @@
 package com.sap.sailing.domain.swisstimingadapter.persistence.impl;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -73,10 +72,39 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
     @Override
-    public List<SailMasterMessage> loadMessages(String raceID) {
-        // TODO implement DomainObjectFactoyr.loadMessages, loading the messages stored for raceID in the MongoDB
-        return Collections.emptyList();
+    public List<SailMasterMessage> loadRaceMessages(String raceID) {
+
+        DBCollection racesMessagesCollection = database.getCollection(CollectionNames.RACES_MESSAGES.name());
+
+        BasicDBObject query = new BasicDBObject();
+        query.append(FieldNames.RACE_ID.name(), raceID);
+    	
+        DBCursor results = racesMessagesCollection.find(query);
+        List<SailMasterMessage> result = new ArrayList<SailMasterMessage>();
+        
+        for (DBObject o : results) {
+        	SailMasterMessage msg = swissTimingFactory.createMessage((String) o.get(FieldNames.MESSAGE_CONTENT.name()),
+            		(Long) o.get(FieldNames.MESSAGE_SEQUENCE_NUMBER.name()));
+            result.add(msg);
+        }
+        return result;
     }
+
+    @Override
+    public List<SailMasterMessage> loadCommandMessages() {
+        DBCollection cmdMessagesCollection = database.getCollection(CollectionNames.COMMAND_MESSAGES.name());
+        
+        DBCursor results = cmdMessagesCollection.find();
+        List<SailMasterMessage> result = new ArrayList<SailMasterMessage>();
+        
+        for (DBObject o : results) {
+        	SailMasterMessage msg = swissTimingFactory.createMessage((String) o.get(FieldNames.MESSAGE_CONTENT.name()),
+            		(Long) o.get(FieldNames.MESSAGE_SEQUENCE_NUMBER.name()));
+            result.add(msg);
+        }
+        return result;
+    }
+
 
     public Race getRace(String raceID) {
         DBCollection races = database.getCollection(CollectionNames.RACES_MASTERDATA.name());

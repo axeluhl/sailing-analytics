@@ -165,7 +165,7 @@ public class StoreAndForwardTest implements RaceSpecificMessageLoader {
     }
 
     @Override
-    public List<SailMasterMessage> loadMessages(String raceID) {
+    public List<SailMasterMessage> loadRaceMessages(String raceID) {
         synchronized (this) {
             loadMessagesCalled = true;
             notifyAll();
