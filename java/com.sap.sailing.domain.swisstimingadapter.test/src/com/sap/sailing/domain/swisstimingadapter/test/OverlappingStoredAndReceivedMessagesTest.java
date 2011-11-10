@@ -174,7 +174,7 @@ public class OverlappingStoredAndReceivedMessagesTest implements RaceSpecificMes
     }
 
     @Override
-    public List<SailMasterMessage> loadMessages(String raceID) {
+    public List<SailMasterMessage> loadRaceMessages(String raceID) {
         synchronized (this) {
             loadMessagesCalled = true;
             notifyAll();
