@@ -880,7 +880,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     /**
      * Also updates the min/max values on the columns
      */
-    private void updateLeaderboard(LeaderboardDAO leaderboard) {
+    protected void updateLeaderboard(LeaderboardDAO leaderboard) {
         setLeaderboard(leaderboard);
         adjustColumnLayout(leaderboard);
         getData().getList().clear();

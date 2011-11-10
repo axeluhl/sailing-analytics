@@ -5,6 +5,7 @@ import com.sap.sailing.gwt.ui.client.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.SortableColumn;
 import com.sap.sailing.gwt.ui.client.StringConstants;
+import com.sap.sailing.gwt.ui.shared.LeaderboardDAO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDAO;
 
 public class LeaderboardPanelMock extends LeaderboardPanel {
@@ -33,6 +34,12 @@ public class LeaderboardPanelMock extends LeaderboardPanel {
     public void removeColumn(int columnIndex) {
         // TODO Auto-generated method stub
         super.removeColumn(columnIndex);
+    }
+
+    @Override
+    public void updateLeaderboard(LeaderboardDAO leaderboard) {
+        // TODO Auto-generated method stub
+        super.updateLeaderboard(leaderboard);
     }
     
     

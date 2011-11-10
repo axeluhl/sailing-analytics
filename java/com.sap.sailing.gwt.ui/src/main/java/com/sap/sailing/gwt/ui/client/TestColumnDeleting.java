@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.client;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -23,9 +24,9 @@ public class TestColumnDeleting extends GWTTestCase {
     
     private final String LEADERBOARD_NAME = "test";
     private final String COLUMN1_NAME = "r1";
-    private final String EVENT_NAME = "kielerwoche";
+    private final String EVENT_NAME = "Kieler Woche (49er)";
     private final String JSON_URL= "http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/jsonservice.php";
-    private final String TRACKED_RACE = "49eryellow1";
+    private final String TRACKED_RACE = "49er Yellow 1";
     
     
     private LeaderboardDAO leaderboard;
@@ -37,7 +38,6 @@ public class TestColumnDeleting extends GWTTestCase {
 
     @Override
     protected void gwtSetUp() throws Exception {
-        // TODO Auto-generated method stub
         super.gwtSetUp();
         service = GWT.create(TestSailingService.class);
         sc = GWT.create(StringConstants.class);
@@ -50,39 +50,24 @@ public class TestColumnDeleting extends GWTTestCase {
         
     }
     
-    private void linkTrackedRace(){
-        service.connectTrackedRaceToLeaderboardColumn(LEADERBOARD_NAME, COLUMN1_NAME, EVENT_NAME, TRACKED_RACE, new AsyncCallback<Void>() {
-
-            @Override
-            public void onFailure(Throwable caught) {
-                // TODO Auto-generated method stub
-                
-            }
-
-            @Override
-            public void onSuccess(Void result) {
-                // TODO Auto-generated method stub
-                removeColumnAndAssert();
-            }
-        });
-    }
-    
     private void listRacesInEvent(){
         service.listRacesInEvent(JSON_URL, new AsyncCallback<Pair<String,List<RaceRecordDAO>>>() {
 
             @Override
             public void onFailure(Throwable caught) {
-                // TODO Auto-generated method stub
-                
+                fail("Failed to list races." + caught.getLocalizedMessage());
             }
 
             @Override
             public void onSuccess(Pair<String, List<RaceRecordDAO>> result) {
+                System.out.println("Listed races.");
                 for (RaceRecordDAO rr : result.getB()){
-                    if (rr.name.toLowerCase().trim().equals(TRACKED_RACE)){
+                    System.out.println(rr.name + " : " + TRACKED_RACE);
+                    if (rr.name.equals(TRACKED_RACE)){
                         rrDao = rr;
                     }
                 }
+                assertNotNull("rrDao != null",rrDao);
                 trackRace();
             }
         });
@@ -93,13 +78,12 @@ public class TestColumnDeleting extends GWTTestCase {
 
             @Override
             public void onFailure(Throwable caught) {
-                // TODO Auto-generated method stub
-                
+                fail("Failed to track race: " + caught.getLocalizedMessage());
             }
 
             @Override
             public void onSuccess(Void result) {
-                // TODO Auto-generated method stub
+                System.out.println("Tracked race.");
                 createLeaderboard();
             }
         });
@@ -111,7 +95,6 @@ public class TestColumnDeleting extends GWTTestCase {
 
                     @Override
                     public void onSuccess(Void result) {
-                        // TODO Auto-generated method stub
                         System.out.println("Created Leaderboard.");
                         addColumnToLeaderboard();
                     }
@@ -123,7 +106,7 @@ public class TestColumnDeleting extends GWTTestCase {
                     }
                 });
     }
-
+    
     private void addColumnToLeaderboard() {
         leaderboardPanel = new LeaderboardPanelMock(service, LEADERBOARD_NAME,
                 null, sc);
@@ -141,13 +124,31 @@ public class TestColumnDeleting extends GWTTestCase {
                     public void onSuccess(Void result) {
                         System.out.println("Added column to leaderboard.");
                         leaderboardPanel.addColumn(leaderboardPanel.createRaceColumn(COLUMN1_NAME, false, false));
-                        getLeaderboard();
+                        linkTrackedRace();
                     }
                 });
     }
     
+    private void linkTrackedRace(){
+        service.connectTrackedRaceToLeaderboardColumn(LEADERBOARD_NAME, COLUMN1_NAME, EVENT_NAME, TRACKED_RACE, new AsyncCallback<Void>() {
+
+            @Override
+            public void onFailure(Throwable caught) {
+                fail("Failed to link race.");
+            }
+
+            @Override
+            public void onSuccess(Void result) {
+                System.out.println("Linked race to column.");
+                getLeaderboard();
+            }
+        });
+    }
+    
     private void getLeaderboard(){
-        service.getLeaderboardByName(LEADERBOARD_NAME, new Date(), null,
+        ArrayList<String> al = new ArrayList<String>();
+        al.add(COLUMN1_NAME);
+        service.getLeaderboardByName(LEADERBOARD_NAME, new Date(), al,
                 new AsyncCallback<LeaderboardDAO>() {
 
                     @Override
@@ -159,20 +160,21 @@ public class TestColumnDeleting extends GWTTestCase {
                     @Override
                     public void onSuccess(LeaderboardDAO result) {
                         System.out.println("Got leaderboard.");
+                        
                         leaderboard = result;
-                        System.out.println("Legcount: " + leaderboard.getLegCount(COLUMN1_NAME));
+                        leaderboardPanel.updateLeaderboard(leaderboard);
                         for (int i = 0; i < leaderboardPanel.getLeaderboardTable()
                                 .getColumnCount(); i++) {
                             Column<LeaderboardRowDAO, ?> c = leaderboardPanel.getLeaderboardTable().getColumn(i);
-                            System.out.println(i + ": " + c);
                             if (c instanceof RaceColumn<?>) {
                                 
                                 rc = (RaceColumn<LeaderboardRowDAO>) c;
                                 rc.setEnableLegDrillDown(true);
+                                
                                 indexOfRaceColumn = i;
                             }
                         }
-                        linkTrackedRace();
+                        removeColumnAndAssert();
                     }
                 });
     }
