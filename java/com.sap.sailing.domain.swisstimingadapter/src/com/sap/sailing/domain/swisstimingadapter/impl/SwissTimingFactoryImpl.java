@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.swisstimingadapter.impl;
 
+import com.sap.sailing.domain.base.TimePoint;
+import com.sap.sailing.domain.swisstimingadapter.Race;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterConnector;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterMessage;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterTransceiver;
@@ -40,5 +42,11 @@ public class SwissTimingFactoryImpl implements SwissTimingFactory {
     public SailMasterMessage createMessage(String message, Long sequenceNumber) {
         return new SailMasterMessageImpl(message, sequenceNumber);
     }
+    
+    @Override
+    public Race createRace(String raceId, String description, TimePoint startTime) {
+    	return new RaceImpl(raceId, description, startTime);
+    }
+
     
 }

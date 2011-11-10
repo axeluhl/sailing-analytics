@@ -10,6 +10,8 @@ import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
+import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.swisstimingadapter.Race;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterMessage;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingConfiguration;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
@@ -68,5 +70,38 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         }
         return result;
     }
+
+    public Race getRace(String raceID) {
+        DBCollection races = database.getCollection(CollectionNames.RACES_MASTERDATA.name());
+
+        BasicDBObject query = new BasicDBObject();
+        query.append(FieldNames.RACE_ID.name(), raceID);
+        
+       	DBObject o = races.findOne(query);
+
+       	if(o != null) {
+        	Race race = swissTimingFactory.createRace((String) o.get(FieldNames.RACE_ID.name()),
+            		(String) o.get(FieldNames.RACE_DESCRIPTION.name()), new MillisecondsTimePoint((Long) o.get(FieldNames.RACE_STARTTIME.name())));
+
+        	return race;
+        }
+    	return null;
+    }
+
+    public List<Race> getRaces() {
+        DBCollection races = database.getCollection(CollectionNames.RACES_MASTERDATA.name());
+  
+        DBCursor results = races.find();
+        List<Race> result = new ArrayList<Race>();
+        
+        for (DBObject o : results) {
+        	Race race = swissTimingFactory.createRace((String) o.get(FieldNames.RACE_ID.name()),
+            		(String) o.get(FieldNames.RACE_DESCRIPTION.name()), new MillisecondsTimePoint((Long) o.get(FieldNames.RACE_STARTTIME.name())));
+            result.add(race);
+        }
+        return result;
+    }
+    
+
 
 }
