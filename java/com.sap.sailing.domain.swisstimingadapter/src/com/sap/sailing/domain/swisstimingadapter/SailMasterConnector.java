@@ -77,7 +77,7 @@ public interface SailMasterConnector {
      */
     void stop() throws IOException;
 
-    void trackRace(String raceID);
+    void trackRace(String raceID) throws ParseException;
 
     void stopTrackingRace(String raceID);
 }

@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.swisstimingadapter.persistence.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -71,8 +72,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
 
     @Override
     public List<SailMasterMessage> loadMessages(String raceID) {
-        // TODO Auto-generated method stub
-        return null;
+        // TODO implement DomainObjectFactoyr.loadMessages, loading the messages stored for raceID in the MongoDB
+        return Collections.emptyList();
     }
 
 }
