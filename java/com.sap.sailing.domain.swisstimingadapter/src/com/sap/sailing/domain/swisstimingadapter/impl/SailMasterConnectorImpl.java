@@ -443,7 +443,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
         List<Race> result = new ArrayList<Race>();
         for (int i=0; i<count; i++) {
             String[] idAndDescription = availableRacesMessage.getSections()[2+i].split(";");
-            result.add(new RaceImpl(idAndDescription[1], idAndDescription[0]));
+            result.add(new RaceImpl(idAndDescription[0], idAndDescription[1]));
         }
         return result;
     }

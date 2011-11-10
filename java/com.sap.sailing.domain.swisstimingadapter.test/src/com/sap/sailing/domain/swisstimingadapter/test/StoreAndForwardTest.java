@@ -203,8 +203,9 @@ public class StoreAndForwardTest implements RaceSpecificMessageLoader {
     @Override
     public List<SailMasterMessage> loadMessages(String raceID) {
         synchronized (this) {
-            // wait until STORED messages were transmitted; only then return them
-            while (messagesSent < STORED) {
+            // Wait until STORED-OVERLAP messages were transmitted; only then return the first STORED messages.
+            // This should produce an overlap of OVERLAP messages
+            while (messagesSent < STORED-OVERLAP) {
                 try {
                     wait();
                 } catch (InterruptedException e) {
