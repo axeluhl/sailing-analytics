@@ -162,17 +162,18 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
             for (SailMasterMessage message : messages) {
                 logger.info("notifying loaded message "+message);
                 notifyListeners(message);
-                assert message.getSequenceNumber() > maxSequenceNumber;
-                maxSequenceNumber = message.getSequenceNumber();
+                assert message.getSequenceNumber() == null || message.getSequenceNumber() > maxSequenceNumber;
+                if (message.getSequenceNumber() != null) {
+                    maxSequenceNumber = message.getSequenceNumber();
+                }
             }
             // now process the buffered messages one by one:
             SailMasterMessage bufferedMessage;
             do {
-                // FIXME when all loaded messages have been processed but there are more from the overlap being transmitted, hold them back to avoid duplicate notifications
                 synchronized (this) {
                     if (buffer.size() > 0) {
                         bufferedMessage = buffer.remove(0);
-                        if (bufferedMessage.getSequenceNumber() > maxSequenceNumber) {
+                        if (bufferedMessage.getSequenceNumber() != null && bufferedMessage.getSequenceNumber() > maxSequenceNumber) {
                             maxSequenceNumber = bufferedMessage.getSequenceNumber();
                         }
                     } else {
@@ -184,8 +185,9 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
                         raceSpecificMessageBuffers.remove(raceID);
                     }
                 }
-                if (bufferedMessage != null && bufferedMessage.getSequenceNumber() > maxSequenceNumber) {
-                    logger.info("notifying buffered message "+bufferedMessage);
+                if (bufferedMessage != null
+                        && (bufferedMessage.getSequenceNumber() == null || bufferedMessage.getSequenceNumber() > maxSequenceNumber)) {
+                    logger.info("notifying buffered message " + bufferedMessage);
                     notifyListeners(bufferedMessage);
                 }
             } while (bufferedMessage != null && raceSpecificMessageBuffers.containsKey(raceID));
@@ -221,7 +223,8 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
                                 rendevouz(message);
                             } else if (message.isEvent()) {
                                 // only notify if it hasn't been loaded from a store yet
-                                if (message.getSequenceNumber() > sequenceNumberOfLastMessageForRaceID.get(message.getRaceID())) {
+                                if (!message.getType().isRaceSpecific() || message.getSequenceNumber() == null ||
+                                        message.getSequenceNumber() > sequenceNumberOfLastMessageForRaceID.get(message.getRaceID())) {
                                     // a spontaneous event
                                     logger.info("notifying message " + message);
                                     notifyListeners(message);
