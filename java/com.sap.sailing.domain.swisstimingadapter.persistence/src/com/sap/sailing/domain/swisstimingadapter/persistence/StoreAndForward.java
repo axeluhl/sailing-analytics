@@ -166,8 +166,7 @@ public class StoreAndForward implements Runnable {
                             for (OutputStream os : streamsToForwardTo) {
                                 // write the sequence number of the message into the stream before actually writing the
                                 // SwissTiming message
-                                os.write(("" + message.getSequenceNumber()).getBytes());
-                                transceiver.sendMessage(message.getMessage(), os);
+                                transceiver.sendMessage(message, os);
                             }
                         }
                         if (!stopped) {

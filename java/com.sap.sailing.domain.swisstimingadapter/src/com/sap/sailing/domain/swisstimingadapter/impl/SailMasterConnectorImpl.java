@@ -175,6 +175,8 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
                         bufferedMessage = buffer.remove(0);
                         if (bufferedMessage.getSequenceNumber() != null && bufferedMessage.getSequenceNumber() > maxSequenceNumber) {
                             maxSequenceNumber = bufferedMessage.getSequenceNumber();
+                        } else {
+                            bufferedMessage = null;
                         }
                     } else {
                         bufferedMessage = null;
@@ -185,12 +187,11 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
                         raceSpecificMessageBuffers.remove(raceID);
                     }
                 }
-                if (bufferedMessage != null
-                        && (bufferedMessage.getSequenceNumber() == null || bufferedMessage.getSequenceNumber() > maxSequenceNumber)) {
+                if (bufferedMessage != null) {
                     logger.info("notifying buffered message " + bufferedMessage);
                     notifyListeners(bufferedMessage);
                 }
-            } while (bufferedMessage != null && raceSpecificMessageBuffers.containsKey(raceID));
+            } while (raceSpecificMessageBuffers.containsKey(raceID));
         }
     }
     

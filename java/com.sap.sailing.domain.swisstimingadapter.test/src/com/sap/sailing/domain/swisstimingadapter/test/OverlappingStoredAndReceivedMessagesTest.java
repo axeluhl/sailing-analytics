@@ -104,7 +104,7 @@ public class OverlappingStoredAndReceivedMessagesTest implements RaceSpecificMes
                 }
             }
         });
-        assert COUNT <= 10 && STORED < COUNT && STORED-OVERLAP >= 0;
+        assert STORED < COUNT && STORED-OVERLAP >= 0;
         final String[] rawMessage = new String[COUNT];
         for (int i=0; i<COUNT; i++) {
             rawMessage[i] = "CCG|4711|2|1;Lee Gate;LG1;LG2|"+i+";Windward;WW1";
@@ -128,7 +128,7 @@ public class OverlappingStoredAndReceivedMessagesTest implements RaceSpecificMes
                     // unblocked by us sending the STORED-OVERLAPth message
                     for (int i = 0; i < COUNT; i++) {
                         if (i >= STORED-OVERLAP) {
-                            transceiver.sendMessage(rawMessage[i], sendingStream);
+                            transceiver.sendMessage(swissTimingFactory.createMessage(rawMessage[i], (long) i), sendingStream);
                         }
                         synchronized (OverlappingStoredAndReceivedMessagesTest.this) {
                             messagesSent++;
