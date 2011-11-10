@@ -8,8 +8,8 @@ public enum FieldNames {
     LAST_MESSAGE_COUNT,
     
     // raw messages:
-    MESSAGE_SEQUENCE_NUMBER, MESSAGE_CONTENT,
+    MESSAGE_SEQUENCE_NUMBER, MESSAGE_CONTENT, MESSAGE_COMMAND,
     
-    // race masterdata
-    RACE_ID, RACE_DESCRIPTION, RACE_STARTTIME
+    // race specific message and masterdata
+    RACE_ID, RACE_DESCRIPTION, RACE_STARTTIME,
 }

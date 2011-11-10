@@ -28,7 +28,19 @@ public interface DomainObjectFactory extends RaceSpecificMessageLoader {
      * @return messages in ascending sequence number order; always a valid but perhaps empty list
      */
     List<SailMasterMessage> loadMessages(int firstSequenceNumber);
-    
+
+    /**
+     * Loads all messages received and stored to the DB for a specific race.
+     * @return messages of the specified race; null if the race does not exist
+     */
+    List<SailMasterMessage> loadRaceMessages(String raceID);
+
+    /**
+     * Loads all command messages (not race specific) received and stored to the DB.
+     * @return command messages; always a valid but perhaps empty list
+     */
+    List<SailMasterMessage> loadCommandMessages();
+
     /**
      * Gets all races stored in the DB
      * @return the list of races

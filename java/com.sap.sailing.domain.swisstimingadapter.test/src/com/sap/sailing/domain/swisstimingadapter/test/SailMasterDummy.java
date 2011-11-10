@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.logging.Logger;
 
 import com.sap.sailing.domain.swisstimingadapter.MessageType;
 import com.sap.sailing.domain.swisstimingadapter.impl.SailMasterMessageImpl;
@@ -12,6 +13,8 @@ import com.sap.sailing.domain.swisstimingadapter.impl.SailMasterTransceiverImpl;
 import com.sap.sailing.util.Util.Pair;
 
 public class SailMasterDummy implements Runnable {
+    private static final Logger logger = Logger.getLogger(SailMasterDummy.class.getName());
+    
     public static final byte STX = 0x02;
     public static final byte ETX = 0x03;
     
@@ -42,7 +45,7 @@ public class SailMasterDummy implements Runnable {
                 }
             }
             listenOn.close();
-            System.out.println("Server stopped. Thread ending.");
+            logger.info("Server stopped. Thread ending.");
         } catch (IOException e) {
             e.printStackTrace();
         }

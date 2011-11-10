@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
 
+import com.sap.sailing.domain.swisstimingadapter.SailMasterMessage;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterTransceiver;
 import com.sap.sailing.util.Util.Pair;
 
@@ -23,10 +24,17 @@ public class SailMasterTransceiverImpl implements SailMasterTransceiver {
      * Sends the string message to the output stream <code>os</code>, using the cp1252 character set
      * for encoding and framing the message with the <code>STX</code> and <code>ETX</code> bytes.
      */
+    @Override
     public synchronized void sendMessage(String message, OutputStream os) throws IOException {
         os.write(STX);
         os.write(message.getBytes(Charset.forName("cp1252")));
         os.write(ETX);
+    }
+    
+    @Override
+    public synchronized void sendMessage(SailMasterMessage message, OutputStream os) throws IOException {
+        os.write(("" + message.getSequenceNumber()).getBytes());
+        sendMessage(message.getMessage(), os);
     }
 
     /**
