@@ -97,6 +97,11 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
      */
     private String lastTimeZoneSuffix;
     
+    /**
+     * Used for the {@link #rendevouz(SailMasterMessage)} pattern. For each {@link MessageType} there
+     * is a queue to which response messages of that type are offered so that {@link #receiveMessage(MessageType)}
+     * can take them from there.
+     */
     private final Map<MessageType, BlockingQueue<SailMasterMessage>> unprocessedMessagesByType;
     
     public SailMasterConnectorImpl(String host, int port) throws InterruptedException {
@@ -120,7 +125,8 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
     
     @Override
     public void trackRace(String raceID) {
-        idsOfTrackedRaces.add(raceID);
+        idsOfTrackedRaces.add(raceID); // from this time on, the connector interprets messages for raceID
+        
     }
     
     @Override
