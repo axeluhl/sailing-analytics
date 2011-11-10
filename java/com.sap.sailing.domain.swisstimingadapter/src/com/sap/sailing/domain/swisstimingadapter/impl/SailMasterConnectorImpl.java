@@ -172,7 +172,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
                         raceSpecificMessageBuffers.remove(raceID);
                     }
                 }
-                if (bufferedMessage != null) {
+                if (bufferedMessage != null) { // FIXME compare sequence number to maxSequenceNumber (first create failing test case)
                     notifyListeners(bufferedMessage);
                 }
             } while (bufferedMessage != null && raceSpecificMessageBuffers.containsKey(raceID));

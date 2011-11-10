@@ -98,6 +98,7 @@ public class StoreAndForward implements Runnable {
                             s.close();
                         }
                     }
+                    ss.close();
                     logger.info("StoreAndForward client listener thread stopped.");
                 } catch (IOException e) {
                     throw new RuntimeException(e);
@@ -181,6 +182,7 @@ public class StoreAndForward implements Runnable {
                     }
                 }
             }
+            ss.close();
             logger.info("Stopping StoreAndForward server.");
         } catch (IOException e) {
             throw new RuntimeException(e);
