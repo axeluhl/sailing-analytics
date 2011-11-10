@@ -4,6 +4,7 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
+import com.sap.sailing.domain.swisstimingadapter.Race;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterMessage;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingConfiguration;
 import com.sap.sailing.domain.swisstimingadapter.persistence.MongoObjectFactory;
@@ -37,4 +38,20 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
                 append(FieldNames.MESSAGE_CONTENT.name(), message.getMessage()));
     }
 
+    @Override
+    public void storeRace(Race race) {
+        DBCollection racesCollection = database.getCollection(CollectionNames.RACES_MASTERDATA.name());
+     
+        BasicDBObject query = new BasicDBObject();
+        query.append(FieldNames.RACE_ID.name(), race.getRaceID());
+        
+        BasicDBObject result = new BasicDBObject();
+
+        result.put(FieldNames.RACE_ID.name(), race.getRaceID());
+        result.put(FieldNames.RACE_DESCRIPTION.name(), race.getDescription());
+        result.put(FieldNames.RACE_STARTTIME.name(), new Long(race.getStartTime().asMillis()));
+
+        racesCollection.update(query,result);
+    }
+    
 }

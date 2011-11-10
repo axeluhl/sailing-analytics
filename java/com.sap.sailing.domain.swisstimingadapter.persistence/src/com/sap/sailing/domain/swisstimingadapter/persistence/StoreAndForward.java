@@ -98,6 +98,7 @@ public class StoreAndForward implements Runnable {
                             s.close();
                         }
                     }
+                    ss.close();
                     logger.info("StoreAndForward client listener thread stopped.");
                 } catch (IOException e) {
                     throw new RuntimeException(e);
@@ -121,10 +122,13 @@ public class StoreAndForward implements Runnable {
      * Stops execution after having received the next message
      */
     public void stop() throws UnknownHostException, IOException, InterruptedException {
+        logger.entering(getClass().getName(), "stop");
         stopped = true;
         new Socket("localhost", portForClients); // this is to stop the client listener thread
+        logger.info("joining clientListener thread "+clientListener);
         clientListener.join();
         socket.close(); // will let a read terminate abnormally
+        logger.info("joining storeAndForwardThread "+storeAndForwardThread);
         storeAndForwardThread.join();
     }
 
@@ -136,6 +140,7 @@ public class StoreAndForward implements Runnable {
     }
 
     public void run() {
+        logger.entering(getClass().getName(), "run");
         try {
             ServerSocket ss = new ServerSocket(listenPort);
             synchronized (this) {
@@ -152,7 +157,7 @@ public class StoreAndForward implements Runnable {
                     DBObject emptyQuery = new BasicDBObject();
                     DBObject incrementLastMessageCountQuery = new BasicDBObject().
                             append("$inc", new BasicDBObject().append(FieldNames.LAST_MESSAGE_COUNT.name(), 1));
-                    while (messageAndOptionalSequenceNumber != null) {
+                    while (!stopped && messageAndOptionalSequenceNumber != null) {
                         DBObject newCountRecord = lastMessageCountCollection.findAndModify(emptyQuery, incrementLastMessageCountQuery);
                         lastMessageCount = (Long) newCountRecord.get(FieldNames.LAST_MESSAGE_COUNT.name());
                         SailMasterMessage message = swissTimingFactory.createMessage(messageAndOptionalSequenceNumber.getA(), lastMessageCount);
@@ -181,9 +186,15 @@ public class StoreAndForward implements Runnable {
                     }
                 }
             }
+            logger.info("StoreAndForward is closing receiving server socket");
+            if (!ss.isClosed()) {
+                ss.close();
+            }
             logger.info("Stopping StoreAndForward server.");
         } catch (IOException e) {
+            logger.throwing(getClass().getName(), "run", e);
             throw new RuntimeException(e);
         }
+        logger.exiting(getClass().getName(), "run");
     }
 }

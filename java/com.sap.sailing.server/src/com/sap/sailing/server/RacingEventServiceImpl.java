@@ -91,12 +91,15 @@ public class RacingEventServiceImpl implements RacingEventService {
     private final DomainObjectFactory domainObjectFactory;
     
     private final SwissTimingFactory swissTimingFactory;
+    
+    private final com.sap.sailing.domain.swisstimingadapter.persistence.DomainObjectFactory swissTimingDomainObjectFactory;
 
     public RacingEventServiceImpl() {
         domainFactory = DomainFactory.INSTANCE;
         domainObjectFactory = DomainObjectFactory.INSTANCE;
         mongoObjectFactory = MongoObjectFactory.INSTANCE;
         swissTimingFactory = SwissTimingFactory.INSTANCE;
+        swissTimingDomainObjectFactory = com.sap.sailing.domain.swisstimingadapter.persistence.DomainObjectFactory.INSTANCE;
         windTrackerFactory = ExpeditionWindTrackerFactory.getInstance();
         eventsByName = new HashMap<String, Event>();
         raceTrackersByEvent = new HashMap<Event, Set<RaceTracker>>();
@@ -225,7 +228,7 @@ public class RacingEventServiceImpl implements RacingEventService {
         Triple<String, String, Integer> key = new Triple<String, String, Integer>(raceID, hostname, port);
         RaceTracker tracker = raceTrackersByID.get(key);
         if (tracker == null) {
-            tracker = getSwissTimingFactory().createRaceTracker(raceID, hostname, port, windStore);
+            tracker = getSwissTimingFactory().createRaceTracker(raceID, hostname, port, windStore, swissTimingDomainObjectFactory);
             raceTrackersByID.put(tracker.getID(), tracker);
             Set<RaceTracker> trackers = raceTrackersByEvent.get(tracker.getEvent());
             if (trackers == null) {

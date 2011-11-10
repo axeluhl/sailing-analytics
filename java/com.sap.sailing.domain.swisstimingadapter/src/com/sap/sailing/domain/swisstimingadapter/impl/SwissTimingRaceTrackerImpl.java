@@ -6,6 +6,7 @@ import java.util.Set;
 
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.swisstimingadapter.RaceSpecificMessageLoader;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterConnector;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingRaceTracker;
@@ -18,8 +19,9 @@ public class SwissTimingRaceTrackerImpl implements SwissTimingRaceTracker {
     private final SailMasterConnector connector;
 //    private final Set<RaceDefinition> races;
     
-    protected SwissTimingRaceTrackerImpl(String raceID, String hostname, int port, SwissTimingFactory factory) throws InterruptedException {
-        connector = factory.createSailMasterConnector(hostname, port);
+    protected SwissTimingRaceTrackerImpl(String raceID, String hostname, int port, SwissTimingFactory factory,
+            RaceSpecificMessageLoader messageLoader) throws InterruptedException {
+        connector = factory.createSailMasterConnector(hostname, port, messageLoader);
 //        races = new HashSet<RaceDefinition>();
     }
 

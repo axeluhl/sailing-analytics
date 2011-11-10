@@ -1026,7 +1026,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     public List<SwissTimingRaceRecordDAO> listSwissTimingRaces(String hostname, int port) 
            throws UnknownHostException, IOException, InterruptedException, ParseException {
         List<SwissTimingRaceRecordDAO> result = new ArrayList<SwissTimingRaceRecordDAO>();
-        SailMasterConnector swissTimingConnector = swissTimingFactory.createSailMasterConnector(hostname, port);
+        SailMasterConnector swissTimingConnector = swissTimingFactory.createSailMasterConnector(hostname, port, swissTimingDomainObjectFactory);
         for (Race race : swissTimingConnector.getRaces()) {
             TimePoint startTime = swissTimingConnector.getStartTime(race.getRaceID());
             result.add(new SwissTimingRaceRecordDAO(race.getRaceID(), race.getDescription(), startTime.asDate()));

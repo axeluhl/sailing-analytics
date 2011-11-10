@@ -2,6 +2,8 @@ package com.sap.sailing.domain.swisstimingadapter.persistence;
 
 import java.util.List;
 
+import com.sap.sailing.domain.swisstimingadapter.RaceSpecificMessageLoader;
+import com.sap.sailing.domain.swisstimingadapter.Race;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterMessage;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingConfiguration;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
@@ -14,7 +16,7 @@ import com.sap.sailing.mongodb.Activator;
  * @author Axel Uhl (d043530)
  *
  */
-public interface DomainObjectFactory {
+public interface DomainObjectFactory extends RaceSpecificMessageLoader {
     DomainObjectFactory INSTANCE = new DomainObjectFactoryImpl(Activator.getDefaultInstance().getDB(), SwissTimingFactory.INSTANCE);
 
     Iterable<SwissTimingConfiguration> getSwissTimingConfigurations();
@@ -26,4 +28,16 @@ public interface DomainObjectFactory {
      * @return messages in ascending sequence number order; always a valid but perhaps empty list
      */
     List<SailMasterMessage> loadMessages(int firstSequenceNumber);
+    
+    /**
+     * Gets all races stored in the DB
+     * @return the list of races
+     */
+    List<Race> getRaces();
+
+    /**
+     * Gets the race masterdata for a given raceID
+     * @return the race or null if the race does not exist 
+     */
+    Race getRace(String raceID);
 }
