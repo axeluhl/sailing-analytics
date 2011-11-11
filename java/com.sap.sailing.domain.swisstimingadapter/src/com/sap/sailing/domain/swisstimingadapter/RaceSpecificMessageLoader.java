@@ -17,4 +17,7 @@ public interface RaceSpecificMessageLoader {
      * has to be a valid, non-<code>null</code> and perhaps empty list.
      */
     List<SailMasterMessage> loadRaceMessages(String raceID);
+    
+    // TODO augment to support loading of list of known Race objects (ID/description/optional start time)
+    // something like Collection<Race> getRaces();
 }

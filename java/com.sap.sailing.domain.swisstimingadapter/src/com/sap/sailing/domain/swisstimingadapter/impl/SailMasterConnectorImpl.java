@@ -454,6 +454,8 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
 
     @Override
     public Iterable<Race> getRaces() throws UnknownHostException, IOException, InterruptedException {
+        // TODO in case we have a non-null RaceSpecificMessageLoader then ask it to deliver all races it knows
+        // otherwise we're probably in a single SailMaster connection
         SailMasterMessage response = sendRequestAndGetResponse(MessageType.RAC);
         assertResponseType(MessageType.RAC, response);
         List<Race> result = parseAvailableRacesMessage(response);
