@@ -53,6 +53,7 @@ import com.sap.sailing.domain.swisstimingadapter.Race;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterConnector;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingConfiguration;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
+import com.sap.sailing.domain.swisstimingadapter.persistence.SwissTimingAdapterPersistence;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
@@ -106,15 +107,13 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     
     private final MongoObjectFactory mongoObjectFactory;
     
-    private final com.sap.sailing.domain.swisstimingadapter.persistence.MongoObjectFactory swissTimingMongoObjectFactory;
+    private final SwissTimingAdapterPersistence swissTimingAdapterPersistence;
     
     private final com.sap.sailing.domain.tractracadapter.persistence.MongoObjectFactory tractracMongoObjectFactory;
 
     private final DomainObjectFactory domainObjectFactory;
     
     private final SwissTimingFactory swissTimingFactory;
-
-    private final com.sap.sailing.domain.swisstimingadapter.persistence.DomainObjectFactory swissTimingDomainObjectFactory;
 
     private final com.sap.sailing.domain.tractracadapter.persistence.DomainObjectFactory tractracDomainObjectFactory;
 
@@ -123,9 +122,8 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         racingEventServiceTracker = createAndOpenRacingEventServiceTracker(context);
         mongoObjectFactory = MongoObjectFactory.INSTANCE;
         domainObjectFactory = DomainObjectFactory.INSTANCE;
-        swissTimingDomainObjectFactory = com.sap.sailing.domain.swisstimingadapter.persistence.DomainObjectFactory.INSTANCE;
+        swissTimingAdapterPersistence = SwissTimingAdapterPersistence.INSTANCE;
         tractracDomainObjectFactory = com.sap.sailing.domain.tractracadapter.persistence.DomainObjectFactory.INSTANCE;
-        swissTimingMongoObjectFactory = com.sap.sailing.domain.swisstimingadapter.persistence.MongoObjectFactory.INSTANCE;
         tractracMongoObjectFactory = com.sap.sailing.domain.tractracadapter.persistence.MongoObjectFactory.INSTANCE;
         swissTimingFactory = SwissTimingFactory.INSTANCE;
     }
@@ -1014,7 +1012,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
 
     @Override
     public List<SwissTimingConfigurationDAO> getPreviousSwissTimingConfigurations() {
-        Iterable<SwissTimingConfiguration> configs = swissTimingDomainObjectFactory.getSwissTimingConfigurations();
+        Iterable<SwissTimingConfiguration> configs = swissTimingAdapterPersistence.getSwissTimingConfigurations();
         List<SwissTimingConfigurationDAO> result = new ArrayList<SwissTimingConfigurationDAO>();
         for (SwissTimingConfiguration stConfig : configs) {
             result.add(new SwissTimingConfigurationDAO(stConfig.getName(), stConfig.getHostname(), stConfig.getPort()));
@@ -1027,7 +1025,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
            throws UnknownHostException, IOException, InterruptedException, ParseException {
         List<SwissTimingRaceRecordDAO> result = new ArrayList<SwissTimingRaceRecordDAO>();
         // FIXME can't rely on the connector being able to send a request; perhaps need to extract from SwissTiming persistence
-        SailMasterConnector swissTimingConnector = swissTimingFactory.createSailMasterConnector(hostname, port, swissTimingDomainObjectFactory);
+        SailMasterConnector swissTimingConnector = swissTimingFactory.createSailMasterConnector(hostname, port, swissTimingAdapterPersistence);
         for (Race race : swissTimingConnector.getRaces()) {
             TimePoint startTime = swissTimingConnector.getStartTime(race.getRaceID());
             result.add(new SwissTimingRaceRecordDAO(race.getRaceID(), race.getDescription(), startTime.asDate()));
@@ -1037,7 +1035,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
 
     @Override
     public void storeSwissTimingConfiguration(String configName, String hostname, int port) {
-        swissTimingMongoObjectFactory.storeSwissTimingConfiguration(swissTimingFactory.createSwissTimingConfiguration(configName, hostname, port));
+        swissTimingAdapterPersistence.storeSwissTimingConfiguration(swissTimingFactory.createSwissTimingConfiguration(configName, hostname, port));
    }
 
     @Override

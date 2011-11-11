@@ -79,7 +79,7 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
         } catch (Throwable t) {
              // something went wrong during DB access; report, then use empty new wind track
             logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load recorded TracTrac configurations. Check MongoDB settings.");
-            logger.throwing(DomainObjectFactoryImpl.class.getName(), "getTracTracConfigurations", t);
+            logger.throwing(SwissTimingAdapterPersistenceImpl.class.getName(), "getTracTracConfigurations", t);
         }
         return result;
     }
