@@ -48,6 +48,12 @@ public interface SailMasterConnector {
      */
     void addSailMasterListener(SailMasterListener listener) throws UnknownHostException, IOException;
     
+    /**
+     * Like {@link #addSailMasterListener(SailMasterListener)}, but only forwards race-specific events for the
+     * race identified by <code>raceID</code> to the <code>listener</code>
+     */
+    void addSailMasterListener(String raceID, SailMasterListener listener) throws UnknownHostException, IOException;
+    
     void removeSailMasterListener(SailMasterListener listener);
 
     SailMasterMessage receiveMessage(MessageType type) throws InterruptedException;
@@ -80,4 +86,8 @@ public interface SailMasterConnector {
     void trackRace(String raceID) throws ParseException;
 
     void stopTrackingRace(String raceID);
+
+    void removeSailMasterListener(String raceID, SailMasterListener listener);
+
+    boolean isStopped();
 }

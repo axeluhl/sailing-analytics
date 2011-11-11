@@ -17,4 +17,8 @@ public interface RaceSpecificMessageLoader {
      * has to be a valid, non-<code>null</code> and perhaps empty list.
      */
     List<SailMasterMessage> loadRaceMessages(String raceID);
+    
+    Iterable<Race> getRaces();
+
+    Race getRace(String raceID);
 }

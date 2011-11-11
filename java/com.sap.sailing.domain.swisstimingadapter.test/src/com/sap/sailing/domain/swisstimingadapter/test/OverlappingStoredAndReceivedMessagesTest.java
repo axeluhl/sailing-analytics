@@ -19,6 +19,7 @@ import org.junit.Test;
 
 import com.sap.sailing.domain.swisstimingadapter.Course;
 import com.sap.sailing.domain.swisstimingadapter.Mark;
+import com.sap.sailing.domain.swisstimingadapter.Race;
 import com.sap.sailing.domain.swisstimingadapter.RaceSpecificMessageLoader;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterAdapter;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterConnector;
@@ -68,7 +69,7 @@ public class OverlappingStoredAndReceivedMessagesTest implements RaceSpecificMes
         }.start();
         swissTimingFactory = SwissTimingFactory.INSTANCE;
         transceiver = swissTimingFactory.createSailMasterTransceiver();
-        connector = swissTimingFactory.createSailMasterConnector("localhost", PORT, this);
+        connector = swissTimingFactory.getOrCreateSailMasterConnector("localhost", PORT, this);
         synchronized (this) {
             while (sendingStream == null) {
                 wait();
@@ -193,6 +194,18 @@ public class OverlappingStoredAndReceivedMessagesTest implements RaceSpecificMes
             e.printStackTrace();
         }
         return messagesToLoad;
+    }
+
+    @Override
+    public Iterable<Race> getRaces() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Race getRace(String raceID) {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

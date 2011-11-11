@@ -6,6 +6,7 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Require-Bundle: com.sap.sailing.domain,
- com.sap.sailing.udpconnector
+ com.sap.sailing.udpconnector,
+ org.eclipse.osgi;bundle-version="3.7.1"
 Export-Package: com.sap.sailing.domain.swisstimingadapter,
  com.sap.sailing.domain.swisstimingadapter.impl;x-friends:="com.sap.sailing.domain.swisstimingadapter.test"

@@ -7,6 +7,7 @@ import java.net.SocketException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -33,6 +34,7 @@ import com.sap.sailing.domain.leaderboard.impl.ScoreCorrectionImpl;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
+import com.sap.sailing.domain.swisstimingadapter.persistence.SwissTimingAdapterPersistence;
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.RaceListener;
@@ -92,14 +94,14 @@ public class RacingEventServiceImpl implements RacingEventService {
     
     private final SwissTimingFactory swissTimingFactory;
     
-    private final com.sap.sailing.domain.swisstimingadapter.persistence.DomainObjectFactory swissTimingDomainObjectFactory;
+    private final SwissTimingAdapterPersistence swissTimingAdapterPersistence;
 
     public RacingEventServiceImpl() {
         domainFactory = DomainFactory.INSTANCE;
         domainObjectFactory = DomainObjectFactory.INSTANCE;
         mongoObjectFactory = MongoObjectFactory.INSTANCE;
         swissTimingFactory = SwissTimingFactory.INSTANCE;
-        swissTimingDomainObjectFactory = com.sap.sailing.domain.swisstimingadapter.persistence.DomainObjectFactory.INSTANCE;
+        swissTimingAdapterPersistence = SwissTimingAdapterPersistence.INSTANCE;
         windTrackerFactory = ExpeditionWindTrackerFactory.getInstance();
         eventsByName = new HashMap<String, Event>();
         raceTrackersByEvent = new HashMap<Event, Set<RaceTracker>>();
@@ -224,11 +226,11 @@ public class RacingEventServiceImpl implements RacingEventService {
     
     @Override
     public synchronized RaceHandle addSwissTimingRace(String raceID, String hostname, int port, WindStore windStore,
-            long timeoutInMilliseconds) throws InterruptedException {
+            long timeoutInMilliseconds) throws InterruptedException, UnknownHostException, IOException {
         Triple<String, String, Integer> key = new Triple<String, String, Integer>(raceID, hostname, port);
         RaceTracker tracker = raceTrackersByID.get(key);
         if (tracker == null) {
-            tracker = getSwissTimingFactory().createRaceTracker(raceID, hostname, port, windStore, swissTimingDomainObjectFactory);
+            tracker = getSwissTimingFactory().createRaceTracker(raceID, hostname, port, windStore, swissTimingAdapterPersistence);
             raceTrackersByID.put(tracker.getID(), tracker);
             Set<RaceTracker> trackers = raceTrackersByEvent.get(tracker.getEvent());
             if (trackers == null) {
