@@ -22,7 +22,7 @@ public interface SwissTimingAdapterPersistence extends RaceSpecificMessageLoader
      * 
      * @return messages in ascending sequence number order; always a valid but perhaps empty list
      */
-    List<SailMasterMessage> loadMessages(int firstSequenceNumber);
+    List<SailMasterMessage> loadCommandMessages(int firstSequenceNumber);
 
     /**
      * Loads all command messages (not race specific) received and stored to the DB.

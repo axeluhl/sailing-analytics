@@ -79,6 +79,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
     private Socket socket;
     private final DateFormat dateFormat;
     private final Set<SailMasterListener> listeners;
+    private final Map<String, Set<SailMasterListener>> raceSpecificListeners;
     private final Thread receiverThread;
     private boolean stopped;
     private boolean connected;
@@ -110,7 +111,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
     private final Map<String, Long> sequenceNumberOfLastMessageForRaceID;
     
     private final RaceSpecificMessageLoader messageLoader;
-    
+
     public SailMasterConnectorImpl(String host, int port, RaceSpecificMessageLoader messageLoader) throws InterruptedException {
         super();
         this.messageLoader = messageLoader;
@@ -119,6 +120,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
         this.host = host;
         this.port = port;
         this.listeners = new HashSet<SailMasterListener>();
+        this.raceSpecificListeners = new HashMap<String, Set<SailMasterListener>>();
         this.unprocessedMessagesByType = new HashMap<MessageType, BlockingQueue<SailMasterMessage>>();
         raceSpecificMessageBuffers = new HashMap<String, List<SailMasterMessage>>();
         sequenceNumberOfLastMessageForRaceID = new HashMap<String, Long>();
@@ -418,14 +420,41 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
     }
     
     @Override
+    public boolean isStopped() {
+        return stopped;
+    }
+    
+    @Override
     public void addSailMasterListener(SailMasterListener listener) throws UnknownHostException, IOException {
         ensureSocketIsOpen();
         listeners.add(listener);
     }
     
     @Override
+    public synchronized void addSailMasterListener(String raceID, SailMasterListener listener) throws UnknownHostException, IOException {
+        ensureSocketIsOpen();
+        Set<SailMasterListener> set = raceSpecificListeners.get(raceID);
+        if (set == null) {
+            set = new HashSet<SailMasterListener>();
+            raceSpecificListeners.put(raceID, set);
+        }
+        set.add(listener);
+    }
+    
+    @Override
     public void removeSailMasterListener(SailMasterListener listener) {
         listeners.remove(listener);
+    }
+
+    @Override
+    public synchronized void removeSailMasterListener(String raceID, SailMasterListener listener) {
+        Set<SailMasterListener> set = raceSpecificListeners.get(raceID);
+        if (set != null) {
+            set.remove(listener);
+            if (set.isEmpty()) {
+                raceSpecificListeners.remove(raceID);
+            }
+        }
     }
     
     public SailMasterMessage sendRequestAndGetResponse(MessageType messageType, String... args) throws UnknownHostException, IOException, InterruptedException {

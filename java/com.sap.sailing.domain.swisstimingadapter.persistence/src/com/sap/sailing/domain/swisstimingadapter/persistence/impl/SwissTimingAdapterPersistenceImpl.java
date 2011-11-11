@@ -91,13 +91,13 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
     }
 
     @Override
-    public List<SailMasterMessage> loadMessages(int firstSequenceNumber) {
-        DBCollection rawMessages = database.getCollection(CollectionNames.RAW_MESSAGES.name());
+    public List<SailMasterMessage> loadCommandMessages(int firstSequenceNumber) {
+        DBCollection commandMessages = database.getCollection(CollectionNames.COMMAND_MESSAGES.name());
         BasicDBObject query = new BasicDBObject();
         if (firstSequenceNumber != -1) {
             query.append(FieldNames.MESSAGE_SEQUENCE_NUMBER.name(), new BasicDBObject("$gte", firstSequenceNumber));
         }
-        DBCursor results = rawMessages.find(query);
+        DBCursor results = commandMessages.find(query);
         List<SailMasterMessage> result = new ArrayList<SailMasterMessage>();
         for (DBObject o : results) {
             result.add(swissTimingFactory.createMessage((String) o.get(FieldNames.MESSAGE_CONTENT.name()),
@@ -141,6 +141,7 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
     }
 
 
+    @Override
     public Race getRace(String raceID) {
         DBCollection races = database.getCollection(CollectionNames.RACES_MASTERDATA.name());
 
@@ -158,6 +159,7 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
         return null;
     }
 
+    @Override
     public Iterable<Race> getRaces() {
         DBCollection races = database.getCollection(CollectionNames.RACES_MASTERDATA.name());
 

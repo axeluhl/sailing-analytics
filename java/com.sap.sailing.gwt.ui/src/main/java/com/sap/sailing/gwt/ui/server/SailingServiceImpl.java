@@ -1025,7 +1025,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
            throws UnknownHostException, IOException, InterruptedException, ParseException {
         List<SwissTimingRaceRecordDAO> result = new ArrayList<SwissTimingRaceRecordDAO>();
         // FIXME can't rely on the connector being able to send a request; perhaps need to extract from SwissTiming persistence
-        SailMasterConnector swissTimingConnector = swissTimingFactory.createSailMasterConnector(hostname, port, swissTimingAdapterPersistence);
+        SailMasterConnector swissTimingConnector = swissTimingFactory.getOrCreateSailMasterConnector(hostname, port, swissTimingAdapterPersistence);
         for (Race race : swissTimingConnector.getRaces()) {
             TimePoint startTime = swissTimingConnector.getStartTime(race.getRaceID());
             result.add(new SwissTimingRaceRecordDAO(race.getRaceID(), race.getDescription(), startTime.asDate()));

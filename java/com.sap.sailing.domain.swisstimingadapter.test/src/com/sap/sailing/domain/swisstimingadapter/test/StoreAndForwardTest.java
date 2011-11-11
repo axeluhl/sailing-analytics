@@ -53,7 +53,7 @@ public class StoreAndForwardTest {
         sendingStream = sendingSocket.getOutputStream();
         swissTimingFactory = SwissTimingFactory.INSTANCE;
         transceiver = swissTimingFactory.createSailMasterTransceiver();
-        connector = swissTimingFactory.createSailMasterConnector("localhost", CLIENT_PORT, null);
+        connector = swissTimingFactory.getOrCreateSailMasterConnector("localhost", CLIENT_PORT, null);
         DBCollection lastMessageCountCollection = db.getCollection(CollectionNames.LAST_MESSAGE_COUNT.name());
         lastMessageCountCollection.update(new BasicDBObject(), new BasicDBObject().append(FieldNames.LAST_MESSAGE_COUNT.name(), 0l),
                 /* upsert */ true, /* multi */ false);
@@ -97,7 +97,7 @@ public class StoreAndForwardTest {
         DBCollection lastMessageCountCollection = db.getCollection(CollectionNames.LAST_MESSAGE_COUNT.name());
         Long lastMessageCount = (Long) lastMessageCountCollection.findOne().get(FieldNames.LAST_MESSAGE_COUNT.name());
         assertEquals((Long) 1l, lastMessageCount);
-        List<SailMasterMessage> rawMessages = swissTimingAdapterPersistence.loadMessages(0);
+        List<SailMasterMessage> rawMessages = swissTimingAdapterPersistence.loadCommandMessages(0);
         assertEquals(1, rawMessages.size());
         assertEquals(rawMessage, rawMessages.get(0).getMessage());
         assertEquals(0l, (long) rawMessages.get(0).getSequenceNumber());

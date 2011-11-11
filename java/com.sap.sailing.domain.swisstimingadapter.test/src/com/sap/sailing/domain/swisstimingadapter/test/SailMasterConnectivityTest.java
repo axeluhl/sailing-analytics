@@ -47,7 +47,7 @@ public class SailMasterConnectivityTest {
     @Before
     public void setUp() throws InterruptedException, ParseException {
         startSailMasterDummy();
-        connector = SwissTimingFactory.INSTANCE.createSailMasterConnector("localhost", port, SwissTimingAdapterPersistence.INSTANCE);
+        connector = SwissTimingFactory.INSTANCE.getOrCreateSailMasterConnector("localhost", port, SwissTimingAdapterPersistence.INSTANCE);
         connector.trackRace("W4702");
         connector.trackRace("4711");
         connector.trackRace("4712");

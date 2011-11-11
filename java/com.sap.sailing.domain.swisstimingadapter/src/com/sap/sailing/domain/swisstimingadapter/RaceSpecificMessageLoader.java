@@ -19,4 +19,6 @@ public interface RaceSpecificMessageLoader {
     List<SailMasterMessage> loadRaceMessages(String raceID);
     
     Iterable<Race> getRaces();
+
+    Race getRace(String raceID);
 }
