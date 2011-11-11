@@ -18,6 +18,5 @@ public interface RaceSpecificMessageLoader {
      */
     List<SailMasterMessage> loadRaceMessages(String raceID);
     
-    // TODO augment to support loading of list of known Race objects (ID/description/optional start time)
-    // something like Collection<Race> getRaces();
+    Iterable<Race> getRaces();
 }

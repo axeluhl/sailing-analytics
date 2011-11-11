@@ -123,20 +123,19 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     	return null;
     }
 
-    public List<Race> getRaces() {
+    public Iterable<Race> getRaces() {
         DBCollection races = database.getCollection(CollectionNames.RACES_MASTERDATA.name());
-  
+
         DBCursor results = races.find();
         List<Race> result = new ArrayList<Race>();
-        
+
         for (DBObject o : results) {
-        	Race race = swissTimingFactory.createRace((String) o.get(FieldNames.RACE_ID.name()),
-            		(String) o.get(FieldNames.RACE_DESCRIPTION.name()), new MillisecondsTimePoint((Long) o.get(FieldNames.RACE_STARTTIME.name())));
+            Race race = swissTimingFactory.createRace((String) o.get(FieldNames.RACE_ID.name()),
+                    (String) o.get(FieldNames.RACE_DESCRIPTION.name()),
+                    new MillisecondsTimePoint((Long) o.get(FieldNames.RACE_STARTTIME.name())));
             result.add(race);
         }
         return result;
     }
     
-
-
 }
