@@ -23,6 +23,15 @@ public class SwissTimingRaceTrackerImpl implements SwissTimingRaceTracker {
     protected SwissTimingRaceTrackerImpl(String raceID, String hostname, int port, SwissTimingFactory factory,
             RaceSpecificMessageLoader messageLoader) throws InterruptedException {
         connector = factory.createSailMasterConnector(hostname, port, messageLoader);
+
+        /*
+        connector.addSailMasterListener(new SailMasterAdapter() {
+            @Override
+            public void receivedAvailableRaces(Iterable<Race> races)  {
+                }
+        });
+        */
+
         // TODO fix race after having created it
         race = null;
     }

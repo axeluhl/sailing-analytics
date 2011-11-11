@@ -19,6 +19,7 @@ import org.junit.Test;
 
 import com.sap.sailing.domain.swisstimingadapter.Course;
 import com.sap.sailing.domain.swisstimingadapter.Mark;
+import com.sap.sailing.domain.swisstimingadapter.Race;
 import com.sap.sailing.domain.swisstimingadapter.RaceSpecificMessageLoader;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterAdapter;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterConnector;
@@ -194,5 +195,12 @@ public class OverlappingStoredAndReceivedMessagesTest implements RaceSpecificMes
         }
         return messagesToLoad;
     }
+
+    @Override
+    public Iterable<Race> getRaces() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 
 }

@@ -48,8 +48,10 @@ public class StoreAndForward implements Runnable {
     private boolean receivingFromSailMaster;
 
     private final DBCollection lastMessageCountCollection;
+  
+    private final SwissTimingAdapterPersistence swissTimingAdapterPersistence;
     
-    private final MongoObjectFactory mongoObjectFactory;
+//    private final MongoObjectFactory mongoObjectFactory;
     
     private final SwissTimingFactory swissTimingFactory;
 
@@ -64,16 +66,16 @@ public class StoreAndForward implements Runnable {
      *            clients can connect to this port and will receive forwarded and sequence-numbered messages over those
      *            sockets
      */
-    public StoreAndForward(final int listenPort, final int portForClients, MongoObjectFactory mongoObjectFactory,
-            SwissTimingFactory swissTimingFactory) throws InterruptedException {
+    public StoreAndForward(final int listenPort, final int portForClients, SwissTimingFactory swissTimingFactory, 
+            SwissTimingAdapterPersistence swissTimingAdapterPersistence) throws InterruptedException {
         db = Activator.getDefaultInstance().getDB();
         this.listenPort = listenPort;
         this.transceiver = SwissTimingFactory.INSTANCE.createSailMasterTransceiver();
         this.portForClients = portForClients;
         this.streamsToForwardTo = new ArrayList<OutputStream>();
         this.socketsToForwardTo = new ArrayList<Socket>();
-        this.mongoObjectFactory = mongoObjectFactory;
-        this.swissTimingFactory = swissTimingFactory;
+        this.swissTimingAdapterPersistence = swissTimingAdapterPersistence;
+        this.swissTimingFactory = swissTimingFactory; 
         lastMessageCountCollection = db.getCollection(CollectionNames.LAST_MESSAGE_COUNT.name());
         DBObject lastMessageCountRecord = lastMessageCountCollection.findOne();
         lastMessageCount = lastMessageCountRecord == null ? 0 : (Long) lastMessageCountRecord.get(FieldNames.LAST_MESSAGE_COUNT.name());
@@ -135,7 +137,7 @@ public class StoreAndForward implements Runnable {
     public static void main(String[] args) throws InterruptedException {
         int listenPort = Integer.valueOf(args[0]);
         int clientPort = Integer.valueOf(args[1]);
-        StoreAndForward storeAndForward = new StoreAndForward(listenPort, clientPort, MongoObjectFactory.INSTANCE, SwissTimingFactory.INSTANCE);
+        StoreAndForward storeAndForward = new StoreAndForward(listenPort, clientPort, SwissTimingFactory.INSTANCE, SwissTimingAdapterPersistence.INSTANCE);
         storeAndForward.run();
     }
 
@@ -161,7 +163,7 @@ public class StoreAndForward implements Runnable {
                         DBObject newCountRecord = lastMessageCountCollection.findAndModify(emptyQuery, incrementLastMessageCountQuery);
                         lastMessageCount = (Long) newCountRecord.get(FieldNames.LAST_MESSAGE_COUNT.name());
                         SailMasterMessage message = swissTimingFactory.createMessage(messageAndOptionalSequenceNumber.getA(), lastMessageCount);
-                        mongoObjectFactory.storeRawSailMasterMessage(message);
+                        swissTimingAdapterPersistence.storeSailMasterMessage(message);
                         synchronized (this) {
                             for (OutputStream os : streamsToForwardTo) {
                                 // write the sequence number of the message into the stream before actually writing the

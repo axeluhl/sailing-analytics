@@ -27,6 +27,7 @@ import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
 import com.sap.sailing.domain.swisstimingadapter.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.swisstimingadapter.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.swisstimingadapter.persistence.StoreAndForward;
+import com.sap.sailing.domain.swisstimingadapter.persistence.SwissTimingAdapterPersistence;
 import com.sap.sailing.domain.swisstimingadapter.persistence.impl.CollectionNames;
 import com.sap.sailing.domain.swisstimingadapter.persistence.impl.FieldNames;
 import com.sap.sailing.mongodb.Activator;
@@ -49,7 +50,7 @@ public class StoreAndForwardTest {
     @Before
     public void setUp() throws UnknownHostException, IOException, InterruptedException {
         db = Activator.getDefaultInstance().getDB();
-        storeAndForward = new StoreAndForward(RECEIVE_PORT, CLIENT_PORT, MongoObjectFactory.INSTANCE, SwissTimingFactory.INSTANCE);
+        storeAndForward = new StoreAndForward(RECEIVE_PORT, CLIENT_PORT, SwissTimingFactory.INSTANCE, SwissTimingAdapterPersistence.INSTANCE);
         sendingSocket = new Socket("localhost", RECEIVE_PORT);
         sendingStream = sendingSocket.getOutputStream();
         swissTimingFactory = SwissTimingFactory.INSTANCE;
