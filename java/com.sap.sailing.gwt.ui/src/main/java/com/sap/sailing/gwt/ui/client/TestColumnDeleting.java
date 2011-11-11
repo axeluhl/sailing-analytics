@@ -18,21 +18,23 @@ import com.sap.sailing.gwt.ui.test.TestSailingService;
 import com.sap.sailing.gwt.ui.test.TestSailingServiceAsync;
 
 public class TestColumnDeleting extends GWTTestCase {
+    
+    //These objects should be created by calling GWT.create(Class c);
     private LeaderboardPanelMock leaderboardPanel;
     private TestSailingServiceAsync service;
     private StringConstants sc;
     
+    //Test data.
     private final String LEADERBOARD_NAME = "test";
     private final String COLUMN1_NAME = "r1";
-    private final String EVENT_NAME = "Kieler Woche (49er)";
-    private final String JSON_URL= "http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/jsonservice.php";
-    private final String TRACKED_RACE = "49er Yellow 1";
+    private final String EVENT_NAME = "Sailing Team Germany (STG)";
+    private final String JSON_URL= "http://germanmaster.traclive.dk/events/event_20110505_SailingTea/jsonservice.php";
+    private final String TRACKED_RACE = "schwerttest";
     
     
     private LeaderboardDAO leaderboard;
     private RaceRecordDAO rrDao;
     private RaceColumn<LeaderboardRowDAO> rc;
-    private int indexOfRaceColumn;
     
     
 
@@ -62,7 +64,6 @@ public class TestColumnDeleting extends GWTTestCase {
             public void onSuccess(Pair<String, List<RaceRecordDAO>> result) {
                 System.out.println("Listed races.");
                 for (RaceRecordDAO rr : result.getB()){
-                    System.out.println(rr.name + " : " + TRACKED_RACE);
                     if (rr.name.equals(TRACKED_RACE)){
                         rrDao = rr;
                     }
@@ -148,7 +149,7 @@ public class TestColumnDeleting extends GWTTestCase {
     private void getLeaderboard(){
         ArrayList<String> al = new ArrayList<String>();
         al.add(COLUMN1_NAME);
-        service.getLeaderboardByName(LEADERBOARD_NAME, new Date(), null,
+        service.getLeaderboardByName(LEADERBOARD_NAME, new Date(), al,
                 new AsyncCallback<LeaderboardDAO>() {
 
                     @Override
@@ -170,8 +171,6 @@ public class TestColumnDeleting extends GWTTestCase {
                                 
                                 rc = (RaceColumn<LeaderboardRowDAO>) c;
                                 rc.setEnableLegDrillDown(true);
-                                
-                                indexOfRaceColumn = i;
                             }
                         }
                         removeColumnAndAssert();
@@ -191,13 +190,11 @@ public class TestColumnDeleting extends GWTTestCase {
 
                     @Override
                     public void onSuccess(Void result) {
-                        System.out.println("Removed column.");
-                        
-                        //leaderboardPanel.removeColumn(indexOfRaceColumn);
+                        leaderboardPanel.updateLeaderboard(leaderboard);
                         assertNotNull(rc);
                         try {
-                            leaderboardPanel.updateLeaderboard(leaderboard);
                             rc.toggleExpansion();
+                            leaderboardPanel.updateLeaderboard(leaderboard);
                         } catch (Exception e) {
                             fail("Toggle column failed." + e.getLocalizedMessage());
                         }
@@ -205,16 +202,13 @@ public class TestColumnDeleting extends GWTTestCase {
                     }
                 });
     }
-
-    public void assertColumnDeleting(){
-        
-    }
     
+    
+
     @Override
     protected void gwtTearDown() throws Exception {
         // TODO Auto-generated method stub
-        //super.gwtTearDown();
-        
+        super.gwtTearDown();
     }
 
     @Override

@@ -975,13 +975,13 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                             if (raceColumn.isExpanded()) {
                                 raceColumn.toggleExpansion(); // remove children from table
                             }
-                            
+                            removeColumn(columnIndex);
+                            insertColumn(
+                                    positionRaceColumn[indexRaceColumn],
+                                    createRaceColumn(race, leaderboard.raceIsMedalRace(race),
+                                            leaderboard.raceIsTracked(race)));
                         }
-                        removeColumn(columnIndex);
-                        insertColumn(
-                                positionRaceColumn[indexRaceColumn],
-                                createRaceColumn(race, leaderboard.raceIsMedalRace(race),
-                                        leaderboard.raceIsTracked(race)));
+                        
                     }
                 }
             }
