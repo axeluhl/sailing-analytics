@@ -7,6 +7,7 @@ import java.net.SocketException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.util.List;
 import java.util.Map;
@@ -177,7 +178,8 @@ public interface RacingEventService {
      */
     void updateStoredLeaderboard(Leaderboard leaderboard);
 
-    RaceHandle addSwissTimingRace(String raceID, String hostname, int port, WindStore windStore, long timeoutInMilliseconds) throws InterruptedException;
+    RaceHandle addSwissTimingRace(String raceID, String hostname, int port, WindStore windStore,
+            long timeoutInMilliseconds) throws InterruptedException, UnknownHostException, IOException;
 
     SwissTimingFactory getSwissTimingFactory();
 

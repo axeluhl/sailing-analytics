@@ -12,6 +12,7 @@ import com.sap.sailing.domain.base.Distance;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.TimePoint;
+import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.EventImpl;
 import com.sap.sailing.domain.swisstimingadapter.Course;
 import com.sap.sailing.domain.swisstimingadapter.Fix;
@@ -108,7 +109,8 @@ public class SwissTimingRaceTrackerImpl implements SwissTimingRaceTracker, SailM
     public void receivedStartList(String raceID, StartList startList) {
         // now we can create the RaceDefinition and most other things
         Race race = messageLoader.getRace(raceID);
-//        Event event = new EventImpl(name, boatClass)
+        Event event = new EventImpl(race.getDescription(), new BoatClassImpl("Unknown"));
+        
     }
 
     @Override

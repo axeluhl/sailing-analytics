@@ -7,6 +7,7 @@ import java.net.SocketException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -225,7 +226,7 @@ public class RacingEventServiceImpl implements RacingEventService {
     
     @Override
     public synchronized RaceHandle addSwissTimingRace(String raceID, String hostname, int port, WindStore windStore,
-            long timeoutInMilliseconds) throws InterruptedException {
+            long timeoutInMilliseconds) throws InterruptedException, UnknownHostException, IOException {
         Triple<String, String, Integer> key = new Triple<String, String, Integer>(raceID, hostname, port);
         RaceTracker tracker = raceTrackersByID.get(key);
         if (tracker == null) {
