@@ -34,6 +34,8 @@ public class SwissTimingRaceTrackerImpl implements SwissTimingRaceTracker, SailM
     private RaceDefinition race;
     private final String raceID;
     private final RaceSpecificMessageLoader messageLoader;
+    private Course course;
+    private StartList startList;
     
     protected SwissTimingRaceTrackerImpl(String raceID, String hostname, int port, SwissTimingFactory factory,
             RaceSpecificMessageLoader messageLoader) throws InterruptedException, UnknownHostException, IOException {
@@ -107,22 +109,30 @@ public class SwissTimingRaceTrackerImpl implements SwissTimingRaceTracker, SailM
 
     @Override
     public void receivedStartList(String raceID, StartList startList) {
+        this.startList = startList;
+        if (course != null) {
+            createRaceDefinition(raceID);
+        }
+    }
+
+    private void createRaceDefinition(String raceID2) {
         // now we can create the RaceDefinition and most other things
         Race race = messageLoader.getRace(raceID);
         Event event = new EventImpl(race.getDescription(), new BoatClassImpl("Unknown"));
-        
+        // TODO continue here...
     }
 
     @Override
     public void receivedCourseConfiguration(String raceID, Course course) {
-        // TODO Auto-generated method stub
-        
+        this.course = course;
+        if (startList != null) {
+            createRaceDefinition(raceID);
+        }
     }
 
     @Override
     public void receivedAvailableRaces(Iterable<Race> races) {
-        // TODO Auto-generated method stub
-        
+        // don't care
     }
 
 }
