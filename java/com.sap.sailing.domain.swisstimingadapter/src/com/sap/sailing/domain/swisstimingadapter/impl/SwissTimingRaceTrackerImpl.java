@@ -115,11 +115,12 @@ public class SwissTimingRaceTrackerImpl implements SwissTimingRaceTracker, SailM
         }
     }
 
-    private void createRaceDefinition(String raceID2) {
+    private void createRaceDefinition(String raceID) {
+        this.raceID = raceID;
         // now we can create the RaceDefinition and most other things
         Race race = messageLoader.getRace(raceID);
         Event event = new EventImpl(race.getDescription(), new BoatClassImpl("Unknown"));
-        // TODO continue here...
+        // TODO continue here by creating the Waypoint/ControlPoint objects, then the CourseImpl, the CompetitorImpl objects and then the RaceDefinition; afterwards, also create the tracking counterparts such as the TrackedRaceImpl and TrackedEventImpl
     }
 
     @Override
@@ -134,5 +135,4 @@ public class SwissTimingRaceTrackerImpl implements SwissTimingRaceTracker, SailM
     public void receivedAvailableRaces(Iterable<Race> races) {
         // don't care
     }
-
 }
