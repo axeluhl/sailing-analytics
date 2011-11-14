@@ -17,6 +17,7 @@ import com.sap.sailing.domain.base.impl.NationalityImpl;
 import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.swisstimingadapter.DomainFactory;
+import com.sap.sailing.domain.swisstimingadapter.Race;
 
 public class DomainFactoryImpl implements DomainFactory {
     private final Map<String, Event> raceIDToEventCache;
@@ -30,11 +31,11 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public Event getOrCreateEvent(String raceID) {
-        Event result = raceIDToEventCache.get(raceID);
+    public Event getOrCreateEvent(Race race) {
+        Event result = raceIDToEventCache.get(race.getRaceID());
         if (result == null) {
-            result = new EventImpl(raceID, null);
-            raceIDToEventCache.put(raceID, result);
+            result = new EventImpl(race.getDescription(), null);
+            raceIDToEventCache.put(race.getRaceID(), result);
         }
         return result;
     }

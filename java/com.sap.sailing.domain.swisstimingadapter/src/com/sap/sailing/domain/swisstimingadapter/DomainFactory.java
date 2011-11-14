@@ -8,7 +8,7 @@ import com.sap.sailing.domain.swisstimingadapter.impl.DomainFactoryImpl;
 public interface DomainFactory {
     final static DomainFactory INSTANCE = new DomainFactoryImpl();
     
-    Event getOrCreateEvent(String raceID);
+    Event getOrCreateEvent(Race race);
 
     Nationality getOrCreateNationality(String nationalityName);
 

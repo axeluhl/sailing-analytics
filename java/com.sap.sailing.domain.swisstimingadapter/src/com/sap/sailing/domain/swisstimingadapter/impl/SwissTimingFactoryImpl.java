@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.sap.sailing.domain.base.TimePoint;
+import com.sap.sailing.domain.swisstimingadapter.DomainFactory;
 import com.sap.sailing.domain.swisstimingadapter.Race;
 import com.sap.sailing.domain.swisstimingadapter.RaceSpecificMessageLoader;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterConnector;
@@ -55,9 +56,9 @@ public class SwissTimingFactoryImpl implements SwissTimingFactory {
 
     @Override
     public SwissTimingRaceTracker createRaceTracker(String raceID, String hostname, int port, WindStore windStore,
-            RaceSpecificMessageLoader messageLoader, TrackedEventRegistry trackedEventRegistry)
+            RaceSpecificMessageLoader messageLoader, DomainFactory domainFactory, TrackedEventRegistry trackedEventRegistry)
             throws InterruptedException, UnknownHostException, IOException, ParseException {
-        return new SwissTimingRaceTrackerImpl(raceID, hostname, port, this, messageLoader, trackedEventRegistry);
+        return new SwissTimingRaceTrackerImpl(raceID, hostname, port, domainFactory, this, messageLoader, trackedEventRegistry);
     }
 
     @Override
