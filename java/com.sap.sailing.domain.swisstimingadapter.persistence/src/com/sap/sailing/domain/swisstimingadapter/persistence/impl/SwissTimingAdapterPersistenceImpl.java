@@ -27,6 +27,9 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
     
     private static final Logger logger = Logger.getLogger(SwissTimingAdapterPersistenceImpl.class.getName());
 
+    /** this race cache should only be used for checks in the storeSailMasterMessage method to ensure
+     * that we have always a valid race for a message (also in case we missed a RAC message) 
+     */
     private HashMap<String, Race> cachedRaces = new HashMap<String, Race>();
     
     public SwissTimingAdapterPersistenceImpl(DB db, SwissTimingFactory swissTimingFactory) {
@@ -214,9 +217,15 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
             // in order to have a more intelligent conflict resolver mechanism we will forward the resolution to a special thread later on
             boolean simpleResolution = true;
             if(simpleResolution) {
-                Race newRace = SwissTimingFactory.INSTANCE.createRace(message.getRaceID(), null, null);
-                storeRace(newRace);
-                cachedRaces.put(newRace.getRaceID(), newRace);
+                // first check if the missing race has been created in the mean time
+                Race checkRace = getRace(message.getRaceID());
+                if(checkRace != null) {
+                    cachedRaces.put(checkRace.getRaceID(), checkRace);
+                } else {
+                    Race newRace = SwissTimingFactory.INSTANCE.createRace(message.getRaceID(), null, null);
+                    storeRace(newRace);
+                    cachedRaces.put(newRace.getRaceID(), newRace);
+                }
             }
         }
     }
@@ -237,5 +246,18 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
     public void dropAllRaceMasterData() {
         DBCollection racesCollection = database.getCollection(CollectionNames.RACES_MASTERDATA.name());
         racesCollection.drop();
+    }
+    
+    @Override
+    public void dropAllMessageData() {
+
+        DBCollection rawMessageCollection = database.getCollection(CollectionNames.RAW_MESSAGES.name());
+        rawMessageCollection.drop();
+
+        DBCollection racesMessageCollection = database.getCollection(CollectionNames.RACES_MESSAGES.name());
+        racesMessageCollection.drop();
+        
+        DBCollection cmdMessageCollection = database.getCollection(CollectionNames.COMMAND_MESSAGES.name());
+        cmdMessageCollection.drop();
     }
 }
