@@ -53,7 +53,7 @@ import com.sap.sailing.util.Util.Pair;
 import com.sap.sailing.util.Util.Triple;
 
 /**
- * Implements the connector to the SwissTiming Sail Master system. It uses a hostname and port number to establish the
+ * Implements the connector to the SwissTiming Sail Master system. It uses a host name and port number to establish the
  * connecting via TCP. The connector offers a number of explicit service request methods. Additionally, the connector
  * can receive "spontaneous" events sent by the sail master system. Clients can register for those spontaneous events
  * (see {@link #addSailMasterListener}).
@@ -61,12 +61,15 @@ import com.sap.sailing.util.Util.Triple;
  * 
  * When the connector is used with SailMaster instances hidden behind a "bridge" / firewall, no explicit requests are
  * possible, and the connector has to rely solely on the events it receives. It may, though, load recorded race-specific
- * messages through a {@link RaceSpecificMessageLoader} object.
+ * messages through a {@link RaceSpecificMessageLoader} object. If a non-<code>null</code> {@link RaceSpecificMessageLoader}
+ * is provided to the constructor, the connector will fetch the {@link #getRaces() list of races} from that loader.
+ * Additionally, the connector will use the loader upon each {@link #trackRace(String)} to load all messages recorded
+ * by the loader for the race requested so far.
  * <p>
  * 
  * Generally, the connector needs to be instructed for which races it shall handle events using calls to the
  * {@link #trackRace} and {@link #stopTrackingRace} operations. {@link MessageType#isRaceSpecific() Race-specific
- * messages} for other races are then ignored and not forwarded to any listener.
+ * messages} for other races are ignored and not forwarded to any listener.
  * 
  * @author Axel Uhl (d043530)
  * 
@@ -332,12 +335,24 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
         for (SailMasterListener listener : listeners) {
             listener.receivedClockAtMark(message.getSections()[1], clockAtMarkResults);
         }
+        Set<SailMasterListener> raceSpecificListenerSet = raceSpecificListeners.get(message.getRaceID());
+        if (raceSpecificListenerSet != null) {
+            for (SailMasterListener listener : raceSpecificListenerSet) {
+                listener.receivedClockAtMark(message.getSections()[1], clockAtMarkResults);
+            }
+        }
     }
 
     private void notifyListenersSTL(SailMasterMessage message) {
         StartList startListMessage = parseStartListMessage(message);
         for (SailMasterListener listener : listeners) {
             listener.receivedStartList(message.getSections()[1], startListMessage);
+        }
+        Set<SailMasterListener> raceSpecificListenerSet = raceSpecificListeners.get(message.getRaceID());
+        if (raceSpecificListenerSet != null) {
+            for (SailMasterListener listener : raceSpecificListenerSet) {
+                listener.receivedStartList(message.getSections()[1], startListMessage);
+            }
         }
     }
 
@@ -346,6 +361,12 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
         for (SailMasterListener listener : listeners) {
             listener.receivedCourseConfiguration(message.getSections()[1], course);
         }
+        Set<SailMasterListener> raceSpecificListenerSet = raceSpecificListeners.get(message.getRaceID());
+        if (raceSpecificListenerSet != null) {
+            for (SailMasterListener listener : raceSpecificListenerSet) {
+                listener.receivedCourseConfiguration(message.getSections()[1], course);
+            }
+        }
     }
 
     private void notifyListenersRAC(SailMasterMessage message) {
@@ -353,6 +374,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
         for (SailMasterListener listener : listeners) {
             listener.receivedAvailableRaces(races);
         }
+        // not race specific; no need to notify any listener from raceSpecificListeners
     }
 
     private void notifyListenersRPD(SailMasterMessage message) throws ParseException {
@@ -409,6 +431,13 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
         for (SailMasterListener listener : listeners) {
             listener.receivedRacePositionData(raceID, status, timePoint, startTimeEstimatedStartTime, millisecondsSinceRaceStart,
                     nextMarkIndexForLeader, distanceToNextMarkForLeader, fixes);
+        }
+        Set<SailMasterListener> raceSpecificListenerSet = raceSpecificListeners.get(message.getRaceID());
+        if (raceSpecificListenerSet != null) {
+            for (SailMasterListener listener : raceSpecificListenerSet) {
+                listener.receivedRacePositionData(raceID, status, timePoint, startTimeEstimatedStartTime, millisecondsSinceRaceStart,
+                        nextMarkIndexForLeader, distanceToNextMarkForLeader, fixes);
+            }
         }
     }
 
@@ -483,11 +512,14 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
 
     @Override
     public Iterable<Race> getRaces() throws UnknownHostException, IOException, InterruptedException {
-        // TODO in case we have a non-null RaceSpecificMessageLoader then ask it to deliver all races it knows
-        // otherwise we're probably in a single SailMaster connection
-        SailMasterMessage response = sendRequestAndGetResponse(MessageType.RAC);
-        assertResponseType(MessageType.RAC, response);
-        List<Race> result = parseAvailableRacesMessage(response);
+        Iterable<Race> result;
+        if (messageLoader != null) {
+            result = messageLoader.getRaces();
+        } else {
+            SailMasterMessage response = sendRequestAndGetResponse(MessageType.RAC);
+            assertResponseType(MessageType.RAC, response);
+            result = parseAvailableRacesMessage(response);
+        }
         return result;
     }
 

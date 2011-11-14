@@ -42,7 +42,7 @@ public class SwissTimingRaceTrackerImpl implements SwissTimingRaceTracker, SailM
         this.connector = factory.getOrCreateSailMasterConnector(hostname, port, messageLoader);
         this.raceID = raceID;
         this.messageLoader = messageLoader;
-        connector.addSailMasterListener(this);
+        connector.addSailMasterListener(raceID, this);
     }
 
     @Override
@@ -116,7 +116,7 @@ public class SwissTimingRaceTrackerImpl implements SwissTimingRaceTracker, SailM
     }
 
     private void createRaceDefinition(String raceID) {
-        this.raceID = raceID;
+        assert this.raceID == raceID;
         // now we can create the RaceDefinition and most other things
         Race race = messageLoader.getRace(raceID);
         Event event = new EventImpl(race.getDescription(), new BoatClassImpl("Unknown"));
