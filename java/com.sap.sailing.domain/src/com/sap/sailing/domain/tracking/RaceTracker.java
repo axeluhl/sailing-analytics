@@ -18,7 +18,7 @@ public interface RaceTracker {
     com.sap.sailing.domain.base.Event getEvent();
 
     /**
-     * Returns the races currently being tracked by this tracked. Non-blocking call that returns <code>null</code> if
+     * Returns the races currently being tracked by this tracker. Non-blocking call that returns <code>null</code> if
      * the {@link RaceDefinition} for a TracTrac Event hasn't been created yet, e.g., because the course definition
      * hasn't been received yet or the listener for receiving course information hasn't been registered (yet).
      */

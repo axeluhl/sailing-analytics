@@ -58,7 +58,7 @@ public class SwissTimingFactoryImpl implements SwissTimingFactory {
     public SwissTimingRaceTracker createRaceTracker(String raceID, String hostname, int port, WindStore windStore,
             RaceSpecificMessageLoader messageLoader, DomainFactory domainFactory, TrackedEventRegistry trackedEventRegistry)
             throws InterruptedException, UnknownHostException, IOException, ParseException {
-        return new SwissTimingRaceTrackerImpl(raceID, hostname, port, domainFactory, this, messageLoader, trackedEventRegistry);
+        return new SwissTimingRaceTrackerImpl(raceID, hostname, port, windStore, domainFactory, this, messageLoader, trackedEventRegistry);
     }
 
     @Override

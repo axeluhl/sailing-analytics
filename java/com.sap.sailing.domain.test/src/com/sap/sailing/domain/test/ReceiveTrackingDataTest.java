@@ -13,6 +13,8 @@ import org.junit.Test;
 import com.maptrack.client.io.TypeController;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFix;
@@ -91,12 +93,22 @@ public class ReceiveTrackingDataTest extends AbstractTracTracLiveTest {
             public void raceRemoved(TrackedRace trackedRace) {
             }
         });
-        for (Receiver receiver : domainFactory.getUpdateReceivers(trackedEvent, getEvent(), EmptyWindStore.INSTANCE, this)) {
+        for (Receiver receiver : domainFactory.getUpdateReceivers(trackedEvent, getEvent(), EmptyWindStore.INSTANCE,
+                new DynamicRaceDefinitionSet() {
+                    @Override
+                    public void addRaceDefinition(RaceDefinition race) {
+                    }
+                })) {
             for (TypeController raceListener : receiver.getTypeControllersAndStart()) {
                 listeners.add(raceListener);
             }
         }
-        addListenersForStoredDataAndStartController(domainFactory.getUpdateReceivers(trackedEvent, getEvent(), EmptyWindStore.INSTANCE, this));
+        addListenersForStoredDataAndStartController(domainFactory.getUpdateReceivers(trackedEvent, getEvent(),
+                EmptyWindStore.INSTANCE, new DynamicRaceDefinitionSet() {
+                    @Override
+                    public void addRaceDefinition(RaceDefinition race) {
+                    }
+                }));
     }
 
     @Test

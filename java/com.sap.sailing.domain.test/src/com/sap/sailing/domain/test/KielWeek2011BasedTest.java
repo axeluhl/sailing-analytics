@@ -26,6 +26,7 @@ import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.DegreePosition;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedEventImpl;
@@ -88,7 +89,11 @@ public abstract class KielWeek2011BasedTest extends AbstractTracTracLiveTest {
         setStoredDataLoaded(false);
         ArrayList<Receiver> receivers = new ArrayList<Receiver>();
         for (Receiver r : domainFactory.getUpdateReceivers(trackedEvent, getEvent(), EmptyWindStore.INSTANCE,
-                /* tokenToRetrieveAssociatedRace */ this, receiverTypes)) {
+                new DynamicRaceDefinitionSet() {
+                    @Override
+                    public void addRaceDefinition(RaceDefinition race) {
+                    }
+                }, receiverTypes)) {
             receivers.add(r);
         }
         addListenersForStoredDataAndStartController(receivers);

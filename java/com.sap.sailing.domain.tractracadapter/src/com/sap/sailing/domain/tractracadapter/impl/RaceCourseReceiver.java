@@ -10,6 +10,7 @@ import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.TrackedEvent;
 import com.sap.sailing.domain.tracking.WindStore;
@@ -40,11 +41,11 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
     private final long millisecondsOverWhichToAverageWind;
     private final long millisecondsOverWhichToAverageSpeed;
     private final WindStore windStore;
-    private final Object tokenToRetrieveAssociatedRace;
+    private final DynamicRaceDefinitionSet raceDefinitionSetToUpdate;
     
     public RaceCourseReceiver(DomainFactory domainFactory, TrackedEvent trackedEvent,
             com.tractrac.clientmodule.Event tractracEvent, WindStore windStore,
-            Object tokenToRetrieveAssociatedRace,
+            DynamicRaceDefinitionSet raceDefinitionSetToUpdate,
             long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed) {
         super(domainFactory);
         this.trackedEvent = trackedEvent;
@@ -52,7 +53,7 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
         this.millisecondsOverWhichToAverageWind = millisecondsOverWhichToAverageWind;
         this.millisecondsOverWhichToAverageSpeed = millisecondsOverWhichToAverageSpeed;
         this.windStore = windStore;
-        this.tokenToRetrieveAssociatedRace = tokenToRetrieveAssociatedRace;
+        this.raceDefinitionSetToUpdate = raceDefinitionSetToUpdate;
     }
 
     /**
@@ -111,9 +112,9 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
     }
 
     private void createTrackedRace(RaceDefinition race) {
+        // TODO instead of using the complicated tokenToRetrieveAssociatedRace pattern, consider using a callback interface on TracTracRaceTrackerImpl through which to add the RaceDefinition
         DynamicTrackedRace trackedRace = getDomainFactory().trackRace(trackedEvent, race,
-                windStore, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed, tractracEvent,
-                tokenToRetrieveAssociatedRace);
+                windStore, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed, raceDefinitionSetToUpdate);
         trackedEvent.addTrackedRace(trackedRace);
     }
 

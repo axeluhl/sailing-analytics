@@ -8,7 +8,6 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.ParseException;
 import java.util.List;
-import java.util.Set;
 
 import com.maptrack.client.io.TypeController;
 import com.sap.sailing.domain.base.BoatClass;
@@ -20,6 +19,7 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Team;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
@@ -129,11 +129,11 @@ public interface DomainFactory {
      *            {@link #getOrCreateTrackedEvent(com.sap.sailing.domain.base.Event)} because otherwise the link to the
      *            {@link Event} can't be established
      * @param tokenToRetrieveAssociatedRace
-     *            used in {@link #getRace} to retrieve the {@link RaceDefinition} received by the
+     *            used to update the set of{@link RaceDefinition}s received by the
      *            {@link RaceCourseReceiver} created by this call
      */
     Iterable<Receiver> getUpdateReceivers(DynamicTrackedEvent trackedEvent, Event tractracEvent, WindStore windStore,
-            Object tokenToRetrieveAssociatedRace);
+            DynamicRaceDefinitionSet raceDefinitionSetToUpdate);
 
     RaceDefinition getOrCreateRaceDefinition(Race race, Course course);
 
@@ -149,19 +149,11 @@ public interface DomainFactory {
     MarkPassing createMarkPassing(com.tractrac.clientmodule.Competitor competitor, Waypoint passed, TimePoint time);
 
     Iterable<Receiver> getUpdateReceivers(DynamicTrackedEvent trackedEvent, Event tractracEvent, WindStore windStore,
-            Object tokenToRetrieveAssociatedRace, ReceiverType... types);
+            DynamicRaceDefinitionSet raceDefinitionSetToUpdate, ReceiverType... types);
 
     DynamicTrackedRace trackRace(TrackedEvent trackedEvent, RaceDefinition raceDefinition, WindStore windStore,
-            long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed, Event tractracEvent,
-            Object tokenToRetrieveAssociatedRace);
-
-    /**
-     * Non-blocking call that returns <code>null</code> if no {@link RaceDefinition} for the token
-     * has been created yet, e.g., because no course definition has been received yet or the listener
-     * for receiving course information hasn't been registered (yet). Multiple races will be returned if
-     * the {@link Event} to which the client connected has multiple {@link Event#getRaceList() races}.
-     */
-    Set<RaceDefinition> getRaces(Object tokenToRetrieveAssociatedRace);
+            long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
+            DynamicRaceDefinitionSet raceDefinitionSetToUpdate);
 
     JSONService parseJSONURL(URL jsonURL) throws IOException, ParseException, org.json.simple.parser.ParseException, URISyntaxException;
 
