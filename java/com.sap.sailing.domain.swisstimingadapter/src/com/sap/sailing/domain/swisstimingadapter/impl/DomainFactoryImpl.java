@@ -2,33 +2,46 @@ package com.sap.sailing.domain.swisstimingadapter.impl;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.Person;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Team;
+import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.BoatImpl;
+import com.sap.sailing.domain.base.impl.BuoyImpl;
+import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.EventImpl;
+import com.sap.sailing.domain.base.impl.GateImpl;
 import com.sap.sailing.domain.base.impl.NationalityImpl;
 import com.sap.sailing.domain.base.impl.PersonImpl;
+import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
+import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.swisstimingadapter.Course;
 import com.sap.sailing.domain.swisstimingadapter.DomainFactory;
+import com.sap.sailing.domain.swisstimingadapter.Mark;
 import com.sap.sailing.domain.swisstimingadapter.Race;
+import com.sap.sailing.domain.swisstimingadapter.StartList;
+import com.sap.sailing.util.Util;
 
 public class DomainFactoryImpl implements DomainFactory {
     private final Map<String, Event> raceIDToEventCache;
     private final Map<String, Competitor> boatIDToCompetitorCache;
+    private final Map<Iterable<String>, ControlPoint> controlPointCache;
     private final Map<String, Nationality> nationalityCache;
     
     public DomainFactoryImpl() {
         raceIDToEventCache = new HashMap<String, Event>();
         boatIDToCompetitorCache = new HashMap<String, Competitor>();
+        controlPointCache = new HashMap<Iterable<String>, ControlPoint>();
         nationalityCache = new HashMap<String, Nationality>();
     }
 
@@ -72,8 +85,51 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public RaceDefinition createRaceDefinition(Event event, Race race, Course course) {
-        // TODO implement SwissTiming DomainFactoryImpl.createRaceDefinition(Event, Race, Course)
-        return null;
+    public RaceDefinition createRaceDefinition(Event event, Race race, StartList startList, Course course) {
+        com.sap.sailing.domain.base.Course domainCourse = createCourse(race.getDescription(), course);
+        Iterable<Competitor> competitors = createCompetitorList(startList);
+        RaceDefinition result = new RaceDefinitionImpl(race.getDescription(), domainCourse, /* boatClass */ null, competitors);
+        event.addRace(result);
+        return result;
+    }
+
+    private Iterable<Competitor> createCompetitorList(StartList startList) {
+        List<Competitor> result = new ArrayList<Competitor>();
+        for (com.sap.sailing.domain.swisstimingadapter.Competitor swissTimingCompetitor : startList.getCompetitors()) {
+            Competitor domainCompetitor = getOrCreateCompetitor(swissTimingCompetitor);
+            result.add(domainCompetitor);
+        }
+        return result;
+    }
+
+    private com.sap.sailing.domain.base.Course createCourse(String courseName, Course course) {
+        List<Waypoint> waypoints = new ArrayList<Waypoint>();
+        for (Mark mark : course.getMarks()) {
+            ControlPoint controlPoint = getOrCreateControlPoint(mark.getDevices());
+            Waypoint waypoint = new WaypointImpl(controlPoint);
+            waypoints.add(waypoint);
+        }
+        com.sap.sailing.domain.base.Course result = new CourseImpl(courseName, waypoints);
+        return result;
+    }
+
+    private ControlPoint getOrCreateControlPoint(Iterable<String> devices) {
+        ControlPoint result = controlPointCache.get(devices);
+        if (result == null) {
+            switch (Util.size(devices)) {
+            case 1:
+                result = new BuoyImpl(devices.iterator().next());
+                break;
+            case 2:
+                Iterator<String> buoyNameIter = devices.iterator();
+                String left = buoyNameIter.next();
+                String right = buoyNameIter.next();
+                result = new GateImpl(new BuoyImpl(left), new BuoyImpl(right), left+"/"+right);
+                break;
+            default:
+                throw new RuntimeException("Don't know how to handle control points with number of devices neither 1 nor 2. Was "+Util.size(devices));
+            }
+        }
+        return result;
     }
 }

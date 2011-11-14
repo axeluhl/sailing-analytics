@@ -159,7 +159,7 @@ public class SwissTimingRaceTrackerImpl implements SwissTimingRaceTracker, SailM
         assert course != null;
         // now we can create the RaceDefinition and most other things
         Race race = messageLoader.getRace(raceID);
-        final RaceDefinition raceDefinition = domainFactory.createRaceDefinition(event, race, course);
+        final RaceDefinition raceDefinition = domainFactory.createRaceDefinition(event, race, startList, course);
         trackedRace = getTrackedEvent().createTrackedRace(raceDefinition, windStore,
                 WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND, GPSFixTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_SPEED,
                 new DynamicRaceDefinitionSet() {
@@ -174,8 +174,12 @@ public class SwissTimingRaceTrackerImpl implements SwissTimingRaceTracker, SailM
     @Override
     public void receivedCourseConfiguration(String raceID, Course course) {
         this.course = course;
-        if (startList != null) {
-            createRaceDefinition(raceID);
+        if (trackedRace == null) {
+            if (startList != null) {
+                createRaceDefinition(raceID);
+            }
+        } else {
+            // TODO update trackedRace with updated course
         }
     }
 
