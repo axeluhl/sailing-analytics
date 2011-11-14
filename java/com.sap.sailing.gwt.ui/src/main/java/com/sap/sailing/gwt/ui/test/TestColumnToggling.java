@@ -166,8 +166,9 @@ public class TestColumnToggling extends GWTTestCase {
                                 .getColumnCount(); i++) {
                             Column<LeaderboardRowDAO, ?> c = leaderboardPanel.getLeaderboardTable().getColumn(i);
                             if (c instanceof ExpandableSortableColumn<?>) {
-                                
-                                rc = (ExpandableSortableColumn<LeaderboardRowDAO>) c;
+                                @SuppressWarnings("unchecked")
+                                ExpandableSortableColumn<LeaderboardRowDAO> myRc = (ExpandableSortableColumn<LeaderboardRowDAO>) c;
+                                rc = myRc;
                                 rc.setEnableLegDrillDown(true);
                             }
                         }

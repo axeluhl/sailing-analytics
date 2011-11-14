@@ -43,6 +43,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTracker;
 import com.sap.sailing.domain.tracking.WindTrackerFactory;
+import com.sap.sailing.domain.tracking.impl.DynamicTrackedEventImpl;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.JSONService;
 import com.sap.sailing.domain.tractracadapter.RaceRecord;
@@ -96,6 +97,8 @@ public class RacingEventServiceImpl implements RacingEventService {
     
     private final SwissTimingAdapterPersistence swissTimingAdapterPersistence;
 
+    private final Map<Event, DynamicTrackedEvent> eventTrackingCache;
+
     public RacingEventServiceImpl() {
         domainFactory = DomainFactory.INSTANCE;
         domainObjectFactory = DomainObjectFactory.INSTANCE;
@@ -104,6 +107,7 @@ public class RacingEventServiceImpl implements RacingEventService {
         swissTimingAdapterPersistence = SwissTimingAdapterPersistence.INSTANCE;
         windTrackerFactory = ExpeditionWindTrackerFactory.getInstance();
         eventsByName = new HashMap<String, Event>();
+        eventTrackingCache = new HashMap<Event, DynamicTrackedEvent>();
         raceTrackersByEvent = new HashMap<Event, Set<RaceTracker>>();
         windTrackers = new HashMap<RaceDefinition, WindTracker>();
         raceTrackersByID = new HashMap<Object, RaceTracker>();
@@ -175,8 +179,7 @@ public class RacingEventServiceImpl implements RacingEventService {
         }
     }
 
-    @Override
-    public DomainFactory getDomainFactory() {
+    private DomainFactory getDomainFactory() {
         return domainFactory;
     }
     
@@ -230,7 +233,7 @@ public class RacingEventServiceImpl implements RacingEventService {
         Triple<String, String, Integer> key = new Triple<String, String, Integer>(raceID, hostname, port);
         RaceTracker tracker = raceTrackersByID.get(key);
         if (tracker == null) {
-            tracker = getSwissTimingFactory().createRaceTracker(raceID, hostname, port, windStore, swissTimingAdapterPersistence);
+            tracker = getSwissTimingFactory().createRaceTracker(raceID, hostname, port, windStore, swissTimingAdapterPersistence, this);
             raceTrackersByID.put(tracker.getID(), tracker);
             Set<RaceTracker> trackers = raceTrackersByEvent.get(tracker.getEvent());
             if (trackers == null) {
@@ -270,7 +273,7 @@ public class RacingEventServiceImpl implements RacingEventService {
         Triple<URL, URI, URI> key = new Triple<URL, URI, URI>(paramURL, liveURI, storedURI);
         RaceTracker tracker = raceTrackersByID.get(key);
         if (tracker == null) {
-            tracker = getDomainFactory().createRaceTracker(paramURL, liveURI, storedURI, windStore);
+            tracker = getDomainFactory().createRaceTracker(paramURL, liveURI, storedURI, windStore, this);
             raceTrackersByID.put(tracker.getID(), tracker);
             Set<RaceTracker> trackers = raceTrackersByEvent.get(tracker.getEvent());
             if (trackers == null) {
@@ -408,7 +411,7 @@ public class RacingEventServiceImpl implements RacingEventService {
     @Override
     public void startTrackingWind(Event event, RaceDefinition race,
             boolean correctByDeclination) throws SocketException {
-        windTrackerFactory.createWindTracker(getDomainFactory().getOrCreateTrackedEvent(event), race, correctByDeclination);
+        windTrackerFactory.createWindTracker(getOrCreateTrackedEvent(event), race, correctByDeclination);
     }
 
     @Override
@@ -435,7 +438,29 @@ public class RacingEventServiceImpl implements RacingEventService {
 
     @Override
     public TrackedRace getTrackedRace(Event e, RaceDefinition r) {
-        return getDomainFactory().getTrackedEvent(e).getTrackedRace(r);
+        return getOrCreateTrackedEvent(e).getTrackedRace(r);
+    }
+    
+    @Override
+    public DynamicTrackedEvent getOrCreateTrackedEvent(Event event) {
+        synchronized (eventTrackingCache) {
+            DynamicTrackedEvent result = eventTrackingCache.get(event);
+            if (result == null) {
+                result = new DynamicTrackedEventImpl(event);
+                eventTrackingCache.put(event, result);
+            }
+            return result;
+        }
+    }
+    
+    @Override
+    public DynamicTrackedEvent getTrackedEvent(com.sap.sailing.domain.base.Event event) {
+        return eventTrackingCache.get(event);
+    }
+
+    @Override
+    public void remove(Event event) {
+        eventTrackingCache.remove(event);
     }
     
 }

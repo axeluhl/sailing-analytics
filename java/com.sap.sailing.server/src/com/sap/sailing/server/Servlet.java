@@ -90,7 +90,7 @@ public abstract class Servlet extends HttpServlet {
 	    RaceDefinition race = getRaceDefinition(req);
 	    TrackedRace trackedRace = null;
 	    if (event != null && race != null) {
-	        trackedRace = getService().getDomainFactory().getTrackedEvent(event).getTrackedRace(race);
+	        trackedRace = getService().getOrCreateTrackedEvent(event).getTrackedRace(race);
 	    }
 	    return trackedRace;
 	}

@@ -23,6 +23,7 @@ import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.impl.DynamicGPSFixMovingTrackImpl;
+import com.sap.sailing.domain.tracking.impl.DynamicTrackedEventImpl;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
 
@@ -80,7 +81,7 @@ public class FetchTracksAndStoreLocallyTest extends KielWeek2011BasedTest {
             }
         };
         Event event = getDomainFactory().getOrCreateEvent(getEvent());
-        DynamicTrackedEvent trackedEvent = getDomainFactory().getOrCreateTrackedEvent(event);
+        DynamicTrackedEvent trackedEvent = new DynamicTrackedEventImpl(event);
         trackedEvent.addRaceListener(new RaceListener() {
             @Override
             public void raceAdded(TrackedRace trackedRace) {

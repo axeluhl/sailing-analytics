@@ -26,20 +26,25 @@ import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingRaceTracker;
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.domain.tracking.RaceHandle;
+import com.sap.sailing.domain.tracking.TrackedEventRegistry;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.util.Util.Triple;
 
 public class SwissTimingRaceTrackerImpl implements SwissTimingRaceTracker, SailMasterListener {
     private final SailMasterConnector connector;
-    private RaceDefinition race;
     private final String raceID;
     private final RaceSpecificMessageLoader messageLoader;
+    private final TrackedEventRegistry trackedEventRegistry;
+
+    private RaceDefinition race;
     private Course course;
     private StartList startList;
     
     protected SwissTimingRaceTrackerImpl(String raceID, String hostname, int port, SwissTimingFactory factory,
-            RaceSpecificMessageLoader messageLoader) throws InterruptedException, UnknownHostException, IOException {
+            RaceSpecificMessageLoader messageLoader, TrackedEventRegistry trackedEventRegistry)
+            throws InterruptedException, UnknownHostException, IOException {
         this.connector = factory.getOrCreateSailMasterConnector(hostname, port, messageLoader);
+        this.trackedEventRegistry = trackedEventRegistry;
         this.raceID = raceID;
         this.messageLoader = messageLoader;
         connector.addSailMasterListener(raceID, this);

@@ -422,8 +422,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         if (event != null) {
             RaceDefinition race = getRaceByName(event, raceName);
             if (race != null) {
-                result = getService().getDomainFactory().getTrackedEvent(event)
-                        .getExistingTrackedRace(race);
+                result = getService().getOrCreateTrackedEvent(event).getExistingTrackedRace(race);
             }
         }
         return result;       
@@ -535,7 +534,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         if (event != null) {
             RaceDefinition race = getRaceByName(event, raceName);
             if (race != null) {
-                TrackedRace trackedRace = getService().getDomainFactory().getTrackedEvent(event)
+                TrackedRace trackedRace = getService().getOrCreateTrackedEvent(event)
                         .getExistingTrackedRace(race);
                 if (trackedRace != null) {
                     WindTrack estimatedTrack = null;
@@ -615,7 +614,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             }
         }
         Wind wind = new WindImpl(p, at, speedWithBearing);
-        getService().getDomainFactory().getTrackedEvent(event).getTrackedRace(race).recordWind(wind, WindSource.WEB);
+        getService().getOrCreateTrackedEvent(event).getTrackedRace(race).recordWind(wind, WindSource.WEB);
     }
     
     @Override
@@ -624,7 +623,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         if (event != null) {
             RaceDefinition race = getRaceByName(event, raceName);
             if (race != null) {
-                TrackedRace trackedRace = getService().getDomainFactory().getTrackedEvent(event).getTrackedRace(race);
+                TrackedRace trackedRace = getService().getOrCreateTrackedEvent(event).getTrackedRace(race);
                 if (trackedRace != null) {
                     trackedRace.setWindSource(WindSource.valueOf(windSourceName));
                 }
@@ -641,7 +640,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             if (event != null) {
                 RaceDefinition race = getRaceByName(event, raceName);
                 TimePoint end = new MillisecondsTimePoint(date);
-                TrackedRace trackedRace = getService().getDomainFactory().getTrackedEvent(event).getTrackedRace(race);
+                TrackedRace trackedRace = getService().getOrCreateTrackedEvent(event).getTrackedRace(race);
                 for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
                     CompetitorDAO competitorDAO = getCompetitorDAO(competitor);
                     List<GPSFixDAO> fixesForCompetitor = new ArrayList<GPSFixDAO>();
@@ -690,7 +689,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             if (event != null) {
                 RaceDefinition race = getRaceByName(event, raceName);
                 TimePoint dateAsTimePoint = new MillisecondsTimePoint(date);
-                TrackedRace trackedRace = getService().getDomainFactory().getTrackedEvent(event).getTrackedRace(race);
+                TrackedRace trackedRace = getService().getOrCreateTrackedEvent(event).getTrackedRace(race);
                 Set<Buoy> buoys = new HashSet<Buoy>();
                 for (Waypoint waypoint : trackedRace.getRace().getCourse().getWaypoints()) {
                     for (Buoy b : waypoint.getBuoys()) {
@@ -719,7 +718,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             RaceDefinition race = getRaceByName(event, raceName);
             if (race != null) {
                 TimePoint dateAsTimePoint = new MillisecondsTimePoint(date);
-                TrackedRace trackedRace = getService().getDomainFactory().getTrackedEvent(event).getTrackedRace(race);
+                TrackedRace trackedRace = getService().getOrCreateTrackedEvent(event).getTrackedRace(race);
                 for (Competitor competitor : race.getCompetitors()) {
                     int rank = trackedRace.getRank(competitor, dateAsTimePoint);
                     TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(competitor, dateAsTimePoint);
@@ -771,7 +770,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             }
         }
         Wind wind = new WindImpl(p, at, speedWithBearing);
-        getService().getDomainFactory().getTrackedEvent(event).getTrackedRace(race).removeWind(wind, WindSource.WEB);
+        getService().getOrCreateTrackedEvent(event).getTrackedRace(race).removeWind(wind, WindSource.WEB);
    }
 
     protected RacingEventService getService() {
