@@ -213,7 +213,7 @@ public class StoreAndForward implements Runnable {
         } else {
             synchronized (this) {
                 receivingFromSailMaster = true;
-                logger.info("StoreAndForward issuing SailMaster connections to "+sailMasterHostname+":"+sailMasterPort);
+                logger.info("StoreAndForward issuing SailMaster connection to "+sailMasterHostname+":"+sailMasterPort);
                 notifyAll();
             }
            socket = new Socket(sailMasterHostname, sailMasterPort);
@@ -279,6 +279,11 @@ public class StoreAndForward implements Runnable {
                 } catch (Throwable e) {
                     if (!stopped) {
                         logger.throwing(StoreAndForward.class.getName(), "Error during forwarding message. Continuing...", e);
+                        try {
+                            Thread.sleep(1000l); // wait a little bit before trying to re-establish a connection
+                        } catch (InterruptedException e1) {
+                            logger.throwing(StoreAndForward.class.getName(), "Can't find any sleep...", e1);
+                        } 
                     }
                 }
             }
