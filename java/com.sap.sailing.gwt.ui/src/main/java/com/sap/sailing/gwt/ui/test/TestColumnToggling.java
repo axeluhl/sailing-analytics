@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.client;
+package com.sap.sailing.gwt.ui.test;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -8,16 +8,14 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.junit.client.GWTTestCase;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.sap.sailing.gwt.ui.client.LeaderboardPanel.RaceColumn;
+import com.sap.sailing.gwt.ui.client.ExpandableSortableColumn;
+import com.sap.sailing.gwt.ui.client.StringConstants;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDAO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDAO;
 import com.sap.sailing.gwt.ui.shared.Pair;
 import com.sap.sailing.gwt.ui.shared.RaceRecordDAO;
-import com.sap.sailing.gwt.ui.test.LeaderboardPanelMock;
-import com.sap.sailing.gwt.ui.test.TestSailingService;
-import com.sap.sailing.gwt.ui.test.TestSailingServiceAsync;
 
-public class TestColumnDeleting extends GWTTestCase {
+public class TestColumnToggling extends GWTTestCase {
     
     //These objects should be created by calling GWT.create(Class c);
     private LeaderboardPanelMock leaderboardPanel;
@@ -34,7 +32,7 @@ public class TestColumnDeleting extends GWTTestCase {
     
     private LeaderboardDAO leaderboard;
     private RaceRecordDAO rrDao;
-    private RaceColumn<LeaderboardRowDAO> rc;
+    private ExpandableSortableColumn<LeaderboardRowDAO> rc;
     
     
 
@@ -167,9 +165,9 @@ public class TestColumnDeleting extends GWTTestCase {
                         for (int i = 0; i < leaderboardPanel.getLeaderboardTable()
                                 .getColumnCount(); i++) {
                             Column<LeaderboardRowDAO, ?> c = leaderboardPanel.getLeaderboardTable().getColumn(i);
-                            if (c instanceof RaceColumn<?>) {
+                            if (c instanceof ExpandableSortableColumn<?>) {
                                 
-                                rc = (RaceColumn<LeaderboardRowDAO>) c;
+                                rc = (ExpandableSortableColumn<LeaderboardRowDAO>) c;
                                 rc.setEnableLegDrillDown(true);
                             }
                         }

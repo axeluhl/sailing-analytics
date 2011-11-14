@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.test;
 
+import com.google.gwt.user.cellview.client.CellTable;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -41,8 +42,11 @@ public class LeaderboardPanelMock extends LeaderboardPanel {
         // TODO Auto-generated method stub
         super.updateLeaderboard(leaderboard);
     }
-    
-    
-    
 
+    @Override
+    public CellTable<LeaderboardRowDAO> getLeaderboardTable() {
+        // TODO Auto-generated method stub
+        return super.getLeaderboardTable();
+    }
+    
 }
