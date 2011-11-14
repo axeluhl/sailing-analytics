@@ -53,17 +53,17 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedEvent;
+import com.sap.sailing.domain.tracking.TrackedEventRegistry;
 import com.sap.sailing.domain.tracking.WindStore;
-import com.sap.sailing.domain.tracking.impl.DynamicTrackedEventImpl;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.JSONService;
-import com.sap.sailing.domain.tractracadapter.TracTracRaceTracker;
 import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
 import com.sap.sailing.domain.tractracadapter.TracTracConfiguration;
+import com.sap.sailing.domain.tractracadapter.TracTracRaceTracker;
 import com.sap.sailing.util.Util;
 import com.sap.sailing.util.Util.Pair;
 import com.tractrac.clientmodule.CompetitorClass;
@@ -118,8 +118,6 @@ public class DomainFactoryImpl implements DomainFactory {
     
     private final Map<Race, RaceDefinition> raceCache = new HashMap<Race, RaceDefinition>();
     
-    private final Map<Event, DynamicTrackedEvent> eventTrackingCache = new HashMap<Event, DynamicTrackedEvent>();
-
     @Override
     public Position createPosition(
             com.tractrac.clientmodule.data.Position position) {
@@ -374,24 +372,7 @@ public class DomainFactoryImpl implements DomainFactory {
     }
     
     @Override
-    public DynamicTrackedEvent getTrackedEvent(com.sap.sailing.domain.base.Event event) {
-        return eventTrackingCache.get(event);
-    }
-
-    @Override
-    public DynamicTrackedEvent getOrCreateTrackedEvent(com.sap.sailing.domain.base.Event event) {
-        synchronized (eventTrackingCache) {
-            DynamicTrackedEvent result = eventTrackingCache.get(event);
-            if (result == null) {
-                result = new DynamicTrackedEventImpl(event);
-                eventTrackingCache.put(event, result);
-            }
-            return result;
-        }
-    }
-    
-    @Override
-    public void removeRace(com.tractrac.clientmodule.Event tractracEvent, Race tractracRace) {
+    public void removeRace(com.tractrac.clientmodule.Event tractracEvent, Race tractracRace, TrackedEventRegistry trackedEventRegistry) {
         RaceDefinition raceDefinition = getExistingRaceDefinitionForRace(tractracRace);
         if (raceDefinition != null) { // otherwise, this domain factory doesn't seem to know about the race
             synchronized (tokenToRaceDefinitionMap) {
@@ -422,11 +403,11 @@ public class DomainFactoryImpl implements DomainFactory {
                 if (Util.size(event.getAllRaces()) == 0) {
                     eventCache.remove(key);
                 }
-                TrackedEvent trackedEvent = eventTrackingCache.get(event);
+                TrackedEvent trackedEvent = trackedEventRegistry.getTrackedEvent(event);
                 if (trackedEvent != null) {
                     trackedEvent.removeTrackedRace(raceDefinition);
                     if (Util.size(trackedEvent.getTrackedRaces()) == 0) {
-                        eventTrackingCache.remove(event);
+                        trackedEventRegistry.remove(event);
                     }
                 }
             }
@@ -513,9 +494,10 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public TracTracRaceTracker createRaceTracker(URL paramURL, URI liveURI, URI storedURI, WindStore windStore) throws MalformedURLException,
-            FileNotFoundException, URISyntaxException {
-        return new TracTracRaceTrackerImpl(this, paramURL, liveURI, storedURI, windStore);
+    public TracTracRaceTracker createRaceTracker(URL paramURL, URI liveURI, URI storedURI, WindStore windStore,
+            TrackedEventRegistry trackedEventRegistry) throws MalformedURLException, FileNotFoundException,
+            URISyntaxException {
+        return new TracTracRaceTrackerImpl(this, paramURL, liveURI, storedURI, windStore, trackedEventRegistry);
     }
 
     @Override

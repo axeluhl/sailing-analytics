@@ -28,6 +28,7 @@ import com.sap.sailing.domain.base.impl.DegreePosition;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
+import com.sap.sailing.domain.tracking.impl.DynamicTrackedEventImpl;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.tracking.impl.TrackedLegImpl;
@@ -123,7 +124,7 @@ public abstract class KielWeek2011BasedTest extends AbstractTracTracLiveTest {
             domainFactory = new DomainFactoryImpl();
         }
         domainEvent = domainFactory.getOrCreateEvent(getEvent());
-        trackedEvent = domainFactory.getOrCreateTrackedEvent(domainEvent);
+        trackedEvent = new DynamicTrackedEventImpl(domainEvent);
     }
     
     protected Competitor getCompetitorByName(String nameRegexp) {

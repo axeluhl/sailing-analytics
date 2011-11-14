@@ -26,14 +26,15 @@ import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.RaceHandle;
+import com.sap.sailing.domain.tracking.TrackedEventRegistry;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
-import com.sap.sailing.domain.tractracadapter.TracTracRaceTracker;
 import com.sap.sailing.domain.tractracadapter.Receiver;
+import com.sap.sailing.domain.tractracadapter.TracTracRaceTracker;
 import com.sap.sailing.util.Util.Triple;
 import com.tractrac.clientmodule.ControlPoint;
 import com.tractrac.clientmodule.Event;
@@ -83,14 +84,15 @@ public class TracTracRaceTrackerImpl implements Listener, TracTracRaceTracker {
      * respond with the {@link RaceDefinition} when its {@link DomainFactory#getRaces(Event)} is called with the TracTrac
      * {@link Event} as argument that is used for its tracking.
      * <p>
-     * 
      * @param windStore
      *            Provides the capability to obtain the {@link WindTrack}s for the different wind sources. A trivial
      *            implementation is {@link EmptyWindStore} which simply provides new, empty tracks. This is always
      *            available but loses track of the wind, e.g., during server restarts.
+     * @param trackedEventRegistry TODO
      */
-    protected TracTracRaceTrackerImpl(DomainFactory domainFactory, URL paramURL, URI liveURI, URI storedURI, WindStore windStore)
-            throws URISyntaxException, MalformedURLException, FileNotFoundException {
+    protected TracTracRaceTrackerImpl(DomainFactory domainFactory, URL paramURL, URI liveURI, URI storedURI,
+            WindStore windStore, TrackedEventRegistry trackedEventRegistry) throws URISyntaxException,
+            MalformedURLException, FileNotFoundException {
         urls = new Triple<URL, URI, URI>(paramURL, liveURI, storedURI);
         this.windStore = windStore;
         this.domainFactory = domainFactory;
@@ -111,10 +113,10 @@ public class TracTracRaceTrackerImpl implements Listener, TracTracRaceTracker {
             // removeRace may detach the domain event from the domain factory if that
             // removed the last race; therefore, it's important to getOrCreate the
             // domainEvent *after* calling removeRace
-            domainFactory.removeRace(tractracEvent, tractracRace);
+            domainFactory.removeRace(tractracEvent, tractracRace, trackedEventRegistry);
         }
         domainEvent = domainFactory.getOrCreateEvent(tractracEvent);
-        trackedEvent = domainFactory.getOrCreateTrackedEvent(domainEvent);
+        trackedEvent = trackedEventRegistry.getOrCreateTrackedEvent(domainEvent);
         receivers = new HashSet<Receiver>();
         Set<TypeController> typeControllers = new HashSet<TypeController>();
         for (Receiver receiver : domainFactory.getUpdateReceivers(trackedEvent, tractracEvent, windStore, this)) {

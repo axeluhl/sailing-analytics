@@ -35,6 +35,7 @@ import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
 import com.sap.sailing.mongodb.Activator;
+import com.sap.sailing.server.RacingEventServiceImpl;
 
 public class TestStoringAndRetrievingWindTracksTest extends AbstractTracTracLiveTest implements MongoDBTest {
 
@@ -63,7 +64,7 @@ public class TestStoringAndRetrievingWindTracksTest extends AbstractTracTracLive
     public void testStoreAFewWindEntries() throws UnknownHostException, MongoException, InterruptedException {
         DomainFactory domainFactory = DomainFactory.INSTANCE;
         Event domainEvent = domainFactory.getOrCreateEvent(getEvent());
-        DynamicTrackedEvent trackedEvent = domainFactory.getOrCreateTrackedEvent(domainEvent);
+        DynamicTrackedEvent trackedEvent = new RacingEventServiceImpl().getOrCreateTrackedEvent(domainEvent);
         Iterable<Receiver> typeControllers = domainFactory.getUpdateReceivers(trackedEvent, getEvent(),
                 EmptyWindStore.INSTANCE, ReceiverType.RACECOURSE);
         addListenersForStoredDataAndStartController(typeControllers);
