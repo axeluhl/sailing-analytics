@@ -3,6 +3,7 @@ package com.sap.sailing.domain.swisstimingadapter.impl;
 import java.io.IOException;
 
 import java.net.UnknownHostException;
+import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -55,7 +56,7 @@ public class SwissTimingFactoryImpl implements SwissTimingFactory {
     @Override
     public SwissTimingRaceTracker createRaceTracker(String raceID, String hostname, int port, WindStore windStore,
             RaceSpecificMessageLoader messageLoader, TrackedEventRegistry trackedEventRegistry)
-            throws InterruptedException, UnknownHostException, IOException {
+            throws InterruptedException, UnknownHostException, IOException, ParseException {
         return new SwissTimingRaceTrackerImpl(raceID, hostname, port, this, messageLoader, trackedEventRegistry);
     }
 
