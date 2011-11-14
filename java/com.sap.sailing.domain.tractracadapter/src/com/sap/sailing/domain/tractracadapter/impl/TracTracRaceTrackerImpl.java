@@ -21,6 +21,7 @@ import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.impl.DegreePosition;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
@@ -43,7 +44,7 @@ import com.tractrac.clientmodule.data.DataController;
 import com.tractrac.clientmodule.data.DataController.Listener;
 import com.tractrac.clientmodule.setup.KeyValue;
 
-public class TracTracRaceTrackerImpl implements Listener, TracTracRaceTracker {
+public class TracTracRaceTrackerImpl implements Listener, TracTracRaceTracker, DynamicRaceDefinitionSet {
     private static final Logger logger = Logger.getLogger(TracTracRaceTrackerImpl.class.getName());
     
     /**
@@ -60,6 +61,7 @@ public class TracTracRaceTrackerImpl implements Listener, TracTracRaceTracker {
     private final DomainFactory domainFactory;
     private final DynamicTrackedEvent trackedEvent;
     private final WindStore windStore;
+    private final Set<RaceDefinition> races;
     
     /**
      * paramURL, liveURI and storedURI for TracTrac connection
@@ -94,6 +96,7 @@ public class TracTracRaceTrackerImpl implements Listener, TracTracRaceTracker {
             WindStore windStore, TrackedEventRegistry trackedEventRegistry) throws URISyntaxException,
             MalformedURLException, FileNotFoundException {
         urls = new Triple<URL, URI, URI>(paramURL, liveURI, storedURI);
+        this.races = new HashSet<RaceDefinition>();
         this.windStore = windStore;
         this.domainFactory = domainFactory;
         // Read event data from configuration file
@@ -191,7 +194,7 @@ public class TracTracRaceTrackerImpl implements Listener, TracTracRaceTracker {
     
     @Override
     public Set<RaceDefinition> getRaces() {
-        return domainFactory.getRaces(this);
+        return races;
     }
     
     protected void addListenersForStoredDataAndStartController(Iterable<TypeController> listenersForStoredData) {
@@ -283,5 +286,10 @@ public class TracTracRaceTrackerImpl implements Listener, TracTracRaceTracker {
     @Override
     public void liveDataConnectError(String arg0) {
         logger.warning("Error with live data for race(s) "+getRaces()+": "+arg0);
+    }
+
+    @Override
+    public void addRaceDefinition(RaceDefinition race) {
+        races.add(race);
     }
 }

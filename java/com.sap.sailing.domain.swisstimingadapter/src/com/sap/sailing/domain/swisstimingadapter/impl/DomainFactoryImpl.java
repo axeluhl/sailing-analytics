@@ -10,12 +10,14 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.Person;
+import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Team;
 import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.EventImpl;
 import com.sap.sailing.domain.base.impl.NationalityImpl;
 import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
+import com.sap.sailing.domain.swisstimingadapter.Course;
 import com.sap.sailing.domain.swisstimingadapter.DomainFactory;
 import com.sap.sailing.domain.swisstimingadapter.Race;
 
@@ -31,11 +33,11 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public Event getOrCreateEvent(Race race) {
-        Event result = raceIDToEventCache.get(race.getRaceID());
+    public Event getOrCreateEvent(String raceID) {
+        Event result = raceIDToEventCache.get(raceID);
         if (result == null) {
-            result = new EventImpl(race.getDescription(), null);
-            raceIDToEventCache.put(race.getRaceID(), result);
+            result = new EventImpl(raceID, null);
+            raceIDToEventCache.put(raceID, result);
         }
         return result;
     }
@@ -67,5 +69,11 @@ public class DomainFactoryImpl implements DomainFactory {
             }
             return result;
         }
+    }
+
+    @Override
+    public RaceDefinition createRaceDefinition(Event event, Race race, Course course) {
+        // TODO implement SwissTiming DomainFactoryImpl.createRaceDefinition(Event, Race, Course)
+        return null;
     }
 }

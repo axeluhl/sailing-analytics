@@ -10,12 +10,10 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -48,6 +46,7 @@ import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
+import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
@@ -108,13 +107,6 @@ public class DomainFactoryImpl implements DomainFactory {
      */
     private final Map<Pair<String, String>, com.sap.sailing.domain.base.Event> eventCache =
             new HashMap<Pair<String, String>, com.sap.sailing.domain.base.Event>();
-    
-    /**
-     * Keyed by an object that the client that started the {@link RaceCourseReceiver} which then provided the
-     * {@link RaceDefinition} has provided to retrieve the {@link RaceDefinition} again using
-     * {@link #getRace}.
-     */
-    private final Map<Object, Set<RaceDefinition>> tokenToRaceDefinitionMap = new HashMap<Object, Set<RaceDefinition>>();
     
     private final Map<Race, RaceDefinition> raceCache = new HashMap<Race, RaceDefinition>();
     
@@ -333,14 +325,14 @@ public class DomainFactoryImpl implements DomainFactory {
     
     @Override
     public Iterable<Receiver> getUpdateReceivers(DynamicTrackedEvent trackedEvent, com.tractrac.clientmodule.Event tractracEvent,
-            WindStore windStore, Object tokenToRetrieveAssociatedRace, ReceiverType... types) {
+            WindStore windStore, DynamicRaceDefinitionSet raceDefinitionSetToUpdate, ReceiverType... types) {
         Collection<Receiver> result = new ArrayList<Receiver>();
         for (ReceiverType type : types) {
             switch (type) {
             case RACECOURSE:
                 result.add(new RaceCourseReceiver(
                         this, trackedEvent, tractracEvent, windStore,
-                        tokenToRetrieveAssociatedRace, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed));
+                        raceDefinitionSetToUpdate, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed));
                 break;
             case MARKPOSITIONS:
                 result.add(new MarkPositionReceiver(
@@ -365,8 +357,8 @@ public class DomainFactoryImpl implements DomainFactory {
 
     @Override
     public Iterable<Receiver> getUpdateReceivers(DynamicTrackedEvent trackedEvent,
-            com.tractrac.clientmodule.Event tractracEvent, WindStore windStore, Object tokenToRetrieveAssociatedRace) {
-        return getUpdateReceivers(trackedEvent, tractracEvent, windStore, tokenToRetrieveAssociatedRace, ReceiverType.RACECOURSE,
+            com.tractrac.clientmodule.Event tractracEvent, WindStore windStore, DynamicRaceDefinitionSet raceDefinitionSetToUpdate) {
+        return getUpdateReceivers(trackedEvent, tractracEvent, windStore, raceDefinitionSetToUpdate, ReceiverType.RACECOURSE,
                 ReceiverType.MARKPASSINGS, ReceiverType.MARKPOSITIONS, ReceiverType.RACESTARTFINISH,
                 ReceiverType.RAWPOSITIONS);
     }
@@ -375,20 +367,6 @@ public class DomainFactoryImpl implements DomainFactory {
     public void removeRace(com.tractrac.clientmodule.Event tractracEvent, Race tractracRace, TrackedEventRegistry trackedEventRegistry) {
         RaceDefinition raceDefinition = getExistingRaceDefinitionForRace(tractracRace);
         if (raceDefinition != null) { // otherwise, this domain factory doesn't seem to know about the race
-            synchronized (tokenToRaceDefinitionMap) {
-                Set<Object> tokensToRemove = new HashSet<Object>();
-                for (Map.Entry<Object, Set<RaceDefinition>> e : tokenToRaceDefinitionMap.entrySet()) {
-                    if (e.getValue().contains(raceDefinition)) {
-                        e.getValue().remove(raceDefinition);
-                        if (e.getValue().isEmpty()) {
-                            tokensToRemove.add(e.getKey());
-                        }
-                    }
-                }
-                for (Object tokenToRemove : tokensToRemove) {
-                    tokenToRaceDefinitionMap.remove(tokenToRemove);
-                }
-            }
             raceCache.remove(tractracRace);
             Collection<CompetitorClass> competitorClassList = new ArrayList<CompetitorClass>();
             for (com.tractrac.clientmodule.Competitor c : tractracEvent.getCompetitorList()) {
@@ -501,27 +479,13 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public Set<RaceDefinition> getRaces(Object tokenToRetrieveAssociatedRace) {
-        synchronized (tokenToRaceDefinitionMap) {
-            return tokenToRaceDefinitionMap.get(tokenToRetrieveAssociatedRace);
-        }
-    }
-
-    @Override
     public DynamicTrackedRace trackRace(TrackedEvent trackedEvent, RaceDefinition raceDefinition,
             WindStore windStore, long millisecondsOverWhichToAverageWind,
-            long millisecondsOverWhichToAverageSpeed, com.tractrac.clientmodule.Event tractracEvent, Object tokenToRetrieveAssociatedRace) {
+            long millisecondsOverWhichToAverageSpeed, DynamicRaceDefinitionSet raceDefinitionSetToUpdate) {
         logger.log(Level.INFO, "Creating DynamicTrackedRaceImpl for RaceDefinition "+raceDefinition.getName());
         DynamicTrackedRaceImpl result = new DynamicTrackedRaceImpl(trackedEvent, raceDefinition,
                 windStore, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed);
-        synchronized (tokenToRaceDefinitionMap) {
-            Set<RaceDefinition> racesForToken = tokenToRaceDefinitionMap.get(tokenToRetrieveAssociatedRace);
-            if (racesForToken == null) {
-                racesForToken = new HashSet<RaceDefinition>();
-                tokenToRaceDefinitionMap.put(tokenToRetrieveAssociatedRace, racesForToken);
-            }
-            racesForToken.add(raceDefinition);
-        }
+        raceDefinitionSetToUpdate.addRaceDefinition(raceDefinition);
         return result;
     }
 
