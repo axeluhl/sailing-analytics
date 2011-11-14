@@ -49,14 +49,13 @@ public class SailMasterConnectivityTest {
     public void setUp() throws InterruptedException, ParseException {
         startSailMasterDummy();
         SwissTimingAdapterPersistence swissTimingPersistence = SwissTimingAdapterPersistence.INSTANCE;
-        Race raceW4702 = new RaceImpl("W4702", "W4702");
-        Race race4711 = new RaceImpl("4711", "4711");
-        Race race4712 = new RaceImpl("4712", "4712");
-        swissTimingPersistence.storeRace(raceW4702);
+        swissTimingPersistence.dropAllRaceMasterData();
+        Race race4711 = new RaceImpl("4711", "A wonderful test race");
+        Race race4712 = new RaceImpl("4712", "Not such a wonderful race");
         swissTimingPersistence.storeRace(race4711);
         swissTimingPersistence.storeRace(race4712);
         connector = SwissTimingFactory.INSTANCE.getOrCreateSailMasterConnector("localhost", port, swissTimingPersistence);
-        connector.trackRace(raceW4702.getRaceID());
+        connector.trackRace("W4702");
         connector.trackRace(race4711.getRaceID());
         connector.trackRace(race4712.getRaceID());
     }

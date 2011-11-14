@@ -232,6 +232,10 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
         result.put(FieldNames.RACE_STARTTIME.name(), race.getStartTime() == null ? null : new Long(race.getStartTime().asMillis()));
         racesCollection.update(query, result, /* upsrt */ true, /* multi */ false);
     }
-    
 
+    @Override
+    public void dropAllRaceMasterData() {
+        DBCollection racesCollection = database.getCollection(CollectionNames.RACES_MASTERDATA.name());
+        racesCollection.drop();
+    }
 }
