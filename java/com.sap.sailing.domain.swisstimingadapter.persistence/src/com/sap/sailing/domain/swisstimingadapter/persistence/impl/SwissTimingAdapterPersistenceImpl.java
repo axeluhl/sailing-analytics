@@ -1,0 +1,241 @@
+package com.sap.sailing.domain.swisstimingadapter.persistence.impl;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import com.mongodb.BasicDBObject;
+import com.mongodb.DB;
+import com.mongodb.DBCollection;
+import com.mongodb.DBCursor;
+import com.mongodb.DBObject;
+import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.swisstimingadapter.MessageType;
+import com.sap.sailing.domain.swisstimingadapter.Race;
+import com.sap.sailing.domain.swisstimingadapter.SailMasterMessage;
+import com.sap.sailing.domain.swisstimingadapter.SwissTimingConfiguration;
+import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
+import com.sap.sailing.domain.swisstimingadapter.persistence.SwissTimingAdapterPersistence;
+
+public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPersistence {
+
+    private final DB database;
+    
+    private final SwissTimingFactory swissTimingFactory;
+    
+    private static final Logger logger = Logger.getLogger(SwissTimingAdapterPersistenceImpl.class.getName());
+
+    private HashMap<String, Race> cachedRaces = new HashMap<String, Race>();
+    
+    public SwissTimingAdapterPersistenceImpl(DB db, SwissTimingFactory swissTimingFactory) {
+        super();
+
+        this.database = db;
+        this.swissTimingFactory = swissTimingFactory;
+        
+        init();
+    }
+
+    private void init()
+    {
+        DBCollection rawMessages = database.getCollection(CollectionNames.RAW_MESSAGES.name());
+        rawMessages.ensureIndex(new BasicDBObject().append(FieldNames.MESSAGE_SEQUENCE_NUMBER.name(), 1));
+
+        
+        // ensure the required indexes for the collection of race specific messages
+        DBCollection racesMessageCollection = database.getCollection(CollectionNames.RACES_MESSAGES.name());
+
+        BasicDBObject indexKeysRaceMsgs = new BasicDBObject();
+        indexKeysRaceMsgs.put(FieldNames.MESSAGE_SEQUENCE_NUMBER.name(), 1);
+        indexKeysRaceMsgs.put(FieldNames.RACE_ID.name(), 1);
+
+        racesMessageCollection.ensureIndex(indexKeysRaceMsgs, IndexNames.INDEX_RACES_MESSAGES.name(), true);
+        
+        // ensure the required indexes for the collection of command messages
+        DBCollection cmdMessagesCollection = database.getCollection(CollectionNames.COMMAND_MESSAGES.name());
+        
+        BasicDBObject indexKeysCmdMsgs = new BasicDBObject();
+        indexKeysCmdMsgs.put(FieldNames.MESSAGE_SEQUENCE_NUMBER.name(), 1);
+
+        cmdMessagesCollection.ensureIndex(indexKeysCmdMsgs, IndexNames.INDEX_COMMAND_MESSAGES.name(), true);
+        
+        // initially fill the races cache
+        Iterable<Race> races = getRaces();
+        for(Race race: races) {
+            cachedRaces.put(race.getRaceID(), race);
+        }
+    }
+    
+    @Override
+    public Iterable<SwissTimingConfiguration> getSwissTimingConfigurations() {
+        List<SwissTimingConfiguration> result = new ArrayList<SwissTimingConfiguration>();
+        try {
+            DBCollection stConfigs = database.getCollection(CollectionNames.SWISSTIMING_CONFIGURATIONS.name());
+            for (DBObject o : stConfigs.find()) {
+                SwissTimingConfiguration stConfig = loadSwissTimingConfiguration(o);
+                result.add(stConfig);
+            }
+        } catch (Throwable t) {
+             // something went wrong during DB access; report, then use empty new wind track
+            logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load recorded TracTrac configurations. Check MongoDB settings.");
+            logger.throwing(SwissTimingAdapterPersistenceImpl.class.getName(), "getTracTracConfigurations", t);
+        }
+        return result;
+    }
+
+    private SwissTimingConfiguration loadSwissTimingConfiguration(DBObject object) {
+        return swissTimingFactory.createSwissTimingConfiguration((String) object.get(FieldNames.ST_CONFIG_NAME.name()),
+                (String) object.get(FieldNames.ST_CONFIG_HOSTNAME.name()),
+                (Integer) object.get(FieldNames.ST_CONFIG_PORT.name()));
+    }
+
+    @Override
+    public List<SailMasterMessage> loadCommandMessages(int firstSequenceNumber) {
+        DBCollection commandMessages = database.getCollection(CollectionNames.COMMAND_MESSAGES.name());
+        BasicDBObject query = new BasicDBObject();
+        if (firstSequenceNumber != -1) {
+            query.append(FieldNames.MESSAGE_SEQUENCE_NUMBER.name(), new BasicDBObject("$gte", firstSequenceNumber));
+        }
+        DBCursor results = commandMessages.find(query);
+        List<SailMasterMessage> result = new ArrayList<SailMasterMessage>();
+        for (DBObject o : results) {
+            result.add(swissTimingFactory.createMessage((String) o.get(FieldNames.MESSAGE_CONTENT.name()),
+                    (Long) o.get(FieldNames.MESSAGE_SEQUENCE_NUMBER.name())));
+        }
+        return result;
+    }
+
+    @Override
+    public List<SailMasterMessage> loadRaceMessages(String raceID) {
+
+        DBCollection racesMessagesCollection = database.getCollection(CollectionNames.RACES_MESSAGES.name());
+
+        BasicDBObject query = new BasicDBObject();
+        query.append(FieldNames.RACE_ID.name(), raceID);
+        
+        DBCursor results = racesMessagesCollection.find(query);
+        List<SailMasterMessage> result = new ArrayList<SailMasterMessage>();
+        
+        for (DBObject o : results) {
+                SailMasterMessage msg = swissTimingFactory.createMessage((String) o.get(FieldNames.MESSAGE_CONTENT.name()),
+                        (Long) o.get(FieldNames.MESSAGE_SEQUENCE_NUMBER.name()));
+            result.add(msg);
+        }
+        return result;
+    }
+
+    @Override
+    public List<SailMasterMessage> loadCommandMessages() {
+        DBCollection cmdMessagesCollection = database.getCollection(CollectionNames.COMMAND_MESSAGES.name());
+        
+        DBCursor results = cmdMessagesCollection.find();
+        List<SailMasterMessage> result = new ArrayList<SailMasterMessage>();
+        
+        for (DBObject o : results) {
+                SailMasterMessage msg = swissTimingFactory.createMessage((String) o.get(FieldNames.MESSAGE_CONTENT.name()),
+                        (Long) o.get(FieldNames.MESSAGE_SEQUENCE_NUMBER.name()));
+            result.add(msg);
+        }
+        return result;
+    }
+
+
+    @Override
+    public Race getRace(String raceID) {
+        DBCollection races = database.getCollection(CollectionNames.RACES_MASTERDATA.name());
+        BasicDBObject query = new BasicDBObject();
+        query.append(FieldNames.RACE_ID.name(), raceID);
+        DBObject o = races.findOne(query);
+        if (o != null) {
+            Race race = swissTimingFactory.createRace((String) o.get(FieldNames.RACE_ID.name()),
+                    (String) o.get(FieldNames.RACE_DESCRIPTION.name()),
+                    new MillisecondsTimePoint((Long) o.get(FieldNames.RACE_STARTTIME.name())));
+            return race;
+        }
+        return null;
+    }
+
+    @Override
+    public Iterable<Race> getRaces() {
+        DBCollection races = database.getCollection(CollectionNames.RACES_MASTERDATA.name());
+        DBCursor results = races.find();
+        List<Race> result = new ArrayList<Race>();
+        for (DBObject o : results) {
+            Long startTimeAsMillis = (Long) o.get(FieldNames.RACE_STARTTIME.name());
+            Race race = swissTimingFactory.createRace((String) o.get(FieldNames.RACE_ID.name()),
+                    (String) o.get(FieldNames.RACE_DESCRIPTION.name()),
+                    startTimeAsMillis == null ? null : new MillisecondsTimePoint(startTimeAsMillis));
+            result.add(race);
+        }
+        return result;
+    }
+
+    @Override
+    public void storeSwissTimingConfiguration(SwissTimingConfiguration swissTimingConfiguration) {
+        DBCollection stConfigCollection = database.getCollection(CollectionNames.SWISSTIMING_CONFIGURATIONS.name());
+        stConfigCollection.ensureIndex(CollectionNames.SWISSTIMING_CONFIGURATIONS.name());
+        BasicDBObject result = new BasicDBObject();
+        result.put(FieldNames.ST_CONFIG_NAME.name(), swissTimingConfiguration.getName());
+        for (DBObject equallyNamedConfig : stConfigCollection.find(result)) {
+            stConfigCollection.remove(equallyNamedConfig);
+        }
+        result.put(FieldNames.ST_CONFIG_HOSTNAME.name(), swissTimingConfiguration.getHostname());
+        result.put(FieldNames.ST_CONFIG_PORT.name(), swissTimingConfiguration.getPort());
+        stConfigCollection.insert(result);
+    }
+
+    @Override
+    public void storeRawSailMasterMessage(SailMasterMessage message) {
+        DBCollection rawMessageCollection = database.getCollection(CollectionNames.RAW_MESSAGES.name());
+        rawMessageCollection.insert(new BasicDBObject().append(FieldNames.MESSAGE_SEQUENCE_NUMBER.name(), message.getSequenceNumber()).
+                append(FieldNames.MESSAGE_CONTENT.name(), message.getMessage()));
+    }
+
+    @Override
+    public void storeSailMasterMessage(SailMasterMessage message) {
+        // Attention: this method is very time critical as we will receive thousands of messages in a short time
+        DBCollection messageCollection = null;
+        MessageType type = message.getType();
+        BasicDBObject objToInsert = new BasicDBObject();
+        objToInsert.put(FieldNames.MESSAGE_COMMAND.name(), message.getType().name());
+        objToInsert.put(FieldNames.MESSAGE_SEQUENCE_NUMBER.name(), message.getSequenceNumber());
+        objToInsert.put(FieldNames.MESSAGE_CONTENT.name(), message.getMessage());
+        if(type.isRaceSpecific()) {
+                objToInsert.put(FieldNames.RACE_ID.name(), message.getRaceID());
+            messageCollection = database.getCollection(CollectionNames.RACES_MESSAGES.name());
+        } else {
+            messageCollection = database.getCollection(CollectionNames.COMMAND_MESSAGES.name());
+        }
+        messageCollection.insert(objToInsert);
+        if(message.getRaceID() != null && cachedRaces.containsKey(message.getRaceID()) == false) {
+            // ah, we found a new raceID which is not in the list of known races
+            // in order to have a more intelligent conflict resolver mechanism we will forward the resolution to a special thread later on
+            boolean simpleResolution = true;
+            if(simpleResolution) {
+                Race newRace = SwissTimingFactory.INSTANCE.createRace(message.getRaceID(), null, null);
+                storeRace(newRace);
+                cachedRaces.put(newRace.getRaceID(), newRace);
+            }
+        }
+    }
+
+    @Override
+    public void storeRace(Race race) {
+        DBCollection racesCollection = database.getCollection(CollectionNames.RACES_MASTERDATA.name());
+        BasicDBObject query = new BasicDBObject();
+        query.append(FieldNames.RACE_ID.name(), race.getRaceID());
+        BasicDBObject result = new BasicDBObject();
+        result.put(FieldNames.RACE_ID.name(), race.getRaceID());
+        result.put(FieldNames.RACE_DESCRIPTION.name(), race.getDescription());
+        result.put(FieldNames.RACE_STARTTIME.name(), race.getStartTime() == null ? null : new Long(race.getStartTime().asMillis()));
+        racesCollection.update(query, result, /* upsrt */ true, /* multi */ false);
+    }
+
+    @Override
+    public void dropAllRaceMasterData() {
+        DBCollection racesCollection = database.getCollection(CollectionNames.RACES_MASTERDATA.name());
+        racesCollection.drop();
+    }
+}

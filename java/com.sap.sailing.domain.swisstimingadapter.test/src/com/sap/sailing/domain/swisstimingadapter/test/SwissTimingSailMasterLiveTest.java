@@ -9,8 +9,11 @@ import java.io.IOException;
 import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -28,6 +31,7 @@ import com.sap.sailing.domain.swisstimingadapter.SailMasterConnector;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterListener;
 import com.sap.sailing.domain.swisstimingadapter.StartList;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
+import com.sap.sailing.domain.swisstimingadapter.persistence.SwissTimingAdapterPersistence;
 import com.sap.sailing.util.Util;
 import com.sap.sailing.util.Util.Pair;
 import com.sap.sailing.util.Util.Triple;
@@ -38,8 +42,13 @@ public class SwissTimingSailMasterLiveTest implements SailMasterListener {
     private SailMasterConnector connector;
 
     @Before
-    public void connect() {
-        connector = SwissTimingFactory.INSTANCE.createSailMasterConnector("gps.sportresult.com", 40300);
+    public void connect() throws InterruptedException {
+        connector = SwissTimingFactory.INSTANCE.getOrCreateSailMasterConnector("gps.sportresult.com", 40300, SwissTimingAdapterPersistence.INSTANCE);
+    }
+    
+    @After
+    public void stopConnector() throws IOException {
+        connector.stop();
     }
     
     @Test
@@ -50,6 +59,7 @@ public class SwissTimingSailMasterLiveTest implements SailMasterListener {
         synchronized (this) {
             wait(10000); // receive 10s worth of events and expect to have received some data
         }
+        connector.removeSailMasterListener(this);
         assertTrue(rpdCounter > 5);
     }
     
@@ -107,6 +117,65 @@ public class SwissTimingSailMasterLiveTest implements SailMasterListener {
             assertNotNull(currentBoatSpeed);
         }
     }
+    
+    @Test
+    public void testGetDistanceBetweenBoats() throws UnknownHostException, IOException, InterruptedException {
+        Iterable<Race> races = connector.getRaces();
+        Race race = races.iterator().next();
+        Iterator<Competitor> competitorIter = connector.getStartList(race.getRaceID()).getCompetitors().iterator();
+        competitorIter.next();
+        competitorIter.next();
+        Competitor competitor1 = competitorIter.next();
+        for (Competitor competitor2 : connector.getStartList(race.getRaceID()).getCompetitors()) {
+            System.out.print("d");
+            Distance distance = connector.getDistanceBetweenBoats(race.getRaceID(), competitor1.getBoatID(),
+                    competitor2.getBoatID());
+            Distance reverseDistance = connector.getDistanceBetweenBoats(race.getRaceID(), competitor2.getBoatID(),
+                    competitor1.getBoatID());
+            if (distance != null && reverseDistance != null) {
+                assertEquals(distance.getMeters(), reverseDistance.getMeters(), 5);
+            }
+        }
+    }
+    
+    @Test
+    public void testGetDistanceToMark() throws UnknownHostException, IOException, InterruptedException {
+        Iterable<Race> races = connector.getRaces();
+        Race race = races.iterator().next();
+        Course course = connector.getCourse(race.getRaceID());
+        for (Competitor competitor : connector.getStartList(race.getRaceID()).getCompetitors()) {
+            for (int i = 0; i < Util.size(course.getMarks()); i++) {
+                Distance distance = connector.getDistanceToMark(race.getRaceID(), i, competitor.getBoatID());
+                System.out.print("d");
+                if (distance != null) {
+                    assertTrue(distance.getMeters() > 0);
+                }
+            }
+        }
+    }
+    
+    @Test
+    public void testGetMarkPassingTimes() throws UnknownHostException, IOException, InterruptedException {
+        Iterable<Race> races = connector.getRaces();
+        Race race = races.iterator().next();
+        Course course = connector.getCourse(race.getRaceID());
+        int numberOfMarks = Util.size(course.getMarks());
+        Iterable<Competitor> competitors = connector.getStartList(race.getRaceID()).getCompetitors();
+        for (Competitor competitor : competitors) {
+            Map<Integer, Pair<Integer, Long>> markPassingTimes = connector.getMarkPassingTimesInMillisecondsSinceRaceStart(race.getRaceID(), competitor.getBoatID());
+            for (Integer markIndex : markPassingTimes.keySet()) {
+                Pair<Integer, Long> rankAndTime = markPassingTimes.get(markIndex);
+                for (int i=0; i<numberOfMarks; i++) {
+                    if (i != markIndex && markPassingTimes.containsKey(numberOfMarks)) {
+                        if (markPassingTimes.get(i).getB() != null && rankAndTime.getB() != null) {
+                            // previous marks must have been passed before subsequent marks
+                            assertTrue(markPassingTimes.get(i).getB() < rankAndTime.getB());
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     @Override
     public void receivedRacePositionData(String raceID, RaceStatus status, TimePoint timePoint, TimePoint startTime,
@@ -131,19 +200,19 @@ public class SwissTimingSailMasterLiveTest implements SailMasterListener {
     }
 
     @Override
-    public void receivedStartList(String raceID, List<Triple<String, String, String>> boatIDsISOCountryCodesAndNames) {
+    public void receivedStartList(String raceID, StartList startList) {
         // TODO Auto-generated method stub
         
     }
 
     @Override
-    public void receivedCourseConfiguration(String raceID, List<Mark> marks) {
+    public void receivedCourseConfiguration(String raceID, Course course) {
         // TODO Auto-generated method stub
         
     }
 
     @Override
-    public void receivedAvailableRaces(List<Pair<String, String>> raceIDsAndDescriptions) {
+    public void receivedAvailableRaces(Iterable<Race> races) {
         // TODO Auto-generated method stub
         
     }

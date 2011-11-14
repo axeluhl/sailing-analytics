@@ -7,6 +7,7 @@ import java.net.SocketException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -30,21 +31,23 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.impl.LeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.ResultDiscardingRuleImpl;
 import com.sap.sailing.domain.leaderboard.impl.ScoreCorrectionImpl;
+import com.sap.sailing.domain.persistence.DomainObjectFactory;
+import com.sap.sailing.domain.persistence.MongoObjectFactory;
+import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
+import com.sap.sailing.domain.swisstimingadapter.persistence.SwissTimingAdapterPersistence;
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
+import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.RaceListener;
+import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTracker;
 import com.sap.sailing.domain.tracking.WindTrackerFactory;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.JSONService;
-import com.sap.sailing.domain.tractracadapter.RaceHandle;
 import com.sap.sailing.domain.tractracadapter.RaceRecord;
-import com.sap.sailing.domain.tractracadapter.RaceTracker;
 import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sailing.expeditionconnector.ExpeditionWindTrackerFactory;
-import com.sap.sailing.mongodb.DomainObjectFactory;
-import com.sap.sailing.mongodb.MongoObjectFactory;
 import com.sap.sailing.util.Util.Pair;
 import com.sap.sailing.util.Util.Triple;
 
@@ -53,7 +56,7 @@ public class RacingEventServiceImpl implements RacingEventService {
 
     /**
      * A scheduler for the periodic checks of the paramURL documents for the advent of {@link ControlPoint}s
-     * with static position information otherwise not available through {@link MarkPassingReceiver}'s events.
+     * with static position information otherwise not available through <code>MarkPassingReceiver</code>'s events.
      */
     private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     
@@ -74,7 +77,7 @@ public class RacingEventServiceImpl implements RacingEventService {
     /**
      * Remembers the trackers by paramURL/liveURI/storedURI to avoid duplication
      */
-    private final Map<Triple<URL, URI, URI>, RaceTracker> raceTrackersByURLs;
+    private final Map<Object, RaceTracker> raceTrackersByID;
     
     /**
      * Leaderboards managed by this racing event service
@@ -88,16 +91,22 @@ public class RacingEventServiceImpl implements RacingEventService {
     private final MongoObjectFactory mongoObjectFactory;
     
     private final DomainObjectFactory domainObjectFactory;
+    
+    private final SwissTimingFactory swissTimingFactory;
+    
+    private final SwissTimingAdapterPersistence swissTimingAdapterPersistence;
 
     public RacingEventServiceImpl() {
         domainFactory = DomainFactory.INSTANCE;
         domainObjectFactory = DomainObjectFactory.INSTANCE;
         mongoObjectFactory = MongoObjectFactory.INSTANCE;
+        swissTimingFactory = SwissTimingFactory.INSTANCE;
+        swissTimingAdapterPersistence = SwissTimingAdapterPersistence.INSTANCE;
         windTrackerFactory = ExpeditionWindTrackerFactory.getInstance();
         eventsByName = new HashMap<String, Event>();
         raceTrackersByEvent = new HashMap<Event, Set<RaceTracker>>();
         windTrackers = new HashMap<RaceDefinition, WindTracker>();
-        raceTrackersByURLs = new HashMap<Triple<URL, URI, URI>, RaceTracker>();
+        raceTrackersByID = new HashMap<Object, RaceTracker>();
         leaderboardsByName = new HashMap<String, Leaderboard>();
         // Add one default leaderboard that aggregates all races currently tracked by this service.
         // This is more for debugging purposes than for anything else.
@@ -172,6 +181,11 @@ public class RacingEventServiceImpl implements RacingEventService {
     }
     
     @Override
+    public SwissTimingFactory getSwissTimingFactory() {
+        return swissTimingFactory;
+    }
+    
+    @Override
     public Iterable<Event> getAllEvents() {
         return Collections.unmodifiableCollection(eventsByName.values());
     }
@@ -199,25 +213,66 @@ public class RacingEventServiceImpl implements RacingEventService {
         Event event = null;
         for (RaceRecord rr : jsonService.getRaceRecords()) {
             URL paramURL = rr.getParamURL();
-            event = addRace(paramURL, liveURI, storedURI, windStore, timeoutInMilliseconds).getEvent();
+            event = addTracTracRace(paramURL, liveURI, storedURI, windStore, timeoutInMilliseconds).getEvent();
         }
         return event;
     }
 
     @Override
-    public Pair<String, List<RaceRecord>> getRaceRecords(URL jsonURL) throws IOException, ParseException, org.json.simple.parser.ParseException, URISyntaxException {
+    public Pair<String, List<RaceRecord>> getTracTracRaceRecords(URL jsonURL) throws IOException, ParseException, org.json.simple.parser.ParseException, URISyntaxException {
         JSONService jsonService = getDomainFactory().parseJSONURL(jsonURL);
         return new Pair<String, List<RaceRecord>>(jsonService.getEventName(), jsonService.getRaceRecords());
     }
+    
+    @Override
+    public synchronized RaceHandle addSwissTimingRace(String raceID, String hostname, int port, WindStore windStore,
+            long timeoutInMilliseconds) throws InterruptedException, UnknownHostException, IOException {
+        Triple<String, String, Integer> key = new Triple<String, String, Integer>(raceID, hostname, port);
+        RaceTracker tracker = raceTrackersByID.get(key);
+        if (tracker == null) {
+            tracker = getSwissTimingFactory().createRaceTracker(raceID, hostname, port, windStore, swissTimingAdapterPersistence);
+            raceTrackersByID.put(tracker.getID(), tracker);
+            Set<RaceTracker> trackers = raceTrackersByEvent.get(tracker.getEvent());
+            if (trackers == null) {
+                trackers = new HashSet<RaceTracker>();
+                raceTrackersByEvent.put(tracker.getEvent(), trackers);
+            }
+            trackers.add(tracker);
+            // TODO we assume here that the event name is unique which necessesitates adding the boat class name to it in EventImpl constructor
+            String eventName = tracker.getEvent().getName();
+            Event eventWithName = eventsByName.get(eventName);
+            // TODO we assume here that the event name is unique which necessesitates adding the boat class name to it in EventImpl constructor
+            if (eventWithName != null) {
+                if (eventWithName != tracker.getEvent()) {
+                    throw new RuntimeException("Internal error. Two Event objects with equal name "+eventName);
+                }
+            } else {
+                eventsByName.put(eventName, tracker.getEvent());
+            }
+        } else {
+            WindStore existingTrackersWindStore = tracker.getWindStore();
+            if (!existingTrackersWindStore.equals(windStore)) {
+                logger.warning("Wind store mismatch. Requested wind store: "+windStore+
+                        ". Wind store in use by existing tracker: "+existingTrackersWindStore);
+            }
+        }
+        DynamicTrackedEvent trackedEvent = tracker.getTrackedEvent();
+        ensureEventIsObservedForDefaultLeaderboard(trackedEvent);
+        if (timeoutInMilliseconds != -1) {
+            scheduleAbortTrackerAfterInitialTimeout(tracker, timeoutInMilliseconds);
+        }
+        return tracker.getRaceHandle();
+
+    }
 
     @Override
-    public synchronized RaceHandle addRace(URL paramURL, URI liveURI, URI storedURI, WindStore windStore,
+    public synchronized RaceHandle addTracTracRace(URL paramURL, URI liveURI, URI storedURI, WindStore windStore,
             long timeoutInMilliseconds) throws MalformedURLException, FileNotFoundException, URISyntaxException {
         Triple<URL, URI, URI> key = new Triple<URL, URI, URI>(paramURL, liveURI, storedURI);
-        RaceTracker tracker = raceTrackersByURLs.get(key);
+        RaceTracker tracker = raceTrackersByID.get(key);
         if (tracker == null) {
             tracker = getDomainFactory().createRaceTracker(paramURL, liveURI, storedURI, windStore);
-            raceTrackersByURLs.put(key, tracker);
+            raceTrackersByID.put(tracker.getID(), tracker);
             Set<RaceTracker> trackers = raceTrackersByEvent.get(tracker.getEvent());
             if (trackers == null) {
                 trackers = new HashSet<RaceTracker>();
@@ -274,7 +329,7 @@ public class RacingEventServiceImpl implements RacingEventService {
         if (raceTrackersByEvent.containsKey(event)) {
             for (RaceTracker raceTracker : raceTrackersByEvent.get(event)) {
                 raceTracker.stop(); // this also removes the TrackedRace from trackedEvent
-                raceTrackersByURLs.remove(raceTracker.getURLs());
+                raceTrackersByID.remove(raceTracker.getID());
             }
             raceTrackersByEvent.remove(event);
         }
@@ -314,7 +369,7 @@ public class RacingEventServiceImpl implements RacingEventService {
                             trackersForEvent.remove(tracker);
                         }
                         tracker.stop();
-                        raceTrackersByURLs.remove(tracker.getURLs());
+                        raceTrackersByID.remove(tracker.getID());
                         if (trackersForEvent == null || trackersForEvent.isEmpty()) {
                             stopTracking(event);
                         }
@@ -338,7 +393,7 @@ public class RacingEventServiceImpl implements RacingEventService {
                     System.out.println("Found tracker to stop...");
                     raceTracker.stop(); // this also removes the TrackedRace from trackedEvent
                     trackerIter.remove();
-                    raceTrackersByURLs.remove(raceTracker.getURLs());
+                    raceTrackersByID.remove(raceTracker.getID());
                 }
             }
         } else {

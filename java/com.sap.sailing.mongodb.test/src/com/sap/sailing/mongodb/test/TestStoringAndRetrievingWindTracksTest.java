@@ -21,6 +21,8 @@ import com.sap.sailing.domain.base.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.base.impl.DegreePosition;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.persistence.impl.DomainObjectFactoryImpl;
+import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
 import com.sap.sailing.domain.test.AbstractTracTracLiveTest;
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
@@ -32,9 +34,7 @@ import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
-import com.sap.sailing.mongodb.impl.DomainObjectFactoryImpl;
-import com.sap.sailing.mongodb.impl.MongoObjectFactoryImpl;
-import com.sap.sailing.mongodb.impl.MongoWindStoreFactoryImpl;
+import com.sap.sailing.mongodb.Activator;
 
 public class TestStoringAndRetrievingWindTracksTest extends AbstractTracTracLiveTest implements MongoDBTest {
 
@@ -47,7 +47,7 @@ public class TestStoringAndRetrievingWindTracksTest extends AbstractTracTracLive
     
     private Mongo newMongo() throws UnknownHostException, MongoException {
         return new Mongo(System.getProperty("mongo.host", "127.0.0.1"),
-                ((MongoWindStoreFactoryImpl) MongoWindStoreFactoryImpl.getDefaultInstance()).getDefaultPort());
+                Activator.getDefaultInstance().getDefaultPort());
     }
     
     @Before

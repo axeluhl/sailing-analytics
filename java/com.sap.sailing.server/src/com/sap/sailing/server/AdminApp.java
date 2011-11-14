@@ -31,6 +31,9 @@ import com.sap.sailing.domain.base.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.base.impl.DegreePosition;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.persistence.DomainObjectFactory;
+import com.sap.sailing.domain.persistence.MongoObjectFactory;
+import com.sap.sailing.domain.persistence.MongoWindStoreFactory;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.NoWindException;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -41,9 +44,6 @@ import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tractracadapter.RaceRecord;
-import com.sap.sailing.mongodb.DomainObjectFactory;
-import com.sap.sailing.mongodb.MongoObjectFactory;
-import com.sap.sailing.mongodb.MongoWindStoreFactory;
 import com.sap.sailing.util.InvalidDateException;
 import com.sap.sailing.util.Util.Triple;
 
@@ -191,7 +191,7 @@ public class AdminApp extends Servlet {
     private void listRacesInEvent(HttpServletRequest req, HttpServletResponse resp) throws IOException, ParseException,
             org.json.simple.parser.ParseException, URISyntaxException {
         URL jsonURL = new URL(req.getParameter(PARAM_NAME_EVENT_JSON_URL));
-        List<RaceRecord> raceRecords = getService().getRaceRecords(jsonURL).getB();
+        List<RaceRecord> raceRecords = getService().getTracTracRaceRecords(jsonURL).getB();
         JSONArray result = new JSONArray();
         for (RaceRecord raceRecord : raceRecords) {
             JSONObject jsonRaceRecord = new JSONObject();
@@ -514,7 +514,7 @@ public class AdminApp extends Servlet {
         URL paramURL = new URL(req.getParameter(PARAM_NAME_PARAM_URL));
         URI liveURI = new URI(req.getParameter(PARAM_NAME_LIVE_URI));
         URI storedURI = new URI(req.getParameter(PARAM_NAME_STORED_URI));
-        getService().addRace(paramURL, liveURI, storedURI, getWindStore(req), /* timeoutInMilliseconds */ 60000);
+        getService().addTracTracRace(paramURL, liveURI, storedURI, getWindStore(req), /* timeoutInMilliseconds */ 60000);
     }
 
     private void stopRace(HttpServletRequest req, HttpServletResponse resp) throws MalformedURLException, IOException, InterruptedException {

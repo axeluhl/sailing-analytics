@@ -16,11 +16,11 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.TrackedEvent;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
-import com.sap.sailing.domain.tractracadapter.RaceHandle;
 import com.sap.sailing.server.RacingEventServiceImpl;
 
 public class RaceTrackerTest {
@@ -53,7 +53,7 @@ public class RaceTrackerTest {
     @Before
     public void setUp() throws MalformedURLException, FileNotFoundException, URISyntaxException, InterruptedException {
         service = new RacingEventServiceImpl();
-        raceHandle = service.addRace(paramUrl, liveUri, storedUri, EmptyWindStore.INSTANCE, /* timeoutInMilliseconds */ 60000);
+        raceHandle = service.addTracTracRace(paramUrl, liveUri, storedUri, EmptyWindStore.INSTANCE, /* timeoutInMilliseconds */ 60000);
     }
     
     @After
@@ -96,7 +96,7 @@ public class RaceTrackerTest {
         TrackedRace oldTrackedRace = getTrackedRace(oldTrackedEvent);
         RaceDefinition oldRaceDefinition = oldTrackedRace.getRace();
         service.stopTracking(raceHandle.getEvent());
-        RaceHandle myRaceHandle = service.addRace(paramUrl, liveUri, storedUri, EmptyWindStore.INSTANCE, /* timeoutInMilliseconds */ 60000);
+        RaceHandle myRaceHandle = service.addTracTracRace(paramUrl, liveUri, storedUri, EmptyWindStore.INSTANCE, /* timeoutInMilliseconds */ 60000);
         TrackedEvent newTrackedEvent = myRaceHandle.getTrackedEvent();
         TrackedRace newTrackedRace = getTrackedRace(newTrackedEvent);
         // expecting a new tracked race to be created when starting over with tracking
@@ -116,7 +116,7 @@ public class RaceTrackerTest {
     public void testTrackingSameRaceWithoutStopping() throws MalformedURLException, IOException, InterruptedException, URISyntaxException {
         TrackedEvent oldTrackedEvent = raceHandle.getTrackedEvent();
         TrackedRace oldTrackedRace = getTrackedRace(oldTrackedEvent);
-        RaceHandle myRaceHandle = service.addRace(paramUrl, liveUri, storedUri, EmptyWindStore.INSTANCE, /* timeoutInMilliseconds */ 60000);
+        RaceHandle myRaceHandle = service.addTracTracRace(paramUrl, liveUri, storedUri, EmptyWindStore.INSTANCE, /* timeoutInMilliseconds */ 60000);
         TrackedEvent newTrackedEvent = myRaceHandle.getTrackedEvent();
         TrackedRace newTrackedRace = getTrackedRace(newTrackedEvent);
         // expecting a new tracked race to be created when starting over with tracking

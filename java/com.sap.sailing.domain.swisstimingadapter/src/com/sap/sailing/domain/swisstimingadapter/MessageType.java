@@ -4,75 +4,85 @@ public enum MessageType {
     /**
      * Available Races
      */
-    RAC,
+    RAC(/* isRaceSpecific */ false),
     
     /**
      * Course Configuration
      */
-    CCG,
+    CCG(/* isRaceSpecific */ true),
     
     /**
      * Startlist
      */
-    STL,
+    STL(/* isRaceSpecific */ true),
     
     /**
      * StartTime
      */
-    STT,
+    STT(/* isRaceSpecific */ true),
     
     /**
      * Clock at Mark/Finish
      */
-    CAM,
+    CAM(/* isRaceSpecific */ true),
     
     /**
      * Distance to Mark
      */
-    DTM,
+    DTM(/* isRaceSpecific */ true),
     
     /**
      * Current Boat Speed
      */
-    CBS,
+    CBS(/* isRaceSpecific */ true),
     
     /**
      * Distance between Boats
      */
-    DBB,
+    DBB(/* isRaceSpecific */ true),
     
     /**
      * Average Boat Speed per Leg
      */
-    ABS,
+    ABS(/* isRaceSpecific */ true),
     
     /**
      * Timing Data
      */
-    TMD,
+    TMD(/* isRaceSpecific */ true),
     
     /**
      * Weather Information
      */
-    WEA,
+    WEA(/* isRaceSpecific */ false),
     
     /**
      * Wind Data
      */
-    WND,
+    WND(/* isRaceSpecific */ false),
     
     /**
      * Version
      */
-    VER,
+    VER(/* isRaceSpecific */ false),
     
     /**
      * Race Position Data
      */
-    RPD,
+    RPD(/* isRaceSpecific */ true),
     
     /**
      * internal, inofficial event, used during testing to stop a test / dummy server instance
      */
-    _STOPSERVER
+    _STOPSERVER(/* isRaceSpecific */ false);
+    
+    private boolean isRaceSpecific;
+    
+    private MessageType(boolean isRaceSpecific) {
+        this.isRaceSpecific = isRaceSpecific;
+    }
+    
+    public boolean isRaceSpecific() {
+        return isRaceSpecific;
+    }
 }

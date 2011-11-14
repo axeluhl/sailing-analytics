@@ -5,12 +5,16 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.logging.Logger;
 
 import com.sap.sailing.domain.swisstimingadapter.MessageType;
 import com.sap.sailing.domain.swisstimingadapter.impl.SailMasterMessageImpl;
-import com.sap.sailing.domain.swisstimingadapter.impl.SailMasterTransceiver;
+import com.sap.sailing.domain.swisstimingadapter.impl.SailMasterTransceiverImpl;
+import com.sap.sailing.util.Util.Pair;
 
 public class SailMasterDummy implements Runnable {
+    private static final Logger logger = Logger.getLogger(SailMasterDummy.class.getName());
+    
     public static final byte STX = 0x02;
     public static final byte ETX = 0x03;
     
@@ -20,7 +24,7 @@ public class SailMasterDummy implements Runnable {
     
     private boolean stopped;
     
-    private final SailMasterTransceiver transceiver = new SailMasterTransceiver();
+    private final SailMasterTransceiverImpl transceiver = new SailMasterTransceiverImpl();
     
     public SailMasterDummy(int port) {
         this.port = port;
@@ -41,7 +45,7 @@ public class SailMasterDummy implements Runnable {
                 }
             }
             listenOn.close();
-            System.out.println("Server stopped. Thread ending.");
+            logger.info("Server stopped. Thread ending.");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -49,19 +53,19 @@ public class SailMasterDummy implements Runnable {
 
     private void processRequests() throws IOException {
         InputStream is = socket.getInputStream();
-        String message = transceiver.receiveMessage(is);
-        while (message != null) {
-            respondToMessage(message, socket.getOutputStream());
+        Pair<String, Long> messageAndOptionalSequenceNumber = transceiver.receiveMessage(is);
+        while (messageAndOptionalSequenceNumber != null) {
+            respondToMessage(messageAndOptionalSequenceNumber.getA(), socket.getOutputStream());
             if (stopped) {
-                message = null;
+                messageAndOptionalSequenceNumber = null;
             } else {
-                message = transceiver.receiveMessage(is);
+                messageAndOptionalSequenceNumber = transceiver.receiveMessage(is);
             }
         }
     }
     
     private void respondToMessage(String message, OutputStream os) throws IOException {
-        SailMasterMessageImpl smMessage = new SailMasterMessageImpl(message);
+        SailMasterMessageImpl smMessage = new SailMasterMessageImpl(message, null);
         String[] sections = smMessage.getSections();
         if ((MessageType.RAC.name()+"?").equals(sections[0])) {
             // Available Races

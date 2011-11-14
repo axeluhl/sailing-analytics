@@ -23,13 +23,6 @@ public interface SailMasterConnector {
     
     TimePoint getStartTime(String raceID) throws UnknownHostException, IOException, ParseException, InterruptedException;
     
-    /**
-     * @return a map with all indices of those marks already passed by the leading boat as key; pairs of mark passing
-     *         times and boat ID of the boat passing that mark first as values.
-     * @throws InterruptedException 
-     */
-    Map<Integer, Pair<TimePoint, String>> getDeltaClockAtMark(String raceID) throws UnknownHostException, IOException, NumberFormatException, ParseException, InterruptedException;
-    
     Distance getDistanceToMark(String raceID, int markIndex, String boatID) throws UnknownHostException, IOException, InterruptedException;
     
     Speed getCurrentBoatSpeed(String raceID, String boatID) throws UnknownHostException, IOException, InterruptedException;
@@ -55,6 +48,12 @@ public interface SailMasterConnector {
      */
     void addSailMasterListener(SailMasterListener listener) throws UnknownHostException, IOException;
     
+    /**
+     * Like {@link #addSailMasterListener(SailMasterListener)}, but only forwards race-specific events for the
+     * race identified by <code>raceID</code> to the <code>listener</code>
+     */
+    void addSailMasterListener(String raceID, SailMasterListener listener) throws UnknownHostException, IOException;
+    
     void removeSailMasterListener(SailMasterListener listener);
 
     SailMasterMessage receiveMessage(MessageType type) throws InterruptedException;
@@ -77,4 +76,18 @@ public interface SailMasterConnector {
      * first passed the mark with the respective index
      */
     List<Triple<Integer, TimePoint, String>> getClockAtMark(String raceID) throws ParseException, UnknownHostException, IOException, InterruptedException;
+    
+    /**
+     * Stops this connector's thread that is started upon creation and responsible for receiving spontaneous events
+     * @throws IOException 
+     */
+    void stop() throws IOException;
+
+    void trackRace(String raceID) throws ParseException;
+
+    void stopTrackingRace(String raceID);
+
+    void removeSailMasterListener(String raceID, SailMasterListener listener);
+
+    boolean isStopped();
 }

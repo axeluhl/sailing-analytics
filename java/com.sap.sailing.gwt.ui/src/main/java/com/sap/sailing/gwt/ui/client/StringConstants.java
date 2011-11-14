@@ -7,6 +7,7 @@ public interface StringConstants extends Constants {
     String kielWeel2011();
     String stgAccount();
     String tracTracEvents();
+    String swissTimingEvents();
     String trackedBefore();
     String listRaces();
     String wind();
@@ -107,4 +108,6 @@ public interface StringConstants extends Constants {
     String legDetailsToShow();
     String columnMoveUp();
     String columnMoveDown();
+    String port();
+    String raceStartTimeColumn();
 }

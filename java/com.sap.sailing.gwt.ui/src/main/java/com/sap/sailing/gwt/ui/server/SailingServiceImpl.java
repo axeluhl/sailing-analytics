@@ -5,6 +5,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -45,10 +46,19 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard.Entry;
 import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
 import com.sap.sailing.domain.leaderboard.ScoreCorrection.MaxPointsReason;
+import com.sap.sailing.domain.persistence.DomainObjectFactory;
+import com.sap.sailing.domain.persistence.MongoObjectFactory;
+import com.sap.sailing.domain.persistence.MongoWindStoreFactory;
+import com.sap.sailing.domain.swisstimingadapter.Race;
+import com.sap.sailing.domain.swisstimingadapter.SailMasterConnector;
+import com.sap.sailing.domain.swisstimingadapter.SwissTimingConfiguration;
+import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
+import com.sap.sailing.domain.swisstimingadapter.persistence.SwissTimingAdapterPersistence;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.NoWindException;
+import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
@@ -57,7 +67,6 @@ import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tracking.impl.WindTrackImpl;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
-import com.sap.sailing.domain.tractracadapter.RaceHandle;
 import com.sap.sailing.domain.tractracadapter.RaceRecord;
 import com.sap.sailing.domain.tractracadapter.TracTracConfiguration;
 import com.sap.sailing.gwt.ui.client.SailingService;
@@ -77,13 +86,12 @@ import com.sap.sailing.gwt.ui.shared.RaceDAO;
 import com.sap.sailing.gwt.ui.shared.RaceRecordDAO;
 import com.sap.sailing.gwt.ui.shared.RegattaDAO;
 import com.sap.sailing.gwt.ui.shared.SpeedWithBearingDAO;
+import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDAO;
+import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDAO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDAO;
 import com.sap.sailing.gwt.ui.shared.WindDAO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDAO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDAO;
-import com.sap.sailing.mongodb.DomainObjectFactory;
-import com.sap.sailing.mongodb.MongoObjectFactory;
-import com.sap.sailing.mongodb.MongoWindStoreFactory;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.util.CountryCode;
 
@@ -99,13 +107,25 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     
     private final MongoObjectFactory mongoObjectFactory;
     
+    private final SwissTimingAdapterPersistence swissTimingAdapterPersistence;
+    
+    private final com.sap.sailing.domain.tractracadapter.persistence.MongoObjectFactory tractracMongoObjectFactory;
+
     private final DomainObjectFactory domainObjectFactory;
+    
+    private final SwissTimingFactory swissTimingFactory;
+
+    private final com.sap.sailing.domain.tractracadapter.persistence.DomainObjectFactory tractracDomainObjectFactory;
 
     public SailingServiceImpl() {
         BundleContext context = Activator.getDefault();
         racingEventServiceTracker = createAndOpenRacingEventServiceTracker(context);
         mongoObjectFactory = MongoObjectFactory.INSTANCE;
         domainObjectFactory = DomainObjectFactory.INSTANCE;
+        swissTimingAdapterPersistence = SwissTimingAdapterPersistence.INSTANCE;
+        tractracDomainObjectFactory = com.sap.sailing.domain.tractracadapter.persistence.DomainObjectFactory.INSTANCE;
+        tractracMongoObjectFactory = com.sap.sailing.domain.tractracadapter.persistence.MongoObjectFactory.INSTANCE;
+        swissTimingFactory = SwissTimingFactory.INSTANCE;
     }
 
     protected ServiceTracker<RacingEventService, RacingEventService> createAndOpenRacingEventServiceTracker(
@@ -299,10 +319,10 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
 
     @Override
-    public Pair<String, List<RaceRecordDAO>> listRacesInEvent(String eventJsonURL) throws MalformedURLException, IOException,
+    public Pair<String, List<RaceRecordDAO>> listTracTracRacesInEvent(String eventJsonURL) throws MalformedURLException, IOException,
             ParseException, org.json.simple.parser.ParseException, URISyntaxException {
         com.sap.sailing.util.Util.Pair<String,List<RaceRecord>> raceRecords;
-        raceRecords = getService().getRaceRecords(new URL(eventJsonURL));
+        raceRecords = getService().getTracTracRaceRecords(new URL(eventJsonURL));
         List<RaceRecordDAO> result = new ArrayList<RaceRecordDAO>();
         for (RaceRecord raceRecord : raceRecords.getB()) {
             result.add(new RaceRecordDAO(raceRecord.getID(), raceRecord.getEventName(), raceRecord.getName(),
@@ -321,7 +341,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         if (storedURI == null || storedURI.trim().length() == 0) {
             storedURI = rr.storedURI;
         }
-        final RaceHandle raceHandle = getService().addRace(new URL(rr.paramURL), new URI(liveURI), new URI(storedURI),
+        final RaceHandle raceHandle = getService().addTracTracRace(new URL(rr.paramURL), new URI(liveURI), new URI(storedURI),
                 MongoWindStoreFactory.INSTANCE.getMongoWindStore(mongoObjectFactory, domainObjectFactory), TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS);
         if (trackWind) {
             new Thread("Wind tracking starter for race "+rr.eventName+"/"+rr.name) {
@@ -337,8 +357,8 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
 
     @Override
-    public List<TracTracConfigurationDAO> getPreviousConfigurations() throws Exception {
-        Iterable<TracTracConfiguration> configs = domainObjectFactory.getTracTracConfigurations();
+    public List<TracTracConfigurationDAO> getPreviousTracTracConfigurations() throws Exception {
+        Iterable<TracTracConfiguration> configs = tractracDomainObjectFactory.getTracTracConfigurations();
         List<TracTracConfigurationDAO> result = new ArrayList<TracTracConfigurationDAO>();
         for (TracTracConfiguration ttConfig : configs) {
             result.add(new TracTracConfigurationDAO(ttConfig.getName(), ttConfig.getJSONURL().toString(),
@@ -350,7 +370,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     @Override
     public void storeTracTracConfiguration(String name, String jsonURL, String liveDataURI, String storedDataURI) throws Exception {
         DomainFactory domainFactory = DomainFactory.INSTANCE;
-        mongoObjectFactory.storeTracTracConfiguration(domainFactory.createTracTracConfiguration(name, jsonURL, liveDataURI, storedDataURI));
+        tractracMongoObjectFactory.storeTracTracConfiguration(domainFactory.createTracTracConfiguration(name, jsonURL, liveDataURI, storedDataURI));
     }
     
     @Override
@@ -956,39 +976,84 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         }
     }
 
-	@Override
-	public void moveLeaderboardColumnUp(String leaderboardName,
-			String columnName) {
-		Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+    @Override
+    public void moveLeaderboardColumnUp(String leaderboardName, String columnName) {
+        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         if (leaderboard != null) {
-        	leaderboard.moveRaceColumnUp(columnName);
+            leaderboard.moveRaceColumnUp(columnName);
             getService().updateStoredLeaderboard(leaderboard);
         } else {
-            throw new IllegalArgumentException("Leaderboard named "+leaderboardName+" not found");
+            throw new IllegalArgumentException("Leaderboard named " + leaderboardName + " not found");
         }
-		
-	}
 
-	@Override
-	public void moveLeaderboardColumnDown(String leaderboardName,
-			String columnName) {
-		Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+    }
+
+    @Override
+    public void moveLeaderboardColumnDown(String leaderboardName, String columnName) {
+        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         if (leaderboard != null) {
-        	leaderboard.moveRaceColumnDown(columnName);
+            leaderboard.moveRaceColumnDown(columnName);
             getService().updateStoredLeaderboard(leaderboard);
         } else {
-            throw new IllegalArgumentException("Leaderboard named "+leaderboardName+" not found");
+            throw new IllegalArgumentException("Leaderboard named " + leaderboardName + " not found");
         }
-	}
+    }
 
-	@Override
-	public void updateIsMedalRace(String leaderboardName, String columnName, boolean isMedalRace) {
-		Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
-		if (leaderboard != null) {
-        	leaderboard.updateIsMedalRace(columnName, isMedalRace);
+    @Override
+    public void updateIsMedalRace(String leaderboardName, String columnName, boolean isMedalRace) {
+        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        if (leaderboard != null) {
+            leaderboard.updateIsMedalRace(columnName, isMedalRace);
             getService().updateStoredLeaderboard(leaderboard);
         } else {
-            throw new IllegalArgumentException("Leaderboard named "+leaderboardName+" not found");
+            throw new IllegalArgumentException("Leaderboard named " + leaderboardName + " not found");
         }
-	}
+    }
+
+    @Override
+    public List<SwissTimingConfigurationDAO> getPreviousSwissTimingConfigurations() {
+        Iterable<SwissTimingConfiguration> configs = swissTimingAdapterPersistence.getSwissTimingConfigurations();
+        List<SwissTimingConfigurationDAO> result = new ArrayList<SwissTimingConfigurationDAO>();
+        for (SwissTimingConfiguration stConfig : configs) {
+            result.add(new SwissTimingConfigurationDAO(stConfig.getName(), stConfig.getHostname(), stConfig.getPort()));
+        }
+        return result;
+   }
+
+    @Override
+    public List<SwissTimingRaceRecordDAO> listSwissTimingRaces(String hostname, int port) 
+           throws UnknownHostException, IOException, InterruptedException, ParseException {
+        List<SwissTimingRaceRecordDAO> result = new ArrayList<SwissTimingRaceRecordDAO>();
+        // FIXME can't rely on the connector being able to send a request; perhaps need to extract from SwissTiming persistence
+        SailMasterConnector swissTimingConnector = swissTimingFactory.getOrCreateSailMasterConnector(hostname, port, swissTimingAdapterPersistence);
+        for (Race race : swissTimingConnector.getRaces()) {
+            TimePoint startTime = swissTimingConnector.getStartTime(race.getRaceID());
+            result.add(new SwissTimingRaceRecordDAO(race.getRaceID(), race.getDescription(), startTime.asDate()));
+        }
+        return result;
+    }
+
+    @Override
+    public void storeSwissTimingConfiguration(String configName, String hostname, int port) {
+        swissTimingAdapterPersistence.storeSwissTimingConfiguration(swissTimingFactory.createSwissTimingConfiguration(configName, hostname, port));
+   }
+
+    @Override
+    public void trackWithSwissTiming(SwissTimingRaceRecordDAO rr, String hostname, int port, boolean trackWind,
+            final boolean correctWindByDeclination) throws Exception {
+        final RaceHandle raceHandle = getService().addSwissTimingRace(rr.ID, hostname, port,
+                MongoWindStoreFactory.INSTANCE.getMongoWindStore(mongoObjectFactory, domainObjectFactory),
+                TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS);
+        if (trackWind) {
+            new Thread("Wind tracking starter for race "+rr.ID+"/"+rr.description) {
+                public void run() {
+                    try {
+                        startTrackingWind(raceHandle, correctWindByDeclination, TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            }.start();
+        }
+    }
 }

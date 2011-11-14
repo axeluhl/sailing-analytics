@@ -5,17 +5,24 @@ import com.sap.sailing.domain.swisstimingadapter.SailMasterMessage;
 
 public class SailMasterMessageImpl implements SailMasterMessage {
     private final String message;
+    private final Long sequenceNumber;
     
     private String[] sections;
 
-    public SailMasterMessageImpl(String message) {
+    public SailMasterMessageImpl(String message, Long sequenceNumber) {
         super();
         this.message = message;
+        this.sequenceNumber = sequenceNumber;
     }
 
     @Override
     public String getMessage() {
         return message;
+    }
+    
+    @Override
+    public Long getSequenceNumber() {
+        return sequenceNumber;
     }
 
     @Override
@@ -28,7 +35,7 @@ public class SailMasterMessageImpl implements SailMasterMessage {
     
     @Override
     public String toString() {
-        return getMessage();
+        return ""+getSequenceNumber()+": "+getMessage();
     }
 
     @Override
@@ -56,5 +63,19 @@ public class SailMasterMessageImpl implements SailMasterMessage {
     @Override
     public boolean isEvent() {
         return !isRequest() && !isResponse();
+    }
+
+    /**
+     * For race-specific messages, the race ID is always found in section #1
+     */
+    @Override
+    public String getRaceID() {
+        String result;
+        if (getType().isRaceSpecific()) {
+            result = getSections()[1];
+        } else {
+            result = null;
+        }
+        return result;
     }
 }
