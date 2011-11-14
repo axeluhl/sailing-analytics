@@ -2,6 +2,7 @@ package com.sap.sailing.domain.swisstimingadapter;
 
 import java.io.IOException;
 import java.net.UnknownHostException;
+import java.text.ParseException;
 
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.swisstimingadapter.impl.SwissTimingFactoryImpl;
@@ -40,7 +41,7 @@ public interface SwissTimingFactory {
 
     SwissTimingConfiguration createSwissTimingConfiguration(String name, String hostname, int port);
 
-    SwissTimingRaceTracker createRaceTracker(String raceID, String hostname, int port, WindStore windStore, RaceSpecificMessageLoader messageLoader, TrackedEventRegistry trackedEventRegistry) throws InterruptedException, UnknownHostException, IOException;
+    SwissTimingRaceTracker createRaceTracker(String raceID, String hostname, int port, WindStore windStore, RaceSpecificMessageLoader messageLoader, TrackedEventRegistry trackedEventRegistry) throws InterruptedException, UnknownHostException, IOException, ParseException;
 
     Race createRace(String raceId, String description, TimePoint startTime);
 

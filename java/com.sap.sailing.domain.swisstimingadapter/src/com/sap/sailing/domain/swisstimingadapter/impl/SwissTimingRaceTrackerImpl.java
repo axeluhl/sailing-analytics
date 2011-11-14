@@ -3,6 +3,7 @@ package com.sap.sailing.domain.swisstimingadapter.impl;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.UnknownHostException;
+import java.text.ParseException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -42,12 +43,13 @@ public class SwissTimingRaceTrackerImpl implements SwissTimingRaceTracker, SailM
     
     protected SwissTimingRaceTrackerImpl(String raceID, String hostname, int port, SwissTimingFactory factory,
             RaceSpecificMessageLoader messageLoader, TrackedEventRegistry trackedEventRegistry)
-            throws InterruptedException, UnknownHostException, IOException {
+            throws InterruptedException, UnknownHostException, IOException, ParseException {
         this.connector = factory.getOrCreateSailMasterConnector(hostname, port, messageLoader);
         this.trackedEventRegistry = trackedEventRegistry;
         this.raceID = raceID;
         this.messageLoader = messageLoader;
         connector.addSailMasterListener(raceID, this);
+        connector.trackRace(raceID);
     }
 
     @Override
