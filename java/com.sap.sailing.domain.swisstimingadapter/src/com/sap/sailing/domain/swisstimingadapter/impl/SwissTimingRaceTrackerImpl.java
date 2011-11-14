@@ -117,6 +117,8 @@ public class SwissTimingRaceTrackerImpl implements SwissTimingRaceTracker, SailM
 
     private void createRaceDefinition(String raceID) {
         assert this.raceID == raceID;
+        assert startList != null;
+        assert course != null;
         // now we can create the RaceDefinition and most other things
         Race race = messageLoader.getRace(raceID);
         Event event = new EventImpl(race.getDescription(), new BoatClassImpl("Unknown"));

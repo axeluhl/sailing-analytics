@@ -110,12 +110,11 @@ public class StoreAndForward implements Runnable {
         }
     }
 
-    private long getLastMessageCount() {
-        DBObject lastMessageCountRecord = lastMessageCountCollection.findOne();
-        return lastMessageCountRecord == null ? 0 : (Long) lastMessageCountRecord.get(FieldNames.LAST_MESSAGE_COUNT.name());
-    }
-
     /**
+     * Creates a storing message forwarder in listening mode. In this mode, this object won't actively try to open
+     * TCP connections to a SailMaster system / bridge but instead listen for inbound TCP connections on port
+     * <code>listenPort</code>.
+     * 
      * @param listenPort
      *            listens on this port for messages coming in from a real SwissTiming SailMaster
      * @param portForClients
@@ -152,6 +151,11 @@ public class StoreAndForward implements Runnable {
         }
     }
     
+    private long getLastMessageCount() {
+        DBObject lastMessageCountRecord = lastMessageCountCollection.findOne();
+        return lastMessageCountRecord == null ? 0 : (Long) lastMessageCountRecord.get(FieldNames.LAST_MESSAGE_COUNT.name());
+    }
+
     /**
      * Returns <code>true</code> if and only if this object is listening for incoming SailMaster TCP
      * connections instead of actively connecting / reconnecting to a SailMaster server by itself.
