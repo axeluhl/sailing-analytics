@@ -16,6 +16,7 @@ import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.EventImpl;
 import com.sap.sailing.domain.swisstimingadapter.Course;
+import com.sap.sailing.domain.swisstimingadapter.DomainFactory;
 import com.sap.sailing.domain.swisstimingadapter.Fix;
 import com.sap.sailing.domain.swisstimingadapter.Race;
 import com.sap.sailing.domain.swisstimingadapter.RaceSpecificMessageLoader;
@@ -35,17 +36,19 @@ public class SwissTimingRaceTrackerImpl implements SwissTimingRaceTracker, SailM
     private final SailMasterConnector connector;
     private final String raceID;
     private final RaceSpecificMessageLoader messageLoader;
+    private final DomainFactory domainFactory;
     private final TrackedEventRegistry trackedEventRegistry;
 
     private RaceDefinition race;
     private Course course;
     private StartList startList;
     
-    protected SwissTimingRaceTrackerImpl(String raceID, String hostname, int port, SwissTimingFactory factory,
-            RaceSpecificMessageLoader messageLoader, TrackedEventRegistry trackedEventRegistry)
+    protected SwissTimingRaceTrackerImpl(String raceID, String hostname, int port, DomainFactory domainFactory,
+            SwissTimingFactory factory, RaceSpecificMessageLoader messageLoader, TrackedEventRegistry trackedEventRegistry)
             throws InterruptedException, UnknownHostException, IOException, ParseException {
         this.connector = factory.getOrCreateSailMasterConnector(hostname, port, messageLoader);
         this.trackedEventRegistry = trackedEventRegistry;
+        this.domainFactory = domainFactory;
         this.raceID = raceID;
         this.messageLoader = messageLoader;
         connector.addSailMasterListener(raceID, this);
@@ -128,7 +131,7 @@ public class SwissTimingRaceTrackerImpl implements SwissTimingRaceTracker, SailM
         assert course != null;
         // now we can create the RaceDefinition and most other things
         Race race = messageLoader.getRace(raceID);
-        Event event = new EventImpl(race.getDescription(), new BoatClassImpl("Unknown"));
+        Event event = domainFactory.getOrCreateEvent(race);
         // TODO continue here by creating the Waypoint/ControlPoint objects, then the CourseImpl, the CompetitorImpl objects and then the RaceDefinition; afterwards, also create the tracking counterparts such as the TrackedRaceImpl and TrackedEventImpl
     }
 

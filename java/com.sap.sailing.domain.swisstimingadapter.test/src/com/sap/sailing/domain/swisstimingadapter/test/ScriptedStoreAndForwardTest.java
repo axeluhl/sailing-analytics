@@ -50,9 +50,7 @@ public class ScriptedStoreAndForwardTest {
     @Before
     public void setUp() throws UnknownHostException, IOException, InterruptedException, ParseException {
         db = Activator.getDefaultInstance().getDB();
-
         swissTimingAdapterPersistence = SwissTimingAdapterPersistence.INSTANCE;
-        
         storeAndForward = new StoreAndForward(RECEIVE_PORT, CLIENT_PORT, SwissTimingFactory.INSTANCE, SwissTimingAdapterPersistence.INSTANCE);
         sendingSocket = new Socket("localhost", RECEIVE_PORT);
         sendingStream = sendingSocket.getOutputStream();
@@ -62,10 +60,8 @@ public class ScriptedStoreAndForwardTest {
         DBCollection lastMessageCountCollection = db.getCollection(CollectionNames.LAST_MESSAGE_COUNT.name());
         lastMessageCountCollection.update(new BasicDBObject(), new BasicDBObject().append(FieldNames.LAST_MESSAGE_COUNT.name(), 0l),
                 /* upsert */ true, /* multi */ false);
-        
         swissTimingAdapterPersistence.dropAllRaceMasterData();
         swissTimingAdapterPersistence.dropAllMessageData();
-        
         connector.trackRace("4711");
         connector.trackRace("4712");
     }
@@ -80,15 +76,11 @@ public class ScriptedStoreAndForwardTest {
     
     @Test
     public void testInitMessages() throws IOException, InterruptedException {
-
         InputStream is = getClass().getResourceAsStream("/InitMessagesScript.txt");
-
         ScriptedMessages scriptedMessages = new ScriptedMessages(is);
-        
         final List<Race> racesReceived = new ArrayList<Race>();
         final boolean[] receivedSomething = new boolean[1];
         final List<Competitor> receivedCompetitors  = new ArrayList<Competitor>();
-
         connector.addSailMasterListener(new SailMasterAdapter() {
             @Override
             public void receivedStartList(String raceID, StartList startList) {
@@ -108,11 +100,9 @@ public class ScriptedStoreAndForwardTest {
                 }
             }
         });
-
         for(String msg: scriptedMessages.getMessages()) {
             transceiver.sendMessage(msg, sendingStream);
         }
-
         synchronized (this) {
             while (!receivedSomething[0]) {
                 wait(2000l); // wait for two seconds to receive the messages
@@ -120,7 +110,6 @@ public class ScriptedStoreAndForwardTest {
         }
         assertEquals(2, racesReceived.size());
         assertEquals(4, receivedCompetitors.size());
-        
     }
     
 }
