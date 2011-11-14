@@ -33,6 +33,7 @@ import com.sap.sailing.domain.swisstimingadapter.SailMasterListener;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterMessage;
 import com.sap.sailing.domain.swisstimingadapter.StartList;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
+import com.sap.sailing.domain.swisstimingadapter.impl.RaceImpl;
 import com.sap.sailing.domain.swisstimingadapter.persistence.SwissTimingAdapterPersistence;
 import com.sap.sailing.util.Util;
 import com.sap.sailing.util.Util.Triple;
@@ -47,10 +48,17 @@ public class SailMasterConnectivityTest {
     @Before
     public void setUp() throws InterruptedException, ParseException {
         startSailMasterDummy();
-        connector = SwissTimingFactory.INSTANCE.getOrCreateSailMasterConnector("localhost", port, SwissTimingAdapterPersistence.INSTANCE);
-        connector.trackRace("W4702");
-        connector.trackRace("4711");
-        connector.trackRace("4712");
+        SwissTimingAdapterPersistence swissTimingPersistence = SwissTimingAdapterPersistence.INSTANCE;
+        Race raceW4702 = new RaceImpl("W4702", "W4702");
+        Race race4711 = new RaceImpl("4711", "4711");
+        Race race4712 = new RaceImpl("4712", "4712");
+        swissTimingPersistence.storeRace(raceW4702);
+        swissTimingPersistence.storeRace(race4711);
+        swissTimingPersistence.storeRace(race4712);
+        connector = SwissTimingFactory.INSTANCE.getOrCreateSailMasterConnector("localhost", port, swissTimingPersistence);
+        connector.trackRace(raceW4702.getRaceID());
+        connector.trackRace(race4711.getRaceID());
+        connector.trackRace(race4712.getRaceID());
     }
 
     private void startSailMasterDummy() throws InterruptedException {
