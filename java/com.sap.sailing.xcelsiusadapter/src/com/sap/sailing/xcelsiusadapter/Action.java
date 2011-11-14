@@ -140,7 +140,7 @@ public class Action {
     }
 
     public TrackedRace getTrackedRace(Event event, RaceDefinition race) throws IOException {
-        DynamicTrackedEvent trackedEvent = getService().getDomainFactory().getTrackedEvent(event);
+        DynamicTrackedEvent trackedEvent = getService().getOrCreateTrackedEvent(event);
         TrackedRace trackedRace = trackedEvent == null ? null : trackedEvent.getTrackedRace(race);
         return trackedRace;
     }

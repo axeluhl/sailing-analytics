@@ -18,6 +18,7 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
 import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.TrackedEvent;
+import com.sap.sailing.domain.tracking.TrackedEventRegistry;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
@@ -44,13 +45,11 @@ import com.sap.sailing.util.Util.Triple;
  * @author Axel Uhl (d043530)
  *
  */
-public interface RacingEventService {
+public interface RacingEventService extends TrackedEventRegistry {
     Iterable<Event> getAllEvents();
 
     Event getEventByName(String name);
 
-    DomainFactory getDomainFactory();
-    
     /**
      * Defines the event and for each race listed in the JSON document that is not already being tracked by this service
      * creates a {@link TracTracRaceTracker} that starts tracking the respective race. The {@link RaceDefinition}s obtained this
@@ -140,7 +139,7 @@ public interface RacingEventService {
             org.json.simple.parser.ParseException, URISyntaxException;
 
     boolean isRaceBeingTracked(RaceDefinition r);
-
+    
     TrackedRace getTrackedRace(Event event, RaceDefinition r);
 
     /**

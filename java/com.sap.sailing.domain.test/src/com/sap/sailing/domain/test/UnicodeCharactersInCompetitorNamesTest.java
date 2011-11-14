@@ -44,7 +44,7 @@ public class UnicodeCharactersInCompetitorNamesTest {
                         new URL(
                                 "http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/clientparams.php?event=event_20110609_KielerWoch&race=5b08a9ee-9933-11e0-85be-406186cbf87c"),
                         new URI("tcp://germanmaster.traclive.dk:1520"), new URI("tcp://germanmaster.traclive.dk:1521"),
-                        EmptyWindStore.INSTANCE);
+                        EmptyWindStore.INSTANCE, new DummyTrackedEventRegistry());
         
         Iterable<Competitor> competitors = fourtyninerYellow_2.getRaceHandle().getRace().getCompetitors();
         for (Competitor competitor : competitors) {

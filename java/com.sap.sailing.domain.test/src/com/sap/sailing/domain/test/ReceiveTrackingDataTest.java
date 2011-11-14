@@ -21,6 +21,7 @@ import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
+import com.sap.sailing.domain.tracking.impl.DynamicTrackedEventImpl;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
@@ -79,7 +80,7 @@ public class ReceiveTrackingDataTest extends AbstractTracTracLiveTest {
         };
         List<TypeController> listeners = new ArrayList<TypeController>();
         Event event = domainFactory.getOrCreateEvent(getEvent());
-        DynamicTrackedEvent trackedEvent = domainFactory.getOrCreateTrackedEvent(event);
+        DynamicTrackedEvent trackedEvent = new DynamicTrackedEventImpl(event);
         trackedEvent.addRaceListener(new RaceListener() {
             @Override
             public void raceAdded(TrackedRace trackedRace) {

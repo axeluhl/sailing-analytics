@@ -25,6 +25,7 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedEvent;
+import com.sap.sailing.domain.tracking.TrackedEventRegistry;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
@@ -105,21 +106,15 @@ public interface DomainFactory {
      * respond with the {@link RaceDefinition} when its {@link DomainFactory#getRaces(Event)} is called with the TracTrac
      * {@link Event} as argument that is used for its tracking.
      * <p>
-     * 
      * @param windStore
      *            Provides the capability to obtain the {@link WindTrack}s for the different wind sources. A trivial
      *            implementation is {@link EmptyWindStore} which simply provides new, empty tracks. This is always
      *            available but loses track of the wind, e.g., during server restarts.
+     * @param trackedEventRegistry TODO
      */
-    TracTracRaceTracker createRaceTracker(URL paramURL, URI liveURI, URI storedURI, WindStore windStore) throws MalformedURLException,
+    TracTracRaceTracker createRaceTracker(URL paramURL, URI liveURI, URI storedURI, WindStore windStore, TrackedEventRegistry trackedEventRegistry) throws MalformedURLException,
             FileNotFoundException, URISyntaxException;
 
-    /**
-     * Looks for tracking information about <code>event</code>. If no such object exists yet, a new one
-     * is created.
-     */
-    DynamicTrackedEvent getOrCreateTrackedEvent(com.sap.sailing.domain.base.Event event);
-    
     BoatClass getOrCreateBoatClass(CompetitorClass competitorClass);
 
     /**
@@ -183,12 +178,6 @@ public interface DomainFactory {
      */
     void updateCourseWaypoints(Course courseToUpdate, List<ControlPoint> controlPoints) throws PatchFailedException;
 
-    /**
-     * Looks for the tracking information for <code>event</code>. If not found, <code>null</code> is returned
-     * immediately. See also {@link #getOrCreateTrackedEvent(com.sap.sailing.domain.base.Event)}.
-     */
-    DynamicTrackedEvent getTrackedEvent(com.sap.sailing.domain.base.Event event);
-
     TracTracConfiguration createTracTracConfiguration(String name, String jsonURL, String liveDataURI,
             String storedDataURI);
 
@@ -215,7 +204,8 @@ public interface DomainFactory {
      * if the {@link TrackedRace} that was removed from the {@link TrackedEvent} was the last one, the
      * {@link TrackedEvent} is removed such that {@link #getOrCreateTrackedEvent(com.sap.sailing.domain.base.Event)}
      * will have to create a new one.
+     * @param trackedEventRegistry TODO
      */
-    void removeRace(Event tractracEvent, Race tractracRace);
+    void removeRace(Event tractracEvent, Race tractracRace, TrackedEventRegistry trackedEventRegistry);
 
 }

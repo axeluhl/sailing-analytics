@@ -375,7 +375,7 @@ public class ModeratorApp extends Servlet {
             JSONArray jsonRaces = new JSONArray();
             for (RaceDefinition race : event.getAllRaces()) {
                 // don't wait for the arrival of a tracked race; just ignore it if it's not currently being tracked
-                TrackedRace trackedRace = getService().getDomainFactory().getOrCreateTrackedEvent(event).getExistingTrackedRace(race);
+                TrackedRace trackedRace = getService().getOrCreateTrackedEvent(event).getExistingTrackedRace(race);
                 if (trackedRace != null) {
                     JSONObject jsonRace = new JSONObject();
                     jsonRace.put("name", race.getName());
