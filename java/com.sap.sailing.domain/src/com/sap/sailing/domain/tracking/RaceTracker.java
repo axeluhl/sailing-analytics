@@ -24,6 +24,7 @@ public interface RaceTracker {
      */
     Set<RaceDefinition> getRaces();
 
+    // TODO this is inconsistent with getRaces() which can return more than one race
     RaceHandle getRaceHandle();
 
     DynamicTrackedEvent getTrackedEvent();

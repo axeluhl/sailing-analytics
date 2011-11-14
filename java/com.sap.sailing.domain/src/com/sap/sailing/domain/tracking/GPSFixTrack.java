@@ -17,6 +17,8 @@ import com.sap.sailing.domain.base.TimePoint;
  * @param <ItemType>
  */
 public interface GPSFixTrack<ItemType, FixType extends GPSFix> extends Track<FixType> {
+    private final long DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_SPEED = 40000; // makes for a 20s half-side interval
+
     ItemType getTrackedItem();
 
     /**
