@@ -63,8 +63,9 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
         
         // initially fill the races cache
         Iterable<Race> races = getRaces();
-        for(Race race: races)
+        for(Race race: races) {
             cachedRaces.put(race.getRaceID(), race);
+        }
     }
     
     @Override
@@ -144,17 +145,14 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
     @Override
     public Race getRace(String raceID) {
         DBCollection races = database.getCollection(CollectionNames.RACES_MASTERDATA.name());
-
         BasicDBObject query = new BasicDBObject();
         query.append(FieldNames.RACE_ID.name(), raceID);
-        
         DBObject o = races.findOne(query);
-
-        if(o != null) {
-                Race race = swissTimingFactory.createRace((String) o.get(FieldNames.RACE_ID.name()),
-                        (String) o.get(FieldNames.RACE_DESCRIPTION.name()), new MillisecondsTimePoint((Long) o.get(FieldNames.RACE_STARTTIME.name())));
-
-                return race;
+        if (o != null) {
+            Race race = swissTimingFactory.createRace((String) o.get(FieldNames.RACE_ID.name()),
+                    (String) o.get(FieldNames.RACE_DESCRIPTION.name()),
+                    new MillisecondsTimePoint((Long) o.get(FieldNames.RACE_STARTTIME.name())));
+            return race;
         }
         return null;
     }
@@ -162,14 +160,13 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
     @Override
     public Iterable<Race> getRaces() {
         DBCollection races = database.getCollection(CollectionNames.RACES_MASTERDATA.name());
-
         DBCursor results = races.find();
         List<Race> result = new ArrayList<Race>();
-
         for (DBObject o : results) {
+            Long startTimeAsMillis = (Long) o.get(FieldNames.RACE_STARTTIME.name());
             Race race = swissTimingFactory.createRace((String) o.get(FieldNames.RACE_ID.name()),
                     (String) o.get(FieldNames.RACE_DESCRIPTION.name()),
-                    new MillisecondsTimePoint((Long) o.get(FieldNames.RACE_STARTTIME.name())));
+                    startTimeAsMillis == null ? null : new MillisecondsTimePoint(startTimeAsMillis));
             result.add(race);
         }
         return result;
@@ -198,34 +195,25 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
 
     @Override
     public void storeSailMasterMessage(SailMasterMessage message) {
-        
         // Attention: this method is very time critical as we will receive thousands of messages in a short time
         DBCollection messageCollection = null;
         MessageType type = message.getType();
-
         BasicDBObject objToInsert = new BasicDBObject();
-
         objToInsert.put(FieldNames.MESSAGE_COMMAND.name(), message.getType().name());
         objToInsert.put(FieldNames.MESSAGE_SEQUENCE_NUMBER.name(), message.getSequenceNumber());
         objToInsert.put(FieldNames.MESSAGE_CONTENT.name(), message.getMessage());
-        
         if(type.isRaceSpecific()) {
                 objToInsert.put(FieldNames.RACE_ID.name(), message.getRaceID());
             messageCollection = database.getCollection(CollectionNames.RACES_MESSAGES.name());
-        }
-        else {
+        } else {
             messageCollection = database.getCollection(CollectionNames.COMMAND_MESSAGES.name());
         }
-
         messageCollection.insert(objToInsert);
-        
         if(message.getRaceID() != null && cachedRaces.containsKey(message.getRaceID()) == false) {
             // ah, we found a new raceID which is not in the list of known races
             // in order to have a more intelligent conflict resolver mechanism we will forward the resolution to a special thread later on
             boolean simpleResolution = true;
-            
-            if(simpleResolution)
-            {
+            if(simpleResolution) {
                 Race newRace = SwissTimingFactory.INSTANCE.createRace(message.getRaceID(), null, null);
                 storeRace(newRace);
                 cachedRaces.put(newRace.getRaceID(), newRace);
@@ -236,18 +224,18 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
     @Override
     public void storeRace(Race race) {
         DBCollection racesCollection = database.getCollection(CollectionNames.RACES_MASTERDATA.name());
-     
         BasicDBObject query = new BasicDBObject();
         query.append(FieldNames.RACE_ID.name(), race.getRaceID());
-        
         BasicDBObject result = new BasicDBObject();
-
         result.put(FieldNames.RACE_ID.name(), race.getRaceID());
         result.put(FieldNames.RACE_DESCRIPTION.name(), race.getDescription());
-        result.put(FieldNames.RACE_STARTTIME.name(), new Long(race.getStartTime().asMillis()));
-
-        racesCollection.update(query,result);
+        result.put(FieldNames.RACE_STARTTIME.name(), race.getStartTime() == null ? null : new Long(race.getStartTime().asMillis()));
+        racesCollection.update(query, result, /* upsrt */ true, /* multi */ false);
     }
-    
 
+    @Override
+    public void dropAllRaceMasterData() {
+        DBCollection racesCollection = database.getCollection(CollectionNames.RACES_MASTERDATA.name());
+        racesCollection.drop();
+    }
 }
