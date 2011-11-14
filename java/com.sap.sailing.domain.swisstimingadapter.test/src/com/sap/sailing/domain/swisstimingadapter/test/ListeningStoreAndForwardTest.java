@@ -30,8 +30,8 @@ import com.sap.sailing.domain.swisstimingadapter.persistence.impl.CollectionName
 import com.sap.sailing.domain.swisstimingadapter.persistence.impl.FieldNames;
 import com.sap.sailing.mongodb.Activator;
 
-public class StoreAndForwardTest {
-    private static final Logger logger = Logger.getLogger(StoreAndForwardTest.class.getName());
+public class ListeningStoreAndForwardTest {
+    private static final Logger logger = Logger.getLogger(ListeningStoreAndForwardTest.class.getName());
     
     private static final int RECEIVE_PORT = 6543;
     private static final int CLIENT_PORT = 6544;
@@ -47,8 +47,10 @@ public class StoreAndForwardTest {
 
     @Before
     public void setUp() throws UnknownHostException, IOException, InterruptedException {
+        logger.info("ListeningStoreAndForwardTest.setUp");
         db = Activator.getDefaultInstance().getDB();
-        storeAndForward = new StoreAndForward(RECEIVE_PORT, CLIENT_PORT, SwissTimingFactory.INSTANCE, SwissTimingAdapterPersistence.INSTANCE);
+        swissTimingAdapterPersistence = SwissTimingAdapterPersistence.INSTANCE;
+        storeAndForward = new StoreAndForward(RECEIVE_PORT, CLIENT_PORT, SwissTimingFactory.INSTANCE, swissTimingAdapterPersistence);
         sendingSocket = new Socket("localhost", RECEIVE_PORT);
         sendingStream = sendingSocket.getOutputStream();
         swissTimingFactory = SwissTimingFactory.INSTANCE;
@@ -59,18 +61,19 @@ public class StoreAndForwardTest {
                 /* upsert */ true, /* multi */ false);
         DBCollection rawMessages = db.getCollection(CollectionNames.RAW_MESSAGES.name());
         rawMessages.drop();
-        swissTimingAdapterPersistence = SwissTimingAdapterPersistence.INSTANCE;
     }
     
     @After
     public void tearDown() throws InterruptedException, IOException {
         logger.entering(getClass().getName(), "tearDown");
         storeAndForward.stop();
+        connector.stop();
         logger.exiting(getClass().getName(), "tearDown");
     }
     
     @Test
     public void testSimpleRACMessage() throws IOException, InterruptedException {
+        logger.info("Starting ListeningStoreAndForwardTest.testSimpleRACMessage");
         final List<Race> racesReceived = new ArrayList<Race>();
         final boolean[] receivedSomething = new boolean[1];
         connector.addSailMasterListener(new SailMasterAdapter() {
@@ -79,9 +82,9 @@ public class StoreAndForwardTest {
                 for (Race race : races) {
                     racesReceived.add(race);
                 }
-                synchronized (StoreAndForwardTest.this) {
+                synchronized (ListeningStoreAndForwardTest.this) {
                     receivedSomething[0] = true;
-                    StoreAndForwardTest.this.notifyAll();
+                    ListeningStoreAndForwardTest.this.notifyAll();
                 }
             }
         });
