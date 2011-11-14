@@ -112,7 +112,6 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
     }
 
     private void createTrackedRace(RaceDefinition race) {
-        // TODO instead of using the complicated tokenToRetrieveAssociatedRace pattern, consider using a callback interface on TracTracRaceTrackerImpl through which to add the RaceDefinition
         DynamicTrackedRace trackedRace = getDomainFactory().trackRace(trackedEvent, race,
                 windStore, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed, raceDefinitionSetToUpdate);
         trackedEvent.addTrackedRace(trackedRace);
