@@ -233,7 +233,7 @@ public class RacingEventServiceImpl implements RacingEventService {
         Triple<String, String, Integer> key = new Triple<String, String, Integer>(raceID, hostname, port);
         RaceTracker tracker = raceTrackersByID.get(key);
         if (tracker == null) {
-            tracker = getSwissTimingFactory().createRaceTracker(raceID, hostname, port, windStore, swissTimingAdapterPersistence);
+            tracker = getSwissTimingFactory().createRaceTracker(raceID, hostname, port, windStore, swissTimingAdapterPersistence, this);
             raceTrackersByID.put(tracker.getID(), tracker);
             Set<RaceTracker> trackers = raceTrackersByEvent.get(tracker.getEvent());
             if (trackers == null) {
