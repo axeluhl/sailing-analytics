@@ -262,7 +262,6 @@ public class RacingEventServiceImpl implements RacingEventService {
             scheduleAbortTrackerAfterInitialTimeout(tracker, timeoutInMilliseconds);
         }
         return tracker.getRaceHandle();
-
     }
 
     @Override

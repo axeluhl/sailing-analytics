@@ -231,7 +231,8 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
                             } else if (message.isEvent()) {
                                 // only notify if it hasn't been loaded from a store yet
                                 if (!message.getType().isRaceSpecific() || message.getSequenceNumber() == null ||
-                                        message.getSequenceNumber() > sequenceNumberOfLastMessageForRaceID.get(message.getRaceID())) {
+                                        (sequenceNumberOfLastMessageForRaceID.containsKey(message.getRaceID()) &&
+                                                message.getSequenceNumber() > sequenceNumberOfLastMessageForRaceID.get(message.getRaceID()))) {
                                     // a spontaneous event
                                     logger.fine("notifying message " + message);
                                     notifyListeners(message);
