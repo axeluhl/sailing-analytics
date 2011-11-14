@@ -391,6 +391,49 @@ public class DomainFactoryImpl implements DomainFactory {
     }
     
     @Override
+    public void removeRace(com.tractrac.clientmodule.Event tractracEvent, Race tractracRace) {
+        RaceDefinition raceDefinition = getExistingRaceDefinitionForRace(tractracRace);
+        if (raceDefinition != null) { // otherwise, this domain factory doesn't seem to know about the race
+            synchronized (tokenToRaceDefinitionMap) {
+                Set<Object> tokensToRemove = new HashSet<Object>();
+                for (Map.Entry<Object, Set<RaceDefinition>> e : tokenToRaceDefinitionMap.entrySet()) {
+                    if (e.getValue().contains(raceDefinition)) {
+                        e.getValue().remove(raceDefinition);
+                        if (e.getValue().isEmpty()) {
+                            tokensToRemove.add(e.getKey());
+                        }
+                    }
+                }
+                for (Object tokenToRemove : tokensToRemove) {
+                    tokenToRaceDefinitionMap.remove(tokenToRemove);
+                }
+            }
+            raceCache.remove(tractracRace);
+            Collection<CompetitorClass> competitorClassList = new ArrayList<CompetitorClass>();
+            for (com.tractrac.clientmodule.Competitor c : tractracEvent.getCompetitorList()) {
+                competitorClassList.add(c.getCompetitorClass());
+            }
+            BoatClass boatClass = getDominantBoatClass(competitorClassList);
+            Pair<String, String> key = new Pair<String, String>(tractracEvent.getName(), boatClass == null ? null
+                    : boatClass.getName());
+            Event event = eventCache.get(key);
+            if (event != null) {
+                event.removeRace(raceDefinition);
+                if (Util.size(event.getAllRaces()) == 0) {
+                    eventCache.remove(key);
+                }
+                TrackedEvent trackedEvent = eventTrackingCache.get(event);
+                if (trackedEvent != null) {
+                    trackedEvent.removeTrackedRace(raceDefinition);
+                    if (Util.size(trackedEvent.getTrackedRaces()) == 0) {
+                        eventTrackingCache.remove(event);
+                    }
+                }
+            }
+        }
+    }
+
+    @Override
     public RaceDefinition getOrCreateRaceDefinition(Race race, Course course) {
         synchronized (raceCache) {
             RaceDefinition result = raceCache.get(race);
@@ -508,49 +551,6 @@ public class DomainFactoryImpl implements DomainFactory {
     @Override
     public TracTracConfiguration createTracTracConfiguration(String name, String jsonURL, String liveDataURI, String storedDataURI) {
         return new TracTracConfigurationImpl(name, jsonURL, liveDataURI, storedDataURI);
-    }
-
-    @Override
-    public void removeRace(com.tractrac.clientmodule.Event tractracEvent, Race tractracRace) {
-        RaceDefinition raceDefinition = getExistingRaceDefinitionForRace(tractracRace);
-        if (raceDefinition != null) { // otherwise, this domain factory doesn't seem to know about the race
-            synchronized (tokenToRaceDefinitionMap) {
-                Set<Object> tokensToRemove = new HashSet<Object>();
-                for (Map.Entry<Object, Set<RaceDefinition>> e : tokenToRaceDefinitionMap.entrySet()) {
-                    if (e.getValue().contains(raceDefinition)) {
-                        e.getValue().remove(raceDefinition);
-                        if (e.getValue().isEmpty()) {
-                            tokensToRemove.add(e.getKey());
-                        }
-                    }
-                }
-                for (Object tokenToRemove : tokensToRemove) {
-                    tokenToRaceDefinitionMap.remove(tokenToRemove);
-                }
-            }
-            raceCache.remove(tractracRace);
-            Collection<CompetitorClass> competitorClassList = new ArrayList<CompetitorClass>();
-            for (com.tractrac.clientmodule.Competitor c : tractracEvent.getCompetitorList()) {
-                competitorClassList.add(c.getCompetitorClass());
-            }
-            BoatClass boatClass = getDominantBoatClass(competitorClassList);
-            Pair<String, String> key = new Pair<String, String>(tractracEvent.getName(), boatClass == null ? null
-                    : boatClass.getName());
-            Event event = eventCache.get(key);
-            if (event != null) {
-                event.removeRace(raceDefinition);
-                if (Util.size(event.getAllRaces()) == 0) {
-                    eventCache.remove(key);
-                }
-                TrackedEvent trackedEvent = eventTrackingCache.get(event);
-                if (trackedEvent != null) {
-                    trackedEvent.removeTrackedRace(raceDefinition);
-                    if (Util.size(trackedEvent.getTrackedRaces()) == 0) {
-                        eventTrackingCache.remove(event);
-                    }
-                }
-            }
-        }
     }
 
 }
