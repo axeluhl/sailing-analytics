@@ -27,7 +27,14 @@ import com.sap.sailing.util.Util.Pair;
  * to a port specified. The messages forwarded are augmented by sending a counter in ASCII encoding before the
  * message's <code>STX</code> start byte. This allows a receiver to optionally record the counter value after
  * having processed the message. When messages have to be retrieved from the database at a later point, a
- * client can request only those message starting at a specific counter value.
+ * client can request only those message starting at a specific counter value.<p>
+ * 
+ * The connectivity to the SailMaster system can operate in one of two modes. Either a TCP connection to the
+ * SailMaster is initiated by this client. When the connection is lost or a connect is unsuccessful, the client
+ * will try again periodically. In the other mode of operation, this client will act as a TCP server and accepts
+ * inbound requests from the SailMaster system (typically a bridge that forwards messages from multiple
+ * SailMaster systems). In this mode of operation it's up to the SailMaster environment to re-initiate
+ * connects after a connection loss.
  * 
  * @author Axel Uhl (d043530)
  *
@@ -51,13 +58,62 @@ public class StoreAndForward implements Runnable {
   
     private final SwissTimingAdapterPersistence swissTimingAdapterPersistence;
     
-//    private final MongoObjectFactory mongoObjectFactory;
-    
     private final SwissTimingFactory swissTimingFactory;
 
     private final Thread storeAndForwardThread;
 
     private Socket socket;
+    
+    /**
+     * Use of this server socket is optional and happens if and only if this object is operated in
+     * "listening" mode. This means that the SailMaster system / bridge is expected to initiate TCP
+     * connections to this object.
+     */
+    private ServerSocket serverSocketListeningForSailMasterBridge;
+
+    private final int sailMasterPort;
+
+    private final String sailMasterHostname;
+    
+    /**
+     * When initialized using this constructor, the resulting object proactively connects and re-connects to the
+     * SailMaster server specified by <code>sailMasterHostname</code>/<code>sailMasterPort</code>. The
+     * {@link #serverSocketListeningForSailMasterBridge} remains <code>null</code> and {@link #listenPort} is set
+     * to <code>-1</code>, indicating that this object is not listening on any port for incoming
+     * SailMaster connections.
+     */
+    public StoreAndForward(String sailMasterHostname, int sailMasterPort, int portForClients, SwissTimingFactory swissTimingFactory, 
+            SwissTimingAdapterPersistence swissTimingAdapterPersistence) throws InterruptedException, IOException {
+        db = Activator.getDefaultInstance().getDB();
+        this.listenPort = -1;
+        this.transceiver = swissTimingFactory.createSailMasterTransceiver();
+        this.portForClients = portForClients;
+        this.sailMasterHostname = sailMasterHostname;
+        this.sailMasterPort = sailMasterPort;
+        this.streamsToForwardTo = new ArrayList<OutputStream>();
+        this.socketsToForwardTo = new ArrayList<Socket>();
+        this.swissTimingAdapterPersistence = swissTimingAdapterPersistence;
+        this.swissTimingFactory = swissTimingFactory; 
+        lastMessageCountCollection = db.getCollection(CollectionNames.LAST_MESSAGE_COUNT.name());
+        lastMessageCount = getLastMessageCount();
+        clientListener = createClientListenerThread(portForClients);
+        clientListener.start();
+        storeAndForwardThread = new Thread(this, "StoreAndForward");
+        storeAndForwardThread.start();
+        synchronized (this) {
+            while (!listeningForClients) {
+                wait();
+            }
+            while (!receivingFromSailMaster) {
+                wait();
+            }
+        }
+    }
+
+    private long getLastMessageCount() {
+        DBObject lastMessageCountRecord = lastMessageCountCollection.findOne();
+        return lastMessageCountRecord == null ? 0 : (Long) lastMessageCountRecord.get(FieldNames.LAST_MESSAGE_COUNT.name());
+    }
 
     /**
      * @param listenPort
@@ -65,21 +121,47 @@ public class StoreAndForward implements Runnable {
      * @param portForClients
      *            clients can connect to this port and will receive forwarded and sequence-numbered messages over those
      *            sockets
+     * @throws IOException 
      */
     public StoreAndForward(final int listenPort, final int portForClients, SwissTimingFactory swissTimingFactory, 
-            SwissTimingAdapterPersistence swissTimingAdapterPersistence) throws InterruptedException {
+            SwissTimingAdapterPersistence swissTimingAdapterPersistence) throws InterruptedException, IOException {
         db = Activator.getDefaultInstance().getDB();
         this.listenPort = listenPort;
-        this.transceiver = SwissTimingFactory.INSTANCE.createSailMasterTransceiver();
+        this.transceiver = swissTimingFactory.createSailMasterTransceiver();
         this.portForClients = portForClients;
         this.streamsToForwardTo = new ArrayList<OutputStream>();
         this.socketsToForwardTo = new ArrayList<Socket>();
         this.swissTimingAdapterPersistence = swissTimingAdapterPersistence;
         this.swissTimingFactory = swissTimingFactory; 
+        this.sailMasterHostname = null;
+        this.sailMasterPort = -1;
         lastMessageCountCollection = db.getCollection(CollectionNames.LAST_MESSAGE_COUNT.name());
-        DBObject lastMessageCountRecord = lastMessageCountCollection.findOne();
-        lastMessageCount = lastMessageCountRecord == null ? 0 : (Long) lastMessageCountRecord.get(FieldNames.LAST_MESSAGE_COUNT.name());
-        clientListener = new Thread(new Runnable() {
+        lastMessageCount = getLastMessageCount();
+        serverSocketListeningForSailMasterBridge = new ServerSocket(listenPort);
+        clientListener = createClientListenerThread(portForClients);
+        clientListener.start();
+        storeAndForwardThread = new Thread(this, "StoreAndForward");
+        storeAndForwardThread.start();
+        synchronized (this) {
+            while (!listeningForClients) {
+                wait();
+            }
+            while (!receivingFromSailMaster) {
+                wait();
+            }
+        }
+    }
+    
+    /**
+     * Returns <code>true</code> if and only if this object is listening for incoming SailMaster TCP
+     * connections instead of actively connecting / reconnecting to a SailMaster server by itself.
+     */
+    private boolean isInSailMasterListeningMode() {
+        return serverSocketListeningForSailMasterBridge != null;
+    }
+
+    private Thread createClientListenerThread(final int portForClients) {
+        return new Thread(new Runnable() {
             public void run() {
                 ServerSocket ss;
                 try {
@@ -107,16 +189,31 @@ public class StoreAndForward implements Runnable {
                 }
             }
         }, "StoreAndForwardClientListener");
-        clientListener.start();
-        storeAndForwardThread = new Thread(this, "StoreAndForward");
-        storeAndForwardThread.start();
-        synchronized (this) {
-            while (!listeningForClients) {
-                wait();
+    }
+    
+    /**
+     * Depending on the mode of operation, accepts an inbound connect from a SailMaster server / bridge or
+     * actively initiates a TCP connection to the SailMaster address/port configured. When this method
+     * returns, the {@link #socket} holds an open and connected socket.
+     * @throws IOException 
+     */
+    private void establishConnection() throws IOException {
+        if (isInSailMasterListeningMode()) {
+            synchronized (this) {
+                receivingFromSailMaster = true;
+                logger.info("StoreAndForward waiting for inbound SailMaster connections on port "+listenPort);
+                notifyAll();
             }
-            while (!receivingFromSailMaster) {
-                wait();
+            socket = serverSocketListeningForSailMasterBridge.accept();
+            logger.info("StoreAndForward received SailMaster connect on port "+listenPort);
+        } else {
+            synchronized (this) {
+                receivingFromSailMaster = true;
+                logger.info("StoreAndForward issuing SailMaster connections to "+sailMasterHostname+":"+sailMasterPort);
+                notifyAll();
             }
+           socket = new Socket(sailMasterHostname, sailMasterPort);
+           logger.info("StoreAndForward connections to SailMaster "+sailMasterHostname+":"+sailMasterPort+" established");
         }
     }
     
@@ -134,7 +231,7 @@ public class StoreAndForward implements Runnable {
         storeAndForwardThread.join();
     }
 
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) throws InterruptedException, IOException {
         int listenPort = Integer.valueOf(args[0]);
         int clientPort = Integer.valueOf(args[1]);
         StoreAndForward storeAndForward = new StoreAndForward(listenPort, clientPort, SwissTimingFactory.INSTANCE, SwissTimingAdapterPersistence.INSTANCE);
@@ -144,15 +241,9 @@ public class StoreAndForward implements Runnable {
     public void run() {
         logger.entering(getClass().getName(), "run");
         try {
-            ServerSocket ss = new ServerSocket(listenPort);
-            synchronized (this) {
-                receivingFromSailMaster = true;
-                logger.info("StoreAndForward receiving packages on port "+listenPort);
-                notifyAll();
-            }
             while (!stopped) {
-                socket = ss.accept();
                 try {
+                    establishConnection();
                     InputStream is = socket.getInputStream();
                     Pair<String, Long> messageAndOptionalSequenceNumber = transceiver.receiveMessage(is);
                     // ignore any sequence number contained in the message; we'll create our own
@@ -188,8 +279,8 @@ public class StoreAndForward implements Runnable {
                 }
             }
             logger.info("StoreAndForward is closing receiving server socket");
-            if (!ss.isClosed()) {
-                ss.close();
+            if (serverSocketListeningForSailMasterBridge != null && !serverSocketListeningForSailMasterBridge.isClosed()) {
+                serverSocketListeningForSailMasterBridge.close();
             }
             logger.info("Stopping StoreAndForward server.");
         } catch (IOException e) {
