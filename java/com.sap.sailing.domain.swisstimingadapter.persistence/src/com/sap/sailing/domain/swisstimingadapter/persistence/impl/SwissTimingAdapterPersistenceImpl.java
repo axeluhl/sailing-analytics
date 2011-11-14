@@ -243,4 +243,17 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
         DBCollection racesCollection = database.getCollection(CollectionNames.RACES_MASTERDATA.name());
         racesCollection.drop();
     }
+    
+    @Override
+    public void dropAllMessageData() {
+
+        DBCollection rawMessageCollection = database.getCollection(CollectionNames.RAW_MESSAGES.name());
+        rawMessageCollection.drop();
+
+        DBCollection racesMessageCollection = database.getCollection(CollectionNames.RACES_MESSAGES.name());
+        racesMessageCollection.drop();
+        
+        DBCollection cmdMessageCollection = database.getCollection(CollectionNames.COMMAND_MESSAGES.name());
+        cmdMessageCollection.drop();
+    }
 }
