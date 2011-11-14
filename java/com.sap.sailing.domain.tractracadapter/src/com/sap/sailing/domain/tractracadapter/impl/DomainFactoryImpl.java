@@ -14,8 +14,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
@@ -50,11 +48,12 @@ import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
+import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedEvent;
 import com.sap.sailing.domain.tracking.TrackedEventRegistry;
 import com.sap.sailing.domain.tracking.WindStore;
-import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
+import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
@@ -76,13 +75,6 @@ import difflib.Patch;
 import difflib.PatchFailedException;
 
 public class DomainFactoryImpl implements DomainFactory {
-    private static final Logger logger = Logger.getLogger(DomainFactoryImpl.class.getName());
-    
-    private final long millisecondsOverWhichToAverageSpeed = 40000; // makes for a 20s half-side interval
-
-    // TODO clarify how millisecondsOverWhichToAverageWind could be updated and propagated live
-    private final long millisecondsOverWhichToAverageWind = 30000;
-    
     // TODO consider (re-)introducing WeakHashMaps for cache structures, but such that the cache is maintained as long as our domain objects are strongly referenced
     private final Map<ControlPoint, com.sap.sailing.domain.base.ControlPoint> controlPointCache =
         new HashMap<ControlPoint, com.sap.sailing.domain.base.ControlPoint>();
@@ -332,7 +324,8 @@ public class DomainFactoryImpl implements DomainFactory {
             case RACECOURSE:
                 result.add(new RaceCourseReceiver(
                         this, trackedEvent, tractracEvent, windStore,
-                        raceDefinitionSetToUpdate, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed));
+                        raceDefinitionSetToUpdate, WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND,
+                        GPSFixTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_SPEED));
                 break;
             case MARKPOSITIONS:
                 result.add(new MarkPositionReceiver(
@@ -479,14 +472,10 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public DynamicTrackedRace trackRace(TrackedEvent trackedEvent, RaceDefinition raceDefinition,
+    public DynamicTrackedRace trackRace(DynamicTrackedEvent trackedEvent, RaceDefinition raceDefinition,
             WindStore windStore, long millisecondsOverWhichToAverageWind,
             long millisecondsOverWhichToAverageSpeed, DynamicRaceDefinitionSet raceDefinitionSetToUpdate) {
-        logger.log(Level.INFO, "Creating DynamicTrackedRaceImpl for RaceDefinition "+raceDefinition.getName());
-        DynamicTrackedRaceImpl result = new DynamicTrackedRaceImpl(trackedEvent, raceDefinition,
-                windStore, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed);
-        raceDefinitionSetToUpdate.addRaceDefinition(raceDefinition);
-        return result;
+        return trackedEvent.createTrackedRace(raceDefinition, windStore, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed, raceDefinitionSetToUpdate);
     }
 
     @Override

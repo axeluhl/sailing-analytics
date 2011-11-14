@@ -24,11 +24,15 @@ import com.sap.sailing.domain.swisstimingadapter.SailMasterListener;
 import com.sap.sailing.domain.swisstimingadapter.StartList;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingRaceTracker;
+import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
+import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.RaceHandle;
+import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.TrackedEventRegistry;
 import com.sap.sailing.domain.tracking.WindStore;
+import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.util.Util.Triple;
 
 public class SwissTimingRaceTrackerImpl implements SwissTimingRaceTracker, SailMasterListener {
@@ -36,7 +40,6 @@ public class SwissTimingRaceTrackerImpl implements SwissTimingRaceTracker, SailM
     private final String raceID;
     private final RaceSpecificMessageLoader messageLoader;
     private final DomainFactory domainFactory;
-    private final TrackedEventRegistry trackedEventRegistry;
     private final Triple<String, String, Integer> id;
     private final Event event;
     private final DynamicTrackedEvent trackedEvent;
@@ -45,12 +48,12 @@ public class SwissTimingRaceTrackerImpl implements SwissTimingRaceTracker, SailM
     private RaceDefinition race;
     private Course course;
     private StartList startList;
+    private DynamicTrackedRace trackedRace;
     
     protected SwissTimingRaceTrackerImpl(String raceID, String hostname, int port, WindStore windStore,
             DomainFactory domainFactory, SwissTimingFactory factory, RaceSpecificMessageLoader messageLoader,
             TrackedEventRegistry trackedEventRegistry) throws InterruptedException, UnknownHostException, IOException, ParseException {
         this.connector = factory.getOrCreateSailMasterConnector(hostname, port, messageLoader);
-        this.trackedEventRegistry = trackedEventRegistry;
         this.domainFactory = domainFactory;
         this.raceID = raceID;
         this.messageLoader = messageLoader;
@@ -74,8 +77,32 @@ public class SwissTimingRaceTrackerImpl implements SwissTimingRaceTracker, SailM
 
     @Override
     public RaceHandle getRaceHandle() {
-        // TODO Auto-generated method stub
-        return null;
+        return new RaceHandle() {
+            @Override
+            public Event getEvent() {
+                return SwissTimingRaceTrackerImpl.this.getEvent();
+            }
+
+            @Override
+            public RaceDefinition getRace() {
+                return race;
+            }
+
+            @Override
+            public RaceDefinition getRace(long timeoutInMilliseconds) {
+                return race;
+            }
+
+            @Override
+            public DynamicTrackedEvent getTrackedEvent() {
+                return trackedEvent;
+            }
+
+            @Override
+            public RaceTracker getRaceTracker() {
+                return SwissTimingRaceTrackerImpl.this;
+            }
+        };
     }
 
     @Override
@@ -132,9 +159,16 @@ public class SwissTimingRaceTrackerImpl implements SwissTimingRaceTracker, SailM
         assert course != null;
         // now we can create the RaceDefinition and most other things
         Race race = messageLoader.getRace(raceID);
-        RaceDefinition raceDefinition = domainFactory.createRaceDefinition(event, race, course);
-        DynamicTrackedRace trackedRace = getTrackedEvent().getTrackedRace(raceDefinition);
-        // TODO continue here by creating the Waypoint/ControlPoint objects, then the CourseImpl, the CompetitorImpl objects and then the RaceDefinition; afterwards, also create the tracking counterparts such as the TrackedRaceImpl and TrackedEventImpl
+        final RaceDefinition raceDefinition = domainFactory.createRaceDefinition(event, race, course);
+        trackedRace = getTrackedEvent().createTrackedRace(raceDefinition, windStore,
+                WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND, GPSFixTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_SPEED,
+                new DynamicRaceDefinitionSet() {
+                    @Override
+                    public void addRaceDefinition(RaceDefinition race) {
+                        // we already know our single RaceDefinition
+                        assert raceDefinition == race;
+                    }
+                });
     }
 
     @Override

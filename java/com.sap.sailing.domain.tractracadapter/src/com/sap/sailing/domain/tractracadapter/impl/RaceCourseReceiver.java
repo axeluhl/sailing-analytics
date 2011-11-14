@@ -11,8 +11,7 @@ import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
-import com.sap.sailing.domain.tracking.DynamicTrackedRace;
-import com.sap.sailing.domain.tracking.TrackedEvent;
+import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.util.Util.Triple;
@@ -36,14 +35,14 @@ import difflib.PatchFailedException;
 public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteData, Race>  {
     private final static Logger logger = Logger.getLogger(RaceCourseReceiver.class.getName());
     
-    private final TrackedEvent trackedEvent;
+    private final DynamicTrackedEvent trackedEvent;
     private final com.tractrac.clientmodule.Event tractracEvent;
     private final long millisecondsOverWhichToAverageWind;
     private final long millisecondsOverWhichToAverageSpeed;
     private final WindStore windStore;
     private final DynamicRaceDefinitionSet raceDefinitionSetToUpdate;
     
-    public RaceCourseReceiver(DomainFactory domainFactory, TrackedEvent trackedEvent,
+    public RaceCourseReceiver(DomainFactory domainFactory, DynamicTrackedEvent trackedEvent,
             com.tractrac.clientmodule.Event tractracEvent, WindStore windStore,
             DynamicRaceDefinitionSet raceDefinitionSetToUpdate,
             long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed) {
@@ -112,9 +111,8 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
     }
 
     private void createTrackedRace(RaceDefinition race) {
-        DynamicTrackedRace trackedRace = getDomainFactory().trackRace(trackedEvent, race,
+        trackedEvent.createTrackedRace(race,
                 windStore, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed, raceDefinitionSetToUpdate);
-        trackedEvent.addTrackedRace(trackedRace);
     }
 
 }
