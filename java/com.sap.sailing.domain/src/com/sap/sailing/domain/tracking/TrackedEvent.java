@@ -22,6 +22,11 @@ public interface TrackedEvent {
 
     Iterable<TrackedRace> getTrackedRaces(BoatClass boatClass);
 
+    /**
+     * Creates a {@link TrackedRace} based on the parameter specified and {@link #addTrackedRace(TrackedRace) adds} it to
+     * this tracked event. Afterwards, calling {@link #getTrackedRace(RaceDefinition) getTrackedRace(raceDefinition)} will
+     * return the result of this method call.
+     */
     TrackedRace createTrackedRace(RaceDefinition raceDefinition, WindStore windStore,
             long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
             DynamicRaceDefinitionSet raceDefinitionSetToUpdate);

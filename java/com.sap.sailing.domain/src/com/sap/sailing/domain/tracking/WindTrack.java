@@ -4,7 +4,7 @@ import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.TimePoint;
 
 public interface WindTrack extends Track<Wind> {
-    private final long DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND = 30000;
+    static final long DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND = 30000;
 
     void add(Wind wind);
 
