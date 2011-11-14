@@ -31,18 +31,14 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
     
     public SwissTimingAdapterPersistenceImpl(DB db, SwissTimingFactory swissTimingFactory) {
         super();
-
         this.database = db;
         this.swissTimingFactory = swissTimingFactory;
-        
         init();
     }
 
-    private void init()
-    {
+    private void init() {
         DBCollection rawMessages = database.getCollection(CollectionNames.RAW_MESSAGES.name());
         rawMessages.ensureIndex(new BasicDBObject().append(FieldNames.MESSAGE_SEQUENCE_NUMBER.name(), 1));
-
         
         // ensure the required indexes for the collection of race specific messages
         DBCollection racesMessageCollection = database.getCollection(CollectionNames.RACES_MESSAGES.name());
