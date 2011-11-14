@@ -15,5 +15,5 @@ public interface DomainFactory {
 
     Competitor getOrCreateCompetitor(com.sap.sailing.domain.swisstimingadapter.Competitor competitor);
 
-    RaceDefinition createRaceDefinition(Event event, Race race, Course course);
+    RaceDefinition createRaceDefinition(Event event, Race race, StartList startList, Course course);
 }
