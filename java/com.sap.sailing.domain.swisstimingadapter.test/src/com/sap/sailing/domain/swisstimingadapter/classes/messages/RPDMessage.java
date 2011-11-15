@@ -14,6 +14,7 @@ public class RPDMessage {
     private int nextMarkLeader;
     private double distanceToNextMarkLeader;
     private List<RacePositionDataElement> racePositionElements;
+    
     public RPDMessage(String raceId, int status, Date dataTime, Date startTime, Date raceTime, int nextMarkLeader,
             double distanceToNextMarkLeader, List<RacePositionDataElement> racePositionElements) {
         super();
@@ -82,10 +83,13 @@ public class RPDMessage {
         SimpleDateFormat sdataTime = new SimpleDateFormat("yyyy.MM.dd");
         SimpleDateFormat sstartTime = new SimpleDateFormat("yyyy.MM.dd");
         SimpleDateFormat sraceTime = new SimpleDateFormat("yyyy.MM.dd");
-        SimpleDateFormat sageOfData = new SimpleDateFormat("yyyy.MM.dd");
     
-                
-        return "RPD|" + raceId  + ";" + status + ";" + sdataTime.format(dataTime) + ";" + sstartTime.format(startTime) + ";" + sraceTime
+        String elements = "";
+        for (RacePositionDataElement el : racePositionElements) {
+            elements = elements + el.toString();
+        }
+        
+        return "RPD|" + raceId  + "|" + status + "|" + sdataTime.format(dataTime) + "|" + sstartTime.format(startTime) + "|" + sraceTime.format(raceTime) + "|"  + racePositionElements.size() + elements;
     }
     
 }

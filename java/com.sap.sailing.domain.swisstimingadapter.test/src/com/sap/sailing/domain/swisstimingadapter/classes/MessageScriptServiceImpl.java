@@ -24,6 +24,11 @@ public class MessageScriptServiceImpl implements MessageScriptService{
             }
         }
     }
+    
+    @Override
+    public void createMessage(Object message) {
+        messageList.add(message);
+    }
 
     @Override
     public void createMessagePosition(int pos, Object message) {
@@ -57,5 +62,7 @@ public class MessageScriptServiceImpl implements MessageScriptService{
     @Override
     public void readFromFile(String path) {
         fileService.readListFromFile(path);
-    } 
+    }
+
+     
 }
