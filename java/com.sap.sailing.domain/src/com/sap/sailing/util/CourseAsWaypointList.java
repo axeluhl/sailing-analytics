@@ -1,10 +1,9 @@
-package com.sap.sailing.domain.tractracadapter.impl;
+package com.sap.sailing.util;
 
 import java.util.AbstractList;
 
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.util.Util;
 
 import difflib.Patch;
 

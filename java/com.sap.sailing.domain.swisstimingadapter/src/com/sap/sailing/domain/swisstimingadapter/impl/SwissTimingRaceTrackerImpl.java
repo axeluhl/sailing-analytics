@@ -41,6 +41,8 @@ import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.util.Util.Triple;
 
+import difflib.PatchFailedException;
+
 public class SwissTimingRaceTrackerImpl implements SwissTimingRaceTracker, SailMasterListener {
     private static final Logger logger = Logger.getLogger(SwissTimingRaceTrackerImpl.class.getName());
     
@@ -161,10 +163,9 @@ public class SwissTimingRaceTrackerImpl implements SwissTimingRaceTracker, SailM
                     competitorTrack.addGPSFix(gpsFix);
                     break;
                 default:
-                    logger.info("Unknoen tracker type "+fix.getTrackerType());
+                    logger.info("Unknown tracker type "+fix.getTrackerType());
                 }
             }
-            // TODO implement receivedRacePositionData; extract race start time, add GPSFixMoving objects to tracked race
         }
     }
 
@@ -214,7 +215,12 @@ public class SwissTimingRaceTrackerImpl implements SwissTimingRaceTracker, SailM
                 createRaceDefinition(raceID);
             }
         } else {
-            // TODO update trackedRace with updated course
+            try {
+                domainFactory.updateCourseWaypoints(trackedRace.getRace().getCourse(), course.getMarks());
+            } catch (PatchFailedException e) {
+                logger.info("Internal error trying to update course: "+e.getMessage());
+                logger.throwing(SwissTimingRaceTrackerImpl.class.getName(), "receivedCourseConfiguration", e);
+            }
         }
     }
 
