@@ -53,4 +53,48 @@ public class ABSMessage {
     public String toString() {
         return "ABS|" + raceId + ";" + leg + ";" + sailNumber + ";" + speed;
     }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((leg == null) ? 0 : leg.hashCode());
+        result = prime * result + ((raceId == null) ? 0 : raceId.hashCode());
+        result = prime * result + ((sailNumber == null) ? 0 : sailNumber.hashCode());
+        long temp;
+        temp = Double.doubleToLongBits(speed);
+        result = prime * result + (int) (temp ^ (temp >>> 32));
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        ABSMessage other = (ABSMessage) obj;
+        if (leg == null) {
+            if (other.leg != null)
+                return false;
+        } else if (!leg.equals(other.leg))
+            return false;
+        if (raceId == null) {
+            if (other.raceId != null)
+                return false;
+        } else if (!raceId.equals(other.raceId))
+            return false;
+        if (sailNumber == null) {
+            if (other.sailNumber != null)
+                return false;
+        } else if (!sailNumber.equals(other.sailNumber))
+            return false;
+        if (Double.doubleToLongBits(speed) != Double.doubleToLongBits(other.speed))
+            return false;
+        return true;
+    }
+    
+    
 }

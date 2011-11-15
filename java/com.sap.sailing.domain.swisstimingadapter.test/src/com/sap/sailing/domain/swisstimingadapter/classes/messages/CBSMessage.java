@@ -36,4 +36,37 @@ public class CBSMessage {
     public String toString() {
         return "CBS|" + raceId + ";" + sailNumber + ";" + speed;
     }
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + raceId;
+        result = prime * result + ((sailNumber == null) ? 0 : sailNumber.hashCode());
+        long temp;
+        temp = Double.doubleToLongBits(speed);
+        result = prime * result + (int) (temp ^ (temp >>> 32));
+        return result;
+    }
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        CBSMessage other = (CBSMessage) obj;
+        if (raceId != other.raceId)
+            return false;
+        if (sailNumber == null) {
+            if (other.sailNumber != null)
+                return false;
+        } else if (!sailNumber.equals(other.sailNumber))
+            return false;
+        if (Double.doubleToLongBits(speed) != Double.doubleToLongBits(other.speed))
+            return false;
+        return true;
+    }
+    
+    
 }

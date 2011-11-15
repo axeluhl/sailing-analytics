@@ -1,8 +1,11 @@
 package com.sap.sailing.domain.swisstimingadapter.classes.services;
 
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.sap.sailing.domain.swisstimingadapter.classes.services.Exceptions.MessageScriptParsingException;
 
 public class MessageScriptServiceImpl implements MessageScriptService{
 
@@ -60,7 +63,7 @@ public class MessageScriptServiceImpl implements MessageScriptService{
     }
 
     @Override
-    public void readFromFile(String path) {
+    public void readFromFile(String path) throws IOException, ParseException, MessageScriptParsingException {
         fileService.readListFromFile(path);
     }
 

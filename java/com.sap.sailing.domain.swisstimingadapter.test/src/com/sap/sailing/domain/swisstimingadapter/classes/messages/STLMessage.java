@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.sap.sailing.domain.swisstimingadapter.Competitor;
-import com.sap.sailing.domain.swisstimingadapter.Race;
 
 public class STLMessage {
     private String raceId;
@@ -39,4 +38,34 @@ public class STLMessage {
         }
         return "STL|" + competitorList.size() + s;
     }
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((competitorList == null) ? 0 : competitorList.hashCode());
+        result = prime * result + ((raceId == null) ? 0 : raceId.hashCode());
+        return result;
+    }
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        STLMessage other = (STLMessage) obj;
+        if (competitorList == null) {
+            if (other.competitorList != null)
+                return false;
+        } else if (!competitorList.equals(other.competitorList))
+            return false;
+        if (raceId == null) {
+            if (other.raceId != null)
+                return false;
+        } else if (!raceId.equals(other.raceId))
+            return false;
+        return true;
+    }
+    
 }

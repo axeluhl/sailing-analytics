@@ -1,7 +1,10 @@
 package com.sap.sailing.domain.swisstimingadapter.classes.services;
 
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.List;
+
+import com.sap.sailing.domain.swisstimingadapter.classes.services.Exceptions.MessageScriptParsingException;
 
 public interface MessageScriptService {
     void updateMessage(Object message);
@@ -12,5 +15,5 @@ public interface MessageScriptService {
     Object getMessageId(int id);
     
     void saveToFile(String path) throws IOException;
-    void readFromFile(String path);
+    void readFromFile(String path) throws IOException, ParseException, MessageScriptParsingException;
 }

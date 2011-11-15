@@ -53,4 +53,43 @@ public class WNDMessage {
     public String toString(){
         return "WND|" + raceId + ";" + markIndex + ";" + windDirection+ ";" +windSpeed;
     }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + markIndex;
+        result = prime * result + ((raceId == null) ? 0 : raceId.hashCode());
+        long temp;
+        temp = Double.doubleToLongBits(windDirection);
+        result = prime * result + (int) (temp ^ (temp >>> 32));
+        temp = Double.doubleToLongBits(windSpeed);
+        result = prime * result + (int) (temp ^ (temp >>> 32));
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        WNDMessage other = (WNDMessage) obj;
+        if (markIndex != other.markIndex)
+            return false;
+        if (raceId == null) {
+            if (other.raceId != null)
+                return false;
+        } else if (!raceId.equals(other.raceId))
+            return false;
+        if (Double.doubleToLongBits(windDirection) != Double.doubleToLongBits(other.windDirection))
+            return false;
+        if (Double.doubleToLongBits(windSpeed) != Double.doubleToLongBits(other.windSpeed))
+            return false;
+        return true;
+    }
+    
+    
 }
