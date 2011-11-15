@@ -178,7 +178,15 @@ public class SwissTimingRaceTrackerImpl implements SwissTimingRaceTracker, SailM
     public void receivedTimingData(String raceID, String boatID,
             List<Triple<Integer, Integer, Long>> markIndicesRanksAndTimesSinceStartInMilliseconds) {
         assert this.raceID.equals(raceID);
+        Competitor competitor = domainFactory.getCompetitorByBoatID(boatID);
+        // the list of mark indices and time stamps is partial and usually only shows the last mark passing;
+        // we need to use this to *update* the competitor's mark passings list, not *replace* it
         TreeMap<Integer, MarkPassing> markPassingsByMarkIndex = new TreeMap<Integer, MarkPassing>();
+        // now fill with the already existing mark passings for the competitor identified by boatID...
+        for (MarkPassing markPassing : trackedRace.getMarkPassings(competitor)) {
+            markPassingsByMarkIndex.put(trackedRace.getRace().getCourse().getIndexOfWaypoint(markPassing.getWaypoint()), markPassing);
+        }
+        // ...and then overwrite those for which we received "new evidence"
         for (Triple<Integer, Integer, Long> markIndexRankAndTimeSinceStartInMilliseconds : markIndicesRanksAndTimesSinceStartInMilliseconds) {
             Waypoint waypoint = Util.get(trackedRace.getRace().getCourse().getWaypoints(),
                     markIndexRankAndTimeSinceStartInMilliseconds.getA());
@@ -187,7 +195,6 @@ public class SwissTimingRaceTrackerImpl implements SwissTimingRaceTracker, SailM
             MarkPassing markPassing = domainFactory.createMarkPassing(raceID, boatID, waypoint, timePoint);
             markPassingsByMarkIndex.put(markIndexRankAndTimeSinceStartInMilliseconds.getA(), markPassing);
         }
-        Competitor competitor = domainFactory.getCompetitorByBoatID(boatID);
         trackedRace.updateMarkPassings(competitor, markPassingsByMarkIndex.values());
     }
 
