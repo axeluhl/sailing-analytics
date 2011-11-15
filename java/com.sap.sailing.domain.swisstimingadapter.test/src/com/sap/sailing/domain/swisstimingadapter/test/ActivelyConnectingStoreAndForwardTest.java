@@ -70,6 +70,7 @@ public class ActivelyConnectingStoreAndForwardTest {
         };
         sailMasterDummyListenerThread.start();
         swissTimingAdapterPersistence = SwissTimingAdapterPersistence.INSTANCE;
+        swissTimingAdapterPersistence.dropAllMessageData();
         storeAndForward = new StoreAndForward("localhost", RECEIVE_PORT, CLIENT_PORT, SwissTimingFactory.INSTANCE, swissTimingAdapterPersistence);
         synchronized (this) {
             while (sendingStream == null) {
@@ -82,8 +83,6 @@ public class ActivelyConnectingStoreAndForwardTest {
         DBCollection lastMessageCountCollection = db.getCollection(CollectionNames.LAST_MESSAGE_COUNT.name());
         lastMessageCountCollection.update(new BasicDBObject(), new BasicDBObject().append(FieldNames.LAST_MESSAGE_COUNT.name(), 0l),
                 /* upsert */ true, /* multi */ false);
-        DBCollection rawMessages = db.getCollection(CollectionNames.RAW_MESSAGES.name());
-        rawMessages.drop();
     }
     
     @After

@@ -28,6 +28,7 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.BuoyImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
+import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
@@ -70,7 +71,10 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
         trackedEvent = new DynamicTrackedEventImpl(domainEvent);
         ArrayList<Receiver> receivers = new ArrayList<Receiver>();
         receivers.add(new RaceCourseReceiver(domainFactory, trackedEvent, getEvent(), /* millisecondsOverWhichToAverageWind */
-                EmptyWindStore.INSTANCE, this,
+                EmptyWindStore.INSTANCE, new DynamicRaceDefinitionSet() {
+                    @Override
+                    public void addRaceDefinition(RaceDefinition race) {}
+                },
                 30000, /* millisecondsOverWhichToAverageSpeed */30000) {
             @Override
             protected void handleEvent(Triple<Route, RouteData, Race> event) {

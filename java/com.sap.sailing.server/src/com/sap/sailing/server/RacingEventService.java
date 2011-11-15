@@ -178,7 +178,7 @@ public interface RacingEventService extends TrackedEventRegistry {
     void updateStoredLeaderboard(Leaderboard leaderboard);
 
     RaceHandle addSwissTimingRace(String raceID, String hostname, int port, WindStore windStore,
-            long timeoutInMilliseconds) throws InterruptedException, UnknownHostException, IOException;
+            long timeoutInMilliseconds) throws InterruptedException, UnknownHostException, IOException, ParseException;
 
     SwissTimingFactory getSwissTimingFactory();
 

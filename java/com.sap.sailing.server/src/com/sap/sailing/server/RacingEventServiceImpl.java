@@ -61,7 +61,9 @@ public class RacingEventServiceImpl implements RacingEventService {
      */
     private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     
-    private final DomainFactory domainFactory;
+    private final DomainFactory tractracDomainFactory;
+    
+    private final com.sap.sailing.domain.swisstimingadapter.DomainFactory swissTimingDomainFactory;
     
     private final WindTrackerFactory windTrackerFactory;
     
@@ -100,10 +102,11 @@ public class RacingEventServiceImpl implements RacingEventService {
     private final Map<Event, DynamicTrackedEvent> eventTrackingCache;
 
     public RacingEventServiceImpl() {
-        domainFactory = DomainFactory.INSTANCE;
+        tractracDomainFactory = DomainFactory.INSTANCE;
         domainObjectFactory = DomainObjectFactory.INSTANCE;
         mongoObjectFactory = MongoObjectFactory.INSTANCE;
         swissTimingFactory = SwissTimingFactory.INSTANCE;
+        swissTimingDomainFactory = com.sap.sailing.domain.swisstimingadapter.DomainFactory.INSTANCE;
         swissTimingAdapterPersistence = SwissTimingAdapterPersistence.INSTANCE;
         windTrackerFactory = ExpeditionWindTrackerFactory.getInstance();
         eventsByName = new HashMap<String, Event>();
@@ -180,7 +183,7 @@ public class RacingEventServiceImpl implements RacingEventService {
     }
 
     private DomainFactory getDomainFactory() {
-        return domainFactory;
+        return tractracDomainFactory;
     }
     
     @Override
@@ -229,11 +232,12 @@ public class RacingEventServiceImpl implements RacingEventService {
     
     @Override
     public synchronized RaceHandle addSwissTimingRace(String raceID, String hostname, int port, WindStore windStore,
-            long timeoutInMilliseconds) throws InterruptedException, UnknownHostException, IOException {
+            long timeoutInMilliseconds) throws InterruptedException, UnknownHostException, IOException, ParseException {
         Triple<String, String, Integer> key = new Triple<String, String, Integer>(raceID, hostname, port);
         RaceTracker tracker = raceTrackersByID.get(key);
         if (tracker == null) {
-            tracker = getSwissTimingFactory().createRaceTracker(raceID, hostname, port, windStore, swissTimingAdapterPersistence, this);
+            tracker = getSwissTimingFactory().createRaceTracker(raceID, hostname, port, windStore,
+                    swissTimingAdapterPersistence, swissTimingDomainFactory, this);
             raceTrackersByID.put(tracker.getID(), tracker);
             Set<RaceTracker> trackers = raceTrackersByEvent.get(tracker.getEvent());
             if (trackers == null) {
