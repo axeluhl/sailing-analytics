@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.swisstimingadapter.classes;
+package com.sap.sailing.domain.swisstimingadapter.classes.services;
 
 import java.io.IOException;
 import java.util.ArrayList;
