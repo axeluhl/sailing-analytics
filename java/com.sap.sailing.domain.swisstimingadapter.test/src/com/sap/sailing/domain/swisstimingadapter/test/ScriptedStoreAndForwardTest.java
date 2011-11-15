@@ -227,8 +227,8 @@ public class ScriptedStoreAndForwardTest {
                 wait(2000l); // wait for two seconds to receive the messages
             }
         }
-        assertEquals(2, racesReceived.size());
-        assertEquals(5, receivedCompetitors.size());
+        assertEquals(1, racesReceived.size());
+        assertEquals(2, receivedCompetitors.size());
 
         for (String raceToTrack : racesToTrack)
             connector.stopTrackingRace(raceToTrack);
