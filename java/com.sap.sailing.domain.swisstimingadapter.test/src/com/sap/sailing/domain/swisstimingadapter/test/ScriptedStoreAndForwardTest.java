@@ -65,9 +65,6 @@ public class ScriptedStoreAndForwardTest {
         
         swissTimingAdapterPersistence.dropAllRaceMasterData();
         swissTimingAdapterPersistence.dropAllMessageData();
-        
-        connector.trackRace("4711");
-        connector.trackRace("4712");
     }
     
     @After
@@ -79,14 +76,22 @@ public class ScriptedStoreAndForwardTest {
     }
     
     @Test
-    public void testInitMessages() throws IOException, InterruptedException {
+    public void testInitMessages() throws IOException, InterruptedException, ParseException {
+
+        String[] racesToTrack = new String[] { "4711", "4712" };
+        
+        for(String raceToTrack: racesToTrack)
+            connector.trackRace(raceToTrack);
 
         InputStream is = getClass().getResourceAsStream("/InitMessagesScript.txt");
 
         ScriptedMessages scriptedMessages = new ScriptedMessages(is);
         
+        final int messageCount = scriptedMessages.getMessages().size();
+        
+        final int[] receivedMessagesCount = new int[] {0};
         final List<Race> racesReceived = new ArrayList<Race>();
-        final boolean[] receivedSomething = new boolean[1];
+        final boolean[] receivedAll = new boolean[1];
         final List<Competitor> receivedCompetitors  = new ArrayList<Competitor>();
 
         connector.addSailMasterListener(new SailMasterAdapter() {
@@ -95,17 +100,24 @@ public class ScriptedStoreAndForwardTest {
 
                 for(Competitor competitor: startList.getCompetitors())
                     receivedCompetitors.add(competitor);
-                
-                synchronized (ScriptedStoreAndForwardTest.this) {
-                    receivedSomething[0] = true;
-                    ScriptedStoreAndForwardTest.this.notifyAll();
+
+                receivedMessagesCount[0] = receivedMessagesCount[0] + 1;
+
+                if(messageCount == receivedMessagesCount[0]) {
+                    synchronized (ScriptedStoreAndForwardTest.this) {
+                        receivedAll[0] = true;
+                        ScriptedStoreAndForwardTest.this.notifyAll();
+                    }
                 }
+
             }
             @Override
             public void receivedAvailableRaces(Iterable<Race> races) {
+
                 for (Race race : races) {
                     racesReceived.add(race);
                 }
+                receivedMessagesCount[0] = receivedMessagesCount[0] + 1;
             }
         });
 
@@ -114,13 +126,15 @@ public class ScriptedStoreAndForwardTest {
         }
 
         synchronized (this) {
-            while (!receivedSomething[0]) {
+            while (!receivedAll[0]) {
                 wait(2000l); // wait for two seconds to receive the messages
             }
         }
         assertEquals(2, racesReceived.size());
-        assertEquals(4, receivedCompetitors.size());
+        assertEquals(5, receivedCompetitors.size());
         
+        for(String raceToTrack: racesToTrack)
+            connector.stopTrackingRace(raceToTrack);
     }
     
 }
