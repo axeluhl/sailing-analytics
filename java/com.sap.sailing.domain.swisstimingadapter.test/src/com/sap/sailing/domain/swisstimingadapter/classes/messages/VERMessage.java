@@ -20,5 +20,7 @@ public class VERMessage {
         super();
     }
     
-    
+    public String toString(){
+        return "VER|" + version;
+    }
 }

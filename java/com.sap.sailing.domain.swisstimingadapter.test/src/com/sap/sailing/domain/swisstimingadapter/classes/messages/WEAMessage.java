@@ -40,5 +40,7 @@ public class WEAMessage {
         this.humidity = humidity;
     }
     
-    
+    public String toString(){
+        return "WEA|" + raceId + ";" + conditions + ";" + temperature + ";" +humidity;
+    }
 }

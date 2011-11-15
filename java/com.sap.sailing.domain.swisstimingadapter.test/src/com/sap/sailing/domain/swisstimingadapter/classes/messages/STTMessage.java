@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.swisstimingadapter.classes.messages;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class STTMessage {
@@ -26,4 +27,10 @@ public class STTMessage {
         this.startTime = startTime;
     }
   
+    
+    @Override
+    public String toString() {
+        SimpleDateFormat sd = new SimpleDateFormat("yyyy.MM.dd");
+        return "STT|" + raceId + sd.format(startTime);
+    }
 }

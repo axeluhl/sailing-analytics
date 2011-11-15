@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.swisstimingadapter.classes.messages;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -77,5 +78,14 @@ public class RPDMessage {
         this.racePositionElements = racePositionElements;
     }
     
+    public String toString(){
+        SimpleDateFormat sdataTime = new SimpleDateFormat("yyyy.MM.dd");
+        SimpleDateFormat sstartTime = new SimpleDateFormat("yyyy.MM.dd");
+        SimpleDateFormat sraceTime = new SimpleDateFormat("yyyy.MM.dd");
+        SimpleDateFormat sageOfData = new SimpleDateFormat("yyyy.MM.dd");
+    
+                
+        return "RPD|" + raceId  + ";" + status + ";" + sdataTime.format(dataTime) + ";" + sstartTime.format(startTime) + ";" + sraceTime
+    }
     
 }

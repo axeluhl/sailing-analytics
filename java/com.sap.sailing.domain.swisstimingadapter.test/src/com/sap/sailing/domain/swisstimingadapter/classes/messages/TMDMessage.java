@@ -3,6 +3,8 @@ package com.sap.sailing.domain.swisstimingadapter.classes.messages;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.sap.sailing.domain.swisstimingadapter.Race;
+
 public class TMDMessage {
     private String raceId;
     private String sailNumber;
@@ -41,6 +43,16 @@ public class TMDMessage {
 
     public void setList(List<TimingDataElement> list) {
         this.list = list;
+    }
+
+    @Override
+    public String toString() {
+        String s = "";
+        for (TimingDataElement el : list) {
+            s = s + el.toString();
+        }
+
+        return "TMD|" + list.size() + s;
     }
 
 }

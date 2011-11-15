@@ -50,4 +50,7 @@ public class WNDMessage {
         this.windSpeed = windSpeed;
     }
 
+    public String toString(){
+        return "WND|" + raceId + ";" + markIndex + ";" + windDirection+ ";" +windSpeed;
+    }
 }

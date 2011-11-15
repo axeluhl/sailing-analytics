@@ -25,6 +25,13 @@ public class RACMessage {
         this.raceList = raceList;
     }
     
-    
+    @Override
+    public String toString() {
+        String s = "";
+        for (Race race : raceList) {
+            s = s + "|" + race.getRaceID() + ";" + race.getDescription();
+        }
+        return "RAC|" + raceList.size() + s;
+    }
     
 }

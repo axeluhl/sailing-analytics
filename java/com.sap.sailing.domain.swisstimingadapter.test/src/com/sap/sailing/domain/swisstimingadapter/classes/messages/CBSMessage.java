@@ -32,5 +32,8 @@ public class CBSMessage {
         this.speed = speed;
     }
     
-    
+    @Override
+    public String toString() {
+        return "CBS|" + raceId + ";" + sailNumber + ";" + speed;
+    }
 }

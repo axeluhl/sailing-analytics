@@ -4,10 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.sap.sailing.domain.swisstimingadapter.Competitor;
+import com.sap.sailing.domain.swisstimingadapter.Race;
 
 public class STLMessage {
     private String raceId;
     private List<Competitor> competitorList;
+    
     public STLMessage(String raceId, List<Competitor> competitorList) {
         super();
         this.raceId = raceId;
@@ -29,4 +31,12 @@ public class STLMessage {
         this.competitorList = competitorList;
     }
    
+    @Override
+    public String toString() {
+        String s = "";
+        for(Competitor c : competitorList){
+            s = s + "|" + c.getBoatID() + ";" + c.getThreeLetterIOCCode() + ";" + c.getName();
+        }
+        return "STL|" + competitorList.size() + s;
+    }
 }
