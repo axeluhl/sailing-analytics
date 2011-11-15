@@ -194,7 +194,8 @@ public class SwissTimingRaceTrackerImpl implements SwissTimingRaceTracker, SailM
     @Override
     public void receivedClockAtMark(String raceID,
             List<Triple<Integer, TimePoint, String>> markIndicesTimePointsAndBoatIDs) {
-        // TODO implement receivedClockAtMark; generateMarkPassing object and update tracked race accordingly
+        // Ignored because it's covered by TMD. Mail from Kai Hahndorf of 2011-11-15T12:42:00Z:
+        // "Die TMD werden immer gesendet. Das CAM Protokoll ist nur für unsere TV-Grafik wichtig, da damit die Rückstandsuhr gestartet wird."
     }
 
     @Override
