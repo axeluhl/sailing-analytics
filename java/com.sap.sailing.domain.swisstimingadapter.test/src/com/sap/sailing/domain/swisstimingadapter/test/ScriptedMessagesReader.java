@@ -24,9 +24,7 @@ public class ScriptedMessagesReader {
     }
 
     public boolean addMessagesFromRawMessageFile(InputStream scriptInputStream) {
-        
         Map<String, Integer> messageTypes = new HashMap<String, Integer>();
-        
         try { 
             // read the script from an inputstream
             DataInputStream in = new DataInputStream(scriptInputStream);
