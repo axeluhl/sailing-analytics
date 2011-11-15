@@ -50,6 +50,7 @@ public class ListeningStoreAndForwardTest {
         logger.info("ListeningStoreAndForwardTest.setUp");
         db = Activator.getDefaultInstance().getDB();
         swissTimingAdapterPersistence = SwissTimingAdapterPersistence.INSTANCE;
+        swissTimingAdapterPersistence.dropAllMessageData();
         storeAndForward = new StoreAndForward(RECEIVE_PORT, CLIENT_PORT, SwissTimingFactory.INSTANCE, swissTimingAdapterPersistence);
         sendingSocket = new Socket("localhost", RECEIVE_PORT);
         sendingStream = sendingSocket.getOutputStream();
@@ -59,8 +60,6 @@ public class ListeningStoreAndForwardTest {
         DBCollection lastMessageCountCollection = db.getCollection(CollectionNames.LAST_MESSAGE_COUNT.name());
         lastMessageCountCollection.update(new BasicDBObject(), new BasicDBObject().append(FieldNames.LAST_MESSAGE_COUNT.name(), 0l),
                 /* upsert */ true, /* multi */ false);
-        DBCollection rawMessages = db.getCollection(CollectionNames.RAW_MESSAGES.name());
-        rawMessages.drop();
     }
     
     @After
