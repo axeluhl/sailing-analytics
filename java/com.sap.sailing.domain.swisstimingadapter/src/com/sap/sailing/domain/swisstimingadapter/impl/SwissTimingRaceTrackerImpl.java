@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Buoy;
@@ -16,6 +17,8 @@ import com.sap.sailing.domain.base.Distance;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.TimePoint;
+import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.swisstimingadapter.Course;
 import com.sap.sailing.domain.swisstimingadapter.DomainFactory;
 import com.sap.sailing.domain.swisstimingadapter.Fix;
@@ -34,12 +37,16 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
+import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.TrackedEventRegistry;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
+import com.sap.sailing.util.Util;
 import com.sap.sailing.util.Util.Triple;
+
+import difflib.PatchFailedException;
 
 public class SwissTimingRaceTrackerImpl implements SwissTimingRaceTracker, SailMasterListener {
     private static final Logger logger = Logger.getLogger(SwissTimingRaceTrackerImpl.class.getName());
@@ -161,23 +168,41 @@ public class SwissTimingRaceTrackerImpl implements SwissTimingRaceTracker, SailM
                     competitorTrack.addGPSFix(gpsFix);
                     break;
                 default:
-                    logger.info("Unknoen tracker type "+fix.getTrackerType());
+                    logger.info("Unknown tracker type "+fix.getTrackerType());
                 }
             }
-            // TODO implement receivedRacePositionData; extract race start time, add GPSFixMoving objects to tracked race
         }
     }
 
     @Override
     public void receivedTimingData(String raceID, String boatID,
             List<Triple<Integer, Integer, Long>> markIndicesRanksAndTimesSinceStartInMilliseconds) {
-        // TODO implement receivedTimingData; generate MarkPassing objects and update tracked race accordingly
+        assert this.raceID.equals(raceID);
+        Competitor competitor = domainFactory.getCompetitorByBoatID(boatID);
+        // the list of mark indices and time stamps is partial and usually only shows the last mark passing;
+        // we need to use this to *update* the competitor's mark passings list, not *replace* it
+        TreeMap<Integer, MarkPassing> markPassingsByMarkIndex = new TreeMap<Integer, MarkPassing>();
+        // now fill with the already existing mark passings for the competitor identified by boatID...
+        for (MarkPassing markPassing : trackedRace.getMarkPassings(competitor)) {
+            markPassingsByMarkIndex.put(trackedRace.getRace().getCourse().getIndexOfWaypoint(markPassing.getWaypoint()), markPassing);
+        }
+        // ...and then overwrite those for which we received "new evidence"
+        for (Triple<Integer, Integer, Long> markIndexRankAndTimeSinceStartInMilliseconds : markIndicesRanksAndTimesSinceStartInMilliseconds) {
+            Waypoint waypoint = Util.get(trackedRace.getRace().getCourse().getWaypoints(),
+                    markIndexRankAndTimeSinceStartInMilliseconds.getA());
+            MillisecondsTimePoint timePoint = new MillisecondsTimePoint(trackedRace.getStart().asMillis()
+                    + markIndexRankAndTimeSinceStartInMilliseconds.getC());
+            MarkPassing markPassing = domainFactory.createMarkPassing(raceID, boatID, waypoint, timePoint);
+            markPassingsByMarkIndex.put(markIndexRankAndTimeSinceStartInMilliseconds.getA(), markPassing);
+        }
+        trackedRace.updateMarkPassings(competitor, markPassingsByMarkIndex.values());
     }
 
     @Override
     public void receivedClockAtMark(String raceID,
             List<Triple<Integer, TimePoint, String>> markIndicesTimePointsAndBoatIDs) {
-        // TODO implement receivedClockAtMark; generateMarkPassing object and update tracked race accordingly
+        // Ignored because it's covered by TMD. Mail from Kai Hahndorf of 2011-11-15T12:42:00Z:
+        // "Die TMD werden immer gesendet. Das CAM Protokoll ist nur für unsere TV-Grafik wichtig, da damit die Rückstandsuhr gestartet wird."
     }
 
     @Override
@@ -214,7 +239,12 @@ public class SwissTimingRaceTrackerImpl implements SwissTimingRaceTracker, SailM
                 createRaceDefinition(raceID);
             }
         } else {
-            // TODO update trackedRace with updated course
+            try {
+                domainFactory.updateCourseWaypoints(trackedRace.getRace().getCourse(), course.getMarks());
+            } catch (PatchFailedException e) {
+                logger.info("Internal error trying to update course: "+e.getMessage());
+                logger.throwing(SwissTimingRaceTrackerImpl.class.getName(), "receivedCourseConfiguration", e);
+            }
         }
     }
 
