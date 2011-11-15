@@ -8,7 +8,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Logger;
 
+import com.sap.sailing.domain.base.Buoy;
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Distance;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -25,8 +28,11 @@ import com.sap.sailing.domain.swisstimingadapter.StartList;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingRaceTracker;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
+import com.sap.sailing.domain.tracking.DynamicTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
+import com.sap.sailing.domain.tracking.GPSFix;
+import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.RaceTracker;
@@ -36,6 +42,8 @@ import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.util.Util.Triple;
 
 public class SwissTimingRaceTrackerImpl implements SwissTimingRaceTracker, SailMasterListener {
+    private static final Logger logger = Logger.getLogger(SwissTimingRaceTrackerImpl.class.getName());
+    
     private final SailMasterConnector connector;
     private final String raceID;
     private final RaceSpecificMessageLoader messageLoader;
@@ -129,8 +137,35 @@ public class SwissTimingRaceTrackerImpl implements SwissTimingRaceTracker, SailM
     public void receivedRacePositionData(String raceID, RaceStatus status, TimePoint timePoint, TimePoint startTime,
             Long millisecondsSinceRaceStart, Integer nextMarkIndexForLeader, Distance distanceToNextMarkForLeader,
             Collection<Fix> fixes) {
-        // TODO implement receivedRacePositionData; extract race start time, add GPSFixMoving objects to tracked race
-        
+        assert this.raceID.equals(raceID);
+        if (this.raceID.equals(raceID)) {
+            if (startTime != null) {
+                trackedRace.setStartTimeReceived(startTime);
+            }
+            for (Fix fix : fixes) {
+                GPSFixMoving gpsFix = domainFactory.createGPSFix(timePoint, fix);
+                switch (fix.getTrackerType()) {
+                case BUOY:
+                case COMMITTEE:
+                case JURY:
+                case TIMINGSCORING:
+                case UNIDENTIFIED:
+                    String trackerID = fix.getBoatID();
+                    Buoy buoy = domainFactory.getOrCreateBuoy(trackerID);
+                    DynamicTrack<Buoy, GPSFix> buoyTrack = trackedRace.getOrCreateTrack(buoy);
+                    buoyTrack.addGPSFix(gpsFix);
+                    break;
+                case COMPETITOR:
+                    Competitor competitor = domainFactory.getCompetitorByBoatID(fix.getBoatID());
+                    DynamicTrack<Competitor, GPSFixMoving> competitorTrack = trackedRace.getTrack(competitor);
+                    competitorTrack.addGPSFix(gpsFix);
+                    break;
+                default:
+                    logger.info("Unknoen tracker type "+fix.getTrackerType());
+                }
+            }
+            // TODO implement receivedRacePositionData; extract race start time, add GPSFixMoving objects to tracked race
+        }
     }
 
     @Override
@@ -154,7 +189,7 @@ public class SwissTimingRaceTrackerImpl implements SwissTimingRaceTracker, SailM
     }
 
     private void createRaceDefinition(String raceID) {
-        assert this.raceID == raceID;
+        assert this.raceID.equals(raceID);
         assert startList != null;
         assert course != null;
         // now we can create the RaceDefinition and most other things

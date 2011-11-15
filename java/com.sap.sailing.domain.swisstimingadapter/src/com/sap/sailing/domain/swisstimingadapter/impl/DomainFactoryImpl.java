@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.sap.sailing.domain.base.Boat;
+import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Event;
@@ -14,12 +15,14 @@ import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.Person;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Team;
+import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.BuoyImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.EventImpl;
 import com.sap.sailing.domain.base.impl.GateImpl;
+import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.base.impl.NationalityImpl;
 import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
@@ -27,20 +30,26 @@ import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.swisstimingadapter.Course;
 import com.sap.sailing.domain.swisstimingadapter.DomainFactory;
+import com.sap.sailing.domain.swisstimingadapter.Fix;
 import com.sap.sailing.domain.swisstimingadapter.Mark;
+import com.sap.sailing.domain.swisstimingadapter.MessageType;
 import com.sap.sailing.domain.swisstimingadapter.Race;
 import com.sap.sailing.domain.swisstimingadapter.StartList;
+import com.sap.sailing.domain.tracking.GPSFixMoving;
+import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.util.Util;
 
 public class DomainFactoryImpl implements DomainFactory {
     private final Map<String, Event> raceIDToEventCache;
     private final Map<String, Competitor> boatIDToCompetitorCache;
+    private final Map<String, Buoy> buoyCache;
     private final Map<Iterable<String>, ControlPoint> controlPointCache;
     private final Map<String, Nationality> nationalityCache;
     
     public DomainFactoryImpl() {
         raceIDToEventCache = new HashMap<String, Event>();
         boatIDToCompetitorCache = new HashMap<String, Competitor>();
+        buoyCache = new HashMap<String, Buoy>();
         controlPointCache = new HashMap<Iterable<String>, ControlPoint>();
         nationalityCache = new HashMap<String, Nationality>();
     }
@@ -53,6 +62,11 @@ public class DomainFactoryImpl implements DomainFactory {
             raceIDToEventCache.put(raceID, result);
         }
         return result;
+    }
+    
+    @Override
+    public Competitor getCompetitorByBoatID(String boatID) {
+        return boatIDToCompetitorCache.get(boatID);
     }
     
     @Override
@@ -118,18 +132,40 @@ public class DomainFactoryImpl implements DomainFactory {
         if (result == null) {
             switch (Util.size(devices)) {
             case 1:
-                result = new BuoyImpl(devices.iterator().next());
+                result = getOrCreateBuoy(devices.iterator().next());
                 break;
             case 2:
                 Iterator<String> buoyNameIter = devices.iterator();
                 String left = buoyNameIter.next();
                 String right = buoyNameIter.next();
-                result = new GateImpl(new BuoyImpl(left), new BuoyImpl(right), left+"/"+right);
+                result = new GateImpl(getOrCreateBuoy(left), getOrCreateBuoy(right), left+"/"+right);
                 break;
             default:
                 throw new RuntimeException("Don't know how to handle control points with number of devices neither 1 nor 2. Was "+Util.size(devices));
             }
         }
+        return result;
+    }
+
+    /**
+     * @param id
+     *            the ID which is probably also used as the "device name" and the "sail number" in case of an
+     *            {@link MessageType#RPD RPD} message
+     */
+    @Override
+    public Buoy getOrCreateBuoy(String id) {
+        Buoy result = buoyCache.get(id);
+        if (result == null) {
+            result = new BuoyImpl(id);
+            buoyCache.put(id, result);
+        }
+        return result;
+    }
+
+    @Override
+    public GPSFixMoving createGPSFix(TimePoint timePointOfTransmission, Fix fix) {
+        GPSFixMoving result = new GPSFixMovingImpl(fix.getPosition(), new MillisecondsTimePoint(
+                timePointOfTransmission.asMillis() + fix.getAgeOfDataInMilliseconds()), fix.getSpeed());
         return result;
     }
 }
