@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Buoy;
@@ -16,6 +17,8 @@ import com.sap.sailing.domain.base.Distance;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.TimePoint;
+import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.swisstimingadapter.Course;
 import com.sap.sailing.domain.swisstimingadapter.DomainFactory;
 import com.sap.sailing.domain.swisstimingadapter.Fix;
@@ -34,11 +37,13 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
+import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.TrackedEventRegistry;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
+import com.sap.sailing.util.Util;
 import com.sap.sailing.util.Util.Triple;
 
 import difflib.PatchFailedException;
@@ -172,7 +177,18 @@ public class SwissTimingRaceTrackerImpl implements SwissTimingRaceTracker, SailM
     @Override
     public void receivedTimingData(String raceID, String boatID,
             List<Triple<Integer, Integer, Long>> markIndicesRanksAndTimesSinceStartInMilliseconds) {
-        // TODO implement receivedTimingData; generate MarkPassing objects and update tracked race accordingly
+        assert this.raceID.equals(raceID);
+        TreeMap<Integer, MarkPassing> markPassingsByMarkIndex = new TreeMap<Integer, MarkPassing>();
+        for (Triple<Integer, Integer, Long> markIndexRankAndTimeSinceStartInMilliseconds : markIndicesRanksAndTimesSinceStartInMilliseconds) {
+            Waypoint waypoint = Util.get(trackedRace.getRace().getCourse().getWaypoints(),
+                    markIndexRankAndTimeSinceStartInMilliseconds.getA());
+            MillisecondsTimePoint timePoint = new MillisecondsTimePoint(trackedRace.getStart().asMillis()
+                    + markIndexRankAndTimeSinceStartInMilliseconds.getC());
+            MarkPassing markPassing = domainFactory.createMarkPassing(raceID, boatID, waypoint, timePoint);
+            markPassingsByMarkIndex.put(markIndexRankAndTimeSinceStartInMilliseconds.getA(), markPassing);
+        }
+        Competitor competitor = domainFactory.getCompetitorByBoatID(boatID);
+        trackedRace.updateMarkPassings(competitor, markPassingsByMarkIndex.values());
     }
 
     @Override

@@ -7,8 +7,10 @@ import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.TimePoint;
+import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.swisstimingadapter.impl.DomainFactoryImpl;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
+import com.sap.sailing.domain.tracking.MarkPassing;
 
 import difflib.PatchFailedException;
 
@@ -27,7 +29,9 @@ public interface DomainFactory {
     
     GPSFixMoving createGPSFix(TimePoint timePointOfTransmission, Fix fix);
 
-    Competitor getCompetitorByBoatID(String sailNumber);
+    Competitor getCompetitorByBoatID(String boatID);
 
     void updateCourseWaypoints(Course courseToUpdate, Iterable<Mark> marks) throws PatchFailedException;
+    
+    MarkPassing createMarkPassing(String raceID, String boatID, Waypoint waypoint, TimePoint timePoint);
 }
