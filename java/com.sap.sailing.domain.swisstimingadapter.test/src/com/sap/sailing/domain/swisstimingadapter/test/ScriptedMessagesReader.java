@@ -26,7 +26,6 @@ public class ScriptedMessagesReader {
     public boolean addMessagesFromRawMessageFile(InputStream scriptInputStream) {
         
         Map<String, Integer> messageTypes = new HashMap<String, Integer>();
-        Map<String, String> comp = new HashMap<String, String>();
         
         try { 
             // read the script from an inputstream
@@ -76,7 +75,6 @@ public class ScriptedMessagesReader {
 
                         break;
                     default:
-                        int controlChar = tokenizer.ttype;
                 }
             }
             
