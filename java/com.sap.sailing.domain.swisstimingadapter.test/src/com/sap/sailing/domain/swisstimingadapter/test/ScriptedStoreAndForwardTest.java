@@ -9,6 +9,7 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -20,8 +21,13 @@ import org.junit.Test;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
+import com.sap.sailing.domain.base.Distance;
+import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.swisstimingadapter.Competitor;
+import com.sap.sailing.domain.swisstimingadapter.Course;
+import com.sap.sailing.domain.swisstimingadapter.Fix;
 import com.sap.sailing.domain.swisstimingadapter.Race;
+import com.sap.sailing.domain.swisstimingadapter.RaceStatus;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterAdapter;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterConnector;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterTransceiver;
@@ -32,13 +38,14 @@ import com.sap.sailing.domain.swisstimingadapter.persistence.SwissTimingAdapterP
 import com.sap.sailing.domain.swisstimingadapter.persistence.impl.CollectionNames;
 import com.sap.sailing.domain.swisstimingadapter.persistence.impl.FieldNames;
 import com.sap.sailing.mongodb.Activator;
+import com.sap.sailing.util.Util.Triple;
 
 public class ScriptedStoreAndForwardTest {
     private static final Logger logger = Logger.getLogger(ScriptedStoreAndForwardTest.class.getName());
-    
+
     private static final int RECEIVE_PORT = 6543;
     private static final int CLIENT_PORT = 6544;
-    
+
     private DB db;
     private StoreAndForward storeAndForward;
     private Socket sendingSocket;
@@ -53,21 +60,22 @@ public class ScriptedStoreAndForwardTest {
         db = Activator.getDefaultInstance().getDB();
 
         swissTimingAdapterPersistence = SwissTimingAdapterPersistence.INSTANCE;
-        
-        storeAndForward = new StoreAndForward(RECEIVE_PORT, CLIENT_PORT, SwissTimingFactory.INSTANCE, SwissTimingAdapterPersistence.INSTANCE);
+
+        storeAndForward = new StoreAndForward(RECEIVE_PORT, CLIENT_PORT, SwissTimingFactory.INSTANCE,
+                SwissTimingAdapterPersistence.INSTANCE);
         sendingSocket = new Socket("localhost", RECEIVE_PORT);
         sendingStream = sendingSocket.getOutputStream();
         swissTimingFactory = SwissTimingFactory.INSTANCE;
         transceiver = swissTimingFactory.createSailMasterTransceiver();
-        connector = swissTimingFactory.getOrCreateSailMasterConnector("localhost", CLIENT_PORT, swissTimingAdapterPersistence);
+        connector = swissTimingFactory.getOrCreateSailMasterConnector("localhost", CLIENT_PORT,
+                swissTimingAdapterPersistence);
         DBCollection lastMessageCountCollection = db.getCollection(CollectionNames.LAST_MESSAGE_COUNT.name());
-        lastMessageCountCollection.update(new BasicDBObject(), new BasicDBObject().append(FieldNames.LAST_MESSAGE_COUNT.name(), 0l),
-                /* upsert */ true, /* multi */ false);
-        
-        swissTimingAdapterPersistence.dropAllRaceMasterData();
-        swissTimingAdapterPersistence.dropAllMessageData();
+        lastMessageCountCollection.update(new BasicDBObject(),
+                new BasicDBObject().append(FieldNames.LAST_MESSAGE_COUNT.name(), 0l),
+                /* upsert */true, /* multi */false);
+
     }
-    
+
     @After
     public void tearDown() throws InterruptedException, IOException {
         logger.entering(getClass().getName(), "tearDown");
@@ -75,36 +83,39 @@ public class ScriptedStoreAndForwardTest {
         connector.stop();
         logger.exiting(getClass().getName(), "tearDown");
     }
-    
+
     @Test
     public void testInitMessages() throws IOException, InterruptedException, ParseException {
 
+        swissTimingAdapterPersistence.dropAllRaceMasterData();
+        swissTimingAdapterPersistence.dropAllMessageData();
+
         String[] racesToTrack = new String[] { "4711", "4712" };
-        
-        for(String raceToTrack: racesToTrack)
+
+        for (String raceToTrack : racesToTrack)
             connector.trackRace(raceToTrack);
 
         InputStream is = getClass().getResourceAsStream("/InitMessagesScript.txt");
 
         ScriptedMessages scriptedMessages = new ScriptedMessages(is);
-        
+
         final int messageCount = scriptedMessages.getMessages().size();
-        
-        final int[] receivedMessagesCount = new int[] {0};
+
+        final int[] receivedMessagesCount = new int[] { 0 };
         final List<Race> racesReceived = new ArrayList<Race>();
         final boolean[] receivedAll = new boolean[1];
-        final List<Competitor> receivedCompetitors  = new ArrayList<Competitor>();
+        final List<Competitor> receivedCompetitors = new ArrayList<Competitor>();
 
         connector.addSailMasterListener(new SailMasterAdapter() {
             @Override
             public void receivedStartList(String raceID, StartList startList) {
 
-                for(Competitor competitor: startList.getCompetitors())
+                for (Competitor competitor : startList.getCompetitors())
                     receivedCompetitors.add(competitor);
 
                 receivedMessagesCount[0] = receivedMessagesCount[0] + 1;
 
-                if(messageCount == receivedMessagesCount[0]) {
+                if (messageCount == receivedMessagesCount[0]) {
                     synchronized (ScriptedStoreAndForwardTest.this) {
                         receivedAll[0] = true;
                         ScriptedStoreAndForwardTest.this.notifyAll();
@@ -112,6 +123,7 @@ public class ScriptedStoreAndForwardTest {
                 }
 
             }
+
             @Override
             public void receivedAvailableRaces(Iterable<Race> races) {
 
@@ -122,7 +134,7 @@ public class ScriptedStoreAndForwardTest {
             }
         });
 
-        for(String msg: scriptedMessages.getMessages()) {
+        for (String msg : scriptedMessages.getMessages()) {
             transceiver.sendMessage(msg, sendingStream);
         }
 
@@ -133,9 +145,103 @@ public class ScriptedStoreAndForwardTest {
         }
         assertEquals(2, racesReceived.size());
         assertEquals(5, receivedCompetitors.size());
-        
-        for(String raceToTrack: racesToTrack)
+
+        for (String raceToTrack : racesToTrack)
             connector.stopTrackingRace(raceToTrack);
     }
-    
+
+    @Test
+    public void testInitMessages2() throws IOException, InterruptedException, ParseException {
+
+        swissTimingAdapterPersistence.dropAllRaceMasterData();
+        swissTimingAdapterPersistence.dropAllMessageData();
+
+        String[] racesToTrack = new String[] { "4711" };
+
+        for (String raceToTrack : racesToTrack)
+            connector.trackRace(raceToTrack);
+
+        InputStream is = getClass().getResourceAsStream("/InitMessagesScript2.txt");
+
+        ScriptedMessages scriptedMessages = new ScriptedMessages(is);
+
+        final int messageCount = scriptedMessages.getMessages().size();
+
+        final int[] receivedMessagesCount = new int[] { 0 };
+        final List<Race> racesReceived = new ArrayList<Race>();
+        final boolean[] receivedAll = new boolean[1];
+        final List<Competitor> receivedCompetitors = new ArrayList<Competitor>();
+
+        connector.addSailMasterListener(new SailMasterAdapter() {
+            
+            @Override
+            public void receivedRacePositionData(String raceID, RaceStatus status, TimePoint timePoint,
+                    TimePoint startTime, Long millisecondsSinceRaceStart, Integer nextMarkIndexForLeader,
+                    Distance distanceToNextMarkForLeader, Collection<Fix> fixes) {
+                // TODO Auto-generated method stub
+                countAndCheckAllMessagesRecieved(messageCount, receivedMessagesCount, receivedAll);
+            }
+
+
+            @Override
+            public void receivedClockAtMark(String raceID,
+                    List<Triple<Integer, TimePoint, String>> markIndicesTimePointsAndBoatIDs) {
+                // TODO Auto-generated method stub
+                countAndCheckAllMessagesRecieved(messageCount, receivedMessagesCount, receivedAll);
+            }
+
+
+            @Override
+            public void receivedCourseConfiguration(String raceID, Course course) {
+                // TODO Auto-generated method stub
+                countAndCheckAllMessagesRecieved(messageCount, receivedMessagesCount, receivedAll);
+
+            }
+
+            
+            @Override
+            public void receivedStartList(String raceID, StartList startList) {
+
+                for (Competitor competitor : startList.getCompetitors())
+                    receivedCompetitors.add(competitor);
+
+                countAndCheckAllMessagesRecieved(messageCount, receivedMessagesCount, receivedAll);
+            }
+
+            @Override
+            public void receivedAvailableRaces(Iterable<Race> races) {
+
+                for (Race race : races) {
+                    racesReceived.add(race);
+                }
+                countAndCheckAllMessagesRecieved(messageCount, receivedMessagesCount, receivedAll);
+            }
+        });
+
+        for (String msg : scriptedMessages.getMessages()) {
+            transceiver.sendMessage(msg, sendingStream);
+        }
+
+        synchronized (this) {
+            while (!receivedAll[0]) {
+                wait(2000l); // wait for two seconds to receive the messages
+            }
+        }
+        assertEquals(2, racesReceived.size());
+        assertEquals(5, receivedCompetitors.size());
+
+        for (String raceToTrack : racesToTrack)
+            connector.stopTrackingRace(raceToTrack);
+    }
+
+    private void countAndCheckAllMessagesRecieved(int messageCount, int[] receivedMessagesCount, boolean[] receivedAll) {
+        receivedMessagesCount[0] = receivedMessagesCount[0] + 1;
+        if (messageCount == receivedMessagesCount[0]) {
+            synchronized (ScriptedStoreAndForwardTest.this) {
+                receivedAll[0] = true;
+                ScriptedStoreAndForwardTest.this.notifyAll();
+            }
+        }
+
+    }
 }
