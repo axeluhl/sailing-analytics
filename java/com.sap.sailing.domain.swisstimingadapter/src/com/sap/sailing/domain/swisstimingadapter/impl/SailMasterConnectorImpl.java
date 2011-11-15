@@ -327,19 +327,45 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
             markIndicesRanksAndTimesSinceStartInMilliseconds.add(new Triple<Integer, Integer, Long>(markIndex, rank, timeSinceStartInMilliseconds));
         }
         for (SailMasterListener listener : listeners) {
-            listener.receivedTimingData(raceID, boatID, markIndicesRanksAndTimesSinceStartInMilliseconds);
+            try {
+                listener.receivedTimingData(raceID, boatID, markIndicesRanksAndTimesSinceStartInMilliseconds);
+            } catch (Throwable t) {
+                logger.info("Exception occurred trying to notify listener "+listener+" about "+message+": "+t.getMessage());
+                logger.throwing(SailMasterConnectorImpl.class.getName(), "notifyListenersTMD", t);
+            }
+        }
+        Set<SailMasterListener> raceSpecificListenerSet = raceSpecificListeners.get(message.getRaceID());
+        if (raceSpecificListenerSet != null) {
+            for (SailMasterListener listener : raceSpecificListenerSet) {
+                try {
+                    listener.receivedTimingData(raceID, boatID, markIndicesRanksAndTimesSinceStartInMilliseconds);
+                } catch (Throwable t) {
+                    logger.info("Exception occurred trying to notify listener "+listener+" about "+message+": "+t.getMessage());
+                    logger.throwing(SailMasterConnectorImpl.class.getName(), "notifyListenersTMD", t);
+                }
+            }
         }
     }
 
     private void notifyListenersCAM(SailMasterMessage message) throws ParseException {
         List<Triple<Integer, TimePoint, String>> clockAtMarkResults = parseClockAtMarkMessage(message);
         for (SailMasterListener listener : listeners) {
-            listener.receivedClockAtMark(message.getSections()[1], clockAtMarkResults);
+            try {
+                listener.receivedClockAtMark(message.getSections()[1], clockAtMarkResults);
+            } catch (Throwable t) {
+                logger.info("Exception occurred trying to notify listener "+listener+" about "+message+": "+t.getMessage());
+                logger.throwing(SailMasterConnectorImpl.class.getName(), "notifyListenersCAM", t);
+            }
         }
         Set<SailMasterListener> raceSpecificListenerSet = raceSpecificListeners.get(message.getRaceID());
         if (raceSpecificListenerSet != null) {
             for (SailMasterListener listener : raceSpecificListenerSet) {
-                listener.receivedClockAtMark(message.getSections()[1], clockAtMarkResults);
+                try {
+                    listener.receivedClockAtMark(message.getSections()[1], clockAtMarkResults);
+                } catch (Throwable t) {
+                    logger.info("Exception occurred trying to notify listener "+listener+" about "+message+": "+t.getMessage());
+                    logger.throwing(SailMasterConnectorImpl.class.getName(), "notifyListenersCAM", t);
+                }
             }
         }
     }
@@ -347,12 +373,22 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
     private void notifyListenersSTL(SailMasterMessage message) {
         StartList startListMessage = parseStartListMessage(message);
         for (SailMasterListener listener : listeners) {
-            listener.receivedStartList(message.getSections()[1], startListMessage);
+            try {
+                listener.receivedStartList(message.getSections()[1], startListMessage);
+            } catch (Throwable t) {
+                logger.info("Exception occurred trying to notify listener "+listener+" about "+message+": "+t.getMessage());
+                logger.throwing(SailMasterConnectorImpl.class.getName(), "notifyListenersSTL", t);
+            }
         }
         Set<SailMasterListener> raceSpecificListenerSet = raceSpecificListeners.get(message.getRaceID());
         if (raceSpecificListenerSet != null) {
             for (SailMasterListener listener : raceSpecificListenerSet) {
-                listener.receivedStartList(message.getSections()[1], startListMessage);
+                try {
+                    listener.receivedStartList(message.getSections()[1], startListMessage);
+                } catch (Throwable t) {
+                    logger.info("Exception occurred trying to notify listener "+listener+" about "+message+": "+t.getMessage());
+                    logger.throwing(SailMasterConnectorImpl.class.getName(), "notifyListenersSTL", t);
+                }
             }
         }
     }
@@ -360,12 +396,22 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
     private void notifyListenersCCG(SailMasterMessage message) {
         Course course = parseCourseConfigurationMessage(message);
         for (SailMasterListener listener : listeners) {
-            listener.receivedCourseConfiguration(message.getSections()[1], course);
+            try {
+                listener.receivedCourseConfiguration(message.getSections()[1], course);
+            } catch (Throwable t) {
+                logger.info("Exception occurred trying to notify listener "+listener+" about "+message+": "+t.getMessage());
+                logger.throwing(SailMasterConnectorImpl.class.getName(), "notifyListenersCCG", t);
+            }
         }
         Set<SailMasterListener> raceSpecificListenerSet = raceSpecificListeners.get(message.getRaceID());
         if (raceSpecificListenerSet != null) {
             for (SailMasterListener listener : raceSpecificListenerSet) {
-                listener.receivedCourseConfiguration(message.getSections()[1], course);
+                try {
+                    listener.receivedCourseConfiguration(message.getSections()[1], course);
+                } catch (Throwable t) {
+                    logger.info("Exception occurred trying to notify listener "+listener+" about "+message+": "+t.getMessage());
+                    logger.throwing(SailMasterConnectorImpl.class.getName(), "notifyListenersCCG", t);
+                }
             }
         }
     }
@@ -373,7 +419,12 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
     private void notifyListenersRAC(SailMasterMessage message) {
         Iterable<Race> races = parseAvailableRacesMessage(message);
         for (SailMasterListener listener : listeners) {
-            listener.receivedAvailableRaces(races);
+            try {
+                listener.receivedAvailableRaces(races);
+            } catch (Throwable t) {
+                logger.info("Exception occurred trying to notify listener "+listener+" about "+message+": "+t.getMessage());
+                logger.throwing(SailMasterConnectorImpl.class.getName(), "notifyListenersRAC", t);
+            }
         }
         // not race specific; no need to notify any listener from raceSpecificListeners
     }
@@ -430,14 +481,24 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
             }
         }
         for (SailMasterListener listener : listeners) {
-            listener.receivedRacePositionData(raceID, status, timePoint, startTimeEstimatedStartTime, millisecondsSinceRaceStart,
-                    nextMarkIndexForLeader, distanceToNextMarkForLeader, fixes);
+            try {
+                listener.receivedRacePositionData(raceID, status, timePoint, startTimeEstimatedStartTime, millisecondsSinceRaceStart,
+                        nextMarkIndexForLeader, distanceToNextMarkForLeader, fixes);
+            } catch (Throwable t) {
+                logger.info("Exception occurred trying to notify listener "+listener+" about "+message+": "+t.getMessage());
+                logger.throwing(SailMasterConnectorImpl.class.getName(), "notifyListenersRPD", t);
+            }
         }
         Set<SailMasterListener> raceSpecificListenerSet = raceSpecificListeners.get(message.getRaceID());
         if (raceSpecificListenerSet != null) {
             for (SailMasterListener listener : raceSpecificListenerSet) {
-                listener.receivedRacePositionData(raceID, status, timePoint, startTimeEstimatedStartTime, millisecondsSinceRaceStart,
-                        nextMarkIndexForLeader, distanceToNextMarkForLeader, fixes);
+                try {
+                    listener.receivedRacePositionData(raceID, status, timePoint, startTimeEstimatedStartTime, millisecondsSinceRaceStart,
+                            nextMarkIndexForLeader, distanceToNextMarkForLeader, fixes);
+                } catch (Throwable t) {
+                    logger.info("Exception occurred trying to notify listener "+listener+" about "+message+": "+t.getMessage());
+                    logger.throwing(SailMasterConnectorImpl.class.getName(), "notifyListenersRPD", t);
+                }
             }
         }
     }

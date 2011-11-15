@@ -62,6 +62,7 @@ import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
 import com.sap.sailing.domain.tractracadapter.TracTracConfiguration;
 import com.sap.sailing.domain.tractracadapter.TracTracRaceTracker;
+import com.sap.sailing.util.CourseAsWaypointList;
 import com.sap.sailing.util.Util;
 import com.sap.sailing.util.Util.Pair;
 import com.tractrac.clientmodule.CompetitorClass;

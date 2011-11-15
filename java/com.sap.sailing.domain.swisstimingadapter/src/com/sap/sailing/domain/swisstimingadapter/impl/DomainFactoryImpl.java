@@ -3,6 +3,7 @@ package com.sap.sailing.domain.swisstimingadapter.impl;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -36,8 +37,15 @@ import com.sap.sailing.domain.swisstimingadapter.MessageType;
 import com.sap.sailing.domain.swisstimingadapter.Race;
 import com.sap.sailing.domain.swisstimingadapter.StartList;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
+import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
+import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
+import com.sap.sailing.util.CourseAsWaypointList;
 import com.sap.sailing.util.Util;
+
+import difflib.DiffUtils;
+import difflib.Patch;
+import difflib.PatchFailedException;
 
 public class DomainFactoryImpl implements DomainFactory {
     private final Map<String, Event> raceIDToEventCache;
@@ -168,4 +176,47 @@ public class DomainFactoryImpl implements DomainFactory {
                 timePointOfTransmission.asMillis() + fix.getAgeOfDataInMilliseconds()), fix.getSpeed());
         return result;
     }
+    
+    @Override
+    public void updateCourseWaypoints(com.sap.sailing.domain.base.Course courseToUpdate, Iterable<Mark> marks) throws PatchFailedException {
+        Iterable<Waypoint> courseWaypoints = courseToUpdate.getWaypoints();
+        List<Waypoint> newWaypointList = new LinkedList<Waypoint>();
+        // key existing waypoints by control points and re-use each one at most once during construction of the
+        // new waypoint list; since several waypoints can have the same control point, the map goes from
+        // control point to List<Waypoint>. The waypoints in the lists are held in the order of their
+        // occurrence in courseToUpdate.getWaypoints().
+        Map<com.sap.sailing.domain.base.ControlPoint, List<Waypoint>> existingWaypointsByControlPoint =
+                new HashMap<com.sap.sailing.domain.base.ControlPoint, List<Waypoint>>();
+        for (Waypoint waypoint : courseToUpdate.getWaypoints()) {
+            List<Waypoint> wpl = existingWaypointsByControlPoint.get(waypoint.getControlPoint());
+            if (wpl == null) {
+                wpl = new ArrayList<Waypoint>();
+                existingWaypointsByControlPoint.put(waypoint.getControlPoint(), wpl);
+            }
+            wpl.add(waypoint);
+        }
+        for (Mark mark : marks) {
+            com.sap.sailing.domain.base.ControlPoint domainControlPoint = getOrCreateControlPoint(mark.getDevices());
+            List<Waypoint> waypoints = existingWaypointsByControlPoint.get(domainControlPoint);
+            Waypoint waypoint;
+            if (waypoints == null || waypoints.isEmpty()) {
+                // must be a new control point for which we don't have a waypoint yet
+                waypoint = new WaypointImpl(domainControlPoint);
+            } else {
+                waypoint = waypoints.remove(0); // take the first from the list
+            }
+            newWaypointList.add(waypoint);
+        }
+        Patch<Waypoint> patch = DiffUtils.diff(courseWaypoints, newWaypointList);
+        CourseAsWaypointList courseAsWaypointList = new CourseAsWaypointList(courseToUpdate);
+        synchronized (courseToUpdate) {
+            patch.applyToInPlace(courseAsWaypointList);
+        }
+    }
+
+    @Override
+    public MarkPassing createMarkPassing(String raceID, String boatID, Waypoint waypoint, TimePoint timePoint) {
+        return new MarkPassingImpl(timePoint, waypoint, getCompetitorByBoatID(boatID));
+    }
+
 }
