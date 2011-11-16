@@ -49,8 +49,7 @@ public class TMDMessage {
         for (TimingDataElement el : list) {
             s = s + el.toString();
         }
-
-        return "TMD|" + list.size() + s;
+        return "TMD|" + raceId + "|" + sailNumber + "|" + list.size() + s;
     }
 
 }

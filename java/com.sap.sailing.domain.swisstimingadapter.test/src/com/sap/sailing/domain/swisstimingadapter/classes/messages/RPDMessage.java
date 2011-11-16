@@ -103,13 +103,17 @@ public class RPDMessage {
         SimpleDateFormat sstartTime = new SimpleDateFormat("HH:mm:ss");
         SimpleDateFormat sraceTime = new SimpleDateFormat("HH:mm:ss");
 
+        String sdataTimeString = dataTime == null ? "" : sdataTime.format(dataTime);
+        String sstartTimeString = startTime == null ? "" : sstartTime.format(startTime);
+        String ssraceTimeString = raceTime == null ? "" : sraceTime.format(raceTime);
+        
         String elements = "";
         for (RacePositionDataElement el : racePositionElements) {
             elements = elements + el.toString();
         }
 
-        return "RPD|" + raceId + "|" + status + "|" + sdataTime.format(dataTime) + "|"
-                + sstartTime.format(startTime) + "|" + sraceTime.format(raceTime) + "|"
+        return "RPD|" + raceId + "|" + status + "|" + sdataTimeString+ "|"
+                + sstartTimeString + "|" + ssraceTimeString + "|" + nextMarkLeader + "|" + distanceToNextMarkLeader + "|" 
                 + racePositionElements.size() + elements;
     }
 }

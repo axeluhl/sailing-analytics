@@ -82,19 +82,19 @@ public class MessageFileServiceImpl implements MessageFileService {
             case RPD:
                 resultList.add(getRPDMessage(sailMasterMessage));
                 break;
-            case RAC: // /
+            case RAC: // / Used in MainTestfileService
                 resultList.add(getRACMessage(sailMasterMessage));
                 break;
-            case CCG: // /
+            case CCG: // /Used in MainTestfileService
                 resultList.add(getCCGMessage(sailMasterMessage));
                 break;
-            case STL: // /
+            case STL: // / Used in MainTestfileService
                 resultList.add(getSTLMessage(sailMasterMessage));
                 break;
-            case CAM: // /
+            case CAM: // / Used in MainTestfileService
                 resultList.add(getCAMMessage(sailMasterMessage));
                 break;
-            case TMD:
+            case TMD: // / Used in MainTestfileService
                 resultList.add(getTMDMessage(sailMasterMessage));
                 break;
             default:
@@ -111,7 +111,7 @@ public class MessageFileServiceImpl implements MessageFileService {
         int status = Integer.valueOf(sections[2]);
         Date timePoint = parseTimeAndDateISO(sections[3]);
         Date startTimeEstimatedStartTime = sections[4].trim().length() == 0 ? null
-                : parseTimePrefixedWithISOToday(sections[4]);
+                : parseHHMMSSToDate(sections[4]);
         Long millisecondsSinceRaceStart = sections[5].trim().length() == 0 ? null
                 : parseHHMMSSToMilliseconds(sections[5]);
         Integer nextMarkIndexForLeader = sections[6].trim().length() == 0 ? null : Integer.valueOf(sections[6]);
@@ -225,7 +225,7 @@ public class MessageFileServiceImpl implements MessageFileService {
             Integer markIndex = details.length <= 0 || details[0].trim().length() == 0 ? null : Integer
                     .valueOf(details[0]);
             Integer rank = details.length <= 1 || details[1].trim().length() == 0 ? null : Integer.valueOf(details[1]);
-            Date timeSinceStart = details[4].trim().length() == 0 ? null : parseTimePrefixedWithISOToday(details[4]);
+            Date timeSinceStart = details[2].trim().length() == 0 ? null : parseHHMMSSToDate(details[2]);
             timingDataelementList.add(new TimingDataElement(markIndex, rank, timeSinceStart));
         }
         return new TMDMessage(raceID, boatID, timingDataelementList);
