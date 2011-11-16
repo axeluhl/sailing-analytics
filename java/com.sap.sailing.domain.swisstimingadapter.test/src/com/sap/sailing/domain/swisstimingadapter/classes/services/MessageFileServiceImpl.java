@@ -127,10 +127,8 @@ public class MessageFileServiceImpl implements MessageFileService {
                 String boatID = fixSections[fixDetailIndex++];
                 int trackerTypeInt = Integer.valueOf(fixSections[fixDetailIndex++]);
                 Long ageOfDataInMilliseconds = 1000l * Long.valueOf(fixSections[fixDetailIndex++]);
-                //double longitude = Double.valueOf(fixSections[fixDetailIndex++]);
-                double longitude = Double.parseDouble(fixSections[fixDetailIndex++]);
-                //double latitude = Double.valueOf(fixSections[fixDetailIndex++]);
                 double latitude = Double.parseDouble(fixSections[fixDetailIndex++]);
+                double longitude = Double.parseDouble(fixSections[fixDetailIndex++]);
                 Double speedOverGroundInKnots = Double.valueOf(fixSections[fixDetailIndex++]);
                 Speed averageSpeedOverGround = fixSections[fixDetailIndex].trim().length() == 0 ? null
                         : new KnotSpeedImpl(Double.valueOf(fixSections[fixDetailIndex]));
