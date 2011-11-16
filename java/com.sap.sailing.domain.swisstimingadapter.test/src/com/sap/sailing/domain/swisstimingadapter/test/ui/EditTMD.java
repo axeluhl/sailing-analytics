@@ -193,7 +193,7 @@ public class EditTMD extends javax.swing.JDialog {
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
         // TODO add your handling code here:
         tmd.setRaceId(jRaceId.getText());
-        tmd.setSailNumber(tmd.getSailNumber());
+        tmd.setSailNumber(jSailNumber.getText());
         dispose();
     }//GEN-LAST:event_jButton3ActionPerformed
 
