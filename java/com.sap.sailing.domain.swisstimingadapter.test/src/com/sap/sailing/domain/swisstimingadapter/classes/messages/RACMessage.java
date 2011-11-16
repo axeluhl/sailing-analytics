@@ -54,8 +54,13 @@ public class RACMessage {
         if (raceList == null) {
             if (other.raceList != null)
                 return false;
-        } else if (!raceList.equals(other.raceList))
-            return false;
+        } 
+
+        for (int i = 0; i < other.raceList.size(); i++) {
+            Race rObj = other.raceList.get(i);
+            Race lRace = raceList.get(i);
+        }
+        
         return true;
     }
     

@@ -6,8 +6,6 @@ public class CAMMessage {
     private String raceId;
     private List<ClockAtMarkElement> markList;
 
-    
-
     public CAMMessage(String raceId, List<ClockAtMarkElement> markList) {
         super();
         this.raceId = raceId;
@@ -22,8 +20,6 @@ public class CAMMessage {
         this.raceId = raceId;
     }
 
-    
-
     public List<ClockAtMarkElement> getMarkList() {
         return markList;
     }
@@ -37,7 +33,7 @@ public class CAMMessage {
         // TODO data element ändern
         String s = "";
         for (ClockAtMarkElement m : markList) {
-            s = s + s.toString();
+            s = s + m.toString();
         }
         return "CAM|" + markList.size() + s;
     }
@@ -72,7 +68,5 @@ public class CAMMessage {
             return false;
         return true;
     }
-    
-    
 
 }
