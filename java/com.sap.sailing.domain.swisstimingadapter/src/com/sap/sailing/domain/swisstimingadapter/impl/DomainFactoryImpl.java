@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.sap.sailing.domain.base.Boat;
+import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
@@ -110,9 +111,15 @@ public class DomainFactoryImpl implements DomainFactory {
     public RaceDefinition createRaceDefinition(Event event, Race race, StartList startList, Course course) {
         com.sap.sailing.domain.base.Course domainCourse = createCourse(race.getDescription(), course);
         Iterable<Competitor> competitors = createCompetitorList(startList);
-        RaceDefinition result = new RaceDefinitionImpl(race.getDescription(), domainCourse, /* boatClass */ null, competitors);
+        RaceDefinition result = new RaceDefinitionImpl(race.getDescription(), domainCourse,
+                getOrCreateBoatClassFromRaceID(race.getRaceID()), competitors);
         event.addRace(result);
         return result;
+    }
+
+    private BoatClass getOrCreateBoatClassFromRaceID(String raceID) {
+        // TODO extract boat class from raceID according to SwissTiming-internal mapping rules
+        return /* boatClass */ null;
     }
 
     private Iterable<Competitor> createCompetitorList(StartList startList) {
