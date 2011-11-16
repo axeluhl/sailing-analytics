@@ -8,7 +8,7 @@
  *
  * Created on 15.11.2011, 14:14:41
  */
-package swisstimingracecreator;
+package com.sap.sailing.domain.swisstimingadapter.test.ui;
 
 import com.sap.sailing.domain.swisstimingadapter.classes.messages.ABSMessage;
 import com.sap.sailing.domain.swisstimingadapter.classes.messages.CAMMessage;
@@ -17,6 +17,9 @@ import com.sap.sailing.domain.swisstimingadapter.classes.messages.RACMessage;
 import com.sap.sailing.domain.swisstimingadapter.classes.messages.RPDMessage;
 import com.sap.sailing.domain.swisstimingadapter.classes.messages.STLMessage;
 import com.sap.sailing.domain.swisstimingadapter.classes.messages.TMDMessage;
+import com.sap.sailing.domain.swisstimingadapter.classes.services.MessageFileService;
+import com.sap.sailing.domain.swisstimingadapter.classes.services.MessageFileServiceImpl;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
