@@ -8,7 +8,7 @@
  *
  * Created on 15.11.2011, 14:14:41
  */
-package com.sap.sailing.domain.swisstimingadapter.test.ui;
+package swisstimingracecreator;
 
 import com.sap.sailing.domain.swisstimingadapter.classes.messages.ABSMessage;
 import com.sap.sailing.domain.swisstimingadapter.classes.messages.CAMMessage;
@@ -17,9 +17,6 @@ import com.sap.sailing.domain.swisstimingadapter.classes.messages.RACMessage;
 import com.sap.sailing.domain.swisstimingadapter.classes.messages.RPDMessage;
 import com.sap.sailing.domain.swisstimingadapter.classes.messages.STLMessage;
 import com.sap.sailing.domain.swisstimingadapter.classes.messages.TMDMessage;
-import com.sap.sailing.domain.swisstimingadapter.classes.services.MessageFileService;
-import com.sap.sailing.domain.swisstimingadapter.classes.services.MessageFileServiceImpl;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -83,6 +80,7 @@ public class SwissTimingRaceEditor extends javax.swing.JFrame {
         jMenuItem3 = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setTitle("SwissTiming-Sample-Race Editor");
 
         jCommandList.setModel(new javax.swing.AbstractListModel() {
             String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
@@ -341,7 +339,6 @@ public class SwissTimingRaceEditor extends javax.swing.JFrame {
             } catch (Exception ex) {
                 Logger.getLogger(SwissTimingRaceEditor.class.getName()).log(Level.SEVERE, null, ex);
             }
-            System.out.println("al: " + al);
             if (al != null)
                 commands = al;
             jCommandList.setListData(getArrayOfList(commands));
