@@ -48,7 +48,7 @@ public class ClockAtMarkElement {
 
     public String toString() {
         SimpleDateFormat sd = new SimpleDateFormat("HH:mm:ss");
-        return "|" + markindex + ";" + sd.format(marktime) + ";" + sailnumber;
+        return "|" + markindex + ";" + (marktime == null ? "" : sd.format(marktime)) + ";" + sailnumber;
     }
 
 

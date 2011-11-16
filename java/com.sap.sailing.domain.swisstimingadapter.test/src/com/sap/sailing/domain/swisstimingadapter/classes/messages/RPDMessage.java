@@ -104,6 +104,9 @@ public class RPDMessage {
         SimpleDateFormat sraceTime = new SimpleDateFormat("HH:mm:ss");
 
         String sdataTimeString = dataTime == null ? "" : sdataTime.format(dataTime);
+        String sec3 = new String(sdataTimeString);
+        String sdataTimeStringWithColon = sec3.substring(0, sec3.length()-3) + ":" +  sec3.substring(sec3.length()-2, sec3.length());
+        
         String sstartTimeString = startTime == null ? "" : sstartTime.format(startTime);
         String ssraceTimeString = raceTime == null ? "" : sraceTime.format(raceTime);
         
@@ -112,7 +115,7 @@ public class RPDMessage {
             elements = elements + el.toString();
         }
 
-        return "RPD|" + raceId + "|" + status + "|" + sdataTimeString+ "|"
+        return "RPD|" + raceId + "|" + status + "|" + sdataTimeStringWithColon + "|"
                 + sstartTimeString + "|" + ssraceTimeString + "|" + nextMarkLeader + "|" + distanceToNextMarkLeader + "|" 
                 + racePositionElements.size() + elements;
     }
