@@ -1,10 +1,12 @@
-package com.sap.sailing.domain.swisstimingadapter.classes.services;
+package com.sap.sailing.domain.swisstimingadapter.classes.services.old;
 
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.sap.sailing.domain.swisstimingadapter.classes.services.MessageFileService;
+import com.sap.sailing.domain.swisstimingadapter.classes.services.MessageFileServiceImpl;
 import com.sap.sailing.domain.swisstimingadapter.classes.services.Exceptions.MessageScriptParsingException;
 
 public class MessageScriptServiceImpl implements MessageScriptService{
@@ -21,7 +23,8 @@ public class MessageScriptServiceImpl implements MessageScriptService{
     @Override
     public void updateMessage(Object message) {
         for (int i = 0; i < messageList.size(); i++) {
-            if(messageList.get(i).equals(message)){
+            // compare per refereence since 16.11.11 11:38
+            if(messageList.get(i)==message){
                 messageList.remove(i);
                 messageList.add(i-1, message);
             }
@@ -41,7 +44,8 @@ public class MessageScriptServiceImpl implements MessageScriptService{
     @Override
     public void deleteMessage(Object message) {
         for (int i = 0; i < messageList.size(); i++) {
-            if(messageList.get(i).equals(message)){
+         // compare per refereence since 16.11.11 11:38
+            if(messageList.get(i)==message){
                 messageList.remove(i);
             }
         }

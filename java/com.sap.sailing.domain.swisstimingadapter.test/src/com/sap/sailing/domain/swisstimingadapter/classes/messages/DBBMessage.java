@@ -44,46 +44,4 @@ public class DBBMessage {
     public String toString() {
         return "DBB|" + raceId + ";" +  sailNumber + ";" +  sailNumber2;
     }
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        long temp;
-        temp = Double.doubleToLongBits(distance);
-        result = prime * result + (int) (temp ^ (temp >>> 32));
-        result = prime * result + ((raceId == null) ? 0 : raceId.hashCode());
-        result = prime * result + ((sailNumber == null) ? 0 : sailNumber.hashCode());
-        result = prime * result + ((sailNumber2 == null) ? 0 : sailNumber2.hashCode());
-        return result;
-    }
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        DBBMessage other = (DBBMessage) obj;
-        if (Double.doubleToLongBits(distance) != Double.doubleToLongBits(other.distance))
-            return false;
-        if (raceId == null) {
-            if (other.raceId != null)
-                return false;
-        } else if (!raceId.equals(other.raceId))
-            return false;
-        if (sailNumber == null) {
-            if (other.sailNumber != null)
-                return false;
-        } else if (!sailNumber.equals(other.sailNumber))
-            return false;
-        if (sailNumber2 == null) {
-            if (other.sailNumber2 != null)
-                return false;
-        } else if (!sailNumber2.equals(other.sailNumber2))
-            return false;
-        return true;
-    }
-    
-    
 }

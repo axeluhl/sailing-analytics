@@ -35,38 +35,8 @@ public class CAMMessage {
         for (ClockAtMarkElement m : markList) {
             s = s + m.toString();
         }
-        return "CAM|" + markList.size() + s;
+        return "CAM|" +  raceId + "|"+ markList.size() + s;
     }
 
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((markList == null) ? 0 : markList.hashCode());
-        result = prime * result + ((raceId == null) ? 0 : raceId.hashCode());
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        CAMMessage other = (CAMMessage) obj;
-        if (markList == null) {
-            if (other.markList != null)
-                return false;
-        } else if (!markList.equals(other.markList))
-            return false;
-        if (raceId == null) {
-            if (other.raceId != null)
-                return false;
-        } else if (!raceId.equals(other.raceId))
-            return false;
-        return true;
-    }
 
 }

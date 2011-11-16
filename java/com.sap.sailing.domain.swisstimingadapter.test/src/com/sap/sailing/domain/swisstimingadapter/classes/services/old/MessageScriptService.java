@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.swisstimingadapter.classes.services;
+package com.sap.sailing.domain.swisstimingadapter.classes.services.old;
 
 import java.io.IOException;
 import java.text.ParseException;

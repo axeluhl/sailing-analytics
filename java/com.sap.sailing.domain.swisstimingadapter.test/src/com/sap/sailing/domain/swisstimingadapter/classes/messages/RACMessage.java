@@ -34,35 +34,5 @@ public class RACMessage {
         return "RAC|" + raceList.size() + s;
     }
 
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((raceList == null) ? 0 : raceList.hashCode());
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        RACMessage other = (RACMessage) obj;
-        if (raceList == null) {
-            if (other.raceList != null)
-                return false;
-        } 
-
-        for (int i = 0; i < other.raceList.size(); i++) {
-            Race rObj = other.raceList.get(i);
-            Race lRace = raceList.get(i);
-        }
-        
-        return true;
-    }
-    
     
 }

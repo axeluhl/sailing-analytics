@@ -56,8 +56,7 @@ public class MessageFileServiceImpl implements MessageFileService {
     }
 
     @Override
-    public void writeListToFile(String path, List<Object> msgList) throws IOException {
-        file = new File(path);
+    public void writeListToFile(File path, List<Object> msgList) throws IOException {
         writer = new BufferedWriter(new FileWriter(path));
         String tmp = "";
         for (Object object : msgList) {
@@ -69,8 +68,7 @@ public class MessageFileServiceImpl implements MessageFileService {
     }
 
     @Override
-    public List<Object> readListFromFile(String path) throws MessageScriptParsingException, IOException, ParseException {
-        file = new File(path);
+    public List<Object> readListFromFile(File path) throws MessageScriptParsingException, IOException, ParseException {
         List<Object> resultList = new ArrayList<Object>();
 
         reader = new BufferedReader(new FileReader(path));
@@ -84,16 +82,16 @@ public class MessageFileServiceImpl implements MessageFileService {
             case RPD:
                 resultList.add(getRPDMessage(sailMasterMessage));
                 break;
-            case RAC:
+            case RAC: // /
                 resultList.add(getRACMessage(sailMasterMessage));
                 break;
-            case CCG:
+            case CCG: // /
                 resultList.add(getCCGMessage(sailMasterMessage));
                 break;
-            case STL:
+            case STL: // /
                 resultList.add(getSTLMessage(sailMasterMessage));
                 break;
-            case CAM:
+            case CAM: // /
                 resultList.add(getCAMMessage(sailMasterMessage));
                 break;
             case TMD:
@@ -107,22 +105,22 @@ public class MessageFileServiceImpl implements MessageFileService {
     }
 
     private RPDMessage getRPDMessage(SailMasterMessage message) throws ParseException {
-        String[] sections = message.getSections();        
-        
+        String[] sections = message.getSections();
+
         String raceID = sections[1];
         int status = Integer.valueOf(sections[2]);
-        TimePoint timePoint = new MillisecondsTimePoint(parseTimeAndDateISO(sections[3]));
-        TimePoint startTimeEstimatedStartTime = sections[4].trim().length() == 0 ? null : new MillisecondsTimePoint(
-                parseTimePrefixedWithISOToday(sections[4]));
+        Date timePoint = parseTimeAndDateISO(sections[3]);
+        Date startTimeEstimatedStartTime = sections[4].trim().length() == 0 ? null
+                : parseTimePrefixedWithISOToday(sections[4]);
         Long millisecondsSinceRaceStart = sections[5].trim().length() == 0 ? null
                 : parseHHMMSSToMilliseconds(sections[5]);
         Integer nextMarkIndexForLeader = sections[6].trim().length() == 0 ? null : Integer.valueOf(sections[6]);
         Distance distanceToNextMarkForLeader = sections[7].trim().length() == 0 ? null : new MeterDistance(
                 Double.valueOf(sections[7]));
         int count = Integer.valueOf(sections[8]);
-        
+
         List<RacePositionDataElement> racePositionElements = new ArrayList<RacePositionDataElement>();
-        
+
         for (int i = 0; i < count; i++) {
             int fixDetailIndex = 0;
             String[] fixSections = sections[9 + i].split(";");
@@ -141,7 +139,7 @@ public class MessageFileServiceImpl implements MessageFileService {
                 fixDetailIndex++;
                 SpeedWithBearing speed = new KnotSpeedWithBearingImpl(speedOverGroundInKnots, new DegreeBearingImpl(
                         Double.valueOf(fixSections[fixDetailIndex++])));
-                
+
                 Integer nextMarkIndex = fixSections.length <= fixDetailIndex
                         || fixSections[fixDetailIndex].trim().length() == 0 ? null : Integer
                         .valueOf(fixSections[fixDetailIndex]);
@@ -157,18 +155,23 @@ public class MessageFileServiceImpl implements MessageFileService {
                         || fixSections[fixDetailIndex].trim().length() == 0 ? null : new MeterDistance(
                         Double.valueOf(fixSections[fixDetailIndex]));
                 fixDetailIndex++;
-                
-               racePositionElements.add(new RacePositionDataElement(boatID, trackerTypeInt, ageOfDataInMilliseconds.longValue(), latitude, longitude, speedOverGroundInKnots.doubleValue(), velocityMadeGood.getKnots(), speed.getKnots(), speed.getBearing().getDegrees(), nextMarkIndex.intValue(), rank.intValue(), distanceToLeader.getMeters(), distanceToNextMark.getMeters()));
+
+                racePositionElements.add(new RacePositionDataElement(boatID, trackerTypeInt, ageOfDataInMilliseconds
+                        .longValue(), latitude, longitude, speedOverGroundInKnots.doubleValue(), velocityMadeGood
+                        .getKnots(), averageSpeedOverGround.getKnots(), speed.getBearing().getDegrees(), nextMarkIndex
+                        .intValue(), rank.intValue(), distanceToLeader.getMeters(), distanceToNextMark.getMeters()));
             }
         }
-        return new RPDMessage(raceID, status, timePoint, startTimeEstimatedStartTime, new Date(millisecondsSinceRaceStart), nextMarkIndexForLeader.intValue(), distanceToNextMarkForLeader.getMeters(), racePositionElements);
+        return new RPDMessage(raceID, status, timePoint, startTimeEstimatedStartTime, new Date(
+                millisecondsSinceRaceStart), nextMarkIndexForLeader.intValue(),
+                distanceToNextMarkForLeader.getMeters(), racePositionElements);
     }
 
     private RACMessage getRACMessage(SailMasterMessage message) {
         int count = Integer.valueOf(message.getSections()[1]);
         List<Race> result = new ArrayList<Race>();
-        for (int i=0; i<count; i++) {
-            String[] idAndDescription = message.getSections()[2+i].split(";");
+        for (int i = 0; i < count; i++) {
+            String[] idAndDescription = message.getSections()[2 + i].split(";");
             result.add(new RaceImpl(idAndDescription[0], idAndDescription[1]));
         }
         return new RACMessage(result);
@@ -178,9 +181,10 @@ public class MessageFileServiceImpl implements MessageFileService {
         String raceId = message.getSections()[1];
         int count = Integer.valueOf(message.getSections()[2]);
         List<Mark> marks = new ArrayList<Mark>();
-        for (int i=0; i<count; i++) {
-            String[] markDetails = message.getSections()[3+i].split(";");
-            marks.add(new MarkImpl(markDetails[1], Integer.valueOf(markDetails[0]), Arrays.asList(markDetails).subList(2, markDetails.length)));
+        for (int i = 0; i < count; i++) {
+            String[] markDetails = message.getSections()[3 + i].split(";");
+            marks.add(new MarkImpl(markDetails[1], Integer.valueOf(markDetails[0]), Arrays.asList(markDetails).subList(
+                    2, markDetails.length)));
         }
         return new CCGMessage(raceId, marks);
     }
@@ -189,8 +193,8 @@ public class MessageFileServiceImpl implements MessageFileService {
         String raceId = message.getSections()[1];
         ArrayList<Competitor> competitors = new ArrayList<Competitor>();
         int count = Integer.valueOf(message.getSections()[2]);
-        for (int i=0; i<count; i++) {
-            String[] competitorDetails = message.getSections()[3+i].split(";");
+        for (int i = 0; i < count; i++) {
+            String[] competitorDetails = message.getSections()[3 + i].split(";");
             competitors.add(new CompetitorImpl(competitorDetails[0], competitorDetails[1], competitorDetails[2]));
         }
         return new STLMessage(raceId, competitors);
@@ -200,12 +204,13 @@ public class MessageFileServiceImpl implements MessageFileService {
         String raceId = message.getSections()[1];
         List<ClockAtMarkElement> result = new ArrayList<ClockAtMarkElement>();
         int count = Integer.valueOf(message.getSections()[2]);
-        for (int i=0; i<count; i++) {
-            String[] clockAtMarkDetail = message.getSections()[3+i].split(";");
+        for (int i = 0; i < count; i++) {
+            String[] clockAtMarkDetail = message.getSections()[3 + i].split(";");
             int markIndex = Integer.valueOf(clockAtMarkDetail[0]);
-            TimePoint timePoint = clockAtMarkDetail.length <= 1 || clockAtMarkDetail[1].trim().length() == 0 ? null :
-                new MillisecondsTimePoint(parseTimePrefixedWithISOToday(clockAtMarkDetail[1]));
-            result.add(new ClockAtMarkElement(markIndex, timePoint, clockAtMarkDetail.length <= 2 ? null : clockAtMarkDetail[2]));
+            Date timePoint = clockAtMarkDetail.length <= 1 || clockAtMarkDetail[1].trim().length() == 0 ? null
+                    : parseHHMMSSToDate(clockAtMarkDetail[1]);
+            result.add(new ClockAtMarkElement(markIndex, timePoint, clockAtMarkDetail.length <= 2 ? null
+                    : clockAtMarkDetail[2]));
         }
         return new CAMMessage(raceId, result);
     }
@@ -216,44 +221,53 @@ public class MessageFileServiceImpl implements MessageFileService {
         int count = Integer.valueOf(message.getSections()[3]);
         List<TimingDataElement> timingDataelementList = new ArrayList<TimingDataElement>();
         for (int i = 0; i < count; i++) {
-            String[] details = message.getSections()[4+i].split(";");
-            Integer markIndex = details.length <= 0 || details[0].trim().length() == 0 ? null : Integer.valueOf(details[0]); 
-            Integer rank = details.length <= 1 || details[1].trim().length() == 0 ? null : Integer.valueOf(details[1]); 
-            TimePoint timeSinceStart = details[4].trim().length() == 0 ? null : new MillisecondsTimePoint(
-                    parseTimePrefixedWithISOToday(details[4]));
+            String[] details = message.getSections()[4 + i].split(";");
+            Integer markIndex = details.length <= 0 || details[0].trim().length() == 0 ? null : Integer
+                    .valueOf(details[0]);
+            Integer rank = details.length <= 1 || details[1].trim().length() == 0 ? null : Integer.valueOf(details[1]);
+            Date timeSinceStart = details[4].trim().length() == 0 ? null : parseTimePrefixedWithISOToday(details[4]);
             timingDataelementList.add(new TimingDataElement(markIndex, rank, timeSinceStart));
         }
         return new TMDMessage(raceID, boatID, timingDataelementList);
     }
-    
+
     private Date parseTimeAndDateISO(String timeAndDateISO) throws ParseException {
-        char timeZoneIndicator = timeAndDateISO.charAt(timeAndDateISO.length()-6);
-        if ((timeZoneIndicator == '+' || timeZoneIndicator == '-') && timeAndDateISO.charAt(timeAndDateISO.length()-3) == ':') {
-            timeAndDateISO = timeAndDateISO.substring(0, timeAndDateISO.length()-3)+timeAndDateISO.substring(timeAndDateISO.length()-2);
-            lastTimeZoneSuffix = timeAndDateISO.substring(timeAndDateISO.length()-5);
+        char timeZoneIndicator = timeAndDateISO.charAt(timeAndDateISO.length() - 6);
+        if ((timeZoneIndicator == '+' || timeZoneIndicator == '-')
+                && timeAndDateISO.charAt(timeAndDateISO.length() - 3) == ':') {
+            timeAndDateISO = timeAndDateISO.substring(0, timeAndDateISO.length() - 3)
+                    + timeAndDateISO.substring(timeAndDateISO.length() - 2);
+            lastTimeZoneSuffix = timeAndDateISO.substring(timeAndDateISO.length() - 5);
         }
-        synchronized(dateFormat) {
+        synchronized (dateFormat) {
             return dateFormat.parse(timeAndDateISO);
         }
     }
-    
+
     private Date parseTimePrefixedWithISOToday(String timeHHMMSS) throws ParseException {
-        synchronized(dateFormat) {
+        synchronized (dateFormat) {
             return dateFormat.parse(prefixTimeWithISOTodayAndSuffixWithTimezoneIndicator(timeHHMMSS));
         }
     }
 
     private String prefixTimeWithISOTodayAndSuffixWithTimezoneIndicator(String time) {
         synchronized (dateFormat) {
-            return dateFormat.format(new Date()).substring(0, "yyyy-mm-ddT".length())+time+lastTimeZoneSuffix;
+            return dateFormat.format(new Date()).substring(0, "yyyy-mm-ddT".length()) + time + lastTimeZoneSuffix;
         }
     }
-    
+
     private long parseHHMMSSToMilliseconds(String hhmmss) {
         String[] timeDetail = hhmmss.split(":");
         long millisecondsSinceStart = 1000 * (Long.valueOf(timeDetail[2]) + 60 * Long.valueOf(timeDetail[1]) + 3600 * Long
                 .valueOf(timeDetail[0]));
         return millisecondsSinceStart;
+    }
+    
+    private Date parseHHMMSSToDate(String hhmmss){
+        String[] timeDetail = hhmmss.split(":");
+        long millisecondsSinceStart = 1000 * (Long.valueOf(timeDetail[2]) + 60 * Long.valueOf(timeDetail[1]) + 3600 * Long
+                .valueOf(timeDetail[0]));
+        return new Date(millisecondsSinceStart);
     }
 
     private List<SailMasterMessage> getSailMasterMessageList(List<String> strList) {
@@ -266,13 +280,10 @@ public class MessageFileServiceImpl implements MessageFileService {
     }
 
     private List<String> getFileIntoArrayListString(BufferedReader reader) throws IOException {
-        // List<Object> list = new ArrayList<Object>();
         List<String> strList = new ArrayList<String>();
-
-        // Read Lines into ArrayList
         String tmp = "";
         while ((tmp = reader.readLine()) != null) {
-            strList.add(reader.readLine());
+            strList.add(tmp);
         }
         return strList;
     }

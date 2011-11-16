@@ -55,45 +55,4 @@ public class DTMMessage {
         return "DTM|" + raceId + ";" + markIndex + ";" + sailNumber;
     }
 
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        long temp;
-        temp = Double.doubleToLongBits(distance);
-        result = prime * result + (int) (temp ^ (temp >>> 32));
-        result = prime * result + markIndex;
-        result = prime * result + ((raceId == null) ? 0 : raceId.hashCode());
-        result = prime * result + ((sailNumber == null) ? 0 : sailNumber.hashCode());
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        DTMMessage other = (DTMMessage) obj;
-        if (Double.doubleToLongBits(distance) != Double.doubleToLongBits(other.distance))
-            return false;
-        if (markIndex != other.markIndex)
-            return false;
-        if (raceId == null) {
-            if (other.raceId != null)
-                return false;
-        } else if (!raceId.equals(other.raceId))
-            return false;
-        if (sailNumber == null) {
-            if (other.sailNumber != null)
-                return false;
-        } else if (!sailNumber.equals(other.sailNumber))
-            return false;
-        return true;
-    }
-    
-    
-
 }
