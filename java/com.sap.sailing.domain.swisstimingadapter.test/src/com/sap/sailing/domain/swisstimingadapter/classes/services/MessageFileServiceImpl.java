@@ -17,12 +17,10 @@ import java.util.List;
 import com.sap.sailing.domain.base.Distance;
 import com.sap.sailing.domain.base.Speed;
 import com.sap.sailing.domain.base.SpeedWithBearing;
-import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MeterDistance;
-import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.swisstimingadapter.Competitor;
 import com.sap.sailing.domain.swisstimingadapter.Mark;
 import com.sap.sailing.domain.swisstimingadapter.Race;
@@ -37,7 +35,6 @@ import com.sap.sailing.domain.swisstimingadapter.classes.messages.STLMessage;
 import com.sap.sailing.domain.swisstimingadapter.classes.messages.TMDMessage;
 import com.sap.sailing.domain.swisstimingadapter.classes.messages.TimingDataElement;
 import com.sap.sailing.domain.swisstimingadapter.classes.services.Exceptions.MessageScriptParsingException;
-
 import com.sap.sailing.domain.swisstimingadapter.impl.CompetitorImpl;
 import com.sap.sailing.domain.swisstimingadapter.impl.MarkImpl;
 import com.sap.sailing.domain.swisstimingadapter.impl.RaceImpl;
@@ -48,11 +45,15 @@ public class MessageFileServiceImpl implements MessageFileService {
     private File file;
     private BufferedWriter writer;
     private BufferedReader reader;
-    private String lastTimeZoneSuffix;
+    //private String lastTimeZoneSuffix;
     private final DateFormat dateFormat;
+    private final DateFormat timeFormat;
+    
+    
 
     public MessageFileServiceImpl() {
         dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ssZ");
+        timeFormat = new SimpleDateFormat("HH:mm:ss");
     }
 
     @Override
@@ -109,11 +110,9 @@ public class MessageFileServiceImpl implements MessageFileService {
 
         String raceID = sections[1];
         int status = Integer.valueOf(sections[2]);
-        Date timePoint = parseTimeAndDateISO(sections[3]);
-        Date startTimeEstimatedStartTime = sections[4].trim().length() == 0 ? null
-                : parseHHMMSSToDate(sections[4]);
-        Long millisecondsSinceRaceStart = sections[5].trim().length() == 0 ? null
-                : parseHHMMSSToMilliseconds(sections[5]);
+        Date timePoint = dateFormat.parse(sections[3]);
+        Date startTimeEstimatedStartTime = timeFormat.parse(sections[4]);
+        Long millisecondsSinceRaceStart = timeFormat.parse(sections[5]).getTime();
         Integer nextMarkIndexForLeader = sections[6].trim().length() == 0 ? null : Integer.valueOf(sections[6]);
         Distance distanceToNextMarkForLeader = sections[7].trim().length() == 0 ? null : new MeterDistance(
                 Double.valueOf(sections[7]));
@@ -128,8 +127,10 @@ public class MessageFileServiceImpl implements MessageFileService {
                 String boatID = fixSections[fixDetailIndex++];
                 int trackerTypeInt = Integer.valueOf(fixSections[fixDetailIndex++]);
                 Long ageOfDataInMilliseconds = 1000l * Long.valueOf(fixSections[fixDetailIndex++]);
-                double longitude = Double.valueOf(fixSections[fixDetailIndex++]);
-                double latitude = Double.valueOf(fixSections[fixDetailIndex++]);
+                //double longitude = Double.valueOf(fixSections[fixDetailIndex++]);
+                double longitude = Double.parseDouble(fixSections[fixDetailIndex++]);
+                //double latitude = Double.valueOf(fixSections[fixDetailIndex++]);
+                double latitude = Double.parseDouble(fixSections[fixDetailIndex++]);
                 Double speedOverGroundInKnots = Double.valueOf(fixSections[fixDetailIndex++]);
                 Speed averageSpeedOverGround = fixSections[fixDetailIndex].trim().length() == 0 ? null
                         : new KnotSpeedImpl(Double.valueOf(fixSections[fixDetailIndex]));
@@ -208,7 +209,7 @@ public class MessageFileServiceImpl implements MessageFileService {
             String[] clockAtMarkDetail = message.getSections()[3 + i].split(";");
             int markIndex = Integer.valueOf(clockAtMarkDetail[0]);
             Date timePoint = clockAtMarkDetail.length <= 1 || clockAtMarkDetail[1].trim().length() == 0 ? null
-                    : parseHHMMSSToDate(clockAtMarkDetail[1]);
+                    : timeFormat.parse(clockAtMarkDetail[1]);
             result.add(new ClockAtMarkElement(markIndex, timePoint, clockAtMarkDetail.length <= 2 ? null
                     : clockAtMarkDetail[2]));
         }
@@ -225,51 +226,12 @@ public class MessageFileServiceImpl implements MessageFileService {
             Integer markIndex = details.length <= 0 || details[0].trim().length() == 0 ? null : Integer
                     .valueOf(details[0]);
             Integer rank = details.length <= 1 || details[1].trim().length() == 0 ? null : Integer.valueOf(details[1]);
-            Date timeSinceStart = details[2].trim().length() == 0 ? null : parseHHMMSSToDate(details[2]);
+            Date timeSinceStart = details[2].trim().length() == 0 ? null : timeFormat.parse(details[2]);
             timingDataelementList.add(new TimingDataElement(markIndex, rank, timeSinceStart));
         }
         return new TMDMessage(raceID, boatID, timingDataelementList);
     }
-
-    private Date parseTimeAndDateISO(String timeAndDateISO) throws ParseException {
-        char timeZoneIndicator = timeAndDateISO.charAt(timeAndDateISO.length() - 6);
-        if ((timeZoneIndicator == '+' || timeZoneIndicator == '-')
-                && timeAndDateISO.charAt(timeAndDateISO.length() - 3) == ':') {
-            timeAndDateISO = timeAndDateISO.substring(0, timeAndDateISO.length() - 3)
-                    + timeAndDateISO.substring(timeAndDateISO.length() - 2);
-            lastTimeZoneSuffix = timeAndDateISO.substring(timeAndDateISO.length() - 5);
-        }
-        synchronized (dateFormat) {
-            return dateFormat.parse(timeAndDateISO);
-        }
-    }
-
-    private Date parseTimePrefixedWithISOToday(String timeHHMMSS) throws ParseException {
-        synchronized (dateFormat) {
-            return dateFormat.parse(prefixTimeWithISOTodayAndSuffixWithTimezoneIndicator(timeHHMMSS));
-        }
-    }
-
-    private String prefixTimeWithISOTodayAndSuffixWithTimezoneIndicator(String time) {
-        synchronized (dateFormat) {
-            return dateFormat.format(new Date()).substring(0, "yyyy-mm-ddT".length()) + time + lastTimeZoneSuffix;
-        }
-    }
-
-    private long parseHHMMSSToMilliseconds(String hhmmss) {
-        String[] timeDetail = hhmmss.split(":");
-        long millisecondsSinceStart = 1000 * (Long.valueOf(timeDetail[2]) + 60 * Long.valueOf(timeDetail[1]) + 3600 * Long
-                .valueOf(timeDetail[0]));
-        return millisecondsSinceStart;
-    }
     
-    private Date parseHHMMSSToDate(String hhmmss){
-        String[] timeDetail = hhmmss.split(":");
-        long millisecondsSinceStart = 1000 * (Long.valueOf(timeDetail[2]) + 60 * Long.valueOf(timeDetail[1]) + 3600 * Long
-                .valueOf(timeDetail[0]));
-        return new Date(millisecondsSinceStart);
-    }
-
     private List<SailMasterMessage> getSailMasterMessageList(List<String> strList) {
         // Add Strings of stringmessageList into a ArrayList of type SailMasterMessage
         List<SailMasterMessage> sailMasterMessageList = new ArrayList<SailMasterMessage>();
@@ -287,5 +249,43 @@ public class MessageFileServiceImpl implements MessageFileService {
         }
         return strList;
     }
-
+//
+//    private Date parseTimeAndDateISO(String timeAndDateISO) throws ParseException {
+//        char timeZoneIndicator = timeAndDateISO.charAt(timeAndDateISO.length() - 6);
+//        /*if ((timeZoneIndicator == '+' || timeZoneIndicator == '-')
+//                && timeAndDateISO.charAt(timeAndDateISO.length() - 3) == ':') {
+//            timeAndDateISO = timeAndDateISO.substring(0, timeAndDateISO.length() - 3)
+//                    + timeAndDateISO.substring(timeAndDateISO.length() - 2);
+//            //lastTimeZoneSuffix = timeAndDateISO.substring(timeAndDateISO.length() - 5);
+//        }*/
+//        synchronized (dateFormat) {
+//            return dateFormat.parse(timeAndDateISO);
+//        }
+//    }
+//
+//    private Date parseTimePrefixedWithISOToday(String timeHHMMSS) throws ParseException {
+//        synchronized (dateFormat) {
+//            return dateFormat.parse(prefixTimeWithISOTodayAndSuffixWithTimezoneIndicator(timeHHMMSS));
+//        }
+//    }
+//
+//    private String prefixTimeWithISOTodayAndSuffixWithTimezoneIndicator(String time) {
+//        synchronized (dateFormat) {
+//            return dateFormat.format(new Date()).substring(0, "yyyy-mm-ddT".length()) + time /*+ lastTimeZoneSuffix*/;
+//        }
+//    }
+//
+//    private long parseHHMMSSToMilliseconds(String hhmmss) {
+//        String[] timeDetail = hhmmss.split(":");
+//        long millisecondsSinceStart = 1000 * (Long.valueOf(timeDetail[2]) + 60 * Long.valueOf(timeDetail[1]) + 3600 * Long
+//                .valueOf(timeDetail[0]));
+//        return millisecondsSinceStart;
+//    }
+    
+//    private Date parseHHMMSSToDate(String hhmmss){
+//        String[] timeDetail = hhmmss.split(":");
+//        long millisecondsSinceStart = 1000 * (Long.valueOf(timeDetail[2]) + 60 * Long.valueOf(timeDetail[1]) + 3600 * Long
+//                .valueOf(timeDetail[0]));
+//        return new Date(millisecondsSinceStart);
+//    }
 }
