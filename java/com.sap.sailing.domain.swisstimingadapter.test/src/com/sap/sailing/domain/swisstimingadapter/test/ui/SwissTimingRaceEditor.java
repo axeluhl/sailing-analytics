@@ -11,11 +11,24 @@
 package com.sap.sailing.domain.swisstimingadapter.test.ui;
 
 import com.sap.sailing.domain.swisstimingadapter.classes.messages.ABSMessage;
+import com.sap.sailing.domain.swisstimingadapter.classes.messages.CAMMessage;
+import com.sap.sailing.domain.swisstimingadapter.classes.messages.CCGMessage;
 import com.sap.sailing.domain.swisstimingadapter.classes.messages.RACMessage;
 import com.sap.sailing.domain.swisstimingadapter.classes.messages.RPDMessage;
+import com.sap.sailing.domain.swisstimingadapter.classes.messages.STLMessage;
+import com.sap.sailing.domain.swisstimingadapter.classes.messages.TMDMessage;
+import com.sap.sailing.domain.swisstimingadapter.classes.services.MessageFileService;
+import com.sap.sailing.domain.swisstimingadapter.classes.services.MessageFileServiceImpl;
+
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import javax.swing.AbstractListModel;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
+import javax.swing.filechooser.FileFilter;
 
 /**
  *
@@ -23,24 +36,28 @@ import javax.swing.AbstractListModel;
  */
 public class SwissTimingRaceEditor extends javax.swing.JFrame {
     private List<Object> commands;
+    private JFileChooser fc;
+    private MessageFileService mfs;
 
     /** Creates new form RaceEditor */
     public SwissTimingRaceEditor() {
         initComponents();
-        jCommandList.setModel(new AbstractListModel() {
-            private ArrayList<Object> commands = new ArrayList<Object>();
+        fc = new JFileChooser();
+        fc.setFileFilter(new FileFilter() {
 
             @Override
-            public int getSize() {
-                return commands.size();
+            public boolean accept(File f) {
+                return f.getPath().trim().toLowerCase().endsWith(".txt") || f.isDirectory();
             }
 
             @Override
-            public Object getElementAt(int index) {
-                return commands.get(index);
+            public String getDescription() {
+                return "Textfile";
             }
         });
+        mfs = new MessageFileServiceImpl();
         commands = new ArrayList<Object>();
+        jCommandList.setListData(getArrayOfList(commands));
     }
 
     /** This method is called from within the constructor to
@@ -59,6 +76,11 @@ public class SwissTimingRaceEditor extends javax.swing.JFrame {
         jEdit = new javax.swing.JButton();
         jMoveUp = new javax.swing.JButton();
         jMoveDown = new javax.swing.JButton();
+        jMenuBar1 = new javax.swing.JMenuBar();
+        jMenu1 = new javax.swing.JMenu();
+        jImport = new javax.swing.JMenuItem();
+        jExport = new javax.swing.JMenuItem();
+        jMenuItem3 = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -77,6 +99,11 @@ public class SwissTimingRaceEditor extends javax.swing.JFrame {
         });
 
         jRemove.setText("Remove");
+        jRemove.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jRemoveActionPerformed(evt);
+            }
+        });
 
         jEdit.setText("Edit");
         jEdit.addActionListener(new java.awt.event.ActionListener() {
@@ -86,8 +113,51 @@ public class SwissTimingRaceEditor extends javax.swing.JFrame {
         });
 
         jMoveUp.setText("Up");
+        jMoveUp.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMoveUpActionPerformed(evt);
+            }
+        });
 
         jMoveDown.setText("Down");
+        jMoveDown.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMoveDownActionPerformed(evt);
+            }
+        });
+
+        jMenu1.setText("File");
+
+        jImport.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_I, java.awt.event.InputEvent.CTRL_MASK));
+        jImport.setText("Import");
+        jImport.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jImportActionPerformed(evt);
+            }
+        });
+        jMenu1.add(jImport);
+
+        jExport.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S, java.awt.event.InputEvent.CTRL_MASK));
+        jExport.setText("Export");
+        jExport.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jExportActionPerformed(evt);
+            }
+        });
+        jMenu1.add(jExport);
+
+        jMenuItem3.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_ESCAPE, 0));
+        jMenuItem3.setText("Exit");
+        jMenuItem3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem3ActionPerformed(evt);
+            }
+        });
+        jMenu1.add(jMenuItem3);
+
+        jMenuBar1.add(jMenu1);
+
+        setJMenuBar(jMenuBar1);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -110,7 +180,7 @@ public class SwissTimingRaceEditor extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 404, Short.MAX_VALUE)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 383, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jAdd)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -147,6 +217,26 @@ public class SwissTimingRaceEditor extends javax.swing.JFrame {
                 jRpd.setVisible(true);
                 commands.add(jRpd.getMessage());
                 break;
+            case CommandChoice.CCG:
+                EditCCG jCcg = new EditCCG(this, true, null);
+                jCcg.setVisible(true);
+                commands.add(jCcg.getMessage());
+                break;
+            case CommandChoice.STL:
+                EditSTL jStl = new EditSTL(this, true, null);
+                jStl.setVisible(true);
+                commands.add(jStl.getMessage());
+                break;
+            case CommandChoice.CAM:
+                EditCAM jCam = new EditCAM(this, true, null);
+                jCam.setVisible(true);
+                commands.add(jCam.getMessage());
+                break;
+            case CommandChoice.TMD:
+                EditTMD jTmd = new EditTMD(this, true, null);
+                jTmd.setVisible(true);
+                commands.add(jTmd.getMessage());
+                break;
         }
         jCommandList.setListData(getArrayOfList(commands));
     }//GEN-LAST:event_jAddActionPerformed
@@ -168,9 +258,108 @@ public class SwissTimingRaceEditor extends javax.swing.JFrame {
                 EditRPD jRpd = new EditRPD(this, true, (RPDMessage) o);
                 jRpd.setVisible(true);
             }
+            else if (o instanceof CCGMessage){
+                EditCCG jCcg = new EditCCG(this, true, (CCGMessage) o);
+                jCcg.setVisible(true);
+            }
+            else if (o instanceof STLMessage){
+                EditSTL jStl = new EditSTL(this, true, (STLMessage) o);
+                jStl.setVisible(true);
+            }
+            else if (o instanceof CAMMessage){
+                EditCAM jCam = new EditCAM(this, true, (CAMMessage) o);
+                jCam.setVisible(true);
+            }
+            else if (o instanceof TMDMessage){
+                EditTMD jTmd = new EditTMD(this, true, (TMDMessage) o);
+                jTmd.setVisible(true);
+            }
             jCommandList.setListData(getArrayOfList(commands));
         }
     }//GEN-LAST:event_jEditActionPerformed
+
+    private void jRemoveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRemoveActionPerformed
+        // TODO add your handling code here:
+        for (Object o : jCommandList.getSelectedValues())
+            commands.remove(o);
+        jCommandList.setListData(getArrayOfList(commands));
+    }//GEN-LAST:event_jRemoveActionPerformed
+
+    private void jMoveUpActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMoveUpActionPerformed
+        // TODO add your handling code here:
+        Object o = jCommandList.getSelectedValue();
+        int index = 0;
+        if (o != null){
+            index = jCommandList.getSelectedIndex();
+            if (index < 0)
+                return;
+            index--;
+            if (index >= 0){
+                commands.remove(o);
+                commands.add(index, o);
+            }
+        }
+        jCommandList.setListData(getArrayOfList(commands));
+        if (index >= 0)
+            jCommandList.setSelectedIndex(index);
+    }//GEN-LAST:event_jMoveUpActionPerformed
+
+    private void jMoveDownActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMoveDownActionPerformed
+        // TODO add your handling code here:
+        Object o = jCommandList.getSelectedValue();
+        int index = 0;
+        if (o != null){
+            index = jCommandList.getSelectedIndex();
+            if (index < 0)
+                return;
+            index++;
+            if (index < commands.size()){
+                commands.remove(o);
+                commands.add(index, o);
+            }
+        }
+        jCommandList.setListData(getArrayOfList(commands));
+        if (index >= 0)
+            jCommandList.setSelectedIndex(index);
+    }//GEN-LAST:event_jMoveDownActionPerformed
+
+    private void jMenuItem3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem3ActionPerformed
+        // TODO add your handling code here:
+        int a = JOptionPane.showConfirmDialog(this, "When you exit without saving you will lose all data.\n Are you sure?", "Exit", JOptionPane.YES_NO_OPTION);
+        if (a == JOptionPane.YES_OPTION)
+            System.exit(0);
+    }//GEN-LAST:event_jMenuItem3ActionPerformed
+
+    private void jImportActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jImportActionPerformed
+        // TODO add your handling code here:
+        int ret = fc.showDialog(this, "Import");
+        if (ret == JFileChooser.APPROVE_OPTION){
+            File f = fc.getSelectedFile();
+            List<Object> al = null;
+            try {
+                al = mfs.readListFromFile(f);
+            } catch (Exception ex) {
+                Logger.getLogger(SwissTimingRaceEditor.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            System.out.println("al: " + al);
+            if (al != null)
+                commands = al;
+            jCommandList.setListData(getArrayOfList(commands));
+        }
+    }//GEN-LAST:event_jImportActionPerformed
+
+    private void jExportActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jExportActionPerformed
+        // TODO add your handling code here:
+        int ret = fc.showDialog(this, "Export");
+        if (ret == JFileChooser.APPROVE_OPTION){
+            File f = fc.getSelectedFile();
+            try {
+                mfs.writeListToFile(f, commands);
+            } catch (IOException ex) {
+                Logger.getLogger(SwissTimingRaceEditor.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }//GEN-LAST:event_jExportActionPerformed
 
     /**
      * @param args the command line arguments
@@ -202,6 +391,7 @@ public class SwissTimingRaceEditor extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
 
+            @Override
             public void run() {
                 new SwissTimingRaceEditor().setVisible(true);
             }
@@ -219,6 +409,11 @@ public class SwissTimingRaceEditor extends javax.swing.JFrame {
     private javax.swing.JButton jAdd;
     private javax.swing.JList jCommandList;
     private javax.swing.JButton jEdit;
+    private javax.swing.JMenuItem jExport;
+    private javax.swing.JMenuItem jImport;
+    private javax.swing.JMenu jMenu1;
+    private javax.swing.JMenuBar jMenuBar1;
+    private javax.swing.JMenuItem jMenuItem3;
     private javax.swing.JButton jMoveDown;
     private javax.swing.JButton jMoveUp;
     private javax.swing.JButton jRemove;

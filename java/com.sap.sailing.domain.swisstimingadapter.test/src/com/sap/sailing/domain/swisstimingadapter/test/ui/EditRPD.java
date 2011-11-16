@@ -10,14 +10,12 @@
  */
 package com.sap.sailing.domain.swisstimingadapter.test.ui;
 
+import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.swisstimingadapter.classes.messages.RPDMessage;
 import com.sap.sailing.domain.swisstimingadapter.classes.messages.RacePositionDataElement;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 
 /**
@@ -28,21 +26,23 @@ public class EditRPD extends javax.swing.JDialog {
     private RPDMessage rpd;
     private List<RacePositionDataElement> rpdData;
     private DateFormat dateFormat;
+    private DateFormat timeFormat;
 
     /** Creates new form EditRPD */
     public EditRPD(java.awt.Frame parent, boolean modal, RPDMessage pRpd) {
         super(parent, modal);
         initComponents();
-        dateFormat = new SimpleDateFormat("HH:MM:SS");
+        dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+        timeFormat = new SimpleDateFormat("HH:mm:ss");
         if (pRpd != null){
             this.rpd = pRpd;
         }
         else{
             rpd = new RPDMessage();
             try {
-                rpd.setStartTime(dateFormat.parse("00:00:00"));
-                rpd.setRaceTime(dateFormat.parse("00:00:00"));
-                rpd.setDataTime(dateFormat.parse("00:00:00"));
+                rpd.setStartTime(timeFormat.parse("00:00:00"));
+                rpd.setRaceTime(timeFormat.parse("00:00:00"));
+                rpd.setDataTime(dateFormat.parse("2011-11-11T00:00:00+0100"));
             }
             catch (Exception e){
                 
@@ -56,9 +56,9 @@ public class EditRPD extends javax.swing.JDialog {
     private void setValuesInUI(){
         jRaceID.setText(rpd.getRaceId());
         jStatus.setText(""+rpd.getStatus());
-        jDateTime.setText(""+rpd.getDataTime());
-        jStartTime.setText(""+rpd.getStartTime());
-        jRaceTime.setText(""+rpd.getRaceTime());
+        jDateTime.setText(""+dateFormat.format(rpd.getDataTime()));
+        jStartTime.setText(""+timeFormat.format(rpd.getStartTime()));
+        jRaceTime.setText(""+timeFormat.format(rpd.getRaceTime()));
         jNextMarkLeader.setText(""+rpd.getNextMarkLeader());
         jDistanceToNextMarkLeader.setText(""+rpd.getDistanceToNextMarkLeader());
     }
@@ -68,8 +68,8 @@ public class EditRPD extends javax.swing.JDialog {
         rpd.setStatus(Integer.parseInt(jStatus.getText()));
         try {
             rpd.setDataTime(dateFormat.parse(jDateTime.getText()));
-            rpd.setStartTime(dateFormat.parse(jStartTime.getText()));
-            rpd.setRaceTime(dateFormat.parse(jRaceTime.getText()));
+            rpd.setStartTime(timeFormat.parse(jStartTime.getText()));
+            rpd.setRaceTime(timeFormat.parse(jRaceTime.getText()));
         }
         catch (Exception e){
             
@@ -423,7 +423,7 @@ public class EditRPD extends javax.swing.JDialog {
                 Double.parseDouble(jVMG.getText()), 
                 Double.parseDouble(jALS.getText()),
                 Double.parseDouble(jCOG.getText()),
-                jNextMark.getText(),
+                Integer.parseInt(jNextMark.getText()),
                 Integer.parseInt(jRank.getText()), 
                 Double.parseDouble(jDistanceToLeader.getText()), 
                 Double.parseDouble(jDistanceToNextMark.getText())));
@@ -438,6 +438,7 @@ public class EditRPD extends javax.swing.JDialog {
         // TODO add your handling code here:
         for (Object o : jRPDData.getSelectedValues())
             rpdData.remove(o);
+        jRPDData.setListData(rpdData.toArray());
         
     }//GEN-LAST:event_jButton2ActionPerformed
 
