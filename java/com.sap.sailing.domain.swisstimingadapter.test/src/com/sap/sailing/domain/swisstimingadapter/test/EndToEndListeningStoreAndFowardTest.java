@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.swisstimingadapter.test;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -7,7 +9,9 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import org.junit.After;
@@ -19,12 +23,9 @@ import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
-import com.sap.sailing.domain.swisstimingadapter.Course;
-import com.sap.sailing.domain.swisstimingadapter.Race;
-import com.sap.sailing.domain.swisstimingadapter.SailMasterAdapter;
+import com.sap.sailing.domain.swisstimingadapter.MessageType;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterConnector;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterTransceiver;
-import com.sap.sailing.domain.swisstimingadapter.StartList;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
 import com.sap.sailing.domain.swisstimingadapter.persistence.StoreAndForward;
 import com.sap.sailing.domain.swisstimingadapter.persistence.SwissTimingAdapterPersistence;
@@ -37,6 +38,7 @@ import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.mongodb.Activator;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceImpl;
+import com.sap.sailing.util.Util;
 
 public class EndToEndListeningStoreAndFowardTest {
     private static final Logger logger = Logger.getLogger(EndToEndListeningStoreAndFowardTest.class.getName());
@@ -56,123 +58,91 @@ public class EndToEndListeningStoreAndFowardTest {
     private EmptyWindStore emptyWindStore;
     private RacingEventService racingEventService;
 
+    private List<RaceHandle> raceHandles;
+    
+
     @Before
     public void setUp() throws UnknownHostException, IOException, InterruptedException {
         logger.info("EndToEndListeningStoreAndFowardTest.setUp");
-        
         db = Activator.getDefaultInstance().getDB();
-
         swissTimingAdapterPersistence = SwissTimingAdapterPersistence.INSTANCE;
         swissTimingAdapterPersistence.dropAllMessageData();
         swissTimingAdapterPersistence.dropAllRaceMasterData();
-        
         storeAndForward = new StoreAndForward(RECEIVE_PORT, CLIENT_PORT, SwissTimingFactory.INSTANCE, swissTimingAdapterPersistence);
         sendingSocket = new Socket("localhost", RECEIVE_PORT);
         sendingStream = sendingSocket.getOutputStream();
         swissTimingFactory = SwissTimingFactory.INSTANCE;
         emptyWindStore = EmptyWindStore.INSTANCE;
         transceiver = swissTimingFactory.createSailMasterTransceiver();
-//        connector = swissTimingFactory.getOrCreateSailMasterConnector("localhost", CLIENT_PORT, null);
-        
         DBCollection lastMessageCountCollection = db.getCollection(CollectionNames.LAST_MESSAGE_COUNT.name());
         lastMessageCountCollection.update(new BasicDBObject(), new BasicDBObject().append(FieldNames.LAST_MESSAGE_COUNT.name(), 0l),
                 /* upsert */ true, /* multi */ false);
-
         racingEventService = new RacingEventServiceImpl();
-//        racingEventService.getSwissTimingFactory().getOrCreateSailMasterConnector(hostname, port, messageLoader)
+        raceHandles = new ArrayList<RaceHandle>();  
     }
     
     @After
     public void tearDown() throws InterruptedException, IOException {
         logger.entering(getClass().getName(), "tearDown");
+        for(RaceHandle raceHandle: raceHandles) {
+            racingEventService.stopTracking(raceHandle.getEvent());
+        }
         storeAndForward.stop();
         logger.exiting(getClass().getName(), "tearDown");
     }
     
     @Test
     public void testEndToEndScenario() throws IOException, InterruptedException, ParseException {
-
         String[] racesToTrack = new String[] { "4711", "4712" };
-        List<RaceHandle> raceHandles = new ArrayList<RaceHandle>();  
-        
-        for(String raceToTrack: racesToTrack) {
-            RaceHandle raceHandle = racingEventService.addSwissTimingRace(raceToTrack, "localhost", CLIENT_PORT, emptyWindStore, -1);
-            raceHandles.add(raceHandle);
-            
-            if(connector == null) {
-                connector = racingEventService.getSwissTimingFactory().getOrCreateSailMasterConnector("localhost", CLIENT_PORT, swissTimingAdapterPersistence);
-            }
-        }
+        String scriptName = "/InitMessagesScript.txt";
+        setUpUsingScript(racesToTrack, scriptName);
 
-        InputStream is = getClass().getResourceAsStream("/InitMessagesScript.txt");
-
-        ScriptedMessagesReader scriptedMessagesReader = new ScriptedMessagesReader();
-        scriptedMessagesReader.addMessagesFromTextFile(is);
-
-        final int messageCount = scriptedMessagesReader.getMessages().size();
-        
-        final int[] receivedMessagesCount = new int[] {0};
-        final boolean[] receivedAll = new boolean[1];
-
-        connector.addSailMasterListener(new SailMasterAdapter() {
-            @Override
-            public void receivedStartList(String raceID, StartList startList) {
-
-                receivedMessagesCount[0] = receivedMessagesCount[0] + 1;
-            }
-
-            @Override
-            public void receivedCourseConfiguration(String raceID, Course course) {
-                receivedMessagesCount[0] = receivedMessagesCount[0] + 1;
-
-                if(messageCount == receivedMessagesCount[0]) {
-                    synchronized (EndToEndListeningStoreAndFowardTest.this) {
-                        receivedAll[0] = true;
-                        EndToEndListeningStoreAndFowardTest.this.notifyAll();
-                    }
-                }
-                
-            }
-
-            
-            @Override
-            public void receivedAvailableRaces(Iterable<Race> races) {
-
-                receivedMessagesCount[0] = receivedMessagesCount[0] + 1;
-            }
-        });
-
-        for(String msg: scriptedMessagesReader.getMessages()) {
-            transceiver.sendMessage(msg, sendingStream);
-        }
-
-        synchronized (this) {
-            while (!receivedAll[0]) {
-                wait(2000l); // wait for two seconds to receive the messages
-            }
-        }
-
+        Set<TrackedRace> allTrackedRaces = new HashSet<TrackedRace>();
         Iterable<Event> allEvents = racingEventService.getAllEvents();
         for (Event event : allEvents) {
             DynamicTrackedEvent trackedEvent = racingEventService.getTrackedEvent(event);
-
             Iterable<TrackedRace> trackedRaces = trackedEvent.getTrackedRaces();
-
             for (TrackedRace trackedRace : trackedRaces) {
-                RaceDefinition race = trackedRace.getRace();
-                
-                System.out.println(race);
+                allTrackedRaces.add(trackedRace);
             }
         }
-        
+        assertEquals(2, Util.size(allTrackedRaces));
+        Set<String> raceIDs = new HashSet<String>();
+        for (TrackedRace trackedRace : allTrackedRaces) {
+            RaceDefinition race = trackedRace.getRace();
+            raceIDs.add(race.getName());
+        }
+        Set<String> expectedRaceIDs = new HashSet<String>();
+        for (String raceIDToTrack : new String[] { "Not such a wonderful race", "A wonderful test race" }) {
+            expectedRaceIDs.add(raceIDToTrack);
+        }
+        assertEquals(expectedRaceIDs, raceIDs);
+    }
 
-        
-        for(RaceHandle raceHandle: raceHandles)
-            racingEventService.stopTracking(raceHandle.getEvent());
-        
-        //for(String raceToTrack: racesToTrack)
-        //    connector.stopTrackingRace(raceToTrack);
-
+    private void setUpUsingScript(String[] racesToTrack, String... scriptNames) throws InterruptedException,
+            UnknownHostException, IOException, ParseException {
+        for(String raceToTrack: racesToTrack) {
+            RaceHandle raceHandle = racingEventService.addSwissTimingRace(raceToTrack, "localhost", CLIENT_PORT, emptyWindStore, -1);
+            raceHandles.add(raceHandle);
+            if(connector == null) {
+                connector = racingEventService.getSwissTimingFactory().getOrCreateSailMasterConnector("localhost",
+                        CLIENT_PORT, swissTimingAdapterPersistence);
+            }
+        }
+        ScriptedMessagesReader scriptedMessagesReader = new ScriptedMessagesReader();
+        for (String scriptName : scriptNames) {
+            InputStream is = getClass().getResourceAsStream(scriptName);
+            scriptedMessagesReader.addMessagesFromTextFile(is);
+        }
+        for (String msg: scriptedMessagesReader.getMessages()) {
+            transceiver.sendMessage(msg, sendingStream);
+        }
+        transceiver.sendMessage(swissTimingFactory.createMessage(MessageType._STOPSERVER.name(), null), sendingStream);
+        synchronized (connector) {
+            while (!connector.isStopped()) {
+                connector.wait();
+            }
+        }
     }
     
 }

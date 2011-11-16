@@ -69,7 +69,10 @@ import com.sap.sailing.util.Util.Triple;
  * 
  * Generally, the connector needs to be instructed for which races it shall handle events using calls to the
  * {@link #trackRace} and {@link #stopTrackingRace} operations. {@link MessageType#isRaceSpecific() Race-specific
- * messages} for other races are ignored and not forwarded to any listener.
+ * messages} for other races are ignored and not forwarded to any listener.<p>
+ * 
+ * Clients that want to wait until the connector changes to {@link #isStopped()} can {@link Object#wait()} on this
+ * object because it notifies all waiters when changing from !{@link #isStopped()} to {@link #isStopped()}. 
  * 
  * @author Axel Uhl (d043530)
  * 
@@ -504,10 +507,11 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
     }
 
     @Override
-    public void stop() throws IOException {
+    public synchronized void stop() throws IOException {
         stopped = true;
         socket.close();
         socket = null;
+        notifyAll();
     }
     
     @Override
