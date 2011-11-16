@@ -148,9 +148,10 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
         query.append(FieldNames.RACE_ID.name(), raceID);
         DBObject o = races.findOne(query);
         if (o != null) {
+            Long startTimeAsMillis = (Long) o.get(FieldNames.RACE_STARTTIME.name());
             Race race = swissTimingFactory.createRace((String) o.get(FieldNames.RACE_ID.name()),
                     (String) o.get(FieldNames.RACE_DESCRIPTION.name()),
-                    new MillisecondsTimePoint((Long) o.get(FieldNames.RACE_STARTTIME.name())));
+                    startTimeAsMillis == null ? null : new MillisecondsTimePoint(startTimeAsMillis));
             return race;
         }
         return null;
@@ -208,7 +209,15 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
             messageCollection = database.getCollection(CollectionNames.COMMAND_MESSAGES.name());
         }
         messageCollection.insert(objToInsert);
-        if(message.getRaceID() != null && cachedRaces.containsKey(message.getRaceID()) == false) {
+        
+        if(message.getType() == MessageType.RAC) {
+            // store the new race in the master data collection
+            List<Race> availableRaces = parseAvailableRacesMessage(message);
+            
+            for (Race newRace : availableRaces) {
+                storeRace(newRace);
+            }
+        } else if(message.getRaceID() != null && cachedRaces.containsKey(message.getRaceID()) == false) {
             // ah, we found a new raceID which is not in the list of known races
             // in order to have a more intelligent conflict resolver mechanism we will forward the resolution to a special thread later on
             boolean simpleResolution = true;
@@ -224,6 +233,16 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
                 }
             }
         }
+    }
+
+    private List<Race> parseAvailableRacesMessage(SailMasterMessage availableRacesMessage) {
+        int count = Integer.valueOf(availableRacesMessage.getSections()[1]);
+        List<Race> result = new ArrayList<Race>();
+        for (int i=0; i<count; i++) {
+            String[] idAndDescription = availableRacesMessage.getSections()[2+i].split(";");
+            result.add(SwissTimingFactory.INSTANCE.createRace(idAndDescription[0], idAndDescription[1], null));
+        }
+        return result;
     }
 
     @Override
