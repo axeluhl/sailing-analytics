@@ -1,7 +1,5 @@
 package com.sap.sailing.domain.swisstimingadapter.test;
 
-import static org.junit.Assert.assertEquals;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -19,7 +17,8 @@ import org.junit.Test;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
-import com.sap.sailing.domain.swisstimingadapter.Competitor;
+import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.swisstimingadapter.Course;
 import com.sap.sailing.domain.swisstimingadapter.Race;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterAdapter;
@@ -31,10 +30,16 @@ import com.sap.sailing.domain.swisstimingadapter.persistence.StoreAndForward;
 import com.sap.sailing.domain.swisstimingadapter.persistence.SwissTimingAdapterPersistence;
 import com.sap.sailing.domain.swisstimingadapter.persistence.impl.CollectionNames;
 import com.sap.sailing.domain.swisstimingadapter.persistence.impl.FieldNames;
+import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
+import com.sap.sailing.domain.tracking.RaceHandle;
+import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.mongodb.Activator;
+import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.RacingEventServiceImpl;
 
-public class ScriptedStoreAndForwardTest {
-    private static final Logger logger = Logger.getLogger(ScriptedStoreAndForwardTest.class.getName());
+public class EndToEndListeningStoreAndFowardTest {
+    private static final Logger logger = Logger.getLogger(EndToEndListeningStoreAndFowardTest.class.getName());
     
     private static final int RECEIVE_PORT = 6543;
     private static final int CLIENT_PORT = 6544;
@@ -47,91 +52,97 @@ public class ScriptedStoreAndForwardTest {
     private SailMasterConnector connector;
     private SwissTimingAdapterPersistence swissTimingAdapterPersistence;
     private SwissTimingFactory swissTimingFactory;
+    
+    private EmptyWindStore emptyWindStore;
+    private RacingEventService racingEventService;
 
     @Before
-    public void setUp() throws UnknownHostException, IOException, InterruptedException, ParseException {
+    public void setUp() throws UnknownHostException, IOException, InterruptedException {
+        logger.info("EndToEndListeningStoreAndFowardTest.setUp");
+        
         db = Activator.getDefaultInstance().getDB();
 
         swissTimingAdapterPersistence = SwissTimingAdapterPersistence.INSTANCE;
+        swissTimingAdapterPersistence.dropAllMessageData();
+        swissTimingAdapterPersistence.dropAllRaceMasterData();
         
-        storeAndForward = new StoreAndForward(RECEIVE_PORT, CLIENT_PORT, SwissTimingFactory.INSTANCE, SwissTimingAdapterPersistence.INSTANCE);
+        storeAndForward = new StoreAndForward(RECEIVE_PORT, CLIENT_PORT, SwissTimingFactory.INSTANCE, swissTimingAdapterPersistence);
         sendingSocket = new Socket("localhost", RECEIVE_PORT);
         sendingStream = sendingSocket.getOutputStream();
         swissTimingFactory = SwissTimingFactory.INSTANCE;
+        emptyWindStore = EmptyWindStore.INSTANCE;
         transceiver = swissTimingFactory.createSailMasterTransceiver();
-        connector = swissTimingFactory.getOrCreateSailMasterConnector("localhost", CLIENT_PORT, swissTimingAdapterPersistence);
+//        connector = swissTimingFactory.getOrCreateSailMasterConnector("localhost", CLIENT_PORT, null);
+        
         DBCollection lastMessageCountCollection = db.getCollection(CollectionNames.LAST_MESSAGE_COUNT.name());
         lastMessageCountCollection.update(new BasicDBObject(), new BasicDBObject().append(FieldNames.LAST_MESSAGE_COUNT.name(), 0l),
                 /* upsert */ true, /* multi */ false);
-        
-        swissTimingAdapterPersistence.dropAllRaceMasterData();
-        swissTimingAdapterPersistence.dropAllMessageData();
+
+        racingEventService = new RacingEventServiceImpl();
+//        racingEventService.getSwissTimingFactory().getOrCreateSailMasterConnector(hostname, port, messageLoader)
     }
     
     @After
     public void tearDown() throws InterruptedException, IOException {
         logger.entering(getClass().getName(), "tearDown");
         storeAndForward.stop();
-        connector.stop();
         logger.exiting(getClass().getName(), "tearDown");
     }
     
     @Test
-    public void testInitMessages() throws IOException, InterruptedException, ParseException {
+    public void testEndToEndScenario() throws IOException, InterruptedException, ParseException {
 
         String[] racesToTrack = new String[] { "4711", "4712" };
+        List<RaceHandle> raceHandles = new ArrayList<RaceHandle>();  
         
-        for(String raceToTrack: racesToTrack)
-            connector.trackRace(raceToTrack);
+        for(String raceToTrack: racesToTrack) {
+            RaceHandle raceHandle = racingEventService.addSwissTimingRace(raceToTrack, "localhost", CLIENT_PORT, emptyWindStore, -1);
+            raceHandles.add(raceHandle);
+            
+            if(connector == null) {
+                connector = racingEventService.getSwissTimingFactory().getOrCreateSailMasterConnector("localhost", CLIENT_PORT, swissTimingAdapterPersistence);
+            }
+        }
 
         InputStream is = getClass().getResourceAsStream("/InitMessagesScript.txt");
 
-        ScriptedMessages scriptedMessages = new ScriptedMessages(is);
-        
-        final int messageCount = scriptedMessages.getMessages().size();
+        ScriptedMessagesReader scriptedMessagesReader = new ScriptedMessagesReader();
+        scriptedMessagesReader.addMessagesFromTextFile(is);
+
+        final int messageCount = scriptedMessagesReader.getMessages().size();
         
         final int[] receivedMessagesCount = new int[] {0};
-        final List<Race> racesReceived = new ArrayList<Race>();
         final boolean[] receivedAll = new boolean[1];
-        final List<Competitor> receivedCompetitors  = new ArrayList<Competitor>();
-        final List<Course> receivedCourses  = new ArrayList<Course>();
 
         connector.addSailMasterListener(new SailMasterAdapter() {
             @Override
             public void receivedStartList(String raceID, StartList startList) {
 
-                for(Competitor competitor: startList.getCompetitors())
-                    receivedCompetitors.add(competitor);
-
                 receivedMessagesCount[0] = receivedMessagesCount[0] + 1;
             }
-            
+
             @Override
             public void receivedCourseConfiguration(String raceID, Course course) {
-
-                receivedCourses.add(course);
-
                 receivedMessagesCount[0] = receivedMessagesCount[0] + 1;
 
                 if(messageCount == receivedMessagesCount[0]) {
-                    synchronized (ScriptedStoreAndForwardTest.this) {
+                    synchronized (EndToEndListeningStoreAndFowardTest.this) {
                         receivedAll[0] = true;
-                        ScriptedStoreAndForwardTest.this.notifyAll();
+                        EndToEndListeningStoreAndFowardTest.this.notifyAll();
                     }
                 }
+                
             }
+
             
             @Override
             public void receivedAvailableRaces(Iterable<Race> races) {
 
-                for (Race race : races) {
-                    racesReceived.add(race);
-                }
                 receivedMessagesCount[0] = receivedMessagesCount[0] + 1;
             }
         });
 
-        for(String msg: scriptedMessages.getMessages()) {
+        for(String msg: scriptedMessagesReader.getMessages()) {
             transceiver.sendMessage(msg, sendingStream);
         }
 
@@ -140,12 +151,28 @@ public class ScriptedStoreAndForwardTest {
                 wait(2000l); // wait for two seconds to receive the messages
             }
         }
-        assertEquals(2, racesReceived.size());
-        assertEquals(5, receivedCompetitors.size());
-        assertEquals(2, receivedCourses.size());
+
+        Iterable<Event> allEvents = racingEventService.getAllEvents();
+        for (Event event : allEvents) {
+            DynamicTrackedEvent trackedEvent = racingEventService.getTrackedEvent(event);
+
+            Iterable<TrackedRace> trackedRaces = trackedEvent.getTrackedRaces();
+
+            for (TrackedRace trackedRace : trackedRaces) {
+                RaceDefinition race = trackedRace.getRace();
+                
+                System.out.println(race);
+            }
+        }
         
-        for(String raceToTrack: racesToTrack)
-            connector.stopTrackingRace(raceToTrack);
+
+        
+        for(RaceHandle raceHandle: raceHandles)
+            racingEventService.stopTracking(raceHandle.getEvent());
+        
+        //for(String raceToTrack: racesToTrack)
+        //    connector.stopTrackingRace(raceToTrack);
+
     }
     
 }

@@ -14,3 +14,4 @@ Require-Bundle: com.sap.sailing.domain.swisstimingadapter,
  com.sap.sailing.mongodb
 Bundle-ClassPath: resources/,
  .
+Import-Package: com.sap.sailing.server
