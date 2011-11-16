@@ -137,6 +137,9 @@ public interface RacingEventService extends TrackedEventRegistry {
      */
     Pair<String, List<RaceRecord>> getTracTracRaceRecords(URL jsonURL) throws IOException, ParseException,
             org.json.simple.parser.ParseException, URISyntaxException;
+    
+    List<com.sap.sailing.domain.swisstimingadapter.RaceRecord> getSwissTimingRaceRecords(String hostname, int port)
+            throws InterruptedException, UnknownHostException, IOException, ParseException;
 
     boolean isRaceBeingTracked(RaceDefinition r);
     

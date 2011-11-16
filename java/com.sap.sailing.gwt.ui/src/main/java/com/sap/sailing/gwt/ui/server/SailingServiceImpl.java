@@ -49,8 +49,6 @@ import com.sap.sailing.domain.leaderboard.ScoreCorrection.MaxPointsReason;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.MongoWindStoreFactory;
-import com.sap.sailing.domain.swisstimingadapter.Race;
-import com.sap.sailing.domain.swisstimingadapter.SailMasterConnector;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingConfiguration;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
 import com.sap.sailing.domain.swisstimingadapter.persistence.SwissTimingAdapterPersistence;
@@ -83,12 +81,12 @@ import com.sap.sailing.gwt.ui.shared.Pair;
 import com.sap.sailing.gwt.ui.shared.PositionDAO;
 import com.sap.sailing.gwt.ui.shared.QuickRankDAO;
 import com.sap.sailing.gwt.ui.shared.RaceDAO;
-import com.sap.sailing.gwt.ui.shared.RaceRecordDAO;
 import com.sap.sailing.gwt.ui.shared.RegattaDAO;
 import com.sap.sailing.gwt.ui.shared.SpeedWithBearingDAO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDAO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDAO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDAO;
+import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDAO;
 import com.sap.sailing.gwt.ui.shared.WindDAO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDAO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDAO;
@@ -319,22 +317,22 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
 
     @Override
-    public Pair<String, List<RaceRecordDAO>> listTracTracRacesInEvent(String eventJsonURL) throws MalformedURLException, IOException,
+    public Pair<String, List<TracTracRaceRecordDAO>> listTracTracRacesInEvent(String eventJsonURL) throws MalformedURLException, IOException,
             ParseException, org.json.simple.parser.ParseException, URISyntaxException {
         com.sap.sailing.util.Util.Pair<String,List<RaceRecord>> raceRecords;
         raceRecords = getService().getTracTracRaceRecords(new URL(eventJsonURL));
-        List<RaceRecordDAO> result = new ArrayList<RaceRecordDAO>();
+        List<TracTracRaceRecordDAO> result = new ArrayList<TracTracRaceRecordDAO>();
         for (RaceRecord raceRecord : raceRecords.getB()) {
-            result.add(new RaceRecordDAO(raceRecord.getID(), raceRecord.getEventName(), raceRecord.getName(),
+            result.add(new TracTracRaceRecordDAO(raceRecord.getID(), raceRecord.getEventName(), raceRecord.getName(),
                     raceRecord.getParamURL().toString(), raceRecord.getReplayURL(), raceRecord.getLiveURI().toString(),
                     raceRecord.getStoredURI().toString(), raceRecord.getTrackingStartTime().asDate(), raceRecord
                             .getTrackingEndTime().asDate(), raceRecord.getRaceStartTime().asDate()));
         }
-        return new Pair<String, List<RaceRecordDAO>>(raceRecords.getA(), result);
+        return new Pair<String, List<TracTracRaceRecordDAO>>(raceRecords.getA(), result);
     }
 
     @Override
-    public void track(RaceRecordDAO rr, String liveURI, String storedURI, boolean trackWind, final boolean correctWindByDeclination) throws Exception {
+    public void track(TracTracRaceRecordDAO rr, String liveURI, String storedURI, boolean trackWind, final boolean correctWindByDeclination) throws Exception {
         if (liveURI == null || liveURI.trim().length() == 0) {
             liveURI = rr.liveURI;
         }
@@ -1023,11 +1021,8 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     public List<SwissTimingRaceRecordDAO> listSwissTimingRaces(String hostname, int port) 
            throws UnknownHostException, IOException, InterruptedException, ParseException {
         List<SwissTimingRaceRecordDAO> result = new ArrayList<SwissTimingRaceRecordDAO>();
-        // FIXME can't rely on the connector being able to send a request; perhaps need to extract from SwissTiming persistence
-        SailMasterConnector swissTimingConnector = swissTimingFactory.getOrCreateSailMasterConnector(hostname, port, swissTimingAdapterPersistence);
-        for (Race race : swissTimingConnector.getRaces()) {
-            TimePoint startTime = swissTimingConnector.getStartTime(race.getRaceID());
-            result.add(new SwissTimingRaceRecordDAO(race.getRaceID(), race.getDescription(), startTime.asDate()));
+        for (com.sap.sailing.domain.swisstimingadapter.RaceRecord rr : getService().getSwissTimingRaceRecords(hostname, port)) {
+            result.add(new SwissTimingRaceRecordDAO(rr.getRaceID(), rr.getDescription(), rr.getStartTime()));
         }
         return result;
     }
