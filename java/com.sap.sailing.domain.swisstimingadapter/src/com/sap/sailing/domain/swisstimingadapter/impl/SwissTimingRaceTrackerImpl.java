@@ -75,9 +75,10 @@ public class SwissTimingRaceTrackerImpl implements SwissTimingRaceTracker, SailM
         this.windStore = windStore;
         this.id = new Triple<String, String, Integer>(raceID, hostname, port);
         connector.addSailMasterListener(raceID, this);
-        connector.trackRace(raceID);
         event = domainFactory.getOrCreateEvent(raceID);
         trackedEvent = trackedEventRegistry.getOrCreateTrackedEvent(event);
+        connector.trackRace(raceID);
+        
     }
 
     @Override
@@ -218,15 +219,15 @@ public class SwissTimingRaceTrackerImpl implements SwissTimingRaceTracker, SailM
         assert startList != null;
         assert course != null;
         // now we can create the RaceDefinition and most other things
-        Race race = messageLoader.getRace(raceID);
-        final RaceDefinition raceDefinition = domainFactory.createRaceDefinition(event, race, startList, course);
-        trackedRace = getTrackedEvent().createTrackedRace(raceDefinition, windStore,
+        Race swissTimingRace = messageLoader.getRace(raceID);
+        race = domainFactory.createRaceDefinition(event, swissTimingRace, startList, course);
+        trackedRace = getTrackedEvent().createTrackedRace(race, windStore,
                 WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND, GPSFixTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_SPEED,
                 new DynamicRaceDefinitionSet() {
                     @Override
                     public void addRaceDefinition(RaceDefinition race) {
                         // we already know our single RaceDefinition
-                        assert raceDefinition == race;
+                        assert SwissTimingRaceTrackerImpl.this.race == race;
                     }
                 });
     }
