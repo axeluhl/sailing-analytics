@@ -56,9 +56,9 @@ public class EditRPD extends javax.swing.JDialog {
     private void setValuesInUI(){
         jRaceID.setText(rpd.getRaceId());
         jStatus.setText(""+rpd.getStatus());
-        jDateTime.setText(""+dateFormat.format(rpd.getDataTime()));
-        jStartTime.setText(""+timeFormat.format(rpd.getStartTime()));
-        jRaceTime.setText(""+timeFormat.format(rpd.getRaceTime()));
+        jDateTime.setText(""+(rpd.getDataTime() == null? "" : dateFormat.format(rpd.getDataTime())));
+        jStartTime.setText(""+(rpd.getStartTime()==null?"" :timeFormat.format(rpd.getStartTime())));
+        jRaceTime.setText(""+(rpd.getRaceTime()==null? "" :timeFormat.format(rpd.getRaceTime())));
         jNextMarkLeader.setText(""+rpd.getNextMarkLeader());
         jDistanceToNextMarkLeader.setText(""+rpd.getDistanceToNextMarkLeader());
     }
