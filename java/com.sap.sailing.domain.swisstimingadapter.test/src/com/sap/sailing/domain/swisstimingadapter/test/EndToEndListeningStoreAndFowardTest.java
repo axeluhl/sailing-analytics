@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.swisstimingadapter.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,8 +22,11 @@ import org.junit.Test;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
+import com.sap.sailing.domain.base.Buoy;
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.swisstimingadapter.MessageType;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterConnector;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterTransceiver;
@@ -140,6 +144,21 @@ public class EndToEndListeningStoreAndFowardTest {
         for (TrackedRace trackedRace : allTrackedRaces) {
             RaceDefinition race = trackedRace.getRace();
             raceIDs.add(race.getName());
+            assertEquals(46, Util.size(race.getCompetitors()));
+            assertEquals(7, Util.size(race.getCourse().getWaypoints()));
+            assertEquals(6, Util.size(race.getCourse().getLegs()));
+            for (Competitor competitor : race.getCompetitors()) {
+                assertTrue(!Util.isEmpty(trackedRace.getTrack(competitor).getRawFixes()));
+            }
+            Set<Buoy> buoys = new HashSet<Buoy>();
+            for (Waypoint waypoint : race.getCourse().getWaypoints()) {
+                for (Buoy buoy : waypoint.getBuoys()) {
+                    buoys.add(buoy);
+                }
+            }
+            for (Buoy buoy : buoys) {
+                assertTrue(!Util.isEmpty(trackedRace.getOrCreateTrack(buoy).getRawFixes()));
+            }
         }
         Set<String> expectedRaceIDs = new HashSet<String>();
         for (String raceIDToTrack : new String[] { "A simulated SwissTiming race" }) {

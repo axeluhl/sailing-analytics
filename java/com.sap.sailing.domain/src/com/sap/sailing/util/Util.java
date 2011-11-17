@@ -46,6 +46,13 @@ public class Util {
         }
     }
 
+    public static <T> boolean isEmpty(Iterable<T> ts) {
+        if (ts instanceof Collection<?>) {
+            return ((Collection<?>) ts).isEmpty();
+        } else {
+            return !ts.iterator().hasNext();
+        }
+    }
 
     public static class Pair<A, B> {
 
