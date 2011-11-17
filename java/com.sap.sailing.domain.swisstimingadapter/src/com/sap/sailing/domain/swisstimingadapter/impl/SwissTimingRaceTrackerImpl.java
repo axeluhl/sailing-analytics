@@ -75,9 +75,9 @@ public class SwissTimingRaceTrackerImpl implements SwissTimingRaceTracker, SailM
         this.windStore = windStore;
         this.id = new Triple<String, String, Integer>(raceID, hostname, port);
         connector.addSailMasterListener(raceID, this);
-        connector.trackRace(raceID);
         event = domainFactory.getOrCreateEvent(raceID);
         trackedEvent = trackedEventRegistry.getOrCreateTrackedEvent(event);
+        connector.trackRace(raceID);
     }
 
     @Override
