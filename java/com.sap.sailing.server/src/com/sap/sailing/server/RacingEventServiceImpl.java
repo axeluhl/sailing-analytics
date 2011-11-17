@@ -27,12 +27,15 @@ import java.util.logging.Logger;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.impl.LeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.ResultDiscardingRuleImpl;
 import com.sap.sailing.domain.leaderboard.impl.ScoreCorrectionImpl;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
+import com.sap.sailing.domain.swisstimingadapter.Race;
+import com.sap.sailing.domain.swisstimingadapter.SailMasterConnector;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
 import com.sap.sailing.domain.swisstimingadapter.persistence.SwissTimingAdapterPersistence;
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
@@ -231,13 +234,27 @@ public class RacingEventServiceImpl implements RacingEventService {
     }
     
     @Override
-    public synchronized RaceHandle addSwissTimingRace(String raceID, String hostname, int port, WindStore windStore,
-            long timeoutInMilliseconds) throws InterruptedException, UnknownHostException, IOException, ParseException {
+    public List<com.sap.sailing.domain.swisstimingadapter.RaceRecord> getSwissTimingRaceRecords(String hostname,
+            int port, boolean canSendRequests) throws InterruptedException, UnknownHostException, IOException, ParseException {
+        List<com.sap.sailing.domain.swisstimingadapter.RaceRecord> result = new ArrayList<com.sap.sailing.domain.swisstimingadapter.RaceRecord>();
+        SailMasterConnector swissTimingConnector = swissTimingFactory.getOrCreateSailMasterConnector(hostname, port, swissTimingAdapterPersistence,
+                canSendRequests);
+        for (Race race : swissTimingConnector.getRaces()) {
+            TimePoint startTime = swissTimingConnector.getStartTime(race.getRaceID());
+            result.add(new com.sap.sailing.domain.swisstimingadapter.RaceRecord(race.getRaceID(), race.getDescription(),
+                    startTime==null?null:startTime.asDate()));
+        }
+        return result;
+    }
+
+    @Override
+    public synchronized RaceHandle addSwissTimingRace(String raceID, String hostname, int port, boolean canSendRequests,
+            WindStore windStore, long timeoutInMilliseconds) throws InterruptedException, UnknownHostException, IOException, ParseException {
         Triple<String, String, Integer> key = new Triple<String, String, Integer>(raceID, hostname, port);
         RaceTracker tracker = raceTrackersByID.get(key);
         if (tracker == null) {
-            tracker = getSwissTimingFactory().createRaceTracker(raceID, hostname, port, windStore,
-                    swissTimingAdapterPersistence, swissTimingDomainFactory, this);
+            tracker = getSwissTimingFactory().createRaceTracker(raceID, hostname, port, canSendRequests,
+                    windStore, swissTimingAdapterPersistence, swissTimingDomainFactory, this);
             raceTrackersByID.put(tracker.getID(), tracker);
             Set<RaceTracker> trackers = raceTrackersByEvent.get(tracker.getEvent());
             if (trackers == null) {

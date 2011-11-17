@@ -13,7 +13,7 @@ import com.sap.sailing.gwt.ui.client.StringConstants;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDAO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDAO;
 import com.sap.sailing.gwt.ui.shared.Pair;
-import com.sap.sailing.gwt.ui.shared.RaceRecordDAO;
+import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDAO;
 
 public class TestColumnToggling extends GWTTestCase {
     
@@ -31,7 +31,7 @@ public class TestColumnToggling extends GWTTestCase {
     
     
     private LeaderboardDAO leaderboard;
-    private RaceRecordDAO rrDao;
+    private TracTracRaceRecordDAO rrDao;
     private ExpandableSortableColumn<LeaderboardRowDAO> rc;
     
     
@@ -51,7 +51,7 @@ public class TestColumnToggling extends GWTTestCase {
     }
     
     private void listRacesInEvent(){
-        service.listTracTracRacesInEvent(JSON_URL, new AsyncCallback<Pair<String,List<RaceRecordDAO>>>() {
+        service.listTracTracRacesInEvent(JSON_URL, new AsyncCallback<Pair<String,List<TracTracRaceRecordDAO>>>() {
 
             @Override
             public void onFailure(Throwable caught) {
@@ -59,9 +59,9 @@ public class TestColumnToggling extends GWTTestCase {
             }
 
             @Override
-            public void onSuccess(Pair<String, List<RaceRecordDAO>> result) {
+            public void onSuccess(Pair<String, List<TracTracRaceRecordDAO>> result) {
                 System.out.println("Listed races.");
-                for (RaceRecordDAO rr : result.getB()){
+                for (TracTracRaceRecordDAO rr : result.getB()){
                     if (rr.name.equals(TRACKED_RACE)){
                         rrDao = rr;
                     }

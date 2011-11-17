@@ -238,8 +238,7 @@ public class StoreAndForward implements Runnable {
     public static void main(String[] args) throws InterruptedException, IOException {
         int listenPort = Integer.valueOf(args[0]);
         int clientPort = Integer.valueOf(args[1]);
-        StoreAndForward storeAndForward = new StoreAndForward(listenPort, clientPort, SwissTimingFactory.INSTANCE, SwissTimingAdapterPersistence.INSTANCE);
-        storeAndForward.run();
+        new StoreAndForward(listenPort, clientPort, SwissTimingFactory.INSTANCE, SwissTimingAdapterPersistence.INSTANCE);
     }
 
     public void run() {

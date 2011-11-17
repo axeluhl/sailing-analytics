@@ -46,4 +46,5 @@ public interface SwissTimingAdapterPersistence extends RaceSpecificMessageLoader
     
     void dropAllRaceMasterData();
 
+    void dropAllMessageData();
 }

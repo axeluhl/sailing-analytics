@@ -69,7 +69,10 @@ import com.sap.sailing.util.Util.Triple;
  * 
  * Generally, the connector needs to be instructed for which races it shall handle events using calls to the
  * {@link #trackRace} and {@link #stopTrackingRace} operations. {@link MessageType#isRaceSpecific() Race-specific
- * messages} for other races are ignored and not forwarded to any listener.
+ * messages} for other races are ignored and not forwarded to any listener.<p>
+ * 
+ * Clients that want to wait until the connector changes to {@link #isStopped()} can {@link Object#wait()} on this
+ * object because it notifies all waiters when changing from !{@link #isStopped()} to {@link #isStopped()}. 
  * 
  * @author Axel Uhl (d043530)
  * 
@@ -98,9 +101,11 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
      * The only way known so far for how to find out the time zone relative to which the other time stamps
      * are to be interpreted is to start with the current default time zone's offset and wait for an
      * {@link MessageType#RPD RPD} event to be received. From this event, the time zone offset can be extracted
-     * and applied to all other time stamps.
+     * and applied to all other time stamps. It is stored using the race ID as key.
      */
-    private String lastTimeZoneSuffix;
+    private final Map<String, String> lastTimeZoneSuffixPerRaceID;
+    
+    private final Map<String, TimePoint> startTimePerRaceID;
     
     /**
      * Used for the {@link #rendevouz(SailMasterMessage)} pattern. For each {@link MessageType} there
@@ -115,20 +120,23 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
     
     private final RaceSpecificMessageLoader messageLoader;
 
-    public SailMasterConnectorImpl(String host, int port, RaceSpecificMessageLoader messageLoader) throws InterruptedException {
+    private final boolean canSendRequests;
+
+    public SailMasterConnectorImpl(String host, int port, RaceSpecificMessageLoader messageLoader, boolean canSendRequests) throws InterruptedException {
         super();
         this.messageLoader = messageLoader;
         dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ssZ");
         idsOfTrackedRaces = new HashSet<String>();
         this.host = host;
         this.port = port;
+        this.canSendRequests = canSendRequests;
         this.listeners = new HashSet<SailMasterListener>();
         this.raceSpecificListeners = new HashMap<String, Set<SailMasterListener>>();
         this.unprocessedMessagesByType = new HashMap<MessageType, BlockingQueue<SailMasterMessage>>();
         raceSpecificMessageBuffers = new HashMap<String, List<SailMasterMessage>>();
         sequenceNumberOfLastMessageForRaceID = new HashMap<String, Long>();
-        int offset = TimeZone.getDefault().getOffset(System.currentTimeMillis())/1000/3600;
-        lastTimeZoneSuffix = (offset<0?"-":"+") + new DecimalFormat("00").format(offset)+"00";
+        lastTimeZoneSuffixPerRaceID = new HashMap<String, String>();
+        startTimePerRaceID = new HashMap<String, TimePoint>();
         receiverThread = new Thread(this, "SwissTiming SailMaster Receiver");
         receiverThread.start();
         synchronized (this) {
@@ -327,19 +335,45 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
             markIndicesRanksAndTimesSinceStartInMilliseconds.add(new Triple<Integer, Integer, Long>(markIndex, rank, timeSinceStartInMilliseconds));
         }
         for (SailMasterListener listener : listeners) {
-            listener.receivedTimingData(raceID, boatID, markIndicesRanksAndTimesSinceStartInMilliseconds);
+            try {
+                listener.receivedTimingData(raceID, boatID, markIndicesRanksAndTimesSinceStartInMilliseconds);
+            } catch (Throwable t) {
+                logger.info("Exception occurred trying to notify listener "+listener+" about "+message+": "+t.getMessage());
+                logger.throwing(SailMasterConnectorImpl.class.getName(), "notifyListenersTMD", t);
+            }
+        }
+        Set<SailMasterListener> raceSpecificListenerSet = raceSpecificListeners.get(message.getRaceID());
+        if (raceSpecificListenerSet != null) {
+            for (SailMasterListener listener : raceSpecificListenerSet) {
+                try {
+                    listener.receivedTimingData(raceID, boatID, markIndicesRanksAndTimesSinceStartInMilliseconds);
+                } catch (Throwable t) {
+                    logger.info("Exception occurred trying to notify listener "+listener+" about "+message+": "+t.getMessage());
+                    logger.throwing(SailMasterConnectorImpl.class.getName(), "notifyListenersTMD", t);
+                }
+            }
         }
     }
 
     private void notifyListenersCAM(SailMasterMessage message) throws ParseException {
         List<Triple<Integer, TimePoint, String>> clockAtMarkResults = parseClockAtMarkMessage(message);
         for (SailMasterListener listener : listeners) {
-            listener.receivedClockAtMark(message.getSections()[1], clockAtMarkResults);
+            try {
+                listener.receivedClockAtMark(message.getSections()[1], clockAtMarkResults);
+            } catch (Throwable t) {
+                logger.info("Exception occurred trying to notify listener "+listener+" about "+message+": "+t.getMessage());
+                logger.throwing(SailMasterConnectorImpl.class.getName(), "notifyListenersCAM", t);
+            }
         }
         Set<SailMasterListener> raceSpecificListenerSet = raceSpecificListeners.get(message.getRaceID());
         if (raceSpecificListenerSet != null) {
             for (SailMasterListener listener : raceSpecificListenerSet) {
-                listener.receivedClockAtMark(message.getSections()[1], clockAtMarkResults);
+                try {
+                    listener.receivedClockAtMark(message.getSections()[1], clockAtMarkResults);
+                } catch (Throwable t) {
+                    logger.info("Exception occurred trying to notify listener "+listener+" about "+message+": "+t.getMessage());
+                    logger.throwing(SailMasterConnectorImpl.class.getName(), "notifyListenersCAM", t);
+                }
             }
         }
     }
@@ -347,12 +381,22 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
     private void notifyListenersSTL(SailMasterMessage message) {
         StartList startListMessage = parseStartListMessage(message);
         for (SailMasterListener listener : listeners) {
-            listener.receivedStartList(message.getSections()[1], startListMessage);
+            try {
+                listener.receivedStartList(message.getSections()[1], startListMessage);
+            } catch (Throwable t) {
+                logger.info("Exception occurred trying to notify listener "+listener+" about "+message+": "+t.getMessage());
+                logger.throwing(SailMasterConnectorImpl.class.getName(), "notifyListenersSTL", t);
+            }
         }
         Set<SailMasterListener> raceSpecificListenerSet = raceSpecificListeners.get(message.getRaceID());
         if (raceSpecificListenerSet != null) {
             for (SailMasterListener listener : raceSpecificListenerSet) {
-                listener.receivedStartList(message.getSections()[1], startListMessage);
+                try {
+                    listener.receivedStartList(message.getSections()[1], startListMessage);
+                } catch (Throwable t) {
+                    logger.info("Exception occurred trying to notify listener "+listener+" about "+message+": "+t.getMessage());
+                    logger.throwing(SailMasterConnectorImpl.class.getName(), "notifyListenersSTL", t);
+                }
             }
         }
     }
@@ -360,12 +404,22 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
     private void notifyListenersCCG(SailMasterMessage message) {
         Course course = parseCourseConfigurationMessage(message);
         for (SailMasterListener listener : listeners) {
-            listener.receivedCourseConfiguration(message.getSections()[1], course);
+            try {
+                listener.receivedCourseConfiguration(message.getSections()[1], course);
+            } catch (Throwable t) {
+                logger.info("Exception occurred trying to notify listener "+listener+" about "+message+": "+t.getMessage());
+                logger.throwing(SailMasterConnectorImpl.class.getName(), "notifyListenersCCG", t);
+            }
         }
         Set<SailMasterListener> raceSpecificListenerSet = raceSpecificListeners.get(message.getRaceID());
         if (raceSpecificListenerSet != null) {
             for (SailMasterListener listener : raceSpecificListenerSet) {
-                listener.receivedCourseConfiguration(message.getSections()[1], course);
+                try {
+                    listener.receivedCourseConfiguration(message.getSections()[1], course);
+                } catch (Throwable t) {
+                    logger.info("Exception occurred trying to notify listener "+listener+" about "+message+": "+t.getMessage());
+                    logger.throwing(SailMasterConnectorImpl.class.getName(), "notifyListenersCCG", t);
+                }
             }
         }
     }
@@ -373,7 +427,12 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
     private void notifyListenersRAC(SailMasterMessage message) {
         Iterable<Race> races = parseAvailableRacesMessage(message);
         for (SailMasterListener listener : listeners) {
-            listener.receivedAvailableRaces(races);
+            try {
+                listener.receivedAvailableRaces(races);
+            } catch (Throwable t) {
+                logger.info("Exception occurred trying to notify listener "+listener+" about "+message+": "+t.getMessage());
+                logger.throwing(SailMasterConnectorImpl.class.getName(), "notifyListenersRAC", t);
+            }
         }
         // not race specific; no need to notify any listener from raceSpecificListeners
     }
@@ -383,9 +442,14 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
         String[] sections = message.getSections();
         String raceID = sections[1];
         RaceStatus status = RaceStatus.values()[Integer.valueOf(sections[2])];
-        TimePoint timePoint = new MillisecondsTimePoint(parseTimeAndDateISO(sections[3]));
+        TimePoint timePoint = new MillisecondsTimePoint(parseTimeAndDateISO(sections[3], raceID));
+        String dateISO = sections[3].substring(0, sections[3].indexOf('T'));
+        String startTimeEstimatedStartTimeISO = dateISO+"T"+sections[4]+lastTimeZoneSuffixPerRaceID.get(raceID);
         TimePoint startTimeEstimatedStartTime = sections[4].trim().length() == 0 ? null : new MillisecondsTimePoint(
-                parseTimePrefixedWithISOToday(sections[4]));
+                parseTimeAndDateISO(startTimeEstimatedStartTimeISO, raceID));
+        if (startTimeEstimatedStartTime != null) {
+            startTimePerRaceID.put(raceID, startTimeEstimatedStartTime);
+        }
         Long millisecondsSinceRaceStart = sections[5].trim().length() == 0 ? null : parseHHMMSSToMilliseconds(sections[5]);
         Integer nextMarkIndexForLeader = sections[6].trim().length() == 0 ? null : Integer.valueOf(sections[6]);
         Distance distanceToNextMarkForLeader = sections[7].trim().length() == 0 ? null : new MeterDistance(Double.valueOf(sections[7]));
@@ -430,23 +494,34 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
             }
         }
         for (SailMasterListener listener : listeners) {
-            listener.receivedRacePositionData(raceID, status, timePoint, startTimeEstimatedStartTime, millisecondsSinceRaceStart,
-                    nextMarkIndexForLeader, distanceToNextMarkForLeader, fixes);
+            try {
+                listener.receivedRacePositionData(raceID, status, timePoint, startTimeEstimatedStartTime, millisecondsSinceRaceStart,
+                        nextMarkIndexForLeader, distanceToNextMarkForLeader, fixes);
+            } catch (Throwable t) {
+                logger.info("Exception occurred trying to notify listener "+listener+" about "+message+": "+t.getMessage());
+                logger.throwing(SailMasterConnectorImpl.class.getName(), "notifyListenersRPD", t);
+            }
         }
         Set<SailMasterListener> raceSpecificListenerSet = raceSpecificListeners.get(message.getRaceID());
         if (raceSpecificListenerSet != null) {
             for (SailMasterListener listener : raceSpecificListenerSet) {
-                listener.receivedRacePositionData(raceID, status, timePoint, startTimeEstimatedStartTime, millisecondsSinceRaceStart,
-                        nextMarkIndexForLeader, distanceToNextMarkForLeader, fixes);
+                try {
+                    listener.receivedRacePositionData(raceID, status, timePoint, startTimeEstimatedStartTime, millisecondsSinceRaceStart,
+                            nextMarkIndexForLeader, distanceToNextMarkForLeader, fixes);
+                } catch (Throwable t) {
+                    logger.info("Exception occurred trying to notify listener "+listener+" about "+message+": "+t.getMessage());
+                    logger.throwing(SailMasterConnectorImpl.class.getName(), "notifyListenersRPD", t);
+                }
             }
         }
     }
 
     @Override
-    public void stop() throws IOException {
+    public synchronized void stop() throws IOException {
         stopped = true;
         socket.close();
         socket = null;
+        notifyAll();
     }
     
     @Override
@@ -511,12 +586,17 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
         }
     }
 
+    private boolean canSendRequests() {
+        return canSendRequests;
+    }
+    
     @Override
     public Iterable<Race> getRaces() throws UnknownHostException, IOException, InterruptedException {
-        Iterable<Race> result;
+        Iterable<Race> result = null;
         if (messageLoader != null) {
             result = messageLoader.getRaces();
-        } else {
+        }
+        if (result == null && canSendRequests()) {
             SailMasterMessage response = sendRequestAndGetResponse(MessageType.RAC);
             assertResponseType(MessageType.RAC, response);
             result = parseAvailableRacesMessage(response);
@@ -555,17 +635,27 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
         return new CourseImpl(courseConfigurationMessage.getSections()[1], marks);
     }
     
-    private String prefixTimeWithISOTodayAndSuffixWithTimezoneIndicator(String time) {
+    private String getLastTimeZoneSuffix(String raceID) {
+        String result = lastTimeZoneSuffixPerRaceID.get(raceID);
+        if (result == null) {
+            int offset = TimeZone.getDefault().getOffset(System.currentTimeMillis())/1000/3600;
+            result = (offset<0?"-":"+") + new DecimalFormat("00").format(offset)+"00";
+            lastTimeZoneSuffixPerRaceID.put(raceID, result);
+        }
+        return result;
+    }
+    
+    private String prefixTimeWithISOTodayAndSuffixWithTimezoneIndicator(String time, String raceID) {
         synchronized (dateFormat) {
-            return dateFormat.format(new Date()).substring(0, "yyyy-mm-ddT".length())+time+lastTimeZoneSuffix;
+            return dateFormat.format(new Date()).substring(0, "yyyy-mm-ddT".length())+time+getLastTimeZoneSuffix(raceID);
         }
     }
 
-    private Date parseTimeAndDateISO(String timeAndDateISO) throws ParseException {
+    private Date parseTimeAndDateISO(String timeAndDateISO, String raceID) throws ParseException {
         char timeZoneIndicator = timeAndDateISO.charAt(timeAndDateISO.length()-6);
         if ((timeZoneIndicator == '+' || timeZoneIndicator == '-') && timeAndDateISO.charAt(timeAndDateISO.length()-3) == ':') {
             timeAndDateISO = timeAndDateISO.substring(0, timeAndDateISO.length()-3)+timeAndDateISO.substring(timeAndDateISO.length()-2);
-            lastTimeZoneSuffix = timeAndDateISO.substring(timeAndDateISO.length()-5);
+            lastTimeZoneSuffixPerRaceID.put(raceID, timeAndDateISO.substring(timeAndDateISO.length()-5));
         }
         synchronized(dateFormat) {
             return dateFormat.parse(timeAndDateISO);
@@ -633,16 +723,23 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
 
     @Override
     public TimePoint getStartTime(String raceID) throws UnknownHostException, IOException, ParseException, InterruptedException {
-        SailMasterMessage response = sendRequestAndGetResponse(MessageType.STT, raceID);
-        String[] sections = response.getSections();
-        assertResponseType(MessageType.STT, response);
-        assertRaceID(raceID, sections[1]);
-        return new MillisecondsTimePoint(parseTimePrefixedWithISOToday(sections[2]));
+        TimePoint result = null;
+        if (messageLoader != null) {
+            result = startTimePerRaceID.get(raceID);
+        }
+        if (result == null && canSendRequests()) {
+            SailMasterMessage response = sendRequestAndGetResponse(MessageType.STT, raceID);
+            String[] sections = response.getSections();
+            assertResponseType(MessageType.STT, response);
+            assertRaceID(raceID, sections[1]);
+            result = new MillisecondsTimePoint(parseTimePrefixedWithISOToday(sections[2], raceID));
+        }
+        return result; 
     }
 
-    private Date parseTimePrefixedWithISOToday(String timeHHMMSS) throws ParseException {
+    private Date parseTimePrefixedWithISOToday(String timeHHMMSS, String raceID) throws ParseException {
         synchronized(dateFormat) {
-            return dateFormat.parse(prefixTimeWithISOTodayAndSuffixWithTimezoneIndicator(timeHHMMSS));
+            return dateFormat.parse(prefixTimeWithISOTodayAndSuffixWithTimezoneIndicator(timeHHMMSS, raceID));
         }
     }
 
@@ -734,7 +831,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
             String[] clockAtMarkDetail = clockAtMarkMessage.getSections()[3+i].split(";");
             int markIndex = Integer.valueOf(clockAtMarkDetail[0]);
             TimePoint timePoint = clockAtMarkDetail.length <= 1 || clockAtMarkDetail[1].trim().length() == 0 ? null :
-                new MillisecondsTimePoint(parseTimePrefixedWithISOToday(clockAtMarkDetail[1]));
+                new MillisecondsTimePoint(parseTimePrefixedWithISOToday(clockAtMarkDetail[1], clockAtMarkMessage.getRaceID()));
             result.add(new Triple<Integer, TimePoint, String>(
                     markIndex, timePoint, clockAtMarkDetail.length <= 2 ? null : clockAtMarkDetail[2]));
         }

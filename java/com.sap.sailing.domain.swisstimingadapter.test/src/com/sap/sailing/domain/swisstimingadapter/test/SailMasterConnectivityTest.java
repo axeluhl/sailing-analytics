@@ -54,7 +54,7 @@ public class SailMasterConnectivityTest {
         Race race4712 = new RaceImpl("4712", "Not such a wonderful race");
         swissTimingPersistence.storeRace(race4711);
         swissTimingPersistence.storeRace(race4712);
-        connector = SwissTimingFactory.INSTANCE.getOrCreateSailMasterConnector("localhost", port, swissTimingPersistence);
+        connector = SwissTimingFactory.INSTANCE.getOrCreateSailMasterConnector("localhost", port, swissTimingPersistence, /* canSendRequests */ true);
         connector.trackRace("W4702");
         connector.trackRace(race4711.getRaceID());
         connector.trackRace(race4712.getRaceID());

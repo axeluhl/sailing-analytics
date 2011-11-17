@@ -27,6 +27,9 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
     
     private static final Logger logger = Logger.getLogger(SwissTimingAdapterPersistenceImpl.class.getName());
 
+    /** this race cache should only be used for checks in the storeSailMasterMessage method to ensure
+     * that we have always a valid race for a message (also in case we missed a RAC message) 
+     */
     private HashMap<String, Race> cachedRaces = new HashMap<String, Race>();
     
     public SwissTimingAdapterPersistenceImpl(DB db, SwissTimingFactory swissTimingFactory) {
@@ -105,15 +108,11 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
 
     @Override
     public List<SailMasterMessage> loadRaceMessages(String raceID) {
-
         DBCollection racesMessagesCollection = database.getCollection(CollectionNames.RACES_MESSAGES.name());
-
         BasicDBObject query = new BasicDBObject();
         query.append(FieldNames.RACE_ID.name(), raceID);
-        
-        DBCursor results = racesMessagesCollection.find(query);
+        DBCursor results = racesMessagesCollection.find(query).sort(new BasicDBObject().append(FieldNames.MESSAGE_SEQUENCE_NUMBER.name(), 1));
         List<SailMasterMessage> result = new ArrayList<SailMasterMessage>();
-        
         for (DBObject o : results) {
                 SailMasterMessage msg = swissTimingFactory.createMessage((String) o.get(FieldNames.MESSAGE_CONTENT.name()),
                         (Long) o.get(FieldNames.MESSAGE_SEQUENCE_NUMBER.name()));
@@ -125,10 +124,8 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
     @Override
     public List<SailMasterMessage> loadCommandMessages() {
         DBCollection cmdMessagesCollection = database.getCollection(CollectionNames.COMMAND_MESSAGES.name());
-        
-        DBCursor results = cmdMessagesCollection.find();
+        DBCursor results = cmdMessagesCollection.find().sort(new BasicDBObject().append(FieldNames.MESSAGE_SEQUENCE_NUMBER.name(), 1));
         List<SailMasterMessage> result = new ArrayList<SailMasterMessage>();
-        
         for (DBObject o : results) {
                 SailMasterMessage msg = swissTimingFactory.createMessage((String) o.get(FieldNames.MESSAGE_CONTENT.name()),
                         (Long) o.get(FieldNames.MESSAGE_SEQUENCE_NUMBER.name()));
@@ -145,9 +142,10 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
         query.append(FieldNames.RACE_ID.name(), raceID);
         DBObject o = races.findOne(query);
         if (o != null) {
+            Long startTimeAsMillis = (Long) o.get(FieldNames.RACE_STARTTIME.name());
             Race race = swissTimingFactory.createRace((String) o.get(FieldNames.RACE_ID.name()),
                     (String) o.get(FieldNames.RACE_DESCRIPTION.name()),
-                    new MillisecondsTimePoint((Long) o.get(FieldNames.RACE_STARTTIME.name())));
+                    startTimeAsMillis == null ? null : new MillisecondsTimePoint(startTimeAsMillis));
             return race;
         }
         return null;
@@ -205,16 +203,41 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
             messageCollection = database.getCollection(CollectionNames.COMMAND_MESSAGES.name());
         }
         messageCollection.insert(objToInsert);
-        if(message.getRaceID() != null && cachedRaces.containsKey(message.getRaceID()) == false) {
+        
+        if(message.getType() == MessageType.RAC) {
+            // store the new race in the master data collection
+            List<Race> availableRaces = parseAvailableRacesMessage(message);
+            
+            for (Race newRace : availableRaces) {
+                storeRace(newRace);
+            }
+        } else if (message.getRaceID() != null && !cachedRaces.containsKey(message.getRaceID())) {
             // ah, we found a new raceID which is not in the list of known races
             // in order to have a more intelligent conflict resolver mechanism we will forward the resolution to a special thread later on
             boolean simpleResolution = true;
-            if(simpleResolution) {
-                Race newRace = SwissTimingFactory.INSTANCE.createRace(message.getRaceID(), null, null);
-                storeRace(newRace);
-                cachedRaces.put(newRace.getRaceID(), newRace);
+            if (simpleResolution) {
+                // first check if the missing race has been created in the mean time
+                Race raceFromDB = getRace(message.getRaceID());
+                if (raceFromDB != null) {
+                    cachedRaces.put(raceFromDB.getRaceID(), raceFromDB);
+                } else {
+                    logger.info("Didn't find race "+message.getRaceID()+" in race DB. Adding it.");
+                    Race newRace = SwissTimingFactory.INSTANCE.createRace(message.getRaceID(), null, null);
+                    storeRace(newRace);
+                    cachedRaces.put(newRace.getRaceID(), newRace);
+                }
             }
         }
+    }
+
+    private List<Race> parseAvailableRacesMessage(SailMasterMessage availableRacesMessage) {
+        int count = Integer.valueOf(availableRacesMessage.getSections()[1]);
+        List<Race> result = new ArrayList<Race>();
+        for (int i=0; i<count; i++) {
+            String[] idAndDescription = availableRacesMessage.getSections()[2+i].split(";");
+            result.add(SwissTimingFactory.INSTANCE.createRace(idAndDescription[0], idAndDescription[1], null));
+        }
+        return result;
     }
 
     @Override
@@ -233,5 +256,18 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
     public void dropAllRaceMasterData() {
         DBCollection racesCollection = database.getCollection(CollectionNames.RACES_MASTERDATA.name());
         racesCollection.drop();
+    }
+    
+    @Override
+    public void dropAllMessageData() {
+
+        DBCollection rawMessageCollection = database.getCollection(CollectionNames.RAW_MESSAGES.name());
+        rawMessageCollection.drop();
+
+        DBCollection racesMessageCollection = database.getCollection(CollectionNames.RACES_MESSAGES.name());
+        racesMessageCollection.drop();
+        
+        DBCollection cmdMessageCollection = database.getCollection(CollectionNames.COMMAND_MESSAGES.name());
+        cmdMessageCollection.drop();
     }
 }

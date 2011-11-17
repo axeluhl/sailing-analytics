@@ -35,15 +35,15 @@ public class SwissTimingFactoryImpl implements SwissTimingFactory {
     }
 
     @Override
-    public SailMasterConnector getOrCreateSailMasterConnector(String host, int port, RaceSpecificMessageLoader messageLoader) throws InterruptedException {
+    public SailMasterConnector getOrCreateSailMasterConnector(String host, int port, RaceSpecificMessageLoader messageLoader, boolean canSendRequests) throws InterruptedException {
         Triple<String, Integer, RaceSpecificMessageLoader> key = new Triple<String, Integer, RaceSpecificMessageLoader>(host, port, messageLoader);
         SailMasterConnector result = connectors.get(key);
         if (result == null) {
-            result = new SailMasterConnectorImpl(host, port, messageLoader);
+            result = new SailMasterConnectorImpl(host, port, messageLoader, canSendRequests);
             connectors.put(key, result);
             // TODO how do connectors get stopped, terminated and removed from the connectors map again?
         } else if (result.isStopped()) {
-            result = new SailMasterConnectorImpl(host, port, messageLoader);
+            result = new SailMasterConnectorImpl(host, port, messageLoader, canSendRequests);
             connectors.put(key, result);
         }
         return result;
@@ -55,10 +55,12 @@ public class SwissTimingFactoryImpl implements SwissTimingFactory {
     }
 
     @Override
-    public SwissTimingRaceTracker createRaceTracker(String raceID, String hostname, int port, WindStore windStore,
-            RaceSpecificMessageLoader messageLoader, DomainFactory domainFactory, TrackedEventRegistry trackedEventRegistry)
-            throws InterruptedException, UnknownHostException, IOException, ParseException {
-        return new SwissTimingRaceTrackerImpl(raceID, hostname, port, windStore, domainFactory, this, messageLoader, trackedEventRegistry);
+    public SwissTimingRaceTracker createRaceTracker(String raceID, String hostname, int port, boolean canSendRequests,
+            WindStore windStore, RaceSpecificMessageLoader messageLoader, DomainFactory domainFactory, TrackedEventRegistry trackedEventRegistry)
+ throws InterruptedException, UnknownHostException, IOException,
+            ParseException {
+        return new SwissTimingRaceTrackerImpl(raceID, hostname, port, windStore, domainFactory, this, messageLoader,
+                trackedEventRegistry, canSendRequests);
     }
 
     @Override

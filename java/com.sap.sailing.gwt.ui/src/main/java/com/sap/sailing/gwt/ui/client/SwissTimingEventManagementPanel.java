@@ -137,7 +137,7 @@ public class SwissTimingEventManagementPanel extends FormPanel implements EventD
         TextColumn<SwissTimingRaceRecordDAO> raceStartTrackingColumn = new TextColumn<SwissTimingRaceRecordDAO>() {
             @Override
             public String getValue(SwissTimingRaceRecordDAO object) {
-                return object.raceStartTime.toString();
+                return object.raceStartTime==null?"":object.raceStartTime.toString();
             }
         };
         raceNameColumn.setSortable(true);
@@ -267,7 +267,8 @@ public class SwissTimingEventManagementPanel extends FormPanel implements EventD
     private void fillRaces(final SailingServiceAsync sailingService) {
         final String hostname = hostnameTextbox.getValue();
         final int port = portIntegerbox.getValue();
-        sailingService.listSwissTimingRaces(hostname, port, new AsyncCallback<List<SwissTimingRaceRecordDAO>>() {
+        sailingService.listSwissTimingRaces(hostname, port, /* TODO canSendRequests */ false,
+                new AsyncCallback<List<SwissTimingRaceRecordDAO>>() {
             @Override
             public void onFailure(Throwable caught) {
                 SwissTimingEventManagementPanel.this.errorReporter.reportError("Error trying to list races: "
@@ -309,7 +310,8 @@ public class SwissTimingEventManagementPanel extends FormPanel implements EventD
         int port = portIntegerbox.getValue();
         for (final SwissTimingRaceRecordDAO rr : raceList.getList()) {
             if (raceTable.getSelectionModel().isSelected(rr)) {
-                sailingService.trackWithSwissTiming(rr, hostname, port, trackWind, correctWindByDeclination, new AsyncCallback<Void>() {
+                sailingService.trackWithSwissTiming(rr, hostname, port, /* TODO canSendRequests */false, trackWind,
+                        correctWindByDeclination, new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         errorReporter.reportError("Error trying to register race " + rr.ID + " for tracking: "

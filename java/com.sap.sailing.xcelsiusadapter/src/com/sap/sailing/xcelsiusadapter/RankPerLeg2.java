@@ -17,7 +17,6 @@ import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Speed;
-import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
@@ -88,7 +87,7 @@ public class RankPerLeg2 extends Action {
                         addColumn(upOrDownwindLegText);
                         addColumn(legId);
                         if (legTime > 0) {
-                            addColumn(legId + " " + markName);
+                            addColumn(legId + " " + markName + "(" + upOrDownwinLeg + ")");
                         } else {
                             addColumn(markName);
                         }
@@ -126,6 +125,7 @@ public class RankPerLeg2 extends Action {
                         // position and tracking-related columns (see Kersten's
                         // mail
                         // of 2011-10-07T11:32:00CEST)
+                        /*
                         SpeedWithBearing speedOverGround = trackedLegOfCompetitor.getSpeedOverGround(time);
                         addColumn("" + (speedOverGround == null ? "null" : speedOverGround.getKnots()));
                         Double estimatedTimeToNextMarkInSeconds = trackedLegOfCompetitor
@@ -133,7 +133,7 @@ public class RankPerLeg2 extends Action {
                         addColumn(""
                                 + (estimatedTimeToNextMarkInSeconds == null ? "null" : estimatedTimeToNextMarkInSeconds));
                         Speed velocityMadeGood = trackedLegOfCompetitor.getVelocityMadeGood(time);
-                        addColumn("" + (velocityMadeGood == null ? "null" : velocityMadeGood.getKnots()));
+                        addColumn("" + (velocityMadeGood == null ? "null" : velocityMadeGood.getKnots()));*/
                     }
                 }
                 previousLeg = trackedLeg;

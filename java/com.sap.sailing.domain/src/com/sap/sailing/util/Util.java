@@ -2,6 +2,7 @@ package com.sap.sailing.util;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 
 public class Util {
     public static <T> int size(Iterable<T> i) {
@@ -13,6 +14,20 @@ public class Util {
             while (iter.hasNext()) {
                 result++;
                 iter.next();
+            }
+            return result;
+        }
+    }
+    
+    public static <T> T get(Iterable<T> iterable, int i) {
+        if (iterable instanceof List<?>) {
+            List<T> l = (List<T>) iterable;
+            return l.get(i);
+        } else {
+            Iterator<T> iter = iterable.iterator();
+            T result = iter.next();
+            for (int j=0; j<i; j++) {
+                result = iter.next();
             }
             return result;
         }
@@ -31,6 +46,13 @@ public class Util {
         }
     }
 
+    public static <T> boolean isEmpty(Iterable<T> ts) {
+        if (ts instanceof Collection<?>) {
+            return ((Collection<?>) ts).isEmpty();
+        } else {
+            return !ts.iterator().hasNext();
+        }
+    }
 
     public static class Pair<A, B> {
 

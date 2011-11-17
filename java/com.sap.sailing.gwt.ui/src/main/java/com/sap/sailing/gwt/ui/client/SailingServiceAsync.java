@@ -17,7 +17,7 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDAO;
 import com.sap.sailing.gwt.ui.shared.MarkDAO;
 import com.sap.sailing.gwt.ui.shared.Pair;
 import com.sap.sailing.gwt.ui.shared.QuickRankDAO;
-import com.sap.sailing.gwt.ui.shared.RaceRecordDAO;
+import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDAO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDAO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDAO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDAO;
@@ -33,15 +33,15 @@ public interface SailingServiceAsync {
     /**
      * The string returned in the callback's pair is the common event name
      */
-    void listTracTracRacesInEvent(String eventJsonURL, AsyncCallback<Pair<String, List<RaceRecordDAO>>> callback);
+    void listTracTracRacesInEvent(String eventJsonURL, AsyncCallback<Pair<String, List<TracTracRaceRecordDAO>>> callback);
 
     /**
      * @param liveURI may be <code>null</code> or the empty string in which case the server will
-     * use the {@link RaceRecordDAO#liveURI} from the <code>rr</code> race record.
+     * use the {@link TracTracRaceRecordDAO#liveURI} from the <code>rr</code> race record.
      * @param storedURImay be <code>null</code> or the empty string in which case the server will
-     * use the {@link RaceRecordDAO#storedURI} from the <code>rr</code> race record.
+     * use the {@link TracTracRaceRecordDAO#storedURI} from the <code>rr</code> race record.
      */
-    void track(RaceRecordDAO rr, String liveURI, String storedURI, boolean trackWind, boolean correctWindByDeclination,
+    void track(TracTracRaceRecordDAO rr, String liveURI, String storedURI, boolean trackWind, boolean correctWindByDeclination,
             AsyncCallback<Void> callback);
 
     void getPreviousTracTracConfigurations(AsyncCallback<List<TracTracConfigurationDAO>> callback);
@@ -162,10 +162,11 @@ public interface SailingServiceAsync {
 
     void getPreviousSwissTimingConfigurations(AsyncCallback<List<SwissTimingConfigurationDAO>> asyncCallback);
 
-    void listSwissTimingRaces(String hostname, int port, AsyncCallback<List<SwissTimingRaceRecordDAO>> asyncCallback);
+    void listSwissTimingRaces(String hostname, int port, boolean canSendRequests,
+            AsyncCallback<List<SwissTimingRaceRecordDAO>> asyncCallback);
 
     void storeSwissTimingConfiguration(String a, String hostname, int port, AsyncCallback<Void> asyncCallback);
 
-    void trackWithSwissTiming(SwissTimingRaceRecordDAO rr, String hostname, int port, boolean trackWind,
-            boolean correctWindByDeclination, AsyncCallback<Void> asyncCallback);
+    void trackWithSwissTiming(SwissTimingRaceRecordDAO rr, String hostname, int port, boolean canSendRequests,
+            boolean trackWind, boolean correctWindByDeclination, AsyncCallback<Void> asyncCallback);
 }
