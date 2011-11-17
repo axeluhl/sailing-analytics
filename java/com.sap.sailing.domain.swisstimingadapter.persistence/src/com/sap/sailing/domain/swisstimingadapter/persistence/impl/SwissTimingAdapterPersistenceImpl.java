@@ -108,15 +108,11 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
 
     @Override
     public List<SailMasterMessage> loadRaceMessages(String raceID) {
-
         DBCollection racesMessagesCollection = database.getCollection(CollectionNames.RACES_MESSAGES.name());
-
         BasicDBObject query = new BasicDBObject();
         query.append(FieldNames.RACE_ID.name(), raceID);
-        
-        DBCursor results = racesMessagesCollection.find(query);
+        DBCursor results = racesMessagesCollection.find(query).sort(new BasicDBObject().append(FieldNames.MESSAGE_SEQUENCE_NUMBER.name(), 1));
         List<SailMasterMessage> result = new ArrayList<SailMasterMessage>();
-        
         for (DBObject o : results) {
                 SailMasterMessage msg = swissTimingFactory.createMessage((String) o.get(FieldNames.MESSAGE_CONTENT.name()),
                         (Long) o.get(FieldNames.MESSAGE_SEQUENCE_NUMBER.name()));
@@ -128,10 +124,8 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
     @Override
     public List<SailMasterMessage> loadCommandMessages() {
         DBCollection cmdMessagesCollection = database.getCollection(CollectionNames.COMMAND_MESSAGES.name());
-        
-        DBCursor results = cmdMessagesCollection.find();
+        DBCursor results = cmdMessagesCollection.find().sort(new BasicDBObject().append(FieldNames.MESSAGE_SEQUENCE_NUMBER.name(), 1));
         List<SailMasterMessage> result = new ArrayList<SailMasterMessage>();
-        
         for (DBObject o : results) {
                 SailMasterMessage msg = swissTimingFactory.createMessage((String) o.get(FieldNames.MESSAGE_CONTENT.name()),
                         (Long) o.get(FieldNames.MESSAGE_SEQUENCE_NUMBER.name()));

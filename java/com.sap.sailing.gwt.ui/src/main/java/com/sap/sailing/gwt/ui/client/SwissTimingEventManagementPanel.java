@@ -137,7 +137,7 @@ public class SwissTimingEventManagementPanel extends FormPanel implements EventD
         TextColumn<SwissTimingRaceRecordDAO> raceStartTrackingColumn = new TextColumn<SwissTimingRaceRecordDAO>() {
             @Override
             public String getValue(SwissTimingRaceRecordDAO object) {
-                return object.raceStartTime.toString();
+                return object.raceStartTime==null?"":object.raceStartTime.toString();
             }
         };
         raceNameColumn.setSortable(true);

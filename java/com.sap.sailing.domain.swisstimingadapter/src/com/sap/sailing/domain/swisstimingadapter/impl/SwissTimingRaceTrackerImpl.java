@@ -191,7 +191,7 @@ public class SwissTimingRaceTrackerImpl implements SwissTimingRaceTracker, SailM
         for (Triple<Integer, Integer, Long> markIndexRankAndTimeSinceStartInMilliseconds : markIndicesRanksAndTimesSinceStartInMilliseconds) {
             Waypoint waypoint = Util.get(trackedRace.getRace().getCourse().getWaypoints(),
                     markIndexRankAndTimeSinceStartInMilliseconds.getA());
-            MillisecondsTimePoint timePoint = new MillisecondsTimePoint(trackedRace.getStart().asMillis()
+            MillisecondsTimePoint timePoint = trackedRace.getStart()==null?null:new MillisecondsTimePoint(trackedRace.getStart().asMillis()
                     + markIndexRankAndTimeSinceStartInMilliseconds.getC());
             MarkPassing markPassing = domainFactory.createMarkPassing(raceID, boatID, waypoint, timePoint);
             markPassingsByMarkIndex.put(markIndexRankAndTimeSinceStartInMilliseconds.getA(), markPassing);

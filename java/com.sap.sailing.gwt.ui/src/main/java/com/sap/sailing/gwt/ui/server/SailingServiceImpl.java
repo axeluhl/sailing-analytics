@@ -276,7 +276,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         for (Map.Entry<BoatClass, Set<RaceDefinition>> e : racesByBoatClass.entrySet()) {
             List<RaceDAO> raceDAOsInBoatClass = getRaceDAOs(event, e.getValue());
             if (!raceDAOsInBoatClass.isEmpty()) {
-                RegattaDAO regatta = new RegattaDAO(new BoatClassDAO(e.getKey().getName()), raceDAOsInBoatClass);
+                RegattaDAO regatta = new RegattaDAO(new BoatClassDAO(e.getKey()==null?"":e.getKey().getName()), raceDAOsInBoatClass);
                 result.add(regatta);
             }
         }

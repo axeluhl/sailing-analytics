@@ -443,9 +443,13 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
         String raceID = sections[1];
         RaceStatus status = RaceStatus.values()[Integer.valueOf(sections[2])];
         TimePoint timePoint = new MillisecondsTimePoint(parseTimeAndDateISO(sections[3], raceID));
+        String dateISO = sections[3].substring(0, sections[3].indexOf('T'));
+        String startTimeEstimatedStartTimeISO = dateISO+"T"+sections[4]+lastTimeZoneSuffixPerRaceID.get(raceID);
         TimePoint startTimeEstimatedStartTime = sections[4].trim().length() == 0 ? null : new MillisecondsTimePoint(
-                parseTimePrefixedWithISOToday(sections[4], raceID));
-        startTimePerRaceID.put(raceID, startTimeEstimatedStartTime);
+                parseTimeAndDateISO(startTimeEstimatedStartTimeISO, raceID));
+        if (startTimeEstimatedStartTime != null) {
+            startTimePerRaceID.put(raceID, startTimeEstimatedStartTime);
+        }
         Long millisecondsSinceRaceStart = sections[5].trim().length() == 0 ? null : parseHHMMSSToMilliseconds(sections[5]);
         Integer nextMarkIndexForLeader = sections[6].trim().length() == 0 ? null : Integer.valueOf(sections[6]);
         Distance distanceToNextMarkForLeader = sections[7].trim().length() == 0 ? null : new MeterDistance(Double.valueOf(sections[7]));
