@@ -13,6 +13,7 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Tack;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
@@ -27,6 +28,7 @@ import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindSource;
+import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.WindTrackImpl;
 
@@ -374,6 +376,14 @@ public class MockedTrackedRace implements DynamicTrackedRace {
                 // TODO Auto-generated method stub
                 
             }
+
+            @Override
+            public DynamicTrackedRace createTrackedRace(RaceDefinition raceDefinition, WindStore windStore,
+                    long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
+                    DynamicRaceDefinitionSet raceDefinitionSetToUpdate) {
+                // TODO Auto-generated method stub
+                return null;
+            }
         };
     }
 
@@ -385,6 +395,12 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
     @Override
     public Tack getTack(Competitor competitor, TimePoint timePoint) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Wind getDirectionFromStartToNextMark(TimePoint at) {
         // TODO Auto-generated method stub
         return null;
     }

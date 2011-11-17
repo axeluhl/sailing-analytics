@@ -11,4 +11,21 @@ public interface SailMasterMessage {
      * @return the {@link #getMessage()} result split along occurrences of the "|" character ("pipe")
      */
     String[] getSections();
+    
+    MessageType getType();
+    
+    boolean isRequest();
+    
+    boolean isResponse();
+    
+    boolean isEvent();
+    
+    /**
+     * Most messages emitted by a SailMaster are specific to a single race. If this is such a message,
+     * the race ID is returned. Otherwise, (e.g., if the message is a {@link MessageType#RAC RAC} message),
+     * <code>null</code> is returned.
+     */
+    String getRaceID();
+
+    Long getSequenceNumber();
 }

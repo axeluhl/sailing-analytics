@@ -15,7 +15,9 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDAO;
 import com.sap.sailing.gwt.ui.shared.MarkDAO;
 import com.sap.sailing.gwt.ui.shared.Pair;
 import com.sap.sailing.gwt.ui.shared.QuickRankDAO;
-import com.sap.sailing.gwt.ui.shared.RaceRecordDAO;
+import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDAO;
+import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDAO;
+import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDAO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDAO;
 import com.sap.sailing.gwt.ui.shared.WindDAO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDAO;
@@ -26,13 +28,13 @@ import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDAO;
  */
 @RemoteServiceRelativePath("sailing")
 public interface SailingService extends RemoteService {
-    List<TracTracConfigurationDAO> getPreviousConfigurations() throws Exception;
+    List<TracTracConfigurationDAO> getPreviousTracTracConfigurations() throws Exception;
     
     List<EventDAO> listEvents();
 
-    Pair<String, List<RaceRecordDAO>> listRacesInEvent(String eventJsonURL) throws Exception;
+    Pair<String, List<TracTracRaceRecordDAO>> listTracTracRacesInEvent(String eventJsonURL) throws Exception;
 
-    void track(RaceRecordDAO rr, String liveURI, String storedURI, boolean trackWind, boolean correctWindByDeclination) throws Exception;
+    void track(TracTracRaceRecordDAO rr, String liveURI, String storedURI, boolean trackWind, boolean correctWindByDeclination) throws Exception;
 
     void storeTracTracConfiguration(String name, String jsonURL, String liveDataURI, String storedDataURI) throws Exception;
 
@@ -75,6 +77,10 @@ public interface SailingService extends RemoteService {
     void removeLeaderboardColumn(String leaderboardName, String columnName);
 
     void addColumnToLeaderboard(String columnName, String leaderboardName, boolean medalRace);
+    
+    void moveLeaderboardColumnUp(String leaderboardName, String columnName);
+    
+    void moveLeaderboardColumnDown(String leaderboardName, String columnName);
 
     void connectTrackedRaceToLeaderboardColumn(String leaderboardName, String raceColumnName,
             String eventName, String raceName);
@@ -95,4 +101,17 @@ public interface SailingService extends RemoteService {
             String raceName, Integer correctedScore, Date date) throws Exception;
 
     LeaderboardEntryDAO getLeaderboardEntry(String leaderboardName, String competitorName, String raceName, Date date) throws Exception;
+
+    void updateCompetitorDisplayNameInLeaderboard(String leaderboardName, String competitorName, String displayName);
+    
+    void updateIsMedalRace(String leaderboardName, String columnName, boolean isMedalRace);
+
+    List<SwissTimingConfigurationDAO> getPreviousSwissTimingConfigurations();
+
+    List<SwissTimingRaceRecordDAO> listSwissTimingRaces(String hostname, int port, boolean canSendRequests) throws Exception;
+
+    void storeSwissTimingConfiguration(String a, String hostname, int port);
+
+    void trackWithSwissTiming(SwissTimingRaceRecordDAO rr, String hostname, int port, boolean canSendRequests,
+            boolean trackWind, boolean correctWindByDeclination) throws Exception;
 }

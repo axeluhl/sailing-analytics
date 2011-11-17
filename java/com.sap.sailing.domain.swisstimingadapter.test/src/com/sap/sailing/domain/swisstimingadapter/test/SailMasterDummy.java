@@ -5,19 +5,26 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.logging.Logger;
 
+import com.sap.sailing.domain.swisstimingadapter.MessageType;
 import com.sap.sailing.domain.swisstimingadapter.impl.SailMasterMessageImpl;
-import com.sap.sailing.domain.swisstimingadapter.impl.SailMasterTransceiver;
+import com.sap.sailing.domain.swisstimingadapter.impl.SailMasterTransceiverImpl;
+import com.sap.sailing.util.Util.Pair;
 
 public class SailMasterDummy implements Runnable {
+    private static final Logger logger = Logger.getLogger(SailMasterDummy.class.getName());
+    
     public static final byte STX = 0x02;
     public static final byte ETX = 0x03;
     
     private final int port;
     
+    private Socket socket;
+    
     private boolean stopped;
     
-    private final SailMasterTransceiver transceiver = new SailMasterTransceiver();
+    private final SailMasterTransceiverImpl transceiver = new SailMasterTransceiverImpl();
     
     public SailMasterDummy(int port) {
         this.port = port;
@@ -28,70 +35,96 @@ public class SailMasterDummy implements Runnable {
             ServerSocket listenOn = new ServerSocket(port);
             stopped = false;
             while (!stopped) {
-                Socket s = listenOn.accept();
-                processRequests(s);
+                socket = listenOn.accept();
+                synchronized (this) {
+                    this.notifyAll();
+                }
+                processRequests();
                 if (stopped) {
-                    s.close();
+                    socket.close();
                 }
             }
             listenOn.close();
-            System.out.println("Server stopped. Thread ending.");
+            logger.info("Server stopped. Thread ending.");
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private void processRequests(Socket s) throws IOException {
-        InputStream is = s.getInputStream();
-        String message = transceiver.receiveMessage(is);
-        while (message != null) {
-            respondToMessage(message, s.getOutputStream());
+    private void processRequests() throws IOException {
+        InputStream is = socket.getInputStream();
+        Pair<String, Long> messageAndOptionalSequenceNumber = transceiver.receiveMessage(is);
+        while (messageAndOptionalSequenceNumber != null) {
+            respondToMessage(messageAndOptionalSequenceNumber.getA(), socket.getOutputStream());
             if (stopped) {
-                message = null;
+                messageAndOptionalSequenceNumber = null;
             } else {
-                message = transceiver.receiveMessage(is);
+                messageAndOptionalSequenceNumber = transceiver.receiveMessage(is);
             }
         }
     }
     
     private void respondToMessage(String message, OutputStream os) throws IOException {
-        SailMasterMessageImpl smMessage = new SailMasterMessageImpl(message);
+        SailMasterMessageImpl smMessage = new SailMasterMessageImpl(message, null);
         String[] sections = smMessage.getSections();
-        if ("RaceId".equals(sections[0])) {
-            transceiver.sendMessage("RaceId|4711,A wonderful test race|4712,Not such a wonderful race", os);
-        } else if ("CourseConfig".equals(sections[0])) {
+        if ((MessageType.RAC.name()+"?").equals(sections[0])) {
+            // Available Races
+            transceiver.sendMessage("RAC!|2|4711;A wonderful test race|4712;Not such a wonderful race", os);
+        } else if ((MessageType.CCG.name()+"?").equals(sections[0])) {
+            // Cource Configuration
             if (sections[1].equals("4711")) {
-                transceiver.sendMessage("CourseConfig|"+sections[1]+"|1,Lee Gate,LG1,LG2|2,Windward,WW1", os);
+                transceiver.sendMessage("CCG!|"+sections[1]+"|2|1;Lee Gate;LG1;LG2|2;Windward;WW1", os);
             } else if (sections[1].equals("4712")) {
-                transceiver.sendMessage("CourseConfig|"+sections[1]+"|1,Lee Gate,LG1,LG2|2,Windward,WW1|3,Offset,OS1", os);
+                transceiver.sendMessage("CCG!|"+sections[1]+"|3|1;Lee Gate;LG1;LG2|2;Windward;WW1|3;Offset;OS1", os);
             }
-        } else if ("StartList".equals(sections[0])) {
+        } else if ((MessageType.STL.name()+"?").equals(sections[0])) {
+            // Startlist
             if (sections[1].equals("4711")) {
-                transceiver.sendMessage("Startlist|"+sections[1]+"|GER 8414,GER,Polgar/Koy|GER 8140,GER,Schlonski/Bohn", os);
+                transceiver.sendMessage("STL!|"+sections[1]+"|2|GER 8414;GER;Polgar/Koy|GER 8140;GER;Schlonski/Bohn", os);
             } else if (sections[1].equals("4712")) {
-                transceiver.sendMessage("Startlist|"+sections[1]+"|GER 8340,GER,Stanjek/Kleen|GER 8433,GER,Babendererde/Jacobs|GER 8299,GER,Elsner/Schulz", os);
+                transceiver.sendMessage("STL!|"+sections[1]+"|3|GER 8340;GER;Stanjek/Kleen|GER 8433;GER;Babendererde/Jacobs|GER 8299;GER;Elsner/Schulz", os);
             }
-        } else if ("RaceTime".equals(sections[0])) {
+        } else if ((MessageType.STT.name()+"?").equals(sections[0])) {
+            // StartTime
             if (sections[1].equals("4711")) {
-                transceiver.sendMessage("RaceTime|"+sections[1]+"|10:15:22", os);
+                transceiver.sendMessage("STT!|"+sections[1]+"|10:15:22", os);
             } else if (sections[1].equals("4712")) {
-                transceiver.sendMessage("RaceTime|"+sections[1]+"|18:17:23", os);
+                transceiver.sendMessage("STT!|"+sections[1]+"|18:17:23", os);
             }
-        } else if ("ClockAtMark".equals(sections[0])) {
-            
-        } else if ("DistToMark".equals(sections[0])) {
-            
-        } else if ("CurrentBoatSpeed".equals(sections[0])) {
-            
-        } else if ("AverageBoatSpeed".equals(sections[0])) {
-            
-        } else if ("DistBetweenBoats".equals(sections[0])) {
-            
-        } else if ("StopServer".equals(sections[0])) {
+        } else if ((MessageType.CAM.name()+"?").equals(sections[0])) {
+            // Clock at Mark/Finish
+        } else if ((MessageType.DTM.name()+"?").equals(sections[0])) {
+            // Distance to Mark
+        } else if ((MessageType.CBS.name()+"?").equals(sections[0])) {
+            // Current Boat Speed
+        } else if ((MessageType.DBB.name()+"?").equals(sections[0])) {
+            // Distance between Boats
+        } else if ((MessageType.ABS.name()+"?").equals(sections[0])) {
+            // Average Boat Speed per Leg
+        } else if ((MessageType.TMD.name()+"?").equals(sections[0])) {
+            // Timing Data
+        } else if ((MessageType.VER.name()+"?").equals(sections[0])) {
+            // Version
+            transceiver.sendMessage("VER!|1.0", os);
+        } else if ((MessageType._STOPSERVER.name()+"?").equals(sections[0])) {
             stopped = true;
-            transceiver.sendMessage("Server stopped", os);
+            transceiver.sendMessage(MessageType._STOPSERVER.name()+"!", os);
         } else {
             transceiver.sendMessage("Request not understood", os);
         }
+    }
+    
+    public void sendEvent(String message) throws IOException, InterruptedException {
+        synchronized (this) {
+            if (socket == null) {
+                // wait a while to get notified about socket being set; could be a thread startup / synchronization
+                // problem
+                this.wait(/* timeout in milliseconds */1000l);
+            }
+        }
+        if (socket == null) {
+            throw new IllegalStateException(SailMasterDummy.class.getSimpleName()+" must be running (run() method must be executing)");
+        }
+        transceiver.sendMessage(message, socket.getOutputStream());
     }
 }

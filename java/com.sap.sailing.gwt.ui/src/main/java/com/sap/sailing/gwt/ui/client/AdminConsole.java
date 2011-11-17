@@ -4,8 +4,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.google.gwt.event.logical.shared.SelectionEvent;
-import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TabPanel;
@@ -26,18 +24,22 @@ public class AdminConsole extends AbstractEntryPoint implements EventRefresher {
         tabPanel.setSize("95%", "95%");
 
         eventDisplayers = new HashSet<EventDisplayer>();
-        EventManagementPanel eventManagementPanel = new EventManagementPanel(sailingService, this, this, stringConstants);
-        eventDisplayers.add(eventManagementPanel);
-        eventManagementPanel.setSize("90%", "90%");
-        tabPanel.add(eventManagementPanel, stringConstants.tracTracEvents(), false);
+        TracTracEventManagementPanel tractracEventManagementPanel = new TracTracEventManagementPanel(sailingService, this, this, stringConstants);
+        eventDisplayers.add(tractracEventManagementPanel);
+        tractracEventManagementPanel.setSize("90%", "90%");
+        tabPanel.add(tractracEventManagementPanel, stringConstants.tracTracEvents(), false);
+        SwissTimingEventManagementPanel swisstimingEventManagementPanel = new SwissTimingEventManagementPanel(sailingService, this, this, stringConstants);
+        eventDisplayers.add(swisstimingEventManagementPanel);
+        swisstimingEventManagementPanel.setSize("90%", "90%");
+        tabPanel.add(swisstimingEventManagementPanel, stringConstants.swissTimingEvents(), false);
         WindPanel windPanel = new WindPanel(sailingService, this, this, stringConstants);
         eventDisplayers.add(windPanel);
         windPanel.setSize("90%", "90%");
         tabPanel.add(windPanel, stringConstants.wind(), /* asHTML */ false);
-        final RaceMapPanel raceMapPanel = new RaceMapPanel(sailingService, this, this, stringConstants);
-        eventDisplayers.add(raceMapPanel);
-        raceMapPanel.setSize("90%", "90%");
-        tabPanel.add(raceMapPanel, stringConstants.map(), /* asHTML */ false);
+        //final RaceMapPanel raceMapPanel = new RaceMapPanel(sailingService, this, this, stringConstants);
+        //eventDisplayers.add(raceMapPanel);
+        //raceMapPanel.setSize("90%", "90%");
+        //tabPanel.add(raceMapPanel, stringConstants.map(), /* asHTML */ false);
         LeaderboardPanel defaultLeaderboardPanel = new LeaderboardPanel(sailingService, stringConstants.defaultLeaderboard(), this, stringConstants);
         defaultLeaderboardPanel.setSize("90%", "90%");
         tabPanel.add(defaultLeaderboardPanel, stringConstants.defaultLeaderboard(), /* asHTML */ false);
@@ -47,14 +49,14 @@ public class AdminConsole extends AbstractEntryPoint implements EventRefresher {
         eventDisplayers.add(leaderboardConfigPanel);
         
         tabPanel.selectTab(0);
-        tabPanel.addSelectionHandler(new SelectionHandler<Integer>() {
+        /*tabPanel.addSelectionHandler(new SelectionHandler<Integer>() {
 			@Override
 			public void onSelection(SelectionEvent<Integer> event) {
 				if(raceMapPanel.isVisible()) {
 					raceMapPanel.onResize();
 				}				
 			}
-		});
+		});*/
         fillEvents();
     }
 

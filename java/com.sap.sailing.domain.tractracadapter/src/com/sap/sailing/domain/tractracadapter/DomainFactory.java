@@ -8,7 +8,6 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.ParseException;
 import java.util.List;
-import java.util.Set;
 
 import com.maptrack.client.io.TypeController;
 import com.sap.sailing.domain.base.BoatClass;
@@ -20,11 +19,13 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Team;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedEvent;
+import com.sap.sailing.domain.tracking.TrackedEventRegistry;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
@@ -91,7 +92,7 @@ public interface DomainFactory {
     
     /**
      * Creates a race tracked for the specified URL/URIs and starts receiving all available existing and future push
-     * data from there. Receiving continues until {@link RaceTracker#stop()} is called.
+     * data from there. Receiving continues until {@link TracTracRaceTracker#stop()} is called.
      * <p>
      * 
      * A race tracker uses the <code>paramURL</code> for the TracTrac Java client to register for push data about one
@@ -105,21 +106,15 @@ public interface DomainFactory {
      * respond with the {@link RaceDefinition} when its {@link DomainFactory#getRaces(Event)} is called with the TracTrac
      * {@link Event} as argument that is used for its tracking.
      * <p>
-     * 
      * @param windStore
      *            Provides the capability to obtain the {@link WindTrack}s for the different wind sources. A trivial
      *            implementation is {@link EmptyWindStore} which simply provides new, empty tracks. This is always
      *            available but loses track of the wind, e.g., during server restarts.
+     * @param trackedEventRegistry TODO
      */
-    RaceTracker createRaceTracker(URL paramURL, URI liveURI, URI storedURI, WindStore windStore) throws MalformedURLException,
+    TracTracRaceTracker createRaceTracker(URL paramURL, URI liveURI, URI storedURI, WindStore windStore, TrackedEventRegistry trackedEventRegistry) throws MalformedURLException,
             FileNotFoundException, URISyntaxException;
 
-    /**
-     * Looks for tracking information about <code>event</code>. If no such object exists yet, a new one
-     * is created.
-     */
-    DynamicTrackedEvent getOrCreateTrackedEvent(com.sap.sailing.domain.base.Event event);
-    
     BoatClass getOrCreateBoatClass(CompetitorClass competitorClass);
 
     /**
@@ -134,11 +129,11 @@ public interface DomainFactory {
      *            {@link #getOrCreateTrackedEvent(com.sap.sailing.domain.base.Event)} because otherwise the link to the
      *            {@link Event} can't be established
      * @param tokenToRetrieveAssociatedRace
-     *            used in {@link #getRace} to retrieve the {@link RaceDefinition} received by the
+     *            used to update the set of{@link RaceDefinition}s received by the
      *            {@link RaceCourseReceiver} created by this call
      */
     Iterable<Receiver> getUpdateReceivers(DynamicTrackedEvent trackedEvent, Event tractracEvent, WindStore windStore,
-            Object tokenToRetrieveAssociatedRace);
+            DynamicRaceDefinitionSet raceDefinitionSetToUpdate);
 
     RaceDefinition getOrCreateRaceDefinition(Race race, Course course);
 
@@ -154,19 +149,11 @@ public interface DomainFactory {
     MarkPassing createMarkPassing(com.tractrac.clientmodule.Competitor competitor, Waypoint passed, TimePoint time);
 
     Iterable<Receiver> getUpdateReceivers(DynamicTrackedEvent trackedEvent, Event tractracEvent, WindStore windStore,
-            Object tokenToRetrieveAssociatedRace, ReceiverType... types);
+            DynamicRaceDefinitionSet raceDefinitionSetToUpdate, ReceiverType... types);
 
-    DynamicTrackedRace trackRace(TrackedEvent trackedEvent, RaceDefinition raceDefinition, WindStore windStore,
-            long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed, Event tractracEvent,
-            Object tokenToRetrieveAssociatedRace);
-
-    /**
-     * Non-blocking call that returns <code>null</code> if no {@link RaceDefinition} for the token
-     * has been created yet, e.g., because no course definition has been received yet or the listener
-     * for receiving course information hasn't been registered (yet). Multiple races will be returned if
-     * the {@link Event} to which the client connected has multiple {@link Event#getRaceList() races}.
-     */
-    Set<RaceDefinition> getRaces(Object tokenToRetrieveAssociatedRace);
+    DynamicTrackedRace trackRace(DynamicTrackedEvent trackedEvent, RaceDefinition raceDefinition, WindStore windStore,
+            long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
+            DynamicRaceDefinitionSet raceDefinitionSetToUpdate);
 
     JSONService parseJSONURL(URL jsonURL) throws IOException, ParseException, org.json.simple.parser.ParseException, URISyntaxException;
 
@@ -182,12 +169,6 @@ public interface DomainFactory {
      * in a course. A single control point may be used more than once in a course's list of waypoints.
      */
     void updateCourseWaypoints(Course courseToUpdate, List<ControlPoint> controlPoints) throws PatchFailedException;
-
-    /**
-     * Looks for the tracking information for <code>event</code>. If not found, <code>null</code> is returned
-     * immediately. See also {@link #getOrCreateTrackedEvent(com.sap.sailing.domain.base.Event)}.
-     */
-    DynamicTrackedEvent getTrackedEvent(com.sap.sailing.domain.base.Event event);
 
     TracTracConfiguration createTracTracConfiguration(String name, String jsonURL, String liveDataURI,
             String storedDataURI);
@@ -215,7 +196,8 @@ public interface DomainFactory {
      * if the {@link TrackedRace} that was removed from the {@link TrackedEvent} was the last one, the
      * {@link TrackedEvent} is removed such that {@link #getOrCreateTrackedEvent(com.sap.sailing.domain.base.Event)}
      * will have to create a new one.
+     * @param trackedEventRegistry TODO
      */
-    void removeRace(Event tractracEvent, Race tractracRace);
+    void removeRace(Event tractracEvent, Race tractracRace, TrackedEventRegistry trackedEventRegistry);
 
 }

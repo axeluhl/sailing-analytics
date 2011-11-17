@@ -163,6 +163,18 @@ public interface Leaderboard extends Named {
      * {@link #addRace}. If no race column by the requested <code>name</code> exists, <code>null</code> is returned.
      */
     RaceInLeaderboard getRaceColumnByName(String name);
+    
+    /**
+     * Moves the column with the name <code>name</code> up. 
+     * @param name The name of the column to move.
+     */
+    void moveRaceColumnUp(String name);
+    
+    /**
+     * Moves the column with the name <code>name</code> down. 
+     * @param name The name of the column to move.
+     */
+    void moveRaceColumnDown(String name);
 
     /**
      * A leaderboard can carry over points from races that are not tracked by this leaderboard in detail,
@@ -195,7 +207,15 @@ public interface Leaderboard extends Named {
     ThresholdBasedResultDiscardingRule getResultDiscardingRule();
 
     Competitor getCompetitorByName(String competitorName);
+    
+    void setDisplayName(Competitor competitor, String displayName);
 
+    /**
+     * If a display name different from the competitor's {@link Competitor#getName() name} has been defined,
+     * this method returns it; otherwise, <code>null</code> is returned.
+     */
+    String getDisplayName(Competitor competitor);
+    
     /**
      * Tells if the column represented by <code>raceInLeaderboard</code> shall be considered for discarding.
      * Medal races are never considered for discarding (not counted as a "started race" nor discarded themselves).
@@ -205,4 +225,6 @@ public interface Leaderboard extends Named {
      * @param timePoint TODO
      */
     boolean considerForDiscarding(RaceInLeaderboard raceInLeaderboard, TimePoint timePoint);
+    
+    void updateIsMedalRace(String raceName, boolean isMedalRace);
 }

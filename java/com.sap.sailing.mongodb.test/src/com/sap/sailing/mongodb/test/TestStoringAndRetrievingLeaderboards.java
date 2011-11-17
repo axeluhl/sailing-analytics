@@ -22,10 +22,10 @@ import com.sap.sailing.domain.leaderboard.ScoreCorrection;
 import com.sap.sailing.domain.leaderboard.impl.LeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.ResultDiscardingRuleImpl;
 import com.sap.sailing.domain.leaderboard.impl.ScoreCorrectionImpl;
+import com.sap.sailing.domain.persistence.impl.DomainObjectFactoryImpl;
+import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
 import com.sap.sailing.domain.test.MockedTrackedRaceWithFixedRank;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.mongodb.impl.DomainObjectFactoryImpl;
-import com.sap.sailing.mongodb.impl.MongoObjectFactoryImpl;
 import com.sap.sailing.util.Util;
 
 public class TestStoringAndRetrievingLeaderboards extends AbstractMongoDBTest {

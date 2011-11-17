@@ -22,10 +22,14 @@ public interface RaceInLeaderboard extends LeaderboardColumn {
      */
     boolean isMedalRace();
     
+    void setIsMedalRace(boolean isMedalRace);
+    
     void setName(String newName);
     
     /**
      * Constructs a key for maps storing corrections such as score corrections and max points reasons.
      */
     Pair<Competitor, RaceInLeaderboard> getKey(Competitor competitor);
+    
+    
 }

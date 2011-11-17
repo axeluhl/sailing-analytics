@@ -46,7 +46,7 @@ the correct directory, if not already there:
 
 Then launch the server:
 
- - ./start
+ - ./start 2>&1 | tee log
 
 This should start an OSGi console with the latest version of the
 bundles deployed to ~trac/servers/<instance>/plugins.

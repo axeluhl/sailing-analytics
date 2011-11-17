@@ -31,6 +31,9 @@ import com.sap.sailing.domain.base.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.base.impl.DegreePosition;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.persistence.DomainObjectFactory;
+import com.sap.sailing.domain.persistence.MongoObjectFactory;
+import com.sap.sailing.domain.persistence.MongoWindStoreFactory;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.NoWindException;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -41,9 +44,6 @@ import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tractracadapter.RaceRecord;
-import com.sap.sailing.mongodb.DomainObjectFactory;
-import com.sap.sailing.mongodb.MongoObjectFactory;
-import com.sap.sailing.mongodb.MongoWindStoreFactory;
 import com.sap.sailing.util.InvalidDateException;
 import com.sap.sailing.util.Util.Triple;
 
@@ -175,7 +175,7 @@ public class AdminApp extends Servlet {
             if (race == null) {
                 resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Race not found");
             } else {
-                DynamicTrackedRace trackedRace = getService().getDomainFactory().getTrackedEvent(event).getTrackedRace(race);
+                DynamicTrackedRace trackedRace = getService().getOrCreateTrackedEvent(event).getTrackedRace(race);
                 String windAveragingIntervalInMIllis = req.getParameter(PARAM_NAME_WIND_AVERAGING_INTERVAL_MILLIS);
                 if (windAveragingIntervalInMIllis != null) {
                     trackedRace.setMillisecondsOverWhichToAverageWind(Long.valueOf(windAveragingIntervalInMIllis));
@@ -191,7 +191,7 @@ public class AdminApp extends Servlet {
     private void listRacesInEvent(HttpServletRequest req, HttpServletResponse resp) throws IOException, ParseException,
             org.json.simple.parser.ParseException, URISyntaxException {
         URL jsonURL = new URL(req.getParameter(PARAM_NAME_EVENT_JSON_URL));
-        List<RaceRecord> raceRecords = getService().getRaceRecords(jsonURL).getB();
+        List<RaceRecord> raceRecords = getService().getTracTracRaceRecords(jsonURL).getB();
         JSONArray result = new JSONArray();
         for (RaceRecord raceRecord : raceRecords) {
             JSONObject jsonRaceRecord = new JSONObject();
@@ -214,7 +214,7 @@ public class AdminApp extends Servlet {
             if (race == null) {
                 resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Race not found");
             } else {
-                TrackedRace trackedRace = getService().getDomainFactory().getTrackedEvent(event).getTrackedRace(race);
+                TrackedRace trackedRace = getService().getOrCreateTrackedEvent(event).getTrackedRace(race);
                 TimePoint time = getTimePoint(req, PARAM_NAME_TIME, PARAM_NAME_TIME_MILLIS, MillisecondsTimePoint.now());
                 TimePoint oneHourLater = new MillisecondsTimePoint(time.asMillis()+3600*1000);
                 String[] latitudes = req.getParameterValues(PARAM_NAME_LATDEG);
@@ -256,7 +256,7 @@ public class AdminApp extends Servlet {
             if (race == null) {
                 resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Race not found");
             } else {
-                TrackedRace trackedRace = getService().getDomainFactory().getTrackedEvent(event).getTrackedRace(race);
+                TrackedRace trackedRace = getService().getOrCreateTrackedEvent(event).getTrackedRace(race);
                 TimePoint from = getTimePoint(req, PARAM_NAME_FROM_TIME, PARAM_NAME_FROM_TIME_MILLIS,
                         trackedRace.getStart()==null?new MillisecondsTimePoint(0):
                             /* 24h before race start */ new MillisecondsTimePoint(trackedRace.getStart().asMillis()-24*3600*1000));
@@ -314,7 +314,7 @@ public class AdminApp extends Servlet {
                     if (race == null) {
                         resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Race not found");
                     } else {
-                        TrackedRace trackedRace = getService().getDomainFactory().getTrackedEvent(event)
+                        TrackedRace trackedRace = getService().getOrCreateTrackedEvent(event)
                                 .getTrackedRace(race);
                         trackedRace.setWindSource(windSource);
                         resp.getWriter().println(
@@ -378,7 +378,7 @@ public class AdminApp extends Servlet {
                     try {
                         TimePoint timePoint = getTimePoint(req, PARAM_NAME_TIME, PARAM_NAME_TIME_MILLIS, MillisecondsTimePoint.now());
                         Wind wind = new WindImpl(p, timePoint, speed);
-                        getService().getDomainFactory().getTrackedEvent(event).getTrackedRace(race).recordWind(wind, WindSource.WEB);
+                        getService().getOrCreateTrackedEvent(event).getTrackedRace(race).recordWind(wind, WindSource.WEB);
                     } catch (InvalidDateException ex) {
                         resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Couldn't parse time specification " + ex.getMessage());
                     }
@@ -407,7 +407,7 @@ public class AdminApp extends Servlet {
                         resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Wind source name " + sourceName + " unknown");
                     } else {
                         try {
-                            WindTrack windTrack = getService().getDomainFactory().getTrackedEvent(event)
+                            WindTrack windTrack = getService().getOrCreateTrackedEvent(event)
                                     .getTrackedRace(race).getWindTrack(windSource);
                             TimePoint timePoint = getTimePoint(req, PARAM_NAME_TIME, PARAM_NAME_TIME_MILLIS,
                                     MillisecondsTimePoint.now());
@@ -514,7 +514,7 @@ public class AdminApp extends Servlet {
         URL paramURL = new URL(req.getParameter(PARAM_NAME_PARAM_URL));
         URI liveURI = new URI(req.getParameter(PARAM_NAME_LIVE_URI));
         URI storedURI = new URI(req.getParameter(PARAM_NAME_STORED_URI));
-        getService().addRace(paramURL, liveURI, storedURI, getWindStore(req), /* timeoutInMilliseconds */ 60000);
+        getService().addTracTracRace(paramURL, liveURI, storedURI, getWindStore(req), /* timeoutInMilliseconds */ 60000);
     }
 
     private void stopRace(HttpServletRequest req, HttpServletResponse resp) throws MalformedURLException, IOException, InterruptedException {

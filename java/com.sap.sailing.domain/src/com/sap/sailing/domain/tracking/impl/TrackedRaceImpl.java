@@ -427,12 +427,19 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                             " Future warnings of this type will be suppressed for this race.");
                     warnedOfUsingLegDirectionAsWindEstimation = true;
                 }
-                Leg firstLeg = getRace().getCourse().getLegs().iterator().next();
-                Position firstLegEnd = getApproximatePosition(firstLeg.getTo(), at);
-                Position firstEndStart = getApproximatePosition(firstLeg.getFrom(), at);
-                result = new WindImpl(p, at, new KnotSpeedWithBearingImpl(1.0, firstLegEnd.getBearingGreatCircle(firstEndStart)));
+                result = getDirectionFromStartToNextMark(at);
             }
         }
+        return result;
+    }
+
+    @Override
+    public Wind getDirectionFromStartToNextMark(TimePoint at) {
+        Wind result;
+        Leg firstLeg = getRace().getCourse().getLegs().iterator().next();
+        Position firstLegEnd = getApproximatePosition(firstLeg.getTo(), at);
+        Position firstLegStart = getApproximatePosition(firstLeg.getFrom(), at);
+        result = new WindImpl(firstLegStart, at, new KnotSpeedWithBearingImpl(1.0, firstLegEnd.getBearingGreatCircle(firstLegStart)));
         return result;
     }
     

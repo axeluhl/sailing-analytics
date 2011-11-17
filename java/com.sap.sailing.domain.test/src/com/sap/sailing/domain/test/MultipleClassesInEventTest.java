@@ -17,17 +17,17 @@ import org.junit.Test;
 
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
-import com.sap.sailing.domain.tractracadapter.RaceTracker;
+import com.sap.sailing.domain.tractracadapter.TracTracRaceTracker;
 import com.sap.sailing.domain.tractracadapter.impl.DomainFactoryImpl;
 
 public class MultipleClassesInEventTest {
     private static final boolean tractracTunnel = Boolean.valueOf(System.getProperty("tractrac.tunnel", "false"));
     private static final String tractracTunnelHost = System.getProperty("tractrac.tunnel.host", "localhost");
     private DomainFactory domainFactory;
-    private RaceTracker kiwotest1;
-    private RaceTracker kiwotest2;
-    private RaceTracker kiwotest3;
-    private RaceTracker weym470may112014_2;
+    private TracTracRaceTracker kiwotest1;
+    private TracTracRaceTracker kiwotest2;
+    private TracTracRaceTracker kiwotest3;
+    private TracTracRaceTracker weym470may112014_2;
     
     @Before
     public void setUp() {
@@ -48,25 +48,25 @@ public class MultipleClassesInEventTest {
                         new URL(
                                 httpAndHost+"/events/event_20110505_SailingTea/clientparams.php?event=event_20110505_SailingTea&race=cce678c8-97e6-11e0-9aed-406186cbf87c"),
                         new URI(liveURI), new URI(storedURI),
-                        EmptyWindStore.INSTANCE);
+                        EmptyWindStore.INSTANCE, new DummyTrackedEventRegistry());
         kiwotest2 = domainFactory
                 .createRaceTracker(
                         new URL(
                                 httpAndHost+"/events/event_20110505_SailingTea/clientparams.php?event=event_20110505_SailingTea&race=11290bd6-97e7-11e0-9aed-406186cbf87c"),
                         new URI(liveURI), new URI(storedURI),
-                        EmptyWindStore.INSTANCE);
+                        EmptyWindStore.INSTANCE, new DummyTrackedEventRegistry());
         kiwotest3 = domainFactory
                 .createRaceTracker(
                         new URL(
                                 httpAndHost+"/events/event_20110505_SailingTea/clientparams.php?event=event_20110505_SailingTea&race=39635b24-97e7-11e0-9aed-406186cbf87c"),
                         new URI(liveURI), new URI(storedURI),
-                        EmptyWindStore.INSTANCE);
+                        EmptyWindStore.INSTANCE, new DummyTrackedEventRegistry());
         weym470may112014_2 = domainFactory
                 .createRaceTracker(
                         new URL(
                                 httpAndHost+"/events/event_20110505_SailingTea/clientparams.php?event=event_20110505_SailingTea&race=04498426-7dfd-11e0-8236-406186cbf87c"),
                         new URI(liveURI), new URI(storedURI),
-                        EmptyWindStore.INSTANCE);
+                        EmptyWindStore.INSTANCE, new DummyTrackedEventRegistry());
         
         assertEquals("STG", kiwotest1.getEvent().getBoatClass().getName());
         assertEquals("505", kiwotest2.getEvent().getBoatClass().getName());

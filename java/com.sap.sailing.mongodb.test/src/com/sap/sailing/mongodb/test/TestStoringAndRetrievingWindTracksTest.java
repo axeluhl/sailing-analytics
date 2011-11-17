@@ -21,7 +21,10 @@ import com.sap.sailing.domain.base.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.base.impl.DegreePosition;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.persistence.impl.DomainObjectFactoryImpl;
+import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
 import com.sap.sailing.domain.test.AbstractTracTracLiveTest;
+import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
@@ -32,9 +35,8 @@ import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
-import com.sap.sailing.mongodb.impl.DomainObjectFactoryImpl;
-import com.sap.sailing.mongodb.impl.MongoObjectFactoryImpl;
-import com.sap.sailing.mongodb.impl.MongoWindStoreFactoryImpl;
+import com.sap.sailing.mongodb.Activator;
+import com.sap.sailing.server.RacingEventServiceImpl;
 
 public class TestStoringAndRetrievingWindTracksTest extends AbstractTracTracLiveTest implements MongoDBTest {
 
@@ -47,7 +49,7 @@ public class TestStoringAndRetrievingWindTracksTest extends AbstractTracTracLive
     
     private Mongo newMongo() throws UnknownHostException, MongoException {
         return new Mongo(System.getProperty("mongo.host", "127.0.0.1"),
-                ((MongoWindStoreFactoryImpl) MongoWindStoreFactoryImpl.getDefaultInstance()).getDefaultPort());
+                Activator.getDefaultInstance().getDefaultPort());
     }
     
     @Before
@@ -63,14 +65,22 @@ public class TestStoringAndRetrievingWindTracksTest extends AbstractTracTracLive
     public void testStoreAFewWindEntries() throws UnknownHostException, MongoException, InterruptedException {
         DomainFactory domainFactory = DomainFactory.INSTANCE;
         Event domainEvent = domainFactory.getOrCreateEvent(getEvent());
-        DynamicTrackedEvent trackedEvent = domainFactory.getOrCreateTrackedEvent(domainEvent);
+        DynamicTrackedEvent trackedEvent = new RacingEventServiceImpl().getOrCreateTrackedEvent(domainEvent);
         Iterable<Receiver> typeControllers = domainFactory.getUpdateReceivers(trackedEvent, getEvent(),
-                EmptyWindStore.INSTANCE, ReceiverType.RACECOURSE);
+                EmptyWindStore.INSTANCE, new DynamicRaceDefinitionSet() {
+                    @Override
+                    public void addRaceDefinition(RaceDefinition race) {
+                    }
+                }, ReceiverType.RACECOURSE);
         addListenersForStoredDataAndStartController(typeControllers);
         RaceDefinition race = domainFactory.getAndWaitForRaceDefinition(getEvent().getRaceList().iterator().next());
-        DynamicTrackedRace trackedRace = domainFactory.trackRace(trackedEvent, race, /* millisecondsOverWhichToAverageWind */
+        DynamicTrackedRace trackedRace = trackedEvent.createTrackedRace(race, /* millisecondsOverWhichToAverageWind */
                 EmptyWindStore.INSTANCE, /* millisecondsOverWhichToAverageSpeed */
-                30000, 10000, getEvent(), this);
+                30000, 10000, new DynamicRaceDefinitionSet() {
+                    @Override
+                    public void addRaceDefinition(RaceDefinition race) {
+                    }
+                });
         WindSource windSource = WindSource.WEB;
         Mongo myFirstMongo = newMongo();
         DB firstDatabase = myFirstMongo.getDB(WIND_TEST_DB);

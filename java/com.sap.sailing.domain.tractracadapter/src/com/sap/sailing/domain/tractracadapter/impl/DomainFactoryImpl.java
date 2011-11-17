@@ -10,14 +10,10 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
@@ -48,22 +44,25 @@ import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
+import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
+import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedEvent;
+import com.sap.sailing.domain.tracking.TrackedEventRegistry;
 import com.sap.sailing.domain.tracking.WindStore;
-import com.sap.sailing.domain.tracking.impl.DynamicTrackedEventImpl;
-import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
+import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.JSONService;
-import com.sap.sailing.domain.tractracadapter.RaceTracker;
 import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
 import com.sap.sailing.domain.tractracadapter.TracTracConfiguration;
+import com.sap.sailing.domain.tractracadapter.TracTracRaceTracker;
+import com.sap.sailing.util.CourseAsWaypointList;
 import com.sap.sailing.util.Util;
 import com.sap.sailing.util.Util.Pair;
 import com.tractrac.clientmodule.CompetitorClass;
@@ -77,13 +76,6 @@ import difflib.Patch;
 import difflib.PatchFailedException;
 
 public class DomainFactoryImpl implements DomainFactory {
-    private static final Logger logger = Logger.getLogger(DomainFactoryImpl.class.getName());
-    
-    private final long millisecondsOverWhichToAverageSpeed = 40000; // makes for a 20s half-side interval
-
-    // TODO clarify how millisecondsOverWhichToAverageWind could be updated and propagated live
-    private final long millisecondsOverWhichToAverageWind = 30000;
-    
     // TODO consider (re-)introducing WeakHashMaps for cache structures, but such that the cache is maintained as long as our domain objects are strongly referenced
     private final Map<ControlPoint, com.sap.sailing.domain.base.ControlPoint> controlPointCache =
         new HashMap<ControlPoint, com.sap.sailing.domain.base.ControlPoint>();
@@ -109,17 +101,8 @@ public class DomainFactoryImpl implements DomainFactory {
     private final Map<Pair<String, String>, com.sap.sailing.domain.base.Event> eventCache =
             new HashMap<Pair<String, String>, com.sap.sailing.domain.base.Event>();
     
-    /**
-     * Keyed by an object that the client that started the {@link RaceCourseReceiver} which then provided the
-     * {@link RaceDefinition} has provided to retrieve the {@link RaceDefinition} again using
-     * {@link #getRace}.
-     */
-    private final Map<Object, Set<RaceDefinition>> tokenToRaceDefinitionMap = new HashMap<Object, Set<RaceDefinition>>();
-    
     private final Map<Race, RaceDefinition> raceCache = new HashMap<Race, RaceDefinition>();
     
-    private final Map<Event, DynamicTrackedEvent> eventTrackingCache = new HashMap<Event, DynamicTrackedEvent>();
-
     @Override
     public Position createPosition(
             com.tractrac.clientmodule.data.Position position) {
@@ -335,14 +318,15 @@ public class DomainFactoryImpl implements DomainFactory {
     
     @Override
     public Iterable<Receiver> getUpdateReceivers(DynamicTrackedEvent trackedEvent, com.tractrac.clientmodule.Event tractracEvent,
-            WindStore windStore, Object tokenToRetrieveAssociatedRace, ReceiverType... types) {
+            WindStore windStore, DynamicRaceDefinitionSet raceDefinitionSetToUpdate, ReceiverType... types) {
         Collection<Receiver> result = new ArrayList<Receiver>();
         for (ReceiverType type : types) {
             switch (type) {
             case RACECOURSE:
                 result.add(new RaceCourseReceiver(
                         this, trackedEvent, tractracEvent, windStore,
-                        tokenToRetrieveAssociatedRace, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed));
+                        raceDefinitionSetToUpdate, WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND,
+                        GPSFixTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_SPEED));
                 break;
             case MARKPOSITIONS:
                 result.add(new MarkPositionReceiver(
@@ -367,29 +351,41 @@ public class DomainFactoryImpl implements DomainFactory {
 
     @Override
     public Iterable<Receiver> getUpdateReceivers(DynamicTrackedEvent trackedEvent,
-            com.tractrac.clientmodule.Event tractracEvent, WindStore windStore, Object tokenToRetrieveAssociatedRace) {
-        return getUpdateReceivers(trackedEvent, tractracEvent, windStore, tokenToRetrieveAssociatedRace, ReceiverType.RACECOURSE,
+            com.tractrac.clientmodule.Event tractracEvent, WindStore windStore, DynamicRaceDefinitionSet raceDefinitionSetToUpdate) {
+        return getUpdateReceivers(trackedEvent, tractracEvent, windStore, raceDefinitionSetToUpdate, ReceiverType.RACECOURSE,
                 ReceiverType.MARKPASSINGS, ReceiverType.MARKPOSITIONS, ReceiverType.RACESTARTFINISH,
                 ReceiverType.RAWPOSITIONS);
     }
     
     @Override
-    public DynamicTrackedEvent getTrackedEvent(com.sap.sailing.domain.base.Event event) {
-        return eventTrackingCache.get(event);
-    }
-
-    @Override
-    public DynamicTrackedEvent getOrCreateTrackedEvent(com.sap.sailing.domain.base.Event event) {
-        synchronized (eventTrackingCache) {
-            DynamicTrackedEvent result = eventTrackingCache.get(event);
-            if (result == null) {
-                result = new DynamicTrackedEventImpl(event);
-                eventTrackingCache.put(event, result);
+    public void removeRace(com.tractrac.clientmodule.Event tractracEvent, Race tractracRace, TrackedEventRegistry trackedEventRegistry) {
+        RaceDefinition raceDefinition = getExistingRaceDefinitionForRace(tractracRace);
+        if (raceDefinition != null) { // otherwise, this domain factory doesn't seem to know about the race
+            raceCache.remove(tractracRace);
+            Collection<CompetitorClass> competitorClassList = new ArrayList<CompetitorClass>();
+            for (com.tractrac.clientmodule.Competitor c : tractracEvent.getCompetitorList()) {
+                competitorClassList.add(c.getCompetitorClass());
             }
-            return result;
+            BoatClass boatClass = getDominantBoatClass(competitorClassList);
+            Pair<String, String> key = new Pair<String, String>(tractracEvent.getName(), boatClass == null ? null
+                    : boatClass.getName());
+            Event event = eventCache.get(key);
+            if (event != null) {
+                event.removeRace(raceDefinition);
+                if (Util.size(event.getAllRaces()) == 0) {
+                    eventCache.remove(key);
+                }
+                TrackedEvent trackedEvent = trackedEventRegistry.getTrackedEvent(event);
+                if (trackedEvent != null) {
+                    trackedEvent.removeTrackedRace(raceDefinition);
+                    if (Util.size(trackedEvent.getTrackedRaces()) == 0) {
+                        trackedEventRegistry.remove(event);
+                    }
+                }
+            }
         }
     }
-    
+
     @Override
     public RaceDefinition getOrCreateRaceDefinition(Race race, Course course) {
         synchronized (raceCache) {
@@ -470,34 +466,17 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public RaceTracker createRaceTracker(URL paramURL, URI liveURI, URI storedURI, WindStore windStore) throws MalformedURLException,
-            FileNotFoundException, URISyntaxException {
-        return new RaceTrackerImpl(this, paramURL, liveURI, storedURI, windStore);
+    public TracTracRaceTracker createRaceTracker(URL paramURL, URI liveURI, URI storedURI, WindStore windStore,
+            TrackedEventRegistry trackedEventRegistry) throws MalformedURLException, FileNotFoundException,
+            URISyntaxException {
+        return new TracTracRaceTrackerImpl(this, paramURL, liveURI, storedURI, windStore, trackedEventRegistry);
     }
 
     @Override
-    public Set<RaceDefinition> getRaces(Object tokenToRetrieveAssociatedRace) {
-        synchronized (tokenToRaceDefinitionMap) {
-            return tokenToRaceDefinitionMap.get(tokenToRetrieveAssociatedRace);
-        }
-    }
-
-    @Override
-    public DynamicTrackedRace trackRace(TrackedEvent trackedEvent, RaceDefinition raceDefinition,
+    public DynamicTrackedRace trackRace(DynamicTrackedEvent trackedEvent, RaceDefinition raceDefinition,
             WindStore windStore, long millisecondsOverWhichToAverageWind,
-            long millisecondsOverWhichToAverageSpeed, com.tractrac.clientmodule.Event tractracEvent, Object tokenToRetrieveAssociatedRace) {
-        logger.log(Level.INFO, "Creating DynamicTrackedRaceImpl for RaceDefinition "+raceDefinition.getName());
-        DynamicTrackedRaceImpl result = new DynamicTrackedRaceImpl(trackedEvent, raceDefinition,
-                windStore, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed);
-        synchronized (tokenToRaceDefinitionMap) {
-            Set<RaceDefinition> racesForToken = tokenToRaceDefinitionMap.get(tokenToRetrieveAssociatedRace);
-            if (racesForToken == null) {
-                racesForToken = new HashSet<RaceDefinition>();
-                tokenToRaceDefinitionMap.put(tokenToRetrieveAssociatedRace, racesForToken);
-            }
-            racesForToken.add(raceDefinition);
-        }
-        return result;
+            long millisecondsOverWhichToAverageSpeed, DynamicRaceDefinitionSet raceDefinitionSetToUpdate) {
+        return trackedEvent.createTrackedRace(raceDefinition, windStore, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed, raceDefinitionSetToUpdate);
     }
 
     @Override
@@ -508,49 +487,6 @@ public class DomainFactoryImpl implements DomainFactory {
     @Override
     public TracTracConfiguration createTracTracConfiguration(String name, String jsonURL, String liveDataURI, String storedDataURI) {
         return new TracTracConfigurationImpl(name, jsonURL, liveDataURI, storedDataURI);
-    }
-
-    @Override
-    public void removeRace(com.tractrac.clientmodule.Event tractracEvent, Race tractracRace) {
-        RaceDefinition raceDefinition = getExistingRaceDefinitionForRace(tractracRace);
-        if (raceDefinition != null) { // otherwise, this domain factory doesn't seem to know about the race
-            synchronized (tokenToRaceDefinitionMap) {
-                Set<Object> tokensToRemove = new HashSet<Object>();
-                for (Map.Entry<Object, Set<RaceDefinition>> e : tokenToRaceDefinitionMap.entrySet()) {
-                    if (e.getValue().contains(raceDefinition)) {
-                        e.getValue().remove(raceDefinition);
-                        if (e.getValue().isEmpty()) {
-                            tokensToRemove.add(e.getKey());
-                        }
-                    }
-                }
-                for (Object tokenToRemove : tokensToRemove) {
-                    tokenToRaceDefinitionMap.remove(tokenToRemove);
-                }
-            }
-            raceCache.remove(tractracRace);
-            Collection<CompetitorClass> competitorClassList = new ArrayList<CompetitorClass>();
-            for (com.tractrac.clientmodule.Competitor c : tractracEvent.getCompetitorList()) {
-                competitorClassList.add(c.getCompetitorClass());
-            }
-            BoatClass boatClass = getDominantBoatClass(competitorClassList);
-            Pair<String, String> key = new Pair<String, String>(tractracEvent.getName(), boatClass == null ? null
-                    : boatClass.getName());
-            Event event = eventCache.get(key);
-            if (event != null) {
-                event.removeRace(raceDefinition);
-                if (Util.size(event.getAllRaces()) == 0) {
-                    eventCache.remove(key);
-                }
-                TrackedEvent trackedEvent = eventTrackingCache.get(event);
-                if (trackedEvent != null) {
-                    trackedEvent.removeTrackedRace(raceDefinition);
-                    if (Util.size(trackedEvent.getTrackedRaces()) == 0) {
-                        eventTrackingCache.remove(event);
-                    }
-                }
-            }
-        }
     }
 
 }
