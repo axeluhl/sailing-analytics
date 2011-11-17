@@ -138,7 +138,7 @@ public interface RacingEventService extends TrackedEventRegistry {
     Pair<String, List<RaceRecord>> getTracTracRaceRecords(URL jsonURL) throws IOException, ParseException,
             org.json.simple.parser.ParseException, URISyntaxException;
     
-    List<com.sap.sailing.domain.swisstimingadapter.RaceRecord> getSwissTimingRaceRecords(String hostname, int port)
+    List<com.sap.sailing.domain.swisstimingadapter.RaceRecord> getSwissTimingRaceRecords(String hostname, int port, boolean canSendRequests)
             throws InterruptedException, UnknownHostException, IOException, ParseException;
 
     boolean isRaceBeingTracked(RaceDefinition r);
@@ -180,8 +180,8 @@ public interface RacingEventService extends TrackedEventRegistry {
      */
     void updateStoredLeaderboard(Leaderboard leaderboard);
 
-    RaceHandle addSwissTimingRace(String raceID, String hostname, int port, WindStore windStore,
-            long timeoutInMilliseconds) throws InterruptedException, UnknownHostException, IOException, ParseException;
+    RaceHandle addSwissTimingRace(String raceID, String hostname, int port, boolean canSendRequests,
+            WindStore windStore, long timeoutInMilliseconds) throws InterruptedException, UnknownHostException, IOException, ParseException;
 
     SwissTimingFactory getSwissTimingFactory();
 

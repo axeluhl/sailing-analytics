@@ -1018,10 +1018,10 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
    }
 
     @Override
-    public List<SwissTimingRaceRecordDAO> listSwissTimingRaces(String hostname, int port) 
+    public List<SwissTimingRaceRecordDAO> listSwissTimingRaces(String hostname, int port, boolean canSendRequests) 
            throws UnknownHostException, IOException, InterruptedException, ParseException {
         List<SwissTimingRaceRecordDAO> result = new ArrayList<SwissTimingRaceRecordDAO>();
-        for (com.sap.sailing.domain.swisstimingadapter.RaceRecord rr : getService().getSwissTimingRaceRecords(hostname, port)) {
+        for (com.sap.sailing.domain.swisstimingadapter.RaceRecord rr : getService().getSwissTimingRaceRecords(hostname, port, canSendRequests)) {
             result.add(new SwissTimingRaceRecordDAO(rr.getRaceID(), rr.getDescription(), rr.getStartTime()));
         }
         return result;
@@ -1033,9 +1033,9 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
    }
 
     @Override
-    public void trackWithSwissTiming(SwissTimingRaceRecordDAO rr, String hostname, int port, boolean trackWind,
-            final boolean correctWindByDeclination) throws Exception {
-        final RaceHandle raceHandle = getService().addSwissTimingRace(rr.ID, hostname, port,
+    public void trackWithSwissTiming(SwissTimingRaceRecordDAO rr, String hostname, int port, boolean canSendRequests,
+            boolean trackWind, final boolean correctWindByDeclination) throws Exception {
+        final RaceHandle raceHandle = getService().addSwissTimingRace(rr.ID, hostname, port, canSendRequests,
                 MongoWindStoreFactory.INSTANCE.getMongoWindStore(mongoObjectFactory, domainObjectFactory),
                 TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS);
         if (trackWind) {
