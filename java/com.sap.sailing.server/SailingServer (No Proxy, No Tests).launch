@@ -11,7 +11,6 @@
 <booleanAttribute key="default" value="true"/>
 <booleanAttribute key="default_auto_start" value="true"/>
 <intAttribute key="default_start_level" value="4"/>
-<stringAttribute key="deselected_workspace_plugins" value="com.googlecode.java-diff-utils.test,com.sap.sailing.declination.test,com.sap.sailing.domain.test,com.sap.sailing.expeditionconnector.test,com.sap.sailing.mongodb.test"/>
 <booleanAttribute key="includeOptional" value="true"/>
 <listAttribute key="org.eclipse.debug.ui.favoriteGroups">
 <listEntry value="org.eclipse.debug.ui.launchGroup.debug"/>
@@ -26,5 +25,4 @@
 <booleanAttribute key="tracing" value="false"/>
 <booleanAttribute key="useCustomFeatures" value="false"/>
 <booleanAttribute key="useDefaultConfigArea" value="true"/>
-<stringAttribute key="workspace_bundles" value="com.google.gwt.osgi@default:default,com.googlecode.java-diff-utils@default:default,com.mongodb.driver@default:default,com.sap.sailing.declination@default:default,com.sap.sailing.domain.swisstimingadapter.test@default:default,com.sap.sailing.domain.swisstimingadapter@default:default,com.sap.sailing.domain.tractracadapter@default:default,com.sap.sailing.domain@default:default,com.sap.sailing.expeditionconnector@default:default,com.sap.sailing.gwt.ui@default:default,com.sap.sailing.mongodb@default:default,com.sap.sailing.server.test@default:default,com.sap.sailing.server@default:default,com.sap.sailing.udpconnector@default:default,com.sap.ui.phoenix.resource-osgi@default:false,com.sap.ui.phoenix.resource-servlet@default:default,com.tractrac.clientmodule@default:default,com.tractrac.resultapi@default:default,org.json.simple@default:default"/>
 </launchConfiguration>
