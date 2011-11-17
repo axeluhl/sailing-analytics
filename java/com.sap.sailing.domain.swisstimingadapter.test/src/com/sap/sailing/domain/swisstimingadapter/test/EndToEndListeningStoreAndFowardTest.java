@@ -16,7 +16,6 @@ import java.util.logging.Logger;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Test;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
@@ -91,8 +90,8 @@ public class EndToEndListeningStoreAndFowardTest {
         logger.exiting(getClass().getName(), "tearDown");
     }
     
-    @Test
-    public void testEndToEndScenario() throws IOException, InterruptedException, ParseException {
+//    @Test
+    public void testEndToEndScenarioWithInitMessages() throws IOException, InterruptedException, ParseException {
         String[] racesToTrack = new String[] { "4711", "4712" };
         String scriptName = "/InitMessagesScript.txt";
         setUpUsingScript(racesToTrack, scriptName);
@@ -119,6 +118,27 @@ public class EndToEndListeningStoreAndFowardTest {
         assertEquals(expectedRaceIDs, raceIDs);
     }
 
+  public void testEndToEndWithSwissTimingData() throws IOException, InterruptedException, ParseException {
+        String[] racesToTrack = new String[] { "W4702" };
+        String scriptName1 = "/SailMasterDataInterfaceRACandSTL.txt";
+        String scriptName2 = "/SailMasterDataInterface-ExampleAsText.txt";
+        setUpUsingScript(racesToTrack, scriptName1, scriptName2);
+
+        Set<TrackedRace> allTrackedRaces = new HashSet<TrackedRace>();
+        Iterable<Event> allEvents = racingEventService.getAllEvents();
+        for (Event event : allEvents) {
+            DynamicTrackedEvent trackedEvent = racingEventService.getTrackedEvent(event);
+            Iterable<TrackedRace> trackedRaces = trackedEvent.getTrackedRaces();
+            for (TrackedRace trackedRace : trackedRaces) {
+                
+//                Course course = trackedRace.getRace().getCourse();
+//                System.out.println(course.getWaypoints());
+                 
+                allTrackedRaces.add(trackedRace);
+            }
+        }
+    }
+    
     private void setUpUsingScript(String[] racesToTrack, String... scriptNames) throws InterruptedException,
             UnknownHostException, IOException, ParseException {
         for(String raceToTrack: racesToTrack) {
