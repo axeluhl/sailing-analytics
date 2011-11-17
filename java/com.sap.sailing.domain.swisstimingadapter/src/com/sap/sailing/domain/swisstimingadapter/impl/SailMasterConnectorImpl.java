@@ -101,9 +101,11 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
      * The only way known so far for how to find out the time zone relative to which the other time stamps
      * are to be interpreted is to start with the current default time zone's offset and wait for an
      * {@link MessageType#RPD RPD} event to be received. From this event, the time zone offset can be extracted
-     * and applied to all other time stamps.
+     * and applied to all other time stamps. It is stored using the race ID as key.
      */
-    private String lastTimeZoneSuffix;
+    private final Map<String, String> lastTimeZoneSuffixPerRaceID;
+    
+    private final Map<String, TimePoint> startTimePerRaceID;
     
     /**
      * Used for the {@link #rendevouz(SailMasterMessage)} pattern. For each {@link MessageType} there
@@ -118,20 +120,23 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
     
     private final RaceSpecificMessageLoader messageLoader;
 
-    public SailMasterConnectorImpl(String host, int port, RaceSpecificMessageLoader messageLoader) throws InterruptedException {
+    private final boolean canSendRequests;
+
+    public SailMasterConnectorImpl(String host, int port, RaceSpecificMessageLoader messageLoader, boolean canSendRequests) throws InterruptedException {
         super();
         this.messageLoader = messageLoader;
         dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ssZ");
         idsOfTrackedRaces = new HashSet<String>();
         this.host = host;
         this.port = port;
+        this.canSendRequests = canSendRequests;
         this.listeners = new HashSet<SailMasterListener>();
         this.raceSpecificListeners = new HashMap<String, Set<SailMasterListener>>();
         this.unprocessedMessagesByType = new HashMap<MessageType, BlockingQueue<SailMasterMessage>>();
         raceSpecificMessageBuffers = new HashMap<String, List<SailMasterMessage>>();
         sequenceNumberOfLastMessageForRaceID = new HashMap<String, Long>();
-        int offset = TimeZone.getDefault().getOffset(System.currentTimeMillis())/1000/3600;
-        lastTimeZoneSuffix = (offset<0?"-":"+") + new DecimalFormat("00").format(offset)+"00";
+        lastTimeZoneSuffixPerRaceID = new HashMap<String, String>();
+        startTimePerRaceID = new HashMap<String, TimePoint>();
         receiverThread = new Thread(this, "SwissTiming SailMaster Receiver");
         receiverThread.start();
         synchronized (this) {
@@ -437,9 +442,10 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
         String[] sections = message.getSections();
         String raceID = sections[1];
         RaceStatus status = RaceStatus.values()[Integer.valueOf(sections[2])];
-        TimePoint timePoint = new MillisecondsTimePoint(parseTimeAndDateISO(sections[3]));
+        TimePoint timePoint = new MillisecondsTimePoint(parseTimeAndDateISO(sections[3], raceID));
         TimePoint startTimeEstimatedStartTime = sections[4].trim().length() == 0 ? null : new MillisecondsTimePoint(
-                parseTimePrefixedWithISOToday(sections[4]));
+                parseTimePrefixedWithISOToday(sections[4], raceID));
+        startTimePerRaceID.put(raceID, startTimeEstimatedStartTime);
         Long millisecondsSinceRaceStart = sections[5].trim().length() == 0 ? null : parseHHMMSSToMilliseconds(sections[5]);
         Integer nextMarkIndexForLeader = sections[6].trim().length() == 0 ? null : Integer.valueOf(sections[6]);
         Distance distanceToNextMarkForLeader = sections[7].trim().length() == 0 ? null : new MeterDistance(Double.valueOf(sections[7]));
@@ -576,12 +582,17 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
         }
     }
 
+    private boolean canSendRequests() {
+        return canSendRequests;
+    }
+    
     @Override
     public Iterable<Race> getRaces() throws UnknownHostException, IOException, InterruptedException {
-        Iterable<Race> result;
+        Iterable<Race> result = null;
         if (messageLoader != null) {
             result = messageLoader.getRaces();
-        } else {
+        }
+        if (result == null && canSendRequests()) {
             SailMasterMessage response = sendRequestAndGetResponse(MessageType.RAC);
             assertResponseType(MessageType.RAC, response);
             result = parseAvailableRacesMessage(response);
@@ -620,17 +631,27 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
         return new CourseImpl(courseConfigurationMessage.getSections()[1], marks);
     }
     
-    private String prefixTimeWithISOTodayAndSuffixWithTimezoneIndicator(String time) {
+    private String getLastTimeZoneSuffix(String raceID) {
+        String result = lastTimeZoneSuffixPerRaceID.get(raceID);
+        if (result == null) {
+            int offset = TimeZone.getDefault().getOffset(System.currentTimeMillis())/1000/3600;
+            result = (offset<0?"-":"+") + new DecimalFormat("00").format(offset)+"00";
+            lastTimeZoneSuffixPerRaceID.put(raceID, result);
+        }
+        return result;
+    }
+    
+    private String prefixTimeWithISOTodayAndSuffixWithTimezoneIndicator(String time, String raceID) {
         synchronized (dateFormat) {
-            return dateFormat.format(new Date()).substring(0, "yyyy-mm-ddT".length())+time+lastTimeZoneSuffix;
+            return dateFormat.format(new Date()).substring(0, "yyyy-mm-ddT".length())+time+getLastTimeZoneSuffix(raceID);
         }
     }
 
-    private Date parseTimeAndDateISO(String timeAndDateISO) throws ParseException {
+    private Date parseTimeAndDateISO(String timeAndDateISO, String raceID) throws ParseException {
         char timeZoneIndicator = timeAndDateISO.charAt(timeAndDateISO.length()-6);
         if ((timeZoneIndicator == '+' || timeZoneIndicator == '-') && timeAndDateISO.charAt(timeAndDateISO.length()-3) == ':') {
             timeAndDateISO = timeAndDateISO.substring(0, timeAndDateISO.length()-3)+timeAndDateISO.substring(timeAndDateISO.length()-2);
-            lastTimeZoneSuffix = timeAndDateISO.substring(timeAndDateISO.length()-5);
+            lastTimeZoneSuffixPerRaceID.put(raceID, timeAndDateISO.substring(timeAndDateISO.length()-5));
         }
         synchronized(dateFormat) {
             return dateFormat.parse(timeAndDateISO);
@@ -698,16 +719,23 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
 
     @Override
     public TimePoint getStartTime(String raceID) throws UnknownHostException, IOException, ParseException, InterruptedException {
-        SailMasterMessage response = sendRequestAndGetResponse(MessageType.STT, raceID);
-        String[] sections = response.getSections();
-        assertResponseType(MessageType.STT, response);
-        assertRaceID(raceID, sections[1]);
-        return new MillisecondsTimePoint(parseTimePrefixedWithISOToday(sections[2]));
+        TimePoint result = null;
+        if (messageLoader != null) {
+            result = startTimePerRaceID.get(raceID);
+        }
+        if (result == null && canSendRequests()) {
+            SailMasterMessage response = sendRequestAndGetResponse(MessageType.STT, raceID);
+            String[] sections = response.getSections();
+            assertResponseType(MessageType.STT, response);
+            assertRaceID(raceID, sections[1]);
+            result = new MillisecondsTimePoint(parseTimePrefixedWithISOToday(sections[2], raceID));
+        }
+        return result; 
     }
 
-    private Date parseTimePrefixedWithISOToday(String timeHHMMSS) throws ParseException {
+    private Date parseTimePrefixedWithISOToday(String timeHHMMSS, String raceID) throws ParseException {
         synchronized(dateFormat) {
-            return dateFormat.parse(prefixTimeWithISOTodayAndSuffixWithTimezoneIndicator(timeHHMMSS));
+            return dateFormat.parse(prefixTimeWithISOTodayAndSuffixWithTimezoneIndicator(timeHHMMSS, raceID));
         }
     }
 
@@ -799,7 +827,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
             String[] clockAtMarkDetail = clockAtMarkMessage.getSections()[3+i].split(";");
             int markIndex = Integer.valueOf(clockAtMarkDetail[0]);
             TimePoint timePoint = clockAtMarkDetail.length <= 1 || clockAtMarkDetail[1].trim().length() == 0 ? null :
-                new MillisecondsTimePoint(parseTimePrefixedWithISOToday(clockAtMarkDetail[1]));
+                new MillisecondsTimePoint(parseTimePrefixedWithISOToday(clockAtMarkDetail[1], clockAtMarkMessage.getRaceID()));
             result.add(new Triple<Integer, TimePoint, String>(
                     markIndex, timePoint, clockAtMarkDetail.length <= 2 ? null : clockAtMarkDetail[2]));
         }

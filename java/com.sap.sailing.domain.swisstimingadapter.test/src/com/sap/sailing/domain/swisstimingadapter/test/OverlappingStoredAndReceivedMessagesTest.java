@@ -69,7 +69,7 @@ public class OverlappingStoredAndReceivedMessagesTest implements RaceSpecificMes
         }.start();
         swissTimingFactory = SwissTimingFactory.INSTANCE;
         transceiver = swissTimingFactory.createSailMasterTransceiver();
-        connector = swissTimingFactory.getOrCreateSailMasterConnector("localhost", PORT, this);
+        connector = swissTimingFactory.getOrCreateSailMasterConnector("localhost", PORT, this, /* canSendRequests */ false);
         synchronized (this) {
             while (sendingStream == null) {
                 wait();

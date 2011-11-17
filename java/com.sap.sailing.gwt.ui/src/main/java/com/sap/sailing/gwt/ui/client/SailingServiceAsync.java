@@ -162,10 +162,11 @@ public interface SailingServiceAsync {
 
     void getPreviousSwissTimingConfigurations(AsyncCallback<List<SwissTimingConfigurationDAO>> asyncCallback);
 
-    void listSwissTimingRaces(String hostname, int port, AsyncCallback<List<SwissTimingRaceRecordDAO>> asyncCallback);
+    void listSwissTimingRaces(String hostname, int port, boolean canSendRequests,
+            AsyncCallback<List<SwissTimingRaceRecordDAO>> asyncCallback);
 
     void storeSwissTimingConfiguration(String a, String hostname, int port, AsyncCallback<Void> asyncCallback);
 
-    void trackWithSwissTiming(SwissTimingRaceRecordDAO rr, String hostname, int port, boolean trackWind,
-            boolean correctWindByDeclination, AsyncCallback<Void> asyncCallback);
+    void trackWithSwissTiming(SwissTimingRaceRecordDAO rr, String hostname, int port, boolean canSendRequests,
+            boolean trackWind, boolean correctWindByDeclination, AsyncCallback<Void> asyncCallback);
 }

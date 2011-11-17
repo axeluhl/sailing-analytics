@@ -217,16 +217,17 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
             for (Race newRace : availableRaces) {
                 storeRace(newRace);
             }
-        } else if(message.getRaceID() != null && cachedRaces.containsKey(message.getRaceID()) == false) {
+        } else if (message.getRaceID() != null && !cachedRaces.containsKey(message.getRaceID())) {
             // ah, we found a new raceID which is not in the list of known races
             // in order to have a more intelligent conflict resolver mechanism we will forward the resolution to a special thread later on
             boolean simpleResolution = true;
-            if(simpleResolution) {
+            if (simpleResolution) {
                 // first check if the missing race has been created in the mean time
-                Race checkRace = getRace(message.getRaceID());
-                if(checkRace != null) {
-                    cachedRaces.put(checkRace.getRaceID(), checkRace);
+                Race raceFromDB = getRace(message.getRaceID());
+                if (raceFromDB != null) {
+                    cachedRaces.put(raceFromDB.getRaceID(), raceFromDB);
                 } else {
+                    logger.info("Didn't find race "+message.getRaceID()+" in race DB. Adding it.");
                     Race newRace = SwissTimingFactory.INSTANCE.createRace(message.getRaceID(), null, null);
                     storeRace(newRace);
                     cachedRaces.put(newRace.getRaceID(), newRace);

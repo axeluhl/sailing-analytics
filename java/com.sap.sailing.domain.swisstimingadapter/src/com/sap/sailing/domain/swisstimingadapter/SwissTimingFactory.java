@@ -34,14 +34,15 @@ public interface SwissTimingFactory {
      * {@link SailMasterConnector#trackRace} and {@link SailMasterConnector#stopTrackingRace} operations.
      * {@link MessageType#isRaceSpecific() Race-specific messages} for other races are ignored and not forwarded to any
      * listener.
+     * @param canSendRequests TODO
      */
-    SailMasterConnector getOrCreateSailMasterConnector(String hostname, int port, RaceSpecificMessageLoader messageLoader) throws InterruptedException;
+    SailMasterConnector getOrCreateSailMasterConnector(String hostname, int port, RaceSpecificMessageLoader messageLoader, boolean canSendRequests) throws InterruptedException;
     
     SailMasterTransceiver createSailMasterTransceiver();
 
     SwissTimingConfiguration createSwissTimingConfiguration(String name, String hostname, int port);
 
-    SwissTimingRaceTracker createRaceTracker(String raceID, String hostname, int port, WindStore windStore, RaceSpecificMessageLoader messageLoader, DomainFactory domainFactory, TrackedEventRegistry trackedEventRegistry) throws InterruptedException, UnknownHostException, IOException, ParseException;
+    SwissTimingRaceTracker createRaceTracker(String raceID, String hostname, int port, boolean canSendRequests, WindStore windStore, RaceSpecificMessageLoader messageLoader, DomainFactory domainFactory, TrackedEventRegistry trackedEventRegistry) throws InterruptedException, UnknownHostException, IOException, ParseException;
 
     Race createRace(String raceId, String description, TimePoint startTime);
 

@@ -92,8 +92,36 @@ public class EndToEndListeningStoreAndFowardTest {
     }
     
     @Test
-    public void testEndToEndScenario() throws IOException, InterruptedException, ParseException {
+    public void testSimpleRaceCreationScript() throws IOException, InterruptedException, ParseException {
         String[] racesToTrack = new String[] { "4711", "4712" };
+        String scriptName = "/InitMessagesScript.txt";
+        setUpUsingScript(racesToTrack, scriptName);
+
+        Set<TrackedRace> allTrackedRaces = new HashSet<TrackedRace>();
+        Iterable<Event> allEvents = racingEventService.getAllEvents();
+        for (Event event : allEvents) {
+            DynamicTrackedEvent trackedEvent = racingEventService.getTrackedEvent(event);
+            Iterable<TrackedRace> trackedRaces = trackedEvent.getTrackedRaces();
+            for (TrackedRace trackedRace : trackedRaces) {
+                allTrackedRaces.add(trackedRace);
+            }
+        }
+        assertEquals(2, Util.size(allTrackedRaces));
+        Set<String> raceIDs = new HashSet<String>();
+        for (TrackedRace trackedRace : allTrackedRaces) {
+            RaceDefinition race = trackedRace.getRace();
+            raceIDs.add(race.getName());
+        }
+        Set<String> expectedRaceIDs = new HashSet<String>();
+        for (String raceIDToTrack : new String[] { "Not such a wonderful race", "A wonderful test race" }) {
+            expectedRaceIDs.add(raceIDToTrack);
+        }
+        assertEquals(expectedRaceIDs, raceIDs);
+    }
+
+    @Test
+    public void testLongRaceLog() throws IOException, InterruptedException, ParseException {
+        String[] racesToTrack = new String[] { "W4702" };
         String scriptName = "/InitMessagesScript.txt";
         setUpUsingScript(racesToTrack, scriptName);
 
@@ -122,11 +150,12 @@ public class EndToEndListeningStoreAndFowardTest {
     private void setUpUsingScript(String[] racesToTrack, String... scriptNames) throws InterruptedException,
             UnknownHostException, IOException, ParseException {
         for(String raceToTrack: racesToTrack) {
-            RaceHandle raceHandle = racingEventService.addSwissTimingRace(raceToTrack, "localhost", CLIENT_PORT, emptyWindStore, -1);
+            RaceHandle raceHandle = racingEventService.addSwissTimingRace(raceToTrack, "localhost", CLIENT_PORT, /* canSendRequests */
+                    false, emptyWindStore, -1);
             raceHandles.add(raceHandle);
             if(connector == null) {
                 connector = racingEventService.getSwissTimingFactory().getOrCreateSailMasterConnector("localhost",
-                        CLIENT_PORT, swissTimingAdapterPersistence);
+                        CLIENT_PORT, swissTimingAdapterPersistence, /* canSendRequests */ false);
             }
         }
         ScriptedMessagesReader scriptedMessagesReader = new ScriptedMessagesReader();
