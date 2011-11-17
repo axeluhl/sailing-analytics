@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.swisstimingadapter.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
@@ -140,6 +141,10 @@ public class EndToEndListeningStoreAndFowardTest {
             }
         }
         assertEquals(1, Util.size(allTrackedRaces));
+        Set<RaceDefinition> races = raceHandles.iterator().next().getRaceTracker().getRaces();
+        assertEquals(1, races.size());
+        RaceDefinition raceFromTracker = races.iterator().next();
+        assertNotNull(raceFromTracker);
         Set<String> raceIDs = new HashSet<String>();
         for (TrackedRace trackedRace : allTrackedRaces) {
             RaceDefinition race = trackedRace.getRace();
