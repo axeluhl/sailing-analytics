@@ -1,7 +1,6 @@
 package com.sap.sailing.domain.swisstimingadapter.classes.messages;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import com.sap.sailing.domain.swisstimingadapter.Mark;

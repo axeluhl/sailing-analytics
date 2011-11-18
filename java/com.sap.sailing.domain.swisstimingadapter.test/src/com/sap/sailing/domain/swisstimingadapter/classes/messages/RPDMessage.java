@@ -5,8 +5,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import com.sap.sailing.domain.base.TimePoint;
-
 public class RPDMessage {
     private String raceId;
     private int status;

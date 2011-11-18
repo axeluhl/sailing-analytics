@@ -3,8 +3,6 @@ package com.sap.sailing.domain.swisstimingadapter.classes.messages;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import com.sap.sailing.domain.base.TimePoint;
-
 public class TimingDataElement {
     private int markIndex;
     private int rank;
