@@ -11,17 +11,24 @@ public class GPSFixDAO implements IsSerializable {
     public SpeedWithBearingDAO speedWithBearing;
     
     /**
+     * tells if this fix was computed by extrapolation instead of having been captured by a device directly
+     * or having been interpolated between captured fixes
+     */
+    public boolean extrapolated;
+    
+    /**
      * Contains one of the literals of the {@link Tack} enumeration ("STARBOARD" or "PORT")
      */
     public String tack;
     
     public GPSFixDAO() {}
 
-    public GPSFixDAO(Date timepoint, PositionDAO position, SpeedWithBearingDAO speedWithBearing, String tack) {
+    public GPSFixDAO(Date timepoint, PositionDAO position, SpeedWithBearingDAO speedWithBearing, String tack, boolean extrapolated) {
         super();
         this.timepoint = timepoint;
         this.position = position;
         this.speedWithBearing = speedWithBearing;
         this.tack = tack;
+        this.extrapolated = extrapolated;
     }
 }

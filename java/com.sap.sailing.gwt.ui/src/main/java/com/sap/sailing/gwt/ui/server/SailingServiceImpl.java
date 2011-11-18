@@ -655,7 +655,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                             GPSFixDAO fixDAO = new GPSFixDAO(fix.getTimePoint().asDate(), new PositionDAO(fix
                                     .getPosition().getLatDeg(), fix.getPosition().getLngDeg()),
                                     new SpeedWithBearingDAO(fix.getSpeed().getKnots(), fix.getSpeed().getBearing()
-                                            .getDegrees()), tack.name());
+                                            .getDegrees()), tack.name(), /* extrapolated */ false);
                             fixesForCompetitor.add(fixDAO);
                             if (fixIter.hasNext()) {
                                 fix = fixIter.next();
@@ -667,7 +667,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                                     SpeedWithBearing speedWithBearing = track.getEstimatedSpeed(toTimePointExcluding);
                                     GPSFixDAO extrapolated = new GPSFixDAO(to.get(competitorDAO), new PositionDAO(position.getLatDeg(),
                                             position.getLngDeg()), new SpeedWithBearingDAO(speedWithBearing.getKnots(),
-                                            speedWithBearing.getBearing().getDegrees()), tack2.name());
+                                            speedWithBearing.getBearing().getDegrees()), tack2.name(), /* extrapolated */ true);
                                     fixesForCompetitor.add(extrapolated);
                                 }
                                 fix = null;

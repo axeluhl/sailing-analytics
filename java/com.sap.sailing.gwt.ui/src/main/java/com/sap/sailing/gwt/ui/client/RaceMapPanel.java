@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -85,17 +86,19 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
     private final Map<CompetitorDAO, Polyline> tails;
     
     /**
-     * Key set is equal to that of {@link #tails} and tells what the index of the first shown fix is in {@link #fixes}.
+     * Key set is equal to that of {@link #tails} and tells what the index in in {@link #fixes} of the first fix shown in {@link #tails} is .
      */
     private final Map<CompetitorDAO, Integer> firstShownFix;
 
     /**
-     * Key set is equal to that of {@link #tails} and tells what the index of the last shown fix is in {@link #fixes}.
+     * Key set is equal to that of {@link #tails} and tells what the index in in {@link #fixes} of the last fix shown in {@link #tails} is .
      */
     private final Map<CompetitorDAO, Integer> lastShownFix;
 
     /**
-     * First/Last Fix of each competitors tail. lastShownFix should be the one with the boatMarker on it.
+     * Fixes of each competitors tail. If a list is contained for a competitor, the list contains a timely "contiguous" list of
+     * fixes for the competitor. This means the server has no more data for the time interval covered, unless the last fix was
+     * {@link GPSFixDAO#extrapolated obtained by extrapolation}.
      */
     private final Map<CompetitorDAO, List<GPSFixDAO>> fixes;
     
@@ -280,8 +283,8 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
                 EventDAO event = selection.get(selection.size() - 1).getA();
                 RaceDAO race = selection.get(selection.size() - 1).getC();
                 if (event != null && race != null) {
-                    Pair<Map<CompetitorDAO, Date>, Map<CompetitorDAO, Date>> fromAndTo = computeFromAndTo(date);
-                    sailingService.getBoatPositions(event.name, race.name, fromAndTo.getA(), fromAndTo.getB(), true,
+                    final Triple<Map<CompetitorDAO, Date>, Map<CompetitorDAO, Date>, Map<CompetitorDAO, Boolean>> fromAndToAndOverlap = computeFromAndTo(date);
+                    sailingService.getBoatPositions(event.name, race.name, fromAndToAndOverlap.getA(), fromAndToAndOverlap.getB(), true,
                             new AsyncCallback<Map<CompetitorDAO, List<GPSFixDAO>>>() {
                                 @Override
                                 public void onFailure(Throwable caught) {
@@ -290,8 +293,8 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
 
                                 @Override
                                 public void onSuccess(Map<CompetitorDAO, List<GPSFixDAO>> result) {
-                                    updateFixes(result);
-                                    showBoatsOnMap(result, new Date(date.getTime()-TAILLENGTHINMILLISECONDS), date);
+                                    updateFixes(result, fromAndToAndOverlap.getC());
+                                    showBoatsOnMap(new Date(date.getTime()-TAILLENGTHINMILLISECONDS), date);
                                 }
                             });
                     sailingService.getMarkPositions(event.name, race.name, date, new AsyncCallback<List<MarkDAO>>() {
@@ -329,37 +332,73 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
      * competitor from {@link #competitorsToShow} there are all fixes known by the server for that competitor starting
      * at <code>upTo-{@link #TAILLENGTHINMILLISECONDS}</code> and ending at <code>upTo</code> (exclusive).
      * 
-     * @return a pair whose {@link Pair#getA() first} component contains the "from", and whose {@link Pair#getB()
-     *         second} component contains the "to" times for the competitors whose trails / positions to show.
+     * @return a triple whose {@link Triple#getA() first} component contains the "from", and whose {@link Triple#getB()
+     *         second} component contains the "to" times for the competitors whose trails / positions to show; the
+     *         {@link Triple#getC() third} component tells whether the existing fixes can remain and be augmented by those
+     *         requested or need to be replaced
      */
-    private Pair<Map<CompetitorDAO, Date>, Map<CompetitorDAO, Date>> computeFromAndTo(Date upTo) {
+    private Triple<Map<CompetitorDAO, Date>, Map<CompetitorDAO, Date>, Map<CompetitorDAO, Boolean>> computeFromAndTo(Date upTo) {
         Date tailStart = new Date(upTo.getTime() - TAILLENGTHINMILLISECONDS);
         Map<CompetitorDAO, Date> from = new HashMap<CompetitorDAO, Date>();
         Map<CompetitorDAO, Date> to = new HashMap<CompetitorDAO, Date>();
+        Map<CompetitorDAO, Boolean> overlapWithKnownFixes = new HashMap<CompetitorDAO, Boolean>();
         for (CompetitorDAO competitor : competitorsToShow) {
             List<GPSFixDAO> fixesForCompetitor = fixes.get(competitor);
             Date fromDate;
             Date toDate;
-            if (fixesForCompetitor == null || fixesForCompetitor.get(0).timepoint.after(tailStart)) {
+            Date timepointOfLastKnownFix = getTimepointOfLastNonExtrapolated(fixesForCompetitor);
+            Date timepointOfFirstKnownFix = getTimepointOfFirstNonExtrapolated(fixesForCompetitor);
+            boolean overlap = false;
+            if (fixesForCompetitor != null && !tailStart.before(timepointOfFirstKnownFix) && !tailStart.after(timepointOfLastKnownFix)) {
+                // the beginning of what we need is contained in the interval we already have; skip what we already have
+                fromDate = timepointOfLastKnownFix;
+                overlap = true;
+            } else {
                 fromDate = tailStart;
-            } else {
-                fromDate = fixesForCompetitor.get(fixesForCompetitor.size()-1).timepoint;
             }
-            if (fixesForCompetitor == null || fixesForCompetitor.get(fixesForCompetitor.size()-1).timepoint.before(upTo)) {
-                toDate = upTo;
+            if (fixesForCompetitor != null && !upTo.before(timepointOfFirstKnownFix) && !upTo.after(timepointOfLastKnownFix)) {
+                // the end of what we need is contained in the interval we already have; skip what we already have
+                toDate = timepointOfFirstKnownFix;
+                overlap = true;
             } else {
-                toDate = fixesForCompetitor.get(0).timepoint;
+                toDate = upTo;
             }
             // only request something for the competitor if we're missing information at all
             if (fromDate.before(toDate) || fromDate.equals(toDate)) {
                 from.put(competitor, fromDate);
                 to.put(competitor, toDate);
+                overlapWithKnownFixes.put(competitor, overlap);
             }
         }
-        return new Pair<Map<CompetitorDAO,Date>, Map<CompetitorDAO,Date>>(from, to);
+        return new Triple<Map<CompetitorDAO,Date>, Map<CompetitorDAO,Date>, Map<CompetitorDAO, Boolean>>(from, to, overlapWithKnownFixes);
     }
 
-    private void updateFixes(Map<CompetitorDAO, List<GPSFixDAO>> result) {
+    private Date getTimepointOfFirstNonExtrapolated(List<GPSFixDAO> fixesForCompetitor) {
+        for (GPSFixDAO fix : fixesForCompetitor) {
+            if (!fix.extrapolated) {
+                return fix.timepoint;
+            }
+        }
+        return null;
+    }
+
+    private Date getTimepointOfLastNonExtrapolated(List<GPSFixDAO> fixesForCompetitor) {
+        for (ListIterator<GPSFixDAO> fixIter = fixesForCompetitor.listIterator(fixesForCompetitor.size()-1); fixIter.hasPrevious(); ) {
+            GPSFixDAO fix = fixIter.previous();
+            if (!fix.extrapolated) {
+                return fix.timepoint;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Adds the fixes received in <code>result</code> to {@link #fixes} and ensures they are still contiguous for each
+     * competitor. If <code>overlapsWithKnownFixes</code> indicates that the fixes received in <code>result</code>
+     * overlap with those already known, the fixes are merged into the list of already known fixes for the competitor.
+     * Otherwise, the fixes received in <code>result</code> replace those known so far for the respective competitor.
+     */
+    private void updateFixes(Map<CompetitorDAO, List<GPSFixDAO>> result, Map<CompetitorDAO, Boolean> overlapsWithKnownFixes) {
         for (Map.Entry<CompetitorDAO, List<GPSFixDAO>> e : result.entrySet()) {
             if (e.getValue() != null && !e.getValue().isEmpty()) {
                 List<GPSFixDAO> fixesForCompetitor = fixes.get(e.getKey());
@@ -367,46 +406,29 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
                     fixesForCompetitor = new ArrayList<GPSFixDAO>();
                     fixes.put(e.getKey(), fixesForCompetitor);
                 }
-                GPSFixDAO firstNewFix = e.getValue().get(0);
-                GPSFixDAO lastNewFix = e.getValue().get(e.getValue().size()-1);
-                if (firstNewFix.timepoint.before(fixesForCompetitor.get(0).timepoint)) {
-                    if (lastNewFix.timepoint.after(fixesForCompetitor.get(fixesForCompetitor.size()-1).timepoint)) {
-                        // known fixes are a true subset; replace:
-                        fixesForCompetitor.clear();
-                        fixesForCompetitor.addAll(e.getValue());
-                    } else {
-                        // new fixes start earlier but end somewhere within known sequence; prepend new fixes
-                        Date timeOfFirstKnownFix = fixesForCompetitor.get(0).timepoint;
-                        int insertPosition = 0;
-                        Iterator<GPSFixDAO> newFixIter = e.getValue().iterator();
-                        GPSFixDAO newFix = newFixIter.next();
-                        while (newFix != null && newFix.timepoint.before(timeOfFirstKnownFix)) {
-                            fixesForCompetitor.add(insertPosition++, newFix);
-                            if (newFixIter.hasNext()) {
-                                newFix = newFixIter.next();
-                            } else {
-                                newFix = null;
-                            }
-                        }
-                    }
+                if (!overlapsWithKnownFixes.get(e.getKey())) {
+                    fixesForCompetitor.clear();
+                    fixesForCompetitor.addAll(e.getValue());
                 } else {
-                    if (lastNewFix.timepoint.after(fixesForCompetitor.get(fixesForCompetitor.size()-1).timepoint)) {
-                        // new fixes may overlap but exceed at the end
-                        Date timeOfFirstKnownFix = fixesForCompetitor.get(0).timepoint;
-                        int insertPosition = 0;
-                        Iterator<GPSFixDAO> newFixIter = e.getValue().iterator();
-                        GPSFixDAO newFix = newFixIter.next();
-                        while (newFix != null && newFix.timepoint.before(timeOfFirstKnownFix)) {
-                            fixesForCompetitor.add(insertPosition++, newFix);
-                            if (newFixIter.hasNext()) {
-                                newFix = newFixIter.next();
-                            } else {
-                                newFix = null;
-                            }
-                        }
-                    } // else new fixes are a true subset; nothing to do at all
+                    mergeFixes(fixesForCompetitor, e.getValue());
                 }
             }
+        }
+    }
+
+    private void mergeFixes(List<GPSFixDAO> intoThis, List<GPSFixDAO> mergeThis) {
+        int intoThisIndex = 0;
+        for (GPSFixDAO mergeThisFix : mergeThis) {
+            while (intoThisIndex < intoThis.size() && intoThis.get(intoThisIndex).timepoint.before(mergeThisFix.timepoint)) {
+                intoThisIndex++;
+            }
+            if (intoThisIndex < intoThis.size() && intoThis.get(intoThisIndex).timepoint.equals(mergeThisFix.timepoint)) {
+                // exactly same time point; replace with fix from mergeThis
+                intoThis.set(intoThisIndex, mergeThisFix);
+            } else {
+                intoThis.add(intoThisIndex, mergeThisFix);
+            }
+            intoThisIndex++;
         }
     }
 
@@ -445,111 +467,54 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
      * @param from time point for first fix to show in tails
      * @param to time point for last fix to show in tails
      */
-    private void showBoatsOnMap(Map<CompetitorDAO, List<GPSFixDAO>> result, Date from, Date to) {
+    private void showBoatsOnMap(Date from, Date to) {
         if (map != null) {
             LatLngBounds newMapBounds = null;
             Set<CompetitorDAO> competitorDAOsOfUnusedTails = new HashSet<CompetitorDAO>(tails.keySet());
-                Set<CompetitorDAO> competitorDAOsOfUnusedMarkers = new HashSet<CompetitorDAO>(boatMarkers.keySet());
-                for (final Map.Entry<CompetitorDAO, List<GPSFixDAO>> tailEntry : result.entrySet()) {
-                    if (!tailEntry.getValue().isEmpty()) {
-                        final CompetitorDAO competitorDAO = tailEntry.getKey();
-                        Polyline tail = tails.get(competitorDAO);
-                        if (tail == null) {
-                            tail = createTail(competitorDAO, tailEntry.getValue(), from, to);
-                            map.addOverlay(tail);
-                            tails.put(competitorDAO, tail);
-                        } else {
-                            updateTail(tail, tailEntry.getValue());
-                            competitorDAOsOfUnusedTails.remove(tail);
-                        }
-                        LatLngBounds bounds = tail.getBounds();
-                        if (newMapBounds == null) {
-                            newMapBounds = bounds;
-                        } else {
-                            newMapBounds.extend(bounds.getNorthEast());
-                            newMapBounds.extend(bounds.getSouthWest());
-                        }
-                        GPSFixDAO lastPos = tailEntry.getValue().get(tailEntry.getValue().size() - 1);
-                        Marker boatMarker = boatMarkers.get(competitorDAO);
-                        if (boatMarker == null) {
-                            boatMarker = createBoatMarker(competitorDAO, lastPos.position.latDeg, lastPos.position.lngDeg, false);
-                            map.addOverlay(boatMarker);
-                            boatMarkers.put(competitorDAO, boatMarker);
-                        } else {
-                            competitorDAOsOfUnusedMarkers.remove(competitorDAO);
-                            boatMarker.setLatLng(LatLng.newInstance(lastPos.position.latDeg, lastPos.position.lngDeg));
-                        }
-                    }
+            Set<CompetitorDAO> competitorDAOsOfUnusedMarkers = new HashSet<CompetitorDAO>(boatMarkers.keySet());
+            for (CompetitorDAO competitorDAO : competitorsToShow) {
+                Polyline tail = tails.get(competitorDAO);
+                if (tail == null) {
+                    tail = createTailAndUpdateIndices(competitorDAO, from, to);
+                    map.addOverlay(tail);
+                } else {
+                    updateTail(tail, competitorDAO);
+                    competitorDAOsOfUnusedTails.remove(tail);
                 }
-                if (!mapZoomedOrPannedSinceLastRaceSelectionChange && newMapBounds != null) {
-                    map.setZoomLevel(map.getBoundsZoomLevel(newMapBounds));
-                    map.setCenter(newMapBounds.getCenter());
+                LatLngBounds bounds = tail.getBounds();
+                if (newMapBounds == null) {
+                    newMapBounds = bounds;
+                } else {
+                    newMapBounds.extend(bounds.getNorthEast());
+                    newMapBounds.extend(bounds.getSouthWest());
                 }
-                for (CompetitorDAO unusedMarkerCompetitorDAO : competitorDAOsOfUnusedMarkers) {
-                    map.removeOverlay(boatMarkers.remove(unusedMarkerCompetitorDAO));
+                GPSFixDAO lastPos = fixes.get(competitorDAO).get(lastShownFix.get(competitorDAO));
+                Marker boatMarker = boatMarkers.get(competitorDAO);
+                if (boatMarker == null) {
+                    boatMarker = createBoatMarker(competitorDAO, lastPos.position.latDeg, lastPos.position.lngDeg,
+                            false);
+                    map.addOverlay(boatMarker);
+                    boatMarkers.put(competitorDAO, boatMarker);
+                } else {
+                    competitorDAOsOfUnusedMarkers.remove(competitorDAO);
+                    boatMarker.setLatLng(LatLng.newInstance(lastPos.position.latDeg, lastPos.position.lngDeg));
                 }
-                for (CompetitorDAO unusedTailCompetitorDAO : competitorDAOsOfUnusedTails) {
-                    map.removeOverlay(tails.remove(unusedTailCompetitorDAO));
-                }
-            /* } else {
-                for (Map.Entry<CompetitorDAO, Polyline> tailEntry : tails.entrySet()) {
-                    try {
-                        final CompetitorDAO competitorDAO = tailEntry.getKey();
-                        Polyline tail = tailEntry.getValue();
-                        List<GPSFixDAO> gpsFixDao = result.get(competitorDAO);
-                        int newPointsCount = gpsFixDao.size();
-                        for (int i = 0; i < newPointsCount; i++) {
-                            tail.insertVertex(tail.getVertexCount(), LatLng.newInstance(
-                                    gpsFixDao.get(i).position.latDeg, gpsFixDao.get(i).position.lngDeg));
-                            tail.deleteVertex(0);
-                        }
-                        GPSFixDAO lastFix = gpsFixDao.get(gpsFixDao.size() - 1);
-                        Marker bMarker = boatMarkers.get(competitorDAO);
-                        bMarker.setLatLng(LatLng.newInstance(lastFix.position.latDeg, lastFix.position.lngDeg));
-                        lastShownFix.put(competitorDAO, lastFix);
-
-                        LatLngBounds bounds = tail.getBounds();
-                        if (newMapBounds == null) {
-                            newMapBounds = bounds;
-                        } else {
-                            newMapBounds.extend(bounds.getNorthEast());
-                            newMapBounds.extend(bounds.getSouthWest());
-                        }
-
-                        if (!mapZoomedOrPannedSinceLastRaceSelectionChange && newMapBounds != null) {
-                            map.setZoomLevel(map.getBoundsZoomLevel(newMapBounds));
-                            map.setCenter(newMapBounds.getCenter());
-                        }
-                    } catch (Exception e) {
-                        final CompetitorDAO competitorDAO = tailEntry.getKey();
-                        Polyline tail = tailEntry.getValue();
-                        List<GPSFixDAO> gpsFixDao = result.get(competitorDAO);
-                        map.removeOverlay(tail);
-                        Polyline newTail = createTail(competitorDAO, gpsFixDao);
-                        map.addOverlay(newTail);
-                        tails.put(competitorDAO, newTail);
-                        LatLngBounds bounds = newTail.getBounds();
-                        if (newMapBounds == null) {
-                            newMapBounds = bounds;
-                        } else {
-                            newMapBounds.extend(bounds.getNorthEast());
-                            newMapBounds.extend(bounds.getSouthWest());
-                        }
-                        GPSFixDAO lastPos = gpsFixDao.get(gpsFixDao.size() - 1);
-                        Marker boatMarker = createBoatMarker(competitorDAO, lastPos.position.latDeg,
-                                lastPos.position.lngDeg, false);
-                        map.addOverlay(boatMarker);
-                        boatMarkers.put(competitorDAO, boatMarker);
-                    } finally {
-
-                    }
-                }
-            }*/
+            }
+            if (!mapZoomedOrPannedSinceLastRaceSelectionChange && newMapBounds != null) {
+                map.setZoomLevel(map.getBoundsZoomLevel(newMapBounds));
+                map.setCenter(newMapBounds.getCenter());
+            }
+            for (CompetitorDAO unusedMarkerCompetitorDAO : competitorDAOsOfUnusedMarkers) {
+                map.removeOverlay(boatMarkers.remove(unusedMarkerCompetitorDAO));
+            }
+            for (CompetitorDAO unusedTailCompetitorDAO : competitorDAOsOfUnusedTails) {
+                map.removeOverlay(tails.remove(unusedTailCompetitorDAO));
+            }
         }
-
     }
 
-    private void updateTail(Polyline tail, List<GPSFixDAO> value) {
+    private void updateTail(Polyline tail, CompetitorDAO competitorDAO) {
+        
         // TODO Auto-generated method stub
         
     }
@@ -642,16 +607,39 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         return "#" + Integer.toHexString(competitorDAO.hashCode()).substring(0, 6).toUpperCase();
     }
 
-    private Polyline createTail(final CompetitorDAO competitorDAO, List<GPSFixDAO> value, Date from, Date to) {
-        if (!value.isEmpty()) {
-            firstShownFix.put(competitorDAO, value.get(0));
-            lastShownFix.put(competitorDAO, value.get(value.size() - 1));
-        }
-
+    /**
+     * Creates a polyline for the competitor represented by <code>competitorDAO</code>, taking the fixes from
+     * {@link #fixes fixes.get(competitorDAO)} and using the fixes starting at time point <code>from</code>
+     * (inclusive) up to the last fix with time point before <code>to</code>. The polyline is returned.
+     * Updates are applied to {@link #lastShownFix}, {@link #firstShownFix} and {@link #tails}.
+     */
+    private Polyline createTailAndUpdateIndices(final CompetitorDAO competitorDAO, Date from, Date to) {
         List<LatLng> points = new ArrayList<LatLng>();
-        for (int i = 0; i < value.size(); i++) {
-            points.add(LatLng.newInstance(value.get(i).position.latDeg, value.get(i).position.lngDeg));
+        List<GPSFixDAO> fixesForCompetitor = fixes.get(competitorDAO);
+        int indexOfFirst = -1;
+        int indexOfLast = -1;
+        int i=0;
+        for (Iterator<GPSFixDAO> fixIter=fixesForCompetitor.iterator(); fixIter.hasNext() && indexOfLast == -1; ) {
+            GPSFixDAO fix = fixIter.next();
+            if (!fix.timepoint.before(to)) {
+                indexOfLast = i;
+            } else {
+                LatLng point = null;
+                if (indexOfFirst == -1) {
+                    if (!fix.timepoint.before(from)) {
+                        indexOfFirst = i;
+                        point = LatLng.newInstance(fix.position.latDeg, fix.position.lngDeg);
+                    }
+                } else {
+                    point = LatLng.newInstance(fix.position.latDeg, fix.position.lngDeg);
+                }
+                if (point != null) {
+                    points.add(point);
+                }
+            }
         }
+        firstShownFix.put(competitorDAO, indexOfFirst);
+        lastShownFix.put(competitorDAO, indexOfLast);
         PolylineOptions options = PolylineOptions.newInstance(
         /* clickable */true, /* geodesic */true);
         Polyline result = new Polyline(points.toArray(new LatLng[0]), getColorString(competitorDAO), /* width */3,
@@ -678,6 +666,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
                 quickRanksBox.setItemSelected(quickRanksList.indexOf(competitorDAO), false);
             }
         });
+        tails.put(competitorDAO, result);
         return result;
     }
 
