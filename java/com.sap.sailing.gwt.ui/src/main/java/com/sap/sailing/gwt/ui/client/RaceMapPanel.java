@@ -349,14 +349,16 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
             Date timepointOfLastKnownFix = fixesForCompetitor==null?null:getTimepointOfLastNonExtrapolated(fixesForCompetitor);
             Date timepointOfFirstKnownFix = fixesForCompetitor==null?null:getTimepointOfFirstNonExtrapolated(fixesForCompetitor);
             boolean overlap = false;
-            if (fixesForCompetitor != null && !tailStart.before(timepointOfFirstKnownFix) && !tailStart.after(timepointOfLastKnownFix)) {
+            if (fixesForCompetitor != null && timepointOfFirstKnownFix != null && !tailStart.before(timepointOfFirstKnownFix) &&
+                    timepointOfLastKnownFix != null && !tailStart.after(timepointOfLastKnownFix)) {
                 // the beginning of what we need is contained in the interval we already have; skip what we already have
                 fromDate = timepointOfLastKnownFix;
                 overlap = true;
             } else {
                 fromDate = tailStart;
             }
-            if (fixesForCompetitor != null && !upTo.before(timepointOfFirstKnownFix) && !upTo.after(timepointOfLastKnownFix)) {
+            if (fixesForCompetitor != null && timepointOfFirstKnownFix != null && !upTo.before(timepointOfFirstKnownFix)
+                    && timepointOfLastKnownFix != null && !upTo.after(timepointOfLastKnownFix)) {
                 // the end of what we need is contained in the interval we already have; skip what we already have
                 toDate = timepointOfFirstKnownFix;
                 overlap = true;
@@ -383,10 +385,13 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
     }
 
     private Date getTimepointOfLastNonExtrapolated(List<GPSFixDAO> fixesForCompetitor) {
-        for (ListIterator<GPSFixDAO> fixIter = fixesForCompetitor.listIterator(fixesForCompetitor.size()-1); fixIter.hasPrevious(); ) {
-            GPSFixDAO fix = fixIter.previous();
-            if (!fix.extrapolated) {
-                return fix.timepoint;
+        if (!fixesForCompetitor.isEmpty()) {
+            for (ListIterator<GPSFixDAO> fixIter = fixesForCompetitor.listIterator(fixesForCompetitor.size() - 1); fixIter
+                    .hasPrevious();) {
+                GPSFixDAO fix = fixIter.previous();
+                if (!fix.extrapolated) {
+                    return fix.timepoint;
+                }
             }
         }
         return null;
@@ -410,11 +415,8 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
                     fixesForCompetitor.clear();
                     // to re-establish the invariants for tails, firstShownFix and lastShownFix, we now need to remove all
                     // points from the competitor's polyline and clear the entries in firstShownFix and lastShownFix
-                    Polyline tail = tails.get(e.getKey());
-                    if (tail != null) {
-                        while (tail.getVertexCount() > 0) {
-                            tail.deleteVertex(0);
-                        }
+                    if (map != null && tails.containsKey(e.getKey())) {
+                        map.removeOverlay(tails.remove(e.getKey()));
                     }
                     firstShownFix.remove(e.getKey());
                     lastShownFix.remove(e.getKey());
@@ -718,6 +720,10 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
                     points.add(point);
                 }
             }
+            i++;
+        }
+        if (indexOfLast == -1) {
+            indexOfLast = i-1;
         }
         if (indexOfFirst != -1 && indexOfLast != -1) {
             firstShownFix.put(competitorDAO, indexOfFirst);
