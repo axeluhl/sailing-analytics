@@ -593,7 +593,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         // now the polyline contains no more vertices representing fixes after "to";
         // go forward in time starting at indexOfLastShownFix while the fixes are still at or before "to"
         // and insert corresponding vertices into the polyline
-        while (indexOfLastShownFix < fixesForCompetitor.size() && !fixesForCompetitor.get(indexOfLastShownFix+1).timepoint.after(to)) {
+        while (indexOfLastShownFix < fixesForCompetitor.size()-1 && !fixesForCompetitor.get(indexOfLastShownFix+1).timepoint.after(to)) {
             indexOfLastShownFix++;
             GPSFixDAO fix = fixesForCompetitor.get(indexOfLastShownFix);
             tail.insertVertex(tail.getVertexCount(), LatLng.newInstance(fix.position.latDeg, fix.position.lngDeg));
