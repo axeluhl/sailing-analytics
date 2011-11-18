@@ -33,7 +33,7 @@ import com.google.gwt.view.client.MultiSelectionModel;
 import com.sap.sailing.gwt.ui.shared.EventDAO;
 import com.sap.sailing.gwt.ui.shared.Pair;
 import com.sap.sailing.gwt.ui.shared.RaceDAO;
-import com.sap.sailing.gwt.ui.shared.RaceRecordDAO;
+import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDAO;
 import com.sap.sailing.gwt.ui.shared.RegattaDAO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDAO;
 import com.sap.sailing.gwt.ui.shared.Triple;
@@ -61,8 +61,8 @@ public class TracTracEventManagementPanel extends FormPanel implements EventDisp
     private final IntegerBox livePortIntegerbox;
     private final TextBox hostnameTextbox;
     private final TextBox eventNameTextbox;
-    private final ListDataProvider<RaceRecordDAO> raceList;
-    private final CellTable<RaceRecordDAO> raceTable;
+    private final ListDataProvider<TracTracRaceRecordDAO> raceList;
+    private final CellTable<TracTracRaceRecordDAO> raceTable;
     private final Map<String, TracTracConfigurationDAO> previousConfigurations;
     private final ListBox previousConfigurationsComboBox;
     private final Grid grid;
@@ -208,28 +208,28 @@ public class TracTracEventManagementPanel extends FormPanel implements EventDisp
         
         Label lblTrackableRaces = new Label(stringConstants.trackableRaces());
         grid.setWidget(5, 0, lblTrackableRaces);
-        TextColumn<RaceRecordDAO> raceNameColumn = new TextColumn<RaceRecordDAO>() {
+        TextColumn<TracTracRaceRecordDAO> raceNameColumn = new TextColumn<TracTracRaceRecordDAO>() {
             @Override
-            public String getValue(RaceRecordDAO object) {
+            public String getValue(TracTracRaceRecordDAO object) {
                 return object.name;
             }
         };
-        TextColumn<RaceRecordDAO> raceStartTrackingColumn = new TextColumn<RaceRecordDAO>() {
+        TextColumn<TracTracRaceRecordDAO> raceStartTrackingColumn = new TextColumn<TracTracRaceRecordDAO>() {
             @Override
-            public String getValue(RaceRecordDAO object) {
+            public String getValue(TracTracRaceRecordDAO object) {
                 return object.trackingStartTime.toString();
             }
         };
         raceNameColumn.setSortable(true);
         raceStartTrackingColumn.setSortable(true);
-        raceTable = new CellTable<RaceRecordDAO>(/* pageSize */ 100);
+        raceTable = new CellTable<TracTracRaceRecordDAO>(/* pageSize */ 100);
         raceTable.addColumn(raceNameColumn, stringConstants.name());
         raceTable.addColumn(raceStartTrackingColumn, stringConstants.raceStartTrackingColumn());
         grid.setWidget(6, 0, raceTable);
         grid.getCellFormatter().setHeight(6, 0, "100%");
         raceTable.setWidth("100%");
-        raceTable.setSelectionModel(new MultiSelectionModel<RaceRecordDAO>() {});
-        raceList = new ListDataProvider<RaceRecordDAO>();
+        raceTable.setSelectionModel(new MultiSelectionModel<TracTracRaceRecordDAO>() {});
+        raceList = new ListDataProvider<TracTracRaceRecordDAO>();
         raceList.addDataDisplay(raceTable);
         Handler columnSortHandler = getRaceTableColumnSortHandler(raceList.getList(), raceNameColumn, raceStartTrackingColumn);
         raceTable.addColumnSortHandler(columnSortHandler);
@@ -304,18 +304,18 @@ public class TracTracEventManagementPanel extends FormPanel implements EventDisp
         });
     }
 
-    private ListHandler<RaceRecordDAO> getRaceTableColumnSortHandler(List<RaceRecordDAO> raceRecords,
-            Column<RaceRecordDAO, ?> nameColumn, Column<RaceRecordDAO, ?> trackingStartColumn) {
-        ListHandler<RaceRecordDAO> result = new ListHandler<RaceRecordDAO>(raceRecords);
-        result.setComparator(nameColumn, new Comparator<RaceRecordDAO>() {
+    private ListHandler<TracTracRaceRecordDAO> getRaceTableColumnSortHandler(List<TracTracRaceRecordDAO> raceRecords,
+            Column<TracTracRaceRecordDAO, ?> nameColumn, Column<TracTracRaceRecordDAO, ?> trackingStartColumn) {
+        ListHandler<TracTracRaceRecordDAO> result = new ListHandler<TracTracRaceRecordDAO>(raceRecords);
+        result.setComparator(nameColumn, new Comparator<TracTracRaceRecordDAO>() {
             @Override
-            public int compare(RaceRecordDAO o1, RaceRecordDAO o2) {
+            public int compare(TracTracRaceRecordDAO o1, TracTracRaceRecordDAO o2) {
                 return o1.name.compareTo(o2.name);
             }
         });
-        result.setComparator(trackingStartColumn, new Comparator<RaceRecordDAO>() {
+        result.setComparator(trackingStartColumn, new Comparator<TracTracRaceRecordDAO>() {
             @Override
-            public int compare(RaceRecordDAO o1, RaceRecordDAO o2) {
+            public int compare(TracTracRaceRecordDAO o1, TracTracRaceRecordDAO o2) {
                 return o1.trackingStartTime == null ? -1 : o2.trackingStartTime == null ? 1 : o1.trackingStartTime
                         .compareTo(o2.trackingStartTime);
             }
@@ -368,7 +368,7 @@ public class TracTracEventManagementPanel extends FormPanel implements EventDisp
         final String jsonURL = jsonURLBox.getValue();
         final String liveDataURI = liveURIBox.getValue();
         final String storedDataURI = storedURIBox.getValue();
-        sailingService.listTracTracRacesInEvent(jsonURL, new AsyncCallback<Pair<String, List<RaceRecordDAO>>>() {
+        sailingService.listTracTracRacesInEvent(jsonURL, new AsyncCallback<Pair<String, List<TracTracRaceRecordDAO>>>() {
             @Override
             public void onFailure(Throwable caught) {
                 TracTracEventManagementPanel.this.errorReporter.reportError("Error trying to list races: "
@@ -376,7 +376,7 @@ public class TracTracEventManagementPanel extends FormPanel implements EventDisp
             }
 
             @Override
-            public void onSuccess(final Pair<String, List<RaceRecordDAO>> result) {
+            public void onSuccess(final Pair<String, List<TracTracRaceRecordDAO>> result) {
                 raceList.getList().clear();
                 if (result.getB() != null) {
                     raceList.getList().addAll(result.getB());
@@ -407,7 +407,7 @@ public class TracTracEventManagementPanel extends FormPanel implements EventDisp
     private void trackSelectedRaces(boolean trackWind, boolean correctWindByDeclination) {
         String liveURI = liveURIBox.getValue();
         String storedURI = storedURIBox.getValue();
-        for (final RaceRecordDAO rr : raceList.getList()) {
+        for (final TracTracRaceRecordDAO rr : raceList.getList()) {
             if (raceTable.getSelectionModel().isSelected(rr)) {
                 sailingService.track(rr, liveURI, storedURI, trackWind, correctWindByDeclination, new AsyncCallback<Void>() {
                     @Override

@@ -56,7 +56,7 @@ public class ListeningStoreAndForwardTest {
         sendingStream = sendingSocket.getOutputStream();
         swissTimingFactory = SwissTimingFactory.INSTANCE;
         transceiver = swissTimingFactory.createSailMasterTransceiver();
-        connector = swissTimingFactory.getOrCreateSailMasterConnector("localhost", CLIENT_PORT, null);
+        connector = swissTimingFactory.getOrCreateSailMasterConnector("localhost", CLIENT_PORT, null, /* canSendRequests */ false);
         DBCollection lastMessageCountCollection = db.getCollection(CollectionNames.LAST_MESSAGE_COUNT.name());
         lastMessageCountCollection.update(new BasicDBObject(), new BasicDBObject().append(FieldNames.LAST_MESSAGE_COUNT.name(), 0l),
                 /* upsert */ true, /* multi */ false);

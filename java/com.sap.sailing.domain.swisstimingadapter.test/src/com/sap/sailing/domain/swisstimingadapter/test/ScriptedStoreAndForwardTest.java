@@ -66,7 +66,7 @@ public class ScriptedStoreAndForwardTest {
         sendingStream = sendingSocket.getOutputStream();
         swissTimingFactory = SwissTimingFactory.INSTANCE;
         transceiver = swissTimingFactory.createSailMasterTransceiver();
-        connector = swissTimingFactory.getOrCreateSailMasterConnector("localhost", CLIENT_PORT,
+        connector = swissTimingFactory.getOrCreateSailMasterConnector("localhost", CLIENT_PORT, swissTimingAdapterPersistence, /* canSendRequests */ false);
                 swissTimingAdapterPersistence);
         DBCollection lastMessageCountCollection = db.getCollection(CollectionNames.LAST_MESSAGE_COUNT.name());
         lastMessageCountCollection.update(new BasicDBObject(),
@@ -104,6 +104,7 @@ public class ScriptedStoreAndForwardTest {
         final List<Race> racesReceived = new ArrayList<Race>();
         final boolean[] receivedAll = new boolean[1];
         final List<Competitor> receivedCompetitors = new ArrayList<Competitor>();
+        final List<Course> receivedCourses  = new ArrayList<Course>();
 
         connector.addSailMasterListener(new SailMasterAdapter() {
             @Override
@@ -111,6 +112,14 @@ public class ScriptedStoreAndForwardTest {
 
                 for (Competitor competitor : startList.getCompetitors())
                     receivedCompetitors.add(competitor);
+
+                receivedMessagesCount[0] = receivedMessagesCount[0] + 1;
+            }
+            
+            @Override
+            public void receivedCourseConfiguration(String raceID, Course course) {
+
+                receivedCourses.add(course);
 
                 receivedMessagesCount[0] = receivedMessagesCount[0] + 1;
 
@@ -122,7 +131,7 @@ public class ScriptedStoreAndForwardTest {
                 }
 
             }
-
+            
             @Override
             public void receivedAvailableRaces(Iterable<Race> races) {
 
@@ -133,7 +142,7 @@ public class ScriptedStoreAndForwardTest {
             }
         });
 
-        for (String msg : scriptedMessages.getMessages()) {
+        for(String msg: scriptedMessages.getMessages()) {
             transceiver.sendMessage(msg, sendingStream);
         }
 
@@ -144,103 +153,10 @@ public class ScriptedStoreAndForwardTest {
         }
         assertEquals(2, racesReceived.size());
         assertEquals(5, receivedCompetitors.size());
-
-        for (String raceToTrack : racesToTrack)
+        assertEquals(2, receivedCourses.size());
+        
+        for(String raceToTrack: racesToTrack)
             connector.stopTrackingRace(raceToTrack);
     }
-
-    @Test
-    public void testInitMessages2() throws IOException, InterruptedException, ParseException {
-
-        swissTimingAdapterPersistence.dropAllRaceMasterData();
-        swissTimingAdapterPersistence.dropAllMessageData();
-
-        String[] racesToTrack = new String[] { "4711" };
-
-        for (String raceToTrack : racesToTrack)
-            connector.trackRace(raceToTrack);
-
-        InputStream is = getClass().getResourceAsStream("/InitMessagesScript2.txt");
-
-        ScriptedMessages scriptedMessages = new ScriptedMessages(is);
-
-        final int messageCount = scriptedMessages.getMessages().size();
-
-        final int[] receivedMessagesCount = new int[] { 0 };
-        final List<Race> racesReceived = new ArrayList<Race>();
-        final boolean[] receivedAll = new boolean[1];
-        final List<Competitor> receivedCompetitors = new ArrayList<Competitor>();
-
-        connector.addSailMasterListener(new SailMasterAdapter() {
-            
-            @Override
-            public void receivedRacePositionData(String raceID, RaceStatus status, TimePoint timePoint,
-                    TimePoint startTime, Long millisecondsSinceRaceStart, Integer nextMarkIndexForLeader,
-                    Distance distanceToNextMarkForLeader, Collection<Fix> fixes) {
-                // TODO Auto-generated method stub
-                countAndCheckAllMessagesRecieved(messageCount, receivedMessagesCount, receivedAll);
-            }
-
-
-            @Override
-            public void receivedClockAtMark(String raceID,
-                    List<Triple<Integer, TimePoint, String>> markIndicesTimePointsAndBoatIDs) {
-                // TODO Auto-generated method stub
-                countAndCheckAllMessagesRecieved(messageCount, receivedMessagesCount, receivedAll);
-            }
-
-
-            @Override
-            public void receivedCourseConfiguration(String raceID, Course course) {
-                // TODO Auto-generated method stub
-                countAndCheckAllMessagesRecieved(messageCount, receivedMessagesCount, receivedAll);
-
-            }
-
-            
-            @Override
-            public void receivedStartList(String raceID, StartList startList) {
-
-                for (Competitor competitor : startList.getCompetitors())
-                    receivedCompetitors.add(competitor);
-
-                countAndCheckAllMessagesRecieved(messageCount, receivedMessagesCount, receivedAll);
-            }
-
-            @Override
-            public void receivedAvailableRaces(Iterable<Race> races) {
-
-                for (Race race : races) {
-                    racesReceived.add(race);
-                }
-                countAndCheckAllMessagesRecieved(messageCount, receivedMessagesCount, receivedAll);
-            }
-        });
-
-        for (String msg : scriptedMessages.getMessages()) {
-            transceiver.sendMessage(msg, sendingStream);
-        }
-
-        synchronized (this) {
-            while (!receivedAll[0]) {
-                wait(2000l); // wait for two seconds to receive the messages
-            }
-        }
-        assertEquals(1, racesReceived.size());
-        assertEquals(2, receivedCompetitors.size());
-
-        for (String raceToTrack : racesToTrack)
-            connector.stopTrackingRace(raceToTrack);
-    }
-
-    private void countAndCheckAllMessagesRecieved(int messageCount, int[] receivedMessagesCount, boolean[] receivedAll) {
-        receivedMessagesCount[0] = receivedMessagesCount[0] + 1;
-        if (messageCount == receivedMessagesCount[0]) {
-            synchronized (ScriptedStoreAndForwardTest.this) {
-                receivedAll[0] = true;
-                ScriptedStoreAndForwardTest.this.notifyAll();
-            }
-        }
-
-    }
+    
 }

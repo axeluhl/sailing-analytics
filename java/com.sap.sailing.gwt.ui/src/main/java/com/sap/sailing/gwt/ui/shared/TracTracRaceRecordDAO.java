@@ -4,7 +4,7 @@ import java.util.Date;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
-public class RaceRecordDAO implements IsSerializable {
+public class TracTracRaceRecordDAO implements IsSerializable {
     public String eventName;
     public String name;
     public String replayURL;
@@ -16,9 +16,9 @@ public class RaceRecordDAO implements IsSerializable {
     public Date trackingEndTime;
     public Date raceStartTime;
 
-    public RaceRecordDAO() {}
+    public TracTracRaceRecordDAO() {}
     
-    public RaceRecordDAO(String id, String eventName, String name, String paramURL,
+    public TracTracRaceRecordDAO(String id, String eventName, String name, String paramURL,
             String replayURL, String liveURI, String storedURI, Date trackingStartTime, Date trackingEndTime, Date raceStartTime) {
         super();
         this.eventName = eventName;

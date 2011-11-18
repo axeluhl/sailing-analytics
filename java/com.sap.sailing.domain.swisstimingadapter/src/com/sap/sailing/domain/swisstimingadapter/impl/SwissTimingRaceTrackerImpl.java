@@ -67,17 +67,18 @@ public class SwissTimingRaceTrackerImpl implements SwissTimingRaceTracker, SailM
     
     protected SwissTimingRaceTrackerImpl(String raceID, String hostname, int port, WindStore windStore,
             DomainFactory domainFactory, SwissTimingFactory factory, RaceSpecificMessageLoader messageLoader,
-            TrackedEventRegistry trackedEventRegistry) throws InterruptedException, UnknownHostException, IOException, ParseException {
-        this.connector = factory.getOrCreateSailMasterConnector(hostname, port, messageLoader);
+            TrackedEventRegistry trackedEventRegistry, boolean canSendRequests) throws InterruptedException, UnknownHostException, IOException, ParseException {
+        this.connector = factory.getOrCreateSailMasterConnector(hostname, port, messageLoader, canSendRequests);
         this.domainFactory = domainFactory;
         this.raceID = raceID;
         this.messageLoader = messageLoader;
         this.windStore = windStore;
         this.id = new Triple<String, String, Integer>(raceID, hostname, port);
         connector.addSailMasterListener(raceID, this);
-        connector.trackRace(raceID);
         event = domainFactory.getOrCreateEvent(raceID);
         trackedEvent = trackedEventRegistry.getOrCreateTrackedEvent(event);
+        connector.trackRace(raceID);
+        
     }
 
     @Override
@@ -190,7 +191,7 @@ public class SwissTimingRaceTrackerImpl implements SwissTimingRaceTracker, SailM
         for (Triple<Integer, Integer, Long> markIndexRankAndTimeSinceStartInMilliseconds : markIndicesRanksAndTimesSinceStartInMilliseconds) {
             Waypoint waypoint = Util.get(trackedRace.getRace().getCourse().getWaypoints(),
                     markIndexRankAndTimeSinceStartInMilliseconds.getA());
-            MillisecondsTimePoint timePoint = new MillisecondsTimePoint(trackedRace.getStart().asMillis()
+            MillisecondsTimePoint timePoint = trackedRace.getStart()==null?null:new MillisecondsTimePoint(trackedRace.getStart().asMillis()
                     + markIndexRankAndTimeSinceStartInMilliseconds.getC());
             MarkPassing markPassing = domainFactory.createMarkPassing(raceID, boatID, waypoint, timePoint);
             markPassingsByMarkIndex.put(markIndexRankAndTimeSinceStartInMilliseconds.getA(), markPassing);
@@ -218,15 +219,15 @@ public class SwissTimingRaceTrackerImpl implements SwissTimingRaceTracker, SailM
         assert startList != null;
         assert course != null;
         // now we can create the RaceDefinition and most other things
-        Race race = messageLoader.getRace(raceID);
-        final RaceDefinition raceDefinition = domainFactory.createRaceDefinition(event, race, startList, course);
-        trackedRace = getTrackedEvent().createTrackedRace(raceDefinition, windStore,
+        Race swissTimingRace = messageLoader.getRace(raceID);
+        race = domainFactory.createRaceDefinition(event, swissTimingRace, startList, course);
+        trackedRace = getTrackedEvent().createTrackedRace(race, windStore,
                 WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND, GPSFixTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_SPEED,
                 new DynamicRaceDefinitionSet() {
                     @Override
                     public void addRaceDefinition(RaceDefinition race) {
                         // we already know our single RaceDefinition
-                        assert raceDefinition == race;
+                        assert SwissTimingRaceTrackerImpl.this.race == race;
                     }
                 });
     }
