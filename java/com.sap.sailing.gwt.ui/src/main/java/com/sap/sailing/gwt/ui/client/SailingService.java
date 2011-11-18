@@ -2,7 +2,6 @@ package com.sap.sailing.gwt.ui.client;
 
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -16,10 +15,10 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDAO;
 import com.sap.sailing.gwt.ui.shared.MarkDAO;
 import com.sap.sailing.gwt.ui.shared.Pair;
 import com.sap.sailing.gwt.ui.shared.QuickRankDAO;
-import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDAO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDAO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDAO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDAO;
+import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDAO;
 import com.sap.sailing.gwt.ui.shared.WindDAO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDAO;
 
@@ -48,8 +47,8 @@ public interface SailingService extends RemoteService {
 
     void setWind(String eventName, String raceName, WindDAO wind);
 
-    Map<CompetitorDAO, List<GPSFixDAO>> getBoatPositions(String eventName, String raceName, Date date,
-            long tailLengthInMilliseconds, HashMap<CompetitorDAO, GPSFixDAO> firstShownFix, HashMap<CompetitorDAO, GPSFixDAO> lastShownFix, boolean extrapolate);
+    Map<CompetitorDAO, List<GPSFixDAO>> getBoatPositions(String eventName, String raceName,
+            Map<CompetitorDAO, Date> from, Map<CompetitorDAO, Date> to, boolean extrapolate);
 
     List<MarkDAO> getMarkPositions(String eventName, String raceName, Date date);
 
