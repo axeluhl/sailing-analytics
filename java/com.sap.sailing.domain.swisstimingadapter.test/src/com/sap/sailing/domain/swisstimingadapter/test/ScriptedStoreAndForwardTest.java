@@ -35,10 +35,10 @@ import com.sap.sailing.mongodb.Activator;
 
 public class ScriptedStoreAndForwardTest {
     private static final Logger logger = Logger.getLogger(ScriptedStoreAndForwardTest.class.getName());
-    
+
     private static final int RECEIVE_PORT = 6543;
     private static final int CLIENT_PORT = 6544;
-    
+
     private DB db;
     private StoreAndForward storeAndForward;
     private Socket sendingSocket;
@@ -53,21 +53,21 @@ public class ScriptedStoreAndForwardTest {
         db = Activator.getDefaultInstance().getDB();
 
         swissTimingAdapterPersistence = SwissTimingAdapterPersistence.INSTANCE;
-        
-        storeAndForward = new StoreAndForward(RECEIVE_PORT, CLIENT_PORT, SwissTimingFactory.INSTANCE, SwissTimingAdapterPersistence.INSTANCE);
+
+        storeAndForward = new StoreAndForward(RECEIVE_PORT, CLIENT_PORT, SwissTimingFactory.INSTANCE,
+                SwissTimingAdapterPersistence.INSTANCE);
         sendingSocket = new Socket("localhost", RECEIVE_PORT);
         sendingStream = sendingSocket.getOutputStream();
         swissTimingFactory = SwissTimingFactory.INSTANCE;
         transceiver = swissTimingFactory.createSailMasterTransceiver();
         connector = swissTimingFactory.getOrCreateSailMasterConnector("localhost", CLIENT_PORT, swissTimingAdapterPersistence, /* canSendRequests */ false);
         DBCollection lastMessageCountCollection = db.getCollection(CollectionNames.LAST_MESSAGE_COUNT.name());
-        lastMessageCountCollection.update(new BasicDBObject(), new BasicDBObject().append(FieldNames.LAST_MESSAGE_COUNT.name(), 0l),
-                /* upsert */ true, /* multi */ false);
-        
-        swissTimingAdapterPersistence.dropAllRaceMasterData();
-        swissTimingAdapterPersistence.dropAllMessageData();
+        lastMessageCountCollection.update(new BasicDBObject(),
+                new BasicDBObject().append(FieldNames.LAST_MESSAGE_COUNT.name(), 0l),
+                /* upsert */true, /* multi */false);
+
     }
-    
+
     @After
     public void tearDown() throws InterruptedException, IOException {
         logger.entering(getClass().getName(), "tearDown");
@@ -75,32 +75,35 @@ public class ScriptedStoreAndForwardTest {
         connector.stop();
         logger.exiting(getClass().getName(), "tearDown");
     }
-    
+
     @Test
     public void testInitMessages() throws IOException, InterruptedException, ParseException {
 
+        swissTimingAdapterPersistence.dropAllRaceMasterData();
+        swissTimingAdapterPersistence.dropAllMessageData();
+
         String[] racesToTrack = new String[] { "4711", "4712" };
-        
-        for(String raceToTrack: racesToTrack)
+
+        for (String raceToTrack : racesToTrack)
             connector.trackRace(raceToTrack);
 
         InputStream is = getClass().getResourceAsStream("/InitMessagesScript.txt");
 
         ScriptedMessages scriptedMessages = new ScriptedMessages(is);
-        
+
         final int messageCount = scriptedMessages.getMessages().size();
-        
-        final int[] receivedMessagesCount = new int[] {0};
+
+        final int[] receivedMessagesCount = new int[] { 0 };
         final List<Race> racesReceived = new ArrayList<Race>();
         final boolean[] receivedAll = new boolean[1];
-        final List<Competitor> receivedCompetitors  = new ArrayList<Competitor>();
+        final List<Competitor> receivedCompetitors = new ArrayList<Competitor>();
         final List<Course> receivedCourses  = new ArrayList<Course>();
 
         connector.addSailMasterListener(new SailMasterAdapter() {
             @Override
             public void receivedStartList(String raceID, StartList startList) {
 
-                for(Competitor competitor: startList.getCompetitors())
+                for (Competitor competitor : startList.getCompetitors())
                     receivedCompetitors.add(competitor);
 
                 receivedMessagesCount[0] = receivedMessagesCount[0] + 1;
@@ -113,12 +116,13 @@ public class ScriptedStoreAndForwardTest {
 
                 receivedMessagesCount[0] = receivedMessagesCount[0] + 1;
 
-                if(messageCount == receivedMessagesCount[0]) {
+                if (messageCount == receivedMessagesCount[0]) {
                     synchronized (ScriptedStoreAndForwardTest.this) {
                         receivedAll[0] = true;
                         ScriptedStoreAndForwardTest.this.notifyAll();
                     }
                 }
+
             }
             
             @Override
