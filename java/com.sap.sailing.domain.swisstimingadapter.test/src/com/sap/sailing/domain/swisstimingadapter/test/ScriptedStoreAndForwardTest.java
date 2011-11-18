@@ -9,7 +9,6 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -20,13 +19,9 @@ import org.junit.Test;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
-import com.sap.sailing.domain.base.Distance;
-import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.swisstimingadapter.Competitor;
 import com.sap.sailing.domain.swisstimingadapter.Course;
-import com.sap.sailing.domain.swisstimingadapter.Fix;
 import com.sap.sailing.domain.swisstimingadapter.Race;
-import com.sap.sailing.domain.swisstimingadapter.RaceStatus;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterAdapter;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterConnector;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterTransceiver;
@@ -37,7 +32,6 @@ import com.sap.sailing.domain.swisstimingadapter.persistence.SwissTimingAdapterP
 import com.sap.sailing.domain.swisstimingadapter.persistence.impl.CollectionNames;
 import com.sap.sailing.domain.swisstimingadapter.persistence.impl.FieldNames;
 import com.sap.sailing.mongodb.Activator;
-import com.sap.sailing.util.Util.Triple;
 
 public class ScriptedStoreAndForwardTest {
     private static final Logger logger = Logger.getLogger(ScriptedStoreAndForwardTest.class.getName());
@@ -67,7 +61,6 @@ public class ScriptedStoreAndForwardTest {
         swissTimingFactory = SwissTimingFactory.INSTANCE;
         transceiver = swissTimingFactory.createSailMasterTransceiver();
         connector = swissTimingFactory.getOrCreateSailMasterConnector("localhost", CLIENT_PORT, swissTimingAdapterPersistence, /* canSendRequests */ false);
-                swissTimingAdapterPersistence);
         DBCollection lastMessageCountCollection = db.getCollection(CollectionNames.LAST_MESSAGE_COUNT.name());
         lastMessageCountCollection.update(new BasicDBObject(),
                 new BasicDBObject().append(FieldNames.LAST_MESSAGE_COUNT.name(), 0l),
