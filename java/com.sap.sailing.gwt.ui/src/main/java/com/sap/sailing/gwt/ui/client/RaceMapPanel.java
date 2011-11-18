@@ -293,8 +293,9 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
 
                                 @Override
                                 public void onSuccess(Map<CompetitorDAO, List<GPSFixDAO>> result) {
+                                    Date from = new Date(date.getTime()-TAILLENGTHINMILLISECONDS);
                                     updateFixes(result, fromAndToAndOverlap.getC());
-                                    showBoatsOnMap(new Date(date.getTime()-TAILLENGTHINMILLISECONDS), date);
+                                    showBoatsOnMap(from, date);
                                 }
                             });
                     sailingService.getMarkPositions(event.name, race.name, date, new AsyncCallback<List<MarkDAO>>() {
@@ -408,15 +409,34 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
                 }
                 if (!overlapsWithKnownFixes.get(e.getKey())) {
                     fixesForCompetitor.clear();
+                    // to re-establish the invariants for tails, firstShownFix and lastShownFix, we now need to remove all
+                    // points from the competitor's polyline and clear the entries in firstShownFix and lastShownFix
+                    Polyline tail = tails.get(e.getKey());
+                    while (tail.getVertexCount() > 0) {
+                        tail.deleteVertex(0);
+                    }
+                    firstShownFix.remove(e.getKey());
+                    lastShownFix.remove(e.getKey());
                     fixesForCompetitor.addAll(e.getValue());
                 } else {
-                    mergeFixes(fixesForCompetitor, e.getValue());
+                    mergeFixes(e.getKey(), e.getValue());
                 }
             }
         }
     }
 
-    private void mergeFixes(List<GPSFixDAO> intoThis, List<GPSFixDAO> mergeThis) {
+    /**
+     * While updating the {@link #fixes} for <code>competitorDAO</code>, the invariants for {@link #tails}
+     * and {@link #firstShownFix} and {@link #lastShownFix} are maintained: each time a fix is inserted,
+     * the {@link #firstShownFix}/{@link #lastShownFix} records for <code>competitorDAO</code> are incremented
+     * if they are greater or equal to the insertion index. Additionally, if the fix is in between the fixes
+     * shown in the competitor's tail, the tail is adjusted by inserting the corresponding fix.
+     */
+    private void mergeFixes(CompetitorDAO competitorDAO, List<GPSFixDAO> mergeThis) {
+        List<GPSFixDAO> intoThis = fixes.get(competitorDAO);
+        int indexOfFirstShownFix = firstShownFix.get(competitorDAO);
+        int indexOfLastShownFix = lastShownFix.get(competitorDAO);
+        Polyline tail = tails.get(competitorDAO);
         int intoThisIndex = 0;
         for (GPSFixDAO mergeThisFix : mergeThis) {
             while (intoThisIndex < intoThis.size() && intoThis.get(intoThisIndex).timepoint.before(mergeThisFix.timepoint)) {
@@ -427,6 +447,16 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
                 intoThis.set(intoThisIndex, mergeThisFix);
             } else {
                 intoThis.add(intoThisIndex, mergeThisFix);
+                if (indexOfFirstShownFix >= intoThisIndex) {
+                    indexOfFirstShownFix++;
+                }
+                if (indexOfLastShownFix >= intoThisIndex) {
+                    indexOfLastShownFix++;
+                }
+                if (intoThisIndex >= indexOfFirstShownFix && intoThisIndex <= indexOfLastShownFix) {
+                    tail.insertVertex(intoThisIndex - indexOfFirstShownFix,
+                            LatLng.newInstance(mergeThisFix.position.latDeg, mergeThisFix.position.lngDeg));
+                }
             }
             intoThisIndex++;
         }
@@ -478,7 +508,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
                     tail = createTailAndUpdateIndices(competitorDAO, from, to);
                     map.addOverlay(tail);
                 } else {
-                    updateTail(tail, competitorDAO);
+                    updateTail(tail, competitorDAO, from, to);
                     competitorDAOsOfUnusedTails.remove(tail);
                 }
                 LatLngBounds bounds = tail.getBounds();
@@ -513,10 +543,42 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         }
     }
 
-    private void updateTail(Polyline tail, CompetitorDAO competitorDAO) {
-        
+    /**
+     * If the tail starts before <code>from</code>, removes leading vertices from <code>tail</code> that are before
+     * <code>from</code>. This is determined by using the {@link #firstShownFix} index which tells us where in
+     * {@link #fixes} we find the sequence of fixes currently represented in the tail.
+     * <p>
+     * 
+     * If the tail starts after <code>from</code>, vertices for those {@link #fixes} for <code>competitorDAO</code> at
+     * or after time point <code>from</code> and before the time point of the first fix displayed so far in the tail and
+     * before <code>to</code> are prepended to the tail.
+     * <p>
+     * 
+     * Now to the end of the tail: if the existing tail's end exceeds <code>to</code>, the vertices in excess are
+     * removed (aided by {@link #lastShownFix}). Otherwise, for the competitor's fixes starting at the tail's end
+     * up to <code>to</code> are appended to the tail.<p>
+     * 
+     * When this method returns, {@link #firstShownFix} and {@link #lastShownFix} have been updated accordingly. 
+     */
+    private void updateTail(Polyline tail, CompetitorDAO competitorDAO, Date from, Date to) {
+        List<GPSFixDAO> fixesForCompetitor = fixes.get(competitorDAO);
+        int indexOfFirstShownFix = firstShownFix.get(competitorDAO);
+        if (tail.getVertexCount() > 0) {
+            while (fixesForCompetitor.get(indexOfFirstShownFix).timepoint.before(from)) {
+                tail.deleteVertex(0);
+                indexOfFirstShownFix++;
+            }
+        }
+        int insertPos = 0;
+        List<GPSFixDAO> fixesOfCompetitor = fixes.get(competitorDAO);
+        for (GPSFixDAO fix : fixesOfCompetitor) {
+            if (!fix.timepoint.before(from) && !fix.timepoint.after(to)) {
+                // the fix is in the range that needs to be inserted into the polyline
+                
+            }
+        }
+        firstShownFix.put(competitorDAO, indexOfFirstShownFix);
         // TODO Auto-generated method stub
-        
     }
 
     private Marker createBuoyMarker(final MarkDAO markDAO) {
