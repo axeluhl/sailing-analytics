@@ -49,7 +49,6 @@ import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
 import com.sap.sailing.gwt.ui.shared.EventDAO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDAO;
 import com.sap.sailing.gwt.ui.shared.MarkDAO;
-import com.sap.sailing.gwt.ui.shared.Pair;
 import com.sap.sailing.gwt.ui.shared.PositionDAO;
 import com.sap.sailing.gwt.ui.shared.QuickRankDAO;
 import com.sap.sailing.gwt.ui.shared.RaceDAO;
@@ -563,22 +562,34 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
     private void updateTail(Polyline tail, CompetitorDAO competitorDAO, Date from, Date to) {
         List<GPSFixDAO> fixesForCompetitor = fixes.get(competitorDAO);
         int indexOfFirstShownFix = firstShownFix.get(competitorDAO);
-        if (tail.getVertexCount() > 0) {
-            while (fixesForCompetitor.get(indexOfFirstShownFix).timepoint.before(from)) {
-                tail.deleteVertex(0);
-                indexOfFirstShownFix++;
-            }
+        while (tail.getVertexCount() > 0 && fixesForCompetitor.get(indexOfFirstShownFix).timepoint.before(from)) {
+            tail.deleteVertex(0);
+            indexOfFirstShownFix++;
         }
-        int insertPos = 0;
-        List<GPSFixDAO> fixesOfCompetitor = fixes.get(competitorDAO);
-        for (GPSFixDAO fix : fixesOfCompetitor) {
-            if (!fix.timepoint.before(from) && !fix.timepoint.after(to)) {
-                // the fix is in the range that needs to be inserted into the polyline
-                
-            }
+        // now the polyline contains no more vertices representing fixes before "from";
+        // go back in time starting at indexOfFirstShownFix while the fixes are still at or after "from"
+        // and insert corresponding vertices into the polyline
+        while (indexOfFirstShownFix > 0 && !fixesForCompetitor.get(indexOfFirstShownFix-1).timepoint.before(from)) {
+            indexOfFirstShownFix--;
+            GPSFixDAO fix = fixesForCompetitor.get(indexOfFirstShownFix);
+            tail.insertVertex(0, LatLng.newInstance(fix.position.latDeg, fix.position.lngDeg));
+        }
+        // now adjust the polylines tail: remove excess vertices that are after "to"
+        int indexOfLastShownFix = lastShownFix.get(competitorDAO);
+        while (tail.getVertexCount() > 0 && fixesForCompetitor.get(indexOfLastShownFix).timepoint.after(to)) {
+            tail.deleteVertex(tail.getVertexCount()-1);
+            indexOfLastShownFix--;
+        }
+        // now the polyline contains no more vertices representing fixes after "to";
+        // go forward in time starting at indexOfLastShownFix while the fixes are still at or before "to"
+        // and insert corresponding vertices into the polyline
+        while (indexOfLastShownFix < fixesForCompetitor.size() && !fixesForCompetitor.get(indexOfLastShownFix+1).timepoint.after(to)) {
+            indexOfLastShownFix++;
+            GPSFixDAO fix = fixesForCompetitor.get(indexOfLastShownFix);
+            tail.insertVertex(tail.getVertexCount(), LatLng.newInstance(fix.position.latDeg, fix.position.lngDeg));
         }
         firstShownFix.put(competitorDAO, indexOfFirstShownFix);
-        // TODO Auto-generated method stub
+        lastShownFix.put(competitorDAO, indexOfLastShownFix);
     }
 
     private Marker createBuoyMarker(final MarkDAO markDAO) {
