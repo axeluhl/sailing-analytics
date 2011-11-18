@@ -6,12 +6,30 @@ import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.TimePoint;
 
+/**
+ * Manages a set of {@link TrackedRace} objects that belong to the same {@link Event} (regatta, sailing event for a
+ * single boat class). It therefore represents the entry point into the tracking-related objects for such an
+ * event. Allows clients to find a {@link TrackedRace} by the {@link RaceDefinition} for which it holds the
+ * tracking data.
+ * 
+ * @author Axel Uhl (D043530)
+ * 
+ */
 public interface TrackedEvent {
     Event getEvent();
 
     Iterable<TrackedRace> getTrackedRaces();
 
     Iterable<TrackedRace> getTrackedRaces(BoatClass boatClass);
+
+    /**
+     * Creates a {@link TrackedRace} based on the parameter specified and {@link #addTrackedRace(TrackedRace) adds} it to
+     * this tracked event. Afterwards, calling {@link #getTrackedRace(RaceDefinition) getTrackedRace(raceDefinition)} will
+     * return the result of this method call.
+     */
+    TrackedRace createTrackedRace(RaceDefinition raceDefinition, WindStore windStore,
+            long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
+            DynamicRaceDefinitionSet raceDefinitionSetToUpdate);
 
     /**
      * Obtains the tracked race for <code>race</code>. Blocks until the tracked race has been created
@@ -37,5 +55,7 @@ public interface TrackedEvent {
     void addRaceListener(RaceListener listener);
     
     int getNetPoints(Competitor competitor, TimePoint timePoint) throws NoWindException;
+
+    void removeTrackedRace(RaceDefinition raceDefinition);
 
 }

@@ -26,10 +26,14 @@ public class AdminConsole extends AbstractEntryPoint implements EventRefresher {
         tabPanel.setSize("95%", "95%");
 
         eventDisplayers = new HashSet<EventDisplayer>();
-        EventManagementPanel eventManagementPanel = new EventManagementPanel(sailingService, this, this, stringConstants);
-        eventDisplayers.add(eventManagementPanel);
-        eventManagementPanel.setSize("90%", "90%");
-        tabPanel.add(eventManagementPanel, stringConstants.tracTracEvents(), false);
+        TracTracEventManagementPanel tractracEventManagementPanel = new TracTracEventManagementPanel(sailingService, this, this, stringConstants);
+        eventDisplayers.add(tractracEventManagementPanel);
+        tractracEventManagementPanel.setSize("90%", "90%");
+        tabPanel.add(tractracEventManagementPanel, stringConstants.tracTracEvents(), false);
+        SwissTimingEventManagementPanel swisstimingEventManagementPanel = new SwissTimingEventManagementPanel(sailingService, this, this, stringConstants);
+        eventDisplayers.add(swisstimingEventManagementPanel);
+        swisstimingEventManagementPanel.setSize("90%", "90%");
+        tabPanel.add(swisstimingEventManagementPanel, stringConstants.swissTimingEvents(), false);
         WindPanel windPanel = new WindPanel(sailingService, this, this, stringConstants);
         eventDisplayers.add(windPanel);
         windPanel.setSize("90%", "90%");

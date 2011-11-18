@@ -28,7 +28,7 @@ public class ExpandCollapseButtonCell extends AbstractCell<SafeHtml> {
       this.column = column;
       this.delegate = delegate;
       this.html = new SafeHtmlBuilder().appendHtmlConstant(
-          "<input class=\"valignMiddle\" type=\"image\" src=\"/images/"+(column.isExpanded()?"close":"open")+".png\" />").toSafeHtml();
+          "<input class=\"valignMiddle\" type=\"image\" src=\"/images/"+(column.isExpanded()?"magnifier_slashed":"magnifier")+".png\" />").toSafeHtml();
     }
 
     @Override

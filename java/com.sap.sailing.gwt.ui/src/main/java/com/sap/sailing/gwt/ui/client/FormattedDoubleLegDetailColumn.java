@@ -47,7 +47,8 @@ public class FormattedDoubleLegDetailColumn extends LegDetailColumn<Double, Stri
         Double value = getField().get(row);
         int percentage = 0;
         if (value != null && getMinimum() != null && getMaximum() != null) {
-            percentage = (int) (100.*(value-getMinimum())/(getMaximum()-getMinimum()));
+            int minBarLength = Math.abs(getMinimum()) < 0.01 ? 0 : 10;
+            percentage = (int) (minBarLength+(100.-minBarLength)*(value-getMinimum())/(getMaximum()-getMinimum()));
         }
         return percentage;
     }

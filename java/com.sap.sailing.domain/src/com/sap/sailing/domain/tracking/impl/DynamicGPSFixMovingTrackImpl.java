@@ -25,7 +25,7 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends DynamicTrackImpl<Ite
      * memory compared to the original, "naive" implementation. It gets along with a single object.
      */
     @Override
-    public void addGPSFix(GPSFixMoving gpsFix) {
+    public synchronized void addGPSFix(GPSFixMoving gpsFix) {
         super.addGPSFix(new CompactGPSFixMovingImpl(gpsFix));
     }
 
@@ -38,7 +38,7 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends DynamicTrackImpl<Ite
      * the speeds/bearings determined by distance/time difference of the fixes themselves.
      */
     @Override
-    public SpeedWithBearing getEstimatedSpeed(TimePoint at) {
+    public synchronized SpeedWithBearing getEstimatedSpeed(TimePoint at) {
         // TODO factor out the obtaining of relevant fixes which should be the same in super.getEstimatedSpeed(at)
         DummyGPSFixMoving atTimed = new DummyGPSFixMoving(at);
         NavigableSet<GPSFixMoving> beforeSet = getInternalFixes().headSet(atTimed, /* inclusive */ true);

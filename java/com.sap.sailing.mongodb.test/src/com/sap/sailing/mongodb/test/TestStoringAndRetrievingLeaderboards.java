@@ -22,10 +22,10 @@ import com.sap.sailing.domain.leaderboard.ScoreCorrection;
 import com.sap.sailing.domain.leaderboard.impl.LeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.ResultDiscardingRuleImpl;
 import com.sap.sailing.domain.leaderboard.impl.ScoreCorrectionImpl;
+import com.sap.sailing.domain.persistence.impl.DomainObjectFactoryImpl;
+import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
 import com.sap.sailing.domain.test.MockedTrackedRaceWithFixedRank;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.mongodb.impl.DomainObjectFactoryImpl;
-import com.sap.sailing.mongodb.impl.MongoObjectFactoryImpl;
 import com.sap.sailing.util.Util;
 
 public class TestStoringAndRetrievingLeaderboards extends AbstractMongoDBTest {
@@ -148,8 +148,8 @@ public class TestStoringAndRetrievingLeaderboards extends AbstractMongoDBTest {
     }
 
     private Competitor createCompetitor() {
-        Competitor competitor = new CompetitorImpl(123, "$$$Dr. Wolfgang Hunger$$$", new TeamImpl("STG", Collections.singleton(
-                new PersonImpl("$$$Dr. Wolfgang Hunger$$$", new NationalityImpl("Germany", "GER"),
+        Competitor competitor = new CompetitorImpl(123, "$$$Dr. Wolfgang+Hunger$$$", new TeamImpl("STG", Collections.singleton(
+                new PersonImpl("$$$Dr. Wolfgang+Hunger$$$", new NationalityImpl("Germany", "GER"),
                 /* dateOfBirth */ null, "This is famous Dr. Wolfgang Hunger")), new PersonImpl("Rigo van Maas", new NationalityImpl("The Netherlands", "NED"),
                         /* dateOfBirth */ null, "This is Rigo, the coach")), new BoatImpl("Dr. Wolfgang Hunger's boat", new BoatClassImpl("505"), null));
         return competitor;

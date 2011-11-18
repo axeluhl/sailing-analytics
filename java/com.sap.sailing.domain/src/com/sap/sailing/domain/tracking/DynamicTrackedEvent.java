@@ -11,4 +11,9 @@ public interface DynamicTrackedEvent extends TrackedEvent {
      * for <code>race</code>. See also {@link #getTrackedRace(RaceDefinition)} for a blocking variant.
      */
     DynamicTrackedRace getExistingTrackedRace(RaceDefinition race);
+
+    DynamicTrackedRace createTrackedRace(RaceDefinition raceDefinition, WindStore windStore,
+            long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
+            DynamicRaceDefinitionSet raceDefinitionSetToUpdate);
+
 }

@@ -6,7 +6,6 @@
             <directoryPermissions>775</directoryPermissions>
         </server>
   </servers>
-<!--  -->
   <proxies>
    <proxy>
       <active>true</active>
@@ -16,7 +15,46 @@
       <nonProxyHosts>localhost|*.sap.corp</nonProxyHosts>
     </proxy>
   </proxies>
+
+ <profiles>
+    <profile>
+      <id>snapshot.build</id>
+      <pluginRepositories>
+        <pluginRepository>
+          <id>build.snapshots</id>
+          <url>http://nexus.wdf.sap.corp:8081/nexus/content/groups/build.snapshots/</url>
+        </pluginRepository>
+      </pluginRepositories>
+      <repositories>
+        <repository>
+			<id>central</id>
+			<url>http://repo1.maven.org/maven2</url>
+		</repository>
+		<repository>
+			<layout>p2</layout>
+			<id>eclipse</id>
+			<url>http://download.eclipse.org/releases/indigo/</url>
+		</repository>
+        <repository>
+          <id>build.snapshots</id>
+          <url>http://nexus.wdf.sap.corp:8081/nexus/content/groups/build.snapshots/</url>
+        </repository>
+      </repositories>
+    </profile>
+ </profiles>
+
+  <!-- definition of mirrors (by default the public repository of the Nexus server) -->
  <!-- -->
+  <mirrors>
+    <mirror>
+      <id>leandi.nexus.mirror</id>
+      <url>http://nexus.wdf.sap.corp:8081/nexus/content/groups/build.snapshots/</url>
+      <mirrorOf>*,!build.snapshots,!build.milestones,!sonar</mirrorOf>
+    </mirror>
+  </mirrors>
+<!-- -->
+
+
 </settings>
 
 

@@ -2,8 +2,8 @@ package com.sap.sailing.gwt.ui.client;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Map.Entry;
 
 import com.google.gwt.cell.client.Cell.Context;
 import com.google.gwt.cell.client.CompositeCell;
@@ -13,6 +13,7 @@ import com.google.gwt.cell.client.HasCell;
 import com.google.gwt.cell.client.SelectionCell;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDAO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDAO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDAO;
@@ -52,6 +53,43 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
             });
         }
     }
+    
+    private class EditableCompetitorColumn extends CompetitorColumn {
+        
+        @Override
+        public EditTextCell getCell() {
+            return (EditTextCell) super.getCell();
+        }
+
+        public EditableCompetitorColumn() {
+            super(new EditTextCell());
+            setFieldUpdater(new FieldUpdater<LeaderboardRowDAO, String>() {
+                @Override
+                public void update(final int rowIndex, final LeaderboardRowDAO row, final String value) {
+                    getSailingService().updateCompetitorDisplayNameInLeaderboard(getLeaderboardName(), row.competitor.name,
+                            value == null || value.length() == 0 ? null : value.trim(),
+                            new AsyncCallback<Void>() {
+                                @Override
+                                public void onFailure(Throwable t) {
+                                    EditableLeaderboardPanel.this.getErrorReporter().reportError("Error trying to update display name for competitor "+
+                                            row.competitor.name+" in leaderboard "+getLeaderboardName()+": "+t.getMessage()+
+                                            "\nYou may have to refresh your view.");
+                                }
+
+                                @Override
+                                public void onSuccess(Void v) {
+                                    if (getLeaderboard().displayNames == null) {
+                                        getLeaderboard().displayNames = new HashMap<CompetitorDAO, String>();
+                                    }
+                                    getCell().setViewData(row, null); // ensure that getValue() is called again
+                                    getLeaderboard().displayNames.put(row.competitor, value == null || value.trim().length() == 0 ? null : value.trim());
+                                    EditableLeaderboardPanel.this.getData().getList().set(rowIndex, row);
+                                }
+                            });
+                }
+            });
+        }
+    }
 
     private class EditableRaceColumn extends RaceColumn<LeaderboardRowDAO> implements RowUpdateWhiteboardOwner<LeaderboardRowDAO> {
         private RowUpdateWhiteboard<LeaderboardRowDAO> currentRowUpdateWhiteboard;
@@ -68,8 +106,8 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
             setFieldUpdater(new FieldUpdater<LeaderboardRowDAO, LeaderboardRowDAO>() {
                 @Override
                 public void update(int rowIndex, LeaderboardRowDAO row, LeaderboardRowDAO value) {
-                    currentRowUpdateWhiteboard.setIndexOfRowToUpdate(rowIndex);
                     currentRowUpdateWhiteboard = null; // show that it has been consumed and updated
+                    currentRowUpdateWhiteboard.setIndexOfRowToUpdate(rowIndex);
                 }
             });
         }
@@ -223,11 +261,24 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
     protected CarryColumn createCarryColumn() {
         return new EditableCarryColumn();
     }
+    
+    @Override
+    protected CompetitorColumn createCompetitorColumn() {
+        return new EditableCompetitorColumn();
+    }
 
+    /*
     @Override
     protected RaceColumn<?> createRaceColumn(Entry<String, Pair<Boolean, Boolean>> raceNameAndMedalRace) {
         return new EditableRaceColumn(raceNameAndMedalRace.getKey(), raceNameAndMedalRace.getValue().getA(),
                 getCellList(raceNameAndMedalRace.getKey(), raceNameAndMedalRace.getValue().getA()));
+    }
+    */
+    
+    @Override
+    protected RaceColumn<?> createRaceColumn(String raceName, boolean isMedalRace, boolean isTracked) {
+        return new EditableRaceColumn(raceName, isMedalRace,
+                getCellList(raceName, isMedalRace));
     }
 
     private List<RowUpdateWhiteboardProducerThatAlsoHasCell<LeaderboardRowDAO, ?>> getCellList(String raceName, boolean medalRace) {

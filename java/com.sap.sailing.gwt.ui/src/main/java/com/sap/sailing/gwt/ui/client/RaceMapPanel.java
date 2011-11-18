@@ -68,6 +68,8 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
 	private Icon buoyIcon;
 	private LatLng lastMousePosition;
 	private final Set<CompetitorDAO> competitorsSelectedInMap;
+    private final Timer timer;
+    private final Map<CompetitorDAO, GPSFixDAO> latestFix;
 
 	private final long TAILLENGTHINMILLISECONDS = 30000l;
 
@@ -103,8 +105,10 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
 			final EventRefresher eventRefresher, StringConstants stringConstants) {
 		this.sailingService = sailingService;
 		this.errorReporter = errorReporter;
+        this.timer = new Timer(/* delayBetweenAutoAdvancesInMilliseconds */ 3000);
 		competitorsSelectedInMap = new HashSet<CompetitorDAO>();
 		tails = new HashMap<CompetitorDAO, Polyline>();
+        latestFix = new HashMap<CompetitorDAO, GPSFixDAO>();
 		buoyMarkers = new HashMap<MarkDAO, Marker>();
 		boatMarkers = new HashMap<CompetitorDAO, Marker>();
 		firstShownFix = new HashMap<CompetitorDAO, GPSFixDAO>();
@@ -150,10 +154,9 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
 			}
 		});
 		grid.setWidget(2, 0, quickRanksBox);
-		timePanel = new TimePanel(stringConstants, /* delayBetweenAutoAdvancesInMilliseconds */
-		3000);
-		timePanel.addTimeListener(this);
-		timePanel.addTimeListener(windHistory);
+        timePanel = new TimePanel(stringConstants, timer);
+        timer.addTimeListener(this);
+        timer.addTimeListener(windHistory);
 		grid.setWidget(1, 1, timePanel);
 	}
 
@@ -243,7 +246,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
 			updateSlider(selectedRaces.get(selectedRaces.size() - 1).getC());
 		}
 		// force display of currently selected race
-		timeChanged(timePanel.getTime());
+        timeChanged(timer.getTime());
 	}
 
 	private void updateSlider(RaceDAO selectedRace) {
@@ -273,6 +276,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
 
 								@Override
 								public void onSuccess(Map<CompetitorDAO, List<GPSFixDAO>> result) {
+                                    updateLastFixes(result);
 									showBoatsOnMap(result);
 								}
 							});
@@ -302,6 +306,14 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
 			}
 		}
 	}
+
+    private void updateLastFixes(Map<CompetitorDAO, List<GPSFixDAO>> result) {
+        for (Map.Entry<CompetitorDAO, List<GPSFixDAO>> e : result.entrySet()) {
+            if (e.getValue() != null && !e.getValue().isEmpty()) {
+                latestFix.put(e.getKey(), e.getValue().get(e.getValue().size()-1));
+            }
+        }
+    }
 
 	private void showQuickRanks(List<QuickRankDAO> result) {
 		quickRanksBox.clear();
@@ -486,8 +498,10 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
 		map.getInfoWindow().open(latlng, new InfoWindowContent(getInfoWindowContent(markDAO)));
 	}
 
-	private void showCompetitorInfoWindow(final CompetitorDAO competitorDAO, LatLng latlng) {
-		map.getInfoWindow().open(latlng, new InfoWindowContent(getInfoWindowContent(competitorDAO, latlng)));
+    private void showCompetitorInfoWindow(final CompetitorDAO competitorDAO, LatLng where) {
+        GPSFixDAO latestFixForCompetitor = latestFix.get(competitorDAO);
+        map.getInfoWindow().open(where,
+                new InfoWindowContent(getInfoWindowContent(competitorDAO, latestFixForCompetitor)));
 	}
 
 	private Widget getInfoWindowContent(MarkDAO markDAO) {
@@ -497,10 +511,12 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
 		return result;
 	}
 
-	private Widget getInfoWindowContent(CompetitorDAO competitorDAO, LatLng latlng) {
+    private Widget getInfoWindowContent(CompetitorDAO competitorDAO, GPSFixDAO lastFix) {
 		VerticalPanel result = new VerticalPanel();
 		result.add(new Label("Competitor " + competitorDAO.name));
-		result.add(new Label("" + latlng));
+        result.add(new Label(""+lastFix.position));
+        result.add(new Label(lastFix.speedWithBearing.speedInKnots+"kts "+lastFix.speedWithBearing.bearingInDegrees+"deg"));
+        result.add(new Label("Tack: "+lastFix.tack));
 		return result;
 	}
 

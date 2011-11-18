@@ -82,27 +82,33 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener<Competitor
      * consider the order of the boats not currently in this leg, too.
      */
     protected List<TrackedLegOfCompetitor> getCompetitorTracksOrderedByRank(TimePoint timePoint) {
+        List<TrackedLegOfCompetitor> rankedCompetitorList;
         synchronized (competitorTracksOrderedByRank) {
-            List<TrackedLegOfCompetitor> rankedCompetitorList = competitorTracksOrderedByRank.get(timePoint);
-            if (rankedCompetitorList == null) {
-                rankedCompetitorList = new ArrayList<TrackedLegOfCompetitor>();
-                for (TrackedLegOfCompetitor competitorLeg : getTrackedLegsOfCompetitors()) {
-                    rankedCompetitorList.add(competitorLeg);
-                }
-                // ensure that race isn't updated by events as we're tying to sort the competitors
-                synchronized (getTrackedRace()) {
-                    Collections.sort(rankedCompetitorList, new WindwardToGoComparator(this, timePoint));
-                    rankedCompetitorList = Collections.unmodifiableList(rankedCompetitorList);
+            rankedCompetitorList = competitorTracksOrderedByRank.get(timePoint);
+            if (rankedCompetitorList != null) {
+                rankedCompetitorList = new ArrayList<TrackedLegOfCompetitor>(rankedCompetitorList);
+            }
+        }
+        if (rankedCompetitorList == null) {
+            rankedCompetitorList = new ArrayList<TrackedLegOfCompetitor>();
+            for (TrackedLegOfCompetitor competitorLeg : getTrackedLegsOfCompetitors()) {
+                rankedCompetitorList.add(competitorLeg);
+            }
+            // ensure that race isn't updated by events as we're tying to sort the competitors
+            synchronized (getTrackedRace()) {
+                Collections.sort(rankedCompetitorList, new WindwardToGoComparator(this, timePoint));
+                rankedCompetitorList = Collections.unmodifiableList(rankedCompetitorList);
+                synchronized (competitorTracksOrderedByRank) {
                     competitorTracksOrderedByRank.put(timePoint, rankedCompetitorList);
-                    if (Util.size(getTrackedLegsOfCompetitors()) != rankedCompetitorList.size()) {
-                        logger.warning("Number of competitors in leg (" + Util.size(getTrackedLegsOfCompetitors())
-                                + ") differs from number of competitors in race ("
-                                + Util.size(getTrackedRace().getRace().getCompetitors()) + ")");
-                    }
+                }
+                if (Util.size(getTrackedLegsOfCompetitors()) != rankedCompetitorList.size()) {
+                    logger.warning("Number of competitors in leg (" + Util.size(getTrackedLegsOfCompetitors())
+                            + ") differs from number of competitors in race ("
+                            + Util.size(getTrackedRace().getRace().getCompetitors()) + ")");
                 }
             }
-            return rankedCompetitorList;
         }
+        return rankedCompetitorList;
     }
     
     @Override
@@ -125,9 +131,9 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener<Competitor
         }
         // check for all combinations of start/end waypoint buoys:
         for (Buoy startBuoy : getLeg().getFrom().getBuoys()) {
-            Position startBuoyPos = getTrackedRace().getTrack(startBuoy).getEstimatedPosition(at, false);
+            Position startBuoyPos = getTrackedRace().getOrCreateTrack(startBuoy).getEstimatedPosition(at, false);
             for (Buoy endBuoy : getLeg().getTo().getBuoys()) {
-                Position endBuoyPos = getTrackedRace().getTrack(endBuoy).getEstimatedPosition(at, false);
+                Position endBuoyPos = getTrackedRace().getOrCreateTrack(endBuoy).getEstimatedPosition(at, false);
                 Bearing legBearing = startBuoyPos.getBearingGreatCircle(endBuoyPos);
                 double deltaDeg = legBearing.getDegrees() - wind.getBearing().getDegrees();
                 if (Math.abs(deltaDeg) < UPWIND_DOWNWIND_TOLERANCE_IN_DEG) {
@@ -149,9 +155,9 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener<Competitor
     }
 
     private Wind getWindOnLeg(TimePoint at) {
-        Position approximateLegStartPosition = getTrackedRace().getTrack(
+        Position approximateLegStartPosition = getTrackedRace().getOrCreateTrack(
                 getLeg().getFrom().getBuoys().iterator().next()).getEstimatedPosition(at, false);
-        Position approximateLegEndPosition = getTrackedRace().getTrack(
+        Position approximateLegEndPosition = getTrackedRace().getOrCreateTrack(
                 getLeg().getTo().getBuoys().iterator().next()).getEstimatedPosition(at, false);
         if (approximateLegStartPosition == null || approximateLegEndPosition == null) {
             throw new RuntimeException("No mark positions received yet for leg "+getLeg()+

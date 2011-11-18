@@ -52,7 +52,9 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     private static final Logger logger = Logger.getLogger(TrackedRaceImpl.class.getName());
 
-    private static final double MINIMUM_ANGLE_BETWEEN_DIFFERENT_TACKS = 45.;
+    // TODO make typical tack/jibe angles and the respective clustering thresholds a boat class parameter
+    private static final double MINIMUM_ANGLE_BETWEEN_DIFFERENT_TACKS_UPWIND = 45.;
+    private static final double MINIMUM_ANGLE_BETWEEN_DIFFERENT_TACKS_DOWNWIND = 15.;
     
     // TODO observe the race course; if it changes, update leg structures; consider fine-grained update events that tell what changed
     private final RaceDefinition race;
@@ -106,6 +108,12 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     private final Map<Buoy, GPSFixTrack<Buoy, GPSFix>> buoyTracks;
     
     private final long millisecondsOverWhichToAverageSpeed;
+
+    private boolean warnedOfUsingWindFromAlternativeWindSource;
+
+    private boolean warnedOfNoWindFromSelectedSource;
+
+    private boolean warnedOfUsingLegDirectionAsWindEstimation;
     
     public TrackedRaceImpl(TrackedEvent trackedEvent, RaceDefinition race, WindStore windStore,
             long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed) {
@@ -116,7 +124,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         this.buoyTracks = new HashMap<Buoy, GPSFixTrack<Buoy, GPSFix>>();
         for (Waypoint waypoint : race.getCourse().getWaypoints()) {
             for (Buoy buoy : waypoint.getBuoys()) {
-                getTrack(buoy);
+                getOrCreateTrack(buoy);
             }
         }
         trackedLegs = new LinkedHashMap<Leg, TrackedLeg>();
@@ -361,7 +369,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     }
 
     @Override
-    public GPSFixTrack<Buoy, GPSFix> getTrack(Buoy buoy) {
+    public GPSFixTrack<Buoy, GPSFix> getOrCreateTrack(Buoy buoy) {
         synchronized (buoyTracks) {
             GPSFixTrack<Buoy, GPSFix> result = buoyTracks.get(buoy);
             if (result == null) {
@@ -376,7 +384,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     public Position getApproximatePosition(Waypoint waypoint, TimePoint timePoint) {
         Position result = null;
         for (Buoy buoy : waypoint.getBuoys()) {
-            Position nextPos = getTrack(buoy).getEstimatedPosition(timePoint, /* extrapolate */ false);
+            Position nextPos = getOrCreateTrack(buoy).getEstimatedPosition(timePoint, /* extrapolate */ false);
             if (result == null) {
                 result = nextPos;
             } else {
@@ -395,24 +403,43 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     public Wind getWind(Position p, TimePoint at) {
         Wind result = getWindTrack(currentWindSource).getEstimatedWind(p, at);
         if (result == null) {
-            logger.warning("Couldn't find any wind information for race "+getRace()+" from currently selected source "+currentWindSource);
+            if (!warnedOfNoWindFromSelectedSource) {
+                logger.warning("Couldn't find any wind information for race "+getRace()+" from currently selected source "+currentWindSource+
+                        ". Future warnings of this type will be suppressed for this race.");
+                warnedOfNoWindFromSelectedSource = true;
+            }
             for (WindSource alternativeWindSource : WindSource.values()) {
                 if (alternativeWindSource != currentWindSource) {
                     result = getWindTrack(alternativeWindSource).getEstimatedWind(p, at);
                     if (result != null) {
-                        logger.warning("Found wind settings in alternative wind source "+alternativeWindSource+" which will be used as a fallback");
+                        if (!warnedOfUsingWindFromAlternativeWindSource) {
+                            logger.warning("Found wind settings in alternative wind source "+alternativeWindSource+
+                                    " which will be used as a fallback. Future warnings of this type will be suppressed for this race.");
+                            warnedOfUsingWindFromAlternativeWindSource = true;
+                        }
                         break;
                     }
                 }
             }
             if (result == null) {
-                logger.warning("Found no other wind settings either; using starting leg direction as guess for wind direction. Force assumed as 1 knot.");
-                Leg firstLeg = getRace().getCourse().getLegs().iterator().next();
-                Position firstLegEnd = getApproximatePosition(firstLeg.getTo(), at);
-                Position firstEndStart = getApproximatePosition(firstLeg.getFrom(), at);
-                result = new WindImpl(p, at, new KnotSpeedWithBearingImpl(1.0, firstLegEnd.getBearingGreatCircle(firstEndStart)));
+                if (!warnedOfUsingLegDirectionAsWindEstimation) {
+                    logger.warning("Found no other wind settings either; using starting leg direction as guess for wind direction. Force assumed as 1 knot."+
+                            " Future warnings of this type will be suppressed for this race.");
+                    warnedOfUsingLegDirectionAsWindEstimation = true;
+                }
+                result = getDirectionFromStartToNextMark(at);
             }
         }
+        return result;
+    }
+
+    @Override
+    public Wind getDirectionFromStartToNextMark(TimePoint at) {
+        Wind result;
+        Leg firstLeg = getRace().getCourse().getLegs().iterator().next();
+        Position firstLegEnd = getApproximatePosition(firstLeg.getTo(), at);
+        Position firstLegStart = getApproximatePosition(firstLeg.getFrom(), at);
+        result = new WindImpl(firstLegStart, at, new KnotSpeedWithBearingImpl(1.0, firstLegEnd.getBearingGreatCircle(firstLegStart)));
         return result;
     }
     
@@ -472,7 +499,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     public synchronized void waypointAdded(int zeroBasedIndex, Waypoint waypointThatGotAdded) {
         markPassingsForWaypoint.put(waypointThatGotAdded, new ConcurrentSkipListSet<MarkPassing>(TimedComparator.INSTANCE));
         for (Buoy buoy : waypointThatGotAdded.getBuoys()) {
-            getTrack(buoy);
+            getOrCreateTrack(buoy);
         }
         // a waypoint got added; this means that a leg got added as well; but we shouldn't claim we know where
         // in the leg list of the course the leg was added; that's an implementation secret of CourseImpl. So try:
@@ -542,12 +569,12 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             }
         }
         Bearing upwindAverage = null;
-        BearingCluster[] bearingClustersUpwind = bearings.get(LegType.UPWIND).splitInTwo(MINIMUM_ANGLE_BETWEEN_DIFFERENT_TACKS);
+        BearingCluster[] bearingClustersUpwind = bearings.get(LegType.UPWIND).splitInTwo(MINIMUM_ANGLE_BETWEEN_DIFFERENT_TACKS_UPWIND);
         if (!bearingClustersUpwind[0].isEmpty() && !bearingClustersUpwind[1].isEmpty()) {
             upwindAverage = bearingClustersUpwind[0].getAverage().middle(bearingClustersUpwind[1].getAverage());
         }
         Bearing downwindAverage = null;
-        BearingCluster[] bearingClustersDownwind = bearings.get(LegType.DOWNWIND).splitInTwo(MINIMUM_ANGLE_BETWEEN_DIFFERENT_TACKS);
+        BearingCluster[] bearingClustersDownwind = bearings.get(LegType.DOWNWIND).splitInTwo(MINIMUM_ANGLE_BETWEEN_DIFFERENT_TACKS_DOWNWIND);
         if (!bearingClustersDownwind[0].isEmpty() && !bearingClustersDownwind[1].isEmpty()) {
             downwindAverage = bearingClustersDownwind[0].getAverage().middle(bearingClustersDownwind[1].getAverage());
         }

@@ -23,6 +23,7 @@ import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.impl.DynamicGPSFixMovingTrackImpl;
+import com.sap.sailing.domain.tracking.impl.DynamicTrackedEventImpl;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
 
@@ -50,8 +51,8 @@ public class FetchTracksAndStoreLocallyTest extends KielWeek2011BasedTest {
      * into {@link #firstTracked} and {@link #firstData}. All events are converted into {@link GPSFixMovingImpl}
      * objects and appended to the {@link DynamicTrackedRace}s.
      */
-    private void setUp(String raceId) throws MalformedURLException, IOException, InterruptedException, URISyntaxException {
-        super.setUpWithoutLaunchingController(raceId);
+    private void setUp(String eventName, String raceId) throws MalformedURLException, IOException, InterruptedException, URISyntaxException {
+        super.setUpWithoutLaunchingController(eventName, raceId);
         final RaceChangeListener<Competitor> positionListener = new RaceChangeListener<Competitor>() {
             @Override
             public void gpsFixReceived(GPSFix fix, Competitor competitor) {
@@ -79,8 +80,8 @@ public class FetchTracksAndStoreLocallyTest extends KielWeek2011BasedTest {
                     long newMillisecondsOverWhichToAverage) {
             }
         };
-        Event event = getDomainFactory().createEvent(getEvent());
-        DynamicTrackedEvent trackedEvent = getDomainFactory().getOrCreateTrackedEvent(event);
+        Event event = getDomainFactory().getOrCreateEvent(getEvent());
+        DynamicTrackedEvent trackedEvent = new DynamicTrackedEventImpl(event);
         trackedEvent.addRaceListener(new RaceListener() {
             @Override
             public void raceAdded(TrackedRace trackedRace) {
@@ -150,19 +151,26 @@ public class FetchTracksAndStoreLocallyTest extends KielWeek2011BasedTest {
                 "bc78290c-9f55-11e0-85be-406186cbf87c", "d62d4288-9f55-11e0-85be-406186cbf87c",
                 "972c4d74-9f53-11e0-85be-406186cbf87c", "c3ab8bcc-a17d-11e0-aeec-406186cbf87c" }) {
             System.out.println("Loading and storing race "+raceId);
-            storeRace(raceId);
+            storeRace("event_20110609_KielerWoch", raceId);
         }
     }
     
     @Ignore
     public void store505Race2() throws InterruptedException, FileNotFoundException, IOException, URISyntaxException {
-        storeRace("357c700a-9d9a-11e0-85be-406186cbf87c");
+        storeRace("event_20110609_KielerWoch", "357c700a-9d9a-11e0-85be-406186cbf87c");
     }
 
-    private void storeRace(String raceId) throws MalformedURLException, IOException, InterruptedException,
+    private void storeRace(String eventName, String raceId) throws MalformedURLException, IOException, InterruptedException,
             URISyntaxException, FileNotFoundException {
-        setUp(raceId);
+        setUp(eventName, raceId);
         storeTracks();
+    }
+    
+    public static void main(String[] args) throws URISyntaxException, FileNotFoundException, IOException, InterruptedException {
+        FetchTracksAndStoreLocallyTest thiz = new FetchTracksAndStoreLocallyTest();
+        for (int i=1; i<args.length; i++) {
+            thiz.storeRace(args[0], args[i]);
+        }
     }
     
     private void storeTracks() throws FileNotFoundException, IOException {

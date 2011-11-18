@@ -62,6 +62,10 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
     private final Button columnRenameButton;
 
     private final Button columnRemoveButton;
+    
+    private final Button columnMoveUpButton;
+    
+    private final Button columnMoveDownButton;
 
     private final Button unlinkRaceColumnFromTrackedRaceButton;
 
@@ -165,8 +169,15 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
             }
         });
         medalRaceCheckBox = new CheckBox(stringConstants.medalRace());
-        medalRaceCheckBox.setEnabled(false); // only displays the immutable medal race property
+        medalRaceCheckBox.setEnabled(true); // only displays the immutable medal race property
         selectedLeaderboardPanel.add(medalRaceCheckBox);
+        medalRaceCheckBox.addClickHandler(new ClickHandler() {
+			
+			@Override
+			public void onClick(ClickEvent event) {
+				changeIsMedalRace(((CheckBox) event.getSource()).getValue());
+			}
+		});
 
         VerticalPanel labelAndTreePanel = new VerticalPanel();
         Label lblTrackedRaceConnected = new Label(stringConstants.trackedRaceConnectedToSelectedRaceName());
@@ -204,6 +215,23 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
                 removeSelectedLeaderboardColumn();
             }
         });
+        columnMoveUpButton = new Button(stringConstants.columnMoveUp());
+        buttonPanelForSelectedLeaderboardDetails.add(columnMoveUpButton);
+        columnMoveUpButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+            	moveSelectedLeaderboardColumnUp();
+            }
+        });
+        columnMoveDownButton = new Button(stringConstants.columnMoveDown());
+        buttonPanelForSelectedLeaderboardDetails.add(columnMoveDownButton);
+        columnMoveDownButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+            	moveSelectedLeaderboardColumnDown();
+            }
+        });
+        
         unlinkRaceColumnFromTrackedRaceButton = new Button(stringConstants.unlink());
         buttonPanelForSelectedLeaderboardDetails.add(unlinkRaceColumnFromTrackedRaceButton);
         unlinkRaceColumnFromTrackedRaceButton.addClickHandler(new ClickHandler() {
@@ -251,7 +279,8 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
                 @Override
                 public void onSuccess(Void arg0) {
                     columnNamesInSelectedLeaderboardListBox.removeItem(selectedIndex);
-                    selectedLeaderboard.raceNamesAndMedalRaceAndTracked.remove(selectedRaceColumnName);
+                    //selectedLeaderboard.raceNamesAndMedalRaceAndTracked.remove(selectedRaceColumnName);
+                    selectedLeaderboard.removeRace(selectedRaceColumnName);
                     selectedLeaderboard.invalidateCompetitorOrdering();
                 }
             });
@@ -296,11 +325,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
                                             public void onSuccess(Void v) {
                                                 columnNamesInSelectedLeaderboardListBox.setItemText(selectedIndex,
                                                         newColumnName);
-                                                selectedLeaderboard.raceNamesAndMedalRaceAndTracked.put(newColumnName,
-                                                        selectedLeaderboard.raceNamesAndMedalRaceAndTracked
-                                                                .get(selectedRaceColumnName));
-                                                selectedLeaderboard.raceNamesAndMedalRaceAndTracked
-                                                        .remove(selectedRaceColumnName);
+                                                selectedLeaderboard.renameRace(selectedRaceColumnName, newColumnName);
                                             }
                                         });
                             }
@@ -309,17 +334,87 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
             newNameDialog.show();
         }
     }
+    
+    private void moveSelectedLeaderboardColumnUp(){
+    	final int selectedIndex = columnNamesInSelectedLeaderboardListBox.getSelectedIndex();
+    	if (selectedIndex >= 0){
+    		final String selectedRaceColumnName = columnNamesInSelectedLeaderboardListBox.getItemText(selectedIndex);
+    		sailingService.moveLeaderboardColumnUp(getSelectedLeaderboardName(), selectedRaceColumnName, new AsyncCallback<Void>() {
+
+				@Override
+				public void onFailure(Throwable caught) {
+					errorReporter
+                    .reportError("Error trying to move leaderboard race column "
+                            + selectedRaceColumnName + " in leaderboard "
+                            + getSelectedLeaderboardName() + " up: "+
+                            caught.getMessage());
+				}
+
+				@Override
+				public void onSuccess(Void result) {
+					String raceName = columnNamesInSelectedLeaderboardListBox.getItemText(selectedIndex);
+					int index = selectedIndex;
+					index--;
+					if (index >= 0){
+						columnNamesInSelectedLeaderboardListBox.removeItem(selectedIndex);
+						columnNamesInSelectedLeaderboardListBox.insertItem(raceName, index);
+						columnNamesInSelectedLeaderboardListBox.setSelectedIndex(index);
+						selectedLeaderboard.moveRaceUp(raceName);
+					}
+				}
+			});
+    	}
+    }
+    
+    private void moveSelectedLeaderboardColumnDown(){
+    	final int selectedIndex = columnNamesInSelectedLeaderboardListBox.getSelectedIndex();
+    	if (selectedIndex >= 0){
+    		final String selectedRaceColumnName = columnNamesInSelectedLeaderboardListBox.getItemText(selectedIndex);
+    		sailingService.moveLeaderboardColumnDown(getSelectedLeaderboardName(), selectedRaceColumnName, new AsyncCallback<Void>() {
+
+				@Override
+				public void onFailure(Throwable caught) {
+					errorReporter
+                    .reportError("Error trying to move leaderboard race column "
+                            + selectedRaceColumnName + " in leaderboard "
+                            + getSelectedLeaderboardName() + " down: "+
+                            caught.getMessage());
+				}
+
+				@Override
+				public void onSuccess(Void result) {
+					String raceName = columnNamesInSelectedLeaderboardListBox.getItemText(selectedIndex);
+					int index = selectedIndex;
+					index++;
+					if (index < columnNamesInSelectedLeaderboardListBox.getItemCount()){
+						columnNamesInSelectedLeaderboardListBox.removeItem(selectedIndex);
+						columnNamesInSelectedLeaderboardListBox.insertItem(raceName, index);
+						columnNamesInSelectedLeaderboardListBox.setSelectedIndex(index);
+						selectedLeaderboard.moveRaceDown(raceName);
+					}
+				}
+			});
+    	}
+    }
 
     private void leaderboardRaceColumnSelectionChanged() {
         String selectedRaceColumnName = getSelectedRaceColumnName();
         if (selectedRaceColumnName != null) {
-            medalRaceCheckBox.setValue(selectedLeaderboard.raceNamesAndMedalRaceAndTracked.get(selectedRaceColumnName).getA());
+            medalRaceCheckBox.setValue(selectedLeaderboard.raceIsMedalRace(selectedRaceColumnName));
+            medalRaceCheckBox.setEnabled(true);
             columnRenameButton.setEnabled(true);
             columnRemoveButton.setEnabled(true);
+            columnMoveUpButton.setEnabled(true);
+            columnMoveDownButton.setEnabled(true);
+            unlinkRaceColumnFromTrackedRaceButton.setEnabled(true);
             selectTrackedRaceInRaceTree();
         } else {
+        	medalRaceCheckBox.setValue(false);
+        	medalRaceCheckBox.setEnabled(false);
             columnRenameButton.setEnabled(false);
             columnRemoveButton.setEnabled(false);
+            columnMoveUpButton.setEnabled(false);
+            columnMoveDownButton.setEnabled(false);
             raceTree.clearSelection();
             unlinkRaceColumnFromTrackedRaceButton.setEnabled(false);
         }
@@ -388,9 +483,10 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
                             @Override
                             public void onSuccess(Void v) {
                                 columnNamesInSelectedLeaderboardListBox.addItem(columnNameAndMedalRace.getA());
-                                selectedLeaderboard.raceNamesAndMedalRaceAndTracked.put(columnNameAndMedalRace.getA(),
-                                        new Pair<Boolean, Boolean>(/* medal race */ columnNameAndMedalRace.getB(),
-                                                /* tracked */ false));
+                                //selectedLeaderboard.raceNamesAndMedalRaceAndTracked.put(columnNameAndMedalRace.getA(),
+                                //        new Pair<Boolean, Boolean>(/* medal race */ columnNameAndMedalRace.getB(),
+                                //                /* tracked */ false));
+                                selectedLeaderboard.addRace(columnNameAndMedalRace.getA(), columnNameAndMedalRace.getB(), false);
                                 selectedLeaderboard.invalidateCompetitorOrdering();
                             }
                         });
@@ -523,7 +619,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
             discardThresholdLabelsForSelectedLeaderboard[i++].setText("");
         }
         columnNamesInSelectedLeaderboardListBox.clear();
-        for (String columnName : selectedLeaderboard.raceNamesAndMedalRaceAndTracked.keySet()) {
+        for (String columnName : selectedLeaderboard.getRaceList()) {
             columnNamesInSelectedLeaderboardListBox.addItem(columnName);
         }
         leaderboardRaceColumnSelectionChanged();
@@ -635,5 +731,21 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
                         unlinkRaceColumnFromTrackedRaceButton.setEnabled(true);
                     }
                 });
+    }
+    
+    private void changeIsMedalRace(final boolean isMedalRace){
+    	sailingService.updateIsMedalRace(getSelectedLeaderboardName(), getSelectedRaceColumnName(), isMedalRace, new AsyncCallback<Void>() {
+
+			@Override
+			public void onFailure(Throwable caught) {
+				 errorReporter.reportError("Error trying to change isMedalRace of "+getSelectedRaceColumnName()+": "+caught.getMessage());
+			}
+
+			@Override
+			public void onSuccess(Void result) {
+				// TODO Punkte in spalte updaten.
+				selectedLeaderboard.setIsMedalRace(getSelectedRaceColumnName(), isMedalRace);
+			}
+		});
     }
 }

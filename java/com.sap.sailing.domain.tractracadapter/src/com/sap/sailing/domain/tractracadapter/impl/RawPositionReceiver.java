@@ -51,10 +51,10 @@ public class RawPositionReceiver extends AbstractReceiverWithQueue<RaceCompetito
     protected void handleEvent(Triple<RaceCompetitor, CompetitorPositionRawData, Boolean> event) {
         System.out.print("P");
         Race race = event.getA().getRace();
-        RaceDefinition raceDefinition = getDomainFactory().getRaceDefinition(race);
+        RaceDefinition raceDefinition = getDomainFactory().getAndWaitForRaceDefinition(race);
         DynamicTrackedRace trackedRace = (DynamicTrackedRace) trackedEvent.getTrackedRace(raceDefinition);
         GPSFixMoving fix = getDomainFactory().createGPSFixMoving(event.getB());
-        Competitor competitor = getDomainFactory().getCompetitor(event.getA().getCompetitor());
+        Competitor competitor = getDomainFactory().getOrCreateCompetitor(event.getA().getCompetitor());
         trackedRace.recordFix(competitor, fix);
     }
 }

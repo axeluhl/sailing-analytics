@@ -15,9 +15,12 @@
 
 	<modules>
 		<module>com.sap.sailing.domain</module>
+		<module>com.sap.sailing.domain.persistence</module>
 		<module>com.sap.sailing.domain.test</module>
 		<module>com.sap.sailing.domain.tractracadapter</module>
+		<module>com.sap.sailing.domain.tractracadapter.persistence</module>
 		<module>com.sap.sailing.domain.swisstimingadapter</module>
+		<module>com.sap.sailing.domain.swisstimingadapter.persistence</module>
 		<module>com.sap.sailing.domain.swisstimingadapter.test</module>
 		<module>com.sap.sailing.declination</module>
 		<module>com.sap.sailing.declination.test</module>
@@ -25,7 +28,10 @@
 		<module>com.sap.sailing.expeditionconnector</module>
 		<module>com.sap.sailing.expeditionconnector.test</module>
 		<module>com.sap.sailing.server</module>
+		<module>com.sap.sailing.xcelsiusadapter</module>
+		<module>com.sap.sailing.httpservicetracker</module>
 		<module>com.sap.sailing.gwt.ui</module>
+		<module>com.sap.sailing.gwt.ui.test</module>
 		<module>com.google.gwt.osgi</module>
 		<module>com.sap.sailing.server.test</module>
 		<module>com.sap.sailing.mongodb</module>

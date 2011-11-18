@@ -129,7 +129,7 @@ public interface Leaderboard extends Named {
      * Fetches all entries for all competitors of all races tracked by this leaderboard in one sweep. This saves some
      * computational effort compared to fetching all entries separately, particularly because all
      * {@link #isDiscarded(Competitor, RaceInLeaderboard, TimePoint) discarded races} of a competitor are computed in one
-     * sweep using {@link ResultDiscardingRule#getDiscardedRaceColumns(Competitor, Iterable, TimePoint)} only once.
+     * sweep using {@link ResultDiscardingRule#getDiscardedRaceColumns(Competitor, Leaderboard, TimePoint)} only once.
      * Note that in order to get the {@link #getTotalPoints(Competitor, TimePoint) total points} for a competitor
      * for the entire leaderboard, the {@link #getCarriedPoints(Competitor) carried-over points} need to be added.
      */
@@ -163,6 +163,18 @@ public interface Leaderboard extends Named {
      * {@link #addRace}. If no race column by the requested <code>name</code> exists, <code>null</code> is returned.
      */
     RaceInLeaderboard getRaceColumnByName(String name);
+    
+    /**
+     * Moves the column with the name <code>name</code> up. 
+     * @param name The name of the column to move.
+     */
+    void moveRaceColumnUp(String name);
+    
+    /**
+     * Moves the column with the name <code>name</code> down. 
+     * @param name The name of the column to move.
+     */
+    void moveRaceColumnDown(String name);
 
     /**
      * A leaderboard can carry over points from races that are not tracked by this leaderboard in detail,
@@ -195,4 +207,24 @@ public interface Leaderboard extends Named {
     ThresholdBasedResultDiscardingRule getResultDiscardingRule();
 
     Competitor getCompetitorByName(String competitorName);
+    
+    void setDisplayName(Competitor competitor, String displayName);
+
+    /**
+     * If a display name different from the competitor's {@link Competitor#getName() name} has been defined,
+     * this method returns it; otherwise, <code>null</code> is returned.
+     */
+    String getDisplayName(Competitor competitor);
+    
+    /**
+     * Tells if the column represented by <code>raceInLeaderboard</code> shall be considered for discarding.
+     * Medal races are never considered for discarding (not counted as a "started race" nor discarded themselves).
+     * If a leaderboard has corrections for a column then that column shall be considered for discarding and counts
+     * for determining the number of races so far. Also, if a tracked race is connected to the column and has
+     * started already, the column is to be considered for discarding. 
+     * @param timePoint TODO
+     */
+    boolean considerForDiscarding(RaceInLeaderboard raceInLeaderboard, TimePoint timePoint);
+    
+    void updateIsMedalRace(String raceName, boolean isMedalRace);
 }

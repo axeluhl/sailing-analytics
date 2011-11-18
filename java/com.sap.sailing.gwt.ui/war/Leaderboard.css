@@ -124,3 +124,18 @@ h1 {
 	font-family: Arial !important;
 	font-size: 12px !important;
 }
+
+select {
+	font-family: Arial !important;
+	font-size: 12px !important;
+}
+
+button {
+	font-family: Arial !important;
+	font-size: 12px !important;
+}
+
+.leftPaddedPanel {
+	padding-left: 50px;
+	padding-right: 50px;
+}

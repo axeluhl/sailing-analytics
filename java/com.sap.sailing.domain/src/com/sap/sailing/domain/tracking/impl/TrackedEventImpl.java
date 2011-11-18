@@ -6,18 +6,24 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.TimePoint;
+import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.NoWindException;
 import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.TrackedEvent;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.WindStore;
 
 public class TrackedEventImpl implements TrackedEvent {
+    private static final Logger logger = Logger.getLogger(TrackedEventImpl.class.getName());
+    
     private final Event event;
     private final Map<RaceDefinition, TrackedRace> trackedRaces;
     private final Map<BoatClass, Collection<TrackedRace>> trackedRacesByBoatClass;
@@ -45,6 +51,13 @@ public class TrackedEventImpl implements TrackedEvent {
                 listener.raceAdded(trackedRace);
             }
             trackedRaces.notifyAll();
+        }
+    }
+    
+    @Override
+    public void removeTrackedRace(RaceDefinition raceDefinition) {
+        synchronized (trackedRaces) {
+            trackedRaces.remove(raceDefinition);
         }
     }
     
@@ -119,6 +132,16 @@ public class TrackedEventImpl implements TrackedEvent {
         for (TrackedRace trackedRace : getTrackedRaces()) {
             result += trackedRace.getRank(competitor, timePoint);
         }
+        return result;
+    }
+
+    @Override
+    public TrackedRace createTrackedRace(RaceDefinition raceDefinition, WindStore windStore, long millisecondsOverWhichToAverageWind,
+            long millisecondsOverWhichToAverageSpeed, DynamicRaceDefinitionSet raceDefinitionSetToUpdate) {
+        logger.log(Level.INFO, "Creating DynamicTrackedRaceImpl for RaceDefinition "+raceDefinition.getName());
+        DynamicTrackedRaceImpl result = new DynamicTrackedRaceImpl(this, raceDefinition,
+                windStore, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed);
+        raceDefinitionSetToUpdate.addRaceDefinition(raceDefinition);
         return result;
     }
 

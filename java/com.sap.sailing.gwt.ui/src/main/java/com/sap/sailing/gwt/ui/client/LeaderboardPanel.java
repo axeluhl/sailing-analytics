@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -35,18 +36,19 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog.Validator;
+import com.sap.sailing.gwt.ui.client.LegDetailColumn.LegDetailField;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDAO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDAO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDAO;
-import com.sap.sailing.gwt.ui.shared.Pair;
+import com.sap.sailing.gwt.ui.shared.LegEntryDAO;
 
 /**
  * A leaderboard essentially consists of a table widget that in its columns displays the entries.
  * 
  * @author Axel Uhl (D043530)
- *
+ * 
  */
-public class LeaderboardPanel extends FormPanel implements LegDetailSelectionProvider {
+public class LeaderboardPanel extends FormPanel implements TimeListener, PlayStateListener {
     private static final int RANK_COLUMN_INDEX = 0;
 
     private static final int SAIL_ID_COLUMN_INDEX = 1;
@@ -54,34 +56,36 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
     private static final int CARRY_COLUMN_INDEX = 3;
 
     private final SailingServiceAsync sailingService;
-    
+
     /**
      * The leaderboard name is used to
      * {@link SailingServiceAsync#getLeaderboardByName(String, java.util.Date, String[], com.google.gwt.user.client.rpc.AsyncCallback)
      * obtain the leaderboard contents} from the server. It may change in case the leaderboard is renamed.
      */
     private String leaderboardName;
-    
+
     private final ErrorReporter errorReporter;
-    
+
     private final StringConstants stringConstants;
 
     private final CellTable<LeaderboardRowDAO> leaderboardTable;
 
     private ListDataProvider<LeaderboardRowDAO> data;
-    
+
     private final ListHandler<LeaderboardRowDAO> listHandler;
 
     private LeaderboardDAO leaderboard;
 
     private final RankColumn rankColumn;
-    
-    private final List<LegDetailSelectionProvider.LegDetailColumnType> selectedLegDetails;
+
+    private final List<DetailColumnType> selectedLegDetails;
+
+    private final List<DetailColumnType> selectedRaceDetails;
 
     protected final String RACE_COLUMN_HEADER_STYLE;
 
     protected final String LEG_DETAIL_COLUMN_HEADER_STYLE;
-    
+
     protected final String LEG_DETAIL_COLUMN_STYLE;
 
     protected final String LEG_COLUMN_HEADER_STYLE;
@@ -89,8 +93,21 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
     protected final String RACE_COLUMN_STYLE;
 
     protected final String LEG_COLUMN_STYLE;
-    
+
     protected final String TOTAL_COLUMN_STYLE;
+
+    private final Timer timer;
+
+    /**
+     * The delay with which the timer shall work. Before the timer is resumed, the delay is set to this value.
+     */
+    private long delayInMilliseconds;
+
+    /**
+     * This anchor's HTML holds the image tag for the play/pause button that needs to be updated when the {@link #timer}
+     * changes its playing state
+     */
+    private final Anchor playPause;
 
     private class SettingsClickHandler implements ClickHandler {
         private final StringConstants stringConstants;
@@ -101,28 +118,54 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
 
         @Override
         public void onClick(ClickEvent event) {
-            new LegDetailSelectionPanel(LeaderboardPanel.this,
-                    stringConstants.leaderboardSettings(), stringConstants.selectLegDetails(),
-                    stringConstants.ok(), stringConstants.cancel(), new Validator<List<LegDetailColumnType>>() {
+            new LeaderboardSettingsPanel(Collections.unmodifiableList(selectedLegDetails),
+                    Collections.unmodifiableList(selectedRaceDetails),
+                    timer.getDelayBetweenAutoAdvancesInMilliseconds(), stringConstants.leaderboardSettings(),
+                    stringConstants.selectLegDetails(), stringConstants.ok(), stringConstants.cancel(),
+                    new Validator<LeaderboardSettingsPanel.Result>() {
                         @Override
-                        public String getErrorMessage(List<LegDetailColumnType> valueToValidate) {
-                            if (valueToValidate.isEmpty()) {
+                        public String getErrorMessage(LeaderboardSettingsPanel.Result valueToValidate) {
+                            if (valueToValidate.getLegDetailsToShow().isEmpty()) {
                                 return stringConstants.selectAtLeastOneLegDetail();
+                            } else if (valueToValidate.getDelayBetweenAutoAdvancesInMilliseconds() < 1000) {
+                                return stringConstants.chooseUpdateIntervalOfAtLeastOneSecond();
                             } else {
                                 return null;
                             }
                         }
-            }, new AsyncCallback<List<LegDetailColumnType>>() {
+                    }, new AsyncCallback<LeaderboardSettingsPanel.Result>() {
                         @Override
-                        public void onSuccess(List<LegDetailColumnType> result) {
+                        public void onSuccess(LeaderboardSettingsPanel.Result result) {
+                            List<ExpandableSortableColumn<?>> columnsToExpandAgain = new ArrayList<ExpandableSortableColumn<?>>();
+                            for (int i = 0; i < getLeaderboardTable().getColumnCount(); i++) {
+                                Column<LeaderboardRowDAO, ?> c = getLeaderboardTable().getColumn(i);
+                                if (c instanceof ExpandableSortableColumn<?>) {
+                                    ExpandableSortableColumn<?> expandableSortableColumn = (ExpandableSortableColumn<?>) c;
+                                    if (expandableSortableColumn.isExpanded()) {
+                                        // now toggle expansion back and forth,
+                                        // enforcing a re-build of the visible
+                                        // child columns
+                                        expandableSortableColumn.toggleExpansion();
+                                        columnsToExpandAgain.add(expandableSortableColumn);
+                                    }
+                                }
+                            }
                             selectedLegDetails.clear();
-                            selectedLegDetails.addAll(result);
-                            refreshHeaders();
+                            selectedLegDetails.addAll(result.getLegDetailsToShow());
+                            selectedRaceDetails.clear();
+                            selectedRaceDetails.addAll(result.getRaceDetailsToShow());
+                            timer.setDelayBetweenAutoAdvancesInMilliseconds(result
+                                    .getDelayBetweenAutoAdvancesInMilliseconds());
+                            setDelayInMilliseconds(result.getDelayInMilliseconds());
+                            for (ExpandableSortableColumn<?> expandableSortableColumn : columnsToExpandAgain) {
+                                expandableSortableColumn.toggleExpansion();
+                            }
                         }
+
                         @Override
                         public void onFailure(Throwable caught) {
                         }
-                    }, stringConstants).show();
+                    }, stringConstants, getDelayInMilliseconds()).show();
         }
     }
 
@@ -164,15 +207,20 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
             String cellTableTotalColumn();
 
         }
+
         @Override
-        @Source ({CellTable.Style.DEFAULT_CSS, "LeaderboardTable.css"})
+        @Source({ CellTable.Style.DEFAULT_CSS, "LeaderboardTable.css" })
         LeaderboardTableStyle cellTableStyle();
     }
 
-    private class CompetitorColumn extends SortableColumn<LeaderboardRowDAO, String> {
+    protected class CompetitorColumn extends SortableColumn<LeaderboardRowDAO, String> {
 
         protected CompetitorColumn() {
             super(new TextCell());
+        }
+
+        protected CompetitorColumn(EditTextCell editTextCell) {
+            super(editTextCell);
         }
 
         @Override
@@ -180,7 +228,8 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
             return new Comparator<LeaderboardRowDAO>() {
                 @Override
                 public int compare(LeaderboardRowDAO o1, LeaderboardRowDAO o2) {
-                    return Collator.getInstance().compare(o1.competitor.name, o2.competitor.name);
+                    return Collator.getInstance().compare(getLeaderboard().getDisplayName(o1.competitor),
+                            getLeaderboard().getDisplayName(o2.competitor));
                 }
             };
         }
@@ -192,15 +241,15 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
 
         @Override
         public String getValue(LeaderboardRowDAO object) {
-            return object.competitor.name;
+            return getLeaderboard().getDisplayName(object.competitor);
         }
     }
-    
+
     /**
      * Shows the country flag and sail ID, if present
      * 
      * @author Axel Uhl (d043530)
-     *
+     * 
      */
     private class SailIDColumn extends SortableColumn<LeaderboardRowDAO, String> {
 
@@ -213,10 +262,9 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
             return new Comparator<LeaderboardRowDAO>() {
                 @Override
                 public int compare(LeaderboardRowDAO o1, LeaderboardRowDAO o2) {
-                    return o1.competitor.sailID == null ?
-                            o2.competitor.sailID == null ? 0 :
-                                -1 : o2.competitor.sailID == null ? 1 : 
-                                    Collator.getInstance().compare(o1.competitor.sailID, o2.competitor.sailID);
+                    return o1.competitor.sailID == null ? o2.competitor.sailID == null ? 0 : -1
+                            : o2.competitor.sailID == null ? 1 : Collator.getInstance().compare(o1.competitor.sailID,
+                                    o2.competitor.sailID);
                 }
             };
         }
@@ -228,14 +276,13 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
 
         @Override
         public void render(Context context, LeaderboardRowDAO object, SafeHtmlBuilder sb) {
-            sb.appendHtmlConstant("<img title=\""+object.competitor.countryName+"\" src=\""+
-                    getFlagURL(object.competitor.twoLetterIsoCountryCode)+
-                    "\"/>&nbsp;");
+            sb.appendHtmlConstant("<img title=\"" + object.competitor.countryName + "\" src=\""
+                    + getFlagURL(object.competitor.twoLetterIsoCountryCode) + "\"/>&nbsp;");
             sb.appendEscaped(object.competitor.sailID);
         }
 
         private String getFlagURL(String twoLetterIsoCountryCode) {
-            return "/images/flags/"+twoLetterIsoCountryCode.toLowerCase()+".png";
+            return "/images/flags/" + twoLetterIsoCountryCode.toLowerCase() + ".png";
         }
 
         @Override
@@ -243,58 +290,81 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
             return object.competitor.sailID;
         }
     }
-    
+
     /**
-     * Displays net/total points and possible max-points reasons based on a {@link LeaderboardRowDAO} and a
-     * race name and makes the column sortable by the total points.
-     *  
+     * Displays net/total points and possible max-points reasons based on a {@link LeaderboardRowDAO} and a race name
+     * and makes the column sortable by the total points.
+     * 
      * @author Axel Uhl (D043530)
-     *
+     * 
      */
     protected abstract class RaceColumn<C> extends ExpandableSortableColumn<C> {
         private final String raceName;
         private final boolean medalRace;
+
         private final String headerStyle;
         private final String columnStyle;
-        
-        public RaceColumn(String raceName, boolean medalRace, boolean enableExpansion, Cell<C> cell, String headerStyle, String columnStyle) {
-            super(LeaderboardPanel.this, enableExpansion, cell);
+
+        public RaceColumn(String raceName, boolean medalRace, boolean enableExpansion, Cell<C> cell,
+                String headerStyle, String columnStyle) {
+            super(LeaderboardPanel.this, enableExpansion, cell, stringConstants, LEG_COLUMN_HEADER_STYLE,
+                    LEG_COLUMN_STYLE, selectedRaceDetails);
             setHorizontalAlignment(ALIGN_CENTER);
             this.raceName = raceName;
             this.medalRace = medalRace;
             this.headerStyle = headerStyle;
             this.columnStyle = columnStyle;
         }
-        
+
         public String getRaceName() {
             return raceName;
         }
-        
+
         @Override
         public String getColumnStyle() {
             return columnStyle;
         }
 
+        /**
+         * Displays a combination of total points and maxPointsReason in bold, transparent, strike-through, depending on
+         * various criteria. Here's how:
+         * 
+         * <pre>
+         *                                  total points                |    maxPointsReason
+         * -------------------------------+-----------------------------+-----------------------
+         *  not discarded, no maxPoints   | bold                        | none
+         *  not discarded, maxPoints      | bold                        | transparent
+         *  discarded, no maxPoints       | transparent, strike-through | none
+         *  discarded, maxPoints          | transparent, strike-through | transparent, strike-through
+         * </pre>
+         */
         @Override
         public void render(Context context, LeaderboardRowDAO object, SafeHtmlBuilder html) {
             LeaderboardEntryDAO entry = object.fieldsByRaceName.get(raceName);
             if (entry != null) {
-                if (entry.discarded) {
-                    html.appendHtmlConstant("<del>");
-                }
-                html.append(entry.totalPoints);
-                if (entry.netPoints != entry.totalPoints) {
-                    html.appendHtmlConstant(" (" + entry.netPoints + ")");
+                if (!entry.discarded) {
+                    html.appendHtmlConstant("<span style=\"font-weight: bold;\">");
+                    html.append(entry.totalPoints);
+                    html.appendHtmlConstant("</span>");
+                } else {
+                    html.appendHtmlConstant(" <span style=\"opacity: 0.3;\"><del>");
+                    html.append(entry.netPoints);
+                    html.appendHtmlConstant("</del></span>");
                 }
                 if (!entry.reasonForMaxPoints.equals("NONE")) {
-                    html.appendEscapedLines("\n(" + entry.reasonForMaxPoints + ")");
-                }
-                if (entry.discarded) {
-                    html.appendHtmlConstant("</del>");
+                    html.appendHtmlConstant(" <span style=\"opacity: 0.3;\">");
+                    if (entry.discarded) {
+                        html.appendHtmlConstant("<del>");
+                    }
+                    html.appendEscaped(entry.reasonForMaxPoints);
+                    if (entry.discarded) {
+                        html.appendHtmlConstant("</del>");
+                    }
+                    html.appendHtmlConstant("</span>");
                 }
             }
         }
-        
+
         @Override
         public Comparator<LeaderboardRowDAO> getComparator() {
             if (medalRace) {
@@ -306,9 +376,10 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
                         boolean ascending = isSortedAscendingForThisColumn(getLeaderboardPanel().getLeaderboardTable());
                         LeaderboardEntryDAO o1Entry = o1.fieldsByRaceName.get(raceName);
                         LeaderboardEntryDAO o2Entry = o2.fieldsByRaceName.get(raceName);
-                        return (o1Entry == null || o1Entry.netPoints == 0) ?
-                                (o2Entry == null || o2Entry.netPoints == 0) ? 0 : ascending?1:-1
-                                    : (o2Entry == null || o2Entry.netPoints == 0) ? ascending?-1:1 : o1Entry.netPoints - o2Entry.netPoints;
+                        return (o1Entry == null || o1Entry.netPoints == 0) ? (o2Entry == null || o2Entry.netPoints == 0) ? 0
+                                : ascending ? 1 : -1
+                                : (o2Entry == null || o2Entry.netPoints == 0) ? ascending ? -1 : 1 : o1Entry.netPoints
+                                        - o2Entry.netPoints;
                     }
                 };
             }
@@ -321,21 +392,39 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
 
         @Override
         public Header<SafeHtml> getHeader() {
-            SortableExpandableColumnHeader header = new SortableExpandableColumnHeader(/* title */ raceName,
-                    /* iconURL */ medalRace ? "/images/medal_small.png" : null,
-                            LeaderboardPanel.this, this, stringConstants);
+            SortableExpandableColumnHeader header = new SortableExpandableColumnHeader(
+            /* title */raceName,
+            /* iconURL */medalRace ? "/images/medal_small.png" : null, LeaderboardPanel.this, this, stringConstants);
             return header;
         }
+        
+        public boolean isMedalRace() {
+            return medalRace;
+        }
+
     }
-    
+
+    public static DetailColumnType[] getAvailableRaceDetailColumnTypes() {
+        return new DetailColumnType[] { DetailColumnType.RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS,
+                DetailColumnType.RACE_DISTANCE_TRAVELED, DetailColumnType.RACE_GAP_TO_LEADER_IN_SECONDS };
+    }
+
     private class TextRaceColumn extends RaceColumn<String> {
-        public TextRaceColumn(String raceName, boolean medalRace, boolean expandable, String headerStyle, String columnStyle) {
+        /**
+         * Remembers the leg columns; <code>null</code>-padded, if {@link #getLegColumn(int)} asks for a column index
+         * not yet existing. It is important to remember the columns because column removal happens based on identity.
+         */
+        private final List<LegColumn> legColumns;
+
+        public TextRaceColumn(String raceName, boolean medalRace, boolean expandable, String headerStyle,
+                String columnStyle) {
             super(raceName, medalRace, expandable, new TextCell(), headerStyle, columnStyle);
+            legColumns = new ArrayList<LegColumn>();
         }
 
         @Override
         public String getValue(LeaderboardRowDAO object) {
-            return ""+object.fieldsByRaceName.get(getRaceName()).totalPoints;
+            return "" + object.fieldsByRaceName.get(getRaceName()).totalPoints;
         }
 
         @Override
@@ -344,43 +433,157 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
                 callWhenExpansionDataIsLoaded.run();
             } else {
                 getSailingService().getLeaderboardByName(getLeaderboardName(), getLeaderboardDisplayDate(),
-                        /* namesOfRacesForWhichToLoadLegDetails */ getNamesOfExpandedRaces(),
+                /* namesOfRacesForWhichToLoadLegDetails */getNamesOfExpandedRaces(),
                         new AsyncCallback<LeaderboardDAO>() {
-                    @Override
-                    public void onSuccess(LeaderboardDAO result) {
-                        updateLeaderboard(result);
-                        callWhenExpansionDataIsLoaded.run();
-                    }
-                    
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        getErrorReporter().reportError("Error trying to obtain leaderboard contents: "+caught.getMessage());
-                    }
-                });
+                            @Override
+                            public void onSuccess(LeaderboardDAO result) {
+                                updateLeaderboard(result);
+                                callWhenExpansionDataIsLoaded.run();
+                            }
+
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                getErrorReporter().reportError(
+                                        "Error trying to obtain leaderboard contents: " + caught.getMessage());
+                            }
+                        });
             }
         }
 
         @Override
-        protected List<SortableColumn<LeaderboardRowDAO, ?>> createExpansionColumns() {
-            int legCount = getLeaderboard().getLegCount(getRaceName());
-            List<SortableColumn<LeaderboardRowDAO, ?>> result = new ArrayList<SortableColumn<LeaderboardRowDAO,?>>();
-            for (int i=0; i<legCount; i++) {
-                result.add(new LegColumn(LeaderboardPanel.this, getRaceName(), /* legIndex */ i, stringConstants, LeaderboardPanel.this,
-                        LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LEG_DETAIL_COLUMN_HEADER_STYLE, LEG_DETAIL_COLUMN_STYLE));
+        protected Map<DetailColumnType, SortableColumn<LeaderboardRowDAO, ?>> getDetailColumnMap(
+                LeaderboardPanel leaderboardPanel, StringConstants stringConstants, String detailHeaderStyle,
+                String detailColumnStyle) {
+            Map<DetailColumnType, SortableColumn<LeaderboardRowDAO, ?>> result = new HashMap<DetailColumnType, SortableColumn<LeaderboardRowDAO, ?>>();
+            result.put(DetailColumnType.RACE_DISTANCE_TRAVELED,
+                    new FormattedDoubleLegDetailColumn(stringConstants.distanceInMeters(),
+                            new RaceDistanceTraveledInMeters(), 1, getLeaderboardPanel().getLeaderboardTable(),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
+            result.put(DetailColumnType.RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS, new FormattedDoubleLegDetailColumn(
+                    stringConstants.averageSpeedInKnots(), new RaceAverageSpeedInKnots(), 1, getLeaderboardPanel()
+                            .getLeaderboardTable(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
+            result.put(DetailColumnType.RACE_GAP_TO_LEADER_IN_SECONDS, new FormattedDoubleLegDetailColumn(
+                    stringConstants.gapToLeaderInSeconds(), new RaceGapToLeaderInSeconds(), 1, getLeaderboardPanel()
+                            .getLeaderboardTable(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
+            return result;
+        }
+
+        @Override
+        protected Iterable<SortableColumn<LeaderboardRowDAO, ?>> getDirectChildren() {
+            List<SortableColumn<LeaderboardRowDAO, ?>> result = new ArrayList<SortableColumn<LeaderboardRowDAO, ?>>();
+            for (SortableColumn<LeaderboardRowDAO, ?> column : super.getDirectChildren()) {
+                result.add(column);
+            }
+            if (isExpanded()) {
+                // it is important to re-use existing LegColumn objects because
+                // removing the columns from the table
+                // is based on column identity
+                int legCount = getLeaderboard().getLegCount(getRaceName());
+                for (int i = 0; i < legCount; i++) {
+                    LegColumn legColumn = getLegColumn(i);
+                    result.add(legColumn);
+                }
             }
             return result;
         }
+
+        private LegColumn getLegColumn(int legNumber) {
+            LegColumn result;
+            if (legColumns.size() > legNumber && legColumns.get(legNumber) != null) {
+                result = legColumns.get(legNumber);
+            } else {
+                result = new LegColumn(LeaderboardPanel.this, getRaceName(), legNumber, stringConstants,
+                        Collections.unmodifiableList(selectedLegDetails), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE,
+                        LEG_DETAIL_COLUMN_HEADER_STYLE, LEG_DETAIL_COLUMN_STYLE);
+                while (legColumns.size() <= legNumber) {
+                    legColumns.add(null);
+                }
+                legColumns.set(legNumber, result);
+            }
+            return result;
+        }
+
+        /**
+         * Accumulates the average speed over all legs of a race
+         * 
+         * @author Axel Uhl (D043530)
+         */
+        private class RaceAverageSpeedInKnots implements LegDetailField<Double> {
+            @Override
+            public Double get(LeaderboardRowDAO row) {
+                Double result = null;
+                LeaderboardEntryDAO fieldsForRace = row.fieldsByRaceName.get(getRaceName());
+                if (fieldsForRace != null && fieldsForRace.legDetails != null) {
+                    double distanceTraveledInMeters = 0;
+                    long timeInMilliseconds = 0;
+                    for (LegEntryDAO legDetail : fieldsForRace.legDetails) {
+                        if (legDetail != null) {
+                            distanceTraveledInMeters += legDetail.distanceTraveledInMeters;
+                            timeInMilliseconds += legDetail.timeInMilliseconds;
+                        }
+                    }
+                    if (timeInMilliseconds != 0) {
+                        result = distanceTraveledInMeters / (double) timeInMilliseconds * 1000 * 3600 / 1852;
+                    }
+                }
+                return result;
+            }
+        }
+
+        /**
+         * Accumulates the distance traveled over all legs of a race
+         * 
+         * @author Axel Uhl (D043530)
+         */
+        private class RaceDistanceTraveledInMeters implements LegDetailField<Double> {
+            @Override
+            public Double get(LeaderboardRowDAO row) {
+                Double result = null;
+                LeaderboardEntryDAO fieldsForRace = row.fieldsByRaceName.get(getRaceName());
+                if (fieldsForRace != null && fieldsForRace.legDetails != null) {
+                    for (LegEntryDAO legDetail : fieldsForRace.legDetails) {
+                        if (legDetail != null) {
+                            if (result == null) {
+                                result = 0.0;
+                            }
+                            result += legDetail.distanceTraveledInMeters;
+                        }
+                    }
+                }
+                return result;
+            }
+        }
+
+        /**
+         * Accumulates the average speed over all legs of a race
+         * 
+         * @author Axel Uhl (D043530)
+         */
+        private class RaceGapToLeaderInSeconds implements LegDetailField<Double> {
+            @Override
+            public Double get(LeaderboardRowDAO row) {
+                Double result = null;
+                LeaderboardEntryDAO fieldsForRace = row.fieldsByRaceName.get(getRaceName());
+                if (fieldsForRace != null && fieldsForRace.legDetails != null) {
+                    LegEntryDAO lastLegDetail = fieldsForRace.legDetails.get(fieldsForRace.legDetails.size() - 1);
+                    if (lastLegDetail != null) {
+                        result = lastLegDetail.gapToLeaderInSeconds;
+                    }
+                }
+                return result;
+            }
+        }
     }
-    
+
     /**
      * Displays the totals for a competitor for the entire leaderboard.
      * 
      * @author Axel Uhl (D043530)
-     *
+     * 
      */
-    private class TotalsColumn extends SortableColumn<LeaderboardRowDAO, String>  {
+    private class TotalsColumn extends SortableColumn<LeaderboardRowDAO, String> {
         private final String columnStyle;
-        
+
         protected TotalsColumn(String columnStyle) {
             super(new TextCell());
             this.columnStyle = columnStyle;
@@ -390,7 +593,14 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
         @Override
         public String getValue(LeaderboardRowDAO object) {
             int totalPoints = getLeaderboard().getTotalPoints(object);
-            return ""+totalPoints;
+            return "" + totalPoints;
+        }
+
+        @Override
+        public void render(Context context, LeaderboardRowDAO object, SafeHtmlBuilder sb) {
+            sb.appendHtmlConstant("<b>");
+            sb.appendEscaped(getValue(object));
+            sb.appendHtmlConstant("</b>");
         }
 
         @Override
@@ -408,8 +618,8 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
             return new TextHeader(stringConstants.total());
         }
     }
-    
-    protected class CarryColumn extends SortableColumn<LeaderboardRowDAO, String>  {
+
+    protected class CarryColumn extends SortableColumn<LeaderboardRowDAO, String> {
         public CarryColumn() {
             super(new TextCell());
             setSortable(true);
@@ -422,7 +632,7 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
 
         @Override
         public String getValue(LeaderboardRowDAO object) {
-            return object.carriedPoints==null?"":""+object.carriedPoints;
+            return object.carriedPoints == null ? "" : "" + object.carriedPoints;
         }
 
         @Override
@@ -430,8 +640,8 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
             return new Comparator<LeaderboardRowDAO>() {
                 @Override
                 public int compare(LeaderboardRowDAO o1, LeaderboardRowDAO o2) {
-                    return (o1.carriedPoints==null?0:o1.carriedPoints) -
-                           (o2.carriedPoints==null?0:o2.carriedPoints);
+                    return (o1.carriedPoints == null ? 0 : o1.carriedPoints)
+                            - (o2.carriedPoints == null ? 0 : o2.carriedPoints);
                 }
             };
         }
@@ -441,8 +651,8 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
             return new TextHeader(stringConstants.carry());
         }
     }
-    
-    private class RankColumn extends SortableColumn<LeaderboardRowDAO, String>  {
+
+    private class RankColumn extends SortableColumn<LeaderboardRowDAO, String> {
         public RankColumn() {
             super(new TextCell());
             setHorizontalAlignment(ALIGN_CENTER);
@@ -451,7 +661,7 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
 
         @Override
         public String getValue(LeaderboardRowDAO object) {
-            return ""+getLeaderboard().getRank(object.competitor);
+            return "" + getLeaderboard().getRank(object.competitor);
         }
 
         @Override
@@ -469,19 +679,26 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
             return new TextHeader(stringConstants.rank());
         }
     }
-    
+
     public LeaderboardPanel(SailingServiceAsync sailingService, String leaderboardName, ErrorReporter errorReporter,
             final StringConstants stringConstants) {
         this.sailingService = sailingService;
         this.setLeaderboardName(leaderboardName);
         this.errorReporter = errorReporter;
         this.stringConstants = stringConstants;
-        this.selectedLegDetails = new ArrayList<LegDetailSelectionProvider.LegDetailColumnType>();
-        this.selectedLegDetails.add(LegDetailColumnType.DISTANCE_TRAVELED);
-        this.selectedLegDetails.add(LegDetailColumnType.AVERAGE_SPEED_OVER_GROUND_IN_KNOTS);
-        this.selectedLegDetails.add(LegDetailColumnType.RANK_GAIN);
+        this.selectedLegDetails = new ArrayList<DetailColumnType>();
+        this.selectedLegDetails.add(DetailColumnType.DISTANCE_TRAVELED);
+        this.selectedLegDetails.add(DetailColumnType.AVERAGE_SPEED_OVER_GROUND_IN_KNOTS);
+        this.selectedLegDetails.add(DetailColumnType.RANK_GAIN);
+        this.selectedRaceDetails = new ArrayList<DetailColumnType>();
+        delayInMilliseconds = 0l;
+        timer = new Timer(/* delayBetweenAutoAdvancesInMilliseconds */3000l);
+        timer.setDelay(getDelayInMilliseconds()); // set time/delay before
+                                                  // adding as listener
+        timer.addPlayStateListener(this);
+        timer.addTimeListener(this);
         rankColumn = new RankColumn();
-        LeaderboardTableResources resources = GWT.create(LeaderboardTableResources.class); 
+        LeaderboardTableResources resources = GWT.create(LeaderboardTableResources.class);
         RACE_COLUMN_HEADER_STYLE = resources.cellTableStyle().cellTableRaceColumnHeader();
         LEG_COLUMN_HEADER_STYLE = resources.cellTableStyle().cellTableLegColumnHeader();
         LEG_DETAIL_COLUMN_HEADER_STYLE = resources.cellTableStyle().cellTableLegDetailColumnHeader();
@@ -489,9 +706,11 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
         LEG_COLUMN_STYLE = resources.cellTableStyle().cellTableLegColumn();
         LEG_DETAIL_COLUMN_STYLE = resources.cellTableStyle().cellTableLegDetailColumn();
         TOTAL_COLUMN_STYLE = resources.cellTableStyle().cellTableTotalColumn();
-        leaderboardTable = new CellTableWithStylableHeaders<LeaderboardRowDAO>(/* pageSize */ 100, resources);
+        leaderboardTable = new CellTableWithStylableHeaders<LeaderboardRowDAO>(
+        /* pageSize */100, resources);
         getLeaderboardTable().setWidth("100%");
-        getLeaderboardTable().setSelectionModel(new MultiSelectionModel<LeaderboardRowDAO>() {});
+        getLeaderboardTable().setSelectionModel(new MultiSelectionModel<LeaderboardRowDAO>() {
+        });
         setData(new ListDataProvider<LeaderboardRowDAO>());
         getData().addDataDisplay(getLeaderboardTable());
         listHandler = new ListHandler<LeaderboardRowDAO>(getData().getList());
@@ -499,21 +718,33 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
         loadCompleteLeaderboard(getLeaderboardDisplayDate());
         VerticalPanel vp = new VerticalPanel();
         vp.setSpacing(15);
-        DockPanel logoAndSettings = new DockPanel();
-        vp.add(logoAndSettings);
-        Anchor sapLogo = new Anchor(new SafeHtmlBuilder().appendHtmlConstant("<img class=\"linkNoBorder\" src=\"/images/sap_66_transparent.png\"/>").toSafeHtml());
+        HorizontalPanel logoAndTitle = new HorizontalPanel();
+        vp.add(logoAndTitle);
+        Anchor sapLogo = new Anchor(new SafeHtmlBuilder().appendHtmlConstant(
+                "<img class=\"linkNoBorder\" src=\"/images/sap_66_transparent.png\"/>").toSafeHtml());
         sapLogo.setHref("http://www.sap.com");
-        vp.add(sapLogo);
+        logoAndTitle.add(sapLogo);
+        Label sailingAnalyticsLabel = new Label(stringConstants.sapSailingAnalytics());
+        HorizontalPanel labelPanel = new HorizontalPanel();
+        labelPanel.add(sailingAnalyticsLabel);
+        labelPanel.setSpacing(10);
+        logoAndTitle.add(labelPanel);
+        sailingAnalyticsLabel.addStyleName("boldLabel");
         DockPanel dockPanel = new DockPanel();
         dockPanel.setWidth("100%");
         dockPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
-        Label leaderboardLabel = new Label(stringConstants.leaderboard()+" "+leaderboardName.toUpperCase());
+        Label leaderboardLabel = new Label(stringConstants.leaderboard() + " " + leaderboardName.toUpperCase());
         leaderboardLabel.addStyleName("boldLabel");
         dockPanel.add(leaderboardLabel, DockPanel.WEST);
-        ClickHandler refreshHandler = new ClickHandler() {
+        ClickHandler playPauseHandler = new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                loadCompleteLeaderboard(getLeaderboardDisplayDate());
+                if (timer.isPlaying()) {
+                    timer.pause();
+                } else {
+                    timer.setDelay(getDelayInMilliseconds());
+                    timer.resume();
+                }
             }
         };
         HorizontalPanel refreshAndSettingsPanel = new HorizontalPanel();
@@ -522,44 +753,60 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
         refreshPanel.setSpacing(5);
         refreshPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
         refreshPanel.addStyleName("refreshPanel");
-        Anchor refresh = new Anchor(new SafeHtmlBuilder().appendHtmlConstant(stringConstants.refresh()).toSafeHtml());
-        refresh.addStyleName("boldAnchor");
         dockPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
-        Anchor refreshLogo = new Anchor(new SafeHtmlBuilder().appendHtmlConstant("<img class=\"linkNoBorder\" src=\"/images/refresh.png\"/>").toSafeHtml());
-        refreshLogo.addClickHandler(refreshHandler);
-        refreshPanel.add(refreshLogo);
-        refreshPanel.add(refresh);
-        Anchor settingsAnchor = new Anchor(new SafeHtmlBuilder().appendHtmlConstant("<img class=\"linkNoBorder\" src=\"/images/settings.png\"/>").toSafeHtml());
+        playPause = new Anchor(getPlayPauseImgHtml(timer.isPlaying()));
+        playPause.addClickHandler(playPauseHandler);
+        playStateChanged(timer.isPlaying());
+        refreshPanel.add(playPause);
+        Anchor settingsAnchor = new Anchor(new SafeHtmlBuilder().appendHtmlConstant(
+                "<img class=\"linkNoBorder\" src=\"/images/settings.png\"/>").toSafeHtml());
         settingsAnchor.setTitle(stringConstants.settings());
         settingsAnchor.addClickHandler(new SettingsClickHandler(stringConstants));
         refreshAndSettingsPanel.add(refreshPanel);
         refreshAndSettingsPanel.add(settingsAnchor);
         dockPanel.add(refreshAndSettingsPanel, DockPanel.EAST);
-        refresh.addClickHandler(refreshHandler);
         vp.add(dockPanel);
         vp.add(getLeaderboardTable());
         setWidget(vp);
     }
-    
+
+    private SafeHtml getPlayPauseImgHtml(boolean playing) {
+        return new SafeHtmlBuilder().appendHtmlConstant(
+                "<img class=\"linkNoBorder\" src=\"/images/" + (playing ? "pause" : "play") + "_16.png\"/>")
+                .toSafeHtml();
+    }
+
+    private long getDelayInMilliseconds() {
+        return delayInMilliseconds;
+    }
+
+    private void setDelayInMilliseconds(long delayInMilliseconds) {
+        this.delayInMilliseconds = delayInMilliseconds;
+    }
+
     /**
      * The time point for which the leaderboard currently shows results
      */
     protected Date getLeaderboardDisplayDate() {
-        // TODO add a notion of selectable time to the leaderboard panel
-        return new Date();
+        return timer.getTime();
     }
-    
+
+    /**
+     * adds the <code>column</code> to the right end of the {@link #getLeaderboardTable() leaderboard table} and sets
+     * the column style according to the {@link SortableColumn#getColumnStyle() column's style definition}.
+     */
     protected void addColumn(SortableColumn<LeaderboardRowDAO, ?> column) {
         getLeaderboardTable().addColumn(column, column.getHeader());
         listHandler.setComparator(column, column.getComparator());
         String columnStyle = column.getColumnStyle();
         if (columnStyle != null) {
-            getLeaderboardTable().addColumnStyleName(getLeaderboardTable().getColumnCount()-1, columnStyle);
+            getLeaderboardTable().addColumnStyleName(getLeaderboardTable().getColumnCount() - 1, columnStyle);
         }
     }
-    
+
     protected void insertColumn(int beforeIndex, SortableColumn<LeaderboardRowDAO, ?> column) {
-        // remove column styles of those columns whose index will shift right by one:
+        // remove column styles of those columns whose index will shift right by
+        // one:
         removeColumnStyles(beforeIndex);
         getLeaderboardTable().insertColumn(beforeIndex, column, column.getHeader());
         addColumnStyles(beforeIndex);
@@ -567,8 +814,9 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
     }
 
     private void addColumnStyles(int startColumn) {
-        for (int i=startColumn; i<getLeaderboardTable().getColumnCount(); i++) {
-            SortableColumn<LeaderboardRowDAO, ?> columnToRemoveStyleFor = (SortableColumn<LeaderboardRowDAO, ?>) getLeaderboardTable().getColumn(i);
+        for (int i = startColumn; i < getLeaderboardTable().getColumnCount(); i++) {
+            SortableColumn<LeaderboardRowDAO, ?> columnToRemoveStyleFor = (SortableColumn<LeaderboardRowDAO, ?>) getLeaderboardTable()
+                    .getColumn(i);
             String columnStyle = columnToRemoveStyleFor.getColumnStyle();
             if (columnStyle != null) {
                 getLeaderboardTable().addColumnStyleName(i, columnStyle);
@@ -577,43 +825,47 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
     }
 
     private void removeColumnStyles(int startColumn) {
-        for (int i=startColumn; i<getLeaderboardTable().getColumnCount(); i++) {
-            SortableColumn<LeaderboardRowDAO, ?> columnToRemoveStyleFor = (SortableColumn<LeaderboardRowDAO, ?>) getLeaderboardTable().getColumn(i);
+        for (int i = startColumn; i < getLeaderboardTable().getColumnCount(); i++) {
+            SortableColumn<LeaderboardRowDAO, ?> columnToRemoveStyleFor = (SortableColumn<LeaderboardRowDAO, ?>) getLeaderboardTable()
+                    .getColumn(i);
             String columnStyle = columnToRemoveStyleFor.getColumnStyle();
             if (columnStyle != null) {
                 getLeaderboardTable().removeColumnStyleName(i, columnStyle);
             }
         }
     }
-    
+
+    /**
+     * removes the column specified by <code>columnIndex</code> from the {@link #getLeaderboardTable() leaderboard
+     * table} and fixes the column styles again (see {@link #addColumnStyles(int)}).
+     */
     protected void removeColumn(int columnIndex) {
-        removeColumnStyles(/* startColumn */ columnIndex);
+        removeColumnStyles(/* startColumn */columnIndex);
         getLeaderboardTable().removeColumn(columnIndex);
-        addColumnStyles(/* startColumn */ columnIndex);
+        addColumnStyles(/* startColumn */columnIndex);
     }
 
     private void loadCompleteLeaderboard(Date date) {
-        getSailingService().getLeaderboardByName(getLeaderboardName(), date, 
-                /* namesOfRacesForWhichToLoadLegDetails */ getNamesOfExpandedRaces(),
-                new AsyncCallback<LeaderboardDAO>() {
+        getSailingService().getLeaderboardByName(getLeaderboardName(), date,
+        /* namesOfRacesForWhichToLoadLegDetails */getNamesOfExpandedRaces(), new AsyncCallback<LeaderboardDAO>() {
             @Override
             public void onSuccess(LeaderboardDAO result) {
                 updateLeaderboard(result);
             }
-            
+
             @Override
             public void onFailure(Throwable caught) {
-                getErrorReporter().reportError("Error trying to obtain leaderboard contents: "+caught.getMessage());
+                getErrorReporter().reportError("Error trying to obtain leaderboard contents: " + caught.getMessage());
             }
         });
     }
-    
+
     /**
      * Determine from column expansion state which races need their leg details
      */
     private Collection<String> getNamesOfExpandedRaces() {
         Collection<String> namesOfExpandedRaces = new ArrayList<String>();
-        for (int i=0; i<getLeaderboardTable().getColumnCount(); i++) {
+        for (int i = 0; i < getLeaderboardTable().getColumnCount(); i++) {
             Column<LeaderboardRowDAO, ?> column = getLeaderboardTable().getColumn(i);
             if (column instanceof RaceColumn<?>) {
                 RaceColumn<?> raceColumn = (RaceColumn<?>) column;
@@ -628,13 +880,13 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
     /**
      * Also updates the min/max values on the columns
      */
-    private void updateLeaderboard(LeaderboardDAO leaderboard) {
+    protected void updateLeaderboard(LeaderboardDAO leaderboard) {
         setLeaderboard(leaderboard);
         adjustColumnLayout(leaderboard);
         getData().getList().clear();
         if (leaderboard != null) {
             getData().getList().addAll(leaderboard.rows.values());
-            for (int i=0; i<getLeaderboardTable().getColumnCount(); i++) {
+            for (int i = 0; i < getLeaderboardTable().getColumnCount(); i++) {
                 SortableColumn<?, ?> c = (SortableColumn<?, ?>) getLeaderboardTable().getColumn(i);
                 c.updateMinMax(leaderboard);
             }
@@ -642,19 +894,21 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
             if (comparator != null) {
                 Collections.sort(getData().getList(), comparator);
             } else {
-                // if no sorting was selected, sort by ascending rank and mark table header so
+                // if no sorting was selected, sort by ascending rank and mark
+                // table header so
                 Collections.sort(getData().getList(), getRankColumn().getComparator());
                 getLeaderboardTable().getColumnSortList().push(getRankColumn());
             }
         }
     }
-    
+
     private Comparator<LeaderboardRowDAO> getComparatorForSelectedSorting() {
         Comparator<LeaderboardRowDAO> result = null;
         if (getLeaderboardTable().getColumnSortList().size() > 0) {
             ColumnSortInfo columnSortInfo = getLeaderboardTable().getColumnSortList().get(0);
             @SuppressWarnings("unchecked")
-            SortableColumn<LeaderboardRowDAO, ?> castResult = (SortableColumn<LeaderboardRowDAO, ?>) columnSortInfo.getColumn();
+            SortableColumn<LeaderboardRowDAO, ?> castResult = (SortableColumn<LeaderboardRowDAO, ?>) columnSortInfo
+                    .getColumn();
             if (columnSortInfo.isAscending()) {
                 result = castResult.getComparator();
             } else {
@@ -671,7 +925,7 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
     private void setLeaderboard(LeaderboardDAO leaderboard) {
         this.leaderboard = leaderboard;
     }
-    
+
     protected LeaderboardDAO getLeaderboard() {
         return leaderboard;
     }
@@ -689,49 +943,78 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
     }
 
     /**
-     * Existing and matching race columns may still need to be removed, re-created and inserted because the
-     * "tracked" property may have changed, changing the columns expandability.
+     * Existing and matching race columns may still need to be removed, re-created and inserted because the "tracked"
+     * property may have changed, changing the columns expandability.
      */
     private void createMissingAndAdjustExistingRaceColumns(LeaderboardDAO leaderboard) {
-        for (Map.Entry<String, Pair<Boolean, Boolean>> raceNameAndMedalRaceAndTracked : leaderboard.raceNamesAndMedalRaceAndTracked.entrySet()) {
+        int currentRaceColumnIndex = 0;
+        int[] positionRaceColumn = new int[leaderboard.getRaceList().size()];
+        List<String> raceList = leaderboard.getRaceList();
+        for (int i = 0; i < getLeaderboardTable().getColumnCount(); i++) {
+            Column<LeaderboardRowDAO, ?> c = getLeaderboardTable().getColumn(i);
+            if (c instanceof RaceColumn) {
+                positionRaceColumn[currentRaceColumnIndex] = i;
+                currentRaceColumnIndex++;
+            }
+        }
+
+        int indexRaceColumn = 0;
+        for (String race : raceList) {
             boolean foundRaceColumn = false;
-            for (int i=0; !foundRaceColumn && i<getLeaderboardTable().getColumnCount(); i++) {
+            for (int i = 0; !foundRaceColumn && i < getLeaderboardTable().getColumnCount(); i++) {
                 Column<LeaderboardRowDAO, ?> c = getLeaderboardTable().getColumn(i);
                 if (c instanceof RaceColumn) {
                     RaceColumn<?> raceColumn = (RaceColumn<?>) c;
-                    if (raceColumn.getRaceName().equals(raceNameAndMedalRaceAndTracked.getKey())) {
+                    if (raceColumn.getRaceName().equals(race)) {
                         foundRaceColumn = true;
-                        // if tracked-ness differs, column must be updated with e new column
-                        // that is expansion-enabled
-                        if (raceColumn.isExpansionEnabled() != raceNameAndMedalRaceAndTracked.getValue().getB()) {
+                        // if tracked-ness differs, column must be updated with
+                        // a new column that is expansion-enabled
+                        int columnIndex = getLeaderboardTable().getColumnIndex(raceColumn);
+                        if (raceColumn.isExpansionEnabled() != leaderboard.raceIsTracked(race) || columnIndex != positionRaceColumn[indexRaceColumn]
+                                || leaderboard.raceIsMedalRace(race) != raceColumn.isMedalRace()) {
                             if (raceColumn.isExpanded()) {
                                 raceColumn.toggleExpansion(); // remove children from table
                             }
-                            int columnIndex = getLeaderboardTable().getColumnIndex(raceColumn);
                             removeColumn(columnIndex);
-                            insertColumn(columnIndex, createRaceColumn(raceNameAndMedalRaceAndTracked));
+                            insertColumn(
+                                    positionRaceColumn[indexRaceColumn],
+                                    createRaceColumn(race, leaderboard.raceIsMedalRace(race),
+                                            leaderboard.raceIsTracked(race)));
                         }
+                        
                     }
                 }
             }
             if (!foundRaceColumn) {
-                addRaceColumn(createRaceColumn(raceNameAndMedalRaceAndTracked));
+                addRaceColumn(createRaceColumn(race, leaderboard.raceIsMedalRace(race), leaderboard.raceIsTracked(race)));
             }
+            indexRaceColumn++;
         }
     }
 
-    protected RaceColumn<?> createRaceColumn(Map.Entry<String, Pair<Boolean, Boolean>> raceNameAndMedalRaceAndTracked) {
-        return new TextRaceColumn(raceNameAndMedalRaceAndTracked.getKey(), raceNameAndMedalRaceAndTracked.getValue().getA(),
-                raceNameAndMedalRaceAndTracked.getValue().getB(), RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE);
+    // protected RaceColumn<?> createRaceColumn(Map.Entry<String, Pair<Boolean,
+    // Boolean>> raceNameAndMedalRaceAndTracked) {
+    // return new TextRaceColumn(raceNameAndMedalRaceAndTracked.getKey(),
+    // raceNameAndMedalRaceAndTracked.getValue().getA(),
+    // raceNameAndMedalRaceAndTracked.getValue().getB(),
+    // RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE);
+    // }
+
+    protected RaceColumn<?> createRaceColumn(String raceName, boolean isMedalRace, boolean isTracked) {
+        return new TextRaceColumn(raceName, isMedalRace, isTracked, RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE);
     }
 
     private void removeUnusedRaceColumns(LeaderboardDAO leaderboard) {
-        List<Column<LeaderboardRowDAO, ?>> columnsToRemove = new ArrayList<Column<LeaderboardRowDAO,?>>();
-        for (int i=0; i<getLeaderboardTable().getColumnCount(); i++) {
+        List<Column<LeaderboardRowDAO, ?>> columnsToRemove = new ArrayList<Column<LeaderboardRowDAO, ?>>();
+        for (int i = 0; i < getLeaderboardTable().getColumnCount(); i++) {
             Column<LeaderboardRowDAO, ?> c = getLeaderboardTable().getColumn(i);
+            /*
+             * if (c instanceof RaceColumn && (leaderboard == null ||
+             * !leaderboard.raceNamesAndMedalRaceAndTracked.keySet().contains( ((RaceColumn<?>) c).getRaceName()))) {
+             * columnsToRemove.add(c); }
+             */
             if (c instanceof RaceColumn
-                    && (leaderboard == null || !leaderboard.raceNamesAndMedalRaceAndTracked.keySet().contains(
-                            ((RaceColumn<?>) c).getRaceName()))) {
+                    && (leaderboard == null || !leaderboard.raceListContains(((RaceColumn<?>) c).getRaceName()))) {
                 columnsToRemove.add(c);
             }
         }
@@ -744,8 +1027,8 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
      * If the last column is the totals column, remove it. Add the race column as the last column.
      */
     private void addRaceColumn(RaceColumn<?> raceColumn) {
-        if (getLeaderboardTable().getColumn(getLeaderboardTable().getColumnCount()-1) instanceof TotalsColumn) {
-            removeColumn(getLeaderboardTable().getColumnCount()-1);
+        if (getLeaderboardTable().getColumn(getLeaderboardTable().getColumnCount() - 1) instanceof TotalsColumn) {
+            removeColumn(getLeaderboardTable().getColumnCount() - 1);
         }
         addColumn(raceColumn);
     }
@@ -755,8 +1038,8 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
             addColumn(getRankColumn());
         } else {
             if (!(getLeaderboardTable().getColumn(RANK_COLUMN_INDEX) instanceof RankColumn)) {
-                throw new RuntimeException("The first column must always be the rank column but it was of type "+
-                        getLeaderboardTable().getColumn(RANK_COLUMN_INDEX).getClass().getName());
+                throw new RuntimeException("The first column must always be the rank column but it was of type "
+                        + getLeaderboardTable().getColumn(RANK_COLUMN_INDEX).getClass().getName());
             }
         }
     }
@@ -764,13 +1047,17 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
     private void ensureSailIDAndCompetitorColumn() {
         if (getLeaderboardTable().getColumnCount() <= SAIL_ID_COLUMN_INDEX) {
             addColumn(new SailIDColumn());
-            addColumn(new CompetitorColumn());
+            addColumn(createCompetitorColumn());
         } else {
             if (!(getLeaderboardTable().getColumn(SAIL_ID_COLUMN_INDEX) instanceof SailIDColumn)) {
-                throw new RuntimeException("The second column must always be the sail ID column but it was of type "+
-                        getLeaderboardTable().getColumn(SAIL_ID_COLUMN_INDEX).getClass().getName());
+                throw new RuntimeException("The second column must always be the sail ID column but it was of type "
+                        + getLeaderboardTable().getColumn(SAIL_ID_COLUMN_INDEX).getClass().getName());
             }
         }
+    }
+
+    protected CompetitorColumn createCompetitorColumn() {
+        return new CompetitorColumn();
     }
 
     private void ensureTotalsColumn() {
@@ -784,8 +1071,8 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
     /**
      * If the <code>leaderboard</code> {@link LeaderboardDAO#hasCarriedPoints has carried points} and if column #1
      * (second column, right of the competitor column) does not exist or is not of type {@link CarryColumn}, all columns
-     * starting from #1 will be removed and a {@link CarryColumn} will be added. If the leaderboard has no carried points
-     * but the display still shows a carry column, the column is removed.
+     * starting from #1 will be removed and a {@link CarryColumn} will be added. If the leaderboard has no carried
+     * points but the display still shows a carry column, the column is removed.
      */
     protected void updateCarryColumn(LeaderboardDAO leaderboard) {
         if (leaderboard != null && leaderboard.hasCarriedPoints) {
@@ -845,31 +1132,13 @@ public class LeaderboardPanel extends FormPanel implements LegDetailSelectionPro
     }
 
     @Override
-    public List<LegDetailColumnType> getLegDetailsToShow() {
-        return Collections.unmodifiableList(selectedLegDetails);
+    public void timeChanged(Date date) {
+        loadCompleteLeaderboard(getLeaderboardDisplayDate());
     }
 
-    /**
-     * After the leg detail selection has changed, updates the headers accordingly. This implementation
-     * chooses to collapse all expanded race columns and then expand them again (see {@link #toggleExpansion()}).
-     * This will re-establish their expansion structure while updating the leg detail columns accordingly.
-     */
-    private void refreshHeaders() {
-        for (int i=0; i<getLeaderboardTable().getColumnCount(); i++) {
-            Column<LeaderboardRowDAO, ?> c = getLeaderboardTable().getColumn(i);
-            if (c instanceof ExpandableSortableColumn<?>) {
-                ExpandableSortableColumn<?> expandableSortableColumn = (ExpandableSortableColumn<?>) c;
-                if (expandableSortableColumn.isExpanded()) {
-                    expandableSortableColumn.toggleExpansion();
-                    expandableSortableColumn.refreshChildren();
-                    expandableSortableColumn.toggleExpansion();
-                } else {
-                    // if column is not currently expanded, still force children (particularly leg columns) to refresh
-                    // their list of detail columns
-                    expandableSortableColumn.refreshChildren();
-                }
-            }
-        }
+    @Override
+    public void playStateChanged(boolean isPlaying) {
+        playPause.setHTML(getPlayPauseImgHtml(isPlaying));
+        playPause.setTitle(isPlaying ? stringConstants.pauseAutomaticRefresh() : stringConstants.autoRefresh());
     }
-
 }

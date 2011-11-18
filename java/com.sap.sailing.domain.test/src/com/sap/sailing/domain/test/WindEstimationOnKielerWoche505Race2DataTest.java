@@ -30,8 +30,8 @@ public class WindEstimationOnKielerWoche505Race2DataTest extends KielWeek2011Bas
     @Before
     public void setUp() throws MalformedURLException, IOException, InterruptedException, URISyntaxException {
         super.setUp();
-        super.setUp(/* raceId */ "357c700a-9d9a-11e0-85be-406186cbf87c",
-                new ReceiverType[] { ReceiverType.MARKPASSINGS, ReceiverType.RACECOURSE, ReceiverType.RAWPOSITIONS });
+        super.setUp("event_20110609_KielerWoch",
+                /* raceId */ "357c700a-9d9a-11e0-85be-406186cbf87c", new ReceiverType[] { ReceiverType.MARKPASSINGS, ReceiverType.RACECOURSE, ReceiverType.RAWPOSITIONS });
         KielWeek2011BasedTest.fixApproximateMarkPositionsForWindReadOut(getTrackedRace());
         getTrackedRace().setWindSource(WindSource.WEB);
         getTrackedRace().recordWind(new WindImpl(/* position */ null, MillisecondsTimePoint.now(),
@@ -49,7 +49,7 @@ public class WindEstimationOnKielerWoche505Race2DataTest extends KielWeek2011Bas
         // at this point in time, a few boats are still going downwind, a few have passed the downwind
         // mark and are already going upwind again, and Lehmann is tacking, hence has a direction change.
         TimePoint middle = new MillisecondsTimePoint(1308839250105l);
-        assertTrue(getTrackedRace().getTrack(getCompetitorByName("Lehmann")).hasDirectionChange(middle, /* minimumDegreeDifference */ 30.));
+        assertTrue(getTrackedRace().getTrack(getCompetitorByName("Lehmann")).hasDirectionChange(middle, /* minimumDegreeDifference */ 15.));
         Wind estimatedWindDirection = getTrackedRace().getEstimatedWindDirection(/* position */ null, middle);
         assertNotNull(estimatedWindDirection);
         assertEquals(241., estimatedWindDirection.getFrom().getDegrees(), 3.); // expect wind from 241 +/- 3 degrees
@@ -60,9 +60,9 @@ public class WindEstimationOnKielerWoche505Race2DataTest extends KielWeek2011Bas
         // at this point in time, most boats are already going upwind again, and Köchlin, Neulen and Findel are tacking,
         // hence have a direction change.
         TimePoint middle = new MillisecondsTimePoint(1308839492322l);
-        assertTrue(getTrackedRace().getTrack(getCompetitorByName("K.chlin")).hasDirectionChange(middle, /* minimumDegreeDifference */ 30.));
-        assertTrue(getTrackedRace().getTrack(getCompetitorByName("Neulen")).hasDirectionChange(middle, /* minimumDegreeDifference */ 30.));
-        assertTrue(getTrackedRace().getTrack(getCompetitorByName("Findel")).hasDirectionChange(middle, /* minimumDegreeDifference */ 30.));
+        assertTrue(getTrackedRace().getTrack(getCompetitorByName("K.chlin")).hasDirectionChange(middle, /* minimumDegreeDifference */ 20.));
+        assertTrue(getTrackedRace().getTrack(getCompetitorByName("Neulen")).hasDirectionChange(middle, /* minimumDegreeDifference */ 20.));
+        assertTrue(getTrackedRace().getTrack(getCompetitorByName("Findel")).hasDirectionChange(middle, /* minimumDegreeDifference */ 20.));
         Wind estimatedWindDirection = getTrackedRace().getEstimatedWindDirection(/* position */ null, middle);
         assertNotNull(estimatedWindDirection);
         assertEquals(241., estimatedWindDirection.getFrom().getDegrees(), 3.); // expect wind from 241 +/- 3 degrees

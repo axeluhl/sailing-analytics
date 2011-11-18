@@ -15,7 +15,9 @@ import org.junit.Test;
 import com.maptrack.client.io.TypeController;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
+import com.sap.sailing.domain.tracking.impl.DynamicTrackedEventImpl;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
@@ -87,13 +89,16 @@ public class ReceiveMarkPassingDataTest extends AbstractTracTracLiveTest {
         List<Receiver> receivers = new ArrayList<Receiver>();
         receivers.add(receiver);
         for (Receiver r : DomainFactory.INSTANCE.getUpdateReceivers(
-                DomainFactory.INSTANCE.getOrCreateTrackedEvent(DomainFactory.INSTANCE.createEvent(getEvent())),
-                getEvent(), EmptyWindStore.INSTANCE, this, ReceiverType.RACECOURSE,
+                new DynamicTrackedEventImpl(DomainFactory.INSTANCE.getOrCreateEvent(getEvent())),
+                getEvent(), EmptyWindStore.INSTANCE, new DynamicRaceDefinitionSet() {
+                    @Override
+                    public void addRaceDefinition(RaceDefinition race) {}
+                }, ReceiverType.RACECOURSE,
                 ReceiverType.MARKPOSITIONS, ReceiverType.RACESTARTFINISH, ReceiverType.RAWPOSITIONS)) {
             receivers.add(r);
         }
         addListenersForStoredDataAndStartController(receivers);
-        raceDefinition = DomainFactory.INSTANCE.getRaceDefinition(race);
+        raceDefinition = DomainFactory.INSTANCE.getAndWaitForRaceDefinition(race);
         synchronized (semaphor) {
             while (firstData[0] == null) {
                 try {

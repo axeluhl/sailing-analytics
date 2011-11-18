@@ -65,7 +65,7 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
         }
         for (Waypoint waypoint : getRace().getCourse().getWaypoints()) {
             for (Buoy buoy : waypoint.getBuoys()) {
-                getTrack(buoy).setMillisecondsOverWhichToAverage(millisecondsOverWhichToAverageSpeed);
+                getOrCreateTrack(buoy).setMillisecondsOverWhichToAverage(millisecondsOverWhichToAverageSpeed);
             }
         }
         updated(MillisecondsTimePoint.now());
@@ -85,8 +85,8 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     }
     
     @Override
-    public DynamicTrack<Buoy, GPSFix> getTrack(Buoy buoy) {
-        return (DynamicTrack<Buoy, GPSFix>) super.getTrack(buoy);
+    public DynamicTrack<Buoy, GPSFix> getOrCreateTrack(Buoy buoy) {
+        return (DynamicTrack<Buoy, GPSFix>) super.getOrCreateTrack(buoy);
     }
     
     private synchronized Set<RaceChangeListener<Competitor>> getListeners() {
@@ -168,18 +168,20 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     }
 
     @Override
-    public synchronized void updateMarkPassings(Competitor competitor, Iterable<MarkPassing> markPassings) {
-        clearMarkPassings(competitor);
-        NavigableSet<MarkPassing> competitorMarkPassings = getMarkPassings(competitor);
-        TimePoint timePointOfLatestEvent = new MillisecondsTimePoint(0);
-        for (MarkPassing markPassing : markPassings) {
-            competitorMarkPassings.add(markPassing);
-            getMarkPassingsInOrder(markPassing.getWaypoint()).add(markPassing);
-            if (markPassing.getTimePoint().compareTo(timePointOfLatestEvent) > 0) {
-                timePointOfLatestEvent = markPassing.getTimePoint();
+    public void updateMarkPassings(Competitor competitor, Iterable<MarkPassing> markPassings) {
+        synchronized (this) {
+            clearMarkPassings(competitor);
+            NavigableSet<MarkPassing> competitorMarkPassings = getMarkPassings(competitor);
+            TimePoint timePointOfLatestEvent = new MillisecondsTimePoint(0);
+            for (MarkPassing markPassing : markPassings) {
+                competitorMarkPassings.add(markPassing);
+                getMarkPassingsInOrder(markPassing.getWaypoint()).add(markPassing);
+                if (markPassing.getTimePoint().compareTo(timePointOfLatestEvent) > 0) {
+                    timePointOfLatestEvent = markPassing.getTimePoint();
+                }
             }
+            updated(timePointOfLatestEvent);
         }
-        updated(timePointOfLatestEvent);
         // notify *after* all mark passings have been re-established; should avoid flicker
         for (MarkPassing markPassing : markPassings) {
             notifyListeners(markPassing);

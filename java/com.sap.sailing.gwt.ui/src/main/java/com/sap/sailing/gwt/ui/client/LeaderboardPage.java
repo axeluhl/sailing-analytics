@@ -18,6 +18,10 @@ public class LeaderboardPage extends AbstractEntryPoint {
                 if (leaderboardNames.contains(leaderboardName)) {
                     LeaderboardPanel leaderboardPanel = new LeaderboardPanel(sailingService, leaderboardName,
                             LeaderboardPage.this, stringConstants);
+                    String padding = Window.Location.getParameter("padding");
+                    if (padding != null && Boolean.valueOf(padding)) {
+                        leaderboardPanel.addStyleName("leftPaddedPanel");
+                    }
                     RootPanel.get().add(leaderboardPanel);
                 } else {
                     RootPanel.get().add(new Label(stringConstants.noSuchLeaderboard()));

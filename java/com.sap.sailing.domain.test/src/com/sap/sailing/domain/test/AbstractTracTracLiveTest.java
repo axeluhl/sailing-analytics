@@ -1,6 +1,5 @@
 package com.sap.sailing.domain.test;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import java.io.FileNotFoundException;
@@ -64,7 +63,6 @@ public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest impl
         // Read event data from configuration file
         event = KeyValue.setup(paramUrl);
         assertNotNull(event);
-        assertEquals(getExpectedEventName(), event.getName());
         // Initialize data controller using live and stored data sources
         controller = new DataController(liveUri, storedUri, this);
         // Start live and stored data streams

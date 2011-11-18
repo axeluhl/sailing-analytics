@@ -139,6 +139,8 @@ public class ExpeditionMessageImpl implements ExpeditionMessage {
     public SpeedWithBearing getTrueWind() {
         if (hasValue(ID_TWD) && hasValue(ID_TWS)) {
             return new KnotSpeedWithBearingImpl(getValue(ID_TWS), getTrueWindBearing());
+        } else if (hasValue(ID_GWD) && hasValue(ID_GWS)) {
+            return new KnotSpeedWithBearingImpl(getValue(ID_GWS), getTrueWindBearing());
         } else {
             return null;
         }
@@ -146,8 +148,10 @@ public class ExpeditionMessageImpl implements ExpeditionMessage {
     
     @Override
     public Bearing getTrueWindBearing() {
-        if (hasValue(ID_TWD)) {
-            return new DegreeBearingImpl(getValue(ID_TWD));
+        if (hasValue(ID_TWD)) { // TWD represents the "from" direction and need to be reversed to obtain the "to" bearing
+            return new DegreeBearingImpl(getValue(ID_TWD)).reverse();
+        } else if (hasValue(ID_GWD)) {
+                return new DegreeBearingImpl(getValue(ID_GWD)).reverse();
         } else {
             return null;
         }

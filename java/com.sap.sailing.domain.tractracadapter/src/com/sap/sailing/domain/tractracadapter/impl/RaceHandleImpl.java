@@ -2,18 +2,18 @@ package com.sap.sailing.domain.tractracadapter.impl;
 
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
+import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
-import com.sap.sailing.domain.tractracadapter.RaceHandle;
-import com.sap.sailing.domain.tractracadapter.RaceTracker;
+import com.sap.sailing.domain.tractracadapter.TracTracRaceTracker;
 import com.tractrac.clientmodule.Event;
 
 public class RaceHandleImpl implements RaceHandle {
     private final Event tractracEvent;
     private final DomainFactory domainFactory;
     private final DynamicTrackedEvent trackedEvent;
-    private final RaceTracker raceTracker;
+    private final TracTracRaceTracker raceTracker;
     
-    public RaceHandleImpl(DomainFactory domainFactory, Event tractracEvent, DynamicTrackedEvent trackedEvent, RaceTracker raceTracker) {
+    public RaceHandleImpl(DomainFactory domainFactory, Event tractracEvent, DynamicTrackedEvent trackedEvent, TracTracRaceTracker raceTracker) {
         this.domainFactory = domainFactory;
         this.tractracEvent = tractracEvent;
         this.trackedEvent = trackedEvent;
@@ -22,13 +22,13 @@ public class RaceHandleImpl implements RaceHandle {
 
     @Override
     public com.sap.sailing.domain.base.Event getEvent() {
-        return domainFactory.createEvent(tractracEvent);
+        return domainFactory.getOrCreateEvent(tractracEvent);
     }
 
     @Override
     public RaceDefinition getRace() {
-        // we assume there is exactly one Race per TracTrac event
-        return domainFactory.getRaceDefinition(tractracEvent.getRaceList().iterator().next());
+        // FIXME we assume there is exactly one Race per TracTrac event but during match racing there may be many
+        return domainFactory.getAndWaitForRaceDefinition(tractracEvent.getRaceList().iterator().next());
     }
     
     @Override
@@ -37,8 +37,14 @@ public class RaceHandleImpl implements RaceHandle {
     }
 
     @Override
-    public RaceTracker getRaceTracker() {
+    public TracTracRaceTracker getRaceTracker() {
         return raceTracker;
+    }
+
+    @Override
+    public RaceDefinition getRace(long timeoutInMilliseconds) {
+        // FIXME we assume there is exactly one Race per TracTrac event but during match racing there may be many
+        return domainFactory.getAndWaitForRaceDefinition(tractracEvent.getRaceList().iterator().next(), timeoutInMilliseconds);
     }
     
 }

@@ -50,9 +50,19 @@ public abstract class Servlet extends HttpServlet {
         if (event != null) {
             String racename = req.getParameter(PARAM_NAME_RACENAME);
             for (RaceDefinition race : event.getAllRaces()) {
-                if (racename.equals(race.getName())) {
+                if (race.getName().equals(racename)) {
                     return race;
                 }
+            }
+        }
+        return null;
+    }
+
+    protected RaceDefinition getRaceDefinition(Event event, HttpServletRequest req) {
+        String racename = req.getParameter(PARAM_NAME_RACENAME);
+        for (RaceDefinition race : event.getAllRaces()) {
+            if (race.getName().equals(racename)) {
+                return race;
             }
         }
         return null;
@@ -80,7 +90,7 @@ public abstract class Servlet extends HttpServlet {
 	    RaceDefinition race = getRaceDefinition(req);
 	    TrackedRace trackedRace = null;
 	    if (event != null && race != null) {
-	        trackedRace = getService().getDomainFactory().getTrackedEvent(event).getTrackedRace(race);
+	        trackedRace = getService().getOrCreateTrackedEvent(event).getTrackedRace(race);
 	    }
 	    return trackedRace;
 	}

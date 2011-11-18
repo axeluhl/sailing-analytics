@@ -8,6 +8,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.text.ParseException;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -30,6 +31,9 @@ import com.sap.sailing.domain.base.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.base.impl.DegreePosition;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.persistence.DomainObjectFactory;
+import com.sap.sailing.domain.persistence.MongoObjectFactory;
+import com.sap.sailing.domain.persistence.MongoWindStoreFactory;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.NoWindException;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -40,8 +44,6 @@ import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tractracadapter.RaceRecord;
-import com.sap.sailing.mongodb.MongoObjectFactory;
-import com.sap.sailing.mongodb.MongoWindStoreFactory;
 import com.sap.sailing.util.InvalidDateException;
 import com.sap.sailing.util.Util.Triple;
 
@@ -173,7 +175,7 @@ public class AdminApp extends Servlet {
             if (race == null) {
                 resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Race not found");
             } else {
-                DynamicTrackedRace trackedRace = getService().getDomainFactory().getTrackedEvent(event).getTrackedRace(race);
+                DynamicTrackedRace trackedRace = getService().getOrCreateTrackedEvent(event).getTrackedRace(race);
                 String windAveragingIntervalInMIllis = req.getParameter(PARAM_NAME_WIND_AVERAGING_INTERVAL_MILLIS);
                 if (windAveragingIntervalInMIllis != null) {
                     trackedRace.setMillisecondsOverWhichToAverageWind(Long.valueOf(windAveragingIntervalInMIllis));
@@ -186,9 +188,10 @@ public class AdminApp extends Servlet {
         }
     }
 
-    private void listRacesInEvent(HttpServletRequest req, HttpServletResponse resp) throws IOException, ParseException, org.json.simple.parser.ParseException {
+    private void listRacesInEvent(HttpServletRequest req, HttpServletResponse resp) throws IOException, ParseException,
+            org.json.simple.parser.ParseException, URISyntaxException {
         URL jsonURL = new URL(req.getParameter(PARAM_NAME_EVENT_JSON_URL));
-        List<RaceRecord> raceRecords = getService().getRaceRecords(jsonURL);
+        List<RaceRecord> raceRecords = getService().getTracTracRaceRecords(jsonURL).getB();
         JSONArray result = new JSONArray();
         for (RaceRecord raceRecord : raceRecords) {
             JSONObject jsonRaceRecord = new JSONObject();
@@ -211,7 +214,7 @@ public class AdminApp extends Servlet {
             if (race == null) {
                 resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Race not found");
             } else {
-                TrackedRace trackedRace = getService().getDomainFactory().getTrackedEvent(event).getTrackedRace(race);
+                TrackedRace trackedRace = getService().getOrCreateTrackedEvent(event).getTrackedRace(race);
                 TimePoint time = getTimePoint(req, PARAM_NAME_TIME, PARAM_NAME_TIME_MILLIS, MillisecondsTimePoint.now());
                 TimePoint oneHourLater = new MillisecondsTimePoint(time.asMillis()+3600*1000);
                 String[] latitudes = req.getParameterValues(PARAM_NAME_LATDEG);
@@ -253,7 +256,7 @@ public class AdminApp extends Servlet {
             if (race == null) {
                 resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Race not found");
             } else {
-                TrackedRace trackedRace = getService().getDomainFactory().getTrackedEvent(event).getTrackedRace(race);
+                TrackedRace trackedRace = getService().getOrCreateTrackedEvent(event).getTrackedRace(race);
                 TimePoint from = getTimePoint(req, PARAM_NAME_FROM_TIME, PARAM_NAME_FROM_TIME_MILLIS,
                         trackedRace.getStart()==null?new MillisecondsTimePoint(0):
                             /* 24h before race start */ new MillisecondsTimePoint(trackedRace.getStart().asMillis()-24*3600*1000));
@@ -311,7 +314,7 @@ public class AdminApp extends Servlet {
                     if (race == null) {
                         resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Race not found");
                     } else {
-                        TrackedRace trackedRace = getService().getDomainFactory().getTrackedEvent(event)
+                        TrackedRace trackedRace = getService().getOrCreateTrackedEvent(event)
                                 .getTrackedRace(race);
                         trackedRace.setWindSource(windSource);
                         resp.getWriter().println(
@@ -337,14 +340,22 @@ public class AdminApp extends Servlet {
     }
 
     private void setWind(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        Event event = getEvent(req);
-        if (event == null) {
-            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Event not found");
+        Event e = getEvent(req);
+        Iterable<Event> events;
+        if (e == null) {
+            events = getService().getAllEvents();
         } else {
-            RaceDefinition race = getRaceDefinition(req);
-            if (race == null) {
-                resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Race not found");
+            events = Collections.singleton(e);
+        }
+        for (Event event : events) {
+            RaceDefinition r = getRaceDefinition(event, req);
+            Iterable<RaceDefinition> races;
+            if (r == null) {
+                races = event.getAllRaces();
             } else {
+                races = Collections.singleton(r);
+            }
+            for (RaceDefinition race : races) {
                 String bearingAsString = req.getParameter(PARAM_NAME_BEARING);
                 if (bearingAsString != null) {
                     Bearing bearing = new DegreeBearingImpl(Double.valueOf(bearingAsString));
@@ -367,9 +378,9 @@ public class AdminApp extends Servlet {
                     try {
                         TimePoint timePoint = getTimePoint(req, PARAM_NAME_TIME, PARAM_NAME_TIME_MILLIS, MillisecondsTimePoint.now());
                         Wind wind = new WindImpl(p, timePoint, speed);
-                        getService().getDomainFactory().getTrackedEvent(event).getTrackedRace(race).recordWind(wind, WindSource.WEB);
-                    } catch (InvalidDateException e) {
-                        resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Couldn't parse time specification " + e.getMessage());
+                        getService().getOrCreateTrackedEvent(event).getTrackedRace(race).recordWind(wind, WindSource.WEB);
+                    } catch (InvalidDateException ex) {
+                        resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Couldn't parse time specification " + ex.getMessage());
                     }
                 } else {
                     resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "wind bearing parameter "+PARAM_NAME_BEARING+" missing");
@@ -396,7 +407,7 @@ public class AdminApp extends Servlet {
                         resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Wind source name " + sourceName + " unknown");
                     } else {
                         try {
-                            WindTrack windTrack = getService().getDomainFactory().getTrackedEvent(event)
+                            WindTrack windTrack = getService().getOrCreateTrackedEvent(event)
                                     .getTrackedRace(race).getWindTrack(windSource);
                             TimePoint timePoint = getTimePoint(req, PARAM_NAME_TIME, PARAM_NAME_TIME_MILLIS,
                                     MillisecondsTimePoint.now());
@@ -480,7 +491,7 @@ public class AdminApp extends Servlet {
         URL jsonURL = new URL(req.getParameter(PARAM_NAME_EVENT_JSON_URL));
         URI liveURI = new URI(req.getParameter(PARAM_NAME_LIVE_URI));
         URI storedURI = new URI(req.getParameter(PARAM_NAME_STORED_URI));
-        getService().addEvent(jsonURL, liveURI, storedURI, getWindStore(req));
+        getService().addEvent(jsonURL, liveURI, storedURI, getWindStore(req), /* timeoutInMilliseconds */ 60000);
     }
     
     private WindStore getWindStore(HttpServletRequest req) throws UnknownHostException, MongoException {
@@ -489,7 +500,7 @@ public class AdminApp extends Servlet {
             if (windStore.equals(WIND_STORE_EMPTY)) {
                 return EmptyWindStore.INSTANCE;
             } else if (windStore.equals(WIND_STORE_MONGO)) {
-                return MongoWindStoreFactory.INSTANCE.getMongoWindStore(MongoObjectFactory.INSTANCE);
+                return MongoWindStoreFactory.INSTANCE.getMongoWindStore(MongoObjectFactory.INSTANCE, DomainObjectFactory.INSTANCE);
             } else {
                 log("Couldn't find wind store "+windStore+". Using EmptyWindStore instead.");
                 return EmptyWindStore.INSTANCE;
@@ -503,7 +514,7 @@ public class AdminApp extends Servlet {
         URL paramURL = new URL(req.getParameter(PARAM_NAME_PARAM_URL));
         URI liveURI = new URI(req.getParameter(PARAM_NAME_LIVE_URI));
         URI storedURI = new URI(req.getParameter(PARAM_NAME_STORED_URI));
-        getService().addRace(paramURL, liveURI, storedURI, getWindStore(req));
+        getService().addTracTracRace(paramURL, liveURI, storedURI, getWindStore(req), /* timeoutInMilliseconds */ 60000);
     }
 
     private void stopRace(HttpServletRequest req, HttpServletResponse resp) throws MalformedURLException, IOException, InterruptedException {

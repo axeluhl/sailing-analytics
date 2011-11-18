@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Sailing App GWT UI
-Bundle-SymbolicName: com.sap.sailing.gwt.ui;singleton:=true
+Bundle-SymbolicName: com.sap.sailing.gwt.ui
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
@@ -15,15 +15,22 @@ Require-Bundle: javax.servlet;bundle-version="2.5.0",
  org.json.simple;bundle-version="1.1.0",
  com.sap.sailing.mongodb,
  com.mongodb.driver;bundle-version="2.6.2",
- com.sap.sailing.declination,
  com.sap.ui.phoenix.pwt-sap.ui.commons,
  com.sap.ui.phoenix.pwt-sap.ui.core,
  com.sap.ui.phoenix.commons,
- com.sap.ui.phoenix.core
+ com.sap.ui.phoenix.core,
+ org.eclipse.osgi.services,
+ com.sap.sailing.httpservicetracker,
+ com.sap.sailing.domain.swisstimingadapter,
+ com.sap.sailing.domain.persistence,
+ com.sap.sailing.domain.swisstimingadapter.persistence,
+ com.sap.sailing.domain.tractracadapter.persistence,
+ org.junit4
 Bundle-ClassPath: lib/gwt-maps.jar,
  lib/gwt-visualization.jar,
  lib/gwt-servlet.jar,
  .
 Bundle-Activator: com.sap.sailing.gwt.ui.server.Activator
 Bundle-ActivationPolicy: lazy
-Export-Package: com.sap.sailing.gwt.ui.server
+Export-Package: com.sap.sailing.gwt.ui.server,
+ com.sap.sailing.gwt.ui.shared;x-friends:="com.sap.sailing.gwt.ui.test"

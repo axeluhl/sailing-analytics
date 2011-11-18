@@ -165,13 +165,13 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
         Position estimatedPosition = getTrackedRace().getTrack(getCompetitor()).getEstimatedPosition(at, false);
         if (!hasStartedLeg(at) || estimatedPosition == null) {
             // covers the case with no fixes for this leg yet, also if the mark passing has already been received
-            estimatedPosition = getTrackedRace().getTrack(getLeg().getFrom().getBuoys().iterator().next())
+            estimatedPosition = getTrackedRace().getOrCreateTrack(getLeg().getFrom().getBuoys().iterator().next())
                     .getEstimatedPosition(at, false);
         }
         if (estimatedPosition == null) { // may happen if mark positions haven't been received yet
             return null;
         }
-        return getWindwardDistance(estimatedPosition, getTrackedRace().getTrack(buoy).getEstimatedPosition(at, false),
+        return getWindwardDistance(estimatedPosition, getTrackedRace().getOrCreateTrack(buoy).getEstimatedPosition(at, false),
                 at);
     }
 
@@ -210,7 +210,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
         if (cos < 0) {
             bearing = bearing.reverse();
         }
-        SpeedWithBearing result = new KnotSpeedWithBearingImpl(Math.abs(wind.getKnots() * cos), bearing);
+        SpeedWithBearing result = new KnotSpeedWithBearingImpl(Math.abs(speed.getKnots() * cos), bearing);
         return result;
     }
 
@@ -224,8 +224,12 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
 
     @Override
     public int getRank(TimePoint timePoint) {
-        List<TrackedLegOfCompetitor> competitorTracksByRank = getTrackedLeg().getCompetitorTracksOrderedByRank(timePoint);
-        return competitorTracksByRank.indexOf(this)+1;
+        int result = 0;
+        if (hasStartedLeg(timePoint)) {
+            List<TrackedLegOfCompetitor> competitorTracksByRank = getTrackedLeg().getCompetitorTracksOrderedByRank(timePoint);
+            result = competitorTracksByRank.indexOf(this)+1;
+        }
+        return result;
     }
 
     @Override
