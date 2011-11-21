@@ -4,3 +4,4 @@
 *.swp
 *~
 manifest.txt
+java/com.sap.sailing.gwt.ui/gwt-unitCache/*
