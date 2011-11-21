@@ -12,21 +12,31 @@ public class LeaderboardPage extends AbstractEntryPoint {
     public void onModuleLoad() {
         super.onModuleLoad();
         sailingService.getLeaderboardNames(new AsyncCallback<List<String>>() {
+            
             @Override
             public void onSuccess(List<String> leaderboardNames) {
+                
                 String leaderboardName = Window.Location.getParameter("name");
-                if (leaderboardNames.contains(leaderboardName)) {
+                
+                if (leaderboardNames.contains(leaderboardName)) 
+                {
                     LeaderboardPanel leaderboardPanel = new LeaderboardPanel(sailingService, leaderboardName,
                             LeaderboardPage.this, stringConstants);
+                    
                     String padding = Window.Location.getParameter("padding");
-                    if (padding != null && Boolean.valueOf(padding)) {
-                        leaderboardPanel.addStyleName("leftPaddedPanel");
+                    
+                    if (padding != null && Boolean.valueOf(padding)) 
+                    {
+                      leaderboardPanel.addStyleName("leftPaddedPanel");
                     }
+                    
                     RootPanel.get().add(leaderboardPanel);
+                    
                 } else {
                     RootPanel.get().add(new Label(stringConstants.noSuchLeaderboard()));
                 }
             }
+            
             @Override
             public void onFailure(Throwable t) {
                 reportError("Error trying to obtain list of leaderboard names: "+t.getMessage());
