@@ -81,8 +81,10 @@ public class CourseImpl extends NamedImpl implements Course {
             boolean isLast = zeroBasedPosition == waypoints.size()-1;
             Waypoint removedWaypoint = waypoints.remove(zeroBasedPosition);
             if (isLast) {
-                // last waypoint was removed; remove last leg
-                legs.remove(legs.size()-1);
+                if (waypoints.size() > 1) {
+                    // last waypoint was removed; remove last leg
+                    legs.remove(legs.size() - 1);
+                }
             } else {
                 legs.remove(zeroBasedPosition);
             }

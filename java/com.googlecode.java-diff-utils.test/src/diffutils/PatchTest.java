@@ -1,12 +1,13 @@
 package diffutils;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import junit.framework.TestCase;
 import difflib.DiffUtils;
 import difflib.Patch;
 import difflib.PatchFailedException;
-import junit.framework.TestCase;
-
-import java.util.Arrays;
-import java.util.List;
 
 public class PatchTest extends TestCase {
 
@@ -41,6 +42,21 @@ public class PatchTest extends TestCase {
         final Patch<String> patch = DiffUtils.diff(changeTest_from, changeTest_to);
         try {
             assertEquals(changeTest_to, DiffUtils.patch(changeTest_from, patch));
+        } catch (PatchFailedException e) {
+            fail(e.getMessage());
+        }
+    }
+
+    public void testPatch_EntirelyDifferent() {
+        final List<String> changeTest_from = new ArrayList<String>();
+        changeTest_from.add("aaa");
+        changeTest_from.add("bbb");
+        final List<String> changeTest_to = Arrays.asList("ccc", "ddd");
+
+        final Patch<String> patch = DiffUtils.diff(changeTest_from, changeTest_to);
+        try {
+            patch.applyToInPlace(changeTest_from);
+            assertEquals(changeTest_to, changeTest_from);
         } catch (PatchFailedException e) {
             fail(e.getMessage());
         }
