@@ -20,7 +20,7 @@ public class Activator implements BundleActivator {
 
     private static final String MONGO_DB_NAME = "mongo.dbName";
 
-    String DEFAULT_DB_NAME = "winddb"; 
+    private String DEFAULT_DB_NAME = "winddb"; 
     
     private static Activator defaultInstance;
     
@@ -33,6 +33,7 @@ public class Activator implements BundleActivator {
         defaultHostName = System.getProperty(MONGO_HOSTNAME, "127.0.0.1");
         defaultPort = Integer.valueOf(System.getProperty(MONGO_PORT, "27017"));
         defaultDatabaseName = System.getProperty(MONGO_DB_NAME, DEFAULT_DB_NAME);
+        logger.info("Default Mongo host:port/DBName: "+defaultHostName+":"+defaultPort+"/"+defaultDatabaseName);
         mongos = new HashMap<com.sap.sailing.util.Util.Pair<String, Integer>, Mongo>();
     }
     

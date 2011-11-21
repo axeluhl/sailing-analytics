@@ -283,6 +283,8 @@ public class StoreAndForward implements Runnable {
                         } catch (InterruptedException e1) {
                             logger.throwing(StoreAndForward.class.getName(), "Can't find any sleep...", e1);
                         } 
+                    } else {
+                        logger.info("StoreAndForward socket was closed.");
                     }
                 }
             }
