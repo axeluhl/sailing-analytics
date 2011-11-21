@@ -213,7 +213,7 @@ public class TestColumnToggling extends GWTTestCase {
     @Override
     public String getModuleName() {
         // TODO Auto-generated method stub
-        return "com.sap.sailing.gwt.ui.AdminConsole";
+        return "com.sap.sailing.gwt.ui.test.TestConsole";
     }
 
 }
