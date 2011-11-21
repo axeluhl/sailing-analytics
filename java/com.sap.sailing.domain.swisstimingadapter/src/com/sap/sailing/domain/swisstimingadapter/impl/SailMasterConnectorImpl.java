@@ -417,7 +417,6 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
                 try {
                     listener.receivedCourseConfiguration(message.getSections()[1], course);
                 } catch (Throwable t) {
-                    logger.info("Exception occurred trying to notify listener "+listener+" about "+message+": "+t.getMessage());
                     logger.throwing(SailMasterConnectorImpl.class.getName(), "notifyListenersCCG", t);
                 }
             }
