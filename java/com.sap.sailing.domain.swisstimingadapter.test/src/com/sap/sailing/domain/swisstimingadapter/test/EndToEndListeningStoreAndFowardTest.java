@@ -119,7 +119,7 @@ public class EndToEndListeningStoreAndFowardTest {
             raceIDs.add(race.getName());
         }
         Set<String> expectedRaceIDs = new HashSet<String>();
-        for (String raceIDToTrack : new String[] { "Not such a wonderful race", "A wonderful test race" }) {
+        for (String raceIDToTrack : new String[] { "4711", "4712" }) {
             expectedRaceIDs.add(raceIDToTrack);
         }
         assertEquals(expectedRaceIDs, raceIDs);
@@ -171,7 +171,7 @@ public class EndToEndListeningStoreAndFowardTest {
             }
         }
         Set<String> expectedRaceIDs = new HashSet<String>();
-        for (String raceIDToTrack : new String[] { "A simulated SwissTiming race" }) {
+        for (String raceIDToTrack : new String[] { "W4702" }) {
             expectedRaceIDs.add(raceIDToTrack);
         }
         assertEquals(expectedRaceIDs, raceIDs);
@@ -223,7 +223,7 @@ public class EndToEndListeningStoreAndFowardTest {
             }
         }
         Set<String> expectedRaceIDs = new HashSet<String>();
-        for (String raceIDToTrack : new String[] { "A simulated SwissTiming race" }) {
+        for (String raceIDToTrack : new String[] { "W4702" }) {
             expectedRaceIDs.add(raceIDToTrack);
         }
         assertEquals(expectedRaceIDs, raceIDs);
