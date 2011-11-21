@@ -35,8 +35,9 @@ public class SimpleDomainFactoryTest {
         Race race = new RaceImpl("1234", "Race 1234");
         Iterable<Competitor> competitors = Collections.emptyList();
         StartList startList = new StartListImpl("1234", competitors);
-        Mark mark = new MarkImpl("M1", 0, Collections.singleton("D1"));
-        List<Mark> marks = Collections.singletonList(mark);
+        Mark mark1 = new MarkImpl("M1", 0, Arrays.asList("D1", "D2"));
+        Mark mark2 = new MarkImpl("M1", 0, Arrays.asList("D3", "D4"));
+        List<Mark> marks = Arrays.asList(mark1, mark2);
         Course course = new CourseImpl("1234", marks);
         RaceDefinition raceDefinition = domainFactory.createRaceDefinition(event, race, startList, course);
         ArrayList<Waypoint> waypoints1 = new ArrayList<Waypoint>();
