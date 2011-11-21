@@ -21,12 +21,13 @@ import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.impl.DegreePosition;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.tracking.AbstractRaceTrackerImpl;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrack;
-import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.RaceHandle;
+import com.sap.sailing.domain.tracking.TrackedEvent;
 import com.sap.sailing.domain.tracking.TrackedEventRegistry;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindStore;
@@ -44,7 +45,7 @@ import com.tractrac.clientmodule.data.DataController;
 import com.tractrac.clientmodule.data.DataController.Listener;
 import com.tractrac.clientmodule.setup.KeyValue;
 
-public class TracTracRaceTrackerImpl implements Listener, TracTracRaceTracker, DynamicRaceDefinitionSet {
+public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements Listener, TracTracRaceTracker, DynamicRaceDefinitionSet {
     private static final Logger logger = Logger.getLogger(TracTracRaceTrackerImpl.class.getName());
     
     /**
@@ -59,7 +60,6 @@ public class TracTracRaceTrackerImpl implements Listener, TracTracRaceTracker, D
     private final DataController controller;
     private final Set<Receiver> receivers;
     private final DomainFactory domainFactory;
-    private final DynamicTrackedEvent trackedEvent;
     private final WindStore windStore;
     private final Set<RaceDefinition> races;
     
@@ -90,7 +90,7 @@ public class TracTracRaceTrackerImpl implements Listener, TracTracRaceTracker, D
      *            Provides the capability to obtain the {@link WindTrack}s for the different wind sources. A trivial
      *            implementation is {@link EmptyWindStore} which simply provides new, empty tracks. This is always
      *            available but loses track of the wind, e.g., during server restarts.
-     * @param trackedEventRegistry TODO
+     * @param trackedEventRegistry used to create the {@link TrackedEvent} for the domain event
      */
     protected TracTracRaceTrackerImpl(DomainFactory domainFactory, URL paramURL, URI liveURI, URI storedURI,
             WindStore windStore, TrackedEventRegistry trackedEventRegistry) throws URISyntaxException,
@@ -119,10 +119,10 @@ public class TracTracRaceTrackerImpl implements Listener, TracTracRaceTracker, D
             domainFactory.removeRace(tractracEvent, tractracRace, trackedEventRegistry);
         }
         domainEvent = domainFactory.getOrCreateEvent(tractracEvent);
-        trackedEvent = trackedEventRegistry.getOrCreateTrackedEvent(domainEvent);
+        setTrackedEvent(trackedEventRegistry.getOrCreateTrackedEvent(domainEvent));
         receivers = new HashSet<Receiver>();
         Set<TypeController> typeControllers = new HashSet<TypeController>();
-        for (Receiver receiver : domainFactory.getUpdateReceivers(trackedEvent, tractracEvent, windStore, this)) {
+        for (Receiver receiver : domainFactory.getUpdateReceivers(getTrackedEvent(), tractracEvent, windStore, this)) {
             receivers.add(receiver);
             for (TypeController typeController : receiver.getTypeControllersAndStart()) {
                 typeControllers.add(typeController);
@@ -183,11 +183,6 @@ public class TracTracRaceTrackerImpl implements Listener, TracTracRaceTracker, D
     }
 
     @Override
-    public DynamicTrackedEvent getTrackedEvent() {
-        return trackedEvent;
-    }
-    
-    @Override
     public RaceHandle getRaceHandle() {
         return new RaceHandleImpl(domainFactory, tractracEvent, getTrackedEvent(), this);
     }
@@ -232,15 +227,7 @@ public class TracTracRaceTrackerImpl implements Listener, TracTracRaceTracker, D
         }
         ioThread.join(3000); // wait no more than three seconds
         logger.info("Joined TracTrac IO thread for race(s) "+getRaces());
-        Set<RaceDefinition> races = getRaces();
-        if (races != null && !races.isEmpty()) {
-            for (RaceDefinition race : races) {
-                TrackedRace trackedRace = trackedEvent.getExistingTrackedRace(race);
-                if (trackedRace != null) {
-                    trackedEvent.removedTrackedRace(trackedRace);
-                }
-            }
-        }
+        super.stop();
     }
 
     protected DataController getController() {

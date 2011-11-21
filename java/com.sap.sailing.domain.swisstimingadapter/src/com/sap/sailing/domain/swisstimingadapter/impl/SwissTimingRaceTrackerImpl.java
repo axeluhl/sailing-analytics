@@ -30,6 +30,7 @@ import com.sap.sailing.domain.swisstimingadapter.SailMasterListener;
 import com.sap.sailing.domain.swisstimingadapter.StartList;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingRaceTracker;
+import com.sap.sailing.domain.tracking.AbstractRaceTrackerImpl;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
@@ -41,6 +42,7 @@ import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.TrackedEventRegistry;
+import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.util.Util;
@@ -48,7 +50,7 @@ import com.sap.sailing.util.Util.Triple;
 
 import difflib.PatchFailedException;
 
-public class SwissTimingRaceTrackerImpl implements SwissTimingRaceTracker, SailMasterListener {
+public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implements SwissTimingRaceTracker, SailMasterListener {
     private static final Logger logger = Logger.getLogger(SwissTimingRaceTrackerImpl.class.getName());
     
     private final SailMasterConnector connector;
@@ -57,7 +59,6 @@ public class SwissTimingRaceTrackerImpl implements SwissTimingRaceTracker, SailM
     private final DomainFactory domainFactory;
     private final Triple<String, String, Integer> id;
     private final Event event;
-    private final DynamicTrackedEvent trackedEvent;
     private final WindStore windStore;
 
     private RaceDefinition race;
@@ -76,7 +77,7 @@ public class SwissTimingRaceTrackerImpl implements SwissTimingRaceTracker, SailM
         this.id = new Triple<String, String, Integer>(raceID, hostname, port);
         connector.addSailMasterListener(raceID, this);
         event = domainFactory.getOrCreateEvent(raceID);
-        trackedEvent = trackedEventRegistry.getOrCreateTrackedEvent(event);
+        setTrackedEvent(trackedEventRegistry.getOrCreateTrackedEvent(event));
         connector.trackRace(raceID);
         
     }
@@ -84,6 +85,15 @@ public class SwissTimingRaceTrackerImpl implements SwissTimingRaceTracker, SailM
     @Override
     public void stop() throws MalformedURLException, IOException, InterruptedException {
         connector.removeSailMasterListener(raceID, this);
+        Set<RaceDefinition> races = getRaces();
+        if (races != null && !races.isEmpty()) {
+            for (RaceDefinition race : races) {
+                TrackedRace trackedRace = getTrackedEvent().getExistingTrackedRace(race);
+                if (trackedRace != null) {
+                    getTrackedEvent().removedTrackedRace(trackedRace);
+                }
+            }
+        }
     }
 
     @Override
@@ -111,7 +121,7 @@ public class SwissTimingRaceTrackerImpl implements SwissTimingRaceTracker, SailM
 
             @Override
             public DynamicTrackedEvent getTrackedEvent() {
-                return trackedEvent;
+                return SwissTimingRaceTrackerImpl.this.getTrackedEvent();
             }
 
             @Override
@@ -119,11 +129,6 @@ public class SwissTimingRaceTrackerImpl implements SwissTimingRaceTracker, SailM
                 return SwissTimingRaceTrackerImpl.this;
             }
         };
-    }
-
-    @Override
-    public DynamicTrackedEvent getTrackedEvent() {
-        return trackedEvent;
     }
 
     @Override
