@@ -718,18 +718,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         loadCompleteLeaderboard(getLeaderboardDisplayDate());
         VerticalPanel vp = new VerticalPanel();
         vp.setSpacing(15);
-        HorizontalPanel logoAndTitle = new HorizontalPanel();
+        HorizontalPanel logoAndTitle = createLogoAndTitlePanel(stringConstants);
         vp.add(logoAndTitle);
-        Anchor sapLogo = new Anchor(new SafeHtmlBuilder().appendHtmlConstant(
-                "<img class=\"linkNoBorder\" src=\"/images/sap_66_transparent.png\"/>").toSafeHtml());
-        sapLogo.setHref("http://www.sap.com");
-        logoAndTitle.add(sapLogo);
-        Label sailingAnalyticsLabel = new Label(stringConstants.sapSailingAnalytics());
-        HorizontalPanel labelPanel = new HorizontalPanel();
-        labelPanel.add(sailingAnalyticsLabel);
-        labelPanel.setSpacing(10);
-        logoAndTitle.add(labelPanel);
-        sailingAnalyticsLabel.addStyleName("boldLabel");
         DockPanel dockPanel = new DockPanel();
         dockPanel.setWidth("100%");
         dockPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
@@ -768,6 +758,21 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         vp.add(dockPanel);
         vp.add(getLeaderboardTable());
         setWidget(vp);
+    }
+
+    private HorizontalPanel createLogoAndTitlePanel(final StringConstants stringConstants) {
+        HorizontalPanel logoAndTitle = new HorizontalPanel();
+        Anchor sapLogo = new Anchor(new SafeHtmlBuilder().appendHtmlConstant(
+                "<img class=\"linkNoBorder\" src=\"/images/sap_66_transparent.png\"/>").toSafeHtml());
+        sapLogo.setHref("http://www.sap.com");
+        logoAndTitle.add(sapLogo);
+        Label sailingAnalyticsLabel = new Label(stringConstants.sapSailingAnalytics());
+        HorizontalPanel labelPanel = new HorizontalPanel();
+        labelPanel.add(sailingAnalyticsLabel);
+        labelPanel.setSpacing(10);
+        logoAndTitle.add(labelPanel);
+        sailingAnalyticsLabel.addStyleName("boldLabel");
+        return logoAndTitle;
     }
 
     private SafeHtml getPlayPauseImgHtml(boolean playing) {
