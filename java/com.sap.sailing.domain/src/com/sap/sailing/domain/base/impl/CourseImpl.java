@@ -16,7 +16,6 @@ import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.CourseListener;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.util.Util;
 
 public class CourseImpl extends NamedImpl implements Course {
     private static final Logger logger = Logger.getLogger(CourseImpl.class.getName());
@@ -28,9 +27,6 @@ public class CourseImpl extends NamedImpl implements Course {
     
     public CourseImpl(String name, Iterable<Waypoint> waypoints) {
         super(name);
-        if (Util.size(waypoints) == 1) {
-            throw new IllegalArgumentException("Can't create a course with a single waypoint "+waypoints+"; this makes no leg");
-        }
         listeners = new HashSet<CourseListener>();
         this.waypoints = new ArrayList<Waypoint>();
         waypointIndexes = new HashMap<Waypoint, Integer>();
@@ -71,7 +67,9 @@ public class CourseImpl extends NamedImpl implements Course {
         } else {
             legStartWaypointIndex = zeroBasedPosition;
         }
-        legs.add(new LegImpl(this, legStartWaypointIndex));
+        if (waypoints.size() > 1) {
+            legs.add(new LegImpl(this, legStartWaypointIndex));
+        }
         notifyListenersWaypointAdded(zeroBasedPosition, waypointToAdd);
     }
 
@@ -81,8 +79,10 @@ public class CourseImpl extends NamedImpl implements Course {
             boolean isLast = zeroBasedPosition == waypoints.size()-1;
             Waypoint removedWaypoint = waypoints.remove(zeroBasedPosition);
             if (isLast) {
-                // last waypoint was removed; remove last leg
-                legs.remove(legs.size()-1);
+                if (waypoints.size() > 0) { // if we had only one waypoint, we didn't have any legs
+                    // last waypoint was removed; remove last leg
+                    legs.remove(legs.size() - 1);
+                }
             } else {
                 legs.remove(zeroBasedPosition);
             }
