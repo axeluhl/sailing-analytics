@@ -95,6 +95,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
     protected TracTracRaceTrackerImpl(DomainFactory domainFactory, URL paramURL, URI liveURI, URI storedURI,
             WindStore windStore, TrackedEventRegistry trackedEventRegistry) throws URISyntaxException,
             MalformedURLException, FileNotFoundException {
+        super(trackedEventRegistry);
         urls = new Triple<URL, URI, URI>(paramURL, liveURI, storedURI);
         this.races = new HashSet<RaceDefinition>();
         this.windStore = windStore;

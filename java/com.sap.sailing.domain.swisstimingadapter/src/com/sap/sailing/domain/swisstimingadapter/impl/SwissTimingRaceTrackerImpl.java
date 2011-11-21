@@ -42,7 +42,6 @@ import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.TrackedEventRegistry;
-import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.util.Util;
@@ -69,6 +68,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
     protected SwissTimingRaceTrackerImpl(String raceID, String hostname, int port, WindStore windStore,
             DomainFactory domainFactory, SwissTimingFactory factory, RaceSpecificMessageLoader messageLoader,
             TrackedEventRegistry trackedEventRegistry, boolean canSendRequests) throws InterruptedException, UnknownHostException, IOException, ParseException {
+        super(trackedEventRegistry);
         this.connector = factory.getOrCreateSailMasterConnector(hostname, port, messageLoader, canSendRequests);
         this.domainFactory = domainFactory;
         this.raceID = raceID;
@@ -85,15 +85,8 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
     @Override
     public void stop() throws MalformedURLException, IOException, InterruptedException {
         connector.removeSailMasterListener(raceID, this);
-        Set<RaceDefinition> races = getRaces();
-        if (races != null && !races.isEmpty()) {
-            for (RaceDefinition race : races) {
-                TrackedRace trackedRace = getTrackedEvent().getExistingTrackedRace(race);
-                if (trackedRace != null) {
-                    getTrackedEvent().removedTrackedRace(trackedRace);
-                }
-            }
-        }
+        super.stop();
+        domainFactory.removeRace(raceID);
     }
 
     @Override

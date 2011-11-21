@@ -473,7 +473,7 @@ public class RacingEventServiceImpl implements RacingEventService {
             return result;
         }
     }
-    
+
     @Override
     public DynamicTrackedEvent getTrackedEvent(com.sap.sailing.domain.base.Event event) {
         return eventTrackingCache.get(event);
