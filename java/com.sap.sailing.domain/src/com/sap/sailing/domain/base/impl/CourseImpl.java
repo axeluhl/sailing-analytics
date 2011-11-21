@@ -16,6 +16,7 @@ import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.CourseListener;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.util.Util;
 
 public class CourseImpl extends NamedImpl implements Course {
     private static final Logger logger = Logger.getLogger(CourseImpl.class.getName());
@@ -27,6 +28,9 @@ public class CourseImpl extends NamedImpl implements Course {
     
     public CourseImpl(String name, Iterable<Waypoint> waypoints) {
         super(name);
+        if (Util.size(waypoints) == 1) {
+            throw new IllegalArgumentException("Can't create a course with a single waypoint "+waypoints+"; this makes no leg");
+        }
         listeners = new HashSet<CourseListener>();
         this.waypoints = new ArrayList<Waypoint>();
         waypointIndexes = new HashMap<Waypoint, Integer>();
