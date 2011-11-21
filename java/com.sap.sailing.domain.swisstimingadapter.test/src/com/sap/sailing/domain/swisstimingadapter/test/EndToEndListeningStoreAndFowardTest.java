@@ -175,6 +175,29 @@ public class EndToEndListeningStoreAndFowardTest {
     }
 
     @Test
+    public void testDuplicateCCGMessageAndWaypointUniqueness() throws IOException, InterruptedException, ParseException {
+        String[] racesToTrack = new String[] { "W4702" };
+        setUpUsingScript(racesToTrack, "/DuplicateCCG.txt");
+
+        Set<TrackedRace> allTrackedRaces = new HashSet<TrackedRace>();
+        Iterable<Event> allEvents = racingEventService.getAllEvents();
+        for (Event event : allEvents) {
+            DynamicTrackedEvent trackedEvent = racingEventService.getTrackedEvent(event);
+            Iterable<TrackedRace> trackedRaces = trackedEvent.getTrackedRaces();
+            for (TrackedRace trackedRace : trackedRaces) {
+                allTrackedRaces.add(trackedRace);
+            }
+        }
+        assertEquals(1, allTrackedRaces.size());
+        TrackedRace trackedRace = allTrackedRaces.iterator().next();
+        List<Waypoint> waypoints = new ArrayList<Waypoint>();
+        for (Waypoint waypoint : trackedRace.getRace().getCourse().getWaypoints()) {
+            waypoints.add(waypoint);
+        }
+        assertEquals(7, Util.size(waypoints));
+    }
+    
+    @Test
     public void testEndToEndWithSwissTimingData() throws IOException, InterruptedException, ParseException {
         String[] racesToTrack = new String[] { "W4702" };
         String scriptName1 = "/SailMasterDataInterfaceRACandSTL.txt";
