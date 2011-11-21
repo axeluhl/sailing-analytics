@@ -257,6 +257,7 @@ public class StoreAndForward implements Runnable {
                     DBObject incrementLastMessageCountQuery = new BasicDBObject().
                             append("$inc", new BasicDBObject().append(FieldNames.LAST_MESSAGE_COUNT.name(), 1));
                     while (!stopped && messageAndOptionalSequenceNumber != null) {
+                        logger.fine("Received message: "+messageAndOptionalSequenceNumber.getA());
                         DBObject newCountRecord = lastMessageCountCollection.findAndModify(emptyQuery, incrementLastMessageCountQuery);
                         lastMessageCount = (Long) newCountRecord.get(FieldNames.LAST_MESSAGE_COUNT.name());
                         SailMasterMessage message = swissTimingFactory.createMessage(messageAndOptionalSequenceNumber.getA(), lastMessageCount);
