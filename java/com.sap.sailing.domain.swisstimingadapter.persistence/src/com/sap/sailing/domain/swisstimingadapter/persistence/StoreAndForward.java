@@ -154,7 +154,7 @@ public class StoreAndForward implements Runnable {
     private long getLastMessageCount() {
         DBObject lastMessageCountRecord = lastMessageCountCollection.findOne();
         if (lastMessageCountRecord == null) {
-            lastMessageCountCollection.insert(new BasicDBObject().append(FieldNames.LAST_MESSAGE_COUNT.name(), "0"));
+            lastMessageCountCollection.insert(new BasicDBObject().append(FieldNames.LAST_MESSAGE_COUNT.name(), 0l));
         }
         return lastMessageCountRecord == null ? 0 : (Long) lastMessageCountRecord.get(FieldNames.LAST_MESSAGE_COUNT.name());
     }
