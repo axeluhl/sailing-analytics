@@ -761,17 +761,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     }
 
     private HorizontalPanel createLogoAndTitlePanel(final StringConstants stringConstants) {
-        HorizontalPanel logoAndTitle = new HorizontalPanel();
-        Anchor sapLogo = new Anchor(new SafeHtmlBuilder().appendHtmlConstant(
-                "<img class=\"linkNoBorder\" src=\"/images/sap_66_transparent.png\"/>").toSafeHtml());
-        sapLogo.setHref("http://www.sap.com");
-        logoAndTitle.add(sapLogo);
-        Label sailingAnalyticsLabel = new Label(stringConstants.sapSailingAnalytics());
-        HorizontalPanel labelPanel = new HorizontalPanel();
-        labelPanel.add(sailingAnalyticsLabel);
-        labelPanel.setSpacing(10);
-        logoAndTitle.add(labelPanel);
-        sailingAnalyticsLabel.addStyleName("boldLabel");
+        HorizontalPanel logoAndTitle = new LogoAndTitlePanel(stringConstants);
         return logoAndTitle;
     }
 
