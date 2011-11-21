@@ -1,3 +1,2 @@
 # Module com.sap.sailing.gwt.ui.AdminConsole
 # RPC service class, partial path of RPC policy file
-com.sap.sailing.gwt.ui.client.SailingService, 0148445E03B6030B90BCBC2A759DFD15.gwt.rpc

@@ -480,9 +480,18 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 // removing the columns from the table
                 // is based on column identity
                 int legCount = getLeaderboard().getLegCount(getRaceName());
-                for (int i = 0; i < legCount; i++) {
-                    LegColumn legColumn = getLegColumn(i);
-                    result.add(legColumn);
+                if (legCount != -1) {
+                    for (int i = 0; i < legCount; i++) {
+                        LegColumn legColumn = getLegColumn(i);
+                        result.add(legColumn);
+                    }
+                } else {
+                    // the race is no longer part of the LeaderboardDAO; consider the non-null legs in legColumns:
+                    for (LegColumn legColumn : legColumns) {
+                        if (legColumn != null) {
+                            result.add(legColumn);
+                        }
+                    }
                 }
             }
             return result;
@@ -836,9 +845,26 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
      * table} and fixes the column styles again (see {@link #addColumnStyles(int)}).
      */
     protected void removeColumn(int columnIndex) {
+        Column<LeaderboardRowDAO, ?> c = getLeaderboardTable().getColumn(columnIndex);
+        if (c instanceof ExpandableSortableColumn<?>) {
+            ExpandableSortableColumn<?> expandableColumn = (ExpandableSortableColumn<?>) c;
+            if (expandableColumn.isExpanded()) {
+                // remove expanded child columns from the leaderboard...
+                expandableColumn.toggleExpansion();
+                // them remember that column c was expanded:
+                expandableColumn.setExpanded(true);
+            }
+        }
         removeColumnStyles(/* startColumn */columnIndex);
         getLeaderboardTable().removeColumn(columnIndex);
         addColumnStyles(/* startColumn */columnIndex);
+    }
+
+    protected void removeColumn(Column<LeaderboardRowDAO, ?> c) {
+        int columnIndex = getLeaderboardTable().getColumnIndex(c);
+        if (columnIndex != -1) {
+            removeColumn(columnIndex);
+        }
     }
 
     private void loadCompleteLeaderboard(Date date) {
@@ -988,14 +1014,6 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         }
     }
 
-    // protected RaceColumn<?> createRaceColumn(Map.Entry<String, Pair<Boolean,
-    // Boolean>> raceNameAndMedalRaceAndTracked) {
-    // return new TextRaceColumn(raceNameAndMedalRaceAndTracked.getKey(),
-    // raceNameAndMedalRaceAndTracked.getValue().getA(),
-    // raceNameAndMedalRaceAndTracked.getValue().getB(),
-    // RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE);
-    // }
-
     protected RaceColumn<?> createRaceColumn(String raceName, boolean isMedalRace, boolean isTracked) {
         return new TextRaceColumn(raceName, isMedalRace, isTracked, RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE);
     }
@@ -1004,18 +1022,16 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         List<Column<LeaderboardRowDAO, ?>> columnsToRemove = new ArrayList<Column<LeaderboardRowDAO, ?>>();
         for (int i = 0; i < getLeaderboardTable().getColumnCount(); i++) {
             Column<LeaderboardRowDAO, ?> c = getLeaderboardTable().getColumn(i);
-            /*
-             * if (c instanceof RaceColumn && (leaderboard == null ||
-             * !leaderboard.raceNamesAndMedalRaceAndTracked.keySet().contains( ((RaceColumn<?>) c).getRaceName()))) {
-             * columnsToRemove.add(c); }
-             */
             if (c instanceof RaceColumn
                     && (leaderboard == null || !leaderboard.raceListContains(((RaceColumn<?>) c).getRaceName()))) {
                 columnsToRemove.add(c);
             }
         }
+        // Tricky issue: if the race column is currently expanded, we can't know anymore how many detail columns
+        // there are because the updated LeaderboardDAO object doesn't contain the race anymore. We have to
+        // collapse and remove all LegColumns following the RaceColumn
         for (Column<LeaderboardRowDAO, ?> c : columnsToRemove) {
-            getLeaderboardTable().removeColumn(c);
+            removeColumn(c);
         }
     }
 
