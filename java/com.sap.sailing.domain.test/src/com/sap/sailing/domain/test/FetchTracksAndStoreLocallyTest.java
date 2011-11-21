@@ -11,7 +11,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.tracking.DynamicTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
@@ -23,7 +22,6 @@ import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.impl.DynamicGPSFixMovingTrackImpl;
-import com.sap.sailing.domain.tracking.impl.DynamicTrackedEventImpl;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
 
@@ -80,8 +78,7 @@ public class FetchTracksAndStoreLocallyTest extends KielWeek2011BasedTest {
                     long newMillisecondsOverWhichToAverage) {
             }
         };
-        Event event = getDomainFactory().getOrCreateEvent(getEvent());
-        DynamicTrackedEvent trackedEvent = new DynamicTrackedEventImpl(event);
+        DynamicTrackedEvent trackedEvent = getTrackedEvent();
         trackedEvent.addRaceListener(new RaceListener() {
             @Override
             public void raceAdded(TrackedRace trackedRace) {
@@ -93,7 +90,8 @@ public class FetchTracksAndStoreLocallyTest extends KielWeek2011BasedTest {
             public void raceRemoved(TrackedRace trackedRace) {
             }
         });
-        super.completeSetupLaunchingControllerAndWaitForRaceDefinition(ReceiverType.RACECOURSE, ReceiverType.RACESTARTFINISH, ReceiverType.RAWPOSITIONS);
+        super.completeSetupLaunchingControllerAndWaitForRaceDefinition(ReceiverType.RACECOURSE,
+                ReceiverType.RACESTARTFINISH, ReceiverType.RAWPOSITIONS);
     }
 
     @Test
