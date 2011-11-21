@@ -204,14 +204,14 @@ public class EndToEndListeningStoreAndFowardTest {
             raceIDs.add(race.getName());
             assertEquals(46, Util.size(race.getCompetitors()));
             // new race with only 2 waypoints
-            assertEquals(2, Util.size(race.getCourse().getWaypoints()));
+            assertEquals(3, Util.size(race.getCourse().getWaypoints()));
             // new race with 2 legs
             assertEquals(2, Util.size(race.getCourse().getLegs()));
             for (Competitor competitor : race.getCompetitors()) {
-                //if (!competitor.getName().equals("Competitor 35") && !competitor.getName().equals("Competitor 20")) {
+                if (!competitor.getName().equals("Competitor 35") && !competitor.getName().equals("Competitor 20")) {
                     assertTrue("Track of competitor " + competitor + " empty",
                             !Util.isEmpty(trackedRace.getTrack(competitor).getRawFixes()));
-                //}
+                }
             }
             Set<Buoy> buoys = new HashSet<Buoy>();
             for (Waypoint waypoint : race.getCourse().getWaypoints()) {
