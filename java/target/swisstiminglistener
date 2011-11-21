@@ -1,4 +1,4 @@
 #!/bin/sh
 classpath=`find plugins -name 'org.eclipse.osgi_*.jar' | sort | tail -1`:`find plugins -name 'com.sap.sailing.mongodb-*. jar' | sort | tail -1`:`find plugins -name 'com.sap.sailing.domain-*.jar' | sort | tail -1`:`find plugins -name 'com.sap.sailing.udpconnector-*.jar' | sort | tail -1`:`find plugins -name 'com.sap.sailing.domain.swisstimingadapter-*.jar' | sort | tail -1`:`find plugins -name 'com.sap.sailing.domain.swisstimingadapter.persistence-*.jar' | sort | tail -1`:plugins/mongo-2.6.2.jar
 echo Using classpath $classpath
-java -cp "$classpath" -Dmongo.port=10201 com.sap.sailing.domain.swisstimingadapter.persistence.StoreAndForward $*
+java -cp "$classpath" -Dmongo.port=10201 -Djava.util.logging.config.file=swisstiminglistenerLog.properties swiss com.sap.sailing.domain.swisstimingadapter.persistence.StoreAndForward $*
