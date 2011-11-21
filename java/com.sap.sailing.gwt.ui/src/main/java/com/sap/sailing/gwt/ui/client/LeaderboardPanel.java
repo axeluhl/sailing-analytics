@@ -32,6 +32,7 @@ import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
@@ -718,7 +719,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         loadCompleteLeaderboard(getLeaderboardDisplayDate());
         VerticalPanel vp = new VerticalPanel();
         vp.setSpacing(15);
-        HorizontalPanel logoAndTitle = createLogoAndTitlePanel(stringConstants);
+        Panel logoAndTitle = createLogoAndTitlePanel(stringConstants);
         vp.add(logoAndTitle);
         DockPanel dockPanel = new DockPanel();
         dockPanel.setWidth("100%");
@@ -760,8 +761,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         setWidget(vp);
     }
 
-    private HorizontalPanel createLogoAndTitlePanel(final StringConstants stringConstants) {
-        HorizontalPanel logoAndTitle = new LogoAndTitlePanel(stringConstants);
+    private Panel createLogoAndTitlePanel(final StringConstants stringConstants) {
+        Panel logoAndTitle = new LogoAndTitlePanel(stringConstants);
         return logoAndTitle;
     }
 
