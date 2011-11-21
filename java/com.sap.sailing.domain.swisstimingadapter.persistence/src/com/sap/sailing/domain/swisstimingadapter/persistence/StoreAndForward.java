@@ -262,6 +262,7 @@ public class StoreAndForward implements Runnable {
                             for (OutputStream os : streamsToForwardTo) {
                                 // write the sequence number of the message into the stream before actually writing the
                                 // SwissTiming message
+                                // TODO if forwarding to os doesn't work, e.g., because the socket was closed or the client died, remove os from streamsToForwardTo and the socket from socketsToForwardTo
                                 transceiver.sendMessage(message, os);
                             }
                         }
@@ -276,6 +277,7 @@ public class StoreAndForward implements Runnable {
                         socketToForwardTo.close();
                     }
                 } catch (Throwable e) {
+                    e.printStackTrace();
                     if (!stopped) {
                         logger.throwing(StoreAndForward.class.getName(), "Error during forwarding message. Continuing...", e);
                         try {
