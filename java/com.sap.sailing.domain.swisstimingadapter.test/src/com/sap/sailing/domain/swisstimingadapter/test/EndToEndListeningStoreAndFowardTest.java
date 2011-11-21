@@ -97,7 +97,7 @@ public class EndToEndListeningStoreAndFowardTest {
         logger.exiting(getClass().getName(), "tearDown");
     }
 
-    // @Test
+     @Test
     public void testEndToEndScenarioWithInitMessages() throws IOException, InterruptedException, ParseException {
         String[] racesToTrack = new String[] { "4711", "4712" };
         String scriptName = "/InitMessagesScript.txt";
@@ -125,7 +125,7 @@ public class EndToEndListeningStoreAndFowardTest {
         assertEquals(expectedRaceIDs, raceIDs);
     }
 
-    //@Test
+    @Test
     public void testLongRaceLog() throws IOException, InterruptedException, ParseException {
         String[] racesToTrack = new String[] { "W4702" };
         String scriptName1 = "/SailMasterDataInterfaceRACandSTL.txt";
@@ -227,6 +227,23 @@ public class EndToEndListeningStoreAndFowardTest {
             expectedRaceIDs.add(raceIDToTrack);
         }
         assertEquals(expectedRaceIDs, raceIDs);
+    }
+
+    @Test
+    public void testRongRaceLogRACZero() throws UnknownHostException, InterruptedException, IOException, ParseException{
+        String[] racesToTrack = new String[] { "W4702" };
+        String scriptName2 = "/SailMasterDataInterfaceRACZero.txt";
+        setUpUsingScript(racesToTrack, scriptName2);
+        Set<TrackedRace> allNewTrackedRaces = new HashSet<TrackedRace>();
+        Iterable<Event> allNewEvents = racingEventService.getAllEvents();
+        for (Event event : allNewEvents) {
+            DynamicTrackedEvent trackedEvent = racingEventService.getTrackedEvent(event);
+            Iterable<TrackedRace> trackedRaces = trackedEvent.getTrackedRaces();
+            for (TrackedRace trackedRace : trackedRaces) {
+                allNewTrackedRaces.add(trackedRace);
+            }
+        }
+        assertEquals(0, Util.size(allNewTrackedRaces));
     }
 
     // @Test
