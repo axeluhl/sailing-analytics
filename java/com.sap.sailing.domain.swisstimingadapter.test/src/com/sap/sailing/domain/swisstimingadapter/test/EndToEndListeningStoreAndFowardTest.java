@@ -246,7 +246,7 @@ public class EndToEndListeningStoreAndFowardTest {
         assertEquals(0, Util.size(allNewTrackedRaces));
     }
 
-    // @Test
+    @Test
     public void testEndToEndWithSwissTimingData() throws IOException, InterruptedException, ParseException {
         String[] racesToTrack = new String[] { "W4702" };
         String scriptName1 = "/SailMasterDataInterfaceRACandSTL.txt";
