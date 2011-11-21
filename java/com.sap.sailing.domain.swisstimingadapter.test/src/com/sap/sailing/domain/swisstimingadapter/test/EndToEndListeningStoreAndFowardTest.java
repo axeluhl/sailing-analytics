@@ -176,14 +176,14 @@ public class EndToEndListeningStoreAndFowardTest {
         }
         assertEquals(expectedRaceIDs, raceIDs);
     }
+    
     @Test
     public void testLongLogRaceNewConfig() throws UnknownHostException, InterruptedException, IOException, ParseException {
         String[] racesToTrack = new String[] { "W4702" };
         String scriptName1 = "/SailMasterDataInterfaceRACandSTL.txt";
         String scriptName2 = "/SailMasterDataInterface-ExampleAsText.txt";
-        String scriptNewCourseConfig = "/SailMasterDataInterfaceNewCourseConfig.txt";
+         String scriptNewCourseConfig = "/SailMasterDataInterfaceNewCourseConfig.txt";
         setUpUsingScript(racesToTrack, scriptName1, scriptName2, scriptNewCourseConfig);
-        
         Set<TrackedRace> allNewTrackedRaces = new HashSet<TrackedRace>();
         Iterable<Event> allNewEvents = racingEventService.getAllEvents();
         for (Event event : allNewEvents) {
@@ -203,9 +203,7 @@ public class EndToEndListeningStoreAndFowardTest {
             RaceDefinition race = trackedRace.getRace();
             raceIDs.add(race.getName());
             assertEquals(46, Util.size(race.getCompetitors()));
-            // new race with only 2 waypoints
             assertEquals(3, Util.size(race.getCourse().getWaypoints()));
-            // new race with 2 legs
             assertEquals(2, Util.size(race.getCourse().getLegs()));
             for (Competitor competitor : race.getCompetitors()) {
                 if (!competitor.getName().equals("Competitor 35") && !competitor.getName().equals("Competitor 20")) {
