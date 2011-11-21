@@ -168,11 +168,7 @@ public abstract class ExpandableSortableColumn<C> extends SortableColumn<Leaderb
             final CellTable<LeaderboardRowDAO> table = getLeaderboardPanel().getLeaderboardTable();
             if (isExpanded()) {
                 for (SortableColumn<LeaderboardRowDAO, ?> column : getAllVisibleChildren()) {
-                    int columnIndex = table.getColumnIndex(column);
-                    // remove only the children currently displayed
-                    if (columnIndex >= 0) {
-                        getLeaderboardPanel().removeColumn(columnIndex);
-                    }
+                    getLeaderboardPanel().removeColumn(column); // removes only the children currently displayed
                 }
                 // important: toggle expanded state after asking for all visible children
                 setExpanded(!isExpanded());
