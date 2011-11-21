@@ -67,7 +67,9 @@ public class CourseImpl extends NamedImpl implements Course {
         } else {
             legStartWaypointIndex = zeroBasedPosition;
         }
-        legs.add(new LegImpl(this, legStartWaypointIndex));
+        if (waypoints.size() > 1) {
+            legs.add(new LegImpl(this, legStartWaypointIndex));
+        }
         notifyListenersWaypointAdded(zeroBasedPosition, waypointToAdd);
     }
 
@@ -77,8 +79,10 @@ public class CourseImpl extends NamedImpl implements Course {
             boolean isLast = zeroBasedPosition == waypoints.size()-1;
             Waypoint removedWaypoint = waypoints.remove(zeroBasedPosition);
             if (isLast) {
-                // last waypoint was removed; remove last leg
-                legs.remove(legs.size()-1);
+                if (waypoints.size() > 0) { // if we had only one waypoint, we didn't have any legs
+                    // last waypoint was removed; remove last leg
+                    legs.remove(legs.size() - 1);
+                }
             } else {
                 legs.remove(zeroBasedPosition);
             }

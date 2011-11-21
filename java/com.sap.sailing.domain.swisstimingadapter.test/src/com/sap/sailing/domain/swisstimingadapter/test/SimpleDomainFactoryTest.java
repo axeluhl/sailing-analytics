@@ -1,0 +1,79 @@
+package com.sap.sailing.domain.swisstimingadapter.test;
+
+import static org.junit.Assert.assertEquals;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+import org.junit.Test;
+
+import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.base.impl.EventImpl;
+import com.sap.sailing.domain.swisstimingadapter.Competitor;
+import com.sap.sailing.domain.swisstimingadapter.Course;
+import com.sap.sailing.domain.swisstimingadapter.DomainFactory;
+import com.sap.sailing.domain.swisstimingadapter.Mark;
+import com.sap.sailing.domain.swisstimingadapter.Race;
+import com.sap.sailing.domain.swisstimingadapter.StartList;
+import com.sap.sailing.domain.swisstimingadapter.impl.CourseImpl;
+import com.sap.sailing.domain.swisstimingadapter.impl.MarkImpl;
+import com.sap.sailing.domain.swisstimingadapter.impl.RaceImpl;
+import com.sap.sailing.domain.swisstimingadapter.impl.StartListImpl;
+import com.sap.sailing.util.Util;
+
+import difflib.PatchFailedException;
+
+public class SimpleDomainFactoryTest {
+    @Test
+    public void testCourseConfigForBuoy() throws PatchFailedException {
+        DomainFactory domainFactory = DomainFactory.INSTANCE;
+        Event event = new EventImpl("TestEvent", /* boatClass */ null);
+        Race race = new RaceImpl("1234", "Race 1234");
+        Iterable<Competitor> competitors = Collections.emptyList();
+        StartList startList = new StartListImpl("1234", competitors);
+        Mark mark1 = new MarkImpl("M1", 0, Arrays.asList("D1", "D2"));
+        Mark mark2 = new MarkImpl("M1", 0, Arrays.asList("D3", "D4"));
+        List<Mark> marks = Arrays.asList(mark1, mark2);
+        Course course = new CourseImpl("1234", marks);
+        RaceDefinition raceDefinition = domainFactory.createRaceDefinition(event, race, startList, course);
+        ArrayList<Waypoint> waypoints1 = new ArrayList<Waypoint>();
+        for (Waypoint waypoint : raceDefinition.getCourse().getWaypoints()) {
+            waypoints1.add(waypoint);
+        }
+        domainFactory.updateCourseWaypoints(raceDefinition.getCourse(), marks);
+        ArrayList<Waypoint> waypoints2 = new ArrayList<Waypoint>();
+        for (Waypoint waypoint : raceDefinition.getCourse().getWaypoints()) {
+            waypoints2.add(waypoint);
+        }
+        assertEquals(waypoints1, waypoints2);
+    }
+
+    @Test
+    public void testCourseConfigForGate() throws PatchFailedException {
+        DomainFactory domainFactory = DomainFactory.INSTANCE;
+        Event event = new EventImpl("TestEvent", /* boatClass */ null);
+        Race race = new RaceImpl("1234", "Race 1234");
+        Iterable<Competitor> competitors = Collections.emptyList();
+        StartList startList = new StartListImpl("1234", competitors);
+        Mark mark1 = new MarkImpl("M1", 0, Arrays.asList("D1", "D2"));
+        Mark mark2 = new MarkImpl("M1", 0, Arrays.asList("D3", "D4"));
+        List<Mark> marks = Arrays.asList(mark1, mark2);
+        Course course = new CourseImpl("1234", marks);
+        RaceDefinition raceDefinition = domainFactory.createRaceDefinition(event, race, startList, course);
+        assertEquals(2, Util.size(raceDefinition.getCourse().getWaypoints()));
+        ArrayList<Waypoint> waypoints1 = new ArrayList<Waypoint>();
+        for (Waypoint waypoint : raceDefinition.getCourse().getWaypoints()) {
+            waypoints1.add(waypoint);
+        }
+        domainFactory.updateCourseWaypoints(raceDefinition.getCourse(), marks);
+        ArrayList<Waypoint> waypoints2 = new ArrayList<Waypoint>();
+        for (Waypoint waypoint : raceDefinition.getCourse().getWaypoints()) {
+            waypoints2.add(waypoint);
+        }
+        assertEquals(waypoints1, waypoints2);
+    }
+}

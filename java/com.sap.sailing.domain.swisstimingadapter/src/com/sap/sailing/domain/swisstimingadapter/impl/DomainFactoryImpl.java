@@ -158,6 +158,7 @@ public class DomainFactoryImpl implements DomainFactory {
             default:
                 throw new RuntimeException("Don't know how to handle control points with number of devices neither 1 nor 2. Was "+Util.size(devices));
             }
+            controlPointCache.put(devices, result);
         }
         return result;
     }

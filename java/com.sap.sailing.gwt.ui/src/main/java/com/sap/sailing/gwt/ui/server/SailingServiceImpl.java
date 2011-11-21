@@ -630,43 +630,44 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
 
     @Override
-    public Map<CompetitorDAO, List<GPSFixDAO>> getBoatPositions(String eventName, String raceName, Date date,
-            long tailLengthInMilliseconds, boolean extrapolate) {
+    public Map<CompetitorDAO, List<GPSFixDAO>> getBoatPositions(String eventName, String raceName,
+            Map<CompetitorDAO, Date> from, Map<CompetitorDAO, Date> to,
+            boolean extrapolate) {
         Map<CompetitorDAO, List<GPSFixDAO>> result = new HashMap<CompetitorDAO, List<GPSFixDAO>>();
-        if (date != null) {
-            Event event = getService().getEventByName(eventName);
-            if (event != null) {
-                RaceDefinition race = getRaceByName(event, raceName);
-                TimePoint end = new MillisecondsTimePoint(date);
-                TrackedRace trackedRace = getService().getOrCreateTrackedEvent(event).getTrackedRace(race);
-                for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
-                    CompetitorDAO competitorDAO = getCompetitorDAO(competitor);
+        Event event = getService().getEventByName(eventName);
+        if (event != null) {
+            RaceDefinition race = getRaceByName(event, raceName);
+            TrackedRace trackedRace = getService().getOrCreateTrackedEvent(event).getTrackedRace(race);
+            for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
+                CompetitorDAO competitorDAO = getCompetitorDAO(competitor);
+                if (from.containsKey(competitorDAO)) {
                     List<GPSFixDAO> fixesForCompetitor = new ArrayList<GPSFixDAO>();
                     result.put(competitorDAO, fixesForCompetitor);
                     GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
-                    Iterator<GPSFixMoving> fixIter = track.getFixesIterator(new MillisecondsTimePoint(date.getTime()
-                            - tailLengthInMilliseconds), /* inclusive */true);
+                    TimePoint fromTimePoint = new MillisecondsTimePoint(from.get(competitorDAO));
+                    TimePoint toTimePointExcluding = new MillisecondsTimePoint(to.get(competitorDAO));
+                    Iterator<GPSFixMoving> fixIter;
+                    fixIter = track.getFixesIterator(fromTimePoint, /* inclusive */ true);
                     if (fixIter.hasNext()) {
                         GPSFixMoving fix = fixIter.next();
-                        while (fix != null && fix.getTimePoint().compareTo(end) < 0) {
+                        while (fix != null && fix.getTimePoint().compareTo(toTimePointExcluding) < 0) {
                             Tack tack = trackedRace.getTack(competitor, fix.getTimePoint());
                             GPSFixDAO fixDAO = new GPSFixDAO(fix.getTimePoint().asDate(), new PositionDAO(fix
                                     .getPosition().getLatDeg(), fix.getPosition().getLngDeg()),
-                                    new SpeedWithBearingDAO(fix.getSpeed().getKnots(), fix.getSpeed().getBearing().getDegrees()),
-                                    tack.name());
+                                    new SpeedWithBearingDAO(fix.getSpeed().getKnots(), fix.getSpeed().getBearing()
+                                            .getDegrees()), tack.name(), /* extrapolated */ false);
                             fixesForCompetitor.add(fixDAO);
                             if (fixIter.hasNext()) {
                                 fix = fixIter.next();
                             } else {
                                 // check if fix was at date and if extrapolation is requested
-                                if (!fix.getTimePoint().equals(end) && extrapolate) {
-                                    Position position = track.getEstimatedPosition(end, extrapolate);
-                                    Tack tack2 = trackedRace.getTack(competitor, end);
-                                    SpeedWithBearing speedWithBearing = track.getEstimatedSpeed(end);
-                                    GPSFixDAO extrapolated = new GPSFixDAO(date, new PositionDAO(position.getLatDeg(),
-                                            position.getLngDeg()),
-                                            new SpeedWithBearingDAO(speedWithBearing.getKnots(), speedWithBearing.getBearing().getDegrees()),
-                                            tack2.name());
+                                if (!fix.getTimePoint().equals(toTimePointExcluding) && extrapolate) {
+                                    Position position = track.getEstimatedPosition(toTimePointExcluding, extrapolate);
+                                    Tack tack2 = trackedRace.getTack(competitor, toTimePointExcluding);
+                                    SpeedWithBearing speedWithBearing = track.getEstimatedSpeed(toTimePointExcluding);
+                                    GPSFixDAO extrapolated = new GPSFixDAO(to.get(competitorDAO), new PositionDAO(position.getLatDeg(),
+                                            position.getLngDeg()), new SpeedWithBearingDAO(speedWithBearing.getKnots(),
+                                            speedWithBearing.getBearing().getDegrees()), tack2.name(), /* extrapolated */ true);
                                     fixesForCompetitor.add(extrapolated);
                                 }
                                 fix = null;
