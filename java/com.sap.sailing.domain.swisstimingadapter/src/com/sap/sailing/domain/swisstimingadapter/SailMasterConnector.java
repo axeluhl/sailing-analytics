@@ -50,7 +50,9 @@ public interface SailMasterConnector {
     
     /**
      * Like {@link #addSailMasterListener(SailMasterListener)}, but only forwards race-specific events for the
-     * race identified by <code>raceID</code> to the <code>listener</code>
+     * race identified by <code>raceID</code> to the <code>listener</code>. Clients still need to call
+     * {@link #trackRace(String)} with the <code>raceID</code> to make the connector actually receive the
+     * events for that race.
      */
     void addSailMasterListener(String raceID, SailMasterListener listener) throws UnknownHostException, IOException;
     
