@@ -85,10 +85,11 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
     }
 
     private SwissTimingConfiguration loadSwissTimingConfiguration(DBObject object) {
+        Boolean canSendRequests = (Boolean) object.get(FieldNames.ST_CONFIG_CAN_SEND_REQUESTS.name());
         return swissTimingFactory.createSwissTimingConfiguration((String) object.get(FieldNames.ST_CONFIG_NAME.name()),
                 (String) object.get(FieldNames.ST_CONFIG_HOSTNAME.name()),
                 (Integer) object.get(FieldNames.ST_CONFIG_PORT.name()),
-                (Boolean) object.get(FieldNames.ST_CONFIG_CAN_SEND_REQUESTS.name()));
+                canSendRequests==null?false:canSendRequests);
     }
 
     @Override
