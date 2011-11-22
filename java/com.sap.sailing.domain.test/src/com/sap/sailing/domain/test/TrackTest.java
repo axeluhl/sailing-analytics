@@ -3,10 +3,15 @@ package com.sap.sailing.domain.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.List;
+import java.util.NavigableSet;
+import java.util.SortedSet;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -27,35 +32,41 @@ import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.impl.DynamicGPSFixMovingTrackImpl;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackImpl;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
+import com.sap.sailing.domain.tracking.impl.TrackImpl;
 
 public class TrackTest {
     private DynamicTrackImpl<Boat, GPSFixMoving> track;
+    private GPSFixMovingImpl gpsFix1;
+    private GPSFixMovingImpl gpsFix2;
+    private GPSFixMovingImpl gpsFix3;
+    private GPSFixMovingImpl gpsFix4;
+    private GPSFixMovingImpl gpsFix5;
 
     @Before
     public void setUp() throws InterruptedException {
         track = new DynamicGPSFixMovingTrackImpl<Boat>(new BoatImpl("MyFirstBoat",
                 new BoatClassImpl("505"), null), /* millisecondsOverWhichToAverage */ 5000);
-        GPSFixMovingImpl gpsFix1 = new GPSFixMovingImpl(
+        gpsFix1 = new GPSFixMovingImpl(
                 new DegreePosition(1, 2), new MillisecondsTimePoint(
                         System.currentTimeMillis()), new KnotSpeedWithBearingImpl(1,
                         new DegreeBearingImpl(90)));
         waitThreeMillis();
-        GPSFixMovingImpl gpsFix2 = new GPSFixMovingImpl(
+        gpsFix2 = new GPSFixMovingImpl(
                 new DegreePosition(1, 3), new MillisecondsTimePoint(
                         System.currentTimeMillis()), new KnotSpeedWithBearingImpl(1,
                         new DegreeBearingImpl(90)));
         waitThreeMillis();
-        GPSFixMovingImpl gpsFix3 = new GPSFixMovingImpl(
+        gpsFix3 = new GPSFixMovingImpl(
                 new DegreePosition(1, 4), new MillisecondsTimePoint(
                         System.currentTimeMillis()), new KnotSpeedWithBearingImpl(2,
                         new DegreeBearingImpl(0)));
         waitThreeMillis();
-        GPSFixMovingImpl gpsFix4 = new GPSFixMovingImpl(
+        gpsFix4 = new GPSFixMovingImpl(
                 new DegreePosition(3, 4), new MillisecondsTimePoint(
                         System.currentTimeMillis()), new KnotSpeedWithBearingImpl(2,
                         new DegreeBearingImpl(0)));
         waitThreeMillis();
-        GPSFixMovingImpl gpsFix5 = new GPSFixMovingImpl(
+        gpsFix5 = new GPSFixMovingImpl(
                 new DegreePosition(5, 4), new MillisecondsTimePoint(
                         System.currentTimeMillis()), new KnotSpeedWithBearingImpl(2, new DegreeBearingImpl(0)));
         track.addGPSFix(gpsFix1);
@@ -63,6 +74,41 @@ public class TrackTest {
         track.addGPSFix(gpsFix3);
         track.addGPSFix(gpsFix4);
         track.addGPSFix(gpsFix5);
+    }
+    
+    /**
+     * Bug #70: modify a track while iterating over a subset of it; ensure that this doesn't cause a
+     * {@link ConcurrentModificationException}.
+     * @throws InterruptedException 
+     * @throws IllegalAccessException 
+     * @throws IllegalArgumentException 
+     * @throws NoSuchFieldException 
+     * @throws SecurityException 
+     */
+    @Test
+    public void testAddingWhileIteratingOverSubset() throws InterruptedException, IllegalArgumentException,
+            IllegalAccessException, SecurityException, NoSuchFieldException {
+        Field fixesField = TrackImpl.class.getDeclaredField("fixes");
+        fixesField.setAccessible(true);
+        @SuppressWarnings("unchecked")
+        NavigableSet<GPSFixMoving> fixes = (NavigableSet<GPSFixMoving>) fixesField.get(track);
+        SortedSet<GPSFixMoving> subset = fixes.subSet(gpsFix2, gpsFix5);
+        assertEquals(3, subset.size());
+        Iterator<GPSFixMoving> subsetIter = subset.iterator();
+        // start iteration
+        GPSFixMoving firstOfSubset = subsetIter.next();
+        assertEquals(gpsFix2, firstOfSubset);
+        // now add a fix:
+        waitThreeMillis();
+        track.addGPSFix(new GPSFixMovingImpl(
+                new DegreePosition(6, 5), new MillisecondsTimePoint(
+                        System.currentTimeMillis()), new KnotSpeedWithBearingImpl(2, new DegreeBearingImpl(0))));
+        try {
+            GPSFixMoving secondOfSubset = subsetIter.next();
+            assertEquals(gpsFix3, secondOfSubset);
+        } catch (ConcurrentModificationException e) {
+            fail("adding a fix interferes with iteration over subSet of track's fixes");
+        }
     }
     
     /**

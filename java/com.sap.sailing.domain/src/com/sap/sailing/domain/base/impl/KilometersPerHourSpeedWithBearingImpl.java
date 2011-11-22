@@ -27,4 +27,15 @@ public class KilometersPerHourSpeedWithBearingImpl extends KilometersPerHourSpee
     public String toString() {
         return super.toString()+" to "+getBearing().getDegrees()+"°";
     }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode() ^ getBearing().hashCode();
+    }
+    
+    @Override
+    public boolean equals(Object object) {
+        return super.equals(object) && object instanceof SpeedWithBearing
+                && getBearing().equals(((SpeedWithBearing) object).getBearing());
+    }
 }

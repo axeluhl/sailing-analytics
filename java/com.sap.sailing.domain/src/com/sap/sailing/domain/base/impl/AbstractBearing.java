@@ -47,4 +47,14 @@ public abstract class AbstractBearing implements Bearing {
     public String toString() {
         return ""+getDegrees()+"°";
     }
+    
+    @Override
+    public int hashCode() {
+        return (int) (1023 ^ Double.doubleToLongBits(getDegrees()));
+    }
+    
+    @Override
+    public boolean equals(Object object) {
+        return object != null && object instanceof Bearing && getDegrees() == ((Bearing) object).getDegrees();
+    }
 }
