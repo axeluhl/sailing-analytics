@@ -1013,7 +1013,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         Iterable<SwissTimingConfiguration> configs = swissTimingAdapterPersistence.getSwissTimingConfigurations();
         List<SwissTimingConfigurationDAO> result = new ArrayList<SwissTimingConfigurationDAO>();
         for (SwissTimingConfiguration stConfig : configs) {
-            result.add(new SwissTimingConfigurationDAO(stConfig.getName(), stConfig.getHostname(), stConfig.getPort()));
+            result.add(new SwissTimingConfigurationDAO(stConfig.getName(), stConfig.getHostname(), stConfig.getPort(), stConfig.canSendRequests()));
         }
         return result;
    }
@@ -1029,8 +1029,8 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
 
     @Override
-    public void storeSwissTimingConfiguration(String configName, String hostname, int port) {
-        swissTimingAdapterPersistence.storeSwissTimingConfiguration(swissTimingFactory.createSwissTimingConfiguration(configName, hostname, port));
+    public void storeSwissTimingConfiguration(String configName, String hostname, int port, boolean canSendRequests) {
+        swissTimingAdapterPersistence.storeSwissTimingConfiguration(swissTimingFactory.createSwissTimingConfiguration(configName, hostname, port, canSendRequests));
    }
 
     @Override
