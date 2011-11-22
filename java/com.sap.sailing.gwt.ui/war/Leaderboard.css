@@ -26,7 +26,8 @@ body {
   background: url(images/header_bg.png) 0 0 repeat-x;
   font-family: Arial, Verdana, sans-serif;
   line-height: 1;
-  font-size: 62.5%;}
+  font-size: 62.5%;
+  margin-top: 0; }
 
 /** Example rules used by the template application (remove for your app) */
 h1 {
@@ -37,7 +38,8 @@ h1 {
   text-align: center;}
 
 .LogoAndTitlePanel {
-	border: 1px solid red; }
+	border: 1px solid red;
+  height: 57px; }
 
 .LogoAndTitlePanel:after {
 	content: " ";
@@ -47,7 +49,15 @@ h1 {
 	visibility: hidden; }
 
 .sapLogo {
-	float: left; }
+	float: left; 
+  margin: 8px 0 0 0; }
+
+.sailingAnalyticsLabelPanel {
+  margin: 10px 0 0 0;
+  border: 1px solid red;}
 
 .sailingAnalyticsLabel {
-  color: #fff; }
+  color: #fff;
+  font-size: 1.2em;
+  font-weight: bold;
+  margin: 20px 0 0 0; }
