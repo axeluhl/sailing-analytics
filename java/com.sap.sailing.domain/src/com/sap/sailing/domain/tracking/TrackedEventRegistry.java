@@ -22,7 +22,7 @@ public interface TrackedEventRegistry {
      * immediately. See also {@link #getOrCreateTrackedEvent(com.sap.sailing.domain.base.Event)}.
      */
     DynamicTrackedEvent getTrackedEvent(com.sap.sailing.domain.base.Event event);
-
+    
     void remove(Event event);
 
 }

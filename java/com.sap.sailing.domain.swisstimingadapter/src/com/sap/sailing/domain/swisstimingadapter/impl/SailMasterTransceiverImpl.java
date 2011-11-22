@@ -66,7 +66,7 @@ public class SailMasterTransceiverImpl implements SailMasterTransceiver {
         if (bufferForOptionalSequenceNumber.size() > 0) {
             sequenceNumber = getSequenceNumber(bufferForOptionalSequenceNumber);
         }
-        return new Pair<String, Long>(message, sequenceNumber);
+        return message == null ? null : new Pair<String, Long>(message, sequenceNumber);
     }
 
     private Long getSequenceNumber(ByteArrayOutputStream bufferForOptionalSequenceNumber) {
