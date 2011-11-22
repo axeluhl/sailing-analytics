@@ -16,7 +16,6 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
@@ -41,9 +40,6 @@ public class TrackedEventsComposite extends FormPanel implements EventDisplayer,
 
     private CellTable<Triple<EventDAO, RegattaDAO, RaceDAO>> raceTable;
     
-    private ListBox regattasComboBox = null;
-    private ListBox eventsComboBox = null;
-
     private ListDataProvider<Triple<EventDAO, RegattaDAO, RaceDAO>> raceList;
     
     private VerticalPanel panel;
