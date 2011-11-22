@@ -77,13 +77,8 @@ public class TrackTest {
     }
     
     /**
-     * Bug #70: modify a track while iterating over a subset of it; ensure that this doesn't cause a
+     * Bug #70: modify a track while iterating over a subset of it; ensure that this causes a
      * {@link ConcurrentModificationException}.
-     * @throws InterruptedException 
-     * @throws IllegalAccessException 
-     * @throws IllegalArgumentException 
-     * @throws NoSuchFieldException 
-     * @throws SecurityException 
      */
     @Test
     public void testAddingWhileIteratingOverSubset() throws InterruptedException, IllegalArgumentException,
@@ -106,8 +101,9 @@ public class TrackTest {
         try {
             GPSFixMoving secondOfSubset = subsetIter.next();
             assertEquals(gpsFix3, secondOfSubset);
-        } catch (ConcurrentModificationException e) {
             fail("adding a fix interferes with iteration over subSet of track's fixes");
+        } catch (ConcurrentModificationException e) {
+            // this is what we expected
         }
     }
     
