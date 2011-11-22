@@ -21,6 +21,7 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Team;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.BuoyImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
@@ -64,6 +65,8 @@ public class DomainFactoryImpl implements DomainFactory {
     private final Map<String, Buoy> buoyCache;
     private final Map<Iterable<String>, ControlPoint> controlPointCache;
     private final Map<String, Nationality> nationalityCache;
+    private final Map<String, BoatClass> olympicClassesByID;
+    private final BoatClass unknownBoatClass;
     
     public DomainFactoryImpl() {
         raceIDToEventCache = new HashMap<String, Event>();
@@ -71,6 +74,28 @@ public class DomainFactoryImpl implements DomainFactory {
         buoyCache = new HashMap<String, Buoy>();
         controlPointCache = new HashMap<Iterable<String>, ControlPoint>();
         nationalityCache = new HashMap<String, Nationality>();
+        olympicClassesByID = new HashMap<String, BoatClass>();
+        /*
+        SAM102000 Men's Windsurfer = Windsufer Männer RS:X
+        SAW102000 Women's Windsurfer = Windsurfer Damen RS:X
+        SAM004000 Men's One Person Dinghy = Laser Männer
+        SAW103000 Women's One Person Dinghy = Laser Damen Laser Radial
+        SAM002000 Men's One Person Dinghy Heavy = Finn Dinghy Männer
+        SAM005000 Men's Two Person Dinghy = 470er Männer
+        SAW005000 Women's Two Person Dinghy = 470er Damen
+        SAM009000 Men's Skiff = 49er Männer
+        SAM007000 Men's Keelboat = Starboot Männer 
+        SAW010000 Women's Match Racing = Matchrace Damen Elliott 6M (modified)
+        */
+        olympicClassesByID.put("102", new BoatClassImpl("RS:X"));
+        olympicClassesByID.put("004", new BoatClassImpl("Laser"));
+        olympicClassesByID.put("103", new BoatClassImpl("Laser Radial"));
+        olympicClassesByID.put("002", new BoatClassImpl("Finn"));
+        olympicClassesByID.put("005", new BoatClassImpl("470"));
+        olympicClassesByID.put("009", new BoatClassImpl("49er"));
+        olympicClassesByID.put("007", new BoatClassImpl("Star"));
+        olympicClassesByID.put("010", new BoatClassImpl("Elliott 6M"));
+        unknownBoatClass = new BoatClassImpl("Unknown");
     }
 
     @Override
@@ -128,8 +153,26 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     private BoatClass getOrCreateBoatClassFromRaceID(String raceID) {
-        // TODO extract boat class from raceID according to SwissTiming-internal mapping rules
-        return /* boatClass */ null;
+        BoatClass result;
+        /*
+            SAM102000 Men's Windsurfer = Windsufer Männer RS:X
+            SAW102000 Women's Windsurfer = Windsurfer Damen RS:X
+            SAM004000 Men's One Person Dinghy = Laser Männer
+            SAW103000 Women's One Person Dinghy = Laser Damen Laser Radial
+            SAM002000 Men's One Person Dinghy Heavy = Finn Dinghy Männer
+            SAM005000 Men's Two Person Dinghy = 470er Männer
+            SAW005000 Women's Two Person Dinghy = 470er Damen
+            SAM009000 Men's Skiff = 49er Männer
+            SAM007000 Men's Keelboat = Starboot Männer 
+            SAW010000 Women's Match Racing = Matchrace Damen Elliott 6M (modified)
+         */
+        if (raceID.startsWith("SA") && raceID.length() == 9) {
+            String classID = raceID.substring(3, 6);
+            result = olympicClassesByID.get(classID);
+        } else {
+            result = unknownBoatClass;
+        }
+        return result;
     }
 
     private Iterable<Competitor> createCompetitorList(StartList startList) {
