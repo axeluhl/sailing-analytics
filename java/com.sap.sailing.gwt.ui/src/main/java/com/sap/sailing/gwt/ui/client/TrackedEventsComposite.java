@@ -1,12 +1,12 @@
 package com.sap.sailing.gwt.ui.client;
 
-import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.text.client.DateTimeFormatRenderer;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.FormPanel;
@@ -44,8 +44,8 @@ public class TrackedEventsComposite extends FormPanel implements EventDisplayer,
     
     private VerticalPanel panel;
 
-    private final DateFormat df = DateFormat.getDateTimeInstance();
-
+    private DateTimeFormatRenderer dateFormatter = new DateTimeFormatRenderer();
+    
     public TrackedEventsComposite(StringConstants stringConstants, boolean multiSelection) {
         this.multiSelection = multiSelection;
         this.raceSelectionChangeListeners = new HashSet<RaceSelectionChangeListener>();
@@ -161,7 +161,7 @@ public class TrackedEventsComposite extends FormPanel implements EventDisplayer,
                 @Override
                 public String getValue(Triple<EventDAO, RegattaDAO, RaceDAO> object) {
                     if(object.getC().startOfRace != null) {
-                        return df.format(object.getC().startOfRace);
+                        return dateFormatter.render(object.getC().startOfRace);
                     }
                     
                     return "";
@@ -199,6 +199,13 @@ public class TrackedEventsComposite extends FormPanel implements EventDisplayer,
             });
             setWidget(panel);
         }
+        
+        
+        if(events.size() == 0)
+            raceTable.setVisible(false);
+        else
+            raceTable.setVisible(true);
+            
 
         raceList.getList().clear();
         // Handler columnSortHandler = getRaceTableColumnSortHandler(raceList.getList(), raceNameColumn, raceStartTrackingColumn);

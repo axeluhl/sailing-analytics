@@ -137,6 +137,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         return result;
     }
     
+    @Override
     public LeaderboardDAO getLeaderboardByName(String leaderboardName, Date date,
             Collection<String> namesOfRacesForWhichToLoadLegDetails) throws Exception {
         long startOfRequestHandling = System.currentTimeMillis();
@@ -183,6 +184,24 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
     
     @Override
+    public void stressTestLeaderboardByName(String leaderboardName, int times) throws Exception {
+        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        if (leaderboard != null) {
+            List<String> raceColumnNames = new ArrayList<String>();
+            for (RaceInLeaderboard column : leaderboard.getRaceColumns()) {
+                raceColumnNames.add(column.getName());
+            }
+            int i=0;
+            for (Date date = new Date(); i<times; date = new Date(date.getTime()-10)) {
+                getLeaderboardByName(leaderboardName, date, raceColumnNames);
+                i++;
+            }
+        } else {
+            logger.warning("stressTestLeaderboardByName: couldn't find leaderboard "+leaderboardName);
+        }
+    }
+    
+    @Override
     public LeaderboardEntryDAO getLeaderboardEntry(String leaderboardName, String competitorName, String raceName, Date date) throws NoWindException {
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         if (leaderboard != null) {
@@ -203,7 +222,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             throw new IllegalArgumentException("Didn't find leaderboard "+leaderboardName);
         }
     }
-
+    
     private LeaderboardEntryDAO getLeaderboardEntryDAO(Entry entry, TrackedRace trackedRace, Competitor competitor,
             TimePoint timePoint, boolean addLegDetails) throws NoWindException {
         LeaderboardEntryDAO entryDAO = new LeaderboardEntryDAO();
@@ -211,7 +230,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         entryDAO.totalPoints = entry.getTotalPoints();
         entryDAO.reasonForMaxPoints = entry.getMaxPointsReason().name();
         entryDAO.discarded = entry.isDiscarded();
-        if (addLegDetails) {
+        if (addLegDetails && trackedRace != null) {
             entryDAO.legDetails = new ArrayList<LegEntryDAO>();
             for (Leg leg : trackedRace.getRace().getCourse().getLegs()) {
                 TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(competitor, leg);
