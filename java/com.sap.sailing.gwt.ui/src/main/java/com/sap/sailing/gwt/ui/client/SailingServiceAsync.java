@@ -17,10 +17,10 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDAO;
 import com.sap.sailing.gwt.ui.shared.MarkDAO;
 import com.sap.sailing.gwt.ui.shared.Pair;
 import com.sap.sailing.gwt.ui.shared.QuickRankDAO;
-import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDAO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDAO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDAO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDAO;
+import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDAO;
 import com.sap.sailing.gwt.ui.shared.WindDAO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDAO;
 
@@ -81,10 +81,13 @@ public interface SailingServiceAsync {
     void removeWind(String eventName, String raceName, WindDAO wind, AsyncCallback<Void> callback);
 
     /**
-     * @param tailLengthInMilliseconds
-     *            the time interval to go back in time, starting at <code>date</code>. The result will contain all fixes
-     *            known for the respective competitor starting at <code>date-tailLengthInMilliseconds</code> up to and
-     *            including <code>date</code>.
+     * @param from
+     *            for the list of competitors provided as keys of this map, requests the GPS fixes starting with the
+     *            date provided as value
+     * @param to
+     *            for the list of competitors provided as keys (expected to be equal to the set of competitors used as
+     *            keys in the <code>from</code> parameter, requests the GPS fixes up to but excluding the date provided
+     *            as value
      * @param extrapolate
      *            if <code>true</code> and no position is known for <code>date</code>, the last entry returned in the
      *            list of GPS fixes will be obtained by extrapolating from the competitors last known position before
@@ -92,7 +95,8 @@ public interface SailingServiceAsync {
      * @return a map where for each competitor participating in the race the list of GPS fixes in increasing
      *         chronological order is provided. The last one is the last position at or before <code>date</code>.
      */
-    void getBoatPositions(String eventName, String raceName, Date date, long tailLengthInMilliseconds,
+    void getBoatPositions(String eventName, String raceName,
+            Map<CompetitorDAO, Date> from, Map<CompetitorDAO, Date> to,
             boolean extrapolate, AsyncCallback<Map<CompetitorDAO, List<GPSFixDAO>>> callback);
 
     void getMarkPositions(String eventName, String raceName, Date date, AsyncCallback<List<MarkDAO>> asyncCallback);
@@ -165,7 +169,7 @@ public interface SailingServiceAsync {
     void listSwissTimingRaces(String hostname, int port, boolean canSendRequests,
             AsyncCallback<List<SwissTimingRaceRecordDAO>> asyncCallback);
 
-    void storeSwissTimingConfiguration(String a, String hostname, int port, AsyncCallback<Void> asyncCallback);
+    void storeSwissTimingConfiguration(String configName, String hostname, int port, boolean canSendRequests, AsyncCallback<Void> asyncCallback);
 
     void trackWithSwissTiming(SwissTimingRaceRecordDAO rr, String hostname, int port, boolean canSendRequests,
             boolean trackWind, boolean correctWindByDeclination, AsyncCallback<Void> asyncCallback);

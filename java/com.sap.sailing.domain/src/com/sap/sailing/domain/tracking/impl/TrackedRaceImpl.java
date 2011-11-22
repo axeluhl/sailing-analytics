@@ -199,7 +199,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     
     @Override
     public boolean hasStarted(TimePoint at) {
-        return getStart().compareTo(at) <= 0;
+        return getStart() != null && getStart().compareTo(at) <= 0;
     }
 
     protected void setStartTimeReceived(TimePoint start) {
@@ -534,12 +534,14 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             }
             i++;
         }
-        if (toRemove == null) {
+        if (toRemove == null && !trackedLegs.isEmpty()) {
             // last waypoint removed
             toRemove = last;
         }
-        trackedLegs.remove(toRemove);
-        updated(/* time point*/ null);
+        if (toRemove != null) {
+            trackedLegs.remove(toRemove);
+            updated(/* time point*/ null);
+        }
     }
     
     @Override

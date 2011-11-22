@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.swisstimingadapter.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
@@ -46,10 +47,10 @@ import com.sap.sailing.util.Util;
 
 public class EndToEndListeningStoreAndFowardTest {
     private static final Logger logger = Logger.getLogger(EndToEndListeningStoreAndFowardTest.class.getName());
-    
+
     private static final int RECEIVE_PORT = 6543;
     private static final int CLIENT_PORT = 6544;
-    
+
     private DB db;
     private StoreAndForward storeAndForward;
     private Socket sendingSocket;
@@ -58,12 +59,11 @@ public class EndToEndListeningStoreAndFowardTest {
     private SailMasterConnector connector;
     private SwissTimingAdapterPersistence swissTimingAdapterPersistence;
     private SwissTimingFactory swissTimingFactory;
-    
+
     private EmptyWindStore emptyWindStore;
     private RacingEventService racingEventService;
 
     private List<RaceHandle> raceHandles;
-    
 
     @Before
     public void setUp() throws UnknownHostException, IOException, InterruptedException {
@@ -72,30 +72,32 @@ public class EndToEndListeningStoreAndFowardTest {
         swissTimingAdapterPersistence = SwissTimingAdapterPersistence.INSTANCE;
         swissTimingAdapterPersistence.dropAllMessageData();
         swissTimingAdapterPersistence.dropAllRaceMasterData();
-        storeAndForward = new StoreAndForward(RECEIVE_PORT, CLIENT_PORT, SwissTimingFactory.INSTANCE, swissTimingAdapterPersistence);
+        storeAndForward = new StoreAndForward(RECEIVE_PORT, CLIENT_PORT, SwissTimingFactory.INSTANCE,
+                swissTimingAdapterPersistence);
         sendingSocket = new Socket("localhost", RECEIVE_PORT);
         sendingStream = sendingSocket.getOutputStream();
         swissTimingFactory = SwissTimingFactory.INSTANCE;
         emptyWindStore = EmptyWindStore.INSTANCE;
         transceiver = swissTimingFactory.createSailMasterTransceiver();
         DBCollection lastMessageCountCollection = db.getCollection(CollectionNames.LAST_MESSAGE_COUNT.name());
-        lastMessageCountCollection.update(new BasicDBObject(), new BasicDBObject().append(FieldNames.LAST_MESSAGE_COUNT.name(), 0l),
-                /* upsert */ true, /* multi */ false);
+        lastMessageCountCollection.update(new BasicDBObject(),
+                new BasicDBObject().append(FieldNames.LAST_MESSAGE_COUNT.name(), 0l),
+                /* upsert */true, /* multi */false);
         racingEventService = new RacingEventServiceImpl();
-        raceHandles = new ArrayList<RaceHandle>();  
+        raceHandles = new ArrayList<RaceHandle>();
     }
-    
+
     @After
     public void tearDown() throws InterruptedException, IOException {
         logger.entering(getClass().getName(), "tearDown");
-        for(RaceHandle raceHandle: raceHandles) {
+        for (RaceHandle raceHandle : raceHandles) {
             racingEventService.stopTracking(raceHandle.getEvent());
         }
         storeAndForward.stop();
         logger.exiting(getClass().getName(), "tearDown");
     }
-    
-//    @Test
+
+     @Test
     public void testEndToEndScenarioWithInitMessages() throws IOException, InterruptedException, ParseException {
         String[] racesToTrack = new String[] { "4711", "4712" };
         String scriptName = "/InitMessagesScript.txt";
@@ -117,7 +119,7 @@ public class EndToEndListeningStoreAndFowardTest {
             raceIDs.add(race.getName());
         }
         Set<String> expectedRaceIDs = new HashSet<String>();
-        for (String raceIDToTrack : new String[] { "Not such a wonderful race", "A wonderful test race" }) {
+        for (String raceIDToTrack : new String[] { "4711", "4712" }) {
             expectedRaceIDs.add(raceIDToTrack);
         }
         assertEquals(expectedRaceIDs, raceIDs);
@@ -140,6 +142,10 @@ public class EndToEndListeningStoreAndFowardTest {
             }
         }
         assertEquals(1, Util.size(allTrackedRaces));
+        Set<RaceDefinition> races = raceHandles.iterator().next().getRaceTracker().getRaces();
+        assertEquals(1, races.size());
+        RaceDefinition raceFromTracker = races.iterator().next();
+        assertNotNull(raceFromTracker);
         Set<String> raceIDs = new HashSet<String>();
         for (TrackedRace trackedRace : allTrackedRaces) {
             RaceDefinition race = trackedRace.getRace();
@@ -149,7 +155,8 @@ public class EndToEndListeningStoreAndFowardTest {
             assertEquals(6, Util.size(race.getCourse().getLegs()));
             for (Competitor competitor : race.getCompetitors()) {
                 if (!competitor.getName().equals("Competitor 35") && !competitor.getName().equals("Competitor 20")) {
-                    assertTrue("Track of competitor "+competitor+" empty", !Util.isEmpty(trackedRace.getTrack(competitor).getRawFixes()));
+                    assertTrue("Track of competitor " + competitor + " empty",
+                            !Util.isEmpty(trackedRace.getTrack(competitor).getRawFixes()));
                 }
             }
             Set<Buoy> buoys = new HashSet<Buoy>();
@@ -159,14 +166,107 @@ public class EndToEndListeningStoreAndFowardTest {
                 }
             }
             for (Buoy buoy : buoys) {
-                assertTrue("Track of buoy "+buoy+" empty", !Util.isEmpty(trackedRace.getOrCreateTrack(buoy).getRawFixes()));
+                assertTrue("Track of buoy " + buoy + " empty",
+                        !Util.isEmpty(trackedRace.getOrCreateTrack(buoy).getRawFixes()));
             }
         }
         Set<String> expectedRaceIDs = new HashSet<String>();
-        for (String raceIDToTrack : new String[] { "A simulated SwissTiming race" }) {
+        for (String raceIDToTrack : new String[] { "W4702" }) {
             expectedRaceIDs.add(raceIDToTrack);
         }
         assertEquals(expectedRaceIDs, raceIDs);
+    }
+    
+    @Test
+    public void testLongLogRaceNewConfig() throws UnknownHostException, InterruptedException, IOException, ParseException {
+        String[] racesToTrack = new String[] { "W4702" };
+        String scriptName1 = "/SailMasterDataInterfaceRACandSTL.txt";
+        String scriptName2 = "/SailMasterDataInterface-ExampleAsText.txt";
+         String scriptNewCourseConfig = "/SailMasterDataInterfaceNewCourseConfig.txt";
+        setUpUsingScript(racesToTrack, scriptName1, scriptName2, scriptNewCourseConfig);
+        Set<TrackedRace> allNewTrackedRaces = new HashSet<TrackedRace>();
+        Iterable<Event> allNewEvents = racingEventService.getAllEvents();
+        for (Event event : allNewEvents) {
+            DynamicTrackedEvent trackedEvent = racingEventService.getTrackedEvent(event);
+            Iterable<TrackedRace> trackedRaces = trackedEvent.getTrackedRaces();
+            for (TrackedRace trackedRace : trackedRaces) {
+                allNewTrackedRaces.add(trackedRace);
+            }
+        }
+        assertEquals(1, Util.size(allNewTrackedRaces));
+        Set<RaceDefinition> races = raceHandles.iterator().next().getRaceTracker().getRaces();
+        assertEquals(1, races.size());
+        RaceDefinition raceFromTracker = races.iterator().next();
+        assertNotNull(raceFromTracker);
+        Set<String> raceIDs = new HashSet<String>();
+        for (TrackedRace trackedRace : allNewTrackedRaces) {
+            RaceDefinition race = trackedRace.getRace();
+            raceIDs.add(race.getName());
+            assertEquals(46, Util.size(race.getCompetitors()));
+            assertEquals(3, Util.size(race.getCourse().getWaypoints()));
+            assertEquals(2, Util.size(race.getCourse().getLegs()));
+            for (Competitor competitor : race.getCompetitors()) {
+                if (!competitor.getName().equals("Competitor 35") && !competitor.getName().equals("Competitor 20")) {
+                    assertTrue("Track of competitor " + competitor + " empty",
+                            !Util.isEmpty(trackedRace.getTrack(competitor).getRawFixes()));
+                }
+            }
+            Set<Buoy> buoys = new HashSet<Buoy>();
+            for (Waypoint waypoint : race.getCourse().getWaypoints()) {
+                for (Buoy buoy : waypoint.getBuoys()) {
+                    buoys.add(buoy);
+                }
+            }
+            for (Buoy buoy : buoys) {
+                assertTrue("Track of buoy " + buoy + " empty",
+                        !Util.isEmpty(trackedRace.getOrCreateTrack(buoy).getRawFixes()));
+            }
+        }
+        Set<String> expectedRaceIDs = new HashSet<String>();
+        for (String raceIDToTrack : new String[] { "W4702" }) {
+            expectedRaceIDs.add(raceIDToTrack);
+        }
+        assertEquals(expectedRaceIDs, raceIDs);
+    }
+
+    @Test
+    public void testDuplicateCCGMessageAndWaypointUniqueness() throws IOException, InterruptedException, ParseException {
+        String[] racesToTrack = new String[] { "W4702" };
+        setUpUsingScript(racesToTrack, "/DuplicateCCG.txt");
+
+        Set<TrackedRace> allTrackedRaces = new HashSet<TrackedRace>();
+        Iterable<Event> allEvents = racingEventService.getAllEvents();
+        for (Event event : allEvents) {
+            DynamicTrackedEvent trackedEvent = racingEventService.getTrackedEvent(event);
+            Iterable<TrackedRace> trackedRaces = trackedEvent.getTrackedRaces();
+            for (TrackedRace trackedRace : trackedRaces) {
+                allTrackedRaces.add(trackedRace);
+            }
+        }
+        assertEquals(1, allTrackedRaces.size());
+        TrackedRace trackedRace = allTrackedRaces.iterator().next();
+        List<Waypoint> waypoints = new ArrayList<Waypoint>();
+        for (Waypoint waypoint : trackedRace.getRace().getCourse().getWaypoints()) {
+            waypoints.add(waypoint);
+        }
+        assertEquals(7, Util.size(waypoints));
+    }
+    
+    @Test
+    public void testRongRaceLogRACZero() throws UnknownHostException, InterruptedException, IOException, ParseException{
+        String[] racesToTrack = new String[] { "W4702" };
+        String scriptName2 = "/SailMasterDataInterfaceRACZero.txt";
+        setUpUsingScript(racesToTrack, scriptName2);
+        Set<TrackedRace> allNewTrackedRaces = new HashSet<TrackedRace>();
+        Iterable<Event> allNewEvents = racingEventService.getAllEvents();
+        for (Event event : allNewEvents) {
+            DynamicTrackedEvent trackedEvent = racingEventService.getTrackedEvent(event);
+            Iterable<TrackedRace> trackedRaces = trackedEvent.getTrackedRaces();
+            for (TrackedRace trackedRace : trackedRaces) {
+                allNewTrackedRaces.add(trackedRace);
+            }
+        }
+        assertEquals(0, Util.size(allNewTrackedRaces));
     }
 
     @Test
@@ -186,16 +286,16 @@ public class EndToEndListeningStoreAndFowardTest {
             }
         }
     }
-    
+
     private void setUpUsingScript(String[] racesToTrack, String... scriptNames) throws InterruptedException,
             UnknownHostException, IOException, ParseException {
-        for(String raceToTrack: racesToTrack) {
+        for (String raceToTrack : racesToTrack) {
             RaceHandle raceHandle = racingEventService.addSwissTimingRace(raceToTrack, "localhost", CLIENT_PORT, /* canSendRequests */
                     false, emptyWindStore, -1);
             raceHandles.add(raceHandle);
-            if(connector == null) {
+            if (connector == null) {
                 connector = racingEventService.getSwissTimingFactory().getOrCreateSailMasterConnector("localhost",
-                        CLIENT_PORT, swissTimingAdapterPersistence, /* canSendRequests */ false);
+                        CLIENT_PORT, swissTimingAdapterPersistence, /* canSendRequests */false);
             }
         }
         ScriptedMessagesReader scriptedMessagesReader = new ScriptedMessagesReader();
@@ -203,7 +303,7 @@ public class EndToEndListeningStoreAndFowardTest {
             InputStream is = getClass().getResourceAsStream(scriptName);
             scriptedMessagesReader.addMessagesFromTextFile(is);
         }
-        for (String msg: scriptedMessagesReader.getMessages()) {
+        for (String msg : scriptedMessagesReader.getMessages()) {
             transceiver.sendMessage(msg, sendingStream);
         }
         transceiver.sendMessage(swissTimingFactory.createMessage(MessageType._STOPSERVER.name(), null), sendingStream);
@@ -213,5 +313,5 @@ public class EndToEndListeningStoreAndFowardTest {
             }
         }
     }
-    
+
 }

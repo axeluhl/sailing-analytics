@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -16,10 +17,10 @@ import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.Grid;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.IntegerBox;
 import com.google.gwt.user.client.ui.Label;
@@ -57,29 +58,40 @@ public class SwissTimingEventManagementPanel extends FormPanel implements EventD
     private final CellTable<SwissTimingRaceRecordDAO> raceTable;
     private final Map<String, SwissTimingConfigurationDAO> previousConfigurations;
     private final ListBox previousConfigurationsComboBox;
-    private final Grid grid;
-    private final RaceTreeView trackedRacesTreeView;
+//    private final RaceTreeView trackedRacesTreeView;
+    private final TrackedEventsComposite trackedEventsComposite;
     private final EventRefresher eventRefresher;
+    private final CheckBox canSendRequestsCheckbox;
 
     public SwissTimingEventManagementPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
             EventRefresher eventRefresher, StringConstants stringConstants) {
+        
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.eventRefresher = eventRefresher;
+
+        VerticalPanel mainPanel = new VerticalPanel();
+        this.setWidget(mainPanel);
+        mainPanel.setSize("100%", "100%");
+        
+        CaptionPanel captionPanelConnections = new CaptionPanel("Connections");
+        mainPanel.add(captionPanelConnections);
+
         VerticalPanel verticalPanel = new VerticalPanel();
-        this.setWidget(verticalPanel);
-        verticalPanel.setSize("100%", "100%");
         
-        grid = new Grid(9, 2);
-        verticalPanel.add(grid);
-        verticalPanel.setCellWidth(grid, "100%");
+        captionPanelConnections.setContentWidget(verticalPanel);
+        captionPanelConnections.setStyleName("bold");
+        Grid connectionsGrid = new Grid(7, 2);
+        verticalPanel.add(connectionsGrid);
+        verticalPanel.setCellWidth(connectionsGrid, "100%");
         
-        Label lblPredefined = new Label(stringConstants.trackedBefore());
-        grid.setWidget(0, 0, lblPredefined);
+//        Label lblPredefined = new Label(stringConstants.trackedBefore() + ":");
+        Label lblPredefined = new Label("History of connections:");
+        connectionsGrid.setWidget(0, 0, lblPredefined);
         
         previousConfigurations = new HashMap<String, SwissTimingConfigurationDAO>();
         previousConfigurationsComboBox = new ListBox();
-        grid.setWidget(1, 0, previousConfigurationsComboBox);
+        connectionsGrid.setWidget(0, 1, previousConfigurationsComboBox);
         previousConfigurationsComboBox.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
@@ -93,105 +105,144 @@ public class SwissTimingEventManagementPanel extends FormPanel implements EventD
             }
         });
         fillConfigurations();
+
+//        Label lblTrackNewEvent = new Label(stringConstants.trackNewEvent());
+        Label lblTrackNewEvent = new Label("Define a new connection");
+        connectionsGrid.setWidget(2, 0, lblTrackNewEvent);
         
-        Button btnListRaces = new Button(stringConstants.listRaces());
-        grid.setWidget(1, 1, btnListRaces);
-        btnListRaces.setWidth("100%");
+        Label lblHostname = new Label(stringConstants.hostname() + ":");
+        connectionsGrid.setWidget(3, 0, lblHostname);
+        
+        hostnameTextbox = new TextBox();
+        hostnameTextbox.setText("");
+        connectionsGrid.setWidget(3, 1, hostnameTextbox);
+        
+        Label lblPort = new Label(stringConstants.port() + ":");
+        connectionsGrid.setWidget(4, 0, lblPort);
+        
+        portIntegerbox = new IntegerBox();
+        connectionsGrid.setWidget(4, 1, portIntegerbox);
+
+        Label lblCanSendRequests = new Label("Can send requests:");
+        connectionsGrid.setWidget(5, 0, lblCanSendRequests);
+
+        canSendRequestsCheckbox = new CheckBox();
+        canSendRequestsCheckbox.setValue(false);
+        connectionsGrid.setWidget(5, 1, canSendRequestsCheckbox);
+
+        
+//        Button btnListRaces = new Button(stringConstants.listRaces());
+        Button btnListRaces = new Button("Connect and read races");
+        connectionsGrid.setWidget(6, 1, btnListRaces);
         btnListRaces.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 fillRaces(sailingService);
             }
         });
-        
-        Label lblTrackNewEvent = new Label(stringConstants.trackNewEvent());
-        grid.setWidget(2, 0, lblTrackNewEvent);
-        
-        Grid grid_1 = new Grid(5, 3);
-        grid.setWidget(3, 0, grid_1);
-        
-        Label lblHostname = new Label(stringConstants.hostname());
-        grid_1.setWidget(0, 1, lblHostname);
-        
-        hostnameTextbox = new TextBox();
-        hostnameTextbox.setText("gps.sportresult.com");
-        grid_1.setWidget(0, 2, hostnameTextbox);
-        
-        HorizontalPanel horizontalPanel_1 = new HorizontalPanel();
-        grid_1.setWidget(2, 2, horizontalPanel_1);
-        
-        Label lblPort = new Label(stringConstants.port());
-        horizontalPanel_1.add(lblPort);
-        
-        portIntegerbox = new IntegerBox();
-        horizontalPanel_1.add(portIntegerbox);
-        
-        Label lblTrackableRaces = new Label(stringConstants.trackableRaces());
-        grid.setWidget(5, 0, lblTrackableRaces);
+
+
         TextColumn<SwissTimingRaceRecordDAO> raceNameColumn = new TextColumn<SwissTimingRaceRecordDAO>() {
             @Override
             public String getValue(SwissTimingRaceRecordDAO object) {
                 return object.ID;
             }
         };
+        
         TextColumn<SwissTimingRaceRecordDAO> raceStartTrackingColumn = new TextColumn<SwissTimingRaceRecordDAO>() {
             @Override
             public String getValue(SwissTimingRaceRecordDAO object) {
-                return object.raceStartTime.toString();
+                return object.raceStartTime==null?"":object.raceStartTime.toString();
             }
         };
+
+
+        HorizontalPanel racesSplitPanel = new HorizontalPanel();
+        mainPanel.add(racesSplitPanel);
+        
+        CaptionPanel racesCaptionPanel = new CaptionPanel("Available Races");
+        racesSplitPanel.add(racesCaptionPanel);
+        racesCaptionPanel.setWidth("50%");
+
+        CaptionPanel trackedRacesCaptionPanel = new CaptionPanel("Tracked Races");
+        racesSplitPanel.add(trackedRacesCaptionPanel);
+        trackedRacesCaptionPanel.setWidth("50%");
+
+        VerticalPanel racesPanel = new VerticalPanel();
+        racesCaptionPanel.setContentWidget(racesPanel);
+        racesCaptionPanel.setStyleName("bold");
+
+        VerticalPanel trackedRacesPanel = new VerticalPanel();
+        trackedRacesPanel.setWidth("100%");
+        trackedRacesCaptionPanel.setContentWidget(trackedRacesPanel);
+        trackedRacesCaptionPanel.setStyleName("bold");
+        
+        HorizontalPanel racesHorizontalPanel = new HorizontalPanel();
+        racesPanel.add(racesHorizontalPanel);
+
+        VerticalPanel trackPanel = new VerticalPanel();
+        trackPanel.setStyleName("paddedPanel");
+        
+//        Label lblTrackableRaces = new Label(stringConstants.trackableRaces());
+//       connectionsGrid.setWidget(5, 0, lblTrackableRaces);
+
         raceNameColumn.setSortable(true);
         raceStartTrackingColumn.setSortable(true);
-        raceTable = new CellTable<SwissTimingRaceRecordDAO>(/* pageSize */ 100);
+        
+        AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
+        raceTable = new CellTable<SwissTimingRaceRecordDAO>(/* pageSize */ 200, tableRes);
         raceTable.addColumn(raceNameColumn, stringConstants.name());
         raceTable.addColumn(raceStartTrackingColumn, stringConstants.raceStartTimeColumn());
-        grid.setWidget(6, 0, raceTable);
-        grid.getCellFormatter().setHeight(6, 0, "100%");
-        raceTable.setWidth("100%");
+        raceTable.setWidth("300px");
         raceTable.setSelectionModel(new MultiSelectionModel<SwissTimingRaceRecordDAO>() {});
+
+        racesHorizontalPanel.add(raceTable);
+        racesHorizontalPanel.add(trackPanel);
+
         raceList = new ListDataProvider<SwissTimingRaceRecordDAO>();
         raceList.addDataDisplay(raceTable);
         Handler columnSortHandler = getRaceTableColumnSortHandler(raceList.getList(), raceNameColumn, raceStartTrackingColumn);
         raceTable.addColumnSortHandler(columnSortHandler);
+
+        Label lblTrackSettings = new Label("Track settings");
+        trackPanel.add(lblTrackSettings);
         
-        VerticalPanel trackPanel = new VerticalPanel();
-        grid.setWidget(6, 1, trackPanel);
         final CheckBox trackWindCheckbox = new CheckBox(stringConstants.trackWind());
+        trackWindCheckbox.setWordWrap(false);
         trackWindCheckbox.setValue(true);
         trackPanel.add(trackWindCheckbox);
+
         final CheckBox declinationCheckbox = new CheckBox(stringConstants.declinationCheckbox());
+        declinationCheckbox.setWordWrap(false);
         declinationCheckbox.setValue(true);
         trackPanel.add(declinationCheckbox);
         
-        Button btnTrack = new Button(stringConstants.btnTrack());
-        trackPanel.add(btnTrack);
+  //      trackedRacesTreeView = new RaceTreeView(stringConstants, /* multiselection */ true);
+  //      trackedRacesPanel.add(trackedRacesTreeView);
+        
+        trackedEventsComposite = new TrackedEventsComposite(stringConstants, /* multiselection */ true);
+        trackedRacesPanel.add(trackedEventsComposite);
+        
+        HorizontalPanel buttonPanel = new HorizontalPanel();
+        racesPanel.add(buttonPanel);
+
+        Button btnTrack = new Button("Start tracking");
+//        Button btnTrack = new Button(stringConstants.btnTrack());
+        buttonPanel.add(btnTrack);
+        buttonPanel.setSpacing(10);
         btnTrack.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 trackSelectedRaces(trackWindCheckbox.getValue(), declinationCheckbox.getValue());
             }
         });
-        grid.getCellFormatter().setVerticalAlignment(6, 1, HasVerticalAlignment.ALIGN_TOP);
-        grid.getCellFormatter().setVerticalAlignment(6, 0, HasVerticalAlignment.ALIGN_TOP);
 
-        Label lblEventsConnectedTo = new Label(stringConstants.eventsConnectedTo());
-        grid.setWidget(7, 0, lblEventsConnectedTo);
-        trackedRacesTreeView = new RaceTreeView(stringConstants, /* multiselection */ true);
-        grid.setWidget(8, 0, trackedRacesTreeView);
-        VerticalPanel buttonPanel = new VerticalPanel();
-        Button btnRefresh = new Button(stringConstants.refresh());
-        btnRefresh.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                SwissTimingEventManagementPanel.this.eventRefresher.fillEvents();
-            }
-        });
-        buttonPanel.add(btnRefresh);
-        Button btnRemove = new Button(stringConstants.remove());
+        Button btnRemove = new Button("Stop tracking");
+//        Button btnRemove = new Button(stringConstants.remove());
         btnRemove.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent click) {
-                for (Triple<EventDAO, RegattaDAO, RaceDAO> selection : trackedRacesTreeView.getSelectedEventAndRace()) {
+                for (Triple<EventDAO, RegattaDAO, RaceDAO> selection : trackedEventsComposite.getSelectedEventAndRace()) {
                     if (selection.getC().currentlyTracked) {
                         stopTrackingRace(selection.getA(), selection.getC());
                     }
@@ -200,10 +251,16 @@ public class SwissTimingEventManagementPanel extends FormPanel implements EventD
         });
         btnRemove.setWidth("100%");
         buttonPanel.add(btnRemove);
-        grid.setWidget(8, 1, buttonPanel);
-        
-        grid.getCellFormatter().setVerticalAlignment(8, 1, HasVerticalAlignment.ALIGN_TOP);
-        grid.getCellFormatter().setVerticalAlignment(8, 0, HasVerticalAlignment.ALIGN_TOP);
+
+        Button btnRefresh = new Button(stringConstants.refresh());
+        btnRefresh.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                SwissTimingEventManagementPanel.this.eventRefresher.fillEvents();
+            }
+        });
+        buttonPanel.add(btnRefresh);
+
     }
 
     private void stopTrackingRace(final EventDAO event, final RaceDAO race) {
@@ -267,7 +324,8 @@ public class SwissTimingEventManagementPanel extends FormPanel implements EventD
     private void fillRaces(final SailingServiceAsync sailingService) {
         final String hostname = hostnameTextbox.getValue();
         final int port = portIntegerbox.getValue();
-        sailingService.listSwissTimingRaces(hostname, port, /* TODO canSendRequests */ false,
+        final boolean canSendRequests = canSendRequestsCheckbox.getValue();
+        sailingService.listSwissTimingRaces(hostname, port, canSendRequests,
                 new AsyncCallback<List<SwissTimingRaceRecordDAO>>() {
             @Override
             public void onFailure(Throwable caught) {
@@ -283,7 +341,7 @@ public class SwissTimingEventManagementPanel extends FormPanel implements EventD
                 }
                 // store a successful configuration in the database for later retrieval
                 final String configName = hostname+":"+port;
-                sailingService.storeSwissTimingConfiguration(configName, hostname, port,
+                sailingService.storeSwissTimingConfiguration(configName, hostname, port, canSendRequests,
                         new AsyncCallback<Void>() {
                             @Override
                             public void onFailure(Throwable caught) {
@@ -295,7 +353,7 @@ public class SwissTimingEventManagementPanel extends FormPanel implements EventD
                             public void onSuccess(Void voidResult) {
                                 // refresh list of previous configurations
                                 SwissTimingConfigurationDAO stConfig = new SwissTimingConfigurationDAO(configName,
-                                        hostname, port);
+                                        hostname, port, canSendRequests);
                                 if (previousConfigurations.put(stConfig.name, stConfig) == null) {
                                     previousConfigurationsComboBox.addItem(stConfig.name);
                                 }
@@ -334,13 +392,15 @@ public class SwissTimingEventManagementPanel extends FormPanel implements EventD
             if (stConfig != null) {
                 hostnameTextbox.setValue(stConfig.hostname);
                 portIntegerbox.setValue(stConfig.port);
+                canSendRequestsCheckbox.setValue(stConfig.canSendRequests);
             }
         }
     }
 
     @Override
     public void fillEvents(List<EventDAO> result) {
-        trackedRacesTreeView.fillEvents(result);
+    //    trackedRacesTreeView.fillEvents(result);
+        trackedEventsComposite.fillEvents(result);
     }
 
 }

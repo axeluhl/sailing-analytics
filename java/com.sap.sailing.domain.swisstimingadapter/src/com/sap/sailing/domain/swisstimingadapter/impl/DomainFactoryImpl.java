@@ -2,10 +2,12 @@ package com.sap.sailing.domain.swisstimingadapter.impl;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
@@ -19,6 +21,7 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Team;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.BuoyImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
@@ -48,12 +51,22 @@ import difflib.DiffUtils;
 import difflib.Patch;
 import difflib.PatchFailedException;
 
+/**
+ * {@link RaceDefinition} objects created by this factory are created using the SwissTiming "Race ID"
+ * as the {@link RaceDefinition#getName() race name}. This at the same time defines the name of the
+ * single {@link Event} created per {@link RaceDefinition}.
+ * 
+ * @author Axel Uhl (d043530)
+ *
+ */
 public class DomainFactoryImpl implements DomainFactory {
     private final Map<String, Event> raceIDToEventCache;
     private final Map<String, Competitor> boatIDToCompetitorCache;
     private final Map<String, Buoy> buoyCache;
     private final Map<Iterable<String>, ControlPoint> controlPointCache;
     private final Map<String, Nationality> nationalityCache;
+    private final Map<String, BoatClass> olympicClassesByID;
+    private final BoatClass unknownBoatClass;
     
     public DomainFactoryImpl() {
         raceIDToEventCache = new HashMap<String, Event>();
@@ -61,6 +74,28 @@ public class DomainFactoryImpl implements DomainFactory {
         buoyCache = new HashMap<String, Buoy>();
         controlPointCache = new HashMap<Iterable<String>, ControlPoint>();
         nationalityCache = new HashMap<String, Nationality>();
+        olympicClassesByID = new HashMap<String, BoatClass>();
+        /*
+        SAM102000 Men's Windsurfer = Windsufer Männer RS:X
+        SAW102000 Women's Windsurfer = Windsurfer Damen RS:X
+        SAM004000 Men's One Person Dinghy = Laser Männer
+        SAW103000 Women's One Person Dinghy = Laser Damen Laser Radial
+        SAM002000 Men's One Person Dinghy Heavy = Finn Dinghy Männer
+        SAM005000 Men's Two Person Dinghy = 470er Männer
+        SAW005000 Women's Two Person Dinghy = 470er Damen
+        SAM009000 Men's Skiff = 49er Männer
+        SAM007000 Men's Keelboat = Starboot Männer 
+        SAW010000 Women's Match Racing = Matchrace Damen Elliott 6M (modified)
+        */
+        olympicClassesByID.put("102", new BoatClassImpl("RS:X"));
+        olympicClassesByID.put("004", new BoatClassImpl("Laser"));
+        olympicClassesByID.put("103", new BoatClassImpl("Laser Radial"));
+        olympicClassesByID.put("002", new BoatClassImpl("Finn"));
+        olympicClassesByID.put("005", new BoatClassImpl("470"));
+        olympicClassesByID.put("009", new BoatClassImpl("49er"));
+        olympicClassesByID.put("007", new BoatClassImpl("Star"));
+        olympicClassesByID.put("010", new BoatClassImpl("Elliott 6M"));
+        unknownBoatClass = new BoatClassImpl("Unknown");
     }
 
     @Override
@@ -111,15 +146,33 @@ public class DomainFactoryImpl implements DomainFactory {
     public RaceDefinition createRaceDefinition(Event event, Race race, StartList startList, Course course) {
         com.sap.sailing.domain.base.Course domainCourse = createCourse(race.getDescription(), course);
         Iterable<Competitor> competitors = createCompetitorList(startList);
-        RaceDefinition result = new RaceDefinitionImpl(race.getDescription(), domainCourse,
+        RaceDefinition result = new RaceDefinitionImpl(race.getRaceID(), domainCourse,
                 getOrCreateBoatClassFromRaceID(race.getRaceID()), competitors);
         event.addRace(result);
         return result;
     }
 
     private BoatClass getOrCreateBoatClassFromRaceID(String raceID) {
-        // TODO extract boat class from raceID according to SwissTiming-internal mapping rules
-        return /* boatClass */ null;
+        BoatClass result;
+        /*
+            SAM102000 Men's Windsurfer = Windsufer Männer RS:X
+            SAW102000 Women's Windsurfer = Windsurfer Damen RS:X
+            SAM004000 Men's One Person Dinghy = Laser Männer
+            SAW103000 Women's One Person Dinghy = Laser Damen Laser Radial
+            SAM002000 Men's One Person Dinghy Heavy = Finn Dinghy Männer
+            SAM005000 Men's Two Person Dinghy = 470er Männer
+            SAW005000 Women's Two Person Dinghy = 470er Damen
+            SAM009000 Men's Skiff = 49er Männer
+            SAM007000 Men's Keelboat = Starboot Männer 
+            SAW010000 Women's Match Racing = Matchrace Damen Elliott 6M (modified)
+         */
+        if (raceID.startsWith("SA") && raceID.length() == 9) {
+            String classID = raceID.substring(3, 6);
+            result = olympicClassesByID.get(classID);
+        } else {
+            result = unknownBoatClass;
+        }
+        return result;
     }
 
     private Iterable<Competitor> createCompetitorList(StartList startList) {
@@ -158,6 +211,7 @@ public class DomainFactoryImpl implements DomainFactory {
             default:
                 throw new RuntimeException("Don't know how to handle control points with number of devices neither 1 nor 2. Was "+Util.size(devices));
             }
+            controlPointCache.put(devices, result);
         }
         return result;
     }
@@ -224,6 +278,25 @@ public class DomainFactoryImpl implements DomainFactory {
     @Override
     public MarkPassing createMarkPassing(String raceID, String boatID, Waypoint waypoint, TimePoint timePoint) {
         return new MarkPassingImpl(timePoint, waypoint, getCompetitorByBoatID(boatID));
+    }
+
+    @Override
+    public void removeRace(String raceID) {
+        Event event = getOrCreateEvent(raceID);
+        Set<RaceDefinition> toRemove = new HashSet<RaceDefinition>();
+        if (event != null) {
+            for (RaceDefinition race : event.getAllRaces()) {
+                if (race.getName().equals(raceID)) {
+                    toRemove.add(race);
+                }
+            }
+            for (RaceDefinition raceToRemove : toRemove) {
+                event.removeRace(raceToRemove);
+            }
+            if (Util.isEmpty(event.getAllRaces())) {
+                raceIDToEventCache.remove(raceID);
+            }
+        }
     }
 
 }

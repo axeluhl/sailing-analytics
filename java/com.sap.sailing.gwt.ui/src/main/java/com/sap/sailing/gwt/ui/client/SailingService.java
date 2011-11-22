@@ -15,10 +15,10 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDAO;
 import com.sap.sailing.gwt.ui.shared.MarkDAO;
 import com.sap.sailing.gwt.ui.shared.Pair;
 import com.sap.sailing.gwt.ui.shared.QuickRankDAO;
-import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDAO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDAO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDAO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDAO;
+import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDAO;
 import com.sap.sailing.gwt.ui.shared.WindDAO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDAO;
 
@@ -47,8 +47,8 @@ public interface SailingService extends RemoteService {
 
     void setWind(String eventName, String raceName, WindDAO wind);
 
-    Map<CompetitorDAO, List<GPSFixDAO>> getBoatPositions(String eventName, String raceName, Date date,
-            long tailLengthInMilliseconds, boolean extrapolate);
+    Map<CompetitorDAO, List<GPSFixDAO>> getBoatPositions(String eventName, String raceName,
+            Map<CompetitorDAO, Date> from, Map<CompetitorDAO, Date> to, boolean extrapolate);
 
     List<MarkDAO> getMarkPositions(String eventName, String raceName, Date date);
 
@@ -110,7 +110,7 @@ public interface SailingService extends RemoteService {
 
     List<SwissTimingRaceRecordDAO> listSwissTimingRaces(String hostname, int port, boolean canSendRequests) throws Exception;
 
-    void storeSwissTimingConfiguration(String a, String hostname, int port);
+    void storeSwissTimingConfiguration(String configName, String hostname, int port, boolean canSendRequests);
 
     void trackWithSwissTiming(SwissTimingRaceRecordDAO rr, String hostname, int port, boolean canSendRequests,
             boolean trackWind, boolean correctWindByDeclination) throws Exception;
