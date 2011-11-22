@@ -21,7 +21,7 @@ public class LeaderboardPage extends AbstractEntryPoint {
                 if (leaderboardNames.contains(leaderboardName)) {
 
                     LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(stringConstants);
-                    logoAndTitlePanel.addStyleName("TEST");
+                    logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
 
                     LeaderboardPanel leaderboardPanel = new LeaderboardPanel(sailingService, leaderboardName,
                             LeaderboardPage.this, stringConstants);
