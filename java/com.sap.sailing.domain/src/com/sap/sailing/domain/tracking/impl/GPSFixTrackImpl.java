@@ -95,7 +95,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
     }
 
     @Override
-    public Speed getMaximumSpeedOverGround(TimePoint from, TimePoint to) {
+    public synchronized Speed getMaximumSpeedOverGround(TimePoint from, TimePoint to) {
         // fetch all fixes on this leg so far and determine their maximum speed
         Iterator<FixType> iter = getFixesIterator(from, /* inclusive */ true);
         Speed max = Speed.NULL;

@@ -167,24 +167,28 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
     @Override
     public String toString() {
         StringBuilder result = new StringBuilder();
-        for (Wind wind : getRawFixes()) {
-            result.append(wind);
-            result.append(" avg(");
-            result.append(millisecondsOverWhichToAverage);
-            result.append("ms): ");
-            result.append(getEstimatedWind(wind.getPosition(), wind.getTimePoint()));
-            result.append("\n");
+        synchronized (this) {
+            for (Wind wind : getRawFixes()) {
+                result.append(wind);
+                result.append(" avg(");
+                result.append(millisecondsOverWhichToAverage);
+                result.append("ms): ");
+                result.append(getEstimatedWind(wind.getPosition(), wind.getTimePoint()));
+                result.append("\n");
+            }
         }
         return result.toString();
     }
     
     public String toCSV() {
         StringBuilder result = new StringBuilder();
-        for (Wind wind : getRawFixes()) {
-            append(result, wind);
-            Wind estimate = getEstimatedWind(wind.getPosition(), wind.getTimePoint());
-            append(result, estimate);
-            result.append("\n");
+        synchronized (this) {
+            for (Wind wind : getRawFixes()) {
+                append(result, wind);
+                Wind estimate = getEstimatedWind(wind.getPosition(), wind.getTimePoint());
+                append(result, estimate);
+                result.append("\n");
+            }
         }
         return result.toString();
     }

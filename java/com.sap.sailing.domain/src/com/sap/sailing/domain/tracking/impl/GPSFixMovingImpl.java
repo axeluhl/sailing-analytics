@@ -22,4 +22,14 @@ public class GPSFixMovingImpl extends GPSFixImpl implements GPSFixMoving {
     public String toString() {
         return super.toString()+" with "+getSpeed();
     }
+    
+    @Override
+    public int hashCode() {
+        return super.hashCode() ^ getSpeed().hashCode();
+    }
+    
+    @Override
+    public boolean equals(Object other) {
+        return super.equals(other) && other instanceof GPSFixMoving && getSpeed().equals(((GPSFixMoving) other).getSpeed());
+    }
 }

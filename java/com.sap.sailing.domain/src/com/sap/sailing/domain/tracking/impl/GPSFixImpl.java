@@ -4,7 +4,13 @@ import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.tracking.GPSFix;
 
-public class GPSFixImpl implements GPSFix {
+/**
+ * Equality / hash code are based on {@link #getPosition()}'s and {@link #getTimePoint()}'s equality / hash code.
+ * 
+ * @author Axel Uhl (d043530)
+ *
+ */
+public class GPSFixImpl extends AbstractGPSFixImpl implements GPSFix {
     private final Position position;
     private final TimePoint timePoint;
     
