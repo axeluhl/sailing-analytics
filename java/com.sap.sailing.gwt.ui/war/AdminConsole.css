@@ -118,6 +118,7 @@ h1 {
 .gwt-Button {
 	background-color: #e2e2e2;
 	border-color: #a3a3a3 !important;
+	white-space: nowrap;
 }
 
 .gwt-TextBox {
