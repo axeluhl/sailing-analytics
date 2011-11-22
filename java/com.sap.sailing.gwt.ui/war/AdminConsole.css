@@ -12,3 +12,7 @@
 .paddedPanel {
     padding: 10px;
 }
+
+.linkNoBorder {
+	border: none;
+}
