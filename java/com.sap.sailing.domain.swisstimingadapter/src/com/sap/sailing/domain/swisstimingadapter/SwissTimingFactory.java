@@ -34,10 +34,14 @@ public interface SwissTimingFactory {
      * {@link SailMasterConnector#trackRace} and {@link SailMasterConnector#stopTrackingRace} operations.
      * {@link MessageType#isRaceSpecific() Race-specific messages} for other races are ignored and not forwarded to any
      * listener.
-     * @param canSendRequests TODO
+     * 
+     * @param canSendRequests
+     *            tells whether the hostname/port combination is able to receive and process SailMaster request messages;
+     *            if <code>false</code>, only events are sent by the host to which the connector connects.
      */
-    SailMasterConnector getOrCreateSailMasterConnector(String hostname, int port, RaceSpecificMessageLoader messageLoader, boolean canSendRequests) throws InterruptedException;
-    
+    SailMasterConnector getOrCreateSailMasterConnector(String hostname, int port,
+            RaceSpecificMessageLoader messageLoader, boolean canSendRequests) throws InterruptedException;
+
     SailMasterTransceiver createSailMasterTransceiver();
 
     SwissTimingConfiguration createSwissTimingConfiguration(String name, String hostname, int port, boolean canSendRequests);
