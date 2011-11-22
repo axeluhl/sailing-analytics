@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.client;
 
 import java.util.List;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Label;
@@ -10,6 +11,7 @@ import com.google.gwt.user.client.ui.RootPanel;
 public class LeaderboardPage extends AbstractEntryPoint {
     @Override
     public void onModuleLoad() {
+        Window.alert(GWT.getModuleBaseURL());
         super.onModuleLoad();
         sailingService.getLeaderboardNames(new AsyncCallback<List<String>>() {
 
@@ -30,9 +32,8 @@ public class LeaderboardPage extends AbstractEntryPoint {
                         leaderboardPanel.addStyleName("leftPaddedPanel");
                     }
 
-                    RootPanel.get("Logo").add(logoAndTitlePanel);
-                    RootPanel.get("leaderboardwrapper").add(leaderboardPanel); // leaderboardwrapper -> wrapper for html
-                                                                               // host page
+                    RootPanel.get().add(logoAndTitlePanel);
+                    RootPanel.get().add(leaderboardPanel);
 
                 } else {
                     RootPanel.get().add(new Label(stringConstants.noSuchLeaderboard()));
