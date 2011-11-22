@@ -497,7 +497,11 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 windTrackInfoDAOs.put("COURSEBASED", createWindTrackInfoDAO(windwardMarkWindTrack));
             }
             if (includeTrackBasedWindEstimation && estimatedTrack != null) {
-                if (!estimatedTrack.getFixes().iterator().hasNext()) {
+                boolean hasNext;
+                synchronized (estimatedTrack) {
+                    hasNext = estimatedTrack.getFixes().iterator().hasNext();
+                }
+                if (!hasNext) {
                     // empty wind estimation track; add at least one estimate for the current time for the start gate
                     Wind estimatedWindDirectionForNow;
                     try {
@@ -519,8 +523,10 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         WindTrackInfoDAO windEstimations = new WindTrackInfoDAO();
         windEstimations.dampeningIntervalInMilliseconds = estimatedTrack.getMillisecondsOverWhichToAverageWind();
         windEstimations.windFixes = new ArrayList<WindDAO>();
-        for (Wind estimatedWind : estimatedTrack.getFixes()) {
-            windEstimations.windFixes.add(createWindDAO(estimatedWind, estimatedTrack));
+        synchronized (estimatedTrack) {
+            for (Wind estimatedWind : estimatedTrack.getFixes()) {
+                windEstimations.windFixes.add(createWindDAO(estimatedWind, estimatedTrack));
+            }
         }
         return windEstimations;
     }
@@ -672,30 +678,36 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                     TimePoint fromTimePoint = new MillisecondsTimePoint(from.get(competitorDAO));
                     TimePoint toTimePointExcluding = new MillisecondsTimePoint(to.get(competitorDAO));
                     Iterator<GPSFixMoving> fixIter;
-                    fixIter = track.getFixesIterator(fromTimePoint, /* inclusive */ true);
-                    if (fixIter.hasNext()) {
-                        GPSFixMoving fix = fixIter.next();
-                        while (fix != null && fix.getTimePoint().compareTo(toTimePointExcluding) < 0) {
-                            Tack tack = trackedRace.getTack(competitor, fix.getTimePoint());
-                            GPSFixDAO fixDAO = new GPSFixDAO(fix.getTimePoint().asDate(), new PositionDAO(fix
-                                    .getPosition().getLatDeg(), fix.getPosition().getLngDeg()),
-                                    new SpeedWithBearingDAO(fix.getSpeed().getKnots(), fix.getSpeed().getBearing()
-                                            .getDegrees()), tack.name(), /* extrapolated */ false);
-                            fixesForCompetitor.add(fixDAO);
-                            if (fixIter.hasNext()) {
-                                fix = fixIter.next();
-                            } else {
-                                // check if fix was at date and if extrapolation is requested
-                                if (!fix.getTimePoint().equals(toTimePointExcluding) && extrapolate) {
-                                    Position position = track.getEstimatedPosition(toTimePointExcluding, extrapolate);
-                                    Tack tack2 = trackedRace.getTack(competitor, toTimePointExcluding);
-                                    SpeedWithBearing speedWithBearing = track.getEstimatedSpeed(toTimePointExcluding);
-                                    GPSFixDAO extrapolated = new GPSFixDAO(to.get(competitorDAO), new PositionDAO(position.getLatDeg(),
-                                            position.getLngDeg()), new SpeedWithBearingDAO(speedWithBearing.getKnots(),
-                                            speedWithBearing.getBearing().getDegrees()), tack2.name(), /* extrapolated */ true);
-                                    fixesForCompetitor.add(extrapolated);
+                    synchronized (track) {
+                        fixIter = track.getFixesIterator(fromTimePoint, /* inclusive */true);
+                        if (fixIter.hasNext()) {
+                            GPSFixMoving fix = fixIter.next();
+                            while (fix != null && fix.getTimePoint().compareTo(toTimePointExcluding) < 0) {
+                                Tack tack = trackedRace.getTack(competitor, fix.getTimePoint());
+                                GPSFixDAO fixDAO = new GPSFixDAO(fix.getTimePoint().asDate(), new PositionDAO(fix
+                                        .getPosition().getLatDeg(), fix.getPosition().getLngDeg()),
+                                        new SpeedWithBearingDAO(fix.getSpeed().getKnots(), fix.getSpeed().getBearing()
+                                                .getDegrees()), tack.name(), /* extrapolated */false);
+                                fixesForCompetitor.add(fixDAO);
+                                if (fixIter.hasNext()) {
+                                    fix = fixIter.next();
+                                } else {
+                                    // check if fix was at date and if extrapolation is requested
+                                    if (!fix.getTimePoint().equals(toTimePointExcluding) && extrapolate) {
+                                        Position position = track.getEstimatedPosition(toTimePointExcluding,
+                                                extrapolate);
+                                        Tack tack2 = trackedRace.getTack(competitor, toTimePointExcluding);
+                                        SpeedWithBearing speedWithBearing = track
+                                                .getEstimatedSpeed(toTimePointExcluding);
+                                        GPSFixDAO extrapolated = new GPSFixDAO(to.get(competitorDAO), new PositionDAO(
+                                                position.getLatDeg(), position.getLngDeg()),
+                                                new SpeedWithBearingDAO(speedWithBearing.getKnots(), speedWithBearing
+                                                        .getBearing().getDegrees()), tack2.name(), /* extrapolated */
+                                                true);
+                                        fixesForCompetitor.add(extrapolated);
+                                    }
+                                    fix = null;
                                 }
-                                fix = null;
                             }
                         }
                     }

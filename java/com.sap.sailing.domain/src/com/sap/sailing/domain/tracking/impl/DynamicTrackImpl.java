@@ -18,7 +18,9 @@ public class DynamicTrackImpl<ItemType, FixType extends GPSFix> extends
 
     @Override
     public void addGPSFix(FixType gpsFix) {
-        getInternalRawFixes().add(gpsFix);
+        synchronized (this) {
+            getInternalRawFixes().add(gpsFix);
+        }
         for (RaceChangeListener<ItemType> listener : listeners) {
             listener.gpsFixReceived(gpsFix, getTrackedItem());
         }
