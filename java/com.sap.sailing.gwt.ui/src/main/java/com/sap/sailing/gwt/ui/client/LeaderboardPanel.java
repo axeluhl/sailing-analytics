@@ -32,7 +32,6 @@ import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
@@ -398,7 +397,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             /* iconURL */medalRace ? "/images/medal_small.png" : null, LeaderboardPanel.this, this, stringConstants);
             return header;
         }
-        
+
         public boolean isMedalRace() {
             return medalRace;
         }
@@ -681,7 +680,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         }
     }
 
-    public LeaderboardPanel(SailingServiceAsync sailingService, String leaderboardName, ErrorReporter errorReporter, final StringConstants stringConstants) {
+    public LeaderboardPanel(SailingServiceAsync sailingService, String leaderboardName, ErrorReporter errorReporter,
+            final StringConstants stringConstants) {
         this.sailingService = sailingService;
         this.setLeaderboardName(leaderboardName);
         this.errorReporter = errorReporter;
@@ -716,10 +716,10 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         listHandler = new ListHandler<LeaderboardRowDAO>(getData().getList());
         getLeaderboardTable().addColumnSortHandler(listHandler);
         loadCompleteLeaderboard(getLeaderboardDisplayDate());
+
         VerticalPanel vp = new VerticalPanel();
         vp.setSpacing(15);
-        Panel logoAndTitle = createTitleAndLogo(stringConstants);
-        vp.add(logoAndTitle);        
+
         DockPanel dockPanel = new DockPanel();
         dockPanel.setWidth("100%");
         dockPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
@@ -758,11 +758,6 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         vp.add(dockPanel);
         vp.add(getLeaderboardTable());
         setWidget(vp);
-    }
-
-    private Panel createTitleAndLogo(final StringConstants stringConstants) {
-        Panel logoAndTitle = new LogoAndTitlePanel(stringConstants);
-        return logoAndTitle;
     }
 
     private SafeHtml getPlayPauseImgHtml(boolean playing) {
@@ -965,7 +960,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                         // if tracked-ness differs, column must be updated with
                         // a new column that is expansion-enabled
                         int columnIndex = getLeaderboardTable().getColumnIndex(raceColumn);
-                        if (raceColumn.isExpansionEnabled() != leaderboard.raceIsTracked(race) || columnIndex != positionRaceColumn[indexRaceColumn]
+                        if (raceColumn.isExpansionEnabled() != leaderboard.raceIsTracked(race)
+                                || columnIndex != positionRaceColumn[indexRaceColumn]
                                 || leaderboard.raceIsMedalRace(race) != raceColumn.isMedalRace()) {
                             if (raceColumn.isExpanded()) {
                                 raceColumn.toggleExpansion(); // remove children from table
@@ -976,7 +972,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                                     createRaceColumn(race, leaderboard.raceIsMedalRace(race),
                                             leaderboard.raceIsTracked(race)));
                         }
-                        
+
                     }
                 }
             }
