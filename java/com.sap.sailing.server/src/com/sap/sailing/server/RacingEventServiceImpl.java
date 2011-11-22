@@ -483,5 +483,12 @@ public class RacingEventServiceImpl implements RacingEventService {
     public void remove(Event event) {
         eventTrackingCache.remove(event);
     }
+
+    @Override
+    public void storeSwissTimingDummyRace(String[] messages) {
+        for (String message : messages){
+            swissTimingAdapterPersistence.storeRawSailMasterMessage(swissTimingFactory.createMessage(message, null));
+        }
+    }
     
 }

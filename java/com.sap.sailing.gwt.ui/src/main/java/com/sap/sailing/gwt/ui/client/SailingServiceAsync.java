@@ -173,4 +173,6 @@ public interface SailingServiceAsync {
 
     void trackWithSwissTiming(SwissTimingRaceRecordDAO rr, String hostname, int port, boolean canSendRequests,
             boolean trackWind, boolean correctWindByDeclination, AsyncCallback<Void> asyncCallback);
+
+    void sendSwissTimingDummyRace(String[] messages, AsyncCallback<Void> callback);
 }

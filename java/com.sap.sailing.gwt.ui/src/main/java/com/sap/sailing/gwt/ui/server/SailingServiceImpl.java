@@ -1051,4 +1051,9 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             }.start();
         }
     }
+
+    @Override
+    public void sendSwissTimingDummyRace(String[] messages) {
+        getService().storeSwissTimingDummyRace(messages);
+    }
 }

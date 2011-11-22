@@ -184,5 +184,7 @@ public interface RacingEventService extends TrackedEventRegistry {
             WindStore windStore, long timeoutInMilliseconds) throws InterruptedException, UnknownHostException, IOException, ParseException;
 
     SwissTimingFactory getSwissTimingFactory();
+    
+    public void storeSwissTimingDummyRace(String[] messages);
 
 }

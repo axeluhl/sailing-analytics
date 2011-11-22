@@ -114,4 +114,6 @@ public interface SailingService extends RemoteService {
 
     void trackWithSwissTiming(SwissTimingRaceRecordDAO rr, String hostname, int port, boolean canSendRequests,
             boolean trackWind, boolean correctWindByDeclination) throws Exception;
+    
+    void sendSwissTimingDummyRace(String[] messages);
 }
