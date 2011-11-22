@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.client;
 
+import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -35,12 +36,16 @@ public class TrackedEventsComposite extends FormPanel implements EventDisplayer,
 
     private CellTable<Triple<EventDAO, RegattaDAO, RaceDAO>> raceTable;
     
-    private ListBox regattaComboBox = null;
+    private ListBox regattasComboBox = null;
+
+    private ListBox eventsComboBox = null;
 
     private ListDataProvider<Triple<EventDAO, RegattaDAO, RaceDAO>> raceList;
     
     private VerticalPanel panel;
-    
+
+    private final DateFormat df = DateFormat.getDateTimeInstance();
+
     public TrackedEventsComposite(StringConstants stringConstants, boolean multiSelection) {
         this.multiSelection = multiSelection;
         this.raceSelectionChangeListeners = new HashSet<RaceSelectionChangeListener>();
@@ -115,12 +120,19 @@ public class TrackedEventsComposite extends FormPanel implements EventDisplayer,
         if(raceTable == null)
         {
             panel = new VerticalPanel();
-
-            regattaComboBox = new ListBox();
-            regattaComboBox.addItem("All Regattas");
-
-            panel.add(regattaComboBox);
+/*
+            HorizontalPanel regattaFilterPanel = new HorizontalPanel();
+            panel.add(regattaFilterPanel);
             
+            Label regattaFilterLabel = new Label("Filter by regatta: ");
+            regattaFilterLabel.setWordWrap(false);
+            regattaFilterPanel.add(regattaFilterLabel);
+
+            regattasComboBox = new ListBox();
+            regattasComboBox.addItem("All Regattas");
+            
+            regattaFilterPanel.add(regattasComboBox);
+*/            
             AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
             raceTable = new CellTable<Triple<EventDAO, RegattaDAO, RaceDAO>>(/* pageSize */ 200, tableRes);
             
@@ -128,6 +140,13 @@ public class TrackedEventsComposite extends FormPanel implements EventDisplayer,
                 @Override
                 public String getValue(Triple<EventDAO, RegattaDAO, RaceDAO> object) {
                     return object.getA().name;
+                }
+            };
+
+            TextColumn<Triple<EventDAO, RegattaDAO, RaceDAO>> regattaNameColumn = new TextColumn<Triple<EventDAO, RegattaDAO, RaceDAO>>() {
+                @Override
+                public String getValue(Triple<EventDAO, RegattaDAO, RaceDAO> object) {
+                    return object.getB().boatClass.name;
                 }
             };
 
@@ -141,8 +160,9 @@ public class TrackedEventsComposite extends FormPanel implements EventDisplayer,
             TextColumn<Triple<EventDAO, RegattaDAO, RaceDAO>> raceStartColumn = new TextColumn<Triple<EventDAO, RegattaDAO, RaceDAO>>() {
                 @Override
                 public String getValue(Triple<EventDAO, RegattaDAO, RaceDAO> object) {
-                    if(object.getC().startOfRace != null)
-                        return object.getC().startOfRace.toString();
+                    if(object.getC().startOfRace != null) {
+                        return df.format(object.getC().startOfRace);
+                    }
                     
                     return "";
                 }
@@ -159,6 +179,7 @@ public class TrackedEventsComposite extends FormPanel implements EventDisplayer,
             };
 
             raceTable.addColumn(eventNameColumn, "Event");
+            raceTable.addColumn(regattaNameColumn, "Regatta");
             raceTable.addColumn(raceNameColumn, "Race");
             raceTable.addColumn(raceStartColumn, "Start time");
             raceTable.addColumn(raceTrackedColumn, "Tracked");

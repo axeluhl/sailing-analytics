@@ -417,6 +417,11 @@ public class RacingEventServiceImpl implements RacingEventService {
                     raceTracker.stop(); // this also removes the TrackedRace from trackedEvent
                     trackerIter.remove();
                     raceTrackersByID.remove(raceTracker.getID());
+                    for (RaceDefinition trackerRace : raceTracker.getRaces()) {
+                        // remove from default leaderboard
+                        Leaderboard defaultLeaderboard = getLeaderboardByName(DEFAULT_LEADERBOARD_NAME);
+                        defaultLeaderboard.removeRaceColumn(trackerRace.getName());
+                    }
                 }
             }
         } else {

@@ -18,6 +18,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
@@ -97,6 +98,8 @@ import com.sap.sailing.util.CountryCode;
  * The server side implementation of the RPC service.
  */
 public class SailingServiceImpl extends RemoteServiceServlet implements SailingService {
+    private static final Logger logger = Logger.getLogger(SailingServiceImpl.class.getName());
+    
     private static final long serialVersionUID = 9031688830194537489L;
 
     private static final long TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS = 60000;
@@ -136,6 +139,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     
     public LeaderboardDAO getLeaderboardByName(String leaderboardName, Date date,
             Collection<String> namesOfRacesForWhichToLoadLegDetails) throws Exception {
+        long startOfRequestHandling = System.currentTimeMillis();
         LeaderboardDAO result = null;
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         if (leaderboard != null) {
@@ -173,6 +177,8 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 }
             }
         }
+        logger.fine("getLeaderboardByName("+leaderboardName+", "+date+", "+namesOfRacesForWhichToLoadLegDetails+") took "+
+                (System.currentTimeMillis()-startOfRequestHandling)+"ms");
         return result;
     }
     
