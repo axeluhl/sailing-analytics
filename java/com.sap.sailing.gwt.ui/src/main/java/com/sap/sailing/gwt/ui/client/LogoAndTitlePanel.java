@@ -14,9 +14,11 @@ public class LogoAndTitlePanel extends FlowPanel {
         sapLogo.addStyleName("sapLogo");
         this.add(sapLogo);
         
-        Label sailingAnalyticsLabel = new Label(stringConstants.sapSailingAnalytics());
         FlowPanel labelPanel = new FlowPanel();
+        Label sailingAnalyticsLabel = new Label(stringConstants.sapSailingAnalytics());
         labelPanel.add(sailingAnalyticsLabel);
+        labelPanel.addStyleName("sailingAnalyticsLabelPanel");
+        
         this.add(labelPanel);
         sailingAnalyticsLabel.addStyleName("sailingAnalyticsLabel boldLabel");
     }
