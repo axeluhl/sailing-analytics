@@ -6,12 +6,14 @@ public class SwissTimingConfigurationImpl implements SwissTimingConfiguration {
     private final String name;
     private final String hostname;
     private final int port;
+    private final boolean canSendRequests;
     
-    public SwissTimingConfigurationImpl(String name, String hostname, int port) {
+    public SwissTimingConfigurationImpl(String name, String hostname, int port, boolean canSendRequests) {
         super();
         this.name = name;
         this.hostname = hostname;
         this.port = port;
+        this.canSendRequests = canSendRequests;
     }
 
     @Override
@@ -27,6 +29,11 @@ public class SwissTimingConfigurationImpl implements SwissTimingConfiguration {
     @Override
     public int getPort() {
         return port;
+    }
+
+    @Override
+    public boolean canSendRequests() {
+        return canSendRequests;
     }
 
 }
