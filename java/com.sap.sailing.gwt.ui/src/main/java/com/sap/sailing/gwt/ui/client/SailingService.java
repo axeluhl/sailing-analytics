@@ -110,7 +110,7 @@ public interface SailingService extends RemoteService {
 
     List<SwissTimingRaceRecordDAO> listSwissTimingRaces(String hostname, int port, boolean canSendRequests) throws Exception;
 
-    void storeSwissTimingConfiguration(String a, String hostname, int port);
+    void storeSwissTimingConfiguration(String configName, String hostname, int port, boolean canSendRequests);
 
     void trackWithSwissTiming(SwissTimingRaceRecordDAO rr, String hostname, int port, boolean canSendRequests,
             boolean trackWind, boolean correctWindByDeclination) throws Exception;
