@@ -729,8 +729,11 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         VerticalPanel vp = new VerticalPanel();
         vp.setSpacing(15);
         DockPanel dockPanel = new DockPanel();
+        DockPanel dockPanel02 = new DockPanel();
         dockPanel.setWidth("100%");
         dockPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
+        dockPanel02.setWidth("100%");
+        dockPanel02.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
         Label leaderboardLabel = new Label(stringConstants.leaderboard() + " " + leaderboardName.toUpperCase());
         leaderboardLabel.addStyleName("boldLabel");
         dockPanel.add(leaderboardLabel, DockPanel.WEST);
@@ -752,6 +755,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         refreshPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
         refreshPanel.addStyleName("refreshPanel");
         dockPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
+        dockPanel02.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
         playPause = new Anchor(getPlayPauseImgHtml(timer.isPlaying()));
         playPause.addClickHandler(playPauseHandler);
         playStateChanged(timer.isPlaying());
@@ -762,8 +766,9 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         settingsAnchor.addClickHandler(new SettingsClickHandler(stringConstants));
         refreshAndSettingsPanel.add(refreshPanel);
         refreshAndSettingsPanel.add(settingsAnchor);
-        dockPanel.add(refreshAndSettingsPanel, DockPanel.EAST);
+        dockPanel02.add(refreshAndSettingsPanel, DockPanel.EAST);
         vp.add(dockPanel);
+        vp.add(dockPanel02);
         vp.add(getLeaderboardTable());
         setWidget(vp);
     }
