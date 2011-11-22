@@ -32,6 +32,7 @@ import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
@@ -680,8 +681,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         }
     }
 
-    public LeaderboardPanel(SailingServiceAsync sailingService, String leaderboardName, ErrorReporter errorReporter,
-            final StringConstants stringConstants) {
+    public LeaderboardPanel(SailingServiceAsync sailingService, String leaderboardName, ErrorReporter errorReporter, final StringConstants stringConstants) {
         this.sailingService = sailingService;
         this.setLeaderboardName(leaderboardName);
         this.errorReporter = errorReporter;
@@ -718,18 +718,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         loadCompleteLeaderboard(getLeaderboardDisplayDate());
         VerticalPanel vp = new VerticalPanel();
         vp.setSpacing(15);
-        HorizontalPanel logoAndTitle = new HorizontalPanel();
-        vp.add(logoAndTitle);
-        Anchor sapLogo = new Anchor(new SafeHtmlBuilder().appendHtmlConstant(
-                "<img class=\"linkNoBorder\" src=\"/images/sap_66_transparent.png\"/>").toSafeHtml());
-        sapLogo.setHref("http://www.sap.com");
-        logoAndTitle.add(sapLogo);
-        Label sailingAnalyticsLabel = new Label(stringConstants.sapSailingAnalytics());
-        HorizontalPanel labelPanel = new HorizontalPanel();
-        labelPanel.add(sailingAnalyticsLabel);
-        labelPanel.setSpacing(10);
-        logoAndTitle.add(labelPanel);
-        sailingAnalyticsLabel.addStyleName("boldLabel");
+        Panel logoAndTitle = createTitleAndLogo(stringConstants);
+        vp.add(logoAndTitle);        
         DockPanel dockPanel = new DockPanel();
         dockPanel.setWidth("100%");
         dockPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
@@ -768,6 +758,11 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         vp.add(dockPanel);
         vp.add(getLeaderboardTable());
         setWidget(vp);
+    }
+
+    private Panel createTitleAndLogo(final StringConstants stringConstants) {
+        Panel logoAndTitle = new LogoAndTitlePanel(stringConstants);
+        return logoAndTitle;
     }
 
     private SafeHtml getPlayPauseImgHtml(boolean playing) {
