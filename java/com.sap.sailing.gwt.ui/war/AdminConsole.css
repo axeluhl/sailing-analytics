@@ -1,0 +1,14 @@
+/** Add css rules here for your application. */
+
+* {
+	font-family: Arial;
+	font-size: 12px;
+}
+
+.bold {
+	font-weight: bold;
+}
+
+.paddedPanel {
+    padding: 10px;
+}
