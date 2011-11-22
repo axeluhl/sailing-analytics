@@ -38,8 +38,8 @@ h1 {
   text-align: center;}
 
 .LogoAndTitlePanel {
-	border: 1px solid red;
-  height: 57px; }
+  margin: 0 0 24px 0;
+  height: 58px; }
 
 .LogoAndTitlePanel:after {
 	content: " ";
@@ -57,6 +57,7 @@ h1 {
   border: 1px solid red;}
 
 .sailingAnalyticsLabel {
+  float: left;
   color: #fff;
   font-size: 1.2em;
   font-weight: bold;
