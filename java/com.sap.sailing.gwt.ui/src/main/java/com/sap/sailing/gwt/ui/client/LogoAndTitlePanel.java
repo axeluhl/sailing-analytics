@@ -12,6 +12,7 @@ public class LogoAndTitlePanel extends FlowPanel {
                 "<img class=\"linkNoBorder\" src=\"/images/sap_66_transparent.png\"/>").toSafeHtml());
         sapLogo.setHref("http://www.sap.com");
         this.add(sapLogo);
+        
         Label sailingAnalyticsLabel = new Label(stringConstants.sapSailingAnalytics());
         FlowPanel labelPanel = new FlowPanel();
         labelPanel.add(sailingAnalyticsLabel);
