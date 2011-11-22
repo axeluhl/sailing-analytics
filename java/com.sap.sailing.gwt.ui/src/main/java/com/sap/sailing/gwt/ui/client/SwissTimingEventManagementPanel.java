@@ -21,6 +21,7 @@ import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.IntegerBox;
 import com.google.gwt.user.client.ui.Label;
@@ -72,7 +73,7 @@ public class SwissTimingEventManagementPanel extends FormPanel implements EventD
 
         VerticalPanel mainPanel = new VerticalPanel();
         this.setWidget(mainPanel);
-        mainPanel.setSize("100%", "100%");
+        mainPanel.setWidth("100%");
         
         CaptionPanel captionPanelConnections = new CaptionPanel("Connections");
         mainPanel.add(captionPanelConnections);
@@ -222,23 +223,14 @@ public class SwissTimingEventManagementPanel extends FormPanel implements EventD
         
         trackedEventsComposite = new TrackedEventsComposite(stringConstants, /* multiselection */ true);
         trackedRacesPanel.add(trackedEventsComposite);
+
+        HorizontalPanel trackedRacesButtonPanel = new HorizontalPanel();
         
-        HorizontalPanel buttonPanel = new HorizontalPanel();
-        racesPanel.add(buttonPanel);
-
-        Button btnTrack = new Button("Start tracking");
-//        Button btnTrack = new Button(stringConstants.btnTrack());
-        buttonPanel.add(btnTrack);
-        buttonPanel.setSpacing(10);
-        btnTrack.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                trackSelectedRaces(trackWindCheckbox.getValue(), declinationCheckbox.getValue());
-            }
-        });
-
+        trackedRacesButtonPanel.setSpacing(10);
+        trackedRacesPanel.add(trackedRacesButtonPanel);
+        
         Button btnRemove = new Button("Stop tracking");
-//        Button btnRemove = new Button(stringConstants.remove());
+//      Button btnRemove = new Button(stringConstants.remove());
         btnRemove.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent click) {
@@ -249,9 +241,8 @@ public class SwissTimingEventManagementPanel extends FormPanel implements EventD
                 }
             }
         });
-        btnRemove.setWidth("100%");
-        buttonPanel.add(btnRemove);
-
+        trackedRacesButtonPanel.add(btnRemove);
+        
         Button btnRefresh = new Button(stringConstants.refresh());
         btnRefresh.addClickHandler(new ClickHandler() {
             @Override
@@ -259,7 +250,23 @@ public class SwissTimingEventManagementPanel extends FormPanel implements EventD
                 SwissTimingEventManagementPanel.this.eventRefresher.fillEvents();
             }
         });
-        buttonPanel.add(btnRefresh);
+        trackedRacesButtonPanel.add(btnRefresh);
+        
+        
+        HorizontalPanel racesButtonPanel = new HorizontalPanel();
+        racesPanel.add(racesButtonPanel);
+
+        Button btnTrack = new Button("Start tracking");
+        
+//        Button btnTrack = new Button(stringConstants.btnTrack());
+        racesButtonPanel.add(btnTrack);
+        racesButtonPanel.setSpacing(10);
+        btnTrack.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                trackSelectedRaces(trackWindCheckbox.getValue(), declinationCheckbox.getValue());
+            }
+        });
 
     }
 
