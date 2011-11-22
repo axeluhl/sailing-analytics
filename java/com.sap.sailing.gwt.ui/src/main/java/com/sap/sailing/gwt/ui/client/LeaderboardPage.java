@@ -30,7 +30,7 @@ public class LeaderboardPage extends AbstractEntryPoint {
                       leaderboardPanel.addStyleName("leftPaddedPanel");
                     }
                     
-                    RootPanel.get().add(leaderboardPanel);
+                    RootPanel.get("leaderboardwrapper").add(leaderboardPanel); // leaderboardwrapper -> wrapper for html host page
                     
                 } else {
                     RootPanel.get().add(new Label(stringConstants.noSuchLeaderboard()));
