@@ -248,13 +248,11 @@ public class TrackedEventsComposite extends FormPanel implements EventDisplayer,
         if(events.size() == 0) {
             raceTable.setVisible(false);
             btnRemove.setVisible(false);
-            btnRefresh.setVisible(false);
             noTrackedRacesLabel.setVisible(true);
         } else {
             raceTable.setVisible(true);
             if(eventRefresher != null) {
                 btnRemove.setVisible(true);
-                btnRefresh.setVisible(true);
             }
             noTrackedRacesLabel.setVisible(false);
         }
