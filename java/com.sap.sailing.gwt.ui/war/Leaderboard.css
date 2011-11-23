@@ -62,3 +62,13 @@ h1 {
   font-size: 1.2em;
   font-weight: bold;
   margin: 20px 0 0 0; }
+
+.leaderboardLabel {
+  border-bottom: 2px solid #007dc0; 
+  padding: 0 0 6px 0; }
+
+.refreshAndSettings {
+  background: #f2f2f2;
+  border-bottom: 2px solid #fff;
+  border-top: 2px solid #fff; 
+  height: 30px; }
