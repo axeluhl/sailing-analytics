@@ -12,12 +12,14 @@ import com.google.gwt.cell.client.ImageCell;
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.cell.client.ValueUpdater;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.EventTarget;
 import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
-import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Header;
 
@@ -40,6 +42,13 @@ public class SortableExpandableColumnHeader extends Header<SafeHtml> {
         }
     }
 
+    interface RaceCellTemplates extends SafeHtmlTemplates {
+        @SafeHtmlTemplates.Template("<span class=\"TEST\">{0}</span>")
+        SafeHtml cell(SafeHtml value);
+    }
+    
+    private static RaceCellTemplates template = GWT.create(RaceCellTemplates.class);
+    
     public SortableExpandableColumnHeader(String title, String iconURL, LeaderboardPanel leaderboardPanel,
             ExpandableSortableColumn<?> column, StringConstants stringConstants) {
         super(constructCell(title, iconURL, column.isExpansionEnabled(), leaderboardPanel, column, stringConstants));
@@ -79,7 +88,8 @@ public class SortableExpandableColumnHeader extends Header<SafeHtml> {
             }
             @Override
             public SafeHtml getValue(SafeHtml object) {
-                return new SafeHtmlBuilder().appendHtmlConstant("&nbsp;").appendEscaped(title).toSafeHtml();
+//                return new SafeHtmlBuilder().appendHtmlConstant("&nbsp;").appendEscaped(title).toSafeHtml();
+                return template.cell(SafeHtmlUtils.fromString(title));
             }
         });
         // add the cell rendering the expand/collapse button:
