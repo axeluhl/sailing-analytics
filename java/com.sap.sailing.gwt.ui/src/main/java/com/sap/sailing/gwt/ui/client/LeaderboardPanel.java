@@ -735,7 +735,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         dockPanel02.setWidth("100%");
         dockPanel02.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
         Label leaderboardLabel = new Label(stringConstants.leaderboard() + " " + leaderboardName.toUpperCase());
-        leaderboardLabel.addStyleName("boldLabel");
+        leaderboardLabel.addStyleName("leaderboardLabel boldLabel");
         dockPanel.add(leaderboardLabel, DockPanel.WEST);
         ClickHandler playPauseHandler = new ClickHandler() {
             @Override
@@ -756,6 +756,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         refreshPanel.addStyleName("refreshPanel");
         dockPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
         dockPanel02.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
+        dockPanel02.addStyleName("refreshAndSettings");
         playPause = new Anchor(getPlayPauseImgHtml(timer.isPlaying()));
         playPause.addClickHandler(playPauseHandler);
         playStateChanged(timer.isPlaying());
