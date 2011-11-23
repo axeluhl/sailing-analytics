@@ -43,7 +43,7 @@ public class SortableExpandableColumnHeader extends Header<SafeHtml> {
     }
 
     interface RaceCellTemplates extends SafeHtmlTemplates {
-        @SafeHtmlTemplates.Template("<span class=\"TEST\">{0}</span>")
+        @SafeHtmlTemplates.Template("<span class=\"race-name\">{0}</span>")
         SafeHtml cell(SafeHtml value);
     }
     
