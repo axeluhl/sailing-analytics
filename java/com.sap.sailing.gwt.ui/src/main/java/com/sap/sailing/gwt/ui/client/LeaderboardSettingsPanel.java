@@ -15,6 +15,7 @@ import com.sap.sailing.gwt.ui.client.LeaderboardSettingsPanel.Result;
 
 public class LeaderboardSettingsPanel extends DataEntryDialog<Result> {
     private final List<String> raceColumnSelection;
+    private final List<String> raceAllRaceColumns;
     private final List<DetailColumnType> legDetailSelection;
     private final List<DetailColumnType> raceDetailSelection;
     private final Map<String, CheckBox> raceColumnCheckboxes;
@@ -60,12 +61,13 @@ public class LeaderboardSettingsPanel extends DataEntryDialog<Result> {
         }
     }
     
-    public LeaderboardSettingsPanel(List<DetailColumnType> legDetailSelection, List<DetailColumnType> raceDetailSelection, List<String> raceColumnSelection,
+    public LeaderboardSettingsPanel(List<DetailColumnType> legDetailSelection, List<DetailColumnType> raceDetailSelection, List<String> raceAllRaceColumns, List<String> raceColumnSelection,
             long delayBetweenAutoAdvancesInMilliseconds, String title, String message,
             String okButtonName,
             String cancelButtonName, com.sap.sailing.gwt.ui.client.DataEntryDialog.Validator<Result> validator, AsyncCallback<Result> callback, StringConstants stringConstants, long delayInMilliseconds) {
         super(title, message, okButtonName, cancelButtonName, validator, callback);
         this.raceColumnSelection = raceColumnSelection;
+        this.raceAllRaceColumns = raceAllRaceColumns;
         this.legDetailSelection = legDetailSelection;
         this.raceDetailSelection = raceDetailSelection;
         this.stringConstants = stringConstants;
@@ -105,10 +107,10 @@ public class LeaderboardSettingsPanel extends DataEntryDialog<Result> {
         }
         // TODO create label with stringcontants
         vp.add(new Label("Selected Races"));
-        List<String> currentColumnSelection = raceColumnSelection;
-        for (String expandableSortableColumn : currentColumnSelection) {
+        List<String> allColumns = raceAllRaceColumns;
+        for (String expandableSortableColumn : allColumns) {
             CheckBox checkbox = createCheckbox(expandableSortableColumn);
-            checkbox.setValue(currentColumnSelection.contains(checkbox));
+            checkbox.setValue(raceColumnSelection.contains(expandableSortableColumn));
             raceColumnCheckboxes.put(expandableSortableColumn, checkbox);
             vp.add(checkbox);
         }
