@@ -14,8 +14,10 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.LeaderboardSettingsPanel.Result;
 
 public class LeaderboardSettingsPanel extends DataEntryDialog<Result> {
+    private final List<String> raceColumnSelection;
     private final List<DetailColumnType> legDetailSelection;
     private final List<DetailColumnType> raceDetailSelection;
+    private final Map<String, CheckBox> raceColumnCheckboxes;
     private final Map<DetailColumnType, CheckBox> legDetailCheckboxes;
     private final Map<DetailColumnType, CheckBox> raceDetailCheckboxes;
     private final StringConstants stringConstants;
@@ -23,14 +25,16 @@ public class LeaderboardSettingsPanel extends DataEntryDialog<Result> {
     private final IntegerBox delayInSecondsBox;
     
     public static class Result {
+        private final List<String> raceColumnsToShow;
         private final List<DetailColumnType> legDetailsToShow;
         private final List<DetailColumnType> raceDetailsToShow;
         private final long delayBetweenAutoAdvancesInMilliseconds;
         private final long delayInMilliseconds;
         
-        public Result(List<DetailColumnType> legDetailsToShow, List<DetailColumnType> raceDetailsToShow, long delayBetweenAutoAdvancesInMilliseconds, long delayInMilliseconds) {
+        public Result(List<DetailColumnType> legDetailsToShow, List<DetailColumnType> raceDetailsToShow, List<String> raceColumnsToShow, long delayBetweenAutoAdvancesInMilliseconds, long delayInMilliseconds) {
             this.legDetailsToShow = legDetailsToShow;
             this.raceDetailsToShow = raceDetailsToShow;
+            this.raceColumnsToShow = raceColumnsToShow;
             this.delayBetweenAutoAdvancesInMilliseconds = delayBetweenAutoAdvancesInMilliseconds;
             this.delayInMilliseconds = delayInMilliseconds;
         }
@@ -42,6 +46,10 @@ public class LeaderboardSettingsPanel extends DataEntryDialog<Result> {
         public List<DetailColumnType> getRaceDetailsToShow() {
             return raceDetailsToShow;
         }
+        
+        public List<String> getRaceColumnsToShow(){
+            return raceColumnsToShow;
+        }
 
         public long getDelayBetweenAutoAdvancesInMilliseconds() {
             return delayBetweenAutoAdvancesInMilliseconds;
@@ -52,14 +60,16 @@ public class LeaderboardSettingsPanel extends DataEntryDialog<Result> {
         }
     }
     
-    public LeaderboardSettingsPanel(List<DetailColumnType> legDetailSelection, List<DetailColumnType> raceDetailSelection,
+    public LeaderboardSettingsPanel(List<DetailColumnType> legDetailSelection, List<DetailColumnType> raceDetailSelection, List<String> raceColumnSelection,
             long delayBetweenAutoAdvancesInMilliseconds, String title, String message,
             String okButtonName,
             String cancelButtonName, com.sap.sailing.gwt.ui.client.DataEntryDialog.Validator<Result> validator, AsyncCallback<Result> callback, StringConstants stringConstants, long delayInMilliseconds) {
         super(title, message, okButtonName, cancelButtonName, validator, callback);
+        this.raceColumnSelection = raceColumnSelection;
         this.legDetailSelection = legDetailSelection;
         this.raceDetailSelection = raceDetailSelection;
         this.stringConstants = stringConstants;
+        raceColumnCheckboxes = new LinkedHashMap<String, CheckBox>();
         legDetailCheckboxes = new LinkedHashMap<DetailColumnType, CheckBox>();
         raceDetailCheckboxes = new LinkedHashMap<DetailColumnType, CheckBox>();
         delayBetweenAutoAdvancesInSecondsBox = createIntegerBox((int) delayBetweenAutoAdvancesInMilliseconds/1000, 4);
@@ -93,6 +103,15 @@ public class LeaderboardSettingsPanel extends DataEntryDialog<Result> {
             legDetailCheckboxes.put(type, checkbox);
             vp.add(checkbox);
         }
+        // TODO create label with stringcontants
+        vp.add(new Label("Selected Races"));
+        List<String> currentColumnSelection = raceColumnSelection;
+        for (String expandableSortableColumn : currentColumnSelection) {
+            CheckBox checkbox = createCheckbox(expandableSortableColumn);
+            checkbox.setValue(currentColumnSelection.contains(checkbox));
+            raceColumnCheckboxes.put(expandableSortableColumn, checkbox);
+            vp.add(checkbox);
+        }
         return vp;
     }
 
@@ -110,9 +129,15 @@ public class LeaderboardSettingsPanel extends DataEntryDialog<Result> {
                 legDetailsToShow.add(entry.getKey());
             }
         }
+        List<String> raceColumnsToShow = new ArrayList<String>();
+        for (Map.Entry<String, CheckBox> entry : raceColumnCheckboxes.entrySet()) {
+            if(entry.getValue().getValue()){
+                raceColumnsToShow.add(entry.getKey());
+            }
+        }
         Integer delayBetweenAutoAdvancesValue = delayBetweenAutoAdvancesInSecondsBox.getValue();
         Integer delayInSecondsValue = delayInSecondsBox.getValue();
-        return new Result(legDetailsToShow, raceDetailsToShow, 1000*(delayBetweenAutoAdvancesValue==null?0:delayBetweenAutoAdvancesValue.longValue()),
+        return new Result(legDetailsToShow, raceDetailsToShow, raceColumnsToShow, 1000*(delayBetweenAutoAdvancesValue==null?0:delayBetweenAutoAdvancesValue.longValue()),
                 1000*(delayInSecondsValue==null?0:delayInSecondsValue.longValue()));
     }
 
