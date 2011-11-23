@@ -36,6 +36,7 @@ import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.swisstimingadapter.Race;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterConnector;
+import com.sap.sailing.domain.swisstimingadapter.SailMasterMessage;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
 import com.sap.sailing.domain.swisstimingadapter.persistence.SwissTimingAdapterPersistence;
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
@@ -417,6 +418,11 @@ public class RacingEventServiceImpl implements RacingEventService {
                     raceTracker.stop(); // this also removes the TrackedRace from trackedEvent
                     trackerIter.remove();
                     raceTrackersByID.remove(raceTracker.getID());
+                    for (RaceDefinition trackerRace : raceTracker.getRaces()) {
+                        // remove from default leaderboard
+                        Leaderboard defaultLeaderboard = getLeaderboardByName(DEFAULT_LEADERBOARD_NAME);
+                        defaultLeaderboard.removeRaceColumn(trackerRace.getName());
+                    }
                 }
             }
         } else {
@@ -485,9 +491,17 @@ public class RacingEventServiceImpl implements RacingEventService {
     }
 
     @Override
-    public void storeSwissTimingDummyRace(String[] messages) {
-        for (String message : messages){
-            swissTimingAdapterPersistence.storeRawSailMasterMessage(swissTimingFactory.createMessage(message, null));
+    public void storeSwissTimingDummyRace(String racMessage, String stlMessage, String ccgMessage, long lastMessageCount){
+        SailMasterMessage racSMMessage = swissTimingFactory.createMessage(racMessage, lastMessageCount);
+        SailMasterMessage stlSMMessage = swissTimingFactory.createMessage(stlMessage, lastMessageCount+1);
+        SailMasterMessage ccgSMMessage = swissTimingFactory.createMessage(ccgMessage, lastMessageCount+2);
+        if (swissTimingAdapterPersistence.getRace(stlSMMessage.getRaceID()) != null) {
+            throw new IllegalArgumentException("Race with raceID \"" + stlSMMessage.getRaceID() + "\" already exists.");
+        }
+        else {
+            swissTimingAdapterPersistence.storeSailMasterMessage(racSMMessage);
+            swissTimingAdapterPersistence.storeSailMasterMessage(stlSMMessage);
+            swissTimingAdapterPersistence.storeSailMasterMessage(ccgSMMessage);
         }
     }
     

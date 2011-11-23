@@ -41,6 +41,16 @@ public class CompactGPSFixMovingImpl extends CompactGPSFixImpl implements GPSFix
         public String toString() {
             return super.toString()+" to "+getBearing().getDegrees()+"°";
         }
+        @Override
+        public int hashCode() {
+            return super.hashCode() ^ getBearing().hashCode();
+        }
+        
+        @Override
+        public boolean equals(Object object) {
+            return super.equals(object) && object instanceof SpeedWithBearing
+                    && getBearing().equals(((SpeedWithBearing) object).getBearing());
+        }
     }
     
     private class CompactBearing extends AbstractBearing {
@@ -73,5 +83,15 @@ public class CompactGPSFixMovingImpl extends CompactGPSFixImpl implements GPSFix
     @Override
     public String toString() {
         return super.toString() + " with " + getSpeed();
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode() ^ getSpeed().hashCode();
+    }
+    
+    @Override
+    public boolean equals(Object other) {
+        return super.equals(other) && other instanceof GPSFixMoving && getSpeed().equals(((GPSFixMoving) other).getSpeed());
     }
 }

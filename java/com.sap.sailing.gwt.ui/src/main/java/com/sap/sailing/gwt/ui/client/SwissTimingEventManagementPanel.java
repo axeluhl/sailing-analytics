@@ -30,11 +30,8 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.sap.sailing.gwt.ui.shared.EventDAO;
-import com.sap.sailing.gwt.ui.shared.RaceDAO;
-import com.sap.sailing.gwt.ui.shared.RegattaDAO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDAO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDAO;
-import com.sap.sailing.gwt.ui.shared.Triple;
 
 /**
  * Allows the user to start and stop tracking of events, regattas and races using the TracTrac connector. In particular,
@@ -72,7 +69,7 @@ public class SwissTimingEventManagementPanel extends FormPanel implements EventD
 
         VerticalPanel mainPanel = new VerticalPanel();
         this.setWidget(mainPanel);
-        mainPanel.setSize("100%", "100%");
+        mainPanel.setWidth("100%");
         
         CaptionPanel captionPanelConnections = new CaptionPanel("Connections");
         mainPanel.add(captionPanelConnections);
@@ -220,16 +217,18 @@ public class SwissTimingEventManagementPanel extends FormPanel implements EventD
   //      trackedRacesTreeView = new RaceTreeView(stringConstants, /* multiselection */ true);
   //      trackedRacesPanel.add(trackedRacesTreeView);
         
-        trackedEventsComposite = new TrackedEventsComposite(stringConstants, /* multiselection */ true);
+        trackedEventsComposite = new TrackedEventsComposite(sailingService, errorReporter, eventRefresher,
+                    stringConstants, /* multiselection */ true);
         trackedRacesPanel.add(trackedEventsComposite);
-        
-        HorizontalPanel buttonPanel = new HorizontalPanel();
-        racesPanel.add(buttonPanel);
+
+        HorizontalPanel racesButtonPanel = new HorizontalPanel();
+        racesPanel.add(racesButtonPanel);
 
         Button btnTrack = new Button("Start tracking");
+        
 //        Button btnTrack = new Button(stringConstants.btnTrack());
-        buttonPanel.add(btnTrack);
-        buttonPanel.setSpacing(10);
+        racesButtonPanel.add(btnTrack);
+        racesButtonPanel.setSpacing(10);
         btnTrack.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -237,45 +236,6 @@ public class SwissTimingEventManagementPanel extends FormPanel implements EventD
             }
         });
 
-        Button btnRemove = new Button("Stop tracking");
-//        Button btnRemove = new Button(stringConstants.remove());
-        btnRemove.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent click) {
-                for (Triple<EventDAO, RegattaDAO, RaceDAO> selection : trackedEventsComposite.getSelectedEventAndRace()) {
-                    if (selection.getC().currentlyTracked) {
-                        stopTrackingRace(selection.getA(), selection.getC());
-                    }
-                }
-            }
-        });
-        btnRemove.setWidth("100%");
-        buttonPanel.add(btnRemove);
-
-        Button btnRefresh = new Button(stringConstants.refresh());
-        btnRefresh.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                SwissTimingEventManagementPanel.this.eventRefresher.fillEvents();
-            }
-        });
-        buttonPanel.add(btnRefresh);
-
-    }
-
-    private void stopTrackingRace(final EventDAO event, final RaceDAO race) {
-        sailingService.stopTrackingRace(event.name, race.name, new AsyncCallback<Void>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                errorReporter.reportError("Exception trying to stop tracking race " + race.name + "in event "+event.name+": "
-                        + caught.getMessage());
-            }
-
-            @Override
-            public void onSuccess(Void result) {
-                eventRefresher.fillEvents();
-            }
-        });
     }
 
     private ListHandler<SwissTimingRaceRecordDAO> getRaceTableColumnSortHandler(List<SwissTimingRaceRecordDAO> raceRecords,

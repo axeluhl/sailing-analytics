@@ -719,8 +719,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         leaderboardTable = new CellTableWithStylableHeaders<LeaderboardRowDAO>(
         /* pageSize */100, resources);
         getLeaderboardTable().setWidth("100%");
-        getLeaderboardTable().setSelectionModel(new MultiSelectionModel<LeaderboardRowDAO>() {
-        });
+        getLeaderboardTable().setSelectionModel(new MultiSelectionModel<LeaderboardRowDAO>() {});
         setData(new ListDataProvider<LeaderboardRowDAO>());
         getData().addDataDisplay(getLeaderboardTable());
         listHandler = new ListHandler<LeaderboardRowDAO>(getData().getList());
