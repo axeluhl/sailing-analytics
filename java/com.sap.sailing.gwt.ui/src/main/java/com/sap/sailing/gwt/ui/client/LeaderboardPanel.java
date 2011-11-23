@@ -83,7 +83,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
 
     private final List<DetailColumnType> selectedRaceDetails;
 
-    private final List<String> selectedRaceColumns;
+    private List<String> selectedRaceColumns;
 
     protected final String RACE_COLUMN_HEADER_STYLE;
 
@@ -1006,6 +1006,16 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
      * property may have changed, changing the columns expandability.
      */
     private void createMissingAndAdjustExistingRaceColumns(LeaderboardDAO leaderboard) {
+        // Correct order of Races in selectedRaceColum
+        List<String> correctedOrderSelectedRaces = new ArrayList<String>();
+        for (String string : leaderboard.getRaceList()) {
+            if(selectedRaceColumns.contains(string)){
+                correctedOrderSelectedRaces.add(string);
+            }
+        }
+        selectedRaceColumns = correctedOrderSelectedRaces;
+        //---
+        
         // TODO sort selected Races 
         int currentRaceColumnIndex = 0;
         //int[] positionRaceColumn = new int[leaderboard.getRaceList().size()];
