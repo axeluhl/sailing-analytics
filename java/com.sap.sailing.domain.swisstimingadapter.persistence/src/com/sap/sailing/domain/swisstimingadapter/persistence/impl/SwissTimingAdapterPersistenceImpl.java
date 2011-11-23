@@ -197,11 +197,9 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
             messageCollection = database.getCollection(CollectionNames.COMMAND_MESSAGES.name());
         }
         messageCollection.insert(objToInsert);
-        
         if(message.getType() == MessageType.RAC) {
             // store the new race in the master data collection
             List<Race> availableRaces = parseAvailableRacesMessage(message);
-            
             for (Race newRace : availableRaces) {
                 storeRace(newRace);
             }
