@@ -105,8 +105,7 @@ public class LeaderboardSettingsPanel extends DataEntryDialog<Result> {
             legDetailCheckboxes.put(type, checkbox);
             vp.add(checkbox);
         }
-        // TODO create label with stringcontants
-        vp.add(new Label("Selected Races"));
+        vp.add(new Label(stringConstants.selectedRaces()));
         List<String> allColumns = raceAllRaceColumns;
         for (String expandableSortableColumn : allColumns) {
             CheckBox checkbox = createCheckbox(expandableSortableColumn);
