@@ -18,6 +18,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
@@ -97,6 +98,8 @@ import com.sap.sailing.util.CountryCode;
  * The server side implementation of the RPC service.
  */
 public class SailingServiceImpl extends RemoteServiceServlet implements SailingService {
+    private static final Logger logger = Logger.getLogger(SailingServiceImpl.class.getName());
+    
     private static final long serialVersionUID = 9031688830194537489L;
 
     private static final long TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS = 60000;
@@ -134,8 +137,10 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         return result;
     }
     
+    @Override
     public LeaderboardDAO getLeaderboardByName(String leaderboardName, Date date,
             Collection<String> namesOfRacesForWhichToLoadLegDetails) throws Exception {
+        long startOfRequestHandling = System.currentTimeMillis();
         LeaderboardDAO result = null;
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         if (leaderboard != null) {
@@ -173,7 +178,27 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 }
             }
         }
+        logger.fine("getLeaderboardByName("+leaderboardName+", "+date+", "+namesOfRacesForWhichToLoadLegDetails+") took "+
+                (System.currentTimeMillis()-startOfRequestHandling)+"ms");
         return result;
+    }
+    
+    @Override
+    public void stressTestLeaderboardByName(String leaderboardName, int times) throws Exception {
+        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        if (leaderboard != null) {
+            List<String> raceColumnNames = new ArrayList<String>();
+            for (RaceInLeaderboard column : leaderboard.getRaceColumns()) {
+                raceColumnNames.add(column.getName());
+            }
+            int i=0;
+            for (Date date = new Date(); i<times; date = new Date(date.getTime()-10)) {
+                getLeaderboardByName(leaderboardName, date, raceColumnNames);
+                i++;
+            }
+        } else {
+            logger.warning("stressTestLeaderboardByName: couldn't find leaderboard "+leaderboardName);
+        }
     }
     
     @Override
@@ -197,7 +222,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             throw new IllegalArgumentException("Didn't find leaderboard "+leaderboardName);
         }
     }
-
+    
     private LeaderboardEntryDAO getLeaderboardEntryDAO(Entry entry, TrackedRace trackedRace, Competitor competitor,
             TimePoint timePoint, boolean addLegDetails) throws NoWindException {
         LeaderboardEntryDAO entryDAO = new LeaderboardEntryDAO();
@@ -205,7 +230,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         entryDAO.totalPoints = entry.getTotalPoints();
         entryDAO.reasonForMaxPoints = entry.getMaxPointsReason().name();
         entryDAO.discarded = entry.isDiscarded();
-        if (addLegDetails) {
+        if (addLegDetails && trackedRace != null) {
             entryDAO.legDetails = new ArrayList<LegEntryDAO>();
             for (Leg leg : trackedRace.getRace().getCourse().getLegs()) {
                 TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(competitor, leg);
@@ -472,7 +497,11 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 windTrackInfoDAOs.put("COURSEBASED", createWindTrackInfoDAO(windwardMarkWindTrack));
             }
             if (includeTrackBasedWindEstimation && estimatedTrack != null) {
-                if (!estimatedTrack.getFixes().iterator().hasNext()) {
+                boolean hasNext;
+                synchronized (estimatedTrack) {
+                    hasNext = estimatedTrack.getFixes().iterator().hasNext();
+                }
+                if (!hasNext) {
                     // empty wind estimation track; add at least one estimate for the current time for the start gate
                     Wind estimatedWindDirectionForNow;
                     try {
@@ -494,8 +523,10 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         WindTrackInfoDAO windEstimations = new WindTrackInfoDAO();
         windEstimations.dampeningIntervalInMilliseconds = estimatedTrack.getMillisecondsOverWhichToAverageWind();
         windEstimations.windFixes = new ArrayList<WindDAO>();
-        for (Wind estimatedWind : estimatedTrack.getFixes()) {
-            windEstimations.windFixes.add(createWindDAO(estimatedWind, estimatedTrack));
+        synchronized (estimatedTrack) {
+            for (Wind estimatedWind : estimatedTrack.getFixes()) {
+                windEstimations.windFixes.add(createWindDAO(estimatedWind, estimatedTrack));
+            }
         }
         return windEstimations;
     }
@@ -647,30 +678,36 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                     TimePoint fromTimePoint = new MillisecondsTimePoint(from.get(competitorDAO));
                     TimePoint toTimePointExcluding = new MillisecondsTimePoint(to.get(competitorDAO));
                     Iterator<GPSFixMoving> fixIter;
-                    fixIter = track.getFixesIterator(fromTimePoint, /* inclusive */ true);
-                    if (fixIter.hasNext()) {
-                        GPSFixMoving fix = fixIter.next();
-                        while (fix != null && fix.getTimePoint().compareTo(toTimePointExcluding) < 0) {
-                            Tack tack = trackedRace.getTack(competitor, fix.getTimePoint());
-                            GPSFixDAO fixDAO = new GPSFixDAO(fix.getTimePoint().asDate(), new PositionDAO(fix
-                                    .getPosition().getLatDeg(), fix.getPosition().getLngDeg()),
-                                    new SpeedWithBearingDAO(fix.getSpeed().getKnots(), fix.getSpeed().getBearing()
-                                            .getDegrees()), tack.name(), /* extrapolated */ false);
-                            fixesForCompetitor.add(fixDAO);
-                            if (fixIter.hasNext()) {
-                                fix = fixIter.next();
-                            } else {
-                                // check if fix was at date and if extrapolation is requested
-                                if (!fix.getTimePoint().equals(toTimePointExcluding) && extrapolate) {
-                                    Position position = track.getEstimatedPosition(toTimePointExcluding, extrapolate);
-                                    Tack tack2 = trackedRace.getTack(competitor, toTimePointExcluding);
-                                    SpeedWithBearing speedWithBearing = track.getEstimatedSpeed(toTimePointExcluding);
-                                    GPSFixDAO extrapolated = new GPSFixDAO(to.get(competitorDAO), new PositionDAO(position.getLatDeg(),
-                                            position.getLngDeg()), new SpeedWithBearingDAO(speedWithBearing.getKnots(),
-                                            speedWithBearing.getBearing().getDegrees()), tack2.name(), /* extrapolated */ true);
-                                    fixesForCompetitor.add(extrapolated);
+                    synchronized (track) {
+                        fixIter = track.getFixesIterator(fromTimePoint, /* inclusive */true);
+                        if (fixIter.hasNext()) {
+                            GPSFixMoving fix = fixIter.next();
+                            while (fix != null && fix.getTimePoint().compareTo(toTimePointExcluding) < 0) {
+                                Tack tack = trackedRace.getTack(competitor, fix.getTimePoint());
+                                GPSFixDAO fixDAO = new GPSFixDAO(fix.getTimePoint().asDate(), new PositionDAO(fix
+                                        .getPosition().getLatDeg(), fix.getPosition().getLngDeg()),
+                                        new SpeedWithBearingDAO(fix.getSpeed().getKnots(), fix.getSpeed().getBearing()
+                                                .getDegrees()), tack.name(), /* extrapolated */false);
+                                fixesForCompetitor.add(fixDAO);
+                                if (fixIter.hasNext()) {
+                                    fix = fixIter.next();
+                                } else {
+                                    // check if fix was at date and if extrapolation is requested
+                                    if (!fix.getTimePoint().equals(toTimePointExcluding) && extrapolate) {
+                                        Position position = track.getEstimatedPosition(toTimePointExcluding,
+                                                extrapolate);
+                                        Tack tack2 = trackedRace.getTack(competitor, toTimePointExcluding);
+                                        SpeedWithBearing speedWithBearing = track
+                                                .getEstimatedSpeed(toTimePointExcluding);
+                                        GPSFixDAO extrapolated = new GPSFixDAO(to.get(competitorDAO), new PositionDAO(
+                                                position.getLatDeg(), position.getLngDeg()),
+                                                new SpeedWithBearingDAO(speedWithBearing.getKnots(), speedWithBearing
+                                                        .getBearing().getDegrees()), tack2.name(), /* extrapolated */
+                                                true);
+                                        fixesForCompetitor.add(extrapolated);
+                                    }
+                                    fix = null;
                                 }
-                                fix = null;
                             }
                         }
                     }

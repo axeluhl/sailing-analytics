@@ -37,4 +37,16 @@ public abstract class AbstractSpeedImpl implements Speed {
         return ""+getKnots()+"kn";
     }
 
+    @Override
+    public int hashCode() {
+        return (int) (31 * Double.doubleToLongBits(getMetersPerSecond()));
+    }
+    
+    @Override
+    public boolean equals(Object object) {
+        if (object == null || !(object instanceof Speed)) {
+            return false;
+        }
+        return getMetersPerSecond() == ((Speed) object).getMetersPerSecond();
+    }
 }

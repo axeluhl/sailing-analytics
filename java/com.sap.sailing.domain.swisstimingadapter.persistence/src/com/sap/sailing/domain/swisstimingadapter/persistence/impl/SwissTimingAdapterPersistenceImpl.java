@@ -40,9 +40,6 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
     }
 
     private void init() {
-        DBCollection rawMessages = database.getCollection(CollectionNames.RAW_MESSAGES.name());
-        rawMessages.ensureIndex(new BasicDBObject().append(FieldNames.MESSAGE_SEQUENCE_NUMBER.name(), 1));
-        
         // ensure the required indexes for the collection of race specific messages
         DBCollection racesMessageCollection = database.getCollection(CollectionNames.RACES_MESSAGES.name());
 
@@ -85,10 +82,11 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
     }
 
     private SwissTimingConfiguration loadSwissTimingConfiguration(DBObject object) {
+        Boolean canSendRequests = (Boolean) object.get(FieldNames.ST_CONFIG_CAN_SEND_REQUESTS.name());
         return swissTimingFactory.createSwissTimingConfiguration((String) object.get(FieldNames.ST_CONFIG_NAME.name()),
                 (String) object.get(FieldNames.ST_CONFIG_HOSTNAME.name()),
                 (Integer) object.get(FieldNames.ST_CONFIG_PORT.name()),
-                (Boolean) object.get(FieldNames.ST_CONFIG_CAN_SEND_REQUESTS.name()));
+                canSendRequests==null?false:canSendRequests);
     }
 
     @Override
@@ -184,13 +182,6 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
     }
 
     @Override
-    public void storeRawSailMasterMessage(SailMasterMessage message) {
-        DBCollection rawMessageCollection = database.getCollection(CollectionNames.RAW_MESSAGES.name());
-        rawMessageCollection.insert(new BasicDBObject().append(FieldNames.MESSAGE_SEQUENCE_NUMBER.name(), message.getSequenceNumber()).
-                append(FieldNames.MESSAGE_CONTENT.name(), message.getMessage()));
-    }
-
-    @Override
     public void storeSailMasterMessage(SailMasterMessage message) {
         // Attention: this method is very time critical as we will receive thousands of messages in a short time
         DBCollection messageCollection = null;
@@ -206,11 +197,9 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
             messageCollection = database.getCollection(CollectionNames.COMMAND_MESSAGES.name());
         }
         messageCollection.insert(objToInsert);
-        
         if(message.getType() == MessageType.RAC) {
             // store the new race in the master data collection
             List<Race> availableRaces = parseAvailableRacesMessage(message);
-            
             for (Race newRace : availableRaces) {
                 storeRace(newRace);
             }
@@ -263,13 +252,8 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
     
     @Override
     public void dropAllMessageData() {
-
-        DBCollection rawMessageCollection = database.getCollection(CollectionNames.RAW_MESSAGES.name());
-        rawMessageCollection.drop();
-
         DBCollection racesMessageCollection = database.getCollection(CollectionNames.RACES_MESSAGES.name());
         racesMessageCollection.drop();
-        
         DBCollection cmdMessageCollection = database.getCollection(CollectionNames.COMMAND_MESSAGES.name());
         cmdMessageCollection.drop();
     }

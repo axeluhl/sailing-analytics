@@ -19,7 +19,7 @@ import java.util.SortedSet;
  * at the expense of always performing one comparison in case the collection is not empty, before resorting to
  * binary search.<p>
  * 
- * Computing subsets is mapped to computing sub-lists (see {@link List#subList(int, int)}), with all the same effects
+ * Computing subsets is mapped to computing sub-lists (see {@link #subList(int, int)}), with all the same effects
  * on how the resulting collection is backed by the original collection.<p>
  * 
  * The iterators returned by {@link #iterator()} and {@link #descendingIterator()} are special in that they do not
@@ -323,7 +323,7 @@ public class ArrayListNavigableSet<E> implements NavigableSet<E> {
         if (to < from) {
             to = from; // will still produce an empty list instead of failing with an exception
         }
-        return new ArrayListNavigableSet<E>(list.subList(from, to), comparator());
+        return new ArrayListNavigableSet<E>(subList(from, to), comparator());
     }
 
     @Override
@@ -339,7 +339,7 @@ public class ArrayListNavigableSet<E> implements NavigableSet<E> {
         if (to < 0) {
             to = 0; // will still produce an empty list instead of failing with an exception
         }
-        return new ArrayListNavigableSet<E>(list.subList(0, to), comparator());
+        return new ArrayListNavigableSet<E>(subList(0, to), comparator());
     }
 
     @Override
@@ -355,7 +355,11 @@ public class ArrayListNavigableSet<E> implements NavigableSet<E> {
         if (from > list.size()) {
             from = list.size(); // will still produce an empty list instead of failing with an exception
         }
-        return new ArrayListNavigableSet<E>(list.subList(from, list.size()), comparator());
+        return new ArrayListNavigableSet<E>(subList(from, list.size()), comparator());
+    }
+    
+    private List<E> subList(int from, int to) {
+        return list.subList(from, to);
     }
 
     @Override
