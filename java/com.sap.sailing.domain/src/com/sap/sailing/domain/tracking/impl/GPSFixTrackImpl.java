@@ -21,6 +21,8 @@ import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 
 public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl<FixType> implements GPSFixTrack<ItemType, FixType> {
+    protected final static Speed MAX_SPEED_FOR_SMOOTHNING = new KnotSpeedImpl(50);
+    
     private final ItemType trackedItem;
     private long millisecondsOverWhichToAverage;
 
@@ -150,7 +152,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
      */
     private NavigableSet<GPSFix> getGPSFixes() {
         @SuppressWarnings("unchecked")
-        NavigableSet<GPSFix> result = (NavigableSet<GPSFix>) super.getInternalFixes();
+        NavigableSet<GPSFix> result = (NavigableSet<GPSFix>) getInternalFixes();
         return result;
     }
 
@@ -162,12 +164,26 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
             if (fromPos == null) {
                 return Distance.NULL;
             }
-            NavigableSet<GPSFix> subset = getGPSFixes().subSet(new DummyGPSFix(from),
-            /* fromInclusive */false, new DummyGPSFix(to),
-            /* toInclusive */false);
-            for (GPSFix fix : subset) {
-                distanceInNauticalMiles += fromPos.getDistance(fix.getPosition()).getNauticalMiles();
-                fromPos = fix.getPosition();
+            synchronized (this) {
+                NavigableSet<GPSFix> subset = getGPSFixes().subSet(new DummyGPSFix(from),
+                /* fromInclusive */false, new DummyGPSFix(to),
+                /* toInclusive */false);
+                TimePoint lastTimePoint = null;
+                for (GPSFix fix : subset) {
+                    double distanceBetweenAdjacentFixesInNauticalMiles = fromPos.getDistance(fix.getPosition()).getNauticalMiles();
+                    // TODO remove this debug code again once the outlier issue is fixed
+                    if (lastTimePoint != null) {
+                        double crossCheckSpeedInKnots = distanceBetweenAdjacentFixesInNauticalMiles /
+                                (fix.getTimePoint().asMillis()-lastTimePoint.asMillis()) * 3600000l;
+                        if (crossCheckSpeedInKnots > 20) {
+                            System.out.println("found suspicious fix");
+                        }
+                    }
+                    lastTimePoint = fix.getTimePoint();
+                    
+                    distanceInNauticalMiles += distanceBetweenAdjacentFixesInNauticalMiles;
+                    fromPos = fix.getPosition();
+                }
             }
             Position toPos = getEstimatedPosition(to, false);
             distanceInNauticalMiles += fromPos.getDistance(toPos).getNauticalMiles();
@@ -211,20 +227,22 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
     @Override
     public SpeedWithBearing getEstimatedSpeed(TimePoint at) {
         DummyGPSFix atTimed = new DummyGPSFix(at);
-        NavigableSet<GPSFix> beforeSet = getGPSFixes().headSet(atTimed, /* inclusive */ true);
-        NavigableSet<GPSFix> afterSet = getGPSFixes().tailSet(atTimed, /* inclusive */ true);
         List<GPSFix> relevantFixes = new LinkedList<GPSFix>();
-        for (GPSFix beforeFix : beforeSet.descendingSet()) {
-            if (at.asMillis() - beforeFix.getTimePoint().asMillis() > getMillisecondsOverWhichToAverage()/2) {
-                break;
+        synchronized (this) {
+            NavigableSet<GPSFix> beforeSet = getGPSFixes().headSet(atTimed, /* inclusive */true);
+            NavigableSet<GPSFix> afterSet = getGPSFixes().tailSet(atTimed, /* inclusive */true);
+            for (GPSFix beforeFix : beforeSet.descendingSet()) {
+                if (at.asMillis() - beforeFix.getTimePoint().asMillis() > getMillisecondsOverWhichToAverage() / 2) {
+                    break;
+                }
+                relevantFixes.add(0, beforeFix);
             }
-            relevantFixes.add(0, beforeFix);
-        }
-        for (GPSFix afterFix : afterSet) {
-            if (afterFix.getTimePoint().asMillis() - at.asMillis() > getMillisecondsOverWhichToAverage()/2) {
-                break;
+            for (GPSFix afterFix : afterSet) {
+                if (afterFix.getTimePoint().asMillis() - at.asMillis() > getMillisecondsOverWhichToAverage() / 2) {
+                    break;
+                }
+                relevantFixes.add(afterFix);
             }
-            relevantFixes.add(afterFix);
         }
         double knotSum = 0;
         double bearingDegSum = 0;
@@ -255,24 +273,27 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
     @Override
     protected NavigableSet<FixType> getInternalFixes() {
         return new PartialNavigableSetView<FixType>(super.getInternalFixes()) {
-            private final Speed maxSpeed = new KnotSpeedImpl(50);
             @Override
             protected boolean isValid(FixType e) {
-                FixType previous = lowerInternal(e);
-                FixType next = higherInternal(e);
-                Speed speedToPrevious = Speed.NULL;
-                if (previous != null) {
-                    speedToPrevious = previous.getPosition().getDistance(e.getPosition())
-                            .inTime(e.getTimePoint().asMillis() - previous.getTimePoint().asMillis());
-                }
-                Speed speedToNext = Speed.NULL;
-                if (next != null) {
-                    speedToNext = e.getPosition().getDistance(next.getPosition())
-                            .inTime(next.getTimePoint().asMillis() - e.getTimePoint().asMillis());
-                }
-                return (speedToPrevious.compareTo(maxSpeed) <= 0 || speedToNext.compareTo(maxSpeed) <= 0); 
+                return GPSFixTrackImpl.this.isValid(this, e);
             }
         };
+    }
+
+    protected boolean isValid(PartialNavigableSetView<FixType> filteredView, FixType e) {
+        FixType previous = filteredView.lowerInternal(e);
+        FixType next = filteredView.higherInternal(e);
+        Speed speedToPrevious = Speed.NULL;
+        if (previous != null) {
+            speedToPrevious = previous.getPosition().getDistance(e.getPosition())
+                    .inTime(e.getTimePoint().asMillis() - previous.getTimePoint().asMillis());
+        }
+        Speed speedToNext = Speed.NULL;
+        if (next != null) {
+            speedToNext = e.getPosition().getDistance(next.getPosition())
+                    .inTime(next.getTimePoint().asMillis() - e.getTimePoint().asMillis());
+        }
+        return (speedToPrevious.compareTo(MAX_SPEED_FOR_SMOOTHNING) <= 0 || speedToNext.compareTo(MAX_SPEED_FOR_SMOOTHNING) <= 0); 
     }
 
     @Override
