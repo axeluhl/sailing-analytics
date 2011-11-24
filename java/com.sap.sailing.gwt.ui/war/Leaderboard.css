@@ -37,6 +37,13 @@ h1 {
   margin: 40px 0px 70px;
   text-align: center;}
 
+table {
+  border-collapse: separate; }
+
+table td, table th {
+  vertical-align: middle;  }
+
+
 .LogoAndTitlePanel {
   margin: 0 0 24px 0;
   height: 58px; }
@@ -72,3 +79,8 @@ h1 {
   border-bottom: 2px solid #fff;
   border-top: 2px solid #fff; 
   height: 30px; }
+
+.race-name {
+  margin: 0 10px 0 0;}
+
+
