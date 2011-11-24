@@ -166,7 +166,7 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends DynamicTrackImpl<Ite
         return (previous == null || speedToPrevious.getMetersPerSecond() <= MAX_SPEED_FACTOR_COMPARED_TO_MEASURED_SPEED_FOR_FILTERING*e.getSpeed().getMetersPerSecond()) &&
                 (next == null || speedToNext.getMetersPerSecond() <= MAX_SPEED_FACTOR_COMPARED_TO_MEASURED_SPEED_FOR_FILTERING*e.getSpeed().getMetersPerSecond()) &&
                 (maxSpeedForSmoothening == null ||
-                 (previous != null && speedToPrevious.compareTo(maxSpeedForSmoothening) <= 0) ||
-                        (next != null && speedToNext.compareTo(maxSpeedForSmoothening) <= 0)); 
+                 (previous == null || speedToPrevious.compareTo(maxSpeedForSmoothening) <= 0) ||
+                        (next == null || speedToNext.compareTo(maxSpeedForSmoothening) <= 0)); 
     }
 }
