@@ -36,13 +36,10 @@ public class CreateSwissTimingRacePanel extends FormPanel {
     private int id = 0;
     private final SailingServiceAsync service;
     private ErrorReporter errorReporter;
-    private StringConstants stringConstants;
-    private long lastMessageCount;
 
     public CreateSwissTimingRacePanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter, StringConstants stringConstants){
         this.service = sailingService;
         this.errorReporter = errorReporter;
-        this.stringConstants = stringConstants;
         competitors = new ArrayList<CreateSwissTimingRacePanel.Competitor>();
         
         VerticalPanel mainPanel = new VerticalPanel();
@@ -242,7 +239,6 @@ public class CreateSwissTimingRacePanel extends FormPanel {
             @Override
             public void onSuccess(Void result) {
                 Window.alert("Succesfully sended new race.");
-                lastMessageCount += 3;
             }
             
             @Override
