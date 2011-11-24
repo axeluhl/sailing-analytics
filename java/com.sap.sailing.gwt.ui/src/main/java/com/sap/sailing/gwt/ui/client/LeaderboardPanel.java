@@ -706,7 +706,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         this.selectedRaceDetails = new ArrayList<DetailColumnType>();
         this.selectedRaceColumns = new ArrayList<String>();
         delayInMilliseconds = 0l;
-        timer = new Timer(/* delayBetweenAutoAdvancesInMilliseconds */ /*3000l*/  10001 );
+        timer = new Timer(/* delayBetweenAutoAdvancesInMilliseconds */ 3000l);
         timer.setDelay(getDelayInMilliseconds()); // set time/delay before
                                                   // adding as listener
         timer.addPlayStateListener(this);
