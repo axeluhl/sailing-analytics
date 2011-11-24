@@ -15,10 +15,17 @@ import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 
 public class DynamicGPSFixMovingTrackImpl<ItemType> extends DynamicTrackImpl<ItemType, GPSFixMoving> {
-    // private static final double MAX_SPEED_FACTOR_COMPARED_TO_MEASURED_SPEED_FOR_FILTERING = 2;
+    private static final double MAX_SPEED_FACTOR_COMPARED_TO_MEASURED_SPEED_FOR_FILTERING = 2;
 
     public DynamicGPSFixMovingTrackImpl(ItemType trackedItem, long millisecondsOverWhichToAverage) {
         super(trackedItem, millisecondsOverWhichToAverage);
+    }
+    
+    /**
+     * @param maxSpeedForSmoothening pass <code>null</code> if you don't want speed-based smoothening
+     */
+    public DynamicGPSFixMovingTrackImpl(ItemType trackedItem, long millisecondsOverWhichToAverage, Speed maxSpeedForSmoothening) {
+        super(trackedItem, millisecondsOverWhichToAverage, maxSpeedForSmoothening);
     }
 
     /**
@@ -142,7 +149,6 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends DynamicTrackImpl<Ite
      * measured speed by more than a factor of {@link #MAX_SPEED_FACTOR_COMPARED_TO_MEASURED_SPEED_FOR_FILTERING},
      * the fix is considered invalid.
      */
-    /* TODO first debug this and adjust any tests accordingly
     @Override
     protected boolean isValid(PartialNavigableSetView<GPSFixMoving> filteredView, GPSFixMoving e) {
         GPSFixMoving previous = filteredView.lowerInternal(e);
@@ -157,9 +163,10 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends DynamicTrackImpl<Ite
             speedToNext = e.getPosition().getDistance(next.getPosition())
                     .inTime(next.getTimePoint().asMillis() - e.getTimePoint().asMillis());
         }
-        return speedToPrevious.getMetersPerSecond() <= MAX_SPEED_FACTOR_COMPARED_TO_MEASURED_SPEED_FOR_FILTERING*e.getSpeed().getMetersPerSecond() &&
-                speedToNext.getMetersPerSecond() <= MAX_SPEED_FACTOR_COMPARED_TO_MEASURED_SPEED_FOR_FILTERING*e.getSpeed().getMetersPerSecond() &&
-                (speedToPrevious.compareTo(MAX_SPEED_FOR_SMOOTHNING) <= 0 || speedToNext.compareTo(MAX_SPEED_FOR_SMOOTHNING) <= 0); 
+        return (previous == null || speedToPrevious.getMetersPerSecond() <= MAX_SPEED_FACTOR_COMPARED_TO_MEASURED_SPEED_FOR_FILTERING*e.getSpeed().getMetersPerSecond()) &&
+                (next == null || speedToNext.getMetersPerSecond() <= MAX_SPEED_FACTOR_COMPARED_TO_MEASURED_SPEED_FOR_FILTERING*e.getSpeed().getMetersPerSecond()) &&
+                (maxSpeedForSmoothening == null ||
+                 (previous != null && speedToPrevious.compareTo(maxSpeedForSmoothening) <= 0) ||
+                        (next != null && speedToNext.compareTo(maxSpeedForSmoothening) <= 0)); 
     }
-    */
 }
