@@ -15,6 +15,7 @@ import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 
 public class DynamicGPSFixMovingTrackImpl<ItemType> extends DynamicTrackImpl<ItemType, GPSFixMoving> {
+    // private static final double MAX_SPEED_FACTOR_COMPARED_TO_MEASURED_SPEED_FOR_FILTERING = 2;
 
     public DynamicGPSFixMovingTrackImpl(ItemType trackedItem, long millisecondsOverWhichToAverage) {
         super(trackedItem, millisecondsOverWhichToAverage);
@@ -134,10 +135,31 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends DynamicTrackImpl<Ite
         return new KilometersPerHourSpeedImpl(sumInKMH/count);
     }
 
+    /**
+     * In addition to the base class implementation, we additionally have the speed and bearing as
+     * measured by the device. We use the device-measured speed and compare it with the speed computed
+     * based on the timestamp and distance between previous and next fix. If the latter speed exceeds the
+     * measured speed by more than a factor of {@link #MAX_SPEED_FACTOR_COMPARED_TO_MEASURED_SPEED_FOR_FILTERING},
+     * the fix is considered invalid.
+     */
+    /* TODO first debug this and adjust any tests accordingly
     @Override
-    protected NavigableSet<GPSFixMoving> getInternalFixes() {
-        // TODO perform even better smoothening than GPSFixTrackImpl because here we additionally have the speeds/bearings on the fixes as a hint
-        return super.getInternalFixes();
+    protected boolean isValid(PartialNavigableSetView<GPSFixMoving> filteredView, GPSFixMoving e) {
+        GPSFixMoving previous = filteredView.lowerInternal(e);
+        GPSFixMoving next = filteredView.higherInternal(e);
+        Speed speedToPrevious = Speed.NULL;
+        if (previous != null) {
+            speedToPrevious = previous.getPosition().getDistance(e.getPosition())
+                    .inTime(e.getTimePoint().asMillis() - previous.getTimePoint().asMillis());
+        }
+        Speed speedToNext = Speed.NULL;
+        if (next != null) {
+            speedToNext = e.getPosition().getDistance(next.getPosition())
+                    .inTime(next.getTimePoint().asMillis() - e.getTimePoint().asMillis());
+        }
+        return speedToPrevious.getMetersPerSecond() <= MAX_SPEED_FACTOR_COMPARED_TO_MEASURED_SPEED_FOR_FILTERING*e.getSpeed().getMetersPerSecond() &&
+                speedToNext.getMetersPerSecond() <= MAX_SPEED_FACTOR_COMPARED_TO_MEASURED_SPEED_FOR_FILTERING*e.getSpeed().getMetersPerSecond() &&
+                (speedToPrevious.compareTo(MAX_SPEED_FOR_SMOOTHNING) <= 0 || speedToNext.compareTo(MAX_SPEED_FOR_SMOOTHNING) <= 0); 
     }
-
+    */
 }

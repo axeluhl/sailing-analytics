@@ -112,5 +112,6 @@ public interface StringConstants extends Constants {
     String raceStartTimeColumn();
     String showOnlySelected();
     String tailLength();
+    String selectedRaces();
     String stressTest();
 }

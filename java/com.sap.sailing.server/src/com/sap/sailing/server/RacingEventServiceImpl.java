@@ -36,6 +36,7 @@ import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.swisstimingadapter.Race;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterConnector;
+import com.sap.sailing.domain.swisstimingadapter.SailMasterMessage;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
 import com.sap.sailing.domain.swisstimingadapter.persistence.SwissTimingAdapterPersistence;
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
@@ -487,6 +488,21 @@ public class RacingEventServiceImpl implements RacingEventService {
     @Override
     public void remove(Event event) {
         eventTrackingCache.remove(event);
+    }
+
+    @Override
+    public void storeSwissTimingDummyRace(String racMessage, String stlMessage, String ccgMessage){
+        SailMasterMessage racSMMessage = swissTimingFactory.createMessage(racMessage, null);
+        SailMasterMessage stlSMMessage = swissTimingFactory.createMessage(stlMessage, null);
+        SailMasterMessage ccgSMMessage = swissTimingFactory.createMessage(ccgMessage, null);
+        if (swissTimingAdapterPersistence.getRace(stlSMMessage.getRaceID()) != null) {
+            throw new IllegalArgumentException("Race with raceID \"" + stlSMMessage.getRaceID() + "\" already exists.");
+        }
+        else {
+            swissTimingAdapterPersistence.storeSailMasterMessage(racSMMessage);
+            swissTimingAdapterPersistence.storeSailMasterMessage(stlSMMessage);
+            swissTimingAdapterPersistence.storeSailMasterMessage(ccgSMMessage);
+        }
     }
     
 }
