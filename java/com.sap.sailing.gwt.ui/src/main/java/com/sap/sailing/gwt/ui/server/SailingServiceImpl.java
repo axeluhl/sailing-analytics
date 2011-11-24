@@ -117,6 +117,8 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     private final SwissTimingFactory swissTimingFactory;
 
     private final com.sap.sailing.domain.tractracadapter.persistence.DomainObjectFactory tractracDomainObjectFactory;
+    
+    private final com.sap.sailing.util.CountryCodeFactory countryCodeFactory;
 
     public SailingServiceImpl() {
         BundleContext context = Activator.getDefault();
@@ -127,6 +129,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         tractracDomainObjectFactory = com.sap.sailing.domain.tractracadapter.persistence.DomainObjectFactory.INSTANCE;
         tractracMongoObjectFactory = com.sap.sailing.domain.tractracadapter.persistence.MongoObjectFactory.INSTANCE;
         swissTimingFactory = SwissTimingFactory.INSTANCE;
+        countryCodeFactory = com.sap.sailing.util.CountryCodeFactory.INSTANCE;
     }
 
     protected ServiceTracker<RacingEventService, RacingEventService> createAndOpenRacingEventServiceTracker(
@@ -1087,5 +1090,22 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 }
             }.start();
         }
+    }
+
+    @Override
+    public void sendSwissTimingDummyRace(String racMessage, String stlMesssage, String ccgMessage) {
+        getService().storeSwissTimingDummyRace(racMessage,stlMesssage,ccgMessage);
+    }
+
+    @Override
+    public String[] getCountryCodes() {
+        List<String> countryCodes = new ArrayList<String>();
+        for (CountryCode cc : countryCodeFactory.getAll()){
+            if (cc.getThreeLetterIOCCode() != null && !cc.getThreeLetterIOCCode().equals("")){
+                countryCodes.add(cc.getThreeLetterIOCCode());
+            }
+        }
+        Collections.sort(countryCodes);
+        return countryCodes.toArray(new String[0]);
     }
 }
