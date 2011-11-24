@@ -3,6 +3,7 @@ package com.sap.sailing.domain.tracking.impl;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.sap.sailing.domain.base.Speed;
 import com.sap.sailing.domain.tracking.DynamicTrack;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
@@ -13,6 +14,11 @@ public class DynamicTrackImpl<ItemType, FixType extends GPSFix> extends
     
     public DynamicTrackImpl(ItemType trackedItem, long millisecondsOverWhichToAverage) {
         super(trackedItem, millisecondsOverWhichToAverage);
+        this.listeners = new HashSet<RaceChangeListener<ItemType>>();
+    }
+
+    public DynamicTrackImpl(ItemType trackedItem, long millisecondsOverWhichToAverage, Speed maxSpeedForSmoothening) {
+        super(trackedItem, millisecondsOverWhichToAverage, maxSpeedForSmoothening);
         this.listeners = new HashSet<RaceChangeListener<ItemType>>();
     }
 
