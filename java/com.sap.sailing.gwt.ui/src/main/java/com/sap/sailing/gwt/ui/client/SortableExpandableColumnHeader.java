@@ -17,6 +17,8 @@ import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.EventTarget;
 import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.dom.client.Node;
+import com.google.gwt.dom.client.NodeList;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
@@ -111,7 +113,21 @@ public class SortableExpandableColumnHeader extends Header<SafeHtml> {
                 }
             });
         }
-        return new CompositeCell<SafeHtml>(cells) {
+        
+        CompositeCell<SafeHtml> abc = new CompositeCell<SafeHtml>(cells) {
+            
+           @Override
+           protected Element getContainerElement(Element parent) {
+                
+               Element childNode = parent.getFirstChildElement();
+               
+               while (childNode != null) {
+                   childNode.setAttribute("background", "red");
+                   childNode = childNode.getNextSiblingElement();              
+               }
+                
+                return parent;
+              }
             /**
              * Redefining this method because when a table column is sorted, GWT wraps a div element
              * around the column header. Subsequently, the div's index no longer corresponds with the
@@ -150,6 +166,7 @@ public class SortableExpandableColumnHeader extends Header<SafeHtml> {
               }
             }
         };
+        return abc;
     }
 
     @Override
