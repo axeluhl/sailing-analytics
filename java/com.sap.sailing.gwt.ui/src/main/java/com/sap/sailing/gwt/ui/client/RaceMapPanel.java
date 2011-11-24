@@ -315,7 +315,8 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
                 EventDAO event = selection.get(selection.size() - 1).getA();
                 RaceDAO race = selection.get(selection.size() - 1).getC();
                 if (event != null && race != null) {
-                    final Triple<Map<CompetitorDAO, Date>, Map<CompetitorDAO, Date>, Map<CompetitorDAO, Boolean>> fromAndToAndOverlap = computeFromAndTo(date);
+                    final Triple<Map<CompetitorDAO, Date>, Map<CompetitorDAO, Date>, Map<CompetitorDAO, Boolean>> fromAndToAndOverlap =
+                            computeFromAndTo(date);
                     sailingService.getBoatPositions(event.name, race.name, fromAndToAndOverlap.getA(), fromAndToAndOverlap.getB(), true,
                             new AsyncCallback<Map<CompetitorDAO, List<GPSFixDAO>>>() {
                                 @Override
@@ -462,11 +463,12 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
     }
 
     /**
-     * While updating the {@link #fixes} for <code>competitorDAO</code>, the invariants for {@link #tails}
-     * and {@link #firstShownFix} and {@link #lastShownFix} are maintained: each time a fix is inserted,
-     * the {@link #firstShownFix}/{@link #lastShownFix} records for <code>competitorDAO</code> are incremented
-     * if they are greater or equal to the insertion index. Additionally, if the fix is in between the fixes
-     * shown in the competitor's tail, the tail is adjusted by inserting the corresponding fix.
+     * While updating the {@link #fixes} for <code>competitorDAO</code>, the invariants for {@link #tails} and
+     * {@link #firstShownFix} and {@link #lastShownFix} are maintained: each time a fix is inserted, the
+     * {@link #firstShownFix}/{@link #lastShownFix} records for <code>competitorDAO</code> are incremented if they are
+     * greater or equal to the insertion index and we have a tail in {@link #tails} for <code>competitorDAO</code>.
+     * Additionally, if the fix is in between the fixes shown in the competitor's tail, the tail is adjusted by
+     * inserting the corresponding fix.
      */
     private void mergeFixes(CompetitorDAO competitorDAO, List<GPSFixDAO> mergeThis) {
         List<GPSFixDAO> intoThis = fixes.get(competitorDAO);
@@ -475,7 +477,8 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         Polyline tail = tails.get(competitorDAO);
         int intoThisIndex = 0;
         for (GPSFixDAO mergeThisFix : mergeThis) {
-            while (intoThisIndex < intoThis.size() && intoThis.get(intoThisIndex).timepoint.before(mergeThisFix.timepoint)) {
+            while (intoThisIndex < intoThis.size()
+                    && intoThis.get(intoThisIndex).timepoint.before(mergeThisFix.timepoint)) {
                 intoThisIndex++;
             }
             if (intoThisIndex < intoThis.size() && intoThis.get(intoThisIndex).timepoint.equals(mergeThisFix.timepoint)) {
@@ -489,7 +492,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
                 if (indexOfLastShownFix >= intoThisIndex) {
                     indexOfLastShownFix++;
                 }
-                if (intoThisIndex >= indexOfFirstShownFix && intoThisIndex <= indexOfLastShownFix) {
+                if (tail != null && intoThisIndex >= indexOfFirstShownFix && intoThisIndex <= indexOfLastShownFix) {
                     tail.insertVertex(intoThisIndex - indexOfFirstShownFix,
                             LatLng.newInstance(mergeThisFix.position.latDeg, mergeThisFix.position.lngDeg));
                 }
@@ -552,7 +555,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
                         map.addOverlay(tail);
                     } else {
                         updateTail(tail, competitorDAO, from, to);
-                        competitorDAOsOfUnusedTails.remove(tail);
+                        competitorDAOsOfUnusedTails.remove(competitorDAO);
                     }
                     LatLngBounds bounds = tail.getBounds();
                     if (newMapBounds == null) {
