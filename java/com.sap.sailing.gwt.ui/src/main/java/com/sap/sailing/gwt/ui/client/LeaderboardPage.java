@@ -2,14 +2,17 @@ package com.sap.sailing.gwt.ui.client;
 
 import java.util.List;
 
+
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 
+
 public class LeaderboardPage extends AbstractEntryPoint {
     @Override
-    public void onModuleLoad() {
+    public void onModuleLoad() {     
+        
         super.onModuleLoad();
         sailingService.getLeaderboardNames(new AsyncCallback<List<String>>() {
 
