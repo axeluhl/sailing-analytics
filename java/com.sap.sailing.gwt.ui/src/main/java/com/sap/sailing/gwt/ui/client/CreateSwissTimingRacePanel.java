@@ -237,7 +237,7 @@ public class CreateSwissTimingRacePanel extends FormPanel {
         
         String ccgMessage = "CCG|" + txtbRaceName.getText() +"|3|0;LeeGate;LG1;LG2|1;Windwards;WW1|2;LeeGate;LG1;LG2";
 
-        service.sendSwissTimingDummyRace(racMessage,stlMessage,ccgMessage,lastMessageCount, new AsyncCallback<Void>() {
+        service.sendSwissTimingDummyRace(racMessage,stlMessage,ccgMessage, new AsyncCallback<Void>() {
             
             @Override
             public void onSuccess(Void result) {

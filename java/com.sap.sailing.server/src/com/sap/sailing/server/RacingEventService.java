@@ -185,6 +185,6 @@ public interface RacingEventService extends TrackedEventRegistry {
 
     SwissTimingFactory getSwissTimingFactory();
     
-    public void storeSwissTimingDummyRace(String racMessage, String stlMesssage, String ccgMessage, long lastMessageCount) throws IllegalArgumentException;
+    public void storeSwissTimingDummyRace(String racMessage, String stlMesssage, String ccgMessage) throws IllegalArgumentException;
 
 }

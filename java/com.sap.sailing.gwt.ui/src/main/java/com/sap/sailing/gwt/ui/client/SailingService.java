@@ -115,7 +115,7 @@ public interface SailingService extends RemoteService {
     void trackWithSwissTiming(SwissTimingRaceRecordDAO rr, String hostname, int port, boolean canSendRequests,
             boolean trackWind, boolean correctWindByDeclination) throws Exception;
     
-    void sendSwissTimingDummyRace(String racMessage, String stlMesssage, String ccgMessage, long lastMessageCount) throws IllegalArgumentException;
+    void sendSwissTimingDummyRace(String racMessage, String stlMesssage, String ccgMessage) throws IllegalArgumentException;
 
     void stressTestLeaderboardByName(String leaderboardName, int times) throws Exception;
     

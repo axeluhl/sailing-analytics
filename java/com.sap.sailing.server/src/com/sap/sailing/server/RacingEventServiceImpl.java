@@ -491,10 +491,10 @@ public class RacingEventServiceImpl implements RacingEventService {
     }
 
     @Override
-    public void storeSwissTimingDummyRace(String racMessage, String stlMessage, String ccgMessage, long lastMessageCount){
-        SailMasterMessage racSMMessage = swissTimingFactory.createMessage(racMessage, lastMessageCount);
-        SailMasterMessage stlSMMessage = swissTimingFactory.createMessage(stlMessage, lastMessageCount+1);
-        SailMasterMessage ccgSMMessage = swissTimingFactory.createMessage(ccgMessage, lastMessageCount+2);
+    public void storeSwissTimingDummyRace(String racMessage, String stlMessage, String ccgMessage){
+        SailMasterMessage racSMMessage = swissTimingFactory.createMessage(racMessage, null);
+        SailMasterMessage stlSMMessage = swissTimingFactory.createMessage(stlMessage, null);
+        SailMasterMessage ccgSMMessage = swissTimingFactory.createMessage(ccgMessage, null);
         if (swissTimingAdapterPersistence.getRace(stlSMMessage.getRaceID()) != null) {
             throw new IllegalArgumentException("Race with raceID \"" + stlSMMessage.getRaceID() + "\" already exists.");
         }

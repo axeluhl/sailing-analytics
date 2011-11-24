@@ -26,6 +26,8 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
     private final SwissTimingFactory swissTimingFactory;
 
     private static final Logger logger = Logger.getLogger(SwissTimingAdapterPersistenceImpl.class.getName());
+    
+    private final DBCollection lastMessageCountCollection;
 
     /**
      * this race cache should only be used for checks in the storeSailMasterMessage method to ensure that we have always
@@ -39,6 +41,7 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
         super();
         this.database = db;
         this.swissTimingFactory = swissTimingFactory;
+        lastMessageCountCollection = db.getCollection(CollectionNames.LAST_MESSAGE_COUNT.name());
         init();
     }
 
@@ -201,7 +204,7 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
                 DBObject emptyQuery = new BasicDBObject();
                 DBObject incrementLastMessageCountQuery = new BasicDBObject().
                         append("$inc", new BasicDBObject().append(FieldNames.LAST_MESSAGE_COUNT.name(), 1));
-                DBObject newCountRecord = messageCollection.findAndModify(emptyQuery, incrementLastMessageCountQuery);
+                DBObject newCountRecord = lastMessageCountCollection.findAndModify(emptyQuery, incrementLastMessageCountQuery);
                 lastMessageCount = (Long) newCountRecord.get(FieldNames.LAST_MESSAGE_COUNT.name());
                 objToInsert.put(FieldNames.MESSAGE_SEQUENCE_NUMBER.name(), lastMessageCount);
             }

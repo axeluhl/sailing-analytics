@@ -1093,8 +1093,8 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
 
     @Override
-    public void sendSwissTimingDummyRace(String racMessage, String stlMesssage, String ccgMessage, long lastMessageCount) {
-        getService().storeSwissTimingDummyRace(racMessage,stlMesssage,ccgMessage, lastMessageCount);
+    public void sendSwissTimingDummyRace(String racMessage, String stlMesssage, String ccgMessage) {
+        getService().storeSwissTimingDummyRace(racMessage,stlMesssage,ccgMessage);
     }
 
     @Override
