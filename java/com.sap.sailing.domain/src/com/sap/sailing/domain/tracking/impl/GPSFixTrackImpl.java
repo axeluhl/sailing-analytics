@@ -81,6 +81,9 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         if (lastFixAtOrBefore != null && lastFixAtOrBefore == firstFixAtOrAfter) {
             return lastFixAtOrBefore.getPosition(); // exact match; how unlikely is that?
         } else {
+            if (lastFixAtOrBefore == null && firstFixAtOrAfter != null) {
+                return firstFixAtOrAfter.getPosition(); // asking for time point before first fix: return first fix's position
+            }
             if (firstFixAtOrAfter == null && !extrapolate) {
                 return lastFixAtOrBefore == null ? null : lastFixAtOrBefore.getPosition();
             } else {
@@ -303,8 +306,8 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
                 speedToNext = e.getPosition().getDistance(next.getPosition())
                         .inTime(next.getTimePoint().asMillis() - e.getTimePoint().asMillis());
             }
-            result = ((previous != null && speedToPrevious.compareTo(maxSpeedForSmoothening) <= 0)
-                    || (next != null && speedToNext.compareTo(maxSpeedForSmoothening) <= 0));
+            result = ((previous == null || speedToPrevious.compareTo(maxSpeedForSmoothening) <= 0)
+                    || (next == null || speedToNext.compareTo(maxSpeedForSmoothening) <= 0));
         }
         return result;
     }
