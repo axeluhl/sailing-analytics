@@ -31,7 +31,7 @@ import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
-import com.sap.sailing.domain.tracking.DynamicTrack;
+import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.impl.DynamicGPSFixMovingTrackImpl;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
@@ -39,8 +39,8 @@ import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 public abstract class StoredTrackBasedTest extends TrackBasedTest {
     private static final String RESOURCES = "resources/";
 
-    protected DynamicTrack<Competitor, GPSFixMoving> readTrack(Competitor competitor, String eventName) throws FileNotFoundException, IOException {
-        DynamicTrack<Competitor, GPSFixMoving> track = null;
+    protected DynamicGPSFixTrack<Competitor, GPSFixMoving> readTrack(Competitor competitor, String eventName) throws FileNotFoundException, IOException {
+        DynamicGPSFixTrack<Competitor, GPSFixMoving> track = null;
         if (getFile(competitor, eventName).exists()) {
             ObjectInput oi = getInputStream(competitor, eventName);
             track = new DynamicGPSFixMovingTrackImpl<Competitor>(competitor, /* millisecondsOverWhichToAverage */
@@ -97,7 +97,7 @@ public abstract class StoredTrackBasedTest extends TrackBasedTest {
         return new GPSFixMovingImpl(position, timePoint, speedWithBearing);
     }
 
-    protected void storeTrack(Competitor competitor, DynamicTrack<Competitor, GPSFixMoving> track, String eventName)
+    protected void storeTrack(Competitor competitor, DynamicGPSFixTrack<Competitor, GPSFixMoving> track, String eventName)
             throws FileNotFoundException, IOException {
         ObjectOutput oo = getOutputStream(competitor, eventName);
         for (GPSFixMoving fix : track.getRawFixes()) {
@@ -106,15 +106,15 @@ public abstract class StoredTrackBasedTest extends TrackBasedTest {
         oo.close();
     }
 
-    protected Map<Competitor, DynamicTrack<Competitor, GPSFixMoving>> loadTracks() throws FileNotFoundException, IOException {
-        Map<Competitor, DynamicTrack<Competitor, GPSFixMoving>> tracks = new HashMap<Competitor, DynamicTrack<Competitor,GPSFixMoving>>();
+    protected Map<Competitor, DynamicGPSFixTrack<Competitor, GPSFixMoving>> loadTracks() throws FileNotFoundException, IOException {
+        Map<Competitor, DynamicGPSFixTrack<Competitor, GPSFixMoving>> tracks = new HashMap<Competitor, DynamicGPSFixTrack<Competitor,GPSFixMoving>>();
         final String KIELER_WOCHE = "Kieler Woche";
         for (String competitorName : getCompetitorNamesOfStoredTracks(KIELER_WOCHE)) {
             Person p = new PersonImpl(competitorName, /* nationality */ null, /* dateOfBirth */ null, /* description */ null);
             Team t = new TeamImpl(competitorName, Collections.singleton(p), /* coach */ null);
             Competitor c = new CompetitorImpl(competitorName, competitorName, t, new BoatImpl(competitorName,
                     new BoatClassImpl("505"), null));
-            DynamicTrack<Competitor, GPSFixMoving> track = readTrack(c, KIELER_WOCHE);
+            DynamicGPSFixTrack<Competitor, GPSFixMoving> track = readTrack(c, KIELER_WOCHE);
             if (track != null) {
                 tracks.put(c, track);
             }

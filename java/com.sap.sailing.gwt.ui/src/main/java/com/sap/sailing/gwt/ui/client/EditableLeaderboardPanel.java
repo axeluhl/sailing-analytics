@@ -106,8 +106,8 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
             setFieldUpdater(new FieldUpdater<LeaderboardRowDAO, LeaderboardRowDAO>() {
                 @Override
                 public void update(int rowIndex, LeaderboardRowDAO row, LeaderboardRowDAO value) {
-                    currentRowUpdateWhiteboard = null; // show that it has been consumed and updated
                     currentRowUpdateWhiteboard.setIndexOfRowToUpdate(rowIndex);
+                    currentRowUpdateWhiteboard = null; // show that it has been consumed and updated
                 }
             });
         }

@@ -20,15 +20,15 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.domain.swisstimingadapter,
  com.sap.sailing.domain.persistence,
  com.sap.sailing.domain.swisstimingadapter.persistence,
- com.sap.sailing.domain.tractracadapter.persistence,
- org.junit4
+ com.sap.sailing.domain.tractracadapter.persistence
 Bundle-ClassPath: lib/gwt-maps.jar,
  lib/gwt-visualization.jar,
  lib/gwt-servlet.jar,
  .
 Bundle-Activator: com.sap.sailing.gwt.ui.server.Activator
 Bundle-ActivationPolicy: lazy
-Export-Package: com.sap.sailing.gwt.ui.server,
+Export-Package: com.sap.sailing.gwt.ui.client;x-friends:="com.sap.sailing.gwt.ui.test",
+ com.sap.sailing.gwt.ui.server;x-friends:="com.sap.sailing.gwt.ui.test",
  com.sap.sailing.gwt.ui.shared;x-friends:="com.sap.sailing.gwt.ui.test"
 Import-Package: org.osgi.framework,
  org.osgi.util.tracker,

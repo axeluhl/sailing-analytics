@@ -32,7 +32,7 @@ import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingRaceTracker;
 import com.sap.sailing.domain.tracking.AbstractRaceTrackerImpl;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
-import com.sap.sailing.domain.tracking.DynamicTrack;
+import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFix;
@@ -158,12 +158,12 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
                 case UNIDENTIFIED:
                     String trackerID = fix.getBoatID();
                     Buoy buoy = domainFactory.getOrCreateBuoy(trackerID);
-                    DynamicTrack<Buoy, GPSFix> buoyTrack = trackedRace.getOrCreateTrack(buoy);
+                    DynamicGPSFixTrack<Buoy, GPSFix> buoyTrack = trackedRace.getOrCreateTrack(buoy);
                     buoyTrack.addGPSFix(gpsFix);
                     break;
                 case COMPETITOR:
                     Competitor competitor = domainFactory.getCompetitorByBoatID(fix.getBoatID());
-                    DynamicTrack<Competitor, GPSFixMoving> competitorTrack = trackedRace.getTrack(competitor);
+                    DynamicGPSFixTrack<Competitor, GPSFixMoving> competitorTrack = trackedRace.getTrack(competitor);
                     competitorTrack.addGPSFix(gpsFix);
                     break;
                 default:
