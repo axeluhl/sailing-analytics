@@ -351,17 +351,19 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         public void render(Context context, LeaderboardRowDAO object, SafeHtmlBuilder html) {
             LeaderboardEntryDAO entry = object.fieldsByRaceName.get(raceName);
             if (entry != null) {
-                if (!entry.discarded) {
-                    html.appendHtmlConstant("<span style=\"font-weight: bold;\">");
-                    html.append(entry.totalPoints);
-                    html.appendHtmlConstant("</span>");
+                // don't show points if max points / penalty
+                if (entry.reasonForMaxPoints.equals("NONE")) {
+                    if (!entry.discarded) {
+                        html.appendHtmlConstant("<span style=\"font-weight: bold;\">");
+                        html.append(entry.totalPoints);
+                        html.appendHtmlConstant("</span>");
+                    } else {
+                        html.appendHtmlConstant(" <span style=\"opacity: 0.5;\"><del>");
+                        html.append(entry.netPoints);
+                        html.appendHtmlConstant("</del></span>");
+                    }
                 } else {
-                    html.appendHtmlConstant(" <span style=\"opacity: 0.3;\"><del>");
-                    html.append(entry.netPoints);
-                    html.appendHtmlConstant("</del></span>");
-                }
-                if (!entry.reasonForMaxPoints.equals("NONE")) {
-                    html.appendHtmlConstant(" <span style=\"opacity: 0.3;\">");
+                    html.appendHtmlConstant(" <span style=\"opacity: 0.5;\">");
                     if (entry.discarded) {
                         html.appendHtmlConstant("<del>");
                     }
