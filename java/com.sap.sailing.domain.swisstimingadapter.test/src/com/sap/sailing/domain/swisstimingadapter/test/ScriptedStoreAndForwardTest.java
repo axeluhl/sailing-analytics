@@ -21,7 +21,6 @@ import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.sap.sailing.domain.swisstimingadapter.Competitor;
 import com.sap.sailing.domain.swisstimingadapter.Course;
-import com.sap.sailing.domain.swisstimingadapter.MessageType;
 import com.sap.sailing.domain.swisstimingadapter.Race;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterAdapter;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterConnector;
@@ -138,20 +137,11 @@ public class ScriptedStoreAndForwardTest {
         for(String msg: scriptedMessages.getMessages()) {
             transceiver.sendMessage(msg, sendingStream);
         }
-
-        transceiver.sendMessage(swissTimingFactory.createMessage(MessageType._STOPSERVER.name(), null), sendingStream);
-        synchronized (connector) {
-            while (!connector.isStopped()) {
-                connector.wait();
-            }
-        }
-/*
         synchronized (this) {
             while (!receivedAll[0]) {
                 wait(2000l); // wait for two seconds to receive the messages
             }
         }
-        */
         assertEquals(2, racesReceived.size());
         assertEquals(5, receivedCompetitors.size());
         assertEquals(2, receivedCourses.size());

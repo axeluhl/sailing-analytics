@@ -19,13 +19,15 @@ public class MongoDBServiceImpl implements MongoDBService {
 
     private final Map<Util.Pair<String, Integer>, Mongo> mongos;
     
+    private final Map<Util.Pair<String, Integer>, DB> dbs;
+    
     public MongoDBServiceImpl() {
         mongos = new HashMap<Util.Pair<String, Integer>, Mongo>();
+        dbs = new HashMap<Util.Pair<String,Integer>, DB>();
     }
 
     public MongoDBServiceImpl(MongoDBConfiguration configuration) {
-        mongos = new HashMap<Util.Pair<String, Integer>, Mongo>();
-
+        this();
         setConfiguration(configuration);
     }
 
@@ -54,11 +56,16 @@ public class MongoDBServiceImpl implements MongoDBService {
     
     private synchronized DB getDB(MongoDBConfiguration mongoDBConfiguration) throws UnknownHostException {
         Util.Pair<String, Integer> key = new Util.Pair<String, Integer>(mongoDBConfiguration.getHostName(), mongoDBConfiguration.getPort());
-        Mongo mongo = mongos.get(key);
-        if (mongo == null) {
-            mongo = new Mongo(mongoDBConfiguration.getHostName(), mongoDBConfiguration.getPort());
-            mongos.put(key, mongo);
+        DB db = dbs.get(key);
+        if (db == null) {
+            Mongo mongo = mongos.get(key);
+            if (mongo == null) {
+                mongo = new Mongo(mongoDBConfiguration.getHostName(), mongoDBConfiguration.getPort());
+                mongos.put(key, mongo);
+            }
+            db = mongo.getDB(mongoDBConfiguration.getDatabaseName());
+            dbs.put(key, db);
         }
-        return mongo.getDB(mongoDBConfiguration.getDatabaseName());
+        return db;
     }
 }
