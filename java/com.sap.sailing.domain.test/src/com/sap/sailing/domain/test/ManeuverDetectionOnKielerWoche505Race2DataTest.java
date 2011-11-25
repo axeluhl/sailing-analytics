@@ -55,7 +55,7 @@ public class ManeuverDetectionOnKielerWoche505Race2DataTest extends KielWeek2011
         TimePoint firstWindwardMarkPassing = hassosMarkPassingsIter.next().getTimePoint();
         GPSFix[] firstLegFineApproximation = dp.approximate(new MeterDistance(20), startMarkPassing, firstWindwardMarkPassing);
         assertNotNull(firstLegFineApproximation);
-        assertEquals(11, firstLegFineApproximation.length);
+        assertEquals(9, firstLegFineApproximation.length);
         GPSFix[] firstLegCoarseApproximation = dp.approximate(new MeterDistance(50), startMarkPassing, firstWindwardMarkPassing);
         assertNotNull(firstLegCoarseApproximation);
         assertEquals(4, firstLegCoarseApproximation.length);

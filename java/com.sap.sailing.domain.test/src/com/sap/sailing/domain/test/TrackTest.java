@@ -45,30 +45,37 @@ public class TrackTest {
     @Before
     public void setUp() throws InterruptedException {
         track = new DynamicGPSFixMovingTrackImpl<Boat>(new BoatImpl("MyFirstBoat",
-                new BoatClassImpl("505"), null), /* millisecondsOverWhichToAverage */ 5000);
+                new BoatClassImpl("505"), null), /* millisecondsOverWhichToAverage */ 5000, /* no smoothening */ null);
+        TimePoint now1 = MillisecondsTimePoint.now();
+        waitThreeMillis();
+        TimePoint now2 = MillisecondsTimePoint.now();
+        DegreePosition position1 = new DegreePosition(1, 2);
+        DegreePosition position2 = new DegreePosition(1, 3);
         gpsFix1 = new GPSFixMovingImpl(
-                new DegreePosition(1, 2), new MillisecondsTimePoint(
-                        System.currentTimeMillis()), new KnotSpeedWithBearingImpl(1,
+                position1, now1, new KnotSpeedWithBearingImpl(position1.getDistance(position2)
+                        .inTime(now2.asMillis() - now1.asMillis()).getKnots(),
                         new DegreeBearingImpl(90)));
+        gpsFix2 = new GPSFixMovingImpl(position2, now2, new KnotSpeedWithBearingImpl(position1.getDistance(position2)
+                .inTime(now2.asMillis() - gpsFix1.getTimePoint().asMillis()).getKnots(), new DegreeBearingImpl(90)));
         waitThreeMillis();
-        gpsFix2 = new GPSFixMovingImpl(
-                new DegreePosition(1, 3), new MillisecondsTimePoint(
-                        System.currentTimeMillis()), new KnotSpeedWithBearingImpl(1,
-                        new DegreeBearingImpl(90)));
-        waitThreeMillis();
+        TimePoint now3 = MillisecondsTimePoint.now();
+        Position position3 = new DegreePosition(1, 4);
         gpsFix3 = new GPSFixMovingImpl(
-                new DegreePosition(1, 4), new MillisecondsTimePoint(
-                        System.currentTimeMillis()), new KnotSpeedWithBearingImpl(2,
+                position3, now3, new KnotSpeedWithBearingImpl(position2.getDistance(position3)
+                        .inTime(now3.asMillis() - gpsFix2.getTimePoint().asMillis()).getKnots(),
                         new DegreeBearingImpl(0)));
         waitThreeMillis();
+        TimePoint now4 = MillisecondsTimePoint.now();
+        Position position4 = new DegreePosition(3, 4);
         gpsFix4 = new GPSFixMovingImpl(
-                new DegreePosition(3, 4), new MillisecondsTimePoint(
-                        System.currentTimeMillis()), new KnotSpeedWithBearingImpl(2,
+                position4, now4, new KnotSpeedWithBearingImpl(position3.getDistance(position4)
+                        .inTime(now4.asMillis() - gpsFix3.getTimePoint().asMillis()).getKnots(),
                         new DegreeBearingImpl(0)));
         waitThreeMillis();
-        gpsFix5 = new GPSFixMovingImpl(
-                new DegreePosition(5, 4), new MillisecondsTimePoint(
-                        System.currentTimeMillis()), new KnotSpeedWithBearingImpl(2, new DegreeBearingImpl(0)));
+        TimePoint now5 = MillisecondsTimePoint.now();
+        Position position5 = new DegreePosition(5, 4);
+        gpsFix5 = new GPSFixMovingImpl(position5, now5, new KnotSpeedWithBearingImpl(position4.getDistance(position5)
+                .inTime(now5.asMillis() - gpsFix4.getTimePoint().asMillis()).getKnots(), new DegreeBearingImpl(0)));
         track.addGPSFix(gpsFix1);
         track.addGPSFix(gpsFix2);
         track.addGPSFix(gpsFix3);
@@ -282,21 +289,23 @@ public class TrackTest {
     
     @Test
     public void testFarFutureFixNotUsedDuringEstimation() {
-        GPSFixMovingImpl gpsFixFarInTheFuture = new GPSFixMovingImpl(
-                new DegreePosition(89, 180), new MillisecondsTimePoint(
-                        System.currentTimeMillis()+10000000l), new KnotSpeedWithBearingImpl(200000, new DegreeBearingImpl(0)));
-        track.addGPSFix(gpsFixFarInTheFuture);
-        TimePoint normalFixesTime = null;
         Iterator<GPSFixMoving> iter = track.getRawFixes().iterator();
+        TimePoint normalFixesTime = null;
         for (int i=0; i<2; i++) {
             normalFixesTime = iter.next().getTimePoint();
         }
         assertNotNull(normalFixesTime);
-        Position estimatedPos = track.getEstimatedPosition(normalFixesTime, /* extrapolate */ false);
-        assertEquals(1., estimatedPos.getLatDeg(), 0.5);
-        assertEquals(2, estimatedPos.getLngDeg(), 0.5);
         SpeedWithBearing estimatedSpeed = track.getEstimatedSpeed(normalFixesTime);
-        assertEquals(1., estimatedSpeed.getKnots(), 0.001);
-        assertEquals(90., estimatedSpeed.getBearing().getDegrees(), 0.001);
+        GPSFixMovingImpl gpsFixFarInTheFuture = new GPSFixMovingImpl(
+                new DegreePosition(89, 180), new MillisecondsTimePoint(
+                        System.currentTimeMillis()+10000000l), new KnotSpeedWithBearingImpl(200000, new DegreeBearingImpl(0)));
+        track.addGPSFix(gpsFixFarInTheFuture);
+        Position estimatedPosNew = track.getEstimatedPosition(normalFixesTime, /* extrapolate */ false);
+        // expecting to get the coordinates of gpsFix2's position
+        assertEquals(gpsFix2.getPosition().getLatDeg(), estimatedPosNew.getLatDeg(), 0.5);
+        assertEquals(gpsFix2.getPosition().getLngDeg(), estimatedPosNew.getLngDeg(), 0.5);
+        SpeedWithBearing estimatedSpeedNew = track.getEstimatedSpeed(normalFixesTime);
+        assertEquals(estimatedSpeed.getKnots(), estimatedSpeedNew.getKnots(), 0.001);
+        assertEquals(estimatedSpeed.getBearing().getDegrees(), estimatedSpeedNew.getBearing().getDegrees(), 0.001);
     }
 }

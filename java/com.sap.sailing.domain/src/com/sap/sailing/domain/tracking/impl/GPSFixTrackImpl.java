@@ -21,17 +21,23 @@ import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 
 public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl<FixType> implements GPSFixTrack<ItemType, FixType> {
-    protected final static Speed MAX_SPEED_FOR_SMOOTHNING = new KnotSpeedImpl(50);
+    private static final Speed DEFAULT_MAX_SPEED_FOR_SMOOTHING = new KnotSpeedImpl(50);
+    protected final Speed maxSpeedForSmoothening;
     
     private final ItemType trackedItem;
     private long millisecondsOverWhichToAverage;
 
     public GPSFixTrackImpl(ItemType trackedItem, long millisecondsOverWhichToAverage) {
+        this(trackedItem, millisecondsOverWhichToAverage, DEFAULT_MAX_SPEED_FOR_SMOOTHING);
+    }
+    
+    public GPSFixTrackImpl(ItemType trackedItem, long millisecondsOverWhichToAverage, Speed maxSpeedForSmoothening) {
         super();
         this.trackedItem = trackedItem;
         this.millisecondsOverWhichToAverage = millisecondsOverWhichToAverage;
+        this.maxSpeedForSmoothening = maxSpeedForSmoothening;
     }
-    
+
     private class DummyGPSFix extends DummyTimed implements GPSFix {
         public DummyGPSFix(TimePoint timePoint) {
             super(timePoint);
@@ -75,6 +81,9 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         if (lastFixAtOrBefore != null && lastFixAtOrBefore == firstFixAtOrAfter) {
             return lastFixAtOrBefore.getPosition(); // exact match; how unlikely is that?
         } else {
+            if (lastFixAtOrBefore == null && firstFixAtOrAfter != null) {
+                return firstFixAtOrAfter.getPosition(); // asking for time point before first fix: return first fix's position
+            }
             if (firstFixAtOrAfter == null && !extrapolate) {
                 return lastFixAtOrBefore == null ? null : lastFixAtOrBefore.getPosition();
             } else {
@@ -281,19 +290,26 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
     }
 
     protected boolean isValid(PartialNavigableSetView<FixType> filteredView, FixType e) {
-        FixType previous = filteredView.lowerInternal(e);
-        FixType next = filteredView.higherInternal(e);
-        Speed speedToPrevious = Speed.NULL;
-        if (previous != null) {
-            speedToPrevious = previous.getPosition().getDistance(e.getPosition())
-                    .inTime(e.getTimePoint().asMillis() - previous.getTimePoint().asMillis());
+        boolean result;
+        if (maxSpeedForSmoothening == null) {
+            result = true;
+        } else {
+            FixType previous = filteredView.lowerInternal(e);
+            FixType next = filteredView.higherInternal(e);
+            Speed speedToPrevious = Speed.NULL;
+            if (previous != null) {
+                speedToPrevious = previous.getPosition().getDistance(e.getPosition())
+                        .inTime(e.getTimePoint().asMillis() - previous.getTimePoint().asMillis());
+            }
+            Speed speedToNext = Speed.NULL;
+            if (next != null) {
+                speedToNext = e.getPosition().getDistance(next.getPosition())
+                        .inTime(next.getTimePoint().asMillis() - e.getTimePoint().asMillis());
+            }
+            result = ((previous == null || speedToPrevious.compareTo(maxSpeedForSmoothening) <= 0)
+                    || (next == null || speedToNext.compareTo(maxSpeedForSmoothening) <= 0));
         }
-        Speed speedToNext = Speed.NULL;
-        if (next != null) {
-            speedToNext = e.getPosition().getDistance(next.getPosition())
-                    .inTime(next.getTimePoint().asMillis() - e.getTimePoint().asMillis());
-        }
-        return (speedToPrevious.compareTo(MAX_SPEED_FOR_SMOOTHNING) <= 0 || speedToNext.compareTo(MAX_SPEED_FOR_SMOOTHNING) <= 0); 
+        return result;
     }
 
     @Override
