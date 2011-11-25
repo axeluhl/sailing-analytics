@@ -4,10 +4,10 @@ import java.net.UnknownHostException;
 
 import com.mongodb.MongoException;
 import com.sap.sailing.domain.persistence.impl.MongoWindStoreFactoryImpl;
-import com.sap.sailing.mongodb.Activator;
+import com.sap.sailing.mongodb.MongoDBService;
 
 public interface MongoWindStoreFactory {
-    MongoWindStoreFactory INSTANCE = new MongoWindStoreFactoryImpl(Activator.getDefaultInstance().getDB());
+    MongoWindStoreFactory INSTANCE = new MongoWindStoreFactoryImpl(MongoDBService.INSTANCE.getDB());
     
     /**
      * Gets the default Mongo store based on the properties mongo.hostname[=localhost], mongo.port[=27017]

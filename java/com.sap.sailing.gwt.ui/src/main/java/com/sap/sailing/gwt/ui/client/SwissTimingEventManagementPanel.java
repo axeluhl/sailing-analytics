@@ -10,6 +10,9 @@ import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
+import com.google.gwt.text.client.DateTimeFormatRenderer;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.Handler;
@@ -30,11 +33,8 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.sap.sailing.gwt.ui.shared.EventDAO;
-import com.sap.sailing.gwt.ui.shared.RaceDAO;
-import com.sap.sailing.gwt.ui.shared.RegattaDAO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDAO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDAO;
-import com.sap.sailing.gwt.ui.shared.Triple;
 
 /**
  * Allows the user to start and stop tracking of events, regattas and races using the TracTrac connector. In particular,
@@ -58,10 +58,10 @@ public class SwissTimingEventManagementPanel extends FormPanel implements EventD
     private final CellTable<SwissTimingRaceRecordDAO> raceTable;
     private final Map<String, SwissTimingConfigurationDAO> previousConfigurations;
     private final ListBox previousConfigurationsComboBox;
-//    private final RaceTreeView trackedRacesTreeView;
     private final TrackedEventsComposite trackedEventsComposite;
     private final EventRefresher eventRefresher;
     private final CheckBox canSendRequestsCheckbox;
+    private DateTimeFormatRenderer dateFormatter = new DateTimeFormatRenderer(DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_LONG));
 
     public SwissTimingEventManagementPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
             EventRefresher eventRefresher, StringConstants stringConstants) {
@@ -72,7 +72,7 @@ public class SwissTimingEventManagementPanel extends FormPanel implements EventD
 
         VerticalPanel mainPanel = new VerticalPanel();
         this.setWidget(mainPanel);
-        mainPanel.setSize("100%", "100%");
+        mainPanel.setWidth("100%");
         
         CaptionPanel captionPanelConnections = new CaptionPanel("Connections");
         mainPanel.add(captionPanelConnections);
@@ -152,7 +152,7 @@ public class SwissTimingEventManagementPanel extends FormPanel implements EventD
         TextColumn<SwissTimingRaceRecordDAO> raceStartTrackingColumn = new TextColumn<SwissTimingRaceRecordDAO>() {
             @Override
             public String getValue(SwissTimingRaceRecordDAO object) {
-                return object.raceStartTime==null?"":object.raceStartTime.toString();
+                return object.raceStartTime==null?"":dateFormatter.render(object.raceStartTime);
             }
         };
 
@@ -160,7 +160,7 @@ public class SwissTimingEventManagementPanel extends FormPanel implements EventD
         HorizontalPanel racesSplitPanel = new HorizontalPanel();
         mainPanel.add(racesSplitPanel);
         
-        CaptionPanel racesCaptionPanel = new CaptionPanel("Available Races");
+        CaptionPanel racesCaptionPanel = new CaptionPanel(stringConstants.trackableRaces());
         racesSplitPanel.add(racesCaptionPanel);
         racesCaptionPanel.setWidth("50%");
 
@@ -183,9 +183,6 @@ public class SwissTimingEventManagementPanel extends FormPanel implements EventD
         VerticalPanel trackPanel = new VerticalPanel();
         trackPanel.setStyleName("paddedPanel");
         
-//        Label lblTrackableRaces = new Label(stringConstants.trackableRaces());
-//       connectionsGrid.setWidget(5, 0, lblTrackableRaces);
-
         raceNameColumn.setSortable(true);
         raceStartTrackingColumn.setSortable(true);
         
@@ -220,16 +217,18 @@ public class SwissTimingEventManagementPanel extends FormPanel implements EventD
   //      trackedRacesTreeView = new RaceTreeView(stringConstants, /* multiselection */ true);
   //      trackedRacesPanel.add(trackedRacesTreeView);
         
-        trackedEventsComposite = new TrackedEventsComposite(stringConstants, /* multiselection */ true);
+        trackedEventsComposite = new TrackedEventsComposite(sailingService, errorReporter, eventRefresher,
+                    stringConstants, /* multiselection */ true);
         trackedRacesPanel.add(trackedEventsComposite);
-        
-        HorizontalPanel buttonPanel = new HorizontalPanel();
-        racesPanel.add(buttonPanel);
+
+        HorizontalPanel racesButtonPanel = new HorizontalPanel();
+        racesPanel.add(racesButtonPanel);
 
         Button btnTrack = new Button("Start tracking");
+        
 //        Button btnTrack = new Button(stringConstants.btnTrack());
-        buttonPanel.add(btnTrack);
-        buttonPanel.setSpacing(10);
+        racesButtonPanel.add(btnTrack);
+        racesButtonPanel.setSpacing(10);
         btnTrack.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -237,45 +236,6 @@ public class SwissTimingEventManagementPanel extends FormPanel implements EventD
             }
         });
 
-        Button btnRemove = new Button("Stop tracking");
-//        Button btnRemove = new Button(stringConstants.remove());
-        btnRemove.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent click) {
-                for (Triple<EventDAO, RegattaDAO, RaceDAO> selection : trackedEventsComposite.getSelectedEventAndRace()) {
-                    if (selection.getC().currentlyTracked) {
-                        stopTrackingRace(selection.getA(), selection.getC());
-                    }
-                }
-            }
-        });
-        btnRemove.setWidth("100%");
-        buttonPanel.add(btnRemove);
-
-        Button btnRefresh = new Button(stringConstants.refresh());
-        btnRefresh.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                SwissTimingEventManagementPanel.this.eventRefresher.fillEvents();
-            }
-        });
-        buttonPanel.add(btnRefresh);
-
-    }
-
-    private void stopTrackingRace(final EventDAO event, final RaceDAO race) {
-        sailingService.stopTrackingRace(event.name, race.name, new AsyncCallback<Void>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                errorReporter.reportError("Exception trying to stop tracking race " + race.name + "in event "+event.name+": "
-                        + caught.getMessage());
-            }
-
-            @Override
-            public void onSuccess(Void result) {
-                eventRefresher.fillEvents();
-            }
-        });
     }
 
     private ListHandler<SwissTimingRaceRecordDAO> getRaceTableColumnSortHandler(List<SwissTimingRaceRecordDAO> raceRecords,
@@ -376,7 +336,7 @@ public class SwissTimingEventManagementPanel extends FormPanel implements EventD
                                 + caught.getMessage());
                     }
 
-                    @Override
+                    @Override 
                     public void onSuccess(Void result) {
                         eventRefresher.fillEvents();
                     }

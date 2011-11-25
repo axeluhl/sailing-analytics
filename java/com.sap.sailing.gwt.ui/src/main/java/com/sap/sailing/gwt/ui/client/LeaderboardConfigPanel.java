@@ -151,7 +151,15 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
                 removeSelectedLeaderboard();
             }
         });
-        
+        Button stressTestButton = new Button(stringConstants.stressTest());
+        verticalPanel.add(stressTestButton);
+        stressTestButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                performStressTestForSelectedLeaderboard();
+            }
+        });
+
         // ------------ specific to selected leaderboard ----------------
         Label lblRaceNamesIn = new Label(stringConstants.columnNamesInSelectedLeaderboard());
         grid.setWidget(2, 0, lblRaceNamesIn);
@@ -243,6 +251,25 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
 
         leaderboardSelectionChanged();
         leaderboardRaceColumnSelectionChanged();
+    }
+
+    private void performStressTestForSelectedLeaderboard() {
+        final int selectedIndex = leaderboardsListBox.getSelectedIndex();
+        if (selectedIndex >= 0) {
+            final String leaderboardName = leaderboardsListBox.getItemText(selectedIndex);
+            sailingService.stressTestLeaderboardByName(leaderboardName, 100, new AsyncCallback<Void>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                    errorReporter.reportError("Error during leaderboard stress test for " + leaderboardName + ": "
+                            + caught.getMessage());
+                }
+
+                @Override
+                public void onSuccess(Void result) {
+                    errorReporter.reportError("Stress test for " + leaderboardName + " finished successfully ");
+                }
+            });
+        }
     }
 
     private void unlinkSelectedRaceColumnFromTrackedRace() {
@@ -719,10 +746,10 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
                 selectedRace.getA().name, selectedRace.getC().name, new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable t) {
-                        errorReporter.reportError("Error trying to link tracked race "+selectedRace.getC().name+
-                                " of event "+selectedRace.getA().name+" to race column named "+
-                                getSelectedRaceColumnName()+" of leaderboard "+getSelectedLeaderboardName()+": "+
-                                t.getMessage());
+                        errorReporter.reportError("Error trying to link tracked race " + selectedRace.getC().name
+                                + " of event " + selectedRace.getA().name + " to race column named "
+                                + getSelectedRaceColumnName() + " of leaderboard " + getSelectedLeaderboardName()
+                                + ": " + t.getMessage());
                         raceTree.clearSelection();
                     }
 
@@ -732,20 +759,20 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
                     }
                 });
     }
-    
-    private void changeIsMedalRace(final boolean isMedalRace){
-    	sailingService.updateIsMedalRace(getSelectedLeaderboardName(), getSelectedRaceColumnName(), isMedalRace, new AsyncCallback<Void>() {
 
-			@Override
-			public void onFailure(Throwable caught) {
-				 errorReporter.reportError("Error trying to change isMedalRace of "+getSelectedRaceColumnName()+": "+caught.getMessage());
-			}
+    private void changeIsMedalRace(final boolean isMedalRace) {
+        sailingService.updateIsMedalRace(getSelectedLeaderboardName(), getSelectedRaceColumnName(), isMedalRace,
+                new AsyncCallback<Void>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        errorReporter.reportError("Error trying to change isMedalRace of "
+                                + getSelectedRaceColumnName() + ": " + caught.getMessage());
+                    }
 
-			@Override
-			public void onSuccess(Void result) {
-				// TODO Punkte in spalte updaten.
-				selectedLeaderboard.setIsMedalRace(getSelectedRaceColumnName(), isMedalRace);
-			}
-		});
+                    @Override
+                    public void onSuccess(Void result) {
+                        selectedLeaderboard.setIsMedalRace(getSelectedRaceColumnName(), isMedalRace);
+                    }
+                });
     }
 }

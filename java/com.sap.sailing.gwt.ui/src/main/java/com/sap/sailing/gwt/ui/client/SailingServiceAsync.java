@@ -173,4 +173,14 @@ public interface SailingServiceAsync {
 
     void trackWithSwissTiming(SwissTimingRaceRecordDAO rr, String hostname, int port, boolean canSendRequests,
             boolean trackWind, boolean correctWindByDeclination, AsyncCallback<Void> asyncCallback);
+
+    void sendSwissTimingDummyRace(String racMessage, String stlMesssage, String ccgMessage, AsyncCallback<Void> callback);
+    /**
+     * Requests the computation of the {@link LeaderboardDAO} for <code>leaderboardName</code> <code>times</code> times.
+     * The date used for the {@link #getLeaderboardByName(String, Date, Collection, AsyncCallback)} call is iterated
+     * in 10ms time steps, going backwards from "now." For all races, all details are requested.
+     */
+    void stressTestLeaderboardByName(String leaderboardName, int times, AsyncCallback<Void> callback);
+
+    void getCountryCodes(AsyncCallback<String[]> callback);
 }

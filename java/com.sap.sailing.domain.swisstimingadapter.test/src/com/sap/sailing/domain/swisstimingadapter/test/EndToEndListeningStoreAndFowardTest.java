@@ -40,7 +40,7 @@ import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
-import com.sap.sailing.mongodb.Activator;
+import com.sap.sailing.mongodb.MongoDBService;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceImpl;
 import com.sap.sailing.util.Util;
@@ -68,12 +68,13 @@ public class EndToEndListeningStoreAndFowardTest {
     @Before
     public void setUp() throws UnknownHostException, IOException, InterruptedException {
         logger.info("EndToEndListeningStoreAndFowardTest.setUp");
-        db = Activator.getDefaultInstance().getDB();
+        MongoDBService mongoDBService = MongoDBService.INSTANCE;
+        db = mongoDBService.getDB();
         swissTimingAdapterPersistence = SwissTimingAdapterPersistence.INSTANCE;
         swissTimingAdapterPersistence.dropAllMessageData();
         swissTimingAdapterPersistence.dropAllRaceMasterData();
         storeAndForward = new StoreAndForward(RECEIVE_PORT, CLIENT_PORT, SwissTimingFactory.INSTANCE,
-                swissTimingAdapterPersistence);
+                swissTimingAdapterPersistence, mongoDBService);
         sendingSocket = new Socket("localhost", RECEIVE_PORT);
         sendingStream = sendingSocket.getOutputStream();
         swissTimingFactory = SwissTimingFactory.INSTANCE;
@@ -93,6 +94,7 @@ public class EndToEndListeningStoreAndFowardTest {
         for (RaceHandle raceHandle : raceHandles) {
             racingEventService.stopTracking(raceHandle.getEvent());
         }
+        logger.info("Calling StoreAndForward.stop() in tearDown");
         storeAndForward.stop();
         logger.exiting(getClass().getName(), "tearDown");
     }
@@ -151,8 +153,8 @@ public class EndToEndListeningStoreAndFowardTest {
             RaceDefinition race = trackedRace.getRace();
             raceIDs.add(race.getName());
             assertEquals(46, Util.size(race.getCompetitors()));
-            assertEquals(7, Util.size(race.getCourse().getWaypoints()));
-            assertEquals(6, Util.size(race.getCourse().getLegs()));
+            assertEquals(6, Util.size(race.getCourse().getWaypoints()));
+            assertEquals(5, Util.size(race.getCourse().getLegs()));
             for (Competitor competitor : race.getCompetitors()) {
                 if (!competitor.getName().equals("Competitor 35") && !competitor.getName().equals("Competitor 20")) {
                     assertTrue("Track of competitor " + competitor + " empty",

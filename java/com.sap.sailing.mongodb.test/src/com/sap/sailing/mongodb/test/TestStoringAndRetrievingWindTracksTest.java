@@ -35,7 +35,7 @@ import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
-import com.sap.sailing.mongodb.Activator;
+import com.sap.sailing.mongodb.MongoDBConfiguration;
 import com.sap.sailing.server.RacingEventServiceImpl;
 
 public class TestStoringAndRetrievingWindTracksTest extends AbstractTracTracLiveTest implements MongoDBTest {
@@ -49,7 +49,7 @@ public class TestStoringAndRetrievingWindTracksTest extends AbstractTracTracLive
     
     private Mongo newMongo() throws UnknownHostException, MongoException {
         return new Mongo(System.getProperty("mongo.host", "127.0.0.1"),
-                Activator.getDefaultInstance().getDefaultPort());
+                MongoDBConfiguration.getDefaultConfiguration().getPort());
     }
     
     @Before

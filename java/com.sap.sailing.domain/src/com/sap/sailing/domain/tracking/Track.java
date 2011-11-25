@@ -13,11 +13,18 @@ import com.sap.sailing.domain.base.Timed;
  */
 public interface Track<FixType extends Timed> {
     /**
+     * Callers must synchronize on this object before iterating the result if they have to expect concurrent
+     * modifications.
+     * 
      * @return the raw fixes as recorded by this track; in particular, no smoothening or dampening of any kind is
      *         applied to the fixes returned by this method.
      */
     Iterable<FixType> getFixes();
-    
+
+    /**
+     * Callers must synchronize on this object before iterating the result if they have to expect concurrent
+     * modifications.
+     */
     Iterable<FixType> getRawFixes();
 
     FixType getLastFixAtOrBefore(TimePoint timePoint);
@@ -50,6 +57,9 @@ public interface Track<FixType extends Timed> {
      * Returns an iterator starting at the first fix after <code>startingAt</code> (or "at or after" in case
      * <code>inclusive</code> is <code>true</code>). The fixes returned by the iterator are the smoothened fixes (see
      * also {@link #getFixes()}, without any smoothening or dampening applied.
+     * 
+     * Callers must synchronize on this object before iterating the result if they have to expect concurrent
+     * modifications.
      */
     Iterator<FixType> getFixesIterator(TimePoint startingAt, boolean inclusive);
 
@@ -57,6 +67,9 @@ public interface Track<FixType extends Timed> {
      * Returns an iterator starting at the first raw fix after <code>startingAt</code> (or "at or after" in case
      * <code>inclusive</code> is <code>true</code>). The fixes returned by the iterator are the raw fixes (see also
      * {@link #getRawFixes()}, without any smoothening or dampening applied.
+     * 
+     * Callers must synchronize on this object before iterating the result if they have to expect concurrent
+     * modifications.
      */
     Iterator<FixType> getRawFixesIterator(TimePoint startingAt, boolean inclusive);
 }

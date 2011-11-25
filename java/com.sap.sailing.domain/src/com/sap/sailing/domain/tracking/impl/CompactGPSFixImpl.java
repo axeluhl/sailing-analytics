@@ -6,7 +6,7 @@ import com.sap.sailing.domain.base.impl.AbstractPosition;
 import com.sap.sailing.domain.base.impl.AbstractTimePoint;
 import com.sap.sailing.domain.tracking.GPSFix;
 
-public class CompactGPSFixImpl implements GPSFix {
+public class CompactGPSFixImpl extends AbstractGPSFixImpl implements GPSFix {
     private final double latDeg;
     private final double lngDeg;
     private final long timePointAsMillis;
@@ -54,4 +54,5 @@ public class CompactGPSFixImpl implements GPSFix {
     public TimePoint getTimePoint() {
         return new CompactTimePoint();
     }
+
 }

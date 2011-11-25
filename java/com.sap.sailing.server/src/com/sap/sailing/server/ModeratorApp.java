@@ -98,26 +98,29 @@ public class ModeratorApp extends Servlet {
                     JSONObject jsonCompetitor = new JSONObject();
                     jsonCompetitor.put("name", competitor.getName());
                     GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
-                    Iterator<GPSFixMoving> fixIter;
-                    if (sinceTimePoint == null) {
-                        fixIter = track.getFixes().iterator();
-                    } else {
-                        fixIter = track.getFixesIterator(sinceTimePoint, /* inclusive */ true);
-                    }
                     JSONArray jsonFixes = new JSONArray();
-                    while (fixIter.hasNext()) {
-                        GPSFixMoving fix = fixIter.next();
-                        if (toTimePoint != null && fix.getTimePoint() != null && toTimePoint.compareTo(fix.getTimePoint()) < 0) {
-                            break;
+                    synchronized (track) {
+                        Iterator<GPSFixMoving> fixIter;
+                        if (sinceTimePoint == null) {
+                            fixIter = track.getFixes().iterator();
+                        } else {
+                            fixIter = track.getFixesIterator(sinceTimePoint, /* inclusive */true);
                         }
-                        JSONObject jsonFix = new JSONObject();
-                        jsonFix.put("timepoint", fix.getTimePoint().asMillis());
-                        jsonFix.put("latdeg", fix.getPosition().getLatDeg());
-                        jsonFix.put("lngdeg", fix.getPosition().getLngDeg());
-                        jsonFix.put("truebearingdeg", fix.getSpeed().getBearing().getDegrees());
-                        jsonFix.put("knotspeed", fix.getSpeed().getKnots());
-                        jsonFix.put("tack", trackedRace.getTack(competitor, fix.getTimePoint()).name());
-                        jsonFixes.add(jsonFix);
+                        while (fixIter.hasNext()) {
+                            GPSFixMoving fix = fixIter.next();
+                            if (toTimePoint != null && fix.getTimePoint() != null
+                                    && toTimePoint.compareTo(fix.getTimePoint()) < 0) {
+                                break;
+                            }
+                            JSONObject jsonFix = new JSONObject();
+                            jsonFix.put("timepoint", fix.getTimePoint().asMillis());
+                            jsonFix.put("latdeg", fix.getPosition().getLatDeg());
+                            jsonFix.put("lngdeg", fix.getPosition().getLngDeg());
+                            jsonFix.put("truebearingdeg", fix.getSpeed().getBearing().getDegrees());
+                            jsonFix.put("knotspeed", fix.getSpeed().getKnots());
+                            jsonFix.put("tack", trackedRace.getTack(competitor, fix.getTimePoint()).name());
+                            jsonFixes.add(jsonFix);
+                        }
                     }
                     jsonCompetitor.put("track", jsonFixes);
                     jsonCompetitors.add(jsonCompetitor);

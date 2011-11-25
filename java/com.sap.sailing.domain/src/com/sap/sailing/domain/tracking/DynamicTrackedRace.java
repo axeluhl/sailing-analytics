@@ -12,13 +12,13 @@ public interface DynamicTrackedRace extends TrackedRace {
     /**
      * The raw, updating feed of a single competitor participating in this race
      */
-    DynamicTrack<Competitor, GPSFixMoving> getTrack(Competitor competitor);
+    DynamicGPSFixTrack<Competitor, GPSFixMoving> getTrack(Competitor competitor);
     
     /**
      * Yields the track describing <code>buoy</code>'s movement over time; never <code>null</code> because a
      * new track will be created in case no track was present for <code>buoy</code> so far.
      */
-    DynamicTrack<Buoy, GPSFix> getOrCreateTrack(Buoy buoy);
+    DynamicGPSFixTrack<Buoy, GPSFix> getOrCreateTrack(Buoy buoy);
 
     void addListener(RaceChangeListener<Competitor> listener);
     

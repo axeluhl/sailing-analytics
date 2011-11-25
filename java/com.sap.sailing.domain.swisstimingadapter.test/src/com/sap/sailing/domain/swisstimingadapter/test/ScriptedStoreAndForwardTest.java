@@ -31,7 +31,7 @@ import com.sap.sailing.domain.swisstimingadapter.persistence.StoreAndForward;
 import com.sap.sailing.domain.swisstimingadapter.persistence.SwissTimingAdapterPersistence;
 import com.sap.sailing.domain.swisstimingadapter.persistence.impl.CollectionNames;
 import com.sap.sailing.domain.swisstimingadapter.persistence.impl.FieldNames;
-import com.sap.sailing.mongodb.Activator;
+import com.sap.sailing.mongodb.MongoDBService;
 
 public class ScriptedStoreAndForwardTest {
     private static final Logger logger = Logger.getLogger(ScriptedStoreAndForwardTest.class.getName());
@@ -50,12 +50,14 @@ public class ScriptedStoreAndForwardTest {
 
     @Before
     public void setUp() throws UnknownHostException, IOException, InterruptedException, ParseException {
-        db = Activator.getDefaultInstance().getDB();
-
+        MongoDBService mongoDBService = MongoDBService.INSTANCE;
+        db = mongoDBService.getDB();
         swissTimingAdapterPersistence = SwissTimingAdapterPersistence.INSTANCE;
+        swissTimingAdapterPersistence.dropAllRaceMasterData();
+        swissTimingAdapterPersistence.dropAllMessageData();
 
         storeAndForward = new StoreAndForward(RECEIVE_PORT, CLIENT_PORT, SwissTimingFactory.INSTANCE,
-                SwissTimingAdapterPersistence.INSTANCE);
+                swissTimingAdapterPersistence, mongoDBService);
         sendingSocket = new Socket("localhost", RECEIVE_PORT);
         sendingStream = sendingSocket.getOutputStream();
         swissTimingFactory = SwissTimingFactory.INSTANCE;
@@ -78,10 +80,6 @@ public class ScriptedStoreAndForwardTest {
 
     @Test
     public void testInitMessages() throws IOException, InterruptedException, ParseException {
-
-        swissTimingAdapterPersistence.dropAllRaceMasterData();
-        swissTimingAdapterPersistence.dropAllMessageData();
-
         String[] racesToTrack = new String[] { "4711", "4712" };
 
         for (String raceToTrack : racesToTrack)
@@ -138,7 +136,6 @@ public class ScriptedStoreAndForwardTest {
         for(String msg: scriptedMessages.getMessages()) {
             transceiver.sendMessage(msg, sendingStream);
         }
-
         synchronized (this) {
             while (!receivedAll[0]) {
                 wait(2000l); // wait for two seconds to receive the messages
