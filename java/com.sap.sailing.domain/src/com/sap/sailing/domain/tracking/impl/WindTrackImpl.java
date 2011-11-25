@@ -13,11 +13,13 @@ import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.Speed;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.TimePoint;
+import com.sap.sailing.domain.base.Timed;
 import com.sap.sailing.domain.base.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindListener;
 import com.sap.sailing.domain.tracking.WindTrack;
+import com.sap.sailing.util.impl.ArrayListNavigableSet;
 
 /**
  * Records {@link Wind} objects over time and offers to average the last so many of them into an
@@ -35,6 +37,7 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
     private final Set<WindListener> listeners;
 
     public WindTrackImpl(long millisecondsOverWhichToAverage) {
+        super(new ArrayListNavigableSet<Timed>(WindComparator.INSTANCE));
         this.millisecondsOverWhichToAverage = millisecondsOverWhichToAverage;
         listeners = new HashSet<WindListener>();
     }

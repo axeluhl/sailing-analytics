@@ -5,5 +5,5 @@
 	<inherits name="com.sap.sailing.gwt.ui.AdminConsole" />
 	<source path="client"/>
 	
-	<servlet path='/testsailing' class='com.sap.sailing.gwt.ui.test.TestSailingServiceImpl'/>
+	<servlet path='/testsailing' class='com.sap.sailing.gwt.ui.test.MyTestSailingServiceImpl'/>
 </module>

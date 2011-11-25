@@ -32,10 +32,13 @@ public abstract class TrackImpl<FixType extends Timed> implements Track<FixType>
     }
     
     public TrackImpl() {
-        super();
-        this.fixes = new ArrayListNavigableSet<Timed>(TimedComparator.INSTANCE);
+        this(new ArrayListNavigableSet<Timed>(TimedComparator.INSTANCE));
     }
     
+    protected TrackImpl(NavigableSet<Timed> fixes) {
+        this.fixes = fixes;
+    }
+
     protected NavigableSet<FixType> getInternalRawFixes() {
         @SuppressWarnings("unchecked")
         NavigableSet<FixType> result = (NavigableSet<FixType>) fixes;
