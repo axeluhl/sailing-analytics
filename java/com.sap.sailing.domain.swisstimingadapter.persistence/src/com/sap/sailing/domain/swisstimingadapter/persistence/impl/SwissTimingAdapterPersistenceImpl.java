@@ -18,6 +18,7 @@ import com.sap.sailing.domain.swisstimingadapter.SailMasterMessage;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingConfiguration;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
 import com.sap.sailing.domain.swisstimingadapter.persistence.SwissTimingAdapterPersistence;
+import com.sap.sailing.mongodb.MongoDBService;
 
 public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPersistence {
 
@@ -37,11 +38,11 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
 
     private long lastMessageCount;
 
-    public SwissTimingAdapterPersistenceImpl(DB db, SwissTimingFactory swissTimingFactory) {
+    public SwissTimingAdapterPersistenceImpl(MongoDBService mongoDBService, SwissTimingFactory swissTimingFactory) {
         super();
-        this.database = db;
+        this.database = mongoDBService.getDB();
         this.swissTimingFactory = swissTimingFactory;
-        lastMessageCountCollection = db.getCollection(CollectionNames.LAST_MESSAGE_COUNT.name());
+        lastMessageCountCollection = database.getCollection(CollectionNames.LAST_MESSAGE_COUNT.name());
         init();
     }
 

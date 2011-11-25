@@ -15,7 +15,7 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.tracking.DynamicTrack;
+import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFix;
@@ -39,7 +39,7 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
             WindStore windStore, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed) {
         super(trackedEvent, race, windStore, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed);
         for (Competitor competitor : getRace().getCompetitors()) {
-            DynamicTrack<Competitor, GPSFixMoving> track = getTrack(competitor);
+            DynamicGPSFixTrack<Competitor, GPSFixMoving> track = getTrack(competitor);
             track.addListener(this);
         }
         for (WindSource windSource : WindSource.values()) {
@@ -49,7 +49,7 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
 
     @Override
     public synchronized void recordFix(Competitor competitor, GPSFixMoving fix) {
-        DynamicTrack<Competitor, GPSFixMoving> track = getTrack(competitor);
+        DynamicGPSFixTrack<Competitor, GPSFixMoving> track = getTrack(competitor);
         track.addGPSFix(fix); // the track notifies this tracked race which in turn notifies its listeners
         if (getStart() == null || getStart().compareTo(fix.getTimePoint())>0) {
             // infer race start time from fix; earliest fix received defines start if earlier than assumed start so far
@@ -80,13 +80,13 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     }
 
     @Override
-    public DynamicTrack<Competitor, GPSFixMoving> getTrack(Competitor competitor) {
-        return (DynamicTrack<Competitor, GPSFixMoving>) super.getTrack(competitor);
+    public DynamicGPSFixTrack<Competitor, GPSFixMoving> getTrack(Competitor competitor) {
+        return (DynamicGPSFixTrack<Competitor, GPSFixMoving>) super.getTrack(competitor);
     }
     
     @Override
-    public DynamicTrack<Buoy, GPSFix> getOrCreateTrack(Buoy buoy) {
-        return (DynamicTrack<Buoy, GPSFix>) super.getOrCreateTrack(buoy);
+    public DynamicGPSFixTrack<Buoy, GPSFix> getOrCreateTrack(Buoy buoy) {
+        return (DynamicGPSFixTrack<Buoy, GPSFix>) super.getOrCreateTrack(buoy);
     }
     
     private synchronized Set<RaceChangeListener<Competitor>> getListeners() {
@@ -260,7 +260,7 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
         long result = 0; // default in case there is no competitor
         Iterator<Competitor> compIter = getRace().getCompetitors().iterator();
         if (compIter.hasNext()) {
-            DynamicTrack<Competitor, GPSFixMoving> someTrack = getTrack(compIter.next());
+            DynamicGPSFixTrack<Competitor, GPSFixMoving> someTrack = getTrack(compIter.next());
             result = someTrack.getMillisecondsOverWhichToAverageSpeed();
         }
         return result;

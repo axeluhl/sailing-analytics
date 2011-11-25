@@ -251,10 +251,12 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
                         }
                     }
                     if (message.getType() == MessageType._STOPSERVER) {
+                        logger.info("SailMasterConnector received "+MessageType._STOPSERVER.name());
                         stop();
                     }
                 } catch (SocketException se) {
                     // This occurs if the socket was closed which may mean the connector was stopped. Check in while
+                    logger.info("Caught exception "+se+" during socket operation; setting socket to null");
                     socket = null;
                 }
             }
