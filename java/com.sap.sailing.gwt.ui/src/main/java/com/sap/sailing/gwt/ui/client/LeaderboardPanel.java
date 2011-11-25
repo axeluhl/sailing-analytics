@@ -26,6 +26,8 @@ import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.cellview.client.TextHeader;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.DockPanel;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
@@ -70,6 +72,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     private final StringConstants stringConstants;
 
     private final CellTable<LeaderboardRowDAO> leaderboardTable;
+    
+    private final MultiSelectionModel<LeaderboardRowDAO> leaderboardSelectionModel;
 
     private ListDataProvider<LeaderboardRowDAO> data;
 
@@ -728,7 +732,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         leaderboardTable = new CellTableWithStylableHeaders<LeaderboardRowDAO>(
         /* pageSize */100, resources);
         getLeaderboardTable().setWidth("100%");
-        getLeaderboardTable().setSelectionModel(new MultiSelectionModel<LeaderboardRowDAO>() {});
+        leaderboardSelectionModel = new MultiSelectionModel<LeaderboardRowDAO>() {};
+        getLeaderboardTable().setSelectionModel(leaderboardSelectionModel);
         setData(new ListDataProvider<LeaderboardRowDAO>());
         getData().addDataDisplay(getLeaderboardTable());
         listHandler = new ListHandler<LeaderboardRowDAO>(getData().getList());
@@ -775,6 +780,15 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         dockPanel.add(refreshAndSettingsPanel, DockPanel.EAST);
         vp.add(dockPanel);
         vp.add(getLeaderboardTable());
+        Button chartButton = new Button("Compare competitors");
+        chartButton.addClickHandler(new ClickHandler() {
+            
+            @Override
+            public void onClick(ClickEvent event) {
+                compareCompetitors();
+            }
+        });
+        vp.add(chartButton);
         setWidget(vp);
     }
 
@@ -1277,5 +1291,23 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     public void playStateChanged(boolean isPlaying) {
         playPause.setHTML(getPlayPauseImgHtml(isPlaying));
         playPause.setTitle(isPlaying ? stringConstants.pauseAutomaticRefresh() : stringConstants.autoRefresh());
+    }
+    
+    private void compareCompetitors(){
+        String raceName = this.selectedRaceColumns.get(0);
+        final DialogBox chartBox = new DialogBox();
+        final Runnable close = new Runnable() {
+            
+            @Override
+            public void run() {
+                chartBox.hide();
+            }
+        };
+        //chartBox.setSize("800", "800");
+        chartBox.setAnimationEnabled(true);
+        chartBox.add(new CompareCompetitorsPanel(sailingService, new ArrayList<LeaderboardRowDAO>(leaderboardSelectionModel.getSelectedSet()), raceName,close));
+        chartBox.setTitle("Compare competitors");
+        chartBox.center();
+        chartBox.show();
     }
 }
