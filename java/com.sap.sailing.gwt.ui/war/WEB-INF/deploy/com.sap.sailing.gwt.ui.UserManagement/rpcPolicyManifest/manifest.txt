@@ -1,2 +1,2 @@
-# Module com.sap.sailing.gwt.ui.AdminConsole
+# Module com.sap.sailing.gwt.ui.UserManagement
 # RPC service class, partial path of RPC policy file

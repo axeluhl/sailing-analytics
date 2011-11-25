@@ -32,7 +32,6 @@ import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
@@ -737,15 +736,17 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         listHandler = new ListHandler<LeaderboardRowDAO>(getData().getList());
         getLeaderboardTable().addColumnSortHandler(listHandler);
         loadCompleteLeaderboard(getLeaderboardDisplayDate());
+
         VerticalPanel vp = new VerticalPanel();
         vp.setSpacing(15);
-        Panel logoAndTitle = createLogoAndTitlePanel(stringConstants);
-        vp.add(logoAndTitle);
         DockPanel dockPanel = new DockPanel();
+        DockPanel dockPanel02 = new DockPanel();
         dockPanel.setWidth("100%");
         dockPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
+        dockPanel02.setWidth("100%");
+        dockPanel02.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
         Label leaderboardLabel = new Label(stringConstants.leaderboard() + " " + leaderboardName.toUpperCase());
-        leaderboardLabel.addStyleName("boldLabel");
+        leaderboardLabel.addStyleName("leaderboardLabel boldLabel");
         dockPanel.add(leaderboardLabel, DockPanel.WEST);
         ClickHandler playPauseHandler = new ClickHandler() {
             @Override
@@ -765,6 +766,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         refreshPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
         refreshPanel.addStyleName("refreshPanel");
         dockPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
+        dockPanel02.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
+        dockPanel02.addStyleName("refreshAndSettings");
         playPause = new Anchor(getPlayPauseImgHtml(timer.isPlaying()));
         playPause.addClickHandler(playPauseHandler);
         playStateChanged(timer.isPlaying());
@@ -775,16 +778,13 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         settingsAnchor.addClickHandler(new SettingsClickHandler(stringConstants));
         refreshAndSettingsPanel.add(refreshPanel);
         refreshAndSettingsPanel.add(settingsAnchor);
-        dockPanel.add(refreshAndSettingsPanel, DockPanel.EAST);
+        dockPanel02.add(refreshAndSettingsPanel, DockPanel.EAST);
         vp.add(dockPanel);
+        vp.add(dockPanel02);
         vp.add(getLeaderboardTable());
         setWidget(vp);
     }
 
-    private Panel createLogoAndTitlePanel(final StringConstants stringConstants) {
-        Panel logoAndTitle = new LogoAndTitlePanel(stringConstants);
-        return logoAndTitle;
-    }
 
     private SafeHtml getPlayPauseImgHtml(boolean playing) {
         return new SafeHtmlBuilder().appendHtmlConstant(
@@ -1005,7 +1005,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         String race = raceColumn.getRaceName();
         int columnIndex = getRaceColumnPosition(raceColumn);
         if (raceColumn.isExpansionEnabled() != leaderboard.raceIsTracked(race)
-              || leaderboard.raceIsMedalRace(race) != raceColumn.isMedalRace()) {
+                || leaderboard.raceIsMedalRace(race) != raceColumn.isMedalRace()) {
           if (raceColumn.isExpanded()) {
               raceColumn.toggleExpansion(); // remove children from table
           }

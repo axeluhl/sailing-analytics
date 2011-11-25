@@ -1,189 +1,190 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
-	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<modelVersion>4.0.0</modelVersion>
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+    xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <modelVersion>4.0.0</modelVersion>
 
-  <parent>
-    <artifactId>workspace</artifactId>
-    <groupId>com.sap.sailing</groupId>
-    <version>0.0.1-SNAPSHOT</version>
-  </parent>
+    <parent>
+        <artifactId>workspace</artifactId>
+        <groupId>com.sap.sailing</groupId>
+        <version>0.0.1-SNAPSHOT</version>
+    </parent>
 
-	<artifactId>root</artifactId>
-	<packaging>pom</packaging>
+    <artifactId>root</artifactId>
+    <packaging>pom</packaging>
 
-	<modules>
-		<module>com.sap.sailing.domain</module>
-		<module>com.sap.sailing.domain.persistence</module>
-		<module>com.sap.sailing.domain.test</module>
-		<module>com.sap.sailing.domain.tractracadapter</module>
-		<module>com.sap.sailing.domain.tractracadapter.persistence</module>
-		<module>com.sap.sailing.domain.swisstimingadapter</module>
-		<module>com.sap.sailing.domain.swisstimingadapter.persistence</module>
-		<module>com.sap.sailing.domain.swisstimingadapter.test</module>
-		<module>com.sap.sailing.declination</module>
-		<module>com.sap.sailing.declination.test</module>
-		<module>com.sap.sailing.udpconnector</module>
-		<module>com.sap.sailing.expeditionconnector</module>
-		<module>com.sap.sailing.expeditionconnector.test</module>
-		<module>com.sap.sailing.server</module>
-		<module>com.sap.sailing.xcelsiusadapter</module>
-		<module>com.sap.sailing.httpservicetracker</module>
-		<module>com.sap.sailing.gwt.ui</module>
-		<module>com.sap.sailing.gwt.ui.test</module>
-		<module>com.google.gwt.osgi</module>
-		<module>com.sap.sailing.server.test</module>
-		<module>com.sap.sailing.mongodb</module>
-		<module>com.sap.sailing.mongodb.test</module>
-		<module>com.tractrac.clientmodule</module>
-		<module>com.tractrac.resultapi</module>
-		<module>org.json.simple</module>
-		<module>com.mongodb.driver</module>
-		<module>com.googlecode.java-diff-utils</module>
-		<module>com.googlecode.java-diff-utils.test</module>
-		<module>com.sap.ui.phoenix.resource-osgi</module>
-		<module>com.sap.ui.phoenix.resource-servlet</module>
-	</modules>
-	
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-	</properties>
+    <modules>
+        <module>com.sap.sailing.domain</module>
+        <module>com.sap.sailing.domain.persistence</module>
+        <module>com.sap.sailing.domain.test</module>
+        <module>com.sap.sailing.domain.tractracadapter</module>
+        <module>com.sap.sailing.domain.tractracadapter.persistence</module>
+        <module>com.sap.sailing.domain.swisstimingadapter</module>
+        <module>com.sap.sailing.domain.swisstimingadapter.persistence</module>
+        <module>com.sap.sailing.domain.swisstimingadapter.test</module>
+        <module>com.sap.sailing.declination</module>
+        <module>com.sap.sailing.declination.test</module>
+        <module>com.sap.sailing.udpconnector</module>
+        <module>com.sap.sailing.expeditionconnector</module>
+        <module>com.sap.sailing.expeditionconnector.test</module>
+        <module>com.sap.sailing.server</module>
+        <module>com.sap.sailing.xcelsiusadapter</module>
+        <module>com.sap.sailing.httpservicetracker</module>
+        <module>com.sap.sailing.gwt.ui</module>
+        <module>com.sap.sailing.gwt.ui.test</module>
+        <module>com.google.gwt.osgi</module>
+        <module>com.sap.sailing.server.test</module>
+        <module>com.sap.sailing.mongodb</module>
+        <module>com.sap.sailing.mongodb.test</module>
+        <module>com.tractrac.clientmodule</module>
+        <module>com.tractrac.resultapi</module>
+        <module>org.json.simple</module>
+        <module>com.mongodb.driver</module>
+        <module>com.googlecode.java-diff-utils</module>
+        <module>com.googlecode.java-diff-utils.test</module>
+        <module>com.sap.ui.phoenix.resource-osgi</module>
+        <module>com.sap.ui.phoenix.resource-servlet</module>
+    </modules>
 
-	<build>
-		<directory>bin</directory>
-		<outputDirectory>bin</outputDirectory>
-		<testOutputDirectory>bin</testOutputDirectory>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    </properties>
 
-		<pluginManagement>
-			<plugins>
-				<plugin>
-					<inherited>true</inherited>
-					<groupId>org.sonatype.tycho</groupId>
-					<artifactId>maven-osgi-test-plugin</artifactId>
-					<version>0.10.0</version>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-surefire-plugin</artifactId>
-					<version>2.6</version>
-				</plugin>
-			</plugins>
-		</pluginManagement>
+    <build>
+        <directory>bin</directory>
+        <outputDirectory>bin</outputDirectory>
+        <testOutputDirectory>bin</testOutputDirectory>
 
-		<plugins>
-			<plugin>
-				<groupId>org.sonatype.tycho</groupId>
-				<artifactId>tycho-maven-plugin</artifactId>
-				<version>0.10.0</version>
-				<extensions>true</extensions>
-			</plugin>
-			<plugin>
-				<groupId>org.sonatype.tycho</groupId>
-				<artifactId>target-platform-configuration</artifactId>
-				<version>0.10.0</version>
-				<configuration>
-					<resolver>p2</resolver>
-					<environments>
-						<environment>
-							<os>linux</os>
-							<ws>gtk</ws>
-							<arch>x86</arch>
-						</environment>
-						<environment>
-							<os>linux</os>
-							<ws>gtk</ws>
-							<arch>x86_64</arch>
-						</environment>
-						<environment>
-							<os>win32</os>
-							<ws>win32</ws>
-							<arch>x86</arch>
-						</environment>
-						<environment>
-							<os>win32</os>
-							<ws>win32</ws>
-							<arch>x86_64</arch>
-						</environment>
-						<environment>
-							<os>macosx</os>
-							<ws>cocoa</ws>
-							<arch>x86_64</arch>
-						</environment>
-					</environments>
-					<pomDependencies>consider</pomDependencies>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.sonatype.tycho</groupId>
-				<artifactId>maven-osgi-test-plugin</artifactId>
-				<configuration>
-<!-- non-debug -->
-<!-- proxy 
-					<argLine>-Dfile.encoding=cp1252 -Dhttp.proxyHost=proxy -Dhttp.proxyPort=8080 -Dtractrac.tunnel=true -Dtractrac.tunnel.host=10.18.10.38 -Dmongo.hostname=10.18.10.38 -Xmx1024m -XX:PermSize=256m -XX:-UseGCOverheadLimit -XX:+UseParallelGC</argLine>
- -->
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <inherited>true</inherited>
+                    <groupId>org.sonatype.tycho</groupId>
+                    <artifactId>maven-osgi-test-plugin</artifactId>
+                    <version>0.10.0</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>2.6</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+
+        <plugins>
+            <plugin>
+                <groupId>org.sonatype.tycho</groupId>
+                <artifactId>tycho-maven-plugin</artifactId>
+                <version>0.10.0</version>
+                <extensions>true</extensions>
+            </plugin>
+            <plugin>
+                <groupId>org.sonatype.tycho</groupId>
+                <artifactId>target-platform-configuration</artifactId>
+                <version>0.10.0</version>
+                <configuration>
+                    <resolver>p2</resolver>
+                    <environments>
+                        <environment>
+                            <os>linux</os>
+                            <ws>gtk</ws>
+                            <arch>x86</arch>
+                        </environment>
+                        <environment>
+                            <os>linux</os>
+                            <ws>gtk</ws>
+                            <arch>x86_64</arch>
+                        </environment>
+                        <environment>
+                            <os>win32</os>
+                            <ws>win32</ws>
+                            <arch>x86</arch>
+                        </environment>
+                        <environment>
+                            <os>win32</os>
+                            <ws>win32</ws>
+                            <arch>x86_64</arch>
+                        </environment>
+                        <environment>
+                            <os>macosx</os>
+                            <ws>cocoa</ws>
+                            <arch>x86_64</arch>
+                        </environment>
+                    </environments>
+                    <pomDependencies>consider</pomDependencies>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.sonatype.tycho</groupId>
+                <artifactId>maven-osgi-test-plugin</artifactId>
+                <configuration>
+                    <!-- non-debug -->
+                    <!-- proxy -->
+                    <argLine>-Dfile.encoding=cp1252 -Dhttp.proxyHost=proxy -Dhttp.proxyPort=8080 -Dtractrac.tunnel=true -Dtractrac.tunnel.host=10.18.10.38 -Dmongo.host=10.18.10.38 -Xmx1024m -XX:PermSize=256m -XX:-UseGCOverheadLimit -XX:+UseParallelGC</argLine>
+                    <!-- -->
+<!-- proxy -->
+					<argLine>-Dfile.encoding=cp1252 -Dhttp.proxyHost=proxy -Dhttp.proxyPort=8080 -Dtractrac.tunnel=true -Dtractrac.tunnel.host=10.18.10.38 -Dmongo.host=10.18.10.38 -Xmx1024m -XX:PermSize=256m -XX:-UseGCOverheadLimit -XX:+UseParallelGC</argLine>
+<!-- -->
+<!-- no proxy 
+					<argLine>-Dfile.encoding=cp1252 -Xmx1024m -XX:PermSize=256m -XX:-UseGCOverheadLimit -XX:+UseParallelGC</argLine>
 <!-- no proxy -->
 					<argLine>-Dfile.encoding=cp1252 -Xmx1024m -XX:PermSize=256m -XX:-UseGCOverheadLimit -XX:+UseParallelGC</argLine>
 <!-- -->
-<!-- -->
-<!-- debug
-					<argLine>-Dfile.encoding=cp1252 -Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=y -Dhttp.proxyHost=proxy -Dhttp.proxyPort=8080 -Xmx1024m -XX:PermSize=256m -XX:-UseGCOverheadLimit -XX:+UseParallelGC</argLine>
--->
-					<testFailureIgnore>true</testFailureIgnore>
-					<excludes>
-						<exclude>**/*$*</exclude> <!-- Exclude inner classes -->
-					</excludes>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.sonatype.tycho</groupId>
-				<artifactId>maven-osgi-compiler-plugin</artifactId>
-				<version>0.10.0</version>
-				<configuration>
-					<source>1.6</source>
-					<target>1.6</target>
-				</configuration>
-			</plugin>
-		</plugins>
+                    <!-- -->
+                    <!-- debug <argLine>-Dfile.encoding=cp1252 -Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=y 
+                        -Dhttp.proxyHost=proxy -Dhttp.proxyPort=8080 -Xmx1024m -XX:PermSize=256m 
+                        -XX:-UseGCOverheadLimit -XX:+UseParallelGC</argLine> -->
+                    <testFailureIgnore>true</testFailureIgnore>
+                    <excludes>
+                        <exclude>**/*$*</exclude> <!-- Exclude inner classes -->
+                    </excludes>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.sonatype.tycho</groupId>
+                <artifactId>maven-osgi-compiler-plugin</artifactId>
+                <version>0.10.0</version>
+                <configuration>
+                    <source>1.6</source>
+                    <target>1.6</target>
+                </configuration>
+            </plugin>
+        </plugins>
 
-    <extensions>
-      <!-- Enabling the use of FTP -->
-      <extension>
-        <groupId>org.apache.maven.wagon</groupId>
-         <artifactId>wagon-ssh-external</artifactId>
-         <version>1.0-beta-6</version>
-      </extension>
-    </extensions>
+        <extensions>
+            <!-- Enabling the use of FTP -->
+            <extension>
+                <groupId>org.apache.maven.wagon</groupId>
+                <artifactId>wagon-ssh-external</artifactId>
+                <version>1.0-beta-6</version>
+            </extension>
+        </extensions>
 
-	</build>
-	
-  <distributionManagement>
-    <repository>
-      <id>ssh-repository</id>
-      <url>scpexe://trac@localhost:12347/home/trac/maven-repositories/dev</url>
-    </repository>
-  </distributionManagement>
+    </build>
 
-	<repositories>
-		<repository>
-			<layout>p2</layout>
-			<id>eclipse</id>
-			<url>http://download.eclipse.org/releases/indigo/</url>
-		</repository>
-		<repository>
-			<id>sap-nexus</id>
-			<url>http://nexus.wdf.sap.corp:8081/nexus/content/groups/build.snapshots</url>
-		</repository>
-<!-- 
-		<repository>
-			<id>central</id>
-			<url>http://repo1.maven.org/maven2</url>
-		</repository>
-		 -->
-                <repository>
-			<id>uni-luebeck</id>
-			<url>http://www.itm.uni-luebeck.de/projects/maven/releases</url>
-		</repository>
-	</repositories>
+    <distributionManagement>
+        <repository>
+            <id>ssh-repository</id>
+            <url>scpexe://trac@localhost:12347/home/trac/maven-repositories/dev</url>
+        </repository>
+    </distributionManagement>
+
+    <repositories>
+        <repository>
+            <layout>p2</layout>
+            <id>eclipse</id>
+            <url>http://download.eclipse.org/releases/indigo/</url>
+        </repository>
+        <repository>
+            <id>sap-nexus</id>
+            <url>http://nexus.wdf.sap.corp:8081/nexus/content/groups/build.snapshots</url>
+        </repository>
+        <!-- <repository> <id>central</id> <url>http://repo1.maven.org/maven2</url> 
+            </repository> -->
+        <repository>
+            <id>uni-luebeck</id>
+            <url>http://www.itm.uni-luebeck.de/projects/maven/releases</url>
+        </repository>
+    </repositories>
 </project>
