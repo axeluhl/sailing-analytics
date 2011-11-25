@@ -19,7 +19,6 @@ import com.sap.sailing.domain.swisstimingadapter.SailMasterTransceiver;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
 import com.sap.sailing.domain.swisstimingadapter.persistence.impl.CollectionNames;
 import com.sap.sailing.domain.swisstimingadapter.persistence.impl.FieldNames;
-import com.sap.sailing.domain.swisstimingadapter.persistence.impl.SwissTimingAdapterPersistenceImpl;
 import com.sap.sailing.mongodb.MongoDBConfiguration;
 import com.sap.sailing.mongodb.MongoDBService;
 import com.sap.sailing.util.Util.Pair;
@@ -182,6 +181,7 @@ public class StoreAndForward implements Runnable {
                     }
                     while (!stopped) {
                         Socket s = ss.accept();
+                        logger.info("StoreAndForward received connector's connect request on port "+portForClients);
                         if (!stopped) {
                             synchronized (StoreAndForward.this) {
                                 socketsToForwardTo.add(s);
@@ -246,7 +246,7 @@ public class StoreAndForward implements Runnable {
         
         MongoDBService mongoDBService = MongoDBService.INSTANCE;
         mongoDBService.setConfiguration(MongoDBConfiguration.getDefaultConfiguration());
-        SwissTimingAdapterPersistence swissTimingAdapterPersistence = new SwissTimingAdapterPersistenceImpl(mongoDBService, SwissTimingFactory.INSTANCE);
+        SwissTimingAdapterPersistence swissTimingAdapterPersistence = SwissTimingAdapterPersistence.INSTANCE;
         new StoreAndForward(listenPort, clientPort, SwissTimingFactory.INSTANCE, swissTimingAdapterPersistence, mongoDBService);
     }
 

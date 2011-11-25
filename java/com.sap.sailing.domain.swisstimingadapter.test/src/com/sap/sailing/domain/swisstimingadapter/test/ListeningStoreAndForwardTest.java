@@ -28,7 +28,6 @@ import com.sap.sailing.domain.swisstimingadapter.persistence.StoreAndForward;
 import com.sap.sailing.domain.swisstimingadapter.persistence.SwissTimingAdapterPersistence;
 import com.sap.sailing.domain.swisstimingadapter.persistence.impl.CollectionNames;
 import com.sap.sailing.domain.swisstimingadapter.persistence.impl.FieldNames;
-import com.sap.sailing.domain.swisstimingadapter.persistence.impl.SwissTimingAdapterPersistenceImpl;
 import com.sap.sailing.mongodb.MongoDBService;
 
 public class ListeningStoreAndForwardTest {
@@ -51,7 +50,7 @@ public class ListeningStoreAndForwardTest {
         logger.info("ListeningStoreAndForwardTest.setUp");
         MongoDBService mongoDBService = MongoDBService.INSTANCE;
         db = mongoDBService.getDB();
-        swissTimingAdapterPersistence = new SwissTimingAdapterPersistenceImpl(mongoDBService, SwissTimingFactory.INSTANCE);
+        swissTimingAdapterPersistence = SwissTimingAdapterPersistence.INSTANCE;
         swissTimingAdapterPersistence.dropAllMessageData();
         storeAndForward = new StoreAndForward(RECEIVE_PORT, CLIENT_PORT, SwissTimingFactory.INSTANCE, swissTimingAdapterPersistence, mongoDBService);
         sendingSocket = new Socket("localhost", RECEIVE_PORT);

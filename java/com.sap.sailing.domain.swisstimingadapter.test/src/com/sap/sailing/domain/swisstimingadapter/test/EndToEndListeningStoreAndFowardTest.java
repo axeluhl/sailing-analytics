@@ -36,7 +36,6 @@ import com.sap.sailing.domain.swisstimingadapter.persistence.StoreAndForward;
 import com.sap.sailing.domain.swisstimingadapter.persistence.SwissTimingAdapterPersistence;
 import com.sap.sailing.domain.swisstimingadapter.persistence.impl.CollectionNames;
 import com.sap.sailing.domain.swisstimingadapter.persistence.impl.FieldNames;
-import com.sap.sailing.domain.swisstimingadapter.persistence.impl.SwissTimingAdapterPersistenceImpl;
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -71,7 +70,7 @@ public class EndToEndListeningStoreAndFowardTest {
         logger.info("EndToEndListeningStoreAndFowardTest.setUp");
         MongoDBService mongoDBService = MongoDBService.INSTANCE;
         db = mongoDBService.getDB();
-        swissTimingAdapterPersistence = new SwissTimingAdapterPersistenceImpl(mongoDBService, SwissTimingFactory.INSTANCE);
+        swissTimingAdapterPersistence = SwissTimingAdapterPersistence.INSTANCE;
         swissTimingAdapterPersistence.dropAllMessageData();
         swissTimingAdapterPersistence.dropAllRaceMasterData();
         storeAndForward = new StoreAndForward(RECEIVE_PORT, CLIENT_PORT, SwissTimingFactory.INSTANCE,
@@ -95,6 +94,7 @@ public class EndToEndListeningStoreAndFowardTest {
         for (RaceHandle raceHandle : raceHandles) {
             racingEventService.stopTracking(raceHandle.getEvent());
         }
+        logger.info("Calling StoreAndForward.stop() in tearDown");
         storeAndForward.stop();
         logger.exiting(getClass().getName(), "tearDown");
     }

@@ -228,6 +228,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
                         assert SwissTimingRaceTrackerImpl.this.race == race;
                     }
                 });
+        logger.info("Created SwissTiming RaceDefinition and TrackedRace for "+race.getName());
     }
 
     @Override

@@ -32,8 +32,6 @@ import com.sap.sailing.domain.swisstimingadapter.SailMasterListener;
 import com.sap.sailing.domain.swisstimingadapter.StartList;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
 import com.sap.sailing.domain.swisstimingadapter.persistence.SwissTimingAdapterPersistence;
-import com.sap.sailing.domain.swisstimingadapter.persistence.impl.SwissTimingAdapterPersistenceImpl;
-import com.sap.sailing.mongodb.MongoDBService;
 import com.sap.sailing.util.Util;
 import com.sap.sailing.util.Util.Pair;
 import com.sap.sailing.util.Util.Triple;
@@ -45,8 +43,7 @@ public class SwissTimingSailMasterLiveTest implements SailMasterListener {
 
     @Before
     public void connect() throws InterruptedException {
-        MongoDBService mongoDBService = MongoDBService.INSTANCE;
-        SwissTimingAdapterPersistence swissTimingPersistence = new SwissTimingAdapterPersistenceImpl(mongoDBService, SwissTimingFactory.INSTANCE);
+        SwissTimingAdapterPersistence swissTimingPersistence = SwissTimingAdapterPersistence.INSTANCE;
         connector = SwissTimingFactory.INSTANCE.getOrCreateSailMasterConnector("gps.sportresult.com", 40300,
                 swissTimingPersistence, /* canSendRequests */true);
     }

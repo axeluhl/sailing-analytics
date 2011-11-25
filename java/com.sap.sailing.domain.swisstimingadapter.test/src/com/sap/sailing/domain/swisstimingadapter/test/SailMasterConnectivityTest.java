@@ -35,8 +35,6 @@ import com.sap.sailing.domain.swisstimingadapter.StartList;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
 import com.sap.sailing.domain.swisstimingadapter.impl.RaceImpl;
 import com.sap.sailing.domain.swisstimingadapter.persistence.SwissTimingAdapterPersistence;
-import com.sap.sailing.domain.swisstimingadapter.persistence.impl.SwissTimingAdapterPersistenceImpl;
-import com.sap.sailing.mongodb.MongoDBService;
 import com.sap.sailing.util.Util;
 import com.sap.sailing.util.Util.Triple;
 
@@ -50,10 +48,7 @@ public class SailMasterConnectivityTest {
     @Before
     public void setUp() throws InterruptedException, ParseException {
         startSailMasterDummy();
-        MongoDBService mongoDBService = MongoDBService.INSTANCE;
-
-        SwissTimingAdapterPersistence swissTimingPersistence = new SwissTimingAdapterPersistenceImpl(mongoDBService, SwissTimingFactory.INSTANCE);
-
+        SwissTimingAdapterPersistence swissTimingPersistence = SwissTimingAdapterPersistence.INSTANCE;
         swissTimingPersistence.dropAllRaceMasterData();
         Race race4711 = new RaceImpl("4711", "A wonderful test race");
         Race race4712 = new RaceImpl("4712", "Not such a wonderful race");
