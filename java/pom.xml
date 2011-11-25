@@ -121,12 +121,7 @@
                 <configuration>
                     <!-- non-debug -->
                     <!-- proxy -->
-                    <argLine>-Dfile.encoding=cp1252
-                        -Dhttp.proxyHost=proxy
-                        -Dhttp.proxyPort=8080 -Dtractrac.tunnel=true
-                        -Dtractrac.tunnel.host=10.18.10.38 -Dmongo.host=10.18.10.38
-                        -Xmx1024m -XX:PermSize=256m -XX:-UseGCOverheadLimit
-                        -XX:+UseParallelGC</argLine>
+                    <argLine>-Dfile.encoding=cp1252 -Dhttp.proxyHost=proxy -Dhttp.proxyPort=8080 -Dtractrac.tunnel=true -Dtractrac.tunnel.host=10.18.10.38 -Dmongo.host=10.18.10.38 -Xmx1024m -XX:PermSize=256m -XX:-UseGCOverheadLimit -XX:+UseParallelGC</argLine>
                     <!-- -->
                     <!-- no proxy <argLine>-Dfile.encoding=cp1252 -Xmx1024m 
                         -XX:PermSize=256m -XX:-UseGCOverheadLimit -XX:+UseParallelGC</argLine> -->
