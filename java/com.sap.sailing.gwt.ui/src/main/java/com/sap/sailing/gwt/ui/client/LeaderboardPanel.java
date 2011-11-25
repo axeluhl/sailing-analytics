@@ -100,6 +100,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     protected final String TOTAL_COLUMN_STYLE;
 
     private final Timer timer;
+    
+    boolean firstTimeLeaderboardLoaded;
 
     /**
      * The delay with which the timer shall work. Before the timer is resumed, the delay is set to this value.
@@ -707,6 +709,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         this.selectedLegDetails.add(DetailColumnType.RANK_GAIN);
         this.selectedRaceDetails = new ArrayList<DetailColumnType>();
         this.selectedRaceColumns = new ArrayList<String>();
+        this.firstTimeLeaderboardLoaded = true;
         delayInMilliseconds = 0l;
         timer = new Timer(/* delayBetweenAutoAdvancesInMilliseconds */ 3000l);
         timer.setDelay(getDelayInMilliseconds()); // set time/delay before
@@ -964,11 +967,18 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         // first remove race columns no longer needed:
         removeUnusedRaceColumns(leaderboard);
         if (leaderboard != null) {
+            if(firstTimeLeaderboardLoaded){
+                for (String string : leaderboard.getRaceList()) {
+                    selectedRaceColumns.add(string);
+                }
+                if(selectedRaceColumns.size()!=0){
+                    firstTimeLeaderboardLoaded = false;
+                }
+            }
             createMissingAndAdjustExistingRaceColumns(leaderboard);
             ensureTotalsColumn();
         }
     }
-
 
     private boolean leaderboardTableContainsRace(String raceName) {
         for (int leaderboardposition = 0; leaderboardposition < getLeaderboardTable().getColumnCount(); leaderboardposition++) {
@@ -1103,7 +1113,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             }
         }
         selectedRaceColumns = correctedOrderSelectedRaces;
-
+        
         removeRaceColumnNotUsed();
         
         for (int selectedRaceCount = 0; selectedRaceCount < selectedRaceColumns.size(); selectedRaceCount++) {
