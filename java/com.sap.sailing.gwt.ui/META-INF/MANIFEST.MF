@@ -32,5 +32,5 @@ Bundle-ClassPath: lib/gwt-maps.jar,
 Bundle-Activator: com.sap.sailing.gwt.ui.server.Activator
 Bundle-ActivationPolicy: lazy
 Export-Package: com.sap.sailing.gwt.ui.client;x-friends:="com.sap.sailing.gwt.ui.test",
- com.sap.sailing.gwt.ui.server,
+ com.sap.sailing.gwt.ui.server;x-friends:="com.sap.sailing.gwt.ui.test",
  com.sap.sailing.gwt.ui.shared;x-friends:="com.sap.sailing.gwt.ui.test"
