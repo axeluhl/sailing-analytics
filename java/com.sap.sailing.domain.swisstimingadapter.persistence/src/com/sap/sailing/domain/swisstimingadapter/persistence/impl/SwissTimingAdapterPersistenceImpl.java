@@ -18,6 +18,7 @@ import com.sap.sailing.domain.swisstimingadapter.SailMasterMessage;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingConfiguration;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
 import com.sap.sailing.domain.swisstimingadapter.persistence.SwissTimingAdapterPersistence;
+import com.sap.sailing.mongodb.MongoDBService;
 
 public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPersistence {
 
@@ -32,9 +33,9 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
      */
     private HashMap<String, Race> cachedRaces = new HashMap<String, Race>();
     
-    public SwissTimingAdapterPersistenceImpl(DB db, SwissTimingFactory swissTimingFactory) {
+    public SwissTimingAdapterPersistenceImpl(MongoDBService mongoDB, SwissTimingFactory swissTimingFactory) {
         super();
-        this.database = db;
+        this.database = mongoDB.getDB();
         this.swissTimingFactory = swissTimingFactory;
         init();
     }

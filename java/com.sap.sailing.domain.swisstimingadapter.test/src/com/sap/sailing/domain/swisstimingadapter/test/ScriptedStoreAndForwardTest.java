@@ -21,6 +21,7 @@ import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.sap.sailing.domain.swisstimingadapter.Competitor;
 import com.sap.sailing.domain.swisstimingadapter.Course;
+import com.sap.sailing.domain.swisstimingadapter.MessageType;
 import com.sap.sailing.domain.swisstimingadapter.Race;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterAdapter;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterConnector;
@@ -31,7 +32,8 @@ import com.sap.sailing.domain.swisstimingadapter.persistence.StoreAndForward;
 import com.sap.sailing.domain.swisstimingadapter.persistence.SwissTimingAdapterPersistence;
 import com.sap.sailing.domain.swisstimingadapter.persistence.impl.CollectionNames;
 import com.sap.sailing.domain.swisstimingadapter.persistence.impl.FieldNames;
-import com.sap.sailing.mongodb.Activator;
+import com.sap.sailing.domain.swisstimingadapter.persistence.impl.SwissTimingAdapterPersistenceImpl;
+import com.sap.sailing.mongodb.MongoDBService;
 
 public class ScriptedStoreAndForwardTest {
     private static final Logger logger = Logger.getLogger(ScriptedStoreAndForwardTest.class.getName());
@@ -50,12 +52,14 @@ public class ScriptedStoreAndForwardTest {
 
     @Before
     public void setUp() throws UnknownHostException, IOException, InterruptedException, ParseException {
-        db = Activator.getDefaultInstance().getDB();
-
-        swissTimingAdapterPersistence = SwissTimingAdapterPersistence.INSTANCE;
+        MongoDBService mongoDBService = MongoDBService.INSTANCE;
+        db = mongoDBService.getDB();
+        swissTimingAdapterPersistence = new SwissTimingAdapterPersistenceImpl(mongoDBService, SwissTimingFactory.INSTANCE);
+        swissTimingAdapterPersistence.dropAllRaceMasterData();
+        swissTimingAdapterPersistence.dropAllMessageData();
 
         storeAndForward = new StoreAndForward(RECEIVE_PORT, CLIENT_PORT, SwissTimingFactory.INSTANCE,
-                SwissTimingAdapterPersistence.INSTANCE);
+                swissTimingAdapterPersistence, mongoDBService);
         sendingSocket = new Socket("localhost", RECEIVE_PORT);
         sendingStream = sendingSocket.getOutputStream();
         swissTimingFactory = SwissTimingFactory.INSTANCE;
@@ -78,10 +82,6 @@ public class ScriptedStoreAndForwardTest {
 
     @Test
     public void testInitMessages() throws IOException, InterruptedException, ParseException {
-
-        swissTimingAdapterPersistence.dropAllRaceMasterData();
-        swissTimingAdapterPersistence.dropAllMessageData();
-
         String[] racesToTrack = new String[] { "4711", "4712" };
 
         for (String raceToTrack : racesToTrack)
@@ -139,11 +139,19 @@ public class ScriptedStoreAndForwardTest {
             transceiver.sendMessage(msg, sendingStream);
         }
 
+        transceiver.sendMessage(swissTimingFactory.createMessage(MessageType._STOPSERVER.name(), null), sendingStream);
+        synchronized (connector) {
+            while (!connector.isStopped()) {
+                connector.wait();
+            }
+        }
+/*
         synchronized (this) {
             while (!receivedAll[0]) {
                 wait(2000l); // wait for two seconds to receive the messages
             }
         }
+        */
         assertEquals(2, racesReceived.size());
         assertEquals(5, receivedCompetitors.size());
         assertEquals(2, receivedCourses.size());

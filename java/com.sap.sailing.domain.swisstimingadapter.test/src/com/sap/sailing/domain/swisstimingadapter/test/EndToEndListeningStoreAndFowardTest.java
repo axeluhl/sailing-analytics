@@ -36,11 +36,12 @@ import com.sap.sailing.domain.swisstimingadapter.persistence.StoreAndForward;
 import com.sap.sailing.domain.swisstimingadapter.persistence.SwissTimingAdapterPersistence;
 import com.sap.sailing.domain.swisstimingadapter.persistence.impl.CollectionNames;
 import com.sap.sailing.domain.swisstimingadapter.persistence.impl.FieldNames;
+import com.sap.sailing.domain.swisstimingadapter.persistence.impl.SwissTimingAdapterPersistenceImpl;
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
-import com.sap.sailing.mongodb.Activator;
+import com.sap.sailing.mongodb.MongoDBService;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceImpl;
 import com.sap.sailing.util.Util;
@@ -68,12 +69,13 @@ public class EndToEndListeningStoreAndFowardTest {
     @Before
     public void setUp() throws UnknownHostException, IOException, InterruptedException {
         logger.info("EndToEndListeningStoreAndFowardTest.setUp");
-        db = Activator.getDefaultInstance().getDB();
-        swissTimingAdapterPersistence = SwissTimingAdapterPersistence.INSTANCE;
+        MongoDBService mongoDBService = MongoDBService.INSTANCE;
+        db = mongoDBService.getDB();
+        swissTimingAdapterPersistence = new SwissTimingAdapterPersistenceImpl(mongoDBService, SwissTimingFactory.INSTANCE);
         swissTimingAdapterPersistence.dropAllMessageData();
         swissTimingAdapterPersistence.dropAllRaceMasterData();
         storeAndForward = new StoreAndForward(RECEIVE_PORT, CLIENT_PORT, SwissTimingFactory.INSTANCE,
-                swissTimingAdapterPersistence);
+                swissTimingAdapterPersistence, mongoDBService);
         sendingSocket = new Socket("localhost", RECEIVE_PORT);
         sendingStream = sendingSocket.getOutputStream();
         swissTimingFactory = SwissTimingFactory.INSTANCE;

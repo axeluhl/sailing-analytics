@@ -19,7 +19,9 @@ import com.sap.sailing.domain.swisstimingadapter.SailMasterTransceiver;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
 import com.sap.sailing.domain.swisstimingadapter.persistence.impl.CollectionNames;
 import com.sap.sailing.domain.swisstimingadapter.persistence.impl.FieldNames;
-import com.sap.sailing.mongodb.Activator;
+import com.sap.sailing.domain.swisstimingadapter.persistence.impl.SwissTimingAdapterPersistenceImpl;
+import com.sap.sailing.mongodb.MongoDBConfiguration;
+import com.sap.sailing.mongodb.MongoDBService;
 import com.sap.sailing.util.Util.Pair;
 
 /**
@@ -83,8 +85,8 @@ public class StoreAndForward implements Runnable {
      * SailMaster connections.
      */
     public StoreAndForward(String sailMasterHostname, int sailMasterPort, int portForClients, SwissTimingFactory swissTimingFactory, 
-            SwissTimingAdapterPersistence swissTimingAdapterPersistence) throws InterruptedException, IOException {
-        db = Activator.getDefaultInstance().getDB();
+            SwissTimingAdapterPersistence swissTimingAdapterPersistence, MongoDBService mongoDBService) throws InterruptedException, IOException {
+        this.db = mongoDBService.getDB();
         this.listenPort = -1;
         this.transceiver = swissTimingFactory.createSailMasterTransceiver();
         this.portForClients = portForClients;
@@ -123,8 +125,8 @@ public class StoreAndForward implements Runnable {
      * @throws IOException 
      */
     public StoreAndForward(final int listenPort, final int portForClients, SwissTimingFactory swissTimingFactory, 
-            SwissTimingAdapterPersistence swissTimingAdapterPersistence) throws InterruptedException, IOException {
-        db = Activator.getDefaultInstance().getDB();
+            SwissTimingAdapterPersistence swissTimingAdapterPersistence, MongoDBService mongoDBService) throws InterruptedException, IOException {
+        this.db = mongoDBService.getDB();
         this.listenPort = listenPort;
         this.transceiver = swissTimingFactory.createSailMasterTransceiver();
         this.portForClients = portForClients;
@@ -241,7 +243,11 @@ public class StoreAndForward implements Runnable {
     public static void main(String[] args) throws InterruptedException, IOException {
         int listenPort = Integer.valueOf(args[0]);
         int clientPort = Integer.valueOf(args[1]);
-        new StoreAndForward(listenPort, clientPort, SwissTimingFactory.INSTANCE, SwissTimingAdapterPersistence.INSTANCE);
+        
+        MongoDBService mongoDBService = MongoDBService.INSTANCE;
+        mongoDBService.setConfiguration(MongoDBConfiguration.getDefaultConfiguration());
+        SwissTimingAdapterPersistence swissTimingAdapterPersistence = new SwissTimingAdapterPersistenceImpl(mongoDBService, SwissTimingFactory.INSTANCE);
+        new StoreAndForward(listenPort, clientPort, SwissTimingFactory.INSTANCE, swissTimingAdapterPersistence, mongoDBService);
     }
 
     public void run() {

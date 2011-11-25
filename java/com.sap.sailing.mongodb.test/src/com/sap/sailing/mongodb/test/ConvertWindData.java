@@ -5,7 +5,7 @@ import com.mongodb.DBObject;
 import com.sap.sailing.domain.base.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.persistence.impl.FieldNames;
 import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
-import com.sap.sailing.mongodb.Activator;
+import com.sap.sailing.mongodb.MongoDBService;
 
 /**
  * Reverses the wind directions of <em>all</em> wind records stored in the MongoDB that is obtained using
@@ -16,7 +16,7 @@ import com.sap.sailing.mongodb.Activator;
  */
 public class ConvertWindData extends AbstractMongoDBTest {
     public static void main(String[] args) {
-        MongoObjectFactoryImpl mof = new MongoObjectFactoryImpl(Activator.getDefaultInstance().getDB());
+        MongoObjectFactoryImpl mof = new MongoObjectFactoryImpl(MongoDBService.INSTANCE.getDB());
         DBCollection windTracksCollection = mof.getWindTrackCollection();
         for (DBObject dbo : windTracksCollection.find()) {
              windTracksCollection.remove(dbo);
