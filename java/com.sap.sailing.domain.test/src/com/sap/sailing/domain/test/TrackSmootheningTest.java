@@ -18,7 +18,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Distance;
 import com.sap.sailing.domain.base.Speed;
 import com.sap.sailing.domain.base.TimePoint;
-import com.sap.sailing.domain.tracking.DynamicTrack;
+import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
@@ -33,10 +33,10 @@ import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
  *
  */
 public class TrackSmootheningTest extends StoredTrackBasedTest {
-    private final Map<Competitor, DynamicTrack<Competitor, GPSFixMoving>> tracks;
+    private final Map<Competitor, DynamicGPSFixTrack<Competitor, GPSFixMoving>> tracks;
 
     public TrackSmootheningTest() throws URISyntaxException, MalformedURLException {
-        tracks = new HashMap<Competitor, DynamicTrack<Competitor,GPSFixMoving>>();
+        tracks = new HashMap<Competitor, DynamicGPSFixTrack<Competitor,GPSFixMoving>>();
     }
     
     /**
@@ -54,8 +54,8 @@ public class TrackSmootheningTest extends StoredTrackBasedTest {
         return "Kieler Woche";
     }
 
-    private DynamicTrack<Competitor, GPSFixMoving> getTrackByCompetitorName(String name) {
-        for (Map.Entry<Competitor, DynamicTrack<Competitor, GPSFixMoving>> e : tracks.entrySet()) {
+    private DynamicGPSFixTrack<Competitor, GPSFixMoving> getTrackByCompetitorName(String name) {
+        for (Map.Entry<Competitor, DynamicGPSFixTrack<Competitor, GPSFixMoving>> e : tracks.entrySet()) {
             if (e.getKey().getName().equals(name)) {
                 return e.getValue();
             }
@@ -63,12 +63,12 @@ public class TrackSmootheningTest extends StoredTrackBasedTest {
         return null;
     }
 
-    protected void assertOutlierInTrack(DynamicTrack<Competitor, GPSFixMoving> track) {
+    protected void assertOutlierInTrack(DynamicGPSFixTrack<Competitor, GPSFixMoving> track) {
         GPSFixMoving outlier = getAnyOutlier(track.getRawFixes());
         assertNotNull(outlier); // assert that we found an outlier
     }
 
-    protected void assertNoOutlierInSmoothenedTrack(DynamicTrack<Competitor, GPSFixMoving> track) {
+    protected void assertNoOutlierInSmoothenedTrack(DynamicGPSFixTrack<Competitor, GPSFixMoving> track) {
         Iterable<GPSFixMoving> fixes = track.getFixes();
         GPSFixMoving outlier = getAnyOutlier(fixes);
         assertNull("Found unexpected outlier "+outlier+" in smoothened track", outlier); // assert that we did not find an outlier
@@ -102,7 +102,7 @@ public class TrackSmootheningTest extends StoredTrackBasedTest {
     
     @Test
     public void assertBirknersEquatorJump() {
-        DynamicTrack<Competitor, GPSFixMoving> track = getTrackByCompetitorName("Birkner");
+        DynamicGPSFixTrack<Competitor, GPSFixMoving> track = getTrackByCompetitorName("Birkner");
         assertNotNull(track);
         assertOutlierInTrack(track);
         assertNoOutlierInSmoothenedTrack(track);
@@ -110,7 +110,7 @@ public class TrackSmootheningTest extends StoredTrackBasedTest {
 
     @Test
     public void assertPlattnersKielerFoerdeJump() {
-        DynamicTrack<Competitor, GPSFixMoving> track = getTrackByCompetitorName("Dr.Plattner");
+        DynamicGPSFixTrack<Competitor, GPSFixMoving> track = getTrackByCompetitorName("Dr.Plattner");
         assertNotNull(track);
         assertOutlierInTrack(track);
         assertNoOutlierInSmoothenedTrack(track);

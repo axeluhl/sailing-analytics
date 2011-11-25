@@ -23,7 +23,7 @@ import com.sap.sailing.domain.base.impl.DegreePosition;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.tracking.AbstractRaceTrackerImpl;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
-import com.sap.sailing.domain.tracking.DynamicTrack;
+import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.RaceHandle;
@@ -157,7 +157,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
                             for (RaceDefinition raceDefinition : raceDefinitions) {
                                 DynamicTrackedRace trackedRace = getTrackedEvent().getExistingTrackedRace(
                                         raceDefinition);
-                                DynamicTrack<Buoy, GPSFix> buoyTrack = trackedRace.getOrCreateTrack(buoy);
+                                DynamicGPSFixTrack<Buoy, GPSFix> buoyTrack = trackedRace.getOrCreateTrack(buoy);
                                 if (buoyTrack.getFirstRawFix() == null) {
                                     buoyTrack.addGPSFix(new GPSFixImpl(new DegreePosition(first ? controlPoint
                                             .getLat1() : controlPoint.getLat2(), first ? controlPoint.getLon1()
