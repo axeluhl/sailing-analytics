@@ -10,8 +10,8 @@ import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.i18n.shared.DateTimeFormat;
-import com.google.gwt.i18n.shared.DateTimeFormat.PredefinedFormat;
+import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.text.client.DateTimeFormatRenderer;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
@@ -58,7 +58,6 @@ public class SwissTimingEventManagementPanel extends FormPanel implements EventD
     private final CellTable<SwissTimingRaceRecordDAO> raceTable;
     private final Map<String, SwissTimingConfigurationDAO> previousConfigurations;
     private final ListBox previousConfigurationsComboBox;
-//    private final RaceTreeView trackedRacesTreeView;
     private final TrackedEventsComposite trackedEventsComposite;
     private final EventRefresher eventRefresher;
     private final CheckBox canSendRequestsCheckbox;
