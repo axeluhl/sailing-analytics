@@ -24,7 +24,7 @@ import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.base.impl.NationalityImpl;
 import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
-import com.sap.sailing.domain.tracking.DynamicTrack;
+import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.NoWindException;
@@ -78,7 +78,7 @@ public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest 
     }
 
     private void setBearingForCompetitor(Competitor competitor, MillisecondsTimePoint timePoint, double bearingDeg) {
-        DynamicTrack<Competitor, GPSFixMoving> hungersTrack = getTrackedRace().getTrack(competitor);
+        DynamicGPSFixTrack<Competitor, GPSFixMoving> hungersTrack = getTrackedRace().getTrack(competitor);
         hungersTrack.addGPSFix(new GPSFixMovingImpl(new DegreePosition(54.4680424, 10.234451), timePoint,
                 new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(bearingDeg))));
     }

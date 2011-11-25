@@ -8,11 +8,11 @@ import com.sap.sailing.domain.swisstimingadapter.SailMasterMessage;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingConfiguration;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
 import com.sap.sailing.domain.swisstimingadapter.persistence.impl.SwissTimingAdapterPersistenceImpl;
-import com.sap.sailing.mongodb.Activator;
+import com.sap.sailing.mongodb.MongoDBService;
 
 public interface SwissTimingAdapterPersistence extends RaceSpecificMessageLoader {
 
-    SwissTimingAdapterPersistence INSTANCE = new SwissTimingAdapterPersistenceImpl(Activator.getDefaultInstance().getDB(), SwissTimingFactory.INSTANCE);
+    SwissTimingAdapterPersistence INSTANCE = new SwissTimingAdapterPersistenceImpl(MongoDBService.INSTANCE, SwissTimingFactory.INSTANCE);
 
     Iterable<SwissTimingConfiguration> getSwissTimingConfigurations();
     

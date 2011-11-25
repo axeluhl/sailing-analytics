@@ -100,6 +100,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     protected final String TOTAL_COLUMN_STYLE;
 
     private final Timer timer;
+    
+    boolean firstTimeLeaderboardLoaded;
 
     /**
      * The delay with which the timer shall work. Before the timer is resumed, the delay is set to this value.
@@ -158,6 +160,9 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                             selectedRaceDetails.addAll(result.getRaceDetailsToShow());
                             selectedRaceColumns.clear();
                             selectedRaceColumns.addAll(result.getRaceColumnsToShow());
+                            // update leaderboard after settings panel column selection change
+                            updateLeaderboard(leaderboard);
+                            
                             timer.setDelayBetweenAutoAdvancesInMilliseconds(result
                                     .getDelayBetweenAutoAdvancesInMilliseconds());
                             setDelayInMilliseconds(result.getDelayInMilliseconds());
@@ -346,17 +351,19 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         public void render(Context context, LeaderboardRowDAO object, SafeHtmlBuilder html) {
             LeaderboardEntryDAO entry = object.fieldsByRaceName.get(raceName);
             if (entry != null) {
-                if (!entry.discarded) {
-                    html.appendHtmlConstant("<span style=\"font-weight: bold;\">");
-                    html.append(entry.totalPoints);
-                    html.appendHtmlConstant("</span>");
+                // don't show points if max points / penalty
+                if (entry.reasonForMaxPoints.equals("NONE")) {
+                    if (!entry.discarded) {
+                        html.appendHtmlConstant("<span style=\"font-weight: bold;\">");
+                        html.append(entry.totalPoints);
+                        html.appendHtmlConstant("</span>");
+                    } else {
+                        html.appendHtmlConstant(" <span style=\"opacity: 0.5;\"><del>");
+                        html.append(entry.netPoints);
+                        html.appendHtmlConstant("</del></span>");
+                    }
                 } else {
-                    html.appendHtmlConstant(" <span style=\"opacity: 0.3;\"><del>");
-                    html.append(entry.netPoints);
-                    html.appendHtmlConstant("</del></span>");
-                }
-                if (!entry.reasonForMaxPoints.equals("NONE")) {
-                    html.appendHtmlConstant(" <span style=\"opacity: 0.3;\">");
+                    html.appendHtmlConstant(" <span style=\"opacity: 0.5;\">");
                     if (entry.discarded) {
                         html.appendHtmlConstant("<del>");
                     }
@@ -705,6 +712,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         this.selectedLegDetails.add(DetailColumnType.RANK_GAIN);
         this.selectedRaceDetails = new ArrayList<DetailColumnType>();
         this.selectedRaceColumns = new ArrayList<String>();
+        this.firstTimeLeaderboardLoaded = true;
         delayInMilliseconds = 0l;
         timer = new Timer(/* delayBetweenAutoAdvancesInMilliseconds */ 3000l);
         timer.setDelay(getDelayInMilliseconds()); // set time/delay before
@@ -962,11 +970,18 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         // first remove race columns no longer needed:
         removeUnusedRaceColumns(leaderboard);
         if (leaderboard != null) {
+            if(firstTimeLeaderboardLoaded){
+                for (String string : leaderboard.getRaceList()) {
+                    selectedRaceColumns.add(string);
+                }
+                if(selectedRaceColumns.size()!=0){
+                    firstTimeLeaderboardLoaded = false;
+                }
+            }
             createMissingAndAdjustExistingRaceColumns(leaderboard);
             ensureTotalsColumn();
         }
     }
-
 
     private boolean leaderboardTableContainsRace(String raceName) {
         for (int leaderboardposition = 0; leaderboardposition < getLeaderboardTable().getColumnCount(); leaderboardposition++) {
@@ -1101,7 +1116,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             }
         }
         selectedRaceColumns = correctedOrderSelectedRaces;
-
+        
         removeRaceColumnNotUsed();
         
         for (int selectedRaceCount = 0; selectedRaceCount < selectedRaceColumns.size(); selectedRaceCount++) {

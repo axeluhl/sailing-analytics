@@ -11,7 +11,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.tracking.DynamicTrack;
+import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFix;
@@ -36,11 +36,11 @@ import com.sap.sailing.domain.tractracadapter.ReceiverType;
  */
 @Ignore("Un-ignore when you need to fetch new tracks")
 public class FetchTracksAndStoreLocallyTest extends KielWeek2011BasedTest {
-    private final Map<Competitor, DynamicTrack<Competitor, GPSFixMoving>> tracks;
+    private final Map<Competitor, DynamicGPSFixTrack<Competitor, GPSFixMoving>> tracks;
     private TrackedRace trackedRace;
 
     public FetchTracksAndStoreLocallyTest() throws URISyntaxException, MalformedURLException {
-        tracks = new HashMap<Competitor, DynamicTrack<Competitor,GPSFixMoving>>();
+        tracks = new HashMap<Competitor, DynamicGPSFixTrack<Competitor,GPSFixMoving>>();
     }
     
     /**
@@ -54,7 +54,7 @@ public class FetchTracksAndStoreLocallyTest extends KielWeek2011BasedTest {
         final RaceChangeListener<Competitor> positionListener = new RaceChangeListener<Competitor>() {
             @Override
             public void gpsFixReceived(GPSFix fix, Competitor competitor) {
-                DynamicTrack<Competitor, GPSFixMoving> track = tracks.get(competitor);
+                DynamicGPSFixTrack<Competitor, GPSFixMoving> track = tracks.get(competitor);
                 if (track == null) {
                     track = new DynamicGPSFixMovingTrackImpl<Competitor>(competitor, /* millisecondsOverWhichToAverage */ 40000);
                     tracks.put(competitor, track);
@@ -172,9 +172,9 @@ public class FetchTracksAndStoreLocallyTest extends KielWeek2011BasedTest {
     }
     
     private void storeTracks() throws FileNotFoundException, IOException {
-        for (Map.Entry<Competitor, DynamicTrack<Competitor, GPSFixMoving>> competitorAndTrack : tracks.entrySet()) {
+        for (Map.Entry<Competitor, DynamicGPSFixTrack<Competitor, GPSFixMoving>> competitorAndTrack : tracks.entrySet()) {
             Competitor competitor = competitorAndTrack.getKey();
-            DynamicTrack<Competitor, GPSFixMoving> track = competitorAndTrack.getValue();
+            DynamicGPSFixTrack<Competitor, GPSFixMoving> track = competitorAndTrack.getValue();
             storeTrack(competitor, track, getEvent().getName()+"-"+trackedRace.getRace().getName());
         }
     }

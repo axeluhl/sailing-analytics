@@ -8,6 +8,8 @@ import java.util.Set;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.text.client.DateTimeFormatRenderer;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.TextColumn;
@@ -44,7 +46,7 @@ public class TrackedEventsComposite extends FormPanel implements EventDisplayer,
     
     private VerticalPanel panel;
 
-    private DateTimeFormatRenderer dateFormatter = new DateTimeFormatRenderer();
+    private DateTimeFormatRenderer dateFormatter = new DateTimeFormatRenderer(DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_LONG));
     
     private Label noTrackedRacesLabel = null;
 

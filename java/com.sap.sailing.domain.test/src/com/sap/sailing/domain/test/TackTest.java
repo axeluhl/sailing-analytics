@@ -19,7 +19,7 @@ import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.base.impl.NationalityImpl;
 import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
-import com.sap.sailing.domain.tracking.DynamicTrack;
+import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.NoWindException;
 import com.sap.sailing.domain.tracking.Wind;
@@ -50,7 +50,7 @@ public class TackTest extends StoredTrackBasedTestWithTrackedRace {
     
     @Test
     public void testStarboardTack() throws NoWindException {
-        DynamicTrack<Competitor, GPSFixMoving> hassosTrack = getTrackedRace().getTrack(competitor);
+        DynamicGPSFixTrack<Competitor, GPSFixMoving> hassosTrack = getTrackedRace().getTrack(competitor);
         MillisecondsTimePoint now = MillisecondsTimePoint.now();
         hassosTrack.addGPSFix(new GPSFixMovingImpl(new DegreePosition(54.4680424, 10.234451), now,
                 new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(45))));
@@ -59,7 +59,7 @@ public class TackTest extends StoredTrackBasedTestWithTrackedRace {
 
     @Test
     public void testPortTack() throws NoWindException {
-        DynamicTrack<Competitor, GPSFixMoving> hassosTrack = getTrackedRace().getTrack(competitor);
+        DynamicGPSFixTrack<Competitor, GPSFixMoving> hassosTrack = getTrackedRace().getTrack(competitor);
         MillisecondsTimePoint now = MillisecondsTimePoint.now();
         hassosTrack.addGPSFix(new GPSFixMovingImpl(new DegreePosition(54.4680424, 10.234451), now,
                 new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(270))));
@@ -68,7 +68,7 @@ public class TackTest extends StoredTrackBasedTestWithTrackedRace {
 
     @Test
     public void testStarboardTackForZeroDifference() throws NoWindException {
-        DynamicTrack<Competitor, GPSFixMoving> hassosTrack = getTrackedRace().getTrack(competitor);
+        DynamicGPSFixTrack<Competitor, GPSFixMoving> hassosTrack = getTrackedRace().getTrack(competitor);
         MillisecondsTimePoint now = MillisecondsTimePoint.now();
         hassosTrack.addGPSFix(new GPSFixMovingImpl(new DegreePosition(54.4680424, 10.234451), now,
                 new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(180))));

@@ -4,6 +4,6 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import com.sap.sailing.gwt.ui.client.SailingService;
 
 @RemoteServiceRelativePath("testsailing")
-public interface TestSailingService extends SailingService {
+public interface MyTestSailingService extends SailingService {
 
 }

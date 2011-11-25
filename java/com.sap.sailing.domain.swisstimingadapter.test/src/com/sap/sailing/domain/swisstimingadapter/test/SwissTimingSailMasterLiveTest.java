@@ -43,8 +43,9 @@ public class SwissTimingSailMasterLiveTest implements SailMasterListener {
 
     @Before
     public void connect() throws InterruptedException {
+        SwissTimingAdapterPersistence swissTimingPersistence = SwissTimingAdapterPersistence.INSTANCE;
         connector = SwissTimingFactory.INSTANCE.getOrCreateSailMasterConnector("gps.sportresult.com", 40300,
-                SwissTimingAdapterPersistence.INSTANCE, /* canSendRequests */true);
+                swissTimingPersistence, /* canSendRequests */true);
     }
     
     @After
