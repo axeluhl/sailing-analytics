@@ -1005,8 +1005,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         String race = raceColumn.getRaceName();
         int columnIndex = getRaceColumnPosition(raceColumn);
         if (raceColumn.isExpansionEnabled() != leaderboard.raceIsTracked(race)
-                                || columnIndex != positionRaceColumn[indexRaceColumn]
-              || leaderboard.raceIsMedalRace(race) != raceColumn.isMedalRace()) {
+                || leaderboard.raceIsMedalRace(race) != raceColumn.isMedalRace()) {
           if (raceColumn.isExpanded()) {
               raceColumn.toggleExpansion(); // remove children from table
           }
