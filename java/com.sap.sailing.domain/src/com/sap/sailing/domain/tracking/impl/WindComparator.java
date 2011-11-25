@@ -21,12 +21,23 @@ public class WindComparator implements Comparator<Timed> {
         int result = o1.getTimePoint().compareTo(o2.getTimePoint());
         if (result == 0) {
             if (o1 instanceof Wind && o2 instanceof Wind) {
+                // try to decide based on position; note that position may be null
                 Wind o1Wind = (Wind) o1;
                 Wind o2Wind = (Wind) o2;
-                // use the coordinates as secondary criteria:
-                result = Double.compare(o1Wind.getPosition().getLatDeg(), o2Wind.getPosition().getLatDeg());
-                if (result == 0) {
-                    result = Double.compare(o1Wind.getPosition().getLngDeg(), o2Wind.getPosition().getLngDeg());
+                if (o1Wind.getPosition() == null) {
+                    if (o2Wind.getPosition() != null) {
+                        result = -1;
+                    } // else both are null and 0 is already the correct answer
+                } else {
+                    if (o2Wind.getPosition() == null) {
+                        result = 1;
+                    } else {
+                        // use the coordinates as secondary criteria:
+                        result = Double.compare(o1Wind.getPosition().getLatDeg(), o2Wind.getPosition().getLatDeg());
+                        if (result == 0) {
+                            result = Double.compare(o1Wind.getPosition().getLngDeg(), o2Wind.getPosition().getLngDeg());
+                        }
+                    }
                 }
             }
         }
