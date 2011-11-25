@@ -10,6 +10,9 @@ import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
+import com.google.gwt.text.client.DateTimeFormatRenderer;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.Handler;
@@ -55,10 +58,10 @@ public class SwissTimingEventManagementPanel extends FormPanel implements EventD
     private final CellTable<SwissTimingRaceRecordDAO> raceTable;
     private final Map<String, SwissTimingConfigurationDAO> previousConfigurations;
     private final ListBox previousConfigurationsComboBox;
-//    private final RaceTreeView trackedRacesTreeView;
     private final TrackedEventsComposite trackedEventsComposite;
     private final EventRefresher eventRefresher;
     private final CheckBox canSendRequestsCheckbox;
+    private DateTimeFormatRenderer dateFormatter = new DateTimeFormatRenderer(DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_LONG));
 
     public SwissTimingEventManagementPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
             EventRefresher eventRefresher, StringConstants stringConstants) {
@@ -149,7 +152,7 @@ public class SwissTimingEventManagementPanel extends FormPanel implements EventD
         TextColumn<SwissTimingRaceRecordDAO> raceStartTrackingColumn = new TextColumn<SwissTimingRaceRecordDAO>() {
             @Override
             public String getValue(SwissTimingRaceRecordDAO object) {
-                return object.raceStartTime==null?"":object.raceStartTime.toString();
+                return object.raceStartTime==null?"":dateFormatter.render(object.raceStartTime);
             }
         };
 
@@ -157,7 +160,7 @@ public class SwissTimingEventManagementPanel extends FormPanel implements EventD
         HorizontalPanel racesSplitPanel = new HorizontalPanel();
         mainPanel.add(racesSplitPanel);
         
-        CaptionPanel racesCaptionPanel = new CaptionPanel("Available Races");
+        CaptionPanel racesCaptionPanel = new CaptionPanel(stringConstants.trackableRaces());
         racesSplitPanel.add(racesCaptionPanel);
         racesCaptionPanel.setWidth("50%");
 
@@ -180,9 +183,6 @@ public class SwissTimingEventManagementPanel extends FormPanel implements EventD
         VerticalPanel trackPanel = new VerticalPanel();
         trackPanel.setStyleName("paddedPanel");
         
-//        Label lblTrackableRaces = new Label(stringConstants.trackableRaces());
-//       connectionsGrid.setWidget(5, 0, lblTrackableRaces);
-
         raceNameColumn.setSortable(true);
         raceStartTrackingColumn.setSortable(true);
         
@@ -336,7 +336,7 @@ public class SwissTimingEventManagementPanel extends FormPanel implements EventD
                                 + caught.getMessage());
                     }
 
-                    @Override
+                    @Override 
                     public void onSuccess(Void result) {
                         eventRefresher.fillEvents();
                     }

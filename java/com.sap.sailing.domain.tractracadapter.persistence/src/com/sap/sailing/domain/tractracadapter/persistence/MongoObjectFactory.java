@@ -4,7 +4,7 @@ package com.sap.sailing.domain.tractracadapter.persistence;
 import com.mongodb.DBObject;
 import com.sap.sailing.domain.tractracadapter.TracTracConfiguration;
 import com.sap.sailing.domain.tractracadapter.persistence.impl.MongoObjectFactoryImpl;
-import com.sap.sailing.mongodb.Activator;
+import com.sap.sailing.mongodb.MongoDBService;
 
 /**
  * Offers methods to construct {@link DBObject MongoDB objects} from domain objects.
@@ -13,7 +13,7 @@ import com.sap.sailing.mongodb.Activator;
  * 
  */
 public interface MongoObjectFactory {
-    MongoObjectFactory INSTANCE = new MongoObjectFactoryImpl(Activator.getDefaultInstance().getDB());
+    MongoObjectFactory INSTANCE = new MongoObjectFactoryImpl(MongoDBService.INSTANCE.getDB());
 
     /**
      * Inserts/updates based on the {@link TracTracConfiguration#getName() name}. Any equally-named

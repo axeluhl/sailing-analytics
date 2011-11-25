@@ -5,12 +5,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
+import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
+import com.google.gwt.text.client.DateTimeFormatRenderer;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.Handler;
@@ -18,6 +22,7 @@ import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.Grid;
@@ -32,11 +37,8 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.sap.sailing.gwt.ui.shared.EventDAO;
 import com.sap.sailing.gwt.ui.shared.Pair;
-import com.sap.sailing.gwt.ui.shared.RaceDAO;
-import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDAO;
-import com.sap.sailing.gwt.ui.shared.RegattaDAO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDAO;
-import com.sap.sailing.gwt.ui.shared.Triple;
+import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDAO;
 
 /**
  * Allows the user to start and stop tracking of events, regattas and races using the TracTrac connector. In particular,
@@ -66,28 +68,42 @@ public class TracTracEventManagementPanel extends FormPanel implements EventDisp
     private final Map<String, TracTracConfigurationDAO> previousConfigurations;
     private final ListBox previousConfigurationsComboBox;
     private final Grid grid;
-    private final RaceTreeView trackedRacesTreeView;
+//    private final RaceTreeView trackedRacesTreeView;
+    private final TrackedEventsComposite trackedEventsComposite;
     private final EventRefresher eventRefresher;
+    private DateTimeFormatRenderer dateFormatter = new DateTimeFormatRenderer(DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_LONG));
 
     public TracTracEventManagementPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
             EventRefresher eventRefresher, StringConstants stringConstants) {
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.eventRefresher = eventRefresher;
+
+        VerticalPanel mainPanel = new VerticalPanel();
+        this.setWidget(mainPanel);
+        mainPanel.setWidth("100%");
+        
+        CaptionPanel captionPanelConnections = new CaptionPanel("Connections");
+        mainPanel.add(captionPanelConnections);
+
         VerticalPanel verticalPanel = new VerticalPanel();
-        this.setWidget(verticalPanel);
-        verticalPanel.setSize("100%", "100%");
+        
+        captionPanelConnections.setContentWidget(verticalPanel);
+        captionPanelConnections.setStyleName("bold");
+        
+        verticalPanel.setWidth("100%");
         
         grid = new Grid(9, 2);
         verticalPanel.add(grid);
         verticalPanel.setCellWidth(grid, "100%");
         
-        Label lblPredefined = new Label(stringConstants.trackedBefore());
+//        Label lblPredefined = new Label(stringConstants.trackedBefore());
+        Label lblPredefined = new Label("History of connections:");
         grid.setWidget(0, 0, lblPredefined);
         
         previousConfigurations = new HashMap<String, TracTracConfigurationDAO>();
         previousConfigurationsComboBox = new ListBox();
-        grid.setWidget(1, 0, previousConfigurationsComboBox);
+        grid.setWidget(0, 1, previousConfigurationsComboBox);
         previousConfigurationsComboBox.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
@@ -103,8 +119,7 @@ public class TracTracEventManagementPanel extends FormPanel implements EventDisp
         fillConfigurations();
         
         Button btnListRaces = new Button(stringConstants.listRaces());
-        grid.setWidget(1, 1, btnListRaces);
-        btnListRaces.setWidth("100%");
+        grid.setWidget(8, 1, btnListRaces);
         btnListRaces.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -112,14 +127,12 @@ public class TracTracEventManagementPanel extends FormPanel implements EventDisp
             }
         });
         
-        Label lblTrackNewEvent = new Label(stringConstants.trackNewEvent());
+//        Label lblTrackNewEvent = new Label(stringConstants.trackNewEvent());
+        Label lblTrackNewEvent = new Label("Define a new connection");
         grid.setWidget(2, 0, lblTrackNewEvent);
         
-        Grid grid_1 = new Grid(5, 3);
-        grid.setWidget(3, 0, grid_1);
-        
-        Label lblHostname = new Label(stringConstants.hostname());
-        grid_1.setWidget(0, 1, lblHostname);
+        Label lblHostname = new Label(stringConstants.hostname() + ":");
+        grid.setWidget(3, 0, lblHostname);
         
         hostnameTextbox = new TextBox();
         hostnameTextbox.setText("germanmaster.traclive.dk");
@@ -131,10 +144,10 @@ public class TracTracEventManagementPanel extends FormPanel implements EventDisp
                 updateJsonUrl();
             }
         });
-        grid_1.setWidget(0, 2, hostnameTextbox);
+        grid.setWidget(3, 1, hostnameTextbox);
         
-        Label lblEventName = new Label(stringConstants.eventName());
-        grid_1.setWidget(1, 1, lblEventName);
+        Label lblEventName = new Label(stringConstants.eventName() + ":");
+        grid.setWidget(4, 0, lblEventName);
         
         eventNameTextbox = new TextBox();
         eventNameTextbox.setText("event_2011...");
@@ -144,14 +157,20 @@ public class TracTracEventManagementPanel extends FormPanel implements EventDisp
                 updateJsonUrl();
             }
         });
-        grid_1.setWidget(1, 2, eventNameTextbox);
+        grid.setWidget(4, 1, eventNameTextbox);
         
-        Label lblLivePort = new Label(stringConstants.livePort());
-        grid_1.setWidget(2, 1, lblLivePort);
+//        Label lblLivePort = new Label(stringConstants.livePort());
+        Label lblLivePort = new Label("Ports" + ":");
+        grid.setWidget(5, 0, lblLivePort);
         
         HorizontalPanel horizontalPanel_1 = new HorizontalPanel();
-        grid_1.setWidget(2, 2, horizontalPanel_1);
-        
+        horizontalPanel_1.setSpacing(5);
+        grid.setWidget(5, 1, horizontalPanel_1);
+
+        Label lblLiveDataPort = new Label("Live data" + ":");
+        horizontalPanel_1.add(lblLiveDataPort);
+        horizontalPanel_1.setCellVerticalAlignment(lblLiveDataPort, HasVerticalAlignment.ALIGN_MIDDLE);
+
         livePortIntegerbox = new IntegerBox();
         livePortIntegerbox.setText("1520");
         livePortIntegerbox.addKeyUpHandler(new KeyUpHandler() {
@@ -165,8 +184,10 @@ public class TracTracEventManagementPanel extends FormPanel implements EventDisp
         });
         horizontalPanel_1.add(livePortIntegerbox);
         
-        Label lblStoredPort = new Label(stringConstants.storedPort());
+//        Label lblStoredPort = new Label(stringConstants.storedPort());
+        Label lblStoredPort = new Label("Stored data" + ":");
         horizontalPanel_1.add(lblStoredPort);
+        horizontalPanel_1.setCellVerticalAlignment(lblStoredPort, HasVerticalAlignment.ALIGN_MIDDLE);
         
         storedPortIntegerbox = new IntegerBox();
         storedPortIntegerbox.addKeyUpHandler(new KeyUpHandler() {
@@ -177,37 +198,48 @@ public class TracTracEventManagementPanel extends FormPanel implements EventDisp
         });
         horizontalPanel_1.add(storedPortIntegerbox);
         
-        Label lblJsonUrl = new Label("JSON URL");
-        grid_1.setWidget(3, 1, lblJsonUrl);
+        Label lblJsonUrl = new Label("JSON URL:");
+        grid.setWidget(7, 0, lblJsonUrl);
         
         jsonURLBox = new TextBox();
-        grid_1.setWidget(3, 2, jsonURLBox);
-        jsonURLBox.setVisibleLength(80);
+        grid.setWidget(7, 1, jsonURLBox);
+        jsonURLBox.setVisibleLength(100);
         
-        Label lblLiveUri = new Label(stringConstants.liveUri());
-        lblLiveUri.setTitle(stringConstants.leaveEmptyForDefault());
-        grid_1.setWidget(4, 1, lblLiveUri);
+//        Label lblUri = new Label(stringConstants.liveUri());
+        Label lblUri = new Label("URIs" + ":");
+        lblUri.setTitle(stringConstants.leaveEmptyForDefault());
+        grid.setWidget(6, 0, lblUri);
         
         HorizontalPanel horizontalPanel = new HorizontalPanel();
-        grid_1.setWidget(4, 2, horizontalPanel);
-        
+        horizontalPanel.setSpacing(5);
+        grid.setWidget(6, 1, horizontalPanel);
+
+        Label lblLiveUri = new Label(stringConstants.liveUri() + ":");
+        lblLiveUri.setTitle(stringConstants.leaveEmptyForDefault());
+        horizontalPanel.add(lblLiveUri);
+        horizontalPanel.setCellVerticalAlignment(lblLiveUri, HasVerticalAlignment.ALIGN_MIDDLE);
+
         liveURIBox = new TextBox();
-        liveURIBox.setVisibleLength(30);
+        liveURIBox.setVisibleLength(40);
         liveURIBox.setTitle(stringConstants.leaveEmptyForDefault());
         horizontalPanel.add(liveURIBox);
         
-        Label lblStoredUri = new Label(stringConstants.storedUri());
+        Label lblStoredUri = new Label(stringConstants.storedUri() + ":");
         lblStoredUri.setTitle(stringConstants.leaveEmptyForDefault());
         horizontalPanel.add(lblStoredUri);
         horizontalPanel.setCellVerticalAlignment(lblStoredUri, HasVerticalAlignment.ALIGN_MIDDLE);
         
         storedURIBox = new TextBox();
-        storedURIBox.setVisibleLength(30);
+        storedURIBox.setVisibleLength(40);
         storedURIBox.setTitle(stringConstants.leaveEmptyForDefault());
         horizontalPanel.add(storedURIBox);
         
-        Label lblTrackableRaces = new Label(stringConstants.trackableRaces());
-        grid.setWidget(5, 0, lblTrackableRaces);
+        TextColumn<TracTracRaceRecordDAO> eventNameColumn = new TextColumn<TracTracRaceRecordDAO>() {
+            @Override
+            public String getValue(TracTracRaceRecordDAO object) {
+                return object.eventName;
+            }
+        };
         TextColumn<TracTracRaceRecordDAO> raceNameColumn = new TextColumn<TracTracRaceRecordDAO>() {
             @Override
             public String getValue(TracTracRaceRecordDAO object) {
@@ -217,91 +249,93 @@ public class TracTracEventManagementPanel extends FormPanel implements EventDisp
         TextColumn<TracTracRaceRecordDAO> raceStartTrackingColumn = new TextColumn<TracTracRaceRecordDAO>() {
             @Override
             public String getValue(TracTracRaceRecordDAO object) {
-                return object.trackingStartTime.toString();
+                return object.trackingStartTime==null?"":dateFormatter.render(object.trackingStartTime);
             }
         };
+
+        
+        HorizontalPanel racesSplitPanel = new HorizontalPanel();
+        mainPanel.add(racesSplitPanel);
+        
+        CaptionPanel racesCaptionPanel = new CaptionPanel(stringConstants.trackableRaces());
+        racesSplitPanel.add(racesCaptionPanel);
+        racesCaptionPanel.setWidth("50%");
+
+        CaptionPanel trackedRacesCaptionPanel = new CaptionPanel("Tracked Races");
+        racesSplitPanel.add(trackedRacesCaptionPanel);
+        trackedRacesCaptionPanel.setWidth("50%");
+
+        VerticalPanel racesPanel = new VerticalPanel();
+        racesCaptionPanel.setContentWidget(racesPanel);
+        racesCaptionPanel.setStyleName("bold");
+
+        VerticalPanel trackedRacesPanel = new VerticalPanel();
+        trackedRacesPanel.setWidth("100%");
+        trackedRacesCaptionPanel.setContentWidget(trackedRacesPanel);
+        trackedRacesCaptionPanel.setStyleName("bold");
+        
+        HorizontalPanel racesHorizontalPanel = new HorizontalPanel();
+        racesPanel.add(racesHorizontalPanel);
+
+        VerticalPanel trackPanel = new VerticalPanel();
+        trackPanel.setStyleName("paddedPanel");
+
         raceNameColumn.setSortable(true);
         raceStartTrackingColumn.setSortable(true);
-        raceTable = new CellTable<TracTracRaceRecordDAO>(/* pageSize */ 100);
-        raceTable.addColumn(raceNameColumn, stringConstants.name());
-        raceTable.addColumn(raceStartTrackingColumn, stringConstants.raceStartTrackingColumn());
-        grid.setWidget(6, 0, raceTable);
-        grid.getCellFormatter().setHeight(6, 0, "100%");
-        raceTable.setWidth("100%");
+        
+        AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
+        raceTable = new CellTable<TracTracRaceRecordDAO>(/* pageSize */ 200, tableRes);
+        raceTable.addColumn(eventNameColumn, "Event");
+        raceTable.addColumn(raceNameColumn, "Race");
+        raceTable.addColumn(raceStartTrackingColumn, "Start time");
+        raceTable.setWidth("300px");
         raceTable.setSelectionModel(new MultiSelectionModel<TracTracRaceRecordDAO>() {});
+
+        racesHorizontalPanel.add(raceTable);
+        racesHorizontalPanel.add(trackPanel);
+
         raceList = new ListDataProvider<TracTracRaceRecordDAO>();
         raceList.addDataDisplay(raceTable);
         Handler columnSortHandler = getRaceTableColumnSortHandler(raceList.getList(), raceNameColumn, raceStartTrackingColumn);
         raceTable.addColumnSortHandler(columnSortHandler);
+
+        Label lblTrackSettings = new Label("Track settings");
+        trackPanel.add(lblTrackSettings);
         
-        VerticalPanel trackPanel = new VerticalPanel();
-        grid.setWidget(6, 1, trackPanel);
         final CheckBox trackWindCheckbox = new CheckBox(stringConstants.trackWind());
+        trackWindCheckbox.setWordWrap(false);
         trackWindCheckbox.setValue(true);
         trackPanel.add(trackWindCheckbox);
+
         final CheckBox declinationCheckbox = new CheckBox(stringConstants.declinationCheckbox());
+        declinationCheckbox.setWordWrap(false);
         declinationCheckbox.setValue(true);
         trackPanel.add(declinationCheckbox);
         
-        Button btnTrack = new Button(stringConstants.btnTrack());
-        trackPanel.add(btnTrack);
+  //      trackedRacesTreeView = new RaceTreeView(stringConstants, /* multiselection */ true);
+  //      trackedRacesPanel.add(trackedRacesTreeView);
+        
+        trackedEventsComposite = new TrackedEventsComposite(sailingService, errorReporter, eventRefresher,
+                    stringConstants, /* multiselection */ true);
+        trackedRacesPanel.add(trackedEventsComposite);
+
+        HorizontalPanel racesButtonPanel = new HorizontalPanel();
+        racesPanel.add(racesButtonPanel);
+
+        Button btnTrack = new Button("Start tracking");
+        
+//        Button btnTrack = new Button(stringConstants.btnTrack());
+        racesButtonPanel.add(btnTrack);
+        racesButtonPanel.setSpacing(10);
         btnTrack.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 trackSelectedRaces(trackWindCheckbox.getValue(), declinationCheckbox.getValue());
             }
         });
-        grid.getCellFormatter().setVerticalAlignment(6, 1, HasVerticalAlignment.ALIGN_TOP);
-        grid.getCellFormatter().setVerticalAlignment(6, 0, HasVerticalAlignment.ALIGN_TOP);
 
-        Label lblEventsConnectedTo = new Label(stringConstants.eventsConnectedTo());
-        grid.setWidget(7, 0, lblEventsConnectedTo);
-        trackedRacesTreeView = new RaceTreeView(stringConstants, /* multiselection */ true);
-        grid.setWidget(8, 0, trackedRacesTreeView);
-        VerticalPanel buttonPanel = new VerticalPanel();
-        Button btnRefresh = new Button(stringConstants.refresh());
-        btnRefresh.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                TracTracEventManagementPanel.this.eventRefresher.fillEvents();
-            }
-        });
-        buttonPanel.add(btnRefresh);
-        Button btnRemove = new Button(stringConstants.remove());
-        btnRemove.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent click) {
-                for (Triple<EventDAO, RegattaDAO, RaceDAO> selection : trackedRacesTreeView.getSelectedEventAndRace()) {
-                    if (selection.getC().currentlyTracked) {
-                        stopTrackingRace(selection.getA(), selection.getC());
-                    }
-                }
-            }
-        });
-        btnRemove.setWidth("100%");
-        buttonPanel.add(btnRemove);
-        grid.setWidget(8, 1, buttonPanel);
-        
-        grid.getCellFormatter().setVerticalAlignment(8, 1, HasVerticalAlignment.ALIGN_TOP);
-        grid.getCellFormatter().setVerticalAlignment(8, 0, HasVerticalAlignment.ALIGN_TOP);
-        
         updatePortStoredData();
         updateJsonUrl();
-    }
-
-    private void stopTrackingRace(final EventDAO event, final RaceDAO race) {
-        sailingService.stopTrackingRace(event.name, race.name, new AsyncCallback<Void>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                errorReporter.reportError("Exception trying to stop tracking race " + race.name + "in event "+event.name+": "
-                        + caught.getMessage());
-            }
-
-            @Override
-            public void onSuccess(Void result) {
-                eventRefresher.fillEvents();
-            }
-        });
     }
 
     private ListHandler<TracTracRaceRecordDAO> getRaceTableColumnSortHandler(List<TracTracRaceRecordDAO> raceRecords,
@@ -400,6 +434,7 @@ public class TracTracEventManagementPanel extends FormPanel implements EventDisp
                                 }
                             }
                         });
+
             }
         });
     }
@@ -441,7 +476,7 @@ public class TracTracEventManagementPanel extends FormPanel implements EventDisp
 
     @Override
     public void fillEvents(List<EventDAO> result) {
-        trackedRacesTreeView.fillEvents(result);
+        trackedEventsComposite.fillEvents(result);
     }
 
 }

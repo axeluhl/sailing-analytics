@@ -5,6 +5,8 @@ import static org.junit.Assert.assertNull;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.junit.Test;
 
@@ -17,9 +19,31 @@ import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tracking.impl.WindTrackImpl;
+import com.sap.sailing.util.Util;
 
 public class WindTest {
     private static final int AVERAGING_INTERVAL_MILLIS = 30000 /* 30s averaging interval */;
+    
+    @Test
+    public void testMultipleWindFixesWithSameTimestampInSameWindTrack() {
+        WindTrack track = new WindTrackImpl(AVERAGING_INTERVAL_MILLIS);
+        TimePoint now = MillisecondsTimePoint.now();
+        DegreePosition pos1 = new DegreePosition(0, 0);
+        DegreePosition pos2 = new DegreePosition(1, 1);
+        Wind wind1 = new WindImpl(pos1, now, new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(0)));
+        Wind wind2 = new WindImpl(pos2, now, new KnotSpeedWithBearingImpl(20, new DegreeBearingImpl(0)));
+        track.add(wind1);
+        track.add(wind2);
+        assertEquals(2, Util.size(track.getFixes()));
+        Set<Wind> expectedWind = new HashSet<Wind>();
+        expectedWind.add(wind1);
+        expectedWind.add(wind2);
+        Set<Wind> actualWind = new HashSet<Wind>();
+        for (Wind wind : track.getFixes()) {
+            actualWind.add(wind);
+        }
+        assertEquals(expectedWind, actualWind);
+    }
     
     @Test
     public void testEmptyTrackYieldsNullAsWindEstimate() {

@@ -693,15 +693,19 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         boatMarker.addMarkerMouseOverHandler(new MarkerMouseOverHandler() {
             @Override
             public void onMouseOver(MarkerMouseOverEvent event) {
-                setSelectedInMap(competitorDAO, true);
-                quickRanksBox.setItemSelected(quickRanksList.indexOf(competitorDAO), true);
+                map.setTitle(competitorDAO.name);
+                //setSelectedInMap(competitorDAO, true);
+                //quickRanksBox.setItemSelected(quickRanksList.indexOf(competitorDAO), true);
             }
         });
         boatMarker.addMarkerMouseOutHandler(new MarkerMouseOutHandler() {
             @Override
             public void onMouseOut(MarkerMouseOutEvent event) {
-                setSelectedInMap(competitorDAO, false);
-                quickRanksBox.setItemSelected(quickRanksList.indexOf(competitorDAO), false);
+                map.setTitle("");
+                /*if(!quickRanksBox.isItemSelected(quickRanksList.indexOf(competitorDAO))){
+                    setSelectedInMap(competitorDAO, false);
+                }*/
+                //quickRanksBox.setItemSelected(quickRanksList.indexOf(competitorDAO), false);
             }
         });
         return boatMarker;
@@ -735,9 +739,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
     }
 
     private String getColorString(CompetitorDAO competitorDAO) {
-        // green no more than 70, rot no less than 120
-        // TODO try to avoid colors close to the light blue water display color
-        // of the underlying 2D map
+        // TODO green no more than 70, red no less than 120
         return "#" + Integer.toHexString(competitorDAO.hashCode()).substring(0, 4).toUpperCase()+"00";
     }
 
@@ -794,16 +796,20 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
             @Override
             public void onMouseOver(PolylineMouseOverEvent event) {
                 map.setTitle(competitorDAO.name);
-                setSelectedInMap(competitorDAO, true);
-                quickRanksBox.setItemSelected(quickRanksList.indexOf(competitorDAO), true);
+                /*if(quickRanksBox.isItemSelected(quickRanksList.indexOf(competitorDAO))){
+                    setSelectedInMap(competitorDAO, true);
+                }*/
+                //quickRanksBox.setItemSelected(quickRanksList.indexOf(competitorDAO), true);
             }
         });
         result.addPolylineMouseOutHandler(new PolylineMouseOutHandler() {
             @Override
             public void onMouseOut(PolylineMouseOutEvent event) {
                 map.setTitle("");
-                setSelectedInMap(competitorDAO, false);
-                quickRanksBox.setItemSelected(quickRanksList.indexOf(competitorDAO), false);
+               /* if(!quickRanksBox.isItemSelected(quickRanksList.indexOf(competitorDAO))){
+                    setSelectedInMap(competitorDAO, false);
+                }*/
+                //quickRanksBox.setItemSelected(quickRanksList.indexOf(competitorDAO), false);
             }
         });
         tails.put(competitorDAO, result);

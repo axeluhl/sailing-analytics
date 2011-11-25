@@ -59,7 +59,7 @@ public class RankPerLeg2 extends Action {
                     // final String legId = numberFormat.format(++i);
                     legId = numberFormat.format(++i);
                 }
-                final String markName = leg.getTo().getName();
+                final String markName = leg==null?"null":leg.getTo().getName();
                 final String upOrDownwinLeg = trackedLeg.isUpOrDownwindLeg(time) ? "U" : "D";
                 final String upOrDownwindLegText = trackedLeg.isUpOrDownwindLeg(time) ? "Upwind" : "Downwind";
                 LinkedHashMap<Competitor, Integer> ranks = trackedLeg.getRanks(time);
@@ -91,7 +91,7 @@ public class RankPerLeg2 extends Action {
                         } else {
                             addColumn(markName);
                         }
-                        addColumn(leg.getTo().getBuoys().iterator().next().getName());
+                        addColumn(leg==null?"null":leg.getTo().getBuoys().iterator().next().getName());
 
                         addColumn(upOrDownwinLeg);
                         addColumn(competitorName);

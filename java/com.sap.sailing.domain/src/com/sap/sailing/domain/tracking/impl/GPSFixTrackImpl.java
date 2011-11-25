@@ -177,19 +177,8 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
                 NavigableSet<GPSFix> subset = getGPSFixes().subSet(new DummyGPSFix(from),
                 /* fromInclusive */false, new DummyGPSFix(to),
                 /* toInclusive */false);
-                TimePoint lastTimePoint = null;
                 for (GPSFix fix : subset) {
                     double distanceBetweenAdjacentFixesInNauticalMiles = fromPos.getDistance(fix.getPosition()).getNauticalMiles();
-                    // TODO remove this debug code again once the outlier issue is fixed
-                    if (lastTimePoint != null) {
-                        double crossCheckSpeedInKnots = distanceBetweenAdjacentFixesInNauticalMiles /
-                                (fix.getTimePoint().asMillis()-lastTimePoint.asMillis()) * 3600000l;
-                        if (crossCheckSpeedInKnots > 20) {
-                            System.out.println("found suspicious fix");
-                        }
-                    }
-                    lastTimePoint = fix.getTimePoint();
-                    
                     distanceInNauticalMiles += distanceBetweenAdjacentFixesInNauticalMiles;
                     fromPos = fix.getPosition();
                 }

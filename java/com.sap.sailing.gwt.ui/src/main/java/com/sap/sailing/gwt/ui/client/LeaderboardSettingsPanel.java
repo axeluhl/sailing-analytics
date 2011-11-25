@@ -7,6 +7,7 @@ import java.util.Map;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.CheckBox;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.IntegerBox;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -80,40 +81,46 @@ public class LeaderboardSettingsPanel extends DataEntryDialog<Result> {
 
     @Override
     protected Widget getAdditionalWidget() {
-        VerticalPanel vp = new VerticalPanel();
-        vp.setSpacing(5);
-        vp.add(new Label(stringConstants.timing()));
+        HorizontalPanel hp = new HorizontalPanel();
+        VerticalPanel vpLeft = new VerticalPanel();
+        vpLeft.setSpacing(5);
+        VerticalPanel vpRight = new VerticalPanel();
+        vpRight.setSpacing(5);
+        vpLeft.add(new Label(stringConstants.timing()));
         Label delayLabel = new Label(stringConstants.delayInSeconds());
-        vp.add(delayLabel);
-        vp.add(delayInSecondsBox);
+        vpLeft.add(delayLabel);
+        vpLeft.add(delayInSecondsBox);
         Label delayBetweenAutoAdvancesLabel = new Label(stringConstants.delayBetweenAutoAdvances());
-        vp.add(delayBetweenAutoAdvancesLabel);
-        vp.add(delayBetweenAutoAdvancesInSecondsBox);
-        vp.add(new Label(stringConstants.raceDetailsToShow()));
+        vpLeft.add(delayBetweenAutoAdvancesLabel);
+        vpLeft.add(delayBetweenAutoAdvancesInSecondsBox);
+        vpLeft.add(new Label(stringConstants.raceDetailsToShow()));
         List<DetailColumnType> currentRaceDetailSelection = raceDetailSelection;
         for (DetailColumnType type : LeaderboardPanel.getAvailableRaceDetailColumnTypes()) {
             CheckBox checkbox = createCheckbox(type.toString(stringConstants));
             checkbox.setValue(currentRaceDetailSelection.contains(type));
             raceDetailCheckboxes.put(type, checkbox);
-            vp.add(checkbox);
+            vpLeft.add(checkbox);
         }
-        vp.add(new Label(stringConstants.legDetailsToShow()));
+        vpLeft.add(new Label(stringConstants.legDetailsToShow()));
         List<DetailColumnType> currentLegDetailSelection = legDetailSelection;
         for (DetailColumnType type : LegColumn.getAvailableLegDetailColumnTypes()) {
             CheckBox checkbox = createCheckbox(type.toString(stringConstants));
             checkbox.setValue(currentLegDetailSelection.contains(type));
             legDetailCheckboxes.put(type, checkbox);
-            vp.add(checkbox);
+            vpLeft.add(checkbox);
         }
-        vp.add(new Label(stringConstants.selectedRaces()));
+        hp.add(vpLeft);
+        
+        vpRight.add(new Label(stringConstants.selectedRaces()));
         List<String> allColumns = raceAllRaceColumns;
         for (String expandableSortableColumn : allColumns) {
             CheckBox checkbox = createCheckbox(expandableSortableColumn);
             checkbox.setValue(raceColumnSelection.contains(expandableSortableColumn));
             raceColumnCheckboxes.put(expandableSortableColumn, checkbox);
-            vp.add(checkbox);
+            vpRight.add(checkbox);
         }
-        return vp;
+        hp.add(vpRight);
+        return hp;
     }
 
     @Override
