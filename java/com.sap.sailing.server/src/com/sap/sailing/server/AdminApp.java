@@ -266,31 +266,34 @@ public class AdminApp extends Servlet {
                 for (WindSource windSource : WindSource.values()) {
                     JSONArray jsonWindArray = new JSONArray();
                     WindTrack windTrack = trackedRace.getWindTrack(windSource);
-                    Iterator<Wind> windIter = windTrack.getFixesIterator(from, /* inclusive */true);
-                    while (windIter.hasNext()) {
-                        Wind wind = windIter.next();
-                        if (wind.getTimePoint().compareTo(to) > 0) {
-                            break;
+                    synchronized (windTrack) {
+                        Iterator<Wind> windIter = windTrack.getFixesIterator(from, /* inclusive */true);
+                        while (windIter.hasNext()) {
+                            Wind wind = windIter.next();
+                            if (wind.getTimePoint().compareTo(to) > 0) {
+                                break;
+                            }
+                            JSONObject jsonWind = new JSONObject();
+                            jsonWind.put("truebearingdeg", wind.getBearing().getDegrees());
+                            jsonWind.put("knotspeed", wind.getKnots());
+                            jsonWind.put("meterspersecondspeed", wind.getMetersPerSecond());
+                            if (wind.getTimePoint() != null) {
+                                jsonWind.put("timepoint", wind.getTimePoint().asMillis());
+                                jsonWind.put("dampenedtruebearingdeg",
+                                        windTrack.getEstimatedWind(wind.getPosition(), wind.getTimePoint())
+                                                .getBearing().getDegrees());
+                                jsonWind.put("dampenedknotspeed",
+                                        windTrack.getEstimatedWind(wind.getPosition(), wind.getTimePoint()).getKnots());
+                                jsonWind.put("dampenedmeterspersecondspeed",
+                                        windTrack.getEstimatedWind(wind.getPosition(), wind.getTimePoint())
+                                                .getMetersPerSecond());
+                            }
+                            if (wind.getPosition() != null) {
+                                jsonWind.put("latdeg", wind.getPosition().getLatDeg());
+                                jsonWind.put("lngdeg", wind.getPosition().getLngDeg());
+                            }
+                            jsonWindArray.add(jsonWind);
                         }
-                        JSONObject jsonWind = new JSONObject();
-                        jsonWind.put("truebearingdeg", wind.getBearing().getDegrees());
-                        jsonWind.put("knotspeed", wind.getKnots());
-                        jsonWind.put("meterspersecondspeed", wind.getMetersPerSecond());
-                        if (wind.getTimePoint() != null) {
-                            jsonWind.put("timepoint", wind.getTimePoint().asMillis());
-                            jsonWind.put("dampenedtruebearingdeg",
-                                    windTrack.getEstimatedWind(wind.getPosition(), wind.getTimePoint()).getBearing()
-                                            .getDegrees());
-                            jsonWind.put("dampenedknotspeed",
-                                    windTrack.getEstimatedWind(wind.getPosition(), wind.getTimePoint()).getKnots());
-                            jsonWind.put("dampenedmeterspersecondspeed",
-                                    windTrack.getEstimatedWind(wind.getPosition(), wind.getTimePoint()).getMetersPerSecond());
-                        }
-                        if (wind.getPosition() != null) {
-                            jsonWind.put("latdeg", wind.getPosition().getLatDeg());
-                            jsonWind.put("lngdeg", wind.getPosition().getLngDeg());
-                        }
-                        jsonWindArray.add(jsonWind);
                     }
                     jsonWindTracks.put(windSource.toString(), jsonWindArray);
                 }

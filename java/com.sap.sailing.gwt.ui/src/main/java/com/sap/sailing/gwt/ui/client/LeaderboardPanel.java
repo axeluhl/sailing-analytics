@@ -83,6 +83,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
 
     private final List<DetailColumnType> selectedRaceDetails;
 
+    private List<String> selectedRaceColumns;
+
     protected final String RACE_COLUMN_HEADER_STYLE;
 
     protected final String LEG_DETAIL_COLUMN_HEADER_STYLE;
@@ -98,6 +100,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     protected final String TOTAL_COLUMN_STYLE;
 
     private final Timer timer;
+    
+    boolean firstTimeLeaderboardLoaded;
 
     /**
      * The delay with which the timer shall work. Before the timer is resumed, the delay is set to this value.
@@ -109,7 +113,6 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
      * changes its playing state
      */
     private final Anchor playPause;
-
     private class SettingsClickHandler implements ClickHandler {
         private final StringConstants stringConstants;
 
@@ -120,10 +123,10 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         @Override
         public void onClick(ClickEvent event) {
             new LeaderboardSettingsPanel(Collections.unmodifiableList(selectedLegDetails),
-                    Collections.unmodifiableList(selectedRaceDetails),
-                    timer.getDelayBetweenAutoAdvancesInMilliseconds(), stringConstants.leaderboardSettings(),
-                    stringConstants.selectLegDetails(), stringConstants.ok(), stringConstants.cancel(),
-                    new Validator<LeaderboardSettingsPanel.Result>() {
+                    Collections.unmodifiableList(selectedRaceDetails), /* All races to select */
+                    leaderboard.getRaceList(), selectedRaceColumns, timer.getDelayBetweenAutoAdvancesInMilliseconds(),
+                    stringConstants.leaderboardSettings(), stringConstants.selectLegDetails(), stringConstants.ok(),
+                    stringConstants.cancel(), new Validator<LeaderboardSettingsPanel.Result>() {
                         @Override
                         public String getErrorMessage(LeaderboardSettingsPanel.Result valueToValidate) {
                             if (valueToValidate.getLegDetailsToShow().isEmpty()) {
@@ -155,6 +158,10 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                             selectedLegDetails.addAll(result.getLegDetailsToShow());
                             selectedRaceDetails.clear();
                             selectedRaceDetails.addAll(result.getRaceDetailsToShow());
+                            selectedRaceColumns.clear();
+                            selectedRaceColumns.addAll(result.getRaceColumnsToShow());
+                            // update leaderboard after settings panel column selection change
+                            updateLeaderboard(leaderboard);
                             timer.setDelayBetweenAutoAdvancesInMilliseconds(result
                                     .getDelayBetweenAutoAdvancesInMilliseconds());
                             setDelayInMilliseconds(result.getDelayInMilliseconds());
@@ -398,7 +405,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             /* iconURL */medalRace ? "/images/medal_small.png" : null, LeaderboardPanel.this, this, stringConstants);
             return header;
         }
-        
+
         public boolean isMedalRace() {
             return medalRace;
         }
@@ -701,8 +708,10 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         this.selectedLegDetails.add(DetailColumnType.AVERAGE_SPEED_OVER_GROUND_IN_KNOTS);
         this.selectedLegDetails.add(DetailColumnType.RANK_GAIN);
         this.selectedRaceDetails = new ArrayList<DetailColumnType>();
+        this.selectedRaceColumns = new ArrayList<String>();
+        this.firstTimeLeaderboardLoaded = true;
         delayInMilliseconds = 0l;
-        timer = new Timer(/* delayBetweenAutoAdvancesInMilliseconds */3000l);
+        timer = new Timer(/* delayBetweenAutoAdvancesInMilliseconds */ 3000l);
         timer.setDelay(getDelayInMilliseconds()); // set time/delay before
                                                   // adding as listener
         timer.addPlayStateListener(this);
@@ -719,8 +728,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         leaderboardTable = new CellTableWithStylableHeaders<LeaderboardRowDAO>(
         /* pageSize */100, resources);
         getLeaderboardTable().setWidth("100%");
-        getLeaderboardTable().setSelectionModel(new MultiSelectionModel<LeaderboardRowDAO>() {
-        });
+        getLeaderboardTable().setSelectionModel(new MultiSelectionModel<LeaderboardRowDAO>() {});
         setData(new ListDataProvider<LeaderboardRowDAO>());
         getData().addDataDisplay(getLeaderboardTable());
         listHandler = new ListHandler<LeaderboardRowDAO>(getData().getList());
@@ -959,63 +967,180 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         // first remove race columns no longer needed:
         removeUnusedRaceColumns(leaderboard);
         if (leaderboard != null) {
+            if(firstTimeLeaderboardLoaded){
+                for (String string : leaderboard.getRaceList()) {
+                    selectedRaceColumns.add(string);
+                }
+                if(selectedRaceColumns.size()!=0){
+                    firstTimeLeaderboardLoaded = false;
+                }
+            }
             createMissingAndAdjustExistingRaceColumns(leaderboard);
             ensureTotalsColumn();
         }
     }
 
+    private boolean leaderboardTableContainsRace(String raceName) {
+        for (int leaderboardposition = 0; leaderboardposition < getLeaderboardTable().getColumnCount(); leaderboardposition++) {
+            Column<LeaderboardRowDAO, ?> c = getLeaderboardTable().getColumn(leaderboardposition);
+            if (c instanceof RaceColumn) {
+                RaceColumn<?> raceColumn = (RaceColumn<?>) c;
+                if (raceColumn.getRaceName().equals(raceName)) {
+                    correctColumnData(raceColumn);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    
+    /**
+     * Corrects the data linke medalRace of the given raceColumn
+     * @param raceColumn the raceColumn to correct.
+     */
+    private void correctColumnData(RaceColumn<?> raceColumn){
+        String race = raceColumn.getRaceName();
+        int columnIndex = getRaceColumnPosition(raceColumn);
+        if (raceColumn.isExpansionEnabled() != leaderboard.raceIsTracked(race)
+              || leaderboard.raceIsMedalRace(race) != raceColumn.isMedalRace()) {
+          if (raceColumn.isExpanded()) {
+              raceColumn.toggleExpansion(); // remove children from table
+          }
+          removeColumn(columnIndex);
+          insertColumn(
+                  columnIndex,
+                  createRaceColumn(race, leaderboard.raceIsMedalRace(race),
+                          leaderboard.raceIsTracked(race)));
+        }
+    }
+
+    /**
+     * Removes all RaceColumns, starting at count {@link raceColumnStartIndex raceColumnStartIndex}
+     * @param raceColumnStartIndex The index of the race column should be deleted from.
+     * @param raceName The name of the racing column until the table should be cleared.
+     */
+    private void removeRaceColumnFromRaceColumnStartIndexBeforeRace(int raceColumnStartIndex, String raceName) {
+        int counter = 0;
+        for (int leaderboardposition = 0; leaderboardposition < getLeaderboardTable().getColumnCount(); leaderboardposition++) {
+            Column<LeaderboardRowDAO, ?> c = getLeaderboardTable().getColumn(leaderboardposition);
+            if (c instanceof RaceColumn) {
+                RaceColumn<?> raceColumn = (RaceColumn<?>) c;
+                if (!raceColumn.getRaceName().equals(raceName) && raceColumnStartIndex==counter) {
+                    removeColumn(raceColumn);
+                } else {
+                    return;
+                }
+                counter++;
+            }
+        }
+    }
+    
+    /**
+     * Gets a ColumnPosition of a raceColumn
+     * @param raceColumn The column for which the position is to be found in the leaderboard table
+     * @return the position. Returns -1 if raceColumn not existing in leaderboardTable.
+     */
+    private int getRaceColumnPosition(RaceColumn<?> raceColumn){
+        for (int leaderboardposition = 0; leaderboardposition < getLeaderboardTable().getColumnCount(); leaderboardposition++) {
+            Column<LeaderboardRowDAO, ?> c = getLeaderboardTable().getColumn(leaderboardposition);
+            if (c instanceof RaceColumn) {
+                RaceColumn<?> rc = (RaceColumn<?>) c;
+                if(rc.equals(raceColumn)){
+                    return leaderboardposition;
+                }
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * This method returns the position where a racecolumn should get inserted.
+     * @param raceName the name of the race to insert
+     * @param the position of the race in the  {@link selectedRaceColumns selectedRaceColumns}
+     * @return the position to insert the racecolumn
+     */
+    private int getColumnPositionToInsert(String raceName, int listpos) {
+        int raceColumnCounter = 0;
+        int noRaceColumnCounter = 0;
+        boolean raceColumnfound = false;
+        for (int leaderboardposition = 0; !raceColumnfound & leaderboardposition < getLeaderboardTable().getColumnCount(); leaderboardposition++) {
+            Column<LeaderboardRowDAO, ?> c = getLeaderboardTable().getColumn(leaderboardposition);
+            if (c instanceof RaceColumn) {
+                //RaceColumn<?> raceColumn = (RaceColumn<?>) c;
+                if (raceColumnCounter == listpos) {
+                    raceColumnfound = true;
+                }
+                raceColumnCounter++;
+            } else {
+                noRaceColumnCounter++;
+            }
+        }
+        if(raceColumnfound){
+            return raceColumnCounter + noRaceColumnCounter;
+        }else{
+            return -1;
+        }
+    }
+    
+    /**
+     * Removes all Columns of type racecolumns of leaderboardTable
+     */
+    private void removeRaceColumnNotUsed() {
+        for (int leaderboardposition = 0; leaderboardposition < getLeaderboardTable().getColumnCount(); leaderboardposition++) {
+            Column<LeaderboardRowDAO, ?> c = getLeaderboardTable().getColumn(leaderboardposition);
+            if (c instanceof RaceColumn) {
+                RaceColumn<?> raceColumn = (RaceColumn<?>) c;
+                if(!selectedRaceColumns.contains(raceColumn.getRaceName())){
+                    if(raceColumn.isExpanded()){
+                        raceColumn.toggleExpansion();
+                    }
+                    getLeaderboardTable().removeColumn(raceColumn);
+                }
+            }
+        }
+    }
+    
     /**
      * Existing and matching race columns may still need to be removed, re-created and inserted because the "tracked"
      * property may have changed, changing the columns expandability.
      */
     private void createMissingAndAdjustExistingRaceColumns(LeaderboardDAO leaderboard) {
-        int currentRaceColumnIndex = 0;
-        int[] positionRaceColumn = new int[leaderboard.getRaceList().size()];
-        List<String> raceList = leaderboard.getRaceList();
-        for (int i = 0; i < getLeaderboardTable().getColumnCount(); i++) {
-            Column<LeaderboardRowDAO, ?> c = getLeaderboardTable().getColumn(i);
-            if (c instanceof RaceColumn) {
-                positionRaceColumn[currentRaceColumnIndex] = i;
-                currentRaceColumnIndex++;
+        // Correct order of races in selectedRaceColum
+        List<String> correctedOrderSelectedRaces = new ArrayList<String>();
+        for (String string : leaderboard.getRaceList()) {
+            if (selectedRaceColumns.contains(string)) {
+                correctedOrderSelectedRaces.add(string);
             }
         }
-
-        int indexRaceColumn = 0;
-        for (String race : raceList) {
-            boolean foundRaceColumn = false;
-            for (int i = 0; !foundRaceColumn && i < getLeaderboardTable().getColumnCount(); i++) {
-                Column<LeaderboardRowDAO, ?> c = getLeaderboardTable().getColumn(i);
-                if (c instanceof RaceColumn) {
-                    RaceColumn<?> raceColumn = (RaceColumn<?>) c;
-                    if (raceColumn.getRaceName().equals(race)) {
-                        foundRaceColumn = true;
-                        // if tracked-ness differs, column must be updated with
-                        // a new column that is expansion-enabled
-                        int columnIndex = getLeaderboardTable().getColumnIndex(raceColumn);
-                        if (raceColumn.isExpansionEnabled() != leaderboard.raceIsTracked(race) || columnIndex != positionRaceColumn[indexRaceColumn]
-                                || leaderboard.raceIsMedalRace(race) != raceColumn.isMedalRace()) {
-                            if (raceColumn.isExpanded()) {
-                                raceColumn.toggleExpansion(); // remove children from table
-                            }
-                            removeColumn(columnIndex);
-                            insertColumn(
-                                    positionRaceColumn[indexRaceColumn],
-                                    createRaceColumn(race, leaderboard.raceIsMedalRace(race),
-                                            leaderboard.raceIsTracked(race)));
-                        }
-                        
-                    }
+        selectedRaceColumns = correctedOrderSelectedRaces;
+        
+        removeRaceColumnNotUsed();
+        
+        for (int selectedRaceCount = 0; selectedRaceCount < selectedRaceColumns.size(); selectedRaceCount++) {
+            String selectedRaceName = selectedRaceColumns.get(selectedRaceCount);
+            if (leaderboardTableContainsRace(selectedRaceName)){
+                // remove all raceColumns, starting at a specific raceColumnPosition, until the selected raceName.
+                removeRaceColumnFromRaceColumnStartIndexBeforeRace(selectedRaceCount, selectedRaceName);
+            }else{
+                // get correct position to insert the column
+                int positionToInsert = getColumnPositionToInsert(selectedRaceName, selectedRaceCount);
+                if(positionToInsert!=-1){
+                    insertColumn(positionToInsert,
+                            createRaceColumn(selectedRaceName, leaderboard.raceIsMedalRace(selectedRaceName),
+                                    leaderboard.raceIsTracked(selectedRaceName)));
+                }else{
+                    // Add the raceColumn with addRaceColumn, if no RaceColumn is existing in leaderboard
+                    addRaceColumn(createRaceColumn(selectedRaceName, leaderboard.raceIsMedalRace(selectedRaceName),
+                                    leaderboard.raceIsTracked(selectedRaceName)));
                 }
             }
-            if (!foundRaceColumn) {
-                addRaceColumn(createRaceColumn(race, leaderboard.raceIsMedalRace(race), leaderboard.raceIsTracked(race)));
-            }
-            indexRaceColumn++;
         }
     }
 
     protected RaceColumn<?> createRaceColumn(String raceName, boolean isMedalRace, boolean isTracked) {
-        return new TextRaceColumn(raceName, isMedalRace, isTracked, RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE);
+        TextRaceColumn textRaceColumn = new TextRaceColumn(raceName, isMedalRace, isTracked, RACE_COLUMN_HEADER_STYLE,
+                RACE_COLUMN_STYLE);
+        return textRaceColumn;
     }
 
     private void removeUnusedRaceColumns(LeaderboardDAO leaderboard) {

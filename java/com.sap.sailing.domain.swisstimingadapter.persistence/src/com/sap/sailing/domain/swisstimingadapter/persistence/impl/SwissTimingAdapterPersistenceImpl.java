@@ -22,27 +22,30 @@ import com.sap.sailing.domain.swisstimingadapter.persistence.SwissTimingAdapterP
 public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPersistence {
 
     private final DB database;
-    
-    private final SwissTimingFactory swissTimingFactory;
-    
-    private static final Logger logger = Logger.getLogger(SwissTimingAdapterPersistenceImpl.class.getName());
 
-    /** this race cache should only be used for checks in the storeSailMasterMessage method to ensure
-     * that we have always a valid race for a message (also in case we missed a RAC message) 
+    private final SwissTimingFactory swissTimingFactory;
+
+    private static final Logger logger = Logger.getLogger(SwissTimingAdapterPersistenceImpl.class.getName());
+    
+    private final DBCollection lastMessageCountCollection;
+
+    /**
+     * this race cache should only be used for checks in the storeSailMasterMessage method to ensure that we have always
+     * a valid race for a message (also in case we missed a RAC message)
      */
     private HashMap<String, Race> cachedRaces = new HashMap<String, Race>();
-    
+
+    private long lastMessageCount;
+
     public SwissTimingAdapterPersistenceImpl(DB db, SwissTimingFactory swissTimingFactory) {
         super();
         this.database = db;
         this.swissTimingFactory = swissTimingFactory;
+        lastMessageCountCollection = db.getCollection(CollectionNames.LAST_MESSAGE_COUNT.name());
         init();
     }
 
     private void init() {
-        DBCollection rawMessages = database.getCollection(CollectionNames.RAW_MESSAGES.name());
-        rawMessages.ensureIndex(new BasicDBObject().append(FieldNames.MESSAGE_SEQUENCE_NUMBER.name(), 1));
-        
         // ensure the required indexes for the collection of race specific messages
         DBCollection racesMessageCollection = database.getCollection(CollectionNames.RACES_MESSAGES.name());
 
@@ -51,22 +54,22 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
         indexKeysRaceMsgs.put(FieldNames.RACE_ID.name(), 1);
 
         racesMessageCollection.ensureIndex(indexKeysRaceMsgs, IndexNames.INDEX_RACES_MESSAGES.name(), true);
-        
+
         // ensure the required indexes for the collection of command messages
         DBCollection cmdMessagesCollection = database.getCollection(CollectionNames.COMMAND_MESSAGES.name());
-        
+
         BasicDBObject indexKeysCmdMsgs = new BasicDBObject();
         indexKeysCmdMsgs.put(FieldNames.MESSAGE_SEQUENCE_NUMBER.name(), 1);
 
         cmdMessagesCollection.ensureIndex(indexKeysCmdMsgs, IndexNames.INDEX_COMMAND_MESSAGES.name(), true);
-        
+
         // initially fill the races cache
         Iterable<Race> races = getRaces();
-        for(Race race: races) {
+        for (Race race : races) {
             cachedRaces.put(race.getRaceID(), race);
         }
     }
-    
+
     @Override
     public Iterable<SwissTimingConfiguration> getSwissTimingConfigurations() {
         List<SwissTimingConfiguration> result = new ArrayList<SwissTimingConfiguration>();
@@ -77,18 +80,19 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
                 result.add(stConfig);
             }
         } catch (Throwable t) {
-             // something went wrong during DB access; report, then use empty new wind track
-            logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load recorded TracTrac configurations. Check MongoDB settings.");
+            // something went wrong during DB access; report, then use empty new wind track
+            logger.log(Level.SEVERE,
+                    "Error connecting to MongoDB, unable to load recorded TracTrac configurations. Check MongoDB settings.");
             logger.throwing(SwissTimingAdapterPersistenceImpl.class.getName(), "getTracTracConfigurations", t);
         }
         return result;
     }
 
     private SwissTimingConfiguration loadSwissTimingConfiguration(DBObject object) {
+        Boolean canSendRequests = (Boolean) object.get(FieldNames.ST_CONFIG_CAN_SEND_REQUESTS.name());
         return swissTimingFactory.createSwissTimingConfiguration((String) object.get(FieldNames.ST_CONFIG_NAME.name()),
-                (String) object.get(FieldNames.ST_CONFIG_HOSTNAME.name()),
-                (Integer) object.get(FieldNames.ST_CONFIG_PORT.name()),
-                (Boolean) object.get(FieldNames.ST_CONFIG_CAN_SEND_REQUESTS.name()));
+                (String) object.get(FieldNames.ST_CONFIG_HOSTNAME.name()), (Integer) object
+                        .get(FieldNames.ST_CONFIG_PORT.name()), canSendRequests == null ? false : canSendRequests);
     }
 
     @Override
@@ -112,11 +116,12 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
         DBCollection racesMessagesCollection = database.getCollection(CollectionNames.RACES_MESSAGES.name());
         BasicDBObject query = new BasicDBObject();
         query.append(FieldNames.RACE_ID.name(), raceID);
-        DBCursor results = racesMessagesCollection.find(query).sort(new BasicDBObject().append(FieldNames.MESSAGE_SEQUENCE_NUMBER.name(), 1));
+        DBCursor results = racesMessagesCollection.find(query).sort(
+                new BasicDBObject().append(FieldNames.MESSAGE_SEQUENCE_NUMBER.name(), 1));
         List<SailMasterMessage> result = new ArrayList<SailMasterMessage>();
         for (DBObject o : results) {
-                SailMasterMessage msg = swissTimingFactory.createMessage((String) o.get(FieldNames.MESSAGE_CONTENT.name()),
-                        (Long) o.get(FieldNames.MESSAGE_SEQUENCE_NUMBER.name()));
+            SailMasterMessage msg = swissTimingFactory.createMessage((String) o.get(FieldNames.MESSAGE_CONTENT.name()),
+                    (Long) o.get(FieldNames.MESSAGE_SEQUENCE_NUMBER.name()));
             result.add(msg);
         }
         return result;
@@ -125,16 +130,16 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
     @Override
     public List<SailMasterMessage> loadCommandMessages() {
         DBCollection cmdMessagesCollection = database.getCollection(CollectionNames.COMMAND_MESSAGES.name());
-        DBCursor results = cmdMessagesCollection.find().sort(new BasicDBObject().append(FieldNames.MESSAGE_SEQUENCE_NUMBER.name(), 1));
+        DBCursor results = cmdMessagesCollection.find().sort(
+                new BasicDBObject().append(FieldNames.MESSAGE_SEQUENCE_NUMBER.name(), 1));
         List<SailMasterMessage> result = new ArrayList<SailMasterMessage>();
         for (DBObject o : results) {
-                SailMasterMessage msg = swissTimingFactory.createMessage((String) o.get(FieldNames.MESSAGE_CONTENT.name()),
-                        (Long) o.get(FieldNames.MESSAGE_SEQUENCE_NUMBER.name()));
+            SailMasterMessage msg = swissTimingFactory.createMessage((String) o.get(FieldNames.MESSAGE_CONTENT.name()),
+                    (Long) o.get(FieldNames.MESSAGE_SEQUENCE_NUMBER.name()));
             result.add(msg);
         }
         return result;
     }
-
 
     @Override
     public Race getRace(String raceID) {
@@ -144,9 +149,9 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
         DBObject o = races.findOne(query);
         if (o != null) {
             Long startTimeAsMillis = (Long) o.get(FieldNames.RACE_STARTTIME.name());
-            Race race = swissTimingFactory.createRace((String) o.get(FieldNames.RACE_ID.name()),
-                    (String) o.get(FieldNames.RACE_DESCRIPTION.name()),
-                    startTimeAsMillis == null ? null : new MillisecondsTimePoint(startTimeAsMillis));
+            Race race = swissTimingFactory.createRace((String) o.get(FieldNames.RACE_ID.name()), (String) o
+                    .get(FieldNames.RACE_DESCRIPTION.name()), startTimeAsMillis == null ? null
+                    : new MillisecondsTimePoint(startTimeAsMillis));
             return race;
         }
         return null;
@@ -159,9 +164,9 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
         List<Race> result = new ArrayList<Race>();
         for (DBObject o : results) {
             Long startTimeAsMillis = (Long) o.get(FieldNames.RACE_STARTTIME.name());
-            Race race = swissTimingFactory.createRace((String) o.get(FieldNames.RACE_ID.name()),
-                    (String) o.get(FieldNames.RACE_DESCRIPTION.name()),
-                    startTimeAsMillis == null ? null : new MillisecondsTimePoint(startTimeAsMillis));
+            Race race = swissTimingFactory.createRace((String) o.get(FieldNames.RACE_ID.name()), (String) o
+                    .get(FieldNames.RACE_DESCRIPTION.name()), startTimeAsMillis == null ? null
+                    : new MillisecondsTimePoint(startTimeAsMillis));
             result.add(race);
         }
         return result;
@@ -179,15 +184,8 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
         result.put(FieldNames.ST_CONFIG_HOSTNAME.name(), swissTimingConfiguration.getHostname());
         result.put(FieldNames.ST_CONFIG_PORT.name(), swissTimingConfiguration.getPort());
         result.put(FieldNames.ST_CONFIG_CAN_SEND_REQUESTS.name(), swissTimingConfiguration.canSendRequests());
-        
-        stConfigCollection.insert(result);
-    }
 
-    @Override
-    public void storeRawSailMasterMessage(SailMasterMessage message) {
-        DBCollection rawMessageCollection = database.getCollection(CollectionNames.RAW_MESSAGES.name());
-        rawMessageCollection.insert(new BasicDBObject().append(FieldNames.MESSAGE_SEQUENCE_NUMBER.name(), message.getSequenceNumber()).
-                append(FieldNames.MESSAGE_CONTENT.name(), message.getMessage()));
+        stConfigCollection.insert(result);
     }
 
     @Override
@@ -202,15 +200,21 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
         if(type.isRaceSpecific()) {
                 objToInsert.put(FieldNames.RACE_ID.name(), message.getRaceID());
             messageCollection = database.getCollection(CollectionNames.RACES_MESSAGES.name());
+            if (message.getSequenceNumber() == null){
+                DBObject emptyQuery = new BasicDBObject();
+                DBObject incrementLastMessageCountQuery = new BasicDBObject().
+                        append("$inc", new BasicDBObject().append(FieldNames.LAST_MESSAGE_COUNT.name(), 1));
+                DBObject newCountRecord = lastMessageCountCollection.findAndModify(emptyQuery, incrementLastMessageCountQuery);
+                lastMessageCount = (Long) newCountRecord.get(FieldNames.LAST_MESSAGE_COUNT.name());
+                objToInsert.put(FieldNames.MESSAGE_SEQUENCE_NUMBER.name(), lastMessageCount);
+            }
         } else {
             messageCollection = database.getCollection(CollectionNames.COMMAND_MESSAGES.name());
         }
         messageCollection.insert(objToInsert);
-        
         if(message.getType() == MessageType.RAC) {
             // store the new race in the master data collection
             List<Race> availableRaces = parseAvailableRacesMessage(message);
-            
             for (Race newRace : availableRaces) {
                 storeRace(newRace);
             }
@@ -236,8 +240,8 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
     private List<Race> parseAvailableRacesMessage(SailMasterMessage availableRacesMessage) {
         int count = Integer.valueOf(availableRacesMessage.getSections()[1]);
         List<Race> result = new ArrayList<Race>();
-        for (int i=0; i<count; i++) {
-            String[] idAndDescription = availableRacesMessage.getSections()[2+i].split(";");
+        for (int i = 0; i < count; i++) {
+            String[] idAndDescription = availableRacesMessage.getSections()[2 + i].split(";");
             result.add(SwissTimingFactory.INSTANCE.createRace(idAndDescription[0], idAndDescription[1], null));
         }
         return result;
@@ -251,8 +255,9 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
         BasicDBObject result = new BasicDBObject();
         result.put(FieldNames.RACE_ID.name(), race.getRaceID());
         result.put(FieldNames.RACE_DESCRIPTION.name(), race.getDescription());
-        result.put(FieldNames.RACE_STARTTIME.name(), race.getStartTime() == null ? null : new Long(race.getStartTime().asMillis()));
-        racesCollection.update(query, result, /* upsrt */ true, /* multi */ false);
+        result.put(FieldNames.RACE_STARTTIME.name(), race.getStartTime() == null ? null : new Long(race.getStartTime()
+                .asMillis()));
+        racesCollection.update(query, result, /* upsrt */true, /* multi */false);
     }
 
     @Override
@@ -260,16 +265,11 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
         DBCollection racesCollection = database.getCollection(CollectionNames.RACES_MASTERDATA.name());
         racesCollection.drop();
     }
-    
+
     @Override
     public void dropAllMessageData() {
-
-        DBCollection rawMessageCollection = database.getCollection(CollectionNames.RAW_MESSAGES.name());
-        rawMessageCollection.drop();
-
         DBCollection racesMessageCollection = database.getCollection(CollectionNames.RACES_MESSAGES.name());
         racesMessageCollection.drop();
-        
         DBCollection cmdMessageCollection = database.getCollection(CollectionNames.COMMAND_MESSAGES.name());
         cmdMessageCollection.drop();
     }

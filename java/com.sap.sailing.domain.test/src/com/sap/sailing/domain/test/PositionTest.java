@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
@@ -9,11 +10,35 @@ import com.sap.sailing.domain.base.Bearing;
 import com.sap.sailing.domain.base.Distance;
 import com.sap.sailing.domain.base.Mile;
 import com.sap.sailing.domain.base.Position;
+import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.base.impl.DegreePosition;
+import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
+import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.base.impl.NauticalMileDistance;
+import com.sap.sailing.domain.tracking.impl.CompactGPSFixImpl;
+import com.sap.sailing.domain.tracking.impl.CompactGPSFixMovingImpl;
 
 public class PositionTest {
+    @Test
+    public void testEqualityBetweenCompactAndVerbosePosition() {
+        Position p1 = new DegreePosition(49.2, 008.3);
+        CompactGPSFixImpl compactFix = new CompactGPSFixImpl(p1, MillisecondsTimePoint.now());
+        assertNotSame(p1, compactFix.getPosition());
+        assertEquals(p1, compactFix.getPosition());
+    }
+    
+    @Test
+    public void testEqualityBetweenCompactAndVerboseSpeedWithBearing() {
+        Position p1 = new DegreePosition(49.2, 008.3);
+        SpeedWithBearing swb = new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(123));
+        CompactGPSFixMovingImpl compactFix = new CompactGPSFixMovingImpl(p1, MillisecondsTimePoint.now(), swb);
+        assertNotSame(p1, compactFix.getPosition());
+        assertEquals(p1, compactFix.getPosition());
+        assertNotSame(swb, compactFix.getSpeed());
+        assertEquals(swb, compactFix.getSpeed());
+    }
+    
     @Test
     public void translateTwoDegreesSouth() {
         Distance distance = new NauticalMileDistance(120/Mile.METERS_PER_GEOGRAPHICAL_MILE*Mile.METERS_PER_NAUTICAL_MILE);
