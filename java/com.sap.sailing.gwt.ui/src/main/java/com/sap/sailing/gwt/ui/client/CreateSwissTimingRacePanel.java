@@ -36,13 +36,10 @@ public class CreateSwissTimingRacePanel extends FormPanel {
     private int id = 0;
     private final SailingServiceAsync service;
     private ErrorReporter errorReporter;
-    private StringConstants stringConstants;
-    private long lastMessageCount;
 
     public CreateSwissTimingRacePanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter, StringConstants stringConstants){
         this.service = sailingService;
         this.errorReporter = errorReporter;
-        this.stringConstants = stringConstants;
         competitors = new ArrayList<CreateSwissTimingRacePanel.Competitor>();
         
         VerticalPanel mainPanel = new VerticalPanel();
@@ -182,8 +179,7 @@ public class CreateSwissTimingRacePanel extends FormPanel {
         if (selectedIndex < 0){
             return;
         }
-        String name = listbCompetitorList.getItemText(selectedIndex);
-        Competitor c = getCompetitorByName(name);
+        Competitor c = getCompetitorById(Integer.parseInt(listbCompetitorList.getValue(selectedIndex)));
         if (c != null){
             txtbCompName.setText(c.getName());
             txtbCompSailNr.setText(c.getSailNumber());
@@ -193,24 +189,27 @@ public class CreateSwissTimingRacePanel extends FormPanel {
     
     private void addCompetitor(){
         Competitor c = new Competitor(id++,"Noname","","");
-        listbCompetitorList.addItem(c.toString());
+        listbCompetitorList.addItem(c.toString(), ""+c.getId());
         competitors.add(c);
-        
+        listbCompetitorList.setSelectedIndex(listbCompetitorList.getItemCount()-1);
+        competitorSelectionChanged();
+        txtbCompName.setFocus(true);
     }
     
     private void deleteCompetitor(){
+        selectedIndex = listbCompetitorList.getSelectedIndex();
         if (selectedIndex < 0){
             return;
         }
+        competitors.remove(getCompetitorById(Integer.parseInt(listbCompetitorList.getValue(selectedIndex))));
         listbCompetitorList.removeItem(selectedIndex);
-        competitors.remove(selectedIndex);
     }
     
     private void competitorChanged(){
         if (selectedIndex < 0){
             return;
         }
-        Competitor c = getCompetitorByName(listbCompetitorList.getItemText(selectedIndex));
+        Competitor c = getCompetitorById(Integer.parseInt(listbCompetitorList.getValue(selectedIndex)));
         if (!txtbCompName.getText().equals(c.getName())){
             c.setName(txtbCompName.getText());
             listbCompetitorList.setItemText(selectedIndex, c.toString());
@@ -219,9 +218,9 @@ public class CreateSwissTimingRacePanel extends FormPanel {
         c.setSailNumber(txtbCompSailNr.getText());
     }
     
-    private Competitor getCompetitorByName(String name){
+    private Competitor getCompetitorById(int id){
         for (Competitor c : competitors){
-            if (name.equals(c.toString()))
+            if (c.getId() == id)
                 return c;
         }
         return null;
@@ -242,7 +241,6 @@ public class CreateSwissTimingRacePanel extends FormPanel {
             @Override
             public void onSuccess(Void result) {
                 Window.alert("Succesfully sended new race.");
-                lastMessageCount += 3;
             }
             
             @Override
@@ -259,7 +257,7 @@ public class CreateSwissTimingRacePanel extends FormPanel {
         private final int id;
         
         
-        public int getId() {
+        public final int getId() {
             return id;
         }
         
@@ -290,7 +288,7 @@ public class CreateSwissTimingRacePanel extends FormPanel {
         }
         
         public String toString(){
-            return getId() + " " + getName();
+            return getName();
         }
     }
 }

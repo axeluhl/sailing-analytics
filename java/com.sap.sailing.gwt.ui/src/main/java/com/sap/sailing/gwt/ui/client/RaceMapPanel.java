@@ -739,9 +739,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
     }
 
     private String getColorString(CompetitorDAO competitorDAO) {
-        // green no more than 70, rot no less than 120
-        // TODO try to avoid colors close to the light blue water display color
-        // of the underlying 2D map
+        // TODO green no more than 70, red no less than 120
         return "#" + Integer.toHexString(competitorDAO.hashCode()).substring(0, 4).toUpperCase()+"00";
     }
 
