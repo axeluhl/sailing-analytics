@@ -158,6 +158,9 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                             selectedRaceDetails.addAll(result.getRaceDetailsToShow());
                             selectedRaceColumns.clear();
                             selectedRaceColumns.addAll(result.getRaceColumnsToShow());
+                            // re-adjust columns after changing selection of leaderboardSettingsPanel
+                            updateLeaderboard(leaderboard);
+                            
                             timer.setDelayBetweenAutoAdvancesInMilliseconds(result
                                     .getDelayBetweenAutoAdvancesInMilliseconds());
                             setDelayInMilliseconds(result.getDelayInMilliseconds());

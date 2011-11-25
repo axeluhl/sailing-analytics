@@ -694,14 +694,16 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
             @Override
             public void onMouseOver(MarkerMouseOverEvent event) {
                 setSelectedInMap(competitorDAO, true);
-                quickRanksBox.setItemSelected(quickRanksList.indexOf(competitorDAO), true);
+                //quickRanksBox.setItemSelected(quickRanksList.indexOf(competitorDAO), true);
             }
         });
         boatMarker.addMarkerMouseOutHandler(new MarkerMouseOutHandler() {
             @Override
             public void onMouseOut(MarkerMouseOutEvent event) {
-                setSelectedInMap(competitorDAO, false);
-                quickRanksBox.setItemSelected(quickRanksList.indexOf(competitorDAO), false);
+                if(!quickRanksBox.isItemSelected(quickRanksList.indexOf(competitorDAO))){
+                    setSelectedInMap(competitorDAO, false);
+                }
+                //quickRanksBox.setItemSelected(quickRanksList.indexOf(competitorDAO), false);
             }
         });
         return boatMarker;
@@ -794,16 +796,20 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
             @Override
             public void onMouseOver(PolylineMouseOverEvent event) {
                 map.setTitle(competitorDAO.name);
-                setSelectedInMap(competitorDAO, true);
-                quickRanksBox.setItemSelected(quickRanksList.indexOf(competitorDAO), true);
+                if(quickRanksBox.isItemSelected(quickRanksList.indexOf(competitorDAO))){
+                    setSelectedInMap(competitorDAO, true);
+                }
+                //quickRanksBox.setItemSelected(quickRanksList.indexOf(competitorDAO), true);
             }
         });
         result.addPolylineMouseOutHandler(new PolylineMouseOutHandler() {
             @Override
             public void onMouseOut(PolylineMouseOutEvent event) {
                 map.setTitle("");
-                setSelectedInMap(competitorDAO, false);
-                quickRanksBox.setItemSelected(quickRanksList.indexOf(competitorDAO), false);
+                if(!quickRanksBox.isItemSelected(quickRanksList.indexOf(competitorDAO))){
+                    setSelectedInMap(competitorDAO, false);
+                }
+                //quickRanksBox.setItemSelected(quickRanksList.indexOf(competitorDAO), false);
             }
         });
         tails.put(competitorDAO, result);
