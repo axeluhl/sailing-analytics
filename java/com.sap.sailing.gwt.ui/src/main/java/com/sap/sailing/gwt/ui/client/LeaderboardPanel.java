@@ -617,9 +617,9 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
 
         @Override
         public void render(Context context, LeaderboardRowDAO object, SafeHtmlBuilder sb) {
-            sb.appendHtmlConstant("<b>");
+            sb.appendHtmlConstant("<span style=\"font-weight: bold;\">");
             sb.appendEscaped(getValue(object));
-            sb.appendHtmlConstant("</b>");
+            sb.appendHtmlConstant("</span>");
         }
 
         @Override
