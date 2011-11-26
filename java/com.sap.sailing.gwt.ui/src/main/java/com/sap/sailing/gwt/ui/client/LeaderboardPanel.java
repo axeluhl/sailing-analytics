@@ -738,7 +738,6 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         loadCompleteLeaderboard(getLeaderboardDisplayDate());
 
         VerticalPanel vp = new VerticalPanel();
-        vp.setSpacing(15);
         DockPanel dockPanel = new DockPanel();
         DockPanel dockPanel02 = new DockPanel();
         dockPanel.setWidth("100%");
