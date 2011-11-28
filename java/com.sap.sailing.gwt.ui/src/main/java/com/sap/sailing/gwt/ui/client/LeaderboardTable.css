@@ -14,6 +14,7 @@
 	border-top: none !important;
 	border-bottom: 1px solid #c9caca !important;
 	padding: 3px 12px;
+	padding-bottom: 5px;
 	text-align: center;
 }
 
@@ -26,6 +27,7 @@
 	border-top: none !important;
 	border-bottom: 1px solid #c9caca !important;
 	padding: 3px 12px;
+		padding-bottom: 5px;
 	text-align: center;
 }
 
@@ -37,6 +39,7 @@
 	border-top: none !important;
 	border-bottom: 1px solid #c9caca !important;
 	padding: 3px 12px;
+		padding-bottom: 5px;
 	text-align: center;
 }
 
@@ -103,17 +106,17 @@
 
 .cellTableRaceColumnHeader {
 	background-color: #e0e0e0;
-	padding: 3px 12px;
+
 }
 
 .cellTableLegColumnHeader {
 	background-color: #efefef;
-	padding: 3px 12px;
+
 }
 
 .cellTableLegDetailColumnHeader {
 	background-color: #f4f5f6;
-	padding: 3px 12px;
+
 }
 
 .cellTableRaceColumn {
