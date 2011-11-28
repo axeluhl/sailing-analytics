@@ -52,14 +52,12 @@ import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.MongoWindStoreFactory;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingConfiguration;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
-import com.sap.sailing.domain.swisstimingadapter.impl.CompetitorImpl;
 import com.sap.sailing.domain.swisstimingadapter.persistence.SwissTimingAdapterPersistence;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.NoWindException;
 import com.sap.sailing.domain.tracking.RaceHandle;
-import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
@@ -1112,22 +1110,32 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
 
     @Override
-    public List<LeaderboardRowDAO> getLeaderboardRowDAOOfRace(String eventName, String raceName, List<CompetitorDAO> competitors, int timeStep) throws NoWindException {
-        List<LeaderboardRowDAO> entries = new ArrayList<LeaderboardRowDAO>();
-        Event event = getService().getEventByName(eventName);
-        RaceDefinition race = getRaceByName(event, raceName);
-        TrackedRace trackedRace = getService().getTrackedRace(event, race);
-        for (long time = trackedRace.getStart().asMillis(); time < trackedRace.getTimePointOfNewestEvent().asMillis(); time += timeStep){
-            MillisecondsTimePoint timePoint = new MillisecondsTimePoint(time);
-            for (CompetitorDAO competitorDAO : competitors){
-                Competitor competitor = (Competitor) new CompetitorImpl(competitorDAO.id, competitorDAO.threeLetterIocCountryCode, competitorDAO.name);
+    public LeaderboardRowDAO[][] getLeaderboardRowDAOOfRace(String leaderboardName, String raceName, List<CompetitorDAO> competitorDAOs, int timeStep) throws NoWindException {
+        LeaderboardRowDAO[][] competitorData;
+        TrackedRace trackedRace = getService().getLeaderboardByName(leaderboardName).getRaceColumnByName(raceName).getTrackedRace();
+        Iterable<Competitor> competitors = trackedRace.getRace().getCompetitors();
+        
+        List<Competitor> selectedCompetitor = new ArrayList<Competitor>();
+        for (Competitor c : competitors){
+            for (CompetitorDAO cDAO : competitorDAOs){
+                if (c.getName().equals(cDAO.name)){
+                    selectedCompetitor.add(c);
+                }
+            }
+        }
+        competitorData = new LeaderboardRowDAO[selectedCompetitor.size()][];
+        int i = 0;
+        for (Competitor c : selectedCompetitor){
+            List<LeaderboardRowDAO> entries = new ArrayList<LeaderboardRowDAO>();
+            for (long time = trackedRace.getStart().asMillis(); time < trackedRace.getTimePointOfNewestEvent().asMillis(); time += (trackedRace.getTimePointOfNewestEvent().asMillis()-trackedRace.getStart().asMillis())/100){
+                MillisecondsTimePoint timePoint = new MillisecondsTimePoint(time);
                 LeaderboardRowDAO row = new LeaderboardRowDAO();
-                row.competitor = competitorDAO;
+                row.competitor = getCompetitorDAO(c);
                 row.fieldsByRaceName = new HashMap<String, LeaderboardEntryDAO>();
                 LeaderboardEntryDAO entryDAO = new LeaderboardEntryDAO();
                 entryDAO.legDetails = new ArrayList<LegEntryDAO>();
                 for (Leg leg : trackedRace.getRace().getCourse().getLegs()) {
-                    TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(competitor, leg);
+                    TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(c, leg);
                     LegEntryDAO legEntry;
                     if (trackedLeg != null && trackedLeg.hasStartedLeg(timePoint)) {
                         legEntry = createLegEntry(trackedLeg, timePoint);
@@ -1140,7 +1148,12 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 row.fieldsByRaceName.put(raceName, entryDAO);
                 entries.add(row);
             }
+            competitorData[i++] = entries.toArray(new LeaderboardRowDAO[0]);
         }
-        return null;
+        
+        
+
+        
+        return competitorData;
     }
 }

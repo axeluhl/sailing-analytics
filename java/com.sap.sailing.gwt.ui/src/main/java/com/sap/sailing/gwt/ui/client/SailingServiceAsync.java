@@ -7,7 +7,6 @@ import java.util.Map;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.base.Course;
-import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
 import com.sap.sailing.domain.tracking.WindSource;
 import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
@@ -187,5 +186,5 @@ public interface SailingServiceAsync {
     void getCountryCodes(AsyncCallback<String[]> callback);
 
     void getLeaderboardRowDAOOfRace(String eventName, String raceName, List<CompetitorDAO> competitors, int timeStep,
-            AsyncCallback<List<LeaderboardRowDAO>> callback);
+            AsyncCallback<LeaderboardRowDAO[][]> callback);
 }

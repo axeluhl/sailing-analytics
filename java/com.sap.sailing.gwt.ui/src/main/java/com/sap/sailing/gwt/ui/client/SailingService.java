@@ -7,7 +7,6 @@ import java.util.Map;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
-import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
 import com.sap.sailing.gwt.ui.shared.EventDAO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDAO;
@@ -123,5 +122,5 @@ public interface SailingService extends RemoteService {
     
     String[] getCountryCodes();
     
-    List<LeaderboardRowDAO> getLeaderboardRowDAOOfRace(String eventName, String raceName, List<CompetitorDAO> competitors, int timeStep) throws Exception;
+    LeaderboardRowDAO[][] getLeaderboardRowDAOOfRace(String eventName, String raceName, List<CompetitorDAO> competitors, int timeStep) throws Exception;
 }
