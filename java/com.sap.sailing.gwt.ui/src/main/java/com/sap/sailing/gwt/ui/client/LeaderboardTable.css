@@ -8,7 +8,7 @@
  */
 .cellTableHeader {
 	position: relative;
-    vertical-align: middle;
+    vertical-align: bottom;
 	background-color: #e5e5e5;
 	border-right: 1px solid #ffffff !important;
 	border-top: none !important;
@@ -19,7 +19,7 @@
 
 .cellTableFirstColumnHeader {
 	position: relative;
-    vertical-align: middle;
+    vertical-align: bottom;
 	background-color: #e5e5e5;
 	border-left: none !important;
 	border-right: 1px solid #ffffff !important;
@@ -31,7 +31,7 @@
 
 .cellTableLastColumnHeader {
 	position: relative;
-    vertical-align: middle;
+    vertical-align: bottom;
 	background-color: #e5e5e5;
 	border-right: 1px solid #c9caca !important;
 	border-top: none !important;
