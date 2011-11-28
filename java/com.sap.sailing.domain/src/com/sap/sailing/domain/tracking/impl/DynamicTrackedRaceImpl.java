@@ -3,7 +3,6 @@ package com.sap.sailing.domain.tracking.impl;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.NavigableSet;
 import java.util.Set;
 import java.util.logging.Level;
@@ -11,12 +10,10 @@ import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.Distance;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.base.impl.DouglasPeucker;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
@@ -284,9 +281,4 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
         return (DynamicTrackedEvent) super.getTrackedEvent();
     }
 
-    @Override
-    public List<GPSFixMoving> approximate(Competitor competitor, Distance maxDistance, TimePoint from, TimePoint to) {
-        DouglasPeucker<Competitor, GPSFixMoving> douglasPeucker = new DouglasPeucker<Competitor, GPSFixMoving>(getTrack(competitor)); 
-        return douglasPeucker.approximate(maxDistance, from, to);
-    }
 }

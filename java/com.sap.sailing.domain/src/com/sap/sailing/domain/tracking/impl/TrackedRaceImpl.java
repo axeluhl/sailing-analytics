@@ -23,6 +23,7 @@ import com.sap.sailing.domain.base.Tack;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.DegreeBearingImpl;
+import com.sap.sailing.domain.base.impl.DouglasPeucker;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.tracking.GPSFix;
@@ -632,5 +633,11 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     @Override
     public String toString() {
         return "TrackedRace for "+getRace();
+    }
+
+    @Override
+    public List<GPSFixMoving> approximate(Competitor competitor, Distance maxDistance, TimePoint from, TimePoint to) {
+        DouglasPeucker<Competitor, GPSFixMoving> douglasPeucker = new DouglasPeucker<Competitor, GPSFixMoving>(getTrack(competitor)); 
+        return douglasPeucker.approximate(maxDistance, from, to);
     }
 }
