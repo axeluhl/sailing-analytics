@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.tracking;
 
+import java.util.List;
 import java.util.NavigableSet;
 
 import com.sap.sailing.domain.base.Buoy;
@@ -12,6 +13,7 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Tack;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.base.impl.DouglasPeucker;
 
 /**
  * Live tracking data of a single race. The race follows a defined {@link Course} with a sequence of {@link Leg}s. The
@@ -206,4 +208,11 @@ public interface TrackedRace {
     TrackedEvent getTrackedEvent();
 
     Wind getDirectionFromStartToNextMark(TimePoint at);
+    
+    /**
+     * Uses a {@link DouglasPeucker Douglas-Peucker} algorithm to approximate this track's fixes starting at
+     * time <code>from</code> until time point <code>to</code> such that the maximum distance between the
+     * track's fixes and the approximation is at most <code>maxDistance</code>.
+     */
+    List<GPSFixMoving> approximate(Competitor competitor, Distance maxDistance, TimePoint from, TimePoint to);
 }

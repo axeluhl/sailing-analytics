@@ -1,6 +1,9 @@
 package com.sap.sailing.domain.base.impl;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 
 import com.sap.sailing.domain.base.Bearing;
 import com.sap.sailing.domain.base.Distance;
@@ -56,26 +59,32 @@ public class DouglasPeucker<ItemType, FixType extends GPSFix> {
      *         the maximum distance of any fix on the {@link #track} to the approximation is less than
      *         <code>maxDistance</code>.
      */
-    public GPSFix[] approximate(Distance maxDistance, TimePoint from, TimePoint to) {
-        GPSFix[] resultWithoutFirstFix = approximateWithoutFirst(maxDistance, from, to);
-        GPSFix[] result = new GPSFix[resultWithoutFirstFix.length+1];
-        result[0] = track.getFirstFixAtOrAfter(from);
-        System.arraycopy(resultWithoutFirstFix, 0, result, 1, resultWithoutFirstFix.length);
+    public List<FixType> approximate(Distance maxDistance, TimePoint from, TimePoint to) {
+        List<FixType> resultWithoutFirstFix = approximateWithoutFirst(maxDistance, from, to);
+        List<FixType> result = new ArrayList<FixType>(resultWithoutFirstFix.size()+1);
+        result.add(track.getFirstFixAtOrAfter(from));
+        for (FixType f : resultWithoutFirstFix) {
+            result.add(f);
+        }
         return result;
     }
     
-    private GPSFix[] approximateWithoutFirst(Distance maxDistance, TimePoint from, TimePoint to) {
-        GPSFix[] result;
+    private List<FixType> approximateWithoutFirst(Distance maxDistance, TimePoint from, TimePoint to) {
+        List<FixType> result;
         Pair<GPSFix, Distance> fixAndDistance = getFixWithGreatestCrossTrackErrorInInterval(from, to);
         if (fixAndDistance.getB().compareTo(maxDistance) < 0) {
             // reached desired accuracy for interval from..to
-            result = new GPSFix[] { track.getLastFixAtOrBefore(to) };
+            result = Collections.singletonList(track.getLastFixAtOrBefore(to));
         } else {
-            GPSFix[] left = approximateWithoutFirst(maxDistance, from, fixAndDistance.getA().getTimePoint());
-            GPSFix[] right = approximateWithoutFirst(maxDistance, fixAndDistance.getA().getTimePoint(), to);
-            result = new GPSFix[left.length+right.length];
-            System.arraycopy(left, 0, result, 0, left.length);
-            System.arraycopy(right, 0, result, left.length, right.length);
+            List<FixType> left = approximateWithoutFirst(maxDistance, from, fixAndDistance.getA().getTimePoint());
+            List<FixType> right = approximateWithoutFirst(maxDistance, fixAndDistance.getA().getTimePoint(), to);
+            result = new ArrayList<FixType>(left.size()+right.size());
+            for (FixType fixFromLeft : left) {
+                result.add(fixFromLeft);
+            }
+            for (FixType fixFromRight : right) {
+                result.add(fixFromRight);
+            }
         }
         return result;
     }
