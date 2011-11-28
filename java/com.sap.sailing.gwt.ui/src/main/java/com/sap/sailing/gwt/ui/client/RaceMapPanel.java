@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
@@ -116,6 +117,8 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
 
     private final Map<MarkDAO, Marker> buoyMarkers;
 
+    private final Map<GPSFixDAO, Marker> douglasMarkerMap;
+
     // key for domain web4sap.com
     private final String mapsAPIKey = "ABQIAAAAmvjPh3ZpHbnwuX3a66lDqRRLCigyC_gRDASMpyomD2do5awpNhRCyD_q-27hwxKe_T6ivSZ_0NgbUg";
 
@@ -134,6 +137,8 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         lastShownFix = new HashMap<CompetitorDAO, Integer>();
         buoyMarkers = new HashMap<MarkDAO, Marker>();
         boatMarkers = new HashMap<CompetitorDAO, Marker>();
+        douglasMarkerMap = new ConcurrentHashMap<GPSFixDAO, Marker>();
+
         fixes = new HashMap<CompetitorDAO, List<GPSFixDAO>>();
         this.grid = new Grid(3, 2);
         setWidget(grid);
@@ -329,6 +334,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
                                     Date from = new Date(date.getTime() - TAILLENGTHINMILLISECONDS);
                                     updateFixes(result, fromAndToAndOverlap.getC());
                                     showBoatsOnMap(from, date);
+                                    removeMarkDouglasPeuckerpoints(result.keySet());
                                 }
                             });
                     sailingService.getMarkPositions(event.name, race.name, date, new AsyncCallback<List<MarkDAO>>() {
@@ -757,8 +763,8 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
                 from.put(competitorDAO, fixes.get(competitorDAO).get(firstShownFix.get(competitorDAO)).timepoint);
                 Map<CompetitorDAO, Date> to = new HashMap<CompetitorDAO, Date>();
                 to.put(competitorDAO, fixes.get(competitorDAO).get(lastShownFix.get(competitorDAO)).timepoint);
-                sailingService.getDouglasPoints(event.name, race.name, from,
-                        to, /* epsilon/meters */ 10, new AsyncCallback<Map<CompetitorDAO, List<GPSFixDAO>>>() {
+                sailingService.getDouglasPoints(event.name, race.name, from, to, /* epsilon/meters */5,
+                        new AsyncCallback<Map<CompetitorDAO, List<GPSFixDAO>>>() {
                             @Override
                             public void onFailure(Throwable caught) {
                                 errorReporter.reportError("Error obtaining douglas positions: " + caught.getMessage());
@@ -872,11 +878,29 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         }
     }
 
+    private void removeMarkDouglasPeuckerpoints(Set<CompetitorDAO> competitorDAOSet) {
+        for (CompetitorDAO competitorDAO : competitorDAOSet) {
+            // first shown fix in raceMaps
+            Integer firstShownInteger = firstShownFix.get(competitorDAO);
+            Integer lastShowninteger = lastShownFix.get(competitorDAO);
+            GPSFixDAO firstShownFix = fixes.get(competitorDAO).get(firstShownInteger);
+            GPSFixDAO lastShownFix = fixes.get(competitorDAO).get(lastShowninteger);
+            Iterator<GPSFixDAO> iter = douglasMarkerMap.keySet().iterator();
+            while (iter.hasNext()) {
+                GPSFixDAO gpsFixDao = iter.next();
+                Marker marker = douglasMarkerMap.get(gpsFixDao);
+                if (gpsFixDao.timepoint.before(firstShownFix.timepoint)
+                        | gpsFixDao.timepoint.after(lastShownFix.timepoint)) {
+                    // remove from map
+                    douglasMarkerMap.remove(gpsFixDao);
+                    map.removeOverlay(marker);
+                }
+            }
+        }
+    }
+
     private void showMarkDouglasPeuckerPoints(Map<CompetitorDAO, List<GPSFixDAO>> gpsFixPointMapForCompetitors) {
-        // TODO show gpsFixPoints with colors, for example point opacity. Or use red points
-        // TODO controll douglas gpsfixdao new gps fix points
-        if (map != null && gpsFixPointMapForCompetitors!=null) {
-            System.out.println(gpsFixPointMapForCompetitors.size());
+        if (map != null && gpsFixPointMapForCompetitors != null) {
             Set<CompetitorDAO> keySet = gpsFixPointMapForCompetitors.keySet();
             Iterator<CompetitorDAO> iter = keySet.iterator();
             while (iter.hasNext()) {
@@ -887,10 +911,12 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
                     MarkerOptions options = MarkerOptions.newInstance();
                     options.setTitle(fix.speedWithBearing.toString());
                     Marker marker = new Marker(latLng, options);
-                    map.addOverlay(marker);
+                    if (!douglasMarkerMap.keySet().contains(gpsFix)) {
+                        douglasMarkerMap.put(fix, marker);
+                        map.addOverlay(marker);
+                    }
                 }
             }
         }
-        // TODO read out gps fixes, and paint them into the google race map
     }
 }
