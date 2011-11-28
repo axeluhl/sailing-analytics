@@ -1110,7 +1110,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
 
     @Override
-    public LeaderboardRowDAO[][] getLeaderboardRowDAOOfRace(String leaderboardName, String raceName, List<CompetitorDAO> competitorDAOs, int timeStep) throws NoWindException {
+    public LeaderboardRowDAO[][] getLeaderboardRowDAOOfRace(String leaderboardName, String raceName, List<CompetitorDAO> competitorDAOs, int steps) throws NoWindException {
         LeaderboardRowDAO[][] competitorData;
         TrackedRace trackedRace = getService().getLeaderboardByName(leaderboardName).getRaceColumnByName(raceName).getTrackedRace();
         Iterable<Competitor> competitors = trackedRace.getRace().getCompetitors();
@@ -1127,7 +1127,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         int i = 0;
         for (Competitor c : selectedCompetitor){
             List<LeaderboardRowDAO> entries = new ArrayList<LeaderboardRowDAO>();
-            for (long time = trackedRace.getStart().asMillis(); time < trackedRace.getTimePointOfNewestEvent().asMillis(); time += (trackedRace.getTimePointOfNewestEvent().asMillis()-trackedRace.getStart().asMillis())/100){
+            for (long time = trackedRace.getStart().asMillis(); time < trackedRace.getTimePointOfNewestEvent().asMillis(); time += (trackedRace.getTimePointOfNewestEvent().asMillis()-trackedRace.getStart().asMillis())/steps){
                 MillisecondsTimePoint timePoint = new MillisecondsTimePoint(time);
                 LeaderboardRowDAO row = new LeaderboardRowDAO();
                 row.competitor = getCompetitorDAO(c);
