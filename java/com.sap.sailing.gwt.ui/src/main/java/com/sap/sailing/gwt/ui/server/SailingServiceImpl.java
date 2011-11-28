@@ -8,6 +8,7 @@ import java.net.URL;
 import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -39,9 +40,11 @@ import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.base.impl.DegreePosition;
+import com.sap.sailing.domain.base.impl.DouglasPeucker;
 import com.sap.sailing.domain.base.impl.KilometersPerHourSpeedImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
+import com.sap.sailing.domain.base.impl.MeterDistance;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard.Entry;
@@ -1107,5 +1110,42 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         }
         Collections.sort(countryCodes);
         return countryCodes.toArray(new String[0]);
+    }
+    
+    @Override
+    public Map<CompetitorDAO, List<GPSFixDAO>> getDouglasPoints(String eventName, String raceName,
+            Map<CompetitorDAO, Date> from, Map<CompetitorDAO, Date> to,
+            boolean extrapolate, double meters) {
+        Map<CompetitorDAO, List<GPSFixDAO>> result = new HashMap<CompetitorDAO, List<GPSFixDAO>>();
+        Event event = getService().getEventByName(eventName);
+        RaceDefinition race = getRaceByName(event, raceName);
+        TrackedRace trackedRace = getService().getOrCreateTrackedEvent(event).getTrackedRace(race);
+        for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
+            // get Track of competitor
+            GPSFixTrack<Competitor, GPSFixMoving> gpsFixTrack = getTrackedRace(eventName, raceName).getTrack(competitor);
+            DouglasPeucker<Competitor, GPSFixMoving> douglas = new DouglasPeucker<Competitor, GPSFixMoving>(gpsFixTrack);
+            // Distance for DouglasPeucker
+            MeterDistance maxDistance = new MeterDistance(meters);
+            if(from.containsKey(competitor) && to.containsKey(competitor)){
+                TimePoint timePointFrom = new MillisecondsTimePoint(from.get(competitor));
+                TimePoint timePointTo = new MillisecondsTimePoint(to.get(competitor));
+                GPSFix[] gpsFixDouglas  = douglas.approximate(maxDistance, timePointFrom, timePointTo);
+                List<GPSFixDAO> gpsFixDouglasList = new ArrayList<GPSFixDAO>();
+                for (int i = 0; i < gpsFixDouglas.length; i++) {
+                    GPSFix fix = gpsFixDouglas[i];
+                    Tack tack = trackedRace.getTack(competitor, fix.getTimePoint());
+                    SpeedWithBearing speedWithBearing = gpsFixTrack.getEstimatedSpeed(fix.getTimePoint());
+                    GPSFixDAO fixDAO = new GPSFixDAO(fix.getTimePoint().asDate(), 
+                            new PositionDAO(fix.getPosition().getLatDeg(), fix.getPosition().getLngDeg()),
+                            new SpeedWithBearingDAO(speedWithBearing.getKnots(),speedWithBearing.getBearing().getDegrees()),
+                            tack.name(), /* extrapolated */false);
+                    gpsFixDouglasList.add(fixDAO);
+                    
+                }
+                CompetitorDAO competitorDAO = getCompetitorDAO(competitor);
+                result.put(competitorDAO, gpsFixDouglasList);
+            }
+        }
+        return result;
     }
 }

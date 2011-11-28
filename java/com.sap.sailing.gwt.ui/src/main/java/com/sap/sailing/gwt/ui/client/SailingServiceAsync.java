@@ -183,4 +183,8 @@ public interface SailingServiceAsync {
     void stressTestLeaderboardByName(String leaderboardName, int times, AsyncCallback<Void> callback);
 
     void getCountryCodes(AsyncCallback<String[]> callback);
+
+    void getDouglasPoints(String eventName, String raceName, Map<CompetitorDAO, Date> from,
+            Map<CompetitorDAO, Date> to, boolean extrapolate, double meters,
+            AsyncCallback<Map<CompetitorDAO, List<GPSFixDAO>>> callback);
 }
