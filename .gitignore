@@ -10,3 +10,5 @@ java/com.sap.sailing.server/SailingServer\ \(No\ Proxy\).launch
 java/com.sap.sailing.server/SailingServer (No Proxy).launch
 java/com.sap.sailing.gwt.ui/SailingGWT.launch
 java/com.sap.sailing.gwt.ui.test/bin/*
+
+*.gitignore
