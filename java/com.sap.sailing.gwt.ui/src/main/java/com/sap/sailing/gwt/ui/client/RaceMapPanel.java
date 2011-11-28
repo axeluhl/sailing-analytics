@@ -353,22 +353,6 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
                             showQuickRanks(result);
                         }
                     });
-                    sailingService.getDouglasPoints(event.name, race.name, fromAndToAndOverlap.getA(),
-                            fromAndToAndOverlap.getB(), true, 10,
-                            new AsyncCallback<Map<CompetitorDAO, List<GPSFixDAO>>>() {
-
-                                @Override
-                                public void onFailure(Throwable caught) {
-                                    errorReporter.reportError("Error obtaining douglas positions: "
-                                            + caught.getMessage());
-                                }
-
-                                @Override
-                                public void onSuccess(Map<CompetitorDAO, List<GPSFixDAO>> result) {
-                                    System.out.println("Size: " + result.size());
-                                    showMarkDouglasPeuckerPoints(result);
-                                }
-                            });
                 }
             }
         }
@@ -758,12 +742,35 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
     }
 
     private Widget getInfoWindowContent(CompetitorDAO competitorDAO, GPSFixDAO lastFix) {
-        VerticalPanel result = new VerticalPanel();
+        final VerticalPanel result = new VerticalPanel();
         result.add(new Label("Competitor " + competitorDAO.name));
         result.add(new Label("" + lastFix.position));
         result.add(new Label(lastFix.speedWithBearing.speedInKnots + "kts " + lastFix.speedWithBearing.bearingInDegrees
                 + "deg"));
         result.add(new Label("Tack: " + lastFix.tack));
+        List<Triple<EventDAO, RegattaDAO, RaceDAO>> selection = newRaceListBox.getSelectedEventAndRace();
+        if (!selection.isEmpty()) {
+            EventDAO event = selection.get(selection.size() - 1).getA();
+            RaceDAO race = selection.get(selection.size() - 1).getC();
+            if (event != null && race != null) {
+                Map<CompetitorDAO, Date> from = new HashMap<CompetitorDAO, Date>();
+                from.put(competitorDAO, fixes.get(competitorDAO).get(firstShownFix.get(competitorDAO)).timepoint);
+                Map<CompetitorDAO, Date> to = new HashMap<CompetitorDAO, Date>();
+                to.put(competitorDAO, fixes.get(competitorDAO).get(lastShownFix.get(competitorDAO)).timepoint);
+                sailingService.getDouglasPoints(event.name, race.name, from,
+                        to, /* epsilon/meters */ 10, new AsyncCallback<Map<CompetitorDAO, List<GPSFixDAO>>>() {
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                errorReporter.reportError("Error obtaining douglas positions: " + caught.getMessage());
+                            }
+
+                            @Override
+                            public void onSuccess(Map<CompetitorDAO, List<GPSFixDAO>> result) {
+                                showMarkDouglasPeuckerPoints(result);
+                            }
+                        });
+            }
+        }
         return result;
     }
 
@@ -877,18 +884,13 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
                 List<GPSFixDAO> gpsFix = gpsFixPointMapForCompetitors.get(competitorDAO);
                 for (GPSFixDAO fix : gpsFix) {
                     LatLng latLng = LatLng.newInstance(fix.position.latDeg, fix.position.lngDeg);
-                    System.out.println("---");
-                    System.out.println(latLng.toString());
-                    Marker marker = new Marker(latLng);
+                    MarkerOptions options = MarkerOptions.newInstance();
+                    options.setTitle(fix.speedWithBearing.toString());
+                    Marker marker = new Marker(latLng, options);
                     map.addOverlay(marker);
                 }
-
             }
         }
         // TODO read out gps fixes, and paint them into the google race map
-    }
-
-    private void createDouglasGPSFixMarker() {
-
     }
 }

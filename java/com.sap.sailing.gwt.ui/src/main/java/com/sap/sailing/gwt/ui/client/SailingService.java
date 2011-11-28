@@ -122,6 +122,5 @@ public interface SailingService extends RemoteService {
     String[] getCountryCodes();
     
     Map<CompetitorDAO, List<GPSFixDAO>> getDouglasPoints(String eventName, String raceName,
-            Map<CompetitorDAO, Date> from, Map<CompetitorDAO, Date> to,
-            boolean extrapolate, double meters);
+            Map<CompetitorDAO, Date> from, Map<CompetitorDAO, Date> to, double meters);
 }
