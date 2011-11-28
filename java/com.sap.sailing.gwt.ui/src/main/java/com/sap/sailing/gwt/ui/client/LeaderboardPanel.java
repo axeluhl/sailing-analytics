@@ -910,7 +910,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
      * Also updates the min/max values on the columns
      */
     protected void updateLeaderboard(LeaderboardDAO leaderboard) {
-        selectedRaceColumns.addAll(getRacesAddedNew(this.leaderboard, leaderboard));
+        selectedRaceColumns.addAll(getRacesAddedNew(getLeaderboard(), leaderboard));
         setLeaderboard(leaderboard);
         adjustColumnLayout(leaderboard);
         getData().getList().clear();
@@ -975,7 +975,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     private List<String> getRacesAddedNew(LeaderboardDAO oldLeaderboard, LeaderboardDAO newLeaderboard){
         List<String> result = new ArrayList<String>();
         for (String s : newLeaderboard.getRaceList()) {
-            if(!oldLeaderboard.getRaceList().contains(s)){
+            if (oldLeaderboard == null || !oldLeaderboard.getRaceList().contains(s)){
                 result.add(s);
             }
         }

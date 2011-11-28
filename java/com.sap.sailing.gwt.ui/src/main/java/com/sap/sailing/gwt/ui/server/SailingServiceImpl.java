@@ -24,6 +24,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
+import com.sap.sailing.domain.base.Bearing;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Competitor;
@@ -42,6 +43,7 @@ import com.sap.sailing.domain.base.impl.DegreePosition;
 import com.sap.sailing.domain.base.impl.KilometersPerHourSpeedImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
+import com.sap.sailing.domain.base.impl.MeterDistance;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard.Entry;
@@ -1107,5 +1109,48 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         }
         Collections.sort(countryCodes);
         return countryCodes.toArray(new String[0]);
+    }
+    
+    @Override
+    public Map<CompetitorDAO, List<GPSFixDAO>> getDouglasPoints(String eventName, String raceName,
+            Map<CompetitorDAO, Date> from, Map<CompetitorDAO, Date> to,
+            double meters) {
+        Map<CompetitorDAO, List<GPSFixDAO>> result = new HashMap<CompetitorDAO, List<GPSFixDAO>>();
+        TrackedRace trackedRace = getTrackedRace(eventName, raceName);
+        MeterDistance maxDistance = new MeterDistance(meters);
+        for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
+            CompetitorDAO competitorDAO = getCompetitorDAO(competitor);
+            if (from.containsKey(competitorDAO)) {
+                // get Track of competitor
+                GPSFixTrack<Competitor, GPSFixMoving> gpsFixTrack = trackedRace.getTrack(competitor);
+                // Distance for DouglasPeucker
+                TimePoint timePointFrom = new MillisecondsTimePoint(from.get(competitorDAO));
+                TimePoint timePointTo = new MillisecondsTimePoint(to.get(competitorDAO));
+                List<GPSFixMoving> gpsFixApproximation = trackedRace.approximate(competitor, maxDistance, timePointFrom, timePointTo);
+                List<GPSFixDAO> gpsFixDouglasList = new ArrayList<GPSFixDAO>();
+                for (int i = 0; i < gpsFixApproximation.size(); i++) {
+                    GPSFix fix = gpsFixApproximation.get(i);
+                    SpeedWithBearing speedWithBearing;
+                    if (i<gpsFixApproximation.size()-1) {
+                        GPSFix next = gpsFixApproximation.get(i+1);
+                        Bearing bearing = fix.getPosition().getBearingGreatCircle(next.getPosition());
+                        Speed speed = fix.getPosition().getDistance(next.getPosition()).inTime(
+                                next.getTimePoint().asMillis()-fix.getTimePoint().asMillis());
+                        speedWithBearing = new KnotSpeedWithBearingImpl(speed.getKnots(), bearing);
+                    } else {
+                        speedWithBearing = gpsFixTrack.getEstimatedSpeed(fix.getTimePoint());
+                    }
+                    Tack tack = trackedRace.getTack(competitor, fix.getTimePoint());
+                    GPSFixDAO fixDAO = new GPSFixDAO(fix.getTimePoint().asDate(), new PositionDAO(fix.getPosition()
+                            .getLatDeg(), fix.getPosition().getLngDeg()), new SpeedWithBearingDAO(
+                            speedWithBearing.getKnots(), speedWithBearing.getBearing().getDegrees()), tack.name(), /* extrapolated */
+                    false);
+                    gpsFixDouglasList.add(fixDAO);
+
+                }
+                result.put(competitorDAO, gpsFixDouglasList);
+            }
+        }
+        return result;
     }
 }
