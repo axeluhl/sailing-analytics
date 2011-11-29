@@ -8,3 +8,8 @@ java/com.sap.sailing.gwt.ui/gwt-unitCache/*
 java/com.sap.sailing.gwt.ui/war/WEB-INF/deploy/*
 java/com.sap.sailing.server/SailingServer\ \(No\ Proxy\).launch
 java/com.sap.sailing.server/SailingServer (No Proxy).launch
+java/com.sap.sailing.gwt.ui/SailingGWT.launch
+java/com.sap.sailing.gwt.ui.test/bin/*
+
+*.gitignore
+java/com.sap.sailing.gwt.ui/.settings/com.google.gdt.eclipse.core.prefs

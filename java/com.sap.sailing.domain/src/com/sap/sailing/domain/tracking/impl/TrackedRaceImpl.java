@@ -12,8 +12,10 @@ import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Bearing;
+import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CourseChange;
 import com.sap.sailing.domain.base.CourseListener;
 import com.sap.sailing.domain.base.Distance;
 import com.sap.sailing.domain.base.Leg;
@@ -29,6 +31,7 @@ import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
+import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.NoWindError;
 import com.sap.sailing.domain.tracking.NoWindException;
@@ -44,19 +47,8 @@ import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.util.Util;
 
 public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
-    /**
-     * If the averaged courses over ground differ by at least this degree angle, a maneuver will
-     * be assumed. Note that this should be much less than the tack angle because averaging may
-     * span across the actual maneuver.
-     */
-    private static final double MANEUVER_DEGREE_ANGLE_THRESHOLD = /* minimumDegreeDifference */ 30.;
-
     private static final Logger logger = Logger.getLogger(TrackedRaceImpl.class.getName());
 
-    // TODO make typical tack/jibe angles and the respective clustering thresholds a boat class parameter
-    private static final double MINIMUM_ANGLE_BETWEEN_DIFFERENT_TACKS_UPWIND = 45.;
-    private static final double MINIMUM_ANGLE_BETWEEN_DIFFERENT_TACKS_DOWNWIND = 15.;
-    
     // TODO observe the race course; if it changes, update leg structures; consider fine-grained update events that tell what changed
     private final RaceDefinition race;
     
@@ -563,7 +555,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                 LegType legType = trackedLeg.getLegType(timePoint);
                 if (legType != LegType.REACHING) {
                     GPSFixTrack<Competitor, GPSFixMoving> track = getTrack(competitor);
-                    if (!track.hasDirectionChange(timePoint, MANEUVER_DEGREE_ANGLE_THRESHOLD)) {
+                    if (!track.hasDirectionChange(timePoint, getManeuverDegreeAngleThreshold())) {
                         Bearing bearing = track.getEstimatedSpeed(timePoint).getBearing();
                         BearingCluster bearingClusters = bearings.get(legType);
                         bearingClusters.add(bearing);
@@ -572,12 +564,12 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             }
         }
         Bearing upwindAverage = null;
-        BearingCluster[] bearingClustersUpwind = bearings.get(LegType.UPWIND).splitInTwo(MINIMUM_ANGLE_BETWEEN_DIFFERENT_TACKS_UPWIND);
+        BearingCluster[] bearingClustersUpwind = bearings.get(LegType.UPWIND).splitInTwo(getMinimumAngleBetweenDifferentTacksUpwind());
         if (!bearingClustersUpwind[0].isEmpty() && !bearingClustersUpwind[1].isEmpty()) {
             upwindAverage = bearingClustersUpwind[0].getAverage().middle(bearingClustersUpwind[1].getAverage());
         }
         Bearing downwindAverage = null;
-        BearingCluster[] bearingClustersDownwind = bearings.get(LegType.DOWNWIND).splitInTwo(MINIMUM_ANGLE_BETWEEN_DIFFERENT_TACKS_DOWNWIND);
+        BearingCluster[] bearingClustersDownwind = bearings.get(LegType.DOWNWIND).splitInTwo(getMinimumAngleBetweenDifferentTacksDownwind());
         if (!bearingClustersDownwind[0].isEmpty() && !bearingClustersDownwind[1].isEmpty()) {
             downwindAverage = bearingClustersDownwind[0].getAverage().middle(bearingClustersDownwind[1].getAverage());
         }
@@ -640,4 +632,94 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         DouglasPeucker<Competitor, GPSFixMoving> douglasPeucker = new DouglasPeucker<Competitor, GPSFixMoving>(getTrack(competitor)); 
         return douglasPeucker.approximate(maxDistance, from, to);
     }
+    
+    @Override
+    public List<Maneuver> getManeuvers(Competitor competitor, TimePoint from, TimePoint to) {
+        return detectManeuvers(competitor, approximate(competitor, getRace().getBoatClass().getMaximumDistanceForCourseApproximation(), from, to));
+    }
+    
+    /**
+     * Tries to detect a maneuver on the <code>competitor</code>'s track around a given time point. The time period is
+     * taken from the {@link BoatClass#getApproximateManeuverDurationInMilliseconds() boat class}. If no maneuver is
+     * detected, an empty list is returned. Maneuvers can only be expected to be detected if at least two fixes are
+     * provided in <code>approximatedFixesToAnalyze</code> that have their {@link GPSFixMoving#getSpeed() speed and
+     * bearing} propertly set.
+     * 
+     * @return an empty list if no maneuver is detected for <code>competitor</code> between <code>from</code> and
+     *         <code>to</code>, or else the list of maneuvers detected.
+     */
+    private List<Maneuver> detectManeuvers(Competitor competitor, List<GPSFixMoving> approximatedFixesToAnalyze) {
+        List<Maneuver> result = new ArrayList<Maneuver>();
+        if (approximatedFixesToAnalyze.size() > 2) {
+            List<CourseChange> courseChangeSequenceInSameDirection = new ArrayList<CourseChange>();
+            Iterator<GPSFixMoving> iter = approximatedFixesToAnalyze.iterator();
+            GPSFixMoving current = iter.next();
+            while (iter.hasNext()) {
+                GPSFixMoving previous = current;
+                current = iter.next();
+                CourseChange courseChange = previous.getCourseChangeRequiredToReach(current.getSpeed());
+                if (!courseChangeSequenceInSameDirection.isEmpty() && courseChangeSequenceInSameDirection.get(0).to() != courseChange.to()) {
+                    // course change in different direction; cluster the course changes in same direction so far, then start new list
+                    List<Maneuver> maneuvers = groupDirectionChangesIntoManeuvers(courseChangeSequenceInSameDirection);
+                    result.addAll(maneuvers);
+                    courseChangeSequenceInSameDirection.clear();
+                }
+                courseChangeSequenceInSameDirection.add(courseChange);
+            }
+            if (!courseChangeSequenceInSameDirection.isEmpty()) {
+                result.addAll(groupDirectionChangesIntoManeuvers(courseChangeSequenceInSameDirection));
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Groups the {@link CourseChange} sequence into groups where the {@link CourseChange#getTimePoint() times} of the
+     * course changes are no further apart than {@link #getApproximateManeuverDurationInMilliseconds()} milliseconds. For those,
+     * a single {@link Maneuver} object is created and added to the resulting list. The maneuver sums up the direction changes
+     * of the individual {@link CourseChange} objects. This can result in direction changes of more than 180 degrees in
+     * one direction which may, e.g., represent a penalty circle or a mark rounding maneuver. As the maneuver's time point,
+     * the average time point of the course changes that went into the maneuver construction is used.
+     * 
+     * @param courseChangeSequenceInSameDirection all expected to have equal {@link CourseChange#to()} values
+     * @return a non-<code>null</code> list
+     */
+    private List<Maneuver> groupDirectionChangesIntoManeuvers(List<CourseChange> courseChangeSequenceInSameDirection) {
+        List<Maneuver> result = new ArrayList<Maneuver>();
+        List<CourseChange> group = new ArrayList<CourseChange>();
+        if (!courseChangeSequenceInSameDirection.isEmpty()) {
+            Iterator<CourseChange> iter = courseChangeSequenceInSameDirection.iterator();
+            while (iter.hasNext()) {
+                CourseChange next = iter.next();
+                if (group.isEmpty()
+                        || next.getTimePoint().asMillis() - group.get(group.size() - 1).getTimePoint().asMillis() <
+                        getApproximateManeuverDurationInMilliseconds()) {
+                    group.add(next);
+                } else {
+                    
+                }
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Fetches the boat class-specific parameter
+     */
+    private double getManeuverDegreeAngleThreshold() {
+        return getRace().getBoatClass().getManeuverDegreeAngleThreshold();
+    }
+
+    private double getMinimumAngleBetweenDifferentTacksDownwind() {
+        return getRace().getBoatClass().getMinimumAngleBetweenDifferentTacksDownwind();
+    }
+
+    private double getMinimumAngleBetweenDifferentTacksUpwind() {
+        return getRace().getBoatClass().getMinimumAngleBetweenDifferentTacksUpwind();
+    }
+    
+    private long getApproximateManeuverDurationInMilliseconds() {
+        return getRace().getBoatClass().getApproximateManeuverDurationInMilliseconds();
+    }
+
 }

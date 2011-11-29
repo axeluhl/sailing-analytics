@@ -3,9 +3,10 @@ package com.sap.sailing.gwt.ui.client;
 import java.util.Comparator;
 
 import com.google.gwt.cell.client.Cell;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Header;
-import com.google.gwt.user.cellview.client.TextHeader;
+import com.google.gwt.user.cellview.client.SafeHtmlHeader;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDAO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDAO;
 
@@ -17,16 +18,18 @@ public abstract class LegDetailColumn<FieldType extends Comparable<?>, Rendering
     private FieldType maximum;
     private final String headerStyle;
     private final String columnStyle;
+    private final String unit;
     
     public interface LegDetailField<T extends Comparable<?>> {
         T get(LeaderboardRowDAO row);
     }
     
-    protected LegDetailColumn(String title, LegDetailField<FieldType> field, Cell<RenderingType> cell, CellTable<LeaderboardRowDAO> leaderboardTable,
-            String headerStyle, String columnStyle) {
+    protected LegDetailColumn(String title, String unit, LegDetailField<FieldType> field, Cell<RenderingType> cell,
+            CellTable<LeaderboardRowDAO> leaderboardTable, String headerStyle, String columnStyle) {
         super(cell);
         setHorizontalAlignment(ALIGN_CENTER);
         this.title = title;
+        this.unit = unit;
         this.field = field;
         this.leaderboardTable = leaderboardTable;
         this.headerStyle = headerStyle;
@@ -72,7 +75,8 @@ public abstract class LegDetailColumn<FieldType extends Comparable<?>, Rendering
 
     @Override
     public Header<?> getHeader() {
-        TextHeader header = new TextHeader(title);
+        SafeHtmlHeader header = new SafeHtmlHeader(new SafeHtmlBuilder().appendEscaped(title).appendHtmlConstant("<br>").
+                appendEscaped(unit).toSafeHtml());
         return header;
     }
 
