@@ -47,7 +47,7 @@ public abstract class AbstractSpeedWithBearingImpl extends AbstractSpeedImpl imp
             courseChangeInDegrees -= 360.;
         }
         double speedChangeInKnots = to.getKnots() - from.getKnots();
-        return new CourseChangeImpl(courseChangeInDegrees, speedChangeInKnots, position, timePoint);
+        return new CourseChangeImpl(courseChangeInDegrees, speedChangeInKnots, position, timePoint, from);
     }
     
     @Override

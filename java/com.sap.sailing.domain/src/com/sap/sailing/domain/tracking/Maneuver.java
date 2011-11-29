@@ -14,11 +14,4 @@ public interface Maneuver extends Timed, Positioned {
     
     double getDirectionChangeInDegrees();
     
-    /**
-     * This assumes that a maneuver usually slows a boat down. This method tries to find out how long
-     * after the {@link #getTimePoint() time of the maneuver} it took for the boat to reach a roughly
-     * constant speed again.
-     */
-    long getTimeInMillisecondsUntilBackToConstantSpeed();
-    
 }

@@ -21,6 +21,7 @@ import com.sap.sailing.domain.base.Distance;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.Tack;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.Waypoint;
@@ -658,16 +659,18 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                 GPSFixMoving previous = current;
                 current = iter.next();
                 CourseChange courseChange = previous.getCourseChangeRequiredToReach(current.getSpeed());
-                if (!courseChangeSequenceInSameDirection.isEmpty() && courseChangeSequenceInSameDirection.get(0).to() != courseChange.to()) {
+                if (!courseChangeSequenceInSameDirection.isEmpty() &&
+                        Math.signum(courseChangeSequenceInSameDirection.get(0).getCourseChangeInDegrees()) !=
+                        Math.signum(courseChange.getCourseChangeInDegrees())) {
                     // course change in different direction; cluster the course changes in same direction so far, then start new list
-                    List<Maneuver> maneuvers = groupDirectionChangesIntoManeuvers(courseChangeSequenceInSameDirection);
+                    List<Maneuver> maneuvers = groupDirectionChangesIntoManeuvers(competitor, courseChangeSequenceInSameDirection);
                     result.addAll(maneuvers);
                     courseChangeSequenceInSameDirection.clear();
                 }
                 courseChangeSequenceInSameDirection.add(courseChange);
             }
             if (!courseChangeSequenceInSameDirection.isEmpty()) {
-                result.addAll(groupDirectionChangesIntoManeuvers(courseChangeSequenceInSameDirection));
+                result.addAll(groupDirectionChangesIntoManeuvers(competitor, courseChangeSequenceInSameDirection));
             }
         }
         return result;
@@ -675,32 +678,60 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     /**
      * Groups the {@link CourseChange} sequence into groups where the {@link CourseChange#getTimePoint() times} of the
-     * course changes are no further apart than {@link #getApproximateManeuverDurationInMilliseconds()} milliseconds. For those,
-     * a single {@link Maneuver} object is created and added to the resulting list. The maneuver sums up the direction changes
-     * of the individual {@link CourseChange} objects. This can result in direction changes of more than 180 degrees in
-     * one direction which may, e.g., represent a penalty circle or a mark rounding maneuver. As the maneuver's time point,
-     * the average time point of the course changes that went into the maneuver construction is used.
+     * course changes are no further apart than {@link #getApproximateManeuverDurationInMilliseconds()} milliseconds.
+     * For those, a single {@link Maneuver} object is created and added to the resulting list. The maneuver sums up the
+     * direction changes of the individual {@link CourseChange} objects. This can result in direction changes of more
+     * than 180 degrees in one direction which may, e.g., represent a penalty circle or a mark rounding maneuver. As the
+     * maneuver's time point, the average time point of the course changes that went into the maneuver construction is
+     * used.
      * 
-     * @param courseChangeSequenceInSameDirection all expected to have equal {@link CourseChange#to()} values
+     * @param courseChangeSequenceInSameDirection
+     *            all expected to have equal {@link CourseChange#to()} values
+     * 
      * @return a non-<code>null</code> list
      */
-    private List<Maneuver> groupDirectionChangesIntoManeuvers(List<CourseChange> courseChangeSequenceInSameDirection) {
+    private List<Maneuver> groupDirectionChangesIntoManeuvers(Competitor competitor, List<CourseChange> courseChangeSequenceInSameDirection) {
         List<Maneuver> result = new ArrayList<Maneuver>();
         List<CourseChange> group = new ArrayList<CourseChange>();
         if (!courseChangeSequenceInSameDirection.isEmpty()) {
             Iterator<CourseChange> iter = courseChangeSequenceInSameDirection.iterator();
+            double totalCourseChangeInDegrees = 0.0;
+            long totalMilliseconds = 0l;
             while (iter.hasNext()) {
                 CourseChange next = iter.next();
-                if (group.isEmpty()
-                        || next.getTimePoint().asMillis() - group.get(group.size() - 1).getTimePoint().asMillis() <
+                if (!group.isEmpty()
+                        && next.getTimePoint().asMillis() - group.get(group.size() - 1).getTimePoint().asMillis() >
                         getApproximateManeuverDurationInMilliseconds()) {
-                    group.add(next);
-                } else {
-                    
+                    // turn the group into a maneuver and add to result
+                    Maneuver maneuver = createManeuverFromGroupOfCourseChanges(competitor, group,
+                            totalCourseChangeInDegrees, totalMilliseconds);
+                    result.add(maneuver);
+                    group.clear();
+                    totalCourseChangeInDegrees = 0.0;
+                    totalMilliseconds = 0l;
                 }
+                totalMilliseconds += next.getTimePoint().asMillis();
+                totalCourseChangeInDegrees += next.getCourseChangeInDegrees();
+                group.add(next);
+            }
+            if (!group.isEmpty()) {
+                result.add(createManeuverFromGroupOfCourseChanges(competitor, group,
+                            totalCourseChangeInDegrees, totalMilliseconds));
             }
         }
         return result;
+    }
+
+    private Maneuver createManeuverFromGroupOfCourseChanges(Competitor competitor, List<CourseChange> group,
+            double totalCourseChangeInDegrees, long totalMilliseconds) {
+        TimePoint maneuverTimePoint = new MillisecondsTimePoint(totalMilliseconds/group.size());
+        Position maneuverPosition = getTrack(competitor).getEstimatedPosition(maneuverTimePoint, /* extrapolate */ false);
+        SpeedWithBearing speedWithBearingBeforeManeuver = group.get(0).getSpeed();
+        SpeedWithBearing speedWithBearingAfterManeufer = group.get(group.size()-1).getSpeed();
+        Maneuver.Type maneuverType = null;
+        Maneuver maneuver = new ManeuverImpl(maneuverType, maneuverPosition, maneuverTimePoint, speedWithBearingBeforeManeuver,
+                speedWithBearingAfterManeufer, totalCourseChangeInDegrees);
+        return maneuver;
     }
 
     /**
