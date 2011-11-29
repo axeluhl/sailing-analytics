@@ -664,8 +664,9 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             GPSFixMoving previous = iter.next();
             GPSFixMoving current = iter.next();
             SpeedWithBearing speedWithBearingFromPreviousToCurrent = previous.getSpeedAndBearingRequiredToReach(current);
-            SpeedWithBearing speedWithBearingFromCurrentToNext = null; // will certainly be assigned because iter's collection's size > 2
-            while (iter.hasNext()) {
+            SpeedWithBearing speedWithBearingAtBeginningOfUnidirectionalCourseChanges = speedWithBearingFromPreviousToCurrent;
+            SpeedWithBearing speedWithBearingFromCurrentToNext; // will certainly be assigned because iter's collection's size > 2
+            do {
                 GPSFixMoving next = iter.next();
                 speedWithBearingFromCurrentToNext = current.getSpeedAndBearingRequiredToReach(next);
                 CourseChange courseChange = speedWithBearingFromPreviousToCurrent.getCourseChangeRequiredToReach(speedWithBearingFromCurrentToNext);
@@ -675,17 +676,18 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                         Math.signum(courseChange.getCourseChangeInDegrees())) {
                     // course change in different direction; cluster the course changes in same direction so far, then start new list
                     List<Maneuver> maneuvers = groupDirectionChangesIntoManeuvers(competitor,
-                            speedWithBearingFromPreviousToCurrent, courseChangeSequenceInSameDirection);
+                            speedWithBearingAtBeginningOfUnidirectionalCourseChanges, courseChangeSequenceInSameDirection);
                     result.addAll(maneuvers);
                     courseChangeSequenceInSameDirection.clear();
+                    speedWithBearingAtBeginningOfUnidirectionalCourseChanges = speedWithBearingFromPreviousToCurrent;
                 }
                 courseChangeSequenceInSameDirection.add(courseChangeAtFix);
                 previous = current;
                 current = next;
                 speedWithBearingFromPreviousToCurrent = speedWithBearingFromCurrentToNext;
-            }
+            } while (iter.hasNext());
             if (!courseChangeSequenceInSameDirection.isEmpty()) {
-                result.addAll(groupDirectionChangesIntoManeuvers(competitor, speedWithBearingFromPreviousToCurrent,
+                result.addAll(groupDirectionChangesIntoManeuvers(competitor, speedWithBearingAtBeginningOfUnidirectionalCourseChanges,
                         courseChangeSequenceInSameDirection));
             }
         }
@@ -719,8 +721,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             Iterator<Pair<GPSFixMoving, CourseChange>> iter = courseChangeSequenceInSameDirection.iterator();
             double totalCourseChangeInDegrees = 0.0;
             long totalMilliseconds = 0l;
-            SpeedWithBearing afterCurrentCourseChange = null; // sure to be set because iter's collection is not empty
-            while (iter.hasNext()) {
+            SpeedWithBearing afterCurrentCourseChange; // sure to be set because iter's collection is not empty
+            do {
                 Pair<GPSFixMoving, CourseChange> currentFixAndCourseChange = iter.next();
                 afterCurrentCourseChange = beforeCurrentCourseChange.applyCourseChange(currentFixAndCourseChange.getB());
                 if (!group.isEmpty()
@@ -739,7 +741,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                 totalCourseChangeInDegrees += currentFixAndCourseChange.getB().getCourseChangeInDegrees();
                 group.add(currentFixAndCourseChange);
                 beforeCurrentCourseChange = afterCurrentCourseChange; // speed/bearing after course change
-            }
+            } while (iter.hasNext());
             if (!group.isEmpty()) {
                 result.add(createManeuverFromGroupOfCourseChanges(competitor, beforeGroup,
                             group, afterCurrentCourseChange, totalCourseChangeInDegrees, totalMilliseconds));
@@ -757,7 +759,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         MillisecondsTimePoint timePointBeforeManeuver = new MillisecondsTimePoint(group.get(0).getA().getTimePoint()
                 .asMillis() - getApproximateManeuverDurationInMilliseconds());
         MillisecondsTimePoint timePointAfterManeuver = new MillisecondsTimePoint(group.get(group.size() - 1).getA()
-                .getTimePoint().asMillis() - getApproximateManeuverDurationInMilliseconds());
+                .getTimePoint().asMillis() + getApproximateManeuverDurationInMilliseconds());
         Tack tackBeforeManeuver = getTack(competitor, timePointBeforeManeuver);
         Tack tackAfterManeuver = getTack(competitor, timePointAfterManeuver);
         TrackedLegOfCompetitor legBeforeManeuver = getTrackedLeg(competitor, timePointBeforeManeuver);
@@ -789,7 +791,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                 Bearing windBearing = wind.getBearing();
                 Bearing toWindBeforeManeuver = windBearing.getDifferenceTo(speedWithBearingAtBeginning.getBearing());
                 Bearing toWindAfterManeuver = windBearing.getDifferenceTo(speedWithBearingAtEnd.getBearing());
-                maneuverType = Math.abs(toWindBeforeManeuver.getDegrees()) > Math.abs(toWindAfterManeuver.getDegrees()) ?
+                maneuverType = Math.abs(toWindBeforeManeuver.getDegrees()) < Math.abs(toWindAfterManeuver.getDegrees()) ?
                         Type.HEAD_UP : Type.BEAR_AWAY;
             }
         }

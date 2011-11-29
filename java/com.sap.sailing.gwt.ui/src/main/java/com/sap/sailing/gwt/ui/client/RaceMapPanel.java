@@ -803,8 +803,8 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
 
                             @Override
                             public void onSuccess(Map<CompetitorDAO, List<ManeuverDAO>> result) {
-                                if (douglasMarkers != null) {
-                                    removeAllMarkDouglasPeuckerpoints();
+                                if (maneuverMarkers != null) {
+                                    removeAllManeuverMarkers();
                                 }
                                 if (!timer.isPlaying()) {
                                     showManeuvers(result);
@@ -963,7 +963,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
                     options.setTitle("" + maneuver.timepoint + ": " + maneuver.type + " "
                             + maneuver.directionChangeInDegrees + "deg from " + maneuver.speedWithBearingBefore
                             + " to " + maneuver.speedWithBearingAfter);
-//                    options.setIcon(icon) // TODO set a different icon for maneuvers
+                    options.setIcon(maneuverIcon);
                     Marker marker = new Marker(latLng, options);
                     maneuverMarkers.add(marker);
                     map.addOverlay(marker);
