@@ -464,15 +464,15 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 String detailColumnStyle) {
             Map<DetailColumnType, SortableColumn<LeaderboardRowDAO, ?>> result = new HashMap<DetailColumnType, SortableColumn<LeaderboardRowDAO, ?>>();
             result.put(DetailColumnType.RACE_DISTANCE_TRAVELED,
-                    new FormattedDoubleLegDetailColumn(stringConstants.distanceInMeters(),
+                    new FormattedDoubleLegDetailColumn(stringConstants.distanceInMeters(), stringConstants.distanceInMetersUnit(),
                             new RaceDistanceTraveledInMeters(), 1, getLeaderboardPanel().getLeaderboardTable(),
                             LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
             result.put(DetailColumnType.RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS, new FormattedDoubleLegDetailColumn(
-                    stringConstants.averageSpeedInKnots(), new RaceAverageSpeedInKnots(), 1, getLeaderboardPanel()
-                            .getLeaderboardTable(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
+                    stringConstants.averageSpeedInKnots(), stringConstants.averageSpeedInKnotsUnit(), new RaceAverageSpeedInKnots(), 1, getLeaderboardPanel()
+                                    .getLeaderboardTable(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
             result.put(DetailColumnType.RACE_GAP_TO_LEADER_IN_SECONDS, new FormattedDoubleLegDetailColumn(
-                    stringConstants.gapToLeaderInSeconds(), new RaceGapToLeaderInSeconds(), 1, getLeaderboardPanel()
-                            .getLeaderboardTable(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
+                    stringConstants.gapToLeaderInSeconds(), stringConstants.gapToLeaderInSecondsUnit(), new RaceGapToLeaderInSeconds(), 1, getLeaderboardPanel()
+                                    .getLeaderboardTable(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
             return result;
         }
 
@@ -910,7 +910,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
      * Also updates the min/max values on the columns
      */
     protected void updateLeaderboard(LeaderboardDAO leaderboard) {
-        selectedRaceColumns.addAll(getRacesAddedNew(this.leaderboard, leaderboard));
+        selectedRaceColumns.addAll(getRacesAddedNew(getLeaderboard(), leaderboard));
         setLeaderboard(leaderboard);
         adjustColumnLayout(leaderboard);
         getData().getList().clear();
@@ -975,7 +975,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     private List<String> getRacesAddedNew(LeaderboardDAO oldLeaderboard, LeaderboardDAO newLeaderboard){
         List<String> result = new ArrayList<String>();
         for (String s : newLeaderboard.getRaceList()) {
-            if(!oldLeaderboard.getRaceList().contains(s)){
+            if (oldLeaderboard == null || !oldLeaderboard.getRaceList().contains(s)) {
                 result.add(s);
             }
         }

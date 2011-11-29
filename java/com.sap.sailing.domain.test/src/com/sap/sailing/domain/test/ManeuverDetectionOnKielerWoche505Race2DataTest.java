@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.util.Iterator;
+import java.util.List;
 import java.util.NavigableSet;
 
 import org.junit.Before;
@@ -19,7 +20,6 @@ import com.sap.sailing.domain.base.impl.DouglasPeucker;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MeterDistance;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.MarkPassing;
@@ -53,18 +53,18 @@ public class ManeuverDetectionOnKielerWoche505Race2DataTest extends KielWeek2011
         Iterator<MarkPassing> hassosMarkPassingsIter = hassosMarkPassings.iterator();
         TimePoint startMarkPassing = hassosMarkPassingsIter.next().getTimePoint();
         TimePoint firstWindwardMarkPassing = hassosMarkPassingsIter.next().getTimePoint();
-        GPSFix[] firstLegFineApproximation = dp.approximate(new MeterDistance(20), startMarkPassing, firstWindwardMarkPassing);
+        List<GPSFixMoving> firstLegFineApproximation = dp.approximate(new MeterDistance(20), startMarkPassing, firstWindwardMarkPassing);
         assertNotNull(firstLegFineApproximation);
-        assertEquals(9, firstLegFineApproximation.length);
-        GPSFix[] firstLegCoarseApproximation = dp.approximate(new MeterDistance(50), startMarkPassing, firstWindwardMarkPassing);
+        assertEquals(9, firstLegFineApproximation.size());
+        List<GPSFixMoving> firstLegCoarseApproximation = dp.approximate(new MeterDistance(50), startMarkPassing, firstWindwardMarkPassing);
         assertNotNull(firstLegCoarseApproximation);
-        assertEquals(4, firstLegCoarseApproximation.length);
+        assertEquals(4, firstLegCoarseApproximation.size());
         TimePoint leewardGatePassing = hassosMarkPassingsIter.next().getTimePoint();
-        GPSFix[] secondLegFineApproximation = dp.approximate(new MeterDistance(20), firstWindwardMarkPassing, leewardGatePassing);
+        List<GPSFixMoving> secondLegFineApproximation = dp.approximate(new MeterDistance(20), firstWindwardMarkPassing, leewardGatePassing);
         assertNotNull(secondLegFineApproximation);
-        assertEquals(7, secondLegFineApproximation.length);
-        GPSFix[] secondLegCoarseApproximation = dp.approximate(new MeterDistance(50), firstWindwardMarkPassing, leewardGatePassing);
+        assertEquals(7, secondLegFineApproximation.size());
+        List<GPSFixMoving> secondLegCoarseApproximation = dp.approximate(new MeterDistance(50), firstWindwardMarkPassing, leewardGatePassing);
         assertNotNull(secondLegCoarseApproximation);
-        assertEquals(3, secondLegCoarseApproximation.length);
+        assertEquals(3, secondLegCoarseApproximation.size());
     }
 }

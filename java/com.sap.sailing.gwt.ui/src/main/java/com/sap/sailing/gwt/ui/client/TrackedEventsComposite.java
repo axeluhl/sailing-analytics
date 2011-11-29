@@ -58,11 +58,11 @@ public class TrackedEventsComposite extends FormPanel implements EventDisplayer,
     private Button btnRefresh = null;
     
     public TrackedEventsComposite(final SailingServiceAsync sailingService, final ErrorReporter errorReporter, final EventRefresher eventRefresher, 
-            StringConstants stringConstants, boolean multiSelection) {
+            StringConstants stringConstants, boolean hasMultiSelection) {
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.eventRefresher = eventRefresher;
-        this.multiSelection = multiSelection;
+        this.multiSelection = hasMultiSelection;
         this.raceSelectionChangeListeners = new HashSet<RaceSelectionChangeListener>();
         
         selectionModel = multiSelection ? new MultiSelectionModel<Triple<EventDAO, RegattaDAO, RaceDAO>>() : new SingleSelectionModel<Triple<EventDAO, RegattaDAO, RaceDAO>>();
@@ -178,12 +178,11 @@ public class TrackedEventsComposite extends FormPanel implements EventDisplayer,
 
         if (raceList != null) {
             for (Triple<EventDAO, RegattaDAO, RaceDAO> raceTriple : raceList.getList()) {
-                if (multiSelection && selectionModel.isSelected(raceTriple)) {
+                if (selectionModel.isSelected(raceTriple)) {
                     result.add(raceTriple);
                 }
             }
         }
-
         return result;
     }
     
@@ -232,21 +231,6 @@ public class TrackedEventsComposite extends FormPanel implements EventDisplayer,
 
     @Override
     public void fillEvents(List<EventDAO> events) {
-/*
-            HorizontalPanel regattaFilterPanel = new HorizontalPanel();
-            panel.add(regattaFilterPanel);
-            
-            Label regattaFilterLabel = new Label("Filter by regatta: ");
-            regattaFilterLabel.setWordWrap(false);
-            regattaFilterPanel.add(regattaFilterLabel);
-
-            regattasComboBox = new ListBox();
-            regattasComboBox.addItem("All Regattas");
-            
-            regattaFilterPanel.add(regattasComboBox);
-*/            
-        
-        
         if(events.size() == 0) {
             raceTable.setVisible(false);
             btnRemove.setVisible(false);

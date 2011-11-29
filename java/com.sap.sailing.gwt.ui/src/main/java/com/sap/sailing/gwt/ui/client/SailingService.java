@@ -12,6 +12,7 @@ import com.sap.sailing.gwt.ui.shared.EventDAO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDAO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDAO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDAO;
+import com.sap.sailing.gwt.ui.shared.ManeuverDAO;
 import com.sap.sailing.gwt.ui.shared.MarkDAO;
 import com.sap.sailing.gwt.ui.shared.Pair;
 import com.sap.sailing.gwt.ui.shared.QuickRankDAO;
@@ -120,4 +121,10 @@ public interface SailingService extends RemoteService {
     void stressTestLeaderboardByName(String leaderboardName, int times) throws Exception;
     
     String[] getCountryCodes();
+    
+    Map<CompetitorDAO, List<GPSFixDAO>> getDouglasPoints(String eventName, String raceName,
+            Map<CompetitorDAO, Date> from, Map<CompetitorDAO, Date> to, double meters);
+
+    Map<CompetitorDAO, List<ManeuverDAO>> getManeuvers(String eventName, String raceName,
+            Map<CompetitorDAO, Date> from, Map<CompetitorDAO, Date> to);
 }
