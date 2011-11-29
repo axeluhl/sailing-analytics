@@ -24,14 +24,14 @@ import com.sap.sailing.domain.tracking.WindSource;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
 
-public class ManouverAnalysisTest extends KielWeek2011BasedTest {
+public class ManeuverAnalysisTest extends KielWeek2011BasedTest {
 
     private SimpleDateFormat dateFormat;
     private long tackDelta;
     private long jibeDelta;
     private long penaltyCircleDelta;
 
-    public ManouverAnalysisTest() throws URISyntaxException, IOException, InterruptedException {
+    public ManeuverAnalysisTest() throws URISyntaxException, IOException, InterruptedException {
         super();
         super.setUp();
         super.setUp("event_20110609_KielerWoch",
