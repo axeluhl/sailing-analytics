@@ -24,14 +24,14 @@ import com.sap.sailing.domain.tracking.WindSource;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
 
-public class DouglasPeuckerManeuverTest extends KielWeek2011BasedTest {
+public class ManouverAnalysisTest extends KielWeek2011BasedTest {
 
     private SimpleDateFormat dateFormat;
     private long tackDelta;
     private long jibeDelta;
     private long penaltyCircleDelta;
 
-    public DouglasPeuckerManeuverTest() throws URISyntaxException, IOException, InterruptedException {
+    public ManouverAnalysisTest() throws URISyntaxException, IOException, InterruptedException {
         super();
         super.setUp();
         super.setUp("event_20110609_KielerWoch",
@@ -110,8 +110,8 @@ public class DouglasPeuckerManeuverTest extends KielWeek2011BasedTest {
 
     private void assertManeuversCounts(List<Maneuver> maneuverList) {
         // TODO count headup and bear away
-        int maneuverHeadUpCount = 0;
-        int maneuverBearAwayCount = 0;
+        //int maneuverHeadUpCount = 0;
+        //int maneuverBearAwayCount = 0;
         int maneuverTackCount = 0;
         int maneuverJibecount = 0;
         int maneuverPenaltyCircle = 0;
@@ -119,10 +119,10 @@ public class DouglasPeuckerManeuverTest extends KielWeek2011BasedTest {
             Type type = maneuver.getType();
             switch (type) {
             case HEAD_UP:
-                maneuverHeadUpCount++;
+                //maneuverHeadUpCount++;
                 break;
             case BEAR_AWAY:
-                maneuverBearAwayCount++;
+                //maneuverBearAwayCount++;
                 break;
             case TACK:
                 maneuverTackCount++;
