@@ -54,7 +54,7 @@ public class ManouverAnalysisTest extends KielWeek2011BasedTest {
     public void testDouglasPeuckerForFindel() throws ParseException {
         Competitor competitor = getCompetitorByName("Findel");
         assertNotNull(competitor);
-        Date fromDate = dateFormat.parse("06/23/1022-16:28:25");
+        Date fromDate = dateFormat.parse("06/23/2011-16:28:25");
         Date toDate = dateFormat.parse("06/23/2011-15:51:05");
         assertNotNull(fromDate);
         assertNotNull(toDate);
