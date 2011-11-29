@@ -71,6 +71,7 @@ import com.sap.sailing.domain.tractracadapter.TracTracConfiguration;
 import com.sap.sailing.gwt.ui.client.SailingService;
 import com.sap.sailing.gwt.ui.shared.BoatClassDAO;
 import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
+import com.sap.sailing.gwt.ui.shared.CompetitorWithRaceDAO;
 import com.sap.sailing.gwt.ui.shared.EventDAO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDAO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDAO;
@@ -1110,8 +1111,8 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
 
     @Override
-    public LeaderboardRowDAO[][] getLeaderboardRowDAOOfRace(String leaderboardName, String raceName, List<CompetitorDAO> competitorDAOs, int steps) throws NoWindException {
-        LeaderboardRowDAO[][] competitorData;
+    public CompetitorWithRaceDAO[][] getCompetitorRaceData(String leaderboardName, String raceName, List<CompetitorDAO> competitorDAOs, int steps) throws NoWindException {
+        CompetitorWithRaceDAO[][] competitorData;
         TrackedRace trackedRace = getService().getLeaderboardByName(leaderboardName).getRaceColumnByName(raceName).getTrackedRace();
         Iterable<Competitor> competitors = trackedRace.getRace().getCompetitors();
         
@@ -1123,32 +1124,29 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 }
             }
         }
-        competitorData = new LeaderboardRowDAO[selectedCompetitor.size()][];
+        competitorData = new CompetitorWithRaceDAO[selectedCompetitor.size()][];
         int i = 0;
         for (Competitor c : selectedCompetitor){
-            List<LeaderboardRowDAO> entries = new ArrayList<LeaderboardRowDAO>();
+            List<CompetitorWithRaceDAO> entries = new ArrayList<CompetitorWithRaceDAO>();
             for (long time = trackedRace.getStart().asMillis(); time < trackedRace.getTimePointOfNewestEvent().asMillis(); time += (trackedRace.getTimePointOfNewestEvent().asMillis()-trackedRace.getStart().asMillis())/steps){
                 MillisecondsTimePoint timePoint = new MillisecondsTimePoint(time);
-                LeaderboardRowDAO row = new LeaderboardRowDAO();
-                row.competitor = getCompetitorDAO(c);
-                row.fieldsByRaceName = new HashMap<String, LeaderboardEntryDAO>();
-                LeaderboardEntryDAO entryDAO = new LeaderboardEntryDAO();
-                entryDAO.legDetails = new ArrayList<LegEntryDAO>();
-                for (Leg leg : trackedRace.getRace().getCourse().getLegs()) {
-                    TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(c, leg);
-                    LegEntryDAO legEntry;
-                    if (trackedLeg != null && trackedLeg.hasStartedLeg(timePoint)) {
-                        legEntry = createLegEntry(trackedLeg, timePoint);
-                    } else {
-                        legEntry = null;
+                CompetitorWithRaceDAO competitorWithRaceEntry = new CompetitorWithRaceDAO();
+                competitorWithRaceEntry.setCompetitor(getCompetitorDAO(c));
+                if (trackedRace != null){
+                    LegEntryDAO legEntry = createLegEntry(trackedRace.getTrackedLeg(c, timePoint), timePoint);
+                    if (legEntry != null){
+                        legEntry.timeInMilliseconds = time;
+                        if (competitorWithRaceEntry.getLegEntry() == null){
+                            competitorWithRaceEntry.setLegEntry(legEntry);
+                            entries.add(competitorWithRaceEntry);
+                        }
+                        else {
+                            competitorWithRaceEntry.updateLegEntry(legEntry);
+                        }
                     }
-                    entryDAO.legDetails.add(legEntry);
                 }
-                
-                row.fieldsByRaceName.put(raceName, entryDAO);
-                entries.add(row);
             }
-            competitorData[i++] = entries.toArray(new LeaderboardRowDAO[0]);
+            competitorData[i++] = entries.toArray(new CompetitorWithRaceDAO[0]);
         }
         
         

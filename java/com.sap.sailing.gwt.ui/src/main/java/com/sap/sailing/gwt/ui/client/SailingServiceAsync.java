@@ -10,11 +10,11 @@ import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
 import com.sap.sailing.domain.tracking.WindSource;
 import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
+import com.sap.sailing.gwt.ui.shared.CompetitorWithRaceDAO;
 import com.sap.sailing.gwt.ui.shared.EventDAO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDAO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDAO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDAO;
-import com.sap.sailing.gwt.ui.shared.LeaderboardRowDAO;
 import com.sap.sailing.gwt.ui.shared.MarkDAO;
 import com.sap.sailing.gwt.ui.shared.Pair;
 import com.sap.sailing.gwt.ui.shared.QuickRankDAO;
@@ -185,6 +185,6 @@ public interface SailingServiceAsync {
 
     void getCountryCodes(AsyncCallback<String[]> callback);
 
-    void getLeaderboardRowDAOOfRace(String eventName, String raceName, List<CompetitorDAO> competitors, int timeStep,
-            AsyncCallback<LeaderboardRowDAO[][]> callback);
+    void getCompetitorRaceData(String eventName, String raceName, List<CompetitorDAO> competitors, int timeStep,
+            AsyncCallback<CompetitorWithRaceDAO[][]> callback);
 }
