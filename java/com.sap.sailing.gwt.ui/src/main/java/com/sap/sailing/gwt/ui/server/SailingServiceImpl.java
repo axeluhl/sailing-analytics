@@ -1161,7 +1161,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
 
     @Override
     public Map<CompetitorDAO, List<ManeuverDAO>> getManeuvers(String eventName, String raceName,
-            Map<CompetitorDAO, Date> from, Map<CompetitorDAO, Date> to) {
+            Map<CompetitorDAO, Date> from, Map<CompetitorDAO, Date> to) throws NoWindException {
         Map<CompetitorDAO, List<ManeuverDAO>> result = new HashMap<CompetitorDAO, List<ManeuverDAO>>();
         TrackedRace trackedRace = getTrackedRace(eventName, raceName);
         for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
