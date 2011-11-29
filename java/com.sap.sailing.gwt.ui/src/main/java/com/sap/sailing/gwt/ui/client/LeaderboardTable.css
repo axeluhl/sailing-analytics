@@ -106,7 +106,6 @@
 
 .cellTableRaceColumnHeader {
 	background-color: #e0e0e0;
-
 }
 
 .cellTableLegColumnHeader {
@@ -116,7 +115,7 @@
 
 .cellTableLegDetailColumnHeader {
 	background-color: #f4f5f6;
-
+  line-height: 1.3;
 }
 
 .cellTableRaceColumn {
