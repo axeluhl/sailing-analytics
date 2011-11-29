@@ -20,6 +20,8 @@ public class ManeuverDAO implements IsSerializable {
     
     public double directionChangeInDegrees;
 
+    public ManeuverDAO() {}
+    
     public ManeuverDAO(String type, PositionDAO position, Date timepoint, SpeedWithBearingDAO speedWithBearingBefore,
             SpeedWithBearingDAO speedWithBearingAfter, double directionChangeInDegrees) {
         super();

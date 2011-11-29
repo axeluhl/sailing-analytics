@@ -5,7 +5,7 @@ import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.tracking.Maneuver;
 
-public class ManeuverImpl implements Maneuver {
+public class ManeuverImpl extends AbstractGPSFixImpl implements Maneuver {
     private final Type type;
     private final Position position;
     private final TimePoint timePoint;

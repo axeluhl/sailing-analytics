@@ -39,7 +39,12 @@ public abstract class AbstractSpeedWithBearingImpl extends AbstractSpeedImpl imp
                 && getBearing().equals(((SpeedWithBearing) object).getBearing());
     }
 
-    public static CourseChange getCourseChangeRequiredToReach(SpeedWithBearing from, SpeedWithBearing to, Position position, TimePoint timePoint) {
+    @Override
+    public CourseChange getCourseChangeRequiredToReach(SpeedWithBearing targetSpeedWithBearing) {
+        return AbstractSpeedWithBearingImpl.getCourseChangeRequiredToReach(this, targetSpeedWithBearing);
+    }
+
+    public static CourseChange getCourseChangeRequiredToReach(SpeedWithBearing from, SpeedWithBearing to) {
         double courseChangeInDegrees = to.getBearing().getDegrees() - from.getBearing().getDegrees();
         if (courseChangeInDegrees < -180.) {
             courseChangeInDegrees += 360.;
@@ -47,7 +52,7 @@ public abstract class AbstractSpeedWithBearingImpl extends AbstractSpeedImpl imp
             courseChangeInDegrees -= 360.;
         }
         double speedChangeInKnots = to.getKnots() - from.getKnots();
-        return new CourseChangeImpl(courseChangeInDegrees, speedChangeInKnots, position, timePoint, from);
+        return new CourseChangeImpl(courseChangeInDegrees, speedChangeInKnots);
     }
     
     @Override

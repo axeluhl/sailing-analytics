@@ -11,5 +11,11 @@ public interface SpeedWithBearing extends Speed {
      */
     Position travelTo(Position pos, TimePoint from, TimePoint to);
 
+    /**
+     * Computes the minimal (in terms of bearing change) course and speed change required to reach the
+     * target speed and bearing specified.
+     */
+    CourseChange getCourseChangeRequiredToReach(SpeedWithBearing targetSpeedWithBearing);
+
     SpeedWithBearing applyCourseChange(CourseChange courseChange);
 }

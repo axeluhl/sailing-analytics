@@ -38,19 +38,17 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
     private final DynamicTrackedEvent trackedEvent;
     private final com.tractrac.clientmodule.Event tractracEvent;
     private final long millisecondsOverWhichToAverageWind;
-    private final long millisecondsOverWhichToAverageSpeed;
     private final WindStore windStore;
     private final DynamicRaceDefinitionSet raceDefinitionSetToUpdate;
     
     public RaceCourseReceiver(DomainFactory domainFactory, DynamicTrackedEvent trackedEvent,
             com.tractrac.clientmodule.Event tractracEvent, WindStore windStore,
             DynamicRaceDefinitionSet raceDefinitionSetToUpdate,
-            long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed) {
+            long millisecondsOverWhichToAverageWind) {
         super(domainFactory);
         this.trackedEvent = trackedEvent;
         this.tractracEvent = tractracEvent;
         this.millisecondsOverWhichToAverageWind = millisecondsOverWhichToAverageWind;
-        this.millisecondsOverWhichToAverageSpeed = millisecondsOverWhichToAverageSpeed;
         this.windStore = windStore;
         this.raceDefinitionSetToUpdate = raceDefinitionSetToUpdate;
     }
@@ -112,7 +110,9 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
 
     private void createTrackedRace(RaceDefinition race) {
         trackedEvent.createTrackedRace(race,
-                windStore, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed, raceDefinitionSetToUpdate);
+                windStore, millisecondsOverWhichToAverageWind,
+                /* time over which to average speed: */ race.getBoatClass().getApproximateManeuverDurationInMilliseconds(),
+                raceDefinitionSetToUpdate);
     }
 
 }
