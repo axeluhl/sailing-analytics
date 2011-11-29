@@ -51,6 +51,8 @@ import com.sap.sailing.util.Util;
 public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     private static final Logger logger = Logger.getLogger(TrackedRaceImpl.class.getName());
 
+    private static final double PENALTY_CIRCLE_DEGREES_THRESHOLD = 320;
+
     // TODO observe the race course; if it changes, update leg structures; consider fine-grained update events that tell what changed
     private final RaceDefinition race;
     
@@ -736,7 +738,9 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         TrackedLegOfCompetitor legBeforeManeuver = getTrackedLeg(competitor, timePointBeforeManeuver);
         TrackedLegOfCompetitor legAfterManeuver = getTrackedLeg(competitor, timePointAfterManeuver);
         Maneuver.Type maneuverType;
-        if (legBeforeManeuver != legAfterManeuver) {
+        if (totalCourseChangeInDegrees > PENALTY_CIRCLE_DEGREES_THRESHOLD) {
+            maneuverType = Type.PENALTY_CIRCLE;
+        } else if (legBeforeManeuver != legAfterManeuver) {
             maneuverType = Type.MARK_PASSING;
         } else {
             LegType legType = getTrackedLeg(legBeforeManeuver.getLeg()).getLegType(timePointBeforeManeuver);
