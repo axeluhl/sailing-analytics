@@ -765,8 +765,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
                 from.put(competitorDAO, fixes.get(competitorDAO).get(firstShownFix.get(competitorDAO)).timepoint);
                 Map<CompetitorDAO, Date> to = new HashMap<CompetitorDAO, Date>();
                 to.put(competitorDAO, fixes.get(competitorDAO).get(lastShownFix.get(competitorDAO)).timepoint);
-                sailingService.getDouglasPoints(event.name, race.name, from, to, /* epsilon/meters */5,
-                        to, /* epsilon/meters */ 3, new AsyncCallback<Map<CompetitorDAO, List<GPSFixDAO>>>() {
+                sailingService.getDouglasPoints(event.name, race.name, from, to, /* epsilon/meters */ 3, new AsyncCallback<Map<CompetitorDAO, List<GPSFixDAO>>>() {
                             @Override
                             public void onFailure(Throwable caught) {
                                 errorReporter.reportError("Error obtaining douglas positions: " + caught.getMessage());
