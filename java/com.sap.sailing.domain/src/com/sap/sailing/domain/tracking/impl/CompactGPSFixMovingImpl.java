@@ -1,11 +1,13 @@
 package com.sap.sailing.domain.tracking.impl;
 
 import com.sap.sailing.domain.base.Bearing;
+import com.sap.sailing.domain.base.CourseChange;
 import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.impl.AbstractBearing;
 import com.sap.sailing.domain.base.impl.AbstractSpeedImpl;
+import com.sap.sailing.domain.base.impl.AbstractSpeedWithBearingImpl;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 
 /**
@@ -37,6 +39,11 @@ public class CompactGPSFixMovingImpl extends CompactGPSFixImpl implements GPSFix
             return pos.translateGreatCircle(getBearing(), this.travel(from, to));
         }
         
+        @Override
+        public SpeedWithBearing applyCourseChange(CourseChange courseChange) {
+            return AbstractSpeedWithBearingImpl.applyCourseChange(this, courseChange);
+        }
+
         @Override
         public String toString() {
             return super.toString()+" to "+getBearing().getDegrees()+"°";
@@ -78,6 +85,11 @@ public class CompactGPSFixMovingImpl extends CompactGPSFixImpl implements GPSFix
     @Override
     public SpeedWithBearing getSpeed() {
         return new CompactSpeedWithBearing();
+    }
+
+    @Override
+    public CourseChange getCourseChangeRequiredToReach(SpeedWithBearing targetSpeedWithBearing) {
+        return AbstractSpeedWithBearingImpl.getCourseChangeRequiredToReach(getSpeed(), targetSpeedWithBearing, getPosition(), getTimePoint());
     }
 
     @Override

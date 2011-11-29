@@ -12,9 +12,10 @@ public class ManeuverImpl implements Maneuver {
     private final SpeedWithBearing speedWithBearingBefore;
     private final SpeedWithBearing speedWithBearingAfter;
     private final long timeInMillisecondsUntilBackToConstantSpeed;
+    private final double directionChangeInDegrees;
 
     public ManeuverImpl(Type type, Position position, TimePoint timePoint, SpeedWithBearing speedWithBearingBefore,
-            SpeedWithBearing speedWithBearingAfter, long timeInMillisecondsUntilBackToConstantSpeed) {
+            SpeedWithBearing speedWithBearingAfter, long timeInMillisecondsUntilBackToConstantSpeed, double directionChangeInDegrees) {
         super();
         this.type = type;
         this.position = position;
@@ -22,6 +23,7 @@ public class ManeuverImpl implements Maneuver {
         this.speedWithBearingBefore = speedWithBearingBefore;
         this.speedWithBearingAfter = speedWithBearingAfter;
         this.timeInMillisecondsUntilBackToConstantSpeed = timeInMillisecondsUntilBackToConstantSpeed;
+        this.directionChangeInDegrees = directionChangeInDegrees;
     }
     
     @Override
@@ -52,6 +54,11 @@ public class ManeuverImpl implements Maneuver {
     @Override
     public SpeedWithBearing getSpeedWithBearingAfter() {
         return speedWithBearingAfter;
+    }
+
+    @Override
+    public double getDirectionChangeInDegrees() {
+        return directionChangeInDegrees;
     }
 
 }
