@@ -1,5 +1,10 @@
 package com.sap.sailing.domain.tracking.impl;
 
+import com.sap.sailing.domain.base.Bearing;
+import com.sap.sailing.domain.base.Distance;
+import com.sap.sailing.domain.base.Speed;
+import com.sap.sailing.domain.base.SpeedWithBearing;
+import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.tracking.GPSFix;
 
 public abstract class AbstractGPSFixImpl implements GPSFix {
@@ -33,4 +38,14 @@ public abstract class AbstractGPSFixImpl implements GPSFix {
             return false;
         return true;
     }
+
+    @Override
+    public SpeedWithBearing getSpeedAndBearingRequiredToReach(GPSFix to) {
+        Distance distance = getPosition().getDistance(to.getPosition());
+        Bearing bearing = getPosition().getBearingGreatCircle(to.getPosition());
+        Speed speed = distance.inTime(to.getTimePoint().asMillis()-getTimePoint().asMillis());
+        return new KnotSpeedWithBearingImpl(speed.getKnots(), bearing);
+    }
+    
+    
 }

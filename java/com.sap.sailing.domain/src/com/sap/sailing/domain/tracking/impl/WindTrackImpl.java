@@ -254,6 +254,10 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
         public SpeedWithBearing applyCourseChange(CourseChange courseChange) {
             return null;
         }
+        @Override
+        public CourseChange getCourseChangeRequiredToReach(SpeedWithBearing targetSpeedWithBearing) {
+            return null;
+        }
     }
 
     @Override

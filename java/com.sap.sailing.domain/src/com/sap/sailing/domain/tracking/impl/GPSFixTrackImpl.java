@@ -46,6 +46,10 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         public Position getPosition() {
             return null;
         }
+        @Override
+        public SpeedWithBearing getSpeedAndBearingRequiredToReach(GPSFix to) {
+            return null;
+        }
     }
     
     protected void setMillisecondsOverWhichToAverage(long millisecondsOverWhichToAverage) {
