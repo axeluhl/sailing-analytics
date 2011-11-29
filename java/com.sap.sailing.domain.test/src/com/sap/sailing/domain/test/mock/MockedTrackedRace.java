@@ -20,6 +20,7 @@ import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
+import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.NoWindException;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
@@ -408,6 +409,12 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
     @Override
     public List<GPSFixMoving> approximate(Competitor competitor, Distance maxDistance, TimePoint from, TimePoint to) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public List<Maneuver> getManeuvers(Competitor competitor, TimePoint from, TimePoint to) {
         // TODO Auto-generated method stub
         return null;
     }

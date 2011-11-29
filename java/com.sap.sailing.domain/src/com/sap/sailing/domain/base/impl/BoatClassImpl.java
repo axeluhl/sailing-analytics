@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.base.impl;
 
 import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.base.Distance;
 
 public class BoatClassImpl extends NamedImpl implements BoatClass {
     /**
@@ -13,6 +14,8 @@ public class BoatClassImpl extends NamedImpl implements BoatClass {
     private static final double MINIMUM_ANGLE_BETWEEN_DIFFERENT_TACKS_UPWIND = 45.;
     
     private static final double MINIMUM_ANGLE_BETWEEN_DIFFERENT_TACKS_DOWNWIND = 15.;
+
+    private static final Distance MAXIMUM_DISTANCE_FOR_COURSE_APPROXIMATION = new MeterDistance(3);
     
     private final long approximateManeuverDurationInMilliseconds;
 
@@ -39,6 +42,11 @@ public class BoatClassImpl extends NamedImpl implements BoatClass {
     @Override
     public double getMinimumAngleBetweenDifferentTacksDownwind() {
         return MINIMUM_ANGLE_BETWEEN_DIFFERENT_TACKS_DOWNWIND;
+    }
+
+    @Override
+    public Distance getMaximumDistanceForCourseApproximation() {
+        return MAXIMUM_DISTANCE_FOR_COURSE_APPROXIMATION;
     }
 
 }
