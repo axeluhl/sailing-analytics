@@ -14,6 +14,7 @@ import com.sap.sailing.gwt.ui.shared.EventDAO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDAO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDAO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDAO;
+import com.sap.sailing.gwt.ui.shared.ManeuverDAO;
 import com.sap.sailing.gwt.ui.shared.MarkDAO;
 import com.sap.sailing.gwt.ui.shared.Pair;
 import com.sap.sailing.gwt.ui.shared.QuickRankDAO;
@@ -184,6 +185,17 @@ public interface SailingServiceAsync {
 
     void getCountryCodes(AsyncCallback<String[]> callback);
 
+    /**
+     * Approximates pieces of GPS tracks using a Douglas-Peucker algorithm and returns the approximation as a
+     * sequence of {@link GPSFixDAO}s for each competitors for which approximation was requested.
+     */
     void getDouglasPoints(String eventName, String raceName, Map<CompetitorDAO, Date> from,
             Map<CompetitorDAO, Date> to, double meters, AsyncCallback<Map<CompetitorDAO, List<GPSFixDAO>>> callback);
+
+    /**
+     * Approximates pieces of GPS tracks using a Douglas-Peucker algorithm and returns the approximation as a
+     * sequence of {@link GPSFixDAO}s for each competitors for which approximation was requested.
+     */
+    void getManeuvers(String eventName, String raceName, Map<CompetitorDAO, Date> from,
+            Map<CompetitorDAO, Date> to, AsyncCallback<Map<CompetitorDAO, List<ManeuverDAO>>> callback);
 }

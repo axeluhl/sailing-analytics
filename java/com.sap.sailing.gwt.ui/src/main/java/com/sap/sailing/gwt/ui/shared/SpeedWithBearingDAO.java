@@ -16,6 +16,6 @@ public class SpeedWithBearingDAO implements IsSerializable {
     
     @Override
     public String toString() {
-        return ""+speedInKnots+"kn to "+bearingInDegrees+"&deg;";
+        return ""+speedInKnots+"kn to "+bearingInDegrees+"deg";
     }
 }
