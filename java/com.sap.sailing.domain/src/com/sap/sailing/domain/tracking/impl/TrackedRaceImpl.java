@@ -633,6 +633,11 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         return douglasPeucker.approximate(maxDistance, from, to);
     }
     
+    @Override
+    public List<Maneuver> getManeuvers(Competitor competitor, TimePoint from, TimePoint to) {
+        return detectManeuvers(competitor, approximate(competitor, getRace().getBoatClass().getMaximumDistanceForCourseApproximation(), from, to));
+    }
+    
     /**
      * Tries to detect a maneuver on the <code>competitor</code>'s track around a given time point. The time period is
      * taken from the {@link BoatClass#getApproximateManeuverDurationInMilliseconds() boat class}. If no maneuver is
@@ -657,16 +662,22 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                     courseChangeSequenceInSameDirection.add(courseChange);
                 } else {
                     // course change in different direction; cluster the course changes in same direction so far, then start new list
-                    List<Maneuver> maneuver = summarizeDirectionChangesIntoManeuvers(courseChangeSequenceInSameDirection);
+                    List<Maneuver> maneuvers = groupDirectionChangesIntoManeuvers(courseChangeSequenceInSameDirection);
+                    result.addAll(maneuvers);
                 }
             }
         }
-        // TODO first group fixes into sequences of direction changes in the same direction
-        // TODO implement detectManeuvers
         return result;
     }
 
-    private List<Maneuver> summarizeDirectionChangesIntoManeuvers(List<CourseChange> courseChangeSequenceInSameDirection) {
+    /**
+     * Groups the {@link CourseChange} sequence into groups where the {@link CourseChange#getTimePoint() times} of the
+     * course change
+     * @param courseChangeSequenceInSameDirection
+     * @return
+     */
+    private List<Maneuver> groupDirectionChangesIntoManeuvers(List<CourseChange> courseChangeSequenceInSameDirection) {
+        
         // TODO Auto-generated method stub
         return null;
     }

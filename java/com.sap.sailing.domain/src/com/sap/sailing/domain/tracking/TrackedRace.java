@@ -215,4 +215,6 @@ public interface TrackedRace {
      * track's fixes and the approximation is at most <code>maxDistance</code>.
      */
     List<GPSFixMoving> approximate(Competitor competitor, Distance maxDistance, TimePoint from, TimePoint to);
+
+    List<Maneuver> getManeuvers(Competitor competitor, TimePoint from, TimePoint to);
 }
