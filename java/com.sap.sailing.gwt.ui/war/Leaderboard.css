@@ -41,7 +41,7 @@ table {
   border-collapse: separate; }
 
 table td, table th {
-  vertical-align: middle;  }
+  vertical-align: bottom;  }
 
 
 .LogoAndTitlePanel {
@@ -81,7 +81,15 @@ table td, table th {
   border-top: 2px solid #fff; 
   height: 30px; }
 
+  .refreshAndSettings table td {
+    padding: 0 10px 0 0;}
+  .refreshAndSettings table table td{
+    padding: 0 0 0 0;}
+
 .race-name {
   margin: 0 10px 0 0;}
-
-
+  
+input.magnifier{
+	display: block;
+	margin: 0 0 5px 0;
+}
