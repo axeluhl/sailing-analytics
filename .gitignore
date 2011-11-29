@@ -12,3 +12,4 @@ java/com.sap.sailing.gwt.ui/SailingGWT.launch
 java/com.sap.sailing.gwt.ui.test/bin/*
 
 *.gitignore
+java/com.sap.sailing.gwt.ui/.settings/com.google.gdt.eclipse.core.prefs

@@ -5,9 +5,9 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardRowDAO;
 
 
 public class RaceAverageSpeedColumn extends FormattedDoubleLegDetailColumn {
-    public RaceAverageSpeedColumn(String title, LegDetailField<Double> field, int decimals,
+    public RaceAverageSpeedColumn(String title, String unit, LegDetailField<Double> field, int decimals,
             CellTable<LeaderboardRowDAO> leaderboardTable, String headerStyle, String columnStyle) {
-        super(title, field, decimals, leaderboardTable, headerStyle, columnStyle);
+        super(title, unit, field, decimals, leaderboardTable, headerStyle, columnStyle);
     }
 
     

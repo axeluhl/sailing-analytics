@@ -8,35 +8,38 @@
  */
 .cellTableHeader {
 	position: relative;
-    vertical-align: middle;
+    vertical-align: bottom;
 	background-color: #e5e5e5;
 	border-right: 1px solid #ffffff !important;
 	border-top: none !important;
 	border-bottom: 1px solid #c9caca !important;
 	padding: 3px 12px;
+	padding-bottom: 5px;
 	text-align: center;
 }
 
 .cellTableFirstColumnHeader {
 	position: relative;
-    vertical-align: middle;
+    vertical-align: bottom;
 	background-color: #e5e5e5;
 	border-left: none !important;
 	border-right: 1px solid #ffffff !important;
 	border-top: none !important;
 	border-bottom: 1px solid #c9caca !important;
 	padding: 3px 12px;
+		padding-bottom: 5px;
 	text-align: center;
 }
 
 .cellTableLastColumnHeader {
 	position: relative;
-    vertical-align: middle;
+    vertical-align: bottom;
 	background-color: #e5e5e5;
 	border-right: 1px solid #c9caca !important;
 	border-top: none !important;
 	border-bottom: 1px solid #c9caca !important;
 	padding: 3px 12px;
+		padding-bottom: 5px;
 	text-align: center;
 }
 
@@ -103,17 +106,17 @@
 
 .cellTableRaceColumnHeader {
 	background-color: #e0e0e0;
-	padding: 3px 12px;
+
 }
 
 .cellTableLegColumnHeader {
 	background-color: #efefef;
-	padding: 3px 12px;
+
 }
 
 .cellTableLegDetailColumnHeader {
 	background-color: #f4f5f6;
-	padding: 3px 12px;
+
 }
 
 .cellTableRaceColumn {
