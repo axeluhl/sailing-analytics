@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.test.mock;
 
+import java.util.List;
 import java.util.NavigableSet;
 
 import com.sap.sailing.domain.base.BoatClass;
@@ -401,6 +402,12 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
     @Override
     public Wind getDirectionFromStartToNextMark(TimePoint at) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public List<GPSFixMoving> approximate(Competitor competitor, Distance maxDistance, TimePoint from, TimePoint to) {
         // TODO Auto-generated method stub
         return null;
     }

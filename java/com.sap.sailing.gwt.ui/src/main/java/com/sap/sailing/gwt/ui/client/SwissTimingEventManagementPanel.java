@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.client;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -10,6 +11,8 @@ import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.text.client.DateTimeFormatRenderer;
@@ -24,6 +27,7 @@ import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.IntegerBox;
 import com.google.gwt.user.client.ui.Label;
@@ -54,6 +58,7 @@ public class SwissTimingEventManagementPanel extends FormPanel implements EventD
     private final ErrorReporter errorReporter;
     private final IntegerBox portIntegerbox;
     private final TextBox hostnameTextbox;
+    private final TextBox filterEventsTextbox;
     private final ListDataProvider<SwissTimingRaceRecordDAO> raceList;
     private final CellTable<SwissTimingRaceRecordDAO> raceTable;
     private final Map<String, SwissTimingConfigurationDAO> previousConfigurations;
@@ -61,7 +66,8 @@ public class SwissTimingEventManagementPanel extends FormPanel implements EventD
     private final TrackedEventsComposite trackedEventsComposite;
     private final EventRefresher eventRefresher;
     private final CheckBox canSendRequestsCheckbox;
-    private DateTimeFormatRenderer dateFormatter = new DateTimeFormatRenderer(DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_LONG));
+    private final DateTimeFormatRenderer dateFormatter = new DateTimeFormatRenderer(DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_LONG));
+    private final List<SwissTimingRaceRecordDAO> availableSwissTimingRaces = new ArrayList<SwissTimingRaceRecordDAO>();
 
     public SwissTimingEventManagementPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
             EventRefresher eventRefresher, StringConstants stringConstants) {
@@ -176,7 +182,40 @@ public class SwissTimingEventManagementPanel extends FormPanel implements EventD
         trackedRacesPanel.setWidth("100%");
         trackedRacesCaptionPanel.setContentWidget(trackedRacesPanel);
         trackedRacesCaptionPanel.setStyleName("bold");
+
+        // text box for filtering the cell table
+        HorizontalPanel filterPanel = new HorizontalPanel();
+        filterPanel.setSpacing(5);
+        racesPanel.add(filterPanel);
         
+        Label lblFilterEvents = new Label("Filter races by name:");
+        filterPanel.add(lblFilterEvents);
+        filterPanel.setCellVerticalAlignment(lblFilterEvents, HasVerticalAlignment.ALIGN_MIDDLE);
+        
+        filterEventsTextbox = new TextBox();
+        filterEventsTextbox.addKeyUpHandler(new KeyUpHandler() {
+            @Override
+            public void onKeyUp(KeyUpEvent event) {
+                String text = filterEventsTextbox.getText();
+
+                raceList.getList().clear();
+                
+                if(text == null || text.isEmpty()) {
+                    raceList.getList().addAll(availableSwissTimingRaces);
+                } else {
+                    String textAsUppercase = text.toUpperCase();
+                    for(SwissTimingRaceRecordDAO dao: availableSwissTimingRaces) {
+                        if(dao.ID != null) {
+                            if(dao.ID.toUpperCase().contains(textAsUppercase))
+                                raceList.getList().add(dao);
+                        }
+                    }
+                }
+            }
+        });
+        
+        filterPanel.add(filterEventsTextbox);
+
         HorizontalPanel racesHorizontalPanel = new HorizontalPanel();
         racesPanel.add(racesHorizontalPanel);
 
@@ -213,9 +252,6 @@ public class SwissTimingEventManagementPanel extends FormPanel implements EventD
         declinationCheckbox.setWordWrap(false);
         declinationCheckbox.setValue(true);
         trackPanel.add(declinationCheckbox);
-        
-  //      trackedRacesTreeView = new RaceTreeView(stringConstants, /* multiselection */ true);
-  //      trackedRacesPanel.add(trackedRacesTreeView);
         
         trackedEventsComposite = new TrackedEventsComposite(sailingService, errorReporter, eventRefresher,
                     stringConstants, /* multiselection */ true);
@@ -295,10 +331,15 @@ public class SwissTimingEventManagementPanel extends FormPanel implements EventD
 
             @Override
             public void onSuccess(final List<SwissTimingRaceRecordDAO> result) {
+                availableSwissTimingRaces.clear();
+                if (result != null)
+                    availableSwissTimingRaces.addAll(result);
+
                 raceList.getList().clear();
-                if (result != null) {
-                    raceList.getList().addAll(result);
-                }
+                raceList.getList().addAll(availableSwissTimingRaces);
+
+                filterEventsTextbox.setText(null);
+
                 // store a successful configuration in the database for later retrieval
                 final String configName = hostname+":"+port;
                 sailingService.storeSwissTimingConfiguration(configName, hostname, port, canSendRequests,
@@ -359,7 +400,6 @@ public class SwissTimingEventManagementPanel extends FormPanel implements EventD
 
     @Override
     public void fillEvents(List<EventDAO> result) {
-    //    trackedRacesTreeView.fillEvents(result);
         trackedEventsComposite.fillEvents(result);
     }
 

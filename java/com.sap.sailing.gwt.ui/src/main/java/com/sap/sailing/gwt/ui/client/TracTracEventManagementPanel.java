@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.client;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -63,16 +64,17 @@ public class TracTracEventManagementPanel extends FormPanel implements EventDisp
     private final IntegerBox livePortIntegerbox;
     private final TextBox hostnameTextbox;
     private final TextBox eventNameTextbox;
+    private final TextBox filterEventsTextbox;
     private final ListDataProvider<TracTracRaceRecordDAO> raceList;
     private final CellTable<TracTracRaceRecordDAO> raceTable;
     private final Map<String, TracTracConfigurationDAO> previousConfigurations;
     private final ListBox previousConfigurationsComboBox;
     private final Grid grid;
-//    private final RaceTreeView trackedRacesTreeView;
     private final TrackedEventsComposite trackedEventsComposite;
     private final EventRefresher eventRefresher;
-    private DateTimeFormatRenderer dateFormatter = new DateTimeFormatRenderer(DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_LONG));
-
+    private final DateTimeFormatRenderer dateFormatter = new DateTimeFormatRenderer(DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_LONG));
+    private final List<TracTracRaceRecordDAO> availableTracTracRaces = new ArrayList<TracTracRaceRecordDAO>();
+    
     public TracTracEventManagementPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
             EventRefresher eventRefresher, StringConstants stringConstants) {
         this.sailingService = sailingService;
@@ -273,13 +275,46 @@ public class TracTracEventManagementPanel extends FormPanel implements EventDisp
         trackedRacesPanel.setWidth("100%");
         trackedRacesCaptionPanel.setContentWidget(trackedRacesPanel);
         trackedRacesCaptionPanel.setStyleName("bold");
+
+        // text box for filtering the cell table
+        HorizontalPanel filterPanel = new HorizontalPanel();
+        filterPanel.setSpacing(5);
+        racesPanel.add(filterPanel);
+        
+        Label lblFilterEvents = new Label("Filter races by name:");
+        filterPanel.add(lblFilterEvents);
+        filterPanel.setCellVerticalAlignment(lblFilterEvents, HasVerticalAlignment.ALIGN_MIDDLE);
+        
+        filterEventsTextbox = new TextBox();
+        filterEventsTextbox.addKeyUpHandler(new KeyUpHandler() {
+            @Override
+            public void onKeyUp(KeyUpEvent event) {
+                String text = filterEventsTextbox.getText();
+
+                raceList.getList().clear();
+                
+                if(text == null || text.isEmpty()) {
+                    raceList.getList().addAll(availableTracTracRaces);
+                } else {
+                    String textAsUppercase = text.toUpperCase();
+                    for(TracTracRaceRecordDAO dao: availableTracTracRaces) {
+                        if(dao.name != null) {
+                            if(dao.name.toUpperCase().contains(textAsUppercase))
+                                raceList.getList().add(dao);
+                        }
+                    }
+                }
+            }
+        });
+        
+        filterPanel.add(filterEventsTextbox);
         
         HorizontalPanel racesHorizontalPanel = new HorizontalPanel();
         racesPanel.add(racesHorizontalPanel);
 
         VerticalPanel trackPanel = new VerticalPanel();
         trackPanel.setStyleName("paddedPanel");
-
+        
         raceNameColumn.setSortable(true);
         raceStartTrackingColumn.setSortable(true);
         
@@ -311,9 +346,6 @@ public class TracTracEventManagementPanel extends FormPanel implements EventDisp
         declinationCheckbox.setWordWrap(false);
         declinationCheckbox.setValue(true);
         trackPanel.add(declinationCheckbox);
-        
-  //      trackedRacesTreeView = new RaceTreeView(stringConstants, /* multiselection */ true);
-  //      trackedRacesPanel.add(trackedRacesTreeView);
         
         trackedEventsComposite = new TrackedEventsComposite(sailingService, errorReporter, eventRefresher,
                     stringConstants, /* multiselection */ true);
@@ -411,10 +443,15 @@ public class TracTracEventManagementPanel extends FormPanel implements EventDisp
 
             @Override
             public void onSuccess(final Pair<String, List<TracTracRaceRecordDAO>> result) {
+                availableTracTracRaces.clear();
+                if (result.getB() != null)
+                    availableTracTracRaces.addAll(result.getB());
+
                 raceList.getList().clear();
-                if (result.getB() != null) {
-                    raceList.getList().addAll(result.getB());
-                }
+                raceList.getList().addAll(availableTracTracRaces);
+
+                filterEventsTextbox.setText(null);
+                
                 // store a successful configuration in the database for later retrieval
                 sailingService.storeTracTracConfiguration(result.getA(), jsonURL, liveDataURI, storedDataURI,
                         new AsyncCallback<Void>() {

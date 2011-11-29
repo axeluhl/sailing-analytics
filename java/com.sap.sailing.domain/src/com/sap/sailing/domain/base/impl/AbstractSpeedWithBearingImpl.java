@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.base.impl;
 
 import com.sap.sailing.domain.base.Bearing;
+import com.sap.sailing.domain.base.CourseChange;
 import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.TimePoint;
@@ -37,4 +38,33 @@ public abstract class AbstractSpeedWithBearingImpl extends AbstractSpeedImpl imp
         return super.equals(object) && object instanceof SpeedWithBearing
                 && getBearing().equals(((SpeedWithBearing) object).getBearing());
     }
+
+    public static CourseChange getCourseChangeRequiredToReach(SpeedWithBearing from, SpeedWithBearing to, Position position, TimePoint timePoint) {
+        double courseChangeInDegrees = to.getBearing().getDegrees() - from.getBearing().getDegrees();
+        if (courseChangeInDegrees < -180.) {
+            courseChangeInDegrees += 360.;
+        } else if (courseChangeInDegrees > 180.) {
+            courseChangeInDegrees -= 360.;
+        }
+        double speedChangeInKnots = to.getKnots() - from.getKnots();
+        return new CourseChangeImpl(courseChangeInDegrees, speedChangeInKnots, position, timePoint);
+    }
+    
+    @Override
+    public SpeedWithBearing applyCourseChange(CourseChange courseChange) {
+        return applyCourseChange(this, courseChange);
+    }
+    
+    public static SpeedWithBearing applyCourseChange(SpeedWithBearing from, CourseChange courseChange) {
+        double newBearingDeg = from.getBearing().getDegrees() + courseChange.getCourseChangeInDegrees();
+        if (newBearingDeg < 0) {
+            newBearingDeg += 360;
+        } else if (newBearingDeg > 360) {
+            newBearingDeg -= 360;
+        }
+        Bearing newBearing = new DegreeBearingImpl(newBearingDeg);
+        double newSpeedInKnots = from.getKnots()+courseChange.getSpeedChangeInKnots();
+        return new KnotSpeedWithBearingImpl(newSpeedInKnots, newBearing);
+    }
+    
 }

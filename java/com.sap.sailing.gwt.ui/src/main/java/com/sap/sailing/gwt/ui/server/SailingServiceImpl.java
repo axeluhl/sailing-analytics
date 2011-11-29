@@ -40,7 +40,6 @@ import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.base.impl.DegreePosition;
-import com.sap.sailing.domain.base.impl.DouglasPeucker;
 import com.sap.sailing.domain.base.impl.KilometersPerHourSpeedImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
@@ -1117,28 +1116,23 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             Map<CompetitorDAO, Date> from, Map<CompetitorDAO, Date> to,
             double meters) {
         Map<CompetitorDAO, List<GPSFixDAO>> result = new HashMap<CompetitorDAO, List<GPSFixDAO>>();
-        Event event = getService().getEventByName(eventName);
-        RaceDefinition race = getRaceByName(event, raceName);
-        TrackedRace trackedRace = getService().getOrCreateTrackedEvent(event).getTrackedRace(race);
+        TrackedRace trackedRace = getTrackedRace(eventName, raceName);
         MeterDistance maxDistance = new MeterDistance(meters);
         for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
             CompetitorDAO competitorDAO = getCompetitorDAO(competitor);
             if (from.containsKey(competitorDAO)) {
                 // get Track of competitor
-                GPSFixTrack<Competitor, GPSFixMoving> gpsFixTrack = getTrackedRace(eventName, raceName).getTrack(
-                        competitor);
-                DouglasPeucker<Competitor, GPSFixMoving> douglas = new DouglasPeucker<Competitor, GPSFixMoving>(
-                        gpsFixTrack);
+                GPSFixTrack<Competitor, GPSFixMoving> gpsFixTrack = trackedRace.getTrack(competitor);
                 // Distance for DouglasPeucker
                 TimePoint timePointFrom = new MillisecondsTimePoint(from.get(competitorDAO));
                 TimePoint timePointTo = new MillisecondsTimePoint(to.get(competitorDAO));
-                GPSFix[] gpsFixDouglas = douglas.approximate(maxDistance, timePointFrom, timePointTo);
+                List<GPSFixMoving> gpsFixApproximation = trackedRace.approximate(competitor, maxDistance, timePointFrom, timePointTo);
                 List<GPSFixDAO> gpsFixDouglasList = new ArrayList<GPSFixDAO>();
-                for (int i = 0; i < gpsFixDouglas.length; i++) {
-                    GPSFix fix = gpsFixDouglas[i];
+                for (int i = 0; i < gpsFixApproximation.size(); i++) {
+                    GPSFix fix = gpsFixApproximation.get(i);
                     SpeedWithBearing speedWithBearing;
-                    if (i<gpsFixDouglas.length-1) {
-                        GPSFix next = gpsFixDouglas[i+1];
+                    if (i<gpsFixApproximation.size()-1) {
+                        GPSFix next = gpsFixApproximation.get(i+1);
                         Bearing bearing = fix.getPosition().getBearingGreatCircle(next.getPosition());
                         Speed speed = fix.getPosition().getDistance(next.getPosition()).inTime(
                                 next.getTimePoint().asMillis()-fix.getTimePoint().asMillis());

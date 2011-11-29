@@ -280,4 +280,5 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     public DynamicTrackedEvent getTrackedEvent() {
         return (DynamicTrackedEvent) super.getTrackedEvent();
     }
+
 }
