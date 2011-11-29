@@ -33,6 +33,7 @@ import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.Maneuver;
+import com.sap.sailing.domain.tracking.Maneuver.Type;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.NoWindError;
 import com.sap.sailing.domain.tracking.NoWindException;
@@ -635,7 +636,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     }
     
     @Override
-    public List<Maneuver> getManeuvers(Competitor competitor, TimePoint from, TimePoint to) {
+    public List<Maneuver> getManeuvers(Competitor competitor, TimePoint from, TimePoint to) throws NoWindException {
         return detectManeuvers(competitor, approximate(competitor, getRace().getBoatClass().getMaximumDistanceForCourseApproximation(), from, to));
     }
     
@@ -649,7 +650,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
      * @return an empty list if no maneuver is detected for <code>competitor</code> between <code>from</code> and
      *         <code>to</code>, or else the list of maneuvers detected.
      */
-    private List<Maneuver> detectManeuvers(Competitor competitor, List<GPSFixMoving> approximatedFixesToAnalyze) {
+    private List<Maneuver> detectManeuvers(Competitor competitor, List<GPSFixMoving> approximatedFixesToAnalyze) throws NoWindException {
         List<Maneuver> result = new ArrayList<Maneuver>();
         if (approximatedFixesToAnalyze.size() > 2) {
             List<CourseChange> courseChangeSequenceInSameDirection = new ArrayList<CourseChange>();
@@ -690,7 +691,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
      * 
      * @return a non-<code>null</code> list
      */
-    private List<Maneuver> groupDirectionChangesIntoManeuvers(Competitor competitor, List<CourseChange> courseChangeSequenceInSameDirection) {
+    private List<Maneuver> groupDirectionChangesIntoManeuvers(Competitor competitor, List<CourseChange> courseChangeSequenceInSameDirection) throws NoWindException {
         List<Maneuver> result = new ArrayList<Maneuver>();
         List<CourseChange> group = new ArrayList<CourseChange>();
         if (!courseChangeSequenceInSameDirection.isEmpty()) {
@@ -723,14 +724,47 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     }
 
     private Maneuver createManeuverFromGroupOfCourseChanges(Competitor competitor, List<CourseChange> group,
-            double totalCourseChangeInDegrees, long totalMilliseconds) {
+            double totalCourseChangeInDegrees, long totalMilliseconds) throws NoWindException {
         TimePoint maneuverTimePoint = new MillisecondsTimePoint(totalMilliseconds/group.size());
         Position maneuverPosition = getTrack(competitor).getEstimatedPosition(maneuverTimePoint, /* extrapolate */ false);
         SpeedWithBearing speedWithBearingBeforeManeuver = group.get(0).getSpeed();
-        SpeedWithBearing speedWithBearingAfterManeufer = group.get(group.size()-1).getSpeed();
-        Maneuver.Type maneuverType = null;
+        SpeedWithBearing speedWithBearingAfterManeuver = group.get(group.size()-1).getSpeed();
+        MillisecondsTimePoint timePointBeforeManeuver = new MillisecondsTimePoint(group.get(0).getTimePoint().asMillis()-getApproximateManeuverDurationInMilliseconds());
+        MillisecondsTimePoint timePointAfterManeuver = new MillisecondsTimePoint(group.get(group.size()-1).getTimePoint().asMillis()-getApproximateManeuverDurationInMilliseconds());
+        Tack tackBeforeManeuver = getTack(competitor, timePointBeforeManeuver);
+        Tack tackAfterManeuver = getTack(competitor, timePointAfterManeuver);
+        TrackedLegOfCompetitor legBeforeManeuver = getTrackedLeg(competitor, timePointBeforeManeuver);
+        TrackedLegOfCompetitor legAfterManeuver = getTrackedLeg(competitor, timePointAfterManeuver);
+        Maneuver.Type maneuverType;
+        if (legBeforeManeuver != legAfterManeuver) {
+            maneuverType = Type.MARK_PASSING;
+        } else {
+            LegType legType = getTrackedLeg(legBeforeManeuver.getLeg()).getLegType(timePointBeforeManeuver);
+            if (tackBeforeManeuver != tackAfterManeuver) {
+                // tack or jibe
+                switch (legType) {
+                case UPWIND:
+                    maneuverType = Type.TACK;
+                    break;
+                case DOWNWIND:
+                    maneuverType = Type.JIBE;
+                    break;
+                default:
+                    maneuverType = Type.UNKNOWN;
+                    logger.fine("Unknown maneuver for "+competitor+" at "+maneuverTimePoint+" on reaching leg "+legBeforeManeuver.getLeg());
+                    break;
+                }
+            } else {
+                // heading up or bearing away
+                Wind wind = getWind(maneuverPosition, maneuverTimePoint);
+                Bearing windBearing = wind.getBearing();
+                Bearing toWindBeforeManeuver = windBearing.getDifferenceTo(speedWithBearingBeforeManeuver.getBearing());
+                Bearing toWindAfterManeuver = windBearing.getDifferenceTo(speedWithBearingAfterManeuver.getBearing());
+                maneuverType = Math.abs(toWindBeforeManeuver.getDegrees()) > Math.abs(toWindAfterManeuver.getDegrees()) ? Type.HEAD_UP : Type.BEAR_AWAY;
+            }
+        }
         Maneuver maneuver = new ManeuverImpl(maneuverType, maneuverPosition, maneuverTimePoint, speedWithBearingBeforeManeuver,
-                speedWithBearingAfterManeufer, totalCourseChangeInDegrees);
+                speedWithBearingAfterManeuver, totalCourseChangeInDegrees);
         return maneuver;
     }
 

@@ -3,7 +3,7 @@ package com.sap.sailing.domain.tracking;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 
 public interface Maneuver extends GPSFix {
-    enum Type { HEAD_UP, BEAR_AWAY, TACK, JIBE, PENALTY_CIRCLE }
+    enum Type { HEAD_UP, BEAR_AWAY, TACK, JIBE, PENALTY_CIRCLE, MARK_PASSING, UNKNOWN }
     
     Type getType();
     

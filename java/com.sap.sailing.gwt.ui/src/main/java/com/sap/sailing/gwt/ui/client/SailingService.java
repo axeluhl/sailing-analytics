@@ -126,5 +126,5 @@ public interface SailingService extends RemoteService {
             Map<CompetitorDAO, Date> from, Map<CompetitorDAO, Date> to, double meters);
 
     Map<CompetitorDAO, List<ManeuverDAO>> getManeuvers(String eventName, String raceName,
-            Map<CompetitorDAO, Date> from, Map<CompetitorDAO, Date> to);
+            Map<CompetitorDAO, Date> from, Map<CompetitorDAO, Date> to) throws Exception;
 }

@@ -216,5 +216,5 @@ public interface TrackedRace {
      */
     List<GPSFixMoving> approximate(Competitor competitor, Distance maxDistance, TimePoint from, TimePoint to);
 
-    List<Maneuver> getManeuvers(Competitor competitor, TimePoint from, TimePoint to);
+    List<Maneuver> getManeuvers(Competitor competitor, TimePoint from, TimePoint to) throws NoWindException;
 }

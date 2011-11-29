@@ -6,7 +6,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 
 public class ManeuverDAO implements IsSerializable {
     /**
-     * One of HEAD_UP, BEAR_AWAY, TACK, JIBE, PENALTY_CIRCLE
+     * One of HEAD_UP, BEAR_AWAY, TACK, JIBE, PENALTY_CIRCLE, MARK_PASSING, UNKNOWN
      */
     public String type;
     
