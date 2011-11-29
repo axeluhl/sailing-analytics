@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.base;
 
+
 public interface SpeedWithBearing extends Speed {
     Bearing getBearing();
 
@@ -9,4 +10,6 @@ public interface SpeedWithBearing extends Speed {
      * applied in reverse.
      */
     Position travelTo(Position pos, TimePoint from, TimePoint to);
+
+    SpeedWithBearing applyCourseChange(CourseChange courseChange);
 }

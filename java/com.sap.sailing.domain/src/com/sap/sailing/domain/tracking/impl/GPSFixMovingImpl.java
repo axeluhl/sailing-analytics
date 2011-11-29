@@ -1,8 +1,10 @@
 package com.sap.sailing.domain.tracking.impl;
 
+import com.sap.sailing.domain.base.CourseChange;
 import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.TimePoint;
+import com.sap.sailing.domain.base.impl.AbstractSpeedWithBearingImpl;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 
 public class GPSFixMovingImpl extends GPSFixImpl implements GPSFixMoving {
@@ -31,5 +33,10 @@ public class GPSFixMovingImpl extends GPSFixImpl implements GPSFixMoving {
     @Override
     public boolean equals(Object other) {
         return super.equals(other) && other instanceof GPSFixMoving && getSpeed().equals(((GPSFixMoving) other).getSpeed());
+    }
+
+    @Override
+    public CourseChange getCourseChangeRequiredToReach(SpeedWithBearing targetSpeedWithBearing) {
+        return AbstractSpeedWithBearingImpl.getCourseChangeRequiredToReach(getSpeed(), targetSpeedWithBearing, getPosition(), getTimePoint());
     }
 }

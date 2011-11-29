@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.base.impl;
 
 import com.sap.sailing.domain.base.Bearing;
+import com.sap.sailing.domain.base.CourseChange;
 import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.TimePoint;
@@ -21,6 +22,11 @@ public class KilometersPerHourSpeedWithBearingImpl extends KilometersPerHourSpee
     @Override
     public Position travelTo(Position pos, TimePoint from, TimePoint to) {
         return pos.translateGreatCircle(getBearing(), this.travel(from, to));
+    }
+
+    @Override
+    public SpeedWithBearing applyCourseChange(CourseChange courseChange) {
+        return AbstractSpeedWithBearingImpl.applyCourseChange(this, courseChange);
     }
 
     @Override

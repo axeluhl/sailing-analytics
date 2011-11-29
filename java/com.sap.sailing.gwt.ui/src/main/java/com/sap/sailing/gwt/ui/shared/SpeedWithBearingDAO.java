@@ -13,4 +13,9 @@ public class SpeedWithBearingDAO implements IsSerializable {
         this.speedInKnots = speedInKnots;
         this.bearingInDegrees = bearingInDegrees;
     }
+    
+    @Override
+    public String toString() {
+        return ""+speedInKnots+"kn to "+bearingInDegrees+"&deg;";
+    }
 }

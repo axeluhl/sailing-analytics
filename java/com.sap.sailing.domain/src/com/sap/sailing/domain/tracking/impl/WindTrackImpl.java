@@ -8,6 +8,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Bearing;
+import com.sap.sailing.domain.base.CourseChange;
 import com.sap.sailing.domain.base.Distance;
 import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.Speed;
@@ -248,6 +249,10 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
         @Override
         public double getBeaufort() {
             return 0;
+        }
+        @Override
+        public SpeedWithBearing applyCourseChange(CourseChange courseChange) {
+            return null;
         }
     }
 

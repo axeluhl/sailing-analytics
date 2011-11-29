@@ -120,4 +120,7 @@ public interface SailingService extends RemoteService {
     void stressTestLeaderboardByName(String leaderboardName, int times) throws Exception;
     
     String[] getCountryCodes();
+    
+    Map<CompetitorDAO, List<GPSFixDAO>> getDouglasPoints(String eventName, String raceName,
+            Map<CompetitorDAO, Date> from, Map<CompetitorDAO, Date> to, double meters);
 }
