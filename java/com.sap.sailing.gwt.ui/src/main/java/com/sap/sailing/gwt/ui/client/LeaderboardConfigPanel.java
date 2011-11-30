@@ -195,7 +195,6 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
         trackedEventsComposite = new TrackedEventsComposite(sailingService, errorReporter, adminConsole,
                 stringConstants, /* multiselection */ false);
  
-//        raceTree = new RaceTreeView(stringConstants, /* multiselection */ false);
         labelAndTreePanel.add(trackedEventsComposite);
         trackedEventsComposite.addRaceSelectionChangeListener(this);
         selectedLeaderboardPanel.add(labelAndTreePanel);

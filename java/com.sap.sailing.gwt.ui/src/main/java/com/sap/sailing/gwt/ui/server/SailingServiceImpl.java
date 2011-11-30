@@ -277,6 +277,9 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             Distance windwardDistanceToGo = trackedLeg.getWindwardDistanceToGo(timePoint);
             result.windwardDistanceToGoInMeters = windwardDistanceToGo == null ? null : windwardDistanceToGo
                     .getMeters();
+            result.numberOfTacks = trackedLeg.getNumberOfTacks(timePoint);
+            result.numberOfJibes = trackedLeg.getNumberOfJibes(timePoint);
+            result.numberOfPenaltyCircles = trackedLeg.getNumberOfPenaltyCircles(timePoint);
         }
         return result;
     }

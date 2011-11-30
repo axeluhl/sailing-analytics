@@ -22,4 +22,7 @@ public class LegEntryDAO implements IsSerializable {
     public long timeInMilliseconds;
     public boolean started;
     public boolean finished;
+    public Integer numberOfJibes;
+    public Integer numberOfTacks;
+    public Integer numberOfPenaltyCircles;
 }

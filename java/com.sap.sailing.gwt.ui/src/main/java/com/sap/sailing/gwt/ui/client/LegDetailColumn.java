@@ -75,8 +75,13 @@ public abstract class LegDetailColumn<FieldType extends Comparable<?>, Rendering
 
     @Override
     public Header<?> getHeader() {
-        SafeHtmlHeader header = new SafeHtmlHeader(new SafeHtmlBuilder().appendEscaped(title).appendHtmlConstant("<br>").
-                appendEscaped(unit).toSafeHtml());
+        SafeHtmlBuilder builder = new SafeHtmlBuilder().appendEscaped(title).appendHtmlConstant("<br>");
+        if (unit == null) {
+            builder.appendHtmlConstant("&nbsp;");
+        } else {
+            builder.appendEscaped(unit);
+        }
+        SafeHtmlHeader header = new SafeHtmlHeader(builder.toSafeHtml());
         return header;
     }
 
