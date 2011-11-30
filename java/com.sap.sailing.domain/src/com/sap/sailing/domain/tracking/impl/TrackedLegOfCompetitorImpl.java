@@ -265,17 +265,12 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
         return result;
     }
 
+    
     @Override
     public Integer getNumberOfTacks(TimePoint timePoint) throws NoWindException {
         Integer result = null;
         if (hasStartedLeg(timePoint)) {
-            MarkPassing legEnd = getMarkPassingForLegEnd();
-            TimePoint end = timePoint;
-            if (legEnd != null && timePoint.compareTo(legEnd.getTimePoint()) > 0) {
-                // timePoint is after leg finish; take leg end and end time point
-                end = legEnd.getTimePoint();
-            }
-            List<Maneuver> maneuvers = getTrackedRace().getManeuvers(getCompetitor(), getMarkPassingForLegStart().getTimePoint(), end);
+            List<Maneuver> maneuvers = getManeuvers(timePoint);
             result = 0;
             for (Maneuver maneuver : maneuvers) {
                 if (maneuver.getType() == Type.TACK) {
@@ -287,16 +282,22 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
 
     @Override
+    public List<Maneuver> getManeuvers(TimePoint timePoint) throws NoWindException {
+        MarkPassing legEnd = getMarkPassingForLegEnd();
+        TimePoint end = timePoint;
+        if (legEnd != null && timePoint.compareTo(legEnd.getTimePoint()) > 0) {
+            // timePoint is after leg finish; take leg end and end time point
+            end = legEnd.getTimePoint();
+        }
+        List<Maneuver> maneuvers = getTrackedRace().getManeuvers(getCompetitor(), getMarkPassingForLegStart().getTimePoint(), end);
+        return maneuvers;
+    }
+
+    @Override
     public Integer getNumberOfJibes(TimePoint timePoint) throws NoWindException {
         Integer result = null;
         if (hasStartedLeg(timePoint)) {
-            MarkPassing legEnd = getMarkPassingForLegEnd();
-            TimePoint end = timePoint;
-            if (legEnd != null && timePoint.compareTo(legEnd.getTimePoint()) > 0) {
-                // timePoint is after leg finish; take leg end and end time point
-                end = legEnd.getTimePoint();
-            }
-            List<Maneuver> maneuvers = getTrackedRace().getManeuvers(getCompetitor(), getMarkPassingForLegStart().getTimePoint(), end);
+            List<Maneuver> maneuvers = getManeuvers(timePoint);
             result = 0;
             for (Maneuver maneuver : maneuvers) {
                 if (maneuver.getType() == Type.JIBE) {
@@ -311,13 +312,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     public Integer getNumberOfPenaltyCircles(TimePoint timePoint) throws NoWindException {
         Integer result = null;
         if (hasStartedLeg(timePoint)) {
-            MarkPassing legEnd = getMarkPassingForLegEnd();
-            TimePoint end = timePoint;
-            if (legEnd != null && timePoint.compareTo(legEnd.getTimePoint()) > 0) {
-                // timePoint is after leg finish; take leg end and end time point
-                end = legEnd.getTimePoint();
-            }
-            List<Maneuver> maneuvers = getTrackedRace().getManeuvers(getCompetitor(), getMarkPassingForLegStart().getTimePoint(), end);
+            List<Maneuver> maneuvers = getManeuvers(timePoint);
             result = 0;
             for (Maneuver maneuver : maneuvers) {
                 if (maneuver.getType() == Type.PENALTY_CIRCLE) {

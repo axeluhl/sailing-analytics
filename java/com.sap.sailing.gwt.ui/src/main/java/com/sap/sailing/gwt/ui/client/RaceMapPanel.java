@@ -966,7 +966,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         maneuverMarkers = null;
     }
 
-    /* TODO see Bug #6, use checkboxes to select what to visualize 
+    /* TODO see Bug #6, use checkboxes to select what to visualize
     private void showMarkDouglasPeuckerPoints(
             Map<CompetitorDAO, List<GPSFixDAO>> gpsFixPointMapForCompetitors) {
         douglasMarkers = new HashSet<Marker>();

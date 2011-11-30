@@ -23,6 +23,10 @@ public class FormattedDoubleLegDetailColumn extends LegDetailColumn<Double, Stri
         }
         formatter = NumberFormat.getFormat(patternBuilder.toString());
     }
+    
+    protected NumberFormat getFormatter() {
+        return formatter;
+    }
 
     /**
      * Computes the string representation of the value to be displayed in the table. Note that it's not the
@@ -34,7 +38,7 @@ public class FormattedDoubleLegDetailColumn extends LegDetailColumn<Double, Stri
         Double fieldValue = getFieldValue(row);
         String result = "";
         if (fieldValue != null) {
-            result = formatter.format(fieldValue);
+            result = getFormatter().format(fieldValue);
         }
         return result;
     }
