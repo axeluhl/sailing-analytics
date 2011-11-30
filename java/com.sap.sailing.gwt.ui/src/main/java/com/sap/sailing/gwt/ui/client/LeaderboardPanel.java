@@ -613,7 +613,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                                 if (result == null) {
                                     result = (double) legDetail.numberOfTacks;
                                 } else {
-                                    result = (double) legDetail.numberOfTacks;
+                                    result += (double) legDetail.numberOfTacks;
                                 }
                             }
                             if (legDetail.numberOfJibes != null) {
