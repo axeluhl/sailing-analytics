@@ -14,13 +14,12 @@ import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
 
 public class CompareCompetitorsChartDialog extends DialogBox {
 
-    public CompareCompetitorsChartDialog(SailingServiceAsync sailingService, List<CompetitorDAO> competitors, String raceName, String leaderboardName){
+    public CompareCompetitorsChartDialog(SailingServiceAsync sailingService, List<CompetitorDAO> competitors, String raceName, String leaderboardName, StringConstants stringConstants){
         super(true);
         VerticalPanel mainPanel = new VerticalPanel();
         mainPanel.setSpacing(5);
         mainPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
-        //chartBox.setAnimationEnabled(true);
-        CompareCompetitorsPanel ccp = new CompareCompetitorsPanel(sailingService, competitors, raceName, leaderboardName);
+        CompareCompetitorsPanel ccp = new CompareCompetitorsPanel(sailingService, competitors, raceName, leaderboardName, stringConstants);
         ccp.addDataLoadedHandler(new DataLoadedHandler() {
             
             @Override
@@ -30,7 +29,7 @@ public class CompareCompetitorsChartDialog extends DialogBox {
             }
         });
         mainPanel.add(ccp);
-        Button closeButton = new Button("Close");
+        Button closeButton = new Button(stringConstants.close());
         closeButton.addClickHandler(new ClickHandler() {
             
             @Override
@@ -41,7 +40,7 @@ public class CompareCompetitorsChartDialog extends DialogBox {
         mainPanel.add(closeButton);
         this.add(mainPanel);
 
-        this.setTitle("Compare competitors");
+        this.setTitle(stringConstants.compareCompetitors());
         this.setPopupPosition(5, 5);
     }
 }

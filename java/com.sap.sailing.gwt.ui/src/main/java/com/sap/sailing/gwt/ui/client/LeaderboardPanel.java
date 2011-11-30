@@ -1305,7 +1305,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         for (LeaderboardRowDAO leaderboardRowDAO : leaderboardSelectionModel.getSelectedSet()) {
             competitors.add(leaderboardRowDAO.competitor);
         }
-        new CompareCompetitorsChartDialog(sailingService, competitors, selectedRaceColumns.get(0), leaderboardName);
+        new CompareCompetitorsChartDialog(sailingService, competitors, selectedRaceColumns.get(0), leaderboardName, stringConstants);
         //compareCompetitorsBox.show();
     }
 }

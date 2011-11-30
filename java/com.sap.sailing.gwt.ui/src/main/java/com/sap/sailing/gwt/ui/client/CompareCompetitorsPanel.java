@@ -43,6 +43,8 @@ public class CompareCompetitorsPanel extends FormPanel {
     private String leaderboardName;
     private String raceName;
     private int stepsToLoad = 100;
+    private final StringConstants stringConstants;
+    
     public static final int DECK_PANEL_INDEX_LOADING = 0;
     public static final int DECK_PANEL_INDEX_CHART = 1;
     
@@ -55,11 +57,12 @@ public class CompareCompetitorsPanel extends FormPanel {
     private AbsolutePanel loadingPanel;
 
     public CompareCompetitorsPanel(SailingServiceAsync sailingService, final List<CompetitorDAO> competitors,
-            String raceName, final String leaderboardName) {
+            String raceName, final String leaderboardName, StringConstants stringConstants) {
         this.sailingService = sailingService;
         this.competitors = competitors;
         this.leaderboardName = leaderboardName;
         this.raceName = raceName;
+        this.stringConstants = stringConstants;
         mainPanel = new HorizontalPanel();
         chartPanel = new VerticalPanel();
         loadingPanel = new AbsolutePanel ();
@@ -73,7 +76,7 @@ public class CompareCompetitorsPanel extends FormPanel {
         deckPanel = new DeckPanel();
         
         deckPanel.add(loadingPanel);
-        final CaptionPanel configCaption = new CaptionPanel("Configuration");
+        final CaptionPanel configCaption = new CaptionPanel(stringConstants.configuration());
         configCaption.setHeight("100%");
         configCaption.setVisible(false);
         VerticalPanel configPanel = new VerticalPanel();
@@ -81,7 +84,7 @@ public class CompareCompetitorsPanel extends FormPanel {
         configPanel.setSpacing(7);
         Anchor showConfigAnchor = new Anchor(new SafeHtmlBuilder().appendHtmlConstant(
                 "<img class=\"linkNoBorder\" src=\"/images/settings.png\"/>").toSafeHtml());
-        showConfigAnchor.setTitle("Configuration");
+        showConfigAnchor.setTitle(stringConstants.configuration());
         showConfigAnchor.addClickHandler(new ClickHandler() {
 
             @Override
@@ -90,14 +93,14 @@ public class CompareCompetitorsPanel extends FormPanel {
             }
         });
         chartPanel.add(showConfigAnchor);
-        Label lblChart = new Label("Choose chart:");
+        Label lblChart = new Label(stringConstants.chooseChart());
         configPanel.add(lblChart);
         final ListBox dataSelection = new ListBox();
-        dataSelection.addItem("Speed over ground", "" + SHOW_CURRENT_SPEED_OVER_GROUND);
-        dataSelection.addItem("Distance traveled", "" + SHOW_DISTANCE_TRAVELED);
-        dataSelection.addItem("Velocity made good", "" + SHOW_VELOCITY_MADE_GOOD);
-        dataSelection.addItem("Gap to leader", "" + SHOW_GAP_TO_LEADER);
-        dataSelection.addItem("Windward distance to go", "" + SHOW_WINDWARD_DISTANCE_TO_GO);
+        dataSelection.addItem(stringConstants.speedOverGroundLong(), "" + SHOW_CURRENT_SPEED_OVER_GROUND);
+        dataSelection.addItem(stringConstants.distanceTraveled(), "" + SHOW_DISTANCE_TRAVELED);
+        dataSelection.addItem(stringConstants.velocityMadeGoodLong(), "" + SHOW_VELOCITY_MADE_GOOD);
+        dataSelection.addItem(stringConstants.gapToLeaderLong(), "" + SHOW_GAP_TO_LEADER);
+        dataSelection.addItem(stringConstants.windwardDistanceToGoInMeters(), "" + SHOW_WINDWARD_DISTANCE_TO_GO);
         dataSelection.addChangeHandler(new ChangeHandler() {
 
             @Override
@@ -112,9 +115,9 @@ public class CompareCompetitorsPanel extends FormPanel {
         Label lblSteps = new Label("Points to load:");
         configPanel.add(lblSteps);
         final TextBox txtbSteps = new TextBox();
-        txtbSteps.setText("100");
+        txtbSteps.setText("" + stepsToLoad);
         configPanel.add(txtbSteps);
-        Button bttSteps = new Button("Refresh");
+        Button bttSteps = new Button(stringConstants.refresh());
         bttSteps.addClickHandler(new ClickHandler() {
 
             @Override
@@ -135,7 +138,6 @@ public class CompareCompetitorsPanel extends FormPanel {
                 deckPanel.add(chart);
                 fireEvent(new DataLoadedEvent());
                 loadData();
-                // chartLoaded = true;
             }
         };
         VisualizationUtils.loadVisualizationApi(onLoadCallback, LineChart.PACKAGE);
@@ -154,19 +156,19 @@ public class CompareCompetitorsPanel extends FormPanel {
         opt.setHeight(600);
         switch (dataToShow) {
         case SHOW_VELOCITY_MADE_GOOD:
-            opt.setTitle("Velocity made good");
+            opt.setTitle(stringConstants.velocityMadeGoodLong());
             break;
         case SHOW_GAP_TO_LEADER:
-            opt.setTitle("Gap to leader");
+            opt.setTitle(stringConstants.gapToLeaderLong());
             break;
         case SHOW_WINDWARD_DISTANCE_TO_GO:
-            opt.setTitle("Windward distance to go");
+            opt.setTitle(stringConstants.windwardDistanceToGoInMeters());
             break;
         case SHOW_DISTANCE_TRAVELED:
-            opt.setTitle("Distance Traveled");
+            opt.setTitle(stringConstants.distanceTraveled());
             break;
         default:
-            opt.setTitle("Speed over ground");
+            opt.setTitle(stringConstants.speedOverGroundLong());
         }
         AxisOptions hAxisOptions = AxisOptions.create();
         hAxisOptions.setTitle("time");
@@ -175,19 +177,19 @@ public class CompareCompetitorsPanel extends FormPanel {
         AxisOptions vAxisOptions = AxisOptions.create();
         switch (dataToShow) {
         case SHOW_VELOCITY_MADE_GOOD:
-            vAxisOptions.setTitle("speed in kts");
+            vAxisOptions.setTitle(stringConstants.speed() + " " + stringConstants.in() + " " + stringConstants.velocityMadeGoodInKnotsUnit());
             break;
         case SHOW_GAP_TO_LEADER:
-            vAxisOptions.setTitle("time in s");
+            vAxisOptions.setTitle(stringConstants.time() + " " + stringConstants.in() + " " + stringConstants.secondsUnit());
             break;
         case SHOW_WINDWARD_DISTANCE_TO_GO:
-            vAxisOptions.setTitle("distance in m");
+            vAxisOptions.setTitle(stringConstants.distance() + " " + stringConstants.in() + " " + stringConstants.metersUnit());
             break;
         case SHOW_DISTANCE_TRAVELED:
-            vAxisOptions.setTitle("distance in m");
+            vAxisOptions.setTitle(stringConstants.distance() + " " + stringConstants.in() + " " + stringConstants.metersUnit());
             break;
         default:
-            vAxisOptions.setTitle("speed in kts");
+            vAxisOptions.setTitle(stringConstants.speed() + " " + stringConstants.in() + " " + stringConstants.currentSpeedOverGroundInKnotsUnit());
             break;
         }
         opt.setVAxisOptions(vAxisOptions);
@@ -200,7 +202,7 @@ public class CompareCompetitorsPanel extends FormPanel {
 
                     @Override
                     public void onFailure(Throwable caught) {
-                        Window.alert("Failed to laod race data.");
+                        Window.alert(stringConstants.failedToLoadRaceData());
                     }
 
                     @Override
@@ -217,7 +219,7 @@ public class CompareCompetitorsPanel extends FormPanel {
 
     private AbstractDataTable prepareTableData() {
         DataTable data = DataTable.create();
-        data.addColumn(ColumnType.STRING, "Time");
+        data.addColumn(ColumnType.STRING, stringConstants.time());
         for (int i = 0; i < competitors.size(); i++) {
             data.addColumn(ColumnType.NUMBER, competitors.get(i).name);
         }
@@ -252,7 +254,6 @@ public class CompareCompetitorsPanel extends FormPanel {
                     switch (dataToShow) {
                     case SHOW_GAP_TO_LEADER:
                         value = chartData[i][j].getLegEntry().gapToLeaderInSeconds;
-                        //value = (value != null && value < 1000)?value:null;
                         break;
                     case SHOW_VELOCITY_MADE_GOOD:
                         value = chartData[i][j].getLegEntry().velocityMadeGoodInKnots;
