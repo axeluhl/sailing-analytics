@@ -42,6 +42,6 @@ public class CompareCompetitorsChartDialog extends DialogBox {
         this.add(mainPanel);
 
         this.setTitle("Compare competitors");
-        this.center();
+        this.setPopupPosition(5, 5);
     }
 }

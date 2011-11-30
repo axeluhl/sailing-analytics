@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.ui.client;
 
-import java.util.Date;
 import java.util.List;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -8,15 +7,16 @@ import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.GwtEvent;
-import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.AbsolutePanel;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
+import com.google.gwt.user.client.ui.DeckPanel;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
@@ -40,24 +40,35 @@ public class CompareCompetitorsPanel extends FormPanel {
     private HorizontalPanel mainPanel;
     private VerticalPanel chartPanel;
     private String raceName;
-    private DateTimeFormat dateTimeFormat;
+    public static final int DECK_PANEL_INDEX_LOADING = 0;
+    public static final int DECK_PANEL_INDEX_CHART = 1;
+    
     public static final int SHOW_CURRENT_SPEED_OVER_GROUND = 0;
     public static final int SHOW_VELOCITY_MADE_GOOD = 1;
     public static final int SHOW_GAP_TO_LEADER = 2;
     public static final int SHOW_WINDWARD_DISTANCE_TO_GO = 3;
+    public static final int SHOW_DISTANCE_TRAVELED = 4;
     private int dataToShow = SHOW_CURRENT_SPEED_OVER_GROUND;
+    private AbsolutePanel loadingPanel;
 
     public CompareCompetitorsPanel(SailingServiceAsync sailingService, final List<CompetitorDAO> competitors,
             String raceName, final String leaderboardName) {
         this.sailingService = sailingService;
         this.competitors = competitors;
         this.raceName = raceName;
-        this.dateTimeFormat = DateTimeFormat.getFormat("HH:mm:ss");
         mainPanel = new HorizontalPanel();
         chartPanel = new VerticalPanel();
+        loadingPanel = new AbsolutePanel ();
+        loadingPanel.setSize("800px", "600px");
+        
+        Anchor a = new Anchor(new SafeHtmlBuilder().appendHtmlConstant(
+                "<img src=\"/images/ajax-loader.gif\"/>").toSafeHtml());
+        loadingPanel.add(a,800/2-32/2,600/2-32-2);
         chartPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
         chartPanel.setSpacing(5);
-
+        final DeckPanel deckPanel = new DeckPanel();
+        
+        deckPanel.add(loadingPanel);
         final CaptionPanel configCaption = new CaptionPanel("Configuration");
         configCaption.setHeight("100%");
         configCaption.setVisible(false);
@@ -79,6 +90,7 @@ public class CompareCompetitorsPanel extends FormPanel {
         configPanel.add(lblChart);
         final ListBox dataSelection = new ListBox();
         dataSelection.addItem("Speed over ground", "" + SHOW_CURRENT_SPEED_OVER_GROUND);
+        dataSelection.addItem("Distance traveled", "" + SHOW_DISTANCE_TRAVELED);
         dataSelection.addItem("Velocity made good", "" + SHOW_VELOCITY_MADE_GOOD);
         dataSelection.addItem("Gap to leader", "" + SHOW_GAP_TO_LEADER);
         dataSelection.addItem("Windward distance to go", "" + SHOW_WINDWARD_DISTANCE_TO_GO);
@@ -96,12 +108,14 @@ public class CompareCompetitorsPanel extends FormPanel {
         Label lblSteps = new Label("Points to load:");
         configPanel.add(lblSteps);
         final TextBox txtbSteps = new TextBox();
+        txtbSteps.setText("100");
         configPanel.add(txtbSteps);
         Button bttSteps = new Button("Refresh");
         bttSteps.addClickHandler(new ClickHandler() {
 
             @Override
             public void onClick(ClickEvent event) {
+                deckPanel.showWidget(DECK_PANEL_INDEX_LOADING);
                 CompareCompetitorsPanel.this.sailingService.getCompetitorRaceData(leaderboardName,
                         CompareCompetitorsPanel.this.raceName, competitors, Integer.parseInt(txtbSteps.getText()),
                         new AsyncCallback<CompetitorWithRaceDAO[][]>() {
@@ -117,6 +131,7 @@ public class CompareCompetitorsPanel extends FormPanel {
                                 fireEvent(new DataLoadedEvent());
                                 chartData = result;
                                 if (chart != null) {
+                                    deckPanel.showWidget(DECK_PANEL_INDEX_CHART);
                                     chart.draw(prepareTableData(), getOptions());
                                 }
                             }
@@ -131,14 +146,15 @@ public class CompareCompetitorsPanel extends FormPanel {
             public void run() {
 
                 chart = new LineChart(prepareTableData(), getOptions());
-                chartPanel.add(chart);
+                deckPanel.add(chart);
                 fireEvent(new DataLoadedEvent());
                 // chartLoaded = true;
             }
         };
         VisualizationUtils.loadVisualizationApi(onLoadCallback, LineChart.PACKAGE);
 
-        this.sailingService.getCompetitorRaceData(leaderboardName, this.raceName, competitors, 150,
+        deckPanel.showWidget(DECK_PANEL_INDEX_LOADING);
+        this.sailingService.getCompetitorRaceData(leaderboardName, this.raceName, competitors, 100,
                 new AsyncCallback<CompetitorWithRaceDAO[][]>() {
 
                     @Override
@@ -151,11 +167,12 @@ public class CompareCompetitorsPanel extends FormPanel {
                         fireEvent(new DataLoadedEvent());
                         chartData = result;
                         if (chart != null) {
+                            deckPanel.showWidget(DECK_PANEL_INDEX_CHART);
                             chart.draw(prepareTableData(), getOptions());
                         }
                     }
                 });
-        // while (!chartLoaded){}
+        chartPanel.add(deckPanel);
         mainPanel.add(chartPanel);
         mainPanel.add(configCaption);
         this.add(mainPanel);
@@ -175,6 +192,9 @@ public class CompareCompetitorsPanel extends FormPanel {
         case SHOW_WINDWARD_DISTANCE_TO_GO:
             opt.setTitle("Windward distance to go");
             break;
+        case SHOW_DISTANCE_TRAVELED:
+            opt.setTitle("Distance Traveled");
+            break;
         default:
             opt.setTitle("Speed over ground");
         }
@@ -191,6 +211,9 @@ public class CompareCompetitorsPanel extends FormPanel {
             vAxisOptions.setTitle("time in s");
             break;
         case SHOW_WINDWARD_DISTANCE_TO_GO:
+            vAxisOptions.setTitle("distance in m");
+            break;
+        case SHOW_DISTANCE_TRAVELED:
             vAxisOptions.setTitle("distance in m");
             break;
         default:
@@ -217,23 +240,44 @@ public class CompareCompetitorsPanel extends FormPanel {
                 length = (length < chartData[i].length) ? chartData[i].length : length;
             }
             data.addRows(length);
+            long startTime = chartData[0][0].getStartTime();
             for (int n = 0; n < chartData[0].length; n++) {
-                Date d = new Date(chartData[0][n].getLegEntry().timeInMilliseconds);
-                String time = "" + ((chartData[0][n] == null) ? 0 : dateTimeFormat.format(d));
-                data.setValue(n, 0, time);
+                long time = chartData[0][n].getLegEntry().timeInMilliseconds - startTime;
+                String minutes = "" + Math.abs((time/60000));
+                if (minutes.length() < 2){
+                    minutes = ((time < 0)? "-" : "") +"0" + minutes;
+                }
+                String seconds = "" + Math.abs((time/1000)%60);
+                if (seconds.length() < 2){
+                    seconds= "0" + seconds;
+                }
+                data.setValue(n, 0, minutes + ":" + seconds);
             }
             for (int i = 0; i < chartData.length; i++) {
+                double distanceTraveledOnPreviousLegs = 0;
+                double lastTraveledDistance = 0;
                 for (int j = 0; j < chartData[i].length; j++) {
                     Double value = null;
                     switch (dataToShow) {
                     case SHOW_GAP_TO_LEADER:
                         value = chartData[i][j].getLegEntry().gapToLeaderInSeconds;
+                        //value = (value != null && value < 1000)?value:null;
                         break;
                     case SHOW_VELOCITY_MADE_GOOD:
                         value = chartData[i][j].getLegEntry().velocityMadeGoodInKnots;
                         break;
                     case SHOW_WINDWARD_DISTANCE_TO_GO:
                         value = chartData[i][j].getLegEntry().windwardDistanceToGoInMeters;
+                        break;
+                    case SHOW_DISTANCE_TRAVELED:
+                        value = chartData[i][j].getLegEntry().distanceTraveledInMeters;
+                        if (value != null){
+                            if (lastTraveledDistance > value){
+                                distanceTraveledOnPreviousLegs += lastTraveledDistance;
+                            }
+                            lastTraveledDistance = value;
+                            value += distanceTraveledOnPreviousLegs;
+                        }
                         break;
                     default:
                         value = chartData[i][j].getLegEntry().currentSpeedOverGroundInKnots;

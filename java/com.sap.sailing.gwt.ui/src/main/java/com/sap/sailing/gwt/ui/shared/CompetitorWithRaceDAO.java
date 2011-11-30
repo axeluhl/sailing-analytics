@@ -1,10 +1,19 @@
 package com.sap.sailing.gwt.ui.shared;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import com.sap.sailing.domain.base.TimePoint;
 
 public class CompetitorWithRaceDAO implements IsSerializable {
     private CompetitorDAO competitor;
     private LegEntryDAO legEntry;
+    private long startTime;
+    
+    public long getStartTime() {
+        return startTime;
+    }
+    public void setStartTime(long startTime) {
+        this.startTime = startTime;
+    }
     public CompetitorDAO getCompetitor() {
         return competitor;
     }

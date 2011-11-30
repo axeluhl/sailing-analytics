@@ -1119,7 +1119,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         List<Competitor> selectedCompetitor = new ArrayList<Competitor>();
         for (Competitor c : competitors){
             for (CompetitorDAO cDAO : competitorDAOs){
-                if (c.getName().equals(cDAO.name)){
+                if (c.getId().toString().equals(cDAO.id)){
                     selectedCompetitor.add(c);
                 }
             }
@@ -1128,23 +1128,20 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         int i = 0;
         for (Competitor c : selectedCompetitor){
             List<CompetitorWithRaceDAO> entries = new ArrayList<CompetitorWithRaceDAO>();
-            for (long time = trackedRace.getStart().asMillis(); time < trackedRace.getTimePointOfNewestEvent().asMillis(); time += (trackedRace.getTimePointOfNewestEvent().asMillis()-trackedRace.getStart().asMillis())/steps){
+            for (long time = trackedRace.getStart().asMillis()-20000; time < trackedRace.getTimePointOfNewestEvent().asMillis(); time += (trackedRace.getTimePointOfNewestEvent().asMillis()-trackedRace.getStart().asMillis()-20000)/steps){
                 MillisecondsTimePoint timePoint = new MillisecondsTimePoint(time);
                 CompetitorWithRaceDAO competitorWithRaceEntry = new CompetitorWithRaceDAO();
                 competitorWithRaceEntry.setCompetitor(getCompetitorDAO(c));
+                competitorWithRaceEntry.setStartTime(trackedRace.getStart().asMillis());
                 if (trackedRace != null){
                     LegEntryDAO legEntry = createLegEntry(trackedRace.getTrackedLeg(c, timePoint), timePoint);
-                    if (legEntry != null){
-                        legEntry.timeInMilliseconds = time;
-                        if (competitorWithRaceEntry.getLegEntry() == null){
-                            competitorWithRaceEntry.setLegEntry(legEntry);
-                            entries.add(competitorWithRaceEntry);
-                        }
-                        else {
-                            competitorWithRaceEntry.updateLegEntry(legEntry);
-                        }
+                    if (legEntry == null){
+                        legEntry = new LegEntryDAO();
                     }
+                    legEntry.timeInMilliseconds = time;
+                    competitorWithRaceEntry.setLegEntry(legEntry);
                 }
+                entries.add(competitorWithRaceEntry);
             }
             competitorData[i++] = entries.toArray(new CompetitorWithRaceDAO[0]);
         }
