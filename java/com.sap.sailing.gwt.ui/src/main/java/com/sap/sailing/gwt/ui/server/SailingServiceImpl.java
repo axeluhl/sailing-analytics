@@ -1159,11 +1159,9 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             }
             competitorData[i++] = entries.toArray(new CompetitorWithRaceDAO[0]);
         }
-        
-        
-
-        
         return competitorData;
+    }
+    
     public Map<CompetitorDAO, List<GPSFixDAO>> getDouglasPoints(String eventName, String raceName,
             Map<CompetitorDAO, Date> from, Map<CompetitorDAO, Date> to,
             double meters) {

@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.ui.shared;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import com.sap.sailing.domain.base.TimePoint;
 
 public class CompetitorWithRaceDAO implements IsSerializable {
     private CompetitorDAO competitor;

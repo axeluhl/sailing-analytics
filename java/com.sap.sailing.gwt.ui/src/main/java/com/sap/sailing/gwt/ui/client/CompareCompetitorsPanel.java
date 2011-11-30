@@ -39,7 +39,10 @@ public class CompareCompetitorsPanel extends FormPanel {
     private final SailingServiceAsync sailingService;
     private HorizontalPanel mainPanel;
     private VerticalPanel chartPanel;
+    private final DeckPanel deckPanel;
+    private String leaderboardName;
     private String raceName;
+    private int stepsToLoad = 100;
     public static final int DECK_PANEL_INDEX_LOADING = 0;
     public static final int DECK_PANEL_INDEX_CHART = 1;
     
@@ -55,6 +58,7 @@ public class CompareCompetitorsPanel extends FormPanel {
             String raceName, final String leaderboardName) {
         this.sailingService = sailingService;
         this.competitors = competitors;
+        this.leaderboardName = leaderboardName;
         this.raceName = raceName;
         mainPanel = new HorizontalPanel();
         chartPanel = new VerticalPanel();
@@ -66,7 +70,7 @@ public class CompareCompetitorsPanel extends FormPanel {
         loadingPanel.add(a,800/2-32/2,600/2-32-2);
         chartPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
         chartPanel.setSpacing(5);
-        final DeckPanel deckPanel = new DeckPanel();
+        deckPanel = new DeckPanel();
         
         deckPanel.add(loadingPanel);
         final CaptionPanel configCaption = new CaptionPanel("Configuration");
@@ -115,27 +119,9 @@ public class CompareCompetitorsPanel extends FormPanel {
 
             @Override
             public void onClick(ClickEvent event) {
+                stepsToLoad = Integer.parseInt(txtbSteps.getText());
                 deckPanel.showWidget(DECK_PANEL_INDEX_LOADING);
-                CompareCompetitorsPanel.this.sailingService.getCompetitorRaceData(leaderboardName,
-                        CompareCompetitorsPanel.this.raceName, competitors, Integer.parseInt(txtbSteps.getText()),
-                        new AsyncCallback<CompetitorWithRaceDAO[][]>() {
-
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                // TODO Auto-generated method stub
-
-                            }
-
-                            @Override
-                            public void onSuccess(CompetitorWithRaceDAO[][] result) {
-                                fireEvent(new DataLoadedEvent());
-                                chartData = result;
-                                if (chart != null) {
-                                    deckPanel.showWidget(DECK_PANEL_INDEX_CHART);
-                                    chart.draw(prepareTableData(), getOptions());
-                                }
-                            }
-                        });
+                loadData();
             }
         });
         configPanel.add(bttSteps);
@@ -148,30 +134,14 @@ public class CompareCompetitorsPanel extends FormPanel {
                 chart = new LineChart(prepareTableData(), getOptions());
                 deckPanel.add(chart);
                 fireEvent(new DataLoadedEvent());
+                loadData();
                 // chartLoaded = true;
             }
         };
         VisualizationUtils.loadVisualizationApi(onLoadCallback, LineChart.PACKAGE);
 
         deckPanel.showWidget(DECK_PANEL_INDEX_LOADING);
-        this.sailingService.getCompetitorRaceData(leaderboardName, this.raceName, competitors, 100,
-                new AsyncCallback<CompetitorWithRaceDAO[][]>() {
-
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        Window.alert("Failed to laod race data.");
-                    }
-
-                    @Override
-                    public void onSuccess(CompetitorWithRaceDAO[][] result) {
-                        fireEvent(new DataLoadedEvent());
-                        chartData = result;
-                        if (chart != null) {
-                            deckPanel.showWidget(DECK_PANEL_INDEX_CHART);
-                            chart.draw(prepareTableData(), getOptions());
-                        }
-                    }
-                });
+        loadData();
         chartPanel.add(deckPanel);
         mainPanel.add(chartPanel);
         mainPanel.add(configCaption);
@@ -222,6 +192,27 @@ public class CompareCompetitorsPanel extends FormPanel {
         }
         opt.setVAxisOptions(vAxisOptions);
         return opt;
+    }
+    
+    private void loadData(){
+        this.sailingService.getCompetitorRaceData(leaderboardName, this.raceName, competitors, stepsToLoad,
+                new AsyncCallback<CompetitorWithRaceDAO[][]>() {
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        Window.alert("Failed to laod race data.");
+                    }
+
+                    @Override
+                    public void onSuccess(CompetitorWithRaceDAO[][] result) {
+                        fireEvent(new DataLoadedEvent());
+                        chartData = result;
+                        if (chart != null) {
+                            deckPanel.showWidget(DECK_PANEL_INDEX_CHART);
+                            chart.draw(prepareTableData(), getOptions());
+                        }
+                    }
+                });
     }
 
     private AbstractDataTable prepareTableData() {
