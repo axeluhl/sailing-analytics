@@ -75,7 +75,19 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
     private Icon boatIcon;
     private Icon boatIconHighlighted;
     private Icon buoyIcon;
-    private Icon maneuverIcon;
+    private Icon tackToStarboardIcon;
+    private Icon tackToPortIcon;
+    private Icon jibeToStarboardIcon;
+    private Icon jibeToPortIcon;
+    private Icon markPassingToStarboardIcon;
+    private Icon markPassingToPortIcon;
+    private Icon headUpOnStarboardIcon;
+    private Icon headUpOnPortIcon;
+    private Icon bearAwayOnStarboardIcon;
+    private Icon bearAwayOnPortIcon;
+    private Icon unknownManeuverIcon;
+    private Icon penaltyCircleToStarboardIcon;
+    private Icon penaltyCircleToPortIcon;
     private LatLng lastMousePosition;
     private final Set<CompetitorDAO> competitorsSelectedInMap;
     private final Timer timer;
@@ -287,8 +299,32 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
                 boatIconHighlighted.setIconAnchor(Point.newInstance(8, 8));
                 buoyIcon = Icon.newInstance("/images/safe-water-small.png");
                 buoyIcon.setIconAnchor(Point.newInstance(10, 19));
-                maneuverIcon = Icon.newInstance("/images/maneuver.png");
-                maneuverIcon.setIconAnchor(Point.newInstance(11, 10));
+                tackToStarboardIcon = Icon.newInstance("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=T|00FF00|000000");
+                tackToStarboardIcon.setIconAnchor(Point.newInstance(10, 33));
+                tackToPortIcon = Icon.newInstance("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=T|FF0000|000000");
+                tackToPortIcon.setIconAnchor(Point.newInstance(10, 33));
+                jibeToStarboardIcon = Icon.newInstance("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=J|00FF00|000000");
+                jibeToStarboardIcon.setIconAnchor(Point.newInstance(10, 33));
+                jibeToPortIcon = Icon.newInstance("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=J|FF0000|000000");
+                jibeToPortIcon.setIconAnchor(Point.newInstance(10, 33));
+                headUpOnStarboardIcon = Icon.newInstance("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=H|00FF00|000000");
+                headUpOnStarboardIcon.setIconAnchor(Point.newInstance(10, 33));
+                headUpOnPortIcon = Icon.newInstance("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=H|FF0000|000000");
+                headUpOnPortIcon.setIconAnchor(Point.newInstance(10, 33));
+                bearAwayOnStarboardIcon = Icon.newInstance("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=B|00FF00|000000");
+                bearAwayOnStarboardIcon.setIconAnchor(Point.newInstance(10, 33));
+                bearAwayOnPortIcon = Icon.newInstance("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=B|FF0000|000000");
+                bearAwayOnPortIcon.setIconAnchor(Point.newInstance(10, 33));
+                markPassingToStarboardIcon = Icon.newInstance("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=M|00FF00|000000");
+                markPassingToStarboardIcon.setIconAnchor(Point.newInstance(10, 33));
+                markPassingToPortIcon = Icon.newInstance("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=M|FF0000|000000");
+                markPassingToPortIcon.setIconAnchor(Point.newInstance(10, 33));
+                unknownManeuverIcon = Icon.newInstance("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=?|FFFFFF|000000");
+                unknownManeuverIcon.setIconAnchor(Point.newInstance(10, 33));
+                penaltyCircleToStarboardIcon = Icon.newInstance("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=P|00FF00|000000");
+                penaltyCircleToStarboardIcon.setIconAnchor(Point.newInstance(10, 33));
+                penaltyCircleToPortIcon = Icon.newInstance("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=P|FF0000|000000");
+                penaltyCircleToPortIcon.setIconAnchor(Point.newInstance(10, 33));
             }
         });
     }
@@ -777,7 +813,8 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
                 from.put(competitorDAO, fixes.get(competitorDAO).get(firstShownFix.get(competitorDAO)).timepoint);
                 Map<CompetitorDAO, Date> to = new HashMap<CompetitorDAO, Date>();
                 to.put(competitorDAO, fixes.get(competitorDAO).get(lastShownFix.get(competitorDAO)).timepoint);
-                sailingService.getDouglasPoints(event.name, race.name, from, to, /* epsilon/meters */3,
+                /* currently not showing Douglas-Peucker points; TODO use checkboxes to select what to show (Bug #6)
+                sailingService.getDouglasPoints(event.name, race.name, from, to, 3, // epsilon/meters
                         new AsyncCallback<Map<CompetitorDAO, List<GPSFixDAO>>>() {
                             @Override
                             public void onFailure(Throwable caught) {
@@ -794,6 +831,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
                                 }
                             }
                         });
+                 */
                 sailingService.getManeuvers(event.name, race.name, from, to,
                         new AsyncCallback<Map<CompetitorDAO, List<ManeuverDAO>>>() {
                             @Override
@@ -803,8 +841,8 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
 
                             @Override
                             public void onSuccess(Map<CompetitorDAO, List<ManeuverDAO>> result) {
-                                if (douglasMarkers != null) {
-                                    removeAllMarkDouglasPeuckerpoints();
+                                if (maneuverMarkers != null) {
+                                    removeAllManeuverMarkers();
                                 }
                                 if (!timer.isPlaying()) {
                                     showManeuvers(result);
@@ -928,6 +966,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         maneuverMarkers = null;
     }
 
+    /* TODO see Bug #6, use checkboxes to select what to visualize 
     private void showMarkDouglasPeuckerPoints(
             Map<CompetitorDAO, List<GPSFixDAO>> gpsFixPointMapForCompetitors) {
         douglasMarkers = new HashSet<Marker>();
@@ -948,6 +987,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
             }
         }
     }
+    */
 
     private void showManeuvers(Map<CompetitorDAO, List<ManeuverDAO>> maneuvers) {
         maneuverMarkers = new HashSet<Marker>();
@@ -963,7 +1003,45 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
                     options.setTitle("" + maneuver.timepoint + ": " + maneuver.type + " "
                             + maneuver.directionChangeInDegrees + "deg from " + maneuver.speedWithBearingBefore
                             + " to " + maneuver.speedWithBearingAfter);
-//                    options.setIcon(icon) // TODO set a different icon for maneuvers
+                    if (maneuver.type.equals("TACK")) {
+                        if (maneuver.newTack.equals("PORT")) {
+                            options.setIcon(tackToPortIcon);
+                        } else {
+                            options.setIcon(tackToStarboardIcon);
+                        }
+                    } else if (maneuver.type.equals("JIBE")) {
+                        if (maneuver.newTack.equals("PORT")) {
+                            options.setIcon(jibeToPortIcon);
+                        } else {
+                            options.setIcon(jibeToStarboardIcon);
+                        }
+                    } else if (maneuver.type.equals("HEAD_UP")) {
+                        if (maneuver.newTack.equals("PORT")) {
+                            options.setIcon(headUpOnPortIcon);
+                        } else {
+                            options.setIcon(headUpOnStarboardIcon);
+                        }
+                    } else if (maneuver.type.equals("BEAR_AWAY")) {
+                        if (maneuver.newTack.equals("PORT")) {
+                            options.setIcon(bearAwayOnPortIcon);
+                        } else {
+                            options.setIcon(bearAwayOnStarboardIcon);
+                        }
+                    } else if (maneuver.type.equals("PENALTY_CIRCLE")) {
+                        if (maneuver.newTack.equals("PORT")) {
+                            options.setIcon(penaltyCircleToPortIcon);
+                        } else {
+                            options.setIcon(penaltyCircleToStarboardIcon);
+                        }
+                    } else if (maneuver.type.equals("MARK_PASSING")) {
+                        if (maneuver.newTack.equals("PORT")) {
+                            options.setIcon(markPassingToPortIcon);
+                        } else {
+                            options.setIcon(markPassingToStarboardIcon);
+                        }
+                    } else {
+                        options.setIcon(unknownManeuverIcon);
+                    }
                     Marker marker = new Marker(latLng, options);
                     maneuverMarkers.add(marker);
                     map.addOverlay(marker);

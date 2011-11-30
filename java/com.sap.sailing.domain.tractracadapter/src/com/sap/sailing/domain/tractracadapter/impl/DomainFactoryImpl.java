@@ -48,7 +48,6 @@ import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
-import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedEvent;
 import com.sap.sailing.domain.tracking.TrackedEventRegistry;
@@ -325,8 +324,7 @@ public class DomainFactoryImpl implements DomainFactory {
             case RACECOURSE:
                 result.add(new RaceCourseReceiver(
                         this, trackedEvent, tractracEvent, windStore,
-                        raceDefinitionSetToUpdate, WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND,
-                        GPSFixTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_SPEED));
+                        raceDefinitionSetToUpdate, WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND));
                 break;
             case MARKPOSITIONS:
                 result.add(new MarkPositionReceiver(

@@ -64,7 +64,9 @@ public interface StringConstants extends Constants {
     String expand();
     String leg();
     String distanceInMeters();
+    String distanceInMetersUnit();
     String averageSpeedInKnots();
+    String averageSpeedInKnotsUnit();
     String rankGain();
     String sapSailingAnalytics();
     String leaderboard();
@@ -73,10 +75,15 @@ public interface StringConstants extends Constants {
     String settings();
     String selectAtLeastOneLegDetail();
     String currentSpeedOverGroundInKnots();
+    String currentSpeedOverGroundInKnotsUnit();
     String estimatedTimeToNextWaypointInSeconds();
+    String estimatedTimeToNextWaypointInSecondsUnit();
     String gapToLeaderInSeconds();
+    String gapToLeaderInSecondsUnit();
     String velocityMadeGoodInKnots();
+    String velocityMadeGoodInKnotsUnit();
     String windwardDistanceToGoInMeters();
+    String windwardDistanceToGoInMetersUnit();
     String name();
     String leaveEmptyForDefault();
     String trackNewEvent();
@@ -114,4 +121,8 @@ public interface StringConstants extends Constants {
     String tailLength();
     String selectedRaces();
     String stressTest();
+    String numberOfManeuvers();
+    String tacks();
+    String jibes();
+    String penaltyCircles();
 }

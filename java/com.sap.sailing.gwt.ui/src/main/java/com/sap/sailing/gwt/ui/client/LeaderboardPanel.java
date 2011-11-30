@@ -414,10 +414,10 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
 
     public static DetailColumnType[] getAvailableRaceDetailColumnTypes() {
         return new DetailColumnType[] { DetailColumnType.RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS,
-                DetailColumnType.RACE_DISTANCE_TRAVELED, DetailColumnType.RACE_GAP_TO_LEADER_IN_SECONDS };
+                DetailColumnType.RACE_DISTANCE_TRAVELED, DetailColumnType.RACE_GAP_TO_LEADER_IN_SECONDS, DetailColumnType.RACE_MANEUVERS };
     }
 
-    private class TextRaceColumn extends RaceColumn<String> {
+    private class TextRaceColumn extends RaceColumn<String> implements RaceNameProvider {
         /**
          * Remembers the leg columns; <code>null</code>-padded, if {@link #getLegColumn(int)} asks for a column index
          * not yet existing. It is important to remember the columns because column removal happens based on identity.
@@ -464,15 +464,18 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 String detailColumnStyle) {
             Map<DetailColumnType, SortableColumn<LeaderboardRowDAO, ?>> result = new HashMap<DetailColumnType, SortableColumn<LeaderboardRowDAO, ?>>();
             result.put(DetailColumnType.RACE_DISTANCE_TRAVELED,
-                    new FormattedDoubleLegDetailColumn(stringConstants.distanceInMeters(),
+                    new FormattedDoubleLegDetailColumn(stringConstants.distanceInMeters(), stringConstants.distanceInMetersUnit(),
                             new RaceDistanceTraveledInMeters(), 1, getLeaderboardPanel().getLeaderboardTable(),
                             LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
             result.put(DetailColumnType.RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS, new FormattedDoubleLegDetailColumn(
-                    stringConstants.averageSpeedInKnots(), new RaceAverageSpeedInKnots(), 1, getLeaderboardPanel()
-                            .getLeaderboardTable(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
+                    stringConstants.averageSpeedInKnots(), stringConstants.averageSpeedInKnotsUnit(), new RaceAverageSpeedInKnots(), 1, getLeaderboardPanel()
+                                    .getLeaderboardTable(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
             result.put(DetailColumnType.RACE_GAP_TO_LEADER_IN_SECONDS, new FormattedDoubleLegDetailColumn(
-                    stringConstants.gapToLeaderInSeconds(), new RaceGapToLeaderInSeconds(), 1, getLeaderboardPanel()
-                            .getLeaderboardTable(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
+                    stringConstants.gapToLeaderInSeconds(), stringConstants.gapToLeaderInSecondsUnit(), new RaceGapToLeaderInSeconds(), 1, getLeaderboardPanel()
+                                    .getLeaderboardTable(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
+            result.put(DetailColumnType.RACE_MANEUVERS, new ManeuverCountRaceColumn(
+                    stringConstants.numberOfManeuvers(), getLeaderboardPanel()
+                                    .getLeaderboardTable(), this, LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, stringConstants));
             return result;
         }
 
@@ -560,10 +563,12 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 if (fieldsForRace != null && fieldsForRace.legDetails != null) {
                     for (LegEntryDAO legDetail : fieldsForRace.legDetails) {
                         if (legDetail != null) {
-                            if (result == null) {
-                                result = 0.0;
+                            if (legDetail.distanceTraveledInMeters != null) {
+                                if (result == null) {
+                                    result = 0.0;
+                                }
+                                result += legDetail.distanceTraveledInMeters;
                             }
-                            result += legDetail.distanceTraveledInMeters;
                         }
                     }
                 }
@@ -975,7 +980,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     private List<String> getRacesAddedNew(LeaderboardDAO oldLeaderboard, LeaderboardDAO newLeaderboard){
         List<String> result = new ArrayList<String>();
         for (String s : newLeaderboard.getRaceList()) {
-            if (oldLeaderboard == null || !oldLeaderboard.getRaceList().contains(s)){
+            if (oldLeaderboard == null || !oldLeaderboard.getRaceList().contains(s)) {
                 result.add(s);
             }
         }

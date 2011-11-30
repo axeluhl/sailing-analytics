@@ -31,13 +31,12 @@ import com.sap.sailing.domain.swisstimingadapter.StartList;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingRaceTracker;
 import com.sap.sailing.domain.tracking.AbstractRaceTrackerImpl;
-import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
+import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
-import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.RaceTracker;
@@ -220,7 +219,8 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
         Race swissTimingRace = messageLoader.getRace(raceID);
         race = domainFactory.createRaceDefinition(event, swissTimingRace, startList, course);
         trackedRace = getTrackedEvent().createTrackedRace(race, windStore,
-                WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND, GPSFixTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_SPEED,
+                WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND,
+                /* time over which to average speed */ race.getBoatClass().getApproximateManeuverDurationInMilliseconds(),
                 new DynamicRaceDefinitionSet() {
                     @Override
                     public void addRaceDefinition(RaceDefinition race) {

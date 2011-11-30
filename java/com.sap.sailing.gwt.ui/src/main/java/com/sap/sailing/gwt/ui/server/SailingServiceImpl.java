@@ -277,6 +277,9 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             Distance windwardDistanceToGo = trackedLeg.getWindwardDistanceToGo(timePoint);
             result.windwardDistanceToGoInMeters = windwardDistanceToGo == null ? null : windwardDistanceToGo
                     .getMeters();
+            result.numberOfTacks = trackedLeg.getNumberOfTacks(timePoint);
+            result.numberOfJibes = trackedLeg.getNumberOfJibes(timePoint);
+            result.numberOfPenaltyCircles = trackedLeg.getNumberOfPenaltyCircles(timePoint);
         }
         return result;
     }
@@ -1161,7 +1164,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
 
     @Override
     public Map<CompetitorDAO, List<ManeuverDAO>> getManeuvers(String eventName, String raceName,
-            Map<CompetitorDAO, Date> from, Map<CompetitorDAO, Date> to) {
+            Map<CompetitorDAO, Date> from, Map<CompetitorDAO, Date> to) throws NoWindException {
         Map<CompetitorDAO, List<ManeuverDAO>> result = new HashMap<CompetitorDAO, List<ManeuverDAO>>();
         TrackedRace trackedRace = getTrackedRace(eventName, raceName);
         for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
@@ -1180,7 +1183,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     private List<ManeuverDAO> createManeuverDAOsForCompetitor(List<Maneuver> maneuvers, TrackedRace trackedRace, Competitor competitor) {
         List<ManeuverDAO> result = new ArrayList<ManeuverDAO>();
         for (Maneuver maneuver : maneuvers) {
-            ManeuverDAO maneuverDAO = new ManeuverDAO(maneuver.getType().name(),
+            ManeuverDAO maneuverDAO = new ManeuverDAO(maneuver.getType().name(), maneuver.getNewTack().name(),
                     new PositionDAO(maneuver.getPosition().getLatDeg(), maneuver.getPosition().getLngDeg()), 
                     maneuver.getTimePoint().asDate(),
                     createSpeedWithBearingDAO(maneuver.getSpeedWithBearingBefore()),
