@@ -7,6 +7,7 @@ import java.util.Map;
 
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Header;
 import com.sap.sailing.gwt.ui.client.LegDetailColumn.LegDetailField;
 import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDAO;
@@ -103,31 +104,85 @@ public class LegColumn extends ExpandableSortableColumn<String> {
         }
     }
     
-    private class NumberOfManeuvers extends AbstractLegDetailField<Double> {
+    private class ManeuverCountLegDetailsColumn extends FormattedDoubleLegDetailColumn {
+        public ManeuverCountLegDetailsColumn(String title, CellTable<LeaderboardRowDAO> leaderboardTable,
+                String headerStyle, String columnStyle) {
+            super(title, /*unit*/null, /* field */ null, /* decimals */ 0, leaderboardTable, headerStyle, columnStyle);
+        }
+        
         @Override
-        protected Double getFromNonNullEntry(LegEntryDAO entry) {
-            Double result = null;
-            if (entry.numberOfTacks != null) {
-                result = (double) entry.numberOfTacks;
-            }
-            if (entry.numberOfJibes != null) {
-                if (result == null) {
-                    result = (double) entry.numberOfJibes;
-                } else {
-                    result += (double) entry.numberOfJibes;
+        protected String getTitle(LeaderboardRowDAO row) {
+            String resultString = null;
+            LegEntryDAO entry = getLegEntry(row);
+            if (entry != null) {
+                StringBuilder result = new StringBuilder();
+                if (entry.numberOfTacks != null) {
+                    result.append(entry.numberOfTacks);
+                    result.append(" ");
+                    result.append(stringConstants.tacks());
                 }
+                if (entry.numberOfJibes != null) {
+                    if (result.length() > 0) {
+                        result.append(", ");
+                    }
+                    result.append(entry.numberOfJibes);
+                    result.append(" ");
+                    result.append(stringConstants.jibes());
+                }
+                if (entry.numberOfPenaltyCircles != null) {
+                    if (result.length() > 0) {
+                        result.append(", ");
+                    }
+                    result.append(entry.numberOfPenaltyCircles);
+                    result.append(" ");
+                    result.append(stringConstants.penaltyCircles());
+                }
+                resultString = result.toString();
             }
-            if (entry.numberOfPenaltyCircles != null) {
-                if (result == null) {
-                    result = (double) entry.numberOfPenaltyCircles;
-                } else {
-                    result += (double) entry.numberOfPenaltyCircles;
+            return resultString;
+        }
+
+        @Override
+        public String getValue(LeaderboardRowDAO row) {
+            Double fieldValue = getFieldValue(row);
+            StringBuilder result = new StringBuilder();
+            result.append(fieldValue);
+            LegEntryDAO entry = getLegEntry(row);
+            if (entry.numberOfPenaltyCircles != null && (int) entry.numberOfPenaltyCircles != 0) {
+                result.append(" (");
+                result.append(entry.numberOfPenaltyCircles);
+                result.append("P)");
+            }
+            return result.toString();
+        }
+
+        @Override
+        protected Double getFieldValue(LeaderboardRowDAO row) {
+            LegEntryDAO entry = getLegEntry(row);
+            Double result = null;
+            if (entry != null) {
+                if (entry.numberOfTacks != null) {
+                    result = (double) entry.numberOfTacks;
+                }
+                if (entry.numberOfJibes != null) {
+                    if (result == null) {
+                        result = (double) entry.numberOfJibes;
+                    } else {
+                        result += (double) entry.numberOfJibes;
+                    }
+                }
+                if (entry.numberOfPenaltyCircles != null) {
+                    if (result == null) {
+                        result = (double) entry.numberOfPenaltyCircles;
+                    } else {
+                        result += (double) entry.numberOfPenaltyCircles;
+                    }
                 }
             }
             return result;
         }
+
     }
-    
     public LegColumn(LeaderboardPanel leaderboardPanel, String raceName, int legIndex, StringConstants stringConstants,
             List<DetailColumnType> legDetailSelection, String headerStyle, String columnStyle,
             String detailHeaderStyle, String detailColumnStyle) {
@@ -183,9 +238,9 @@ public class LegColumn extends ExpandableSortableColumn<String> {
                 1, getLeaderboardPanel().getLeaderboardTable(), detailHeaderStyle, detailColumnStyle));
         result.put(DetailColumnType.RANK_GAIN, new RankGainColumn(stringConstants.rankGain(), new RankGain(),
                 getLeaderboardPanel().getLeaderboardTable(), detailHeaderStyle, detailColumnStyle));
-        result.put(DetailColumnType.NUMBER_OF_MANEUVERS, new FormattedDoubleLegDetailColumn(
-                stringConstants.numberOfManeuvers(), /* unit */null, new NumberOfManeuvers(), 0, getLeaderboardPanel()
-                        .getLeaderboardTable(), detailHeaderStyle, detailColumnStyle));
+        result.put(DetailColumnType.NUMBER_OF_MANEUVERS, new ManeuverCountLegDetailsColumn(
+                stringConstants.numberOfManeuvers(), getLeaderboardPanel()
+                                .getLeaderboardTable(), detailHeaderStyle, detailColumnStyle));
         return result;
     }
 

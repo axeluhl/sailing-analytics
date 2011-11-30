@@ -417,7 +417,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 DetailColumnType.RACE_DISTANCE_TRAVELED, DetailColumnType.RACE_GAP_TO_LEADER_IN_SECONDS, DetailColumnType.RACE_MANEUVERS };
     }
 
-    private class TextRaceColumn extends RaceColumn<String> {
+    private class TextRaceColumn extends RaceColumn<String> implements RaceNameProvider {
         /**
          * Remembers the leg columns; <code>null</code>-padded, if {@link #getLegColumn(int)} asks for a column index
          * not yet existing. It is important to remember the columns because column removal happens based on identity.
@@ -473,9 +473,9 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             result.put(DetailColumnType.RACE_GAP_TO_LEADER_IN_SECONDS, new FormattedDoubleLegDetailColumn(
                     stringConstants.gapToLeaderInSeconds(), stringConstants.gapToLeaderInSecondsUnit(), new RaceGapToLeaderInSeconds(), 1, getLeaderboardPanel()
                                     .getLeaderboardTable(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
-            result.put(DetailColumnType.RACE_MANEUVERS, new FormattedDoubleLegDetailColumn(
-                    stringConstants.numberOfManeuvers(), /* unit */null, new RaceNumberOfManeuvers(), 1, getLeaderboardPanel()
-                                    .getLeaderboardTable(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
+            result.put(DetailColumnType.RACE_MANEUVERS, new ManeuverCountRaceColumn(
+                    stringConstants.numberOfManeuvers(), getLeaderboardPanel()
+                                    .getLeaderboardTable(), this, LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, stringConstants));
             return result;
         }
 
@@ -590,47 +590,6 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                     LegEntryDAO lastLegDetail = fieldsForRace.legDetails.get(fieldsForRace.legDetails.size() - 1);
                     if (lastLegDetail != null) {
                         result = lastLegDetail.gapToLeaderInSeconds;
-                    }
-                }
-                return result;
-            }
-        }
-
-        /**
-         * Accumulates the average speed over all legs of a race
-         * 
-         * @author Axel Uhl (D043530)
-         */
-        private class RaceNumberOfManeuvers implements LegDetailField<Double> {
-            @Override
-            public Double get(LeaderboardRowDAO row) {
-                Double result = null;
-                LeaderboardEntryDAO fieldsForRace = row.fieldsByRaceName.get(getRaceName());
-                if (fieldsForRace != null && fieldsForRace.legDetails != null) {
-                    for (LegEntryDAO legDetail : fieldsForRace.legDetails) {
-                        if (legDetail != null) {
-                            if (legDetail.numberOfTacks != null) {
-                                if (result == null) {
-                                    result = (double) legDetail.numberOfTacks;
-                                } else {
-                                    result += (double) legDetail.numberOfTacks;
-                                }
-                            }
-                            if (legDetail.numberOfJibes != null) {
-                                if (result == null) {
-                                    result = (double) legDetail.numberOfJibes;
-                                } else {
-                                    result += (double) legDetail.numberOfJibes;
-                                }
-                            }
-                            if (legDetail.numberOfPenaltyCircles != null) {
-                                if (result == null) {
-                                    result = (double) legDetail.numberOfPenaltyCircles;
-                                } else {
-                                    result += (double) legDetail.numberOfPenaltyCircles;
-                                }
-                            }
-                        }
                     }
                 }
                 return result;

@@ -122,4 +122,7 @@ public interface StringConstants extends Constants {
     String selectedRaces();
     String stressTest();
     String numberOfManeuvers();
+    String tacks();
+    String jibes();
+    String penaltyCircles();
 }
