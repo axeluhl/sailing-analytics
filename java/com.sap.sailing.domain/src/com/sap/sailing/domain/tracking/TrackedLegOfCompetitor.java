@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.tracking;
 
+import java.util.List;
+
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Distance;
 import com.sap.sailing.domain.base.Leg;
@@ -54,6 +56,15 @@ public interface TrackedLegOfCompetitor {
      */
     Speed getMaximumSpeedOverGround(TimePoint timePoint);
 
+    /**
+     * Infers the maneuvers of the competitor up to <code>timePoint</code> on this leg. If the competitor hasn't started
+     * the leg at the time point specified, <code>null</code> is returned. Otherwise, the list will be valid. If the
+     * time point is after the competitor has finished this leg, all of the competitor's maneuvers during this leg will
+     * be reported in chronological order. The list may be empty if no maneuvers happened between the point in time when
+     * the competitor started the leg and <code>timePoint</code>.
+     */
+    List<Maneuver> getManeuvers(TimePoint timePoint) throws NoWindException;
+    
     /**
      * @return <code>null</code> if the competitor hasn't started this leg yet
      */

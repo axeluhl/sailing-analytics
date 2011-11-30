@@ -675,7 +675,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                         Math.signum(courseChangeSequenceInSameDirection.get(0).getB().getCourseChangeInDegrees()) !=
                         Math.signum(courseChange.getCourseChangeInDegrees())) {
                     // course change in different direction; cluster the course changes in same direction so far, then start new list
-                    List<Maneuver> maneuvers = groupDirectionChangesIntoManeuvers(competitor,
+                    List<Maneuver> maneuvers = groupChangesInSameDirectionIntoManeuvers(competitor,
                             speedWithBearingAtBeginningOfUnidirectionalCourseChanges, courseChangeSequenceInSameDirection);
                     result.addAll(maneuvers);
                     courseChangeSequenceInSameDirection.clear();
@@ -687,7 +687,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                 speedWithBearingFromPreviousToCurrent = speedWithBearingFromCurrentToNext;
             } while (iter.hasNext());
             if (!courseChangeSequenceInSameDirection.isEmpty()) {
-                result.addAll(groupDirectionChangesIntoManeuvers(competitor, speedWithBearingAtBeginningOfUnidirectionalCourseChanges,
+                result.addAll(groupChangesInSameDirectionIntoManeuvers(competitor, speedWithBearingAtBeginningOfUnidirectionalCourseChanges,
                         courseChangeSequenceInSameDirection));
             }
         }
@@ -695,13 +695,14 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     }
 
     /**
-     * Groups the {@link CourseChange} sequence into groups where the {@link CourseChange#getTimePoint() times} of the
-     * course changes are no further apart than {@link #getApproximateManeuverDurationInMilliseconds()} milliseconds.
-     * For those, a single {@link Maneuver} object is created and added to the resulting list. The maneuver sums up the
+     * Groups the {@link CourseChange} sequence into groups where the times of the fixes at which the course changes
+     * took place are no further apart than {@link #getApproximateManeuverDurationInMilliseconds()} milliseconds. For
+     * those, a single {@link Maneuver} object is created and added to the resulting list. The maneuver sums up the
      * direction changes of the individual {@link CourseChange} objects. This can result in direction changes of more
      * than 180 degrees in one direction which may, e.g., represent a penalty circle or a mark rounding maneuver. As the
      * maneuver's time point, the average time point of the course changes that went into the maneuver construction is
-     * used.
+     * used.<p>
+     * 
      * @param speedWithBearingAtBeginning
      *            the speed/bearing before the first approximating fix passed in
      *            <code>courseChangeSequenceInSameDirection</code>
@@ -710,7 +711,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
      * 
      * @return a non-<code>null</code> list
      */
-    private List<Maneuver> groupDirectionChangesIntoManeuvers(Competitor competitor,
+    private List<Maneuver> groupChangesInSameDirectionIntoManeuvers(Competitor competitor,
             SpeedWithBearing speedWithBearingAtBeginning,
             List<Pair<GPSFixMoving, CourseChange>> courseChangeSequenceInSameDirection) throws NoWindException {
         List<Maneuver> result = new ArrayList<Maneuver>();

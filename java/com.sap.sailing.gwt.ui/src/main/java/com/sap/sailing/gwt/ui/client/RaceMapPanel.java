@@ -813,7 +813,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
                 from.put(competitorDAO, fixes.get(competitorDAO).get(firstShownFix.get(competitorDAO)).timepoint);
                 Map<CompetitorDAO, Date> to = new HashMap<CompetitorDAO, Date>();
                 to.put(competitorDAO, fixes.get(competitorDAO).get(lastShownFix.get(competitorDAO)).timepoint);
-                /* currently not showing Douglas-Peucker points; TODO use checkboxes to select what to show (Bug #6)
+                /* currently not showing Douglas-Peucker points; TODO use checkboxes to select what to show (Bug #6) */
                 sailingService.getDouglasPoints(event.name, race.name, from, to, 3, // epsilon/meters
                         new AsyncCallback<Map<CompetitorDAO, List<GPSFixDAO>>>() {
                             @Override
@@ -831,7 +831,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
                                 }
                             }
                         });
-                 */
+                 /* */
                 sailingService.getManeuvers(event.name, race.name, from, to,
                         new AsyncCallback<Map<CompetitorDAO, List<ManeuverDAO>>>() {
                             @Override
@@ -966,7 +966,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         maneuverMarkers = null;
     }
 
-    /* TODO see Bug #6, use checkboxes to select what to visualize 
+    /* TODO see Bug #6, use checkboxes to select what to visualize */
     private void showMarkDouglasPeuckerPoints(
             Map<CompetitorDAO, List<GPSFixDAO>> gpsFixPointMapForCompetitors) {
         douglasMarkers = new HashSet<Marker>();
@@ -987,7 +987,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
             }
         }
     }
-    */
+    /* */
 
     private void showManeuvers(Map<CompetitorDAO, List<ManeuverDAO>> maneuvers) {
         maneuverMarkers = new HashSet<Marker>();

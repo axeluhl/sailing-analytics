@@ -146,9 +146,11 @@ public class LegColumn extends ExpandableSortableColumn<String> {
         public String getValue(LeaderboardRowDAO row) {
             Double fieldValue = getFieldValue(row);
             StringBuilder result = new StringBuilder();
-            result.append(fieldValue);
+            if (fieldValue != null) {
+                result.append(getFormatter().format(fieldValue));
+            }
             LegEntryDAO entry = getLegEntry(row);
-            if (entry.numberOfPenaltyCircles != null && (int) entry.numberOfPenaltyCircles != 0) {
+            if (entry != null && entry.numberOfPenaltyCircles != null && (int) entry.numberOfPenaltyCircles != 0) {
                 result.append(" (");
                 result.append(entry.numberOfPenaltyCircles);
                 result.append("P)");
