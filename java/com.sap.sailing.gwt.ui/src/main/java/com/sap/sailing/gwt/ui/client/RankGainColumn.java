@@ -10,7 +10,7 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardRowDAO;
 public class RankGainColumn extends LegDetailColumn<Integer, Integer> {
     public RankGainColumn(String title, LegDetailField<Integer> field, CellTable<LeaderboardRowDAO> leaderboardTable,
             String headerStyle, String columnStyle) {
-        super(title, "", field, new RankGainCell(), leaderboardTable, headerStyle, columnStyle);
+        super(title, null, field, new RankGainCell(), leaderboardTable, headerStyle, columnStyle);
     }
 
     @Override

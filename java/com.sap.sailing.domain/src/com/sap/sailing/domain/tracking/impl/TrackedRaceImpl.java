@@ -763,6 +763,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                 .getTimePoint().asMillis() + getApproximateManeuverDurationInMilliseconds());
         Tack tackBeforeManeuver = getTack(competitor, timePointBeforeManeuver);
         Tack tackAfterManeuver = getTack(competitor, timePointAfterManeuver);
+        // the TrackedLegOfCompetitor variables may be null, e.g., in case the time points are before or after the race
         TrackedLegOfCompetitor legBeforeManeuver = getTrackedLeg(competitor, timePointBeforeManeuver);
         TrackedLegOfCompetitor legAfterManeuver = getTrackedLeg(competitor, timePointAfterManeuver);
         Maneuver.Type maneuverType;
@@ -771,20 +772,30 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         } else if (legBeforeManeuver != legAfterManeuver) {
             maneuverType = Type.MARK_PASSING;
         } else {
-            LegType legType = getTrackedLeg(legBeforeManeuver.getLeg()).getLegType(timePointBeforeManeuver);
             if (tackBeforeManeuver != tackAfterManeuver) {
-                // tack or jibe
-                switch (legType) {
-                case UPWIND:
-                    maneuverType = Type.TACK;
-                    break;
-                case DOWNWIND:
-                    maneuverType = Type.JIBE;
-                    break;
-                default:
+                LegType legType = legBeforeManeuver!=null ?
+                        getTrackedLeg(legBeforeManeuver.getLeg()).getLegType(timePointBeforeManeuver) :
+                            legAfterManeuver!=null ? getTrackedLeg(legAfterManeuver.getLeg()).getLegType(timePointAfterManeuver) : null;
+                if (legType != null) {
+                    // tack or jibe
+                    switch (legType) {
+                    case UPWIND:
+                        maneuverType = Type.TACK;
+                        break;
+                    case DOWNWIND:
+                        maneuverType = Type.JIBE;
+                        break;
+                    default:
+                        maneuverType = Type.UNKNOWN;
+                        logger.fine("Unknown maneuver for " + competitor + " at " + maneuverTimePoint
+                                + " on reaching leg " + legBeforeManeuver.getLeg());
+                        break;
+                    }
+                } else {
                     maneuverType = Type.UNKNOWN;
-                    logger.fine("Unknown maneuver for "+competitor+" at "+maneuverTimePoint+" on reaching leg "+legBeforeManeuver.getLeg());
-                    break;
+                    logger.fine("Can't determine leg type because tracked legs for competitor "+competitor+
+                            " cannot be determined for time points "+timePointBeforeManeuver+" and "+
+                            timePointAfterManeuver);
                 }
             } else {
                 // heading up or bearing away
