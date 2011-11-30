@@ -108,6 +108,14 @@
 	background-color: #e0e0e0;
 }
 
+.cellTableRaceColumnHeader span{
+	display: block;
+}
+
+.cellTableRaceColumnHeader span input, .cellTableRaceColumnHeader span img{
+	margin: 0 auto;
+}
+
 .cellTableLegColumnHeader {
 	background-color: #efefef;
 
