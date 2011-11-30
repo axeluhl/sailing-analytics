@@ -108,6 +108,18 @@
 	background-color: #e0e0e0;
 }
 
+.cellTableRaceColumnHeader span:first-child{
+	display: block;
+}
+
+.cellTableRaceColumnHeader span input, .cellTableRaceColumnHeader span img{
+	margin: 0 auto;
+}
+
+.cellTableRaceColumnHeader span img {
+	float: left;
+}
+
 .cellTableLegColumnHeader {
 	background-color: #efefef;
 
