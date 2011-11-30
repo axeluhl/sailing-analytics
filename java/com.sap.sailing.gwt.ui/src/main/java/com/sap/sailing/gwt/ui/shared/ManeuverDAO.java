@@ -10,6 +10,11 @@ public class ManeuverDAO implements IsSerializable {
      */
     public String type;
     
+    /**
+     * One of PORT or STARBOARD
+     */
+    public String newTack;
+    
     public PositionDAO position;
     
     public Date timepoint;
@@ -22,10 +27,11 @@ public class ManeuverDAO implements IsSerializable {
 
     public ManeuverDAO() {}
     
-    public ManeuverDAO(String type, PositionDAO position, Date timepoint, SpeedWithBearingDAO speedWithBearingBefore,
+    public ManeuverDAO(String type, String newTack, PositionDAO position, Date timepoint, SpeedWithBearingDAO speedWithBearingBefore,
             SpeedWithBearingDAO speedWithBearingAfter, double directionChangeInDegrees) {
         super();
         this.type = type;
+        this.newTack = newTack;
         this.position = position;
         this.timepoint = timepoint;
         this.speedWithBearingBefore = speedWithBearingBefore;

@@ -795,7 +795,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                         Type.HEAD_UP : Type.BEAR_AWAY;
             }
         }
-        Maneuver maneuver = new ManeuverImpl(maneuverType, maneuverPosition, maneuverTimePoint, speedWithBearingAtBeginning,
+        Maneuver maneuver = new ManeuverImpl(maneuverType, tackAfterManeuver, maneuverPosition, maneuverTimePoint, speedWithBearingAtBeginning,
                 speedWithBearingAtEnd, totalCourseChangeInDegrees);
         return maneuver;
     }
