@@ -2,7 +2,7 @@ package com.sap.sailing.domain.tractracadapter.persistence;
 
 import com.sap.sailing.domain.tractracadapter.TracTracConfiguration;
 import com.sap.sailing.domain.tractracadapter.persistence.impl.DomainObjectFactoryImpl;
-import com.sap.sailing.mongodb.Activator;
+import com.sap.sailing.mongodb.MongoDBService;
 
 /**
  * Offers methods to load domain objects from a Mongo DB
@@ -11,7 +11,7 @@ import com.sap.sailing.mongodb.Activator;
  *
  */
 public interface DomainObjectFactory {
-    DomainObjectFactory INSTANCE = new DomainObjectFactoryImpl(Activator.getDefaultInstance().getDB());
+    DomainObjectFactory INSTANCE = new DomainObjectFactoryImpl(MongoDBService.INSTANCE.getDB());
 
     Iterable<TracTracConfiguration> getTracTracConfigurations();
     

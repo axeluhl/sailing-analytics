@@ -1,9 +1,33 @@
 /** Add css rules here for your application. */
+/*
+    body #calendar:after
+      content: " ";
+      display: block;
+      height: 0;
+      clear: both;
+      visibility: hidden;
+*/
 
-* {
-	font-family: Arial;
-	font-size: 12px;
-}
+.clear {
+  clear: both;
+  font-size: 1px;
+  height: 0px;
+  line-height: 0px;
+  margin: -1px 0 0;
+  width: 100%; }
+
+.cover {
+  left: -1000px;
+  overflow: hidden;
+  position: absolute;
+  top: -1000px; }
+
+body {
+  background: url(images/header_bg.png) 0 0 repeat-x;
+  font-family: Arial, Verdana, sans-serif;
+  line-height: 1;
+  font-size: 62.5%;
+  margin-top: 0; }
 
 /** Example rules used by the template application (remove for your app) */
 h1 {
@@ -11,131 +35,65 @@ h1 {
   font-weight: bold;
   color: #777777;
   margin: 40px 0px 70px;
-  text-align: center;
-}
+  text-align: center;}
 
-.sendButton {
-  display: block;
-  font-size: 16pt;
-}
+table {
+  border-collapse: separate; }
 
-/** Most GWT widgets already have a style name defined */
-.gwt-DialogBox {
-  width: 400px;
-}
+table td, table th {
+  vertical-align: bottom;
+  line-height: 1.3; 
+  padding-top: 2px;}
 
-.dialogVPanel {
-  margin: 5px;
-}
 
-.serverResponseLabelError {
-  color: red;
-}
+.LogoAndTitlePanel {
+  margin: 0 0 24px 0;
+  height: 58px; }
 
-/** Set ids using widget.getElement().setId("idOfElement") */
-#closeButton {
-  margin: 15px 6px 6px;
-}
+.LogoAndTitlePanel:after {
+	content: " ";
+	display: block;
+	height: 0;
+	clear: both;
+	visibility: hidden; }
 
-.gwt-TabPanelBottom {
-	height: 100%;
-}
+.sapLogo {
+	float: left; 
+  margin: 8px 0 0 0; }
 
-.errorLabel {
-	color: #FF0000;
-}
+.sailingAnalyticsLabelPanel {
+  margin: 10px 0 0 0;
+  border: 1px solid red;}
 
-.linkNoBorder {
-	border: none;
-}
+.sailingAnalyticsLabel {
+  float: left;
+  color: #fff;
+  font-size: 1.2em;
+  font-weight: bold;
+  margin: 20px 0 0 0; }
 
-.refreshLink {
-	border: none;
-	position: relative;
-    vertical-align: middle;
-}
+.leaderboardLabel {
+  border-bottom: 2px solid #007dc0; 
+  font-weight: bold;
+  padding: 0 0 6px 0; }
 
-.valignMiddle {
-	position: relative;
-    vertical-align: middle;
-}
+.refreshAndSettings {
+  background: #f2f2f2;
+  border-bottom: 2px solid #fff;
+  border-top: 2px solid #fff; 
+  height: 30px; }
 
-.boldLabel {
-	font-size: 14px;
-	font-weight: bold;
-}
+  .refreshAndSettings table td {
+    padding: 0 10px 0 0;}
+  .refreshAndSettings table table td{
+    padding: 0 0 0 0;}
 
-.boldAnchor {
-	font-weight: bold;
-	vertical-align: middle;
-}
-
-.gwt-ListBox {
-	font-size: 12px;
-}
-
-.legColumnHeader {
-	background-color: #FFFFFF;
-	padding: 0 0 0 0;
-}
-
-.dialogMessageLabel {
-	font-weight: bold;
-}
-
-.gwt-DialogBox .Caption {
-	background: none repeat scroll 0 0 #e5e5e5;
-}
-
-.gwt-DialogBox .dialogTopLeft {
-	background: none repeat scroll 0 0 #e5e5e5;
-}
-
-.gwt-DialogBox .dialogTopRight {
-	background: none repeat scroll 0 0 #e5e5e5;
-}
-
-.gwt-DialogBox .dialogMiddleLeft {
-	background: none repeat scroll 0 0 #e5e5e5;
-}
-
-.gwt-DialogBox .dialogMiddleRight {
-	background: none repeat scroll 0 0 #e5e5e5;
-}
-
-.gwt-DialogBox .dialogBottomCenter {
-	background: none repeat scroll 0 0 #e5e5e5;
-}
-
-.gwt-DialogBox .dialogBottomLeft {
-	background: none repeat scroll 0 0 #e5e5e5;
-}
-
-.gwt-DialogBox .dialogBottomRight {
-	background: none repeat scroll 0 0 #e5e5e5;
-}
-
-.gwt-Button {
-	background-color: #e2e2e2;
-	border-color: #a3a3a3 !important;
-}
-
-.gwt-TextBox {
-	font-family: Arial !important;
-	font-size: 12px !important;
-}
-
-select {
-	font-family: Arial !important;
-	font-size: 12px !important;
-}
-
-button {
-	font-family: Arial !important;
-	font-size: 12px !important;
-}
-
-.leftPaddedPanel {
-	padding-left: 50px;
-	padding-right: 50px;
+.race-name {
+  margin: 2px 10px 0 0;
+  line-height: 1.0;
+  float: left;}
+  
+input.magnifier{
+	display: block;
+	margin: 3px auto 0 auto !important;
 }

@@ -6,7 +6,7 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.persistence.impl.DomainObjectFactoryImpl;
 import com.sap.sailing.domain.tracking.WindSource;
 import com.sap.sailing.domain.tracking.WindTrack;
-import com.sap.sailing.mongodb.Activator;
+import com.sap.sailing.mongodb.MongoDBService;
 
 /**
  * Offers methods to load domain objects from a Mongo DB
@@ -15,7 +15,7 @@ import com.sap.sailing.mongodb.Activator;
  *
  */
 public interface DomainObjectFactory {
-    DomainObjectFactory INSTANCE = new DomainObjectFactoryImpl(Activator.getDefaultInstance().getDB());
+    DomainObjectFactory INSTANCE = new DomainObjectFactoryImpl(MongoDBService.INSTANCE.getDB());
 
     WindTrack loadWindTrack(Event event, RaceDefinition race, WindSource windSource, long millisecondsOverWhichToAverage);
 

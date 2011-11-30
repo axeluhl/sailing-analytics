@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.test.mock;
 
+import java.util.List;
 import java.util.NavigableSet;
 
 import com.sap.sailing.domain.base.BoatClass;
@@ -14,11 +15,12 @@ import com.sap.sailing.domain.base.Tack;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
-import com.sap.sailing.domain.tracking.DynamicTrack;
+import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
+import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.NoWindException;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
@@ -142,7 +144,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public DynamicTrack<Buoy, GPSFix> getOrCreateTrack(Buoy buoy) {
+    public DynamicGPSFixTrack<Buoy, GPSFix> getOrCreateTrack(Buoy buoy) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -227,7 +229,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public DynamicTrack<Competitor, GPSFixMoving> getTrack(Competitor competitor) {
+    public DynamicGPSFixTrack<Competitor, GPSFixMoving> getTrack(Competitor competitor) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -401,6 +403,18 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
     @Override
     public Wind getDirectionFromStartToNextMark(TimePoint at) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public List<GPSFixMoving> approximate(Competitor competitor, Distance maxDistance, TimePoint from, TimePoint to) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public List<Maneuver> getManeuvers(Competitor competitor, TimePoint from, TimePoint to) {
         // TODO Auto-generated method stub
         return null;
     }

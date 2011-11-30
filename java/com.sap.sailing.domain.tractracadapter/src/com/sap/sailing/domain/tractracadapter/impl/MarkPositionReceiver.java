@@ -9,7 +9,7 @@ import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
-import com.sap.sailing.domain.tracking.DynamicTrack;
+import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.TrackedEvent;
@@ -109,7 +109,7 @@ public class MarkPositionReceiver extends AbstractReceiverWithQueue<ControlPoint
         }
         Buoy buoy = getDomainFactory().getBuoy(event.getA(), event.getB());
         // FIXME during getTrackedRaceBlocking it seems as if trackedRace gets assigned a new, invalid instance
-        ((DynamicTrack<Buoy, GPSFix>) getTrackedRaceBlocking().getOrCreateTrack(buoy)).addGPSFix(getDomainFactory()
+        ((DynamicGPSFixTrack<Buoy, GPSFix>) getTrackedRaceBlocking().getOrCreateTrack(buoy)).addGPSFix(getDomainFactory()
                 .createGPSFixMoving(event.getB()));
     }
 

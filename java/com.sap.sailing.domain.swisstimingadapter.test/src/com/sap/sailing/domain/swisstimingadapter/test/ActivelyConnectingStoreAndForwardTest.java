@@ -29,7 +29,7 @@ import com.sap.sailing.domain.swisstimingadapter.persistence.StoreAndForward;
 import com.sap.sailing.domain.swisstimingadapter.persistence.SwissTimingAdapterPersistence;
 import com.sap.sailing.domain.swisstimingadapter.persistence.impl.CollectionNames;
 import com.sap.sailing.domain.swisstimingadapter.persistence.impl.FieldNames;
-import com.sap.sailing.mongodb.Activator;
+import com.sap.sailing.mongodb.MongoDBService;
 
 public class ActivelyConnectingStoreAndForwardTest {
     private static final Logger logger = Logger.getLogger(ActivelyConnectingStoreAndForwardTest.class.getName());
@@ -50,7 +50,8 @@ public class ActivelyConnectingStoreAndForwardTest {
 
     @Before
     public void setUp() throws UnknownHostException, IOException, InterruptedException {
-        db = Activator.getDefaultInstance().getDB();
+        MongoDBService mongoDBService = MongoDBService.INSTANCE;
+        db = mongoDBService.getDB();
         sailMasterDummyListenerThread = new Thread("ActivelyConnectingStoreAndForwardTest-Listener") {
             public void run() {
                 try {
@@ -71,7 +72,8 @@ public class ActivelyConnectingStoreAndForwardTest {
         sailMasterDummyListenerThread.start();
         swissTimingAdapterPersistence = SwissTimingAdapterPersistence.INSTANCE;
         swissTimingAdapterPersistence.dropAllMessageData();
-        storeAndForward = new StoreAndForward("localhost", RECEIVE_PORT, CLIENT_PORT, SwissTimingFactory.INSTANCE, swissTimingAdapterPersistence);
+        storeAndForward = new StoreAndForward("localhost", RECEIVE_PORT, CLIENT_PORT, SwissTimingFactory.INSTANCE, 
+                swissTimingAdapterPersistence, mongoDBService);
         synchronized (this) {
             while (sendingStream == null) {
                 wait();

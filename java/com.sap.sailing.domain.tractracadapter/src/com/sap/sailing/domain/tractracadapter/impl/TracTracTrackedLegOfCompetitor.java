@@ -85,19 +85,19 @@ public class TracTracTrackedLegOfCompetitor implements TrackedLegOfCompetitor {
     }
 
     @Override
-    public int getNumberOfTacks(TimePoint timePoint) {
+    public Integer getNumberOfTacks(TimePoint timePoint) {
         // TODO Auto-generated method stub
         return 0;
     }
 
     @Override
-    public int getNumberOfJibes(TimePoint timePoint) {
+    public Integer getNumberOfJibes(TimePoint timePoint) {
         // TODO Auto-generated method stub
         return 0;
     }
 
     @Override
-    public int getNumberOfDirectionChanges(TimePoint timePoint) {
+    public Integer getNumberOfPenaltyCircles(TimePoint timePoint) {
         // TODO Auto-generated method stub
         return 0;
     }

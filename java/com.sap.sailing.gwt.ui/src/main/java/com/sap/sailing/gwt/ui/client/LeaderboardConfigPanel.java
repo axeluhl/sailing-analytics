@@ -33,8 +33,9 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
 
     private static final int MAX_NUMBER_OF_DISCARDED_RESULTS = 4;
 
-    private final RaceTreeView raceTree;
-    
+//    private final RaceTreeView raceTree;
+    private final TrackedEventsComposite trackedEventsComposite;
+  
     private final StringConstants stringConstants;
     
     private final SailingServiceAsync sailingService;
@@ -190,9 +191,12 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
         VerticalPanel labelAndTreePanel = new VerticalPanel();
         Label lblTrackedRaceConnected = new Label(stringConstants.trackedRaceConnectedToSelectedRaceName());
         labelAndTreePanel.add(lblTrackedRaceConnected);
-        raceTree = new RaceTreeView(stringConstants, /* multiselection */ false);
-        labelAndTreePanel.add(raceTree);
-        raceTree.addRaceSelectionChangeListener(this);
+
+        trackedEventsComposite = new TrackedEventsComposite(sailingService, errorReporter, adminConsole,
+                stringConstants, /* multiselection */ false);
+ 
+        labelAndTreePanel.add(trackedEventsComposite);
+        trackedEventsComposite.addRaceSelectionChangeListener(this);
         selectedLeaderboardPanel.add(labelAndTreePanel);
         
         VerticalPanel buttonPanelForSelectedLeaderboardDetails = new VerticalPanel();
@@ -284,7 +288,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
 
             @Override
             public void onSuccess(Void arg0) {
-                raceTree.clearSelection();
+                trackedEventsComposite.clearSelection();
             }
         });
     }
@@ -442,7 +446,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
             columnRemoveButton.setEnabled(false);
             columnMoveUpButton.setEnabled(false);
             columnMoveDownButton.setEnabled(false);
-            raceTree.clearSelection();
+            trackedEventsComposite.clearSelection();
             unlinkRaceColumnFromTrackedRaceButton.setEnabled(false);
         }
     }
@@ -464,14 +468,14 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
                         if (eventAndRaceName != null) {
                             selectRaceInTree(eventAndRaceName.getA(), eventAndRaceName.getB());
                         } else {
-                            raceTree.clearSelection();
+                            trackedEventsComposite.clearSelection();
                         }
                     }
                 });
     }
 
     private void selectRaceInTree(String eventName, String raceName) {
-        raceTree.selectRaceByName(eventName, raceName);
+        trackedEventsComposite.selectRaceByName(eventName, raceName);
     }
 
     private String getSelectedRaceColumnName() {
@@ -661,7 +665,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
 
     @Override
     public void fillEvents(List<EventDAO> result) {
-        raceTree.fillEvents(result);
+        trackedEventsComposite.fillEvents(result);
     }
 
     private void addNewLeaderboard() {
@@ -750,7 +754,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
                                 + " of event " + selectedRace.getA().name + " to race column named "
                                 + getSelectedRaceColumnName() + " of leaderboard " + getSelectedLeaderboardName()
                                 + ": " + t.getMessage());
-                        raceTree.clearSelection();
+                        trackedEventsComposite.clearSelection();
                     }
 
                     @Override

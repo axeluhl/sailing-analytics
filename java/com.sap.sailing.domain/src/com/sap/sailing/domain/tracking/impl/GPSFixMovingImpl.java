@@ -32,4 +32,5 @@ public class GPSFixMovingImpl extends GPSFixImpl implements GPSFixMoving {
     public boolean equals(Object other) {
         return super.equals(other) && other instanceof GPSFixMoving && getSpeed().equals(((GPSFixMoving) other).getSpeed());
     }
+
 }

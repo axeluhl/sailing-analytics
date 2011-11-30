@@ -13,7 +13,7 @@
   <!-- <inherits name='com.google.gwt.user.theme.standard.Standard'/> -->
   <!-- <inherits name='com.google.gwt.user.theme.chrome.Chrome'/> -->
   <!-- <inherits name='com.google.gwt.user.theme.dark.Dark'/>     -->
-
+  <stylesheet src="../AdminConsole.css" />
   <!-- Google Maps API -->
   <inherits name='com.google.gwt.maps.GoogleMaps' />
   
@@ -33,7 +33,4 @@
   <source path='client'/>
   <source path='shared'/>
   <source path='test'/>
-  
-  <servlet path='/testsailing' class='com.sap.sailing.gwt.ui.test.TestSailingServiceImpl'/>
-  
 </module>

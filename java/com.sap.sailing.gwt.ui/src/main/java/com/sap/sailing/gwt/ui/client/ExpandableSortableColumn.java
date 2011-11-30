@@ -98,17 +98,6 @@ public abstract class ExpandableSortableColumn<C> extends SortableColumn<Leaderb
         return result;
     }
     
-    /**
-     * Subclasses that use this class with expansion enabled need to override this method to define what their expansion
-     * columns look like. They only need to create the direct child columns of this column. This default implementation
-     * will return an empty but valid list.
-     * 
-     * @return a valid but possibly empty list
-     */
-    protected List<SortableColumn<LeaderboardRowDAO, ?>> createExpansionColumns() {
-        return Collections.emptyList();
-    }
-
     protected SortableColumn<LeaderboardRowDAO, ?> createExpansionColumn(DetailColumnType detailColumnType) {
         throw new RuntimeException("Detail column type "+detailColumnType+" not supported by column of type "+getClass().getName());
     }

@@ -12,12 +12,14 @@ import com.google.gwt.cell.client.ImageCell;
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.cell.client.ValueUpdater;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.EventTarget;
 import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
-import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Header;
 
@@ -40,6 +42,13 @@ public class SortableExpandableColumnHeader extends Header<SafeHtml> {
         }
     }
 
+    interface RaceCellTemplates extends SafeHtmlTemplates {
+        @SafeHtmlTemplates.Template("<span class=\"race-name\">{0}</span>")
+        SafeHtml cell(SafeHtml value);
+    }
+    
+    private static RaceCellTemplates template = GWT.create(RaceCellTemplates.class);
+    
     public SortableExpandableColumnHeader(String title, String iconURL, LeaderboardPanel leaderboardPanel,
             ExpandableSortableColumn<?> column, StringConstants stringConstants) {
         super(constructCell(title, iconURL, column.isExpansionEnabled(), leaderboardPanel, column, stringConstants));
@@ -49,6 +58,25 @@ public class SortableExpandableColumnHeader extends Header<SafeHtml> {
             final LeaderboardPanel leaderboardPanel, final ExpandableSortableColumn<?> column, final StringConstants stringConstants) {
         final List<HasCell<SafeHtml, ?>> cells = new ArrayList<HasCell<SafeHtml, ?>>(3);
         // if it's a medal race, add the cell rendering the medal image
+        // add the cell rendering the expand/collapse button:
+        if (isExpansionEnabled) {
+            cells.add(new HasCell<SafeHtml, SafeHtml>() {
+                @Override
+                public Cell<SafeHtml> getCell() {
+                    return new ExpandCollapseButtonCell(column, new ExpandCollapseButtonAction(column));
+                }
+
+                @Override
+                public FieldUpdater<SafeHtml, SafeHtml> getFieldUpdater() {
+                    return null; // no updates possible in a header cell
+                }
+
+                @Override
+                public SafeHtml getValue(SafeHtml object) {
+                    return null;
+                }
+            });
+        }
         if (iconURL != null) {
             cells.add(new HasCell<SafeHtml, String>() {
                 @Override
@@ -79,29 +107,11 @@ public class SortableExpandableColumnHeader extends Header<SafeHtml> {
             }
             @Override
             public SafeHtml getValue(SafeHtml object) {
-                return new SafeHtmlBuilder().appendHtmlConstant("&nbsp;").appendEscaped(title).toSafeHtml();
+                return template.cell(SafeHtmlUtils.fromString(title));
             }
         });
-        // add the cell rendering the expand/collapse button:
-        if (isExpansionEnabled) {
-            cells.add(new HasCell<SafeHtml, SafeHtml>() {
-                @Override
-                public Cell<SafeHtml> getCell() {
-                    return new ExpandCollapseButtonCell(column, new ExpandCollapseButtonAction(column));
-                }
-
-                @Override
-                public FieldUpdater<SafeHtml, SafeHtml> getFieldUpdater() {
-                    return null; // no updates possible in a header cell
-                }
-
-                @Override
-                public SafeHtml getValue(SafeHtml object) {
-                    return null;
-                }
-            });
-        }
-        return new CompositeCell<SafeHtml>(cells) {
+        
+        CompositeCell<SafeHtml> abc = new CompositeCell<SafeHtml>(cells) {
             /**
              * Redefining this method because when a table column is sorted, GWT wraps a div element
              * around the column header. Subsequently, the div's index no longer corresponds with the
@@ -109,37 +119,37 @@ public class SortableExpandableColumnHeader extends Header<SafeHtml> {
              * elements and skip the sort indicator
              */
             @Override
-            public void onBrowserEvent(Context context, Element parent, SafeHtml value,
-                NativeEvent event, ValueUpdater<SafeHtml> valueUpdater) {
-              int index = 0;
-              EventTarget eventTarget = event.getEventTarget();
-              if (Element.is(eventTarget)) {
-                Element target = eventTarget.cast();
-                Element container = getContainerElement(parent);
-                Element wrapper = container.getFirstChildElement();
-                try {
-                    DivElement.as(wrapper);
-                    // this must be a div inserted by the table after the column was sorted;
-                    // delegate on to the div's second child's child; note that this is highly
-                    // implementation-dependant and may easily break. We should probably file
-                    // a bug with Google...
-                    wrapper = wrapper.getFirstChildElement().getNextSiblingElement().getFirstChildElement();
-                } catch (Throwable t) {
-                    // wrapper was no div, so no action necessary
+            public void onBrowserEvent(Context context, Element parent, SafeHtml value, NativeEvent event,
+                    ValueUpdater<SafeHtml> valueUpdater) {
+                int index = 0;
+                EventTarget eventTarget = event.getEventTarget();
+                if (Element.is(eventTarget)) {
+                    Element target = eventTarget.cast();
+                    Element container = getContainerElement(parent);
+                    Element wrapper = container.getFirstChildElement();
+                    try {
+                        DivElement.as(wrapper);
+                        // this must be a div inserted by the table after the column was sorted;
+                        // delegate on to the div's second child's child; note that this is highly
+                        // implementation-dependant and may easily break. We should probably file
+                        // a bug with Google...
+                        wrapper = wrapper.getFirstChildElement().getNextSiblingElement().getFirstChildElement();
+                    } catch (Throwable t) {
+                        // wrapper was no div, so no action necessary
+                    }
+                    while (wrapper != null) {
+                        if (wrapper.isOrHasChild(target)) {
+                            @SuppressWarnings("unchecked")
+                            Cell<Object> cell = (Cell<Object>) cells.get(index).getCell();
+                            cell.onBrowserEvent(context, wrapper, cells.get(index).getValue(value), event, null); // tempUpdater
+                        }
+                        index++;
+                        wrapper = wrapper.getNextSiblingElement();
+                    }
                 }
-                while (wrapper != null) {
-                  if (wrapper.isOrHasChild(target)) {
-                      @SuppressWarnings("unchecked")
-                      Cell<Object> cell = (Cell<Object>) cells.get(index).getCell();
-                      cell.onBrowserEvent(context, wrapper, cells.get(index).getValue(value), event,
-                              null); // tempUpdater
-                  }
-                  index++;
-                  wrapper = wrapper.getNextSiblingElement();
-                }
-              }
             }
         };
+        return abc;
     }
 
     @Override

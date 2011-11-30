@@ -46,6 +46,10 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         public Position getPosition() {
             return null;
         }
+        @Override
+        public SpeedWithBearing getSpeedAndBearingRequiredToReach(GPSFix to) {
+            return null;
+        }
     }
     
     protected void setMillisecondsOverWhichToAverage(long millisecondsOverWhichToAverage) {
@@ -177,19 +181,8 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
                 NavigableSet<GPSFix> subset = getGPSFixes().subSet(new DummyGPSFix(from),
                 /* fromInclusive */false, new DummyGPSFix(to),
                 /* toInclusive */false);
-                TimePoint lastTimePoint = null;
                 for (GPSFix fix : subset) {
                     double distanceBetweenAdjacentFixesInNauticalMiles = fromPos.getDistance(fix.getPosition()).getNauticalMiles();
-                    // TODO remove this debug code again once the outlier issue is fixed
-                    if (lastTimePoint != null) {
-                        double crossCheckSpeedInKnots = distanceBetweenAdjacentFixesInNauticalMiles /
-                                (fix.getTimePoint().asMillis()-lastTimePoint.asMillis()) * 3600000l;
-                        if (crossCheckSpeedInKnots > 20) {
-                            System.out.println("found suspicious fix");
-                        }
-                    }
-                    lastTimePoint = fix.getTimePoint();
-                    
                     distanceInNauticalMiles += distanceBetweenAdjacentFixesInNauticalMiles;
                     fromPos = fix.getPosition();
                 }
@@ -314,9 +307,8 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
 
     @Override
     public boolean hasDirectionChange(TimePoint at, double minimumDegreeDifference) {
-        // TODO use boat-class specific time for a maneuver
-        TimePoint start = new MillisecondsTimePoint(at.asMillis()-5000);
-        TimePoint end = new MillisecondsTimePoint(at.asMillis()+5000);
+        TimePoint start = new MillisecondsTimePoint(at.asMillis()-getMillisecondsOverWhichToAverageSpeed());
+        TimePoint end = new MillisecondsTimePoint(at.asMillis()+getMillisecondsOverWhichToAverageSpeed());
         Bearing bearingAtStart = getEstimatedSpeed(start).getBearing();
         Bearing bearingAtEnd = getEstimatedSpeed(end).getBearing();
         // TODO also need to analyze the (smoothened) directions in between; example: two tacks within averaging interval
