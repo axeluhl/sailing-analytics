@@ -54,11 +54,20 @@ public interface TrackedLegOfCompetitor {
      */
     Speed getMaximumSpeedOverGround(TimePoint timePoint);
 
-    int getNumberOfTacks(TimePoint timePoint);
+    /**
+     * @return <code>null</code> if the competitor hasn't started this leg yet
+     */
+    Integer getNumberOfTacks(TimePoint timePoint) throws NoWindException;
 
-    int getNumberOfJibes(TimePoint timePoint);
+    /**
+     * @return <code>null</code> if the competitor hasn't started this leg yet
+     */
+    Integer getNumberOfJibes(TimePoint timePoint) throws NoWindException;
 
-    int getNumberOfDirectionChanges(TimePoint timePoint);
+    /**
+     * @return <code>null</code> if the competitor hasn't started this leg yet
+     */
+    Integer getNumberOfPenaltyCircles(TimePoint timePoint) throws NoWindException;
 
     /**
      * Computes the competitor's rank within this leg. If the competitor has already finished this leg at
