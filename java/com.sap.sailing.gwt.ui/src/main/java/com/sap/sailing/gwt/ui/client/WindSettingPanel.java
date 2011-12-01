@@ -11,6 +11,7 @@ import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.sap.sailing.gwt.ui.shared.EventDAO;
+import com.sap.sailing.gwt.ui.shared.EventNameAndRaceName;
 import com.sap.sailing.gwt.ui.shared.PositionDAO;
 import com.sap.sailing.gwt.ui.shared.RaceDAO;
 import com.sap.sailing.gwt.ui.shared.RegattaDAO;
@@ -53,7 +54,7 @@ public class WindSettingPanel extends FormPanel {
                 List<Triple<EventDAO, RegattaDAO, RaceDAO>> eventAndRaces = raceSelectionProvider.getSelectedEventAndRace();
                 // TODO can we be sure of single selection?
                 final Triple<EventDAO, RegattaDAO, RaceDAO> eventAndRace = eventAndRaces.get(eventAndRaces.size()-1);
-                sailingService.setWind(eventAndRace.getA().name, eventAndRace.getC().name, wind, new AsyncCallback<Void>() {
+                sailingService.setWind(new EventNameAndRaceName(eventAndRace.getA().name, eventAndRace.getC().name), wind, new AsyncCallback<Void>() {
                     @Override
                     public void onSuccess(Void result) {
                         windShower.showWind(eventAndRace.getA(), eventAndRace.getC());

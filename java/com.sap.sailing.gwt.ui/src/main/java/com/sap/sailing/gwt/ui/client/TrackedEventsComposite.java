@@ -26,6 +26,7 @@ import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.google.gwt.view.client.SelectionModel;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.gwt.ui.shared.EventDAO;
+import com.sap.sailing.gwt.ui.shared.EventNameAndRaceName;
 import com.sap.sailing.gwt.ui.shared.RaceDAO;
 import com.sap.sailing.gwt.ui.shared.RegattaDAO;
 import com.sap.sailing.gwt.ui.shared.Triple;
@@ -257,7 +258,7 @@ public class TrackedEventsComposite extends FormPanel implements EventDisplayer,
     }
 
     private void stopTrackingRace(final EventDAO event, final RaceDAO race) {
-        sailingService.stopTrackingRace(event.name, race.name, new AsyncCallback<Void>() {
+        sailingService.stopTrackingRace(new EventNameAndRaceName(event.name, race.name), new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError("Exception trying to stop tracking race " + race.name + "in event "+event.name+": "
