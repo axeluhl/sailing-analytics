@@ -38,7 +38,6 @@ import com.sap.sailing.domain.swisstimingadapter.StartList;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
-import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
 import com.sap.sailing.util.Util;
 
 import difflib.PatchFailedException;
@@ -223,8 +222,8 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public MarkPassing createMarkPassing(String boatID, Waypoint waypoint, TimePoint timePoint) {
-        return new MarkPassingImpl(timePoint, waypoint, getCompetitorByBoatID(boatID));
+    public MarkPassing createMarkPassing(TimePoint timePoint, Waypoint waypoint, com.sap.sailing.domain.base.Competitor competitor) {
+        return baseDomainFactory.createMarkPassing(timePoint, waypoint, competitor);
     }
 
     @Override

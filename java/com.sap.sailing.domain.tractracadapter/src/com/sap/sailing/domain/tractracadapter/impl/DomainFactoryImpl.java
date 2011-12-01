@@ -49,7 +49,6 @@ import com.sap.sailing.domain.tracking.TrackedEventRegistry;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
-import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.JSONService;
 import com.sap.sailing.domain.tractracadapter.Receiver;
@@ -410,9 +409,8 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public MarkPassing createMarkPassing(com.tractrac.clientmodule.Competitor competitor, Waypoint passed, TimePoint time) {
-        MarkPassing result = new MarkPassingImpl(time, passed, getOrCreateCompetitor(competitor));
-        return result;
+    public MarkPassing createMarkPassing(TimePoint timePoint, Waypoint passed, com.sap.sailing.domain.base.Competitor competitor) {
+        return baseDomainFactory.createMarkPassing(timePoint, passed, competitor);
     }
 
     @Override
