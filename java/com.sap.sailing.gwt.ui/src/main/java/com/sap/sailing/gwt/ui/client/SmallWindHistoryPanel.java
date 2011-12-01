@@ -9,6 +9,7 @@ import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.gwt.ui.shared.EventDAO;
+import com.sap.sailing.gwt.ui.shared.EventNameAndRaceName;
 import com.sap.sailing.gwt.ui.shared.PositionDAO;
 import com.sap.sailing.gwt.ui.shared.RaceDAO;
 import com.sap.sailing.gwt.ui.shared.RegattaDAO;
@@ -68,7 +69,7 @@ public class SmallWindHistoryPanel extends FormPanel implements TimeListener, Ra
         if (date != null) {
             Date from = new Date(date.getTime() - windIndicators.length * millisecondStepsPerLabel);
             if (event != null && race != null) {
-                sailingService.getWindInfo(event.name, race.name, from, millisecondStepsPerLabel,
+                sailingService.getWindInfo(new EventNameAndRaceName(event.name, race.name), from, millisecondStepsPerLabel,
                         windIndicators.length, position.latDeg, position.lngDeg, /* includeTrackBasedWindEstimation */ true,
                         new AsyncCallback<WindInfoForRaceDAO>() {
                             @Override

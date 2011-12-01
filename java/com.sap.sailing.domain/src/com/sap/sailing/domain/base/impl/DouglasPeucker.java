@@ -30,24 +30,29 @@ public class DouglasPeucker<ItemType, FixType extends GPSFix> {
     private Pair<GPSFix, Distance> getFixWithGreatestCrossTrackErrorInInterval(TimePoint from, TimePoint to) {
         Distance maxDistance = Distance.NULL;
         GPSFix fixFurthestAway = null;
-        Position fromPosition = track.getFirstFixAtOrAfter(from).getPosition();
-        FixType toFix = track.getLastFixAtOrBefore(to);
-        Bearing bearing = fromPosition.getBearingGreatCircle(toFix.getPosition());
-        synchronized (track) {
-            Iterator<FixType> fixIter = track.getFixesIterator(from, /* inclusive */ false);
-            while (fixIter.hasNext()) {
-                FixType fix = fixIter.next();
-                if (fix.getTimePoint().compareTo(to) > 0) {
-                    break;
-                }
-                Distance crossTrackError = fix.getPosition().crossTrackError(fromPosition, bearing);
-                if (crossTrackError.compareTo(maxDistance) > 0) {
-                    maxDistance = crossTrackError;
-                    fixFurthestAway = fix;
+        FixType firstFixAtOrAfter = track.getFirstFixAtOrAfter(from);
+        Pair<GPSFix, Distance> result = null;
+        if (firstFixAtOrAfter != null) {
+            Position fromPosition = firstFixAtOrAfter.getPosition();
+            FixType toFix = track.getLastFixAtOrBefore(to);
+            Bearing bearing = fromPosition.getBearingGreatCircle(toFix.getPosition());
+            synchronized (track) {
+                Iterator<FixType> fixIter = track.getFixesIterator(from, /* inclusive */false);
+                while (fixIter.hasNext()) {
+                    FixType fix = fixIter.next();
+                    if (fix.getTimePoint().compareTo(to) > 0) {
+                        break;
+                    }
+                    Distance crossTrackError = fix.getPosition().crossTrackError(fromPosition, bearing);
+                    if (crossTrackError.compareTo(maxDistance) > 0) {
+                        maxDistance = crossTrackError;
+                        fixFurthestAway = fix;
+                    }
                 }
             }
+            result = new Pair<GPSFix, Distance>(fixFurthestAway, maxDistance);
         }
-        return new Pair<GPSFix, Distance>(fixFurthestAway, maxDistance);
+        return result;
     }
     
     /**
@@ -57,24 +62,35 @@ public class DouglasPeucker<ItemType, FixType extends GPSFix> {
      * @return a sequence of fixes from the {@link #track} starting <em>after</em> time point <code>from</code> and
      *         including the last fix at or before time <code>to</code> that approximates the {@link #track} such that
      *         the maximum distance of any fix on the {@link #track} to the approximation is less than
-     *         <code>maxDistance</code>.
+     *         <code>maxDistance</code>. Always returns a non-<code>null</code> list which may, however, be empty.
      */
     public List<FixType> approximate(Distance maxDistance, TimePoint from, TimePoint to) {
         List<FixType> resultWithoutFirstFix = approximateWithoutFirst(maxDistance, from, to);
-        List<FixType> result = new ArrayList<FixType>(resultWithoutFirstFix.size()+1);
-        result.add(track.getFirstFixAtOrAfter(from));
+        List<FixType> result = new ArrayList<FixType>(resultWithoutFirstFix.size() + 1);
+        FixType firstFixAtOrAfter = track.getFirstFixAtOrAfter(from);
+        if (firstFixAtOrAfter != null) {
+            result.add(firstFixAtOrAfter);
+        }
         for (FixType f : resultWithoutFirstFix) {
             result.add(f);
         }
         return result;
     }
     
+    /**
+     * @return a non-<code>null</code> list which may be empty
+     */
     private List<FixType> approximateWithoutFirst(Distance maxDistance, TimePoint from, TimePoint to) {
         List<FixType> result;
         Pair<GPSFix, Distance> fixAndDistance = getFixWithGreatestCrossTrackErrorInInterval(from, to);
-        if (fixAndDistance.getB().compareTo(maxDistance) < 0) {
+        if (fixAndDistance == null || fixAndDistance.getB().compareTo(maxDistance) < 0) {
             // reached desired accuracy for interval from..to
-            result = Collections.singletonList(track.getLastFixAtOrBefore(to));
+            FixType lastFixAtOrBefore = track.getLastFixAtOrBefore(to);
+            if (lastFixAtOrBefore == null || lastFixAtOrBefore.getTimePoint().compareTo(from) < 0) {
+                result = Collections.emptyList();
+            } else {
+                result = Collections.singletonList(lastFixAtOrBefore);
+            }
         } else {
             List<FixType> left = approximateWithoutFirst(maxDistance, from, fixAndDistance.getA().getTimePoint());
             List<FixType> right = approximateWithoutFirst(maxDistance, fixAndDistance.getA().getTimePoint(), to);

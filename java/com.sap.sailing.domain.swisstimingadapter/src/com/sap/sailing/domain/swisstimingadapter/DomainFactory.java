@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.swisstimingadapter;
 
+import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
@@ -21,7 +22,7 @@ public interface DomainFactory {
 
     Nationality getOrCreateNationality(String nationalityName);
 
-    Competitor getOrCreateCompetitor(com.sap.sailing.domain.swisstimingadapter.Competitor competitor);
+    Competitor getOrCreateCompetitor(com.sap.sailing.domain.swisstimingadapter.Competitor competitor, BoatClass boatClass);
 
     RaceDefinition createRaceDefinition(Event event, Race race, StartList startList, com.sap.sailing.domain.swisstimingadapter.Course course);
 

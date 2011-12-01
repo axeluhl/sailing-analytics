@@ -37,6 +37,7 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sailing.gwt.ui.shared.EventDAO;
+import com.sap.sailing.gwt.ui.shared.EventNameAndRaceName;
 import com.sap.sailing.gwt.ui.shared.RaceDAO;
 import com.sap.sailing.gwt.ui.shared.RegattaDAO;
 import com.sap.sailing.gwt.ui.shared.Triple;
@@ -84,7 +85,7 @@ public class WindPanel extends FormPanel implements EventDisplayer, RaceSelectio
             public void execute(final WindDAO wind) {
                 List<Triple<EventDAO, RegattaDAO, RaceDAO>> eventAndRaces = getSelectedEventAndRace();
                 final Triple<EventDAO, RegattaDAO, RaceDAO> eventAndRace = eventAndRaces.get(eventAndRaces.size()-1);
-                sailingService.removeWind(eventAndRace.getA().name, eventAndRace.getC().name, wind, new AsyncCallback<Void>() {
+                sailingService.removeWind(new EventNameAndRaceName(eventAndRace.getA().name, eventAndRace.getC().name), wind, new AsyncCallback<Void>() {
                     @Override
                     public void onSuccess(Void result) {
                         // remove row from underlying list:
@@ -183,7 +184,7 @@ public class WindPanel extends FormPanel implements EventDisplayer, RaceSelectio
     @Override
     public void showWind(final EventDAO event, final RaceDAO race) {
         Date now = new Date();
-        sailingService.getWindInfo(event.name, race.name,
+        sailingService.getWindInfo(new EventNameAndRaceName(event.name, race.name),
                 // TODO what about the time interval?
                                   new Date(now.getTime()-60000 /* one minute */), new Date(/* toAsMilliseconds */),
                 showEstimatedWindBox.getValue(), new AsyncCallback<WindInfoForRaceDAO>() {
@@ -349,7 +350,7 @@ public class WindPanel extends FormPanel implements EventDisplayer, RaceSelectio
         if (selection != null && !selection.isEmpty()) {
             final Triple<EventDAO, RegattaDAO, RaceDAO> selectedRace = selection.get(0);
             final String windSourceName = windSourceSelection.getItemText(windSourceSelection.getSelectedIndex());
-            sailingService.setWindSource(selectedRace.getA().name, selectedRace.getC().name,
+            sailingService.setWindSource(new EventNameAndRaceName(selectedRace.getA().name, selectedRace.getC().name),
                     windSourceName, new AsyncCallback<Void>() {
                         @Override
                         public void onFailure(Throwable caught) {
