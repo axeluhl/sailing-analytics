@@ -253,14 +253,15 @@ public class CompareCompetitorsPanel extends FormPanel {
     private AbstractDataTable prepareTableData() {
         DataTable data = DataTable.create();
         data.addColumn(ColumnType.STRING, stringConstants.time());
-        for (int i = 0; i < competitors.size(); i++) {
-            data.addColumn(ColumnType.NUMBER, competitors.get(i).name);
-        }
+        
 
         if (chartData == null) {
             return data;
         }
         if (chartData[0] != null) {
+            for (int i = 0; i < chartData.length; i++) {
+                data.addColumn(ColumnType.NUMBER, chartData[i][0].getCompetitor().name);
+            }
             int length = 0;
             for (int i = 0; i < chartData.length; i++) {
                 length = (length < chartData[i].length) ? chartData[i].length : length;
