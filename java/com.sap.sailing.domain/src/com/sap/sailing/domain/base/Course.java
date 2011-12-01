@@ -2,6 +2,8 @@ package com.sap.sailing.domain.base;
 
 import java.util.List;
 
+import difflib.PatchFailedException;
+
 /**
  * 
  * A course consists of a sequence of {@link Waypoint}s. The {@link Leg}s extend between the adjacent waypoints.
@@ -39,4 +41,12 @@ public interface Course extends Named {
     void addWaypoint(int zeroBasedPosition, Waypoint waypointToAdd);
 
     void removeWaypoint(int zeroBasedPosition);
+
+    /**
+     * Carefully merges the new list of control points into this course by constructing a minimal difference between the
+     * control point list and the control points referenced by this course's waypoints. Change events are propagated
+     * to the registered {@link CourseListener}s as if {@link #addWaypoint(int, Waypoint)} and {@link #removeWaypoint(int)}
+     * had been used.
+     */
+    void update(List<ControlPoint> newControlPoints, DomainFactory baseDomainFactory) throws PatchFailedException;
 }
