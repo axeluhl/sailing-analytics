@@ -175,10 +175,9 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         checkboxAndType.add(new Pair<CheckBox, String>(new CheckBox("OTHER"), "OTHER"));
         for (Pair<CheckBox, String> pair : checkboxAndType) {
             pair.getA().addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-
                 @Override
                 public void onValueChange(ValueChangeEvent<Boolean> event) {
-                    if(!timer.isPlaying() && lastManeuverResult!=null){
+                    if (!timer.isPlaying() && lastManeuverResult!=null) {
                         removeAllManeuverMarkers();
                         showManeuvers(lastManeuverResult);
                     }
@@ -259,7 +258,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
     
     private boolean getCheckboxValueManeuver(String maneuverType){
         for (Pair<CheckBox, String> pair : checkboxAndType) {
-            if(pair.getB().equals(maneuverType)){
+            if (pair.getB().equals(maneuverType)) {
                 return pair.getA().getValue();
             }
         }
@@ -811,11 +810,6 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
             @Override
             public void onMouseOut(MarkerMouseOutEvent event) {
                 map.setTitle("");
-                /*
-                 * if(!quickRanksBox.isItemSelected(quickRanksList.indexOf(competitorDAO))){
-                 * setSelectedInMap(competitorDAO, false); }
-                 */
-                // quickRanksBox.setItemSelected(quickRanksList.indexOf(competitorDAO), false);
             }
         });
         return boatMarker;
@@ -954,22 +948,12 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
             @Override
             public void onMouseOver(PolylineMouseOverEvent event) {
                 map.setTitle(competitorDAO.name);
-                /*
-                 * if(quickRanksBox.isItemSelected(quickRanksList.indexOf(competitorDAO))){
-                 * setSelectedInMap(competitorDAO, true); }
-                 */
-                // quickRanksBox.setItemSelected(quickRanksList.indexOf(competitorDAO), true);
             }
         });
         result.addPolylineMouseOutHandler(new PolylineMouseOutHandler() {
             @Override
             public void onMouseOut(PolylineMouseOutEvent event) {
                 map.setTitle("");
-                /*
-                 * if(!quickRanksBox.isItemSelected(quickRanksList.indexOf(competitorDAO))){
-                 * setSelectedInMap(competitorDAO, false); }
-                 */
-                // quickRanksBox.setItemSelected(quickRanksList.indexOf(competitorDAO), false);
             }
         });
         tails.put(competitorDAO, result);
