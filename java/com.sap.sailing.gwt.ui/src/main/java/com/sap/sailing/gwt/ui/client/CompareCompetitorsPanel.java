@@ -20,6 +20,7 @@ import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.visualization.client.AbstractDataTable;
@@ -31,6 +32,7 @@ import com.google.gwt.visualization.client.visualizations.corechart.LineChart;
 import com.google.gwt.visualization.client.visualizations.corechart.Options;
 import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
 import com.sap.sailing.gwt.ui.shared.CompetitorWithRaceDAO;
+import com.sap.sailing.gwt.ui.shared.RaceIdentifier;
 
 public class CompareCompetitorsPanel extends FormPanel {
     private final List<CompetitorDAO> competitors;
@@ -40,8 +42,8 @@ public class CompareCompetitorsPanel extends FormPanel {
     private HorizontalPanel mainPanel;
     private VerticalPanel chartPanel;
     private final DeckPanel deckPanel;
-    private String leaderboardName;
-    private String raceName;
+    private final RaceIdentifier[] races;
+    private int selectedRace = 0;
     private int stepsToLoad = 100;
     private final StringConstants stringConstants;
     private boolean chartLoaded = false;
@@ -61,16 +63,37 @@ public class CompareCompetitorsPanel extends FormPanel {
     private AbsolutePanel loadingPanel;
 
     public CompareCompetitorsPanel(SailingServiceAsync sailingService, final List<CompetitorDAO> competitors,
-            String raceName, final String leaderboardName, StringConstants stringConstants, int chartWidth, int chartHeight) {
+            RaceIdentifier[] races, StringConstants stringConstants, int chartWidth, int chartHeight) {
         this.sailingService = sailingService;
         this.competitors = competitors;
-        this.leaderboardName = leaderboardName;
-        this.raceName = raceName;
+        this.races = races;
         this.stringConstants = stringConstants;
         this.chartWidth = chartWidth;
         this.chartHeight = chartHeight;
         mainPanel = new HorizontalPanel();
+        mainPanel.setSpacing(5);
         chartPanel = new VerticalPanel();
+        HorizontalPanel raceChooserPanel = new HorizontalPanel();
+        raceChooserPanel.setSpacing(5);
+        for (int i = 0; i < races.length; i++){
+            RadioButton r = new RadioButton("chooseRace");
+            r.setText(races[i].toString());
+            raceChooserPanel.add(r);
+            if (i == 0){
+                r.setValue(true);
+            }
+            final int index = i;
+            r.addClickHandler(new ClickHandler() {
+                
+                @Override
+                public void onClick(ClickEvent event) {
+                    selectedRace = index;
+                    loadData();
+                }
+            });
+        }
+        chartPanel.add(raceChooserPanel);
+        
         loadingPanel = new AbsolutePanel ();
         loadingPanel.setSize(chartWidth + "px", chartHeight + "px");
         
@@ -87,18 +110,8 @@ public class CompareCompetitorsPanel extends FormPanel {
         configCaption.setVisible(false);
         VerticalPanel configPanel = new VerticalPanel();
         configCaption.setContentWidget(configPanel);
-        configPanel.setSpacing(7);
-        Anchor showConfigAnchor = new Anchor(new SafeHtmlBuilder().appendHtmlConstant(
-                "<img class=\"linkNoBorder\" src=\"/images/settings.png\"/>").toSafeHtml());
-        showConfigAnchor.setTitle(stringConstants.configuration());
-        showConfigAnchor.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                configCaption.setVisible(!configCaption.isVisible());
-            }
-        });
-        chartPanel.add(showConfigAnchor);
+        configPanel.setSpacing(5);
+        
         Label lblChart = new Label(stringConstants.chooseChart());
         configPanel.add(lblChart);
         final ListBox dataSelection = new ListBox();
@@ -152,6 +165,17 @@ public class CompareCompetitorsPanel extends FormPanel {
         loadData();
         chartPanel.add(deckPanel);
         mainPanel.add(chartPanel);
+        Anchor showConfigAnchor = new Anchor(new SafeHtmlBuilder().appendHtmlConstant(
+                "<img class=\"linkNoBorder\" src=\"/images/settings.png\"/>").toSafeHtml());
+        showConfigAnchor.setTitle(stringConstants.configuration());
+        showConfigAnchor.addClickHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                configCaption.setVisible(!configCaption.isVisible());
+            }
+        });
+        mainPanel.add(showConfigAnchor);
         mainPanel.add(configCaption);
         this.add(mainPanel);
     }
@@ -205,7 +229,7 @@ public class CompareCompetitorsPanel extends FormPanel {
     private void loadData(){
         deckPanel.showWidget(DECK_PANEL_INDEX_LOADING);
         dataLoaded = false;
-        this.sailingService.getCompetitorRaceData(leaderboardName, this.raceName, competitors, stepsToLoad,
+        this.sailingService.getCompetitorRaceData(races[selectedRace], stepsToLoad,
                 new AsyncCallback<CompetitorWithRaceDAO[][]>() {
 
                     @Override

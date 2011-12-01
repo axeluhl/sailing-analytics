@@ -1129,22 +1129,13 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
 
     @Override
-    public CompetitorWithRaceDAO[][] getCompetitorRaceData(String leaderboardName, String raceName, List<CompetitorDAO> competitorDAOs, int steps) throws NoWindException {
-        CompetitorWithRaceDAO[][] competitorData;
-        TrackedRace trackedRace = getService().getLeaderboardByName(leaderboardName).getRaceColumnByName(raceName).getTrackedRace();
+    public CompetitorWithRaceDAO[][] getCompetitorRaceData(RaceIdentifier race, int steps) throws NoWindException {
+        List<CompetitorWithRaceDAO[]> competitorData;
+        TrackedRace trackedRace = getTrackedRace(race);
         Iterable<Competitor> competitors = trackedRace.getRace().getCompetitors();
         
-        List<Competitor> selectedCompetitor = new ArrayList<Competitor>();
+        competitorData = new ArrayList<CompetitorWithRaceDAO[]>();
         for (Competitor c : competitors){
-            for (CompetitorDAO cDAO : competitorDAOs){
-                if (c.getId().toString().equals(cDAO.id)){
-                    selectedCompetitor.add(c);
-                }
-            }
-        }
-        competitorData = new CompetitorWithRaceDAO[selectedCompetitor.size()][];
-        int i = 0;
-        for (Competitor c : selectedCompetitor){
             List<CompetitorWithRaceDAO> entries = new ArrayList<CompetitorWithRaceDAO>();
             for (long time = trackedRace.getStart().asMillis()-20000; time < trackedRace.getTimePointOfNewestEvent().asMillis(); time += (trackedRace.getTimePointOfNewestEvent().asMillis()-trackedRace.getStart().asMillis()-20000)/steps){
                 MillisecondsTimePoint timePoint = new MillisecondsTimePoint(time);
@@ -1161,9 +1152,9 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 }
                 entries.add(competitorWithRaceEntry);
             }
-            competitorData[i++] = entries.toArray(new CompetitorWithRaceDAO[0]);
+            competitorData.add(entries.toArray(new CompetitorWithRaceDAO[0]));
         }
-        return competitorData;
+        return competitorData.toArray(new CompetitorWithRaceDAO[0][0]);
     }
     
 public Map<CompetitorDAO, List<GPSFixDAO>> getDouglasPoints(RaceIdentifier raceIdentifier,

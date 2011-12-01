@@ -40,8 +40,11 @@ import com.sap.sailing.gwt.ui.client.LegDetailColumn.LegDetailField;
 import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDAO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDAO;
+import com.sap.sailing.gwt.ui.shared.LeaderboardNameAndRaceColumnName;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDAO;
 import com.sap.sailing.gwt.ui.shared.LegEntryDAO;
+import com.sap.sailing.gwt.ui.shared.RaceIdentifier;
+import com.sap.sailing.gwt.ui.shared.RaceInLeaderboardDAO;
 
 /**
  * A leaderboard essentially consists of a table widget that in its columns displays the entries.
@@ -1303,7 +1306,10 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     
     private void compareCompetitors(){
         List<CompetitorDAO> competitors = new ArrayList<CompetitorDAO>();
-        String raceColumnName = getLeaderboard().getRaceList().get(0).getRaceColumnName();
+        List<RaceIdentifier> races = new ArrayList<RaceIdentifier>();
+        for (RaceInLeaderboardDAO race : getLeaderboard().getRaceList()) {
+            races.add(new LeaderboardNameAndRaceColumnName(leaderboardName, race.getRaceColumnName()));
+        }
         if (leaderboardSelectionModel.getSelectedSet().size() > 0){
             for (LeaderboardRowDAO leaderboardRowDAO : leaderboardSelectionModel.getSelectedSet()) {
                 competitors.add(leaderboardRowDAO.competitor);
@@ -1314,6 +1320,6 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 competitors.add(leaderboardRowDAO.competitor);
             }
         }
-        new CompareCompetitorsChartDialog(sailingService, competitors, raceColumnName, leaderboardName, stringConstants);
+        new CompareCompetitorsChartDialog(sailingService, competitors, races.toArray(new LeaderboardNameAndRaceColumnName[0]), stringConstants);
     }
 }

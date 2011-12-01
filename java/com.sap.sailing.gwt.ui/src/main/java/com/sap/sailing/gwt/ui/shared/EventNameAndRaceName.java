@@ -34,4 +34,11 @@ public class EventNameAndRaceName implements EventAndRaceIdentifier {
     public Object getEvent(EventFetcher eventFetcher) {
         return eventFetcher.getEvent(this);
     }
+
+    @Override
+    public String toString() {
+        return raceName;
+    }
+    
+    
 }

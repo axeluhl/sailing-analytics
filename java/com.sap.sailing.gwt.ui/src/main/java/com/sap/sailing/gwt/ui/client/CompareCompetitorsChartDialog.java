@@ -12,15 +12,16 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.gwt.ui.client.CompareCompetitorsPanel.DataLoadedEvent;
 import com.sap.sailing.gwt.ui.client.CompareCompetitorsPanel.DataLoadedHandler;
 import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
+import com.sap.sailing.gwt.ui.shared.RaceIdentifier;
 
 public class CompareCompetitorsChartDialog extends DialogBox {
 
-    public CompareCompetitorsChartDialog(SailingServiceAsync sailingService, List<CompetitorDAO> competitors, String raceName, String leaderboardName, StringConstants stringConstants){
+    public CompareCompetitorsChartDialog(SailingServiceAsync sailingService, List<CompetitorDAO> competitors, RaceIdentifier[] races, StringConstants stringConstants){
         super(true);
         VerticalPanel mainPanel = new VerticalPanel();
         mainPanel.setSpacing(5);
         mainPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
-        CompareCompetitorsPanel ccp = new CompareCompetitorsPanel(sailingService, competitors, raceName, leaderboardName, stringConstants, (int) (Window.getClientWidth()*0.8), (int) (Window.getClientHeight()*0.8));
+        CompareCompetitorsPanel ccp = new CompareCompetitorsPanel(sailingService, competitors, races, stringConstants, (int) (Window.getClientWidth()*0.8), (int) (Window.getClientHeight()*0.8));
         ccp.addDataLoadedHandler(new DataLoadedHandler() {
             
             @Override
