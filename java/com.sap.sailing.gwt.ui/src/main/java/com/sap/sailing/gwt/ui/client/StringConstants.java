@@ -149,4 +149,5 @@ public interface StringConstants extends Constants {
     String no3LetterCodes();
     String add();
     String delete();
+    String showCharts();
 }

@@ -782,7 +782,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         refreshPanel.add(playPause);
         Anchor chartsAnchor = new Anchor(new SafeHtmlBuilder().appendHtmlConstant(
                 "<img class=\"linkNoBorder\" src=\"/images/chart_small.png\"/>").toSafeHtml());
-        chartsAnchor.setTitle("Show charts");
+        chartsAnchor.setTitle(stringConstants.showCharts());
         chartsAnchor.addClickHandler(new ClickHandler() {
             
             @Override
