@@ -916,16 +916,6 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             throw new IllegalArgumentException("Leaderboard named "+leaderboardName+" not found");
         }
     }
-    
-    public void editLeaderboardColumnName(String oldColumnName, String columnName, String leaderboardName, boolean medalRace){
-        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
-        if(leaderboard != null){
-            leaderboard.removeRaceColumn(oldColumnName);
-            leaderboard.addRaceColumn(columnName, medalRace);
-        } else {
-            throw new IllegalArgumentException("Leaderboard named "+leaderboardName+" not found");
-        }
-    }
 
     @Override
     public void renameLeaderboardColumn(String leaderboardName, String oldColumnName, String newColumnName) {

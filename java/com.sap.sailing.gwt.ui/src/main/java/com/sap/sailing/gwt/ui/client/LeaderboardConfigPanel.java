@@ -515,7 +515,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
 
                     @Override
                     public void onSuccess(Pair<String, Boolean> result) {
-                        sailingService.editLeaderboardColumnName(raceName, result.getA(), leaderboardName, result.getB(), new AsyncCallback<Void>() {
+                        sailingService.renameLeaderboardColumn(leaderboardName, raceName, result.getA(), new AsyncCallback<Void>() {
 
                             @Override
                             public void onFailure(Throwable caught) {}
