@@ -34,7 +34,7 @@ public interface DomainFactory {
 
     void updateCourseWaypoints(Course courseToUpdate, Iterable<Mark> marks) throws PatchFailedException;
     
-    MarkPassing createMarkPassing(String raceID, String boatID, Waypoint waypoint, TimePoint timePoint);
+    MarkPassing createMarkPassing(String boatID, Waypoint waypoint, TimePoint timePoint);
 
     void removeRace(String raceID);
 }
