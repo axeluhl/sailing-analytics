@@ -514,15 +514,37 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
                     public void onFailure(Throwable caught) {}
 
                     @Override
-                    public void onSuccess(Pair<String, Boolean> result) {
+                    public void onSuccess(final Pair<String, Boolean> result) {
                         sailingService.renameLeaderboardColumn(leaderboardName, raceName, result.getA(), new AsyncCallback<Void>() {
 
                             @Override
                             public void onFailure(Throwable caught) {}
 
                             @Override
-                            public void onSuccess(Void result) {
-                                // TODO liste aktualiesieren
+                            public void onSuccess(Void v) {
+                                sailingService.updateIsMedalRace(leaderboardName, result.getA(), result.getB(), new AsyncCallback<Void>() {
+
+                                    @Override
+                                    public void onFailure(Throwable caught) {}
+
+                                    @Override
+                                    public void onSuccess(Void v) {
+                                        int indexRaceColumn = -1;
+                                        for (int i = 0; i < raceColumnList.getList().size(); i++) {
+                                            String raceNameTmp = raceColumnList.getList().get(i);
+                                            if(raceNameTmp.equals(raceName)){
+                                                indexRaceColumn = i;
+                                            }
+                                        }
+                                        final int indexResultRaceColumn = indexRaceColumn;
+                                        if(indexRaceColumn != -1){
+                                            selectedLeaderboard.renameRace(raceName, result.getA());
+                                            selectedLeaderboard.setIsMedalRace(result.getA(), result.getB());
+                                            raceColumnList.getList().set(indexResultRaceColumn, result.getA());
+                                            raceColumnList.refresh();
+                                        }
+                                    }
+                                });
                             }
                         });
                     }

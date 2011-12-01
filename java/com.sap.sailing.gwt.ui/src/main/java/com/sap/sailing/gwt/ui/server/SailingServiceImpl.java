@@ -873,6 +873,20 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         return results;
     }
     
+    public LeaderboardDAO getLeaderboardByName(String leaderboardName){
+        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        LeaderboardDAO dao = new LeaderboardDAO();
+        dao.name = leaderboard.getName();
+        dao.displayNames = new HashMap<CompetitorDAO, String>();
+        for (RaceInLeaderboard raceColumn : leaderboard.getRaceColumns()) {
+            dao.addRace(raceColumn.getName(), raceColumn.isMedalRace(), raceColumn.getTrackedRace() != null);
+        }
+        
+        dao.hasCarriedPoints = leaderboard.hasCarriedPoints();
+        dao.discardThresholds = leaderboard.getResultDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces();
+        return dao;
+    }
+    
     @Override
     public void updateLeaderboard(String leaderboardName, String newLeaderboardName, int[] newDiscardingThreasholds){
         
