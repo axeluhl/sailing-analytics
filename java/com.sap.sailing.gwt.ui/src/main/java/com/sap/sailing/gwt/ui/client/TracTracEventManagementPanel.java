@@ -72,7 +72,8 @@ public class TracTracEventManagementPanel extends FormPanel implements EventDisp
     private final Grid grid;
     private final TrackedEventsComposite trackedEventsComposite;
     private final EventRefresher eventRefresher;
-    private final DateTimeFormatRenderer dateFormatter = new DateTimeFormatRenderer(DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_LONG));
+    private DateTimeFormatRenderer dateFormatter = new DateTimeFormatRenderer(DateTimeFormat.getFormat(PredefinedFormat.DATE_SHORT));
+    private DateTimeFormatRenderer timeFormatter = new DateTimeFormatRenderer(DateTimeFormat.getFormat(PredefinedFormat.TIME_LONG));
     private final List<TracTracRaceRecordDAO> availableTracTracRaces = new ArrayList<TracTracRaceRecordDAO>();
     
     public TracTracEventManagementPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
@@ -251,7 +252,7 @@ public class TracTracEventManagementPanel extends FormPanel implements EventDisp
         TextColumn<TracTracRaceRecordDAO> raceStartTrackingColumn = new TextColumn<TracTracRaceRecordDAO>() {
             @Override
             public String getValue(TracTracRaceRecordDAO object) {
-                return object.trackingStartTime==null?"":dateFormatter.render(object.trackingStartTime);
+                return object.trackingStartTime==null?"":dateFormatter.render(object.trackingStartTime) + " " + timeFormatter.render(object.trackingStartTime);
             }
         };
 

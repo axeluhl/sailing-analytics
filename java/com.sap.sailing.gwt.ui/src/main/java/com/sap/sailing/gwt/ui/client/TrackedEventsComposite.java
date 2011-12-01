@@ -47,7 +47,8 @@ public class TrackedEventsComposite extends FormPanel implements EventDisplayer,
     
     private VerticalPanel panel;
 
-    private DateTimeFormatRenderer dateFormatter = new DateTimeFormatRenderer(DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_LONG));
+    private DateTimeFormatRenderer dateFormatter = new DateTimeFormatRenderer(DateTimeFormat.getFormat(PredefinedFormat.DATE_SHORT));
+    private DateTimeFormatRenderer timeFormatter = new DateTimeFormatRenderer(DateTimeFormat.getFormat(PredefinedFormat.TIME_LONG));
     
     private Label noTrackedRacesLabel = null;
 
@@ -103,7 +104,7 @@ public class TrackedEventsComposite extends FormPanel implements EventDisplayer,
             @Override
             public String getValue(Triple<EventDAO, RegattaDAO, RaceDAO> object) {
                 if(object.getC().startOfRace != null) {
-                    return dateFormatter.render(object.getC().startOfRace);
+                    return dateFormatter.render(object.getC().startOfRace) + " " + timeFormatter.render(object.getC().startOfRace);
                 }
                 
                 return "";

@@ -19,6 +19,8 @@
   
   <!-- Phoenix Stuff -->
   <inherits name='com.sap.ui.commons.Module' />
+
+	<inherits name="com.google.gwt.resources.Resources" />
   
   <!-- Other module inherits                                      -->
 

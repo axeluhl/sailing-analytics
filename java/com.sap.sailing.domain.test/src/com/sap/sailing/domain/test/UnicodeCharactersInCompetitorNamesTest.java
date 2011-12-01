@@ -26,7 +26,7 @@ public class UnicodeCharactersInCompetitorNamesTest {
     
     @Before
     public void setUp() {
-        domainFactory = new DomainFactoryImpl();
+        domainFactory = new DomainFactoryImpl(new com.sap.sailing.domain.base.impl.DomainFactoryImpl());
     }
     
     public static void main(String[] args) throws URISyntaxException, IOException {

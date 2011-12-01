@@ -14,6 +14,7 @@ import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.WindTracker;
 import com.sap.sailing.domain.tracking.WindTrackerFactory;
+import com.sap.sailing.expeditionconnector.impl.Activator;
 
 public class ExpeditionWindTrackerFactory implements WindTrackerFactory, BundleActivator {
     private static Logger logger = Logger.getLogger(ExpeditionWindTrackerFactory.class.getName());
@@ -22,8 +23,6 @@ public class ExpeditionWindTrackerFactory implements WindTrackerFactory, BundleA
     
     private static BundleContext defaultBundleContext;
 
-    private static final String EXPEDITION_UDP_PORT_PROPERTY_NAME = "expedition.udp.port";
-    
     /**
      * Remembers the wind tracker and the port on which the UDP receiver with which the wind tracker is
      * registers is listening for incoming Expedition messages.
@@ -37,7 +36,7 @@ public class ExpeditionWindTrackerFactory implements WindTrackerFactory, BundleA
     public ExpeditionWindTrackerFactory() {
         this.windTrackers = new HashMap<RaceDefinition, WindTracker>();
         windReceivers = new HashMap<Integer, UDPExpeditionReceiver>();
-        defaultPort = Integer.valueOf(System.getProperty(EXPEDITION_UDP_PORT_PROPERTY_NAME, "2013"));
+        defaultPort = Activator.getInstance().getExpeditionUDPPort();
         logger.info("Created "+getClass().getName()+" with default UDP port "+defaultPort);
     }
 

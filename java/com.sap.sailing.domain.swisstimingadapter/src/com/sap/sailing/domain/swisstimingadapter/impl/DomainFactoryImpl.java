@@ -23,12 +23,9 @@ import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.BoatImpl;
-import com.sap.sailing.domain.base.impl.BuoyImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.EventImpl;
-import com.sap.sailing.domain.base.impl.GateImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.base.impl.NationalityImpl;
 import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
@@ -62,18 +59,16 @@ import difflib.PatchFailedException;
 public class DomainFactoryImpl implements DomainFactory {
     private final Map<String, Event> raceIDToEventCache;
     private final Map<String, Competitor> boatIDToCompetitorCache;
-    private final Map<String, Buoy> buoyCache;
     private final Map<Iterable<String>, ControlPoint> controlPointCache;
-    private final Map<String, Nationality> nationalityCache;
     private final Map<String, BoatClass> olympicClassesByID;
     private final BoatClass unknownBoatClass;
+    private final com.sap.sailing.domain.base.DomainFactory baseDomainFactory;
     
-    public DomainFactoryImpl() {
+    public DomainFactoryImpl(com.sap.sailing.domain.base.DomainFactory baseDomainFactory) {
+        this.baseDomainFactory = baseDomainFactory;
         raceIDToEventCache = new HashMap<String, Event>();
         boatIDToCompetitorCache = new HashMap<String, Competitor>();
-        buoyCache = new HashMap<String, Buoy>();
         controlPointCache = new HashMap<Iterable<String>, ControlPoint>();
-        nationalityCache = new HashMap<String, Nationality>();
         olympicClassesByID = new HashMap<String, BoatClass>();
         /*
         SAM102000 Men's Windsurfer = Windsufer Männer RS:X
@@ -128,18 +123,6 @@ public class DomainFactoryImpl implements DomainFactory {
             boatIDToCompetitorCache.put(competitor.getBoatID(), result);
         }
         return result;
-    }
-
-    @Override
-    public Nationality getOrCreateNationality(String nationalityName) {
-        synchronized (nationalityCache) {
-            Nationality result = nationalityCache.get(nationalityName);
-            if (result == null) {
-                result = new NationalityImpl(nationalityName, nationalityName);
-                nationalityCache.put(nationalityName, result);
-            }
-            return result;
-        }
     }
 
     @Override
@@ -207,7 +190,7 @@ public class DomainFactoryImpl implements DomainFactory {
                 Iterator<String> buoyNameIter = devices.iterator();
                 String left = buoyNameIter.next();
                 String right = buoyNameIter.next();
-                result = new GateImpl(getOrCreateBuoy(left), getOrCreateBuoy(right), left+"/"+right);
+                result = baseDomainFactory.createGate(getOrCreateBuoy(left), getOrCreateBuoy(right), left+"/"+right);
                 break;
             default:
                 throw new RuntimeException("Don't know how to handle control points with number of devices neither 1 nor 2. Was "+Util.size(devices));
@@ -224,12 +207,7 @@ public class DomainFactoryImpl implements DomainFactory {
      */
     @Override
     public Buoy getOrCreateBuoy(String id) {
-        Buoy result = buoyCache.get(id);
-        if (result == null) {
-            result = new BuoyImpl(id);
-            buoyCache.put(id, result);
-        }
-        return result;
+        return baseDomainFactory.getOrCreateBuoy(id);
     }
 
     @Override
@@ -277,7 +255,7 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public MarkPassing createMarkPassing(String raceID, String boatID, Waypoint waypoint, TimePoint timePoint) {
+    public MarkPassing createMarkPassing(String boatID, Waypoint waypoint, TimePoint timePoint) {
         return new MarkPassingImpl(timePoint, waypoint, getCompetitorByBoatID(boatID));
     }
 
@@ -298,6 +276,11 @@ public class DomainFactoryImpl implements DomainFactory {
                 raceIDToEventCache.remove(raceID);
             }
         }
+    }
+
+    @Override
+    public Nationality getOrCreateNationality(String nationalityName) {
+        return baseDomainFactory.getOrCreateNationality(nationalityName);
     }
 
 }
