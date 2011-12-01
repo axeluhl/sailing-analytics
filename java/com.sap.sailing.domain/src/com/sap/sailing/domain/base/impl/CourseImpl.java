@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -14,8 +15,14 @@ import java.util.logging.Logger;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.CourseListener;
+import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.util.CourseAsWaypointList;
+
+import difflib.DiffUtils;
+import difflib.Patch;
+import difflib.PatchFailedException;
 
 public class CourseImpl extends NamedImpl implements Course {
     private static final Logger logger = Logger.getLogger(CourseImpl.class.getName());
@@ -178,6 +185,42 @@ public class CourseImpl extends NamedImpl implements Course {
     @Override
     public void addCourseListener(CourseListener listener) {
         listeners.add(listener);
+    }
+
+    @Override
+    public void update(List<ControlPoint> newControlPoints, DomainFactory baseDomainFactory) throws PatchFailedException {
+        Iterable<Waypoint> courseWaypoints = getWaypoints();
+        List<Waypoint> newWaypointList = new LinkedList<Waypoint>();
+        // key existing waypoints by control points and re-use each one at most once during construction of the
+        // new waypoint list; since several waypoints can have the same control point, the map goes from
+        // control point to List<Waypoint>. The waypoints in the lists are held in the order of their
+        // occurrence in courseToUpdate.getWaypoints().
+        Map<com.sap.sailing.domain.base.ControlPoint, List<Waypoint>> existingWaypointsByControlPoint =
+                new HashMap<com.sap.sailing.domain.base.ControlPoint, List<Waypoint>>();
+        for (Waypoint waypoint : courseWaypoints) {
+            List<Waypoint> wpl = existingWaypointsByControlPoint.get(waypoint.getControlPoint());
+            if (wpl == null) {
+                wpl = new ArrayList<Waypoint>();
+                existingWaypointsByControlPoint.put(waypoint.getControlPoint(), wpl);
+            }
+            wpl.add(waypoint);
+        }
+        for (com.sap.sailing.domain.base.ControlPoint newDomainControlPoint : newControlPoints) {
+            List<Waypoint> waypoints = existingWaypointsByControlPoint.get(newDomainControlPoint);
+            Waypoint waypoint;
+            if (waypoints == null || waypoints.isEmpty()) {
+                // must be a new control point for which we don't have a waypoint yet
+                waypoint = baseDomainFactory.createWaypoint(newDomainControlPoint);
+            } else {
+                waypoint = waypoints.remove(0); // take the first from the list
+            }
+            newWaypointList.add(waypoint);
+        }
+        Patch<Waypoint> patch = DiffUtils.diff(courseWaypoints, newWaypointList);
+        CourseAsWaypointList courseAsWaypointList = new CourseAsWaypointList(this);
+        synchronized (this) {
+            patch.applyToInPlace(courseAsWaypointList);
+        }
     }
     
 }

@@ -16,7 +16,7 @@ import com.sap.sailing.domain.tracking.MarkPassing;
 import difflib.PatchFailedException;
 
 public interface DomainFactory {
-    final static DomainFactory INSTANCE = new DomainFactoryImpl();
+    final static DomainFactory INSTANCE = new DomainFactoryImpl(com.sap.sailing.domain.base.DomainFactory.INSTANCE);
     
     Event getOrCreateEvent(String raceID);
 
@@ -34,7 +34,7 @@ public interface DomainFactory {
 
     void updateCourseWaypoints(Course courseToUpdate, Iterable<Mark> marks) throws PatchFailedException;
     
-    MarkPassing createMarkPassing(String raceID, String boatID, Waypoint waypoint, TimePoint timePoint);
+    MarkPassing createMarkPassing(TimePoint timePoint, Waypoint waypoint, Competitor competitor);
 
     void removeRace(String raceID);
 }

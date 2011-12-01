@@ -49,6 +49,7 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard.Entry;
 import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
 import com.sap.sailing.domain.leaderboard.ScoreCorrection.MaxPointsReason;
+import com.sap.sailing.domain.leaderboard.impl.ResultDiscardingRuleImpl;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.MongoWindStoreFactory;
@@ -851,6 +852,40 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         getService().addLeaderboard(leaderboardName, discardThresholds);
     }
 
+    @Override
+    public List<LeaderboardDAO> getLeaderboards() {
+        Map<String, Leaderboard> leaderboards = getService().getLeaderboards();
+        List<LeaderboardDAO> results = new ArrayList<LeaderboardDAO>();
+        
+        for(Leaderboard leaderboard: leaderboards.values()) {
+            LeaderboardDAO dao = new LeaderboardDAO();
+            dao.name = leaderboard.getName();
+            dao.displayNames = new HashMap<CompetitorDAO, String>();
+            for (RaceInLeaderboard raceColumn : leaderboard.getRaceColumns()) {
+                dao.addRace(raceColumn.getName(), raceColumn.isMedalRace(), raceColumn.getTrackedRace() != null);
+            }
+            
+            dao.hasCarriedPoints = leaderboard.hasCarriedPoints();
+            dao.discardThresholds = leaderboard.getResultDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces();
+            
+            results.add(dao);
+        }
+        
+        return results;
+    }
+    
+    @Override
+    public void updateLeaderboard(String leaderboardName, String newLeaderboardName, int[] newDiscardingThreasholds){
+        
+        if(!leaderboardName.equals(newLeaderboardName))
+            getService().renameLeaderboard(leaderboardName, newLeaderboardName);
+        
+        Leaderboard leaderboard = getService().getLeaderboardByName(newLeaderboardName);
+        leaderboard.setResultDiscardingRule(new ResultDiscardingRuleImpl(newDiscardingThreasholds));
+        getService().updateStoredLeaderboard(leaderboard);
+    }
+
+    
     @Override
     public void removeLeaderboard(String leaderboardName) {
         getService().removeLeaderboard(leaderboardName);

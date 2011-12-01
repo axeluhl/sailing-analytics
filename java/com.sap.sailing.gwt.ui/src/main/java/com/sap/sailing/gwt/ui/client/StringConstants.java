@@ -126,6 +126,7 @@ public interface StringConstants extends Constants {
     String jibes();
     String penaltyCircles();
     String configuration();
+    String maneuverTypes();
     String chooseChart();
     String distanceTraveled();
     String velocityMadeGoodLong();

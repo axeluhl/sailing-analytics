@@ -107,6 +107,11 @@ public interface SailingServiceAsync {
 
     void getLeaderboardNames(AsyncCallback<List<String>> callback);
 
+    void getLeaderboards(AsyncCallback<List<LeaderboardDAO>> callback);
+
+    void updateLeaderboard(String leaderboardName, String newLeaderboardName, int[] newDiscardingThreasholds,
+            AsyncCallback<Void> callback);
+
     void createLeaderboard(String leaderboardName, int[] discardThresholds, AsyncCallback<Void> asyncCallback);
 
     void removeLeaderboard(String leaderboardName, AsyncCallback<Void> asyncCallback);
@@ -178,4 +183,5 @@ public interface SailingServiceAsync {
 
     void getManeuvers(RaceIdentifier raceIdentifier, Map<CompetitorDAO, Date> from, Map<CompetitorDAO, Date> to,
             AsyncCallback<Map<CompetitorDAO, List<ManeuverDAO>>> callback);
+
 }

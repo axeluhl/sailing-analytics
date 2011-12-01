@@ -71,6 +71,10 @@ public interface SailingService extends RemoteService {
     LeaderboardDAO getLeaderboardByName(String leaderboardName, Date date,
             Collection<String> namesOfRacesForWhichToLoadLegDetails) throws Exception;
 
+    List<LeaderboardDAO> getLeaderboards();
+
+    void updateLeaderboard(String leaderboardName, String newLeaderboardName, int[] newDiscardingThreasholds);
+
     void createLeaderboard(String leaderboardName, int[] discardThresholds);
 
     void removeLeaderboard(String leaderboardName);

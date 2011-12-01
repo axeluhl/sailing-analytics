@@ -66,7 +66,8 @@ public class SwissTimingEventManagementPanel extends FormPanel implements EventD
     private final TrackedEventsComposite trackedEventsComposite;
     private final EventRefresher eventRefresher;
     private final CheckBox canSendRequestsCheckbox;
-    private final DateTimeFormatRenderer dateFormatter = new DateTimeFormatRenderer(DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_LONG));
+    private DateTimeFormatRenderer dateFormatter = new DateTimeFormatRenderer(DateTimeFormat.getFormat(PredefinedFormat.DATE_SHORT));
+    private DateTimeFormatRenderer timeFormatter = new DateTimeFormatRenderer(DateTimeFormat.getFormat(PredefinedFormat.TIME_LONG));
     private final List<SwissTimingRaceRecordDAO> availableSwissTimingRaces = new ArrayList<SwissTimingRaceRecordDAO>();
 
     public SwissTimingEventManagementPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
@@ -158,7 +159,7 @@ public class SwissTimingEventManagementPanel extends FormPanel implements EventD
         TextColumn<SwissTimingRaceRecordDAO> raceStartTrackingColumn = new TextColumn<SwissTimingRaceRecordDAO>() {
             @Override
             public String getValue(SwissTimingRaceRecordDAO object) {
-                return object.raceStartTime==null?"":dateFormatter.render(object.raceStartTime);
+                return object.raceStartTime==null?"":dateFormatter.render(object.raceStartTime) + " " + timeFormatter.render(object.raceStartTime);
             }
         };
 
