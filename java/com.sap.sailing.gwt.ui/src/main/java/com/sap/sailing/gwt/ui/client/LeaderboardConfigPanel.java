@@ -562,7 +562,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
                     selectedLeaderboard = result;
 
                     raceColumnList.getList().clear();
-                    for(String race: result.getRaceList())
+                    for(String race: result.getRaceColumnNameList())
                         raceColumnList.getList().add(race);    
                     
                     selectedLeaderBoardPanel.setVisible(true);
