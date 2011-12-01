@@ -1026,37 +1026,37 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
                     options.setTitle("" + maneuver.timepoint + ": " + maneuver.type + " "
                             + maneuver.directionChangeInDegrees + "deg from " + maneuver.speedWithBearingBefore
                             + " to " + maneuver.speedWithBearingAfter);
-                    if (maneuver.type.equals("TACK")) {
+                    if (maneuver.type.equals("TACK") && getCheckboxValueManeuver("TACK")) {
                         if (maneuver.newTack.equals("PORT")) {
                             options.setIcon(tackToPortIcon);
                         } else {
                             options.setIcon(tackToStarboardIcon);
                         }
-                    } else if (maneuver.type.equals("JIBE")) {
+                    } else if (maneuver.type.equals("JIBE") && getCheckboxValueManeuver("JIBE")) {
                         if (maneuver.newTack.equals("PORT")) {
                             options.setIcon(jibeToPortIcon);
                         } else {
                             options.setIcon(jibeToStarboardIcon);
                         }
-                    } else if (maneuver.type.equals("HEAD_UP")) {
+                    } else if (maneuver.type.equals("HEAD_UP") && getCheckboxValueManeuver("HEAD_UP")) {
                         if (maneuver.newTack.equals("PORT")) {
                             options.setIcon(headUpOnPortIcon);
                         } else {
                             options.setIcon(headUpOnStarboardIcon);
                         }
-                    } else if (maneuver.type.equals("BEAR_AWAY")) {
+                    } else if (maneuver.type.equals("BEAR_AWAY") && getCheckboxValueManeuver("BEAR_AWAY")) {
                         if (maneuver.newTack.equals("PORT")) {
                             options.setIcon(bearAwayOnPortIcon);
                         } else {
                             options.setIcon(bearAwayOnStarboardIcon);
                         }
-                    } else if (maneuver.type.equals("PENALTY_CIRCLE")) {
+                    } else if (maneuver.type.equals("PENALTY_CIRCLE") && getCheckboxValueManeuver("PENALTY_CIRCLE")) {
                         if (maneuver.newTack.equals("PORT")) {
                             options.setIcon(penaltyCircleToPortIcon);
                         } else {
                             options.setIcon(penaltyCircleToStarboardIcon);
                         }
-                    } else if (maneuver.type.equals("MARK_PASSING")) {
+                    } else if (maneuver.type.equals("MARK_PASSING") && getCheckboxValueManeuver("MARK_PASSING")) {
                         if (maneuver.newTack.equals("PORT")) {
                             options.setIcon(markPassingToPortIcon);
                         } else {
