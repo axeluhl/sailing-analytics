@@ -33,9 +33,9 @@ public class RaceDialog extends DataEntryDialog<Pair<String, Boolean>>{
             boolean medalRaceNotNull = isMedalRace!=null;
             
             if(!isNameNotEmpty){
-                errorMessage = "error"; // stringConstants.raceNameEmpty();
+                errorMessage = stringConstants.raceNameEmpty();
             }else if(!medalRaceNotNull){
-                errorMessage = "error"; //stringConstants.medalRaceIsNull();
+                errorMessage = stringConstants.medalRaceIsNull();
             }else{
                 return errorMessage = null;
             }
