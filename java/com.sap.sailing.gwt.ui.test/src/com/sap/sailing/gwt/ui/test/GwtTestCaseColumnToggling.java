@@ -10,6 +10,7 @@ import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.ui.client.ExpandableSortableColumn;
 import com.sap.sailing.gwt.ui.client.StringConstants;
+import com.sap.sailing.gwt.ui.shared.EventNameAndRaceName;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDAO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDAO;
 import com.sap.sailing.gwt.ui.shared.Pair;
@@ -130,8 +131,8 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
     }
     
     private void linkTrackedRace(){
-        service.connectTrackedRaceToLeaderboardColumn(LEADERBOARD_NAME, COLUMN1_NAME, EVENT_NAME, TRACKED_RACE, new AsyncCallback<Void>() {
-
+        service.connectTrackedRaceToLeaderboardColumn(LEADERBOARD_NAME, COLUMN1_NAME, new EventNameAndRaceName(EVENT_NAME, TRACKED_RACE),
+                new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
                 fail("Failed to link race.");
