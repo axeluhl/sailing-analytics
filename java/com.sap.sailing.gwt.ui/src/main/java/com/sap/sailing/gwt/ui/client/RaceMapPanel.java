@@ -165,6 +165,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         boatMarkers = new HashMap<CompetitorDAO, Marker>();
         checkboxAndType = new ArrayList<Pair<CheckBox,String>>();
         VerticalPanel verticalCheckBoxPanel = new VerticalPanel();
+        verticalCheckBoxPanel.add(new Label(stringConstants.maneuverTypes()));
         checkboxAndType.add(new Pair<CheckBox, String>(new CheckBox("HEAD_UP"), "HEAD_UP"));
         checkboxAndType.add(new Pair<CheckBox, String>(new CheckBox("BEAR_AWAY"), "BEAR_AWAY"));
         checkboxAndType.add(new Pair<CheckBox, String>(new CheckBox("TACK"), "TACK"));
@@ -178,6 +179,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
                 @Override
                 public void onValueChange(ValueChangeEvent<Boolean> event) {
                     if(!timer.isPlaying() && lastManeuverResult!=null){
+                        removeAllManeuverMarkers();
                         showManeuvers(lastManeuverResult);
                     }
                 }
@@ -207,6 +209,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         newRaceListBox.addRaceSelectionChangeListener(windHistory);
         grid.setWidget(1, 0, windHistory);
         HorizontalPanel horizontalRanksVerticalAndCheckboxesManeuversPanel = new HorizontalPanel();
+        horizontalRanksVerticalAndCheckboxesManeuversPanel.setSpacing(15);
         VerticalPanel ranksAndCheckboxAndTailLength = new VerticalPanel();
         HorizontalPanel labelAndTailLengthBox = new HorizontalPanel();
         labelAndTailLengthBox.add(new Label(stringConstants.tailLength()));
@@ -1083,12 +1086,14 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
                         if(getCheckboxValueManeuver("OTHER")){
                             options.setIcon(unknownManeuverIcon);
                         }else{
-                            showThisManeuver = false; // TODO remove not selected maneuver pins
+                            showThisManeuver = false;
                         }
                     }
-                    Marker marker = new Marker(latLng, options);
-                    maneuverMarkers.add(marker);
-                    map.addOverlay(marker);
+                    if(showThisManeuver){
+                        Marker marker = new Marker(latLng, options);
+                        maneuverMarkers.add(marker);
+                        map.addOverlay(marker);
+                    }
                 }
             }
         }
