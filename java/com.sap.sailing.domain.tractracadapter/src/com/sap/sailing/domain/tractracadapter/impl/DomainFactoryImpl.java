@@ -30,16 +30,13 @@ import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.BoatImpl;
-import com.sap.sailing.domain.base.impl.BuoyImpl;
 import com.sap.sailing.domain.base.impl.CompetitorImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.base.impl.DegreePosition;
 import com.sap.sailing.domain.base.impl.EventImpl;
-import com.sap.sailing.domain.base.impl.GateImpl;
 import com.sap.sailing.domain.base.impl.KilometersPerHourSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.base.impl.NationalityImpl;
 import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
@@ -75,18 +72,14 @@ import difflib.Patch;
 import difflib.PatchFailedException;
 
 public class DomainFactoryImpl implements DomainFactory {
+    private final com.sap.sailing.domain.base.DomainFactory baseDomainFactory;
+    
     // TODO consider (re-)introducing WeakHashMaps for cache structures, but such that the cache is maintained as long as our domain objects are strongly referenced
     private final Map<ControlPoint, com.sap.sailing.domain.base.ControlPoint> controlPointCache =
         new HashMap<ControlPoint, com.sap.sailing.domain.base.ControlPoint>();
     
     private final Map<com.tractrac.clientmodule.Competitor, com.sap.sailing.domain.base.Competitor> competitorCache =
             new HashMap<com.tractrac.clientmodule.Competitor, com.sap.sailing.domain.base.Competitor>();
-    
-    /**
-     * Ensure that the <em>same</em> string is used as key that is also used to set the {@link Nationality}
-     * object's {@link Nationality#getName() name}.
-     */
-    private final Map<String, Nationality> nationalityCache = new HashMap<String, Nationality>();
     
     private final Map<String, Person> personCache = new HashMap<String, Person>();
     
@@ -102,6 +95,10 @@ public class DomainFactoryImpl implements DomainFactory {
     
     private final Map<Race, RaceDefinition> raceCache = new HashMap<Race, RaceDefinition>();
     
+    public DomainFactoryImpl(com.sap.sailing.domain.base.DomainFactory baseDomainFactory) {
+        this.baseDomainFactory = baseDomainFactory;
+    }
+
     @Override
     public Position createPosition(
             com.tractrac.clientmodule.data.Position position) {
@@ -139,7 +136,7 @@ public class DomainFactoryImpl implements DomainFactory {
             wpl.add(waypoint);
         }
         for (ControlPoint tractracControlPoint : controlPoints) {
-            com.sap.sailing.domain.base.ControlPoint domainControlPoint = getControlPoint(tractracControlPoint);
+            com.sap.sailing.domain.base.ControlPoint domainControlPoint = getOrCreateControlPoint(tractracControlPoint);
             List<Waypoint> waypoints = existingWaypointsByControlPoint.get(domainControlPoint);
             Waypoint waypoint;
             if (waypoints == null || waypoints.isEmpty()) {
@@ -159,23 +156,23 @@ public class DomainFactoryImpl implements DomainFactory {
 
     @Override
     public Waypoint createWaypoint(ControlPoint controlPoint) {
-        com.sap.sailing.domain.base.ControlPoint domainControlPoint = getControlPoint(controlPoint);
+        com.sap.sailing.domain.base.ControlPoint domainControlPoint = getOrCreateControlPoint(controlPoint);
         return new WaypointImpl(domainControlPoint);
     }
 
-    public com.sap.sailing.domain.base.ControlPoint getControlPoint(ControlPoint controlPoint) {
+    public com.sap.sailing.domain.base.ControlPoint getOrCreateControlPoint(ControlPoint controlPoint) {
         synchronized (controlPointCache) {
             com.sap.sailing.domain.base.ControlPoint domainControlPoint = controlPointCache.get(controlPoint);
             if (domainControlPoint == null) {
                 if (controlPoint.getHasTwoPoints()) {
                     // it's a gate
-                    domainControlPoint = new GateImpl(new BuoyImpl(controlPoint.getName() + " (left)"), new BuoyImpl(
-                            controlPoint.getName() + " (right)"), controlPoint.getName());
+                    domainControlPoint = baseDomainFactory.createGate(baseDomainFactory.getOrCreateBuoy(controlPoint.getName() + " (left)"),
+                            baseDomainFactory.getOrCreateBuoy(controlPoint.getName() + " (right)"), controlPoint.getName());
                 } else {
-                    domainControlPoint = new BuoyImpl(controlPoint.getName());
+                    domainControlPoint = baseDomainFactory.getOrCreateBuoy(controlPoint.getName());
                 }
+                controlPointCache.put(controlPoint, domainControlPoint);
             }
-            controlPointCache.put(controlPoint, domainControlPoint);
             return domainControlPoint;
         }
     }
@@ -249,14 +246,7 @@ public class DomainFactoryImpl implements DomainFactory {
 
     @Override
     public Nationality getOrCreateNationality(String nationalityName) {
-        synchronized (nationalityCache) {
-            Nationality result = nationalityCache.get(nationalityName);
-            if (result == null) {
-                result = new NationalityImpl(nationalityName, nationalityName);
-                nationalityCache.put(nationalityName, result);
-            }
-            return result;
-        }
+        return baseDomainFactory.getOrCreateNationality(nationalityName);
     }
     
     @Override
@@ -441,7 +431,7 @@ public class DomainFactoryImpl implements DomainFactory {
 
     @Override
     public Buoy getBuoy(ControlPoint controlPoint, ControlPointPositionData record) {
-        com.sap.sailing.domain.base.ControlPoint myControlPoint = getControlPoint(controlPoint);
+        com.sap.sailing.domain.base.ControlPoint myControlPoint = getOrCreateControlPoint(controlPoint);
         Buoy result;
         Iterator<Buoy> iter = myControlPoint.getBuoys().iterator();
         if (controlPoint.getHasTwoPoints()) {

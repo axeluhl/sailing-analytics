@@ -151,7 +151,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
                     logger.info("fetching paramURL to check for new ControlPoint positions...");
                     Event event = KeyValue.setup(paramURL);
                     for (ControlPoint controlPoint : event.getControlPointList()) {
-                        com.sap.sailing.domain.base.ControlPoint domainControlPoint = domainFactory.getControlPoint(controlPoint);
+                        com.sap.sailing.domain.base.ControlPoint domainControlPoint = domainFactory.getOrCreateControlPoint(controlPoint);
                         boolean first = true;
                         for (Buoy buoy : domainControlPoint.getBuoys()) {
                             for (RaceDefinition raceDefinition : raceDefinitions) {

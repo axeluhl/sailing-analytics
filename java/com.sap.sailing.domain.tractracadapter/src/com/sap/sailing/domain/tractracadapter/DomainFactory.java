@@ -45,14 +45,13 @@ import com.tractrac.clientmodule.data.Position;
 import difflib.PatchFailedException;
 
 public interface DomainFactory {
-    static DomainFactory INSTANCE = new DomainFactoryImpl();
+    static DomainFactory INSTANCE = new DomainFactoryImpl(com.sap.sailing.domain.base.DomainFactory.INSTANCE);
 
     com.sap.sailing.domain.base.Position createPosition(Position position);
 
     com.sap.sailing.domain.base.TimePoint createTimePoint(long timestamp);
 
-    com.sap.sailing.domain.base.Waypoint createWaypoint(
-            ControlPoint controlPoint);
+    com.sap.sailing.domain.base.Waypoint createWaypoint(ControlPoint controlPoint);
 
     Course createCourse(String name, Iterable<ControlPoint> controlPoints);
 
@@ -144,7 +143,7 @@ public interface DomainFactory {
      */
     Buoy getBuoy(ControlPoint controlPoint, ControlPointPositionData record);
 
-    com.sap.sailing.domain.base.ControlPoint getControlPoint(ControlPoint controlPoint);
+    com.sap.sailing.domain.base.ControlPoint getOrCreateControlPoint(ControlPoint controlPoint);
 
     MarkPassing createMarkPassing(com.tractrac.clientmodule.Competitor competitor, Waypoint passed, TimePoint time);
 

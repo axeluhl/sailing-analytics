@@ -16,7 +16,7 @@ import com.sap.sailing.domain.tracking.MarkPassing;
 import difflib.PatchFailedException;
 
 public interface DomainFactory {
-    final static DomainFactory INSTANCE = new DomainFactoryImpl();
+    final static DomainFactory INSTANCE = new DomainFactoryImpl(com.sap.sailing.domain.base.DomainFactory.INSTANCE);
     
     Event getOrCreateEvent(String raceID);
 
