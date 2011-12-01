@@ -76,14 +76,14 @@ public class DomainFactoryImpl implements DomainFactory {
         SAM007000 Men's Keelboat = Starboot Männer 
         SAW010000 Women's Match Racing = Matchrace Damen Elliott 6M (modified)
         */
-        olympicClassesByID.put("102", new BoatClassImpl("RS:X"));
-        olympicClassesByID.put("004", new BoatClassImpl("Laser"));
-        olympicClassesByID.put("103", new BoatClassImpl("Laser Radial"));
-        olympicClassesByID.put("002", new BoatClassImpl("Finn"));
-        olympicClassesByID.put("005", new BoatClassImpl("470"));
-        olympicClassesByID.put("009", new BoatClassImpl("49er"));
-        olympicClassesByID.put("007", new BoatClassImpl("Star"));
-        olympicClassesByID.put("010", new BoatClassImpl("Elliott 6M"));
+        olympicClassesByID.put("102", baseDomainFactory.getOrCreateBoatClass("RS:X"));
+        olympicClassesByID.put("004", baseDomainFactory.getOrCreateBoatClass("Laser"));
+        olympicClassesByID.put("103", baseDomainFactory.getOrCreateBoatClass("Laser Radial"));
+        olympicClassesByID.put("002", baseDomainFactory.getOrCreateBoatClass("Finn"));
+        olympicClassesByID.put("005", baseDomainFactory.getOrCreateBoatClass("470"));
+        olympicClassesByID.put("009", baseDomainFactory.getOrCreateBoatClass("49er"));
+        olympicClassesByID.put("007", baseDomainFactory.getOrCreateBoatClass("Star"));
+        olympicClassesByID.put("010", baseDomainFactory.getOrCreateBoatClass("Elliott 6M"));
         unknownBoatClass = new BoatClassImpl("Unknown");
     }
 
