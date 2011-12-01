@@ -83,7 +83,6 @@ public abstract class ImagesBarCell extends AbstractSafeHtmlCell<String> {
      * @return
      */
     protected static SafeHtml makeImage(ImageResource resource) {
-        AbstractImagePrototype proto = AbstractImagePrototype.create(resource);
-        return proto.getSafeHtml();
+        return AbstractImagePrototype.create(resource).getSafeHtml();
     }
 }
