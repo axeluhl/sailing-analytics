@@ -138,7 +138,23 @@ public abstract class DataEntryDialog<T> {
         AbstractEntryPoint.linkEscapeToButton(getCancelButton(), integerBox);
         return integerBox;
     }
-    
+
+    protected IntegerBox createIntegerBoxWithOptionalValue(Integer initialValue, int visibleLength) {
+        IntegerBox integerBox = new IntegerBox();
+        integerBox.setVisibleLength(visibleLength);
+        integerBox.setValue(initialValue);
+        AbstractEntryPoint.addFocusUponKeyUpToggler(integerBox);
+        integerBox.addChangeHandler(new ChangeHandler() {
+            @Override
+            public void onChange(ChangeEvent event) {
+                validate();
+            }
+        });
+        AbstractEntryPoint.linkEnterToButton(getOkButton(), integerBox);
+        AbstractEntryPoint.linkEscapeToButton(getCancelButton(), integerBox);
+        return integerBox;
+    }
+
     protected CheckBox createCheckbox(String checkboxLabel) {
         CheckBox result = new CheckBox(checkboxLabel);
         result.addValueChangeHandler(new ValueChangeHandler<Boolean>() {

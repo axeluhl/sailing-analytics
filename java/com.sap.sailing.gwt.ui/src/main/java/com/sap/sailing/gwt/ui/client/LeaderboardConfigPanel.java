@@ -18,13 +18,11 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
-import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
@@ -90,31 +88,15 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
     final SingleSelectionModel<String> raceTableSelectionModel;
     
     public LeaderboardConfigPanel(SailingServiceAsync sailingService, AdminConsole adminConsole,
-            ErrorReporter errorReporter, StringConstants stringConstants) {
-        this.stringConstants = stringConstants;
+            ErrorReporter errorReporter, StringConstants theStringConstants) {
+        this.stringConstants = theStringConstants;
         this.sailingService = sailingService;
   //      leaderboardNames = new ArrayList<String>();
         leaderboardList = new ListDataProvider<LeaderboardDAO>();
         raceColumnList = new ListDataProvider<String>();
         this.errorReporter = errorReporter;
 
-        sailingService.getLeaderboardNames(new AsyncCallback<List<String>>() {
-            @Override
-            public void onSuccess(List<String> leaderboardNames) {
-//                LeaderboardConfigPanel.this.leaderboardNames.addAll(leaderboardNames);
-//                updateLeaderboardNamesListBox();
-                
-                for(String name: leaderboardNames) {
-                    LeaderboardDAO dao = new LeaderboardDAO();
-                    dao.name = name; 
-                    leaderboardList.getList().add(dao);
-                }
-            }
-            @Override
-            public void onFailure(Throwable t) {
-                LeaderboardConfigPanel.this.errorReporter.reportError("Error trying to obtain list of leaderboard names: "+t.getMessage());
-            }
-        });
+        readAllLeaderbords();
 
         VerticalPanel mainPanel = new VerticalPanel();
         this.setWidget(mainPanel);
@@ -135,7 +117,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
             public String getValue(LeaderboardDAO leaderboard) {
                 String result = "";
                 if(leaderboard.discardThresholds != null) {
-                    for (int discardThreshold : selectedLeaderboard.discardThresholds) {
+                    for (int discardThreshold : leaderboard.discardThresholds) {
                         result += discardThreshold + " ";
                     }
                 }
@@ -155,7 +137,23 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
                 } else if("ACTION_OPEN_BROWSER".equals(value)) {
                     Window.open("/Leaderboard.html?name="+object.name, "Leaderboard", null);
                 } else if("ACTION_EDIT".equals(value)) {
-                    Window.alert("Edit clicked");
+
+                    List<String> leaderboardNames = new ArrayList<String>();
+                    for(LeaderboardDAO dao: leaderboardList.getList())
+                        leaderboardNames.add(dao.name);
+                    
+                    final String oldLeaderboardName = object.name;
+                    
+                    LeaderboardEditDialog dialog = new LeaderboardEditDialog(object, Collections.unmodifiableCollection(leaderboardNames),
+                            stringConstants, new AsyncCallback<LeaderboardDAO>() {
+                                @Override
+                                public void onFailure(Throwable arg0) {}
+                                @Override
+                                public void onSuccess(LeaderboardDAO result) {
+                                    updateLeaderboard(oldLeaderboardName, result);
+                                }
+                            });
+                    dialog.show();
                 }
             }
         });
@@ -429,6 +427,20 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
         
         leaderboardSelectionChanged();
         leaderboardRaceColumnSelectionChanged();
+    }
+
+    private void readAllLeaderbords() {
+        sailingService.getLeaderboards(new AsyncCallback<List<LeaderboardDAO>>() {
+            @Override
+            public void onSuccess(List<LeaderboardDAO> leaderboards) {
+                leaderboardList.getList().clear();
+                leaderboardList.getList().addAll(leaderboards);
+            }
+            @Override
+            public void onFailure(Throwable t) {
+                LeaderboardConfigPanel.this.errorReporter.reportError("Error trying to obtain list of leaderboards: "+t.getMessage());
+            }
+        });
     }
 
     private void performStressTestForSelectedLeaderboard() {
@@ -954,55 +966,82 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
         for(LeaderboardDAO dao: leaderboardList.getList())
             leaderboardNames.add(dao.name);
         
-        LeaderboardCreationDialog dialog = new LeaderboardCreationDialog(Collections.unmodifiableCollection(leaderboardNames),
-                stringConstants, errorReporter, new AsyncCallback<Pair<String,String[]>>() {
+        LeaderboardEditDialog dialog = new LeaderboardEditDialog(Collections.unmodifiableCollection(leaderboardNames),
+                stringConstants, new AsyncCallback<LeaderboardDAO>() {
                     @Override
                     public void onFailure(Throwable arg0) {}
                     @Override
-                    public void onSuccess(Pair<String, String[]> result) {
-                        List<Integer> discardThresholds = new ArrayList<Integer>();
-                        for (int i=0; i<result.getB().length; i++) {
-                            if (result.getB()[i] != null && result.getB()[i].trim().length() > 0) {
-                                try {
-                                    discardThresholds.add(Integer.valueOf(result.getB()[i].trim()));
-                                } catch (NumberFormatException e) {
-                                    errorReporter.reportError("Internal error; NumberFormatException for "+result.getB()[i]+
-                                            " which should have been caught by validation before");
-                                }
-                            }
-                        }
-                        int[] discanrdThresholdsAsIntArray = new int[discardThresholds.size()];
-                        int i=0;
-                        for (Integer integer : discardThresholds) {
-                            discanrdThresholdsAsIntArray[i++] = integer;
-                        }
-                        createNewLeaderboard(result.getA(), discanrdThresholdsAsIntArray);
+                    public void onSuccess(LeaderboardDAO result) {
+                        createNewLeaderboard(result);
                     }
                 });
         dialog.show();
     }
 
-    private void createNewLeaderboard(final String leaderboardName, int[] discardThresholds) {
-        sailingService.createLeaderboard(leaderboardName, discardThresholds, new AsyncCallback<Void>() {
+    private void createNewLeaderboard(final LeaderboardDAO newLeaderboard) {
+        sailingService.createLeaderboard(newLeaderboard.name, newLeaderboard.discardThresholds, new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable t) {
-                errorReporter.reportError("Error trying to create new leaderboard "+leaderboardName+": "+t.getMessage());
+                errorReporter.reportError("Error trying to create new leaderboard "+newLeaderboard.name+": "+t.getMessage());
             }
             @Override
             public void onSuccess(Void result) {
-//                leaderboardNames.add(leaderboardName);
-//                leaderboardsListBox.addItem(leaderboardName);
-//                leaderboardsListBox.setSelectedIndex(leaderboardsListBox.getItemCount()-1);
-                LeaderboardDAO dao = new LeaderboardDAO();
-                dao.name = leaderboardName; 
-                leaderboardList.getList().add(dao);
-                
-                selectedLeaderboard = dao;
-                leaderboardSelectionChanged();
+
+                sailingService.getLeaderboardByName(newLeaderboard.name, new Date(),
+                        /* namesOfRacesForWhichToLoadLegDetails */ null, new AsyncCallback<LeaderboardDAO>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        errorReporter.reportError("Error trying to fetch the new leaderboard " + newLeaderboard.name
+                                + " from the server: " + caught.getMessage());
+                    }
+            
+                    @Override
+                    public void onSuccess(LeaderboardDAO result) {
+                        
+                        leaderboardList.getList().add(result);
+                        selectedLeaderboard = result;
+                        leaderboardSelectionChanged();
+                    }
+                });
+
               }
         });
     }
 
+    private void updateLeaderboard(final String oldLeaderboardName, final LeaderboardDAO leaderboardToUdate) {
+        sailingService.updateLeaderboard(oldLeaderboardName, leaderboardToUdate.name, leaderboardToUdate.discardThresholds, new AsyncCallback<Void>() {
+            @Override
+            public void onFailure(Throwable t) {
+                errorReporter.reportError("Error trying to update leaderboard "+oldLeaderboardName+": "+t.getMessage());
+            }
+            @Override
+            public void onSuccess(Void result) {
+                
+                final int[] index = new int[1];
+                index[0] = 0;
+                
+                for(LeaderboardDAO dao: leaderboardList.getList()) {
+                    if(dao.name.equals(oldLeaderboardName)) {
+
+                        sailingService.getLeaderboardByName(leaderboardToUdate.name, new Date(),
+                                /* namesOfRacesForWhichToLoadLegDetails */ null, new AsyncCallback<LeaderboardDAO>() {
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                errorReporter.reportError("Error trying to fetch the new leaderboard " + leaderboardToUdate.name
+                                        + " from the server: " + caught.getMessage());
+                            }
+                    
+                            @Override
+                            public void onSuccess(LeaderboardDAO result) {
+                                leaderboardList.getList().set(index[0], result);
+                            }
+                        });
+                    }
+                    index[0] = index[0]+1;
+                }
+              }
+        });
+    }
 
     private void removeLeaderboard(final LeaderboardDAO leaderBoard) {
         sailingService.removeLeaderboard(leaderBoard.name, new AsyncCallback<Void>() {
