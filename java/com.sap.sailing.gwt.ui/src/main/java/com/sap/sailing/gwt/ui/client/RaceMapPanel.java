@@ -56,6 +56,7 @@ import com.sap.sailing.gwt.ui.shared.EventDAO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDAO;
 import com.sap.sailing.gwt.ui.shared.ManeuverDAO;
 import com.sap.sailing.gwt.ui.shared.MarkDAO;
+import com.sap.sailing.gwt.ui.shared.Pair;
 import com.sap.sailing.gwt.ui.shared.PositionDAO;
 import com.sap.sailing.gwt.ui.shared.QuickRankDAO;
 import com.sap.sailing.gwt.ui.shared.RaceDAO;
@@ -91,6 +92,8 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
     private LatLng lastMousePosition;
     private final Set<CompetitorDAO> competitorsSelectedInMap;
     private final Timer timer;
+    private List<Pair<CheckBox, String>> checkboxAndType;
+    private VerticalPanel verticalCheckBoxPanel;
 
     private long TAILLENGTHINMILLISECONDS = 30000l;
 
@@ -158,6 +161,17 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         lastShownFix = new HashMap<CompetitorDAO, Integer>();
         buoyMarkers = new HashMap<MarkDAO, Marker>();
         boatMarkers = new HashMap<CompetitorDAO, Marker>();
+        checkboxAndType = new ArrayList<Pair<CheckBox,String>>();
+        verticalCheckBoxPanel = new VerticalPanel();
+        checkboxAndType.add(new Pair<CheckBox, String>(new CheckBox("HEAD_UP"), "HEAD_UP"));
+        checkboxAndType.add(new Pair<CheckBox, String>(new CheckBox("BEAR_AWAY"), "BEAR_AWAY"));
+        checkboxAndType.add(new Pair<CheckBox, String>(new CheckBox("TACK"), "TACK"));
+        checkboxAndType.add(new Pair<CheckBox, String>(new CheckBox("JIBE"), "JIBE"));
+        checkboxAndType.add(new Pair<CheckBox, String>(new CheckBox("PENALTY_CIRCLE"), "PENALTY_CIRCLE"));
+        checkboxAndType.add(new Pair<CheckBox, String>(new CheckBox("MARK_PASSING"), "MARK_PASSING"));
+        for (Pair<CheckBox, String> pair : checkboxAndType) {
+            verticalCheckBoxPanel.add(pair.getA());
+        }
         fixes = new HashMap<CompetitorDAO, List<GPSFixDAO>>();
         this.grid = new Grid(3, 2);
         setWidget(grid);
@@ -224,7 +238,16 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         timer.addTimeListener(windHistory);
         grid.setWidget(1, 1, timePanel);
     }
-
+    
+    private boolean getCheckboxValueManeuver(String maneuverType){
+        for (Pair<CheckBox, String> pair : checkboxAndType) {
+            if(pair.getB().equals(maneuverType)){
+                return pair.getA().getValue();
+            }
+        }
+        return false;
+    }
+    
     private void updateBoatSelection() {
         for (int i = 0; i < quickRanksBox.getItemCount(); i++) {
             setSelectedInMap(quickRanksList.get(i), quickRanksBox.isItemSelected(i));
@@ -988,7 +1011,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         }
     }
     */
-
+// TODO add check if maneuvertype is selected in checkbox list
     private void showManeuvers(Map<CompetitorDAO, List<ManeuverDAO>> maneuvers) {
         maneuverMarkers = new HashSet<Marker>();
         if (map != null && maneuvers != null) {
