@@ -277,7 +277,7 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public MarkPassing createMarkPassing(String raceID, String boatID, Waypoint waypoint, TimePoint timePoint) {
+    public MarkPassing createMarkPassing(String boatID, Waypoint waypoint, TimePoint timePoint) {
         return new MarkPassingImpl(timePoint, waypoint, getCompetitorByBoatID(boatID));
     }
 
