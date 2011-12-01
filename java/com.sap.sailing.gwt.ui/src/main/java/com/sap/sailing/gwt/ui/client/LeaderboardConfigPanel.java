@@ -500,7 +500,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
     
     private void editRaceColumnOfLeaderboard(){
         final String leaderboardName = getSelectedLeaderboardName();
-        final String raceName = getSelectedLeaderboardName();
+        final String raceName = getSelectedRaceColumnName();
         boolean raceIsMedalRace = false;
         if(selectedLeaderboard.getRaceList().contains(raceName)){
             raceIsMedalRace = selectedLeaderboard.raceIsMedalRace(raceName);
