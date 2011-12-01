@@ -119,8 +119,8 @@ public class TestColumnSwapping {
         }
 
         // check if leaderboardDAO an dleaderboardOriginalDAO same
-        List<String> leaderboardList = leaderboardDAO.getRaceList();
-        List<String> leaderboardOriginalList = leaderboardOriginalDAO.getRaceList();
+        List<String> leaderboardList = leaderboardDAO.getRaceColumnNameList();
+        List<String> leaderboardOriginalList = leaderboardOriginalDAO.getRaceColumnNameList();
 
         // ??????? assert races in list
         assertArrayEquals(leaderboardList.toArray(), leaderboardOriginalList.toArray());

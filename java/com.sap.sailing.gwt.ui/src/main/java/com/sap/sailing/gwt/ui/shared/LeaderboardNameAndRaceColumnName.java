@@ -32,4 +32,11 @@ public class LeaderboardNameAndRaceColumnName implements RaceIdentifier {
     public Object getExistingTrackedRace(RaceFetcher raceFetcher) {
         return raceFetcher.getExistingTrackedRace(this);
     }
+
+    @Override
+    public String toString() {
+        return raceColumnName;
+    }
+    
+    
 }
