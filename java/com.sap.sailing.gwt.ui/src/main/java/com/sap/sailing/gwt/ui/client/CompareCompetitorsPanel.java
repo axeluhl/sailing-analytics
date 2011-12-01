@@ -44,6 +44,10 @@ public class CompareCompetitorsPanel extends FormPanel {
     private String raceName;
     private int stepsToLoad = 100;
     private final StringConstants stringConstants;
+    private boolean chartLoaded = false;
+    private boolean dataLoaded = false;
+    private int chartWidth;
+    private int chartHeight;
     
     public static final int DECK_PANEL_INDEX_LOADING = 0;
     public static final int DECK_PANEL_INDEX_CHART = 1;
@@ -57,20 +61,22 @@ public class CompareCompetitorsPanel extends FormPanel {
     private AbsolutePanel loadingPanel;
 
     public CompareCompetitorsPanel(SailingServiceAsync sailingService, final List<CompetitorDAO> competitors,
-            String raceName, final String leaderboardName, StringConstants stringConstants) {
+            String raceName, final String leaderboardName, StringConstants stringConstants, int chartWidth, int chartHeight) {
         this.sailingService = sailingService;
         this.competitors = competitors;
         this.leaderboardName = leaderboardName;
         this.raceName = raceName;
         this.stringConstants = stringConstants;
+        this.chartWidth = chartWidth;
+        this.chartHeight = chartHeight;
         mainPanel = new HorizontalPanel();
         chartPanel = new VerticalPanel();
         loadingPanel = new AbsolutePanel ();
-        loadingPanel.setSize("800px", "600px");
+        loadingPanel.setSize(chartWidth + "px", chartHeight + "px");
         
         Anchor a = new Anchor(new SafeHtmlBuilder().appendHtmlConstant(
                 "<img src=\"/images/ajax-loader.gif\"/>").toSafeHtml());
-        loadingPanel.add(a,800/2-32/2,600/2-32-2);
+        loadingPanel.add(a,chartWidth/2-32/2,chartHeight/2-32-2);
         chartPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
         chartPanel.setSpacing(5);
         deckPanel = new DeckPanel();
@@ -123,7 +129,6 @@ public class CompareCompetitorsPanel extends FormPanel {
             @Override
             public void onClick(ClickEvent event) {
                 stepsToLoad = Integer.parseInt(txtbSteps.getText());
-                deckPanel.showWidget(DECK_PANEL_INDEX_LOADING);
                 loadData();
             }
         });
@@ -133,16 +138,17 @@ public class CompareCompetitorsPanel extends FormPanel {
 
             @Override
             public void run() {
-
                 chart = new LineChart(prepareTableData(), getOptions());
                 deckPanel.add(chart);
+                if (chartLoaded && dataLoaded){
+                    deckPanel.showWidget(DECK_PANEL_INDEX_CHART);
+                }
+                chartLoaded = true;
                 fireEvent(new DataLoadedEvent());
-                loadData();
+                
             }
         };
         VisualizationUtils.loadVisualizationApi(onLoadCallback, LineChart.PACKAGE);
-
-        deckPanel.showWidget(DECK_PANEL_INDEX_LOADING);
         loadData();
         chartPanel.add(deckPanel);
         mainPanel.add(chartPanel);
@@ -152,8 +158,8 @@ public class CompareCompetitorsPanel extends FormPanel {
 
     private Options getOptions() {
         Options opt = Options.create();
-        opt.setWidth(800);
-        opt.setHeight(600);
+        opt.setWidth(chartWidth);
+        opt.setHeight(chartHeight);
         switch (dataToShow) {
         case SHOW_VELOCITY_MADE_GOOD:
             opt.setTitle(stringConstants.velocityMadeGoodLong());
@@ -197,6 +203,8 @@ public class CompareCompetitorsPanel extends FormPanel {
     }
     
     private void loadData(){
+        deckPanel.showWidget(DECK_PANEL_INDEX_LOADING);
+        dataLoaded = false;
         this.sailingService.getCompetitorRaceData(leaderboardName, this.raceName, competitors, stepsToLoad,
                 new AsyncCallback<CompetitorWithRaceDAO[][]>() {
 
@@ -209,7 +217,8 @@ public class CompareCompetitorsPanel extends FormPanel {
                     public void onSuccess(CompetitorWithRaceDAO[][] result) {
                         fireEvent(new DataLoadedEvent());
                         chartData = result;
-                        if (chart != null) {
+                        dataLoaded = true;
+                        if (chartLoaded && dataLoaded){
                             deckPanel.showWidget(DECK_PANEL_INDEX_CHART);
                             chart.draw(prepareTableData(), getOptions());
                         }

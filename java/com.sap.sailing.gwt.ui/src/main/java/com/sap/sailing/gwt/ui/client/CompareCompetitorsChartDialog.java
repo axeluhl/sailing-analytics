@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
@@ -19,7 +20,7 @@ public class CompareCompetitorsChartDialog extends DialogBox {
         VerticalPanel mainPanel = new VerticalPanel();
         mainPanel.setSpacing(5);
         mainPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
-        CompareCompetitorsPanel ccp = new CompareCompetitorsPanel(sailingService, competitors, raceName, leaderboardName, stringConstants);
+        CompareCompetitorsPanel ccp = new CompareCompetitorsPanel(sailingService, competitors, raceName, leaderboardName, stringConstants, (int) (Window.getClientWidth()*0.8), (int) (Window.getClientHeight()*0.8));
         ccp.addDataLoadedHandler(new DataLoadedHandler() {
             
             @Override

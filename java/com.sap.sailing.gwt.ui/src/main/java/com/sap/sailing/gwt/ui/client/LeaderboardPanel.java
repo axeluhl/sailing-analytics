@@ -26,7 +26,6 @@ import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.cellview.client.TextHeader;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DockPanel;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
@@ -125,7 +124,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         public void onClick(ClickEvent event) {
             new LeaderboardSettingsPanel(Collections.unmodifiableList(selectedLegDetails),
                     Collections.unmodifiableList(selectedRaceDetails), /* All races to select */
-                    leaderboard.getRaceList(), selectedRaceColumns, timer.getDelayBetweenAutoAdvancesInMilliseconds(),
+                    leaderboard.getRaceColumnNameList(), selectedRaceColumns, timer.getDelayBetweenAutoAdvancesInMilliseconds(),
                     stringConstants.leaderboardSettings(), stringConstants.selectLegDetails(), stringConstants.ok(),
                     stringConstants.cancel(), new Validator<LeaderboardSettingsPanel.Result>() {
                         @Override
@@ -778,25 +777,27 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         playPause.addClickHandler(playPauseHandler);
         playStateChanged(timer.isPlaying());
         refreshPanel.add(playPause);
+        Anchor chartsAnchor = new Anchor(new SafeHtmlBuilder().appendHtmlConstant(
+                "<img class=\"linkNoBorder\" src=\"/images/chart_small.png\"/>").toSafeHtml());
+        chartsAnchor.setTitle("Show charts");
+        chartsAnchor.addClickHandler(new ClickHandler() {
+            
+            @Override
+            public void onClick(ClickEvent event) {
+               compareCompetitors();
+            }
+        });
         Anchor settingsAnchor = new Anchor(new SafeHtmlBuilder().appendHtmlConstant(
                 "<img class=\"linkNoBorder\" src=\"/images/settings.png\"/>").toSafeHtml());
         settingsAnchor.setTitle(stringConstants.settings());
         settingsAnchor.addClickHandler(new SettingsClickHandler(stringConstants));
+        refreshAndSettingsPanel.add(chartsAnchor);
         refreshAndSettingsPanel.add(refreshPanel);
         refreshAndSettingsPanel.add(settingsAnchor);
         dockPanel02.add(refreshAndSettingsPanel, DockPanel.EAST);
         vp.add(dockPanel);
         vp.add(dockPanel02);
         vp.add(getLeaderboardTable());
-        Button chartButton = new Button("Compare competitors");
-        chartButton.addClickHandler(new ClickHandler() {
-            
-            @Override
-            public void onClick(ClickEvent event) {
-                compareCompetitors();
-            }
-        });
-        vp.add(chartButton);
         setWidget(vp);
     }
 
@@ -993,8 +994,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     
     private List<String> getRacesAddedNew(LeaderboardDAO oldLeaderboard, LeaderboardDAO newLeaderboard){
         List<String> result = new ArrayList<String>();
-        for (String s : newLeaderboard.getRaceList()) {
-            if (oldLeaderboard == null || !oldLeaderboard.getRaceList().contains(s)) {
+        for (String s : newLeaderboard.getRaceColumnNameList()) {
+            if (oldLeaderboard == null || !oldLeaderboard.getRaceColumnNameList().contains(s)) {
                 result.add(s);
             }
         }
@@ -1128,7 +1129,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     private void createMissingAndAdjustExistingRaceColumns(LeaderboardDAO leaderboard) {
         // Correct order of races in selectedRaceColum
         List<String> correctedOrderSelectedRaces = new ArrayList<String>();
-        for (String string : leaderboard.getRaceList()) {
+        for (String string : leaderboard.getRaceColumnNameList()) {
             if (selectedRaceColumns.contains(string)) {
                 correctedOrderSelectedRaces.add(string);
             }
@@ -1302,10 +1303,17 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     
     private void compareCompetitors(){
         List<CompetitorDAO> competitors = new ArrayList<CompetitorDAO>();
-        for (LeaderboardRowDAO leaderboardRowDAO : leaderboardSelectionModel.getSelectedSet()) {
-            competitors.add(leaderboardRowDAO.competitor);
+        String raceColumnName = getLeaderboard().getRaceList().get(0).getRaceColumnName();
+        if (leaderboardSelectionModel.getSelectedSet().size() > 0){
+            for (LeaderboardRowDAO leaderboardRowDAO : leaderboardSelectionModel.getSelectedSet()) {
+                competitors.add(leaderboardRowDAO.competitor);
+            }
         }
-        new CompareCompetitorsChartDialog(sailingService, competitors, selectedRaceColumns.get(0), leaderboardName, stringConstants);
-        //compareCompetitorsBox.show();
+        else {
+            for (LeaderboardRowDAO leaderboardRowDAO : leaderboardTable.getVisibleItems()){
+                competitors.add(leaderboardRowDAO.competitor);
+            }
+        }
+        new CompareCompetitorsChartDialog(sailingService, competitors, raceColumnName, leaderboardName, stringConstants);
     }
 }

@@ -650,7 +650,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
             discardThresholdLabelsForSelectedLeaderboard[i++].setText("");
         }
         columnNamesInSelectedLeaderboardListBox.clear();
-        for (String columnName : selectedLeaderboard.getRaceList()) {
+        for (String columnName : selectedLeaderboard.getRaceColumnNameList()) {
             columnNamesInSelectedLeaderboardListBox.addItem(columnName);
         }
         leaderboardRaceColumnSelectionChanged();
