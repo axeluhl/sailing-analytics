@@ -93,7 +93,6 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
     private final Set<CompetitorDAO> competitorsSelectedInMap;
     private final Timer timer;
     private List<Pair<CheckBox, String>> checkboxAndType;
-    private VerticalPanel verticalCheckBoxPanel;
 
     private long TAILLENGTHINMILLISECONDS = 30000l;
 
@@ -162,7 +161,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         buoyMarkers = new HashMap<MarkDAO, Marker>();
         boatMarkers = new HashMap<CompetitorDAO, Marker>();
         checkboxAndType = new ArrayList<Pair<CheckBox,String>>();
-        verticalCheckBoxPanel = new VerticalPanel();
+        VerticalPanel verticalCheckBoxPanel = new VerticalPanel();
         checkboxAndType.add(new Pair<CheckBox, String>(new CheckBox("HEAD_UP"), "HEAD_UP"));
         checkboxAndType.add(new Pair<CheckBox, String>(new CheckBox("BEAR_AWAY"), "BEAR_AWAY"));
         checkboxAndType.add(new Pair<CheckBox, String>(new CheckBox("TACK"), "TACK"));
@@ -170,6 +169,15 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         checkboxAndType.add(new Pair<CheckBox, String>(new CheckBox("PENALTY_CIRCLE"), "PENALTY_CIRCLE"));
         checkboxAndType.add(new Pair<CheckBox, String>(new CheckBox("MARK_PASSING"), "MARK_PASSING"));
         for (Pair<CheckBox, String> pair : checkboxAndType) {
+            pair.getA().addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+
+                @Override
+                public void onValueChange(ValueChangeEvent<Boolean> event) {
+                    if(!timer.isPlaying()){
+                        showManeuvers()
+                    }
+                }
+            });
             verticalCheckBoxPanel.add(pair.getA());
         }
         fixes = new HashMap<CompetitorDAO, List<GPSFixDAO>>();
@@ -194,6 +202,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         /* time interval between displays in milliseconds */5000, stringConstants, errorReporter);
         newRaceListBox.addRaceSelectionChangeListener(windHistory);
         grid.setWidget(1, 0, windHistory);
+        HorizontalPanel horizontalRanksVerticalAndCheckboxesManeuversPanel = new HorizontalPanel();
         VerticalPanel ranksAndCheckboxAndTailLength = new VerticalPanel();
         HorizontalPanel labelAndTailLengthBox = new HorizontalPanel();
         labelAndTailLengthBox.add(new Label(stringConstants.tailLength()));
@@ -232,7 +241,9 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
             }
         });
         ranksAndCheckboxAndTailLength.add(quickRanksBox);
-        grid.setWidget(2, 0, ranksAndCheckboxAndTailLength);
+        horizontalRanksVerticalAndCheckboxesManeuversPanel.add(ranksAndCheckboxAndTailLength);
+        horizontalRanksVerticalAndCheckboxesManeuversPanel.add(verticalCheckBoxPanel);
+        grid.setWidget(2, 0, horizontalRanksVerticalAndCheckboxesManeuversPanel);
         timePanel = new TimePanel(stringConstants, timer);
         timer.addTimeListener(this);
         timer.addTimeListener(windHistory);
@@ -1011,7 +1022,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         }
     }
     */
-// TODO add check if maneuvertype is selected in checkbox list
+
     private void showManeuvers(Map<CompetitorDAO, List<ManeuverDAO>> maneuvers) {
         maneuverMarkers = new HashSet<Marker>();
         if (map != null && maneuvers != null) {
