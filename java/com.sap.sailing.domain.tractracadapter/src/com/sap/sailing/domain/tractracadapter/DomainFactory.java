@@ -51,8 +51,6 @@ public interface DomainFactory {
 
     com.sap.sailing.domain.base.TimePoint createTimePoint(long timestamp);
 
-    com.sap.sailing.domain.base.Waypoint createWaypoint(ControlPoint controlPoint);
-
     Course createCourse(String name, Iterable<ControlPoint> controlPoints);
 
     com.sap.sailing.domain.base.Competitor getOrCreateCompetitor(Competitor competitor);
@@ -145,7 +143,7 @@ public interface DomainFactory {
 
     com.sap.sailing.domain.base.ControlPoint getOrCreateControlPoint(ControlPoint controlPoint);
 
-    MarkPassing createMarkPassing(com.tractrac.clientmodule.Competitor competitor, Waypoint passed, TimePoint time);
+    MarkPassing createMarkPassing(TimePoint timePoint, Waypoint passed, com.sap.sailing.domain.base.Competitor competitor);
 
     Iterable<Receiver> getUpdateReceivers(DynamicTrackedEvent trackedEvent, Event tractracEvent, WindStore windStore,
             DynamicRaceDefinitionSet raceDefinitionSetToUpdate, ReceiverType... types);

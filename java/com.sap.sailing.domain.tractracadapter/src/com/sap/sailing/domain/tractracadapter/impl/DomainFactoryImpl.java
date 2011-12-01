@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -40,7 +39,6 @@ import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
-import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
@@ -51,14 +49,12 @@ import com.sap.sailing.domain.tracking.TrackedEventRegistry;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
-import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.JSONService;
 import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
 import com.sap.sailing.domain.tractracadapter.TracTracConfiguration;
 import com.sap.sailing.domain.tractracadapter.TracTracRaceTracker;
-import com.sap.sailing.util.CourseAsWaypointList;
 import com.sap.sailing.util.Util;
 import com.sap.sailing.util.Util.Pair;
 import com.tractrac.clientmodule.CompetitorClass;
@@ -67,8 +63,6 @@ import com.tractrac.clientmodule.Race;
 import com.tractrac.clientmodule.RaceCompetitor;
 import com.tractrac.clientmodule.data.ControlPointPositionData;
 
-import difflib.DiffUtils;
-import difflib.Patch;
 import difflib.PatchFailedException;
 
 public class DomainFactoryImpl implements DomainFactory {
@@ -119,45 +113,12 @@ public class DomainFactoryImpl implements DomainFactory {
     
     @Override
     public void updateCourseWaypoints(Course courseToUpdate, List<ControlPoint> controlPoints) throws PatchFailedException {
-        Iterable<Waypoint> courseWaypoints = courseToUpdate.getWaypoints();
-        List<Waypoint> newWaypointList = new LinkedList<Waypoint>();
-        // key existing waypoints by control points and re-use each one at most once during construction of the
-        // new waypoint list; since several waypoints can have the same control point, the map goes from
-        // control point to List<Waypoint>. The waypoints in the lists are held in the order of their
-        // occurrence in courseToUpdate.getWaypoints().
-        Map<com.sap.sailing.domain.base.ControlPoint, List<Waypoint>> existingWaypointsByControlPoint =
-                new HashMap<com.sap.sailing.domain.base.ControlPoint, List<Waypoint>>();
-        for (Waypoint waypoint : courseToUpdate.getWaypoints()) {
-            List<Waypoint> wpl = existingWaypointsByControlPoint.get(waypoint.getControlPoint());
-            if (wpl == null) {
-                wpl = new ArrayList<Waypoint>();
-                existingWaypointsByControlPoint.put(waypoint.getControlPoint(), wpl);
-            }
-            wpl.add(waypoint);
-        }
+        List<com.sap.sailing.domain.base.ControlPoint> newDomainControlPoints = new ArrayList<com.sap.sailing.domain.base.ControlPoint>();
         for (ControlPoint tractracControlPoint : controlPoints) {
-            com.sap.sailing.domain.base.ControlPoint domainControlPoint = getOrCreateControlPoint(tractracControlPoint);
-            List<Waypoint> waypoints = existingWaypointsByControlPoint.get(domainControlPoint);
-            Waypoint waypoint;
-            if (waypoints == null || waypoints.isEmpty()) {
-                // must be a new control point for which we don't have a waypoint yet
-                waypoint = createWaypoint(tractracControlPoint);
-            } else {
-                waypoint = waypoints.remove(0); // take the first from the list
-            }
-            newWaypointList.add(waypoint);
+            com.sap.sailing.domain.base.ControlPoint newDomainControlPoint = getOrCreateControlPoint(tractracControlPoint);
+            newDomainControlPoints.add(newDomainControlPoint);
         }
-        Patch<Waypoint> patch = DiffUtils.diff(courseWaypoints, newWaypointList);
-        CourseAsWaypointList courseAsWaypointList = new CourseAsWaypointList(courseToUpdate);
-        synchronized (courseToUpdate) {
-            patch.applyToInPlace(courseAsWaypointList);
-        }
-    }
-
-    @Override
-    public Waypoint createWaypoint(ControlPoint controlPoint) {
-        com.sap.sailing.domain.base.ControlPoint domainControlPoint = getOrCreateControlPoint(controlPoint);
-        return new WaypointImpl(domainControlPoint);
+        courseToUpdate.update(newDomainControlPoints, baseDomainFactory);
     }
 
     public com.sap.sailing.domain.base.ControlPoint getOrCreateControlPoint(ControlPoint controlPoint) {
@@ -181,7 +142,7 @@ public class DomainFactoryImpl implements DomainFactory {
     public Course createCourse(String name, Iterable<ControlPoint> controlPoints) {
         List<Waypoint> waypointList = new ArrayList<Waypoint>();
         for (ControlPoint controlPoint : controlPoints) {
-            Waypoint waypoint = createWaypoint(controlPoint);
+            Waypoint waypoint = baseDomainFactory.createWaypoint(getOrCreateControlPoint(controlPoint));
             waypointList.add(waypoint);
         }
         return new CourseImpl(name, waypointList);
@@ -448,9 +409,8 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public MarkPassing createMarkPassing(com.tractrac.clientmodule.Competitor competitor, Waypoint passed, TimePoint time) {
-        MarkPassing result = new MarkPassingImpl(time, passed, getOrCreateCompetitor(competitor));
-        return result;
+    public MarkPassing createMarkPassing(TimePoint timePoint, Waypoint passed, com.sap.sailing.domain.base.Competitor competitor) {
+        return baseDomainFactory.createMarkPassing(timePoint, passed, competitor);
     }
 
     @Override
