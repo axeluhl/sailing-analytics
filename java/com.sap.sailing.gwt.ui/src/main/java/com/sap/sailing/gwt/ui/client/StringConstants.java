@@ -125,5 +125,7 @@ public interface StringConstants extends Constants {
     String tacks();
     String jibes();
     String penaltyCircles();
+    String medalRaceIsNull();
     String maneuverTypes();
+    String raceNameEmpty();
 }
