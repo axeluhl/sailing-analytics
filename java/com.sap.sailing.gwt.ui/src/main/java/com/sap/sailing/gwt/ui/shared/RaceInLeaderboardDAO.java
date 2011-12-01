@@ -1,6 +1,8 @@
 package com.sap.sailing.gwt.ui.shared;
 
-public class RaceInLeaderboardDAO {
+import com.google.gwt.user.client.rpc.IsSerializable;
+
+public class RaceInLeaderboardDAO implements IsSerializable {
     private String raceColumnName;
     private boolean medalRace;
     private boolean trackedRace;

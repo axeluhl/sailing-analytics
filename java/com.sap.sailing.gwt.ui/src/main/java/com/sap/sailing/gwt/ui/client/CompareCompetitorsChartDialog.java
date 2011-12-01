@@ -28,14 +28,14 @@ public class CompareCompetitorsChartDialog extends DialogBox {
             @Override
             public void onDataLoaded(DataLoadedEvent event) {
                 CompareCompetitorsChartDialog.this.setPopupPosition(5, 5);
-                CompareCompetitorsChartDialog.this.setSize(Window.getClientWidth() + "px",Window.getClientHeight() + "px");
+                //CompareCompetitorsChartDialog.this.setSize((int) (Window.getClientWidth()*0.9) + "px", (int) (Window.getClientHeight() * 0.9) + "px");
                 CompareCompetitorsChartDialog.this.show();
             }
         });
         this.add(ccp);
 
         this.setPopupPosition(5, 5);
-        this.setSize(Window.getClientWidth() + "px",Window.getClientHeight() + "px");
+        //this.setSize((int) (Window.getClientWidth()*0.9) + "px", (int) (Window.getClientHeight() * 0.9) + "px");
         closeAnchor = new Anchor("x");
 
         FlexTable captionLayoutTable = new FlexTable();
