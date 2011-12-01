@@ -26,6 +26,8 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
     private final String LEADERBOARD_NAME = "test";
     private final String COLUMN1_NAME = "r1";
     private final String EVENT_NAME = "Sailing Team Germany (STG)";
+    protected static final boolean tractracTunnel = true; // Boolean.valueOf(System.getProperty("tractrac.tunnel", "false"));
+    protected static final String tractracTunnelHost = "10.18.10.38"; // System.getProperty("tractrac.tunnel.host", "localhost");
     private final String JSON_URL= "http://germanmaster.traclive.dk/events/event_20110505_SailingTea/jsonservice.php";
     private final String TRACKED_RACE = "schwerttest";
     
@@ -67,14 +69,15 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
                     }
                 }
                 //assertNotNull("rrDao != null",rrDao);
-                assertNull(rrDao);
+                assertNotNull(rrDao);
                 trackRace();
             }
         });
     }
     
     private void trackRace(){
-        service.track(rrDao, "", "", false, false, new AsyncCallback<Void>() {
+        service.track(rrDao, tractracTunnel ? "tcp://"+tractracTunnelHost+":4412" : "tcp://germanmaster.traclive.dk:4400",
+                tractracTunnel ? "tcp://"+tractracTunnelHost+":4413" : "tcp://germanmaster.traclive.dk:4401", false, false, new AsyncCallback<Void>() {
 
             @Override
             public void onFailure(Throwable caught) {
