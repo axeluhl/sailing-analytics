@@ -76,6 +76,7 @@ import com.sap.sailing.domain.tractracadapter.TracTracConfiguration;
 import com.sap.sailing.gwt.ui.client.SailingService;
 import com.sap.sailing.gwt.ui.shared.BoatClassDAO;
 import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
+import com.sap.sailing.gwt.ui.shared.CompetitorWithRaceDAO;
 import com.sap.sailing.gwt.ui.shared.EventAndRaceIdentifier;
 import com.sap.sailing.gwt.ui.shared.EventDAO;
 import com.sap.sailing.gwt.ui.shared.EventFetcher;
@@ -1161,9 +1162,37 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         Collections.sort(countryCodes);
         return countryCodes.toArray(new String[0]);
     }
-    
+
     @Override
-    public Map<CompetitorDAO, List<GPSFixDAO>> getDouglasPoints(RaceIdentifier raceIdentifier,
+    public CompetitorWithRaceDAO[][] getCompetitorRaceData(RaceIdentifier race, int steps) throws NoWindException {
+        List<CompetitorWithRaceDAO[]> competitorData;
+        TrackedRace trackedRace = getTrackedRace(race);
+        Iterable<Competitor> competitors = trackedRace.getRace().getCompetitors();
+        
+        competitorData = new ArrayList<CompetitorWithRaceDAO[]>();
+        for (Competitor c : competitors){
+            List<CompetitorWithRaceDAO> entries = new ArrayList<CompetitorWithRaceDAO>();
+            for (long time = trackedRace.getStart().asMillis()-20000; time < trackedRace.getTimePointOfNewestEvent().asMillis(); time += (trackedRace.getTimePointOfNewestEvent().asMillis()-trackedRace.getStart().asMillis()-20000)/steps){
+                MillisecondsTimePoint timePoint = new MillisecondsTimePoint(time);
+                CompetitorWithRaceDAO competitorWithRaceEntry = new CompetitorWithRaceDAO();
+                competitorWithRaceEntry.setCompetitor(getCompetitorDAO(c));
+                competitorWithRaceEntry.setStartTime(trackedRace.getStart().asMillis());
+                if (trackedRace != null){
+                    LegEntryDAO legEntry = createLegEntry(trackedRace.getTrackedLeg(c, timePoint), timePoint);
+                    if (legEntry == null){
+                        legEntry = new LegEntryDAO();
+                    }
+                    legEntry.timeInMilliseconds = time;
+                    competitorWithRaceEntry.setLegEntry(legEntry);
+                }
+                entries.add(competitorWithRaceEntry);
+            }
+            competitorData.add(entries.toArray(new CompetitorWithRaceDAO[0]));
+        }
+        return competitorData.toArray(new CompetitorWithRaceDAO[0][0]);
+    }
+    
+public Map<CompetitorDAO, List<GPSFixDAO>> getDouglasPoints(RaceIdentifier raceIdentifier,
             Map<CompetitorDAO, Date> from, Map<CompetitorDAO, Date> to,
             double meters) {
         Map<CompetitorDAO, List<GPSFixDAO>> result = new HashMap<CompetitorDAO, List<GPSFixDAO>>();

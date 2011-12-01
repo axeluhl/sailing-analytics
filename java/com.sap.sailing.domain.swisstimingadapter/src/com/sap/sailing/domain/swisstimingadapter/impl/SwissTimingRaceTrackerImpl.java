@@ -190,7 +190,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
                     markIndexRankAndTimeSinceStartInMilliseconds.getA());
             MillisecondsTimePoint timePoint = trackedRace.getStart()==null?null:new MillisecondsTimePoint(trackedRace.getStart().asMillis()
                     + markIndexRankAndTimeSinceStartInMilliseconds.getC());
-            MarkPassing markPassing = domainFactory.createMarkPassing(boatID, waypoint, timePoint);
+            MarkPassing markPassing = domainFactory.createMarkPassing(timePoint, waypoint, domainFactory.getCompetitorByBoatID(boatID));
             markPassingsByMarkIndex.put(markIndexRankAndTimeSinceStartInMilliseconds.getA(), markPassing);
         }
         trackedRace.updateMarkPassings(competitor, markPassingsByMarkIndex.values());

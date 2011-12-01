@@ -57,6 +57,7 @@ import com.sap.sailing.gwt.ui.shared.EventNameAndRaceName;
 import com.sap.sailing.gwt.ui.shared.GPSFixDAO;
 import com.sap.sailing.gwt.ui.shared.ManeuverDAO;
 import com.sap.sailing.gwt.ui.shared.MarkDAO;
+import com.sap.sailing.gwt.ui.shared.Pair;
 import com.sap.sailing.gwt.ui.shared.PositionDAO;
 import com.sap.sailing.gwt.ui.shared.QuickRankDAO;
 import com.sap.sailing.gwt.ui.shared.RaceDAO;
@@ -92,6 +93,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
     private LatLng lastMousePosition;
     private final Set<CompetitorDAO> competitorsSelectedInMap;
     private final Timer timer;
+    private List<Pair<CheckBox, String>> checkboxAndType;
 
     private long TAILLENGTHINMILLISECONDS = 30000l;
 
@@ -147,6 +149,8 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
     private final CheckBox showOnlySelected;
 
     private final IntegerBox tailLengthBox;
+    
+    protected Map<CompetitorDAO, List<ManeuverDAO>> lastManeuverResult;
 
     public RaceMapPanel(SailingServiceAsync sailingService, ErrorReporter errorReporter,
             final EventRefresher eventRefresher, StringConstants stringConstants) {
@@ -159,6 +163,28 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         lastShownFix = new HashMap<CompetitorDAO, Integer>();
         buoyMarkers = new HashMap<MarkDAO, Marker>();
         boatMarkers = new HashMap<CompetitorDAO, Marker>();
+        checkboxAndType = new ArrayList<Pair<CheckBox,String>>();
+        VerticalPanel verticalCheckBoxPanel = new VerticalPanel();
+        verticalCheckBoxPanel.add(new Label(stringConstants.maneuverTypes()));
+        checkboxAndType.add(new Pair<CheckBox, String>(new CheckBox("HEAD_UP"), "HEAD_UP"));
+        checkboxAndType.add(new Pair<CheckBox, String>(new CheckBox("BEAR_AWAY"), "BEAR_AWAY"));
+        checkboxAndType.add(new Pair<CheckBox, String>(new CheckBox("TACK"), "TACK"));
+        checkboxAndType.add(new Pair<CheckBox, String>(new CheckBox("JIBE"), "JIBE"));
+        checkboxAndType.add(new Pair<CheckBox, String>(new CheckBox("PENALTY_CIRCLE"), "PENALTY_CIRCLE"));
+        checkboxAndType.add(new Pair<CheckBox, String>(new CheckBox("MARK_PASSING"), "MARK_PASSING"));
+        checkboxAndType.add(new Pair<CheckBox, String>(new CheckBox("OTHER"), "OTHER"));
+        for (Pair<CheckBox, String> pair : checkboxAndType) {
+            pair.getA().addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+                @Override
+                public void onValueChange(ValueChangeEvent<Boolean> event) {
+                    if (!timer.isPlaying() && lastManeuverResult!=null) {
+                        removeAllManeuverMarkers();
+                        showManeuvers(lastManeuverResult);
+                    }
+                }
+            });
+            verticalCheckBoxPanel.add(pair.getA());
+        }
         fixes = new HashMap<CompetitorDAO, List<GPSFixDAO>>();
         this.grid = new Grid(3, 2);
         setWidget(grid);
@@ -181,6 +207,8 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         /* time interval between displays in milliseconds */5000, stringConstants, errorReporter);
         newRaceListBox.addRaceSelectionChangeListener(windHistory);
         grid.setWidget(1, 0, windHistory);
+        HorizontalPanel horizontalRanksVerticalAndCheckboxesManeuversPanel = new HorizontalPanel();
+        horizontalRanksVerticalAndCheckboxesManeuversPanel.setSpacing(15);
         VerticalPanel ranksAndCheckboxAndTailLength = new VerticalPanel();
         HorizontalPanel labelAndTailLengthBox = new HorizontalPanel();
         labelAndTailLengthBox.add(new Label(stringConstants.tailLength()));
@@ -219,13 +247,24 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
             }
         });
         ranksAndCheckboxAndTailLength.add(quickRanksBox);
-        grid.setWidget(2, 0, ranksAndCheckboxAndTailLength);
+        horizontalRanksVerticalAndCheckboxesManeuversPanel.add(ranksAndCheckboxAndTailLength);
+        horizontalRanksVerticalAndCheckboxesManeuversPanel.add(verticalCheckBoxPanel);
+        grid.setWidget(2, 0, horizontalRanksVerticalAndCheckboxesManeuversPanel);
         timePanel = new TimePanel(stringConstants, timer);
         timer.addTimeListener(this);
         timer.addTimeListener(windHistory);
         grid.setWidget(1, 1, timePanel);
     }
-
+    
+    private boolean getCheckboxValueManeuver(String maneuverType){
+        for (Pair<CheckBox, String> pair : checkboxAndType) {
+            if (pair.getB().equals(maneuverType)) {
+                return pair.getA().getValue();
+            }
+        }
+        return false;
+    }
+    
     private void updateBoatSelection() {
         for (int i = 0; i < quickRanksBox.getItemCount(); i++) {
             setSelectedInMap(quickRanksList.get(i), quickRanksBox.isItemSelected(i));
@@ -771,11 +810,6 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
             @Override
             public void onMouseOut(MarkerMouseOutEvent event) {
                 map.setTitle("");
-                /*
-                 * if(!quickRanksBox.isItemSelected(quickRanksList.indexOf(competitorDAO))){
-                 * setSelectedInMap(competitorDAO, false); }
-                 */
-                // quickRanksBox.setItemSelected(quickRanksList.indexOf(competitorDAO), false);
             }
         });
         return boatMarker;
@@ -842,6 +876,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
 
                             @Override
                             public void onSuccess(Map<CompetitorDAO, List<ManeuverDAO>> result) {
+                                RaceMapPanel.this.lastManeuverResult = result;
                                 if (maneuverMarkers != null) {
                                     removeAllManeuverMarkers();
                                 }
@@ -913,22 +948,12 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
             @Override
             public void onMouseOver(PolylineMouseOverEvent event) {
                 map.setTitle(competitorDAO.name);
-                /*
-                 * if(quickRanksBox.isItemSelected(quickRanksList.indexOf(competitorDAO))){
-                 * setSelectedInMap(competitorDAO, true); }
-                 */
-                // quickRanksBox.setItemSelected(quickRanksList.indexOf(competitorDAO), true);
             }
         });
         result.addPolylineMouseOutHandler(new PolylineMouseOutHandler() {
             @Override
             public void onMouseOut(PolylineMouseOutEvent event) {
                 map.setTitle("");
-                /*
-                 * if(!quickRanksBox.isItemSelected(quickRanksList.indexOf(competitorDAO))){
-                 * setSelectedInMap(competitorDAO, false); }
-                 */
-                // quickRanksBox.setItemSelected(quickRanksList.indexOf(competitorDAO), false);
             }
         });
         tails.put(competitorDAO, result);
@@ -961,10 +986,12 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
     }
 
     private void removeAllManeuverMarkers() {
-        for (Marker marker : maneuverMarkers) {
-            map.removeOverlay(marker);
+        if (maneuverMarkers != null) {
+            for (Marker marker : maneuverMarkers) {
+                map.removeOverlay(marker);
+            }
+            maneuverMarkers = null;
         }
-        maneuverMarkers = null;
     }
 
     /* TODO see Bug #6, use checkboxes to select what to visualize
@@ -999,53 +1026,60 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
                 CompetitorDAO competitorDAO = iter.next();
                 List<ManeuverDAO> maneuversForCompetitor = maneuvers.get(competitorDAO);
                 for (ManeuverDAO maneuver : maneuversForCompetitor) {
+                    boolean showThisManeuver = true;
                     LatLng latLng = LatLng.newInstance(maneuver.position.latDeg, maneuver.position.lngDeg);
                     MarkerOptions options = MarkerOptions.newInstance();
                     options.setTitle("" + maneuver.timepoint + ": " + maneuver.type + " "
                             + maneuver.directionChangeInDegrees + "deg from " + maneuver.speedWithBearingBefore
                             + " to " + maneuver.speedWithBearingAfter);
-                    if (maneuver.type.equals("TACK")) {
+                    if (maneuver.type.equals("TACK") && getCheckboxValueManeuver("TACK")) {
                         if (maneuver.newTack.equals("PORT")) {
                             options.setIcon(tackToPortIcon);
                         } else {
                             options.setIcon(tackToStarboardIcon);
                         }
-                    } else if (maneuver.type.equals("JIBE")) {
+                    } else if (maneuver.type.equals("JIBE") && getCheckboxValueManeuver("JIBE")) {
                         if (maneuver.newTack.equals("PORT")) {
                             options.setIcon(jibeToPortIcon);
                         } else {
                             options.setIcon(jibeToStarboardIcon);
                         }
-                    } else if (maneuver.type.equals("HEAD_UP")) {
+                    } else if (maneuver.type.equals("HEAD_UP") && getCheckboxValueManeuver("HEAD_UP")) {
                         if (maneuver.newTack.equals("PORT")) {
                             options.setIcon(headUpOnPortIcon);
                         } else {
                             options.setIcon(headUpOnStarboardIcon);
                         }
-                    } else if (maneuver.type.equals("BEAR_AWAY")) {
+                    } else if (maneuver.type.equals("BEAR_AWAY") && getCheckboxValueManeuver("BEAR_AWAY")) {
                         if (maneuver.newTack.equals("PORT")) {
                             options.setIcon(bearAwayOnPortIcon);
                         } else {
                             options.setIcon(bearAwayOnStarboardIcon);
                         }
-                    } else if (maneuver.type.equals("PENALTY_CIRCLE")) {
+                    } else if (maneuver.type.equals("PENALTY_CIRCLE") && getCheckboxValueManeuver("PENALTY_CIRCLE")) {
                         if (maneuver.newTack.equals("PORT")) {
                             options.setIcon(penaltyCircleToPortIcon);
                         } else {
                             options.setIcon(penaltyCircleToStarboardIcon);
                         }
-                    } else if (maneuver.type.equals("MARK_PASSING")) {
+                    } else if (maneuver.type.equals("MARK_PASSING") && getCheckboxValueManeuver("MARK_PASSING")) {
                         if (maneuver.newTack.equals("PORT")) {
                             options.setIcon(markPassingToPortIcon);
                         } else {
                             options.setIcon(markPassingToStarboardIcon);
                         }
                     } else {
-                        options.setIcon(unknownManeuverIcon);
+                        if (getCheckboxValueManeuver("OTHER")) {
+                            options.setIcon(unknownManeuverIcon);
+                        } else {
+                            showThisManeuver = false;
+                        }
                     }
-                    Marker marker = new Marker(latLng, options);
-                    maneuverMarkers.add(marker);
-                    map.addOverlay(marker);
+                    if (showThisManeuver){
+                        Marker marker = new Marker(latLng, options);
+                        maneuverMarkers.add(marker);
+                        map.addOverlay(marker);
+                    }
                 }
             }
         }

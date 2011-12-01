@@ -27,7 +27,6 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Team;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.CompetitorImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
@@ -49,7 +48,6 @@ import com.sap.sailing.domain.tracking.TrackedEventRegistry;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
-import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.JSONService;
 import com.sap.sailing.domain.tractracadapter.Receiver;
@@ -79,8 +77,6 @@ public class DomainFactoryImpl implements DomainFactory {
     private final Map<String, Person> personCache = new HashMap<String, Person>();
     
     private final Map<String, Team> teamCache = new HashMap<String, Team>();
-    
-    private final Map<CompetitorClass, BoatClass> boatClassCache = new HashMap<CompetitorClass, BoatClass>();
     
     /**
      * Caches events by their name and their boat class's name
@@ -196,14 +192,7 @@ public class DomainFactoryImpl implements DomainFactory {
 
     @Override
     public BoatClass getOrCreateBoatClass(CompetitorClass competitorClass) {
-        synchronized (boatClassCache) {
-            BoatClass result = boatClassCache.get(competitorClass);
-            if (result == null) {
-                result = new BoatClassImpl(competitorClass == null ? "" : competitorClass.getName());
-                boatClassCache.put(competitorClass, result);
-            }
-            return result;
-        }
+        return baseDomainFactory.getOrCreateBoatClass(competitorClass == null ? "" : competitorClass.getName());
     }
 
     @Override
@@ -410,9 +399,8 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public MarkPassing createMarkPassing(com.tractrac.clientmodule.Competitor competitor, Waypoint passed, TimePoint time) {
-        MarkPassing result = new MarkPassingImpl(time, passed, getOrCreateCompetitor(competitor));
-        return result;
+    public MarkPassing createMarkPassing(TimePoint timePoint, Waypoint passed, com.sap.sailing.domain.base.Competitor competitor) {
+        return baseDomainFactory.createMarkPassing(timePoint, passed, competitor);
     }
 
     @Override

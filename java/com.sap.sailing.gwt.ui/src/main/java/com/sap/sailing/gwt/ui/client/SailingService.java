@@ -8,6 +8,7 @@ import java.util.Map;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
+import com.sap.sailing.gwt.ui.shared.CompetitorWithRaceDAO;
 import com.sap.sailing.gwt.ui.shared.EventAndRaceIdentifier;
 import com.sap.sailing.gwt.ui.shared.EventDAO;
 import com.sap.sailing.gwt.ui.shared.EventIdentifier;
@@ -83,7 +84,7 @@ public interface SailingService extends RemoteService {
     void renameLeaderboardColumn(String leaderboardName, String oldColumnName, String newColumnName);
 
     void removeLeaderboardColumn(String leaderboardName, String columnName);
-
+    
     void addColumnToLeaderboard(String columnName, String leaderboardName, boolean medalRace);
     
     void moveLeaderboardColumnUp(String leaderboardName, String columnName);
@@ -129,6 +130,7 @@ public interface SailingService extends RemoteService {
     
     String[] getCountryCodes();
     
+    CompetitorWithRaceDAO[][] getCompetitorRaceData(RaceIdentifier race, int steps) throws Exception;
     Map<CompetitorDAO, List<GPSFixDAO>> getDouglasPoints(RaceIdentifier raceIdentifier,
             Map<CompetitorDAO, Date> from, Map<CompetitorDAO, Date> to, double meters);
 

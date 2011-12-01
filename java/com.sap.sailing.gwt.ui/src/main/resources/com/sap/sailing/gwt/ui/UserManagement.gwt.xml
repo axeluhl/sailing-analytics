@@ -17,6 +17,9 @@
   <!-- Google Maps API -->
   <inherits name='com.google.gwt.maps.GoogleMaps' />
   
+  <!-- Google Visualization API -->
+  <inherits name='com.google.gwt.visualization.Visualization'/>
+  
   <!-- Phoenix Stuff -->
   <inherits name='com.sap.ui.commons.Module' />
   

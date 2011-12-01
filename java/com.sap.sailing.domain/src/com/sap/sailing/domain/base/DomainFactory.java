@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.base;
 
 import com.sap.sailing.domain.base.impl.DomainFactoryImpl;
+import com.sap.sailing.domain.tracking.MarkPassing;
 
 public interface DomainFactory {
     static DomainFactory INSTANCE = new DomainFactoryImpl();
@@ -16,4 +17,8 @@ public interface DomainFactory {
     Gate createGate(Buoy left, Buoy right, String name);
     
     Waypoint createWaypoint(ControlPoint controlPoint);
+
+    MarkPassing createMarkPassing(TimePoint timePoint, Waypoint waypoint, Competitor competitor);
+    
+    BoatClass getOrCreateBoatClass(String name);
 }

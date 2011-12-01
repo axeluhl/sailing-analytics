@@ -3,7 +3,6 @@ package com.sap.sailing.gwt.ui.shared;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -20,9 +19,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 public class LeaderboardDAO implements IsSerializable {
     public String name;
     public List<CompetitorDAO> competitors;
-    private List<String> raceNames;
-    private Map<String, Boolean> racesMedalRace;
-    private Map<String, Boolean> racesTracked;
+    private List<RaceInLeaderboardDAO> races;
     public Map<CompetitorDAO, String> displayNames;
     public Map<CompetitorDAO, LeaderboardRowDAO> rows;
     public boolean hasCarriedPoints;
@@ -35,9 +32,7 @@ public class LeaderboardDAO implements IsSerializable {
     public LeaderboardDAO() {
         totalRankingComparator = new TotalRankingComparator();
         competitorsOrderedAccordingToTotalRank = false;
-        raceNames = new ArrayList<String>();
-        racesMedalRace = new HashMap<String, Boolean>();
-        racesTracked = new HashMap<String, Boolean>();
+        races = new ArrayList<RaceInLeaderboardDAO>();
     }
     
     public String getDisplayName(CompetitorDAO competitor) {
@@ -76,8 +71,8 @@ public class LeaderboardDAO implements IsSerializable {
      */
     public boolean scoredInMedalRace(CompetitorDAO competitor) {
         LeaderboardRowDAO row = rows.get(competitor);
-        for (String race : raceNames) {
-            if (raceIsMedalRace(race) && row.fieldsByRaceName.get(race).totalPoints > 0) {
+        for (RaceInLeaderboardDAO race : races) {
+            if (race.isMedalRace() && row.fieldsByRaceName.get(race.getRaceColumnName()).totalPoints > 0) {
                 return true;
             }
         }
@@ -189,9 +184,9 @@ public class LeaderboardDAO implements IsSerializable {
     private int getMedalRaceScore(CompetitorDAO competitor) {
         int result = 0;
         LeaderboardRowDAO row = rows.get(competitor);
-        for (String race : raceNames) {
-            if (raceIsMedalRace(race) && row.fieldsByRaceName.containsKey(race)) {
-                result += row.fieldsByRaceName.get(race).netPoints;
+        for (RaceInLeaderboardDAO race : races) {
+            if (race.isMedalRace() && row.fieldsByRaceName.containsKey(race.getRaceColumnName())) {
+                result += row.fieldsByRaceName.get(race.getRaceColumnName()).netPoints;
             }
         }
         return result;
@@ -215,12 +210,12 @@ public class LeaderboardDAO implements IsSerializable {
      */
     private String getNameOfLastRaceSoFar(CompetitorDAO c1, CompetitorDAO c2) {
         String nameOfLastRaceSoFar = null;
-        for (String race : raceNames) {
+        for (RaceInLeaderboardDAO race : races) {
             for (LeaderboardRowDAO row : rows.values()) {
                 if (row.competitor.equals(c1) || row.competitor.equals(c2)) {
-                    LeaderboardEntryDAO leaderboardEntryDAO = row.fieldsByRaceName.get(race);
+                    LeaderboardEntryDAO leaderboardEntryDAO = row.fieldsByRaceName.get(race.getRaceColumnName());
                     if (leaderboardEntryDAO != null && leaderboardEntryDAO.netPoints != 0) {
-                        nameOfLastRaceSoFar = race;
+                        nameOfLastRaceSoFar = race.getRaceColumnName();
                         break;
                     }
                 }
@@ -233,8 +228,8 @@ public class LeaderboardDAO implements IsSerializable {
         int result = 0;
         LeaderboardRowDAO row = rows.get(competitor);
         if (row != null) {
-            for (String race : raceNames) {
-                LeaderboardEntryDAO field = row.fieldsByRaceName.get(race);
+            for (RaceInLeaderboardDAO race : races) {
+                LeaderboardEntryDAO field = row.fieldsByRaceName.get(race.getRaceColumnName());
                 if (field != null && field.netPoints == 1) {
                     result++;
                 }
@@ -256,81 +251,94 @@ public class LeaderboardDAO implements IsSerializable {
         return competitors.indexOf(competitor)+1;
     };
     
-    public boolean raceIsTracked(String raceName){
-    	return racesTracked.get(raceName);
+    public boolean raceIsTracked(String raceColumnName){
+        for (RaceInLeaderboardDAO race : races){
+            if (race.getRaceColumnName().equals(raceColumnName)){
+                return race.isTrackedRace();
+            }
+        }
+    	return false;
     	
     }
     
-    public boolean raceIsMedalRace(String raceName){
-    	return racesMedalRace.get(raceName);
+    public boolean raceIsMedalRace(String raceColumnName){
+        return getRaceInLeaderboardByName(raceColumnName).isMedalRace();
     }
     
-    public void addRace(String name, boolean isMedalRace, boolean isTracked){
-    	raceNames.add(name);
-    	racesMedalRace.put(name, isMedalRace);
-    	racesTracked.put(name, isTracked);
+    public void addRace(String raceColumnName, boolean medalRace, boolean trackedRace){
+        RaceInLeaderboardDAO raceInLeaderboardDAO = new RaceInLeaderboardDAO();
+        raceInLeaderboardDAO.setRaceColumnName(raceColumnName);
+        raceInLeaderboardDAO.setMedalRace(medalRace);
+        raceInLeaderboardDAO.setTrackedRace(trackedRace);
+    	races.add(raceInLeaderboardDAO);
     }
     
-    public void addRaceAt(String name, boolean isMedalRace, boolean isTracked, int index){
-    	raceNames.add(index, name);
-    	racesMedalRace.put(name, isMedalRace);
-    	racesTracked.put(name, isTracked);
+    public void addRaceAt(String raceColumnName, boolean medalRace, boolean trackedRace, int index){
+        RaceInLeaderboardDAO raceInLeaderboardDAO = new RaceInLeaderboardDAO();
+        raceInLeaderboardDAO.setRaceColumnName(raceColumnName);
+        raceInLeaderboardDAO.setMedalRace(medalRace);
+        raceInLeaderboardDAO.setTrackedRace(trackedRace);
+        races.add(index, raceInLeaderboardDAO);
     }
     
-    public void removeRace(String name){
-    	racesMedalRace.remove(name);
-    	racesTracked.remove(name);
-    	raceNames.remove(getRaceIdByName(name));
+    public void removeRace(String raceColumnName){
+    	races.remove(getRaceInLeaderboardByName(raceColumnName));
     }
     
     public void renameRace(String oldName, String newName){
-    	int index = getRaceIdByName(oldName);
-    	racesMedalRace.put(newName, racesMedalRace.get(oldName));
-    	racesTracked.put(newName, racesTracked.get(oldName));
-    	racesMedalRace.remove(oldName);
-    	racesTracked.remove(oldName);
-    	raceNames.set(index, newName);
+        RaceInLeaderboardDAO race = getRaceInLeaderboardByName(oldName);
+    	race.setRaceColumnName(newName);
     }
     
-    public List<String> getRaceList(){
-    	return raceNames;
-    }
-    
-    public boolean raceListContains(String raceName) {
-        return getRaceIdByName(raceName) != -1;
-    }
-    
-    public int getRaceIdByName(String raceName) {
-        for (int i = 0; i < raceNames.size(); i++) {
-            if (raceNames.get(i).equals(raceName)) {
-                return i;
+    private RaceInLeaderboardDAO getRaceInLeaderboardByName(String raceColumnName) {
+        for (RaceInLeaderboardDAO race : races){
+            if (race.getRaceColumnName().equals(raceColumnName)){
+                return race;
             }
         }
-        return -1;
+        return null;
     }
 
-    public void moveRaceUp(String raceName) {
-        int index = getRaceIdByName(raceName);
+    public List<String> getRaceColumnNameList(){
+        List<String> raceColumnNames = new ArrayList<String>();
+        for (RaceInLeaderboardDAO raceInLeaderboardDAO : races){
+            raceColumnNames.add(raceInLeaderboardDAO.getRaceColumnName());
+        }
+    	return raceColumnNames;
+    }
+    
+    public List<RaceInLeaderboardDAO> getRaceList(){
+        return races;
+    }
+    
+    public boolean raceListContains(String raceColumnName) {
+        return getRaceInLeaderboardByName(raceColumnName) != null;
+    }
+
+    public void moveRaceUp(String raceColumnName) {
+        RaceInLeaderboardDAO race = getRaceInLeaderboardByName(raceColumnName);
+        int index = races.indexOf(race);
         index--;
         if (index >= 0) {
-            raceNames.remove(index + 1);
-            raceNames.add(index, raceName);
+            races.remove(index + 1);
+            races.add(index, race);
         }
     }
 
-    public void moveRaceDown(String raceName) {
-        int index = getRaceIdByName(raceName);
+    public void moveRaceDown(String raceColumnName) {
+        RaceInLeaderboardDAO race = getRaceInLeaderboardByName(raceColumnName);
+        int index = races.indexOf(race);
         if (index != -1) {
             index++;
-            if (index < raceNames.size()) {
-                raceNames.remove(index - 1);
-                raceNames.add(index, raceName);
+            if (index < races.size()) {
+                races.remove(index - 1);
+                races.add(index, race);
             }
         }
     }
     
-    public void setIsMedalRace(String raceName, boolean isMedalRace){
-    	racesMedalRace.put(raceName, isMedalRace);
+    public void setIsMedalRace(String raceColumnName, boolean medalRace){
+        getRaceInLeaderboardByName(raceColumnName).setMedalRace(medalRace);
     }
 
 }
