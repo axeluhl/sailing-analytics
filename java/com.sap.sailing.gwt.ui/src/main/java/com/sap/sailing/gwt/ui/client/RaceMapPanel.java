@@ -53,6 +53,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
 import com.sap.sailing.gwt.ui.shared.EventDAO;
+import com.sap.sailing.gwt.ui.shared.EventNameAndRaceName;
 import com.sap.sailing.gwt.ui.shared.GPSFixDAO;
 import com.sap.sailing.gwt.ui.shared.ManeuverDAO;
 import com.sap.sailing.gwt.ui.shared.MarkDAO;
@@ -404,7 +405,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
                 RaceDAO race = selection.get(selection.size() - 1).getC();
                 if (event != null && race != null) {
                     final Triple<Map<CompetitorDAO, Date>, Map<CompetitorDAO, Date>, Map<CompetitorDAO, Boolean>> fromAndToAndOverlap = computeFromAndTo(date);
-                    sailingService.getBoatPositions(event.name, race.name, fromAndToAndOverlap.getA(),
+                    sailingService.getBoatPositions(new EventNameAndRaceName(event.name, race.name), fromAndToAndOverlap.getA(),
                             fromAndToAndOverlap.getB(), true, new AsyncCallback<Map<CompetitorDAO, List<GPSFixDAO>>>() {
                                 @Override
                                 public void onFailure(Throwable caught) {
@@ -424,7 +425,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
                                     }
                                 }
                             });
-                    sailingService.getMarkPositions(event.name, race.name, date, new AsyncCallback<List<MarkDAO>>() {
+                    sailingService.getMarkPositions(new EventNameAndRaceName(event.name, race.name), date, new AsyncCallback<List<MarkDAO>>() {
                         @Override
                         public void onFailure(Throwable caught) {
                             errorReporter.reportError("Error trying to obtain mark positions: " + caught.getMessage());
@@ -435,7 +436,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
                             showMarksOnMap(result);
                         }
                     });
-                    sailingService.getQuickRanks(event.name, race.name, date, new AsyncCallback<List<QuickRankDAO>>() {
+                    sailingService.getQuickRanks(new EventNameAndRaceName(event.name, race.name), date, new AsyncCallback<List<QuickRankDAO>>() {
                         @Override
                         public void onFailure(Throwable caught) {
                             errorReporter.reportError("Error obtaining quick rankings: " + caught.getMessage());
@@ -869,7 +870,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
                             }
                         });
                  */
-                sailingService.getManeuvers(event.name, race.name, from, to,
+                sailingService.getManeuvers(new EventNameAndRaceName(event.name, race.name), from, to,
                         new AsyncCallback<Map<CompetitorDAO, List<ManeuverDAO>>>() {
                             @Override
                             public void onFailure(Throwable caught) {

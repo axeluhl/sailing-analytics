@@ -95,7 +95,7 @@ do the following:
 
  - "cd ~/servers/prod1"
 
- - "./udpmirror -v 2012 localhost 2013 localhost 2014"
+ - "./udpmirror -v 2012 localhost 2013 localhost 2014 localhost 2010 localhost 2011"
 
 The "-v" argument ensures that UDP packets received will be dumped to
 the console. The process will listen for inbound UDP packets on port

@@ -25,7 +25,7 @@ import com.sap.sailing.util.Util.Pair;
 public class LeaderboardImpl implements Named, Leaderboard {
     private final List<RaceInLeaderboard> races;
     private final SettableScoreCorrection scoreCorrection;
-    private final ThresholdBasedResultDiscardingRule resultDiscardingRule;
+    private ThresholdBasedResultDiscardingRule resultDiscardingRule;
     private String name;
     
     /**
@@ -378,4 +378,9 @@ public class LeaderboardImpl implements Named, Leaderboard {
 		race.setIsMedalRace(isMedalRace);
 	}
 
+	@Override
+	public void setResultDiscardingRule(ThresholdBasedResultDiscardingRule discardingRule)
+	{
+	    this.resultDiscardingRule = discardingRule; 
+	}
 }

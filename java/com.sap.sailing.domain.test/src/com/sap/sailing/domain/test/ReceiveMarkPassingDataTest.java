@@ -132,7 +132,7 @@ public class ReceiveMarkPassingDataTest extends AbstractTracTracLiveTest {
         // the first waypoint is used
         boolean found = false;
         for (Waypoint waypoint : raceDefinition.getCourse().getWaypoints()) {
-            if (waypoint.getControlPoint() == DomainFactory.INSTANCE.getControlPoint(entry.getControlPoint())) {
+            if (waypoint.getControlPoint() == DomainFactory.INSTANCE.getOrCreateControlPoint(entry.getControlPoint())) {
                 found = true;
             }
         }
