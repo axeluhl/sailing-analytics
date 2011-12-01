@@ -84,6 +84,8 @@ public interface SailingService extends RemoteService {
 
     void removeLeaderboardColumn(String leaderboardName, String columnName);
 
+    void editLeaderboardColumnName(String oldColumnName, String columnName, String leaderboardName, boolean medalRace);
+    
     void addColumnToLeaderboard(String columnName, String leaderboardName, boolean medalRace);
     
     void moveLeaderboardColumnUp(String leaderboardName, String columnName);

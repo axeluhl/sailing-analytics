@@ -260,7 +260,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
                         removeRaceColumn(object);
                     }
                 } else if ("ACTION_EDIT".equals(value)) {
-                    Window.alert("Edit clicked");
+                    editRaceColumnOfLeaderboard();
                 } else if ("ACTION_UNLINK".equals(value)) {
                     unlinkRaceColumnFromTrackedRace(object);
                 }
@@ -497,16 +497,44 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
     private String getSelectedRaceColumnName() {
         return raceTableSelectionModel.getSelectedObject();
     }
-
-    private void addRaceColumnToLeaderboard() {
+    
+    private void editRaceColumnOfLeaderboard(){
         final String leaderboardName = getSelectedLeaderboardName();
-        String raceName = getSelectedLeaderboardName();
+        final String raceName = getSelectedLeaderboardName();
         boolean raceIsMedalRace = false;
         if(selectedLeaderboard.getRaceList().contains(raceName)){
             raceIsMedalRace = selectedLeaderboard.raceIsMedalRace(raceName);
         }
         Pair<String, Boolean> raceDaoAndIsMedalRace = new Pair<String, Boolean>(raceName,
                 raceIsMedalRace);
+        final RaceDialog raceDialog = new RaceDialog(raceDaoAndIsMedalRace, stringConstants,
+                new AsyncCallback<Pair<String, Boolean>>() {
+
+                    @Override
+                    public void onFailure(Throwable caught) {}
+
+                    @Override
+                    public void onSuccess(Pair<String, Boolean> result) {
+                        sailingService.editLeaderboardColumnName(raceName, result.getA(), leaderboardName, result.getB(), new AsyncCallback<Void>() {
+
+                            @Override
+                            public void onFailure(Throwable caught) {}
+
+                            @Override
+                            public void onSuccess(Void result) {
+                                // TODO liste aktualiesieren
+                            }
+                        });
+                    }
+            
+        });
+        raceDialog.show();
+    }
+
+    private void addRaceColumnToLeaderboard() {
+        final String leaderboardName = getSelectedLeaderboardName();
+        Pair<String, Boolean> raceDaoAndIsMedalRace = new Pair<String, Boolean>("",
+                false);
         final RaceDialog raceDialog = new RaceDialog(raceDaoAndIsMedalRace, stringConstants,
                 new AsyncCallback<Pair<String, Boolean>>() {
 
