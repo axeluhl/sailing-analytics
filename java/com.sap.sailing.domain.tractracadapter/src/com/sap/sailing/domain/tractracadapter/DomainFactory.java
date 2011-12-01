@@ -51,8 +51,6 @@ public interface DomainFactory {
 
     com.sap.sailing.domain.base.TimePoint createTimePoint(long timestamp);
 
-    com.sap.sailing.domain.base.Waypoint createWaypoint(ControlPoint controlPoint);
-
     Course createCourse(String name, Iterable<ControlPoint> controlPoints);
 
     com.sap.sailing.domain.base.Competitor getOrCreateCompetitor(Competitor competitor);

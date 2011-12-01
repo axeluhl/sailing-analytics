@@ -5,9 +5,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.sap.sailing.domain.base.Buoy;
+import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Gate;
 import com.sap.sailing.domain.base.Nationality;
+import com.sap.sailing.domain.base.Waypoint;
 
 public class DomainFactoryImpl implements DomainFactory {
     /**
@@ -53,6 +55,11 @@ public class DomainFactoryImpl implements DomainFactory {
     @Override
     public Gate createGate(Buoy left, Buoy right, String name) {
        return new GateImpl(left, right, name);
+    }
+
+    @Override
+    public Waypoint createWaypoint(ControlPoint controlPoint) {
+        return new WaypointImpl(controlPoint);
     }
 
 }
