@@ -1002,10 +1002,12 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
     }
 
     private void removeAllManeuverMarkers() {
-        for (Marker marker : maneuverMarkers) {
-            map.removeOverlay(marker);
+        if (maneuverMarkers != null) {
+            for (Marker marker : maneuverMarkers) {
+                map.removeOverlay(marker);
+            }
+            maneuverMarkers = null;
         }
-        maneuverMarkers = null;
     }
 
     /* TODO see Bug #6, use checkboxes to select what to visualize
