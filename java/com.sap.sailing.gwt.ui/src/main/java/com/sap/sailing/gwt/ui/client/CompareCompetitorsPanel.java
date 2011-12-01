@@ -35,7 +35,6 @@ import com.sap.sailing.gwt.ui.shared.CompetitorWithRaceDAO;
 import com.sap.sailing.gwt.ui.shared.RaceIdentifier;
 
 public class CompareCompetitorsPanel extends FormPanel {
-    private final List<CompetitorDAO> competitors;
     private CompetitorWithRaceDAO[][] chartData = null;
     private LineChart chart;
     private final SailingServiceAsync sailingService;
@@ -65,7 +64,6 @@ public class CompareCompetitorsPanel extends FormPanel {
     public CompareCompetitorsPanel(SailingServiceAsync sailingService, final List<CompetitorDAO> competitors,
             RaceIdentifier[] races, StringConstants stringConstants, int chartWidth, int chartHeight) {
         this.sailingService = sailingService;
-        this.competitors = competitors;
         this.races = races;
         this.stringConstants = stringConstants;
         this.chartWidth = chartWidth;
