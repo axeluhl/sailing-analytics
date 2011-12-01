@@ -30,6 +30,7 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog.Validator;
 import com.sap.sailing.gwt.ui.shared.EventDAO;
+import com.sap.sailing.gwt.ui.shared.EventNameAndRaceName;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDAO;
 import com.sap.sailing.gwt.ui.shared.Pair;
 import com.sap.sailing.gwt.ui.shared.RaceDAO;
@@ -1080,7 +1081,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
 
     private void linkTrackedRaceForRaceColumn(final Triple<EventDAO, RegattaDAO, RaceDAO> selectedRace) {
         sailingService.connectTrackedRaceToLeaderboardColumn(getSelectedLeaderboardName(), getSelectedRaceColumnName(),
-                selectedRace.getA().name, selectedRace.getC().name, new AsyncCallback<Void>() {
+                new EventNameAndRaceName(selectedRace.getA().name, selectedRace.getC().name), new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable t) {
                         errorReporter.reportError("Error trying to link tracked race " + selectedRace.getC().name

@@ -146,9 +146,11 @@ public class LegColumn extends ExpandableSortableColumn<String> {
         public String getValue(LeaderboardRowDAO row) {
             Double fieldValue = getFieldValue(row);
             StringBuilder result = new StringBuilder();
-            result.append(fieldValue);
+            if (fieldValue != null) {
+                result.append(getFormatter().format(fieldValue));
+            }
             LegEntryDAO entry = getLegEntry(row);
-            if (entry.numberOfPenaltyCircles != null && (int) entry.numberOfPenaltyCircles != 0) {
+            if (entry != null && entry.numberOfPenaltyCircles != null && (int) entry.numberOfPenaltyCircles != 0) {
                 result.append(" (");
                 result.append(entry.numberOfPenaltyCircles);
                 result.append("P)");
@@ -219,7 +221,7 @@ public class LegColumn extends ExpandableSortableColumn<String> {
                                 .getLeaderboardTable(), detailHeaderStyle, detailColumnStyle));
         result.put(DetailColumnType.CURRENT_SPEED_OVER_GROUND_IN_KNOTS, new FormattedDoubleLegDetailColumn(
                 stringConstants.currentSpeedOverGroundInKnots(), stringConstants.currentSpeedOverGroundInKnotsUnit(), new CurrentSpeedOverGroundInKnots(),
-                1, getLeaderboardPanel().getLeaderboardTable(), detailHeaderStyle, detailColumnStyle));
+                2, getLeaderboardPanel().getLeaderboardTable(), detailHeaderStyle, detailColumnStyle));
         result.put(DetailColumnType.ESTIMATED_TIME_TO_NEXT_WAYPOINT_IN_SECONDS,
                 new FormattedDoubleLegDetailColumn(stringConstants.estimatedTimeToNextWaypointInSeconds(),
                         stringConstants.estimatedTimeToNextWaypointInSecondsUnit(),
@@ -228,14 +230,14 @@ public class LegColumn extends ExpandableSortableColumn<String> {
         result.put(
                 DetailColumnType.GAP_TO_LEADER_IN_SECONDS,
                 new FormattedDoubleLegDetailColumn(stringConstants.gapToLeaderInSeconds(), stringConstants.gapToLeaderInSecondsUnit(),
-                        new GapToLeaderInSeconds(), 1, getLeaderboardPanel().getLeaderboardTable(), detailHeaderStyle, detailColumnStyle));
+                        new GapToLeaderInSeconds(), 0, getLeaderboardPanel().getLeaderboardTable(), detailHeaderStyle, detailColumnStyle));
         result.put(DetailColumnType.VELOCITY_MADE_GOOD_IN_KNOTS,
                 new FormattedDoubleLegDetailColumn(stringConstants.velocityMadeGoodInKnots(),
-                        stringConstants.velocityMadeGoodInKnotsUnit(), new VelocityMadeGoodInKnots(), 1,
+                        stringConstants.velocityMadeGoodInKnotsUnit(), new VelocityMadeGoodInKnots(), 2,
                         getLeaderboardPanel().getLeaderboardTable(), detailHeaderStyle, detailColumnStyle));
         result.put(DetailColumnType.WINDWARD_DISTANCE_TO_GO_IN_METERS, new FormattedDoubleLegDetailColumn(
                 stringConstants.windwardDistanceToGoInMeters(), stringConstants.windwardDistanceToGoInMetersUnit(), new WindwardDistanceToGoInMeters(),
-                1, getLeaderboardPanel().getLeaderboardTable(), detailHeaderStyle, detailColumnStyle));
+                0, getLeaderboardPanel().getLeaderboardTable(), detailHeaderStyle, detailColumnStyle));
         result.put(DetailColumnType.RANK_GAIN, new RankGainColumn(stringConstants.rankGain(), new RankGain(),
                 getLeaderboardPanel().getLeaderboardTable(), detailHeaderStyle, detailColumnStyle));
         result.put(DetailColumnType.NUMBER_OF_MANEUVERS, new ManeuverCountLegDetailsColumn(

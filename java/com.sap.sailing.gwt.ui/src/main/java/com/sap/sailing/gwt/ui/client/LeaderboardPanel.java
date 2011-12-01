@@ -465,13 +465,13 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             Map<DetailColumnType, SortableColumn<LeaderboardRowDAO, ?>> result = new HashMap<DetailColumnType, SortableColumn<LeaderboardRowDAO, ?>>();
             result.put(DetailColumnType.RACE_DISTANCE_TRAVELED,
                     new FormattedDoubleLegDetailColumn(stringConstants.distanceInMeters(), stringConstants.distanceInMetersUnit(),
-                            new RaceDistanceTraveledInMeters(), 1, getLeaderboardPanel().getLeaderboardTable(),
+                            new RaceDistanceTraveledInMeters(), 0, getLeaderboardPanel().getLeaderboardTable(),
                             LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
             result.put(DetailColumnType.RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS, new FormattedDoubleLegDetailColumn(
-                    stringConstants.averageSpeedInKnots(), stringConstants.averageSpeedInKnotsUnit(), new RaceAverageSpeedInKnots(), 1, getLeaderboardPanel()
+                    stringConstants.averageSpeedInKnots(), stringConstants.averageSpeedInKnotsUnit(), new RaceAverageSpeedInKnots(), 2, getLeaderboardPanel()
                                     .getLeaderboardTable(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
             result.put(DetailColumnType.RACE_GAP_TO_LEADER_IN_SECONDS, new FormattedDoubleLegDetailColumn(
-                    stringConstants.gapToLeaderInSeconds(), stringConstants.gapToLeaderInSecondsUnit(), new RaceGapToLeaderInSeconds(), 1, getLeaderboardPanel()
+                    stringConstants.gapToLeaderInSeconds(), stringConstants.gapToLeaderInSecondsUnit(), new RaceGapToLeaderInSeconds(), 0, getLeaderboardPanel()
                                     .getLeaderboardTable(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
             result.put(DetailColumnType.RACE_MANEUVERS, new ManeuverCountRaceColumn(
                     stringConstants.numberOfManeuvers(), getLeaderboardPanel()

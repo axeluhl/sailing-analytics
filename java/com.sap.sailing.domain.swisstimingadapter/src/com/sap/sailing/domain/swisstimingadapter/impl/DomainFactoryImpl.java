@@ -114,10 +114,10 @@ public class DomainFactoryImpl implements DomainFactory {
     }
     
     @Override
-    public Competitor getOrCreateCompetitor(com.sap.sailing.domain.swisstimingadapter.Competitor competitor) {
+    public Competitor getOrCreateCompetitor(com.sap.sailing.domain.swisstimingadapter.Competitor competitor, BoatClass boatClass) {
         Competitor result = boatIDToCompetitorCache.get(competitor.getBoatID());
         if (result == null) {
-            Boat boat = new BoatImpl(competitor.getName(), null, competitor.getBoatID());
+            Boat boat = new BoatImpl(competitor.getName(), boatClass, competitor.getBoatID());
             List<Person> teamMembers = new ArrayList<Person>();
             for (String teamMemberName : competitor.getName().split("[-+&]")) {
                 teamMembers.add(new PersonImpl(teamMemberName.trim(), getOrCreateNationality(competitor.getThreeLetterIOCCode()),
@@ -145,9 +145,10 @@ public class DomainFactoryImpl implements DomainFactory {
     @Override
     public RaceDefinition createRaceDefinition(Event event, Race race, StartList startList, Course course) {
         com.sap.sailing.domain.base.Course domainCourse = createCourse(race.getDescription(), course);
-        Iterable<Competitor> competitors = createCompetitorList(startList);
+        BoatClass boatClass = getOrCreateBoatClassFromRaceID(race.getRaceID());
+        Iterable<Competitor> competitors = createCompetitorList(startList, boatClass);
         RaceDefinition result = new RaceDefinitionImpl(race.getRaceID(), domainCourse,
-                getOrCreateBoatClassFromRaceID(race.getRaceID()), competitors);
+                boatClass, competitors);
         event.addRace(result);
         return result;
     }
@@ -175,10 +176,10 @@ public class DomainFactoryImpl implements DomainFactory {
         return result;
     }
 
-    private Iterable<Competitor> createCompetitorList(StartList startList) {
+    private Iterable<Competitor> createCompetitorList(StartList startList, BoatClass boatClass) {
         List<Competitor> result = new ArrayList<Competitor>();
         for (com.sap.sailing.domain.swisstimingadapter.Competitor swissTimingCompetitor : startList.getCompetitors()) {
-            Competitor domainCompetitor = getOrCreateCompetitor(swissTimingCompetitor);
+            Competitor domainCompetitor = getOrCreateCompetitor(swissTimingCompetitor, boatClass);
             result.add(domainCompetitor);
         }
         return result;
