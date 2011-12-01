@@ -15,4 +15,5 @@ public interface DomainFactory {
 
     Gate createGate(Buoy left, Buoy right, String name);
     
+    Waypoint createWaypoint(ControlPoint controlPoint);
 }
