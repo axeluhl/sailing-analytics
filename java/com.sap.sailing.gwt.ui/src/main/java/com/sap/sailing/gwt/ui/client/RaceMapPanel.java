@@ -148,6 +148,8 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
     private final CheckBox showOnlySelected;
 
     private final IntegerBox tailLengthBox;
+    
+    protected Map<CompetitorDAO, List<ManeuverDAO>> lastManeuverResult;
 
     public RaceMapPanel(SailingServiceAsync sailingService, ErrorReporter errorReporter,
             final EventRefresher eventRefresher, StringConstants stringConstants) {
@@ -168,13 +170,14 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         checkboxAndType.add(new Pair<CheckBox, String>(new CheckBox("JIBE"), "JIBE"));
         checkboxAndType.add(new Pair<CheckBox, String>(new CheckBox("PENALTY_CIRCLE"), "PENALTY_CIRCLE"));
         checkboxAndType.add(new Pair<CheckBox, String>(new CheckBox("MARK_PASSING"), "MARK_PASSING"));
+        checkboxAndType.add(new Pair<CheckBox, String>(new CheckBox("OTHER"), "OTHER"));
         for (Pair<CheckBox, String> pair : checkboxAndType) {
             pair.getA().addValueChangeHandler(new ValueChangeHandler<Boolean>() {
 
                 @Override
                 public void onValueChange(ValueChangeEvent<Boolean> event) {
-                    if(!timer.isPlaying()){
-                        showManeuvers()
+                    if(!timer.isPlaying() && lastManeuverResult!=null){
+                        showManeuvers(lastManeuverResult);
                     }
                 }
             });
@@ -875,6 +878,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
 
                             @Override
                             public void onSuccess(Map<CompetitorDAO, List<ManeuverDAO>> result) {
+                                RaceMapPanel.this.lastManeuverResult = result;
                                 if (maneuverMarkers != null) {
                                     removeAllManeuverMarkers();
                                 }
@@ -1032,6 +1036,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
                 CompetitorDAO competitorDAO = iter.next();
                 List<ManeuverDAO> maneuversForCompetitor = maneuvers.get(competitorDAO);
                 for (ManeuverDAO maneuver : maneuversForCompetitor) {
+                    boolean showThisManeuver = true;
                     LatLng latLng = LatLng.newInstance(maneuver.position.latDeg, maneuver.position.lngDeg);
                     MarkerOptions options = MarkerOptions.newInstance();
                     options.setTitle("" + maneuver.timepoint + ": " + maneuver.type + " "
@@ -1074,7 +1079,11 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
                             options.setIcon(markPassingToStarboardIcon);
                         }
                     } else {
-                        options.setIcon(unknownManeuverIcon);
+                        if(getCheckboxValueManeuver("OTHER")){
+                            options.setIcon(unknownManeuverIcon);
+                        }else{
+                            showThisManeuver = false; // TODO remove not selected maneuver pins
+                        }
                     }
                     Marker marker = new Marker(latLng, options);
                     maneuverMarkers.add(marker);
