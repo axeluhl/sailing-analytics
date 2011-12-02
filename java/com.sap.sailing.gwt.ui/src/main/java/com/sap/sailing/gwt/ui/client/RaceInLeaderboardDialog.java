@@ -5,16 +5,16 @@ import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.ui.shared.Pair;
+import com.sap.sailing.gwt.ui.shared.RaceInLeaderboardDAO;
 
-public class RaceDialog extends DataEntryDialog<Pair<String, Boolean>>{
+public class RaceInLeaderboardDialog extends DataEntryDialog<RaceInLeaderboardDAO>{
 
     private final TextBox raceNameBox;
     private final CheckBox isMedalRace;
     
-    private Pair<String, Boolean> raceDaoAndIsMedalRace;
+    private RaceInLeaderboardDAO raceInLeaderboard;
     
-    private static class RaceDialogValidator implements Validator<Pair<String, Boolean>>{
+    private static class RaceDialogValidator implements Validator<RaceInLeaderboardDAO>{
         
         private StringConstants stringConstants;
         
@@ -23,10 +23,10 @@ public class RaceDialog extends DataEntryDialog<Pair<String, Boolean>>{
         }
         
         @Override
-        public String getErrorMessage(Pair<String, Boolean> valueToValidate) {
+        public String getErrorMessage(RaceInLeaderboardDAO valueToValidate) {
             String errorMessage;
-            String racename = valueToValidate.getA();
-            Boolean isMedalRace = valueToValidate.getB();
+            String racename = valueToValidate.getRaceColumnName();
+            Boolean isMedalRace = valueToValidate.isMedalRace();
             boolean isNameNotEmpty =racename!=null & racename!="";
             boolean medalRaceNotNull = isMedalRace!=null;
             
@@ -43,20 +43,20 @@ public class RaceDialog extends DataEntryDialog<Pair<String, Boolean>>{
     }
     
     
-    public RaceDialog(Pair<String, Boolean> raceDaoAndIsMedalRace, StringConstants stringConstants,
-            AsyncCallback<Pair<String, Boolean>> callback) {
+    public RaceInLeaderboardDialog(RaceInLeaderboardDAO raceInLeaderboard, StringConstants stringConstants,
+            AsyncCallback<RaceInLeaderboardDAO> callback) {
         super(stringConstants.name(), stringConstants.name(), stringConstants.ok(), stringConstants.cancel(), new RaceDialogValidator(stringConstants), callback);
-        this.raceDaoAndIsMedalRace = raceDaoAndIsMedalRace;
-        raceNameBox = createTextBox(raceDaoAndIsMedalRace.getA());
+        this.raceInLeaderboard = raceInLeaderboard;
+        raceNameBox = createTextBox(raceInLeaderboard.getRaceColumnName());
         isMedalRace = createCheckbox(stringConstants.medalRace());
-        isMedalRace.setValue(raceDaoAndIsMedalRace.getB().booleanValue());
+        isMedalRace.setValue(raceInLeaderboard.isMedalRace());
     }
 
     @Override
-    protected Pair<String, Boolean> getResult() {
-        raceDaoAndIsMedalRace.setA(raceNameBox.getValue());
-        raceDaoAndIsMedalRace.setB(isMedalRace.getValue()); 
-        return raceDaoAndIsMedalRace;
+    protected RaceInLeaderboardDAO getResult() {
+        raceInLeaderboard.setRaceColumnName(raceNameBox.getValue());
+        raceInLeaderboard.setMedalRace(isMedalRace.getValue());
+        return raceInLeaderboard;
     }
     
     
