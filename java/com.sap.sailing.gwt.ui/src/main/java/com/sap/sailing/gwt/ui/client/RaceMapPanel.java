@@ -333,11 +333,11 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
                         lastMousePosition = event.getLatLng();
                     }
                 });
-                boatIcon = Icon.newInstance("/images/boat16.png");
+                boatIcon = Icon.newInstance("/images/blackdot.png");
                 boatIcon.setIconAnchor(Point.newInstance(8, 8));
-                boatIconHighlighted = Icon.newInstance("/images/boat-selected16.png");
+                boatIconHighlighted = Icon.newInstance("/images/reddot.png");
                 boatIconHighlighted.setIconAnchor(Point.newInstance(8, 8));
-                buoyIcon = Icon.newInstance("/images/safe-water-small.png");
+                buoyIcon = Icon.newInstance("/images/reddiamond.png");
                 buoyIcon.setIconAnchor(Point.newInstance(10, 19));
                 tackToStarboardIcon = Icon.newInstance("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=T|00FF00|000000");
                 tackToStarboardIcon.setIconAnchor(Point.newInstance(10, 33));
