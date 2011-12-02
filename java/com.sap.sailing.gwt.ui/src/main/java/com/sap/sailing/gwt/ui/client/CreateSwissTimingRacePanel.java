@@ -37,7 +37,7 @@ public class CreateSwissTimingRacePanel extends FormPanel {
     private final SailingServiceAsync service;
     private ErrorReporter errorReporter;
 
-    public CreateSwissTimingRacePanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter, StringConstants stringConstants){
+    public CreateSwissTimingRacePanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter, final StringConstants stringConstants){
         this.service = sailingService;
         this.errorReporter = errorReporter;
         competitors = new ArrayList<CreateSwissTimingRacePanel.Competitor>();
@@ -55,23 +55,23 @@ public class CreateSwissTimingRacePanel extends FormPanel {
         mainGrid.setWidget(0, 0, raceDataPanel);
         Grid grid = new Grid(2,2);
         raceDataPanel.add(grid);
-        Label lblRaceName = new Label("Race name:");
+        Label lblRaceName = new Label(stringConstants.race() + " " + stringConstants.name() + ":");
         grid.setWidget(0, 0, lblRaceName);
         txtbRaceName = new TextBox();
         grid.setWidget(0, 1, txtbRaceName);
-        Label lblRaceDesc = new Label("Race description:");
+        Label lblRaceDesc = new Label(stringConstants.race() + " " + stringConstants.description()+":");
         grid.setWidget(1, 0, lblRaceDesc);
         txtbRaceDesc = new TextBox();
         grid.setWidget(1, 1, txtbRaceDesc);
         
         //Competitor panel
-        CaptionPanel competitorPanel = new CaptionPanel("Competitors");
+        CaptionPanel competitorPanel = new CaptionPanel(stringConstants.competitor());
         competitorPanel.setSize("90%", "90%");
         mainGrid.setWidget(1, 0, competitorPanel);
         grid = new Grid(3,3);
         competitorPanel.add(grid);
         
-        Label lblCompetitorListTitle = new Label("Competitors:");
+        Label lblCompetitorListTitle = new Label(stringConstants.competitor());
         grid.setWidget(0, 0, lblCompetitorListTitle);
         listbCompetitorList = new ListBox(false);
         listbCompetitorList.setVisibleItemCount(10);
@@ -89,7 +89,7 @@ public class CreateSwissTimingRacePanel extends FormPanel {
         grid.setWidget(1, 1, compData);
         Grid subGrid = new Grid(3,2);
         compData.add(subGrid);
-        Label lblName = new Label("Name:");
+        Label lblName = new Label(stringConstants.name() + ":");
         subGrid.setWidget(0, 0, lblName);
         txtbCompName = new TextBox();
         txtbCompName.addValueChangeHandler(new ValueChangeHandler<String>() {
@@ -100,7 +100,7 @@ public class CreateSwissTimingRacePanel extends FormPanel {
             }
         });
         subGrid.setWidget(0, 1, txtbCompName);
-        Label lblSailNr = new Label("Sail number:");
+        Label lblSailNr = new Label(stringConstants.sailNumber()+":");
         subGrid.setWidget(1, 0, lblSailNr);
         txtbCompSailNr = new TextBox();
         txtbCompSailNr.addValueChangeHandler(new ValueChangeHandler<String>() {
@@ -111,14 +111,14 @@ public class CreateSwissTimingRacePanel extends FormPanel {
             }
         });
         subGrid.setWidget(1, 1, txtbCompSailNr);
-        Label lblCountr = new Label("Country:");
+        Label lblCountr = new Label(stringConstants.country()+":");
         subGrid.setWidget(2, 0, lblCountr);
         suggestionsCompCountr = new MultiWordSuggestOracle();
         service.getCountryCodes(new AsyncCallback<String[]>() {
 
             @Override
             public void onFailure(Throwable caught) {
-                CreateSwissTimingRacePanel.this.errorReporter.reportError("Unable to find the IOC 3-letter-codes.");
+                CreateSwissTimingRacePanel.this.errorReporter.reportError(stringConstants.no3LetterCodes());
             }
 
             @Override
@@ -141,7 +141,7 @@ public class CreateSwissTimingRacePanel extends FormPanel {
         HorizontalPanel horizontalPanel = new HorizontalPanel();
         grid.setWidget(2, 0, horizontalPanel);
         
-        Button bttAddCompetitor = new Button("Add");
+        Button bttAddCompetitor = new Button(stringConstants.add());
         bttAddCompetitor.setWidth("100px");
         bttAddCompetitor.addClickHandler(new ClickHandler() {
             
@@ -152,7 +152,7 @@ public class CreateSwissTimingRacePanel extends FormPanel {
         });
         horizontalPanel.add(bttAddCompetitor);
         
-        Button bttDeleteCompetitor = new Button("Delete");
+        Button bttDeleteCompetitor = new Button(stringConstants.delete());
         bttDeleteCompetitor.setWidth("100px");
         bttDeleteCompetitor.addClickHandler(new ClickHandler() {
             
@@ -163,7 +163,7 @@ public class CreateSwissTimingRacePanel extends FormPanel {
         });
         horizontalPanel.add(bttDeleteCompetitor);
         
-        Button bttAddRace = new Button("Add race");
+        Button bttAddRace = new Button(stringConstants.add() + " " + stringConstants.race());
         bttAddRace.addClickHandler(new ClickHandler() {
             
             @Override

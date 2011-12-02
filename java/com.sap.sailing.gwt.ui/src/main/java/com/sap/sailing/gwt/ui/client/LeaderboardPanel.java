@@ -37,10 +37,14 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog.Validator;
 import com.sap.sailing.gwt.ui.client.LegDetailColumn.LegDetailField;
+import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDAO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDAO;
+import com.sap.sailing.gwt.ui.shared.LeaderboardNameAndRaceColumnName;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDAO;
 import com.sap.sailing.gwt.ui.shared.LegEntryDAO;
+import com.sap.sailing.gwt.ui.shared.RaceIdentifier;
+import com.sap.sailing.gwt.ui.shared.RaceInLeaderboardDAO;
 
 /**
  * A leaderboard essentially consists of a table widget that in its columns displays the entries.
@@ -69,6 +73,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     private final StringConstants stringConstants;
 
     private final CellTable<LeaderboardRowDAO> leaderboardTable;
+    
+    private final MultiSelectionModel<LeaderboardRowDAO> leaderboardSelectionModel;
 
     private ListDataProvider<LeaderboardRowDAO> data;
 
@@ -121,7 +127,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         public void onClick(ClickEvent event) {
             new LeaderboardSettingsPanel(Collections.unmodifiableList(selectedLegDetails),
                     Collections.unmodifiableList(selectedRaceDetails), /* All races to select */
-                    leaderboard.getRaceList(), selectedRaceColumns, timer.getDelayBetweenAutoAdvancesInMilliseconds(),
+                    leaderboard.getRaceColumnNameList(), selectedRaceColumns, timer.getDelayBetweenAutoAdvancesInMilliseconds(),
                     stringConstants.leaderboardSettings(), stringConstants.selectLegDetails(), stringConstants.ok(),
                     stringConstants.cancel(), new Validator<LeaderboardSettingsPanel.Result>() {
                         @Override
@@ -732,7 +738,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         leaderboardTable = new CellTableWithStylableHeaders<LeaderboardRowDAO>(
         /* pageSize */100, resources);
         getLeaderboardTable().setWidth("100%");
-        getLeaderboardTable().setSelectionModel(new MultiSelectionModel<LeaderboardRowDAO>() {});
+        leaderboardSelectionModel = new MultiSelectionModel<LeaderboardRowDAO>() {};
+        getLeaderboardTable().setSelectionModel(leaderboardSelectionModel);
         setData(new ListDataProvider<LeaderboardRowDAO>());
         getData().addDataDisplay(getLeaderboardTable());
         listHandler = new ListHandler<LeaderboardRowDAO>(getData().getList());
@@ -773,10 +780,21 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         playPause.addClickHandler(playPauseHandler);
         playStateChanged(timer.isPlaying());
         refreshPanel.add(playPause);
+        Anchor chartsAnchor = new Anchor(new SafeHtmlBuilder().appendHtmlConstant(
+                "<img class=\"linkNoBorder\" src=\"/images/chart_small.png\"/>").toSafeHtml());
+        chartsAnchor.setTitle(stringConstants.showCharts());
+        chartsAnchor.addClickHandler(new ClickHandler() {
+            
+            @Override
+            public void onClick(ClickEvent event) {
+               compareCompetitors();
+            }
+        });
         Anchor settingsAnchor = new Anchor(new SafeHtmlBuilder().appendHtmlConstant(
                 "<img class=\"linkNoBorder\" src=\"/images/settings.png\"/>").toSafeHtml());
         settingsAnchor.setTitle(stringConstants.settings());
         settingsAnchor.addClickHandler(new SettingsClickHandler(stringConstants));
+        refreshAndSettingsPanel.add(chartsAnchor);
         refreshAndSettingsPanel.add(refreshPanel);
         refreshAndSettingsPanel.add(settingsAnchor);
         dockPanel02.add(refreshAndSettingsPanel, DockPanel.EAST);
@@ -979,8 +997,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     
     private List<String> getRacesAddedNew(LeaderboardDAO oldLeaderboard, LeaderboardDAO newLeaderboard){
         List<String> result = new ArrayList<String>();
-        for (String s : newLeaderboard.getRaceList()) {
-            if (oldLeaderboard == null || !oldLeaderboard.getRaceList().contains(s)) {
+        for (String s : newLeaderboard.getRaceColumnNameList()) {
+            if (oldLeaderboard == null || !oldLeaderboard.getRaceColumnNameList().contains(s)) {
                 result.add(s);
             }
         }
@@ -1114,7 +1132,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     private void createMissingAndAdjustExistingRaceColumns(LeaderboardDAO leaderboard) {
         // Correct order of races in selectedRaceColum
         List<String> correctedOrderSelectedRaces = new ArrayList<String>();
-        for (String string : leaderboard.getRaceList()) {
+        for (String string : leaderboard.getRaceColumnNameList()) {
             if (selectedRaceColumns.contains(string)) {
                 correctedOrderSelectedRaces.add(string);
             }
@@ -1284,5 +1302,24 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     public void playStateChanged(boolean isPlaying) {
         playPause.setHTML(getPlayPauseImgHtml(isPlaying));
         playPause.setTitle(isPlaying ? stringConstants.pauseAutomaticRefresh() : stringConstants.autoRefresh());
+    }
+    
+    private void compareCompetitors(){
+        List<CompetitorDAO> competitors = new ArrayList<CompetitorDAO>();
+        List<RaceIdentifier> races = new ArrayList<RaceIdentifier>();
+        for (RaceInLeaderboardDAO race : getLeaderboard().getRaceList()) {
+            races.add(new LeaderboardNameAndRaceColumnName(leaderboardName, race.getRaceColumnName()));
+        }
+        if (leaderboardSelectionModel.getSelectedSet().size() > 0){
+            for (LeaderboardRowDAO leaderboardRowDAO : leaderboardSelectionModel.getSelectedSet()) {
+                competitors.add(leaderboardRowDAO.competitor);
+            }
+        }
+        else {
+            for (LeaderboardRowDAO leaderboardRowDAO : leaderboardTable.getVisibleItems()){
+                competitors.add(leaderboardRowDAO.competitor);
+            }
+        }
+        new CompareCompetitorsChartDialog(sailingService, competitors, races.toArray(new LeaderboardNameAndRaceColumnName[0]), stringConstants);
     }
 }

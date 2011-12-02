@@ -19,4 +19,6 @@ public interface DomainFactory {
     Waypoint createWaypoint(ControlPoint controlPoint);
 
     MarkPassing createMarkPassing(TimePoint timePoint, Waypoint waypoint, Competitor competitor);
+    
+    BoatClass getOrCreateBoatClass(String name);
 }

@@ -12,8 +12,6 @@ public class RaceDialog extends DataEntryDialog<Pair<String, Boolean>>{
     private final TextBox raceNameBox;
     private final CheckBox isMedalRace;
     
-    private final StringConstants stringConstants;
-    
     private Pair<String, Boolean> raceDaoAndIsMedalRace;
     
     private static class RaceDialogValidator implements Validator<Pair<String, Boolean>>{
@@ -52,7 +50,6 @@ public class RaceDialog extends DataEntryDialog<Pair<String, Boolean>>{
         raceNameBox = createTextBox(raceDaoAndIsMedalRace.getA());
         isMedalRace = createCheckbox(stringConstants.medalRace());
         isMedalRace.setValue(raceDaoAndIsMedalRace.getB().booleanValue());
-        this.stringConstants = stringConstants;
     }
 
     @Override

@@ -4,6 +4,7 @@ import java.awt.TrayIcon.MessageType;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
@@ -23,10 +24,13 @@ public class DomainFactoryImpl implements DomainFactory {
     private final Map<String, Nationality> nationalityCache;
     
     private final Map<String, Buoy> buoyCache;
+    
+    private final Map<String, BoatClass> boatClassCache;
 
     public DomainFactoryImpl() {
         nationalityCache = new HashMap<String, Nationality>();
         buoyCache = new HashMap<String, Buoy>();
+        boatClassCache = new HashMap<String, BoatClass>();
     }
     
     @Override
@@ -69,6 +73,18 @@ public class DomainFactoryImpl implements DomainFactory {
     @Override
     public MarkPassing createMarkPassing(TimePoint timePoint, Waypoint waypoint, Competitor competitor) {
         return new MarkPassingImpl(timePoint, waypoint, competitor);
+    }
+
+    @Override
+    public BoatClass getOrCreateBoatClass(String name) {
+        synchronized (boatClassCache) {
+            BoatClass result = boatClassCache.get(name);
+            if (result == null) {
+                result = new BoatClassImpl(name);
+                boatClassCache.put(name, result);
+            }
+            return result;
+        }
     }
 
 }

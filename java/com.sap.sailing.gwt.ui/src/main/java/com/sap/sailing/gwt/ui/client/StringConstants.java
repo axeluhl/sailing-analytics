@@ -128,4 +128,26 @@ public interface StringConstants extends Constants {
     String medalRaceIsNull();
     String maneuverTypes();
     String raceNameEmpty();
+    String configuration();
+    String chooseChart();
+    String distanceTraveled();
+    String velocityMadeGoodLong();
+    String speedOverGroundLong();
+    String gapToLeaderLong();
+    String pointsToLoad();
+    String speed();
+    String distance();
+    String in();
+    String secondsUnit();
+    String metersUnit();
+    String failedToLoadRaceData();
+    String close();
+    String compareCompetitors();
+    String description();
+    String sailNumber();
+    String country();
+    String no3LetterCodes();
+    String add();
+    String delete();
+    String showCharts();
 }
