@@ -18,6 +18,7 @@ import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FormPanel;
+import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
@@ -32,7 +33,6 @@ import com.sap.sailing.gwt.ui.shared.EventDAO;
 import com.sap.sailing.gwt.ui.shared.EventNameAndRaceName;
 import com.sap.sailing.gwt.ui.shared.RaceDAO;
 import com.sap.sailing.gwt.ui.shared.RegattaDAO;
-import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDAO;
 import com.sap.sailing.gwt.ui.shared.Triple;
 
 
@@ -81,6 +81,10 @@ public class TrackedEventsComposite extends FormPanel implements EventDisplayer,
         panel = new VerticalPanel();
         setWidget(panel);
         
+        HorizontalPanel filterPanel = new HorizontalPanel();
+        filterPanel.setSpacing(5);
+        Label lblFilterEvents = new Label("Filter races by name:");
+        filterPanel.add(lblFilterEvents);
         filterRacesTextbox = new TextBox();
         filterRacesTextbox.addKeyUpHandler(new KeyUpHandler() {
             @Override
@@ -102,7 +106,8 @@ public class TrackedEventsComposite extends FormPanel implements EventDisplayer,
                 }
             }
         });
-        panel.add(filterRacesTextbox);
+        filterPanel.add(filterRacesTextbox);
+        panel.add(filterPanel);
         
         noTrackedRacesLabel = new Label(stringConstants.noRacesYet());
         noTrackedRacesLabel.setWordWrap(false);
