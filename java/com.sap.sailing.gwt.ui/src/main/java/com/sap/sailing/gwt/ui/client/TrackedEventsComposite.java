@@ -18,6 +18,7 @@ import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FormPanel;
+import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
@@ -81,9 +82,11 @@ public class TrackedEventsComposite extends FormPanel implements EventDisplayer,
         setWidget(panel);
         
         HorizontalPanel filterPanel = new HorizontalPanel();
+        panel.add(filterPanel);
+        Label lblFilterEvents = new Label(stringConstants.filterRacesByName() + ":");
         filterPanel.setSpacing(5);
-        Label lblFilterEvents = new Label("Filter races by name:");
         filterPanel.add(lblFilterEvents);
+        filterPanel.setCellVerticalAlignment(lblFilterEvents, HasVerticalAlignment.ALIGN_MIDDLE);
         filterRacesTextbox = new TextBox();
         filterRacesTextbox.addKeyUpHandler(new KeyUpHandler() {
             @Override
@@ -106,7 +109,6 @@ public class TrackedEventsComposite extends FormPanel implements EventDisplayer,
             }
         });
         filterPanel.add(filterRacesTextbox);
-        panel.add(filterPanel);
         
         noTrackedRacesLabel = new Label(stringConstants.noRacesYet());
         noTrackedRacesLabel.setWordWrap(false);
