@@ -201,7 +201,7 @@ public class CompareCompetitorsPanel extends FormPanel {
             opt.setTitle(stringConstants.gapToLeaderLong());
             break;
         case SHOW_WINDWARD_DISTANCE_TO_LEADER:
-            opt.setTitle(stringConstants.windwardDistanceToGoInMeters());
+            opt.setTitle(stringConstants.windwardDistanceToLeaderInMeters());
             break;
         case SHOW_DISTANCE_TRAVELED:
             opt.setTitle(stringConstants.distanceTraveled());
