@@ -83,6 +83,7 @@ public interface StringConstants extends Constants {
     String velocityMadeGoodInKnots();
     String velocityMadeGoodInKnotsUnit();
     String windwardDistanceToGoInMeters();
+    String windwardDistanceToLeaderInMeters();
     String windwardDistanceToGoInMetersUnit();
     String name();
     String leaveEmptyForDefault();
@@ -150,4 +151,5 @@ public interface StringConstants extends Constants {
     String add();
     String delete();
     String showCharts();
+    String raceWithThisNameAlreadyExists();
 }

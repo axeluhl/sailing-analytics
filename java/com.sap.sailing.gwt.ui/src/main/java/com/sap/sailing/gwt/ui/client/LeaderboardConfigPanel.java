@@ -121,7 +121,11 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
 
                     final String oldLeaderboardName= object.name;
 
-                    LeaderboardEditDialog dialog = new LeaderboardEditDialog(object, stringConstants, errorReporter,
+                    List<LeaderboardDAO> otherExistingLeaderboard = new ArrayList<LeaderboardDAO>();
+                    otherExistingLeaderboard.addAll(leaderboardList.getList());
+                    otherExistingLeaderboard.remove(object);
+                    
+                    LeaderboardEditDialog dialog = new LeaderboardEditDialog(Collections.unmodifiableCollection(otherExistingLeaderboard), object, stringConstants, errorReporter,
                             new AsyncCallback<LeaderboardDAO>() {
                                 @Override
                                 public void onFailure(Throwable arg0) {
@@ -517,7 +521,10 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
     private void editRaceColumnOfLeaderboard() {
         final RaceInLeaderboardDAO raceInLeaderboard = getSelectedRaceInLeaderboard();
         final String oldRaceName = raceInLeaderboard.getRaceColumnName();
-        final RaceInLeaderboardDialog raceDialog = new RaceInLeaderboardDialog(raceInLeaderboard, stringConstants,
+        List<RaceInLeaderboardDAO> existingRacesWithoutThisRace = new ArrayList<RaceInLeaderboardDAO>();
+        existingRacesWithoutThisRace.addAll(raceColumnList.getList());
+        existingRacesWithoutThisRace.remove(raceInLeaderboard);
+        final RaceInLeaderboardDialog raceDialog = new RaceInLeaderboardDialog(existingRacesWithoutThisRace, raceInLeaderboard, stringConstants,
                 new AsyncCallback<RaceInLeaderboardDAO>() {
 
                     @Override
@@ -592,7 +599,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
     private void addRaceColumnToLeaderboard() {
         final RaceInLeaderboardDAO raceInLeaderboard = new RaceInLeaderboardDAO();
         final String leaderboardName = getSelectedLeaderboardName();
-        final RaceInLeaderboardDialog raceDialog = new RaceInLeaderboardDialog(raceInLeaderboard, stringConstants,
+        final RaceInLeaderboardDialog raceDialog = new RaceInLeaderboardDialog(raceColumnList.getList(), raceInLeaderboard, stringConstants,
                 new AsyncCallback<RaceInLeaderboardDAO>() {
 
                     @Override
@@ -679,7 +686,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
             leaderboardNames.add(dao.name);
 
         LeaderboardCreateDialog dialog = new LeaderboardCreateDialog(
-                Collections.unmodifiableCollection(leaderboardNames), stringConstants, errorReporter,
+                Collections.unmodifiableCollection(leaderboardList.getList()), stringConstants, errorReporter,
                 new AsyncCallback<LeaderboardDAO>() {
                     @Override
                     public void onFailure(Throwable arg0) {
