@@ -8,6 +8,8 @@ import java.util.Set;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.text.client.DateTimeFormatRenderer;
@@ -18,6 +20,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
@@ -29,6 +32,7 @@ import com.sap.sailing.gwt.ui.shared.EventDAO;
 import com.sap.sailing.gwt.ui.shared.EventNameAndRaceName;
 import com.sap.sailing.gwt.ui.shared.RaceDAO;
 import com.sap.sailing.gwt.ui.shared.RegattaDAO;
+import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDAO;
 import com.sap.sailing.gwt.ui.shared.Triple;
 
 
@@ -59,6 +63,10 @@ public class TrackedEventsComposite extends FormPanel implements EventDisplayer,
     private Button btnRemove = null;
     private Button btnRefresh = null;
     
+    private TextBox filterRacesTextbox;
+    
+    private List<Triple<EventDAO, RegattaDAO, RaceDAO>> availableRaceList;
+    
     public TrackedEventsComposite(final SailingServiceAsync sailingService, final ErrorReporter errorReporter, final EventRefresher eventRefresher, 
             StringConstants stringConstants, boolean hasMultiSelection) {
         this.sailingService = sailingService;
@@ -66,11 +74,35 @@ public class TrackedEventsComposite extends FormPanel implements EventDisplayer,
         this.eventRefresher = eventRefresher;
         this.multiSelection = hasMultiSelection;
         this.raceSelectionChangeListeners = new HashSet<RaceSelectionChangeListener>();
+        this.availableRaceList = new ArrayList<Triple<EventDAO,RegattaDAO,RaceDAO>>();
         
         selectionModel = multiSelection ? new MultiSelectionModel<Triple<EventDAO, RegattaDAO, RaceDAO>>() : new SingleSelectionModel<Triple<EventDAO, RegattaDAO, RaceDAO>>();
 
         panel = new VerticalPanel();
         setWidget(panel);
+        
+        filterRacesTextbox = new TextBox();
+        filterRacesTextbox.addKeyUpHandler(new KeyUpHandler() {
+            @Override
+            public void onKeyUp(KeyUpEvent event) {
+                String text = filterRacesTextbox.getText();
+
+                raceList.getList().clear();
+                
+                if(text == null || text.isEmpty()) {
+                    raceList.getList().addAll(availableRaceList);
+                } else {
+                    String textAsUppercase = text.toUpperCase();
+                    for (Triple<EventDAO, RegattaDAO, RaceDAO> triple : availableRaceList) {
+                        if(triple.getC().name != null) {
+                            if(triple.getC().name.toUpperCase().contains(textAsUppercase))
+                                raceList.getList().add(triple);
+                        }
+                    }
+                }
+            }
+        });
+        panel.add(filterRacesTextbox);
         
         noTrackedRacesLabel = new Label(stringConstants.noRacesYet());
         noTrackedRacesLabel.setWordWrap(false);
@@ -246,13 +278,19 @@ public class TrackedEventsComposite extends FormPanel implements EventDisplayer,
         }
 
         raceList.getList().clear();
+        availableRaceList.clear();
+        
         // Handler columnSortHandler = getRaceTableColumnSortHandler(raceList.getList(), raceNameColumn, raceStartTrackingColumn);
         // raceTable.addColumnSortHandler(columnSortHandler);
         
         for (EventDAO event : events) {
             for (RegattaDAO regatta : event.regattas) {
                 for (RaceDAO race : regatta.races) {
-                    raceList.getList().add(new Triple<EventDAO, RegattaDAO, RaceDAO>(event, regatta, race));
+                    Triple<EventDAO, RegattaDAO, RaceDAO> triple = new Triple<EventDAO, RegattaDAO, RaceDAO>(event, regatta, race);
+                    if (race != null){
+                        availableRaceList.add(triple);
+                    }
+                    raceList.getList().add(triple);
                 }
             }
         }
