@@ -8,10 +8,11 @@ import java.util.Map;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
+import com.sap.sailing.gwt.ui.shared.CompetitorAndTimePointsDAO;
 import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
-import com.sap.sailing.gwt.ui.shared.CompetitorWithRaceDAO;
 import com.sap.sailing.gwt.ui.shared.EventAndRaceIdentifier;
 import com.sap.sailing.gwt.ui.shared.EventDAO;
+import com.sap.sailing.gwt.ui.shared.EventIdentifier;
 import com.sap.sailing.gwt.ui.shared.GPSFixDAO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDAO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDAO;
@@ -19,7 +20,6 @@ import com.sap.sailing.gwt.ui.shared.ManeuverDAO;
 import com.sap.sailing.gwt.ui.shared.MarkDAO;
 import com.sap.sailing.gwt.ui.shared.Pair;
 import com.sap.sailing.gwt.ui.shared.QuickRankDAO;
-import com.sap.sailing.gwt.ui.shared.EventIdentifier;
 import com.sap.sailing.gwt.ui.shared.RaceIdentifier;
 import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDAO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDAO;
@@ -179,10 +179,13 @@ public interface SailingServiceAsync {
 
     void getCountryCodes(AsyncCallback<String[]> callback);
 
-    void getCompetitorRaceData(RaceIdentifier race, int steps, AsyncCallback<CompetitorWithRaceDAO[][]> callback);
+    void getCompetitorRaceData(RaceIdentifier race, CompetitorAndTimePointsDAO competitorAndTimePointsDAO,
+            int dataType, AsyncCallback<List<Pair<CompetitorDAO, Double[]>>> callback);
     void getDouglasPoints(RaceIdentifier raceIdentifier, Map<CompetitorDAO, Date> from, Map<CompetitorDAO, Date> to,
             double meters, AsyncCallback<Map<CompetitorDAO, List<GPSFixDAO>>> callback);
 
     void getManeuvers(RaceIdentifier raceIdentifier, Map<CompetitorDAO, Date> from, Map<CompetitorDAO, Date> to,
             AsyncCallback<Map<CompetitorDAO, List<ManeuverDAO>>> callback);
+
+    void getCompetitorAndTimePoints(RaceIdentifier race, int steps, AsyncCallback<CompetitorAndTimePointsDAO> callback);
 }
