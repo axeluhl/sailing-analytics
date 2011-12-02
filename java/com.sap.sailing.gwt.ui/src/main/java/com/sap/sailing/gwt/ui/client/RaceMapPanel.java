@@ -48,6 +48,7 @@ import com.google.gwt.user.client.ui.IntegerBox;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.ProvidesResize;
+import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -94,6 +95,8 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
     private final Set<CompetitorDAO> competitorsSelectedInMap;
     private final Timer timer;
     private List<Pair<CheckBox, String>> checkboxAndType;
+    private RadioButton radioButtonDouglas;
+    private RadioButton radioButtonManeuvers;
 
     private long TAILLENGTHINMILLISECONDS = 30000l;
 
@@ -134,22 +137,24 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
     private final Map<MarkDAO, Marker> buoyMarkers;
 
     /**
-     * markers displayed in response to {@link SailingServiceAsync#getDouglasPoints(String, String, Map, Map, double, AsyncCallback)}
+     * markers displayed in response to
+     * {@link SailingServiceAsync#getDouglasPoints(String, String, Map, Map, double, AsyncCallback)}
      */
     private Set<Marker> douglasMarkers;
 
     /**
-     * markers displayed in response to {@link SailingServiceAsync#getDouglasPoints(String, String, Map, Map, double, AsyncCallback)}
+     * markers displayed in response to
+     * {@link SailingServiceAsync#getDouglasPoints(String, String, Map, Map, double, AsyncCallback)}
      */
     private Set<Marker> maneuverMarkers;
-    
+
     // key for domain web4sap.com
     private final String mapsAPIKey = "ABQIAAAAmvjPh3ZpHbnwuX3a66lDqRRLCigyC_gRDASMpyomD2do5awpNhRCyD_q-27hwxKe_T6ivSZ_0NgbUg";
 
     private final CheckBox showOnlySelected;
 
     private final IntegerBox tailLengthBox;
-    
+
     protected Map<CompetitorDAO, List<ManeuverDAO>> lastManeuverResult;
 
     public RaceMapPanel(SailingServiceAsync sailingService, ErrorReporter errorReporter,
@@ -163,28 +168,57 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         lastShownFix = new HashMap<CompetitorDAO, Integer>();
         buoyMarkers = new HashMap<MarkDAO, Marker>();
         boatMarkers = new HashMap<CompetitorDAO, Marker>();
-        checkboxAndType = new ArrayList<Pair<CheckBox,String>>();
-        VerticalPanel verticalCheckBoxPanel = new VerticalPanel();
+        VerticalPanel douglasOrManeuverPanel = new VerticalPanel();
+        checkboxAndType = new ArrayList<Pair<CheckBox, String>>();
+        final VerticalPanel verticalCheckBoxPanel = new VerticalPanel();
         verticalCheckBoxPanel.add(new Label(stringConstants.maneuverTypes()));
-        checkboxAndType.add(new Pair<CheckBox, String>(new CheckBox("HEAD_UP"), "HEAD_UP"));
-        checkboxAndType.add(new Pair<CheckBox, String>(new CheckBox("BEAR_AWAY"), "BEAR_AWAY"));
-        checkboxAndType.add(new Pair<CheckBox, String>(new CheckBox("TACK"), "TACK"));
-        checkboxAndType.add(new Pair<CheckBox, String>(new CheckBox("JIBE"), "JIBE"));
-        checkboxAndType.add(new Pair<CheckBox, String>(new CheckBox("PENALTY_CIRCLE"), "PENALTY_CIRCLE"));
-        checkboxAndType.add(new Pair<CheckBox, String>(new CheckBox("MARK_PASSING"), "MARK_PASSING"));
-        checkboxAndType.add(new Pair<CheckBox, String>(new CheckBox("OTHER"), "OTHER"));
+        checkboxAndType.add(new Pair<CheckBox, String>(new CheckBox(stringConstants.headUp()), "HEAD_UP"));
+        checkboxAndType.add(new Pair<CheckBox, String>(new CheckBox(stringConstants.bearAway()), "BEAR_AWAY"));
+        checkboxAndType.add(new Pair<CheckBox, String>(new CheckBox(stringConstants.tack()), "TACK"));
+        checkboxAndType.add(new Pair<CheckBox, String>(new CheckBox(stringConstants.jibe()), "JIBE"));
+        checkboxAndType
+                .add(new Pair<CheckBox, String>(new CheckBox(stringConstants.penaltyCircle()), "PENALTY_CIRCLE"));
+        checkboxAndType.add(new Pair<CheckBox, String>(new CheckBox(stringConstants.markPassing()), "MARK_PASSING"));
+        checkboxAndType.add(new Pair<CheckBox, String>(new CheckBox(stringConstants.otherManeuver()), "OTHER"));
         for (Pair<CheckBox, String> pair : checkboxAndType) {
             pair.getA().addValueChangeHandler(new ValueChangeHandler<Boolean>() {
                 @Override
                 public void onValueChange(ValueChangeEvent<Boolean> event) {
-                    if (!timer.isPlaying() && lastManeuverResult!=null) {
-                        removeAllManeuverMarkers();
-                        showManeuvers(lastManeuverResult);
+                    if (!timer.isPlaying() && lastManeuverResult != null) {
+                        if (radioButtonDouglas.getValue()) {
+                            removeAllMarkDouglasPeuckerpoints();
+                            // showMarkDouglasPeuckerPoints(result);
+                        } else if (radioButtonManeuvers.getValue()) {
+                            removeAllManeuverMarkers();
+                            showManeuvers(lastManeuverResult);
+                        }
                     }
                 }
             });
             verticalCheckBoxPanel.add(pair.getA());
         }
+        String radioButtonGroupName = "douglasOrManeuverPoints";
+        radioButtonDouglas = new RadioButton(radioButtonGroupName, stringConstants.douglasPeuckerPoints());
+        radioButtonDouglas.setValue(true);
+        radioButtonManeuvers = new RadioButton(radioButtonGroupName, stringConstants.maneuverTypes());
+        radioButtonDouglas.addClickHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                removeAllManeuverMarkers();
+                verticalCheckBoxPanel.setVisible(false);
+            }
+        });
+        radioButtonManeuvers.addClickHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                removeAllMarkDouglasPeuckerpoints();
+                verticalCheckBoxPanel.setVisible(true);
+            }
+        });
+        douglasOrManeuverPanel.add(radioButtonDouglas);
+        douglasOrManeuverPanel.add(radioButtonManeuvers);
         fixes = new HashMap<CompetitorDAO, List<GPSFixDAO>>();
         this.grid = new Grid(3, 2);
         setWidget(grid);
@@ -248,15 +282,20 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         });
         ranksAndCheckboxAndTailLength.add(quickRanksBox);
         horizontalRanksVerticalAndCheckboxesManeuversPanel.add(ranksAndCheckboxAndTailLength);
-        horizontalRanksVerticalAndCheckboxesManeuversPanel.add(verticalCheckBoxPanel);
+
+        VerticalPanel verticalPanelRadioAndCheckboxes = new VerticalPanel();
+        verticalPanelRadioAndCheckboxes.add(douglasOrManeuverPanel);
+        verticalPanelRadioAndCheckboxes.add(verticalCheckBoxPanel);
+        horizontalRanksVerticalAndCheckboxesManeuversPanel.add(verticalPanelRadioAndCheckboxes);
+
         grid.setWidget(2, 0, horizontalRanksVerticalAndCheckboxesManeuversPanel);
         timePanel = new TimePanel(stringConstants, timer);
         timer.addTimeListener(this);
         timer.addTimeListener(windHistory);
         grid.setWidget(1, 1, timePanel);
     }
-    
-    private boolean getCheckboxValueManeuver(String maneuverType){
+
+    private boolean getCheckboxValueManeuver(String maneuverType) {
         for (Pair<CheckBox, String> pair : checkboxAndType) {
             if (pair.getB().equals(maneuverType)) {
                 return pair.getA().getValue();
@@ -264,7 +303,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         }
         return false;
     }
-    
+
     private void updateBoatSelection() {
         for (int i = 0; i < quickRanksBox.getItemCount(); i++) {
             setSelectedInMap(quickRanksList.get(i), quickRanksBox.isItemSelected(i));
@@ -339,31 +378,44 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
                 boatIconHighlighted.setIconAnchor(Point.newInstance(8, 8));
                 buoyIcon = Icon.newInstance("/images/reddiamond.png");
                 buoyIcon.setIconAnchor(Point.newInstance(10, 19));
-                tackToStarboardIcon = Icon.newInstance("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=T|00FF00|000000");
+                tackToStarboardIcon = Icon
+                        .newInstance("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=T|00FF00|000000");
                 tackToStarboardIcon.setIconAnchor(Point.newInstance(10, 33));
-                tackToPortIcon = Icon.newInstance("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=T|FF0000|000000");
+                tackToPortIcon = Icon
+                        .newInstance("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=T|FF0000|000000");
                 tackToPortIcon.setIconAnchor(Point.newInstance(10, 33));
-                jibeToStarboardIcon = Icon.newInstance("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=J|00FF00|000000");
+                jibeToStarboardIcon = Icon
+                        .newInstance("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=J|00FF00|000000");
                 jibeToStarboardIcon.setIconAnchor(Point.newInstance(10, 33));
-                jibeToPortIcon = Icon.newInstance("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=J|FF0000|000000");
+                jibeToPortIcon = Icon
+                        .newInstance("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=J|FF0000|000000");
                 jibeToPortIcon.setIconAnchor(Point.newInstance(10, 33));
-                headUpOnStarboardIcon = Icon.newInstance("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=H|00FF00|000000");
+                headUpOnStarboardIcon = Icon
+                        .newInstance("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=H|00FF00|000000");
                 headUpOnStarboardIcon.setIconAnchor(Point.newInstance(10, 33));
-                headUpOnPortIcon = Icon.newInstance("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=H|FF0000|000000");
+                headUpOnPortIcon = Icon
+                        .newInstance("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=H|FF0000|000000");
                 headUpOnPortIcon.setIconAnchor(Point.newInstance(10, 33));
-                bearAwayOnStarboardIcon = Icon.newInstance("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=B|00FF00|000000");
+                bearAwayOnStarboardIcon = Icon
+                        .newInstance("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=B|00FF00|000000");
                 bearAwayOnStarboardIcon.setIconAnchor(Point.newInstance(10, 33));
-                bearAwayOnPortIcon = Icon.newInstance("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=B|FF0000|000000");
+                bearAwayOnPortIcon = Icon
+                        .newInstance("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=B|FF0000|000000");
                 bearAwayOnPortIcon.setIconAnchor(Point.newInstance(10, 33));
-                markPassingToStarboardIcon = Icon.newInstance("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=M|00FF00|000000");
+                markPassingToStarboardIcon = Icon
+                        .newInstance("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=M|00FF00|000000");
                 markPassingToStarboardIcon.setIconAnchor(Point.newInstance(10, 33));
-                markPassingToPortIcon = Icon.newInstance("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=M|FF0000|000000");
+                markPassingToPortIcon = Icon
+                        .newInstance("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=M|FF0000|000000");
                 markPassingToPortIcon.setIconAnchor(Point.newInstance(10, 33));
-                unknownManeuverIcon = Icon.newInstance("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=?|FFFFFF|000000");
+                unknownManeuverIcon = Icon
+                        .newInstance("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=?|FFFFFF|000000");
                 unknownManeuverIcon.setIconAnchor(Point.newInstance(10, 33));
-                penaltyCircleToStarboardIcon = Icon.newInstance("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=P|00FF00|000000");
+                penaltyCircleToStarboardIcon = Icon
+                        .newInstance("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=P|00FF00|000000");
                 penaltyCircleToStarboardIcon.setIconAnchor(Point.newInstance(10, 33));
-                penaltyCircleToPortIcon = Icon.newInstance("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=P|FF0000|000000");
+                penaltyCircleToPortIcon = Icon
+                        .newInstance("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=P|FF0000|000000");
                 penaltyCircleToPortIcon.setIconAnchor(Point.newInstance(10, 33));
             }
         });
@@ -407,8 +459,9 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
                 RaceDAO race = selection.get(selection.size() - 1).getC();
                 if (event != null && race != null) {
                     final Triple<Map<CompetitorDAO, Date>, Map<CompetitorDAO, Date>, Map<CompetitorDAO, Boolean>> fromAndToAndOverlap = computeFromAndTo(date);
-                    sailingService.getBoatPositions(new EventNameAndRaceName(event.name, race.name), fromAndToAndOverlap.getA(),
-                            fromAndToAndOverlap.getB(), true, new AsyncCallback<Map<CompetitorDAO, List<GPSFixDAO>>>() {
+                    sailingService.getBoatPositions(new EventNameAndRaceName(event.name, race.name),
+                            fromAndToAndOverlap.getA(), fromAndToAndOverlap.getB(), true,
+                            new AsyncCallback<Map<CompetitorDAO, List<GPSFixDAO>>>() {
                                 @Override
                                 public void onFailure(Throwable caught) {
                                     errorReporter.reportError("Error obtaining boat positions: " + caught.getMessage());
@@ -427,28 +480,31 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
                                     }
                                 }
                             });
-                    sailingService.getMarkPositions(new EventNameAndRaceName(event.name, race.name), date, new AsyncCallback<List<MarkDAO>>() {
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            errorReporter.reportError("Error trying to obtain mark positions: " + caught.getMessage());
-                        }
+                    sailingService.getMarkPositions(new EventNameAndRaceName(event.name, race.name), date,
+                            new AsyncCallback<List<MarkDAO>>() {
+                                @Override
+                                public void onFailure(Throwable caught) {
+                                    errorReporter.reportError("Error trying to obtain mark positions: "
+                                            + caught.getMessage());
+                                }
 
-                        @Override
-                        public void onSuccess(List<MarkDAO> result) {
-                            showMarksOnMap(result);
-                        }
-                    });
-                    sailingService.getQuickRanks(new EventNameAndRaceName(event.name, race.name), date, new AsyncCallback<List<QuickRankDAO>>() {
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            errorReporter.reportError("Error obtaining quick rankings: " + caught.getMessage());
-                        }
+                                @Override
+                                public void onSuccess(List<MarkDAO> result) {
+                                    showMarksOnMap(result);
+                                }
+                            });
+                    sailingService.getQuickRanks(new EventNameAndRaceName(event.name, race.name), date,
+                            new AsyncCallback<List<QuickRankDAO>>() {
+                                @Override
+                                public void onFailure(Throwable caught) {
+                                    errorReporter.reportError("Error obtaining quick rankings: " + caught.getMessage());
+                                }
 
-                        @Override
-                        public void onSuccess(List<QuickRankDAO> result) {
-                            showQuickRanks(result);
-                        }
-                    });
+                                @Override
+                                public void onSuccess(List<QuickRankDAO> result) {
+                                    showQuickRanks(result);
+                                }
+                            });
                 }
             }
         }
@@ -848,43 +904,46 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
                 from.put(competitorDAO, fixes.get(competitorDAO).get(firstShownFix.get(competitorDAO)).timepoint);
                 Map<CompetitorDAO, Date> to = new HashMap<CompetitorDAO, Date>();
                 to.put(competitorDAO, fixes.get(competitorDAO).get(lastShownFix.get(competitorDAO)).timepoint);
-                /* currently not showing Douglas-Peucker points; TODO use checkboxes to select what to show (Bug #6)
-                sailingService.getDouglasPoints(event.name, race.name, from, to, 3, // epsilon/meters
-                        new AsyncCallback<Map<CompetitorDAO, List<GPSFixDAO>>>() {
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                errorReporter.reportError("Error obtaining douglas positions: " + caught.getMessage());
-                            }
+                if (radioButtonDouglas.getValue()) {
+                    /* currently not showing Douglas-Peucker points; TODO use checkboxes to select what to show (Bug #6) */
+                    sailingService.getDouglasPoints(new EventNameAndRaceName(event.name, race.name), from, to, 3,
+                            new AsyncCallback<Map<CompetitorDAO, List<GPSFixDAO>>>() {
+                                @Override
+                                public void onFailure(Throwable caught) {
+                                    errorReporter.reportError("Error obtaining douglas positions: "
+                                            + caught.getMessage());
+                                }
 
-                            @Override
-                            public void onSuccess(Map<CompetitorDAO, List<GPSFixDAO>> result) {
-                                if (douglasMarkers != null) {
-                                    removeAllMarkDouglasPeuckerpoints();
+                                @Override
+                                public void onSuccess(Map<CompetitorDAO, List<GPSFixDAO>> result) {
+                                    if (douglasMarkers != null) {
+                                        removeAllMarkDouglasPeuckerpoints();
+                                    }
+                                    if (!timer.isPlaying()) {
+                                        showMarkDouglasPeuckerPoints(result);
+                                    }
                                 }
-                                if (!timer.isPlaying()) {
-                                    showMarkDouglasPeuckerPoints(result);
+                            });
+                } else if (radioButtonManeuvers.getValue()) {
+                    sailingService.getManeuvers(new EventNameAndRaceName(event.name, race.name), from, to,
+                            new AsyncCallback<Map<CompetitorDAO, List<ManeuverDAO>>>() {
+                                @Override
+                                public void onFailure(Throwable caught) {
+                                    errorReporter.reportError("Error obtaining maneuvers: " + caught.getMessage());
                                 }
-                            }
-                        });
-                 */
-                sailingService.getManeuvers(new EventNameAndRaceName(event.name, race.name), from, to,
-                        new AsyncCallback<Map<CompetitorDAO, List<ManeuverDAO>>>() {
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                errorReporter.reportError("Error obtaining maneuvers: " + caught.getMessage());
-                            }
 
-                            @Override
-                            public void onSuccess(Map<CompetitorDAO, List<ManeuverDAO>> result) {
-                                RaceMapPanel.this.lastManeuverResult = result;
-                                if (maneuverMarkers != null) {
-                                    removeAllManeuverMarkers();
+                                @Override
+                                public void onSuccess(Map<CompetitorDAO, List<ManeuverDAO>> result) {
+                                    RaceMapPanel.this.lastManeuverResult = result;
+                                    if (maneuverMarkers != null) {
+                                        removeAllManeuverMarkers();
+                                    }
+                                    if (!timer.isPlaying()) {
+                                        showManeuvers(result);
+                                    }
                                 }
-                                if (!timer.isPlaying()) {
-                                    showManeuvers(result);
-                                }
-                            }
-                        });
+                            });
+                }
             }
         }
         return result;
@@ -979,8 +1038,10 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
     }
 
     private void removeAllMarkDouglasPeuckerpoints() {
-        for (Marker marker : douglasMarkers) {
-            map.removeOverlay(marker);
+        if (douglasMarkers != null) {
+            for (Marker marker : douglasMarkers) {
+                map.removeOverlay(marker);
+            }
         }
         douglasMarkers = null;
     }
@@ -994,9 +1055,8 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         }
     }
 
-    /* TODO see Bug #6, use checkboxes to select what to visualize
-    private void showMarkDouglasPeuckerPoints(
-            Map<CompetitorDAO, List<GPSFixDAO>> gpsFixPointMapForCompetitors) {
+    /* TODO see Bug #6, use checkboxes to select what to visualize */
+    private void showMarkDouglasPeuckerPoints(Map<CompetitorDAO, List<GPSFixDAO>> gpsFixPointMapForCompetitors) {
         douglasMarkers = new HashSet<Marker>();
         if (map != null && gpsFixPointMapForCompetitors != null) {
             Set<CompetitorDAO> keySet = gpsFixPointMapForCompetitors.keySet();
@@ -1015,7 +1075,6 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
             }
         }
     }
-    */
 
     private void showManeuvers(Map<CompetitorDAO, List<ManeuverDAO>> maneuvers) {
         maneuverMarkers = new HashSet<Marker>();
@@ -1075,7 +1134,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
                             showThisManeuver = false;
                         }
                     }
-                    if (showThisManeuver){
+                    if (showThisManeuver) {
                         Marker marker = new Marker(latLng, options);
                         maneuverMarkers.add(marker);
                         map.addOverlay(marker);
@@ -1083,7 +1142,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
                 }
             }
         }
-        
+
     }
 
 }

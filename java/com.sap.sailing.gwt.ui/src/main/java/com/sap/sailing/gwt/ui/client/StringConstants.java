@@ -151,4 +151,13 @@ public interface StringConstants extends Constants {
     String delete();
     String showCharts();
     String raceWithThisNameAlreadyExists();
+    String headUp();
+    String bearAway();
+    String tack();
+    String jibe();
+    String penaltyCircle();
+    String markPassing();
+    String otherManeuver();
+    String douglasPeuckerPoints();
+    String filterRacesByName();
 }
