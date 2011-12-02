@@ -10,6 +10,7 @@ import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.layout.client.Layout.Alignment;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
@@ -19,6 +20,8 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment.HorizontalAlignmentConstant;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -236,20 +239,18 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
 
         Column<RaceInLeaderboardDAO, Boolean> isMedalRaceCheckboxColumn = new Column<RaceInLeaderboardDAO, Boolean>(
                 new CheckboxCell()) {
-
             @Override
             public Boolean getValue(RaceInLeaderboardDAO race) {
                 return race.isMedalRace();
             }
         };
-
         isMedalRaceCheckboxColumn.setFieldUpdater(new FieldUpdater<RaceInLeaderboardDAO, Boolean>() {
-
             @Override
             public void update(int index, RaceInLeaderboardDAO object, Boolean value) {
-                editIsMedalRace(selectedLeaderboard.name, object, value);
+                setIsMedalRace(selectedLeaderboard.name, object, value);
             }
         });
+        isMedalRaceCheckboxColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
 
         TextColumn<RaceInLeaderboardDAO> isTrackedRaceColumn = new TextColumn<RaceInLeaderboardDAO>() {
             @Override
@@ -580,7 +581,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
         raceColumnList.refresh();
     }
 
-    private void editIsMedalRace(String leaderboardName, final RaceInLeaderboardDAO raceInLeaderboard,
+    private void setIsMedalRace(String leaderboardName, final RaceInLeaderboardDAO raceInLeaderboard,
             final boolean isMedalRace) {
         sailingService.updateIsMedalRace(leaderboardName, raceInLeaderboard.getRaceColumnName(), isMedalRace,
                 new AsyncCallback<Void>() {
@@ -654,20 +655,17 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
                 @Override
                 public void onSuccess(LeaderboardDAO result) {
                     selectedLeaderboard = result;
-
                     raceColumnList.getList().clear();
                     raceColumnList.getList().addAll(result.getRaceInLeaderboardList());
                     selectedLeaderBoardPanel.setVisible(true);
                     trackedRacesCaptionPanel.setVisible(true);
                     selectedLeaderBoardPanel.setCaptionText("Details of leaderboard '" + result.name + "'");
-
                     addColumnButton.setEnabled(true);
                 }
             });
         } else {
             selectedLeaderBoardPanel.setVisible(false);
             trackedRacesCaptionPanel.setVisible(false);
-
             selectedLeaderboard = null;
             addColumnButton.setEnabled(false);
             leaderboardRaceColumnSelectionChanged();
@@ -680,11 +678,9 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
     }
 
     private void addNewLeaderboard() {
-
         List<String> leaderboardNames = new ArrayList<String>();
         for (LeaderboardDAO dao : leaderboardList.getList())
             leaderboardNames.add(dao.name);
-
         LeaderboardCreateDialog dialog = new LeaderboardCreateDialog(
                 Collections.unmodifiableCollection(leaderboardList.getList()), stringConstants, errorReporter,
                 new AsyncCallback<LeaderboardDAO>() {
