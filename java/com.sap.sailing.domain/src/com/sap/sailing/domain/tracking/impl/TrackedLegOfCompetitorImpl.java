@@ -2,7 +2,6 @@ package com.sap.sailing.domain.tracking.impl;
 
 import java.util.Iterator;
 import java.util.List;
-import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Bearing;
 import com.sap.sailing.domain.base.Buoy;
@@ -32,8 +31,6 @@ import com.sap.sailing.domain.tracking.Wind;
  *
  */
 public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
-    private static final Logger logger = Logger.getLogger(TrackedLegOfCompetitorImpl.class.getName());
-    
     private final TrackedLegImpl trackedLeg;
     private final Competitor competitor;
     
@@ -331,22 +328,31 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     public Distance getWindwardDistanceToOverallLeader(TimePoint timePoint) throws NoWindException {
         Competitor leader = getTrackedLeg().getRanks(timePoint).keySet().iterator().next();
         TrackedLegOfCompetitor leaderLeg = getTrackedRace().getCurrentLeg(leader, timePoint);
-        Distance result = Distance.NULL;
+        Distance result = null;
         Position leaderPosition = getTrackedRace().getTrack(leader).getEstimatedPosition(timePoint, /* extrapolate */ false);
         Position currentPosition = getTrackedRace().getTrack(getCompetitor()).getEstimatedPosition(timePoint, /* extrapolate */ false);
-        Leg leg = getLeg();
-        while (leg != null && leg != leaderLeg.getLeg()) {
-            // add distance to next mark
-            Position nextMarkPosition = getTrackedRace().getApproximatePosition(leg.getTo(), timePoint);
-            Distance distanceToNextMark = getWindwardDistance(currentPosition, nextMarkPosition, timePoint);
-            result = new MeterDistance(result.getMeters()+distanceToNextMark.getMeters());
-        }
-        if (leg != null) {
-            // we're now in the same leg with leader; compute windward distance to leader
-            result = new MeterDistance(result.getMeters()+getWindwardDistance(leaderPosition, currentPosition, timePoint).getMeters());
-        } else {
-            result = null; // strangely, the leader's leg wasn't found by advancing leg by let
-            logger.warning("Couldn't find leader's ("+leader.getName()+") leg starting at "+getCompetitor().getName()+"'s leg");
+        if (leaderPosition != null && currentPosition != null) {
+            result = Distance.NULL;
+            boolean foundCompetitorsLeg = false;
+            for (Leg leg : getTrackedRace().getRace().getCourse().getLegs()) {
+                if (leg == getLeg()) {
+                    foundCompetitorsLeg = true;
+                }
+                if (foundCompetitorsLeg) {
+                    // if the leaderLeg is null, the leader has already arrived
+                    if (leaderLeg == null || leg != leaderLeg.getLeg()) {
+                        // add distance to next mark
+                        Position nextMarkPosition = getTrackedRace().getApproximatePosition(leg.getTo(), timePoint);
+                        Distance distanceToNextMark = getWindwardDistance(currentPosition, nextMarkPosition, timePoint);
+                        result = new MeterDistance(result.getMeters() + distanceToNextMark.getMeters());
+                    } else {
+                        // we're now in the same leg with leader; compute windward distance to leader
+                        result = new MeterDistance(result.getMeters()
+                                + getWindwardDistance(leaderPosition, currentPosition, timePoint).getMeters());
+                        break;
+                    }
+                }
+            }
         }
         return result;
     }
