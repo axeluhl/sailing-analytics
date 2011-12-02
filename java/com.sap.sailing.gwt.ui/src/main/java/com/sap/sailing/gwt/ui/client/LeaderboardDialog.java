@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.client;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -23,10 +24,12 @@ public abstract class LeaderboardDialog extends DataEntryDialog<LeaderboardDAO> 
 
     protected static class LeaderboardParameterValidator implements Validator<LeaderboardDAO> {
         protected final StringConstants stringConstants;
+        protected final Collection<LeaderboardDAO> existingLeaderboards;
         
-        public LeaderboardParameterValidator(StringConstants stringConstants){
+        public LeaderboardParameterValidator(StringConstants stringConstants, Collection<LeaderboardDAO> existingLeaderboards){
             super();
             this.stringConstants = stringConstants;
+            this.existingLeaderboards = existingLeaderboards;
         }
 
         @Override
@@ -42,8 +45,18 @@ public abstract class LeaderboardDialog extends DataEntryDialog<LeaderboardDAO> 
                             && leaderboardToValidate.discardThresholds[i - 1] < leaderboardToValidate.discardThresholds[i];
                 }
             }
+            
+            boolean unique = true;
+            for (LeaderboardDAO dao : existingLeaderboards) {
+                if(dao.name.equals(leaderboardToValidate.name)){
+                    unique = false;
+                }
+            }
+            
             if (!nonEmpty) {
                 errorMessage = stringConstants.pleaseEnterNonEmptyName();
+            } else if(!unique){
+                errorMessage = stringConstants.leaderboardWithThisNameAlreadyExists();
             } else if (!discardThresholdsAscending) {
                 errorMessage = stringConstants.discardThresholdsMustBeAscending();
             } else {
@@ -53,7 +66,7 @@ public abstract class LeaderboardDialog extends DataEntryDialog<LeaderboardDAO> 
         }
     }
     
-    public LeaderboardDialog(LeaderboardDAO leaderboardDAO, StringConstants stringConstants,
+    public LeaderboardDialog(LeaderboardDAO leaderboardDAO,  StringConstants stringConstants,
             ErrorReporter errorReporter, LeaderboardParameterValidator validator,  AsyncCallback<LeaderboardDAO> callback) {
         super(stringConstants.leaderboardName(), stringConstants.leaderboardName(), stringConstants.ok(),
                 stringConstants.cancel(), validator, callback);

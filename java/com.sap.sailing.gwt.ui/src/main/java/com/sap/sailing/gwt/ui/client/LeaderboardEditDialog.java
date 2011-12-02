@@ -1,15 +1,17 @@
 package com.sap.sailing.gwt.ui.client;
 
+import java.util.Collection;
+
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.IntegerBox;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDAO;
 
 public class LeaderboardEditDialog extends LeaderboardDialog {
     
-    public LeaderboardEditDialog(LeaderboardDAO leaderboard, StringConstants stringConstants,
+    public LeaderboardEditDialog(Collection<LeaderboardDAO> otherExistingLeaderboards, LeaderboardDAO leaderboard, StringConstants stringConstants,
             ErrorReporter errorReporter, AsyncCallback<LeaderboardDAO> callback) {
         super(leaderboard, stringConstants, errorReporter, new LeaderboardDialog.LeaderboardParameterValidator(
-                stringConstants), callback);
+                stringConstants, otherExistingLeaderboards), callback);
         
         entryField = createTextBox(leaderboard.name);
 

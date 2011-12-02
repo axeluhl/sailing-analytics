@@ -150,4 +150,5 @@ public interface StringConstants extends Constants {
     String add();
     String delete();
     String showCharts();
+    String raceWithThisNameAlreadyExists();
 }
