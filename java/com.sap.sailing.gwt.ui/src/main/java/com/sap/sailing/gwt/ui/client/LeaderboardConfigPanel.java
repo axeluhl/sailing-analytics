@@ -497,66 +497,72 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
     private String getSelectedRaceColumnName() {
         return raceTableSelectionModel.getSelectedObject();
     }
-    
-    private void editRaceColumnOfLeaderboard(){
+
+    private void editRaceColumnOfLeaderboard() {
         final String leaderboardName = getSelectedLeaderboardName();
         final String raceName = getSelectedRaceColumnName();
         boolean raceIsMedalRace = false;
-        if(selectedLeaderboard.getRaceList().contains(raceName)){
+        if (selectedLeaderboard.getRaceList().contains(raceName)) {
             raceIsMedalRace = selectedLeaderboard.raceIsMedalRace(raceName);
         }
-        Pair<String, Boolean> raceDaoAndIsMedalRace = new Pair<String, Boolean>(raceName,
-                raceIsMedalRace);
+        Pair<String, Boolean> raceDaoAndIsMedalRace = new Pair<String, Boolean>(raceName, raceIsMedalRace);
         final RaceDialog raceDialog = new RaceDialog(raceDaoAndIsMedalRace, stringConstants,
                 new AsyncCallback<Pair<String, Boolean>>() {
 
                     @Override
-                    public void onFailure(Throwable caught) {}
+                    public void onFailure(Throwable caught) {
+                    }
 
                     @Override
                     public void onSuccess(final Pair<String, Boolean> result) {
-                        sailingService.renameLeaderboardColumn(leaderboardName, raceName, result.getA(), new AsyncCallback<Void>() {
-
-                            @Override
-                            public void onFailure(Throwable caught) {}
-
-                            @Override
-                            public void onSuccess(Void v) {
-                                sailingService.updateIsMedalRace(leaderboardName, result.getA(), result.getB(), new AsyncCallback<Void>() {
+                        sailingService.renameLeaderboardColumn(leaderboardName, raceName, result.getA(),
+                                new AsyncCallback<Void>() {
 
                                     @Override
-                                    public void onFailure(Throwable caught) {}
+                                    public void onFailure(Throwable caught) {
+                                    }
 
                                     @Override
                                     public void onSuccess(Void v) {
-                                        int indexRaceColumn = -1;
-                                        for (int i = 0; i < raceColumnList.getList().size(); i++) {
-                                            String raceNameTmp = raceColumnList.getList().get(i);
-                                            if(raceNameTmp.equals(raceName)){
-                                                indexRaceColumn = i;
-                                            }
-                                        }
-                                        final int indexResultRaceColumn = indexRaceColumn;
-                                        if(indexRaceColumn != -1){
-                                            selectedLeaderboard.renameRace(raceName, result.getA());
-                                            selectedLeaderboard.setIsMedalRace(result.getA(), result.getB());
-                                            raceColumnList.getList().set(indexResultRaceColumn, result.getA());
-                                            raceColumnList.refresh();
-                                        }
+                                        sailingService.updateIsMedalRace(leaderboardName, result.getA(), result.getB(),
+                                                new AsyncCallback<Void>() {
+
+                                                    @Override
+                                                    public void onFailure(Throwable caught) {
+                                                    }
+
+                                                    @Override
+                                                    public void onSuccess(Void v) {
+                                                        int indexRaceColumn = -1;
+                                                        for (int i = 0; i < raceColumnList.getList().size(); i++) {
+                                                            String raceNameTmp = raceColumnList.getList().get(i);
+                                                            if (raceNameTmp.equals(raceName)) {
+                                                                indexRaceColumn = i;
+                                                            }
+                                                        }
+                                                        final int indexResultRaceColumn = indexRaceColumn;
+                                                        if (indexRaceColumn != -1) {
+                                                            selectedLeaderboard.renameRace(raceName, result.getA());
+                                                            selectedLeaderboard.setIsMedalRace(result.getA(),
+                                                                    result.getB());
+                                                            // TODO correct is tracked race exception
+                                                            raceColumnList.getList().set(indexResultRaceColumn,
+                                                                    result.getA());
+                                                            raceColumnList.refresh();
+                                                        }
+                                                    }
+                                                });
                                     }
                                 });
-                            }
-                        });
                     }
-            
-        });
+
+                });
         raceDialog.show();
     }
 
     private void addRaceColumnToLeaderboard() {
         final String leaderboardName = getSelectedLeaderboardName();
-        Pair<String, Boolean> raceDaoAndIsMedalRace = new Pair<String, Boolean>("",
-                false);
+        Pair<String, Boolean> raceDaoAndIsMedalRace = new Pair<String, Boolean>("", false);
         final RaceDialog raceDialog = new RaceDialog(raceDaoAndIsMedalRace, stringConstants,
                 new AsyncCallback<Pair<String, Boolean>>() {
 
