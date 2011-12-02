@@ -7,7 +7,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.shared.RaceInLeaderboardDAO;
 
-public class RaceDialog extends DataEntryDialog<RaceInLeaderboardDAO>{
+public class RaceInLeaderboardDialog extends DataEntryDialog<RaceInLeaderboardDAO>{
 
     private final TextBox raceNameBox;
     private final CheckBox isMedalRace;
@@ -43,7 +43,7 @@ public class RaceDialog extends DataEntryDialog<RaceInLeaderboardDAO>{
     }
     
     
-    public RaceDialog(RaceInLeaderboardDAO raceInLeaderboard, StringConstants stringConstants,
+    public RaceInLeaderboardDialog(RaceInLeaderboardDAO raceInLeaderboard, StringConstants stringConstants,
             AsyncCallback<RaceInLeaderboardDAO> callback) {
         super(stringConstants.name(), stringConstants.name(), stringConstants.ok(), stringConstants.cancel(), new RaceDialogValidator(stringConstants), callback);
         this.raceInLeaderboard = raceInLeaderboard;
@@ -54,7 +54,7 @@ public class RaceDialog extends DataEntryDialog<RaceInLeaderboardDAO>{
 
     @Override
     protected RaceInLeaderboardDAO getResult() {
-        raceInLeaderboard.setRaceColumnName(raceNameBox.getName());
+        raceInLeaderboard.setRaceColumnName(raceNameBox.getValue());
         raceInLeaderboard.setMedalRace(isMedalRace.getValue());
         return raceInLeaderboard;
     }

@@ -307,6 +307,10 @@ public class LeaderboardDAO implements IsSerializable {
     	return raceColumnNames;
     }
     
+    public List<RaceInLeaderboardDAO> getRaceInLeaderboardList(){
+        return races;
+    }
+    
     public List<RaceInLeaderboardDAO> getRaceList(){
         return races;
     }
