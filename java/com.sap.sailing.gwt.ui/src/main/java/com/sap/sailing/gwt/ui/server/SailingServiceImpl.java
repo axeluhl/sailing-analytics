@@ -73,10 +73,11 @@ import com.sap.sailing.domain.tracking.impl.WindTrackImpl;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.RaceRecord;
 import com.sap.sailing.domain.tractracadapter.TracTracConfiguration;
+import com.sap.sailing.gwt.ui.client.CompareCompetitorsPanel;
 import com.sap.sailing.gwt.ui.client.SailingService;
 import com.sap.sailing.gwt.ui.shared.BoatClassDAO;
 import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
-import com.sap.sailing.gwt.ui.shared.CompetitorWithRaceDAO;
+import com.sap.sailing.gwt.ui.shared.CompetitorAndTimePointsDAO;
 import com.sap.sailing.gwt.ui.shared.EventAndRaceIdentifier;
 import com.sap.sailing.gwt.ui.shared.EventDAO;
 import com.sap.sailing.gwt.ui.shared.EventFetcher;
@@ -1164,32 +1165,108 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
 
     @Override
-    public CompetitorWithRaceDAO[][] getCompetitorRaceData(RaceIdentifier race, int steps) throws NoWindException {
-        List<CompetitorWithRaceDAO[]> competitorData;
+    public List<Pair<CompetitorDAO, Double[]>> getCompetitorRaceData(RaceIdentifier race, CompetitorAndTimePointsDAO competitorAndTimePointsDAO, int dataType) throws NoWindException {
+        List<Pair<CompetitorDAO, Double[]>> competitorData = new ArrayList<Pair<CompetitorDAO, Double[]>>();
         TrackedRace trackedRace = getTrackedRace(race);
         Iterable<Competitor> competitors = trackedRace.getRace().getCompetitors();
-        
-        competitorData = new ArrayList<CompetitorWithRaceDAO[]>();
-        for (Competitor c : competitors){
-            List<CompetitorWithRaceDAO> entries = new ArrayList<CompetitorWithRaceDAO>();
-            for (long time = trackedRace.getStart().asMillis()-20000; time < trackedRace.getTimePointOfNewestEvent().asMillis(); time += (trackedRace.getTimePointOfNewestEvent().asMillis()-trackedRace.getStart().asMillis()-20000)/steps){
-                MillisecondsTimePoint timePoint = new MillisecondsTimePoint(time);
-                CompetitorWithRaceDAO competitorWithRaceEntry = new CompetitorWithRaceDAO();
-                competitorWithRaceEntry.setCompetitor(getCompetitorDAO(c));
-                competitorWithRaceEntry.setStartTime(trackedRace.getStart().asMillis());
-                if (trackedRace != null){
-                    LegEntryDAO legEntry = createLegEntry(trackedRace.getTrackedLeg(c, timePoint), timePoint);
-                    if (legEntry == null){
-                        legEntry = new LegEntryDAO();
-                    }
-                    legEntry.timeInMilliseconds = time;
-                    competitorWithRaceEntry.setLegEntry(legEntry);
+        List<Competitor> selectedCompetitor = new ArrayList<Competitor>();
+        for (CompetitorDAO cDAO : competitorAndTimePointsDAO.getCompetitor()){
+            for (Competitor c : competitors){
+                if (c.getId().toString().equals(cDAO.id)){
+                    selectedCompetitor.add(c);
                 }
-                entries.add(competitorWithRaceEntry);
             }
-            competitorData.add(entries.toArray(new CompetitorWithRaceDAO[0]));
         }
-        return competitorData.toArray(new CompetitorWithRaceDAO[0][0]);
+        
+        switch (dataType){
+        case CompareCompetitorsPanel.SHOW_CURRENT_SPEED_OVER_GROUND:
+            for (int c = 0; c < selectedCompetitor.size(); c++){
+                Double[] entries = new Double[competitorAndTimePointsDAO.getTimePoints().length];
+                for (int i = 0; i < competitorAndTimePointsDAO.getTimePoints().length; i++){
+                    MillisecondsTimePoint time = new MillisecondsTimePoint(competitorAndTimePointsDAO.getTimePoints()[i]);
+                    TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(selectedCompetitor.get(c), time);
+                    if (trackedLeg != null){
+                        SpeedWithBearing speedOverGround = trackedLeg.getSpeedOverGround(time);
+                        entries[i] = (speedOverGround == null) ? null : speedOverGround.getKnots();
+                    }
+                }
+                competitorData.add(new Pair<CompetitorDAO, Double[]>(competitorAndTimePointsDAO.getCompetitor()[c], entries));
+            }
+            break;
+        case CompareCompetitorsPanel.SHOW_VELOCITY_MADE_GOOD:
+            for (int c = 0; c < selectedCompetitor.size(); c++){
+                Double[] entries = new Double[competitorAndTimePointsDAO.getTimePoints().length];
+                for (int i = 0; i < competitorAndTimePointsDAO.getTimePoints().length; i++){
+                    MillisecondsTimePoint time = new MillisecondsTimePoint(competitorAndTimePointsDAO.getTimePoints()[i]);
+                    TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(selectedCompetitor.get(c), time);
+                    if (trackedLeg != null){
+                        Speed velocityMadeGood = trackedLeg.getVelocityMadeGood(time);
+                        entries[i] = (velocityMadeGood == null) ? null : velocityMadeGood.getKnots();
+                    }
+                }
+                competitorData.add(new Pair<CompetitorDAO, Double[]>(competitorAndTimePointsDAO.getCompetitor()[c], entries));
+            }
+            break;
+        case CompareCompetitorsPanel.SHOW_DISTANCE_TRAVELED:
+            for (int c = 0; c < selectedCompetitor.size(); c++){
+                Double[] entries = new Double[competitorAndTimePointsDAO.getTimePoints().length];
+                double distanceOfPreviousLegs = 0;
+                double lastTraveledDistance = 0;
+                for (int i = 0; i < competitorAndTimePointsDAO.getTimePoints().length; i++){
+                    MillisecondsTimePoint time = new MillisecondsTimePoint(competitorAndTimePointsDAO.getTimePoints()[i]);
+                    TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(selectedCompetitor.get(c), time);
+                    if (trackedLeg != null){
+                        Distance distanceTraveled = trackedLeg.getDistanceTraveled(time);
+                        if (distanceTraveled != null){
+                            double d = distanceTraveled.getMeters();
+                            if (d < lastTraveledDistance){
+                                distanceOfPreviousLegs += lastTraveledDistance;
+                            }
+                            lastTraveledDistance = d;
+                            entries[i] = d + distanceOfPreviousLegs;
+                        }
+                    }
+                }
+                competitorData.add(new Pair<CompetitorDAO, Double[]>(competitorAndTimePointsDAO.getCompetitor()[c], entries));
+            }
+            break;
+        case CompareCompetitorsPanel.SHOW_GAP_TO_LEADER:
+            for (int c = 0; c < selectedCompetitor.size(); c++){
+                Double[] entries = new Double[competitorAndTimePointsDAO.getTimePoints().length];
+                for (int i = 0; i < competitorAndTimePointsDAO.getTimePoints().length; i++){
+                    MillisecondsTimePoint time = new MillisecondsTimePoint(competitorAndTimePointsDAO.getTimePoints()[i]);
+                    TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(selectedCompetitor.get(c), time);
+                    if (trackedLeg != null){
+                        entries[i] = trackedLeg.getGapToLeaderInSeconds(time);
+                    }
+                }
+                competitorData.add(new Pair<CompetitorDAO, Double[]>(competitorAndTimePointsDAO.getCompetitor()[c], entries));
+            }
+            break;
+        case CompareCompetitorsPanel.SHOW_WINDWARD_DISTANCE_TO_LEADER:
+            for (int c = 0; c < selectedCompetitor.size(); c++){
+                Double[] entries = new Double[competitorAndTimePointsDAO.getTimePoints().length];
+                try {
+                    for (int i = 0; i < competitorAndTimePointsDAO.getTimePoints().length; i++){
+                        MillisecondsTimePoint time = new MillisecondsTimePoint(competitorAndTimePointsDAO.getTimePoints()[i]);
+                        TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(selectedCompetitor.get(c), time);
+                        if (trackedLeg != null){
+                            Distance distanceToLeader = trackedLeg.getWindwardDistanceToOverallLeader(time);
+                            entries[i] = (distanceToLeader == null) ? null : distanceToLeader.getMeters();
+                        }
+                    }
+                }
+                catch (NullPointerException npe){
+                    System.out.println(npe.getLocalizedMessage());
+                    npe.printStackTrace();
+                }
+                competitorData.add(new Pair<CompetitorDAO, Double[]>(competitorAndTimePointsDAO.getCompetitor()[c], entries));
+            }
+            break;
+        }
+        
+        
+        return competitorData;
     }
     
 public Map<CompetitorDAO, List<GPSFixDAO>> getDouglasPoints(RaceIdentifier raceIdentifier,
@@ -1341,5 +1418,24 @@ public Map<CompetitorDAO, List<GPSFixDAO>> getDouglasPoints(RaceIdentifier raceI
     
     private Event getEvent(EventIdentifier eventIdentifier) {
         return (Event) eventIdentifier.getEvent(this);
+    }
+
+    @Override
+    public CompetitorAndTimePointsDAO getCompetitorAndTimePoints(RaceIdentifier race, int steps) {
+        CompetitorAndTimePointsDAO competitorAndTimePointsDAO = new CompetitorAndTimePointsDAO();
+        TrackedRace trackedRace = getTrackedRace(race);
+        List<CompetitorDAO> competitorDAOs = new ArrayList<CompetitorDAO>();
+        for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
+            competitorDAOs.add(getCompetitorDAO(competitor));
+        }
+        competitorAndTimePointsDAO.setCompetitor(competitorDAOs.toArray(new CompetitorDAO[0]));
+        competitorAndTimePointsDAO.setStartTime(trackedRace.getStart().asMillis());
+        List<Long> timePoints = new ArrayList<Long>();
+        long stepsize = (trackedRace.getTimePointOfNewestEvent().asMillis()- trackedRace.getStart().asMillis() - 20000)/steps;
+        for (long time = trackedRace.getStart().asMillis() - 20000; time < trackedRace.getTimePointOfNewestEvent().asMillis(); time += stepsize){
+            timePoints.add(time);
+        }
+        competitorAndTimePointsDAO.setTimePoints(timePoints.toArray(new Long[0]));
+        return competitorAndTimePointsDAO;
     }
 }
