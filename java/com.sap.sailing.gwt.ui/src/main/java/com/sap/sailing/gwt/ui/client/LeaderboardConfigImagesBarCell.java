@@ -32,6 +32,8 @@ public class LeaderboardConfigImagesBarCell extends ImagesBarCell {
     private static final SafeHtml ICON_OPEN_BROWSER = makeImage(resources.openBrowserIcon());
 
     private static final SafeHtml ICON_REMOVE = makeImage(resources.removeIcon());
+    
+    private static final SafeHtml ICON_EDIT_SCORES = makeImage(resources.scoresIcon());
 
     @Override
     protected void render(com.google.gwt.cell.client.Cell.Context context, SafeHtml data, SafeHtmlBuilder sb) {
@@ -49,6 +51,9 @@ public class LeaderboardConfigImagesBarCell extends ImagesBarCell {
         SafeHtml rendered = templates.cell("ACTION_EDIT", imgStyle, ICON_EDIT);
         sb.append(rendered);
 
+        rendered = templates.cell("ACTION_EDIT_SCORES", imgStyle, ICON_EDIT_SCORES);
+        sb.append(rendered);
+        
         rendered = templates.cell("ACTION_OPEN_BROWSER", imgStyle, ICON_OPEN_BROWSER);
         sb.append(rendered);
 
