@@ -205,15 +205,6 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
         trackedRacesPanel.add(trackedEventsComposite);
         trackedEventsComposite.addRaceSelectionChangeListener(this);
 
-        /*
-         * discardThresholdLabelsForSelectedLeaderboard = new Label[MAX_NUMBER_OF_DISCARDED_RESULTS];
-         * discardThresholdsGrid.setWidget(0, 0, new Label(stringConstants.discarding() + ":"));
-         * discardThresholdsGrid.setWidget(1, 0, new Label(stringConstants.startingFromNumberOfRaces() + ":")); for (int
-         * i=0; i<MAX_NUMBER_OF_DISCARDED_RESULTS; i++) { discardThresholdsGrid.setWidget(0, i+1, new Label(""+(i+1)));
-         * discardThresholdLabelsForSelectedLeaderboard[i] = new Label(); discardThresholdsGrid.setWidget(1, i+1,
-         * discardThresholdLabelsForSelectedLeaderboard[i]); }
-         */
-
         HorizontalPanel hPanel = new HorizontalPanel();
         hPanel.setSpacing(5);
         vPanel.add(hPanel);

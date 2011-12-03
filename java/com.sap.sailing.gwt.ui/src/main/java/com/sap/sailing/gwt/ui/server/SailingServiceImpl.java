@@ -8,6 +8,7 @@ import java.net.URL;
 import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -858,7 +859,6 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     public List<LeaderboardDAO> getLeaderboards() {
         Map<String, Leaderboard> leaderboards = getService().getLeaderboards();
         List<LeaderboardDAO> results = new ArrayList<LeaderboardDAO>();
-        
         for(Leaderboard leaderboard: leaderboards.values()) {
             LeaderboardDAO dao = new LeaderboardDAO();
             dao.name = leaderboard.getName();
@@ -866,17 +866,15 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             for (RaceInLeaderboard raceColumn : leaderboard.getRaceColumns()) {
                 dao.addRace(raceColumn.getName(), raceColumn.isMedalRace(), raceColumn.getTrackedRace() != null);
             }
-            
             dao.hasCarriedPoints = leaderboard.hasCarriedPoints();
             dao.discardThresholds = leaderboard.getResultDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces();
-            
             results.add(dao);
         }
         
         return results;
     }
     
-    public LeaderboardDAO getLeaderboardByName(String leaderboardName){
+    public LeaderboardDAO getLeaderboardByName(String leaderboardName) {
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         LeaderboardDAO dao = new LeaderboardDAO();
         dao.name = leaderboard.getName();
@@ -884,24 +882,23 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         for (RaceInLeaderboard raceColumn : leaderboard.getRaceColumns()) {
             dao.addRace(raceColumn.getName(), raceColumn.isMedalRace(), raceColumn.getTrackedRace() != null);
         }
-        
         dao.hasCarriedPoints = leaderboard.hasCarriedPoints();
         dao.discardThresholds = leaderboard.getResultDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces();
         return dao;
     }
     
     @Override
-    public void updateLeaderboard(String leaderboardName, String newLeaderboardName, int[] newDiscardingThreasholds){
-        
-        if(!leaderboardName.equals(newLeaderboardName))
+    public void updateLeaderboard(String leaderboardName, String newLeaderboardName, int[] newDiscardingThreasholds) {
+        if (!leaderboardName.equals(newLeaderboardName)) {
             getService().renameLeaderboard(leaderboardName, newLeaderboardName);
-        
+        }
         Leaderboard leaderboard = getService().getLeaderboardByName(newLeaderboardName);
-        leaderboard.setResultDiscardingRule(new ResultDiscardingRuleImpl(newDiscardingThreasholds));
+        if (!Arrays.equals(leaderboard.getResultDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces(), newDiscardingThreasholds)) {
+            leaderboard.setResultDiscardingRule(new ResultDiscardingRuleImpl(newDiscardingThreasholds));
+        }
         getService().updateStoredLeaderboard(leaderboard);
     }
 
-    
     @Override
     public void removeLeaderboard(String leaderboardName) {
         getService().removeLeaderboard(leaderboardName);
