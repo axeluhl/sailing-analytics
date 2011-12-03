@@ -59,15 +59,16 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
 
     @Override
     public long getTimeInMilliSeconds(TimePoint timePoint) {
-        long result = -1;
-        MarkPassing passedEndWaypoint = getTrackedRace().getMarkPassing(getCompetitor(), getTrackedLeg().getLeg().getTo());
-        if (passedEndWaypoint != null) {
-            MarkPassing passedStartWaypoint = getTrackedRace().getMarkPassing(getCompetitor(), getTrackedLeg().getLeg().getFrom());
-            if (passedStartWaypoint != null) {
+        long result = 0;
+        MarkPassing passedStartWaypoint = getTrackedRace().getMarkPassing(getCompetitor(),
+                getTrackedLeg().getLeg().getFrom());
+        if (passedStartWaypoint != null) {
+            MarkPassing passedEndWaypoint = getTrackedRace().getMarkPassing(getCompetitor(),
+                    getTrackedLeg().getLeg().getTo());
+            if (passedEndWaypoint != null) {
                 result = passedEndWaypoint.getTimePoint().asMillis() - passedStartWaypoint.getTimePoint().asMillis();
             } else {
-                throw new RuntimeException(""+getCompetitor()+" passed waypoint at end of leg "+
-                        getLeg()+" without having passed waypoint at beginning of leg");
+                result = timePoint.asMillis() - passedStartWaypoint.getTimePoint().asMillis();
             }
         }
         return result;
