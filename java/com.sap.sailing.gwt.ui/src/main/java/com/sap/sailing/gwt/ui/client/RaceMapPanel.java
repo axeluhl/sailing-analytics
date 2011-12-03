@@ -156,6 +156,21 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
     private final IntegerBox tailLengthBox;
 
     protected Map<CompetitorDAO, List<ManeuverDAO>> lastManeuverResult;
+    
+    /**
+     * RPC calls may receive responses out of order if there are multiple calls in-flight at the same time. If the time
+     * slider is moved quickly it generates many requests for boat positions quickly after each other. Sometimes, responses
+     * for requests send later may return before the responses to all earlier requests have been received and processed. This
+     * counter is used to number the requests. When processing of a response for a later request has already begun, responses
+     * to earlier requests will be ignored.
+     */
+    private int boatPositionRequestIDCounter;
+    
+    /**
+     * Corresponds to {@link #boatPositionRequestIDCounter}. As soon as the processing of a response for a request ID begins,
+     * this attribute is set to the ID. A response won't be processed if a later response is already being processed.
+     */
+    private int startedProcessingRequestID;
 
     public RaceMapPanel(SailingServiceAsync sailingService, ErrorReporter errorReporter,
             final EventRefresher eventRefresher, StringConstants stringConstants) {
@@ -459,6 +474,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
                 RaceDAO race = selection.get(selection.size() - 1).getC();
                 if (event != null && race != null) {
                     final Triple<Map<CompetitorDAO, Date>, Map<CompetitorDAO, Date>, Map<CompetitorDAO, Boolean>> fromAndToAndOverlap = computeFromAndTo(date);
+                    final int requestID = boatPositionRequestIDCounter++;
                     sailingService.getBoatPositions(new EventNameAndRaceName(event.name, race.name),
                             fromAndToAndOverlap.getA(), fromAndToAndOverlap.getB(), true,
                             new AsyncCallback<Map<CompetitorDAO, List<GPSFixDAO>>>() {
@@ -469,14 +485,21 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
 
                                 @Override
                                 public void onSuccess(Map<CompetitorDAO, List<GPSFixDAO>> result) {
-                                    Date from = new Date(date.getTime() - TAILLENGTHINMILLISECONDS);
-                                    updateFixes(result, fromAndToAndOverlap.getC());
-                                    showBoatsOnMap(from, date);
-                                    if (douglasMarkers != null) {
-                                        removeAllMarkDouglasPeuckerpoints();
-                                    }
-                                    if (maneuverMarkers != null) {
-                                        removeAllManeuverMarkers();
+                                    // process response only if not received out of order
+                                    if (startedProcessingRequestID < requestID) {
+                                        startedProcessingRequestID = requestID;
+                                        Date from = new Date(date.getTime() - TAILLENGTHINMILLISECONDS);
+                                        updateFixes(result, fromAndToAndOverlap.getC());
+                                        showBoatsOnMap(from, date);
+                                        if (douglasMarkers != null) {
+                                            removeAllMarkDouglasPeuckerpoints();
+                                        }
+                                        if (maneuverMarkers != null) {
+                                            removeAllManeuverMarkers();
+                                        }
+                                    } else {
+                                        // TODO remove debug output again
+                                        System.out.println("Received out-of-order response");
                                     }
                                 }
                             });
