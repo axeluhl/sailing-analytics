@@ -46,7 +46,7 @@ public class UnicodeCharactersInCompetitorNamesTest {
                                         tractracTunnel ? new URI("tcp://"+tractracTunnelHost+":4413") : new URI("tcp://germanmaster.traclive.dk:4401"),
                         EmptyWindStore.INSTANCE, new DummyTrackedEventRegistry());
         
-        Iterable<Competitor> competitors = fourtyninerYellow_2.getRaceHandle().getRace().getCompetitors();
+        Iterable<Competitor> competitors = fourtyninerYellow_2.getRaceHandle().getRaces().iterator().next().getCompetitors();
         for (Competitor competitor : competitors) {
             System.out.println(competitor.getName());
         }

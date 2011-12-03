@@ -16,7 +16,7 @@ import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
-import com.sap.sailing.domain.tracking.RaceHandle;
+import com.sap.sailing.domain.tracking.RacesHandle;
 import com.sap.sailing.domain.tracking.TrackedEvent;
 import com.sap.sailing.domain.tracking.TrackedEventRegistry;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -91,7 +91,7 @@ public interface RacingEventService extends TrackedEventRegistry {
      *            if the race definition is not received for the race within this time, the race tracker for
      *            that race is stopped; use -1 to wait forever
      */
-    RaceHandle addTracTracRace(URL paramURL, URI liveURI, URI storedURI, WindStore windStore, long timeoutInMilliseconds)
+    RacesHandle addTracTracRace(URL paramURL, URI liveURI, URI storedURI, WindStore windStore, long timeoutInMilliseconds)
             throws MalformedURLException, FileNotFoundException, URISyntaxException;
 
     /**
@@ -180,7 +180,7 @@ public interface RacingEventService extends TrackedEventRegistry {
      */
     void updateStoredLeaderboard(Leaderboard leaderboard);
 
-    RaceHandle addSwissTimingRace(String raceID, String hostname, int port, boolean canSendRequests,
+    RacesHandle addSwissTimingRace(String raceID, String hostname, int port, boolean canSendRequests,
             WindStore windStore, long timeoutInMilliseconds) throws InterruptedException, UnknownHostException, IOException, ParseException;
 
     SwissTimingFactory getSwissTimingFactory();

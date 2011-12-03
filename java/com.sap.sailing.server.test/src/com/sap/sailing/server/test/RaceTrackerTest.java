@@ -1,5 +1,6 @@
 package com.sap.sailing.server.test;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
@@ -10,14 +11,15 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.Set;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.RaceDefinition;
-import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.RaceListener;
+import com.sap.sailing.domain.tracking.RacesHandle;
 import com.sap.sailing.domain.tracking.TrackedEvent;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
@@ -30,7 +32,7 @@ public class RaceTrackerTest {
     private final URI liveUri;
     private final URI storedUri;
     private RacingEventServiceImpl service;
-    private RaceHandle raceHandle;
+    private RacesHandle raceHandle;
     
     public RaceTrackerTest() throws MalformedURLException, URISyntaxException {
         // for live simulation:
@@ -85,8 +87,9 @@ public class RaceTrackerTest {
 
     @Test
     public void testInitialization() throws InterruptedException {
-        RaceDefinition race = raceHandle.getRace();
-        assertNotNull(race);
+        Set<RaceDefinition> races = raceHandle.getRaces();
+        assertNotNull(races);
+        assertFalse(races.isEmpty());
         assertNotNull(getTrackedRace(raceHandle.getTrackedEvent()));
     }
     
@@ -96,7 +99,7 @@ public class RaceTrackerTest {
         TrackedRace oldTrackedRace = getTrackedRace(oldTrackedEvent);
         RaceDefinition oldRaceDefinition = oldTrackedRace.getRace();
         service.stopTracking(raceHandle.getEvent());
-        RaceHandle myRaceHandle = service.addTracTracRace(paramUrl, liveUri, storedUri, EmptyWindStore.INSTANCE, /* timeoutInMilliseconds */ 60000);
+        RacesHandle myRaceHandle = service.addTracTracRace(paramUrl, liveUri, storedUri, EmptyWindStore.INSTANCE, /* timeoutInMilliseconds */ 60000);
         TrackedEvent newTrackedEvent = myRaceHandle.getTrackedEvent();
         TrackedRace newTrackedRace = getTrackedRace(newTrackedEvent);
         // expecting a new tracked race to be created when starting over with tracking
@@ -116,7 +119,7 @@ public class RaceTrackerTest {
     public void testTrackingSameRaceWithoutStopping() throws MalformedURLException, IOException, InterruptedException, URISyntaxException {
         TrackedEvent oldTrackedEvent = raceHandle.getTrackedEvent();
         TrackedRace oldTrackedRace = getTrackedRace(oldTrackedEvent);
-        RaceHandle myRaceHandle = service.addTracTracRace(paramUrl, liveUri, storedUri, EmptyWindStore.INSTANCE, /* timeoutInMilliseconds */ 60000);
+        RacesHandle myRaceHandle = service.addTracTracRace(paramUrl, liveUri, storedUri, EmptyWindStore.INSTANCE, /* timeoutInMilliseconds */ 60000);
         TrackedEvent newTrackedEvent = myRaceHandle.getTrackedEvent();
         TrackedRace newTrackedRace = getTrackedRace(newTrackedEvent);
         // expecting a new tracked race to be created when starting over with tracking

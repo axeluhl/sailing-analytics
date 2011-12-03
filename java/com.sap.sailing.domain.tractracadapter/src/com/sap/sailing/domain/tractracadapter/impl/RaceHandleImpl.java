@@ -1,13 +1,17 @@
 package com.sap.sailing.domain.tractracadapter.impl;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
-import com.sap.sailing.domain.tracking.RaceHandle;
+import com.sap.sailing.domain.tracking.RacesHandle;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.TracTracRaceTracker;
 import com.tractrac.clientmodule.Event;
+import com.tractrac.clientmodule.Race;
 
-public class RaceHandleImpl implements RaceHandle {
+public class RaceHandleImpl implements RacesHandle {
     private final Event tractracEvent;
     private final DomainFactory domainFactory;
     private final DynamicTrackedEvent trackedEvent;
@@ -26,9 +30,12 @@ public class RaceHandleImpl implements RaceHandle {
     }
 
     @Override
-    public RaceDefinition getRace() {
-        // FIXME we assume there is exactly one Race per TracTrac event but during match racing there may be many
-        return domainFactory.getAndWaitForRaceDefinition(tractracEvent.getRaceList().iterator().next());
+    public Set<RaceDefinition> getRaces() {
+        Set<RaceDefinition> result = new HashSet<RaceDefinition>();
+        for (Race r : tractracEvent.getRaceList()) {
+            result.add(domainFactory.getAndWaitForRaceDefinition(r));
+        }
+        return result;
     }
     
     @Override
@@ -42,9 +49,12 @@ public class RaceHandleImpl implements RaceHandle {
     }
 
     @Override
-    public RaceDefinition getRace(long timeoutInMilliseconds) {
-        // FIXME we assume there is exactly one Race per TracTrac event but during match racing there may be many
-        return domainFactory.getAndWaitForRaceDefinition(tractracEvent.getRaceList().iterator().next(), timeoutInMilliseconds);
+    public Set<RaceDefinition> getRaces(long timeoutInMilliseconds) {
+        Set<RaceDefinition> result = new HashSet<RaceDefinition>();
+        for (Race r : tractracEvent.getRaceList()) {
+            result.add(domainFactory.getAndWaitForRaceDefinition(r, timeoutInMilliseconds));
+        }
+        return result;
     }
     
 }

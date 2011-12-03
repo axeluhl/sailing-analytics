@@ -62,7 +62,7 @@ import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.NoWindException;
-import com.sap.sailing.domain.tracking.RaceHandle;
+import com.sap.sailing.domain.tracking.RacesHandle;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
@@ -401,7 +401,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         if (storedURI == null || storedURI.trim().length() == 0) {
             storedURI = rr.storedURI;
         }
-        final RaceHandle raceHandle = getService().addTracTracRace(new URL(rr.paramURL), new URI(liveURI), new URI(storedURI),
+        final RacesHandle raceHandle = getService().addTracTracRace(new URL(rr.paramURL), new URI(liveURI), new URI(storedURI),
                 MongoWindStoreFactory.INSTANCE.getMongoWindStore(mongoObjectFactory, domainObjectFactory), TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS);
         if (trackWind) {
             new Thread("Wind tracking starter for race "+rr.eventName+"/"+rr.name) {
@@ -464,19 +464,20 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
     
     /**
-     * @param timeoutInMilliseconds eventually passed to {@link RaceHandle#getRace(long)}. If the race definition
+     * @param timeoutInMilliseconds eventually passed to {@link RacesHandle#getRaces(long)}. If the race definition
      * can be obtained within this timeout, wind for the race will be tracked; otherwise, the method returns without
      * taking any effect.
      */
-    private void startTrackingWind(RaceHandle raceHandle, boolean correctByDeclination, long timeoutInMilliseconds) throws Exception {
+    private void startTrackingWind(RacesHandle raceHandle, boolean correctByDeclination, long timeoutInMilliseconds) throws Exception {
         Event event = raceHandle.getEvent();
         if (event != null) {
-            RaceDefinition race = raceHandle.getRace(timeoutInMilliseconds);
-            if (race != null) {
-                getService().startTrackingWind(event, race, correctByDeclination);
-            } else {
-                log("RaceDefinition wasn't received within "+timeoutInMilliseconds+"ms for a race in event "+event.getName()+
-                        ". Aborting wait; no wind tracking for this race.");
+            for (RaceDefinition race : raceHandle.getRaces(timeoutInMilliseconds)) {
+                if (race != null) {
+                    getService().startTrackingWind(event, race, correctByDeclination);
+                } else {
+                    log("RaceDefinition wasn't received within " + timeoutInMilliseconds + "ms for a race in event "
+                            + event.getName() + ". Aborting wait; no wind tracking for this race.");
+                }
             }
         }
     }
@@ -1145,7 +1146,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     @Override
     public void trackWithSwissTiming(SwissTimingRaceRecordDAO rr, String hostname, int port, boolean canSendRequests,
             boolean trackWind, final boolean correctWindByDeclination) throws Exception {
-        final RaceHandle raceHandle = getService().addSwissTimingRace(rr.ID, hostname, port, canSendRequests,
+        final RacesHandle raceHandle = getService().addSwissTimingRace(rr.ID, hostname, port, canSendRequests,
                 MongoWindStoreFactory.INSTANCE.getMongoWindStore(mongoObjectFactory, domainObjectFactory),
                 TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS);
         if (trackWind) {
