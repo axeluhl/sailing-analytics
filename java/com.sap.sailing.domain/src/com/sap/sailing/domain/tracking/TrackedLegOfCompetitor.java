@@ -15,8 +15,10 @@ public interface TrackedLegOfCompetitor {
     Competitor getCompetitor();
 
     /**
-     * How long did it take the competitor to complete this {@link #getLeg() leg}? If the competitor hasn't finished the
-     * leg yet, -1 is returned.
+     * How much time did the {@link #getCompetitor competitor} spend in this {@link #getLeg() leg} at
+     * <code>timePoint</code>? If the competitor hasn't started the leg yet at <code>timePoint</code>, 0 is returned. If the
+     * competitor has finished the leg already at <code>timePoint</code>, the time it took the competitor to
+     * complete the leg is returned. 
      */
     long getTimeInMilliSeconds(TimePoint timePoint);
 
