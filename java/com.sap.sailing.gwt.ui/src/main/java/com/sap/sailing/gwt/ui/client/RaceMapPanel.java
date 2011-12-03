@@ -190,14 +190,21 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         verticalCheckBoxPanel.add(new Label(stringConstants.maneuverTypes()));
         checkboxAndType.add(new Pair<CheckBox, String>(new CheckBox(stringConstants.headUp()), "HEAD_UP"));
         checkboxAndType.add(new Pair<CheckBox, String>(new CheckBox(stringConstants.bearAway()), "BEAR_AWAY"));
-        checkboxAndType.add(new Pair<CheckBox, String>(new CheckBox(stringConstants.tack()), "TACK"));
-        checkboxAndType.add(new Pair<CheckBox, String>(new CheckBox(stringConstants.jibe()), "JIBE"));
+        CheckBox checkBoxTack = new CheckBox(stringConstants.tack());
+        checkBoxTack.setValue(true);
+        checkboxAndType.add(new Pair<CheckBox, String>(checkBoxTack, "TACK"));
+        CheckBox checkBoxJibe = new CheckBox(stringConstants.jibe());
+        checkBoxJibe.setValue(true);
+        checkboxAndType.add(new Pair<CheckBox, String>(checkBoxJibe, "JIBE"));
+        CheckBox checkBoxPenalty=  new CheckBox(stringConstants.penaltyCircle());
+        checkBoxPenalty.setValue(true);
         checkboxAndType
-                .add(new Pair<CheckBox, String>(new CheckBox(stringConstants.penaltyCircle()), "PENALTY_CIRCLE"));
-        checkboxAndType.add(new Pair<CheckBox, String>(new CheckBox(stringConstants.markPassing()), "MARK_PASSING"));
+                .add(new Pair<CheckBox, String>(checkBoxPenalty, "PENALTY_CIRCLE"));
+        CheckBox checkBoxMarkPassing = new CheckBox(stringConstants.markPassing());
+        checkBoxMarkPassing.setValue(true);
+        checkboxAndType.add(new Pair<CheckBox, String>(checkBoxMarkPassing, "MARK_PASSING"));
         checkboxAndType.add(new Pair<CheckBox, String>(new CheckBox(stringConstants.otherManeuver()), "OTHER"));
         for (Pair<CheckBox, String> pair : checkboxAndType) {
-            pair.getA().setValue(true);
             pair.getA().addValueChangeHandler(new ValueChangeHandler<Boolean>() {
                 @Override
                 public void onValueChange(ValueChangeEvent<Boolean> event) {
