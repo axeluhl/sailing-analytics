@@ -497,9 +497,6 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
                                         if (maneuverMarkers != null) {
                                             removeAllManeuverMarkers();
                                         }
-                                    } else {
-                                        // TODO remove debug output again
-                                        System.out.println("Received out-of-order response");
                                     }
                                 }
                             });
