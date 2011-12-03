@@ -22,6 +22,7 @@ import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.Maps;
 import com.google.gwt.maps.client.control.LargeMapControl3D;
 import com.google.gwt.maps.client.control.MenuMapTypeControl;
+import com.google.gwt.maps.client.control.ScaleControl;
 import com.google.gwt.maps.client.event.MapDragEndHandler;
 import com.google.gwt.maps.client.event.MapMouseMoveHandler;
 import com.google.gwt.maps.client.event.MapZoomEndHandler;
@@ -364,6 +365,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
                 map = new MapWidget();
                 map.addControl(new LargeMapControl3D());
                 map.addControl(new MenuMapTypeControl());
+                map.addControl(new ScaleControl());
                 // Add the map to the HTML host page
                 grid.setWidget(2, 1, map);
                 map.setSize("100%", "100%");

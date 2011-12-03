@@ -379,8 +379,7 @@ public class LeaderboardImpl implements Named, Leaderboard {
 	}
 
 	@Override
-	public void setResultDiscardingRule(ThresholdBasedResultDiscardingRule discardingRule)
-	{
+	public void setResultDiscardingRule(ThresholdBasedResultDiscardingRule discardingRule) {
 	    this.resultDiscardingRule = discardingRule; 
 	}
 }
