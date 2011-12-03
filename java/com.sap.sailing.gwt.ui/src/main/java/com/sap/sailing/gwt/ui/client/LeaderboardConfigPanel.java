@@ -107,7 +107,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
         };
 
         ImagesBarColumn<LeaderboardDAO, LeaderboardConfigImagesBarCell> leaderboardActionColumn = new ImagesBarColumn<LeaderboardDAO, LeaderboardConfigImagesBarCell>(
-                new LeaderboardConfigImagesBarCell());
+                new LeaderboardConfigImagesBarCell(stringConstants));
 
         leaderboardActionColumn.setFieldUpdater(new FieldUpdater<LeaderboardDAO, String>() {
             @Override
