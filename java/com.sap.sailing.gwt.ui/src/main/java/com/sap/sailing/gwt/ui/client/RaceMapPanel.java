@@ -951,7 +951,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
 
     private String getColorString(CompetitorDAO competitorDAO) {
         // TODO green no more than 70, red no less than 120
-        return "#" + ("000000"+Integer.toHexString(competitorDAO.hashCode())).substring(0, 4).toUpperCase() + "00";
+        return "#" + (Integer.toHexString(competitorDAO.hashCode())+"000000").substring(0, 4).toUpperCase() + "00";
     }
 
     /**
