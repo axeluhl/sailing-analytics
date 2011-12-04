@@ -49,7 +49,6 @@ import com.google.gwt.user.client.ui.IntegerBox;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.ProvidesResize;
-import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -96,8 +95,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
     private final Set<CompetitorDAO> competitorsSelectedInMap;
     private final Timer timer;
     private List<Pair<CheckBox, String>> checkboxAndType;
-    private RadioButton radioButtonDouglas;
-    private RadioButton radioButtonManeuvers;
+    private CheckBox checkBoxDouglasPeuckerPoints;
 
     private long TAILLENGTHINMILLISECONDS = 30000l;
 
@@ -157,19 +155,22 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
     private final IntegerBox tailLengthBox;
 
     protected Map<CompetitorDAO, List<ManeuverDAO>> lastManeuverResult;
-    
+
+    protected Map<CompetitorDAO, List<GPSFixDAO>> lastDouglasPeuckerResult;
+
     /**
      * RPC calls may receive responses out of order if there are multiple calls in-flight at the same time. If the time
-     * slider is moved quickly it generates many requests for boat positions quickly after each other. Sometimes, responses
-     * for requests send later may return before the responses to all earlier requests have been received and processed. This
-     * counter is used to number the requests. When processing of a response for a later request has already begun, responses
-     * to earlier requests will be ignored.
+     * slider is moved quickly it generates many requests for boat positions quickly after each other. Sometimes,
+     * responses for requests send later may return before the responses to all earlier requests have been received and
+     * processed. This counter is used to number the requests. When processing of a response for a later request has
+     * already begun, responses to earlier requests will be ignored.
      */
     private int boatPositionRequestIDCounter;
-    
+
     /**
-     * Corresponds to {@link #boatPositionRequestIDCounter}. As soon as the processing of a response for a request ID begins,
-     * this attribute is set to the ID. A response won't be processed if a later response is already being processed.
+     * Corresponds to {@link #boatPositionRequestIDCounter}. As soon as the processing of a response for a request ID
+     * begins, this attribute is set to the ID. A response won't be processed if a later response is already being
+     * processed.
      */
     private int startedProcessingRequestID;
 
@@ -184,57 +185,51 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         lastShownFix = new HashMap<CompetitorDAO, Integer>();
         buoyMarkers = new HashMap<MarkDAO, Marker>();
         boatMarkers = new HashMap<CompetitorDAO, Marker>();
-        VerticalPanel douglasOrManeuverPanel = new VerticalPanel();
         checkboxAndType = new ArrayList<Pair<CheckBox, String>>();
         final VerticalPanel verticalCheckBoxPanel = new VerticalPanel();
         verticalCheckBoxPanel.add(new Label(stringConstants.maneuverTypes()));
         checkboxAndType.add(new Pair<CheckBox, String>(new CheckBox(stringConstants.headUp()), "HEAD_UP"));
         checkboxAndType.add(new Pair<CheckBox, String>(new CheckBox(stringConstants.bearAway()), "BEAR_AWAY"));
-        checkboxAndType.add(new Pair<CheckBox, String>(new CheckBox(stringConstants.tack()), "TACK"));
-        checkboxAndType.add(new Pair<CheckBox, String>(new CheckBox(stringConstants.jibe()), "JIBE"));
+        CheckBox checkBoxTack = new CheckBox(stringConstants.tack());
+        checkBoxTack.setValue(true);
+        checkboxAndType.add(new Pair<CheckBox, String>(checkBoxTack, "TACK"));
+        CheckBox checkBoxJibe = new CheckBox(stringConstants.jibe());
+        checkBoxJibe.setValue(true);
+        checkboxAndType.add(new Pair<CheckBox, String>(checkBoxJibe, "JIBE"));
+        CheckBox checkBoxPenalty=  new CheckBox(stringConstants.penaltyCircle());
+        checkBoxPenalty.setValue(true);
         checkboxAndType
-                .add(new Pair<CheckBox, String>(new CheckBox(stringConstants.penaltyCircle()), "PENALTY_CIRCLE"));
-        checkboxAndType.add(new Pair<CheckBox, String>(new CheckBox(stringConstants.markPassing()), "MARK_PASSING"));
+                .add(new Pair<CheckBox, String>(checkBoxPenalty, "PENALTY_CIRCLE"));
+        CheckBox checkBoxMarkPassing = new CheckBox(stringConstants.markPassing());
+        checkBoxMarkPassing.setValue(true);
+        checkboxAndType.add(new Pair<CheckBox, String>(checkBoxMarkPassing, "MARK_PASSING"));
         checkboxAndType.add(new Pair<CheckBox, String>(new CheckBox(stringConstants.otherManeuver()), "OTHER"));
         for (Pair<CheckBox, String> pair : checkboxAndType) {
             pair.getA().addValueChangeHandler(new ValueChangeHandler<Boolean>() {
                 @Override
                 public void onValueChange(ValueChangeEvent<Boolean> event) {
                     if (!timer.isPlaying() && lastManeuverResult != null) {
-                        if (radioButtonDouglas.getValue()) {
-                            removeAllMarkDouglasPeuckerpoints();
-                            // showMarkDouglasPeuckerPoints(result);
-                        } else if (radioButtonManeuvers.getValue()) {
-                            removeAllManeuverMarkers();
-                            showManeuvers(lastManeuverResult);
-                        }
+                        removeAllManeuverMarkers();
+                        showManeuvers(lastManeuverResult);
                     }
                 }
             });
             verticalCheckBoxPanel.add(pair.getA());
         }
-        String radioButtonGroupName = "douglasOrManeuverPoints";
-        radioButtonDouglas = new RadioButton(radioButtonGroupName, stringConstants.douglasPeuckerPoints());
-        radioButtonDouglas.setValue(true);
-        radioButtonManeuvers = new RadioButton(radioButtonGroupName, stringConstants.maneuverTypes());
-        radioButtonDouglas.addClickHandler(new ClickHandler() {
+        checkBoxDouglasPeuckerPoints = new CheckBox(stringConstants.douglasPeuckerPoints());
+        checkBoxDouglasPeuckerPoints.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
 
             @Override
-            public void onClick(ClickEvent event) {
-                removeAllManeuverMarkers();
-                verticalCheckBoxPanel.setVisible(false);
+            public void onValueChange(ValueChangeEvent<Boolean> event) {
+                if (!timer.isPlaying() && lastDouglasPeuckerResult != null && event.getValue()) {
+                    removeAllMarkDouglasPeuckerpoints();
+                    showMarkDouglasPeuckerPoints(lastDouglasPeuckerResult);
+                } else if(!event.getValue()){
+                    removeAllMarkDouglasPeuckerpoints();
+                }
             }
         });
-        radioButtonManeuvers.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                removeAllMarkDouglasPeuckerpoints();
-                verticalCheckBoxPanel.setVisible(true);
-            }
-        });
-        douglasOrManeuverPanel.add(radioButtonDouglas);
-        douglasOrManeuverPanel.add(radioButtonManeuvers);
+        verticalCheckBoxPanel.add(checkBoxDouglasPeuckerPoints);
         fixes = new HashMap<CompetitorDAO, List<GPSFixDAO>>();
         this.grid = new Grid(3, 2);
         setWidget(grid);
@@ -300,7 +295,6 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         horizontalRanksVerticalAndCheckboxesManeuversPanel.add(ranksAndCheckboxAndTailLength);
 
         VerticalPanel verticalPanelRadioAndCheckboxes = new VerticalPanel();
-        verticalPanelRadioAndCheckboxes.add(douglasOrManeuverPanel);
         verticalPanelRadioAndCheckboxes.add(verticalCheckBoxPanel);
         horizontalRanksVerticalAndCheckboxesManeuversPanel.add(verticalPanelRadioAndCheckboxes);
 
@@ -926,46 +920,46 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
                 from.put(competitorDAO, fixes.get(competitorDAO).get(firstShownFix.get(competitorDAO)).timepoint);
                 Map<CompetitorDAO, Date> to = new HashMap<CompetitorDAO, Date>();
                 to.put(competitorDAO, fixes.get(competitorDAO).get(lastShownFix.get(competitorDAO)).timepoint);
-                if (radioButtonDouglas.getValue()) {
-                    /* currently not showing Douglas-Peucker points; TODO use checkboxes to select what to show (Bug #6) */
-                    sailingService.getDouglasPoints(new EventNameAndRaceName(event.name, race.name), from, to, 3,
-                            new AsyncCallback<Map<CompetitorDAO, List<GPSFixDAO>>>() {
-                                @Override
-                                public void onFailure(Throwable caught) {
-                                    errorReporter.reportError("Error obtaining douglas positions: "
-                                            + caught.getMessage());
-                                }
+                /* currently not showing Douglas-Peucker points; TODO use checkboxes to select what to show (Bug #6) */
+                sailingService.getDouglasPoints(new EventNameAndRaceName(event.name, race.name), from, to, 3,
+                        new AsyncCallback<Map<CompetitorDAO, List<GPSFixDAO>>>() {
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                errorReporter.reportError("Error obtaining douglas positions: " + caught.getMessage());
+                            }
 
-                                @Override
-                                public void onSuccess(Map<CompetitorDAO, List<GPSFixDAO>> result) {
-                                    if (douglasMarkers != null) {
-                                        removeAllMarkDouglasPeuckerpoints();
-                                    }
-                                    if (!timer.isPlaying()) {
+                            @Override
+                            public void onSuccess(Map<CompetitorDAO, List<GPSFixDAO>> result) {
+                                RaceMapPanel.this.lastDouglasPeuckerResult = result;
+                                if (douglasMarkers != null) {
+                                    removeAllMarkDouglasPeuckerpoints();
+                                }
+                                if (!timer.isPlaying()) {
+                                    if(checkBoxDouglasPeuckerPoints.getValue()){
                                         showMarkDouglasPeuckerPoints(result);
                                     }
                                 }
-                            });
-                } else if (radioButtonManeuvers.getValue()) {
-                    sailingService.getManeuvers(new EventNameAndRaceName(event.name, race.name), from, to,
-                            new AsyncCallback<Map<CompetitorDAO, List<ManeuverDAO>>>() {
-                                @Override
-                                public void onFailure(Throwable caught) {
-                                    errorReporter.reportError("Error obtaining maneuvers: " + caught.getMessage());
-                                }
+                            }
+                        });
+                sailingService.getManeuvers(new EventNameAndRaceName(event.name, race.name), from, to,
+                        new AsyncCallback<Map<CompetitorDAO, List<ManeuverDAO>>>() {
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                errorReporter.reportError("Error obtaining maneuvers: " + caught.getMessage());
+                            }
 
-                                @Override
-                                public void onSuccess(Map<CompetitorDAO, List<ManeuverDAO>> result) {
-                                    RaceMapPanel.this.lastManeuverResult = result;
-                                    if (maneuverMarkers != null) {
-                                        removeAllManeuverMarkers();
-                                    }
-                                    if (!timer.isPlaying()) {
-                                        showManeuvers(result);
-                                    }
+                            @Override
+                            public void onSuccess(Map<CompetitorDAO, List<ManeuverDAO>> result) {
+                                RaceMapPanel.this.lastManeuverResult = result;
+                                if (maneuverMarkers != null) {
+                                    removeAllManeuverMarkers();
                                 }
-                            });
-                }
+                                if (!timer.isPlaying()) {
+                                    showManeuvers(result);
+                                }
+                            }
+                        });
+
             }
         }
         return result;
@@ -973,7 +967,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
 
     private String getColorString(CompetitorDAO competitorDAO) {
         // TODO green no more than 70, red no less than 120
-        return "#" + (Integer.toHexString(competitorDAO.hashCode())+"000000").substring(0, 4).toUpperCase() + "00";
+        return "#" + (Integer.toHexString(competitorDAO.hashCode()) + "000000").substring(0, 4).toUpperCase() + "00";
     }
 
     /**
@@ -1164,7 +1158,5 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
                 }
             }
         }
-
     }
-
 }
