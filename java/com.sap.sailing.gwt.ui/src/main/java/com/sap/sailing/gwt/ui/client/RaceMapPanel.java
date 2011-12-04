@@ -388,7 +388,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
                 boatIconHighlighted = Icon.newInstance("/images/reddot.png");
                 boatIconHighlighted.setIconAnchor(Point.newInstance(8, 8));
                 buoyIcon = Icon.newInstance("/images/reddiamond.png");
-                buoyIcon.setIconAnchor(Point.newInstance(10, 19));
+                buoyIcon.setIconAnchor(Point.newInstance(7, 7));
                 tackToStarboardIcon = Icon
                         .newInstance("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=T|00FF00|000000");
                 tackToStarboardIcon.setIconAnchor(Point.newInstance(10, 33));
