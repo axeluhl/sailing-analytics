@@ -638,6 +638,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
 
     private void leaderboardSelectionChanged() {
         final String leaderboardName = getSelectedLeaderboardName();
+        trackedEventsComposite.clearSelection();
         if (leaderboardName != null) {
             sailingService.getLeaderboardByName(leaderboardName, new Date(),
             /* namesOfRacesForWhichToLoadLegDetails */null, new AsyncCallback<LeaderboardDAO>() {
