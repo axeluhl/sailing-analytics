@@ -54,6 +54,8 @@ public class CompareCompetitorsPanel extends FormPanel {
     private final RaceIdentifier[] races;
     private int selectedRace = 0;
     private int stepsToLoad = 100;
+    private int startPoint = 0;
+    private int endPoint = stepsToLoad;
     private final StringConstants stringConstants;
     private boolean chartLoaded = false;
     private boolean dataLoaded = false;
@@ -160,8 +162,33 @@ public class CompareCompetitorsPanel extends FormPanel {
             }
         });
         configPanel.add(bttSteps);
+        HorizontalPanel startPointPanel = new HorizontalPanel();
+        Label lblStartPoint = new Label("Start point:");
+        startPointPanel.add(lblStartPoint);
+        final TextBox txtbStartPoint = new TextBox();
+        txtbStartPoint.setText(""+ startPoint);
+        startPointPanel.add(txtbStartPoint);
+        configPanel.add(startPointPanel);
+        HorizontalPanel endPointPanel = new HorizontalPanel();
+        Label lblEndPoint = new Label("End point:");
+        endPointPanel.add(lblEndPoint);
+        final TextBox txtbEndPoint = new TextBox();
+        txtbEndPoint.setText(""+endPoint);
+        endPointPanel.add(txtbEndPoint);
+        configPanel.add(endPointPanel);
         selectCompetitors = new VerticalPanel();
         configPanel.add(selectCompetitors);
+        Button bttSetPoints = new Button("Set Points");
+        bttSetPoints.addClickHandler(new ClickHandler() {
+            
+            @Override
+            public void onClick(ClickEvent event) {
+                startPoint = Integer.parseInt(txtbStartPoint.getText());
+                endPoint = Integer.parseInt(txtbEndPoint.getText());
+                loadData();
+            }
+        });
+        configPanel.add(bttSetPoints);
 
         final Runnable onLoadCallback = new Runnable() {
 
@@ -313,6 +340,7 @@ public class CompareCompetitorsPanel extends FormPanel {
                             @Override
                             public void onClick(ClickEvent event) {
                                 setCompetitorVisible(c, cb.getValue());
+                                setMarkPassingSelection();
                             }
                         });
                         selectCompetitors.add(cb);
@@ -336,9 +364,9 @@ public class CompareCompetitorsPanel extends FormPanel {
             for (int i = 0; i < chartData.size(); i++) {
                 length = (length < chartData.get(i).getB().length) ? chartData.get(i).getB().length : length;
             }
-            data.addRows(length+1);
-            for (int i = 0; i < competitorAndTimePointsDAO.getTimePoints().length; i++) {
-                long time = competitorAndTimePointsDAO.getTimePoints()[i] - competitorAndTimePointsDAO.getStartTime();
+            data.addRows(endPoint-startPoint);
+            for (int i = 0; i < data.getNumberOfRows(); i++) {
+                long time = competitorAndTimePointsDAO.getTimePoints()[startPoint+i] - competitorAndTimePointsDAO.getStartTime();
                 String minutes = "" + Math.abs((time/60000));
                 if (minutes.length() < 2){
                     minutes = ((time < 0)? "-" : "") +"0" + minutes;
@@ -369,9 +397,9 @@ public class CompareCompetitorsPanel extends FormPanel {
             }
             chartNumberFormat = NumberFormat.create(createNumberFormatOptions(suffix));
             for (int i = 0; i < chartData.size(); i++) {
-                for (int j = 0; j < chartData.get(i).getB().length; j++) {
-                    if (chartData.get(i).getB()[j] != null && isCompetitorVisible(chartData.get(i).getA())) {
-                        data.setValue(j, (i + 1), chartData.get(i).getB()[j]);
+                for (int j = 0; j < endPoint-startPoint; j++) {
+                    if (chartData.get(i).getB()[startPoint+j] != null && isCompetitorVisible(chartData.get(i).getA())) {
+                        data.setValue(j, (i + 1), chartData.get(i).getB()[startPoint+j]);
                         
                     }
                 }
@@ -437,14 +465,18 @@ public class CompareCompetitorsPanel extends FormPanel {
             int currentMarkPassing = 0;
             Long[] markPassing = competitorAndTimePointsDAO.getMarkPassings(competitorAndTimePointsDAO.getCompetitor()[column]);
             
-            for (int row = 0; row < timePoints.length && currentMarkPassing < markPassing.length; row++){
-                if (row > 0 && timePoints[row-1] < markPassing[currentMarkPassing] && timePoints[row] > markPassing[currentMarkPassing]){
+            for (int row = 0; currentMarkPassing < markPassing.length; row++){
+                if (startPoint+row > 0 && timePoints[startPoint+row-1] < markPassing[currentMarkPassing] && timePoints[startPoint+row] > markPassing[currentMarkPassing]){
                     selections.add(Selection.createCellSelection(row, column+1));
                     currentMarkPassing++;
                 }
-                else if (row == 0 && timePoints[row] > markPassing[currentMarkPassing]){
+                else if (startPoint + row == 0 && timePoints[startPoint+row] > markPassing[currentMarkPassing]){
                     selections.add(Selection.createCellSelection(row, column+1));
                     currentMarkPassing++;
+                }
+                if (endPoint-startPoint <= row-1){
+                    currentMarkPassing++;
+                    row = 0;
                 }
             }
         }

@@ -1430,14 +1430,17 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     public CompetitorAndTimePointsDAO getCompetitorAndTimePoints(RaceIdentifier race, int steps) {
         CompetitorAndTimePointsDAO competitorAndTimePointsDAO = new CompetitorAndTimePointsDAO();
         TrackedRace trackedRace = getTrackedRace(race);
+        List<CompetitorDAO> competitors = new ArrayList<CompetitorDAO>();
         for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
             NavigableSet<MarkPassing> markPassings = trackedRace.getMarkPassings(competitor);
-            ArrayList<Long> markPassingTimes = new ArrayList<Long>();
+            List<Long> markPassingTimes = new ArrayList<Long>();
             for (MarkPassing markPassing : markPassings){
                 markPassingTimes.add(markPassing.getTimePoint().asMillis());
             }
-            competitorAndTimePointsDAO.addCompetitorAndMarkPassing(getCompetitorDAO(competitor), markPassingTimes.toArray(new Long[0]));
+            competitors.add(getCompetitorDAO(competitor));
+            competitorAndTimePointsDAO.setMarkPassings(getCompetitorDAO(competitor), markPassingTimes.toArray(new Long[0]));
         }
+        competitorAndTimePointsDAO.setCompetitor(competitors.toArray(new CompetitorDAO[0]));
         competitorAndTimePointsDAO.setStartTime(trackedRace.getStart().asMillis());
         List<Long> timePoints = new ArrayList<Long>();
         long stepsize = (trackedRace.getTimePointOfNewestEvent().asMillis()- trackedRace.getStart().asMillis() - 20000)/steps;
