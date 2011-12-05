@@ -63,6 +63,9 @@ public class DouglasPeucker<ItemType, FixType extends GPSFix> {
      *         including the last fix at or before time <code>to</code> that approximates the {@link #track} such that
      *         the maximum distance of any fix on the {@link #track} to the approximation is less than
      *         <code>maxDistance</code>. Always returns a non-<code>null</code> list which may, however, be empty.
+     *         Note, that if the fixes contain bearing information, the bearing is not the bearing leading to the
+     *         next fix of the approximation but the bearing the tracked item had at the point in time of the
+     *         approximation fix.
      */
     public List<FixType> approximate(Distance maxDistance, TimePoint from, TimePoint to) {
         List<FixType> resultWithoutFirstFix = approximateWithoutFirst(maxDistance, from, to);

@@ -644,14 +644,18 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     }
     
     /**
-     * Tries to detect a maneuver on the <code>competitor</code>'s track around a given time point. The time period is
-     * taken from the {@link BoatClass#getApproximateManeuverDurationInMilliseconds() boat class}. If no maneuver is
-     * detected, an empty list is returned. Maneuvers can only be expected to be detected if at least three fixes are
-     * provided in <code>approximatedFixesToAnalyze</code>. For the inner approximating fixes (all except the first and
-     * the last approximating fix), their course changes according to the approximated path (and not the underlying
-     * actual tracked fixes) are computed. Subsequent course changes to the same direction are then grouped. Those in
-     * closer timely distance than {@link #getApproximateManeuverDurationInMilliseconds()} (including single course
-     * changes that have no surrounding other course changes to group) are grouped into one {@link Maneuver}.
+     * Tries to detect maneuvers on the <code>competitor</code>'s track based on a number of approximating fixes. The
+     * fixes contain bearing information, but this is not the bearing leading to the next approximation fix but the
+     * bearing the boat had at the time of the approximating fix which is taken from the original track.
+     * 
+     * The time period assumed for a maneuver duration is taken from the
+     * {@link BoatClass#getApproximateManeuverDurationInMilliseconds() boat class}. If no maneuver is detected, an empty
+     * list is returned. Maneuvers can only be expected to be detected if at least three fixes are provided in
+     * <code>approximatedFixesToAnalyze</code>. For the inner approximating fixes (all except the first and the last
+     * approximating fix), their course changes according to the approximated path (and not the underlying actual
+     * tracked fixes) are computed. Subsequent course changes to the same direction are then grouped. Those in closer
+     * timely distance than {@link #getApproximateManeuverDurationInMilliseconds()} (including single course changes
+     * that have no surrounding other course changes to group) are grouped into one {@link Maneuver}.
      * 
      * @return an empty list if no maneuver is detected for <code>competitor</code> between <code>from</code> and
      *         <code>to</code>, or else the list of maneuvers detected.
@@ -660,15 +664,17 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         List<Maneuver> result = new ArrayList<Maneuver>();
         if (approximatingFixesToAnalyze.size() > 2) {
             List<Pair<GPSFixMoving, CourseChange>> courseChangeSequenceInSameDirection = new ArrayList<Pair<GPSFixMoving, CourseChange>>();
-            Iterator<GPSFixMoving> iter = approximatingFixesToAnalyze.iterator();
-            GPSFixMoving previous = iter.next();
-            GPSFixMoving current = iter.next();
+            Iterator<GPSFixMoving> approximationPointsIter = approximatingFixesToAnalyze.iterator();
+            GPSFixMoving previous = approximationPointsIter.next();
+            GPSFixMoving current = approximationPointsIter.next();
+            // the bearings in these variables are between approximation points
             SpeedWithBearing speedWithBearingFromPreviousToCurrent = previous.getSpeedAndBearingRequiredToReach(current);
             SpeedWithBearing speedWithBearingAtBeginningOfUnidirectionalCourseChanges = speedWithBearingFromPreviousToCurrent;
             SpeedWithBearing speedWithBearingFromCurrentToNext; // will certainly be assigned because iter's collection's size > 2
             do {
-                GPSFixMoving next = iter.next();
+                GPSFixMoving next = approximationPointsIter.next();
                 speedWithBearingFromCurrentToNext = current.getSpeedAndBearingRequiredToReach(next);
+                // compute course change on "approximation track"
                 CourseChange courseChange = speedWithBearingFromPreviousToCurrent.getCourseChangeRequiredToReach(speedWithBearingFromCurrentToNext);
                 Pair<GPSFixMoving, CourseChange> courseChangeAtFix = new Pair<GPSFixMoving, CourseChange>(current, courseChange);
                 if (!courseChangeSequenceInSameDirection.isEmpty() &&
@@ -685,7 +691,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                 previous = current;
                 current = next;
                 speedWithBearingFromPreviousToCurrent = speedWithBearingFromCurrentToNext;
-            } while (iter.hasNext());
+            } while (approximationPointsIter.hasNext());
             if (!courseChangeSequenceInSameDirection.isEmpty()) {
                 result.addAll(groupChangesInSameDirectionIntoManeuvers(competitor, speedWithBearingAtBeginningOfUnidirectionalCourseChanges,
                         courseChangeSequenceInSameDirection));
@@ -722,10 +728,10 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             Iterator<Pair<GPSFixMoving, CourseChange>> iter = courseChangeSequenceInSameDirection.iterator();
             double totalCourseChangeInDegrees = 0.0;
             long totalMilliseconds = 0l;
-            SpeedWithBearing afterCurrentCourseChange; // sure to be set because iter's collection is not empty
+            SpeedWithBearing afterCurrentCourseChange = null; // sure to be set because iter's collection is not empty
+            // and the first use requires group not to be empty which can only happen after the first group.add
             do {
                 Pair<GPSFixMoving, CourseChange> currentFixAndCourseChange = iter.next();
-                afterCurrentCourseChange = beforeCurrentCourseChange.applyCourseChange(currentFixAndCourseChange.getB());
                 if (!group.isEmpty()
                         && currentFixAndCourseChange.getA().getTimePoint().asMillis() - group.get(group.size() - 1).getA().getTimePoint().asMillis() >
                         getApproximateManeuverDurationInMilliseconds()) {
@@ -738,6 +744,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                     totalMilliseconds = 0l;
                     beforeGroup = beforeCurrentCourseChange;
                 }
+                afterCurrentCourseChange = beforeCurrentCourseChange.applyCourseChange(currentFixAndCourseChange.getB());
                 totalMilliseconds += currentFixAndCourseChange.getA().getTimePoint().asMillis();
                 totalCourseChangeInDegrees += currentFixAndCourseChange.getB().getCourseChangeInDegrees();
                 group.add(currentFixAndCourseChange);
