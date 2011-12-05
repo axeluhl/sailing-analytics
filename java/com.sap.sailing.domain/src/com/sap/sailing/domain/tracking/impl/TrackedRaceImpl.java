@@ -765,9 +765,9 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         TimePoint maneuverTimePoint = new MillisecondsTimePoint(totalMilliseconds/group.size());
         Position maneuverPosition = getTrack(competitor).getEstimatedPosition(maneuverTimePoint, /* extrapolate */ false);
         MillisecondsTimePoint timePointBeforeManeuver = new MillisecondsTimePoint(group.get(0).getA().getTimePoint()
-                .asMillis() - getApproximateManeuverDurationInMilliseconds());
+                .asMillis() - getApproximateManeuverDurationInMilliseconds()/2);
         MillisecondsTimePoint timePointAfterManeuver = new MillisecondsTimePoint(group.get(group.size() - 1).getA()
-                .getTimePoint().asMillis() + getApproximateManeuverDurationInMilliseconds());
+                .getTimePoint().asMillis() + getApproximateManeuverDurationInMilliseconds()/2);
         Tack tackBeforeManeuver = getTack(competitor, timePointBeforeManeuver);
         Tack tackAfterManeuver = getTack(competitor, timePointAfterManeuver);
         // the TrackedLegOfCompetitor variables may be null, e.g., in case the time points are before or after the race
