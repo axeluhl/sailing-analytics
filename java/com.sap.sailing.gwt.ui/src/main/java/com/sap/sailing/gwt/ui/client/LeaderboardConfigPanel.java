@@ -10,6 +10,8 @@ import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
@@ -20,8 +22,10 @@ import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
@@ -68,8 +72,14 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
 
     private final CaptionPanel selectedLeaderBoardPanel;
     private final CaptionPanel trackedRacesCaptionPanel;
+    
+    private TextBox filterRacesTextbox;
 
     final SingleSelectionModel<RaceInLeaderboardDAO> raceTableSelectionModel;
+    
+    private List<LeaderboardDAO> availableLeaderboardList;
+    
+    private final SingleSelectionModel<LeaderboardDAO> tableSelectionModel;
 
     public LeaderboardConfigPanel(SailingServiceAsync sailingService, AdminConsole adminConsole,
             final ErrorReporter errorReporter, StringConstants theStringConstants) {
@@ -78,15 +88,47 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
         leaderboardList = new ListDataProvider<LeaderboardDAO>();
         raceColumnList = new ListDataProvider<RaceInLeaderboardDAO>();
         this.errorReporter = errorReporter;
+        this.availableLeaderboardList = new ArrayList<LeaderboardDAO>();
 
         readAllLeaderbords();
 
         VerticalPanel mainPanel = new VerticalPanel();
         this.setWidget(mainPanel);
-
+        
         Label lblLeaderboards = new Label("Leaderboards");
         lblLeaderboards.setStyleName("bold");
         mainPanel.add(lblLeaderboards);
+        
+        Label lblFilterEvents = new Label(stringConstants.filterLeaderboardsByName() + ": ");
+        HorizontalPanel filterPanel = new HorizontalPanel();
+        filterPanel.setSpacing(5);
+        filterPanel.add(lblFilterEvents);
+        filterPanel.setCellVerticalAlignment(lblFilterEvents, HasVerticalAlignment.ALIGN_MIDDLE);
+        filterRacesTextbox = new TextBox();
+        filterRacesTextbox.addKeyUpHandler(new KeyUpHandler() {
+            @Override
+            public void onKeyUp(KeyUpEvent event) {              
+                String text = filterRacesTextbox.getText();
+
+                leaderboardList.getList().clear();
+                
+                if(text == null || text.isEmpty()) {
+                    leaderboardList.getList().addAll(availableLeaderboardList);
+                } else {
+                    String textAsUppercase = text.toUpperCase();
+                    for (LeaderboardDAO dao : availableLeaderboardList) {
+                        if(dao.name != null) {
+                            if(dao.name.toUpperCase().contains(textAsUppercase))
+                                leaderboardList.getList().add(dao);
+                        }
+                    }
+                }
+                selectedLeaderboard = null;
+                clearSelection();
+            }
+        });
+        filterPanel.add(filterRacesTextbox);
+        mainPanel.add(filterPanel);
 
         TextColumn<LeaderboardDAO> leaderboardNameColumn = new TextColumn<LeaderboardDAO>() {
             @Override
@@ -152,7 +194,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
         leaderboardTable.addColumn(discardingOptionsColumn, "Discarding");
         leaderboardTable.addColumn(leaderboardActionColumn, "Actions");
         leaderboardTable.setWidth("500px");
-        final SingleSelectionModel<LeaderboardDAO> tableSelectionModel = new SingleSelectionModel<LeaderboardDAO>();
+        tableSelectionModel = new SingleSelectionModel<LeaderboardDAO>();
         leaderboardTable.setSelectionModel(tableSelectionModel);
 
         tableSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
@@ -330,7 +372,9 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
             @Override
             public void onSuccess(List<LeaderboardDAO> leaderboards) {
                 leaderboardList.getList().clear();
+                availableLeaderboardList.clear();
                 leaderboardList.getList().addAll(leaderboards);
+                availableLeaderboardList.addAll(leaderboards);
             }
 
             @Override
@@ -716,6 +760,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
                             public void onSuccess(LeaderboardDAO result) {
 
                                 leaderboardList.getList().add(result);
+                                availableLeaderboardList.add(result);
                                 selectedLeaderboard = result;
                                 leaderboardSelectionChanged();
                             }
@@ -740,6 +785,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
                             LeaderboardDAO dao = leaderboardList.getList().get(i);
                             if(dao.name.equals(oldLeaderboardName)){
                                 leaderboardList.getList().set(i, leaderboardToUdate);
+                                availableLeaderboardList.set(i, leaderboardToUdate);
                             }
                         }
                         leaderboardList.refresh();
@@ -759,7 +805,8 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
             public void onSuccess(Void result) {
                 // check if the removed leaderboard was the selected one
                 leaderboardList.getList().remove(leaderBoard);
-
+                availableLeaderboardList.remove(leaderBoard);
+                
                 if (selectedLeaderboard != null && selectedLeaderboard.name.equals(leaderBoard.name)) {
                     selectedLeaderboard = null;
                     leaderboardSelectionChanged();
@@ -801,5 +848,13 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
                         raceColumnList.refresh();
                     }
                 });
+    }
+    
+    private void clearSelection(){
+        if (leaderboardList != null) {
+            for (LeaderboardDAO leaderboard : leaderboardList.getList()) {
+                tableSelectionModel.setSelected(leaderboard, false);
+            }
+        }
     }
 }
