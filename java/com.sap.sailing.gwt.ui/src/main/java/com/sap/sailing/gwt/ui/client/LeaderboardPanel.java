@@ -782,7 +782,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         refreshPanel.add(playPause);
         Anchor chartsAnchor = new Anchor(new SafeHtmlBuilder().appendHtmlConstant(
                 "<img class=\"linkNoBorder\" src=\"/images/chart_small.png\"/>").toSafeHtml());
-        chartsAnchor.setTitle("Show charts");
+        chartsAnchor.setTitle(stringConstants.showCharts());
         chartsAnchor.addClickHandler(new ClickHandler() {
             
             @Override
@@ -1110,18 +1110,17 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     /**
      * Removes all Columns of type racecolumns of leaderboardTable
      */
-    private void removeRaceColumnNotUsed() {
-        for (int leaderboardposition = 0; leaderboardposition < getLeaderboardTable().getColumnCount(); leaderboardposition++) {
-            Column<LeaderboardRowDAO, ?> c = getLeaderboardTable().getColumn(leaderboardposition);
-            if (c instanceof RaceColumn) {
-                RaceColumn<?> raceColumn = (RaceColumn<?>) c;
-                if(!selectedRaceColumns.contains(raceColumn.getRaceName())){
-                    if(raceColumn.isExpanded()){
-                        raceColumn.toggleExpansion();
-                    }
-                    getLeaderboardTable().removeColumn(raceColumn);
-                }
+    private void removeRaceColumnsNotSelected(List<String> selectedRaceColumns) {
+        List<Column<LeaderboardRowDAO, ?>> columnsToRemove = new ArrayList<Column<LeaderboardRowDAO, ?>>();
+        for (int i = 0; i < getLeaderboardTable().getColumnCount(); i++) {
+            Column<LeaderboardRowDAO, ?> c = getLeaderboardTable().getColumn(i);
+            if (c instanceof RaceColumn
+                    && (leaderboard == null || !selectedRaceColumns.contains(((RaceColumn<?>) c).getRaceName()))) {
+                columnsToRemove.add(c);
             }
+        }
+        for (Column<LeaderboardRowDAO, ?> c : columnsToRemove) {
+            removeColumn(c);
         }
     }
     
@@ -1139,7 +1138,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         }
         selectedRaceColumns = correctedOrderSelectedRaces;
         
-        removeRaceColumnNotUsed();
+        removeRaceColumnsNotSelected(selectedRaceColumns);
         
         for (int selectedRaceCount = 0; selectedRaceCount < selectedRaceColumns.size(); selectedRaceCount++) {
             String selectedRaceName = selectedRaceColumns.get(selectedRaceCount);

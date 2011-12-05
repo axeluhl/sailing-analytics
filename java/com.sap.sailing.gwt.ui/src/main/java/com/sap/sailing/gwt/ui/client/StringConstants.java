@@ -126,8 +126,10 @@ public interface StringConstants extends Constants {
     String tacks();
     String jibes();
     String penaltyCircles();
-    String configuration();
+    String medalRaceIsNull();
     String maneuverTypes();
+    String raceNameEmpty();
+    String configuration();
     String chooseChart();
     String distanceTraveled();
     String velocityMadeGoodLong();
@@ -148,4 +150,23 @@ public interface StringConstants extends Constants {
     String no3LetterCodes();
     String add();
     String delete();
+    String showCharts();
+    String raceWithThisNameAlreadyExists();
+    String headUp();
+    String bearAway();
+    String tack();
+    String jibe();
+    String penaltyCircle();
+    String markPassing();
+    String otherManeuver();
+    String douglasPeuckerPoints();
+    String filterRacesByName();
+    String actionEdit();
+    String actionEditScores();
+    String actionOpenBrowser();
+    String actionRemove();
+    String actionRaceEdit();
+    String actionRaceUnlink();
+    String actionRaceRemove();
+    String filterLeaderboardsByName();
 }

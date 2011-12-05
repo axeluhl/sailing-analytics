@@ -11,16 +11,18 @@ import com.google.gwt.text.shared.SafeHtmlRenderer;
 public class LeaderboardConfigImagesBarCell extends ImagesBarCell {
 
     interface ImagesBarTemplates extends SafeHtmlTemplates {
-        @SafeHtmlTemplates.Template("<div name=\"{0}\" style=\"{1}\">{2}</div>")
-        SafeHtml cell(String name, SafeStyles styles, SafeHtml value);
+        @SafeHtmlTemplates.Template("<div name=\"{0}\" style=\"{1}\" title=\"{2}\">{3}</div>")
+        SafeHtml cell(String name, SafeStyles styles, String title, SafeHtml value);
     }
 
-    public LeaderboardConfigImagesBarCell() {
+    public LeaderboardConfigImagesBarCell(StringConstants stringConstants) {
         super();
+        this.stringConstants = stringConstants;
     }
 
-    public LeaderboardConfigImagesBarCell(SafeHtmlRenderer<String> renderer) {
+    public LeaderboardConfigImagesBarCell(SafeHtmlRenderer<String> renderer, StringConstants stringConstants) {
         super();
+        this.stringConstants = stringConstants;
     }
 
     private static ImagesBarTemplates templates = GWT.create(ImagesBarTemplates.class);
@@ -32,7 +34,11 @@ public class LeaderboardConfigImagesBarCell extends ImagesBarCell {
     private static final SafeHtml ICON_OPEN_BROWSER = makeImage(resources.openBrowserIcon());
 
     private static final SafeHtml ICON_REMOVE = makeImage(resources.removeIcon());
+    
+    private static final SafeHtml ICON_EDIT_SCORES = makeImage(resources.scoresIcon());
 
+    private StringConstants stringConstants;
+    
     @Override
     protected void render(com.google.gwt.cell.client.Cell.Context context, SafeHtml data, SafeHtmlBuilder sb) {
         /*
@@ -46,13 +52,16 @@ public class LeaderboardConfigImagesBarCell extends ImagesBarCell {
 
         SafeStyles imgStyle = SafeStylesUtils.fromTrustedString("float:left;cursor:hand;cursor:pointer;padding-right:5px;");
 
-        SafeHtml rendered = templates.cell("ACTION_EDIT", imgStyle, ICON_EDIT);
+        SafeHtml rendered = templates.cell("ACTION_EDIT", imgStyle, stringConstants.actionEdit(), ICON_EDIT);
         sb.append(rendered);
 
-        rendered = templates.cell("ACTION_OPEN_BROWSER", imgStyle, ICON_OPEN_BROWSER);
+        rendered = templates.cell("ACTION_EDIT_SCORES", imgStyle, stringConstants.actionEditScores(), ICON_EDIT_SCORES);
+        sb.append(rendered);
+        
+        rendered = templates.cell("ACTION_OPEN_BROWSER", imgStyle, stringConstants.actionOpenBrowser(), ICON_OPEN_BROWSER);
         sb.append(rendered);
 
-        rendered = templates.cell("ACTION_REMOVE", imgStyle, ICON_REMOVE);
+        rendered = templates.cell("ACTION_REMOVE", imgStyle, stringConstants.actionRemove(), ICON_REMOVE);
         sb.append(rendered);
     }
 }

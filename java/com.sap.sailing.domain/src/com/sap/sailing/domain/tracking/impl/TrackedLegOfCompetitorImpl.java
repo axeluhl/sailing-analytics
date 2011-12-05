@@ -13,6 +13,7 @@ import com.sap.sailing.domain.base.Speed;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
+import com.sap.sailing.domain.base.impl.MeterDistance;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.Maneuver;
@@ -58,15 +59,16 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
 
     @Override
     public long getTimeInMilliSeconds(TimePoint timePoint) {
-        long result = -1;
-        MarkPassing passedEndWaypoint = getTrackedRace().getMarkPassing(getCompetitor(), getTrackedLeg().getLeg().getTo());
-        if (passedEndWaypoint != null) {
-            MarkPassing passedStartWaypoint = getTrackedRace().getMarkPassing(getCompetitor(), getTrackedLeg().getLeg().getFrom());
-            if (passedStartWaypoint != null) {
+        long result = 0;
+        MarkPassing passedStartWaypoint = getTrackedRace().getMarkPassing(getCompetitor(),
+                getTrackedLeg().getLeg().getFrom());
+        if (passedStartWaypoint != null) {
+            MarkPassing passedEndWaypoint = getTrackedRace().getMarkPassing(getCompetitor(),
+                    getTrackedLeg().getLeg().getTo());
+            if (passedEndWaypoint != null) {
                 result = passedEndWaypoint.getTimePoint().asMillis() - passedStartWaypoint.getTimePoint().asMillis();
             } else {
-                throw new RuntimeException(""+getCompetitor()+" passed waypoint at end of leg "+
-                        getLeg()+" without having passed waypoint at beginning of leg");
+                result = timePoint.asMillis() - passedStartWaypoint.getTimePoint().asMillis();
             }
         }
         return result;
@@ -327,14 +329,33 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     public Distance getWindwardDistanceToOverallLeader(TimePoint timePoint) throws NoWindException {
         Competitor leader = getTrackedLeg().getRanks(timePoint).keySet().iterator().next();
         TrackedLegOfCompetitor leaderLeg = getTrackedRace().getCurrentLeg(leader, timePoint);
-        if (leaderLeg.getLeg() == getLeg()) {
-            // we're still in the same leg with leader; compute windward distance to leader
-            return getWindwardDistance(getTrackedRace().getTrack(leader).getEstimatedPosition(timePoint, /* extrapolate */ false),
-                    getTrackedRace().getTrack(getCompetitor()).getEstimatedPosition(timePoint, /* extrapolate */ false), timePoint);
-        } else {
-            return null;
-            // TODO special case leader has finished race already
+        Distance result = null;
+        Position leaderPosition = getTrackedRace().getTrack(leader).getEstimatedPosition(timePoint, /* extrapolate */ false);
+        Position currentPosition = getTrackedRace().getTrack(getCompetitor()).getEstimatedPosition(timePoint, /* extrapolate */ false);
+        if (leaderPosition != null && currentPosition != null) {
+            result = Distance.NULL;
+            boolean foundCompetitorsLeg = false;
+            for (Leg leg : getTrackedRace().getRace().getCourse().getLegs()) {
+                if (leg == getLeg()) {
+                    foundCompetitorsLeg = true;
+                }
+                if (foundCompetitorsLeg) {
+                    // if the leaderLeg is null, the leader has already arrived
+                    if (leaderLeg == null || leg != leaderLeg.getLeg()) {
+                        // add distance to next mark
+                        Position nextMarkPosition = getTrackedRace().getApproximatePosition(leg.getTo(), timePoint);
+                        Distance distanceToNextMark = getWindwardDistance(currentPosition, nextMarkPosition, timePoint);
+                        result = new MeterDistance(result.getMeters() + distanceToNextMark.getMeters());
+                    } else {
+                        // we're now in the same leg with leader; compute windward distance to leader
+                        result = new MeterDistance(result.getMeters()
+                                + getWindwardDistance(leaderPosition, currentPosition, timePoint).getMeters());
+                        break;
+                    }
+                }
+            }
         }
+        return result;
     }
 
     @Override

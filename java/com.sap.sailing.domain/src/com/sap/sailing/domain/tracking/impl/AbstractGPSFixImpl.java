@@ -47,5 +47,21 @@ public abstract class AbstractGPSFixImpl implements GPSFix {
         return new KnotSpeedWithBearingImpl(speed.getKnots(), bearing);
     }
     
+    @Override
+    public boolean isValidityCached() {
+        return false;
+    }
     
+    @Override
+    public boolean isValid() {
+        return false;
+    }
+    
+    @Override
+    public void invalidateCache() {
+    }
+    
+    @Override
+    public void cacheValidity(boolean isValid) {
+    }
 }
