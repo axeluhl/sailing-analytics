@@ -162,7 +162,7 @@ public interface StringConstants extends Constants {
     String douglasPeuckerPoints();
     String filterRacesByName();
     String actionEdit();
-    String actionEditDiscardingRoules();
+    String actionEditScores();
     String actionOpenBrowser();
     String actionRemove();
     String actionRaceEdit();
