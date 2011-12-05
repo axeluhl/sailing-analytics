@@ -1,8 +1,11 @@
 package com.sap.sailing.gwt.ui.client;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import com.google.gwt.ajaxloader.client.ArrayHelper;
+import com.google.gwt.core.client.JsArray;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -28,7 +31,10 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.visualization.client.AbstractDataTable;
 import com.google.gwt.visualization.client.AbstractDataTable.ColumnType;
 import com.google.gwt.visualization.client.DataTable;
+import com.google.gwt.visualization.client.Selection;
 import com.google.gwt.visualization.client.VisualizationUtils;
+import com.google.gwt.visualization.client.events.SelectHandler;
+import com.google.gwt.visualization.client.formatters.NumberFormat;
 import com.google.gwt.visualization.client.visualizations.corechart.AxisOptions;
 import com.google.gwt.visualization.client.visualizations.corechart.LineChart;
 import com.google.gwt.visualization.client.visualizations.corechart.Options;
@@ -55,6 +61,7 @@ public class CompareCompetitorsPanel extends FormPanel {
     private int chartHeight;
     private HashMap<String, Boolean> competitorVisible = new HashMap<String, Boolean>();
     private VerticalPanel selectCompetitors;
+    private NumberFormat chartNumberFormat;
     
     public static final int DECK_PANEL_INDEX_LOADING = 0;
     public static final int DECK_PANEL_INDEX_CHART = 1;
@@ -165,13 +172,20 @@ public class CompareCompetitorsPanel extends FormPanel {
                 chartLoaded = true;
                 if (chartLoaded && dataLoaded){
                     deckPanel.showWidget(DECK_PANEL_INDEX_CHART);
+                    chart.draw(prepareTableData(), getOptions());
+                    setMarkPassingSelection();
+                    chart.addSelectHandler(new SelectHandler() {
+                        
+                        @Override
+                        public void onSelect(SelectEvent event) {
+                            setMarkPassingSelection();
+                        }
+                    });
                 }
                 fireEvent(new DataLoadedEvent());
                 
             }
         };
-        VisualizationUtils.loadVisualizationApi(onLoadCallback, LineChart.PACKAGE);
-        loadData();
         chartPanel.add(deckPanel);
         mainPanel.add(chartPanel);
         Anchor showConfigAnchor = new Anchor(new SafeHtmlBuilder().appendHtmlConstant(
@@ -187,6 +201,8 @@ public class CompareCompetitorsPanel extends FormPanel {
         mainPanel.add(showConfigAnchor);
         mainPanel.add(configCaption);
         this.add(mainPanel);
+        VisualizationUtils.loadVisualizationApi(onLoadCallback, LineChart.PACKAGE);
+        loadData();
     }
 
     private Options getOptions() {
@@ -258,6 +274,14 @@ public class CompareCompetitorsPanel extends FormPanel {
                                 if (chartLoaded && dataLoaded){
                                     deckPanel.showWidget(DECK_PANEL_INDEX_CHART);
                                     chart.draw(prepareTableData(), getOptions());
+                                    setMarkPassingSelection();
+                                    chart.addSelectHandler(new SelectHandler() {
+                                        
+                                        @Override
+                                        public void onSelect(SelectEvent event) {
+                                            setMarkPassingSelection();
+                                        }
+                                    });
                                 }
                             }
                         });
@@ -323,14 +347,35 @@ public class CompareCompetitorsPanel extends FormPanel {
                 if (seconds.length() < 2){
                     seconds= "0" + seconds;
                 }
-                data.setValue(i, 0, minutes + ":" + seconds);
+                data.setValue(i, 0, minutes + ":" + seconds + " min");
             }
+            String suffix = "";
+            switch (dataToShow){
+            case SHOW_CURRENT_SPEED_OVER_GROUND:
+                suffix = stringConstants.currentSpeedOverGroundInKnotsUnit();
+                break;
+            case SHOW_DISTANCE_TRAVELED:
+                suffix = stringConstants.metersUnit();
+                break;
+            case SHOW_GAP_TO_LEADER:
+                suffix = stringConstants.secondsUnit();
+                break;
+            case SHOW_VELOCITY_MADE_GOOD:
+                suffix = stringConstants.currentSpeedOverGroundInKnotsUnit();
+                break;
+            case SHOW_WINDWARD_DISTANCE_TO_LEADER:
+                suffix = stringConstants.metersUnit();
+                break;
+            }
+            chartNumberFormat = NumberFormat.create(createNumberFormatOptions(suffix));
             for (int i = 0; i < chartData.size(); i++) {
                 for (int j = 0; j < chartData.get(i).getB().length; j++) {
                     if (chartData.get(i).getB()[j] != null && isCompetitorVisible(chartData.get(i).getA())) {
                         data.setValue(j, (i + 1), chartData.get(i).getB()[j]);
+                        
                     }
                 }
+                chartNumberFormat.format(data, i+1);
             }
         }
 
@@ -378,4 +423,34 @@ public class CompareCompetitorsPanel extends FormPanel {
         return (isVisible != null) ? isVisible : false;
     }
 
+    private com.google.gwt.visualization.client.formatters.NumberFormat.Options createNumberFormatOptions(String suffix){
+        com.google.gwt.visualization.client.formatters.NumberFormat.Options options = com.google.gwt.visualization.client.formatters.NumberFormat.Options.create();
+        options.setFractionDigits(2);
+        options.setSuffix(suffix);
+        return options;
+    }
+    
+    private void setMarkPassingSelection(){
+        ArrayList<Selection> selections = new ArrayList<Selection>();
+        Long[] timePoints = competitorAndTimePointsDAO.getTimePoints();
+        for (int column = 0; column < competitorAndTimePointsDAO.getCompetitor().length; column++) {
+            int currentMarkPassing = 0;
+            Long[] markPassing = competitorAndTimePointsDAO.getMarkPassings(competitorAndTimePointsDAO.getCompetitor()[column]);
+            
+            for (int row = 0; row < timePoints.length && currentMarkPassing < markPassing.length; row++){
+                if (row > 0 && timePoints[row-1] < markPassing[currentMarkPassing] && timePoints[row] > markPassing[currentMarkPassing]){
+                    selections.add(Selection.createCellSelection(row, column+1));
+                    currentMarkPassing++;
+                }
+                else if (row == 0 && timePoints[row] > markPassing[currentMarkPassing]){
+                    selections.add(Selection.createCellSelection(row, column+1));
+                    currentMarkPassing++;
+                }
+            }
+        }
+        JsArray<Selection> sel = ArrayHelper.toJsArray(selections.toArray(new Selection[0]));
+        if (chartLoaded && dataLoaded){
+            chart.setSelections(sel);
+        }
+    }
 }
