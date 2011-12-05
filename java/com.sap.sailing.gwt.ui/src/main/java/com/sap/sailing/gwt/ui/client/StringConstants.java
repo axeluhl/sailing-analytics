@@ -165,4 +165,8 @@ public interface StringConstants extends Constants {
     String actionEditScores();
     String actionOpenBrowser();
     String actionRemove();
+    String actionRaceEdit();
+    String actionRaceUnlink();
+    String actionRaceRemove();
+    String filterLeaderboardsByName();
 }

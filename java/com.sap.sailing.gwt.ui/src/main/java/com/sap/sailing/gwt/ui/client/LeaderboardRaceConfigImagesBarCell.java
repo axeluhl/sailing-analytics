@@ -10,17 +10,21 @@ import com.google.gwt.text.shared.SafeHtmlRenderer;
 
 public class LeaderboardRaceConfigImagesBarCell extends ImagesBarCell {
 
+    private StringConstants stringConstants;
+
     interface ImagesBarTemplates extends SafeHtmlTemplates {
-        @SafeHtmlTemplates.Template("<div name=\"{0}\" style=\"{1}\">{2}</div>")
-        SafeHtml cell(String name, SafeStyles styles, SafeHtml value);
+        @SafeHtmlTemplates.Template("<div name=\"{0}\" style=\"{1}\" title=\"{2}\">{3}</div>")
+        SafeHtml cell(String name, SafeStyles styles, String title, SafeHtml value);
     }
 
-    public LeaderboardRaceConfigImagesBarCell() {
+    public LeaderboardRaceConfigImagesBarCell(StringConstants stringConstants) {
         super();
+        this.stringConstants = stringConstants;
     }
 
-    public LeaderboardRaceConfigImagesBarCell(SafeHtmlRenderer<String> renderer) {
+    public LeaderboardRaceConfigImagesBarCell(SafeHtmlRenderer<String> renderer, StringConstants stringConstants) {
         super();
+        this.stringConstants = stringConstants;
     }
 
     private static ImagesBarTemplates templates = GWT.create(ImagesBarTemplates.class);
@@ -36,23 +40,23 @@ public class LeaderboardRaceConfigImagesBarCell extends ImagesBarCell {
     @Override
     protected void render(com.google.gwt.cell.client.Cell.Context context, SafeHtml data, SafeHtmlBuilder sb) {
         /*
-         * Always do a null check on the value. Cell widgets can pass null to
-         * cells if the underlying data contains a null, or if the data arrives
-         * out of order.
+         * Always do a null check on the value. Cell widgets can pass null to cells if the underlying data contains a
+         * null, or if the data arrives out of order.
          */
         if (data == null) {
             return;
         }
 
-        SafeStyles imgStyle = SafeStylesUtils.fromTrustedString("float:left;cursor:hand;cursor:pointer;padding-right:5px;");
+        SafeStyles imgStyle = SafeStylesUtils
+                .fromTrustedString("float:left;cursor:hand;cursor:pointer;padding-right:5px;");
 
-        SafeHtml rendered = templates.cell("ACTION_EDIT", imgStyle, ICON_EDIT);
+        SafeHtml rendered = templates.cell("ACTION_EDIT", imgStyle, stringConstants.actionRaceEdit(), ICON_EDIT);
         sb.append(rendered);
 
-        rendered = templates.cell("ACTION_UNLINK", imgStyle, ICON_UNLINK);
+        rendered = templates.cell("ACTION_UNLINK", imgStyle, stringConstants.actionRaceUnlink(), ICON_UNLINK);
         sb.append(rendered);
 
-        rendered = templates.cell("ACTION_REMOVE", imgStyle, ICON_REMOVE);
+        rendered = templates.cell("ACTION_REMOVE", imgStyle, stringConstants.actionRaceRemove(), ICON_REMOVE);
         sb.append(rendered);
     }
 }

@@ -52,7 +52,7 @@ public class LeaderboardConfigImagesBarCell extends ImagesBarCell {
 
         SafeStyles imgStyle = SafeStylesUtils.fromTrustedString("float:left;cursor:hand;cursor:pointer;padding-right:5px;");
 
-        SafeHtml rendered = templates.cell("ACTION_EDIT", imgStyle, stringConstants.actionEditScores(), ICON_EDIT);
+        SafeHtml rendered = templates.cell("ACTION_EDIT", imgStyle, stringConstants.actionEdit(), ICON_EDIT);
         sb.append(rendered);
 
         rendered = templates.cell("ACTION_EDIT_SCORES", imgStyle, stringConstants.actionEditScores(), ICON_EDIT_SCORES);

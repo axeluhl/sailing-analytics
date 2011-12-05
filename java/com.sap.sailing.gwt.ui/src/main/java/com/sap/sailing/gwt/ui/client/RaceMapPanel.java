@@ -1144,7 +1144,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
                             options.setIcon(markPassingToStarboardIcon);
                         }
                     } else {
-                        if (getCheckboxValueManeuver("OTHER")) {
+                        if (maneuver.type.equals("UNKNOWN") && getCheckboxValueManeuver("OTHER")) {
                             options.setIcon(unknownManeuverIcon);
                         } else {
                             showThisManeuver = false;
