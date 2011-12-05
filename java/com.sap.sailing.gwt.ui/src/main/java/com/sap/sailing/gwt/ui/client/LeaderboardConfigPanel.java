@@ -57,6 +57,8 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
     private final CellTable<RaceInLeaderboardDAO> raceColumnTable;
 
     private LeaderboardDAO selectedLeaderboard;
+    
+    private RaceInLeaderboardDAO selectedRaceInLeaderboard;
 
     private final Button addColumnButton;
 
@@ -370,6 +372,8 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
                     @Override
                     public void onSuccess(Void arg0) {
                         trackedEventsComposite.clearSelection();
+                        getSelectedRaceInLeaderboard().setTrackedRace(false);
+                        raceColumnList.refresh();
                     }
                 });
     }
@@ -457,10 +461,12 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
     }
 
     private void leaderboardRaceColumnSelectionChanged() {
-        String selectedRaceColumnName = getSelectedRaceInLeaderboard().getRaceColumnName();
-        if (selectedRaceColumnName != null) {
+        //String selectedRaceColumnName = getSelectedRaceInLeaderboard().getRaceColumnName();
+        selectedRaceInLeaderboard = getSelectedRaceInLeaderboard();
+        if (selectedRaceInLeaderboard != null) {
             columnMoveUpButton.setEnabled(true);
             columnMoveDownButton.setEnabled(true);
+            reloadRaceInLeaderboardRow(selectedRaceInLeaderboard.getRaceColumnName(), selectedRaceInLeaderboard);
             selectTrackedRaceInRaceTree();
         } else {
             columnMoveUpButton.setEnabled(false);
@@ -790,6 +796,8 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
                     @Override
                     public void onSuccess(Void arg0) {
                         // unlinkRaceColumnFromTrackedRaceButton.setEnabled(true);
+                        getSelectedRaceInLeaderboard().setTrackedRace(true);
+                        raceColumnList.refresh();
                     }
                 });
     }
