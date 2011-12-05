@@ -805,7 +805,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                     default:
                         maneuverType = Type.UNKNOWN;
                         logger.fine("Unknown maneuver for " + competitor + " at " + maneuverTimePoint
-                                + " on reaching leg " + legBeforeManeuver.getLeg());
+                                + (legBeforeManeuver != null ? " on reaching leg " + legBeforeManeuver.getLeg() : " before start"));
                         break;
                     }
                 } else {
