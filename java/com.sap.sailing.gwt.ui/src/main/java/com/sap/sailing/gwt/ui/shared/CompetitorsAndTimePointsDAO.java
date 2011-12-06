@@ -11,8 +11,10 @@ public class CompetitorsAndTimePointsDAO implements IsSerializable {
     private HashMap<String, long[]> markPassings;
     private long startTime;
     private long timePointOfNewestEvent;
-    private final int steps;
+    private int steps;
 
+    CompetitorsAndTimePointsDAO() {}
+    
     public CompetitorsAndTimePointsDAO(int steps) {
         markPassings = new HashMap<String, long[]>();
         this.steps = steps;
