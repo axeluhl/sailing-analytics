@@ -110,8 +110,6 @@ public interface SailingServiceAsync {
 
     void getLeaderboards(AsyncCallback<List<LeaderboardDAO>> callback);
     
-    void getLeaderboardByName(String leaderboardName, AsyncCallback<LeaderboardDAO> callback);
-    
     void updateLeaderboard(String leaderboardName, String newLeaderboardName, int[] newDiscardingThreasholds,
             AsyncCallback<Void> callback);
 
@@ -171,6 +169,7 @@ public interface SailingServiceAsync {
             boolean trackWind, boolean correctWindByDeclination, AsyncCallback<Void> asyncCallback);
 
     void sendSwissTimingDummyRace(String racMessage, String stlMesssage, String ccgMessage, AsyncCallback<Void> callback);
+    
     /**
      * Requests the computation of the {@link LeaderboardDAO} for <code>leaderboardName</code> <code>times</code> times.
      * The date used for the {@link #getLeaderboardByName(String, Date, Collection, AsyncCallback)} call is iterated
@@ -182,6 +181,7 @@ public interface SailingServiceAsync {
 
     void getCompetitorRaceData(RaceIdentifier race, CompetitorsAndTimePointsDAO competitorAndTimePointsDAO,
             DetailType dataType, AsyncCallback<List<Pair<CompetitorDAO, Double[]>>> callback);
+    
     void getDouglasPoints(RaceIdentifier raceIdentifier, Map<CompetitorDAO, Date> from, Map<CompetitorDAO, Date> to,
             double meters, AsyncCallback<Map<CompetitorDAO, List<GPSFixDAO>>> callback);
 
