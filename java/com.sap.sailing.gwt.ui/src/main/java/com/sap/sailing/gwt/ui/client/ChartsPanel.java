@@ -364,19 +364,19 @@ public class ChartsPanel extends FormPanel {
             }
             String suffix = "";
             switch (dataToShow){
-            case SHOW_CURRENT_SPEED_OVER_GROUND:
+            case CURRENT_SPEED_OVER_GROUND_IN_KNOTS:
                 suffix = stringConstants.currentSpeedOverGroundInKnotsUnit();
                 break;
-            case SHOW_DISTANCE_TRAVELED:
+            case DISTANCE_TRAVELED:
                 suffix = stringConstants.metersUnit();
                 break;
-            case SHOW_GAP_TO_LEADER:
+            case GAP_TO_LEADER_IN_SECONDS:
                 suffix = stringConstants.secondsUnit();
                 break;
-            case SHOW_VELOCITY_MADE_GOOD:
+            case VELOCITY_MADE_GOOD_IN_KNOTS:
                 suffix = stringConstants.currentSpeedOverGroundInKnotsUnit();
                 break;
-            case SHOW_WINDWARD_DISTANCE_TO_LEADER:
+            case WINDWARD_DISTANCE_TO_OVERALL_LEADER:
                 suffix = stringConstants.metersUnit();
                 break;
             }
@@ -438,7 +438,7 @@ public class ChartsPanel extends FormPanel {
 
     private com.google.gwt.visualization.client.formatters.NumberFormat.Options createNumberFormatOptions(String suffix){
         com.google.gwt.visualization.client.formatters.NumberFormat.Options options = com.google.gwt.visualization.client.formatters.NumberFormat.Options.create();
-        options.setFractionDigits(2);
+        options.setFractionDigits(dataToShow.getPrecision());
         options.setSuffix(suffix);
         return options;
     }
