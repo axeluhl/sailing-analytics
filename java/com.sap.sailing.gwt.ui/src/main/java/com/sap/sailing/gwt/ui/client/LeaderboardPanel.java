@@ -434,11 +434,13 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
          * not yet existing. It is important to remember the columns because column removal happens based on identity.
          */
         private final List<LegColumn> legColumns;
+        private final ManeuverCountRaceColumn maneuverColumn;
 
         public TextRaceColumn(String raceName, boolean medalRace, boolean expandable, String headerStyle,
                 String columnStyle) {
             super(raceName, medalRace, expandable, new TextCell(), headerStyle, columnStyle);
             legColumns = new ArrayList<LegColumn>();
+            maneuverColumn = getManeuverCountRaceColumn();
         }
 
         @Override
@@ -498,7 +500,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 result.add(column);
             }
             if (isExpanded()) {
-                result.add(getManeuverCountRaceColumn());
+                result.add(maneuverColumn);
                 // it is important to re-use existing LegColumn objects because
                 // removing the columns from the table
                 // is based on column identity
@@ -521,7 +523,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         }
         
         private ManeuverCountRaceColumn getManeuverCountRaceColumn(){
-            return new ManeuverCountRaceColumn(getLeaderboardPanel(), getRaceName(), stringConstants, LeaderboardPanel.this.selectedManeuverDetails, LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE);
+            return new ManeuverCountRaceColumn(getLeaderboardPanel(), getRaceName(), stringConstants, LeaderboardPanel.this.selectedManeuverDetails, LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LEG_DETAIL_COLUMN_HEADER_STYLE, LEG_DETAIL_COLUMN_STYLE);
         }
 
         private LegColumn getLegColumn(int legNumber) {
@@ -732,6 +734,9 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         this.selectedRaceDetails = new ArrayList<DetailType>();
         this.selectedRaceColumns = new ArrayList<String>();
         this.selectedManeuverDetails = new ArrayList<DetailType>();
+        selectedManeuverDetails.add(DetailType.TACK);
+        selectedManeuverDetails.add(DetailType.JIBE);
+        selectedManeuverDetails.add(DetailType.PENALTY_CIRCLE);
         delayInMilliseconds = 0l;
         timer = new Timer(/* delayBetweenAutoAdvancesInMilliseconds */ 3000l);
         timer.setDelay(getDelayInMilliseconds()); // set time/delay before

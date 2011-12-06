@@ -5,14 +5,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.xml.soap.Detail;
-
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.cellview.client.Header;
 import com.sap.sailing.gwt.ui.client.LegDetailColumn.LegDetailField;
-import com.sap.sailing.gwt.ui.client.ManeuverColumn.AbstractManeuverDetailField;
-import com.sap.sailing.gwt.ui.client.ManeuverDetailColumn.ManeuverDetailField;
 import com.sap.sailing.gwt.ui.shared.DetailType;
 import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDAO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDAO;
@@ -26,6 +22,9 @@ public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> {
     
     private final String headerStyle;
     private final String columnStyle;
+    
+    private final String detailHeaderStyle;
+    private final String detailColumnStyle;
 
     private abstract class AbstractManeuverDetailField<T extends Comparable<?>> implements LegDetailField<T> {
         public T get(LeaderboardRowDAO row) {
@@ -40,41 +39,42 @@ public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> {
         protected abstract T getFromNonNullEntry(LeaderboardEntryDAO entry);
     }
 
-    private class NumberOfTacks extends AbstractManeuverDetailField<Integer> {
+    private class NumberOfTacks extends AbstractManeuverDetailField<Double> {
 
         @Override
-        protected Integer getFromNonNullEntry(LeaderboardEntryDAO entry) {
-            // TODO get lerderboard double like in get number of
-            return ManeuverCountRaceColumn.this.getTotalNumberOfTacks(entry);
+        protected Double getFromNonNullEntry(LeaderboardEntryDAO entry) {
+            return (double) ManeuverCountRaceColumn.this.getTotalNumberOfTacks(entry);
         }
     }
     
-    private class NumberOfJibes extends AbstractManeuverDetailField<Integer> {
+    private class NumberOfJibes extends AbstractManeuverDetailField<Double> {
 
         @Override
-        protected Integer getFromNonNullEntry(LeaderboardEntryDAO entry) {
+        protected Double getFromNonNullEntry(LeaderboardEntryDAO entry) {
             // TODO get lerderboard double like in get number of
-            return ManeuverCountRaceColumn.this.getTotalNumberOfJibes(entry);
+            return (double) ManeuverCountRaceColumn.this.getTotalNumberOfJibes(entry);
         }
     }
     
-    private class NumberOfPenaltyCircles extends AbstractManeuverDetailField<Integer> {
+    private class NumberOfPenaltyCircles extends AbstractManeuverDetailField<Double> {
 
         @Override
-        protected Integer getFromNonNullEntry(LeaderboardEntryDAO entry) {
+        protected Double getFromNonNullEntry(LeaderboardEntryDAO entry) {
             // TODO get lerderboard double like in get number of
-            return ManeuverCountRaceColumn.this.getTotalNumberOfPenaltyCircles(entry);
+            return (double) ManeuverCountRaceColumn.this.getTotalNumberOfPenaltyCircles(entry);
         }
     }
     
     public ManeuverCountRaceColumn(LeaderboardPanel leaderboardPanel, String raceName, StringConstants stringConstants,
-            List<DetailType> maneuverDetailSelection, String headerStyle, String columnStylee) {
+            List<DetailType> maneuverDetailSelection, String headerStyle, String columnStylee, String detailHeaderStyle, String detailColumnStyle) {
         super(leaderboardPanel, /* expandable */true /* all legs have details */, new TextCell(), stringConstants,
                 headerStyle, columnStylee, maneuverDetailSelection);
         this.stringConstants = stringConstants;
         this.raceName = raceName;
         this.headerStyle = headerStyle;
         this.columnStyle = columnStylee;
+        this.detailColumnStyle = detailColumnStyle;
+        this.detailHeaderStyle = detailHeaderStyle;
     }
 
     private Integer getTotalNumberOfTacks(LeaderboardEntryDAO row) {
@@ -181,24 +181,33 @@ public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> {
     @Override
     public Comparator<LeaderboardRowDAO> getComparator() {
          return new Comparator<LeaderboardRowDAO>() {
-            @Override
-            public int compare(LeaderboardRowDAO o1, LeaderboardRowDAO o2) {
-                boolean ascending = isSortedAscendingForThisColumn(getLeaderboardPanel().getLeaderboardTable());
-                if(o1 != null && o2 != null){
-                    String val1 = getValue(o1);
-                    String val2 = getValue(o2);
-                    if(val1!="" && val1 != null && val2 != "" && val2 != null){
-                        int diff = Integer.parseInt(val2) - Integer.parseInt(val1);
-                        return ascending ? diff : -diff;
-                    }
-                }
-                return 0;
-            }
+             @Override
+             public int compare(LeaderboardRowDAO o1, LeaderboardRowDAO o2) {
+                 boolean ascending = isSortedAscendingForThisColumn(getLeaderboardPanel().getLeaderboardTable());
+                 if(o1 != null && o2 != null){
+                     Double val1 = getDoubleValue(o1);
+                     Double val2 = getDoubleValue(o2);
+                     if(val1 != null && val2 != null){
+                         int result = (int) (val1 - val2);
+                         return result;
+                     }
+                 }
+                 return ascending? -1:1;
+             }
         };
     }
 
     @Override
     public String getValue(LeaderboardRowDAO object) {
+        Double result = getDoubleValue(object);
+        if(result==null){
+            return "";
+        }else{
+            return result.toString();
+        }
+    }
+    
+    public Double getDoubleValue(LeaderboardRowDAO object){
         Double result = null;
         Triple<Integer, Integer, Integer> tacksJibesAndPenalties = getTotalNumberOfTacksJibesAndPenaltyCircles(object);
         Integer totalNumberOfTacks = tacksJibesAndPenalties.getA();
@@ -221,11 +230,7 @@ public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> {
                 result += (double) totalNumberOfPenaltyCircles;
             }
         }
-        if(result==null){
-            return "";
-        }else{
-            return result.toString();
-        }
+        return result;
     }
     
     @Override
@@ -234,7 +239,16 @@ public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> {
             String detailColumnStyle) {
         Map<DetailType, SortableColumn<LeaderboardRowDAO, ?>> result = new HashMap<DetailType, SortableColumn<LeaderboardRowDAO, ?>>();
         result.put(DetailType.TACK, 
-                new FormattedDoubleLegDetailColumn(stringConstants.tack(), "", field, 0, getLeaderboardPanel().getLeaderboardTable(), 
+                new FormattedDoubleLegDetailColumn(stringConstants.tack(), "",
+                        new NumberOfTacks(), 0, getLeaderboardPanel().getLeaderboardTable(),
+                        detailHeaderStyle, detailColumnStyle));
+        result.put(DetailType.JIBE, 
+                new FormattedDoubleLegDetailColumn(stringConstants.jibe(), "",
+                        new NumberOfJibes(), 0, getLeaderboardPanel().getLeaderboardTable(),
+                        detailHeaderStyle, detailColumnStyle));
+        result.put(DetailType.PENALTY_CIRCLE, 
+                new FormattedDoubleLegDetailColumn(stringConstants.penaltyCircle(), "",
+                        new NumberOfPenaltyCircles(), 0, getLeaderboardPanel().getLeaderboardTable(),
                         detailHeaderStyle, detailColumnStyle));
         return result;
     }
