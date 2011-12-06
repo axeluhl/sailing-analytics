@@ -1,11 +1,18 @@
 package com.sap.sailing.gwt.ui.shared;
 
+import java.util.HashMap;
+
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 public class CompetitorAndTimePointsDAO implements IsSerializable {
     private CompetitorDAO[] competitors;
+    private HashMap<String, Long[]> markPassings;
     private Long[] timePoints;
     private long startTime;
+    
+    public CompetitorAndTimePointsDAO(){
+        markPassings = new HashMap<String, Long[]>();
+    }
     
     public Long[] getTimePoints() {
         return timePoints;
@@ -24,6 +31,12 @@ public class CompetitorAndTimePointsDAO implements IsSerializable {
     }
     public void setStartTime(long startTime) {
         this.startTime = startTime;
+    }
+    public Long[] getMarkPassings(CompetitorDAO competitor) {
+        return markPassings.get(competitor.id);
+    }
+    public void setMarkPassings(CompetitorDAO competitor, Long[] markPassings) {
+        this.markPassings.put(competitor.id, markPassings);
     }
 
     

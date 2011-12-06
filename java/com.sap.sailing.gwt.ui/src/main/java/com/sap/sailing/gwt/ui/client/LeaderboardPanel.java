@@ -1307,7 +1307,9 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         List<CompetitorDAO> competitors = new ArrayList<CompetitorDAO>();
         List<RaceIdentifier> races = new ArrayList<RaceIdentifier>();
         for (RaceInLeaderboardDAO race : getLeaderboard().getRaceList()) {
-            races.add(new LeaderboardNameAndRaceColumnName(leaderboardName, race.getRaceColumnName()));
+            if (race.isTrackedRace()){
+                races.add(new LeaderboardNameAndRaceColumnName(leaderboardName, race.getRaceColumnName()));
+            }
         }
         if (leaderboardSelectionModel.getSelectedSet().size() > 0){
             for (LeaderboardRowDAO leaderboardRowDAO : leaderboardSelectionModel.getSelectedSet()) {

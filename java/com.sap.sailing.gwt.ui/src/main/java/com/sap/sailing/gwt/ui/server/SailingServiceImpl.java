@@ -18,6 +18,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.NavigableSet;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -62,6 +63,7 @@ import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.Maneuver;
+import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.NoWindException;
 import com.sap.sailing.domain.tracking.RacesHandle;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
@@ -1258,19 +1260,13 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         case WINDWARD_DISTANCE_TO_OVERALL_LEADER:
             for (int c = 0; c < selectedCompetitor.size(); c++){
                 Double[] entries = new Double[competitorAndTimePointsDAO.getTimePoints().length];
-                try {
-                    for (int i = 0; i < competitorAndTimePointsDAO.getTimePoints().length; i++){
-                        MillisecondsTimePoint time = new MillisecondsTimePoint(competitorAndTimePointsDAO.getTimePoints()[i]);
-                        TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(selectedCompetitor.get(c), time);
-                        if (trackedLeg != null){
-                            Distance distanceToLeader = trackedLeg.getWindwardDistanceToOverallLeader(time);
-                            entries[i] = (distanceToLeader == null) ? null : distanceToLeader.getMeters();
-                        }
+                for (int i = 0; i < competitorAndTimePointsDAO.getTimePoints().length; i++){
+                    MillisecondsTimePoint time = new MillisecondsTimePoint(competitorAndTimePointsDAO.getTimePoints()[i]);
+                    TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(selectedCompetitor.get(c), time);
+                    if (trackedLeg != null){
+                        Distance distanceToLeader = trackedLeg.getWindwardDistanceToOverallLeader(time);
+                        entries[i] = (distanceToLeader == null) ? null : distanceToLeader.getMeters();
                     }
-                }
-                catch (NullPointerException npe){
-                    System.out.println(npe.getLocalizedMessage());
-                    npe.printStackTrace();
                 }
                 competitorData.add(new Pair<CompetitorDAO, Double[]>(competitorAndTimePointsDAO.getCompetitor()[c], entries));
             }
@@ -1434,11 +1430,17 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     public CompetitorAndTimePointsDAO getCompetitorAndTimePoints(RaceIdentifier race, int steps) {
         CompetitorAndTimePointsDAO competitorAndTimePointsDAO = new CompetitorAndTimePointsDAO();
         TrackedRace trackedRace = getTrackedRace(race);
-        List<CompetitorDAO> competitorDAOs = new ArrayList<CompetitorDAO>();
+        List<CompetitorDAO> competitors = new ArrayList<CompetitorDAO>();
         for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
-            competitorDAOs.add(getCompetitorDAO(competitor));
+            NavigableSet<MarkPassing> markPassings = trackedRace.getMarkPassings(competitor);
+            List<Long> markPassingTimes = new ArrayList<Long>();
+            for (MarkPassing markPassing : markPassings){
+                markPassingTimes.add(markPassing.getTimePoint().asMillis());
+            }
+            competitors.add(getCompetitorDAO(competitor));
+            competitorAndTimePointsDAO.setMarkPassings(getCompetitorDAO(competitor), markPassingTimes.toArray(new Long[0]));
         }
-        competitorAndTimePointsDAO.setCompetitor(competitorDAOs.toArray(new CompetitorDAO[0]));
+        competitorAndTimePointsDAO.setCompetitor(competitors.toArray(new CompetitorDAO[0]));
         competitorAndTimePointsDAO.setStartTime(trackedRace.getStart().asMillis());
         List<Long> timePoints = new ArrayList<Long>();
         long stepsize = (trackedRace.getTimePointOfNewestEvent().asMillis()- trackedRace.getStart().asMillis() - 20000)/steps;

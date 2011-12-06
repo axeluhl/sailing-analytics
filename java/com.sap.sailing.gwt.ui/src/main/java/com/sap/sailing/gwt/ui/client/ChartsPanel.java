@@ -1,8 +1,11 @@
 package com.sap.sailing.gwt.ui.client;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import com.google.gwt.ajaxloader.client.ArrayHelper;
+import com.google.gwt.core.client.JsArray;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -28,7 +31,10 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.visualization.client.AbstractDataTable;
 import com.google.gwt.visualization.client.AbstractDataTable.ColumnType;
 import com.google.gwt.visualization.client.DataTable;
+import com.google.gwt.visualization.client.Selection;
 import com.google.gwt.visualization.client.VisualizationUtils;
+import com.google.gwt.visualization.client.events.SelectHandler;
+import com.google.gwt.visualization.client.formatters.NumberFormat;
 import com.google.gwt.visualization.client.visualizations.corechart.AxisOptions;
 import com.google.gwt.visualization.client.visualizations.corechart.LineChart;
 import com.google.gwt.visualization.client.visualizations.corechart.Options;
@@ -48,6 +54,8 @@ public class ChartsPanel extends FormPanel {
     private final RaceIdentifier[] races;
     private int selectedRace = 0;
     private int stepsToLoad = 100;
+    private int startPoint = 0;
+    private int endPoint = stepsToLoad;
     private final StringConstants stringConstants;
     private boolean chartLoaded = false;
     private boolean dataLoaded = false;
@@ -55,6 +63,7 @@ public class ChartsPanel extends FormPanel {
     private int chartHeight;
     private HashMap<String, Boolean> competitorVisible = new HashMap<String, Boolean>();
     private VerticalPanel selectCompetitors;
+    private NumberFormat chartNumberFormat;
     
     public static final int DECK_PANEL_INDEX_LOADING = 0;
     public static final int DECK_PANEL_INDEX_CHART = 1;
@@ -153,8 +162,33 @@ public class ChartsPanel extends FormPanel {
             }
         });
         configPanel.add(bttSteps);
+        HorizontalPanel startPointPanel = new HorizontalPanel();
+        Label lblStartPoint = new Label("Start point:");
+        startPointPanel.add(lblStartPoint);
+        final TextBox txtbStartPoint = new TextBox();
+        txtbStartPoint.setText(""+ startPoint);
+        startPointPanel.add(txtbStartPoint);
+        configPanel.add(startPointPanel);
+        HorizontalPanel endPointPanel = new HorizontalPanel();
+        Label lblEndPoint = new Label("End point:");
+        endPointPanel.add(lblEndPoint);
+        final TextBox txtbEndPoint = new TextBox();
+        txtbEndPoint.setText(""+endPoint);
+        endPointPanel.add(txtbEndPoint);
+        configPanel.add(endPointPanel);
         selectCompetitors = new VerticalPanel();
         configPanel.add(selectCompetitors);
+        Button bttSetPoints = new Button("Set Points");
+        bttSetPoints.addClickHandler(new ClickHandler() {
+            
+            @Override
+            public void onClick(ClickEvent event) {
+                startPoint = Integer.parseInt(txtbStartPoint.getText());
+                endPoint = Integer.parseInt(txtbEndPoint.getText());
+                loadData();
+            }
+        });
+        configPanel.add(bttSetPoints);
 
         final Runnable onLoadCallback = new Runnable() {
 
@@ -165,13 +199,20 @@ public class ChartsPanel extends FormPanel {
                 chartLoaded = true;
                 if (chartLoaded && dataLoaded){
                     deckPanel.showWidget(DECK_PANEL_INDEX_CHART);
+                    chart.draw(prepareTableData(), getOptions());
+                    setMarkPassingSelection();
+                    chart.addSelectHandler(new SelectHandler() {
+                        
+                        @Override
+                        public void onSelect(SelectEvent event) {
+                            setMarkPassingSelection();
+                        }
+                    });
                 }
                 fireEvent(new DataLoadedEvent());
                 
             }
         };
-        VisualizationUtils.loadVisualizationApi(onLoadCallback, LineChart.PACKAGE);
-        loadData();
         chartPanel.add(deckPanel);
         mainPanel.add(chartPanel);
         Anchor showConfigAnchor = new Anchor(new SafeHtmlBuilder().appendHtmlConstant(
@@ -187,6 +228,8 @@ public class ChartsPanel extends FormPanel {
         mainPanel.add(showConfigAnchor);
         mainPanel.add(configCaption);
         this.add(mainPanel);
+        VisualizationUtils.loadVisualizationApi(onLoadCallback, LineChart.PACKAGE);
+        loadData();
     }
 
     private Options getOptions() {
@@ -243,6 +286,14 @@ public class ChartsPanel extends FormPanel {
                                 if (chartLoaded && dataLoaded){
                                     deckPanel.showWidget(DECK_PANEL_INDEX_CHART);
                                     chart.draw(prepareTableData(), getOptions());
+                                    setMarkPassingSelection();
+                                    chart.addSelectHandler(new SelectHandler() {
+                                        
+                                        @Override
+                                        public void onSelect(SelectEvent event) {
+                                            setMarkPassingSelection();
+                                        }
+                                    });
                                 }
                             }
                         });
@@ -274,6 +325,7 @@ public class ChartsPanel extends FormPanel {
                             @Override
                             public void onClick(ClickEvent event) {
                                 setCompetitorVisible(c, cb.getValue());
+                                setMarkPassingSelection();
                             }
                         });
                         selectCompetitors.add(cb);
@@ -297,9 +349,9 @@ public class ChartsPanel extends FormPanel {
             for (int i = 0; i < chartData.size(); i++) {
                 length = (length < chartData.get(i).getB().length) ? chartData.get(i).getB().length : length;
             }
-            data.addRows(length+1);
-            for (int i = 0; i < competitorAndTimePointsDAO.getTimePoints().length; i++) {
-                long time = competitorAndTimePointsDAO.getTimePoints()[i] - competitorAndTimePointsDAO.getStartTime();
+            data.addRows(endPoint-startPoint);
+            for (int i = 0; i < data.getNumberOfRows(); i++) {
+                long time = competitorAndTimePointsDAO.getTimePoints()[startPoint+i] - competitorAndTimePointsDAO.getStartTime();
                 String minutes = "" + Math.abs((time/60000));
                 if (minutes.length() < 2){
                     minutes = ((time < 0)? "-" : "") +"0" + minutes;
@@ -308,14 +360,35 @@ public class ChartsPanel extends FormPanel {
                 if (seconds.length() < 2){
                     seconds= "0" + seconds;
                 }
-                data.setValue(i, 0, minutes + ":" + seconds);
+                data.setValue(i, 0, minutes + ":" + seconds + " min");
             }
+            String suffix = "";
+            switch (dataToShow){
+            case SHOW_CURRENT_SPEED_OVER_GROUND:
+                suffix = stringConstants.currentSpeedOverGroundInKnotsUnit();
+                break;
+            case SHOW_DISTANCE_TRAVELED:
+                suffix = stringConstants.metersUnit();
+                break;
+            case SHOW_GAP_TO_LEADER:
+                suffix = stringConstants.secondsUnit();
+                break;
+            case SHOW_VELOCITY_MADE_GOOD:
+                suffix = stringConstants.currentSpeedOverGroundInKnotsUnit();
+                break;
+            case SHOW_WINDWARD_DISTANCE_TO_LEADER:
+                suffix = stringConstants.metersUnit();
+                break;
+            }
+            chartNumberFormat = NumberFormat.create(createNumberFormatOptions(suffix));
             for (int i = 0; i < chartData.size(); i++) {
-                for (int j = 0; j < chartData.get(i).getB().length; j++) {
-                    if (chartData.get(i).getB()[j] != null && isCompetitorVisible(chartData.get(i).getA())) {
-                        data.setValue(j, (i + 1), chartData.get(i).getB()[j]);
+                for (int j = 0; j < endPoint-startPoint; j++) {
+                    if (chartData.get(i).getB()[startPoint+j] != null && isCompetitorVisible(chartData.get(i).getA())) {
+                        data.setValue(j, (i + 1), chartData.get(i).getB()[startPoint+j]);
+                        
                     }
                 }
+                chartNumberFormat.format(data, i+1);
             }
         }
 
@@ -363,4 +436,38 @@ public class ChartsPanel extends FormPanel {
         return (isVisible != null) ? isVisible : false;
     }
 
+    private com.google.gwt.visualization.client.formatters.NumberFormat.Options createNumberFormatOptions(String suffix){
+        com.google.gwt.visualization.client.formatters.NumberFormat.Options options = com.google.gwt.visualization.client.formatters.NumberFormat.Options.create();
+        options.setFractionDigits(2);
+        options.setSuffix(suffix);
+        return options;
+    }
+    
+    private void setMarkPassingSelection(){
+        ArrayList<Selection> selections = new ArrayList<Selection>();
+        Long[] timePoints = competitorAndTimePointsDAO.getTimePoints();
+        for (int column = 0; column < competitorAndTimePointsDAO.getCompetitor().length; column++) {
+            int currentMarkPassing = 0;
+            Long[] markPassing = competitorAndTimePointsDAO.getMarkPassings(competitorAndTimePointsDAO.getCompetitor()[column]);
+            
+            for (int row = 0; currentMarkPassing < markPassing.length; row++){
+                if (startPoint+row > 0 && timePoints[startPoint+row-1] < markPassing[currentMarkPassing] && timePoints[startPoint+row] > markPassing[currentMarkPassing]){
+                    selections.add(Selection.createCellSelection(row, column+1));
+                    currentMarkPassing++;
+                }
+                else if (startPoint + row == 0 && timePoints[startPoint+row] > markPassing[currentMarkPassing]){
+                    selections.add(Selection.createCellSelection(row, column+1));
+                    currentMarkPassing++;
+                }
+                if (endPoint-startPoint <= row-1){
+                    currentMarkPassing++;
+                    row = 0;
+                }
+            }
+        }
+        JsArray<Selection> sel = ArrayHelper.toJsArray(selections.toArray(new Selection[0]));
+        if (chartLoaded && dataLoaded){
+            chart.setSelections(sel);
+        }
+    }
 }
