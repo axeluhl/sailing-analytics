@@ -11,6 +11,8 @@ import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.cellview.client.Header;
 import com.sap.sailing.gwt.ui.client.LegDetailColumn.LegDetailField;
+import com.sap.sailing.gwt.ui.client.ManeuverColumn.AbstractManeuverDetailField;
+import com.sap.sailing.gwt.ui.client.ManeuverDetailColumn.ManeuverDetailField;
 import com.sap.sailing.gwt.ui.shared.DetailType;
 import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDAO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDAO;
@@ -28,23 +30,41 @@ public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> {
     private abstract class AbstractManeuverDetailField<T extends Comparable<?>> implements LegDetailField<T> {
         public T get(LeaderboardRowDAO row) {
             LeaderboardEntryDAO fieldsForRace = row.fieldsByRaceName.get(getRaceName());
-            if (fieldsForRace != null && fieldsForRace.legDetails != null) {
-                for (LegEntryDAO legDetail : fieldsForRace.legDetails) {
-                    if (legDetail != null) {
-                        
-                    }
-                }
-            }
-            
-            LeaderboardEntryDAO entry = row.fieldsByRaceName.get(raceName);
-            if(entry == null){
+            if (fieldsForRace == null) {
                 return null;
-            }else{
-                return getFromNonNullEntry(entry);
+            } else {
+                return getFromNonNullEntry(fieldsForRace);
             }
         }
 
-        protected abstract T getFromNonNullEntry(LegEntryDAO entry);
+        protected abstract T getFromNonNullEntry(LeaderboardEntryDAO entry);
+    }
+
+    private class NumberOfTacks extends AbstractManeuverDetailField<Integer> {
+
+        @Override
+        protected Integer getFromNonNullEntry(LeaderboardEntryDAO entry) {
+            // TODO get lerderboard double like in get number of
+            return ManeuverCountRaceColumn.this.getTotalNumberOfTacks(entry);
+        }
+    }
+    
+    private class NumberOfJibes extends AbstractManeuverDetailField<Integer> {
+
+        @Override
+        protected Integer getFromNonNullEntry(LeaderboardEntryDAO entry) {
+            // TODO get lerderboard double like in get number of
+            return ManeuverCountRaceColumn.this.getTotalNumberOfJibes(entry);
+        }
+    }
+    
+    private class NumberOfPenaltyCircles extends AbstractManeuverDetailField<Integer> {
+
+        @Override
+        protected Integer getFromNonNullEntry(LeaderboardEntryDAO entry) {
+            // TODO get lerderboard double like in get number of
+            return ManeuverCountRaceColumn.this.getTotalNumberOfPenaltyCircles(entry);
+        }
     }
     
     public ManeuverCountRaceColumn(LeaderboardPanel leaderboardPanel, String raceName, StringConstants stringConstants,
