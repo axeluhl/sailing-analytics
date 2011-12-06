@@ -13,6 +13,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.LeaderboardSettingsPanel.Result;
+import com.sap.sailing.gwt.ui.shared.DetailType;
 
 public class LeaderboardSettingsPanel extends DataEntryDialog<Result> {
     private final List<String> raceColumnSelection;

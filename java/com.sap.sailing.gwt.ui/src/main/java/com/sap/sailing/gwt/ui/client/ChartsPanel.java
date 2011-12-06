@@ -40,6 +40,7 @@ import com.google.gwt.visualization.client.visualizations.corechart.LineChart;
 import com.google.gwt.visualization.client.visualizations.corechart.Options;
 import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
 import com.sap.sailing.gwt.ui.shared.CompetitorAndTimePointsDAO;
+import com.sap.sailing.gwt.ui.shared.DetailType;
 import com.sap.sailing.gwt.ui.shared.Pair;
 import com.sap.sailing.gwt.ui.shared.RaceIdentifier;
 
@@ -200,14 +201,14 @@ public class ChartsPanel extends FormPanel {
                 if (chartLoaded && dataLoaded){
                     deckPanel.showWidget(DECK_PANEL_INDEX_CHART);
                     chart.draw(prepareTableData(), getOptions());
-                    setMarkPassingSelection();
-                    chart.addSelectHandler(new SelectHandler() {
-                        
-                        @Override
-                        public void onSelect(SelectEvent event) {
-                            setMarkPassingSelection();
-                        }
-                    });
+//                    setMarkPassingSelection();
+//                    chart.addSelectHandler(new SelectHandler() {
+//                        
+//                        @Override
+//                        public void onSelect(SelectEvent event) {
+//                            setMarkPassingSelection();
+//                        }
+//                    });
                 }
                 fireEvent(new DataLoadedEvent());
                 
