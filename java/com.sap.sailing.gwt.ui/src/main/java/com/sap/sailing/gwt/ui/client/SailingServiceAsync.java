@@ -180,7 +180,7 @@ public interface SailingServiceAsync {
     void getCountryCodes(AsyncCallback<String[]> callback);
 
     void getCompetitorRaceData(RaceIdentifier race, CompetitorAndTimePointsDAO competitorAndTimePointsDAO,
-            int dataType, AsyncCallback<List<Pair<CompetitorDAO, Double[]>>> callback);
+            DetailType dataType, AsyncCallback<List<Pair<CompetitorDAO, Double[]>>> callback);
     void getDouglasPoints(RaceIdentifier raceIdentifier, Map<CompetitorDAO, Date> from, Map<CompetitorDAO, Date> to,
             double meters, AsyncCallback<Map<CompetitorDAO, List<GPSFixDAO>>> callback);
 

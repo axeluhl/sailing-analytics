@@ -24,8 +24,8 @@ public abstract class ExpandableSortableColumn<C> extends SortableColumn<Leaderb
     private boolean enableExpansion;
     private boolean suppressSortingOnce;
     private final LeaderboardPanel leaderboardPanel;
-    private final Map<DetailColumnType, SortableColumn<LeaderboardRowDAO, ?>> detailColumnsMap;
-    private final List<DetailColumnType> detailSelection;
+    private final Map<DetailType, SortableColumn<LeaderboardRowDAO, ?>> detailColumnsMap;
+    private final List<DetailType> detailSelection;
     
     /**
      * Holds the child columns that represent expanded information for this column. If <code>null</code>,
@@ -44,7 +44,7 @@ public abstract class ExpandableSortableColumn<C> extends SortableColumn<Leaderb
 
     public ExpandableSortableColumn(LeaderboardPanel leaderboardPanel, boolean enableExpansion, Cell<C> cell,
             StringConstants stringConstants, String detailHeaderStyle, String detailColumnStyle,
-            List<DetailColumnType> detailSelection) {
+            List<DetailType> detailSelection) {
         super(cell);
         this.enableExpansion = enableExpansion;
         this.leaderboardPanel = leaderboardPanel;
@@ -56,7 +56,7 @@ public abstract class ExpandableSortableColumn<C> extends SortableColumn<Leaderb
      * By default, an expandable sortable column has no detail columns. Subclasses that want to offer detail columns must
      * override this method.
      */
-    protected Map<DetailColumnType, SortableColumn<LeaderboardRowDAO, ?>> getDetailColumnMap(
+    protected Map<DetailType, SortableColumn<LeaderboardRowDAO, ?>> getDetailColumnMap(
             LeaderboardPanel leaderboardPanel, StringConstants stringConstants, String detailHeaderStyle,
             String detailColumnStyle) {
         return Collections.emptyMap();
@@ -86,7 +86,7 @@ public abstract class ExpandableSortableColumn<C> extends SortableColumn<Leaderb
         List<SortableColumn<LeaderboardRowDAO, ?>> result;
         if (isExpanded()) {
             result = new ArrayList<SortableColumn<LeaderboardRowDAO,?>>();
-            for (DetailColumnType detailColumnType : detailSelection) {
+            for (DetailType detailColumnType : detailSelection) {
                 SortableColumn<LeaderboardRowDAO, ?> selectedColumn = detailColumnsMap.get(detailColumnType);
                 if (selectedColumn != null) {
                     result.add(selectedColumn);
@@ -98,14 +98,14 @@ public abstract class ExpandableSortableColumn<C> extends SortableColumn<Leaderb
         return result;
     }
     
-    protected SortableColumn<LeaderboardRowDAO, ?> createExpansionColumn(DetailColumnType detailColumnType) {
+    protected SortableColumn<LeaderboardRowDAO, ?> createExpansionColumn(DetailType detailColumnType) {
         throw new RuntimeException("Detail column type "+detailColumnType+" not supported by column of type "+getClass().getName());
     }
     
     /**
      * @return the list of details supported by {@link #createExpansionColumn}
      */
-    protected List<DetailColumnType> getSupportedDetails() {
+    protected List<DetailType> getSupportedDetails() {
         return Collections.emptyList();
     }
 

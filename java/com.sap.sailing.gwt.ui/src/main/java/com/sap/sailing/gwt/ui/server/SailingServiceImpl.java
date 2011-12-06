@@ -74,7 +74,7 @@ import com.sap.sailing.domain.tracking.impl.WindTrackImpl;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.RaceRecord;
 import com.sap.sailing.domain.tractracadapter.TracTracConfiguration;
-import com.sap.sailing.gwt.ui.client.CompareCompetitorsPanel;
+import com.sap.sailing.gwt.ui.client.DetailType;
 import com.sap.sailing.gwt.ui.client.SailingService;
 import com.sap.sailing.gwt.ui.shared.BoatClassDAO;
 import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
@@ -1177,7 +1177,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
 
     @Override
-    public List<Pair<CompetitorDAO, Double[]>> getCompetitorRaceData(RaceIdentifier race, CompetitorAndTimePointsDAO competitorAndTimePointsDAO, int dataType) throws NoWindException {
+    public List<Pair<CompetitorDAO, Double[]>> getCompetitorRaceData(RaceIdentifier race, CompetitorAndTimePointsDAO competitorAndTimePointsDAO, DetailType dataType) throws NoWindException {
         List<Pair<CompetitorDAO, Double[]>> competitorData = new ArrayList<Pair<CompetitorDAO, Double[]>>();
         TrackedRace trackedRace = getTrackedRace(race);
         Iterable<Competitor> competitors = trackedRace.getRace().getCompetitors();
@@ -1191,7 +1191,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         }
         
         switch (dataType){
-        case CompareCompetitorsPanel.SHOW_CURRENT_SPEED_OVER_GROUND:
+        case CURRENT_SPEED_OVER_GROUND_IN_KNOTS:
             for (int c = 0; c < selectedCompetitor.size(); c++){
                 Double[] entries = new Double[competitorAndTimePointsDAO.getTimePoints().length];
                 for (int i = 0; i < competitorAndTimePointsDAO.getTimePoints().length; i++){
@@ -1205,7 +1205,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 competitorData.add(new Pair<CompetitorDAO, Double[]>(competitorAndTimePointsDAO.getCompetitor()[c], entries));
             }
             break;
-        case CompareCompetitorsPanel.SHOW_VELOCITY_MADE_GOOD:
+        case VELOCITY_MADE_GOOD_IN_KNOTS:
             for (int c = 0; c < selectedCompetitor.size(); c++){
                 Double[] entries = new Double[competitorAndTimePointsDAO.getTimePoints().length];
                 for (int i = 0; i < competitorAndTimePointsDAO.getTimePoints().length; i++){
@@ -1219,7 +1219,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 competitorData.add(new Pair<CompetitorDAO, Double[]>(competitorAndTimePointsDAO.getCompetitor()[c], entries));
             }
             break;
-        case CompareCompetitorsPanel.SHOW_DISTANCE_TRAVELED:
+        case DISTANCE_TRAVELED:
             for (int c = 0; c < selectedCompetitor.size(); c++){
                 Double[] entries = new Double[competitorAndTimePointsDAO.getTimePoints().length];
                 double distanceOfPreviousLegs = 0;
@@ -1242,7 +1242,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 competitorData.add(new Pair<CompetitorDAO, Double[]>(competitorAndTimePointsDAO.getCompetitor()[c], entries));
             }
             break;
-        case CompareCompetitorsPanel.SHOW_GAP_TO_LEADER:
+        case GAP_TO_LEADER_IN_SECONDS:
             for (int c = 0; c < selectedCompetitor.size(); c++){
                 Double[] entries = new Double[competitorAndTimePointsDAO.getTimePoints().length];
                 for (int i = 0; i < competitorAndTimePointsDAO.getTimePoints().length; i++){
@@ -1255,7 +1255,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 competitorData.add(new Pair<CompetitorDAO, Double[]>(competitorAndTimePointsDAO.getCompetitor()[c], entries));
             }
             break;
-        case CompareCompetitorsPanel.SHOW_WINDWARD_DISTANCE_TO_LEADER:
+        case WINDWARD_DISTANCE_TO_OVERALL_LEADER:
             for (int c = 0; c < selectedCompetitor.size(); c++){
                 Double[] entries = new Double[competitorAndTimePointsDAO.getTimePoints().length];
                 try {

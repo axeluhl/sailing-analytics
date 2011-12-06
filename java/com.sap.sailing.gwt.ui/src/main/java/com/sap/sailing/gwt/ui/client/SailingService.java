@@ -132,7 +132,7 @@ public interface SailingService extends RemoteService {
     
     String[] getCountryCodes();
     
-    List<Pair<CompetitorDAO, Double[]>> getCompetitorRaceData(RaceIdentifier race, CompetitorAndTimePointsDAO competitorAndTimePointsDAO, int dataType) throws Exception;
+    List<Pair<CompetitorDAO, Double[]>> getCompetitorRaceData(RaceIdentifier race, CompetitorAndTimePointsDAO competitorAndTimePointsDAO, DetailType dataType) throws Exception;
     
     CompetitorAndTimePointsDAO getCompetitorAndTimePoints(RaceIdentifier race, int steps);
     

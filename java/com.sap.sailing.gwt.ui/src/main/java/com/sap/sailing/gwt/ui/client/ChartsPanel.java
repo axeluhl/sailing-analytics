@@ -37,7 +37,7 @@ import com.sap.sailing.gwt.ui.shared.CompetitorAndTimePointsDAO;
 import com.sap.sailing.gwt.ui.shared.Pair;
 import com.sap.sailing.gwt.ui.shared.RaceIdentifier;
 
-public class CompareCompetitorsPanel extends FormPanel {
+public class ChartsPanel extends FormPanel {
     private List<Pair<CompetitorDAO, Double[]>> chartData = null;
     private CompetitorAndTimePointsDAO competitorAndTimePointsDAO = null;
     private LineChart chart;
@@ -59,15 +59,10 @@ public class CompareCompetitorsPanel extends FormPanel {
     public static final int DECK_PANEL_INDEX_LOADING = 0;
     public static final int DECK_PANEL_INDEX_CHART = 1;
     
-    public static final int SHOW_CURRENT_SPEED_OVER_GROUND = 0;
-    public static final int SHOW_VELOCITY_MADE_GOOD = 1;
-    public static final int SHOW_GAP_TO_LEADER = 2;
-    public static final int SHOW_WINDWARD_DISTANCE_TO_LEADER = 3;
-    public static final int SHOW_DISTANCE_TRAVELED = 4;
-    private int dataToShow = SHOW_CURRENT_SPEED_OVER_GROUND;
+    private DetailType dataToShow = DetailType.WINDWARD_DISTANCE_TO_OVERALL_LEADER;
     private AbsolutePanel loadingPanel;
 
-    public CompareCompetitorsPanel(SailingServiceAsync sailingService, final List<CompetitorDAO> competitors,
+    public ChartsPanel(SailingServiceAsync sailingService, final List<CompetitorDAO> competitors,
             RaceIdentifier[] races, StringConstants stringConstants, int chartWidth, int chartHeight) {
         this.sailingService = sailingService;
         this.races = races;
@@ -123,16 +118,21 @@ public class CompareCompetitorsPanel extends FormPanel {
         Label lblChart = new Label(stringConstants.chooseChart());
         configPanel.add(lblChart);
         final ListBox dataSelection = new ListBox();
-        dataSelection.addItem(stringConstants.speedOverGroundLong(), "" + SHOW_CURRENT_SPEED_OVER_GROUND);
-        dataSelection.addItem(stringConstants.distanceTraveled(), "" + SHOW_DISTANCE_TRAVELED);
-        dataSelection.addItem(stringConstants.velocityMadeGoodLong(), "" + SHOW_VELOCITY_MADE_GOOD);
-        dataSelection.addItem(stringConstants.gapToLeaderLong(), "" + SHOW_GAP_TO_LEADER);
-        dataSelection.addItem(stringConstants.windwardDistanceToLeaderInMeters(), "" + SHOW_WINDWARD_DISTANCE_TO_LEADER);
+        dataSelection.addItem(DetailType.WINDWARD_DISTANCE_TO_OVERALL_LEADER.toString());
+        dataSelection.addItem(DetailType.DISTANCE_TRAVELED.toString());
+        dataSelection.addItem(DetailType.VELOCITY_MADE_GOOD_IN_KNOTS.toString());
+        dataSelection.addItem(DetailType.GAP_TO_LEADER_IN_SECONDS.toString());
+        dataSelection.addItem(DetailType.CURRENT_SPEED_OVER_GROUND_IN_KNOTS.toString());
         dataSelection.addChangeHandler(new ChangeHandler() {
 
             @Override
             public void onChange(ChangeEvent event) {
-                dataToShow = Integer.parseInt(dataSelection.getValue(dataSelection.getSelectedIndex()));
+                for (DetailType dt : DetailType.values()){
+                    if (dt.toString().equals(dataSelection.getItemText(dataSelection.getSelectedIndex()))){
+                        dataToShow = dt;
+                    }
+                }
+                
                 loadData();
             }
         });
@@ -193,41 +193,26 @@ public class CompareCompetitorsPanel extends FormPanel {
         Options opt = Options.create();
         opt.setWidth(chartWidth);
         opt.setHeight(chartHeight);
-        switch (dataToShow) {
-        case SHOW_VELOCITY_MADE_GOOD:
-            opt.setTitle(stringConstants.velocityMadeGoodLong());
-            break;
-        case SHOW_GAP_TO_LEADER:
-            opt.setTitle(stringConstants.gapToLeaderLong());
-            break;
-        case SHOW_WINDWARD_DISTANCE_TO_LEADER:
-            opt.setTitle(stringConstants.windwardDistanceToLeaderInMeters());
-            break;
-        case SHOW_DISTANCE_TRAVELED:
-            opt.setTitle(stringConstants.distanceTraveled());
-            break;
-        default:
-            opt.setTitle(stringConstants.speedOverGroundLong());
-        }
+        opt.setTitle(dataToShow.toString());
         AxisOptions hAxisOptions = AxisOptions.create();
         hAxisOptions.setTitle("time");
         opt.setHAxisOptions(hAxisOptions);
 
         AxisOptions vAxisOptions = AxisOptions.create();
         switch (dataToShow) {
-        case SHOW_VELOCITY_MADE_GOOD:
+        case VELOCITY_MADE_GOOD_IN_KNOTS:
             vAxisOptions.setTitle(stringConstants.speed() + " " + stringConstants.in() + " " + stringConstants.velocityMadeGoodInKnotsUnit());
             break;
-        case SHOW_GAP_TO_LEADER:
+        case GAP_TO_LEADER_IN_SECONDS:
             vAxisOptions.setTitle(stringConstants.time() + " " + stringConstants.in() + " " + stringConstants.secondsUnit());
             break;
-        case SHOW_WINDWARD_DISTANCE_TO_LEADER:
+        case WINDWARD_DISTANCE_TO_OVERALL_LEADER:
             vAxisOptions.setTitle(stringConstants.distance() + " " + stringConstants.in() + " " + stringConstants.metersUnit());
             break;
-        case SHOW_DISTANCE_TRAVELED:
+        case DISTANCE_TRAVELED:
             vAxisOptions.setTitle(stringConstants.distance() + " " + stringConstants.in() + " " + stringConstants.metersUnit());
             break;
-        default:
+        case CURRENT_SPEED_OVER_GROUND_IN_KNOTS:
             vAxisOptions.setTitle(stringConstants.speed() + " " + stringConstants.in() + " " + stringConstants.currentSpeedOverGroundInKnotsUnit());
             break;
         }
@@ -242,7 +227,7 @@ public class CompareCompetitorsPanel extends FormPanel {
             
             @Override
             public void run() {
-                CompareCompetitorsPanel.this.sailingService.getCompetitorRaceData(races[selectedRace], competitorAndTimePointsDAO, dataToShow,
+                ChartsPanel.this.sailingService.getCompetitorRaceData(races[selectedRace], competitorAndTimePointsDAO, dataToShow,
                         new AsyncCallback<List<Pair<CompetitorDAO, Double[]>>>() {
 
                             @Override
