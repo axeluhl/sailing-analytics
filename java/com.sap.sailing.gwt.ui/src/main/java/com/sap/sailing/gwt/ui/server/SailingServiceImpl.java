@@ -116,8 +116,6 @@ import com.sap.sailing.util.CountryCode;
  * The server side implementation of the RPC service.
  */
 public class SailingServiceImpl extends RemoteServiceServlet implements SailingService, RaceFetcher, EventFetcher {
-    private static final int MILLISECONDS_BEFORE_RACE_TO_INCLUDE = 20000;
-
     private static final Logger logger = Logger.getLogger(SailingServiceImpl.class.getName());
     
     private static final long serialVersionUID = 9031688830194537489L;
@@ -1430,28 +1428,22 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
 
     @Override
     public CompetitorsAndTimePointsDAO getCompetitorsAndTimePoints(RaceIdentifier race, int steps) {
-        CompetitorsAndTimePointsDAO competitorAndTimePointsDAO = new CompetitorsAndTimePointsDAO();
+        CompetitorsAndTimePointsDAO competitorAndTimePointsDAO = new CompetitorsAndTimePointsDAO(steps);
         TrackedRace trackedRace = getTrackedRace(race);
         List<CompetitorDAO> competitors = new ArrayList<CompetitorDAO>();
         for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
             NavigableSet<MarkPassing> markPassings = trackedRace.getMarkPassings(competitor);
-            List<Long> markPassingTimes = new ArrayList<Long>();
+            long[] markPassingTimes = new long[markPassings.size()];
+            int i=0;
             for (MarkPassing markPassing : markPassings){
-                markPassingTimes.add(markPassing.getTimePoint().asMillis());
+                markPassingTimes[i++] = markPassing.getTimePoint().asMillis();
             }
             competitors.add(getCompetitorDAO(competitor));
-            competitorAndTimePointsDAO.setMarkPassings(getCompetitorDAO(competitor), markPassingTimes.toArray(new Long[0]));
+            competitorAndTimePointsDAO.setMarkPassings(getCompetitorDAO(competitor), markPassingTimes);
         }
         competitorAndTimePointsDAO.setCompetitor(competitors.toArray(new CompetitorDAO[0]));
         competitorAndTimePointsDAO.setStartTime(trackedRace.getStart().asMillis());
-        List<Long> timePoints = new ArrayList<Long>();
-        long stepsize = (trackedRace.getTimePointOfNewestEvent().asMillis() - trackedRace.getStart().asMillis() - MILLISECONDS_BEFORE_RACE_TO_INCLUDE)
-                / steps;
-        for (long time = trackedRace.getStart().asMillis() - MILLISECONDS_BEFORE_RACE_TO_INCLUDE; time < trackedRace
-                .getTimePointOfNewestEvent().asMillis(); time += stepsize) {
-            timePoints.add(time);
-        }
-        competitorAndTimePointsDAO.setTimePoints(timePoints.toArray(new Long[0]));
+        competitorAndTimePointsDAO.setTimePointOfNewestEvent(trackedRace.getTimePointOfNewestEvent().asMillis());
         return competitorAndTimePointsDAO;
     }
 }
