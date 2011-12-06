@@ -233,7 +233,9 @@ public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> {
             LeaderboardPanel leaderboardPanel, StringConstants stringConstants, String detailHeaderStyle,
             String detailColumnStyle) {
         Map<DetailType, SortableColumn<LeaderboardRowDAO, ?>> result = new HashMap<DetailType, SortableColumn<LeaderboardRowDAO, ?>>();
-        result.put(DetailType.HEAD_UP, new )
+        result.put(DetailType.TACK, 
+                new FormattedDoubleLegDetailColumn(stringConstants.tack(), "", field, 0, getLeaderboardPanel().getLeaderboardTable(), 
+                        detailHeaderStyle, detailColumnStyle));
         return result;
     }
     
