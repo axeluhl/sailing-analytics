@@ -1,8 +1,11 @@
 package com.sap.sailing.gwt.ui.client;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import com.google.gwt.ajaxloader.client.ArrayHelper;
+import com.google.gwt.core.client.JsArray;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -28,16 +31,20 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.visualization.client.AbstractDataTable;
 import com.google.gwt.visualization.client.AbstractDataTable.ColumnType;
 import com.google.gwt.visualization.client.DataTable;
+import com.google.gwt.visualization.client.Selection;
 import com.google.gwt.visualization.client.VisualizationUtils;
+import com.google.gwt.visualization.client.events.SelectHandler;
+import com.google.gwt.visualization.client.formatters.NumberFormat;
 import com.google.gwt.visualization.client.visualizations.corechart.AxisOptions;
 import com.google.gwt.visualization.client.visualizations.corechart.LineChart;
 import com.google.gwt.visualization.client.visualizations.corechart.Options;
 import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
 import com.sap.sailing.gwt.ui.shared.CompetitorAndTimePointsDAO;
+import com.sap.sailing.gwt.ui.shared.DetailType;
 import com.sap.sailing.gwt.ui.shared.Pair;
 import com.sap.sailing.gwt.ui.shared.RaceIdentifier;
 
-public class CompareCompetitorsPanel extends FormPanel {
+public class ChartsPanel extends FormPanel {
     private List<Pair<CompetitorDAO, Double[]>> chartData = null;
     private CompetitorAndTimePointsDAO competitorAndTimePointsDAO = null;
     private LineChart chart;
@@ -48,6 +55,8 @@ public class CompareCompetitorsPanel extends FormPanel {
     private final RaceIdentifier[] races;
     private int selectedRace = 0;
     private int stepsToLoad = 100;
+    private int startPoint = 0;
+    private int endPoint = stepsToLoad;
     private final StringConstants stringConstants;
     private boolean chartLoaded = false;
     private boolean dataLoaded = false;
@@ -55,19 +64,15 @@ public class CompareCompetitorsPanel extends FormPanel {
     private int chartHeight;
     private HashMap<String, Boolean> competitorVisible = new HashMap<String, Boolean>();
     private VerticalPanel selectCompetitors;
+    private NumberFormat chartNumberFormat;
     
     public static final int DECK_PANEL_INDEX_LOADING = 0;
     public static final int DECK_PANEL_INDEX_CHART = 1;
     
-    public static final int SHOW_CURRENT_SPEED_OVER_GROUND = 0;
-    public static final int SHOW_VELOCITY_MADE_GOOD = 1;
-    public static final int SHOW_GAP_TO_LEADER = 2;
-    public static final int SHOW_WINDWARD_DISTANCE_TO_LEADER = 3;
-    public static final int SHOW_DISTANCE_TRAVELED = 4;
-    private int dataToShow = SHOW_CURRENT_SPEED_OVER_GROUND;
+    private DetailType dataToShow = DetailType.WINDWARD_DISTANCE_TO_OVERALL_LEADER;
     private AbsolutePanel loadingPanel;
 
-    public CompareCompetitorsPanel(SailingServiceAsync sailingService, final List<CompetitorDAO> competitors,
+    public ChartsPanel(SailingServiceAsync sailingService, final List<CompetitorDAO> competitors,
             RaceIdentifier[] races, StringConstants stringConstants, int chartWidth, int chartHeight) {
         this.sailingService = sailingService;
         this.races = races;
@@ -123,16 +128,21 @@ public class CompareCompetitorsPanel extends FormPanel {
         Label lblChart = new Label(stringConstants.chooseChart());
         configPanel.add(lblChart);
         final ListBox dataSelection = new ListBox();
-        dataSelection.addItem(stringConstants.speedOverGroundLong(), "" + SHOW_CURRENT_SPEED_OVER_GROUND);
-        dataSelection.addItem(stringConstants.distanceTraveled(), "" + SHOW_DISTANCE_TRAVELED);
-        dataSelection.addItem(stringConstants.velocityMadeGoodLong(), "" + SHOW_VELOCITY_MADE_GOOD);
-        dataSelection.addItem(stringConstants.gapToLeaderLong(), "" + SHOW_GAP_TO_LEADER);
-        dataSelection.addItem(stringConstants.windwardDistanceToLeaderInMeters(), "" + SHOW_WINDWARD_DISTANCE_TO_LEADER);
+        dataSelection.addItem(DetailType.WINDWARD_DISTANCE_TO_OVERALL_LEADER.toString());
+        dataSelection.addItem(DetailType.DISTANCE_TRAVELED.toString());
+        dataSelection.addItem(DetailType.VELOCITY_MADE_GOOD_IN_KNOTS.toString());
+        dataSelection.addItem(DetailType.GAP_TO_LEADER_IN_SECONDS.toString());
+        dataSelection.addItem(DetailType.CURRENT_SPEED_OVER_GROUND_IN_KNOTS.toString());
         dataSelection.addChangeHandler(new ChangeHandler() {
 
             @Override
             public void onChange(ChangeEvent event) {
-                dataToShow = Integer.parseInt(dataSelection.getValue(dataSelection.getSelectedIndex()));
+                for (DetailType dt : DetailType.values()){
+                    if (dt.toString().equals(dataSelection.getItemText(dataSelection.getSelectedIndex()))){
+                        dataToShow = dt;
+                    }
+                }
+                
                 loadData();
             }
         });
@@ -153,8 +163,33 @@ public class CompareCompetitorsPanel extends FormPanel {
             }
         });
         configPanel.add(bttSteps);
+        HorizontalPanel startPointPanel = new HorizontalPanel();
+        Label lblStartPoint = new Label("Start point:");
+        startPointPanel.add(lblStartPoint);
+        final TextBox txtbStartPoint = new TextBox();
+        txtbStartPoint.setText(""+ startPoint);
+        startPointPanel.add(txtbStartPoint);
+        configPanel.add(startPointPanel);
+        HorizontalPanel endPointPanel = new HorizontalPanel();
+        Label lblEndPoint = new Label("End point:");
+        endPointPanel.add(lblEndPoint);
+        final TextBox txtbEndPoint = new TextBox();
+        txtbEndPoint.setText(""+endPoint);
+        endPointPanel.add(txtbEndPoint);
+        configPanel.add(endPointPanel);
         selectCompetitors = new VerticalPanel();
         configPanel.add(selectCompetitors);
+        Button bttSetPoints = new Button("Set Points");
+        bttSetPoints.addClickHandler(new ClickHandler() {
+            
+            @Override
+            public void onClick(ClickEvent event) {
+                startPoint = Integer.parseInt(txtbStartPoint.getText());
+                endPoint = Integer.parseInt(txtbEndPoint.getText());
+                loadData();
+            }
+        });
+        configPanel.add(bttSetPoints);
 
         final Runnable onLoadCallback = new Runnable() {
 
@@ -165,13 +200,20 @@ public class CompareCompetitorsPanel extends FormPanel {
                 chartLoaded = true;
                 if (chartLoaded && dataLoaded){
                     deckPanel.showWidget(DECK_PANEL_INDEX_CHART);
+                    chart.draw(prepareTableData(), getOptions());
+//                    setMarkPassingSelection();
+//                    chart.addSelectHandler(new SelectHandler() {
+//                        
+//                        @Override
+//                        public void onSelect(SelectEvent event) {
+//                            setMarkPassingSelection();
+//                        }
+//                    });
                 }
                 fireEvent(new DataLoadedEvent());
                 
             }
         };
-        VisualizationUtils.loadVisualizationApi(onLoadCallback, LineChart.PACKAGE);
-        loadData();
         chartPanel.add(deckPanel);
         mainPanel.add(chartPanel);
         Anchor showConfigAnchor = new Anchor(new SafeHtmlBuilder().appendHtmlConstant(
@@ -187,47 +229,34 @@ public class CompareCompetitorsPanel extends FormPanel {
         mainPanel.add(showConfigAnchor);
         mainPanel.add(configCaption);
         this.add(mainPanel);
+        VisualizationUtils.loadVisualizationApi(onLoadCallback, LineChart.PACKAGE);
+        loadData();
     }
 
     private Options getOptions() {
         Options opt = Options.create();
         opt.setWidth(chartWidth);
         opt.setHeight(chartHeight);
-        switch (dataToShow) {
-        case SHOW_VELOCITY_MADE_GOOD:
-            opt.setTitle(stringConstants.velocityMadeGoodLong());
-            break;
-        case SHOW_GAP_TO_LEADER:
-            opt.setTitle(stringConstants.gapToLeaderLong());
-            break;
-        case SHOW_WINDWARD_DISTANCE_TO_LEADER:
-            opt.setTitle(stringConstants.windwardDistanceToLeaderInMeters());
-            break;
-        case SHOW_DISTANCE_TRAVELED:
-            opt.setTitle(stringConstants.distanceTraveled());
-            break;
-        default:
-            opt.setTitle(stringConstants.speedOverGroundLong());
-        }
+        opt.setTitle(dataToShow.toString());
         AxisOptions hAxisOptions = AxisOptions.create();
         hAxisOptions.setTitle("time");
         opt.setHAxisOptions(hAxisOptions);
 
         AxisOptions vAxisOptions = AxisOptions.create();
         switch (dataToShow) {
-        case SHOW_VELOCITY_MADE_GOOD:
+        case VELOCITY_MADE_GOOD_IN_KNOTS:
             vAxisOptions.setTitle(stringConstants.speed() + " " + stringConstants.in() + " " + stringConstants.velocityMadeGoodInKnotsUnit());
             break;
-        case SHOW_GAP_TO_LEADER:
+        case GAP_TO_LEADER_IN_SECONDS:
             vAxisOptions.setTitle(stringConstants.time() + " " + stringConstants.in() + " " + stringConstants.secondsUnit());
             break;
-        case SHOW_WINDWARD_DISTANCE_TO_LEADER:
+        case WINDWARD_DISTANCE_TO_OVERALL_LEADER:
             vAxisOptions.setTitle(stringConstants.distance() + " " + stringConstants.in() + " " + stringConstants.metersUnit());
             break;
-        case SHOW_DISTANCE_TRAVELED:
+        case DISTANCE_TRAVELED:
             vAxisOptions.setTitle(stringConstants.distance() + " " + stringConstants.in() + " " + stringConstants.metersUnit());
             break;
-        default:
+        case CURRENT_SPEED_OVER_GROUND_IN_KNOTS:
             vAxisOptions.setTitle(stringConstants.speed() + " " + stringConstants.in() + " " + stringConstants.currentSpeedOverGroundInKnotsUnit());
             break;
         }
@@ -242,7 +271,7 @@ public class CompareCompetitorsPanel extends FormPanel {
             
             @Override
             public void run() {
-                CompareCompetitorsPanel.this.sailingService.getCompetitorRaceData(races[selectedRace], competitorAndTimePointsDAO, dataToShow,
+                ChartsPanel.this.sailingService.getCompetitorRaceData(races[selectedRace], competitorAndTimePointsDAO, dataToShow,
                         new AsyncCallback<List<Pair<CompetitorDAO, Double[]>>>() {
 
                             @Override
@@ -258,6 +287,14 @@ public class CompareCompetitorsPanel extends FormPanel {
                                 if (chartLoaded && dataLoaded){
                                     deckPanel.showWidget(DECK_PANEL_INDEX_CHART);
                                     chart.draw(prepareTableData(), getOptions());
+                                    setMarkPassingSelection();
+                                    chart.addSelectHandler(new SelectHandler() {
+                                        
+                                        @Override
+                                        public void onSelect(SelectEvent event) {
+                                            setMarkPassingSelection();
+                                        }
+                                    });
                                 }
                             }
                         });
@@ -289,6 +326,7 @@ public class CompareCompetitorsPanel extends FormPanel {
                             @Override
                             public void onClick(ClickEvent event) {
                                 setCompetitorVisible(c, cb.getValue());
+                                setMarkPassingSelection();
                             }
                         });
                         selectCompetitors.add(cb);
@@ -312,9 +350,9 @@ public class CompareCompetitorsPanel extends FormPanel {
             for (int i = 0; i < chartData.size(); i++) {
                 length = (length < chartData.get(i).getB().length) ? chartData.get(i).getB().length : length;
             }
-            data.addRows(length+1);
-            for (int i = 0; i < competitorAndTimePointsDAO.getTimePoints().length; i++) {
-                long time = competitorAndTimePointsDAO.getTimePoints()[i] - competitorAndTimePointsDAO.getStartTime();
+            data.addRows(endPoint-startPoint);
+            for (int i = 0; i < data.getNumberOfRows(); i++) {
+                long time = competitorAndTimePointsDAO.getTimePoints()[startPoint+i] - competitorAndTimePointsDAO.getStartTime();
                 String minutes = "" + Math.abs((time/60000));
                 if (minutes.length() < 2){
                     minutes = ((time < 0)? "-" : "") +"0" + minutes;
@@ -323,14 +361,35 @@ public class CompareCompetitorsPanel extends FormPanel {
                 if (seconds.length() < 2){
                     seconds= "0" + seconds;
                 }
-                data.setValue(i, 0, minutes + ":" + seconds);
+                data.setValue(i, 0, minutes + ":" + seconds + " min");
             }
+            String suffix = "";
+            switch (dataToShow){
+            case CURRENT_SPEED_OVER_GROUND_IN_KNOTS:
+                suffix = stringConstants.currentSpeedOverGroundInKnotsUnit();
+                break;
+            case DISTANCE_TRAVELED:
+                suffix = stringConstants.metersUnit();
+                break;
+            case GAP_TO_LEADER_IN_SECONDS:
+                suffix = stringConstants.secondsUnit();
+                break;
+            case VELOCITY_MADE_GOOD_IN_KNOTS:
+                suffix = stringConstants.currentSpeedOverGroundInKnotsUnit();
+                break;
+            case WINDWARD_DISTANCE_TO_OVERALL_LEADER:
+                suffix = stringConstants.metersUnit();
+                break;
+            }
+            chartNumberFormat = NumberFormat.create(createNumberFormatOptions(suffix));
             for (int i = 0; i < chartData.size(); i++) {
-                for (int j = 0; j < chartData.get(i).getB().length; j++) {
-                    if (chartData.get(i).getB()[j] != null && isCompetitorVisible(chartData.get(i).getA())) {
-                        data.setValue(j, (i + 1), chartData.get(i).getB()[j]);
+                for (int j = 0; j < endPoint-startPoint; j++) {
+                    if (chartData.get(i).getB()[startPoint+j] != null && isCompetitorVisible(chartData.get(i).getA())) {
+                        data.setValue(j, (i + 1), chartData.get(i).getB()[startPoint+j]);
+                        
                     }
                 }
+                chartNumberFormat.format(data, i+1);
             }
         }
 
@@ -378,4 +437,38 @@ public class CompareCompetitorsPanel extends FormPanel {
         return (isVisible != null) ? isVisible : false;
     }
 
+    private com.google.gwt.visualization.client.formatters.NumberFormat.Options createNumberFormatOptions(String suffix){
+        com.google.gwt.visualization.client.formatters.NumberFormat.Options options = com.google.gwt.visualization.client.formatters.NumberFormat.Options.create();
+        options.setFractionDigits(dataToShow.getPrecision());
+        options.setSuffix(suffix);
+        return options;
+    }
+    
+    private void setMarkPassingSelection(){
+        ArrayList<Selection> selections = new ArrayList<Selection>();
+        Long[] timePoints = competitorAndTimePointsDAO.getTimePoints();
+        for (int column = 0; column < competitorAndTimePointsDAO.getCompetitor().length; column++) {
+            int currentMarkPassing = 0;
+            Long[] markPassing = competitorAndTimePointsDAO.getMarkPassings(competitorAndTimePointsDAO.getCompetitor()[column]);
+            
+            for (int row = 0; currentMarkPassing < markPassing.length; row++){
+                if (startPoint+row > 0 && timePoints[startPoint+row-1] < markPassing[currentMarkPassing] && timePoints[startPoint+row] > markPassing[currentMarkPassing]){
+                    selections.add(Selection.createCellSelection(row, column+1));
+                    currentMarkPassing++;
+                }
+                else if (startPoint + row == 0 && timePoints[startPoint+row] > markPassing[currentMarkPassing]){
+                    selections.add(Selection.createCellSelection(row, column+1));
+                    currentMarkPassing++;
+                }
+                if (endPoint-startPoint <= row-1){
+                    currentMarkPassing++;
+                    row = 0;
+                }
+            }
+        }
+        JsArray<Selection> sel = ArrayHelper.toJsArray(selections.toArray(new Selection[0]));
+        if (chartLoaded && dataLoaded){
+            chart.setSelections(sel);
+        }
+    }
 }

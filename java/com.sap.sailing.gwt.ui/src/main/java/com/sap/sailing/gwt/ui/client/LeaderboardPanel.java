@@ -38,6 +38,7 @@ import com.google.gwt.view.client.MultiSelectionModel;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog.Validator;
 import com.sap.sailing.gwt.ui.client.LegDetailColumn.LegDetailField;
 import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
+import com.sap.sailing.gwt.ui.shared.DetailType;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDAO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDAO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardNameAndRaceColumnName;
@@ -84,9 +85,9 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
 
     private final RankColumn rankColumn;
 
-    private final List<DetailColumnType> selectedLegDetails;
+    private final List<DetailType> selectedLegDetails;
 
-    private final List<DetailColumnType> selectedRaceDetails;
+    private final List<DetailType> selectedRaceDetails;
 
     private List<String> selectedRaceColumns;
 
@@ -418,9 +419,9 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
 
     }
 
-    public static DetailColumnType[] getAvailableRaceDetailColumnTypes() {
-        return new DetailColumnType[] { DetailColumnType.RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS,
-                DetailColumnType.RACE_DISTANCE_TRAVELED, DetailColumnType.RACE_GAP_TO_LEADER_IN_SECONDS, DetailColumnType.RACE_MANEUVERS };
+    public static DetailType[] getAvailableRaceDetailColumnTypes() {
+        return new DetailType[] { DetailType.RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS,
+                DetailType.RACE_DISTANCE_TRAVELED, DetailType.RACE_GAP_TO_LEADER_IN_SECONDS, DetailType.RACE_MANEUVERS };
     }
 
     private class TextRaceColumn extends RaceColumn<String> implements RaceNameProvider {
@@ -465,21 +466,21 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         }
 
         @Override
-        protected Map<DetailColumnType, SortableColumn<LeaderboardRowDAO, ?>> getDetailColumnMap(
+        protected Map<DetailType, SortableColumn<LeaderboardRowDAO, ?>> getDetailColumnMap(
                 LeaderboardPanel leaderboardPanel, StringConstants stringConstants, String detailHeaderStyle,
                 String detailColumnStyle) {
-            Map<DetailColumnType, SortableColumn<LeaderboardRowDAO, ?>> result = new HashMap<DetailColumnType, SortableColumn<LeaderboardRowDAO, ?>>();
-            result.put(DetailColumnType.RACE_DISTANCE_TRAVELED,
+            Map<DetailType, SortableColumn<LeaderboardRowDAO, ?>> result = new HashMap<DetailType, SortableColumn<LeaderboardRowDAO, ?>>();
+            result.put(DetailType.RACE_DISTANCE_TRAVELED,
                     new FormattedDoubleLegDetailColumn(stringConstants.distanceInMeters(), stringConstants.distanceInMetersUnit(),
                             new RaceDistanceTraveledInMeters(), 0, getLeaderboardPanel().getLeaderboardTable(),
                             LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
-            result.put(DetailColumnType.RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS, new FormattedDoubleLegDetailColumn(
+            result.put(DetailType.RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS, new FormattedDoubleLegDetailColumn(
                     stringConstants.averageSpeedInKnots(), stringConstants.averageSpeedInKnotsUnit(), new RaceAverageSpeedInKnots(), 2, getLeaderboardPanel()
                                     .getLeaderboardTable(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
-            result.put(DetailColumnType.RACE_GAP_TO_LEADER_IN_SECONDS, new FormattedDoubleLegDetailColumn(
+            result.put(DetailType.RACE_GAP_TO_LEADER_IN_SECONDS, new FormattedDoubleLegDetailColumn(
                     stringConstants.gapToLeaderInSeconds(), stringConstants.gapToLeaderInSecondsUnit(), new RaceGapToLeaderInSeconds(), 0, getLeaderboardPanel()
                                     .getLeaderboardTable(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
-            result.put(DetailColumnType.RACE_MANEUVERS, new ManeuverCountRaceColumn(
+            result.put(DetailType.RACE_MANEUVERS, new ManeuverCountRaceColumn(
                     stringConstants.numberOfManeuvers(), getLeaderboardPanel()
                                     .getLeaderboardTable(), this, LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, stringConstants));
             return result;
@@ -714,11 +715,11 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         this.setLeaderboardName(leaderboardName);
         this.errorReporter = errorReporter;
         this.stringConstants = stringConstants;
-        this.selectedLegDetails = new ArrayList<DetailColumnType>();
-        this.selectedLegDetails.add(DetailColumnType.DISTANCE_TRAVELED);
-        this.selectedLegDetails.add(DetailColumnType.AVERAGE_SPEED_OVER_GROUND_IN_KNOTS);
-        this.selectedLegDetails.add(DetailColumnType.RANK_GAIN);
-        this.selectedRaceDetails = new ArrayList<DetailColumnType>();
+        this.selectedLegDetails = new ArrayList<DetailType>();
+        this.selectedLegDetails.add(DetailType.DISTANCE_TRAVELED);
+        this.selectedLegDetails.add(DetailType.AVERAGE_SPEED_OVER_GROUND_IN_KNOTS);
+        this.selectedLegDetails.add(DetailType.RANK_GAIN);
+        this.selectedRaceDetails = new ArrayList<DetailType>();
         this.selectedRaceColumns = new ArrayList<String>();
         delayInMilliseconds = 0l;
         timer = new Timer(/* delayBetweenAutoAdvancesInMilliseconds */ 3000l);
@@ -1307,7 +1308,9 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         List<CompetitorDAO> competitors = new ArrayList<CompetitorDAO>();
         List<RaceIdentifier> races = new ArrayList<RaceIdentifier>();
         for (RaceInLeaderboardDAO race : getLeaderboard().getRaceList()) {
-            races.add(new LeaderboardNameAndRaceColumnName(leaderboardName, race.getRaceColumnName()));
+            if (race.isTrackedRace()){
+                races.add(new LeaderboardNameAndRaceColumnName(leaderboardName, race.getRaceColumnName()));
+            }
         }
         if (leaderboardSelectionModel.getSelectedSet().size() > 0){
             for (LeaderboardRowDAO leaderboardRowDAO : leaderboardSelectionModel.getSelectedSet()) {

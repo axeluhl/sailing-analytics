@@ -12,8 +12,8 @@ import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.sap.sailing.gwt.ui.client.CompareCompetitorsPanel.DataLoadedEvent;
-import com.sap.sailing.gwt.ui.client.CompareCompetitorsPanel.DataLoadedHandler;
+import com.sap.sailing.gwt.ui.client.ChartsPanel.DataLoadedEvent;
+import com.sap.sailing.gwt.ui.client.ChartsPanel.DataLoadedHandler;
 import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
 import com.sap.sailing.gwt.ui.shared.RaceIdentifier;
 
@@ -22,7 +22,7 @@ public class CompareCompetitorsChartDialog extends DialogBox {
 
     public CompareCompetitorsChartDialog(SailingServiceAsync sailingService, List<CompetitorDAO> competitors, RaceIdentifier[] races, StringConstants stringConstants){
         super(true);
-        CompareCompetitorsPanel ccp = new CompareCompetitorsPanel(sailingService, competitors, races, stringConstants, (int) (Window.getClientWidth()-300), (int) (Window.getClientHeight()-200));
+        ChartsPanel ccp = new ChartsPanel(sailingService, competitors, races, stringConstants, (int) (Window.getClientWidth()-300), (int) (Window.getClientHeight()-200));
         ccp.addDataLoadedHandler(new DataLoadedHandler() {
             
             @Override
