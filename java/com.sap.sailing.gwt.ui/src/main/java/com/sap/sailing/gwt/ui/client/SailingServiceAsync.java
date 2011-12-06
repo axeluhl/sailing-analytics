@@ -8,7 +8,7 @@ import java.util.Map;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
-import com.sap.sailing.gwt.ui.shared.CompetitorAndTimePointsDAO;
+import com.sap.sailing.gwt.ui.shared.CompetitorsAndTimePointsDAO;
 import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
 import com.sap.sailing.gwt.ui.shared.DetailType;
 import com.sap.sailing.gwt.ui.shared.EventAndRaceIdentifier;
@@ -180,7 +180,7 @@ public interface SailingServiceAsync {
 
     void getCountryCodes(AsyncCallback<String[]> callback);
 
-    void getCompetitorRaceData(RaceIdentifier race, CompetitorAndTimePointsDAO competitorAndTimePointsDAO,
+    void getCompetitorRaceData(RaceIdentifier race, CompetitorsAndTimePointsDAO competitorAndTimePointsDAO,
             DetailType dataType, AsyncCallback<List<Pair<CompetitorDAO, Double[]>>> callback);
     void getDouglasPoints(RaceIdentifier raceIdentifier, Map<CompetitorDAO, Date> from, Map<CompetitorDAO, Date> to,
             double meters, AsyncCallback<Map<CompetitorDAO, List<GPSFixDAO>>> callback);
@@ -188,5 +188,10 @@ public interface SailingServiceAsync {
     void getManeuvers(RaceIdentifier raceIdentifier, Map<CompetitorDAO, Date> from, Map<CompetitorDAO, Date> to,
             AsyncCallback<Map<CompetitorDAO, List<ManeuverDAO>>> callback);
 
-    void getCompetitorAndTimePoints(RaceIdentifier race, int steps, AsyncCallback<CompetitorAndTimePointsDAO> callback);
+    /**
+     * For the race identified by <code>race</code> computes <code>steps</code> equidistant time points starting at a
+     * few seconds before the race starts, up to the end of the race. The result describes the race's competitors, their
+     * mark passing times, the race start time and the list of time points according to the above specification.
+     */
+    void getCompetitorsAndTimePoints(RaceIdentifier race, int steps, AsyncCallback<CompetitorsAndTimePointsDAO> callback);
 }

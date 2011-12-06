@@ -39,14 +39,14 @@ import com.google.gwt.visualization.client.visualizations.corechart.AxisOptions;
 import com.google.gwt.visualization.client.visualizations.corechart.LineChart;
 import com.google.gwt.visualization.client.visualizations.corechart.Options;
 import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
-import com.sap.sailing.gwt.ui.shared.CompetitorAndTimePointsDAO;
+import com.sap.sailing.gwt.ui.shared.CompetitorsAndTimePointsDAO;
 import com.sap.sailing.gwt.ui.shared.DetailType;
 import com.sap.sailing.gwt.ui.shared.Pair;
 import com.sap.sailing.gwt.ui.shared.RaceIdentifier;
 
 public class ChartsPanel extends FormPanel {
     private List<Pair<CompetitorDAO, Double[]>> chartData = null;
-    private CompetitorAndTimePointsDAO competitorAndTimePointsDAO = null;
+    private CompetitorsAndTimePointsDAO competitorAndTimePointsDAO = null;
     private LineChart chart;
     private final SailingServiceAsync sailingService;
     private HorizontalPanel mainPanel;
@@ -304,7 +304,7 @@ public class ChartsPanel extends FormPanel {
             loadData.run();
         }
         else {
-            this.sailingService.getCompetitorAndTimePoints(races[selectedRace], stepsToLoad, new AsyncCallback<CompetitorAndTimePointsDAO>() {
+            this.sailingService.getCompetitorAndTimePoints(races[selectedRace], stepsToLoad, new AsyncCallback<CompetitorsAndTimePointsDAO>() {
 
                 @Override
                 public void onFailure(Throwable caught) {
@@ -312,7 +312,7 @@ public class ChartsPanel extends FormPanel {
                 }
 
                 @Override
-                public void onSuccess(CompetitorAndTimePointsDAO result) {
+                public void onSuccess(CompetitorsAndTimePointsDAO result) {
                     competitorAndTimePointsDAO = result;
                     selectCompetitors.clear();
                     for (int i = 0; i < result.getCompetitor().length; i++){

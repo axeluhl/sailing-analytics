@@ -4,13 +4,13 @@ import java.util.HashMap;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
-public class CompetitorAndTimePointsDAO implements IsSerializable {
+public class CompetitorsAndTimePointsDAO implements IsSerializable {
     private CompetitorDAO[] competitors;
     private HashMap<String, Long[]> markPassings;
     private Long[] timePoints;
     private long startTime;
     
-    public CompetitorAndTimePointsDAO(){
+    public CompetitorsAndTimePointsDAO(){
         markPassings = new HashMap<String, Long[]>();
     }
     
