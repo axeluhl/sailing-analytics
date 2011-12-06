@@ -13,11 +13,13 @@
     <packaging>eclipse-plugin</packaging>
 
     <dependencies>
+	<!--
         <dependency>
             <groupId>com.sap.ui.phoenix</groupId>
             <artifactId>pwt-sap.ui.commons</artifactId>
             <version>0.18.0</version>
         </dependency>
+		-->
     </dependencies>
 
     <build>

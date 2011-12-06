@@ -29,7 +29,9 @@
 		<module>com.sap.sailing.expeditionconnector.test</module>
 		<module>com.sap.sailing.server</module>
 		<module>com.sap.sailing.xcelsiusadapter</module>
+		<!--
 		<module>com.sap.sailing.httpservicetracker</module>
+		-->
 		<module>com.sap.sailing.gwt.ui</module>
 		<module>com.sap.sailing.gwt.ui.test</module>
 		<module>com.google.gwt.osgi</module>
@@ -42,13 +44,17 @@
 		<module>com.mongodb.driver</module>
 		<module>com.googlecode.java-diff-utils</module>
 		<module>com.googlecode.java-diff-utils.test</module>
+		<!--
 		<module>com.sap.ui.phoenix.resource-osgi</module>
 		<module>com.sap.ui.phoenix.resource-servlet</module>
+		-->
 	</modules>
 	
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<tycho-version>0.13.0</tycho-version>
+		<sailing.tp.p2.repository.url>file:C:/Projects/sailing/dev/target/p2repos/eclipse</sailing.tp.p2.repository.url>
 	</properties>
 
 	<build>
@@ -60,9 +66,9 @@
 			<plugins>
 				<plugin>
 					<inherited>true</inherited>
-					<groupId>org.sonatype.tycho</groupId>
+					<groupId>org.eclipse.tycho</groupId>
 					<artifactId>maven-osgi-test-plugin</artifactId>
-					<version>0.10.0</version>
+					<version>${tycho-version}</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -74,49 +80,29 @@
 
 		<plugins>
 			<plugin>
-				<groupId>org.sonatype.tycho</groupId>
+				<groupId>org.eclipse.tycho</groupId>
 				<artifactId>tycho-maven-plugin</artifactId>
-				<version>0.10.0</version>
+				<version>${tycho-version}</version>
 				<extensions>true</extensions>
 			</plugin>
 			<plugin>
-				<groupId>org.sonatype.tycho</groupId>
+				<groupId>org.eclipse.tycho</groupId>
 				<artifactId>target-platform-configuration</artifactId>
-				<version>0.10.0</version>
+				<version>${tycho-version}</version>
 				<configuration>
-					<resolver>p2</resolver>
-					<environments>
-						<environment>
-							<os>linux</os>
-							<ws>gtk</ws>
-							<arch>x86</arch>
-						</environment>
-						<environment>
-							<os>linux</os>
-							<ws>gtk</ws>
-							<arch>x86_64</arch>
-						</environment>
-						<environment>
-							<os>win32</os>
-							<ws>win32</ws>
-							<arch>x86</arch>
-						</environment>
-						<environment>
-							<os>win32</os>
-							<ws>win32</ws>
-							<arch>x86_64</arch>
-						</environment>
-						<environment>
-							<os>macosx</os>
-							<ws>cocoa</ws>
-							<arch>x86_64</arch>
-						</environment>
-					</environments>
-					<pomDependencies>consider</pomDependencies>
-				</configuration>
+				<resolver>p2</resolver>
+              <target>
+                <artifact>
+					<groupId>${project.groupId}</groupId>
+					<artifactId>${project.artifactId}</artifactId>
+					<version>${project.version}</version>
+					<classifier>../race-analysis-server-p2-local</classifier>
+                </artifact>
+              </target>
+            </configuration>
 			</plugin>
 			<plugin>
-				<groupId>org.sonatype.tycho</groupId>
+				<groupId>org.eclipse.tycho</groupId>
 				<artifactId>maven-osgi-test-plugin</artifactId>
 				<configuration>
 <!-- non-debug -->
@@ -137,9 +123,9 @@
 				</configuration>
 			</plugin>
 			<plugin>
-				<groupId>org.sonatype.tycho</groupId>
+				<groupId>org.eclipse.tycho</groupId>
 				<artifactId>maven-osgi-compiler-plugin</artifactId>
-				<version>0.10.0</version>
+				<version>${tycho-version}</version>
 				<configuration>
 					<source>1.6</source>
 					<target>1.6</target>
@@ -164,8 +150,9 @@
       <url>scpexe://trac@localhost:12347/home/trac/maven-repositories/dev</url>
     </repository>
   </distributionManagement>
-
+  
 	<repositories>
+	<!--
 		<repository>
 			<layout>p2</layout>
 			<id>eclipse</id>
@@ -175,13 +162,13 @@
 			<id>sap-nexus</id>
 			<url>http://nexus.wdf.sap.corp:8081/nexus/content/groups/build.snapshots</url>
 		</repository>
-<!-- 
+--> 
 		<repository>
 			<id>central</id>
 			<url>http://repo1.maven.org/maven2</url>
 		</repository>
- -->
-                <repository>
+ 
+		<repository>
 			<id>uni-luebeck</id>
 			<url>http://www.itm.uni-luebeck.de/projects/maven/releases</url>
 		</repository>
