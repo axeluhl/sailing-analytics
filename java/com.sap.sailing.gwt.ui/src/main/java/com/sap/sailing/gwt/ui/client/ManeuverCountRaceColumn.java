@@ -77,6 +77,60 @@ public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> {
         this.columnStyle = columnStylee;
     }
 
+    private Integer getTotalNumberOfTacks(LeaderboardEntryDAO row) {
+        Integer totalNumberOfTacks = null;
+        if (row != null && row.legDetails != null) {
+            for (LegEntryDAO legDetail : row.legDetails) {
+                if (legDetail != null) {
+                    if (legDetail.numberOfTacks != null) {
+                        if (totalNumberOfTacks == null) {
+                            totalNumberOfTacks = legDetail.numberOfTacks;
+                        } else {
+                            totalNumberOfTacks += legDetail.numberOfTacks;
+                        }
+                    }
+                }
+            }
+        }
+        return totalNumberOfTacks;
+    }
+
+    private Integer getTotalNumberOfJibes(LeaderboardEntryDAO row) {
+        Integer totalNumberOfJibes = null;
+        if (row != null && row.legDetails != null) {
+            for (LegEntryDAO legDetail : row.legDetails) {
+                if (legDetail != null) {
+                    if (legDetail.numberOfJibes != null) {
+                        if (totalNumberOfJibes == null) {
+                            totalNumberOfJibes = legDetail.numberOfJibes;
+                        } else {
+                            totalNumberOfJibes += legDetail.numberOfJibes;
+                        }
+                    }
+                }
+            }
+        }
+        return totalNumberOfJibes;
+    }
+
+    private Integer getTotalNumberOfPenaltyCircles(LeaderboardEntryDAO row) {
+        Integer totalNumberOfPnaltyCicles = null;
+        if (row != null && row.legDetails != null) {
+            for (LegEntryDAO legDetail : row.legDetails) {
+                if (legDetail != null) {
+                    if (legDetail.numberOfPenaltyCircles != null) {
+                        if (totalNumberOfPnaltyCicles == null) {
+                            totalNumberOfPnaltyCicles = legDetail.numberOfPenaltyCircles;
+                        } else {
+                            totalNumberOfPnaltyCicles += legDetail.numberOfPenaltyCircles;
+                        }
+                    }
+                }
+            }
+        }
+        return totalNumberOfPnaltyCicles;
+    }
+
     private Triple<Integer, Integer, Integer> getTotalNumberOfTacksJibesAndPenaltyCircles(LeaderboardRowDAO row) {
         Integer totalNumberOfTacks = null;
         Integer totalNumberOfJibes = null;
