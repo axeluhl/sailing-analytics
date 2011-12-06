@@ -434,13 +434,11 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
          * not yet existing. It is important to remember the columns because column removal happens based on identity.
          */
         private final List<LegColumn> legColumns;
-        private final ManeuverCountRaceColumn maneuverColumn;
 
         public TextRaceColumn(String raceName, boolean medalRace, boolean expandable, String headerStyle,
                 String columnStyle) {
             super(raceName, medalRace, expandable, new TextCell(), headerStyle, columnStyle);
             legColumns = new ArrayList<LegColumn>();
-            maneuverColumn = getManeuverCountRaceColumn();
         }
 
         @Override
@@ -486,11 +484,15 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             result.put(DetailType.RACE_GAP_TO_LEADER_IN_SECONDS, new FormattedDoubleLegDetailColumn(
                     stringConstants.gapToLeaderInSeconds(), stringConstants.gapToLeaderInSecondsUnit(), new RaceGapToLeaderInSeconds(), 0, getLeaderboardPanel()
                                     .getLeaderboardTable(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
-            
+            result.put(DetailType.NUMBER_OF_MANEUVERS, getManeuverCountRaceColumn());
             /*result.put(DetailType.RACE_MANEUVERS, new ManeuverCountRaceColumn(
                     stringConstants.numberOfManeuvers(), getLeaderboardPanel()
                                     .getLeaderboardTable(), this, LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, stringConstants));*/
             return result;
+        }
+        
+        private ManeuverCountRaceColumn getManeuverCountRaceColumn(){
+            return new ManeuverCountRaceColumn(getLeaderboardPanel(), this, stringConstants, LeaderboardPanel.this.selectedManeuverDetails, LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE);
         }
 
         @Override
@@ -500,7 +502,6 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 result.add(column);
             }
             if (isExpanded()) {
-                result.add(maneuverColumn);
                 // it is important to re-use existing LegColumn objects because
                 // removing the columns from the table
                 // is based on column identity
@@ -522,10 +523,6 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             return result;
         }
         
-        private ManeuverCountRaceColumn getManeuverCountRaceColumn(){
-            return new ManeuverCountRaceColumn(getLeaderboardPanel(), getRaceName(), stringConstants, LeaderboardPanel.this.selectedManeuverDetails, LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LEG_DETAIL_COLUMN_HEADER_STYLE, LEG_DETAIL_COLUMN_STYLE);
-        }
-
         private LegColumn getLegColumn(int legNumber) {
             LegColumn result;
             if (legColumns.size() > legNumber && legColumns.get(legNumber) != null) {

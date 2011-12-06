@@ -18,13 +18,10 @@ import com.sap.sailing.gwt.ui.shared.Triple;
 public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> {
 
     private final StringConstants stringConstants;
-    private final String raceName;
+    private final RaceNameProvider raceNameProvider;
     
     private final String headerStyle;
     private final String columnStyle;
-    
-    private final String detailHeaderStyle;
-    private final String detailColumnStyle;
 
     private abstract class AbstractManeuverDetailField<T extends Comparable<?>> implements LegDetailField<T> {
         public T get(LeaderboardRowDAO row) {
@@ -65,16 +62,14 @@ public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> {
         }
     }
     
-    public ManeuverCountRaceColumn(LeaderboardPanel leaderboardPanel, String raceName, StringConstants stringConstants,
-            List<DetailType> maneuverDetailSelection, String headerStyle, String columnStylee, String detailHeaderStyle, String detailColumnStyle) {
+    public ManeuverCountRaceColumn(LeaderboardPanel leaderboardPanel, RaceNameProvider raceNameProvider, StringConstants stringConstants,
+            List<DetailType> maneuverDetailSelection, String headerStyle, String columnStylee) {
         super(leaderboardPanel, /* expandable */true /* all legs have details */, new TextCell(), stringConstants,
                 headerStyle, columnStylee, maneuverDetailSelection);
         this.stringConstants = stringConstants;
-        this.raceName = raceName;
+        this.raceNameProvider = raceNameProvider;
         this.headerStyle = headerStyle;
         this.columnStyle = columnStylee;
-        this.detailColumnStyle = detailColumnStyle;
-        this.detailHeaderStyle = detailHeaderStyle;
     }
 
     private Integer getTotalNumberOfTacks(LeaderboardEntryDAO row) {
@@ -168,7 +163,7 @@ public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> {
     }
 
     private String getRaceName() {
-        return raceName;
+        return raceNameProvider.getRaceName();
     }
 
     @Override

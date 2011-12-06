@@ -82,6 +82,7 @@ public abstract class ExpandableSortableColumn<C> extends SortableColumn<Leaderb
     /**
      * Fetches the cached {@link #directChildren}. If <code>null</code>, the child columns are determined by calling
      * {@link #createExpansionColumns} and cached in {@link #directChildren}.
+     * RaceName of Columns like ManeuverCountRaceColumn is not known at this point because it will be later set in the constructor of TextRaceColumn
      */
     protected Iterable<SortableColumn<LeaderboardRowDAO, ?>> getDirectChildren() {
         List<SortableColumn<LeaderboardRowDAO, ?>> result;
