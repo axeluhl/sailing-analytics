@@ -12,11 +12,11 @@ Require-Bundle: com.sap.sailing.domain,
  org.json.simple;bundle-version="1.1.0",
  com.sap.sailing.mongodb,
  com.mongodb.driver;bundle-version="2.6.2",
- com.sap.ui.phoenix.pwt-sap.ui.commons,
- com.sap.ui.phoenix.pwt-sap.ui.core,
- com.sap.ui.phoenix.commons,
- com.sap.ui.phoenix.core,
- com.sap.sailing.httpservicetracker,
+ com.sap.ui5.commons,
+ com.sap.ui5.core,
+ com.sap.ui5.resource,
+ com.sap.ui5.gwt.commons,
+ com.sap.ui5.gwt.core,
  com.sap.sailing.domain.swisstimingadapter,
  com.sap.sailing.domain.persistence,
  com.sap.sailing.domain.swisstimingadapter.persistence,
@@ -29,10 +29,11 @@ Bundle-ClassPath: lib/gwt-maps.jar,
 Bundle-Activator: com.sap.sailing.gwt.ui.server.Activator
 Bundle-ActivationPolicy: lazy
 Export-Package: com.sap.sailing.gwt.ui.client;x-friends:="com.sap.sailing.gwt.ui.test",
- com.sap.sailing.gwt.ui.server;x-friends:="com.sap.sailing.gwt.ui.test,com.sap.ui.phoenix.resource-osgi",
+ com.sap.sailing.gwt.ui.server;x-friends:="com.sap.sailing.gwt.ui.test",
  com.sap.sailing.gwt.ui.shared;x-friends:="com.sap.sailing.gwt.ui.test"
 Import-Package: org.osgi.framework,
  org.osgi.util.tracker,
- org.osgi.service.http,
  javax.servlet,
  javax.servlet.http
+Web-ContextPath: /
+Jetty-WarFolderPath: war

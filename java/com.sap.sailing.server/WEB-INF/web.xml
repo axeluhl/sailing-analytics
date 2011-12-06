@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://java.sun.com/xml/ns/javaee"
+	xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
+	http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" version="2.5">
+	<servlet>
+		<servlet-name>AdminApp</servlet-name>
+		<servlet-class>com.sap.sailing.server.AdminApp</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>AdminApp</servlet-name>
+		<url-pattern>/admin</url-pattern>
+	</servlet-mapping>
+	<servlet>
+		<servlet-name>ModeratorApp</servlet-name>
+		<servlet-class>com.sap.sailing.server.ModeratorApp</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>ModeratorApp</servlet-name>
+		<url-pattern>/moderator</url-pattern>
+	</servlet-mapping>
+</web-app>

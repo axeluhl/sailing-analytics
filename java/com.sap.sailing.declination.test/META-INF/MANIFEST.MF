@@ -6,5 +6,5 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Require-Bundle: com.sap.sailing.declination,
- com.sap.sailing.domain,
- org.junit4;bundle-version="4.8.1"
+ com.sap.sailing.domain
+Import-Package: org.junit;version="4.8.1"

@@ -16,7 +16,6 @@ import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
-import com.sap.sailing.httpservicetracker.HttpServiceTracker;
 import com.sap.sailing.util.Util.Triple;
 
 public class Activator implements BundleActivator, ServiceListener {
@@ -24,7 +23,7 @@ public class Activator implements BundleActivator, ServiceListener {
     
     private static BundleContext fContext;
     
-    private HttpServiceTracker httpServiceTracker;
+//    private HttpServiceTracker httpServiceTracker;
     
     static BundleContext getDefault() {
         return fContext;
@@ -39,10 +38,10 @@ public class Activator implements BundleActivator, ServiceListener {
         
         // now track the HTTP service:
         Map<String, Class<? extends javax.servlet.Servlet>> pathMap = new HashMap<String, Class<? extends javax.servlet.Servlet>>();
-        pathMap.put("/admin", AdminApp.class);
-        pathMap.put("/moderator", ModeratorApp.class);
-        httpServiceTracker = new HttpServiceTracker(context, pathMap, null);
-        httpServiceTracker.open();
+//        pathMap.put("/admin", AdminApp.class);
+//        pathMap.put("/moderator", ModeratorApp.class);
+//        httpServiceTracker = new HttpServiceTracker(context, pathMap, null);
+//        httpServiceTracker.open();
         logger.log(Level.INFO, "Started "+context.getBundle().getSymbolicName()+". Character encoding: "+
                 Charset.defaultCharset());
     }
@@ -60,8 +59,8 @@ public class Activator implements BundleActivator, ServiceListener {
             service.stopTracking(event);
         }
         // stop tracking the HTTP service:
-        httpServiceTracker.close();
-        httpServiceTracker = null;
+//        httpServiceTracker.close();
+//        httpServiceTracker = null;
     }
 
     public void serviceChanged(ServiceEvent ev) {

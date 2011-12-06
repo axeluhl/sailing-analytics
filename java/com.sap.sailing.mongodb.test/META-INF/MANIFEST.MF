@@ -5,8 +5,7 @@ Bundle-SymbolicName: com.sap.sailing.mongodb.test
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Require-Bundle: org.junit4;bundle-version="4.8.1",
- com.mongodb.driver;bundle-version="2.6.2",
+Require-Bundle: com.mongodb.driver;bundle-version="2.6.2",
  com.sap.sailing.domain,
  com.sap.sailing.mongodb,
  com.sap.sailing.domain.test,
@@ -15,3 +14,4 @@ Require-Bundle: org.junit4;bundle-version="4.8.1",
  org.eclipse.osgi,
  com.sap.sailing.domain.persistence,
  com.sap.sailing.server
+Import-Package: org.junit;version="4.8.1"

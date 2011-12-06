@@ -6,8 +6,6 @@ import java.util.Map;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
-import com.sap.sailing.httpservicetracker.HttpServiceTracker;
-
 public class Activator implements BundleActivator {
 
     private static BundleContext context;
@@ -16,7 +14,7 @@ public class Activator implements BundleActivator {
         return context;
     }
 
-    private HttpServiceTracker httpServiceTracker;
+//    private HttpServiceTracker httpServiceTracker;
 
     /*
      * (non-Javadoc)
@@ -28,8 +26,8 @@ public class Activator implements BundleActivator {
         // now track the HTTP service:
         Map<String, Class<? extends javax.servlet.Servlet>> pathMap = new HashMap<String, Class<? extends javax.servlet.Servlet>>();
         pathMap.put("/xcelsius", XcelsiusApp.class);
-        httpServiceTracker = new HttpServiceTracker(context, pathMap, null);
-        httpServiceTracker.open();
+//        httpServiceTracker = new HttpServiceTracker(context, pathMap, null);
+//        httpServiceTracker.open();
     }
 
     /*
@@ -40,8 +38,8 @@ public class Activator implements BundleActivator {
     public void stop(BundleContext bundleContext) throws Exception {
         Activator.context = null;
         // stop tracking the HTTP service:
-        httpServiceTracker.close();
-        httpServiceTracker = null;
+  //      httpServiceTracker.close();
+  //      httpServiceTracker = null;
     }
 
 }
