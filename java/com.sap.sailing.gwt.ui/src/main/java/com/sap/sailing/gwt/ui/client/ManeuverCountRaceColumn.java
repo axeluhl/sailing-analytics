@@ -63,9 +63,9 @@ public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> {
     }
     
     public ManeuverCountRaceColumn(LeaderboardPanel leaderboardPanel, RaceNameProvider raceNameProvider, StringConstants stringConstants,
-            List<DetailType> maneuverDetailSelection, String headerStyle, String columnStylee) {
+            List<DetailType> maneuverDetailSelection, String headerStyle, String columnStylee, String detailHeaderStyle, String detailColumnStyle) {
         super(leaderboardPanel, /* expandable */true /* all legs have details */, new TextCell(), stringConstants,
-                headerStyle, columnStylee, maneuverDetailSelection);
+                detailHeaderStyle, detailColumnStyle, maneuverDetailSelection);
         this.stringConstants = stringConstants;
         this.raceNameProvider = raceNameProvider;
         this.headerStyle = headerStyle;

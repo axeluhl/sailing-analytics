@@ -492,7 +492,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         }
         
         private ManeuverCountRaceColumn getManeuverCountRaceColumn(){
-            return new ManeuverCountRaceColumn(getLeaderboardPanel(), this, stringConstants, LeaderboardPanel.this.selectedManeuverDetails, LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE);
+            return new ManeuverCountRaceColumn(getLeaderboardPanel(), this, stringConstants, LeaderboardPanel.this.selectedManeuverDetails, LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LEG_DETAIL_COLUMN_HEADER_STYLE, LEG_DETAIL_COLUMN_STYLE);
         }
 
         @Override
