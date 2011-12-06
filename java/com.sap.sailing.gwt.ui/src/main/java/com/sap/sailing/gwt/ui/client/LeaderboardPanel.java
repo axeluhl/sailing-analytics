@@ -84,6 +84,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     private LeaderboardDAO leaderboard;
 
     private final RankColumn rankColumn;
+    
+    private final List<DetailType> selectedManeuverDetails;
 
     private final List<DetailType> selectedLegDetails;
 
@@ -126,7 +128,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
 
         @Override
         public void onClick(ClickEvent event) {
-            new LeaderboardSettingsPanel(Collections.unmodifiableList(selectedLegDetails),
+            new LeaderboardSettingsPanel(Collections.unmodifiableList(selectedManeuverDetails), Collections.unmodifiableList(selectedLegDetails),
                     Collections.unmodifiableList(selectedRaceDetails), /* All races to select */
                     leaderboard.getRaceColumnNameList(), selectedRaceColumns, timer.getDelayBetweenAutoAdvancesInMilliseconds(),
                     stringConstants.leaderboardSettings(), stringConstants.selectLegDetails(), stringConstants.ok(),
@@ -158,6 +160,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                                     }
                                 }
                             }
+                            selectedManeuverDetails.clear();
+                            selectedManeuverDetails.addAll(result.getManeuverDetailsToShow());
                             selectedLegDetails.clear();
                             selectedLegDetails.addAll(result.getLegDetailsToShow());
                             selectedRaceDetails.clear();
@@ -421,7 +425,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
 
     public static DetailType[] getAvailableRaceDetailColumnTypes() {
         return new DetailType[] { DetailType.RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS,
-                DetailType.RACE_DISTANCE_TRAVELED, DetailType.RACE_GAP_TO_LEADER_IN_SECONDS, DetailType.RACE_MANEUVERS };
+                DetailType.RACE_DISTANCE_TRAVELED, DetailType.RACE_GAP_TO_LEADER_IN_SECONDS, DetailType.NUMBER_OF_MANEUVERS };
     }
 
     private class TextRaceColumn extends RaceColumn<String> implements RaceNameProvider {
@@ -480,9 +484,10 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             result.put(DetailType.RACE_GAP_TO_LEADER_IN_SECONDS, new FormattedDoubleLegDetailColumn(
                     stringConstants.gapToLeaderInSeconds(), stringConstants.gapToLeaderInSecondsUnit(), new RaceGapToLeaderInSeconds(), 0, getLeaderboardPanel()
                                     .getLeaderboardTable(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
-            result.put(DetailType.RACE_MANEUVERS, new ManeuverCountRaceColumn(
+            
+            /*result.put(DetailType.RACE_MANEUVERS, new ManeuverCountRaceColumn(
                     stringConstants.numberOfManeuvers(), getLeaderboardPanel()
-                                    .getLeaderboardTable(), this, LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, stringConstants));
+                                    .getLeaderboardTable(), this, LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, stringConstants));*/
             return result;
         }
 
@@ -493,6 +498,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 result.add(column);
             }
             if (isExpanded()) {
+                result.add(getManeuverCountRaceColumn());
                 // it is important to re-use existing LegColumn objects because
                 // removing the columns from the table
                 // is based on column identity
@@ -512,6 +518,10 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 }
             }
             return result;
+        }
+        
+        private ManeuverCountRaceColumn getManeuverCountRaceColumn(){
+            return new ManeuverCountRaceColumn(getLeaderboardPanel(), getRaceName(), stringConstants, LeaderboardPanel.this.selectedManeuverDetails, LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE);
         }
 
         private LegColumn getLegColumn(int legNumber) {
@@ -721,6 +731,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         this.selectedLegDetails.add(DetailType.RANK_GAIN);
         this.selectedRaceDetails = new ArrayList<DetailType>();
         this.selectedRaceColumns = new ArrayList<String>();
+        this.selectedManeuverDetails = new ArrayList<DetailType>();
         delayInMilliseconds = 0l;
         timer = new Timer(/* delayBetweenAutoAdvancesInMilliseconds */ 3000l);
         timer.setDelay(getDelayInMilliseconds()); // set time/delay before

@@ -1,50 +1,62 @@
 package com.sap.sailing.gwt.ui.client;
 
-import com.google.gwt.user.cellview.client.CellTable;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.xml.soap.Detail;
+
+import com.google.gwt.cell.client.TextCell;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.user.cellview.client.Header;
+import com.sap.sailing.gwt.ui.client.LegDetailColumn.LegDetailField;
+import com.sap.sailing.gwt.ui.shared.DetailType;
 import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDAO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDAO;
 import com.sap.sailing.gwt.ui.shared.LegEntryDAO;
 import com.sap.sailing.gwt.ui.shared.Triple;
 
-public class ManeuverCountRaceColumn extends FormattedDoubleLegDetailColumn {
+public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> {
+
     private final StringConstants stringConstants;
-    private final RaceNameProvider raceNameProvider;
+    private final String raceName;
+    
+    private final String headerStyle;
+    private final String columnStyle;
 
-    public ManeuverCountRaceColumn(String title, CellTable<LeaderboardRowDAO> leaderboardTable,
-            RaceNameProvider raceNameProvider, String headerStyle, String columnStyle, StringConstants stringConstants) {
-        super(title, /*unit*/null, /* field */ null, /* decimals */ 0, leaderboardTable, headerStyle, columnStyle);
-        this.stringConstants = stringConstants;
-        this.raceNameProvider = raceNameProvider;
-    }
+    private abstract class AbstractManeuverDetailField<T extends Comparable<?>> implements LegDetailField<T> {
+        public T get(LeaderboardRowDAO row) {
+            LeaderboardEntryDAO fieldsForRace = row.fieldsByRaceName.get(getRaceName());
+            if (fieldsForRace != null && fieldsForRace.legDetails != null) {
+                for (LegEntryDAO legDetail : fieldsForRace.legDetails) {
+                    if (legDetail != null) {
+                        
+                    }
+                }
+            }
+            
+            LeaderboardEntryDAO entry = row.fieldsByRaceName.get(raceName);
+            if(entry == null){
+                return null;
+            }else{
+                return getFromNonNullEntry(entry);
+            }
+        }
 
-    @Override
-    protected String getTitle(LeaderboardRowDAO row) {
-        Triple<Integer, Integer, Integer> tacksJibesAndPenaltyCircles = getTotalNumberOfTacksJibesAndPenaltyCircles(row);
-        StringBuilder result = new StringBuilder();
-        if (tacksJibesAndPenaltyCircles.getA() != null) {
-            result.append(tacksJibesAndPenaltyCircles.getA());
-            result.append(" ");
-            result.append(stringConstants.tacks());
-        }
-        if (tacksJibesAndPenaltyCircles.getB() != null) {
-            if (result.length() > 0) {
-                result.append(", ");
-            }
-            result.append(tacksJibesAndPenaltyCircles.getB());
-            result.append(" ");
-            result.append(stringConstants.jibes());
-        }
-        if (tacksJibesAndPenaltyCircles.getC() != null) {
-            if (result.length() > 0) {
-                result.append(", ");
-            }
-            result.append(tacksJibesAndPenaltyCircles.getC());
-            result.append(" ");
-            result.append(stringConstants.penaltyCircles());
-        }
-        return result.toString();
+        protected abstract T getFromNonNullEntry(LegEntryDAO entry);
     }
     
+    public ManeuverCountRaceColumn(LeaderboardPanel leaderboardPanel, String raceName, StringConstants stringConstants,
+            List<DetailType> maneuverDetailSelection, String headerStyle, String columnStylee) {
+        super(leaderboardPanel, /* expandable */true /* all legs have details */, new TextCell(), stringConstants,
+                headerStyle, columnStylee, maneuverDetailSelection);
+        this.stringConstants = stringConstants;
+        this.raceName = raceName;
+        this.headerStyle = headerStyle;
+        this.columnStyle = columnStylee;
+    }
+
     private Triple<Integer, Integer, Integer> getTotalNumberOfTacksJibesAndPenaltyCircles(LeaderboardRowDAO row) {
         Integer totalNumberOfTacks = null;
         Integer totalNumberOfJibes = null;
@@ -77,13 +89,44 @@ public class ManeuverCountRaceColumn extends FormattedDoubleLegDetailColumn {
                 }
             }
         }
-        return new Triple<Integer, Integer, Integer>(totalNumberOfTacks, totalNumberOfJibes, totalNumberOfPenaltyCircles);
+        return new Triple<Integer, Integer, Integer>(totalNumberOfTacks, totalNumberOfJibes,
+                totalNumberOfPenaltyCircles);
+    }
+
+    private String getRaceName() {
+        return raceName;
     }
 
     @Override
-    protected Double getFieldValue(LeaderboardRowDAO row) {
+    public Header<SafeHtml> getHeader() {
+        SortableExpandableColumnHeader result = new SortableExpandableColumnHeader(/* title */ stringConstants.maneuverTypes(),
+                /* iconURL */ null, getLeaderboardPanel(), this, stringConstants);
+        return result;
+    }
+
+    @Override
+    public Comparator<LeaderboardRowDAO> getComparator() {
+         return new Comparator<LeaderboardRowDAO>() {
+            @Override
+            public int compare(LeaderboardRowDAO o1, LeaderboardRowDAO o2) {
+                boolean ascending = isSortedAscendingForThisColumn(getLeaderboardPanel().getLeaderboardTable());
+                if(o1 != null && o2 != null){
+                    String val1 = getValue(o1);
+                    String val2 = getValue(o2);
+                    if(val1!="" && val1 != null && val2 != "" && val2 != null){
+                        int diff = Integer.parseInt(val2) - Integer.parseInt(val1);
+                        return ascending ? diff : -diff;
+                    }
+                }
+                return 0;
+            }
+        };
+    }
+
+    @Override
+    public String getValue(LeaderboardRowDAO object) {
         Double result = null;
-        Triple<Integer, Integer, Integer> tacksJibesAndPenalties = getTotalNumberOfTacksJibesAndPenaltyCircles(row);
+        Triple<Integer, Integer, Integer> tacksJibesAndPenalties = getTotalNumberOfTacksJibesAndPenaltyCircles(object);
         Integer totalNumberOfTacks = tacksJibesAndPenalties.getA();
         Integer totalNumberOfJibes = tacksJibesAndPenalties.getB();
         Integer totalNumberOfPenaltyCircles = tacksJibesAndPenalties.getC();
@@ -104,11 +147,34 @@ public class ManeuverCountRaceColumn extends FormattedDoubleLegDetailColumn {
                 result += (double) totalNumberOfPenaltyCircles;
             }
         }
+        if(result==null){
+            return "";
+        }else{
+            return result.toString();
+        }
+    }
+    
+    @Override
+    protected Map<DetailType, SortableColumn<LeaderboardRowDAO, ?>> getDetailColumnMap(
+            LeaderboardPanel leaderboardPanel, StringConstants stringConstants, String detailHeaderStyle,
+            String detailColumnStyle) {
+        Map<DetailType, SortableColumn<LeaderboardRowDAO, ?>> result = new HashMap<DetailType, SortableColumn<LeaderboardRowDAO, ?>>();
+        result.put(DetailType.HEAD_UP, new )
         return result;
     }
-
-    private String getRaceName() {
-        return raceNameProvider.getRaceName();
+    
+    public static DetailType[] getAvailableManeuverDetailColumnTypes() {
+        return new DetailType[] { DetailType.TACK, DetailType.JIBE, DetailType.PENALTY_CIRCLE};
+    }
+    
+    @Override
+    public String getColumnStyle() {
+        return columnStyle;
+    }
+    
+    @Override
+    public String getHeaderStyle() {
+        return headerStyle;
     }
 
 }

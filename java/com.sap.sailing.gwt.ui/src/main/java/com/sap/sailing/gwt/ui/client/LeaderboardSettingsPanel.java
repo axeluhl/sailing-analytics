@@ -18,9 +18,11 @@ import com.sap.sailing.gwt.ui.shared.DetailType;
 public class LeaderboardSettingsPanel extends DataEntryDialog<Result> {
     private final List<String> raceColumnSelection;
     private final List<String> raceAllRaceColumns;
+    private final List<DetailType> maneuverDetailSelection;
     private final List<DetailType> legDetailSelection;
     private final List<DetailType> raceDetailSelection;
     private final Map<String, CheckBox> raceColumnCheckboxes;
+    private final Map<DetailType, CheckBox> maneuverDetailCheckboxes;
     private final Map<DetailType, CheckBox> legDetailCheckboxes;
     private final Map<DetailType, CheckBox> raceDetailCheckboxes;
     private final StringConstants stringConstants;
@@ -29,17 +31,23 @@ public class LeaderboardSettingsPanel extends DataEntryDialog<Result> {
     
     public static class Result {
         private final List<String> raceColumnsToShow;
+        private final List<DetailType> maneuverDetailsToShow;
         private final List<DetailType> legDetailsToShow;
         private final List<DetailType> raceDetailsToShow;
         private final long delayBetweenAutoAdvancesInMilliseconds;
         private final long delayInMilliseconds;
         
-        public Result(List<DetailType> legDetailsToShow, List<DetailType> raceDetailsToShow, List<String> raceColumnsToShow, long delayBetweenAutoAdvancesInMilliseconds, long delayInMilliseconds) {
+        public Result(List<DetailType> meneuverDetailsToShow, List<DetailType> legDetailsToShow, List<DetailType> raceDetailsToShow, List<String> raceColumnsToShow, long delayBetweenAutoAdvancesInMilliseconds, long delayInMilliseconds) {
             this.legDetailsToShow = legDetailsToShow;
             this.raceDetailsToShow = raceDetailsToShow;
             this.raceColumnsToShow = raceColumnsToShow;
             this.delayBetweenAutoAdvancesInMilliseconds = delayBetweenAutoAdvancesInMilliseconds;
             this.delayInMilliseconds = delayInMilliseconds;
+            this.maneuverDetailsToShow = meneuverDetailsToShow;
+        }
+      
+        public List<DetailType> getManeuverDetailsToShow() {
+            return maneuverDetailsToShow;
         }
 
         public List<DetailType> getLegDetailsToShow() {
@@ -63,17 +71,19 @@ public class LeaderboardSettingsPanel extends DataEntryDialog<Result> {
         }
     }
     
-    public LeaderboardSettingsPanel(List<DetailType> legDetailSelection, List<DetailType> raceDetailSelection, List<String> raceAllRaceColumns, List<String> raceColumnSelection,
+    public LeaderboardSettingsPanel(List<DetailType> maneuverDetailSelection, List<DetailType> legDetailSelection, List<DetailType> raceDetailSelection, List<String> raceAllRaceColumns, List<String> raceColumnSelection,
             long delayBetweenAutoAdvancesInMilliseconds, String title, String message,
             String okButtonName,
             String cancelButtonName, com.sap.sailing.gwt.ui.client.DataEntryDialog.Validator<Result> validator, AsyncCallback<Result> callback, StringConstants stringConstants, long delayInMilliseconds) {
         super(title, message, okButtonName, cancelButtonName, validator, callback);
+        this.maneuverDetailSelection = maneuverDetailSelection;
         this.raceColumnSelection = raceColumnSelection;
         this.raceAllRaceColumns = raceAllRaceColumns;
         this.legDetailSelection = legDetailSelection;
         this.raceDetailSelection = raceDetailSelection;
         this.stringConstants = stringConstants;
         raceColumnCheckboxes = new LinkedHashMap<String, CheckBox>();
+        maneuverDetailCheckboxes = new LinkedHashMap<DetailType, CheckBox>();
         legDetailCheckboxes = new LinkedHashMap<DetailType, CheckBox>();
         raceDetailCheckboxes = new LinkedHashMap<DetailType, CheckBox>();
         delayBetweenAutoAdvancesInSecondsBox = createIntegerBox((int) delayBetweenAutoAdvancesInMilliseconds/1000, 4);
@@ -83,6 +93,17 @@ public class LeaderboardSettingsPanel extends DataEntryDialog<Result> {
     @Override
     protected Widget getAdditionalWidget() {
         HorizontalPanel hp = new HorizontalPanel();
+        VerticalPanel vpMeneuvers = new VerticalPanel();
+        vpMeneuvers.setSpacing(5);
+        vpMeneuvers.add(new Label(stringConstants.maneuverTypes()));
+        List<DetailType> currentMeneuverDetailSelection = maneuverDetailSelection;
+        for (DetailType detailType : ManeuverCountRaceColumn.getAvailableManeuverDetailColumnTypes()) {
+            CheckBox checkbox = createCheckbox(detailType.toString(stringConstants));
+            checkbox.setValue(currentMeneuverDetailSelection.contains(detailType));
+            maneuverDetailCheckboxes.put(detailType, checkbox);
+            vpMeneuvers.add(checkbox);
+        }
+        hp.add(vpMeneuvers);
         VerticalPanel vpLeft = new VerticalPanel();
         vpLeft.setSpacing(5);
         VerticalPanel vpRight = new VerticalPanel();
@@ -126,6 +147,12 @@ public class LeaderboardSettingsPanel extends DataEntryDialog<Result> {
 
     @Override
     protected Result getResult() {
+        List<DetailType> maneuverDetailsToShow = new ArrayList<DetailType>();
+        for (Map.Entry<DetailType, CheckBox> entry : maneuverDetailCheckboxes.entrySet()) {
+            if (entry.getValue().getValue()) {
+                maneuverDetailsToShow.add(entry.getKey());
+            }
+        }
         List<DetailType> raceDetailsToShow = new ArrayList<DetailType>();
         for (Map.Entry<DetailType, CheckBox> entry : raceDetailCheckboxes.entrySet()) {
             if (entry.getValue().getValue()) {
@@ -146,7 +173,7 @@ public class LeaderboardSettingsPanel extends DataEntryDialog<Result> {
         }
         Integer delayBetweenAutoAdvancesValue = delayBetweenAutoAdvancesInSecondsBox.getValue();
         Integer delayInSecondsValue = delayInSecondsBox.getValue();
-        return new Result(legDetailsToShow, raceDetailsToShow, raceColumnsToShow, 1000*(delayBetweenAutoAdvancesValue==null?0:delayBetweenAutoAdvancesValue.longValue()),
+        return new Result(maneuverDetailsToShow, legDetailsToShow, raceDetailsToShow, raceColumnsToShow, 1000*(delayBetweenAutoAdvancesValue==null?0:delayBetweenAutoAdvancesValue.longValue()),
                 1000*(delayInSecondsValue==null?0:delayInSecondsValue.longValue()));
     }
 
