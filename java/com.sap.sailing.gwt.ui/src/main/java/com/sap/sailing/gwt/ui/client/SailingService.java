@@ -142,5 +142,5 @@ public interface SailingService extends RemoteService {
     Map<CompetitorDAO, List<ManeuverDAO>> getManeuvers(RaceIdentifier raceIdentifier,
             Map<CompetitorDAO, Date> from, Map<CompetitorDAO, Date> to) throws Exception;
 
-    Object getData(ColumnType columnType);
+    ColumnType getData(ColumnType columnType);
 }

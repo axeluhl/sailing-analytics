@@ -26,6 +26,7 @@
   <inherits name="com.google.gwt.resources.Resources" />
   
   <!-- Other module inherits                                      -->
+  <inherits name="com.sap.sailing.server.SailingServer" />
 
   <!-- Specify the app entry point class.                         -->
   <entry-point class='com.sap.sailing.gwt.ui.client.AdminConsole'/>

@@ -50,6 +50,7 @@
     	<groupId>com.sap.sailing</groupId>
     	<artifactId>com.sap.sailing.server.api</artifactId>
     	<version>1.0.0-SNAPSHOT</version>
+    	<classifier>sources</classifier>
     </dependency>
   </dependencies>
 
@@ -79,6 +80,13 @@
             </goals>
           </execution>
         </executions>
+        <!--
+        <configuration>
+	          <compileSourcesArtifacts>
+	          	<artifact>com.sap.sailing:com.sap.sailing.server.api</artifact>
+	          </compileSourcesArtifacts>
+	    </configuration>
+	    -->
       </plugin>
     </plugins>
   </build>

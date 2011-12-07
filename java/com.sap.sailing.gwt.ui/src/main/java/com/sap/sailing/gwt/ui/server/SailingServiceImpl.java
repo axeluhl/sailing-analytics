@@ -1436,7 +1436,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
 
     @Override
-    public Object getData(ColumnType columnType) {
+    public ColumnType getData(ColumnType columnType) {
         logger.info("SailingServiceImpl.getData("+columnType+") called");
         return null;
     }

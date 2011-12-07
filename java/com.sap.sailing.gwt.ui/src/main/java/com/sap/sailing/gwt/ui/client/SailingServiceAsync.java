@@ -196,5 +196,5 @@ public interface SailingServiceAsync {
      */
     void getCompetitorsAndTimePoints(RaceIdentifier race, int steps, AsyncCallback<CompetitorsAndTimePointsDAO> callback);
     
-    void getData(ColumnType columnType, AsyncCallback<Object> callback);
+    void getData(ColumnType columnType, AsyncCallback<ColumnType> callback);
 }
