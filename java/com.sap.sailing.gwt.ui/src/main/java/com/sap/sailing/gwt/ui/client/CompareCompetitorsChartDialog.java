@@ -21,7 +21,7 @@ public class CompareCompetitorsChartDialog extends DialogBox {
     private Anchor closeAnchor;
 
     public CompareCompetitorsChartDialog(SailingServiceAsync sailingService, List<CompetitorDAO> competitors, RaceIdentifier[] races, StringConstants stringConstants){
-        super(true);
+        super(false);
         ChartsPanel ccp = new ChartsPanel(sailingService, competitors, races, stringConstants, (int) (Window.getClientWidth()-300), (int) (Window.getClientHeight()-200));
         ccp.addDataLoadedHandler(new DataLoadedHandler() {
             
