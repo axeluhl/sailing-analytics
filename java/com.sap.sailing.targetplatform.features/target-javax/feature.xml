@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="com.sap.sailing.target.javax"
+      label="javax libraries"
+      version="1.0.0">
+
+   <description>
+      javax libraries
+   </description>
+
+   <license url="">
+      NA.
+   </license>
+
+   <plugin
+         id="javax.servlet"
+         download-size="0"
+         install-size="0"
+         version="2.5.0.v201103041518"
+         unpack="false"/>
+<!--
+   <plugin
+         id="javax.servlet.jsp"
+         download-size="0"
+         install-size="0"
+         version="2.0.0.v201101211617"
+         unpack="false"/>
+-->         
+</feature>
