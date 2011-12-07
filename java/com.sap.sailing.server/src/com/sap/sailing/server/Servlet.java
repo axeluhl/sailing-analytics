@@ -1,4 +1,4 @@
-package com.sap.sailing.server.impl;
+package com.sap.sailing.server;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -11,7 +11,7 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.impl.Activator;
 import com.sap.sailing.util.DateParser;
 import com.sap.sailing.util.InvalidDateException;
 
