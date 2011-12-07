@@ -81,15 +81,10 @@ import com.sap.sailing.gwt.ui.shared.BoatClassDAO;
 import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
 import com.sap.sailing.gwt.ui.shared.CompetitorsAndTimePointsDAO;
 import com.sap.sailing.gwt.ui.shared.DetailType;
-import com.sap.sailing.gwt.ui.shared.EventAndRaceIdentifier;
 import com.sap.sailing.gwt.ui.shared.EventDAO;
-import com.sap.sailing.gwt.ui.shared.EventFetcher;
-import com.sap.sailing.gwt.ui.shared.EventIdentifier;
-import com.sap.sailing.gwt.ui.shared.EventNameAndRaceName;
 import com.sap.sailing.gwt.ui.shared.GPSFixDAO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDAO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDAO;
-import com.sap.sailing.gwt.ui.shared.LeaderboardNameAndRaceColumnName;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDAO;
 import com.sap.sailing.gwt.ui.shared.LegEntryDAO;
 import com.sap.sailing.gwt.ui.shared.ManeuverDAO;
@@ -98,8 +93,6 @@ import com.sap.sailing.gwt.ui.shared.Pair;
 import com.sap.sailing.gwt.ui.shared.PositionDAO;
 import com.sap.sailing.gwt.ui.shared.QuickRankDAO;
 import com.sap.sailing.gwt.ui.shared.RaceDAO;
-import com.sap.sailing.gwt.ui.shared.RaceFetcher;
-import com.sap.sailing.gwt.ui.shared.RaceIdentifier;
 import com.sap.sailing.gwt.ui.shared.RegattaDAO;
 import com.sap.sailing.gwt.ui.shared.SpeedWithBearingDAO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDAO;
@@ -110,7 +103,13 @@ import com.sap.sailing.gwt.ui.shared.WindDAO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDAO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDAO;
 import com.sap.sailing.server.RacingEventService;
-import com.sap.sailing.server.api.ColumnType;
+import com.sap.sailing.server.api.EventAndRaceIdentifier;
+import com.sap.sailing.server.api.EventFetcher;
+import com.sap.sailing.server.api.EventIdentifier;
+import com.sap.sailing.server.api.EventNameAndRaceName;
+import com.sap.sailing.server.api.LeaderboardNameAndRaceColumnName;
+import com.sap.sailing.server.api.RaceFetcher;
+import com.sap.sailing.server.api.RaceIdentifier;
 import com.sap.sailing.util.CountryCode;
 
 /**
@@ -1435,9 +1434,4 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         return competitorAndTimePointsDAO;
     }
 
-    @Override
-    public ColumnType getData(ColumnType columnType) {
-        logger.info("SailingServiceImpl.getData("+columnType+") called");
-        return null;
-    }
 }

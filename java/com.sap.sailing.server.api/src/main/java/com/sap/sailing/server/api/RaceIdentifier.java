@@ -1,8 +1,8 @@
-package com.sap.sailing.gwt.ui.shared;
+package com.sap.sailing.server.api;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
+import java.io.Serializable;
 
-public interface RaceIdentifier extends IsSerializable {
+public interface RaceIdentifier extends Serializable {
     Object getRace(RaceFetcher raceFetcher);
 
     /**

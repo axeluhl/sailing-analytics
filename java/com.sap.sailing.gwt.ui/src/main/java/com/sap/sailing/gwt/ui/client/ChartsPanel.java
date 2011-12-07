@@ -42,7 +42,7 @@ import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
 import com.sap.sailing.gwt.ui.shared.CompetitorsAndTimePointsDAO;
 import com.sap.sailing.gwt.ui.shared.DetailType;
 import com.sap.sailing.gwt.ui.shared.Pair;
-import com.sap.sailing.gwt.ui.shared.RaceIdentifier;
+import com.sap.sailing.server.api.RaceIdentifier;
 
 public class ChartsPanel extends FormPanel {
     private List<Pair<CompetitorDAO, Double[]>> chartData = null;

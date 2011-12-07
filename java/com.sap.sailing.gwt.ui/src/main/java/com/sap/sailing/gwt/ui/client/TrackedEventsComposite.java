@@ -34,10 +34,10 @@ import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.google.gwt.view.client.SelectionModel;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.gwt.ui.shared.EventDAO;
-import com.sap.sailing.gwt.ui.shared.EventNameAndRaceName;
 import com.sap.sailing.gwt.ui.shared.RaceDAO;
 import com.sap.sailing.gwt.ui.shared.RegattaDAO;
 import com.sap.sailing.gwt.ui.shared.Triple;
+import com.sap.sailing.server.api.EventNameAndRaceName;
 
 public class TrackedEventsComposite extends FormPanel implements EventDisplayer, RaceSelectionProvider {
     private final Set<RaceSelectionChangeListener> raceSelectionChangeListeners;
