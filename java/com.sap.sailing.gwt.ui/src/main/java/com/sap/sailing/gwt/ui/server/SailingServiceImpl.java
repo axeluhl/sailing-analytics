@@ -110,6 +110,7 @@ import com.sap.sailing.gwt.ui.shared.WindDAO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDAO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDAO;
 import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.api.ColumnType;
 import com.sap.sailing.util.CountryCode;
 
 /**
@@ -1432,5 +1433,11 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         competitorAndTimePointsDAO.setStartTime(trackedRace.getStart().asMillis());
         competitorAndTimePointsDAO.setTimePointOfNewestEvent(trackedRace.getTimePointOfNewestEvent().asMillis());
         return competitorAndTimePointsDAO;
+    }
+
+    @Override
+    public Object getData(ColumnType columnType) {
+        logger.info("SailingServiceImpl.getData("+columnType+") called");
+        return null;
     }
 }

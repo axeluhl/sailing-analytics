@@ -12,30 +12,21 @@
   <packaging>eclipse-plugin</packaging>
 
   <build>
-    <plugins>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>gwt-maven-plugin</artifactId>
-        <version>2.4.0</version>
-        <executions>
-          <!-- GWT version detected from dependencyManagement -->
-          <execution>
-	        <configuration>
-	          <modules>
-		        <module>com.sap.sailing.server.SailingServer</module>
-		      </modules>
-		      <gen>${basedir}/.generated</gen>
-		      <localWorkers>4</localWorkers>
-		      <webappDirectory>war</webappDirectory>
-		      <warSourceDirectory>${basedir}/src/main/resources</warSourceDirectory>
-	        </configuration>
-            <goals>
-              <goal>compile</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-    </plugins>
-  </build>
-
+	<plugins>
+		<plugin>
+			<groupId>org.sonatype.tycho</groupId>
+			<artifactId>maven-osgi-source-plugin</artifactId>
+			<version>0.10.0</version>
+			<executions>
+				<execution>
+					<id>plugin-source</id>
+					<phase>generate-sources</phase>
+					<goals>
+						<goal>plugin-source</goal>
+					</goals>
+				</execution>
+			</executions>
+		</plugin>
+	</plugins>
+</build>
 </project>

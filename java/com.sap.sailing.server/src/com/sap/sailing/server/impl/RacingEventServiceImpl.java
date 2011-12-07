@@ -54,6 +54,7 @@ import com.sap.sailing.domain.tractracadapter.RaceRecord;
 import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sailing.expeditionconnector.ExpeditionWindTrackerFactory;
 import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.api.ColumnType;
 import com.sap.sailing.util.Util.Pair;
 import com.sap.sailing.util.Util.Triple;
 
@@ -504,6 +505,12 @@ public class RacingEventServiceImpl implements RacingEventService {
             swissTimingAdapterPersistence.storeSailMasterMessage(stlSMMessage);
             swissTimingAdapterPersistence.storeSailMasterMessage(ccgSMMessage);
         }
+    }
+
+    @Override
+    public Object getData(ColumnType columnType) {
+        logger.info("RacingEventServerImpl.getData("+columnType+") was called");
+        return null;
     }
     
 }

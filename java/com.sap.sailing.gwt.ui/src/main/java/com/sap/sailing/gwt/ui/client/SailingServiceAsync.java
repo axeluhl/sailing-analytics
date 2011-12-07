@@ -28,6 +28,7 @@ import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDAO;
 import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDAO;
 import com.sap.sailing.gwt.ui.shared.WindDAO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDAO;
+import com.sap.sailing.server.api.ColumnType;
 
 /**
  * The async counterpart of {@link SailingService}
@@ -194,4 +195,6 @@ public interface SailingServiceAsync {
      * mark passing times, the race start time and the list of time points according to the above specification.
      */
     void getCompetitorsAndTimePoints(RaceIdentifier race, int steps, AsyncCallback<CompetitorsAndTimePointsDAO> callback);
+    
+    void getData(ColumnType columnType, AsyncCallback<Object> callback);
 }
