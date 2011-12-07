@@ -1,4 +1,4 @@
-package com.sap.sailing.server;
+package com.sap.sailing.server.impl;
 
 import java.nio.charset.Charset;
 import java.util.HashMap;
@@ -17,6 +17,7 @@ import org.osgi.util.tracker.ServiceTracker;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.httpservicetracker.HttpServiceTracker;
+import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.util.Util.Triple;
 
 public class Activator implements BundleActivator, ServiceListener {
@@ -26,7 +27,7 @@ public class Activator implements BundleActivator, ServiceListener {
     
     private HttpServiceTracker httpServiceTracker;
     
-    static BundleContext getDefault() {
+    public static BundleContext getDefault() {
         return fContext;
     }
 

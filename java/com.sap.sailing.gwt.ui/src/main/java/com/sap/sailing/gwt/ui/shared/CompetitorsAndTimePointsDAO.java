@@ -5,7 +5,7 @@ import java.util.HashMap;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 public class CompetitorsAndTimePointsDAO implements IsSerializable {
-    private final long MILLISECONDS_BEFORE_RACE_TO_INCLUDE = 20000;
+    private static final long MILLISECONDS_BEFORE_RACE_TO_INCLUDE = 20000;
     
     private CompetitorDAO[] competitors;
     private HashMap<String, long[]> markPassings;

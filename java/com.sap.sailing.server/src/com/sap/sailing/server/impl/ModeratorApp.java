@@ -1,4 +1,4 @@
-package com.sap.sailing.server;
+package com.sap.sailing.server.impl;
 
 import java.io.IOException;
 import java.util.Iterator;
