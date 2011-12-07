@@ -54,7 +54,6 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<tycho-version>0.13.0</tycho-version>
-		<sailing.tp.p2.repository.url>file:C:/Projects/sailing/dev/target/p2repos/eclipse</sailing.tp.p2.repository.url>
 	</properties>
 
 	<build>
@@ -96,7 +95,7 @@
 					<groupId>${project.groupId}</groupId>
 					<artifactId>${project.artifactId}</artifactId>
 					<version>${project.version}</version>
-					<classifier>../race-analysis-server-p2-local</classifier>
+					<classifier>../com.sap.sailing.targetplatform/definitions/race-analysis-p2-maven-local</classifier>
                 </artifact>
               </target>
             </configuration>
