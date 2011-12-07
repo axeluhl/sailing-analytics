@@ -508,7 +508,7 @@ public class RacingEventServiceImpl implements RacingEventService {
     }
 
     @Override
-    public Object getData(ColumnType columnType) {
+    public ColumnType getData(ColumnType columnType) {
         logger.info("RacingEventServerImpl.getData("+columnType+") was called");
         return null;
     }

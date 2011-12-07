@@ -188,5 +188,5 @@ public interface RacingEventService extends TrackedEventRegistry {
     
     void storeSwissTimingDummyRace(String racMessage, String stlMesssage, String ccgMessage) throws IllegalArgumentException;
 
-    Object getData(ColumnType columnType);
+    ColumnType getData(ColumnType columnType);
 }
