@@ -66,8 +66,8 @@ public class ChartsPanel extends FormPanel {
     private VerticalPanel selectCompetitors;
     private NumberFormat chartNumberFormat;
     
-    public static final int DECK_PANEL_INDEX_LOADING = 0;
-    public static final int DECK_PANEL_INDEX_CHART = 1;
+    private static final int DECK_PANEL_INDEX_LOADING = 0;
+    private static final int DECK_PANEL_INDEX_CHART = 1;
     
     private DetailType dataToShow = DetailType.WINDWARD_DISTANCE_TO_OVERALL_LEADER;
     private AbsolutePanel loadingPanel;
@@ -128,17 +128,17 @@ public class ChartsPanel extends FormPanel {
         Label lblChart = new Label(stringConstants.chooseChart());
         configPanel.add(lblChart);
         final ListBox dataSelection = new ListBox();
-        dataSelection.addItem(DetailType.WINDWARD_DISTANCE_TO_OVERALL_LEADER.toString());
-        dataSelection.addItem(DetailType.DISTANCE_TRAVELED.toString());
-        dataSelection.addItem(DetailType.VELOCITY_MADE_GOOD_IN_KNOTS.toString());
-        dataSelection.addItem(DetailType.GAP_TO_LEADER_IN_SECONDS.toString());
-        dataSelection.addItem(DetailType.CURRENT_SPEED_OVER_GROUND_IN_KNOTS.toString());
+        dataSelection.addItem(DetailType.WINDWARD_DISTANCE_TO_OVERALL_LEADER.toString(stringConstants),DetailType.WINDWARD_DISTANCE_TO_OVERALL_LEADER.toString());
+        dataSelection.addItem(DetailType.DISTANCE_TRAVELED.toString(stringConstants),DetailType.DISTANCE_TRAVELED.toString());
+        dataSelection.addItem(DetailType.VELOCITY_MADE_GOOD_IN_KNOTS.toString(stringConstants),DetailType.VELOCITY_MADE_GOOD_IN_KNOTS.toString());
+        dataSelection.addItem(DetailType.GAP_TO_LEADER_IN_SECONDS.toString(stringConstants),DetailType.GAP_TO_LEADER_IN_SECONDS.toString());
+        dataSelection.addItem(DetailType.CURRENT_SPEED_OVER_GROUND_IN_KNOTS.toString(stringConstants),DetailType.CURRENT_SPEED_OVER_GROUND_IN_KNOTS.toString());
         dataSelection.addChangeHandler(new ChangeHandler() {
 
             @Override
             public void onChange(ChangeEvent event) {
                 for (DetailType dt : DetailType.values()){
-                    if (dt.toString().equals(dataSelection.getItemText(dataSelection.getSelectedIndex()))){
+                    if (dt.toString().equals(dataSelection.getValue(dataSelection.getSelectedIndex()))){
                         dataToShow = dt;
                     }
                 }
@@ -176,8 +176,6 @@ public class ChartsPanel extends FormPanel {
         txtbEndPoint.setText(""+endPoint);
         endPointPanel.add(txtbEndPoint);
         configPanel.add(endPointPanel);
-        selectCompetitors = new VerticalPanel();
-        configPanel.add(selectCompetitors);
         Button bttSetPoints = new Button("Set Points");
         bttSetPoints.addClickHandler(new ClickHandler() {
             
@@ -189,6 +187,8 @@ public class ChartsPanel extends FormPanel {
             }
         });
         configPanel.add(bttSetPoints);
+        selectCompetitors = new VerticalPanel();
+        configPanel.add(selectCompetitors);
 
         final Runnable onLoadCallback = new Runnable() {
 
@@ -200,14 +200,6 @@ public class ChartsPanel extends FormPanel {
                 if (chartLoaded && dataLoaded){
                     deckPanel.showWidget(DECK_PANEL_INDEX_CHART);
                     chart.draw(prepareTableData(), getOptions());
-//                    setMarkPassingSelection();
-//                    chart.addSelectHandler(new SelectHandler() {
-//                        
-//                        @Override
-//                        public void onSelect(SelectEvent event) {
-//                            setMarkPassingSelection();
-//                        }
-//                    });
                 }
                 fireEvent(new DataLoadedEvent());
                 
@@ -236,12 +228,18 @@ public class ChartsPanel extends FormPanel {
         Options opt = Options.create();
         opt.setWidth(chartWidth);
         opt.setHeight(chartHeight);
-        opt.setTitle(dataToShow.toString());
+        opt.setTitle(dataToShow.toString(stringConstants));
         AxisOptions hAxisOptions = AxisOptions.create();
         hAxisOptions.setTitle("time");
         opt.setHAxisOptions(hAxisOptions);
 
         AxisOptions vAxisOptions = AxisOptions.create();
+        if (dataToShow.equals(DetailType.WINDWARD_DISTANCE_TO_OVERALL_LEADER)){
+            vAxisOptions.setDirection(-1);
+        }
+        else {
+            vAxisOptions.setDirection(1);
+        }
         switch (dataToShow) {
         case VELOCITY_MADE_GOOD_IN_KNOTS:
             vAxisOptions.setTitle(stringConstants.speed() + " " + stringConstants.in() + " " + stringConstants.velocityMadeGoodInKnotsUnit());
