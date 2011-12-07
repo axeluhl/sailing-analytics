@@ -7,7 +7,7 @@ public enum DetailType implements IsSerializable {
     DISTANCE_TRAVELED(0), AVERAGE_SPEED_OVER_GROUND_IN_KNOTS(2), RANK_GAIN(0), NUMBER_OF_MANEUVERS(0), CURRENT_SPEED_OVER_GROUND_IN_KNOTS(2),
     ESTIMATED_TIME_TO_NEXT_WAYPOINT_IN_SECONDS(1), VELOCITY_MADE_GOOD_IN_KNOTS(2), GAP_TO_LEADER_IN_SECONDS(0),
     WINDWARD_DISTANCE_TO_GO_IN_METERS(0), RACE_DISTANCE_TRAVELED(0), RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS(2), RACE_GAP_TO_LEADER_IN_SECONDS(0),
-    RACE_MANEUVERS(0), WINDWARD_DISTANCE_TO_OVERALL_LEADER(0);
+    WINDWARD_DISTANCE_TO_OVERALL_LEADER(0), HEAD_UP(0), BEAR_AWAY(0), TACK(0), JIBE(0), PENALTY_CIRCLE(0), MARK_PASSING(0);
     
     private int precision;
     
@@ -45,10 +45,20 @@ public enum DetailType implements IsSerializable {
             return stringConstants.averageSpeedInKnots();
         case RACE_GAP_TO_LEADER_IN_SECONDS:
             return stringConstants.gapToLeaderInSeconds();
-        case RACE_MANEUVERS:
-            return stringConstants.numberOfManeuvers();
         case WINDWARD_DISTANCE_TO_OVERALL_LEADER:
             return stringConstants.windwardDistanceToOverallLeader();
+        case HEAD_UP:
+            return stringConstants.headUp();
+        case BEAR_AWAY:
+            return stringConstants.bearAway();
+        case TACK:
+            return stringConstants.tack();
+        case JIBE:
+            return stringConstants.jibe();
+        case PENALTY_CIRCLE:
+            return stringConstants.penaltyCircle();
+        case MARK_PASSING:
+            return stringConstants.markPassing();
         }
         return null;
     }
