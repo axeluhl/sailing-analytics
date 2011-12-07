@@ -15,7 +15,7 @@ import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.sap.sailing.gwt.ui.client.ChartsPanel.DataLoadedEvent;
 import com.sap.sailing.gwt.ui.client.ChartsPanel.DataLoadedHandler;
 import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
-import com.sap.sailing.gwt.ui.shared.RaceIdentifier;
+import com.sap.sailing.server.api.RaceIdentifier;
 
 public class CompareCompetitorsChartDialog extends DialogBox {
     private Anchor closeAnchor;

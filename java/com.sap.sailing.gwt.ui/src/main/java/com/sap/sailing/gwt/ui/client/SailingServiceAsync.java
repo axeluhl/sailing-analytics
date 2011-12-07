@@ -8,12 +8,10 @@ import java.util.Map;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
-import com.sap.sailing.gwt.ui.shared.CompetitorAndTimePointsDAO;
 import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
+import com.sap.sailing.gwt.ui.shared.CompetitorsAndTimePointsDAO;
 import com.sap.sailing.gwt.ui.shared.DetailType;
-import com.sap.sailing.gwt.ui.shared.EventAndRaceIdentifier;
 import com.sap.sailing.gwt.ui.shared.EventDAO;
-import com.sap.sailing.gwt.ui.shared.EventIdentifier;
 import com.sap.sailing.gwt.ui.shared.GPSFixDAO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDAO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDAO;
@@ -21,13 +19,15 @@ import com.sap.sailing.gwt.ui.shared.ManeuverDAO;
 import com.sap.sailing.gwt.ui.shared.MarkDAO;
 import com.sap.sailing.gwt.ui.shared.Pair;
 import com.sap.sailing.gwt.ui.shared.QuickRankDAO;
-import com.sap.sailing.gwt.ui.shared.RaceIdentifier;
 import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDAO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDAO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDAO;
 import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDAO;
 import com.sap.sailing.gwt.ui.shared.WindDAO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDAO;
+import com.sap.sailing.server.api.EventAndRaceIdentifier;
+import com.sap.sailing.server.api.EventIdentifier;
+import com.sap.sailing.server.api.RaceIdentifier;
 
 /**
  * The async counterpart of {@link SailingService}
@@ -110,8 +110,6 @@ public interface SailingServiceAsync {
 
     void getLeaderboards(AsyncCallback<List<LeaderboardDAO>> callback);
     
-    void getLeaderboardByName(String leaderboardName, AsyncCallback<LeaderboardDAO> callback);
-    
     void updateLeaderboard(String leaderboardName, String newLeaderboardName, int[] newDiscardingThreasholds,
             AsyncCallback<Void> callback);
 
@@ -171,6 +169,7 @@ public interface SailingServiceAsync {
             boolean trackWind, boolean correctWindByDeclination, AsyncCallback<Void> asyncCallback);
 
     void sendSwissTimingDummyRace(String racMessage, String stlMesssage, String ccgMessage, AsyncCallback<Void> callback);
+    
     /**
      * Requests the computation of the {@link LeaderboardDAO} for <code>leaderboardName</code> <code>times</code> times.
      * The date used for the {@link #getLeaderboardByName(String, Date, Collection, AsyncCallback)} call is iterated
@@ -180,13 +179,19 @@ public interface SailingServiceAsync {
 
     void getCountryCodes(AsyncCallback<String[]> callback);
 
-    void getCompetitorRaceData(RaceIdentifier race, CompetitorAndTimePointsDAO competitorAndTimePointsDAO,
+    void getCompetitorRaceData(RaceIdentifier race, CompetitorsAndTimePointsDAO competitorAndTimePointsDAO,
             DetailType dataType, AsyncCallback<List<Pair<CompetitorDAO, Double[]>>> callback);
+    
     void getDouglasPoints(RaceIdentifier raceIdentifier, Map<CompetitorDAO, Date> from, Map<CompetitorDAO, Date> to,
             double meters, AsyncCallback<Map<CompetitorDAO, List<GPSFixDAO>>> callback);
 
     void getManeuvers(RaceIdentifier raceIdentifier, Map<CompetitorDAO, Date> from, Map<CompetitorDAO, Date> to,
             AsyncCallback<Map<CompetitorDAO, List<ManeuverDAO>>> callback);
 
-    void getCompetitorAndTimePoints(RaceIdentifier race, int steps, AsyncCallback<CompetitorAndTimePointsDAO> callback);
+    /**
+     * For the race identified by <code>race</code> computes <code>steps</code> equidistant time points starting at a
+     * few seconds before the race starts, up to the end of the race. The result describes the race's competitors, their
+     * mark passing times, the race start time and the list of time points according to the above specification.
+     */
+    void getCompetitorsAndTimePoints(RaceIdentifier race, int steps, AsyncCallback<CompetitorsAndTimePointsDAO> callback);
 }

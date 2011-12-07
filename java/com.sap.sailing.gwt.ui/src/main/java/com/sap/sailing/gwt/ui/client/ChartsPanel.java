@@ -39,14 +39,14 @@ import com.google.gwt.visualization.client.visualizations.corechart.AxisOptions;
 import com.google.gwt.visualization.client.visualizations.corechart.LineChart;
 import com.google.gwt.visualization.client.visualizations.corechart.Options;
 import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
-import com.sap.sailing.gwt.ui.shared.CompetitorAndTimePointsDAO;
+import com.sap.sailing.gwt.ui.shared.CompetitorsAndTimePointsDAO;
 import com.sap.sailing.gwt.ui.shared.DetailType;
 import com.sap.sailing.gwt.ui.shared.Pair;
-import com.sap.sailing.gwt.ui.shared.RaceIdentifier;
+import com.sap.sailing.server.api.RaceIdentifier;
 
 public class ChartsPanel extends FormPanel {
     private List<Pair<CompetitorDAO, Double[]>> chartData = null;
-    private CompetitorAndTimePointsDAO competitorAndTimePointsDAO = null;
+    private CompetitorsAndTimePointsDAO competitorsAndTimePointsDAO = null;
     private LineChart chart;
     private final SailingServiceAsync sailingService;
     private HorizontalPanel mainPanel;
@@ -100,7 +100,7 @@ public class ChartsPanel extends FormPanel {
                 @Override
                 public void onClick(ClickEvent event) {
                     selectedRace = index;
-                    competitorAndTimePointsDAO = null;
+                    competitorsAndTimePointsDAO = null;
                     loadData();
                 }
             });
@@ -154,11 +154,10 @@ public class ChartsPanel extends FormPanel {
         configPanel.add(txtbSteps);
         Button bttSteps = new Button(stringConstants.refresh());
         bttSteps.addClickHandler(new ClickHandler() {
-
             @Override
             public void onClick(ClickEvent event) {
                 stepsToLoad = Integer.parseInt(txtbSteps.getText());
-                competitorAndTimePointsDAO = null;
+                competitorsAndTimePointsDAO = null;
                 loadData();
             }
         });
@@ -266,12 +265,10 @@ public class ChartsPanel extends FormPanel {
         deckPanel.showWidget(DECK_PANEL_INDEX_LOADING);
         dataLoaded = false;
         final Runnable loadData = new Runnable() {
-            
             @Override
             public void run() {
-                ChartsPanel.this.sailingService.getCompetitorRaceData(races[selectedRace], competitorAndTimePointsDAO, dataToShow,
+                ChartsPanel.this.sailingService.getCompetitorRaceData(races[selectedRace], competitorsAndTimePointsDAO, dataToShow,
                         new AsyncCallback<List<Pair<CompetitorDAO, Double[]>>>() {
-
                             @Override
                             public void onFailure(Throwable caught) {
                                 Window.alert(stringConstants.failedToLoadRaceData());
@@ -298,20 +295,19 @@ public class ChartsPanel extends FormPanel {
                         });
             }
         };
-        if (competitorAndTimePointsDAO != null){
+        if (competitorsAndTimePointsDAO != null){
             loadData.run();
         }
         else {
-            this.sailingService.getCompetitorAndTimePoints(races[selectedRace], stepsToLoad, new AsyncCallback<CompetitorAndTimePointsDAO>() {
-
+            this.sailingService.getCompetitorsAndTimePoints(races[selectedRace], stepsToLoad, new AsyncCallback<CompetitorsAndTimePointsDAO>() {
                 @Override
                 public void onFailure(Throwable caught) {
-                    
+                    // TODO show error dialog
                 }
 
                 @Override
-                public void onSuccess(CompetitorAndTimePointsDAO result) {
-                    competitorAndTimePointsDAO = result;
+                public void onSuccess(CompetitorsAndTimePointsDAO result) {
+                    competitorsAndTimePointsDAO = result;
                     selectCompetitors.clear();
                     for (int i = 0; i < result.getCompetitor().length; i++){
                         final CheckBox cb = new CheckBox(result.getCompetitor()[i].name);
@@ -338,8 +334,8 @@ public class ChartsPanel extends FormPanel {
     private AbstractDataTable prepareTableData() {
         DataTable data = DataTable.create();
         data.addColumn(ColumnType.STRING, stringConstants.time());
-        if (competitorAndTimePointsDAO != null){
-            for (CompetitorDAO c : competitorAndTimePointsDAO.getCompetitor()) {
+        if (competitorsAndTimePointsDAO != null){
+            for (CompetitorDAO c : competitorsAndTimePointsDAO.getCompetitor()) {
                 data.addColumn(ColumnType.NUMBER, c.name);
             }
         }
@@ -350,7 +346,7 @@ public class ChartsPanel extends FormPanel {
             }
             data.addRows(endPoint-startPoint);
             for (int i = 0; i < data.getNumberOfRows(); i++) {
-                long time = competitorAndTimePointsDAO.getTimePoints()[startPoint+i] - competitorAndTimePointsDAO.getStartTime();
+                long time = competitorsAndTimePointsDAO.getTimePoints()[startPoint+i] - competitorsAndTimePointsDAO.getStartTime();
                 String minutes = "" + Math.abs((time/60000));
                 if (minutes.length() < 2){
                     minutes = ((time < 0)? "-" : "") +"0" + minutes;
@@ -444,10 +440,10 @@ public class ChartsPanel extends FormPanel {
     
     private void setMarkPassingSelection(){
         ArrayList<Selection> selections = new ArrayList<Selection>();
-        Long[] timePoints = competitorAndTimePointsDAO.getTimePoints();
-        for (int column = 0; column < competitorAndTimePointsDAO.getCompetitor().length; column++) {
+        long[] timePoints = competitorsAndTimePointsDAO.getTimePoints();
+        for (int column = 0; column < competitorsAndTimePointsDAO.getCompetitor().length; column++) {
             int currentMarkPassing = 0;
-            Long[] markPassing = competitorAndTimePointsDAO.getMarkPassings(competitorAndTimePointsDAO.getCompetitor()[column]);
+            long[] markPassing = competitorsAndTimePointsDAO.getMarkPassings(competitorsAndTimePointsDAO.getCompetitor()[column]);
             
             for (int row = 0; currentMarkPassing < markPassing.length; row++){
                 if (startPoint+row > 0 && timePoints[startPoint+row-1] < markPassing[currentMarkPassing] && timePoints[startPoint+row] > markPassing[currentMarkPassing]){

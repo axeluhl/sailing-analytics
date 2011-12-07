@@ -1,4 +1,4 @@
-package com.sap.sailing.server;
+package com.sap.sailing.server.impl;
 
 import java.io.IOException;
 import java.util.Iterator;
@@ -32,6 +32,7 @@ import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
+import com.sap.sailing.server.Servlet;
 import com.sap.sailing.util.CountryCode;
 import com.sap.sailing.util.InvalidDateException;
 

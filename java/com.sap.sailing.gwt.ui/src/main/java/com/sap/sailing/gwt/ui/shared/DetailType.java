@@ -11,11 +11,11 @@ public enum DetailType implements IsSerializable {
     
     private int precision;
     
-    DetailType(int precision){
+    DetailType(int precision) {
         this.precision = precision;
     }
     
-    public int getPrecision(){
+    public int getPrecision() {
         return precision;
     }
 

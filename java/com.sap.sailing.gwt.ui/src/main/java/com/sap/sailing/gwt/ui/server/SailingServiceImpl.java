@@ -79,17 +79,12 @@ import com.sap.sailing.domain.tractracadapter.TracTracConfiguration;
 import com.sap.sailing.gwt.ui.client.SailingService;
 import com.sap.sailing.gwt.ui.shared.BoatClassDAO;
 import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
-import com.sap.sailing.gwt.ui.shared.CompetitorAndTimePointsDAO;
+import com.sap.sailing.gwt.ui.shared.CompetitorsAndTimePointsDAO;
 import com.sap.sailing.gwt.ui.shared.DetailType;
-import com.sap.sailing.gwt.ui.shared.EventAndRaceIdentifier;
 import com.sap.sailing.gwt.ui.shared.EventDAO;
-import com.sap.sailing.gwt.ui.shared.EventFetcher;
-import com.sap.sailing.gwt.ui.shared.EventIdentifier;
-import com.sap.sailing.gwt.ui.shared.EventNameAndRaceName;
 import com.sap.sailing.gwt.ui.shared.GPSFixDAO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDAO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDAO;
-import com.sap.sailing.gwt.ui.shared.LeaderboardNameAndRaceColumnName;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDAO;
 import com.sap.sailing.gwt.ui.shared.LegEntryDAO;
 import com.sap.sailing.gwt.ui.shared.ManeuverDAO;
@@ -98,8 +93,6 @@ import com.sap.sailing.gwt.ui.shared.Pair;
 import com.sap.sailing.gwt.ui.shared.PositionDAO;
 import com.sap.sailing.gwt.ui.shared.QuickRankDAO;
 import com.sap.sailing.gwt.ui.shared.RaceDAO;
-import com.sap.sailing.gwt.ui.shared.RaceFetcher;
-import com.sap.sailing.gwt.ui.shared.RaceIdentifier;
 import com.sap.sailing.gwt.ui.shared.RegattaDAO;
 import com.sap.sailing.gwt.ui.shared.SpeedWithBearingDAO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDAO;
@@ -110,6 +103,13 @@ import com.sap.sailing.gwt.ui.shared.WindDAO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDAO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDAO;
 import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.api.EventAndRaceIdentifier;
+import com.sap.sailing.server.api.EventFetcher;
+import com.sap.sailing.server.api.EventIdentifier;
+import com.sap.sailing.server.api.EventNameAndRaceName;
+import com.sap.sailing.server.api.LeaderboardNameAndRaceColumnName;
+import com.sap.sailing.server.api.RaceFetcher;
+import com.sap.sailing.server.api.RaceIdentifier;
 import com.sap.sailing.util.CountryCode;
 
 /**
@@ -876,19 +876,6 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         return results;
     }
     
-    public LeaderboardDAO getLeaderboardByName(String leaderboardName) {
-        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
-        LeaderboardDAO dao = new LeaderboardDAO();
-        dao.name = leaderboard.getName();
-        dao.displayNames = new HashMap<CompetitorDAO, String>();
-        for (RaceInLeaderboard raceColumn : leaderboard.getRaceColumns()) {
-            dao.addRace(raceColumn.getName(), raceColumn.isMedalRace(), raceColumn.getTrackedRace() != null);
-        }
-        dao.hasCarriedPoints = leaderboard.hasCarriedPoints();
-        dao.discardThresholds = leaderboard.getResultDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces();
-        return dao;
-    }
-    
     @Override
     public void updateLeaderboard(String leaderboardName, String newLeaderboardName, int[] newDiscardingThreasholds) {
         if (!leaderboardName.equals(newLeaderboardName)) {
@@ -1179,7 +1166,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
 
     @Override
-    public List<Pair<CompetitorDAO, Double[]>> getCompetitorRaceData(RaceIdentifier race, CompetitorAndTimePointsDAO competitorAndTimePointsDAO, DetailType dataType) throws NoWindException {
+    public List<Pair<CompetitorDAO, Double[]>> getCompetitorRaceData(RaceIdentifier race, CompetitorsAndTimePointsDAO competitorAndTimePointsDAO, DetailType dataType) throws NoWindException {
         List<Pair<CompetitorDAO, Double[]>> competitorData = new ArrayList<Pair<CompetitorDAO, Double[]>>();
         TrackedRace trackedRace = getTrackedRace(race);
         Iterable<Competitor> competitors = trackedRace.getRace().getCompetitors();
@@ -1427,27 +1414,24 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
 
     @Override
-    public CompetitorAndTimePointsDAO getCompetitorAndTimePoints(RaceIdentifier race, int steps) {
-        CompetitorAndTimePointsDAO competitorAndTimePointsDAO = new CompetitorAndTimePointsDAO();
+    public CompetitorsAndTimePointsDAO getCompetitorsAndTimePoints(RaceIdentifier race, int steps) {
+        CompetitorsAndTimePointsDAO competitorAndTimePointsDAO = new CompetitorsAndTimePointsDAO(steps);
         TrackedRace trackedRace = getTrackedRace(race);
         List<CompetitorDAO> competitors = new ArrayList<CompetitorDAO>();
         for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
             NavigableSet<MarkPassing> markPassings = trackedRace.getMarkPassings(competitor);
-            List<Long> markPassingTimes = new ArrayList<Long>();
+            long[] markPassingTimes = new long[markPassings.size()];
+            int i=0;
             for (MarkPassing markPassing : markPassings){
-                markPassingTimes.add(markPassing.getTimePoint().asMillis());
+                markPassingTimes[i++] = markPassing.getTimePoint().asMillis();
             }
             competitors.add(getCompetitorDAO(competitor));
-            competitorAndTimePointsDAO.setMarkPassings(getCompetitorDAO(competitor), markPassingTimes.toArray(new Long[0]));
+            competitorAndTimePointsDAO.setMarkPassings(getCompetitorDAO(competitor), markPassingTimes);
         }
         competitorAndTimePointsDAO.setCompetitor(competitors.toArray(new CompetitorDAO[0]));
         competitorAndTimePointsDAO.setStartTime(trackedRace.getStart().asMillis());
-        List<Long> timePoints = new ArrayList<Long>();
-        long stepsize = (trackedRace.getTimePointOfNewestEvent().asMillis()- trackedRace.getStart().asMillis() - 20000)/steps;
-        for (long time = trackedRace.getStart().asMillis() - 20000; time < trackedRace.getTimePointOfNewestEvent().asMillis(); time += stepsize){
-            timePoints.add(time);
-        }
-        competitorAndTimePointsDAO.setTimePoints(timePoints.toArray(new Long[0]));
+        competitorAndTimePointsDAO.setTimePointOfNewestEvent(trackedRace.getTimePointOfNewestEvent().asMillis());
         return competitorAndTimePointsDAO;
     }
+
 }

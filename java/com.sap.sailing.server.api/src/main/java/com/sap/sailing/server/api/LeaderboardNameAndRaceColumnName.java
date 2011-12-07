@@ -1,8 +1,9 @@
-package com.sap.sailing.gwt.ui.shared;
+package com.sap.sailing.server.api;
 
 
 
 public class LeaderboardNameAndRaceColumnName implements RaceIdentifier {
+    private static final long serialVersionUID = 6290279076772313524L;
     private String leaderboardName;
     private String raceColumnName;
     
