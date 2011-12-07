@@ -80,13 +80,6 @@
             </goals>
           </execution>
         </executions>
-        <!--
-        <configuration>
-	          <compileSourcesArtifacts>
-	          	<artifact>com.sap.sailing:com.sap.sailing.server.api</artifact>
-	          </compileSourcesArtifacts>
-	    </configuration>
-	    -->
       </plugin>
     </plugins>
   </build>
