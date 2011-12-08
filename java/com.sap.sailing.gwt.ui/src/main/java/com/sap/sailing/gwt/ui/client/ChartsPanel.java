@@ -40,8 +40,8 @@ import com.google.gwt.visualization.client.visualizations.corechart.LineChart;
 import com.google.gwt.visualization.client.visualizations.corechart.Options;
 import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
 import com.sap.sailing.gwt.ui.shared.CompetitorsAndTimePointsDAO;
-import com.sap.sailing.gwt.ui.shared.DetailType;
 import com.sap.sailing.gwt.ui.shared.Pair;
+import com.sap.sailing.server.api.DetailType;
 import com.sap.sailing.server.api.RaceIdentifier;
 
 public class ChartsPanel extends FormPanel {
@@ -128,11 +128,11 @@ public class ChartsPanel extends FormPanel {
         Label lblChart = new Label(stringConstants.chooseChart());
         configPanel.add(lblChart);
         final ListBox dataSelection = new ListBox();
-        dataSelection.addItem(DetailType.WINDWARD_DISTANCE_TO_OVERALL_LEADER.toString(stringConstants),DetailType.WINDWARD_DISTANCE_TO_OVERALL_LEADER.toString());
-        dataSelection.addItem(DetailType.DISTANCE_TRAVELED.toString(stringConstants),DetailType.DISTANCE_TRAVELED.toString());
-        dataSelection.addItem(DetailType.VELOCITY_MADE_GOOD_IN_KNOTS.toString(stringConstants),DetailType.VELOCITY_MADE_GOOD_IN_KNOTS.toString());
-        dataSelection.addItem(DetailType.GAP_TO_LEADER_IN_SECONDS.toString(stringConstants),DetailType.GAP_TO_LEADER_IN_SECONDS.toString());
-        dataSelection.addItem(DetailType.CURRENT_SPEED_OVER_GROUND_IN_KNOTS.toString(stringConstants),DetailType.CURRENT_SPEED_OVER_GROUND_IN_KNOTS.toString());
+        dataSelection.addItem(DetailTypeFormatter.toString(DetailType.WINDWARD_DISTANCE_TO_OVERALL_LEADER, stringConstants),DetailType.WINDWARD_DISTANCE_TO_OVERALL_LEADER.toString());
+        dataSelection.addItem(DetailTypeFormatter.toString(DetailType.DISTANCE_TRAVELED, stringConstants),DetailType.DISTANCE_TRAVELED.toString());
+        dataSelection.addItem(DetailTypeFormatter.toString(DetailType.VELOCITY_MADE_GOOD_IN_KNOTS, stringConstants),DetailType.VELOCITY_MADE_GOOD_IN_KNOTS.toString());
+        dataSelection.addItem(DetailTypeFormatter.toString(DetailType.GAP_TO_LEADER_IN_SECONDS, stringConstants),DetailType.GAP_TO_LEADER_IN_SECONDS.toString());
+        dataSelection.addItem(DetailTypeFormatter.toString(DetailType.CURRENT_SPEED_OVER_GROUND_IN_KNOTS, stringConstants),DetailType.CURRENT_SPEED_OVER_GROUND_IN_KNOTS.toString());
         dataSelection.addChangeHandler(new ChangeHandler() {
 
             @Override
@@ -228,7 +228,7 @@ public class ChartsPanel extends FormPanel {
         Options opt = Options.create();
         opt.setWidth(chartWidth);
         opt.setHeight(chartHeight);
-        opt.setTitle(dataToShow.toString(stringConstants));
+        opt.setTitle(DetailTypeFormatter.toString(dataToShow, stringConstants));
         AxisOptions hAxisOptions = AxisOptions.create();
         hAxisOptions.setTitle("time");
         opt.setHAxisOptions(hAxisOptions);

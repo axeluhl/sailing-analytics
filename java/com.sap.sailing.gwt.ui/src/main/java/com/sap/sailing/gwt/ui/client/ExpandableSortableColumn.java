@@ -12,8 +12,8 @@ import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Header;
-import com.sap.sailing.gwt.ui.shared.DetailType;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDAO;
+import com.sap.sailing.server.api.DetailType;
 
 /**
  * A column that is sortable and offers an expand/collapse button in its column header.
