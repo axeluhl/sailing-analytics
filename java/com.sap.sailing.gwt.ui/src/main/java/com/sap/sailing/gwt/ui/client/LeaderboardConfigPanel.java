@@ -39,7 +39,7 @@ import com.sap.sailing.gwt.ui.shared.RaceInLeaderboardDAO;
 import com.sap.sailing.gwt.ui.shared.RegattaDAO;
 import com.sap.sailing.gwt.ui.shared.Triple;
 
-public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer, RaceSelectionChangeListener {
+public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer, RaceSelectionChangeListener, TrackedRaceChangedListener {
 
     // AXEL: DON'T DELETE!!!
     // private static final int MAX_NUMBER_OF_DISCARDED_RESULTS = 4;
@@ -247,7 +247,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
         trackedEventsComposite = new TrackedEventsComposite(sailingService, errorReporter, adminConsole,
                 stringConstants, /* multiselection */false);
         trackedRacesPanel.add(trackedEventsComposite);
-        trackedEventsComposite.addRaceSelectionChangeListener(this);
+        trackedEventsComposite.addTrackedRaceChangeListener(this);
 
         HorizontalPanel hPanel = new HorizontalPanel();
         hPanel.setSpacing(5);
@@ -716,6 +716,18 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
     public void fillEvents(List<EventDAO> result) {
         trackedEventsComposite.fillEvents(result);
     }
+    
+
+    @Override
+    public void changeTrackingRace(EventNameAndRaceName eventNameAndRaceName, boolean isTracked) {
+        for (RaceInLeaderboardDAO race : raceColumnList.getList()) {
+            if(race.getRaceColumnName().equals(eventNameAndRaceName.getRaceName())){
+                race.setTrackedRace(isTracked);
+            }
+        }
+        raceColumnList.refresh();
+    }
+    
 
     private void addNewLeaderboard() {
         List<String> leaderboardNames = new ArrayList<String>();

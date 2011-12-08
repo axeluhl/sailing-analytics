@@ -417,6 +417,8 @@ public class RacingEventServiceImpl implements RacingEventService {
                     System.out.println("Found tracker to stop...");
                     raceTracker.stop(); // this also removes the TrackedRace from trackedEvent
                     // do not remove the tracker from raceTrackersByEvent, because it should still exist there, but with the state "non-tracked"
+                    trackerIter.remove();
+                    raceTrackersByID.remove(raceTracker.getID());
                 }
             }
         } else {
@@ -429,7 +431,8 @@ public class RacingEventServiceImpl implements RacingEventService {
         }
     }
     
-    public void stopRemoveTrackedRace(Event event, RaceDefinition race) throws MalformedURLException, IOException, InterruptedException{
+    @Override
+    public synchronized void stopRemoveTrackedRace(Event event, RaceDefinition race) throws MalformedURLException, IOException, InterruptedException{
         logger.info("Removing the race + " + race + "...");
         if(raceTrackersByEvent.containsKey(event)){
             Iterator<RaceTracker> trackerIter = raceTrackersByEvent.get(event).iterator();

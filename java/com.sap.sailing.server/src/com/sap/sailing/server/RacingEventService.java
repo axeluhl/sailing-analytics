@@ -104,6 +104,16 @@ public interface RacingEventService extends TrackedEventRegistry {
     void stopTracking(Event event) throws MalformedURLException, IOException, InterruptedException;
     
     /**
+     * Stops the race to non-tracked. Removes the race from whole RacingEventService. The race will be also removed from all leaderboards, containing that race. 
+     * @param event the event to remove
+     * @param race the race to remove
+     * @throws MalformedURLException
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    void stopRemoveTrackedRace(Event event, RaceDefinition race) throws MalformedURLException, IOException,InterruptedException;
+    
+    /**
      * Stops tracking a single race. Other races of the same event that are currently tracked will continue to be
      * tracked. If wind tracking for the race is currently running, it will be stopped (see also
      * {@link #stopTrackingWind(Event, RaceDefinition)}).
