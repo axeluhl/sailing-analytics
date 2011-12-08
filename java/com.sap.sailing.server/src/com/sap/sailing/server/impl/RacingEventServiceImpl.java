@@ -446,21 +446,28 @@ public class RacingEventServiceImpl implements RacingEventService {
                     // remove it from the raceTrackers by Event
                     trackerIter.remove();
                     raceTrackersByID.remove(raceTracker.getID());
-                    // remove the race from the event
-                    eventsByName.get(event.getName()).removeRace(race);
                     for (RaceDefinition trackerRace : raceTracker.getRaces()) {
                         // remove from every leaderboard
                         Map<String, Leaderboard> leaderboards = getLeaderboards();
                         for (Map.Entry<String, Leaderboard> entry : leaderboards.entrySet()) {
                             if(entry.getValue().getRaceColumnByName(race.getName()) != null){
-                                getLeaderboardByName(entry.getKey()).removeRaceColumn(race.getName());                                
+                                getLeaderboardByName(entry.getKey()).removeRaceColumn(trackerRace.getName());                                
                             }
                         }
                     }
                 }
             }
         }
+        // remove the race from the event
+        if(eventsByName.containsKey(event.getName())){
+            eventsByName.get(event.getName()).removeRace(race);
+        }
+        
         stopTrackingWind(event, race);
+     // if the last tracked race was removed, remove the entire event
+        if (raceTrackersByEvent.get(event).isEmpty()) {
+            stopTracking(event);
+        }
     }
 
     @Override
