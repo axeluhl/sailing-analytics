@@ -416,13 +416,7 @@ public class RacingEventServiceImpl implements RacingEventService {
                 if (raceTracker.getRaces() != null && raceTracker.getRaces().contains(race)) {
                     System.out.println("Found tracker to stop...");
                     raceTracker.stop(); // this also removes the TrackedRace from trackedEvent
-                    trackerIter.remove();
-                    raceTrackersByID.remove(raceTracker.getID());
-                    for (RaceDefinition trackerRace : raceTracker.getRaces()) {
-                        // remove from default leaderboard
-                        Leaderboard defaultLeaderboard = getLeaderboardByName(DEFAULT_LEADERBOARD_NAME);
-                        defaultLeaderboard.removeRaceColumn(trackerRace.getName());
-                    }
+                    // do not remove the tracker from raceTrackersByEvent, because it should still exist there, but with the state "non-tracked"
                 }
             }
         } else {
@@ -433,6 +427,36 @@ public class RacingEventServiceImpl implements RacingEventService {
         if (raceTrackersByEvent.get(event).isEmpty()) {
             stopTracking(event);
         }
+    }
+    
+    public void stopRemoveTrackedRace(Event event, RaceDefinition race) throws MalformedURLException, IOException, InterruptedException{
+        logger.info("Removing the race + " + race + "...");
+        if(raceTrackersByEvent.containsKey(event)){
+            Iterator<RaceTracker> trackerIter = raceTrackersByEvent.get(event).iterator();
+            while(trackerIter.hasNext()){
+                RaceTracker raceTracker = trackerIter.next();
+                if(raceTracker.getRaces() != null && raceTracker.getRaces().contains(race)){
+                    System.out.println("Found tracker to remove");
+                    // firstly stop the tracker
+                    raceTracker.stop();
+                    // remove it from the raceTrackers by Event
+                    trackerIter.remove();
+                    raceTrackersByID.remove(raceTracker.getID());
+                    // remove the race from the event
+                    eventsByName.get(event.getName()).removeRace(race);
+                    for (RaceDefinition trackerRace : raceTracker.getRaces()) {
+                        // remove from every leaderboard
+                        Map<String, Leaderboard> leaderboards = getLeaderboards();
+                        for (Map.Entry<String, Leaderboard> entry : leaderboards.entrySet()) {
+                            if(entry.getValue().getRaceColumnByName(race.getName()) != null){
+                                getLeaderboardByName(entry.getKey()).removeRaceColumn(race.getName());                                
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        stopTrackingWind(event, race);
     }
 
     @Override
