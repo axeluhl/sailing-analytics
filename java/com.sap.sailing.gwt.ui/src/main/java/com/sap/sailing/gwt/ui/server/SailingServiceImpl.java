@@ -473,6 +473,18 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         }
     }
     
+    @Override
+    public void removeAndUntrackedRace(EventAndRaceIdentifier eventAndRaceidentifier) throws Exception{
+        Event event = getEvent(eventAndRaceidentifier);
+        if(event!= null){
+            RaceDefinition race = getRace(eventAndRaceidentifier);
+            if(race != null){
+                getService().stopRemoveTrackedRace(event, race);
+            }
+        }
+        
+    }
+    
     /**
      * @param timeoutInMilliseconds eventually passed to {@link RacesHandle#getRaces(long)}. If the race definition
      * can be obtained within this timeout, wind for the race will be tracked; otherwise, the method returns without
