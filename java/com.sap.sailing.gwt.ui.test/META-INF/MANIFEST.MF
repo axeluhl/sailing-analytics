@@ -6,12 +6,14 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Require-Bundle: com.sap.sailing.gwt.ui,
- javax.servlet;bundle-version="2.5.0",
  com.sap.sailing.domain,
- org.json.simple,
  com.sap.sailing.server,
  com.google.gwt.osgi;bundle-version="2.4.0"
 Bundle-ClassPath: .
 Import-Package: org.osgi.framework,
+ javax.servlet;version="2.5.0",
+ javax.servlet.http;version="2.5.0",
  org.osgi.util.tracker;version="1.5.0",
- org.junit;version="4.8.1"
+ org.junit;version="4.8.1",
+ org.json.simple,
+ org.json.simple.parser

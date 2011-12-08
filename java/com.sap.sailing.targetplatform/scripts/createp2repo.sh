@@ -3,9 +3,9 @@
 set -u
 
 ECLIPSE_VM_ARGS="-Xmx256m"
-auncher_*.jar
+ECLIPSE_LAUNCHER=C:/Projects/sailing/dev/eclipse_versions/v371_jee/eclipse/plugins/org.eclipse.equinox.launcher_*.jar
 
-java -jar ${ECLIPSE_EXE} -consolelog -nosplash -verbose -application org.eclipse.equinox.p2.publisher.UpdateSitePublisher \
+java -jar ${ECLIPSE_LAUNCHER} -consolelog -nosplash -verbose -application org.eclipse.equinox.p2.publisher.UpdateSitePublisher \
   -metadataRepository file:/C:/Projects/sailing/dev/p2-repositories/sailing \
   -artifactRepository file:/C:/Projects/sailing/dev/p2-repositories/sailing \
   -source C:/Projects/sailing/dev/p2-repositories/sailing_libs_source \

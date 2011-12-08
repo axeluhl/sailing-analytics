@@ -9,7 +9,6 @@ Eclipse-RegisterBuddy: com.google.gwt.osgi
 Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.server,
  com.sap.sailing.domain.tractracadapter,
- org.json.simple;bundle-version="1.1.0",
  com.sap.sailing.mongodb,
  com.mongodb.driver;bundle-version="2.6.2",
  com.sap.ui5.commons,
@@ -33,7 +32,9 @@ Export-Package: com.sap.sailing.gwt.ui.client;x-friends:="com.sap.sailing.gwt.ui
  com.sap.sailing.gwt.ui.shared;x-friends:="com.sap.sailing.gwt.ui.test"
 Import-Package: org.osgi.framework,
  org.osgi.util.tracker,
- javax.servlet,
- javax.servlet.http
+ javax.servlet;version="2.5.0",
+ javax.servlet.http;version="2.5.0",
+ org.json.simple,
+ org.json.simple.parser
 Web-ContextPath: /
 Jetty-WarFolderPath: war
