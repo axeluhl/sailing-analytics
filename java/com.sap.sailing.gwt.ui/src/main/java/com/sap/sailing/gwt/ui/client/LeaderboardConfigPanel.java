@@ -41,9 +41,6 @@ import com.sap.sailing.server.api.EventNameAndRaceName;
 
 public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer, RaceSelectionChangeListener, TrackedRaceChangedListener {
 
-    // AXEL: DON'T DELETE!!! FABIAN: WHY NOT???
-    // private static final int MAX_NUMBER_OF_DISCARDED_RESULTS = 4;
-
     private final TrackedEventsComposite trackedEventsComposite;
 
     private final StringConstants stringConstants;
