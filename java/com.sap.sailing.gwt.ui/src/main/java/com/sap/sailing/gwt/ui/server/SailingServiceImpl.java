@@ -1450,7 +1450,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     public ServletContext getServletContext() {
         final ServletContext delegate = super.getServletContext();
         return new ServletContext() {
-            private static final String PREFIX = "war/";
+            private static final String PREFIX = "war";
             
             @Override
             public Object getAttribute(String arg0) {
@@ -1517,10 +1517,18 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 URL result = delegate.getResource(arg0);
                 if (result == null) {
                     logger.fine("Couldn't find "+arg0+". Trying "+PREFIX+arg0);
-                    result = delegate.getResource(PREFIX+arg0);
+                    result = delegate.getResource(prependPrefix(arg0));
                     logger.fine("Found "+result);
                 }
                 return result;
+            }
+
+            private String prependPrefix(String arg0) {
+                if (arg0.startsWith("/")) {
+                    return PREFIX+arg0;
+                } else {
+                    return PREFIX+"/"+arg0;
+                }
             }
 
             @Override
@@ -1528,7 +1536,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 InputStream result = delegate.getResourceAsStream(arg0);
                 if (result == null) {
                     logger.fine("Couldn't find "+arg0+". Trying "+PREFIX+arg0);
-                    result = delegate.getResourceAsStream(PREFIX+arg0);
+                    result = delegate.getResourceAsStream(prependPrefix(arg0));
                     logger.fine("Found "+result);
                 }
                 return result;
