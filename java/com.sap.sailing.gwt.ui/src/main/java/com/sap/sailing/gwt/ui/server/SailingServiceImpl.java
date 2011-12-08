@@ -1516,6 +1516,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             public URL getResource(String arg0) throws MalformedURLException {
                 URL result = delegate.getResource(arg0);
                 if (result == null) {
+                    logger.fine("Couldn't find "+arg0+". Trying "+PREFIX+arg0);
                     result = delegate.getResource(PREFIX+arg0);
                 }
                 return result;
@@ -1525,6 +1526,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             public InputStream getResourceAsStream(String arg0) {
                 InputStream result = delegate.getResourceAsStream(arg0);
                 if (result == null) {
+                    logger.fine("Couldn't find "+arg0+". Trying "+PREFIX+arg0);
                     result = delegate.getResourceAsStream(PREFIX+arg0);
                 }
                 return result;
