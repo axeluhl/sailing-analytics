@@ -300,8 +300,9 @@ public class TracTracEventManagementPanel extends FormPanel implements EventDisp
                     String textAsUppercase = text.toUpperCase();
                     for(TracTracRaceRecordDAO dao: availableTracTracRaces) {
                         if(dao.name != null) {
-                            if(dao.name.toUpperCase().contains(textAsUppercase))
+                            if(dao.name.toUpperCase().contains(textAsUppercase)) {
                                 raceList.getList().add(dao);
+                            }
                         }
                     }
                 }
@@ -445,14 +446,12 @@ public class TracTracEventManagementPanel extends FormPanel implements EventDisp
             @Override
             public void onSuccess(final Pair<String, List<TracTracRaceRecordDAO>> result) {
                 availableTracTracRaces.clear();
-                if (result.getB() != null)
+                if (result.getB() != null) {
                     availableTracTracRaces.addAll(result.getB());
-
+                }
                 raceList.getList().clear();
                 raceList.getList().addAll(availableTracTracRaces);
-
                 filterEventsTextbox.setText(null);
-                
                 // store a successful configuration in the database for later retrieval
                 sailingService.storeTracTracConfiguration(result.getA(), jsonURL, liveDataURI, storedDataURI,
                         new AsyncCallback<Void>() {

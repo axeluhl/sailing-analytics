@@ -1,6 +1,8 @@
-package com.sap.sailing.gwt.ui.shared;
+package com.sap.sailing.server.api;
+
 
 public class EventNameAndRaceName implements EventAndRaceIdentifier {
+    private static final long serialVersionUID = 3599904513673776450L;
     private String eventName;
     private String raceName;
     
@@ -39,6 +41,4 @@ public class EventNameAndRaceName implements EventAndRaceIdentifier {
     public String toString() {
         return raceName;
     }
-    
-    
 }

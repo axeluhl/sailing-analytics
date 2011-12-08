@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.shared;
+package com.sap.sailing.server.api;
 
 public interface EventAndRaceIdentifier extends EventIdentifier, RaceIdentifier {
 }

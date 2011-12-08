@@ -41,11 +41,11 @@ import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
 import com.sap.sailing.gwt.ui.shared.DetailType;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDAO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDAO;
-import com.sap.sailing.gwt.ui.shared.LeaderboardNameAndRaceColumnName;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDAO;
 import com.sap.sailing.gwt.ui.shared.LegEntryDAO;
-import com.sap.sailing.gwt.ui.shared.RaceIdentifier;
 import com.sap.sailing.gwt.ui.shared.RaceInLeaderboardDAO;
+import com.sap.sailing.server.api.LeaderboardNameAndRaceColumnName;
+import com.sap.sailing.server.api.RaceIdentifier;
 
 /**
  * A leaderboard essentially consists of a table widget that in its columns displays the entries.

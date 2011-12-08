@@ -1,4 +1,4 @@
-package com.sap.sailing.server;
+package com.sap.sailing.server.impl;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -40,9 +40,9 @@ import com.sap.sailing.domain.swisstimingadapter.SailMasterMessage;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
 import com.sap.sailing.domain.swisstimingadapter.persistence.SwissTimingAdapterPersistence;
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
-import com.sap.sailing.domain.tracking.RacesHandle;
 import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.RaceTracker;
+import com.sap.sailing.domain.tracking.RacesHandle;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTracker;
@@ -53,6 +53,7 @@ import com.sap.sailing.domain.tractracadapter.JSONService;
 import com.sap.sailing.domain.tractracadapter.RaceRecord;
 import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sailing.expeditionconnector.ExpeditionWindTrackerFactory;
+import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.util.Util.Pair;
 import com.sap.sailing.util.Util.Triple;
 
@@ -531,5 +532,5 @@ public class RacingEventServiceImpl implements RacingEventService {
             swissTimingAdapterPersistence.storeSailMasterMessage(ccgSMMessage);
         }
     }
-    
+
 }

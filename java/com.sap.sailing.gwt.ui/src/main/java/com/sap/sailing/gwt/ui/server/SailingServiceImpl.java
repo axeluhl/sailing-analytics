@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.server;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -13,6 +14,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -21,6 +23,11 @@ import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Set;
 import java.util.logging.Logger;
+
+import javax.servlet.RequestDispatcher;
+import javax.servlet.Servlet;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
@@ -79,17 +86,12 @@ import com.sap.sailing.domain.tractracadapter.TracTracConfiguration;
 import com.sap.sailing.gwt.ui.client.SailingService;
 import com.sap.sailing.gwt.ui.shared.BoatClassDAO;
 import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
-import com.sap.sailing.gwt.ui.shared.CompetitorAndTimePointsDAO;
+import com.sap.sailing.gwt.ui.shared.CompetitorsAndTimePointsDAO;
 import com.sap.sailing.gwt.ui.shared.DetailType;
-import com.sap.sailing.gwt.ui.shared.EventAndRaceIdentifier;
 import com.sap.sailing.gwt.ui.shared.EventDAO;
-import com.sap.sailing.gwt.ui.shared.EventFetcher;
-import com.sap.sailing.gwt.ui.shared.EventIdentifier;
-import com.sap.sailing.gwt.ui.shared.EventNameAndRaceName;
 import com.sap.sailing.gwt.ui.shared.GPSFixDAO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDAO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDAO;
-import com.sap.sailing.gwt.ui.shared.LeaderboardNameAndRaceColumnName;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDAO;
 import com.sap.sailing.gwt.ui.shared.LegEntryDAO;
 import com.sap.sailing.gwt.ui.shared.ManeuverDAO;
@@ -98,8 +100,6 @@ import com.sap.sailing.gwt.ui.shared.Pair;
 import com.sap.sailing.gwt.ui.shared.PositionDAO;
 import com.sap.sailing.gwt.ui.shared.QuickRankDAO;
 import com.sap.sailing.gwt.ui.shared.RaceDAO;
-import com.sap.sailing.gwt.ui.shared.RaceFetcher;
-import com.sap.sailing.gwt.ui.shared.RaceIdentifier;
 import com.sap.sailing.gwt.ui.shared.RegattaDAO;
 import com.sap.sailing.gwt.ui.shared.SpeedWithBearingDAO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDAO;
@@ -110,6 +110,13 @@ import com.sap.sailing.gwt.ui.shared.WindDAO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDAO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDAO;
 import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.api.EventAndRaceIdentifier;
+import com.sap.sailing.server.api.EventFetcher;
+import com.sap.sailing.server.api.EventIdentifier;
+import com.sap.sailing.server.api.EventNameAndRaceName;
+import com.sap.sailing.server.api.LeaderboardNameAndRaceColumnName;
+import com.sap.sailing.server.api.RaceFetcher;
+import com.sap.sailing.server.api.RaceIdentifier;
 import com.sap.sailing.util.CountryCode;
 
 /**
@@ -888,19 +895,6 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         return results;
     }
     
-    public LeaderboardDAO getLeaderboardByName(String leaderboardName) {
-        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
-        LeaderboardDAO dao = new LeaderboardDAO();
-        dao.name = leaderboard.getName();
-        dao.displayNames = new HashMap<CompetitorDAO, String>();
-        for (RaceInLeaderboard raceColumn : leaderboard.getRaceColumns()) {
-            dao.addRace(raceColumn.getName(), raceColumn.isMedalRace(), raceColumn.getTrackedRace() != null);
-        }
-        dao.hasCarriedPoints = leaderboard.hasCarriedPoints();
-        dao.discardThresholds = leaderboard.getResultDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces();
-        return dao;
-    }
-    
     @Override
     public void updateLeaderboard(String leaderboardName, String newLeaderboardName, int[] newDiscardingThreasholds) {
         if (!leaderboardName.equals(newLeaderboardName)) {
@@ -1191,7 +1185,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
 
     @Override
-    public List<Pair<CompetitorDAO, Double[]>> getCompetitorRaceData(RaceIdentifier race, CompetitorAndTimePointsDAO competitorAndTimePointsDAO, DetailType dataType) throws NoWindException {
+    public List<Pair<CompetitorDAO, Double[]>> getCompetitorRaceData(RaceIdentifier race, CompetitorsAndTimePointsDAO competitorAndTimePointsDAO, DetailType dataType) throws NoWindException {
         List<Pair<CompetitorDAO, Double[]>> competitorData = new ArrayList<Pair<CompetitorDAO, Double[]>>();
         TrackedRace trackedRace = getTrackedRace(race);
         Iterable<Competitor> competitors = trackedRace.getRace().getCompetitors();
@@ -1439,27 +1433,186 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
 
     @Override
-    public CompetitorAndTimePointsDAO getCompetitorAndTimePoints(RaceIdentifier race, int steps) {
-        CompetitorAndTimePointsDAO competitorAndTimePointsDAO = new CompetitorAndTimePointsDAO();
+    public CompetitorsAndTimePointsDAO getCompetitorsAndTimePoints(RaceIdentifier race, int steps) {
+        CompetitorsAndTimePointsDAO competitorAndTimePointsDAO = new CompetitorsAndTimePointsDAO(steps);
         TrackedRace trackedRace = getTrackedRace(race);
         List<CompetitorDAO> competitors = new ArrayList<CompetitorDAO>();
         for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
             NavigableSet<MarkPassing> markPassings = trackedRace.getMarkPassings(competitor);
-            List<Long> markPassingTimes = new ArrayList<Long>();
+            long[] markPassingTimes = new long[markPassings.size()];
+            int i=0;
             for (MarkPassing markPassing : markPassings){
-                markPassingTimes.add(markPassing.getTimePoint().asMillis());
+                markPassingTimes[i++] = markPassing.getTimePoint().asMillis();
             }
             competitors.add(getCompetitorDAO(competitor));
-            competitorAndTimePointsDAO.setMarkPassings(getCompetitorDAO(competitor), markPassingTimes.toArray(new Long[0]));
+            competitorAndTimePointsDAO.setMarkPassings(getCompetitorDAO(competitor), markPassingTimes);
         }
         competitorAndTimePointsDAO.setCompetitor(competitors.toArray(new CompetitorDAO[0]));
         competitorAndTimePointsDAO.setStartTime(trackedRace.getStart().asMillis());
-        List<Long> timePoints = new ArrayList<Long>();
-        long stepsize = (trackedRace.getTimePointOfNewestEvent().asMillis()- trackedRace.getStart().asMillis() - 20000)/steps;
-        for (long time = trackedRace.getStart().asMillis() - 20000; time < trackedRace.getTimePointOfNewestEvent().asMillis(); time += stepsize){
-            timePoints.add(time);
-        }
-        competitorAndTimePointsDAO.setTimePoints(timePoints.toArray(new Long[0]));
+        competitorAndTimePointsDAO.setTimePointOfNewestEvent(trackedRace.getTimePointOfNewestEvent().asMillis());
         return competitorAndTimePointsDAO;
+    }
+
+    /**
+     * Returns a servlet context that, when asked for a resource, first tries the original servlet context's implementation. If that
+     * fails, it prepends "war/" to the request because the war/ folder contains all the resources exposed externally
+     * through the HTTP server.
+     */
+    @Override
+    public ServletContext getServletContext() {
+        final ServletContext delegate = super.getServletContext();
+        return new ServletContext() {
+            private static final String PREFIX = "/war";
+            
+            @Override
+            public Object getAttribute(String arg0) {
+                return delegate.getAttribute(arg0);
+            }
+
+            @Override
+            public Enumeration<?> getAttributeNames() {
+                return delegate.getAttributeNames();
+            }
+
+            @Override
+            public ServletContext getContext(String arg0) {
+                return delegate.getContext(arg0);
+            }
+
+            @Override
+            public String getContextPath() {
+                return delegate.getContextPath();
+            }
+
+            @Override
+            public String getInitParameter(String arg0) {
+                return delegate.getInitParameter(arg0);
+            }
+
+            @Override
+            public Enumeration<?> getInitParameterNames() {
+                return delegate.getInitParameterNames();
+            }
+
+            @Override
+            public int getMajorVersion() {
+                return delegate.getMajorVersion();
+            }
+
+            @Override
+            public String getMimeType(String arg0) {
+                return delegate.getMimeType(arg0);
+            }
+
+            @Override
+            public int getMinorVersion() {
+                return delegate.getMinorVersion();
+            }
+
+            @Override
+            public RequestDispatcher getNamedDispatcher(String arg0) {
+                return delegate.getNamedDispatcher(arg0);
+            }
+
+            @Override
+            public String getRealPath(String arg0) {
+                return delegate.getRealPath(arg0);
+            }
+
+            @Override
+            public RequestDispatcher getRequestDispatcher(String arg0) {
+                return delegate.getRequestDispatcher(arg0);
+            }
+
+            @Override
+            public URL getResource(String arg0) throws MalformedURLException {
+                URL result = delegate.getResource(arg0);
+                if (result == null) {
+                    logger.fine("Couldn't find "+arg0+". Trying "+prependPrefix(arg0));
+                    result = delegate.getResource(prependPrefix(arg0));
+                    logger.fine("Found "+result);
+                }
+                return result;
+            }
+
+            private String prependPrefix(String arg0) {
+                if (arg0.startsWith("/")) {
+                    return PREFIX+arg0;
+                } else {
+                    return PREFIX+"/"+arg0;
+                }
+            }
+
+            @Override
+            public InputStream getResourceAsStream(String arg0) {
+                InputStream result = delegate.getResourceAsStream(arg0);
+                if (result == null) {
+                    logger.fine("Couldn't find "+arg0+". Trying "+prependPrefix(arg0));
+                    result = delegate.getResourceAsStream(prependPrefix(arg0));
+                    logger.fine("Found "+result);
+                }
+                return result;
+            }
+
+            @Override
+            public Set<?> getResourcePaths(String arg0) {
+                return delegate.getResourcePaths(arg0);
+            }
+
+            @Override
+            public String getServerInfo() {
+                return delegate.getServerInfo();
+            }
+
+            @SuppressWarnings("deprecation") // have to delegate; what can we do?
+            @Override
+            public Servlet getServlet(String arg0) throws ServletException {
+                return delegate.getServlet(arg0);
+            }
+
+            @Override
+            public String getServletContextName() {
+                return delegate.getServletContextName();
+            }
+
+            @SuppressWarnings("deprecation") // have to delegate; what can we do?
+            @Override
+            public Enumeration<?> getServletNames() {
+                return delegate.getServletNames();
+            }
+
+            @SuppressWarnings("deprecation") // have to delegate; what can we do?
+            @Override
+            public Enumeration<?> getServlets() {
+                return delegate.getServlets();
+            }
+
+            @Override
+            public void log(String arg0) {
+                delegate.log(arg0);
+            }
+
+            @SuppressWarnings("deprecation") // have to delegate; what can we do?
+            @Override
+            public void log(Exception arg0, String arg1) {
+                delegate.log(arg0, arg1);
+            }
+
+            @Override
+            public void log(String arg0, Throwable arg1) {
+                delegate.log(arg0, arg1);
+            }
+
+            @Override
+            public void removeAttribute(String arg0) {
+                delegate.removeAttribute(arg0);
+            }
+
+            @Override
+            public void setAttribute(String arg0, Object arg1) {
+                delegate.setAttribute(arg0, arg1);
+            }
+            
+        };
     }
 }
