@@ -296,11 +296,12 @@ public class TrackedEventsComposite extends FormPanel implements EventDisplayer,
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
                 List<Triple<EventDAO, RegattaDAO, RaceDAO>> selectedEventAndRace = getSelectedEventAndRace();
-                lastSelectedTriple = selectedEventAndRace.get(0);
                 if (selectedEventAndRace == null) {
+                    lastSelectedTriple = null;
                     btnRemoveRace.setEnabled(false);
                     btnUntrack.setEnabled(false);
                 } else {
+                    lastSelectedTriple = selectedEventAndRace.get(0);
                     btnRemoveRace.setEnabled(true);
                     btnUntrack.setEnabled(true);
                 }
