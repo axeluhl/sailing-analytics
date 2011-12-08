@@ -3,7 +3,7 @@
 
 <target name="Race Analysis server - local p2 repositories" sequenceNumber="29">
 <locations>
-<location path="${project_loc}/target-javax" type="Directory"/>
+<location path="${project_loc}/target-base" type="Directory"/>
 <location path="${project_loc}/target-test" type="Directory"/>
 <location includeAllPlatforms="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.jetty.bundles.f.feature.group" version="7.5.4"/>
