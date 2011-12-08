@@ -37,6 +37,7 @@
 		<module>com.sap.sailing.mongodb.test</module>
 		<module>com.tractrac.clientmodule</module>
 		<module>com.tractrac.resultapi</module>
+		<module>org.json.simple</module>
 		<module>com.mongodb.driver</module>
 		<module>com.googlecode.java-diff-utils</module>
 		<module>com.googlecode.java-diff-utils.test</module>
