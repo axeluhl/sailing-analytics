@@ -98,7 +98,7 @@ public class LeaderboardSettingsPanel extends DataEntryDialog<Result> {
         vpMeneuvers.add(new Label(stringConstants.maneuverTypes()));
         List<DetailType> currentMeneuverDetailSelection = maneuverDetailSelection;
         for (DetailType detailType : ManeuverCountRaceColumn.getAvailableManeuverDetailColumnTypes()) {
-            CheckBox checkbox = createCheckbox(DetailTypeFormatter.toString(detailType, stringConstants));
+            CheckBox checkbox = createCheckbox(DetailTypeFormatter.format(detailType, stringConstants));
             checkbox.setValue(currentMeneuverDetailSelection.contains(detailType));
             maneuverDetailCheckboxes.put(detailType, checkbox);
             vpMeneuvers.add(checkbox);
@@ -118,7 +118,7 @@ public class LeaderboardSettingsPanel extends DataEntryDialog<Result> {
         vpLeft.add(new Label(stringConstants.raceDetailsToShow()));
         List<DetailType> currentRaceDetailSelection = raceDetailSelection;
         for (DetailType type : LeaderboardPanel.getAvailableRaceDetailColumnTypes()) {
-            CheckBox checkbox = createCheckbox(DetailTypeFormatter.toString(type, stringConstants));
+            CheckBox checkbox = createCheckbox(DetailTypeFormatter.format(type, stringConstants));
             checkbox.setValue(currentRaceDetailSelection.contains(type));
             raceDetailCheckboxes.put(type, checkbox);
             vpLeft.add(checkbox);
@@ -126,7 +126,7 @@ public class LeaderboardSettingsPanel extends DataEntryDialog<Result> {
         vpLeft.add(new Label(stringConstants.legDetailsToShow()));
         List<DetailType> currentLegDetailSelection = legDetailSelection;
         for (DetailType type : LegColumn.getAvailableLegDetailColumnTypes()) {
-            CheckBox checkbox = createCheckbox(DetailTypeFormatter.toString(type, stringConstants));
+            CheckBox checkbox = createCheckbox(DetailTypeFormatter.format(type, stringConstants));
             checkbox.setValue(currentLegDetailSelection.contains(type));
             legDetailCheckboxes.put(type, checkbox);
             vpLeft.add(checkbox);
