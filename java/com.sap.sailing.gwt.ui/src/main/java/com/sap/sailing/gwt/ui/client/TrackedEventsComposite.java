@@ -42,6 +42,8 @@ import com.sap.sailing.server.api.EventNameAndRaceName;
 public class TrackedEventsComposite extends FormPanel implements EventDisplayer, RaceSelectionProvider {
     private final Set<RaceSelectionChangeListener> raceSelectionChangeListeners;
 
+    private final Set<TrackedRaceChangedListener> raceIsTrackedRaceChangeListener;
+
     private final boolean multiSelection;
 
     private boolean dontFireNextSelectionChangeEvent;
@@ -65,12 +67,15 @@ public class TrackedEventsComposite extends FormPanel implements EventDisplayer,
     private final ErrorReporter errorReporter;
     private final EventRefresher eventRefresher;
 
-    private Button btnRemove = null;
+    private Button btnUntrack = null;
     private Button btnRefresh = null;
+    private Button btnRemoveRace = null;
 
     private TextBox filterRacesTextbox;
 
     private List<Triple<EventDAO, RegattaDAO, RaceDAO>> availableRaceList;
+
+    private Triple<EventDAO, RegattaDAO, RaceDAO> lastSelectedTriple;
 
     public TrackedEventsComposite(final SailingServiceAsync sailingService, final ErrorReporter errorReporter,
             final EventRefresher eventRefresher, StringConstants stringConstants, boolean hasMultiSelection) {
@@ -79,7 +84,10 @@ public class TrackedEventsComposite extends FormPanel implements EventDisplayer,
         this.eventRefresher = eventRefresher;
         this.multiSelection = hasMultiSelection;
         this.raceSelectionChangeListeners = new HashSet<RaceSelectionChangeListener>();
+        this.raceIsTrackedRaceChangeListener = new HashSet<TrackedRaceChangedListener>();
         this.availableRaceList = new ArrayList<Triple<EventDAO, RegattaDAO, RaceDAO>>();
+
+        this.lastSelectedTriple = null;
 
         raceList = new ListDataProvider<Triple<EventDAO, RegattaDAO, RaceDAO>>();
 
@@ -106,14 +114,14 @@ public class TrackedEventsComposite extends FormPanel implements EventDisplayer,
                 List<String> wordsToFilter = Arrays.asList(text.split(" "));
                 raceList.getList().clear();
                 raceList.getList().addAll(availableRaceList);
-                racesToHold = new ArrayList<Triple<EventDAO,RegattaDAO,RaceDAO>>();
+                racesToHold = new ArrayList<Triple<EventDAO, RegattaDAO, RaceDAO>>();
                 if (text == null || text.isEmpty()) {
                     racesToHold.addAll(availableRaceList);
                 } else {
                     for (String word : wordsToFilter) {
                         // TODO improve search algorithm
                         String textAsUppercase = word.toUpperCase();
-                        racesToHold = new ArrayList<Triple<EventDAO,RegattaDAO,RaceDAO>>();
+                        racesToHold = new ArrayList<Triple<EventDAO, RegattaDAO, RaceDAO>>();
                         for (Triple<EventDAO, RegattaDAO, RaceDAO> triple : raceList.getList()) {
                             if (triple.getA().name.toUpperCase().contains(textAsUppercase)
                                     || triple.getB().boatClass.name.toUpperCase().contains(textAsUppercase)
@@ -287,7 +295,16 @@ public class TrackedEventsComposite extends FormPanel implements EventDisplayer,
         raceTable.getSelectionModel().addSelectionChangeHandler(new Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
-                fireRaceSelectionChanged(getSelectedEventAndRace());
+                List<Triple<EventDAO, RegattaDAO, RaceDAO>> selectedEventAndRace = getSelectedEventAndRace();
+                lastSelectedTriple = selectedEventAndRace.get(0);
+                if (selectedEventAndRace == null) {
+                    btnRemoveRace.setEnabled(false);
+                    btnUntrack.setEnabled(false);
+                } else {
+                    btnRemoveRace.setEnabled(true);
+                    btnUntrack.setEnabled(true);
+                }
+                fireRaceSelectionChanged(selectedEventAndRace);
             }
         });
 
@@ -296,9 +313,22 @@ public class TrackedEventsComposite extends FormPanel implements EventDisplayer,
         trackedRacesButtonPanel.setSpacing(10);
         panel.add(trackedRacesButtonPanel);
 
-        btnRemove = new Button("Stop tracking");
+        btnRemoveRace = new Button(stringConstants.remove());
+        btnRemoveRace.addClickHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                for (Triple<EventDAO, RegattaDAO, RaceDAO> selection : getSelectedEventAndRace()) {
+                    removeAndUntrackRace(selection.getA(), selection.getC());
+                }
+            }
+        });
+        btnRemoveRace.setEnabled(false);
+        trackedRacesButtonPanel.add(btnRemoveRace);
+
+        btnUntrack = new Button("Stop tracking");
         // btnRemove = new Button(stringConstants.remove());
-        btnRemove.addClickHandler(new ClickHandler() {
+        btnUntrack.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent click) {
                 for (Triple<EventDAO, RegattaDAO, RaceDAO> selection : getSelectedEventAndRace()) {
@@ -308,7 +338,8 @@ public class TrackedEventsComposite extends FormPanel implements EventDisplayer,
                 }
             }
         });
-        trackedRacesButtonPanel.add(btnRemove);
+        btnUntrack.setEnabled(false);
+        trackedRacesButtonPanel.add(btnUntrack);
 
         btnRefresh = new Button(stringConstants.refresh());
         btnRefresh.addClickHandler(new ClickHandler() {
@@ -382,12 +413,14 @@ public class TrackedEventsComposite extends FormPanel implements EventDisplayer,
     public void fillEvents(List<EventDAO> events) {
         if (events.size() == 0) {
             raceTable.setVisible(false);
-            btnRemove.setVisible(false);
+            btnUntrack.setEnabled(false);
+            btnRemoveRace.setEnabled(false);
             noTrackedRacesLabel.setVisible(true);
         } else {
             raceTable.setVisible(true);
             if (eventRefresher != null) {
-                btnRemove.setVisible(true);
+                btnUntrack.setEnabled(true);
+                btnRemoveRace.setEnabled(true);
             }
             noTrackedRacesLabel.setVisible(false);
         }
@@ -411,10 +444,18 @@ public class TrackedEventsComposite extends FormPanel implements EventDisplayer,
                 }
             }
         }
+        if (lastSelectedTriple != null) {
+            selectRaceByName(lastSelectedTriple.getA().name, lastSelectedTriple.getC().name);
+        }
+    }
+
+    public void addTrackedRaceChangeListener(TrackedRaceChangedListener listener) {
+        this.raceIsTrackedRaceChangeListener.add(listener);
     }
 
     private void stopTrackingRace(final EventDAO event, final RaceDAO race) {
-        sailingService.stopTrackingRace(new EventNameAndRaceName(event.name, race.name), new AsyncCallback<Void>() {
+        final EventNameAndRaceName eventNameAndRaceName = new EventNameAndRaceName(event.name, race.name);
+        sailingService.stopTrackingRace(eventNameAndRaceName, new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError("Exception trying to stop tracking race " + race.name + "in event "
@@ -424,8 +465,28 @@ public class TrackedEventsComposite extends FormPanel implements EventDisplayer,
             @Override
             public void onSuccess(Void result) {
                 eventRefresher.fillEvents();
+                for (TrackedRaceChangedListener listener : raceIsTrackedRaceChangeListener) {
+                    listener.changeTrackingRace(eventNameAndRaceName, false);
+                }
             }
         });
+    }
+
+    private void removeAndUntrackRace(final EventDAO event, final RaceDAO race) {
+        sailingService.removeAndUntrackedRace(new EventNameAndRaceName(event.name, race.name),
+                new AsyncCallback<Void>() {
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        errorReporter.reportError("Exception trying to stop tracking race " + race.name + "in event "
+                                + event.name + ": " + caught.getMessage());
+                    }
+
+                    @Override
+                    public void onSuccess(Void result) {
+                        eventRefresher.fillEvents();
+                    }
+                });
     }
 
 }

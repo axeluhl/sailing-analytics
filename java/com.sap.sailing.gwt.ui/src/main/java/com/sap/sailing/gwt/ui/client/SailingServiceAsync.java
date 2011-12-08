@@ -57,6 +57,13 @@ public interface SailingServiceAsync {
     void stopTrackingEvent(EventIdentifier eventIdentifier, AsyncCallback<Void> callback);
 
     void stopTrackingRace(EventAndRaceIdentifier raceIdentifier, AsyncCallback<Void> asyncCallback);
+    
+    /**
+     * Untracks the race and removes it from the event. It will also be removed in all leaerboards
+     * @param eventAndRaceidentifier The identifier for the event name, and the race name to remove
+     * @throws Exception
+     */
+    void removeAndUntrackedRace(EventAndRaceIdentifier eventAndRaceidentifier, AsyncCallback<Void> callback);
 
     void getWindInfo(RaceIdentifier raceIdentifier, Date from, Date to, boolean includeTrackBasedWindEstimation,
             AsyncCallback<WindInfoForRaceDAO> callback);
