@@ -1518,6 +1518,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 if (result == null) {
                     logger.fine("Couldn't find "+arg0+". Trying "+PREFIX+arg0);
                     result = delegate.getResource(PREFIX+arg0);
+                    logger.fine("Found "+result);
                 }
                 return result;
             }
@@ -1528,6 +1529,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 if (result == null) {
                     logger.fine("Couldn't find "+arg0+". Trying "+PREFIX+arg0);
                     result = delegate.getResourceAsStream(PREFIX+arg0);
+                    logger.fine("Found "+result);
                 }
                 return result;
             }
