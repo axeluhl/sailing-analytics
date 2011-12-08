@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="com.sap.sailing.target.javax"
-      label="javax libraries"
+      id="com.sap.sailing.target.base"
+      label="base libraries"
       version="1.0.0">
 
    <description>
-      javax libraries
+      base libraries
    </description>
 
    <license url="">
@@ -18,12 +18,18 @@
          install-size="0"
          version="2.5.0.v201103041518"
          unpack="false"/>
-<!--
+         
    <plugin
-         id="javax.servlet.jsp"
+         id="slf4j-api"
          download-size="0"
          install-size="0"
-         version="2.0.0.v201101211617"
+         version="1.6.4"
          unpack="false"/>
--->         
+         
+   <plugin
+         id="jul-to-slf4j"
+         download-size="0"
+         install-size="0"
+         version="1.6.4"
+         unpack="false"/>
 </feature>
