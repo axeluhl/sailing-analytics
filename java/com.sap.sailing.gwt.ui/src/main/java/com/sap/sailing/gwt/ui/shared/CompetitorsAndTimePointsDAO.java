@@ -24,7 +24,7 @@ public class CompetitorsAndTimePointsDAO implements IsSerializable {
         long[] result = new long[steps];
         int i=0;
         long stepsize = (timePointOfNewestEvent - startTime - MILLISECONDS_BEFORE_RACE_TO_INCLUDE) / steps;
-        for (long time = startTime - MILLISECONDS_BEFORE_RACE_TO_INCLUDE; time < timePointOfNewestEvent; time += stepsize) {
+        for (long time = startTime - MILLISECONDS_BEFORE_RACE_TO_INCLUDE; i<result.length && time < timePointOfNewestEvent; time += stepsize) {
             result[i++] = time;
         }
         return result;
