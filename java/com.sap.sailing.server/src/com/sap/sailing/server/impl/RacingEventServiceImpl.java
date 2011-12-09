@@ -75,9 +75,9 @@ public class RacingEventServiceImpl implements RacingEventService {
     
     private final WindTrackerFactory windTrackerFactory;
     
-    private final Map<String, Event> eventsByName;
+    protected final Map<String, Event> eventsByName;
     
-    private final Map<Event, Set<RaceTracker>> raceTrackersByEvent;
+    protected final Map<Event, Set<RaceTracker>> raceTrackersByEvent;
     
     /**
      * Remembers the wind tracker and the port on which the UDP receiver with which the wind tracker is
@@ -88,7 +88,7 @@ public class RacingEventServiceImpl implements RacingEventService {
     /**
      * Remembers the trackers by paramURL/liveURI/storedURI to avoid duplication
      */
-    private final Map<Object, RaceTracker> raceTrackersByID;
+    protected final Map<Object, RaceTracker> raceTrackersByID;
     
     /**
      * Leaderboards managed by this racing event service

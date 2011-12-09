@@ -9,3 +9,4 @@ Require-Bundle: com.sap.sailing.server,
  com.sap.sailing.domain,
  com.sap.sailing.domain.tractracadapter,
  org.junit4
+Import-Package: com.tractrac.clientmodule
