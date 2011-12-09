@@ -251,11 +251,11 @@ public class TrackedEventsComposite extends FormPanel implements EventDisplayer,
             }
         };
 
-        raceTable.addColumn(eventNameColumn, "Event");
-        raceTable.addColumn(regattaNameColumn, "Regatta");
-        raceTable.addColumn(raceNameColumn, "Race");
-        raceTable.addColumn(raceStartColumn, "Start time");
-        raceTable.addColumn(raceTrackedColumn, "Tracked");
+        raceTable.addColumn(eventNameColumn, stringConstants.event());
+        raceTable.addColumn(regattaNameColumn, stringConstants.regatta());
+        raceTable.addColumn(raceNameColumn, stringConstants.race());
+        raceTable.addColumn(raceStartColumn, stringConstants.startTime());
+        raceTable.addColumn(raceTrackedColumn, stringConstants.tracked());
         raceTable.setWidth("300px");
         raceTable.setSelectionModel(selectionModel);
         raceTable.setVisible(false);
@@ -292,8 +292,7 @@ public class TrackedEventsComposite extends FormPanel implements EventDisplayer,
         });
         btnRemoveRace.setEnabled(false);
         trackedRacesButtonPanel.add(btnRemoveRace);
-        btnUntrack = new Button("Stop tracking");
-        // btnRemove = new Button(stringConstants.remove());
+        btnUntrack = new Button(stringConstants.stopTracking());
         btnUntrack.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent click) {
