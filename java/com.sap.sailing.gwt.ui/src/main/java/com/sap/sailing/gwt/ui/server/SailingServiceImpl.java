@@ -474,7 +474,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         if(event!= null){
             RaceDefinition race = getRace(eventAndRaceidentifier);
             if(race != null){
-                getService().stopRemoveTrackedRace(event, race);
+                getService().removeRace(event, race);
             }
         }
         

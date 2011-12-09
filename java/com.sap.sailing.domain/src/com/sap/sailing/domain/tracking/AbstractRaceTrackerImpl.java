@@ -35,7 +35,7 @@ public abstract class AbstractRaceTrackerImpl implements RaceTracker {
             for (RaceDefinition race : races) {
                 TrackedRace trackedRace = trackedEvent.getExistingTrackedRace(race);
                 if (trackedRace != null) {
-                    trackedEvent.removedTrackedRace(trackedRace);
+                    trackedEvent.removeTrackedRace(trackedRace);
                 }
             }
             if (Util.isEmpty(trackedEvent.getTrackedRaces())) {

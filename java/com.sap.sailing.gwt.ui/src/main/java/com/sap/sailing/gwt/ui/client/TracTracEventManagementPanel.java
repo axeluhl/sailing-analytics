@@ -74,13 +74,14 @@ public class TracTracEventManagementPanel extends FormPanel implements EventDisp
     private final EventRefresher eventRefresher;
     private DateTimeFormatRenderer dateFormatter = new DateTimeFormatRenderer(DateTimeFormat.getFormat(PredefinedFormat.DATE_SHORT));
     private DateTimeFormatRenderer timeFormatter = new DateTimeFormatRenderer(DateTimeFormat.getFormat(PredefinedFormat.TIME_LONG));
-    private final List<TracTracRaceRecordDAO> availableTracTracRaces = new ArrayList<TracTracRaceRecordDAO>();
+    private final List<TracTracRaceRecordDAO> availableTracTracRaces;
     
     public TracTracEventManagementPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
             EventRefresher eventRefresher, StringConstants stringConstants) {
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.eventRefresher = eventRefresher;
+        availableTracTracRaces = new ArrayList<TracTracRaceRecordDAO>();
 
         VerticalPanel mainPanel = new VerticalPanel();
         this.setWidget(mainPanel);
@@ -291,9 +292,7 @@ public class TracTracEventManagementPanel extends FormPanel implements EventDisp
             @Override
             public void onKeyUp(KeyUpEvent event) {
                 String text = filterEventsTextbox.getText();
-
                 raceList.getList().clear();
-                
                 if(text == null || text.isEmpty()) {
                     raceList.getList().addAll(availableTracTracRaces);
                 } else {

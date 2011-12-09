@@ -17,6 +17,7 @@ import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.text.client.DateTimeFormatRenderer;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
+import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.ColumnSortList;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -39,6 +40,9 @@ import com.sap.sailing.gwt.ui.shared.RegattaDAO;
 import com.sap.sailing.gwt.ui.shared.Triple;
 import com.sap.sailing.server.api.EventNameAndRaceName;
 
+/**
+ * Shows the 
+ */
 public class TrackedEventsComposite extends FormPanel implements EventDisplayer, RaceSelectionProvider {
     private final Set<RaceSelectionChangeListener> raceSelectionChangeListeners;
 
@@ -79,6 +83,9 @@ public class TrackedEventsComposite extends FormPanel implements EventDisplayer,
 
     public TrackedEventsComposite(final SailingServiceAsync sailingService, final ErrorReporter errorReporter,
             final EventRefresher eventRefresher, StringConstants stringConstants, boolean hasMultiSelection) {
+        if (eventRefresher == null) {
+            throw new IllegalArgumentException("eventRefresher must not be null");
+        }
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.eventRefresher = eventRefresher;
@@ -86,17 +93,12 @@ public class TrackedEventsComposite extends FormPanel implements EventDisplayer,
         this.raceSelectionChangeListeners = new HashSet<RaceSelectionChangeListener>();
         this.raceIsTrackedRaceChangeListener = new HashSet<TrackedRaceChangedListener>();
         this.availableRaceList = new ArrayList<Triple<EventDAO, RegattaDAO, RaceDAO>>();
-
         this.lastSelectedTriple = null;
-
         raceList = new ListDataProvider<Triple<EventDAO, RegattaDAO, RaceDAO>>();
-
         selectionModel = multiSelection ? new MultiSelectionModel<Triple<EventDAO, RegattaDAO, RaceDAO>>()
                 : new SingleSelectionModel<Triple<EventDAO, RegattaDAO, RaceDAO>>();
-
         panel = new VerticalPanel();
         setWidget(panel);
-
         HorizontalPanel filterPanel = new HorizontalPanel();
         panel.add(filterPanel);
         Label lblFilterEvents = new Label(stringConstants.filterRacesByName() + ":");
@@ -105,34 +107,9 @@ public class TrackedEventsComposite extends FormPanel implements EventDisplayer,
         filterPanel.setCellVerticalAlignment(lblFilterEvents, HasVerticalAlignment.ALIGN_MIDDLE);
         filterRacesTextbox = new TextBox();
         filterRacesTextbox.addKeyUpHandler(new KeyUpHandler() {
-
-            private List<Triple<EventDAO, RegattaDAO, RaceDAO>> racesToHold;
-
             @Override
             public void onKeyUp(KeyUpEvent event) {
-                String text = filterRacesTextbox.getText();
-                List<String> wordsToFilter = Arrays.asList(text.split(" "));
-                raceList.getList().clear();
-                raceList.getList().addAll(availableRaceList);
-                racesToHold = new ArrayList<Triple<EventDAO, RegattaDAO, RaceDAO>>();
-                if (text == null || text.isEmpty()) {
-                    racesToHold.addAll(availableRaceList);
-                } else {
-                    for (String word : wordsToFilter) {
-                        // TODO improve search algorithm
-                        String textAsUppercase = word.toUpperCase();
-                        racesToHold = new ArrayList<Triple<EventDAO, RegattaDAO, RaceDAO>>();
-                        for (Triple<EventDAO, RegattaDAO, RaceDAO> triple : raceList.getList()) {
-                            if (triple.getA().name.toUpperCase().contains(textAsUppercase)
-                                    || triple.getB().boatClass.name.toUpperCase().contains(textAsUppercase)
-                                    || triple.getC().name.toUpperCase().contains(textAsUppercase)) {
-                                racesToHold.add(triple);
-                            }
-                        }
-                        raceList.setList(racesToHold);
-                    }
-                }
-                raceList.setList(racesToHold);
+                fillRaceListFromAvailableRacesApplyingFilter();
             }
         });
         filterPanel.add(filterRacesTextbox);
@@ -143,12 +120,9 @@ public class TrackedEventsComposite extends FormPanel implements EventDisplayer,
 
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
         raceTable = new CellTable<Triple<EventDAO, RegattaDAO, RaceDAO>>(/* pageSize */200, tableRes);
-
         ListHandler<Triple<EventDAO, RegattaDAO, RaceDAO>> columnSortHandler = new ListHandler<Triple<EventDAO, RegattaDAO, RaceDAO>>(
                 raceList.getList());
-
         TextColumn<Triple<EventDAO, RegattaDAO, RaceDAO>> eventNameColumn = new TextColumn<Triple<EventDAO, RegattaDAO, RaceDAO>>() {
-
             @Override
             public String getValue(Triple<EventDAO, RegattaDAO, RaceDAO> object) {
                 return object.getA().name;
@@ -284,19 +258,15 @@ public class TrackedEventsComposite extends FormPanel implements EventDisplayer,
         raceTable.addColumn(raceTrackedColumn, "Tracked");
         raceTable.setWidth("300px");
         raceTable.setSelectionModel(selectionModel);
-
         raceTable.setVisible(false);
         panel.add(raceTable);
-
         raceList.addDataDisplay(raceTable);
-
         raceTable.addColumnSortHandler(columnSortHandler);
-
         raceTable.getSelectionModel().addSelectionChangeHandler(new Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
                 List<Triple<EventDAO, RegattaDAO, RaceDAO>> selectedEventAndRace = getSelectedEventAndRace();
-                if (selectedEventAndRace == null) {
+                if (selectedEventAndRace.isEmpty()) {
                     lastSelectedTriple = null;
                     btnRemoveRace.setEnabled(false);
                     btnUntrack.setEnabled(false);
@@ -308,15 +278,11 @@ public class TrackedEventsComposite extends FormPanel implements EventDisplayer,
                 fireRaceSelectionChanged(selectedEventAndRace);
             }
         });
-
         HorizontalPanel trackedRacesButtonPanel = new HorizontalPanel();
-
         trackedRacesButtonPanel.setSpacing(10);
         panel.add(trackedRacesButtonPanel);
-
         btnRemoveRace = new Button(stringConstants.remove());
         btnRemoveRace.addClickHandler(new ClickHandler() {
-
             @Override
             public void onClick(ClickEvent event) {
                 for (Triple<EventDAO, RegattaDAO, RaceDAO> selection : getSelectedEventAndRace()) {
@@ -326,7 +292,6 @@ public class TrackedEventsComposite extends FormPanel implements EventDisplayer,
         });
         btnRemoveRace.setEnabled(false);
         trackedRacesButtonPanel.add(btnRemoveRace);
-
         btnUntrack = new Button("Stop tracking");
         // btnRemove = new Button(stringConstants.remove());
         btnUntrack.addClickHandler(new ClickHandler() {
@@ -356,7 +321,6 @@ public class TrackedEventsComposite extends FormPanel implements EventDisplayer,
     @Override
     public List<Triple<EventDAO, RegattaDAO, RaceDAO>> getSelectedEventAndRace() {
         List<Triple<EventDAO, RegattaDAO, RaceDAO>> result = new ArrayList<Triple<EventDAO, RegattaDAO, RaceDAO>>();
-
         if (raceList != null) {
             for (Triple<EventDAO, RegattaDAO, RaceDAO> raceTriple : raceList.getList()) {
                 if (selectionModel.isSelected(raceTriple)) {
@@ -412,27 +376,18 @@ public class TrackedEventsComposite extends FormPanel implements EventDisplayer,
 
     @Override
     public void fillEvents(List<EventDAO> events) {
-        if (events.size() == 0) {
+        if (events.isEmpty()) {
             raceTable.setVisible(false);
             btnUntrack.setEnabled(false);
             btnRemoveRace.setEnabled(false);
             noTrackedRacesLabel.setVisible(true);
         } else {
             raceTable.setVisible(true);
-            if (eventRefresher != null) {
-                btnUntrack.setEnabled(true);
-                btnRemoveRace.setEnabled(true);
-            }
+            btnUntrack.setEnabled(true);
+            btnRemoveRace.setEnabled(true);
             noTrackedRacesLabel.setVisible(false);
         }
-
-        raceList.getList().clear();
         availableRaceList.clear();
-
-        // Handler columnSortHandler = getRaceTableColumnSortHandler(raceList.getList(), raceNameColumn,
-        // raceStartTrackingColumn);
-        // raceTable.addColumnSortHandler(columnSortHandler);
-
         for (EventDAO event : events) {
             for (RegattaDAO regatta : event.regattas) {
                 for (RaceDAO race : regatta.races) {
@@ -441,10 +396,10 @@ public class TrackedEventsComposite extends FormPanel implements EventDisplayer,
                     if (race != null) {
                         availableRaceList.add(triple);
                     }
-                    raceList.getList().add(triple);
                 }
             }
         }
+        fillRaceListFromAvailableRacesApplyingFilter();
         if (lastSelectedTriple != null) {
             selectRaceByName(lastSelectedTriple.getA().name, lastSelectedTriple.getC().name);
         }
@@ -476,7 +431,6 @@ public class TrackedEventsComposite extends FormPanel implements EventDisplayer,
     private void removeAndUntrackRace(final EventDAO event, final RaceDAO race) {
         sailingService.removeAndUntrackedRace(new EventNameAndRaceName(event.name, race.name),
                 new AsyncCallback<Void>() {
-
                     @Override
                     public void onFailure(Throwable caught) {
                         errorReporter.reportError("Exception trying to stop tracking race " + race.name + "in event "
@@ -488,6 +442,33 @@ public class TrackedEventsComposite extends FormPanel implements EventDisplayer,
                         eventRefresher.fillEvents();
                     }
                 });
+    }
+
+    private void fillRaceListFromAvailableRacesApplyingFilter() {
+        String text = filterRacesTextbox.getText();
+        List<String> wordsToFilter = Arrays.asList(text.split(" "));
+        raceList.getList().clear();
+        if (text != null && !text.isEmpty()) {
+            for (Triple<EventDAO, RegattaDAO, RaceDAO> triple : availableRaceList) {
+                boolean failed = false;
+                for (String word : wordsToFilter) {
+                    String textAsUppercase = word.toUpperCase().trim();
+                    if (!triple.getA().name.toUpperCase().contains(textAsUppercase)
+                            && !triple.getB().boatClass.name.toUpperCase().contains(textAsUppercase)
+                            && !triple.getC().name.toUpperCase().contains(textAsUppercase)) {
+                        failed = true;
+                        break;
+                    }
+                }
+                if (!failed) {
+                    raceList.getList().add(triple);
+                }
+            }
+        } else {
+            raceList.getList().addAll(availableRaceList);
+        }
+        // now sort again according to selected criterion
+        ColumnSortEvent.fire(raceTable, raceTable.getColumnSortList());
     }
 
 }
