@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.client;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -18,6 +19,7 @@ import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.text.client.DateTimeFormatRenderer;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
+import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.Handler;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
@@ -38,8 +40,11 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.sap.sailing.gwt.ui.shared.EventDAO;
 import com.sap.sailing.gwt.ui.shared.Pair;
+import com.sap.sailing.gwt.ui.shared.RaceDAO;
+import com.sap.sailing.gwt.ui.shared.RegattaDAO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDAO;
 import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDAO;
+import com.sap.sailing.gwt.ui.shared.Triple;
 
 /**
  * Allows the user to start and stop tracking of events, regattas and races using the TracTrac connector. In particular,
@@ -286,20 +291,7 @@ public class TracTracEventManagementPanel extends FormPanel implements EventDisp
         filterEventsTextbox.addKeyUpHandler(new KeyUpHandler() {
             @Override
             public void onKeyUp(KeyUpEvent event) {
-                String text = filterEventsTextbox.getText();
-                raceList.getList().clear();
-                if(text == null || text.isEmpty()) {
-                    raceList.getList().addAll(availableTracTracRaces);
-                } else {
-                    String textAsUppercase = text.toUpperCase();
-                    for(TracTracRaceRecordDAO dao: availableTracTracRaces) {
-                        if(dao.name != null) {
-                            if(dao.name.toUpperCase().contains(textAsUppercase)) {
-                                raceList.getList().add(dao);
-                            }
-                        }
-                    }
-                }
+                fillRaceListFromAvailableRacesApplyingFilter();
             }
         });
         
@@ -506,6 +498,32 @@ public class TracTracEventManagementPanel extends FormPanel implements EventDisp
     @Override
     public void fillEvents(List<EventDAO> result) {
         trackedEventsComposite.fillEvents(result);
+    }
+    
+    private void fillRaceListFromAvailableRacesApplyingFilter() {
+        String text = filterEventsTextbox.getText();
+        List<String> wordsToFilter = Arrays.asList(text.split(" "));
+        raceList.getList().clear();
+        if (text != null && !text.isEmpty()) {
+            for (TracTracRaceRecordDAO triple : availableTracTracRaces) {
+                boolean failed = false;
+                for (String word : wordsToFilter) {
+                    String textAsUppercase = word.toUpperCase().trim();
+                    if (!triple.eventName.toUpperCase().contains(textAsUppercase)
+                            && !triple.name.toUpperCase().contains(textAsUppercase)) {
+                        failed = true;
+                        break;
+                    }
+                }
+                if (!failed) {
+                    raceList.getList().add(triple);
+                }
+            }
+        } else {
+            raceList.getList().addAll(availableTracTracRaces);
+        }
+        // now sort again according to selected criterion
+        ColumnSortEvent.fire(raceTable, raceTable.getColumnSortList());
     }
 
 }
