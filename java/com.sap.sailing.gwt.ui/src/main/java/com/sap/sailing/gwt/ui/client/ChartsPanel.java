@@ -172,6 +172,7 @@ public class ChartsPanel extends FormPanel {
                 competitorAndTimePointsDAO = null;
                 loadData();
                 updateTableData();
+                plot.redraw();
             }
         });
         configPanel.add(bttSteps);
@@ -354,7 +355,7 @@ public class ChartsPanel extends FormPanel {
         plotOptions = new PlotOptions();
         plotOptions.setDefaultLineSeriesOptions(new LineSeriesOptions().setLineWidth(1).setShow(true));
         plotOptions.setDefaultPointsOptions(new PointsSeriesOptions().setShow(false));
-        plotOptions.setDefaultShadowSize(1);
+        plotOptions.setDefaultShadowSize(2);
         AxisOptions hAxisOptions = new AxisOptions();
         hAxisOptions.setTickFormatter(new TickFormatter() {
 
@@ -364,7 +365,6 @@ public class ChartsPanel extends FormPanel {
             }
         });
         plotOptions.setXAxisOptions(hAxisOptions);
-        plotOptions.setDefaultColors(new String[]{createHexColor(0),createHexColor(0),createHexColor(1),createHexColor(1),createHexColor(2),createHexColor(2)});
         plotOptions.setLegendOptions(new LegendOptions().setShow(false));
 
         plotOptions.setSelectionOptions(new SelectionOptions().setDragging(true).setMode("x"));
@@ -373,8 +373,13 @@ public class ChartsPanel extends FormPanel {
         plot.addHoverListener(new PlotHoverListener() {
             public void onPlotHover(Plot plot, PlotPosition position, PlotItem item) {
                 if (item != null) {
-                    selectedPointLabel.setText(item.getSeries().getLabel() + " x: " + item.getDataPoint().getX()
-                            + ", y: " + item.getDataPoint().getY());
+                	if (item.getSeries().getLabel().toLowerCase().contains("mark")){
+                		selectedPointLabel.setText(item.getSeries().getLabel() + " at " + dateFormat.format(new Date((long) item.getDataPoint().getX())));
+                	}
+                	else {
+                		selectedPointLabel.setText(item.getSeries().getLabel() + " at " + dateFormat.format(new Date((long) item.getDataPoint().getX()))
+                                + ": " + item.getDataPoint().getY() + "[Unit]");
+                	}
                 } else {
                     selectedPointLabel.setText("No selection!");
                 }
@@ -438,8 +443,8 @@ public class ChartsPanel extends FormPanel {
     private SeriesHandler getCompetitorSeries(CompetitorDAO competitor, int index){
     	SeriesHandler series  = competitorSeries.get(competitor);
     	if (series == null){
-    		series = plot.getModel().addSeries(competitor.name);
-    		series.setOptions(SeriesType.LINES, new LineSeriesOptions().setLineWidth(2.5).setShow(true).setFillColor(createHexColor(index)));
+    		series = plot.getModel().addSeries(competitor.name, createHexColor(index));
+    		series.setOptions(SeriesType.LINES, new LineSeriesOptions().setLineWidth(2.5).setShow(true));
     		series.setOptions(SeriesType.POINTS, new PointsSeriesOptions().setLineWidth(0).setShow(false));
     		competitorSeries.put(competitor, series);
     	}
@@ -449,9 +454,9 @@ public class ChartsPanel extends FormPanel {
     private SeriesHandler getCompetitorMarkPassingSeries(CompetitorDAO competitor, int index){
     	SeriesHandler series  = competitorMarkPassingSeries.get(competitor);
     	if (series == null){
-    		series = plot.getModel().addSeries(competitor.name + " mark passing");
+    		series = plot.getModel().addSeries(competitor.name + " passed mark", createHexColor(index));
     		series.setOptions(SeriesType.LINES, new LineSeriesOptions().setLineWidth(0).setShow(false));
-    		series.setOptions(SeriesType.POINTS, new PointsSeriesOptions().setLineWidth(3).setShow(true).setFillColor(createHexColor(index)));
+    		series.setOptions(SeriesType.POINTS, new PointsSeriesOptions().setLineWidth(3).setShow(true));
     		competitorMarkPassingSeries.put(competitor, series);
     	}
     	return series;
