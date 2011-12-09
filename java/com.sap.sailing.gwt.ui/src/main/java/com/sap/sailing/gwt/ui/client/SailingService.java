@@ -94,7 +94,7 @@ public interface SailingService extends RemoteService {
     
     void moveLeaderboardColumnDown(String leaderboardName, String columnName);
 
-    void connectTrackedRaceToLeaderboardColumn(String leaderboardName, String raceColumnName,
+    boolean connectTrackedRaceToLeaderboardColumn(String leaderboardName, String raceColumnName,
             RaceIdentifier raceIdentifier);
     
     void disconnectLeaderboardColumnFromTrackedRace(String leaderboardName, String raceColumnName);

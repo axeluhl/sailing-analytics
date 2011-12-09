@@ -133,8 +133,11 @@ public interface SailingServiceAsync {
 
     void removeLeaderboardColumn(String leaderboardName, String columnName, AsyncCallback<Void> callback);
 
+    /**
+     * @param asyncCallback receives <code>true</code> if connecting was successful
+     */
     void connectTrackedRaceToLeaderboardColumn(String leaderboardName, String raceColumnName,
-            RaceIdentifier raceIdentifier, AsyncCallback<Void> asyncCallback);
+            RaceIdentifier raceIdentifier, AsyncCallback<Boolean> asyncCallback);
 
     void getEventAndRaceNameOfTrackedRaceConnectedToLeaderboardColumn(String leaderboardName, String raceColumnName,
             AsyncCallback<Pair<String, String>> callback);

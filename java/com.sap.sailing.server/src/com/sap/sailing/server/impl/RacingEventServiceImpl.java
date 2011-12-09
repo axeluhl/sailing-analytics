@@ -453,6 +453,9 @@ public class RacingEventServiceImpl implements RacingEventService {
             if (trackedEvent != null) {
                 trackedEvent.removeTrackedRace(trackedRace);
             }
+            if (Util.isEmpty(trackedEvent.getTrackedRaces())) {
+                removeTrackedEvent(event);
+            }
             for (Leaderboard leaderboard : getLeaderboards().values()) {
                 boolean changed = false;
                 for (RaceInLeaderboard raceColumn : leaderboard.getRaceColumns()) {
@@ -467,8 +470,9 @@ public class RacingEventServiceImpl implements RacingEventService {
             }
         }
         // remove the race from the event
-        if (eventsByName.containsKey(event.getName())) {
-            eventsByName.get(event.getName()).removeRace(race);
+        event.removeRace(race);
+        if (Util.isEmpty(event.getAllRaces())) {
+            eventsByName.remove(event.getName());
         }
     }
 
@@ -564,7 +568,7 @@ public class RacingEventServiceImpl implements RacingEventService {
     }
 
     @Override
-    public void remove(Event event) {
+    public void removeTrackedEvent(Event event) {
         eventTrackingCache.remove(event);
     }
 

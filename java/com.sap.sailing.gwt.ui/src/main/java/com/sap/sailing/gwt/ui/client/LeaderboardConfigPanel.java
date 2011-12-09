@@ -818,7 +818,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
             final Triple<EventDAO, RegattaDAO, RaceDAO> selectedRace) {
         sailingService.connectTrackedRaceToLeaderboardColumn(getSelectedLeaderboardName(),
                 selectedRaceInLeaderboard.getRaceColumnName(), new EventNameAndRaceName(selectedRace.getA().name,
-                        selectedRace.getC().name), new AsyncCallback<Void>() {
+                        selectedRace.getC().name), new AsyncCallback<Boolean>() {
                     @Override
                     public void onFailure(Throwable t) {
                         errorReporter.reportError("Error trying to link tracked race " + selectedRace.getC().name
@@ -829,10 +829,12 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
                     }
 
                     @Override
-                    public void onSuccess(Void arg0) {
-                        // TODO consider disabling the Unlink button
-                        selectedRaceInLeaderboard.setTrackedRace(true);
-                        raceColumnList.refresh();
+                    public void onSuccess(Boolean success) {
+                        if (success) {
+                            // TODO consider enabling the Unlink button
+                            selectedRaceInLeaderboard.setTrackedRace(true);
+                            raceColumnList.refresh();
+                        }
                     }
                 });
     }

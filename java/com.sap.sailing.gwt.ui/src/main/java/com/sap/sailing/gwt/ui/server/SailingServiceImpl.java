@@ -946,18 +946,21 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
 
     @Override
-    public void connectTrackedRaceToLeaderboardColumn(String leaderboardName, String raceColumnName, RaceIdentifier raceIdentifier) {
-        TrackedRace trackedRace = getTrackedRace(raceIdentifier);
+    public boolean connectTrackedRaceToLeaderboardColumn(String leaderboardName, String raceColumnName, RaceIdentifier raceIdentifier) {
+        boolean success = false;
+        TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
         if (trackedRace != null) {
             Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
             if (leaderboard != null) {
                 RaceInLeaderboard raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
                 if (raceColumn != null) {
                     raceColumn.setTrackedRace(trackedRace);
+                    success = true;
                     getService().updateStoredLeaderboard(leaderboard);
                 }
             }
         }
+        return success;
     }
 
     @Override
