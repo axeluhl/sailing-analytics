@@ -276,7 +276,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
             @Override
             public String getValue(RaceInLeaderboardDAO race) {
                 boolean isTrackedRace = race.isTrackedRace();
-                return isTrackedRace ? "Yes" : "No";
+                return isTrackedRace ? stringConstants.yes() : stringConstants.no();
             }
         };
 
