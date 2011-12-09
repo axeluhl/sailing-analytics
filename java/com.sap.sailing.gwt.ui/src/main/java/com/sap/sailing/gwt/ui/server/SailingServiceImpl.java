@@ -448,13 +448,10 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
 
     private RaceDefinition getRaceByName(Event event, String raceName) {
         if (event != null) {
-            for (RaceDefinition r : event.getAllRaces()) {
-                if (r.getName().equals(raceName)) {
-                    return r;
-                }
-            }
+            return event.getRaceByName(raceName);
+        } else {
+            return null;
         }
-        return null;
     }
     
     @Override

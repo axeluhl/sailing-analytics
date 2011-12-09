@@ -26,6 +26,8 @@ import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.RaceRecord;
 import com.sap.sailing.domain.tractracadapter.TracTracRaceTracker;
+import com.sap.sailing.server.api.EventIdentifier;
+import com.sap.sailing.server.api.RaceIdentifier;
 import com.sap.sailing.util.Util.Pair;
 import com.sap.sailing.util.Util.Triple;
 
@@ -51,6 +53,19 @@ public interface RacingEventService extends TrackedEventRegistry {
     Iterable<Event> getAllEvents();
 
     Event getEventByName(String name);
+    
+    Event getEvent(EventIdentifier eventIdentifier);
+
+    TrackedRace getTrackedRace(Event event, RaceDefinition r);
+    
+    TrackedRace getTrackedRace(RaceIdentifier raceIdentifier);
+
+    /**
+     * Obtains an unmodifiable map of the leaderboard configured in this service keyed by their names.
+     */
+    Map<String, Leaderboard> getLeaderboards();
+
+    Leaderboard getLeaderboardByName(String name);
 
     /**
      * Defines the event and for each race listed in the JSON document that is not already being tracked by this service
@@ -169,8 +184,6 @@ public interface RacingEventService extends TrackedEventRegistry {
 
     boolean isRaceBeingTracked(RaceDefinition r);
     
-    TrackedRace getTrackedRace(Event event, RaceDefinition r);
-
     /**
      * Creates a new leaderboard with the <code>name</code> specified.
      * 
@@ -185,13 +198,6 @@ public interface RacingEventService extends TrackedEventRegistry {
 
     void removeLeaderboard(String leaderboardName);
     
-    Leaderboard getLeaderboardByName(String name);
-
-    /**
-     * Obtains an unmodifiable map of the leaderboard configured in this service keyed by their names.
-     */
-    Map<String, Leaderboard> getLeaderboards();
-
     /**
      * Renames a leaderboard. If a leaderboard by the name <code>oldName</code> does not exist in {@link #getLeaderboards()},
      * or if a leaderboard with the name <code>newName</code> already exists, an {@link IllegalArgumentException} is thrown.
@@ -216,5 +222,7 @@ public interface RacingEventService extends TrackedEventRegistry {
     void stopTrackingAndRemove(Event event) throws MalformedURLException, IOException, InterruptedException;
 
     void removeEvent(Event event) throws MalformedURLException, IOException, InterruptedException;
+
+    TrackedRace getExistingTrackedRace(RaceIdentifier raceIdentifier);
 
 }
