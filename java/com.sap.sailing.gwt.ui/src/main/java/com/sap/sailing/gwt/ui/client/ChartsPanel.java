@@ -25,7 +25,6 @@ import ca.nanometrics.gflot.client.options.PlotOptions;
 import ca.nanometrics.gflot.client.options.PointsSeriesOptions;
 import ca.nanometrics.gflot.client.options.SelectionOptions;
 import ca.nanometrics.gflot.client.options.TickFormatter;
-
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -43,6 +42,7 @@ import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
@@ -63,6 +63,8 @@ public class ChartsPanel extends FormPanel {
     private DateTimeFormat dateFormat;
     private HorizontalPanel mainPanel;
     private VerticalPanel chartPanel;
+    private HorizontalPanel legendPanel;
+    private Widget chart;
     private final RaceIdentifier[] races;
     private int selectedRace = 0;
     private int stepsToLoad = 100;
@@ -71,12 +73,16 @@ public class ChartsPanel extends FormPanel {
     private VerticalPanel selectCompetitors;
     private PlotWithOverview plot;
     private PlotOptions plotOptions;
+    private HashMap<CompetitorDAO, SeriesHandler> competitorSeries;
+    private HashMap<CompetitorDAO, SeriesHandler> competitorMarkPassingSeries;
 
     private DetailType dataToShow = DetailType.WINDWARD_DISTANCE_TO_OVERALL_LEADER;
     private AbsolutePanel loadingPanel;
 
     public ChartsPanel(SailingServiceAsync sailingService, final List<CompetitorDAO> competitors,
             RaceIdentifier[] races, StringConstants stringConstants, int chartWidth, int chartHeight) {
+    	competitorSeries = new HashMap<CompetitorDAO, SeriesHandler>();
+    	competitorMarkPassingSeries = new HashMap<CompetitorDAO, SeriesHandler>();
         this.sailingService = sailingService;
         this.races = races;
         this.stringConstants = stringConstants;
@@ -116,7 +122,7 @@ public class ChartsPanel extends FormPanel {
         Anchor a = new Anchor(new SafeHtmlBuilder().appendHtmlConstant("<img src=\"/images/ajax-loader.gif\"/>")
                 .toSafeHtml());
         loadingPanel.add(a, chartWidth / 2 - 32 / 2, chartHeight / 2 - 32 - 2);
-        chartPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
+        chartPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
         chartPanel.setSpacing(5);
         final CaptionPanel configCaption = new CaptionPanel(stringConstants.configuration());
         configCaption.setHeight("100%");
@@ -165,13 +171,21 @@ public class ChartsPanel extends FormPanel {
                 stepsToLoad = Integer.parseInt(txtbSteps.getText());
                 competitorAndTimePointsDAO = null;
                 loadData();
+                updateTableData();
             }
         });
         configPanel.add(bttSteps);
         selectCompetitors = new VerticalPanel();
         configPanel.add(selectCompetitors);
-
-        chartPanel.add(createChart());
+        
+        legendPanel = new HorizontalPanel();
+        legendPanel.setSpacing(3);
+        legendPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
+        legendPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
+        chartPanel.add(legendPanel);
+        
+        chart = createChart();
+        chartPanel.add(chart);
         mainPanel.add(chartPanel);
         Anchor showConfigAnchor = new Anchor(new SafeHtmlBuilder().appendHtmlConstant(
                 "<img class=\"linkNoBorder\" src=\"/images/settings.png\"/>").toSafeHtml());
@@ -181,6 +195,8 @@ public class ChartsPanel extends FormPanel {
             @Override
             public void onClick(ClickEvent event) {
                 configCaption.setVisible(!configCaption.isVisible());
+                updateTableData();
+                plot.redraw();
             }
         });
 
@@ -207,8 +223,9 @@ public class ChartsPanel extends FormPanel {
                             public void onSuccess(CompetitorInRaceDAO result) {
                                 fireEvent(new DataLoadedEvent());
                                 chartData = result;
-                                chartPanel.clear();
-                                chartPanel.add(createChart());
+                                chartPanel.remove(chart);
+                                chart = createChart();
+                                chartPanel.add(chart);
                             }
                         });
             }
@@ -239,6 +256,7 @@ public class ChartsPanel extends FormPanel {
                                     @Override
                                     public void onClick(ClickEvent event) {
                                         setCompetitorVisible(c, cb.getValue());
+                                        updateTableData();
                                     }
                                 });
                                 selectCompetitors.add(cb);
@@ -249,41 +267,41 @@ public class ChartsPanel extends FormPanel {
         }
     }
 
-    private void prepareTableData() {
+    private void updateTableData() {
         if (plot == null || plotOptions == null) {
             return;
         }
         if (competitorAndTimePointsDAO != null && chartData != null) {
             Markings ms = new Markings();
-            plotOptions.setLegendOptions(new LegendOptions().setShow(true).setNumOfColumns(8).setPosition(LegendOptions.NORTH_EAST));
+            //plotOptions.setLegendOptions(new LegendOptions().setShow(true).setNumOfColumns(8).setPosition(LegendOptions.NORTH_EAST));
+            legendPanel.clear();
             for (int i = 0; i < competitorAndTimePointsDAO.getCompetitor().length; i++) {
                 CompetitorDAO competitor = competitorAndTimePointsDAO.getCompetitor()[i];
-                if (isCompetitorVisible(competitor)) {
-                    String competitorColor = createHexColor(i);
-                    SeriesHandler compSeries = plot.getModel().addSeries(competitor.name);
-                    compSeries.setOptions(SeriesType.LINES, new LineSeriesOptions().setLineWidth(2.5).setShow(true).setFillColor(competitorColor));
-                    compSeries.setOptions(SeriesType.POINTS, new PointsSeriesOptions().setLineWidth(0).setShow(false));
-                    SeriesHandler markSeries = plot.getModel().addSeries(competitor.name + " mark passing");
-                    markSeries.setOptions(SeriesType.LINES, new LineSeriesOptions().setLineWidth(0).setShow(false));
-                    markSeries.setOptions(SeriesType.POINTS, new PointsSeriesOptions().setLineWidth(3).setShow(true).setFillColor(competitorColor));
-                    Long[] markPassingTimes = competitorAndTimePointsDAO.getMarkPassings(competitor);
-                    Double[] markPassingValues = chartData.getMarkPassings(competitor);
-                    for (int j = 0; j < markPassingTimes.length; j++){
-                        if (markPassingValues[j] != null) {
-                            markSeries.add(new DataPoint(markPassingTimes[j],markPassingValues[j]));
-                        }
+                SeriesHandler compSeries = getCompetitorSeries(competitor, i);
+                compSeries.setVisible(isCompetitorVisible(competitor));
+                SeriesHandler markSeries = getCompetitorMarkPassingSeries(competitor, i);
+                if (isCompetitorVisible(competitor)){
+                	addLegend(competitor.name, i);
+                }
+                markSeries.setVisible(isCompetitorVisible(competitor));
+                Long[] markPassingTimes = competitorAndTimePointsDAO.getMarkPassings(competitor);
+                Double[] markPassingValues = chartData.getMarkPassings(competitor);
+                for (int j = 0; j < markPassingTimes.length; j++){
+                    if (markPassingValues[j] != null) {
+                        markSeries.add(new DataPoint(markPassingTimes[j],markPassingValues[j]));
                     }
-                    for (int j = 0; j < stepsToLoad; j++) {
-                        long time = competitorAndTimePointsDAO.getTimePoints()[j];
-                        if (chartData.getRaceData(competitor)[j] != null) {
-                            compSeries.add(new DataPoint(time, chartData.getRaceData(competitor)[j]));
-                        }
+                }
+                for (int j = 0; j < stepsToLoad; j++) {
+                    long time = competitorAndTimePointsDAO.getTimePoints()[j];
+                    if (chartData.getRaceData(competitor)[j] != null) {
+                        compSeries.add(new DataPoint(time, chartData.getRaceData(competitor)[j]));
                     }
                 }
             }
             plotOptions.setGridOptions(new GridOptions().setHoverable(true).setMarkings(ms).setClickable(true)
                     .setAutoHighlight(true));
         }
+        
         return;
     }
 
@@ -346,7 +364,7 @@ public class ChartsPanel extends FormPanel {
             }
         });
         plotOptions.setXAxisOptions(hAxisOptions);
-
+        plotOptions.setDefaultColors(new String[]{createHexColor(0),createHexColor(0),createHexColor(1),createHexColor(1),createHexColor(2),createHexColor(2)});
         plotOptions.setLegendOptions(new LegendOptions().setShow(false));
 
         plotOptions.setSelectionOptions(new SelectionOptions().setDragging(true).setMode("x"));
@@ -355,7 +373,6 @@ public class ChartsPanel extends FormPanel {
         plot.addHoverListener(new PlotHoverListener() {
             public void onPlotHover(Plot plot, PlotPosition position, PlotItem item) {
                 if (item != null) {
-
                     selectedPointLabel.setText(item.getSeries().getLabel() + " x: " + item.getDataPoint().getX()
                             + ", y: " + item.getDataPoint().getY());
                 } else {
@@ -369,7 +386,7 @@ public class ChartsPanel extends FormPanel {
                 plot.setLinearSelection(x1, x2);
             }
         });
-        prepareTableData();
+        updateTableData();
 
         // addMarkPassingMarkers(plotOptions);
 
@@ -402,7 +419,7 @@ public class ChartsPanel extends FormPanel {
             rs = "0" + rs;
         }
         if (index%6 > 0 && index%6 < 4){
-            g = (int) (255*factor);
+            g = (int) (220*factor);
         }
         gs = Integer.toHexString(g);
         while(gs.length() < 2){
@@ -416,6 +433,37 @@ public class ChartsPanel extends FormPanel {
             bs = "0" + bs;
         }
         return "#" + rs + gs + bs;
+    }
+    
+    private SeriesHandler getCompetitorSeries(CompetitorDAO competitor, int index){
+    	SeriesHandler series  = competitorSeries.get(competitor);
+    	if (series == null){
+    		series = plot.getModel().addSeries(competitor.name);
+    		series.setOptions(SeriesType.LINES, new LineSeriesOptions().setLineWidth(2.5).setShow(true).setFillColor(createHexColor(index)));
+    		series.setOptions(SeriesType.POINTS, new PointsSeriesOptions().setLineWidth(0).setShow(false));
+    		competitorSeries.put(competitor, series);
+    	}
+    	return series;
+    }
+    
+    private SeriesHandler getCompetitorMarkPassingSeries(CompetitorDAO competitor, int index){
+    	SeriesHandler series  = competitorMarkPassingSeries.get(competitor);
+    	if (series == null){
+    		series = plot.getModel().addSeries(competitor.name + " mark passing");
+    		series.setOptions(SeriesType.LINES, new LineSeriesOptions().setLineWidth(0).setShow(false));
+    		series.setOptions(SeriesType.POINTS, new PointsSeriesOptions().setLineWidth(3).setShow(true).setFillColor(createHexColor(index)));
+    		competitorMarkPassingSeries.put(competitor, series);
+    	}
+    	return series;
+    }
+    
+    private void addLegend(String competitor, int index){
+    	Label colorSquare = new Label();
+    	colorSquare.getElement().setAttribute("style", "background-color: " + createHexColor(index) + ";");
+    	colorSquare.setSize("10px", "10px");
+    	legendPanel.add(colorSquare);
+    	Label legendLabel = new Label(competitor);
+        legendPanel.add(legendLabel);
     }
 
 }
