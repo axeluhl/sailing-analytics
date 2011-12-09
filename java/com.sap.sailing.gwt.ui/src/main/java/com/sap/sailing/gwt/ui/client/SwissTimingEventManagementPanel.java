@@ -371,19 +371,12 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         trackedEventsComposite.fillEvents(result);
     }
     
-    protected void fillRaceListFromAvailableRacesApplyingFilter(String text) {
+    private void fillRaceListFromAvailableRacesApplyingFilter(String text) {
         List<String> wordsToFilter = Arrays.asList(text.split(" "));
         raceList.getList().clear();
         if (text != null && !text.isEmpty()) {
             for (SwissTimingRaceRecordDAO triple : availableSwissTimingRaces) {
-                boolean failed = false;
-                for (String word : wordsToFilter) {
-                    String textAsUppercase = word.toUpperCase().trim();
-                    if (!triple.ID.toUpperCase().contains(textAsUppercase)) {
-                        failed = true;
-                        break;
-                    }
-                }
+                boolean failed = textContainingStringsToCheck(wordsToFilter, triple.ID);
                 if (!failed) {
                     raceList.getList().add(triple);
                 }

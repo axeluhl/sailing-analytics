@@ -490,15 +490,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         raceList.getList().clear();
         if (text != null && !text.isEmpty()) {
             for (TracTracRaceRecordDAO triple : availableTracTracRaces) {
-                boolean failed = false;
-                for (String word : wordsToFilter) {
-                    String textAsUppercase = word.toUpperCase().trim();
-                    if (!triple.eventName.toUpperCase().contains(textAsUppercase)
-                            && !triple.name.toUpperCase().contains(textAsUppercase)) {
-                        failed = true;
-                        break;
-                    }
-                }
+                boolean failed = textContainingStringsToCheck(wordsToFilter, triple.eventName, triple.name);
                 if (!failed) {
                     raceList.getList().add(triple);
                 }
