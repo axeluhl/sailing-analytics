@@ -1,10 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?pde version="3.6"?>
 
-<target name="Race Analysis server - local p2 repositories" sequenceNumber="29">
+<target name="Race Analysis server - local p2 repositories" sequenceNumber="31">
 <locations>
-<location path="${project_loc}/target-base" type="Directory"/>
-<location path="${project_loc}/target-test" type="Directory"/>
 <location includeAllPlatforms="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.jetty.bundles.f.feature.group" version="7.5.4"/>
 <repository location="http://download.eclipse.org/jetty/updates/jetty-bundles-7.x/7.5.4.v20111024/"/>
@@ -20,5 +18,7 @@
 <unit id="com.sap.ui5.gwt.core.feature.feature.group" version="1.1.0"/>
 <repository location="http://nexus.wdf.sap.corp:8081/nexus/content/repositories/build.snapshots.unzip/com/sap/ui5/com.sap.ui5.updatesite/1.1.0/com.sap.ui5.updatesite-1.1.0-assembly.zip-unzip/"/>
 </location>
+<location path="${project_loc:com.sap.sailing.targetplatform}/target-test" type="Directory"/>
+<location path="${project_loc:com.sap.sailing.targetplatform}/target-base" type="Directory"/>
 </locations>
 </target>
