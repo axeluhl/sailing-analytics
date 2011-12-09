@@ -14,9 +14,6 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
-import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
-import com.google.gwt.text.client.DateTimeFormatRenderer;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
@@ -27,7 +24,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.CheckBox;
-import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -40,11 +36,8 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.sap.sailing.gwt.ui.shared.EventDAO;
 import com.sap.sailing.gwt.ui.shared.Pair;
-import com.sap.sailing.gwt.ui.shared.RaceDAO;
-import com.sap.sailing.gwt.ui.shared.RegattaDAO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDAO;
 import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDAO;
-import com.sap.sailing.gwt.ui.shared.Triple;
 
 /**
  * Allows the user to start and stop tracking of events, regattas and races using the TracTrac connector. In particular,
@@ -59,8 +52,7 @@ import com.sap.sailing.gwt.ui.shared.Triple;
  * @author Axel Uhl (D043530)
  * 
  */
-public class TracTracEventManagementPanel extends FormPanel implements EventDisplayer {
-    private final SailingServiceAsync sailingService;
+public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
     private final ErrorReporter errorReporter;
     private final IntegerBox storedPortIntegerbox;
     private final TextBox jsonURLBox;
@@ -75,17 +67,12 @@ public class TracTracEventManagementPanel extends FormPanel implements EventDisp
     private final Map<String, TracTracConfigurationDAO> previousConfigurations;
     private final ListBox previousConfigurationsComboBox;
     private final Grid grid;
-    private final TrackedEventsComposite trackedEventsComposite;
-    private final EventRefresher eventRefresher;
-    private DateTimeFormatRenderer dateFormatter = new DateTimeFormatRenderer(DateTimeFormat.getFormat(PredefinedFormat.DATE_SHORT));
-    private DateTimeFormatRenderer timeFormatter = new DateTimeFormatRenderer(DateTimeFormat.getFormat(PredefinedFormat.TIME_LONG));
     private final List<TracTracRaceRecordDAO> availableTracTracRaces;
     
     public TracTracEventManagementPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
             EventRefresher eventRefresher, StringConstants stringConstants) {
-        this.sailingService = sailingService;
+        super(sailingService, eventRefresher, errorReporter, stringConstants);
         this.errorReporter = errorReporter;
-        this.eventRefresher = eventRefresher;
         availableTracTracRaces = new ArrayList<TracTracRaceRecordDAO>();
 
         VerticalPanel mainPanel = new VerticalPanel();
@@ -291,7 +278,7 @@ public class TracTracEventManagementPanel extends FormPanel implements EventDisp
         filterEventsTextbox.addKeyUpHandler(new KeyUpHandler() {
             @Override
             public void onKeyUp(KeyUpEvent event) {
-                fillRaceListFromAvailableRacesApplyingFilter();
+                fillRaceListFromAvailableRacesApplyingFilter(TracTracEventManagementPanel.this.filterEventsTextbox.getText());
             }
         });
         
@@ -335,8 +322,6 @@ public class TracTracEventManagementPanel extends FormPanel implements EventDisp
         declinationCheckbox.setValue(true);
         trackPanel.add(declinationCheckbox);
         
-        trackedEventsComposite = new TrackedEventsComposite(sailingService, errorReporter, eventRefresher,
-                    stringConstants, /* multiselection */ true);
         trackedRacesPanel.add(trackedEventsComposite);
 
         HorizontalPanel racesButtonPanel = new HorizontalPanel();
@@ -500,8 +485,7 @@ public class TracTracEventManagementPanel extends FormPanel implements EventDisp
         trackedEventsComposite.fillEvents(result);
     }
     
-    private void fillRaceListFromAvailableRacesApplyingFilter() {
-        String text = filterEventsTextbox.getText();
+    private void fillRaceListFromAvailableRacesApplyingFilter(String text) {
         List<String> wordsToFilter = Arrays.asList(text.split(" "));
         raceList.getList().clear();
         if (text != null && !text.isEmpty()) {
