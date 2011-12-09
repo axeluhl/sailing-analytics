@@ -8,6 +8,9 @@ import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 
 
+
+
+
 public class RacingEventServiceImplMock extends RacingEventServiceImpl{
 
     
@@ -15,15 +18,15 @@ public class RacingEventServiceImplMock extends RacingEventServiceImpl{
         super();
     }
     
-    public Map<String, Event> getEventsByName(){
+    public Map<String, Event> getEventsByNameMap(){
         return eventsByName;
     }
     
-    public Map<Event, Set<RaceTracker>> getRaceTrackersByEvent(){
+    public Map<Event, Set<RaceTracker>> getRaceTrackersByEventMap(){
         return raceTrackersByEvent;
     }
     
-    public Map<Object, RaceTracker> getRaceTrackersByID(){
+    public Map<Object, RaceTracker> getRaceTrackersByIDMap(){
         return raceTrackersByID;
     }
     
