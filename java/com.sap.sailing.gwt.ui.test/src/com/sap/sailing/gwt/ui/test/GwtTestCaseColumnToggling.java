@@ -135,15 +135,15 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
     
     private void linkTrackedRace(){
         service.connectTrackedRaceToLeaderboardColumn(LEADERBOARD_NAME, COLUMN1_NAME, new EventNameAndRaceName(EVENT_NAME, TRACKED_RACE),
-                new AsyncCallback<Void>() {
+                new AsyncCallback<Boolean>() {
             @Override
             public void onFailure(Throwable caught) {
                 fail("Failed to link race.");
             }
 
             @Override
-            public void onSuccess(Void result) {
-                System.out.println("Linked race to column.");
+            public void onSuccess(Boolean result) {
+                System.out.println("Success of linking race to column: "+result);
                 getLeaderboard();
             }
         });
