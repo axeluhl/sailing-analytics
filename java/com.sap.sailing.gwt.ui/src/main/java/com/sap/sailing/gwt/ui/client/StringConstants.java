@@ -188,4 +188,7 @@ public interface StringConstants extends Constants {
     String windwardDistanceToOverallLeader();
     String actions();
     String islinked();
+    String yes();
+    String no();
+    
 }
