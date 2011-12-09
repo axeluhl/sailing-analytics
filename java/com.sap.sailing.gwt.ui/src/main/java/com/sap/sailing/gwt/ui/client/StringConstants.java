@@ -186,4 +186,6 @@ public interface StringConstants extends Constants {
     String actionRaceRemove();
     String filterLeaderboardsByName();
     String windwardDistanceToOverallLeader();
+    String actions();
+    String islinked();
 }
