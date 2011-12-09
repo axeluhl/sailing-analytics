@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?pde version="3.6"?>
 
-<target name="race-analysis-server-p2-local" sequenceNumber="22">
+<target name="Race Analysis Target (Maven - local build)" sequenceNumber="22">
 <locations>
 <location includeAllPlatforms="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.jetty.bundles.f.feature.group" version="7.5.4"/>
