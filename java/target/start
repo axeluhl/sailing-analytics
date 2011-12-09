@@ -1,1 +1,1 @@
-java -Dfile.encoding=cp1252 -Djava.util.logging.config.file=configuration/logging.properties -Xmx2048m -jar plugins/org.eclipse.equinox.launcher_1.2.0.v20110124-0830.jar -console -configuration ./
+java -Dfile.encoding=cp1252 -Djava.util.logging.config.file=configuration/logging.properties -Xmx2048m -jar plugins/org.eclipse.equinox.launcher_1.2.0.v20110124-0830.jar -console -configuration ./ -clean
