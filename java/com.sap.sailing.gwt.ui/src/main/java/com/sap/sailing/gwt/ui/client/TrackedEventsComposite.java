@@ -428,7 +428,8 @@ public class TrackedEventsComposite extends FormPanel implements EventDisplayer,
     }
 
     private void removeAndUntrackRace(final EventDAO event, final RaceDAO race) {
-        sailingService.removeAndUntrackedRace(new EventNameAndRaceName(event.name, race.name),
+        final EventNameAndRaceName eventNameAndRaceName = new EventNameAndRaceName(event.name, race.name);
+        sailingService.removeAndUntrackedRace(eventNameAndRaceName,
                 new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
@@ -439,6 +440,9 @@ public class TrackedEventsComposite extends FormPanel implements EventDisplayer,
                     @Override
                     public void onSuccess(Void result) {
                         eventRefresher.fillEvents();
+                        for (TrackedRaceChangedListener listener : raceIsTrackedRaceChangeListener) {
+                            listener.changeTrackingRace(eventNameAndRaceName, false);
+                        }
                     }
                 });
     }
