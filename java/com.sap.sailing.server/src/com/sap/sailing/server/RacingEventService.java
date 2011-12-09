@@ -215,4 +215,6 @@ public interface RacingEventService extends TrackedEventRegistry {
 
     void stopTrackingAndRemove(Event event) throws MalformedURLException, IOException, InterruptedException;
 
+    void removeEvent(Event event) throws MalformedURLException, IOException, InterruptedException;
+
 }

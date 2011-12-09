@@ -439,6 +439,13 @@ public class RacingEventServiceImpl implements RacingEventService {
             stopTracking(event);
         }
     }
+
+    @Override
+    public synchronized void removeEvent(Event event) throws MalformedURLException, IOException, InterruptedException {
+        for (RaceDefinition race : event.getAllRaces()) {
+            removeRace(event, race);
+        }
+    }
     
     @Override
     public synchronized void removeRace(Event event, RaceDefinition race) throws MalformedURLException,
