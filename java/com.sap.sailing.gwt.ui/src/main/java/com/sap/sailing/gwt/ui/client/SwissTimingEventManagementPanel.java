@@ -81,7 +81,7 @@ public class SwissTimingEventManagementPanel extends FormPanel implements EventD
         this.setWidget(mainPanel);
         mainPanel.setWidth("100%");
         
-        CaptionPanel captionPanelConnections = new CaptionPanel("Connections");
+        CaptionPanel captionPanelConnections = new CaptionPanel(stringConstants.connections());
         mainPanel.add(captionPanelConnections);
 
         VerticalPanel verticalPanel = new VerticalPanel();
@@ -92,8 +92,7 @@ public class SwissTimingEventManagementPanel extends FormPanel implements EventD
         verticalPanel.add(connectionsGrid);
         verticalPanel.setCellWidth(connectionsGrid, "100%");
         
-//        Label lblPredefined = new Label(stringConstants.trackedBefore() + ":");
-        Label lblPredefined = new Label("History of connections:");
+        Label lblPredefined = new Label(stringConstants.connections() +":");
         connectionsGrid.setWidget(0, 0, lblPredefined);
         
         previousConfigurations = new HashMap<String, SwissTimingConfigurationDAO>();
@@ -113,8 +112,7 @@ public class SwissTimingEventManagementPanel extends FormPanel implements EventD
         });
         fillConfigurations();
 
-//        Label lblTrackNewEvent = new Label(stringConstants.trackNewEvent());
-        Label lblTrackNewEvent = new Label("Define a new connection");
+        Label lblTrackNewEvent = new Label(stringConstants.defineNewConnection());
         connectionsGrid.setWidget(2, 0, lblTrackNewEvent);
         
         Label lblHostname = new Label(stringConstants.hostname() + ":");
@@ -130,16 +128,14 @@ public class SwissTimingEventManagementPanel extends FormPanel implements EventD
         portIntegerbox = new IntegerBox();
         connectionsGrid.setWidget(4, 1, portIntegerbox);
 
-        Label lblCanSendRequests = new Label("Can send requests:");
+        Label lblCanSendRequests = new Label(stringConstants.canSendRequests());
         connectionsGrid.setWidget(5, 0, lblCanSendRequests);
 
         canSendRequestsCheckbox = new CheckBox();
         canSendRequestsCheckbox.setValue(false);
         connectionsGrid.setWidget(5, 1, canSendRequestsCheckbox);
 
-        
-//        Button btnListRaces = new Button(stringConstants.listRaces());
-        Button btnListRaces = new Button("Connect and read races");
+        Button btnListRaces = new Button(stringConstants.connectAndReadRaces());
         connectionsGrid.setWidget(6, 1, btnListRaces);
         btnListRaces.addClickHandler(new ClickHandler() {
             @Override
@@ -171,7 +167,7 @@ public class SwissTimingEventManagementPanel extends FormPanel implements EventD
         racesSplitPanel.add(racesCaptionPanel);
         racesCaptionPanel.setWidth("50%");
 
-        CaptionPanel trackedRacesCaptionPanel = new CaptionPanel("Tracked Races");
+        CaptionPanel trackedRacesCaptionPanel = new CaptionPanel(stringConstants.trackedRaces());
         racesSplitPanel.add(trackedRacesCaptionPanel);
         trackedRacesCaptionPanel.setWidth("50%");
 
@@ -189,7 +185,7 @@ public class SwissTimingEventManagementPanel extends FormPanel implements EventD
         filterPanel.setSpacing(5);
         racesPanel.add(filterPanel);
         
-        Label lblFilterEvents = new Label("Filter races by name:");
+        Label lblFilterEvents = new Label(stringConstants.filterRacesByName() + ":");
         filterPanel.add(lblFilterEvents);
         filterPanel.setCellVerticalAlignment(lblFilterEvents, HasVerticalAlignment.ALIGN_MIDDLE);
         
@@ -241,7 +237,7 @@ public class SwissTimingEventManagementPanel extends FormPanel implements EventD
         Handler columnSortHandler = getRaceTableColumnSortHandler(raceList.getList(), raceNameColumn, raceStartTrackingColumn);
         raceTable.addColumnSortHandler(columnSortHandler);
 
-        Label lblTrackSettings = new Label("Track settings");
+        Label lblTrackSettings = new Label(stringConstants.trackSettings());
         trackPanel.add(lblTrackSettings);
         
         final CheckBox trackWindCheckbox = new CheckBox(stringConstants.trackWind());
@@ -261,9 +257,7 @@ public class SwissTimingEventManagementPanel extends FormPanel implements EventD
         HorizontalPanel racesButtonPanel = new HorizontalPanel();
         racesPanel.add(racesButtonPanel);
 
-        Button btnTrack = new Button("Start tracking");
-        
-//        Button btnTrack = new Button(stringConstants.btnTrack());
+        Button btnTrack = new Button(stringConstants.startTracking());
         racesButtonPanel.add(btnTrack);
         racesButtonPanel.setSpacing(10);
         btnTrack.addClickHandler(new ClickHandler() {

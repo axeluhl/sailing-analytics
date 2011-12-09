@@ -67,7 +67,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
     protected SwissTimingRaceTrackerImpl(String raceID, String hostname, int port, WindStore windStore,
             DomainFactory domainFactory, SwissTimingFactory factory, RaceSpecificMessageLoader messageLoader,
             TrackedEventRegistry trackedEventRegistry, boolean canSendRequests) throws InterruptedException, UnknownHostException, IOException, ParseException {
-        super(trackedEventRegistry);
+        super();
         this.connector = factory.getOrCreateSailMasterConnector(hostname, port, messageLoader, canSendRequests);
         this.domainFactory = domainFactory;
         this.raceID = raceID;
@@ -84,8 +84,6 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
     @Override
     public void stop() throws MalformedURLException, IOException, InterruptedException {
         connector.removeSailMasterListener(raceID, this);
-        super.stop();
-        domainFactory.removeRace(raceID);
     }
 
     @Override

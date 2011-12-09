@@ -344,7 +344,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
             }
 
             @Override
-            public void removedTrackedRace(TrackedRace trackedRace) {
+            public void removeTrackedRace(TrackedRace trackedRace) {
                 // TODO Auto-generated method stub
                 
             }

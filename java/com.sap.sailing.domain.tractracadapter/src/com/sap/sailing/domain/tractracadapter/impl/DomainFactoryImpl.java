@@ -318,7 +318,7 @@ public class DomainFactoryImpl implements DomainFactory {
                 if (trackedEvent != null) {
                     trackedEvent.removeTrackedRace(raceDefinition);
                     if (Util.size(trackedEvent.getTrackedRaces()) == 0) {
-                        trackedEventRegistry.remove(event);
+                        trackedEventRegistry.removeTrackedEvent(event);
                     }
                 }
             }

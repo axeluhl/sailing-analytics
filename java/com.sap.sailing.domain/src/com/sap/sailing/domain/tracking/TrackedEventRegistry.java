@@ -21,8 +21,8 @@ public interface TrackedEventRegistry {
      * Looks for the tracking information for <code>event</code>. If not found, <code>null</code> is returned
      * immediately. See also {@link #getOrCreateTrackedEvent(com.sap.sailing.domain.base.Event)}.
      */
-    DynamicTrackedEvent getTrackedEvent(com.sap.sailing.domain.base.Event event);
+    DynamicTrackedEvent getTrackedEvent(Event event);
     
-    void remove(Event event);
+    void removeTrackedEvent(Event event);
 
 }

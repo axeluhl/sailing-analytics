@@ -29,6 +29,7 @@ import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
 import com.sap.sailing.domain.leaderboard.impl.LeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.ResultDiscardingRuleImpl;
 import com.sap.sailing.domain.leaderboard.impl.ScoreCorrectionImpl;
@@ -43,6 +44,7 @@ import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.RacesHandle;
+import com.sap.sailing.domain.tracking.TrackedEvent;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTracker;
@@ -54,6 +56,7 @@ import com.sap.sailing.domain.tractracadapter.RaceRecord;
 import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sailing.expeditionconnector.ExpeditionWindTrackerFactory;
 import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.util.Util;
 import com.sap.sailing.util.Util.Pair;
 import com.sap.sailing.util.Util.Triple;
 
@@ -358,6 +361,11 @@ public class RacingEventServiceImpl implements RacingEventService {
             }
             raceTrackersByEvent.remove(event);
         }
+    }
+    
+    @Override
+    public synchronized void stopTrackingAndRemove(Event event) throws MalformedURLException, IOException, InterruptedException {
+        stopTracking(event);
         if (event != null) {
             if (event.getName() != null) {
                 eventsByName.remove(event.getName());
@@ -415,7 +423,7 @@ public class RacingEventServiceImpl implements RacingEventService {
             while (trackerIter.hasNext()) {
                 RaceTracker raceTracker = trackerIter.next();
                 if (raceTracker.getRaces() != null && raceTracker.getRaces().contains(race)) {
-                    System.out.println("Found tracker to stop...");
+                    logger.info("Found tracker to stop for races "+raceTracker.getRaces());
                     raceTracker.stop(); // this also removes the TrackedRace from trackedEvent
                     // do not remove the tracker from raceTrackersByEvent, because it should still exist there, but with the state "non-tracked"
                     trackerIter.remove();
@@ -433,41 +441,76 @@ public class RacingEventServiceImpl implements RacingEventService {
     }
     
     @Override
-    public synchronized void stopRemoveTrackedRace(Event event, RaceDefinition race) throws MalformedURLException, IOException, InterruptedException{
+    public synchronized void removeRace(Event event, RaceDefinition race) throws MalformedURLException,
+            IOException, InterruptedException {
         logger.info("Removing the race + " + race + "...");
-        if(raceTrackersByEvent.containsKey(event)){
+
+        stopAllTrackersForWhichRaceIsLastReachable(event, race);
+        stopTrackingWind(event, race);
+        TrackedRace trackedRace = getExistingTrackedRace(event, race);
+        if (trackedRace != null) {
+            TrackedEvent trackedEvent = getTrackedEvent(event);
+            if (trackedEvent != null) {
+                trackedEvent.removeTrackedRace(trackedRace);
+            }
+            if (Util.isEmpty(trackedEvent.getTrackedRaces())) {
+                removeTrackedEvent(event);
+            }
+            for (Leaderboard leaderboard : getLeaderboards().values()) {
+                boolean changed = false;
+                for (RaceInLeaderboard raceColumn : leaderboard.getRaceColumns()) {
+                    if (raceColumn.getTrackedRace() == trackedRace) {
+                        raceColumn.setTrackedRace(null);
+                        changed = true;
+                    }
+                }
+                if (changed) {
+                    updateStoredLeaderboard(leaderboard);
+                }
+            }
+        }
+        // remove the race from the event
+        event.removeRace(race);
+        if (Util.isEmpty(event.getAllRaces())) {
+            eventsByName.remove(event.getName());
+        }
+    }
+
+    /**
+     * Doesn't stop any wind trackers
+     */
+    private void stopAllTrackersForWhichRaceIsLastReachable(Event event, RaceDefinition race)
+            throws MalformedURLException, IOException, InterruptedException {
+        if (raceTrackersByEvent.containsKey(event)) {
             Iterator<RaceTracker> trackerIter = raceTrackersByEvent.get(event).iterator();
-            while(trackerIter.hasNext()){
+            while (trackerIter.hasNext()) {
                 RaceTracker raceTracker = trackerIter.next();
-                if(raceTracker.getRaces() != null && raceTracker.getRaces().contains(race)){
-                    System.out.println("Found tracker to remove");
-                    // firstly stop the tracker
-                    raceTracker.stop();
-                    // remove it from the raceTrackers by Event
-                    trackerIter.remove();
-                    raceTrackersByID.remove(raceTracker.getID());
-                    for (RaceDefinition trackerRace : raceTracker.getRaces()) {
-                        // remove from every leaderboard
-                        Map<String, Leaderboard> leaderboards = getLeaderboards();
-                        for (Map.Entry<String, Leaderboard> entry : leaderboards.entrySet()) {
-                            if(entry.getValue().getRaceColumnByName(race.getName()) != null){
-                                getLeaderboardByName(entry.getKey()).removeRaceColumn(trackerRace.getName());                                
-                            }
+                if (raceTracker.getRaces() != null && raceTracker.getRaces().contains(race)) {
+                    boolean foundReachableRace = false;
+                    for (RaceDefinition raceTrackedByTracker : raceTracker.getRaces()) {
+                        if (raceTrackedByTracker != race && isReachable(event, raceTrackedByTracker)) {
+                            foundReachableRace = true;
+                            break;
+                        }
+                    }
+                    if (!foundReachableRace) {
+                        // firstly stop the tracker
+                        raceTracker.stop();
+                        // remove it from the raceTrackers by Event
+                        trackerIter.remove();
+                        raceTrackersByID.remove(raceTracker.getID());
+                        // if the last tracked race was removed, remove the entire event
+                        if (raceTrackersByEvent.get(event).isEmpty()) {
+                            stopTracking(event);
                         }
                     }
                 }
             }
         }
-        // remove the race from the event
-        if(eventsByName.containsKey(event.getName())){
-            eventsByName.get(event.getName()).removeRace(race);
-        }
-        
-        stopTrackingWind(event, race);
-     // if the last tracked race was removed, remove the entire event
-        if (raceTrackersByEvent.get(event).isEmpty()) {
-            stopTracking(event);
-        }
+    }
+
+    private boolean isReachable(Event event, RaceDefinition race) {
+        return Util.contains(event.getAllRaces(), race);
     }
 
     @Override
@@ -503,6 +546,10 @@ public class RacingEventServiceImpl implements RacingEventService {
         return getOrCreateTrackedEvent(e).getTrackedRace(r);
     }
     
+    private TrackedRace getExistingTrackedRace(Event e, RaceDefinition r) {
+        return getOrCreateTrackedEvent(e).getExistingTrackedRace(r);
+    }
+    
     @Override
     public DynamicTrackedEvent getOrCreateTrackedEvent(Event event) {
         synchronized (eventTrackingCache) {
@@ -521,7 +568,7 @@ public class RacingEventServiceImpl implements RacingEventService {
     }
 
     @Override
-    public void remove(Event event) {
+    public void removeTrackedEvent(Event event) {
         eventTrackingCache.remove(event);
     }
 

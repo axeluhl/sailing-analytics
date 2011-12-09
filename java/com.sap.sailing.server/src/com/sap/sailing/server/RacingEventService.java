@@ -15,7 +15,9 @@ import java.util.Map;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
+import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.RacesHandle;
 import com.sap.sailing.domain.tracking.TrackedEvent;
 import com.sap.sailing.domain.tracking.TrackedEventRegistry;
@@ -104,19 +106,33 @@ public interface RacingEventService extends TrackedEventRegistry {
     void stopTracking(Event event) throws MalformedURLException, IOException, InterruptedException;
     
     /**
-     * Stops the race to non-tracked. Removes the race from whole RacingEventService. The race will be also removed from all leaderboards, containing that race. 
-     * @param event the event to remove
-     * @param race the race to remove
-     * @throws MalformedURLException
-     * @throws IOException
-     * @throws InterruptedException
+     * Removes <code>race</code> and any corresponding {@link #getTrackedRace(Event, RaceDefinition) tracked race} from
+     * this service. If it was the last {@link RaceDefinition} in its {@link Event}, the <code>event</code> is removed
+     * as well and will no longer be returned by {@link #getAllEvents()}. The wind tracking is stopped for
+     * <code>race</code>.
+     * <p>
+     * 
+     * Any {@link RaceTracker} for which <code>race</race> is the last race tracked that is still reachable
+     * from {@link #getAllEvents()} will be {@link RaceTracker#stop() stopped}.
+     * 
+     * The <code>race</code> will be also removed from all leaderboards containing a column that has <code>race</code>'s
+     * {@link #getTrackedRace(Event, RaceDefinition) corresponding} {@link TrackedRace} as its
+     * {@link RaceInLeaderboard#getTrackedRace()}.
+     * 
+     * @param event
+     *            the event to remove
+     * @param race
+     *            the race to remove
      */
-    void stopRemoveTrackedRace(Event event, RaceDefinition race) throws MalformedURLException, IOException,InterruptedException;
+    void removeRace(Event event, RaceDefinition race) throws MalformedURLException, IOException,InterruptedException;
     
     /**
-     * Stops tracking a single race. Other races of the same event that are currently tracked will continue to be
-     * tracked. If wind tracking for the race is currently running, it will be stopped (see also
-     * {@link #stopTrackingWind(Event, RaceDefinition)}).
+     * Stops all {@link RaceTracker}s currently tracking <code>race</code>. Note that if the same tracker also may have
+     * been tracking other races. Other races of the same event that are currently tracked will continue to be tracked.
+     * If wind tracking for the race is currently running, it will be stopped (see also
+     * {@link #stopTrackingWind(Event, RaceDefinition)}). The <code>race</code> (and the other races tracked by the
+     * same tracker) as well as the corresponding {@link TrackedRace}s will continue to exist, e.g., when asking
+     * {@link #getTrackedRace(Event, RaceDefinition)}.
      */
     void stopTracking(Event event, RaceDefinition race) throws MalformedURLException, IOException, InterruptedException;
 
@@ -196,5 +212,7 @@ public interface RacingEventService extends TrackedEventRegistry {
     SwissTimingFactory getSwissTimingFactory();
     
     void storeSwissTimingDummyRace(String racMessage, String stlMesssage, String ccgMessage) throws IllegalArgumentException;
+
+    void stopTrackingAndRemove(Event event) throws MalformedURLException, IOException, InterruptedException;
 
 }

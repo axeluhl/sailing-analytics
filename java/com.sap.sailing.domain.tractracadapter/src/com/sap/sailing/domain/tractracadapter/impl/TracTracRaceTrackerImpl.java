@@ -95,7 +95,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
     protected TracTracRaceTrackerImpl(DomainFactory domainFactory, URL paramURL, URI liveURI, URI storedURI,
             WindStore windStore, TrackedEventRegistry trackedEventRegistry) throws URISyntaxException,
             MalformedURLException, FileNotFoundException {
-        super(trackedEventRegistry);
+        super();
         urls = new Triple<URL, URI, URI>(paramURL, liveURI, storedURI);
         this.races = new HashSet<RaceDefinition>();
         this.windStore = windStore;
@@ -228,7 +228,6 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         }
         ioThread.join(3000); // wait no more than three seconds
         logger.info("Joined TracTrac IO thread for race(s) "+getRaces());
-        super.stop();
     }
 
     protected DataController getController() {

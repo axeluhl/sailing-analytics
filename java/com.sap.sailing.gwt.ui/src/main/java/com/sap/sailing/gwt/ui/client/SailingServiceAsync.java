@@ -10,7 +10,6 @@ import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
 import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
 import com.sap.sailing.gwt.ui.shared.CompetitorsAndTimePointsDAO;
-import com.sap.sailing.gwt.ui.shared.DetailType;
 import com.sap.sailing.gwt.ui.shared.EventDAO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDAO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDAO;
@@ -25,6 +24,7 @@ import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDAO;
 import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDAO;
 import com.sap.sailing.gwt.ui.shared.WindDAO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDAO;
+import com.sap.sailing.server.api.DetailType;
 import com.sap.sailing.server.api.EventAndRaceIdentifier;
 import com.sap.sailing.server.api.EventIdentifier;
 import com.sap.sailing.server.api.RaceIdentifier;
@@ -133,8 +133,11 @@ public interface SailingServiceAsync {
 
     void removeLeaderboardColumn(String leaderboardName, String columnName, AsyncCallback<Void> callback);
 
+    /**
+     * @param asyncCallback receives <code>true</code> if connecting was successful
+     */
     void connectTrackedRaceToLeaderboardColumn(String leaderboardName, String raceColumnName,
-            RaceIdentifier raceIdentifier, AsyncCallback<Void> asyncCallback);
+            RaceIdentifier raceIdentifier, AsyncCallback<Boolean> asyncCallback);
 
     void getEventAndRaceNameOfTrackedRaceConnectedToLeaderboardColumn(String leaderboardName, String raceColumnName,
             AsyncCallback<Pair<String, String>> callback);
