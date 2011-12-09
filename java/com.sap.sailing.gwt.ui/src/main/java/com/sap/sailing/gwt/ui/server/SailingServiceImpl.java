@@ -1180,7 +1180,8 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
 
     @Override
-    public List<Pair<CompetitorDAO, Double[]>> getCompetitorRaceData(RaceIdentifier race, CompetitorsAndTimePointsDAO competitorAndTimePointsDAO, DetailType dataType) throws NoWindException {
+    public List<Pair<CompetitorDAO, Double[]>> getCompetitorRaceData(RaceIdentifier race,
+            CompetitorsAndTimePointsDAO competitorAndTimePointsDAO, DetailType dataType) throws NoWindException {
         List<Pair<CompetitorDAO, Double[]>> competitorData = new ArrayList<Pair<CompetitorDAO, Double[]>>();
         TrackedRace trackedRace = getTrackedRace(race);
         Iterable<Competitor> competitors = trackedRace.getRace().getCompetitors();
