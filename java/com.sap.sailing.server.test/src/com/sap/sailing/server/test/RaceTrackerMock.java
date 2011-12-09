@@ -18,6 +18,24 @@ public class RaceTrackerMock implements RaceTracker{
     private Set<RaceDefinition> raceDefinitions;
     private boolean isTracking;
     
+    public RaceTrackerMock() {
+        // TODO check if necesary
+    }
+    
+    
+    
+    public RaceTrackerMock(Long id, Event event, Set<RaceDefinition> raceDefinitions, boolean isTracking) {
+        super();
+        this.id = id;
+        this.event = event;
+        this.raceDefinitions = raceDefinitions;
+        this.isTracking = isTracking;
+    }
+
+    public void setIsTracking(boolean isTracking){
+        this.isTracking = isTracking;
+    }
+
     public RaceTrackerMock(Long id) {
         this.id = id;
     }
