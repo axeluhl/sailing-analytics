@@ -78,6 +78,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
     private final TimePanel timePanel;
     private Icon boatIcon;
     private Icon boatIconHighlighted;
+    private ImageRotator boatIconHighlightedRotator;
     private Icon buoyIcon;
     private Icon tackToStarboardIcon;
     private Icon tackToPortIcon;
@@ -386,11 +387,14 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
                         lastMousePosition = event.getLatLng();
                     }
                 });
-                boatIcon = Icon.newInstance("/images/blackdot.png");
+                // FIXME anchor for new icon is probably somewhere else
+                boatIcon = Icon.newInstance(resources.lowlightedBoatIconDW_Port().getSafeUri().asString());
                 boatIcon.setIconAnchor(Point.newInstance(8, 8));
-                boatIconHighlighted = Icon.newInstance("/images/reddot.png");
+                boatIconHighlighted = Icon.newInstance(resources.highlightedBoatIconDW_Port().getSafeUri().asString());
                 boatIconHighlighted.setIconAnchor(Point.newInstance(8, 8));
+                boatIconHighlightedRotator = new ImageRotator(resources.lowlightedBoatIconDW_Port().getSafeUri().asString());
                 buoyIcon = Icon.newInstance(resources.buoyIcon().getSafeUri().asString());
+                // FIXME anchor for smaller icon is probably closer to 3,3 than to 7,7
                 buoyIcon.setIconAnchor(Point.newInstance(7, 7));
                 tackToStarboardIcon = Icon
                         .newInstance("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=T|00FF00|000000");
@@ -756,6 +760,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
                         } else {
                             competitorDAOsOfUnusedMarkers.remove(competitorDAO);
                             boatMarker.setLatLng(LatLng.newInstance(lastPos.position.latDeg, lastPos.position.lngDeg));
+                            boatMarker.setImage(boatIconHighlightedRotator.getRotatedImageURL(lastPos.speedWithBearing.bearingInDegrees));
                         }
                     }
                 }
