@@ -1,12 +1,11 @@
 package com.sap.sailing.server.test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -17,11 +16,9 @@ import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
-import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.EventImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.tracking.RaceTracker;
-import com.sap.sailing.util.Util;
 import com.sap.sailing.util.Util.Pair;
 
 public class RaceTrackerStartStopTest {
@@ -39,9 +36,6 @@ public class RaceTrackerStartStopTest {
     private RaceDefinition raceDef1;
     private RaceDefinition raceDef2;
     private RaceDefinition raceDef3;
-
-    public RaceTrackerStartStopTest() {
-    }
 
     @Before
     public void setUp() {
@@ -88,12 +82,13 @@ public class RaceTrackerStartStopTest {
     @Test
     public void testUntrackRace() throws MalformedURLException, IOException, InterruptedException {
         racingEventService.stopTracking(event, raceDef2);
-        // assert that the racinEventService does not contain the raceDefinition in the map of trackers by ID
         assertFalse(racingEventService.getRaceTrackersByIDMap().containsValue(raceDef2));
-        // assert that the raceInEventService does contain the racedefinitoin in tht map of events
-        assertTrue(racingEventService.getRaceTrackersByEventMap().containsValue(raceTrackerAndId.get(0).getB()));
-        assertTrue(racingEventService.getRaceTrackersByEventMap().containsValue(raceTrackerAndId.get(1).getB()));
-        assertTrue(racingEventService.getRaceTrackersByEventMap().containsValue(raceTrackerAndId.get(2).getB()));
+        
+        
+        
+        assertFalse(racingEventService.getRaceTrackersByEventMap().containsValue(raceTrackerAndId.get(0).getB()));
+        assertFalse(racingEventService.getRaceTrackersByEventMap().containsValue(raceTrackerAndId.get(1).getB()));
+        assertFalse(racingEventService.getRaceTrackersByEventMap().containsValue(raceTrackerAndId.get(2).getB()));
     }
 
     @Test
