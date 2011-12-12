@@ -41,6 +41,8 @@
 		<module>com.mongodb.driver</module>
 		<module>com.googlecode.java-diff-utils</module>
 		<module>com.googlecode.java-diff-utils.test</module>
+		<module>com.sap.sailing.feature</module>
+		<module>com.sap.sailing.feature.p2build</module>
 	</modules>
 	
 	<properties>

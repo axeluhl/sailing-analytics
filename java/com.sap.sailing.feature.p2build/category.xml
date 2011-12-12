@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <feature url="features/com.sap.sailing.feature_1.0.0.qualifier.jar" id="com.sap.sailing.feature" version="1.0.0.qualifier">
+      <category name="RaceAnalysis"/>
+   </feature>
+   <category-def name="RaceAnalysis" label="RaceAnalysis">
+      <description>
+         Description of example category
+      </description>
+   </category-def>
+</site>
