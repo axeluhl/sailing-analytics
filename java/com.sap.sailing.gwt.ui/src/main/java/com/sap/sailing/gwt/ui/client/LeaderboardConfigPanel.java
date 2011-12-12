@@ -151,7 +151,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
                         removeLeaderboard(object);
                     }
                 } else if ("ACTION_OPEN_BROWSER".equals(value)) {
-                    Window.open("/Leaderboard.html?name=" + object.name, "Leaderboard", null);
+                    Window.open("/Leaderboard.html?name=" + object.name, "_blank", null);
                 } else if ("ACTION_EDIT".equals(value)) {
                     final String oldLeaderboardName = object.name;
                     List<LeaderboardDAO> otherExistingLeaderboard = new ArrayList<LeaderboardDAO>();
@@ -171,7 +171,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
                             });
                     dialog.show();
                 } else if ("ACTION_EDIT_SCORES".equals(value)) {
-                    Window.open("/LeaderboardEditing.html?name=" + object.name, "Edit Leaderboard", null);
+                    Window.open("/LeaderboardEditing.html?name=" + object.name, "_blank", null);
                 }
             }
         });
