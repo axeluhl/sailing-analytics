@@ -25,34 +25,35 @@ import com.sap.sailing.util.Util;
 import com.sap.sailing.util.Util.Pair;
 
 public class RaceTrackerStartStopTest {
-    
+
     private final static String EVENTNAME = "TESTEVENT";
     private final static String BOATCLASSNAME = "HAPPYBOATCLASS";
-    
+
     private RacingEventServiceImplMock racingEventService;
     private Event event;
     private BoatClass boatClass;
     private Set<RaceTracker> raceTrackerSet = new HashSet<RaceTracker>();
-    
+
     private List<Pair<Long, RaceTracker>> raceTrackerAndId;
-    
+
     private RaceDefinition raceDef1;
     private RaceDefinition raceDef2;
     private RaceDefinition raceDef3;
-    
+
     public RaceTrackerStartStopTest() {
     }
-    
+
     @Before
-    public void setUp(){
+    public void setUp() {
         racingEventService = new RacingEventServiceImplMock();
         boatClass = new BoatClassImpl(BOATCLASSNAME);
         event = new EventImpl(EVENTNAME, boatClass);
         racingEventService.getEventsByNameMap().put(EVENTNAME, event);
         raceTrackerSet = new HashSet<RaceTracker>();
-        raceTrackerAndId = new ArrayList<Pair<Long,RaceTracker>>();
-        
-        //raceDef1 = new RaceDefinitionImpl("racedef1", new CourseImpl("race1", null), new BoatClassImpl(BOATCLASSNAME), null);
+        raceTrackerAndId = new ArrayList<Pair<Long, RaceTracker>>();
+
+        // raceDef1 = new RaceDefinitionImpl("racedef1", new CourseImpl("race1", null), new
+        // BoatClassImpl(BOATCLASSNAME), null);
         raceDef1 = new RaceDefinitionImpl("racedef1", null, new BoatClassImpl(BOATCLASSNAME), null);
         raceDef2 = new RaceDefinitionImpl("racedef2", null, new BoatClassImpl(BOATCLASSNAME), null);
         raceDef3 = new RaceDefinitionImpl("racedef3", null, new BoatClassImpl(BOATCLASSNAME), null);
@@ -65,7 +66,7 @@ public class RaceTrackerStartStopTest {
         raceDefinitioSetRace3.add(raceDef1);
         raceDefinitioSetRace3.add(raceDef2);
         raceDefinitioSetRace3.add(raceDef3);
-        
+
         Long trackerID1 = new Long(1);
         Long trackerID2 = new Long(2);
         Long trackerID3 = new Long(3);
@@ -82,21 +83,22 @@ public class RaceTrackerStartStopTest {
         racingEventService.getRaceTrackersByIDMap().put(trackerID1, raceTracker1);
         racingEventService.getRaceTrackersByIDMap().put(trackerID2, raceTracker2);
         racingEventService.getRaceTrackersByIDMap().put(trackerID3, raceTracker3);
-    }    
-    
+    }
+
     @Test
-    public void testUntrackRace() throws MalformedURLException, IOException, InterruptedException{
-        racingEventService.stopTracking(event,raceDef2);
+    public void testUntrackRace() throws MalformedURLException, IOException, InterruptedException {
+        racingEventService.stopTracking(event, raceDef2);
         // assert that the racinEventService does not contain the raceDefinition in the map of trackers by ID
         assertFalse(racingEventService.getRaceTrackersByIDMap().containsValue(raceDef2));
         // assert that the raceInEventService does contain the racedefinitoin in tht map of events
-        assertTrue(racingEventService.getRaceTrackersByEventMap().containsValue(raceDef2));
+        assertTrue(racingEventService.getRaceTrackersByEventMap().containsValue(raceTrackerAndId.get(0).getB()));
+        assertTrue(racingEventService.getRaceTrackersByEventMap().containsValue(raceTrackerAndId.get(1).getB()));
+        assertTrue(racingEventService.getRaceTrackersByEventMap().containsValue(raceTrackerAndId.get(2).getB()));
     }
-    
-    
+
     @Test
-    public void testService(){
-        
+    public void testService() {
+
     }
-    
+
 }
