@@ -100,13 +100,24 @@ public class RaceTrackerStartStopTest {
 
     /**
      * This test method tests, if the {@link RacingEventService#stopTracking(Event, RaceDefinition) stopTracking} method works correctly.
-     * @throws MalformedURLException
-     * @throws IOException
-     * @throws InterruptedException
      */
     @Test
     public void testStopTrackingRace() throws MalformedURLException, IOException, InterruptedException {
+        Event event = racingEventService.getEventByName(EVENTNAME);
+        TrackedEvent trackedEvent = racingEventService.getTrackedEvent(event);
+        assertNotNull(event.getRaceByName(RACENAME2));
+        assertNotNull(trackedEvent.getExistingTrackedRace(event.getRaceByName(RACENAME2)));
         racingEventService.stopTracking(event, raceDef2);
+        // the raceDef2 should still be part of the event, and the corresponding tracked race should still be part
+        // of the tracked event
+        assertNotNull(event.getRaceByName(RACENAME2));
+        boolean foundTrackedRaceForRaceDef2 = false;
+        for (TrackedRace trackedRace : trackedEvent.getTrackedRaces()) {
+            if (trackedRace.getRace().getName().equals(RACENAME2)) {
+                foundTrackedRaceForRaceDef2 = true;
+            }
+        }
+        assertTrue(foundTrackedRaceForRaceDef2);
         // The raceTracker2 and raceTracker3 should currently not be in track mode. 
         assertTrue(raceTracker1.getIsTracking());
         assertFalse(raceTracker2.getIsTracking());
@@ -126,9 +137,6 @@ public class RaceTrackerStartStopTest {
     }
     /**
      * This test methods checks if the {@link RacingEventService#removeRace(Event, RaceDefinition) removeRace} method works correctly
-     * @throws MalformedURLException
-     * @throws IOException
-     * @throws InterruptedException
      */
     @Test
     public void testRemoveRace() throws MalformedURLException, IOException, InterruptedException {
@@ -170,9 +178,6 @@ public class RaceTrackerStartStopTest {
     /**
      * This test methods checks if the {@link RacingEventService#removeRace(Event, RaceDefinition) removeRace} method works correctly if the
      * race to be stopped is the last race of a tracker
-     * @throws MalformedURLException
-     * @throws IOException
-     * @throws InterruptedException
      */
     @Test
     public void testRemoveLastRaceOfTracker() throws MalformedURLException, IOException, InterruptedException {
