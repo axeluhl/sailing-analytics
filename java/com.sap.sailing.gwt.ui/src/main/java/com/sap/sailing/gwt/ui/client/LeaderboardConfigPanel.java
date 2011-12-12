@@ -9,6 +9,8 @@ import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
@@ -229,7 +231,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
         HorizontalPanel splitPanel = new HorizontalPanel();
         mainPanel.add(splitPanel);
 
-        selectedLeaderBoardPanel = new CaptionPanel("Leaderboard:");
+        selectedLeaderBoardPanel = new CaptionPanel(stringConstants.leaderboard());
         selectedLeaderBoardPanel.setWidth("50%");
         splitPanel.add(selectedLeaderBoardPanel);
 
@@ -237,7 +239,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
         vPanel.setWidth("100%");
         selectedLeaderBoardPanel.setContentWidget(vPanel);
 
-        trackedRacesCaptionPanel = new CaptionPanel("Tracked Races");
+        trackedRacesCaptionPanel = new CaptionPanel(stringConstants.trackedRaces());
         trackedRacesCaptionPanel.setWidth("50%");
         splitPanel.add(trackedRacesCaptionPanel);
 
@@ -674,8 +676,19 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
 
     private void leaderboardSelectionChanged() {
         final String leaderboardName = getSelectedLeaderboardName();
+        // make sure that clearing the selection doesn't cause an unlinking of the selected tracked race
+        trackedEventsComposite.removeRaceSelectionChangeListener(this);
         trackedEventsComposite.clearSelection();
+        // add listener again using a scheduled command which is executed when the browser's event loop re-gains
+        // control; we assume that at that point in time the selection updates have already been performed
+        Scheduler.get().scheduleFinally(new ScheduledCommand() {
+            @Override
+            public void execute() {
+                trackedEventsComposite.addRaceSelectionChangeListener(LeaderboardConfigPanel.this);                
+            }
+        });
         if (leaderboardName != null) {
+            // TODO wouldn't the stripped-down version of the LeaderboardDAO do here? See bug #146
             sailingService.getLeaderboardByName(leaderboardName, new Date(),
             /* namesOfRacesForWhichToLoadLegDetails */null, new AsyncCallback<LeaderboardDAO>() {
                 @Override

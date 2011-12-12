@@ -73,7 +73,7 @@ public class ChartsPanel extends FormPanel {
     private int selectedRace = 0;
     private int stepsToLoad = 100;
     private final StringConstants stringConstants;
-    private HashMap<String, Boolean> competitorVisible = new HashMap<String, Boolean>();
+    private HashMap<String, Boolean> competitorVisible;
     private VerticalPanel selectCompetitors;
     private PlotWithOverview plot;
     private PlotWithOverviewModel model;
@@ -91,6 +91,7 @@ public class ChartsPanel extends FormPanel {
     	width = chartWidth;
     	height = chartHeight;
     	competitorSeries = new HashMap<CompetitorDAO, SeriesHandler>();
+    	competitorVisible = new HashMap<String, Boolean>();
     	competitorMarkPassingSeries = new HashMap<CompetitorDAO, SeriesHandler>();
     	competitorColor = new HashMap<CompetitorDAO, String>();
     	competitorLabels = new HashMap<CompetitorDAO, Widget>();
@@ -250,8 +251,8 @@ public class ChartsPanel extends FormPanel {
                         }
 
                         @Override
-                public void onSuccess(CompetitorsAndTimePointsDAO result) {
-                    competitorsAndTimePointsDAO = result;
+                        public void onSuccess(CompetitorsAndTimePointsDAO result) {
+                            competitorsAndTimePointsDAO = result;
                             selectCompetitors.clear();
                             legendPanel.clear();
                             competitorLabels.clear();
@@ -262,11 +263,10 @@ public class ChartsPanel extends FormPanel {
                                     cb.setValue(true);
                                 }
                                 cb.addClickHandler(new ClickHandler() {
-
                                     @Override
                                     public void onClick(ClickEvent event) {
                                         setCompetitorVisible(c, cb.getValue());
-                                        setLegendVisible(c,isCompetitorVisible(c));
+                                        setLegendVisible(c, isCompetitorVisible(c));
                                         getCompetitorSeries(c).setVisible(cb.getValue());
                                         getCompetitorMarkPassingSeries(c).setVisible(cb.getValue());
                                         plot.redraw();
@@ -340,15 +340,10 @@ public class ChartsPanel extends FormPanel {
         public com.google.gwt.event.shared.GwtEvent.Type<DataLoadedHandler> getAssociatedType() {
             return TYPE;
         }
-
     }
 
     private void setCompetitorVisible(CompetitorDAO competitor, boolean isVisible) {
-        //boolean changed = isCompetitorVisible(competitor) != isVisible;
         competitorVisible.put(competitor.id, isVisible);
-        /*
-         * if (changed && chart != null){ chart.draw(prepareTableData(), getOptions()); }
-         */
     }
 
     private boolean isCompetitorVisible(CompetitorDAO competitor) {
@@ -357,9 +352,7 @@ public class ChartsPanel extends FormPanel {
     }
 
     private Widget createChart() {
-
         final Label selectedPointLabel = new Label(stringConstants.hoverOverAPoint());
-
         model = new PlotWithOverviewModel(PlotModelStrategy.defaultStrategy());
         plotOptions = new PlotOptions();
         plotOptions.setDefaultLineSeriesOptions(new LineSeriesOptions().setLineWidth(1).setShow(true));
