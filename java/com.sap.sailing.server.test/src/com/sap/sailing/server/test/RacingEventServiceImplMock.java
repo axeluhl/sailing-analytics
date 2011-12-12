@@ -12,7 +12,6 @@ import com.sap.sailing.server.impl.RacingEventServiceImpl;
 
 
 public class RacingEventServiceImplMock extends RacingEventServiceImpl{
-
     
     public RacingEventServiceImplMock() {
         super();

@@ -97,8 +97,9 @@ public class RaceTrackerStartStopTest {
         assertTrue(racingEventService.getRaceTrackersByIDMap().containsValue(raceTracker1));
         assertFalse(racingEventService.getRaceTrackersByIDMap().containsValue(raceTracker2));
         assertFalse(racingEventService.getRaceTrackersByIDMap().containsValue(raceTracker3));
-        // The RaceTrakcersByEvent map should contain a tracker with a set of RaceDefinitions, containing the
-        // raceDefinition1
+        /* The RaceTrakcersByEvent map should contain a tracker with a set of RaceDefinitions, containing the
+        * raceDefinition1
+        */
         assert racingEventService.getRaceTrackersByEventMap().size() == 1;
         Iterator<RaceTracker> raceTrackerIter = racingEventService.getRaceTrackersByEventMap().get(event).iterator();
         while(raceTrackerIter.hasNext()){
