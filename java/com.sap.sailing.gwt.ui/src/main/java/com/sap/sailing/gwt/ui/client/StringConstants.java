@@ -191,5 +191,6 @@ public interface StringConstants extends Constants {
     String islinked();
     String yes();
     String no();
-    
+    String hoverOverAPoint();
+    String noSelection();
 }
