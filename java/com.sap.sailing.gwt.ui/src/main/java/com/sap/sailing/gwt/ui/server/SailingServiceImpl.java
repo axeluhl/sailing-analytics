@@ -1196,8 +1196,8 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                         entries[i] = (speedOverGround == null) ? null : speedOverGround.getKnots();
                     }
                 }
-                competitorData.setRaceData(competitorAndTimePointsDAO.getCompetitor()[c], entries);
                 CompetitorDAO competitor = competitorAndTimePointsDAO.getCompetitor()[c];
+                competitorData.setRaceData(competitor, entries);
                 entries = new Double[competitorAndTimePointsDAO.getMarkPassings(competitor).length];
                 for (int i = 0; i < competitorAndTimePointsDAO.getMarkPassings(competitor).length; i++){
                     MillisecondsTimePoint time = new MillisecondsTimePoint(competitorAndTimePointsDAO.getMarkPassings(competitor)[i]);
