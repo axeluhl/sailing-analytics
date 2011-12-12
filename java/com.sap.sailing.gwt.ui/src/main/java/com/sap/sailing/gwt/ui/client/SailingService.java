@@ -8,6 +8,7 @@ import java.util.Map;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
+import com.sap.sailing.gwt.ui.shared.CompetitorInRaceDAO;
 import com.sap.sailing.gwt.ui.shared.CompetitorsAndTimePointsDAO;
 import com.sap.sailing.gwt.ui.shared.EventDAO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDAO;
@@ -131,8 +132,7 @@ public interface SailingService extends RemoteService {
     
     String[] getCountryCodes();
     
-    CompetitorInRaceDAO getCompetitorRaceData(RaceIdentifier race, CompetitorAndTimePointsDAO competitorAndTimePointsDAO, DetailType dataType) throws Exception;
-            CompetitorsAndTimePointsDAO competitorAndTimePointsDAO, DetailType dataType) throws Exception;
+    CompetitorInRaceDAO getCompetitorRaceData(RaceIdentifier race, CompetitorsAndTimePointsDAO competitorsAndTimePointsDAO, DetailType dataType) throws Exception;
 
     CompetitorsAndTimePointsDAO getCompetitorsAndTimePoints(RaceIdentifier race, int steps);
     

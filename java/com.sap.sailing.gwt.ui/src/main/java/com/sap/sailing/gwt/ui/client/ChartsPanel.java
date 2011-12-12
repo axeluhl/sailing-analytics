@@ -11,8 +11,6 @@ import ca.nanometrics.gflot.client.PlotModelStrategy;
 import ca.nanometrics.gflot.client.PlotPosition;
 import ca.nanometrics.gflot.client.PlotWithOverview;
 import ca.nanometrics.gflot.client.PlotWithOverviewModel;
-import ca.nanometrics.gflot.client.PlotWithOverviewModel.AsyncDataProvider;
-import ca.nanometrics.gflot.client.PlotWithOverviewModel.DataProvider;
 import ca.nanometrics.gflot.client.SeriesHandler;
 import ca.nanometrics.gflot.client.SeriesType;
 import ca.nanometrics.gflot.client.event.PlotHoverListener;
@@ -22,13 +20,11 @@ import ca.nanometrics.gflot.client.options.AxisOptions;
 import ca.nanometrics.gflot.client.options.GridOptions;
 import ca.nanometrics.gflot.client.options.LegendOptions;
 import ca.nanometrics.gflot.client.options.LineSeriesOptions;
-import ca.nanometrics.gflot.client.options.Markings;
 import ca.nanometrics.gflot.client.options.PlotOptions;
 import ca.nanometrics.gflot.client.options.PointsSeriesOptions;
 import ca.nanometrics.gflot.client.options.SelectionOptions;
 import ca.nanometrics.gflot.client.options.TickFormatter;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -55,9 +51,9 @@ import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.ui.shared.CompetitorsAndTimePointsDAO;
 import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
 import com.sap.sailing.gwt.ui.shared.CompetitorInRaceDAO;
+import com.sap.sailing.gwt.ui.shared.CompetitorsAndTimePointsDAO;
 import com.sap.sailing.server.api.DetailType;
 import com.sap.sailing.server.api.RaceIdentifier;
 
@@ -222,11 +218,11 @@ public class ChartsPanel extends FormPanel {
         final Runnable loadData = new Runnable() {
             @Override
             public void run() {
-                ChartsPanel.this.sailingService.getCompetitorRaceData(races[selectedRace], competitorAndTimePointsDAO,
+                ChartsPanel.this.sailingService.getCompetitorRaceData(races[selectedRace], competitorsAndTimePointsDAO,
                         dataToShow, new AsyncCallback<CompetitorInRaceDAO>() {
                             @Override
                             public void onFailure(Throwable caught) {
-                                Window.alert(stringConstants.failedToLoadRaceData());
+                                Window.alert(stringConstants.failedToLoadRaceData() + ": " + caught.toString());
                             }
 
                             @Override
@@ -243,14 +239,14 @@ public class ChartsPanel extends FormPanel {
             }
         };
         chart.showWidget(0);
-        if (competitorAndTimePointsDAO != null) {
+        if (competitorsAndTimePointsDAO != null) {
             loadData.run();
         } else {
-            this.sailingService.getCompetitorAndTimePoints(races[selectedRace], stepsToLoad,
-                    new AsyncCallback<CompetitorAndTimePointsDAO>() {
+            this.sailingService.getCompetitorsAndTimePoints(races[selectedRace], stepsToLoad,
+                    new AsyncCallback<CompetitorsAndTimePointsDAO>() {
                         @Override
                         public void onFailure(Throwable caught) {
-                    // TODO show error dialog
+                        	Window.alert("Failed to load race information: " + caught.toString());
                         }
 
                         @Override
@@ -288,16 +284,16 @@ public class ChartsPanel extends FormPanel {
         if (model == null || plotOptions == null) {
             return;
         }
-        if (competitorAndTimePointsDAO != null && chartData != null) {
+        if (competitorsAndTimePointsDAO != null && chartData != null) {
             model.clear();
-            for (int i = 0; i < competitorAndTimePointsDAO.getCompetitor().length; i++) {
-                CompetitorDAO competitor = competitorAndTimePointsDAO.getCompetitor()[i];
+            for (int i = 0; i < competitorsAndTimePointsDAO.getCompetitor().length; i++) {
+                CompetitorDAO competitor = competitorsAndTimePointsDAO.getCompetitor()[i];
                 SeriesHandler compSeries = getCompetitorSeries(competitor);
                 setLegendVisible(competitor,isCompetitorVisible(competitor));
                 compSeries.setVisible(isCompetitorVisible(competitor));
                 SeriesHandler markSeries = getCompetitorMarkPassingSeries(competitor);
                 markSeries.setVisible(isCompetitorVisible(competitor));
-                Long[] markPassingTimes = competitorAndTimePointsDAO.getMarkPassings(competitor);
+                long[] markPassingTimes = competitorsAndTimePointsDAO.getMarkPassings(competitor);
                 Double[] markPassingValues = chartData.getMarkPassings(competitor);
                 for (int j = 0; j < markPassingTimes.length; j++){
                     if (markPassingValues[j] != null) {
@@ -305,7 +301,7 @@ public class ChartsPanel extends FormPanel {
                     }
                 }
                 for (int j = 0; j < stepsToLoad; j++) {
-                    long time = competitorAndTimePointsDAO.getTimePoints()[j];
+                    long time = competitorsAndTimePointsDAO.getTimePoints()[j];
                     if (chartData.getRaceData(competitor)[j] != null) {
                         compSeries.add(new DataPoint(time, chartData.getRaceData(competitor)[j]));
                     }
@@ -382,7 +378,7 @@ public class ChartsPanel extends FormPanel {
         plotOptions.setGridOptions(new GridOptions().setHoverable(true).setMouseActiveRadius(5).setAutoHighlight(true));
 
         plotOptions.setSelectionOptions(new SelectionOptions().setDragging(true).setMode("x"));
-        for (CompetitorDAO competitor :  competitorAndTimePointsDAO.getCompetitor()){
+        for (CompetitorDAO competitor :  competitorsAndTimePointsDAO.getCompetitor()){
         	SeriesHandler series = model.addSeries(competitor.name, getColorForCempetitor(competitor));
     		series.setOptions(SeriesType.LINES, new LineSeriesOptions().setLineWidth(2.5).setShow(true));
     		series.setOptions(SeriesType.POINTS, new PointsSeriesOptions().setLineWidth(0).setShow(false));

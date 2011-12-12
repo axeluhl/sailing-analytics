@@ -9,6 +9,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
 import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
+import com.sap.sailing.gwt.ui.shared.CompetitorInRaceDAO;
 import com.sap.sailing.gwt.ui.shared.CompetitorsAndTimePointsDAO;
 import com.sap.sailing.gwt.ui.shared.EventDAO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDAO;
@@ -205,8 +206,9 @@ public interface SailingServiceAsync {
 
     void getCountryCodes(AsyncCallback<String[]> callback);
 
-    void getCompetitorRaceData(RaceIdentifier race, CompetitorsAndTimePointsDAO competitorAndTimePointsDAO,
-            DetailType dataType, AsyncCallback<CompetitorInRaceDAO> callback);
+    void getCompetitorRaceData(RaceIdentifier race,
+			CompetitorsAndTimePointsDAO competitorsAndTimePointsDAO,
+			DetailType dataType, AsyncCallback<CompetitorInRaceDAO> callback);
     
     void getDouglasPoints(RaceIdentifier raceIdentifier, Map<CompetitorDAO, Date> from, Map<CompetitorDAO, Date> to,
             double meters, AsyncCallback<Map<CompetitorDAO, List<GPSFixDAO>>> callback);
