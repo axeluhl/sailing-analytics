@@ -201,9 +201,9 @@ public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> {
         }
     }
 
-    public Double getDoubleValue(LeaderboardRowDAO object) {
+    public Double getDoubleValue(LeaderboardRowDAO row) {
         Double result = null;
-        Triple<Double, Double, Double> tacksJibesAndPenalties = getTotalNumberOfTacksJibesAndPenaltyCircles(object);
+        Triple<Double, Double, Double> tacksJibesAndPenalties = getTotalNumberOfTacksJibesAndPenaltyCircles(row);
         Double totalNumberOfTacks = tacksJibesAndPenalties.getA();
         Double totalNumberOfJibes = tacksJibesAndPenalties.getB();
         Double totalNumberOfPenaltyCircles = tacksJibesAndPenalties.getC();

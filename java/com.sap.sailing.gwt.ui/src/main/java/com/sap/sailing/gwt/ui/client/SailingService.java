@@ -71,7 +71,8 @@ public interface SailingService extends RemoteService {
     public List<String> getLeaderboardNames() throws Exception;
     
     LeaderboardDAO getLeaderboardByName(String leaderboardName, Date date,
-            Collection<String> namesOfRacesForWhichToLoadLegDetails) throws Exception;
+            Collection<String> namesOfRacesForWhichToLoadLegDetails)
+            throws Exception;
 
     List<LeaderboardDAO> getLeaderboards();
     

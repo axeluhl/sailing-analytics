@@ -163,7 +163,8 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     
     @Override
     public LeaderboardDAO getLeaderboardByName(String leaderboardName, Date date,
-            Collection<String> namesOfRacesForWhichToLoadLegDetails) throws Exception {
+            Collection<String> namesOfRacesForWhichToLoadLegDetails)
+            throws NoWindException {
         long startOfRequestHandling = System.currentTimeMillis();
         LeaderboardDAO result = null;
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
@@ -174,8 +175,6 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             result.name = leaderboard.getName();
             result.competitorDisplayNames = new HashMap<CompetitorDAO, String>();
             for (RaceInLeaderboard raceColumn : leaderboard.getRaceColumns()) {
-                //result.raceNamesAndMedalRaceAndTracked.put(raceColumn.getName(),
-                //        new Pair<Boolean, Boolean>(raceColumn.isMedalRace(), raceColumn.getTrackedRace()!=null));
                 result.addRace(raceColumn.getName(), raceColumn.isMedalRace(), raceColumn.getTrackedRace() != null);
             }
             result.rows = new HashMap<CompetitorDAO, LeaderboardRowDAO>();
