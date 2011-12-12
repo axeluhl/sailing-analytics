@@ -35,6 +35,10 @@ public class RaceTrackerMock implements RaceTracker{
     public void setIsTracking(boolean isTracking){
         this.isTracking = isTracking;
     }
+    
+    public boolean getIsTracking(){
+        return isTracking;
+    }
 
     public RaceTrackerMock(Long id) {
         this.id = id;

@@ -30,5 +30,7 @@ public class RacingEventServiceImplMock extends RacingEventServiceImpl{
         return raceTrackersByID;
     }
     
-    
+    public Map<String, Event> getEventsByName(){
+        return eventsByName;
+    }
 }
