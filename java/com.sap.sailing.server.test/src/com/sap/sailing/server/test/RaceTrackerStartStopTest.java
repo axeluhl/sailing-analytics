@@ -174,9 +174,9 @@ public class RaceTrackerStartStopTest {
         assertFalse(racingEventService.getRaceTrackersByIDMap().containsValue(raceTracker1));
         assertFalse(racingEventService.getRaceTrackersByIDMap().containsValue(raceTracker2));
         assertTrue(racingEventService.getRaceTrackersByIDMap().containsValue(raceTracker3));
-        // The raceTracker 3 should exist, and it should contain the raceDefinition3 only
+        // The raceTracker 3 should exist, and it should contain all race definitions still
         assertTrue(raceTracker3.getRaces().contains(raceDef3));
-        assertEquals(1, raceTracker3.getRaces().size());
+        assertEquals(3, raceTracker3.getRaces().size());
     }
 
 }
