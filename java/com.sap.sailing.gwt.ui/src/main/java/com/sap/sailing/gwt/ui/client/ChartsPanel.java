@@ -73,7 +73,7 @@ public class ChartsPanel extends FormPanel {
     private int selectedRace = 0;
     private int stepsToLoad = 100;
     private final StringConstants stringConstants;
-    private HashMap<String, Boolean> competitorVisible = new HashMap<String, Boolean>();
+    private HashMap<String, Boolean> competitorVisible;
     private VerticalPanel selectCompetitors;
     private PlotWithOverview plot;
     private PlotWithOverviewModel model;
@@ -91,6 +91,7 @@ public class ChartsPanel extends FormPanel {
     	width = chartWidth;
     	height = chartHeight;
     	competitorSeries = new HashMap<CompetitorDAO, SeriesHandler>();
+    	competitorVisible = new HashMap<String, Boolean>();
     	competitorMarkPassingSeries = new HashMap<CompetitorDAO, SeriesHandler>();
     	competitorColor = new HashMap<CompetitorDAO, String>();
     	competitorLabels = new HashMap<CompetitorDAO, Widget>();
