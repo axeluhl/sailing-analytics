@@ -9,6 +9,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -17,14 +18,18 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
+import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.EventImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.TrackedEvent;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.server.RacingEventService;
 
 public class RaceTrackerStartStopTest {
@@ -54,14 +59,21 @@ public class RaceTrackerStartStopTest {
         boatClass = new BoatClassImpl(BOATCLASSNAME);
         event = new EventImpl(EVENTNAME, boatClass);
         racingEventService.getEventsByName().put(EVENTNAME, event);
+        TrackedEvent trackedEvent1 = racingEventService.getOrCreateTrackedEvent(event);
         racingEventService.getEventsByNameMap().put(EVENTNAME, event);
         raceTrackerSet = new HashSet<RaceTracker>();
-        raceDef1 = new RaceDefinitionImpl(RACENAME1, null, boatClass, null);
-        raceDef2 = new RaceDefinitionImpl(RACENAME2, null, boatClass, null);
-        raceDef3 = new RaceDefinitionImpl(RACENAME3, null, boatClass, null);
+        raceDef1 = new RaceDefinitionImpl(RACENAME1, new CourseImpl("Course1", new ArrayList<Waypoint>()), boatClass, new ArrayList<Competitor>());
+        raceDef2 = new RaceDefinitionImpl(RACENAME2, new CourseImpl("Course2", new ArrayList<Waypoint>()), boatClass, new ArrayList<Competitor>());
+        raceDef3 = new RaceDefinitionImpl(RACENAME3, new CourseImpl("Course3", new ArrayList<Waypoint>()), boatClass, new ArrayList<Competitor>());
         event.addRace(raceDef1);
+        trackedEvent1.createTrackedRace(raceDef1, /* windStore */ EmptyWindStore.INSTANCE, /* millisecondsOverWhichToAverageWind */ 0l,
+                /* millisecondsOverWhichToAverageSpeed */ 0l, /* raceDefinitionSetToUpdate */ null);
         event.addRace(raceDef2);
+        trackedEvent1.createTrackedRace(raceDef2, /* windStore */ EmptyWindStore.INSTANCE, /* millisecondsOverWhichToAverageWind */ 0l,
+                /* millisecondsOverWhichToAverageSpeed */ 0l, /* raceDefinitionSetToUpdate */ null);
         event.addRace(raceDef3);
+        trackedEvent1.createTrackedRace(raceDef3, /* windStore */ EmptyWindStore.INSTANCE, /* millisecondsOverWhichToAverageWind */ 0l,
+                /* millisecondsOverWhichToAverageSpeed */ 0l, /* raceDefinitionSetToUpdate */ null);
         Set<RaceDefinition> raceDefinitionSetRace1 = new HashSet<RaceDefinition>();
         raceDefinitionSetRace1.add(raceDef1);
         Set<RaceDefinition> raceDefinitionSetRace2 = new HashSet<RaceDefinition>();
