@@ -1,6 +1,8 @@
 package com.sap.sailing.server.test;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
@@ -86,25 +88,20 @@ public class RaceTrackerStartStopTest {
     @Test
     public void testStopTrackingRace() throws MalformedURLException, IOException, InterruptedException {
         racingEventService.stopTracking(event, raceDef2);
-        /*
-         * The raceTracker2 and raceTracker3 should currently not be in track mode. 
-         */
+        // The raceTracker2 and raceTracker3 should currently not be in track mode. 
         assertFalse(raceTracker2.getIsTracking());
         assertFalse(raceTracker3.getIsTracking());
-        /*
-         * The RaceTrackersByID map should not contain the trackers raceTracker2 and raceTracker3 anymore
-         */
+        // The RaceTrackersByID map should not contain the trackers raceTracker2 and raceTracker3 anymore
         assertTrue(racingEventService.getRaceTrackersByIDMap().containsValue(raceTracker1));
         assertFalse(racingEventService.getRaceTrackersByIDMap().containsValue(raceTracker2));
         assertFalse(racingEventService.getRaceTrackersByIDMap().containsValue(raceTracker3));
-        /* The RaceTrakcersByEvent map should contain a tracker with a set of RaceDefinitions, containing the
-        * raceDefinition1
-        */
-        assert racingEventService.getRaceTrackersByEventMap().size() == 1;
+        // The RaceTrakcersByEvent map should contain a tracker with a set of RaceDefinitions, containing the
+        // raceDefinition1
+        assertEquals(1, racingEventService.getRaceTrackersByEventMap().size());
         Iterator<RaceTracker> raceTrackerIter = racingEventService.getRaceTrackersByEventMap().get(event).iterator();
-        while(raceTrackerIter.hasNext()){
+        while (raceTrackerIter.hasNext()) {
             RaceTracker currentTracker = raceTrackerIter.next();
-            assert(currentTracker.equals(raceTracker1));
+            assertSame(raceTracker1, currentTracker);
         }
     }
     /**
@@ -126,12 +123,12 @@ public class RaceTrackerStartStopTest {
         assertTrue(racingEventService.getRaceTrackersByIDMap().containsValue(raceTracker3));
         // The raceTracker should still exist, but not containing the raceDef2 anymore
         assertTrue(raceTracker1.getRaces().contains(raceDef1));
-        assert raceTracker1.getRaces().size()==1;
+        assertEquals(1, raceTracker1.getRaces().size());
         assertTrue(raceTracker2.getRaces().contains(raceDef1));
-        assert raceTracker2.getRaces().size()==1;
+        assertEquals(1, raceTracker2.getRaces().size());
         assertTrue(raceTracker3.getRaces().contains(raceDef1));
         assertTrue(raceTracker3.getRaces().contains(raceDef3));
-        assert raceTracker1.getRaces().size()==2;
+        assertEquals(2, raceTracker1.getRaces().size());
     }
     /**
      * This test methods checks if the {@link RacingEventService#removeRace(Event, RaceDefinition) removeRace} method works correctly if the
@@ -154,7 +151,7 @@ public class RaceTrackerStartStopTest {
         assertTrue(racingEventService.getRaceTrackersByIDMap().containsValue(raceTracker3));
         // The raceTracker 3 should exist, and it should contain the raceDefinition3 only
         assertTrue(raceTracker3.getRaces().contains(raceDef3));
-        assert raceTracker3.getRaces().size() == 1;
+        assertEquals(1, raceTracker3.getRaces().size());
     }
 
 }
