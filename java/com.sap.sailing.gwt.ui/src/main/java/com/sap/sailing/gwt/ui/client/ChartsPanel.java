@@ -193,7 +193,7 @@ public class ChartsPanel extends FormPanel {
             }
         });
         configPanel.add(dataSelection);
-        Label lblSteps = new Label("Points to load:");
+        Label lblSteps = new Label(stringConstants.pointsToLoad());
         configPanel.add(lblSteps);
         final TextBox txtbSteps = new TextBox();
         txtbSteps.setText("" + stepsToLoad);
@@ -358,7 +358,7 @@ public class ChartsPanel extends FormPanel {
 
     private Widget createChart() {
 
-        final Label selectedPointLabel = new Label("Hover over a point!");
+        final Label selectedPointLabel = new Label(stringConstants.hoverOverAPoint());
 
         model = new PlotWithOverviewModel(PlotModelStrategy.defaultStrategy());
         plotOptions = new PlotOptions();
@@ -402,7 +402,7 @@ public class ChartsPanel extends FormPanel {
                                 + ": " + item.getDataPoint().getY() + "[Unit]");
                 	}
                 } else {
-                    selectedPointLabel.setText("No selection!");
+                    selectedPointLabel.setText(stringConstants.noSelection());
                 }
             }
         }, false);
