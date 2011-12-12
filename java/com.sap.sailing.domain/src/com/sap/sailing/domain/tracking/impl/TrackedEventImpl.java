@@ -62,7 +62,7 @@ public class TrackedEventImpl implements TrackedEvent {
     }
     
     @Override
-    public void removedTrackedRace(TrackedRace trackedRace) {
+    public void removeTrackedRace(TrackedRace trackedRace) {
         synchronized (trackedRaces) {
             trackedRaces.remove(trackedRace.getRace());
             Collection<TrackedRace> trbbc = trackedRacesByBoatClass.get(trackedRace.getRace().getBoatClass());

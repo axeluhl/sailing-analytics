@@ -10,11 +10,11 @@ import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.ui.client.ExpandableSortableColumn;
 import com.sap.sailing.gwt.ui.client.StringConstants;
-import com.sap.sailing.gwt.ui.shared.EventNameAndRaceName;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDAO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDAO;
 import com.sap.sailing.gwt.ui.shared.Pair;
 import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDAO;
+import com.sap.sailing.server.api.EventNameAndRaceName;
 
 public class GwtTestCaseColumnToggling extends GWTTestCase {
     
@@ -95,11 +95,10 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
     
     private void createLeaderboard(){
         service.createLeaderboard(LEADERBOARD_NAME, new int[] { 1, 2 },
-                new AsyncCallback<Void>() {
-
+                new AsyncCallback<LeaderboardDAO>() {
                     @Override
-                    public void onSuccess(Void result) {
-                        System.out.println("Created Leaderboard.");
+                    public void onSuccess(LeaderboardDAO result) {
+                        System.out.println("Created Leaderboard "+result.name);
                         addColumnToLeaderboard();
                     }
 
@@ -135,15 +134,15 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
     
     private void linkTrackedRace(){
         service.connectTrackedRaceToLeaderboardColumn(LEADERBOARD_NAME, COLUMN1_NAME, new EventNameAndRaceName(EVENT_NAME, TRACKED_RACE),
-                new AsyncCallback<Void>() {
+                new AsyncCallback<Boolean>() {
             @Override
             public void onFailure(Throwable caught) {
                 fail("Failed to link race.");
             }
 
             @Override
-            public void onSuccess(Void result) {
-                System.out.println("Linked race to column.");
+            public void onSuccess(Boolean result) {
+                System.out.println("Success of linking race to column: "+result);
                 getLeaderboard();
             }
         });

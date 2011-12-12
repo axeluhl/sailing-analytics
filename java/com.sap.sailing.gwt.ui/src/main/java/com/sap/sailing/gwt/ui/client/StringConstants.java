@@ -70,6 +70,7 @@ public interface StringConstants extends Constants {
     String rankGain();
     String sapSailingAnalytics();
     String leaderboard();
+    String leaderboards();
     String leaderboardSettings();
     String selectLegDetails();
     String settings();
@@ -91,12 +92,28 @@ public interface StringConstants extends Constants {
     String trackableRaces();
     String trackWind();
     String eventName();
+    String event();
+    String startTime();
+    String regatta();
+    String startTracking();
+    String stopTracking();
+    String connections();
+    String historyOfConnections();
+    String defineNewConnection();
+    String trackedRaces();
+    String canSendRequests();
+    String connectAndReadRaces();
+    String trackSettings();
+    String ports();
+    String liveData();
+    String storedData();
+    String uris();
+    String jsonUrl();
     String livePort();
     String storedPort();
     String liveUri();
     String storedUri();
     String eventsConnectedTo();
-    String btnTrack();
     String hostname();
     String declinationCheckbox();
     String raceStartTrackingColumn();
@@ -170,4 +187,9 @@ public interface StringConstants extends Constants {
     String actionRaceRemove();
     String filterLeaderboardsByName();
     String windwardDistanceToOverallLeader();
+    String actions();
+    String islinked();
+    String yes();
+    String no();
+    
 }

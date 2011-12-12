@@ -5,7 +5,7 @@ import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sailing.gwt.ui.server.SailingServiceImpl;
 import com.sap.sailing.server.RacingEventService;
-import com.sap.sailing.server.RacingEventServiceImpl;
+import com.sap.sailing.server.impl.RacingEventServiceImpl;
 
 public class MyTestSailingServiceImpl extends SailingServiceImpl implements MyTestSailingService {
     private static final long serialVersionUID = 3647254510616623048L;

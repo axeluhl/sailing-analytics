@@ -11,7 +11,8 @@ Require-Bundle: com.sap.sailing.gwt.ui,
  org.json.simple,
  com.sap.sailing.server,
  com.google.gwt.osgi;bundle-version="2.4.0",
- org.junit4
+ org.junit4,
+ com.sap.sailing.server.api
 Bundle-ClassPath: .
 Import-Package: org.osgi.framework,
  org.osgi.util.tracker;version="1.5.0"

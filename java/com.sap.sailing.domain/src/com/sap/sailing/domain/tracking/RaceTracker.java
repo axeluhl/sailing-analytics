@@ -9,9 +9,7 @@ import com.sap.sailing.domain.base.RaceDefinition;
 
 public interface RaceTracker {
     /**
-     * Stops tracking the race and removes the {@link TrackedRace} object one gets from calling
-     * {@link #getTrackedEvent()}.{@link TrackedEvent#getTrackedRace(RaceDefinition) getTrackedRace(}{@link #getRaces() getRaces())}
-     * from the {@link #getTrackedEvent() tracked event}.
+     * Stops tracking the races.
      */
     void stop() throws MalformedURLException, IOException, InterruptedException;
 
@@ -24,7 +22,6 @@ public interface RaceTracker {
      */
     Set<RaceDefinition> getRaces();
 
-    // TODO this is inconsistent with getRaces() which can return more than one race
     RacesHandle getRaceHandle();
 
     DynamicTrackedEvent getTrackedEvent();

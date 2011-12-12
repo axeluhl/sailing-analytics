@@ -10,10 +10,10 @@ import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Header;
 import com.sap.sailing.gwt.ui.client.LegDetailColumn.LegDetailField;
-import com.sap.sailing.gwt.ui.shared.DetailType;
 import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDAO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDAO;
 import com.sap.sailing.gwt.ui.shared.LegEntryDAO;
+import com.sap.sailing.server.api.DetailType;
 
 /**
  * Displays competitor's rank in leg and makes the column sortable by rank. The leg is

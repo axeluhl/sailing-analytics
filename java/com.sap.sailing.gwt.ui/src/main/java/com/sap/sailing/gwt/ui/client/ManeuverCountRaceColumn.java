@@ -9,11 +9,11 @@ import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.cellview.client.Header;
 import com.sap.sailing.gwt.ui.client.LegDetailColumn.LegDetailField;
-import com.sap.sailing.gwt.ui.shared.DetailType;
 import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDAO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDAO;
 import com.sap.sailing.gwt.ui.shared.LegEntryDAO;
 import com.sap.sailing.gwt.ui.shared.Triple;
+import com.sap.sailing.server.api.DetailType;
 
 public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> {
 
@@ -201,9 +201,9 @@ public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> {
         }
     }
 
-    public Double getDoubleValue(LeaderboardRowDAO object) {
+    public Double getDoubleValue(LeaderboardRowDAO row) {
         Double result = null;
-        Triple<Double, Double, Double> tacksJibesAndPenalties = getTotalNumberOfTacksJibesAndPenaltyCircles(object);
+        Triple<Double, Double, Double> tacksJibesAndPenalties = getTotalNumberOfTacksJibesAndPenaltyCircles(row);
         Double totalNumberOfTacks = tacksJibesAndPenalties.getA();
         Double totalNumberOfJibes = tacksJibesAndPenalties.getB();
         Double totalNumberOfPenaltyCircles = tacksJibesAndPenalties.getC();

@@ -45,7 +45,7 @@ public interface TrackedEvent {
     
     void addTrackedRace(TrackedRace trackedRace);
 
-    void removedTrackedRace(TrackedRace trackedRace);
+    void removeTrackedRace(TrackedRace trackedRace);
 
     /**
      * Listener will be notified when {@link #addTrackedRace(TrackedRace)} is called and

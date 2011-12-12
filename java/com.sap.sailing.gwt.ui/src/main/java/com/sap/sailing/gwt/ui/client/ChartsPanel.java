@@ -55,15 +55,15 @@ import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.ui.shared.CompetitorAndTimePointsDAO;
+import com.sap.sailing.gwt.ui.shared.CompetitorsAndTimePointsDAO;
 import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
 import com.sap.sailing.gwt.ui.shared.CompetitorInRaceDAO;
-import com.sap.sailing.gwt.ui.shared.DetailType;
-import com.sap.sailing.gwt.ui.shared.RaceIdentifier;
+import com.sap.sailing.server.api.DetailType;
+import com.sap.sailing.server.api.RaceIdentifier;
 
 public class ChartsPanel extends FormPanel {
     private CompetitorInRaceDAO chartData = null;
-    private CompetitorAndTimePointsDAO competitorAndTimePointsDAO = null;
+    private CompetitorsAndTimePointsDAO competitorsAndTimePointsDAO = null;
     private final SailingServiceAsync sailingService;
     private DateTimeFormat dateFormat;
     private HorizontalPanel mainPanel;
@@ -124,7 +124,7 @@ public class ChartsPanel extends FormPanel {
                 @Override
                 public void onClick(ClickEvent event) {
                     selectedRace = index;
-                    competitorAndTimePointsDAO = null;
+                    competitorsAndTimePointsDAO = null;
                     colorCounter = 0;
                     loadData();
                 }
@@ -178,22 +178,17 @@ public class ChartsPanel extends FormPanel {
         Label lblChart = new Label(stringConstants.chooseChart());
         configPanel.add(lblChart);
         final ListBox dataSelection = new ListBox();
-        dataSelection.addItem(DetailType.WINDWARD_DISTANCE_TO_OVERALL_LEADER.toString(stringConstants),
-                DetailType.WINDWARD_DISTANCE_TO_OVERALL_LEADER.toString());
-        dataSelection.addItem(DetailType.DISTANCE_TRAVELED.toString(stringConstants),
-                DetailType.DISTANCE_TRAVELED.toString());
-        dataSelection.addItem(DetailType.VELOCITY_MADE_GOOD_IN_KNOTS.toString(stringConstants),
-                DetailType.VELOCITY_MADE_GOOD_IN_KNOTS.toString());
-        dataSelection.addItem(DetailType.GAP_TO_LEADER_IN_SECONDS.toString(stringConstants),
-                DetailType.GAP_TO_LEADER_IN_SECONDS.toString());
-        dataSelection.addItem(DetailType.CURRENT_SPEED_OVER_GROUND_IN_KNOTS.toString(stringConstants),
-                DetailType.CURRENT_SPEED_OVER_GROUND_IN_KNOTS.toString());
+        dataSelection.addItem(DetailTypeFormatter.format(DetailType.WINDWARD_DISTANCE_TO_OVERALL_LEADER, stringConstants),DetailType.WINDWARD_DISTANCE_TO_OVERALL_LEADER.toString());
+        dataSelection.addItem(DetailTypeFormatter.format(DetailType.DISTANCE_TRAVELED, stringConstants),DetailType.DISTANCE_TRAVELED.toString());
+        dataSelection.addItem(DetailTypeFormatter.format(DetailType.VELOCITY_MADE_GOOD_IN_KNOTS, stringConstants),DetailType.VELOCITY_MADE_GOOD_IN_KNOTS.toString());
+        dataSelection.addItem(DetailTypeFormatter.format(DetailType.GAP_TO_LEADER_IN_SECONDS, stringConstants),DetailType.GAP_TO_LEADER_IN_SECONDS.toString());
+        dataSelection.addItem(DetailTypeFormatter.format(DetailType.CURRENT_SPEED_OVER_GROUND_IN_KNOTS, stringConstants),DetailType.CURRENT_SPEED_OVER_GROUND_IN_KNOTS.toString());
         dataSelection.addChangeHandler(new ChangeHandler() {
 
             @Override
             public void onChange(ChangeEvent event) {
-                for (DetailType dt : DetailType.values()) {
-                    if (dt.toString().equals(dataSelection.getValue(dataSelection.getSelectedIndex()))) {
+                for (DetailType dt : DetailType.values()){
+                    if (dt.toString().equals(dataSelection.getValue(dataSelection.getSelectedIndex()))){
                         dataToShow = dt;
                     }
                 }
@@ -209,11 +204,10 @@ public class ChartsPanel extends FormPanel {
         configPanel.add(txtbSteps);
         Button bttSteps = new Button(stringConstants.refresh());
         bttSteps.addClickHandler(new ClickHandler() {
-
             @Override
             public void onClick(ClickEvent event) {
                 stepsToLoad = Integer.parseInt(txtbSteps.getText());
-                competitorAndTimePointsDAO = null;
+                competitorsAndTimePointsDAO = null;
                 loadData();
                 updateTableData();
                 plot.redraw();
@@ -226,12 +220,10 @@ public class ChartsPanel extends FormPanel {
 
     private void loadData() {
         final Runnable loadData = new Runnable() {
-
             @Override
             public void run() {
                 ChartsPanel.this.sailingService.getCompetitorRaceData(races[selectedRace], competitorAndTimePointsDAO,
                         dataToShow, new AsyncCallback<CompetitorInRaceDAO>() {
-
                             @Override
                             public void onFailure(Throwable caught) {
                                 Window.alert(stringConstants.failedToLoadRaceData());
@@ -256,15 +248,14 @@ public class ChartsPanel extends FormPanel {
         } else {
             this.sailingService.getCompetitorAndTimePoints(races[selectedRace], stepsToLoad,
                     new AsyncCallback<CompetitorAndTimePointsDAO>() {
-
                         @Override
                         public void onFailure(Throwable caught) {
-
+                    // TODO show error dialog
                         }
 
                         @Override
-                        public void onSuccess(CompetitorAndTimePointsDAO result) {
-                            competitorAndTimePointsDAO = result;
+                public void onSuccess(CompetitorsAndTimePointsDAO result) {
+                    competitorsAndTimePointsDAO = result;
                             selectCompetitors.clear();
                             legendPanel.clear();
                             competitorLabels.clear();

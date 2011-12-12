@@ -23,7 +23,7 @@ import com.sap.sailing.domain.tracking.RacesHandle;
 import com.sap.sailing.domain.tracking.TrackedEvent;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
-import com.sap.sailing.server.RacingEventServiceImpl;
+import com.sap.sailing.server.impl.RacingEventServiceImpl;
 
 public class RaceTrackerTest {
     protected static final boolean tractracTunnel = Boolean.valueOf(System.getProperty("tractrac.tunnel", "false"));
@@ -98,7 +98,7 @@ public class RaceTrackerTest {
         TrackedEvent oldTrackedEvent = raceHandle.getTrackedEvent();
         TrackedRace oldTrackedRace = getTrackedRace(oldTrackedEvent);
         RaceDefinition oldRaceDefinition = oldTrackedRace.getRace();
-        service.stopTracking(raceHandle.getEvent());
+        service.removeEvent(raceHandle.getEvent());
         RacesHandle myRaceHandle = service.addTracTracRace(paramUrl, liveUri, storedUri, EmptyWindStore.INSTANCE, /* timeoutInMilliseconds */ 60000);
         TrackedEvent newTrackedEvent = myRaceHandle.getTrackedEvent();
         TrackedRace newTrackedRace = getTrackedRace(newTrackedEvent);
