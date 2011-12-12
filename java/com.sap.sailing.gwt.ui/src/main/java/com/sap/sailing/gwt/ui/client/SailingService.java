@@ -8,11 +8,11 @@ import java.util.Map;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
+import com.sap.sailing.gwt.ui.shared.CompetitorInRaceDAO;
 import com.sap.sailing.gwt.ui.shared.CompetitorsAndTimePointsDAO;
 import com.sap.sailing.gwt.ui.shared.EventDAO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDAO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDAO;
-import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDAO;
 import com.sap.sailing.gwt.ui.shared.ManeuverDAO;
 import com.sap.sailing.gwt.ui.shared.MarkDAO;
 import com.sap.sailing.gwt.ui.shared.Pair;
@@ -72,13 +72,14 @@ public interface SailingService extends RemoteService {
     public List<String> getLeaderboardNames() throws Exception;
     
     LeaderboardDAO getLeaderboardByName(String leaderboardName, Date date,
-            Collection<String> namesOfRacesForWhichToLoadLegDetails) throws Exception;
+            Collection<String> namesOfRacesForWhichToLoadLegDetails)
+            throws Exception;
 
     List<LeaderboardDAO> getLeaderboards();
     
     void updateLeaderboard(String leaderboardName, String newLeaderboardName, int[] newDiscardingThreasholds);
 
-    void createLeaderboard(String leaderboardName, int[] discardThresholds);
+    LeaderboardDAO createLeaderboard(String leaderboardName, int[] discardThresholds);
 
     void removeLeaderboard(String leaderboardName);
 
@@ -112,8 +113,6 @@ public interface SailingService extends RemoteService {
     Pair<Integer, Integer> updateLeaderboardScoreCorrection(String leaderboardName, String competitorName,
             String raceName, Integer correctedScore, Date date) throws Exception;
 
-    LeaderboardEntryDAO getLeaderboardEntry(String leaderboardName, String competitorName, String raceName, Date date) throws Exception;
-
     void updateCompetitorDisplayNameInLeaderboard(String leaderboardName, String competitorName, String displayName);
     
     void updateIsMedalRace(String leaderboardName, String columnName, boolean isMedalRace);
@@ -133,8 +132,7 @@ public interface SailingService extends RemoteService {
     
     String[] getCountryCodes();
     
-    List<Pair<CompetitorDAO, Double[]>> getCompetitorRaceData(RaceIdentifier race,
-            CompetitorsAndTimePointsDAO competitorAndTimePointsDAO, DetailType dataType) throws Exception;
+    CompetitorInRaceDAO getCompetitorRaceData(RaceIdentifier race, CompetitorsAndTimePointsDAO competitorsAndTimePointsDAO, DetailType dataType) throws Exception;
 
     CompetitorsAndTimePointsDAO getCompetitorsAndTimePoints(RaceIdentifier race, int steps);
     

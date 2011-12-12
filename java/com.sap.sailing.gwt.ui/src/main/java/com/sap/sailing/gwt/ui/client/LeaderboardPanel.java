@@ -85,10 +85,22 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
 
     private final RankColumn rankColumn;
     
+    /**
+     * Passed to the {@link ManeuverCountRaceColumn}. Modifications to this list will modify the column's children list
+     * when updated the next time.
+     */
     private final List<DetailType> selectedManeuverDetails;
 
+    /**
+     * Passed to the {@link LegColumn}. Modifications to this list will modify the column's children list
+     * when updated the next time.
+     */
     private final List<DetailType> selectedLegDetails;
 
+    /**
+     * Passed to the {@link TextRaceColumn}. Modifications to this list will modify the column's children list
+     * when updated the next time.
+     */
     private final List<DetailType> selectedRaceDetails;
 
     private List<String> selectedRaceColumns;
@@ -491,8 +503,10 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             return result;
         }
         
-        private ManeuverCountRaceColumn getManeuverCountRaceColumn(){
-            return new ManeuverCountRaceColumn(getLeaderboardPanel(), this, stringConstants, LeaderboardPanel.this.selectedManeuverDetails, LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LEG_DETAIL_COLUMN_HEADER_STYLE, LEG_DETAIL_COLUMN_STYLE);
+        private ManeuverCountRaceColumn getManeuverCountRaceColumn() {
+            return new ManeuverCountRaceColumn(getLeaderboardPanel(), this, stringConstants,
+                    LeaderboardPanel.this.selectedManeuverDetails, LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE,
+                    LEG_DETAIL_COLUMN_HEADER_STYLE, LEG_DETAIL_COLUMN_STYLE);
         }
 
         @Override
@@ -1151,25 +1165,24 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             }
         }
         selectedRaceColumns = correctedOrderSelectedRaces;
-        
         removeRaceColumnsNotSelected(selectedRaceColumns);
-        
         for (int selectedRaceCount = 0; selectedRaceCount < selectedRaceColumns.size(); selectedRaceCount++) {
             String selectedRaceName = selectedRaceColumns.get(selectedRaceCount);
-            if (leaderboardTableContainsRace(selectedRaceName)){
+            if (leaderboardTableContainsRace(selectedRaceName)) {
                 // remove all raceColumns, starting at a specific raceColumnPosition, until the selected raceName.
                 removeRaceColumnFromRaceColumnStartIndexBeforeRace(selectedRaceCount, selectedRaceName);
-            }else{
+            } else {
                 // get correct position to insert the column
                 int positionToInsert = getColumnPositionToInsert(selectedRaceName, selectedRaceCount);
-                if(positionToInsert!=-1){
-                    insertColumn(positionToInsert,
+                if (positionToInsert != -1) {
+                    insertColumn(
+                            positionToInsert,
                             createRaceColumn(selectedRaceName, leaderboard.raceIsMedalRace(selectedRaceName),
                                     leaderboard.raceIsTracked(selectedRaceName)));
-                }else{
+                } else {
                     // Add the raceColumn with addRaceColumn, if no RaceColumn is existing in leaderboard
                     addRaceColumn(createRaceColumn(selectedRaceName, leaderboard.raceIsMedalRace(selectedRaceName),
-                                    leaderboard.raceIsTracked(selectedRaceName)));
+                            leaderboard.raceIsTracked(selectedRaceName)));
                 }
             }
         }
@@ -1335,6 +1348,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 competitors.add(leaderboardRowDAO.competitor);
             }
         }
-        new CompareCompetitorsChartDialog(sailingService, competitors, races.toArray(new LeaderboardNameAndRaceColumnName[0]), stringConstants);
+        CompareCompetitorsChartDialog chartDialog = new CompareCompetitorsChartDialog(sailingService, competitors, races.toArray(new LeaderboardNameAndRaceColumnName[0]), stringConstants);
+        chartDialog.show();
     }
 }

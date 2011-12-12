@@ -1,14 +1,18 @@
 package com.sap.sailing.gwt.ui.client;
 
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.gwt.cell.client.Cell.Context;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.Header;
 import com.sap.sailing.gwt.ui.client.LegDetailColumn.LegDetailField;
+import com.sap.sailing.gwt.ui.shared.LeaderboardDAO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDAO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDAO;
 import com.sap.sailing.gwt.ui.shared.LegEntryDAO;
@@ -22,6 +26,9 @@ public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> {
 
     private final String headerStyle;
     private final String columnStyle;
+
+    private LeaderboardRowDAO minimumValue;
+    private LeaderboardRowDAO maximumValue;
 
     private abstract class AbstractManeuverDetailField<T extends Comparable<?>> implements LegDetailField<T> {
         public T get(LeaderboardRowDAO row) {
@@ -171,22 +178,22 @@ public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> {
     @Override
     public Header<SafeHtml> getHeader() {
         SortableExpandableColumnHeader result = new SortableExpandableColumnHeader(
-                /* title */stringConstants.maneuverTypes(),
-                /* iconURL */null, getLeaderboardPanel(), this, stringConstants);
+        /* title */stringConstants.maneuverTypes(),
+        /* iconURL */null, getLeaderboardPanel(), this, stringConstants);
         return result;
     }
 
     @Override
     public Comparator<LeaderboardRowDAO> getComparator() {
-         return new Comparator<LeaderboardRowDAO>() {
-             @Override
-             public int compare(LeaderboardRowDAO o1, LeaderboardRowDAO o2) {
-                 boolean ascending = isSortedAscendingForThisColumn(getLeaderboardPanel().getLeaderboardTable());
-                 Double val1 = getDoubleValue(o1);
-                 Double val2 = getDoubleValue(o2);
-                 return val1 == null ? val2 == null ? 0 :  ascending ? 1 : -1
-                         : val2 == null ? ascending ? -1:1 : val1.compareTo(val2);
-             }
+        return new Comparator<LeaderboardRowDAO>() {
+            @Override
+            public int compare(LeaderboardRowDAO o1, LeaderboardRowDAO o2) {
+                boolean ascending = isSortedAscendingForThisColumn(getLeaderboardPanel().getLeaderboardTable());
+                Double val1 = getDoubleValue(o1);
+                Double val2 = getDoubleValue(o2);
+                return val1 == null ? val2 == null ? 0 : ascending ? 1 : -1 : val2 == null ? ascending ? -1 : 1 : val1
+                        .compareTo(val2);
+            }
         };
     }
 
@@ -201,9 +208,73 @@ public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> {
         }
     }
 
-    public Double getDoubleValue(LeaderboardRowDAO object) {
+    @Override
+    public void render(Context context, LeaderboardRowDAO row, SafeHtmlBuilder sb) {
+        int percent = getPercentage(row);
+        String title = getTitle(row);
+        sb.appendHtmlConstant(
+                "<div " + (title == null ? "" : "title=\"" + title + "\" ")
+                        + "style=\"left: 0px; background-image: url(/images/greyBar.png); "
+                        + " background-position: left; background-repeat: no-repeat; background-size: " + percent
+                        + "% 25px; \">").appendEscaped(getValue(row)).appendHtmlConstant("</div>");
+    }
+
+    /**
+     * Computes a tool-tip text to add to the table cell's content as rendered by
+     * {@link #render(Context, LeaderboardRowDAO, SafeHtmlBuilder)}.
+     * 
+     * @return This default implementation returns <code>null</code> for no tool tip / title
+     */
+    protected String getTitle(LeaderboardRowDAO row) {
+        return null;
+    }
+
+    private int getPercentage(LeaderboardRowDAO row) {
+        updateMinMax(getLeaderboardPanel().getLeaderboard());
+        Double value = getDoubleValue(row);
+        int percentage = 0;
+        if (value != null && getMinimumDouble() != null && getMaximumDouble() != null) {
+            int minBarLength = Math.abs(getMinimumDouble()) < 0.01 ? 0 : 10;
+            percentage = (int) (minBarLength + (100. - minBarLength) * (value - getMinimumDouble())
+                    / (getMaximumDouble() - getMinimumDouble()));
+        }
+        return percentage;
+    }
+
+    @Override
+    protected void updateMinMax(LeaderboardDAO leaderboard) {
+        Comparator<LeaderboardRowDAO> comparator = getComparator();
+        Collection<LeaderboardRowDAO> values = leaderboard.rows.values();
+        LeaderboardRowDAO minimumRow = null;
+        LeaderboardRowDAO maximumRow = null;
+        for (LeaderboardRowDAO row : values) {
+            //LeaderboardEntryDAO fieldsForRace = row.fieldsByRaceName.get(getRaceName());
+            if (getDoubleValue(row) != null && (minimumRow == null || comparator.compare(minimumRow, row) > 0)) {
+                minimumRow = row;
+            }
+            if (getDoubleValue(row) != null && (maximumRow == null || comparator.compare(maximumRow, row) < 0)) {
+                maximumRow = row;
+            }
+        }
+        if (minimumRow != null) {
+            minimumValue = minimumRow;
+        }
+        if (maximumRow != null) {
+            maximumValue = maximumRow;
+        }
+    }
+    
+    private Double getMinimumDouble(){
+        return getDoubleValue(minimumValue);
+    }
+    
+    private Double getMaximumDouble(){
+        return getDoubleValue(maximumValue);
+    }
+
+    public Double getDoubleValue(LeaderboardRowDAO row) {
         Double result = null;
-        Triple<Double, Double, Double> tacksJibesAndPenalties = getTotalNumberOfTacksJibesAndPenaltyCircles(object);
+        Triple<Double, Double, Double> tacksJibesAndPenalties = getTotalNumberOfTacksJibesAndPenaltyCircles(row);
         Double totalNumberOfTacks = tacksJibesAndPenalties.getA();
         Double totalNumberOfJibes = tacksJibesAndPenalties.getB();
         Double totalNumberOfPenaltyCircles = tacksJibesAndPenalties.getC();

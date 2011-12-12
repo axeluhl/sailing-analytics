@@ -31,8 +31,6 @@ public class LeaderboardConfigImagesBarCell extends ImagesBarCell {
 
     private static final SafeHtml ICON_EDIT = makeImage(resources.editIcon());
 
-    private static final SafeHtml ICON_OPEN_BROWSER = makeImage(resources.openBrowserIcon());
-
     private static final SafeHtml ICON_REMOVE = makeImage(resources.removeIcon());
     
     private static final SafeHtml ICON_EDIT_SCORES = makeImage(resources.scoresIcon());
@@ -56,9 +54,6 @@ public class LeaderboardConfigImagesBarCell extends ImagesBarCell {
         sb.append(rendered);
 
         rendered = templates.cell("ACTION_EDIT_SCORES", imgStyle, stringConstants.actionEditScores(), ICON_EDIT_SCORES);
-        sb.append(rendered);
-        
-        rendered = templates.cell("ACTION_OPEN_BROWSER", imgStyle, stringConstants.actionOpenBrowser(), ICON_OPEN_BROWSER);
         sb.append(rendered);
 
         rendered = templates.cell("ACTION_REMOVE", imgStyle, stringConstants.actionRemove(), ICON_REMOVE);
