@@ -11,6 +11,7 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -173,6 +174,8 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
      * processed.
      */
     private int startedProcessingRequestID;
+
+    private static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
 
     public RaceMapPanel(SailingServiceAsync sailingService, ErrorReporter errorReporter,
             final EventRefresher eventRefresher, StringConstants stringConstants) {
@@ -387,7 +390,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
                 boatIcon.setIconAnchor(Point.newInstance(8, 8));
                 boatIconHighlighted = Icon.newInstance("/images/reddot.png");
                 boatIconHighlighted.setIconAnchor(Point.newInstance(8, 8));
-                buoyIcon = Icon.newInstance("/images/reddiamond.png");
+                buoyIcon = Icon.newInstance(resources.buoyIcon().getSafeUri().asString());
                 buoyIcon.setIconAnchor(Point.newInstance(7, 7));
                 tackToStarboardIcon = Icon
                         .newInstance("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=T|00FF00|000000");
