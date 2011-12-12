@@ -10,15 +10,16 @@ import com.google.gwt.user.cellview.client.SafeHtmlHeader;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDAO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDAO;
 
-public abstract class LegDetailColumn<FieldType extends Comparable<?>, RenderingType> extends SortableColumn<LeaderboardRowDAO, RenderingType> {
+public abstract class LegDetailColumn<FieldType extends Comparable<?>, RenderingType> extends SortableColumn<LeaderboardRowDAO, RenderingType> implements HasStringValue{
     private final String title;
     private final LegDetailField<FieldType> field;
     private final CellTable<LeaderboardRowDAO> leaderboardTable;
-    private FieldType minimum;
-    private FieldType maximum;
+    private LeaderboardRowDAO minimumRowDAO;
+    private LeaderboardRowDAO maximumRowDAO;
     private final String headerStyle;
     private final String columnStyle;
     private final String unit;
+    protected MinMaxRenderer minMaxRenderer;
     
     public interface LegDetailField<T extends Comparable<?>> {
         T get(LeaderboardRowDAO row);
@@ -85,12 +86,12 @@ public abstract class LegDetailColumn<FieldType extends Comparable<?>, Rendering
         return header;
     }
 
-    public FieldType getMinimum() {
-        return minimum;
+    public LeaderboardRowDAO getMinimum() {
+        return minimumRowDAO;
     }
     
-    public FieldType getMaximum() {
-        return maximum;
+    public LeaderboardRowDAO getMaximum() {
+        return maximumRowDAO;
     }
     
     /**
@@ -104,23 +105,9 @@ public abstract class LegDetailColumn<FieldType extends Comparable<?>, Rendering
 
     @Override
     protected void updateMinMax(LeaderboardDAO leaderboard) {
-        Comparator<LeaderboardRowDAO> comparator = getComparator();
-        LeaderboardRowDAO minimumRow = null;
-        LeaderboardRowDAO maximumRow = null;
-        for (LeaderboardRowDAO row : leaderboard.rows.values()) {
-            if (getFieldValue(row) != null && (minimumRow == null || comparator.compare(minimumRow, row) > 0)) {
-                minimumRow = row;
-            }
-            if (getFieldValue(row) != null  && (maximumRow == null || comparator.compare(maximumRow, row) < 0)) {
-                maximumRow = row;
-            }
-        }
-        if (minimumRow != null) {
-            minimum = getFieldValue(minimumRow);
-        }
-        if (maximumRow != null) {
-            maximum = getFieldValue(maximumRow);
-        }
+        minMaxRenderer = new MinMaxRenderer(leaderboard, this, getComparator());
+        minMaxRenderer.updateMinMax(leaderboard);
     }
+    
     
 }

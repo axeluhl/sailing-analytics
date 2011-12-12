@@ -144,7 +144,7 @@ public class LegColumn extends ExpandableSortableColumn<String> {
         }
 
         @Override
-        public String getValue(LeaderboardRowDAO row) {
+        public String getStringValue(LeaderboardRowDAO row) {
             Double fieldValue = getFieldValue(row);
             StringBuilder result = new StringBuilder();
             if (fieldValue != null) {

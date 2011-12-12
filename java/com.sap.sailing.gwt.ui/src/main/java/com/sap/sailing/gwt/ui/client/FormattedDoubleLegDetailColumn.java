@@ -7,7 +7,7 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDAO;
 
-public class FormattedDoubleLegDetailColumn extends LegDetailColumn<Double, String> {
+public class FormattedDoubleLegDetailColumn extends LegDetailColumn<Double, String> implements HasStringValue{
     private final NumberFormat formatter;
     
     public FormattedDoubleLegDetailColumn(String title, String unit,
@@ -45,12 +45,7 @@ public class FormattedDoubleLegDetailColumn extends LegDetailColumn<Double, Stri
 
     @Override
     public void render(Context context, LeaderboardRowDAO row, SafeHtmlBuilder sb) {
-        int percent = getPercentage(row);
-        String title = getTitle(row);
-        sb.appendHtmlConstant("<div "+(title==null?"":"title=\""+title+"\" ")+"style=\"left: 0px; background-image: url(/images/greyBar.png); "+
-        " background-position: left; background-repeat: no-repeat; background-size: "+
-                percent+"% 25px; \">").
-        appendEscaped(getValue(row)).appendHtmlConstant("</div>");
+        minMaxRenderer.render(context, row, sb);
     }
 
     /**
@@ -62,14 +57,8 @@ public class FormattedDoubleLegDetailColumn extends LegDetailColumn<Double, Stri
         return null;
     }
 
-    private int getPercentage(LeaderboardRowDAO row) {
-        Double value = getFieldValue(row);
-        int percentage = 0;
-        if (value != null && getMinimum() != null && getMaximum() != null) {
-            int minBarLength = Math.abs(getMinimum()) < 0.01 ? 0 : 10;
-            percentage = (int) (minBarLength+(100.-minBarLength)*(value-getMinimum())/(getMaximum()-getMinimum()));
-        }
-        return percentage;
+    @Override
+    public String getStringValue(LeaderboardRowDAO object) {
+        return getValue(object);
     }
-
 }

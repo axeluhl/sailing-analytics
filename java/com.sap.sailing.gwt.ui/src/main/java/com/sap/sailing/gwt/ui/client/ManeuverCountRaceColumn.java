@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.ui.client;
 
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -19,7 +18,7 @@ import com.sap.sailing.gwt.ui.shared.LegEntryDAO;
 import com.sap.sailing.gwt.ui.shared.Triple;
 import com.sap.sailing.server.api.DetailType;
 
-public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> {
+public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> implements HasStringValue{
 
     private final StringConstants stringConstants;
     private final RaceNameProvider raceNameProvider;
@@ -27,8 +26,7 @@ public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> {
     private final String headerStyle;
     private final String columnStyle;
 
-    private LeaderboardRowDAO minimumValue;
-    private LeaderboardRowDAO maximumValue;
+    private MinMaxRenderer minmaxRenderer;
 
     private abstract class AbstractManeuverDetailField<T extends Comparable<?>> implements LegDetailField<T> {
         public T get(LeaderboardRowDAO row) {
@@ -80,6 +78,7 @@ public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> {
         this.raceNameProvider = raceNameProvider;
         this.headerStyle = headerStyle;
         this.columnStyle = columnStylee;
+        this.minmaxRenderer = new MinMaxRenderer(leaderboardPanel.getLeaderboard(), this, getComparator());
     }
 
     private Double getTotalNumberOfTacks(LeaderboardEntryDAO row) {
@@ -198,7 +197,7 @@ public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> {
     }
 
     @Override
-    public String getValue(LeaderboardRowDAO object) {
+    public String getStringValue(LeaderboardRowDAO object) {
         Double result = getDoubleValue(object);
         if (result == null) {
             return "";
@@ -210,13 +209,7 @@ public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> {
 
     @Override
     public void render(Context context, LeaderboardRowDAO row, SafeHtmlBuilder sb) {
-        int percent = getPercentage(row);
-        String title = getTitle(row);
-        sb.appendHtmlConstant(
-                "<div " + (title == null ? "" : "title=\"" + title + "\" ")
-                        + "style=\"left: 0px; background-image: url(/images/greyBar.png); "
-                        + " background-position: left; background-repeat: no-repeat; background-size: " + percent
-                        + "% 25px; \">").appendEscaped(getValue(row)).appendHtmlConstant("</div>");
+        minmaxRenderer.render(context, row, sb);
     }
 
     /**
@@ -227,49 +220,6 @@ public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> {
      */
     protected String getTitle(LeaderboardRowDAO row) {
         return null;
-    }
-
-    private int getPercentage(LeaderboardRowDAO row) {
-        updateMinMax(getLeaderboardPanel().getLeaderboard());
-        Double value = getDoubleValue(row);
-        int percentage = 0;
-        if (value != null && getMinimumDouble() != null && getMaximumDouble() != null) {
-            int minBarLength = Math.abs(getMinimumDouble()) < 0.01 ? 0 : 10;
-            percentage = (int) (minBarLength + (100. - minBarLength) * (value - getMinimumDouble())
-                    / (getMaximumDouble() - getMinimumDouble()));
-        }
-        return percentage;
-    }
-
-    @Override
-    protected void updateMinMax(LeaderboardDAO leaderboard) {
-        Comparator<LeaderboardRowDAO> comparator = getComparator();
-        Collection<LeaderboardRowDAO> values = leaderboard.rows.values();
-        LeaderboardRowDAO minimumRow = null;
-        LeaderboardRowDAO maximumRow = null;
-        for (LeaderboardRowDAO row : values) {
-            //LeaderboardEntryDAO fieldsForRace = row.fieldsByRaceName.get(getRaceName());
-            if (getDoubleValue(row) != null && (minimumRow == null || comparator.compare(minimumRow, row) > 0)) {
-                minimumRow = row;
-            }
-            if (getDoubleValue(row) != null && (maximumRow == null || comparator.compare(maximumRow, row) < 0)) {
-                maximumRow = row;
-            }
-        }
-        if (minimumRow != null) {
-            minimumValue = minimumRow;
-        }
-        if (maximumRow != null) {
-            maximumValue = maximumRow;
-        }
-    }
-    
-    private Double getMinimumDouble(){
-        return getDoubleValue(minimumValue);
-    }
-    
-    private Double getMaximumDouble(){
-        return getDoubleValue(maximumValue);
     }
 
     public Double getDoubleValue(LeaderboardRowDAO row) {
@@ -296,6 +246,11 @@ public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> {
             }
         }
         return result;
+    }
+
+    @Override
+    protected void updateMinMax(LeaderboardDAO leaderboard) {
+        minmaxRenderer.updateMinMax(leaderboard);
     }
 
     @Override
@@ -327,4 +282,8 @@ public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> {
         return headerStyle;
     }
 
+    @Override
+    public String getValue(LeaderboardRowDAO object) {
+        return getValue(object);
+    }
 }
