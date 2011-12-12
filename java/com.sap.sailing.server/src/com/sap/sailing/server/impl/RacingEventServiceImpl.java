@@ -56,11 +56,17 @@ import com.sap.sailing.domain.tractracadapter.RaceRecord;
 import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sailing.expeditionconnector.ExpeditionWindTrackerFactory;
 import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.api.EventFetcher;
+import com.sap.sailing.server.api.EventIdentifier;
+import com.sap.sailing.server.api.EventNameAndRaceName;
+import com.sap.sailing.server.api.LeaderboardNameAndRaceColumnName;
+import com.sap.sailing.server.api.RaceFetcher;
+import com.sap.sailing.server.api.RaceIdentifier;
 import com.sap.sailing.util.Util;
 import com.sap.sailing.util.Util.Pair;
 import com.sap.sailing.util.Util.Triple;
 
-public class RacingEventServiceImpl implements RacingEventService {
+public class RacingEventServiceImpl implements RacingEventService, EventFetcher, RaceFetcher {
     private static final Logger logger = Logger.getLogger(RacingEventServiceImpl.class.getName());
 
     /**
@@ -164,7 +170,6 @@ public class RacingEventServiceImpl implements RacingEventService {
     
     @Override
     public void updateStoredLeaderboard(Leaderboard leaderboard) {
-        // TODO this is very brute force; consider updating more fine-grained
         mongoObjectFactory.storeLeaderboard(leaderboard);
     }
     
@@ -592,6 +597,67 @@ public class RacingEventServiceImpl implements RacingEventService {
             swissTimingAdapterPersistence.storeSailMasterMessage(stlSMMessage);
             swissTimingAdapterPersistence.storeSailMasterMessage(ccgSMMessage);
         }
+    }
+
+    @Override
+    public Event getEvent(EventIdentifier eventIdentifier) {
+        return (Event) eventIdentifier.getEvent(this);
+    }
+
+    @Override
+    public TrackedRace getTrackedRace(RaceIdentifier raceIdentifier) {
+        return (TrackedRace) raceIdentifier.getTrackedRace(this);
+    }
+
+    @Override
+    public TrackedRace getExistingTrackedRace(RaceIdentifier raceIdentifier) {
+        return (TrackedRace) raceIdentifier.getExistingTrackedRace(this);
+    }
+
+    @Override
+    public RaceDefinition getRace(EventNameAndRaceName eventNameAndRaceName) {
+        RaceDefinition result = null;
+        Event event = getEvent(eventNameAndRaceName);
+        if (event != null) {
+            result = event.getRaceByName(eventNameAndRaceName.getRaceName());
+        }
+        return result;
+    }
+
+    @Override
+    public TrackedRace getTrackedRace(EventNameAndRaceName eventNameAndRaceName) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public RaceDefinition getRace(LeaderboardNameAndRaceColumnName leaderboardNameAndRaceColumnName) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public TrackedRace getTrackedRace(LeaderboardNameAndRaceColumnName leaderboardNameAndRaceColumnName) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public TrackedRace getExistingTrackedRace(LeaderboardNameAndRaceColumnName leaderboardNameAndRaceColumnName) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public TrackedRace getExistingTrackedRace(EventNameAndRaceName eventNameAndRaceName) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Event getEvent(EventNameAndRaceName eventIdentifier) {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

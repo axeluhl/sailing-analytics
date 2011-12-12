@@ -77,7 +77,7 @@ public class TestColumnSwapping {
         sailingService.updateIsMedalRace(TEST_LEADERBOARD_NAME, races[0], true);
         sailingService.updateIsMedalRace(TEST_LEADERBOARD_NAME, races[2], false);
         try {
-            lb = sailingService.getLeaderboardByName(TEST_LEADERBOARD_NAME, new Date(), null);
+            lb = sailingService.getLeaderboardByName(TEST_LEADERBOARD_NAME, new Date(), /* races to load */ null);
         } catch (Exception e) {
             // e.printStackTrace();
             fail(e.getLocalizedMessage());

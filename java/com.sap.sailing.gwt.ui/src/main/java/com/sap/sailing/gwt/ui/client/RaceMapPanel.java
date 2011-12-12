@@ -386,9 +386,9 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
                         lastMousePosition = event.getLatLng();
                     }
                 });
-                boatIcon = Icon.newInstance("/images/blackdot.png");
+                boatIcon = Icon.newInstance(resources.blackdotIcon().getSafeUri().asString());
                 boatIcon.setIconAnchor(Point.newInstance(8, 8));
-                boatIconHighlighted = Icon.newInstance("/images/reddot.png");
+                boatIconHighlighted = Icon.newInstance(resources.reddotIcon().getSafeUri().asString());
                 boatIconHighlighted.setIconAnchor(Point.newInstance(8, 8));
                 buoyIcon = Icon.newInstance(resources.buoyIcon().getSafeUri().asString());
                 buoyIcon.setIconAnchor(Point.newInstance(7, 7));

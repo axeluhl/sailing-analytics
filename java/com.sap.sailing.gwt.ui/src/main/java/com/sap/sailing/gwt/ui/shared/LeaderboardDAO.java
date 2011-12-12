@@ -20,7 +20,7 @@ public class LeaderboardDAO implements IsSerializable {
     public String name;
     public List<CompetitorDAO> competitors;
     private List<RaceInLeaderboardDAO> races;
-    public Map<CompetitorDAO, String> displayNames;
+    public Map<CompetitorDAO, String> competitorDisplayNames;
     public Map<CompetitorDAO, LeaderboardRowDAO> rows;
     public boolean hasCarriedPoints;
     public int[] discardThresholds;
@@ -36,10 +36,10 @@ public class LeaderboardDAO implements IsSerializable {
     }
     
     public String getDisplayName(CompetitorDAO competitor) {
-        if (displayNames == null || displayNames.get(competitor) == null) {
+        if (competitorDisplayNames == null || competitorDisplayNames.get(competitor) == null) {
             return competitor.name;
         } else {
-            return displayNames.get(competitor);
+            return competitorDisplayNames.get(competitor);
         }
     }
     
