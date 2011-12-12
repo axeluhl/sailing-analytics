@@ -95,11 +95,10 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
     
     private void createLeaderboard(){
         service.createLeaderboard(LEADERBOARD_NAME, new int[] { 1, 2 },
-                new AsyncCallback<Void>() {
-
+                new AsyncCallback<LeaderboardDAO>() {
                     @Override
-                    public void onSuccess(Void result) {
-                        System.out.println("Created Leaderboard.");
+                    public void onSuccess(LeaderboardDAO result) {
+                        System.out.println("Created Leaderboard "+result.name);
                         addColumnToLeaderboard();
                     }
 

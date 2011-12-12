@@ -94,6 +94,7 @@ import com.sap.sailing.gwt.ui.shared.Pair;
 import com.sap.sailing.gwt.ui.shared.PositionDAO;
 import com.sap.sailing.gwt.ui.shared.QuickRankDAO;
 import com.sap.sailing.gwt.ui.shared.RaceDAO;
+import com.sap.sailing.gwt.ui.shared.RaceInLeaderboardDAO;
 import com.sap.sailing.gwt.ui.shared.RegattaDAO;
 import com.sap.sailing.gwt.ui.shared.SpeedWithBearingDAO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDAO;
@@ -162,7 +163,8 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     
     @Override
     public LeaderboardDAO getLeaderboardByName(String leaderboardName, Date date,
-            Collection<String> namesOfRacesForWhichToLoadLegDetails) throws Exception {
+            Collection<String> namesOfRacesForWhichToLoadLegDetails)
+            throws NoWindException {
         long startOfRequestHandling = System.currentTimeMillis();
         LeaderboardDAO result = null;
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
@@ -171,10 +173,8 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             TimePoint timePoint = new MillisecondsTimePoint(date);
             result.competitors = new ArrayList<CompetitorDAO>();
             result.name = leaderboard.getName();
-            result.displayNames = new HashMap<CompetitorDAO, String>();
+            result.competitorDisplayNames = new HashMap<CompetitorDAO, String>();
             for (RaceInLeaderboard raceColumn : leaderboard.getRaceColumns()) {
-                //result.raceNamesAndMedalRaceAndTracked.put(raceColumn.getName(),
-                //        new Pair<Boolean, Boolean>(raceColumn.isMedalRace(), raceColumn.getTrackedRace()!=null));
                 result.addRace(raceColumn.getName(), raceColumn.isMedalRace(), raceColumn.getTrackedRace() != null);
             }
             result.rows = new HashMap<CompetitorDAO, LeaderboardRowDAO>();
@@ -197,7 +197,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 }
                 String displayName = leaderboard.getDisplayName(competitor);
                 if (displayName != null) {
-                    result.displayNames.put(competitorDAO, displayName);
+                    result.competitorDisplayNames.put(competitorDAO, displayName);
                 }
             }
         }
@@ -221,28 +221,6 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             }
         } else {
             logger.warning("stressTestLeaderboardByName: couldn't find leaderboard "+leaderboardName);
-        }
-    }
-    
-    @Override
-    public LeaderboardEntryDAO getLeaderboardEntry(String leaderboardName, String competitorName, String raceName, Date date) throws NoWindException {
-        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
-        if (leaderboard != null) {
-            Competitor competitor = leaderboard.getCompetitorByName(competitorName);
-            if (competitor != null) {
-                RaceInLeaderboard raceColumn = leaderboard.getRaceColumnByName(raceName);
-                if (raceColumn != null) {
-                    MillisecondsTimePoint timePoint = new MillisecondsTimePoint(date);
-                    return getLeaderboardEntryDAO(leaderboard.getEntry(competitor, raceColumn, timePoint),
-                            raceColumn.getTrackedRace(), competitor, timePoint, /* addLegDetails */ false);
-                } else {
-                    throw new IllegalArgumentException("Didn't find race "+raceName+" in leaderboard "+leaderboardName);
-                }
-            } else {
-                throw new IllegalArgumentException("Didn't find competitor "+competitorName+" in leaderboard "+leaderboardName);
-            }
-        } else {
-            throw new IllegalArgumentException("Didn't find leaderboard "+leaderboardName);
         }
     }
     
@@ -448,13 +426,10 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
 
     private RaceDefinition getRaceByName(Event event, String raceName) {
         if (event != null) {
-            for (RaceDefinition r : event.getAllRaces()) {
-                if (r.getName().equals(raceName)) {
-                    return r;
-                }
-            }
+            return event.getRaceByName(raceName);
+        } else {
+            return null;
         }
-        return null;
     }
     
     @Override
@@ -867,8 +842,8 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
 
     @Override
-    public void createLeaderboard(String leaderboardName, int[] discardThresholds) {
-        getService().addLeaderboard(leaderboardName, discardThresholds);
+    public LeaderboardDAO createLeaderboard(String leaderboardName, int[] discardThresholds) {
+        return createStrippedLeaderboardDAO(getService().addLeaderboard(leaderboardName, discardThresholds));
     }
 
     @Override
@@ -876,18 +851,30 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         Map<String, Leaderboard> leaderboards = getService().getLeaderboards();
         List<LeaderboardDAO> results = new ArrayList<LeaderboardDAO>();
         for(Leaderboard leaderboard: leaderboards.values()) {
-            LeaderboardDAO dao = new LeaderboardDAO();
-            dao.name = leaderboard.getName();
-            dao.displayNames = new HashMap<CompetitorDAO, String>();
-            for (RaceInLeaderboard raceColumn : leaderboard.getRaceColumns()) {
-                dao.addRace(raceColumn.getName(), raceColumn.isMedalRace(), raceColumn.getTrackedRace() != null);
-            }
-            dao.hasCarriedPoints = leaderboard.hasCarriedPoints();
-            dao.discardThresholds = leaderboard.getResultDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces();
+            LeaderboardDAO dao = createStrippedLeaderboardDAO(leaderboard);
             results.add(dao);
         }
         
         return results;
+    }
+
+    /**
+     * Creates a {@link LeaderboardDAO} for <code>leaderboard</code> and fills in the name, race master data
+     * in the form of {@link RaceInLeaderboardDAO}s, whether or not there are {@link LeaderboardDAO#hasCarriedPoints carried points}
+     * and the {@link LeaderboardDAO#discardThresholds discarding thresholds} for the leaderboard. No data about the points
+     * is filled into the result object. No data about the competitor display names is filled in; instead, an empty map
+     * is used for {@link LeaderboardDAO#competitorDisplayNames}.
+     */
+    private LeaderboardDAO createStrippedLeaderboardDAO(Leaderboard leaderboard) {
+        LeaderboardDAO dao = new LeaderboardDAO();
+        dao.name = leaderboard.getName();
+        dao.competitorDisplayNames = new HashMap<CompetitorDAO, String>();
+        for (RaceInLeaderboard raceColumn : leaderboard.getRaceColumns()) {
+            dao.addRace(raceColumn.getName(), raceColumn.isMedalRace(), raceColumn.getTrackedRace() != null);
+        }
+        dao.hasCarriedPoints = leaderboard.hasCarriedPoints();
+        dao.discardThresholds = leaderboard.getResultDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces();
+        return dao;
     }
     
     @Override

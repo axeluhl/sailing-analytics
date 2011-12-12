@@ -18,6 +18,7 @@ import com.sap.sailing.gwt.ui.shared.ManeuverDAO;
 import com.sap.sailing.gwt.ui.shared.MarkDAO;
 import com.sap.sailing.gwt.ui.shared.Pair;
 import com.sap.sailing.gwt.ui.shared.QuickRankDAO;
+import com.sap.sailing.gwt.ui.shared.RaceInLeaderboardDAO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDAO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDAO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDAO;
@@ -102,25 +103,43 @@ public interface SailingServiceAsync {
     void setWindSource(RaceIdentifier raceIdentifier, String windSourceName, AsyncCallback<Void> callback);
 
     /**
+     * Returns a {@link LeaderboardDAO} will information about all races, their points and competitor display names
+     * filled in. The column details are filled for the races whose named are provided in
+     * <code>namesOfRacesForWhichToLoadLegDetails</code>.
+     * 
      * @param namesOfRacesForWhichToLoadLegDetails
      *            if <code>null</code>, no {@link LeaderboardEntryDAO#legDetails leg details} will be present in the
      *            result ({@link LeaderboardEntryDAO#legDetails} will be <code>null</code> for all
      *            {@link LeaderboardEntryDAO} objects contained). Otherwise, the {@link LeaderboardEntryDAO#legDetails}
      *            list will contain one entry per leg of the race {@link Course} for those race columns whose
-     *            {@link RaceInLeaderboard#getName() name} is contained in <code>namesOfRacesForWhichToLoadLegDetails</code>.
-     *            For all other columns, {@link LeaderboardEntryDAO#legDetails} is <code>null</code>.
+     *            {@link RaceInLeaderboard#getName() name} is contained in
+     *            <code>namesOfRacesForWhichToLoadLegDetails</code>. For all other columns,
+     *            {@link LeaderboardEntryDAO#legDetails} is <code>null</code>.
      */
     void getLeaderboardByName(String leaderboardName, Date date,
             Collection<String> namesOfRacesForWhichToLoadLegDetails, AsyncCallback<LeaderboardDAO> callback);
 
     void getLeaderboardNames(AsyncCallback<List<String>> callback);
 
+    /**
+     * Creates a {@link LeaderboardDAO} for each leaderboard known by the server and fills in the name, race master data
+     * in the form of {@link RaceInLeaderboardDAO}s, whether or not there are {@link LeaderboardDAO#hasCarriedPoints carried points}
+     * and the {@link LeaderboardDAO#discardThresholds discarding thresholds} for the leaderboard. No data about the points
+     * is filled into the result object. No data about the competitor display names is filled in; instead, an empty map
+     * is used for {@link LeaderboardDAO#competitorDisplayNames}.
+     */
     void getLeaderboards(AsyncCallback<List<LeaderboardDAO>> callback);
     
     void updateLeaderboard(String leaderboardName, String newLeaderboardName, int[] newDiscardingThreasholds,
             AsyncCallback<Void> callback);
 
-    void createLeaderboard(String leaderboardName, int[] discardThresholds, AsyncCallback<Void> asyncCallback);
+    /**
+     * Creates a leaderboard with the name specified by <code>leaderboardName</code> and the initial discarding thesholds
+     * as specified by <code>discardThresholds</code>. The leaderboard returned has the leaderboard name and the master
+     * data about the race columns filled in, but no details about the race points. As such, the result structure
+     * equals that of the result of {@link #getLeaderboards(AsyncCallback)}.
+     */
+    void createLeaderboard(String leaderboardName, int[] discardThresholds, AsyncCallback<LeaderboardDAO> asyncCallback);
 
     void removeLeaderboard(String leaderboardName, AsyncCallback<Void> asyncCallback);
     
@@ -152,9 +171,6 @@ public interface SailingServiceAsync {
 
     void updateLeaderboardScoreCorrection(String leaderboardName, String competitorName, String raceName,
             Integer correctedScore, Date date, AsyncCallback<Pair<Integer, Integer>> asyncCallback);
-
-    void getLeaderboardEntry(String leaderboardName, String competitorName, String raceName, Date date,
-            AsyncCallback<LeaderboardEntryDAO> callback);
 
     void updateCompetitorDisplayNameInLeaderboard(String leaderboardName, String competitorName, String displayName,
             AsyncCallback<Void> callback);

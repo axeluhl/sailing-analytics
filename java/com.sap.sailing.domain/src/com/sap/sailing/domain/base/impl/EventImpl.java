@@ -24,6 +24,16 @@ public class EventImpl extends NamedImpl implements Event {
     }
     
     @Override
+    public RaceDefinition getRaceByName(String raceName) {
+        for (RaceDefinition r : getAllRaces()) {
+            if (r.getName().equals(raceName)) {
+                return r;
+            }
+        }
+        return null;
+    }
+    
+    @Override
     public void addRace(RaceDefinition race) {
         if (getBoatClass() != null && race.getBoatClass() != getBoatClass()) {
             throw new IllegalArgumentException("Boat class "+race.getBoatClass()+" doesn't match event's boat class "+getBoatClass());

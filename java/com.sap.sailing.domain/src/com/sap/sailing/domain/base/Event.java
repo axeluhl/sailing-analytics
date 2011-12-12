@@ -11,6 +11,12 @@ package com.sap.sailing.domain.base;
 public interface Event extends Named {
     Iterable<RaceDefinition> getAllRaces();
     
+    /**
+     * @return <code>null</code>, if this event does not contain a race (see {@link #getAllRaces}) whose
+     * {@link RaceDefinition#getName()} equals <code>raceName</code>
+     */
+    RaceDefinition getRaceByName(String raceName);
+    
     BoatClass getBoatClass();
     
     Iterable<Competitor> getCompetitors();

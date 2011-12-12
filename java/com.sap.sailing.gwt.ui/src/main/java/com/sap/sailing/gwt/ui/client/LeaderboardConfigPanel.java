@@ -106,13 +106,11 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
         raceColumnList = new ListDataProvider<RaceInLeaderboardDAO>();
         this.errorReporter = errorReporter;
         this.availableLeaderboardList = new ArrayList<LeaderboardDAO>();
-
         readAllLeaderbords();
-
         VerticalPanel mainPanel = new VerticalPanel();
         this.setWidget(mainPanel);
 
-        Label lblLeaderboards = new Label("Leaderboards");
+        Label lblLeaderboards = new Label(stringConstants.leaderboards());
         lblLeaderboards.setStyleName("bold");
         mainPanel.add(lblLeaderboards);
 
@@ -126,9 +124,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
             @Override
             public void onKeyUp(KeyUpEvent event) {
                 String text = filterRacesTextbox.getText();
-
                 leaderboardList.getList().clear();
-
                 if (text == null || text.isEmpty()) {
                     leaderboardList.getList().addAll(availableLeaderboardList);
                 } else {
@@ -743,7 +739,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
 
     private void createNewLeaderboard(final LeaderboardDAO newLeaderboard) {
         sailingService.createLeaderboard(newLeaderboard.name, newLeaderboard.discardThresholds,
-                new AsyncCallback<Void>() {
+                new AsyncCallback<LeaderboardDAO>() {
                     @Override
                     public void onFailure(Throwable t) {
                         errorReporter.reportError("Error trying to create new leaderboard " + newLeaderboard.name
@@ -751,28 +747,13 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
                     }
 
                     @Override
-                    public void onSuccess(Void result) {
-
-                        sailingService.getLeaderboardByName(newLeaderboard.name, new Date(),
-                        /* namesOfRacesForWhichToLoadLegDetails */null, new AsyncCallback<LeaderboardDAO>() {
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                errorReporter.reportError("Error trying to fetch the new leaderboard "
-                                        + newLeaderboard.name + " from the server: " + caught.getMessage());
-                            }
-
-                            @Override
-                            public void onSuccess(LeaderboardDAO result) {
-
-                                leaderboardList.getList().add(result);
-                                availableLeaderboardList.add(result);
-                                selectedLeaderboard = result;
-                                leaderboardSelectionChanged();
-                            }
-                        });
-
+                    public void onSuccess(LeaderboardDAO result) {
+                        leaderboardList.getList().add(result);
+                        availableLeaderboardList.add(result);
+                        selectedLeaderboard = result;
+                        leaderboardSelectionChanged();
                     }
-                });
+        });
     }
 
     private void updateLeaderboard(final String oldLeaderboardName, final LeaderboardDAO leaderboardToUdate) {
