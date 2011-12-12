@@ -89,6 +89,7 @@ public class RaceTrackerStartStopTest {
     public void testStopTrackingRace() throws MalformedURLException, IOException, InterruptedException {
         racingEventService.stopTracking(event, raceDef2);
         // The raceTracker2 and raceTracker3 should currently not be in track mode. 
+        assertTrue(raceTracker1.getIsTracking());
         assertFalse(raceTracker2.getIsTracking());
         assertFalse(raceTracker3.getIsTracking());
         // The RaceTrackersByID map should not contain the trackers raceTracker2 and raceTracker3 anymore
