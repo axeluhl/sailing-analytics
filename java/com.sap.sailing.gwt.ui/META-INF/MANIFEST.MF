@@ -26,6 +26,7 @@ Require-Bundle: com.sap.sailing.domain,
 Bundle-ClassPath: lib/gwt-maps.jar,
  lib/gwt-visualization.jar,
  lib/gwt-servlet.jar,
+ lib/gflot-1.0.0.jar,
  .
 Bundle-Activator: com.sap.sailing.gwt.ui.server.Activator
 Bundle-ActivationPolicy: lazy
