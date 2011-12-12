@@ -141,7 +141,7 @@ public class RaceTrackerStartStopTest {
      * @throws InterruptedException
      */
     @Test
-    public void testRemoveLastRaceOfTracker() throws MalformedURLException, IOException, InterruptedException{
+    public void testRemoveLastRaceOfTracker() throws MalformedURLException, IOException, InterruptedException {
         racingEventService.removeRace(event, raceDef1);
         racingEventService.removeRace(event, raceDef2);
         // The event map should still contain the raceTrackers except of raceTracker1 and raceTracker2
