@@ -25,4 +25,10 @@ interface AdminConsoleResources extends ClientBundle {
     
     @Source("com/sap/sailing/gwt/ui/client/images/reddiamond.png")
     ImageResource buoyIcon();
+    
+    @Source("com/sap/sailing/gwt/ui/client/images/blackdot.png")
+    ImageResource blackdotIcon();
+    
+    @Source("com/sap/sailing/gwt/ui/client/images/reddot.png")
+    ImageResource reddotIcon();
 }
