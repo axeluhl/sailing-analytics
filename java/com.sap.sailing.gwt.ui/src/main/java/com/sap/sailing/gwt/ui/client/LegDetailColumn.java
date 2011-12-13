@@ -14,8 +14,6 @@ public abstract class LegDetailColumn<FieldType extends Comparable<?>, Rendering
     private final String title;
     private final LegDetailField<FieldType> field;
     private final CellTable<LeaderboardRowDAO> leaderboardTable;
-    private LeaderboardRowDAO minimumRowDAO;
-    private LeaderboardRowDAO maximumRowDAO;
     private final String headerStyle;
     private final String columnStyle;
     private final String unit;
@@ -84,14 +82,6 @@ public abstract class LegDetailColumn<FieldType extends Comparable<?>, Rendering
         }
         SafeHtmlHeader header = new SafeHtmlHeader(builder.toSafeHtml());
         return header;
-    }
-
-    public LeaderboardRowDAO getMinimum() {
-        return minimumRowDAO;
-    }
-    
-    public LeaderboardRowDAO getMaximum() {
-        return maximumRowDAO;
     }
     
     /**

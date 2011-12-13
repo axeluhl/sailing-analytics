@@ -18,7 +18,7 @@ import com.sap.sailing.gwt.ui.shared.LegEntryDAO;
 import com.sap.sailing.gwt.ui.shared.Triple;
 import com.sap.sailing.server.api.DetailType;
 
-public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> implements HasStringValue{
+public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> implements HasStringValue {
 
     private final StringConstants stringConstants;
     private final RaceNameProvider raceNameProvider;
@@ -54,7 +54,6 @@ public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> im
 
         @Override
         protected Double getFromNonNullEntry(LeaderboardEntryDAO entry) {
-            // TODO get lerderboard double like in get number of
             return ManeuverCountRaceColumn.this.getTotalNumberOfJibes(entry);
         }
     }
@@ -63,7 +62,6 @@ public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> im
 
         @Override
         protected Double getFromNonNullEntry(LeaderboardEntryDAO entry) {
-            // TODO get lerderboard double like in get number of
             return ManeuverCountRaceColumn.this.getTotalNumberOfPenaltyCircles(entry);
         }
     }
@@ -250,6 +248,7 @@ public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> im
 
     @Override
     protected void updateMinMax(LeaderboardDAO leaderboard) {
+        minmaxRenderer.setLeaderboard(leaderboard);
         minmaxRenderer.updateMinMax(leaderboard);
     }
 
@@ -284,6 +283,11 @@ public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> im
 
     @Override
     public String getStringValueToRender(LeaderboardRowDAO object) {
-        return getValue(object);
+        String result = getValue(object);
+        if(!result.equals("")){
+            return getValue(object);
+        }else{
+            return null;
+        }
     }
 }

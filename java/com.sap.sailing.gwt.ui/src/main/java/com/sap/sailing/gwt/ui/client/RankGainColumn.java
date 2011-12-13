@@ -55,10 +55,10 @@ public class RankGainColumn extends LegDetailColumn<Integer, Integer> {
 
     @Override
     public String getStringValueToRender(LeaderboardRowDAO object) {
-        if(getValue(object)==null){
-            return null;
-        }else{
-            return getValue(object).toString();
+        Integer intValue = getValue(object);
+        if (intValue != null) {
+            return intValue.toString();
         }
+        return null;
     }
 }
