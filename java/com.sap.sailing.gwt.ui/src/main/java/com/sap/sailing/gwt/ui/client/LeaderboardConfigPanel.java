@@ -5,13 +5,19 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
+import com.google.gwt.safehtml.client.SafeHtmlTemplates;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
@@ -79,6 +85,21 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
 
     private final SingleSelectionModel<LeaderboardDAO> tableSelectionModel;
 
+    public static class AnchorCell extends AbstractCell<SafeHtml> {
+
+        @Override
+        public void render(com.google.gwt.cell.client.Cell.Context context, SafeHtml safeHtml, SafeHtmlBuilder sb) {
+            sb.append(safeHtml);
+        }
+    }
+    
+    interface AnchorTemplates extends SafeHtmlTemplates {
+        @SafeHtmlTemplates.Template("<a href=\"{0}\">{1}</a>")
+        SafeHtml cell(String url, String displayName);
+    }
+    
+    private static AnchorTemplates ANCHORTEMPLATE = GWT.create(AnchorTemplates.class);
+
     public LeaderboardConfigPanel(SailingServiceAsync sailingService, AdminConsole adminConsole,
             final ErrorReporter errorReporter, StringConstants theStringConstants) {
         this.stringConstants = theStringConstants;
@@ -123,11 +144,14 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
         });
         filterPanel.add(filterRacesTextbox);
         mainPanel.add(filterPanel);
-        TextColumn<LeaderboardDAO> leaderboardNameColumn = new TextColumn<LeaderboardDAO>() {
+
+        AnchorCell anchorCell = new AnchorCell();
+        Column<LeaderboardDAO, SafeHtml> linkColumn = new Column<LeaderboardDAO, SafeHtml>(anchorCell) {
             @Override
-            public String getValue(LeaderboardDAO object) {
-                return object.name;
+            public SafeHtml getValue(LeaderboardDAO object) {
+                return ANCHORTEMPLATE.cell("/Leaderboard.html?name=" + object.name, object.name);
             }
+
         };
         TextColumn<LeaderboardDAO> discardingOptionsColumn = new TextColumn<LeaderboardDAO>() {
             @Override
@@ -150,8 +174,6 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
                     if (Window.confirm("Do you really want to remove the leaderboard: '" + object.name + "' ?")) {
                         removeLeaderboard(object);
                     }
-                } else if ("ACTION_OPEN_BROWSER".equals(value)) {
-                    Window.open("/Leaderboard.html?name=" + object.name, "_blank", null);
                 } else if ("ACTION_EDIT".equals(value)) {
                     final String oldLeaderboardName = object.name;
                     List<LeaderboardDAO> otherExistingLeaderboard = new ArrayList<LeaderboardDAO>();
@@ -177,7 +199,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
         });
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
         leaderboardTable = new CellTable<LeaderboardDAO>(/* pageSize */200, tableRes);
-        leaderboardTable.addColumn(leaderboardNameColumn, "Name");
+        leaderboardTable.addColumn(linkColumn, "Name");
         leaderboardTable.addColumn(discardingOptionsColumn, "Discarding");
         leaderboardTable.addColumn(leaderboardActionColumn, "Actions");
         leaderboardTable.setWidth("500px");
@@ -209,7 +231,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
         HorizontalPanel splitPanel = new HorizontalPanel();
         mainPanel.add(splitPanel);
 
-        selectedLeaderBoardPanel = new CaptionPanel("Leaderboard:");
+        selectedLeaderBoardPanel = new CaptionPanel(stringConstants.leaderboard());
         selectedLeaderBoardPanel.setWidth("50%");
         splitPanel.add(selectedLeaderBoardPanel);
 
@@ -217,7 +239,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
         vPanel.setWidth("100%");
         selectedLeaderBoardPanel.setContentWidget(vPanel);
 
-        trackedRacesCaptionPanel = new CaptionPanel("Tracked Races");
+        trackedRacesCaptionPanel = new CaptionPanel(stringConstants.trackedRaces());
         trackedRacesCaptionPanel.setWidth("50%");
         splitPanel.add(trackedRacesCaptionPanel);
 
@@ -654,8 +676,19 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
 
     private void leaderboardSelectionChanged() {
         final String leaderboardName = getSelectedLeaderboardName();
+        // make sure that clearing the selection doesn't cause an unlinking of the selected tracked race
+        trackedEventsComposite.removeRaceSelectionChangeListener(this);
         trackedEventsComposite.clearSelection();
+        // add listener again using a scheduled command which is executed when the browser's event loop re-gains
+        // control; we assume that at that point in time the selection updates have already been performed
+        Scheduler.get().scheduleFinally(new ScheduledCommand() {
+            @Override
+            public void execute() {
+                trackedEventsComposite.addRaceSelectionChangeListener(LeaderboardConfigPanel.this);                
+            }
+        });
         if (leaderboardName != null) {
+            // TODO wouldn't the stripped-down version of the LeaderboardDAO do here? See bug #146
             sailingService.getLeaderboardByName(leaderboardName, new Date(),
             /* namesOfRacesForWhichToLoadLegDetails */null, new AsyncCallback<LeaderboardDAO>() {
                 @Override

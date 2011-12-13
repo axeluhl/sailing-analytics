@@ -2,7 +2,6 @@ package com.sap.sailing.gwt.ui.client;
 
 import java.util.List;
 
-
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Label;
