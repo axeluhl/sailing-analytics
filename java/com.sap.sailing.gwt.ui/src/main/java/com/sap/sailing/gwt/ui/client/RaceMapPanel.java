@@ -76,8 +76,47 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
     private final ListBox quickRanksBox;
     private final List<CompetitorDAO> quickRanksList;
     private final TimePanel timePanel;
-    private ImageRotator boatIconRotator;
-    private ImageRotator boatIconHighlightedRotator;
+    
+    /**
+     * Two sails on downwind leg, wind from port (sails on starboard); no highlighting
+     */
+    private ImageRotator boatIconDownwindPortRotator;
+
+    /**
+     * Two sails on downwind leg, wind from port (sails on starboard); with highlighting
+     */
+    private ImageRotator boatIconHighlightedDownwindPortRotator;
+    
+    /**
+     * Two sails on downwind leg, wind from starboard (sails on port); no highlighting
+     */
+    private ImageRotator boatIconDownwindStarboardRotator;
+
+    /**
+     * Two sails on downwind leg, wind from starboard (sails on port); with highlighting
+     */
+    private ImageRotator boatIconHighlightedDownwindStarboardRotator;
+    
+    /**
+     * One sail, wind from port (sails on starboard); no highlighting
+     */
+    private ImageRotator boatIconPortRotator;
+
+    /**
+     * One sail, wind from port (sails on starboard); with highlighting
+     */
+    private ImageRotator boatIconHighlightedPortRotator;
+    
+    /**
+     * One sail, wind from starboard (sails on port); no highlighting
+     */
+    private ImageRotator boatIconStarboardRotator;
+
+    /**
+     * One sail, wind from starboard (sails on port); with highlighting
+     */
+    private ImageRotator boatIconHighlightedStarboardRotator;
+    
     private Icon buoyIcon;
     private Icon tackToStarboardIcon;
     private Icon tackToPortIcon;
@@ -382,8 +421,14 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
                         lastMousePosition = event.getLatLng();
                     }
                 });
-                boatIconRotator = new ImageRotator(resources.lowlightedBoatIconDW_Port());
-                boatIconHighlightedRotator = new ImageRotator(resources.highlightedBoatIconDW_Port());
+                boatIconDownwindPortRotator = new ImageRotator(resources.lowlightedBoatIconDW_Port());
+                boatIconHighlightedDownwindPortRotator = new ImageRotator(resources.highlightedBoatIconDW_Port());
+                boatIconDownwindStarboardRotator = new ImageRotator(resources.lowlightedBoatIconDW_Starboard());
+                boatIconHighlightedDownwindStarboardRotator = new ImageRotator(resources.highlightedBoatIconDW_Starboard());
+                boatIconPortRotator = new ImageRotator(resources.lowlightedBoatIcon_Port());
+                boatIconHighlightedPortRotator = new ImageRotator(resources.highlightedBoatIcon_Port());
+                boatIconPortRotator = new ImageRotator(resources.lowlightedBoatIcon_Starboard());
+                boatIconHighlightedPortRotator = new ImageRotator(resources.highlightedBoatIcon_Starboard());
                 buoyIcon = Icon.newInstance(resources.buoyIcon().getSafeUri().asString());
                 buoyIcon.setIconAnchor(Point.newInstance(4, 4));
                 tackToStarboardIcon = Icon
@@ -749,7 +794,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
                         } else {
                             competitorDAOsOfUnusedMarkers.remove(competitorDAO);
                             boatMarker.setLatLng(LatLng.newInstance(lastPos.position.latDeg, lastPos.position.lngDeg));
-                            boatMarker.setImage(boatIconHighlightedRotator.getRotatedImageURL(lastPos.speedWithBearing.bearingInDegrees));
+                            boatMarker.setImage(boatIconHighlightedDownwindPortRotator.getRotatedImageURL(lastPos.speedWithBearing.bearingInDegrees));
                         }
                     }
                 }
@@ -858,12 +903,12 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         double bearingInDegrees = boatFix.speedWithBearing.bearingInDegrees;
         MarkerOptions options = MarkerOptions.newInstance();
         if (highlighted) {
-            Icon icon = Icon.newInstance(boatIconHighlightedRotator.getRotatedImageURL(bearingInDegrees));
-            icon.setIconAnchor(boatIconHighlightedRotator.getAnchor());
+            Icon icon = Icon.newInstance(boatIconHighlightedDownwindPortRotator.getRotatedImageURL(bearingInDegrees));
+            icon.setIconAnchor(boatIconHighlightedDownwindPortRotator.getAnchor());
             options.setIcon(icon);
         } else {
-            Icon icon = Icon.newInstance(boatIconRotator.getRotatedImageURL(bearingInDegrees));
-            icon.setIconAnchor(boatIconRotator.getAnchor());
+            Icon icon = Icon.newInstance(boatIconDownwindPortRotator.getRotatedImageURL(bearingInDegrees));
+            icon.setIconAnchor(boatIconDownwindPortRotator.getAnchor());
             options.setIcon(icon);
         }
         options.setTitle(competitorDAO.name);

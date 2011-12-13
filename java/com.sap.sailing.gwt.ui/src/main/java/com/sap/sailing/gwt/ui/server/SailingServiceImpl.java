@@ -68,6 +68,7 @@ import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.NoWindException;
 import com.sap.sailing.domain.tracking.RacesHandle;
+import com.sap.sailing.domain.tracking.TrackedLeg.LegType;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
@@ -677,7 +678,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     @Override
     public Map<CompetitorDAO, List<GPSFixDAO>> getBoatPositions(RaceIdentifier raceIdentifier,
             Map<CompetitorDAO, Date> from, Map<CompetitorDAO, Date> to,
-            boolean extrapolate) {
+            boolean extrapolate) throws NoWindException {
         Map<CompetitorDAO, List<GPSFixDAO>> result = new HashMap<CompetitorDAO, List<GPSFixDAO>>();
         TrackedRace trackedRace = getTrackedRace(raceIdentifier);
         if (trackedRace != null) {
@@ -696,7 +697,9 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                             GPSFixMoving fix = fixIter.next();
                             while (fix != null && fix.getTimePoint().compareTo(toTimePointExcluding) < 0) {
                                 Tack tack = trackedRace.getTack(competitor, fix.getTimePoint());
-                                GPSFixDAO fixDAO = createGPSFixDAO(fix, fix.getSpeed(), tack, /* extrapolate */false);
+                                LegType legType = trackedRace.getTrackedLeg(trackedRace.getTrackedLeg(competitor, fix.getTimePoint()).getLeg()).
+                                        getLegType(fix.getTimePoint());
+                                GPSFixDAO fixDAO = createGPSFixDAO(fix, fix.getSpeed(), tack, legType, /* extrapolate */false);
                                 fixesForCompetitor.add(fixDAO);
                                 if (fixIter.hasNext()) {
                                     fix = fixIter.next();
@@ -706,12 +709,14 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                                         Position position = track.getEstimatedPosition(toTimePointExcluding,
                                                 extrapolate);
                                         Tack tack2 = trackedRace.getTack(competitor, toTimePointExcluding);
+                                        LegType legType2 = trackedRace.getTrackedLeg(trackedRace.getTrackedLeg(competitor, fix.getTimePoint()).getLeg()).
+                                                getLegType(fix.getTimePoint());
                                         SpeedWithBearing speedWithBearing = track
                                                 .getEstimatedSpeed(toTimePointExcluding);
                                         GPSFixDAO extrapolated = new GPSFixDAO(to.get(competitorDAO), new PositionDAO(
                                                 position.getLatDeg(), position.getLngDeg()),
                                                 createSpeedWithBearingDAO(speedWithBearing), tack2.name(), /* extrapolated */
-                                                true);
+                                                legType2.name(), true);
                                         fixesForCompetitor.add(extrapolated);
                                     }
                                     fix = null;
@@ -730,10 +735,10 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 .getBearing().getDegrees());
     }
 
-    private GPSFixDAO createGPSFixDAO(GPSFix fix, SpeedWithBearing speedWithBearing, Tack tack, boolean extrapolated) {
+    private GPSFixDAO createGPSFixDAO(GPSFix fix, SpeedWithBearing speedWithBearing, Tack tack, LegType legType, boolean extrapolated) {
         return new GPSFixDAO(fix.getTimePoint().asDate(), new PositionDAO(fix
                 .getPosition().getLatDeg(), fix.getPosition().getLngDeg()),
-                createSpeedWithBearingDAO(speedWithBearing), tack.name(), extrapolated);
+                createSpeedWithBearingDAO(speedWithBearing), tack.name(), legType.name(), extrapolated);
     }
 
     @Override
@@ -1331,7 +1336,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     
     public Map<CompetitorDAO, List<GPSFixDAO>> getDouglasPoints(RaceIdentifier raceIdentifier,
             Map<CompetitorDAO, Date> from, Map<CompetitorDAO, Date> to,
-            double meters) {
+            double meters) throws NoWindException {
         Map<CompetitorDAO, List<GPSFixDAO>> result = new HashMap<CompetitorDAO, List<GPSFixDAO>>();
         TrackedRace trackedRace = getTrackedRace(raceIdentifier);
         if (trackedRace != null) {
@@ -1360,7 +1365,9 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                             speedWithBearing = gpsFixTrack.getEstimatedSpeed(fix.getTimePoint());
                         }
                         Tack tack = trackedRace.getTack(competitor, fix.getTimePoint());
-                        GPSFixDAO fixDAO = createGPSFixDAO(fix, speedWithBearing, tack, /* extrapolated */false);
+                        LegType legType = trackedRace.getTrackedLeg(trackedRace.getTrackedLeg(competitor, fix.getTimePoint()).getLeg()).
+                                getLegType(fix.getTimePoint());
+                        GPSFixDAO fixDAO = createGPSFixDAO(fix, speedWithBearing, tack, legType, /* extrapolated */false);
                         gpsFixDouglasList.add(fixDAO);
                     }
                     result.put(competitorDAO, gpsFixDouglasList);

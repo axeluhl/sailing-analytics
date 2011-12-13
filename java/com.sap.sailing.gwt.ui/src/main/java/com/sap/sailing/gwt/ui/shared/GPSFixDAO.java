@@ -21,14 +21,20 @@ public class GPSFixDAO implements IsSerializable {
      */
     public String tack;
     
+    /**
+     * Contains one of the literals of the {@link LegType} enumeration ("UPWIND", "DOWNWIND" or "REACHING")
+     */
+    public String legType;
+    
     public GPSFixDAO() {}
 
-    public GPSFixDAO(Date timepoint, PositionDAO position, SpeedWithBearingDAO speedWithBearing, String tack, boolean extrapolated) {
+    public GPSFixDAO(Date timepoint, PositionDAO position, SpeedWithBearingDAO speedWithBearing, String tack, String legType, boolean extrapolated) {
         super();
         this.timepoint = timepoint;
         this.position = position;
         this.speedWithBearing = speedWithBearing;
         this.tack = tack;
+        this.legType = legType;
         this.extrapolated = extrapolated;
     }
 }
