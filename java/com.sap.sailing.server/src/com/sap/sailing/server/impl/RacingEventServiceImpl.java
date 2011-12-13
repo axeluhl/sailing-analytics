@@ -295,7 +295,7 @@ public class RacingEventServiceImpl implements RacingEventService, EventFetcher,
         if (timeoutInMilliseconds != -1) {
             scheduleAbortTrackerAfterInitialTimeout(tracker, timeoutInMilliseconds);
         }
-        return tracker.getRaceHandle();
+        return tracker.getRacesHandle();
     }
 
     @Override
@@ -335,7 +335,7 @@ public class RacingEventServiceImpl implements RacingEventService, EventFetcher,
         if (timeoutInMilliseconds != -1) {
             scheduleAbortTrackerAfterInitialTimeout(tracker, timeoutInMilliseconds);
         }
-        return tracker.getRaceHandle();
+        return tracker.getRacesHandle();
     }
 
     private void ensureEventIsObservedForDefaultLeaderboard(DynamicTrackedEvent trackedEvent) {

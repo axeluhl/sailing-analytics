@@ -2,9 +2,16 @@ package com.sap.sailing.domain.tractracadapter.impl;
 
 import java.util.concurrent.LinkedBlockingQueue;
 
+import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
+import com.sap.sailing.domain.tracking.DynamicTrackedRace;
+import com.sap.sailing.domain.tracking.TrackedEvent;
+import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sailing.util.Util.Triple;
+import com.tractrac.clientmodule.Event;
+import com.tractrac.clientmodule.Race;
 
 /**
  * Some event receiver that can be executed in a thread because it's a runnable, and
@@ -15,10 +22,14 @@ import com.sap.sailing.util.Util.Triple;
 public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Receiver {
     private final LinkedBlockingQueue<Triple<A, B, C>> queue;
     private final DomainFactory domainFactory;
+    private final com.tractrac.clientmodule.Event tractracEvent;
+    private final DynamicTrackedEvent trackedEvent;
     private Thread thread;
 
-    public AbstractReceiverWithQueue(DomainFactory domainFactory) {
+    public AbstractReceiverWithQueue(DomainFactory domainFactory, Event tractracEvent, DynamicTrackedEvent trackedEvent) {
         super();
+        this.tractracEvent = tractracEvent;
+        this.trackedEvent = trackedEvent;
         this.domainFactory = domainFactory;
         this.queue = new LinkedBlockingQueue<Triple<A, B, C>>();
     }
@@ -30,6 +41,14 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
     
     protected DomainFactory getDomainFactory() {
         return domainFactory;
+    }
+    
+    protected com.tractrac.clientmodule.Event getTracTracEvent() {
+        return tractracEvent;
+    }
+    
+    protected DynamicTrackedEvent getTrackedEvent() {
+        return trackedEvent;
     }
     
     public void stopPreemptively() {
@@ -82,4 +101,19 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
 
     protected abstract void handleEvent(Triple<A, B, C> event);
 
+    /**
+     * Tries to find a {@link TrackedRace} for <code>race</code> in the {@link com.sap.sailing.domain.base.Event} corresponding
+     * to {@link #tractracEvent}, as keyed by the {@link #domainFactory}. If the {@link RaceDefinition} for <code>race</code>
+     * is not found in the {@link com.sap.sailing.domain.base.Event}, <code>null</code> is returned. If the {@link TrackedRace}
+     * for <code>race</code> isn't found in the {@link TrackedEvent}, <code>null</code> is returned, too.
+     */
+    protected DynamicTrackedRace getTrackedRace(Race race) {
+        DynamicTrackedRace result = null;
+        RaceDefinition raceDefinition = getDomainFactory().getAndWaitForRaceDefinition(race);
+        com.sap.sailing.domain.base.Event domainEvent = getDomainFactory().getOrCreateEvent(getTracTracEvent());
+        if (domainEvent.getRaceByName(raceDefinition.getName()) != null) {
+            result = trackedEvent.getTrackedRace(raceDefinition);
+        }
+        return result;
+    }
 }
