@@ -76,9 +76,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
     private final ListBox quickRanksBox;
     private final List<CompetitorDAO> quickRanksList;
     private final TimePanel timePanel;
-    private Icon boatIcon;
     private ImageRotator boatIconRotator;
-    private Icon boatIconHighlighted;
     private ImageRotator boatIconHighlightedRotator;
     private Icon buoyIcon;
     private Icon tackToStarboardIcon;
@@ -384,12 +382,8 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
                         lastMousePosition = event.getLatLng();
                     }
                 });
-                boatIcon = Icon.newInstance(resources.lowlightedBoatIconDW_Port().getSafeUri().asString());
                 boatIconRotator = new ImageRotator(resources.lowlightedBoatIconDW_Port());
-                boatIcon.setIconAnchor(boatIconRotator.getAnchor());
-                boatIconHighlighted = Icon.newInstance(resources.highlightedBoatIconDW_Port().getSafeUri().asString());
                 boatIconHighlightedRotator = new ImageRotator(resources.highlightedBoatIconDW_Port());
-                boatIconHighlighted.setIconAnchor(boatIconHighlightedRotator.getAnchor());
                 buoyIcon = Icon.newInstance(resources.buoyIcon().getSafeUri().asString());
                 buoyIcon.setIconAnchor(Point.newInstance(4, 4));
                 tackToStarboardIcon = Icon
@@ -864,9 +858,13 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         double bearingInDegrees = boatFix.speedWithBearing.bearingInDegrees;
         MarkerOptions options = MarkerOptions.newInstance();
         if (highlighted) {
-            options.setIcon(Icon.newInstance(boatIconHighlightedRotator.getRotatedImageURL(bearingInDegrees)));
+            Icon icon = Icon.newInstance(boatIconHighlightedRotator.getRotatedImageURL(bearingInDegrees));
+            icon.setIconAnchor(boatIconHighlightedRotator.getAnchor());
+            options.setIcon(icon);
         } else {
-            options.setIcon(Icon.newInstance(boatIconRotator.getRotatedImageURL(bearingInDegrees)));
+            Icon icon = Icon.newInstance(boatIconRotator.getRotatedImageURL(bearingInDegrees));
+            icon.setIconAnchor(boatIconRotator.getAnchor());
+            options.setIcon(icon);
         }
         options.setTitle(competitorDAO.name);
         final Marker boatMarker = new Marker(LatLng.newInstance(latDeg, lngDeg), options);

@@ -33,7 +33,9 @@ public class ImageRotator {
         imageWidth = unrotatedImage.getWidth();
         imageHeight = unrotatedImage.getHeight();
         canvasRadius = (int) Math.sqrt(imageWidth*imageWidth/4 + imageHeight*imageHeight/4);
-        canvas.setSize(""+2*canvasRadius, ""+2*canvasRadius);
+        canvas.setSize(""+2*canvasRadius+"px", ""+2*canvasRadius+"px");
+        canvas.setCoordinateSpaceWidth(2*canvasRadius);
+        canvas.setCoordinateSpaceHeight(2*canvasRadius);
         context = canvas.getContext2d();
         final Image image = new Image(unrotatedImageURL.toString());
         imageElement = (ImageElement) image.getElement().cast();
@@ -64,12 +66,10 @@ public class ImageRotator {
         if (canvas != null) {
             if (imageElement != null) {
                 double angleInRadians = angleInDegrees/180.*Math.PI;
-                double sin = Math.sin(angleInRadians);
-                double cos = Math.cos(angleInRadians);
-                context.clearRect(0, 0, imageWidth, imageHeight);
+                context.clearRect(0, 0, 2*canvasRadius, 2*canvasRadius);
                 context.save();
+                context.translate(canvasRadius, canvasRadius);
                 context.rotate(angleInRadians);
-                context.translate(sin*imageWidth/2 + cos*imageHeight/2, cos*imageWidth/2 - sin*imageHeight/2);
                 context.drawImage(imageElement, -imageWidth/2, -imageHeight/2);
                 result = canvas.toDataUrl("image/png");
                 context.restore();
