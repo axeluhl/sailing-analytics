@@ -9,9 +9,6 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardDAO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDAO;
 
 public class MinMaxRenderer {
-
-    // FIXME check rankgaincolumns
-    
     private LeaderboardDAO leaderboard;
     private HasStringValue valueProvider;
     private Comparator<LeaderboardRowDAO> comparator;
