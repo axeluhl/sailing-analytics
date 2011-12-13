@@ -60,7 +60,7 @@ public class RaceTrackerMock implements RaceTracker{
     }
 
     @Override
-    public RacesHandle getRaceHandle() {
+    public RacesHandle getRacesHandle() {
         throw new RuntimeException("No race Handle in RaceTrackerMock");
     }
 

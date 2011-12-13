@@ -78,7 +78,6 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
         event = domainFactory.getOrCreateEvent(raceID);
         setTrackedEvent(trackedEventRegistry.getOrCreateTrackedEvent(event));
         connector.trackRace(raceID);
-        
     }
 
     @Override
@@ -92,7 +91,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
     }
 
     @Override
-    public RacesHandle getRaceHandle() {
+    public RacesHandle getRacesHandle() {
         return new RacesHandle() {
             @Override
             public Event getEvent() {
