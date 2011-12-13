@@ -427,8 +427,8 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
                 boatIconHighlightedDownwindStarboardRotator = new ImageRotator(resources.highlightedBoatIconDW_Starboard());
                 boatIconPortRotator = new ImageRotator(resources.lowlightedBoatIcon_Port());
                 boatIconHighlightedPortRotator = new ImageRotator(resources.highlightedBoatIcon_Port());
-                boatIconPortRotator = new ImageRotator(resources.lowlightedBoatIcon_Starboard());
-                boatIconHighlightedPortRotator = new ImageRotator(resources.highlightedBoatIcon_Starboard());
+                boatIconStarboardRotator = new ImageRotator(resources.lowlightedBoatIcon_Starboard());
+                boatIconHighlightedStarboardRotator = new ImageRotator(resources.highlightedBoatIcon_Starboard());
                 buoyIcon = Icon.newInstance(resources.buoyIcon().getSafeUri().asString());
                 buoyIcon.setIconAnchor(Point.newInstance(4, 4));
                 tackToStarboardIcon = Icon
