@@ -141,7 +141,9 @@ public class TrackedEventImpl implements TrackedEvent {
         logger.log(Level.INFO, "Creating DynamicTrackedRaceImpl for RaceDefinition "+raceDefinition.getName());
         DynamicTrackedRaceImpl result = new DynamicTrackedRaceImpl(this, raceDefinition,
                 windStore, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed);
-        raceDefinitionSetToUpdate.addRaceDefinition(raceDefinition);
+        if (raceDefinitionSetToUpdate != null) {
+            raceDefinitionSetToUpdate.addRaceDefinition(raceDefinition);
+        }
         return result;
     }
 

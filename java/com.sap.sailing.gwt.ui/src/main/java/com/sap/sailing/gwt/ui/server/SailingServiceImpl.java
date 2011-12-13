@@ -1171,7 +1171,8 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
 
     @Override
-    public CompetitorInRaceDAO getCompetitorRaceData(RaceIdentifier race, CompetitorsAndTimePointsDAO competitorAndTimePointsDAO, DetailType dataType) throws NoWindException {
+    public CompetitorInRaceDAO getCompetitorRaceData(RaceIdentifier race,
+            CompetitorsAndTimePointsDAO competitorAndTimePointsDAO, DetailType dataType) throws NoWindException {
         CompetitorInRaceDAO competitorData = new CompetitorInRaceDAO();
         TrackedRace trackedRace = getTrackedRace(race);
         Iterable<Competitor> competitors = trackedRace.getRace().getCompetitors();
@@ -1196,8 +1197,8 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                         entries[i] = (speedOverGround == null) ? null : speedOverGround.getKnots();
                     }
                 }
-                competitorData.setRaceData(competitorAndTimePointsDAO.getCompetitor()[c], entries);
                 CompetitorDAO competitor = competitorAndTimePointsDAO.getCompetitor()[c];
+                competitorData.setRaceData(competitor, entries);
                 entries = new Double[competitorAndTimePointsDAO.getMarkPassings(competitor).length];
                 for (int i = 0; i < competitorAndTimePointsDAO.getMarkPassings(competitor).length; i++){
                     MillisecondsTimePoint time = new MillisecondsTimePoint(competitorAndTimePointsDAO.getMarkPassings(competitor)[i]);

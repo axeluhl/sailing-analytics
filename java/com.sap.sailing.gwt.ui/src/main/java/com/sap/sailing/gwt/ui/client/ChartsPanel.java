@@ -201,7 +201,7 @@ public class ChartsPanel extends FormPanel {
             }
         });
         configPanel.add(dataSelection);
-        Label lblSteps = new Label("Points to load:");
+        Label lblSteps = new Label(stringConstants.pointsToLoad());
         configPanel.add(lblSteps);
         final TextBox txtbSteps = new TextBox();
         txtbSteps.setText("" + stepsToLoad);
@@ -268,8 +268,8 @@ public class ChartsPanel extends FormPanel {
                         }
 
                         @Override
-                public void onSuccess(CompetitorsAndTimePointsDAO result) {
-                    competitorsAndTimePointsDAO = result;
+                        public void onSuccess(CompetitorsAndTimePointsDAO result) {
+                            competitorsAndTimePointsDAO = result;
                             selectCompetitors.clear();
                             legendPanel.clear();
                             competitorLabels.clear();
@@ -280,7 +280,6 @@ public class ChartsPanel extends FormPanel {
                                     cb.setValue(true);
                                 }
                                 cb.addClickHandler(new ClickHandler() {
-
                                     @Override
                                     public void onClick(ClickEvent event) {
                                     	if (cb.getValue() == true && chartData.getRaceData(c) == null){
@@ -379,7 +378,6 @@ public class ChartsPanel extends FormPanel {
         public com.google.gwt.event.shared.GwtEvent.Type<DataLoadedHandler> getAssociatedType() {
             return TYPE;
         }
-
     }
 
     private void setCompetitorVisible(CompetitorDAO competitor, boolean isVisible) {
@@ -392,9 +390,7 @@ public class ChartsPanel extends FormPanel {
     }
 
     private Widget createChart() {
-
-        final Label selectedPointLabel = new Label("Hover over a point!");
-
+        final Label selectedPointLabel = new Label(stringConstants.hoverOverAPoint());
         model = new PlotWithOverviewModel(PlotModelStrategy.defaultStrategy());
         plotOptions = new PlotOptions();
         plotOptions.setDefaultLineSeriesOptions(new LineSeriesOptions().setLineWidth(1).setShow(true));
@@ -444,7 +440,7 @@ public class ChartsPanel extends FormPanel {
                                 + ": " + item.getDataPoint().getY() + "[Unit]");
                 	}
                 } else {
-                    selectedPointLabel.setText("No selection!");
+                    selectedPointLabel.setText(stringConstants.noSelection());
                 }
             }
         }, true);

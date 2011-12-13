@@ -377,13 +377,15 @@ public class TrackedEventsComposite extends FormPanel implements EventDisplayer,
     public void fillEvents(List<EventDAO> events) {
         if (events.isEmpty()) {
             raceTable.setVisible(false);
-            btnUntrack.setEnabled(false);
-            btnRemoveRace.setEnabled(false);
+            btnUntrack.setVisible(false);
+            btnRemoveRace.setVisible(false);
             noTrackedRacesLabel.setVisible(true);
         } else {
             raceTable.setVisible(true);
-            btnUntrack.setEnabled(true);
-            btnRemoveRace.setEnabled(true);
+            btnUntrack.setVisible(true);
+            btnUntrack.setEnabled(false);
+            btnRemoveRace.setVisible(true);
+            btnRemoveRace.setEnabled(false);
             noTrackedRacesLabel.setVisible(false);
         }
         availableRaceList.clear();
