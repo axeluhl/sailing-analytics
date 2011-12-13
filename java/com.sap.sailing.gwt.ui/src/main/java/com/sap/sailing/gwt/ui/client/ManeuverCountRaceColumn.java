@@ -197,7 +197,7 @@ public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> im
     }
 
     @Override
-    public String getStringValue(LeaderboardRowDAO object) {
+    public String getValue(LeaderboardRowDAO object) {
         Double result = getDoubleValue(object);
         if (result == null) {
             return "";
@@ -283,7 +283,7 @@ public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> im
     }
 
     @Override
-    public String getValue(LeaderboardRowDAO object) {
+    public String getStringValueToRender(LeaderboardRowDAO object) {
         return getValue(object);
     }
 }

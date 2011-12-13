@@ -58,7 +58,8 @@ public class FormattedDoubleLegDetailColumn extends LegDetailColumn<Double, Stri
     }
 
     @Override
-    public String getStringValue(LeaderboardRowDAO object) {
+    public String  getStringValueToRender(LeaderboardRowDAO object) {
         return getValue(object);
     }
+
 }

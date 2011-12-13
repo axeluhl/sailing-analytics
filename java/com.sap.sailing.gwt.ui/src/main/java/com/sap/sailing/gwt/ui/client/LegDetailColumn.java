@@ -107,7 +107,5 @@ public abstract class LegDetailColumn<FieldType extends Comparable<?>, Rendering
     protected void updateMinMax(LeaderboardDAO leaderboard) {
         minMaxRenderer = new MinMaxRenderer(leaderboard, this, getComparator());
         minMaxRenderer.updateMinMax(leaderboard);
-    }
-    
-    
+    }   
 }
