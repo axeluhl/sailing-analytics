@@ -19,6 +19,10 @@ public interface RaceTracker {
      * Returns the races currently being tracked by this tracker. Non-blocking call that returns <code>null</code> if
      * the {@link RaceDefinition} for a TracTrac Event hasn't been created yet, e.g., because the course definition
      * hasn't been received yet or the listener for receiving course information hasn't been registered (yet).
+     * 
+     * If the {@link RacingEventService} is getting a {@link RaceDefinition}, to look up a {@link TrackedRace} 
+     * for this {@link RaceDefinition} via {@link TrackedEvent} there could a issue. The issue appears if RaceDefinition
+     * is currently changed by a tracker, either {@link SwissTimingRaceTracker} or {@link TracTacRaceTracker}.
      */
     Set<RaceDefinition> getRaces();
 

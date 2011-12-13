@@ -17,9 +17,6 @@
   <!-- Google Maps API -->
   <inherits name='com.google.gwt.maps.GoogleMaps' />
   
-  <!-- Google Visualization API -->
-  <inherits name='com.google.gwt.visualization.Visualization'/>
-  
   <!-- Flot-Gwt API -->
   <inherits name='ca.nanometrics.gflot.GFlot'/>
   

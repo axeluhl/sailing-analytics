@@ -23,9 +23,13 @@ public interface TrackedEvent {
     Iterable<TrackedRace> getTrackedRaces(BoatClass boatClass);
 
     /**
-     * Creates a {@link TrackedRace} based on the parameter specified and {@link #addTrackedRace(TrackedRace) adds} it to
-     * this tracked event. Afterwards, calling {@link #getTrackedRace(RaceDefinition) getTrackedRace(raceDefinition)} will
-     * return the result of this method call.
+     * Creates a {@link TrackedRace} based on the parameter specified and {@link #addTrackedRace(TrackedRace) adds} it
+     * to this tracked event. Afterwards, calling {@link #getTrackedRace(RaceDefinition) getTrackedRace(raceDefinition)}
+     * will return the result of this method call.
+     * 
+     * @param raceDefinitionSetToUpdate
+     *            if not <code>null</code>, after creating the {@link TrackedRace}, the <code>raceDefinition</code> is
+     *            {@link DynamicRaceDefinitionSet#addRaceDefinition(RaceDefinition) added} to that object.
      */
     TrackedRace createTrackedRace(RaceDefinition raceDefinition, WindStore windStore,
             long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
@@ -34,6 +38,9 @@ public interface TrackedEvent {
     /**
      * Obtains the tracked race for <code>race</code>. Blocks until the tracked race has been created
      * and added to this tracked event (see {@link #addTrackedRace(TrackedRace)}).
+     * 
+     * Please note that the {@link RaceDefinition} of the {@link Event} must not be synchronized {@link RaceDefinition}
+     * of {@link TrackedEvent}. The values could be inconsistent.
      */
     TrackedRace getTrackedRace(RaceDefinition race);
 
