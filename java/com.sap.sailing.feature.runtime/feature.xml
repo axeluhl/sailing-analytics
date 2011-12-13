@@ -27,27 +27,28 @@
       <import plugin="org.eclipse.osgi"/>
       <import plugin="org.eclipse.osgi.services"/>
       <import plugin="org.eclipse.jetty.nested"/>
+      <import plugin="slf4j.api"/>
    </requires>
 
    <plugin
          id="org.eclipse.jetty.osgi.boot"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="7.5.4.v20111024"
          unpack="false"/>
 
    <plugin
          id="jul.to.slf4j"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="1.6.4"
          unpack="false"/>
 
    <plugin
          id="slf4j.jdk14"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="1.6.4"
          fragment="true"
          unpack="false"/>
 
@@ -55,7 +56,7 @@
          id="slf4j.api"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="1.6.4"
          unpack="false"/>
 
 </feature>
