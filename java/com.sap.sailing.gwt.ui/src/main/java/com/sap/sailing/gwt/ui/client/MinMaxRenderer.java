@@ -52,8 +52,10 @@ public class MinMaxRenderer {
 
     private Double getMinimumDouble() {
         String valueString = valueProvider.getStringValueToRender(minimumvalue);
+        //Double result = new Double(0);
+        System.out.println("value: " + valueString);
         Double result = null;
-        if (valueString != null || valueString != "") {
+        if (valueString != null && !valueString.isEmpty()) {
             result = Double.parseDouble(valueString);
         }
         return result;
@@ -61,8 +63,9 @@ public class MinMaxRenderer {
 
     private Double getMaximumDouble() {
         String valueString = valueProvider.getStringValueToRender(maximumValue);
+        System.out.println("value: " + valueString);
         Double result = null;
-        if (valueString != null || valueString != "") {
+        if (valueString != null && valueString.isEmpty()) {
             result = Double.parseDouble(valueString);
         }
         return result;
