@@ -829,7 +829,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
 
     private ImageRotator getBoatImageRotator(GPSFixDAO boatFix, boolean highlighted) {
         if (boatFix.tack.equals("PORT")) {
-            if (boatFix.legType.equals("DOWNWIND")) {
+            if ("DOWNWIND".equals(boatFix.legType)) {
                 if (highlighted) {
                     return boatIconHighlightedDownwindStarboardRotator;
                 } else {
@@ -843,7 +843,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
                 }
             }
         } else {
-            if (boatFix.legType.equals("DOWNWIND")) {
+            if ("DOWNWIND".equals(boatFix.legType)) {
                 if (highlighted) {
                     return boatIconHighlightedDownwindPortRotator;
                 } else {

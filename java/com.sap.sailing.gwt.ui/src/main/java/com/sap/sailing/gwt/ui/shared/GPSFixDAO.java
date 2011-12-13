@@ -22,7 +22,9 @@ public class GPSFixDAO implements IsSerializable {
     public String tack;
     
     /**
-     * Contains one of the literals of the {@link LegType} enumeration ("UPWIND", "DOWNWIND" or "REACHING")
+     * Contains one of the literals of the {@link LegType} enumeration ("UPWIND", "DOWNWIND" or "REACHING") or
+     * <code>null</code> if the leg type is not known, e.g., because the competitor is not currently on any of the
+     * race's legs.
      */
     public String legType;
     
