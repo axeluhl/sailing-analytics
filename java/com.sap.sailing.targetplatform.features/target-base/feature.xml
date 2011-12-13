@@ -27,9 +27,17 @@
          unpack="false"/>
          
    <plugin
+         id="slf4j.jdk14"
+         download-size="0"
+         install-size="0"
+         version="1.6.4"
+         unpack="false"/>
+
+   <plugin
          id="jul.to.slf4j"
          download-size="0"
          install-size="0"
          version="1.6.4"
          unpack="false"/>
+
 </feature>

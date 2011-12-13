@@ -42,6 +42,7 @@
 		<module>com.googlecode.java-diff-utils</module>
 		<module>com.googlecode.java-diff-utils.test</module>
 		<module>com.sap.sailing.feature</module>
+		<module>com.sap.sailing.feature.runtime</module>
 		<module>com.sap.sailing.feature.p2build</module>
 	</modules>
 	
@@ -146,12 +147,12 @@
   </distributionManagement>
   
 	<repositories>
-	<!--
 		<repository>
+			<id>equinox-sdk-3.7</id>
 			<layout>p2</layout>
-			<id>eclipse</id>
-			<url>http://download.eclipse.org/releases/indigo/</url>
+			<url>http://download.eclipse.org/equinox/drops/R-3.7-201106131736/</url>
 		</repository>
+<!--		
 		<repository>
 			<id>sap-nexus</id>
 			<url>http://nexus.wdf.sap.corp:8081/nexus/content/groups/build.snapshots</url>
