@@ -38,6 +38,9 @@ public interface TrackedEvent {
     /**
      * Obtains the tracked race for <code>race</code>. Blocks until the tracked race has been created
      * and added to this tracked event (see {@link #addTrackedRace(TrackedRace)}).
+     * 
+     * Please note that the {@link RaceDefinition} of the {@link Event} must not be synchronized {@link RaceDefinition}
+     * of {@link TrackedEvent}. The values could be inconsistent.
      */
     TrackedRace getTrackedRace(RaceDefinition race);
 
