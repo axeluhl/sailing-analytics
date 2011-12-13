@@ -5,6 +5,8 @@ import com.google.gwt.canvas.dom.client.Context2d;
 import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.event.dom.client.LoadEvent;
 import com.google.gwt.event.dom.client.LoadHandler;
+import com.google.gwt.maps.client.geom.Point;
+import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.ui.Image;
 
 /**
@@ -16,16 +18,22 @@ import com.google.gwt.user.client.ui.Image;
  */
 public class ImageRotator {
     private final String unrotatedImageURL;
-    
     private final Canvas canvas;
+    private final int imageWidth;
+    private final int imageHeight;
+    private final int canvasRadius;
     
     private ImageElement imageElement;
 
     private final Context2d context;
     
-    public ImageRotator(String unrotatedImageURL) {
-        this.unrotatedImageURL = unrotatedImageURL;
+    public ImageRotator(ImageResource unrotatedImage) {
+        this.unrotatedImageURL = unrotatedImage.getSafeUri().asString();
         canvas = Canvas.createIfSupported();
+        imageWidth = unrotatedImage.getWidth();
+        imageHeight = unrotatedImage.getHeight();
+        canvasRadius = (int) Math.sqrt(imageWidth*imageWidth/4 + imageHeight*imageHeight/4);
+        canvas.setSize(""+2*canvasRadius, ""+2*canvasRadius);
         context = canvas.getContext2d();
         final Image image = new Image(unrotatedImageURL.toString());
         imageElement = (ImageElement) image.getElement().cast();
@@ -34,12 +42,13 @@ public class ImageRotator {
                 @Override
                 public void onLoad(LoadEvent event) {
                     imageElement = (ImageElement) image.getElement().cast();
-                    context.translate(imageElement.getWidth()/2, imageElement.getHeight()/2);
                 }
             });
-        } else {
-            context.translate(imageElement.getWidth()/2, imageElement.getHeight()/2);
         }
+    }
+    
+    public Point getAnchor() {
+        return Point.newInstance(canvasRadius, canvasRadius);
     }
 
     private String getUnrotatedImageURL() {
@@ -54,12 +63,16 @@ public class ImageRotator {
         String result = getUnrotatedImageURL();
         if (canvas != null) {
             if (imageElement != null) {
-                context.clearRect(0, 0, canvas.getCoordinateSpaceWidth(), canvas.getCoordinateSpaceHeight());
                 double angleInRadians = angleInDegrees/180.*Math.PI;
+                double sin = Math.sin(angleInRadians);
+                double cos = Math.cos(angleInRadians);
+                context.clearRect(0, 0, imageWidth, imageHeight);
+                context.save();
                 context.rotate(angleInRadians);
-                context.drawImage(imageElement, -imageElement.getWidth()/2, -imageElement.getHeight()/2);
+                context.translate(sin*imageWidth/2 + cos*imageHeight/2, cos*imageWidth/2 - sin*imageHeight/2);
+                context.drawImage(imageElement, -imageWidth/2, -imageHeight/2);
                 result = canvas.toDataUrl("image/png");
-                context.rotate(-angleInRadians);
+                context.restore();
             }
         }
         return result;
