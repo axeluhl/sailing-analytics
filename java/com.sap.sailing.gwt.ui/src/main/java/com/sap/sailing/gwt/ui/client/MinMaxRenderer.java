@@ -12,8 +12,10 @@ public class MinMaxRenderer {
     private LeaderboardDAO leaderboard;
     private HasStringValue valueProvider;
     private Comparator<LeaderboardRowDAO> comparator;
-    private LeaderboardRowDAO minimumvalue;
-    private LeaderboardRowDAO maximumValue;
+    //private LeaderboardRowDAO minimumvalue;
+    //private LeaderboardRowDAO maximumValue;
+    private Double minimumValue;
+    private Double maximumValue;
 
     public MinMaxRenderer(LeaderboardDAO leaderboard, HasStringValue valueProvider,
             Comparator<LeaderboardRowDAO> comparator) {
@@ -50,11 +52,11 @@ public class MinMaxRenderer {
     }
 
     private Double getMinimumDouble() {
-        return getDoubleFromString(valueProvider.getStringValueToRender(minimumvalue));
+        return minimumValue;
     }
 
     private Double getMaximumDouble() {
-        return getDoubleFromString(valueProvider.getStringValueToRender(maximumValue));
+        return maximumValue;
     }
 
     private Double getDoubleFromString(String string) {
@@ -74,26 +76,18 @@ public class MinMaxRenderer {
         LeaderboardRowDAO minimumRow = null;
         LeaderboardRowDAO maximumRow = null;
         for (LeaderboardRowDAO row : values) {
-            if (row != null && (minimumRow == null || comparator.compare(minimumRow, row) > 0)) {
+            if (getDoubleFromString(valueProvider.getStringValueToRender(row)) != null && (minimumRow == null || comparator.compare(minimumRow, row) > 0)) {
                 minimumRow = row;
             }
-            if (row != null && (maximumRow == null || comparator.compare(maximumRow, row) < 0)) {
+            if (getDoubleFromString(valueProvider.getStringValueToRender(row)) != null && (maximumRow == null || comparator.compare(maximumRow, row) < 0)) {
                 maximumRow = row;
             }
         }
         if (minimumRow != null) {
-            minimumvalue = minimumRow;
+            minimumValue = getDoubleFromString(valueProvider.getStringValueToRender(minimumRow));
         }
         if (maximumRow != null) {
-            maximumValue = maximumRow;
+            maximumValue = getDoubleFromString(valueProvider.getStringValueToRender(maximumRow));
         }
-    }
-
-    public LeaderboardDAO getLeaderboard() {
-        return leaderboard;
-    }
-
-    public void setLeaderboard(LeaderboardDAO leaderboard) {
-        this.leaderboard = leaderboard;
     }
 }

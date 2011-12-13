@@ -248,7 +248,7 @@ public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> im
 
     @Override
     protected void updateMinMax(LeaderboardDAO leaderboard) {
-        minmaxRenderer.setLeaderboard(leaderboard);
+        minmaxRenderer = new MinMaxRenderer(leaderboard, this, getComparator());
         minmaxRenderer.updateMinMax(leaderboard);
     }
 
