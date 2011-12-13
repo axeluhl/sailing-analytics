@@ -20,18 +20,26 @@ public class ImageRotator {
     private final Canvas canvas;
     
     private ImageElement imageElement;
+
+    private final Context2d context;
     
     public ImageRotator(String unrotatedImageURL) {
         this.unrotatedImageURL = unrotatedImageURL;
         canvas = Canvas.createIfSupported();
+        context = canvas.getContext2d();
         final Image image = new Image(unrotatedImageURL.toString());
         imageElement = (ImageElement) image.getElement().cast();
-        image.addLoadHandler(new LoadHandler() {
-            @Override
-            public void onLoad(LoadEvent event) {
-                imageElement = (ImageElement) image.getElement().cast();
-            }
-        });
+        if (imageElement == null) {
+            image.addLoadHandler(new LoadHandler() {
+                @Override
+                public void onLoad(LoadEvent event) {
+                    imageElement = (ImageElement) image.getElement().cast();
+                    context.translate(imageElement.getWidth()/2, imageElement.getHeight()/2);
+                }
+            });
+        } else {
+            context.translate(imageElement.getWidth()/2, imageElement.getHeight()/2);
+        }
     }
 
     private String getUnrotatedImageURL() {
@@ -45,12 +53,11 @@ public class ImageRotator {
     public String getRotatedImageURL(double angleInDegrees) {
         String result = getUnrotatedImageURL();
         if (canvas != null) {
-            Context2d context = canvas.getContext2d();
             if (imageElement != null) {
                 context.clearRect(0, 0, canvas.getCoordinateSpaceWidth(), canvas.getCoordinateSpaceHeight());
                 double angleInRadians = angleInDegrees/180.*Math.PI;
                 context.rotate(angleInRadians);
-                context.drawImage(imageElement, 0, 0);
+                context.drawImage(imageElement, -imageElement.getWidth()/2, -imageElement.getHeight()/2);
                 result = canvas.toDataUrl("image/png");
                 context.rotate(-angleInRadians);
             }
