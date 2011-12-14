@@ -24,7 +24,7 @@ public class CompareCompetitorsChartDialog extends DialogBox {
 
     public CompareCompetitorsChartDialog(SailingServiceAsync sailingService, List<CompetitorDAO> competitors, RaceIdentifier[] races, StringConstants stringConstants){
         super(false);
-        final ChartsPanel ccp = new ChartsPanel(sailingService, competitors, races, stringConstants, (int) (Window.getClientWidth()-320), (int) (Window.getClientHeight()-90));
+        final ChartsPanel ccp = new ChartsPanel(sailingService, competitors, races, stringConstants, (int) (Window.getClientWidth()-350), (int) (Window.getClientHeight()-170));
         ccp.addDataLoadedHandler(new DataLoadedHandler() {
             
             @Override

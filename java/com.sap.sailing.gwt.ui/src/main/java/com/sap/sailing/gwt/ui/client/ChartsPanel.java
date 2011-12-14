@@ -143,7 +143,7 @@ public class ChartsPanel extends FormPanel {
         chartPanel.add(raceChooserPanel);
 
         loadingPanel = new AbsolutePanel();
-        loadingPanel.setSize(width + "px", height - 60 + "px");
+        loadingPanel.setSize(width + "px", height + "px");
 
         Anchor a = new Anchor(new SafeHtmlBuilder().appendHtmlConstant("<img src=\"/images/ajax-loader.gif\"/>")
                 .toSafeHtml());
@@ -503,7 +503,7 @@ public class ChartsPanel extends FormPanel {
                 plot.setLinearSelection(x1, x2);
             }
         });
-        plot.setHeight(height- 60);
+        plot.setHeight(height);
         plot.setWidth(width);
         plot.setOverviewHeight(60);
         FlowPanel panel = new FlowPanel() {
