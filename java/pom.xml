@@ -150,7 +150,8 @@
 		<repository>
 			<id>equinox-sdk-3.7</id>
 			<layout>p2</layout>
-			<url>http://mirror.selfnet.de/eclipse/equinox/drops/R-3.7-201106131736/</url>
+			<url>file:/home/trac/p2-repositories/eclipse/equinox-SDK-3.7.1/</url>
+			<!--<url>http://mirror.selfnet.de/eclipse/equinox/drops/R-3.7-201106131736/</url>-->
 		</repository>
 <!--		
 		<repository>
