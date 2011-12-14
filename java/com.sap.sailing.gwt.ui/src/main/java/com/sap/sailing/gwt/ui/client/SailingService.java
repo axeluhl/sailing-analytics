@@ -56,7 +56,7 @@ public interface SailingService extends RemoteService {
     void setWind(RaceIdentifier raceIdentifier, WindDAO wind);
 
     Map<CompetitorDAO, List<GPSFixDAO>> getBoatPositions(RaceIdentifier raceIdentifier, Map<CompetitorDAO, Date> from,
-            Map<CompetitorDAO, Date> to, boolean extrapolate);
+            Map<CompetitorDAO, Date> to, boolean extrapolate) throws Exception;
 
     List<MarkDAO> getMarkPositions(RaceIdentifier raceIdentifier, Date date);
 
@@ -137,7 +137,7 @@ public interface SailingService extends RemoteService {
     CompetitorsAndTimePointsDAO getCompetitorsAndTimePoints(RaceIdentifier race, int steps);
     
     Map<CompetitorDAO, List<GPSFixDAO>> getDouglasPoints(RaceIdentifier raceIdentifier,
-            Map<CompetitorDAO, Date> from, Map<CompetitorDAO, Date> to, double meters);
+            Map<CompetitorDAO, Date> from, Map<CompetitorDAO, Date> to, double meters) throws Exception;
 
     Map<CompetitorDAO, List<ManeuverDAO>> getManeuvers(RaceIdentifier raceIdentifier,
             Map<CompetitorDAO, Date> from, Map<CompetitorDAO, Date> to) throws Exception;

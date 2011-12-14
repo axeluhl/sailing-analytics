@@ -1,7 +1,9 @@
 package com.sap.sailing.gwt.ui.client;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -20,6 +22,9 @@ import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
+import com.google.gwt.user.cellview.client.ColumnSortEvent;
+import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
+import com.google.gwt.user.cellview.client.ColumnSortList;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -77,7 +82,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
     private final CaptionPanel selectedLeaderBoardPanel;
     private final CaptionPanel trackedRacesCaptionPanel;
 
-    private TextBox filterRacesTextbox;
+    private TextBox filterLeaderboardTextbox;
 
     final SingleSelectionModel<RaceInLeaderboardDAO> raceTableSelectionModel;
 
@@ -92,12 +97,12 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
             sb.append(safeHtml);
         }
     }
-    
+
     interface AnchorTemplates extends SafeHtmlTemplates {
         @SafeHtmlTemplates.Template("<a href=\"{0}\">{1}</a>")
         SafeHtml cell(String url, String displayName);
     }
-    
+
     private static AnchorTemplates ANCHORTEMPLATE = GWT.create(AnchorTemplates.class);
 
     public LeaderboardConfigPanel(SailingServiceAsync sailingService, AdminConsole adminConsole,
@@ -121,29 +126,20 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
         filterPanel.setSpacing(5);
         filterPanel.add(lblFilterEvents);
         filterPanel.setCellVerticalAlignment(lblFilterEvents, HasVerticalAlignment.ALIGN_MIDDLE);
-        filterRacesTextbox = new TextBox();
-        filterRacesTextbox.addKeyUpHandler(new KeyUpHandler() {
+        filterLeaderboardTextbox = new TextBox();
+        filterLeaderboardTextbox.addKeyUpHandler(new KeyUpHandler() {
             @Override
             public void onKeyUp(KeyUpEvent event) {
-                String text = filterRacesTextbox.getText();
-                leaderboardList.getList().clear();
-                if (text == null || text.isEmpty()) {
-                    leaderboardList.getList().addAll(availableLeaderboardList);
-                } else {
-                    String textAsUppercase = text.toUpperCase();
-                    for (LeaderboardDAO dao : availableLeaderboardList) {
-                        if (dao.name != null) {
-                            if (dao.name.toUpperCase().contains(textAsUppercase))
-                                leaderboardList.getList().add(dao);
-                        }
-                    }
-                }
-                selectedLeaderboard = null;
-                clearSelection();
+                fillRaceListFromAvailableLeaderboardsApplyingFilter();
             }
         });
-        filterPanel.add(filterRacesTextbox);
+        filterPanel.add(filterLeaderboardTextbox);
         mainPanel.add(filterPanel);
+
+        AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
+        leaderboardTable = new CellTable<LeaderboardDAO>(/* pageSize */200, tableRes);
+        ListHandler<LeaderboardDAO> leaderboardColumnListHandler = new ListHandler<LeaderboardDAO>(
+                leaderboardList.getList());
 
         AnchorCell anchorCell = new AnchorCell();
         Column<LeaderboardDAO, SafeHtml> linkColumn = new Column<LeaderboardDAO, SafeHtml>(anchorCell) {
@@ -153,6 +149,26 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
             }
 
         };
+        linkColumn.setSortable(true);
+        leaderboardColumnListHandler.setComparator(linkColumn, new Comparator<LeaderboardDAO>() {
+
+            @Override
+            public int compare(LeaderboardDAO o1, LeaderboardDAO o2) {
+                boolean ascending = isSortedAscending();
+                if (o1.name.equals(o2.name)) {
+                    return 0;
+                }
+                int val = -1;
+                val = (o1 != null && o2 != null && ascending) ? (o1.name.compareTo(o2.name)) : -(o2.name
+                        .compareTo(o1.name));
+                return val;
+            }
+
+            private boolean isSortedAscending() {
+                ColumnSortList sortList = leaderboardTable.getColumnSortList();
+                return sortList.size() > 0 & sortList.get(0).isAscending();
+            }
+        });
         TextColumn<LeaderboardDAO> discardingOptionsColumn = new TextColumn<LeaderboardDAO>() {
             @Override
             public String getValue(LeaderboardDAO leaderboard) {
@@ -197,11 +213,10 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
                 }
             }
         });
-        AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
-        leaderboardTable = new CellTable<LeaderboardDAO>(/* pageSize */200, tableRes);
         leaderboardTable.addColumn(linkColumn, "Name");
         leaderboardTable.addColumn(discardingOptionsColumn, "Discarding");
         leaderboardTable.addColumn(leaderboardActionColumn, "Actions");
+        leaderboardTable.addColumnSortHandler(leaderboardColumnListHandler);
         leaderboardTable.setWidth("500px");
         tableSelectionModel = new SingleSelectionModel<LeaderboardDAO>();
         leaderboardTable.setSelectionModel(tableSelectionModel);
@@ -684,7 +699,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
         Scheduler.get().scheduleFinally(new ScheduledCommand() {
             @Override
             public void execute() {
-                trackedEventsComposite.addRaceSelectionChangeListener(LeaderboardConfigPanel.this);                
+                trackedEventsComposite.addRaceSelectionChangeListener(LeaderboardConfigPanel.this);
             }
         });
         if (leaderboardName != null) {
@@ -766,7 +781,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
                         selectedLeaderboard = result;
                         leaderboardSelectionChanged();
                     }
-        });
+                });
     }
 
     private void updateLeaderboard(final String oldLeaderboardName, final LeaderboardDAO leaderboardToUdate) {
@@ -852,11 +867,28 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
                 });
     }
 
-    private void clearSelection() {
-        if (leaderboardList != null) {
-            for (LeaderboardDAO leaderboard : leaderboardList.getList()) {
-                tableSelectionModel.setSelected(leaderboard, false);
+    private void fillRaceListFromAvailableLeaderboardsApplyingFilter() {
+        String text = filterLeaderboardTextbox.getText();
+        List<String> wordsToFilter = Arrays.asList(text.split(" "));
+        leaderboardList.getList().clear();
+        if (text != null && !text.isEmpty()) {
+            for (LeaderboardDAO dao : availableLeaderboardList) {
+                boolean failed = false;
+                for (String word : wordsToFilter) {
+                    String textAsUppercase = word.toUpperCase().trim();
+                    if (!dao.name.toUpperCase().contains(textAsUppercase)) {
+                        failed = true;
+                        break;
+                    }
+                }
+                if (!failed) {
+                    leaderboardList.getList().add(dao);
+                }
             }
+        } else {
+            leaderboardList.getList().addAll(availableLeaderboardList);
         }
+        // now sort again according to selected criterion
+        ColumnSortEvent.fire(leaderboardTable, leaderboardTable.getColumnSortList());
     }
 }

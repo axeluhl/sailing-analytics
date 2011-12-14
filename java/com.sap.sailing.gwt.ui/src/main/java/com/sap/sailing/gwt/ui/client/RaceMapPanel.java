@@ -76,8 +76,47 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
     private final ListBox quickRanksBox;
     private final List<CompetitorDAO> quickRanksList;
     private final TimePanel timePanel;
-    private Icon boatIcon;
-    private Icon boatIconHighlighted;
+    
+    /**
+     * Two sails on downwind leg, wind from port (sails on starboard); no highlighting
+     */
+    private ImageRotator boatIconDownwindPortRotator;
+
+    /**
+     * Two sails on downwind leg, wind from port (sails on starboard); with highlighting
+     */
+    private ImageRotator boatIconHighlightedDownwindPortRotator;
+    
+    /**
+     * Two sails on downwind leg, wind from starboard (sails on port); no highlighting
+     */
+    private ImageRotator boatIconDownwindStarboardRotator;
+
+    /**
+     * Two sails on downwind leg, wind from starboard (sails on port); with highlighting
+     */
+    private ImageRotator boatIconHighlightedDownwindStarboardRotator;
+    
+    /**
+     * One sail, wind from port (sails on starboard); no highlighting
+     */
+    private ImageRotator boatIconPortRotator;
+
+    /**
+     * One sail, wind from port (sails on starboard); with highlighting
+     */
+    private ImageRotator boatIconHighlightedPortRotator;
+    
+    /**
+     * One sail, wind from starboard (sails on port); no highlighting
+     */
+    private ImageRotator boatIconStarboardRotator;
+
+    /**
+     * One sail, wind from starboard (sails on port); with highlighting
+     */
+    private ImageRotator boatIconHighlightedStarboardRotator;
+    
     private Icon buoyIcon;
     private Icon tackToStarboardIcon;
     private Icon tackToPortIcon;
@@ -331,9 +370,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
             // "lowlight" currently selected competitor
             Marker highlightedMarker = boatMarkers.get(competitorDAO);
             if (highlightedMarker != null) {
-                Marker lowlightedMarker = createBoatMarker(competitorDAO, highlightedMarker.getLatLng().getLatitude(),
-                        highlightedMarker.getLatLng().getLongitude(), /* highlighted */
-                        false);
+                Marker lowlightedMarker = createBoatMarker(competitorDAO, false);
                 map.removeOverlay(highlightedMarker);
                 map.addOverlay(lowlightedMarker);
                 boatMarkers.put(competitorDAO, lowlightedMarker);
@@ -342,9 +379,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         } else if (itemSelected && !competitorsSelectedInMap.contains(competitorDAO)) {
             Marker lowlightedMarker = boatMarkers.get(competitorDAO);
             if (lowlightedMarker != null) {
-                Marker highlightedMarker = createBoatMarker(competitorDAO, lowlightedMarker.getLatLng().getLatitude(),
-                        lowlightedMarker.getLatLng().getLongitude(), /* highlighted */
-                        true);
+                Marker highlightedMarker = createBoatMarker(competitorDAO, true);
                 map.removeOverlay(lowlightedMarker);
                 map.addOverlay(highlightedMarker);
                 boatMarkers.put(competitorDAO, highlightedMarker);
@@ -386,12 +421,16 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
                         lastMousePosition = event.getLatLng();
                     }
                 });
-                boatIcon = Icon.newInstance(resources.blackdotIcon().getSafeUri().asString());
-                boatIcon.setIconAnchor(Point.newInstance(8, 8));
-                boatIconHighlighted = Icon.newInstance(resources.reddotIcon().getSafeUri().asString());
-                boatIconHighlighted.setIconAnchor(Point.newInstance(8, 8));
+                boatIconDownwindPortRotator = new ImageRotator(resources.lowlightedBoatIconDW_Port());
+                boatIconHighlightedDownwindPortRotator = new ImageRotator(resources.highlightedBoatIconDW_Port());
+                boatIconDownwindStarboardRotator = new ImageRotator(resources.lowlightedBoatIconDW_Starboard());
+                boatIconHighlightedDownwindStarboardRotator = new ImageRotator(resources.highlightedBoatIconDW_Starboard());
+                boatIconPortRotator = new ImageRotator(resources.lowlightedBoatIcon_Port());
+                boatIconHighlightedPortRotator = new ImageRotator(resources.highlightedBoatIcon_Port());
+                boatIconStarboardRotator = new ImageRotator(resources.lowlightedBoatIcon_Starboard());
+                boatIconHighlightedStarboardRotator = new ImageRotator(resources.highlightedBoatIcon_Starboard());
                 buoyIcon = Icon.newInstance(resources.buoyIcon().getSafeUri().asString());
-                buoyIcon.setIconAnchor(Point.newInstance(7, 7));
+                buoyIcon.setIconAnchor(Point.newInstance(4, 4));
                 tackToStarboardIcon = Icon
                         .newInstance("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=T|00FF00|000000");
                 tackToStarboardIcon.setIconAnchor(Point.newInstance(10, 33));
@@ -746,16 +785,16 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
                         newMapBounds.extend(bounds.getSouthWest());
                     }
                     if (lastShownFix.containsKey(competitorDAO)) {
-                        GPSFixDAO lastPos = fixes.get(competitorDAO).get(lastShownFix.get(competitorDAO));
+                        GPSFixDAO lastPos = getBoatFix(competitorDAO);
                         Marker boatMarker = boatMarkers.get(competitorDAO);
                         if (boatMarker == null) {
-                            boatMarker = createBoatMarker(competitorDAO, lastPos.position.latDeg,
-                                    lastPos.position.lngDeg, false);
+                            boatMarker = createBoatMarker(competitorDAO, false);
                             map.addOverlay(boatMarker);
                             boatMarkers.put(competitorDAO, boatMarker);
                         } else {
                             competitorDAOsOfUnusedMarkers.remove(competitorDAO);
                             boatMarker.setLatLng(LatLng.newInstance(lastPos.position.latDeg, lastPos.position.lngDeg));
+                            boatMarker.setImage(getBoatImageURL(lastPos, competitorsSelectedInMap.contains(competitorDAO)));
                         }
                     }
                 }
@@ -771,6 +810,57 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
                 map.removeOverlay(tails.remove(unusedTailCompetitorDAO));
             }
         }
+    }
+
+    private String getBoatImageURL(GPSFixDAO boatFix, boolean highlighted) {
+        return getBoatImageURL(getBoatImageRotator(boatFix, highlighted), boatFix);
+    }
+    
+    private String getBoatImageURL(ImageRotator boatImageRotator, GPSFixDAO boatFix) {
+        return boatImageRotator.getRotatedImageURL(boatFix.speedWithBearing.bearingInDegrees);
+    }
+    
+    private Icon getBoatImageIcon(GPSFixDAO boatFix, boolean highlighted) {
+        ImageRotator boatImageRotator = getBoatImageRotator(boatFix, highlighted);
+        Icon icon = Icon.newInstance(getBoatImageURL(boatImageRotator, boatFix));
+        icon.setIconAnchor(boatImageRotator.getAnchor());
+        return icon;
+    }
+
+    private ImageRotator getBoatImageRotator(GPSFixDAO boatFix, boolean highlighted) {
+        if (boatFix.tack.equals("PORT")) {
+            if (boatFix.legType.equals("DOWNWIND")) {
+                if (highlighted) {
+                    return boatIconHighlightedDownwindStarboardRotator;
+                } else {
+                    return boatIconDownwindStarboardRotator;
+                }
+            } else {
+                if (highlighted) {
+                    return boatIconHighlightedStarboardRotator;
+                } else {
+                    return boatIconStarboardRotator;
+                }
+            }
+        } else {
+            if (boatFix.legType.equals("DOWNWIND")) {
+                if (highlighted) {
+                    return boatIconHighlightedDownwindPortRotator;
+                } else {
+                    return boatIconDownwindPortRotator;
+                }
+            } else {
+                if (highlighted) {
+                    return boatIconHighlightedPortRotator;
+                } else {
+                    return boatIconPortRotator;
+                }
+            }
+        }
+    }
+
+    private GPSFixDAO getBoatFix(CompetitorDAO competitorDAO) {
+        return fixes.get(competitorDAO).get(lastShownFix.get(competitorDAO));
     }
 
     private Collection<CompetitorDAO> getCompetitorsToShow() {
@@ -853,17 +943,13 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         return buoyMarker;
     }
 
-    private Marker createBoatMarker(final CompetitorDAO competitorDAO, double latDeg, double lngDeg, boolean highlighted) {
+    private Marker createBoatMarker(final CompetitorDAO competitorDAO, boolean highlighted) {
+        GPSFixDAO boatFix = getBoatFix(competitorDAO);
+        double latDeg = boatFix.position.latDeg;
+        double lngDeg = boatFix.position.lngDeg;
         MarkerOptions options = MarkerOptions.newInstance();
-        if (highlighted) {
-            if (boatIconHighlighted != null) {
-                options.setIcon(boatIconHighlighted);
-            }
-        } else {
-            if (boatIcon != null) {
-                options.setIcon(boatIcon);
-            }
-        }
+        Icon icon = getBoatImageIcon(boatFix, highlighted);
+        options.setIcon(icon);
         options.setTitle(competitorDAO.name);
         final Marker boatMarker = new Marker(LatLng.newInstance(latDeg, lngDeg), options);
         boatMarker.addMarkerClickHandler(new MarkerClickHandler() {
@@ -895,7 +981,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
     }
 
     private void showCompetitorInfoWindow(final CompetitorDAO competitorDAO, LatLng where) {
-        GPSFixDAO latestFixForCompetitor = fixes.get(competitorDAO).get(lastShownFix.get(competitorDAO));
+        GPSFixDAO latestFixForCompetitor = getBoatFix(competitorDAO);
         map.getInfoWindow().open(where,
                 new InfoWindowContent(getInfoWindowContent(competitorDAO, latestFixForCompetitor)));
     }
@@ -922,7 +1008,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
                 Map<CompetitorDAO, Date> from = new HashMap<CompetitorDAO, Date>();
                 from.put(competitorDAO, fixes.get(competitorDAO).get(firstShownFix.get(competitorDAO)).timepoint);
                 Map<CompetitorDAO, Date> to = new HashMap<CompetitorDAO, Date>();
-                to.put(competitorDAO, fixes.get(competitorDAO).get(lastShownFix.get(competitorDAO)).timepoint);
+                to.put(competitorDAO, getBoatFix(competitorDAO).timepoint);
                 /* currently not showing Douglas-Peucker points; TODO use checkboxes to select what to show (Bug #6) */
                 sailingService.getDouglasPoints(new EventNameAndRaceName(event.name, race.name), from, to, 3,
                         new AsyncCallback<Map<CompetitorDAO, List<GPSFixDAO>>>() {

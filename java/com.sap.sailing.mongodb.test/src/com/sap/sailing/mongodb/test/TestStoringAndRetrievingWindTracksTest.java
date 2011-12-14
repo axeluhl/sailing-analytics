@@ -89,7 +89,7 @@ public class TestStoringAndRetrievingWindTracksTest extends AbstractTracTracLive
         Position pos = new DegreePosition(54, 9);
         for (double bearingDeg = 123.4; bearingDeg<140; bearingDeg += 1.1) {
             windTrack.add(new WindImpl(pos, MillisecondsTimePoint.now(), new KnotSpeedWithBearingImpl(10., new DegreeBearingImpl(bearingDeg))));
-            Thread.sleep(1); // ensure that the next now() call is distinguishably later
+            Thread.sleep(10); // ensure that the next now() call is distinguishably later
         }
         Thread.sleep(2000); // give MongoDB some time to make written data available to other connections
         

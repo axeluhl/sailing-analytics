@@ -107,6 +107,7 @@ public abstract class KielWeek2011BasedTest extends AbstractTracTracLiveTest {
                 getSemaphor().wait();
             }
         }
+        Thread.sleep(1000); // storedDataEnd() isn't necessarily synchronized with the controllers/listeners pumping data; wait a bit to receive it all
         for (Receiver receiver : receivers) {
             receiver.stopAfterProcessingQueuedEvents();
             receiver.join();
