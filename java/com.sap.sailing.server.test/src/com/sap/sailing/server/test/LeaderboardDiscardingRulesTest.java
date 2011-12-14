@@ -11,7 +11,7 @@ import com.sap.sailing.domain.leaderboard.impl.ResultDiscardingRuleImpl;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 
-public class LeaderboardDiscardingRoulesTest {
+public class LeaderboardDiscardingRulesTest {
 
     private static final String LEADERBOARDNAME = "TESTBOARD";
 
