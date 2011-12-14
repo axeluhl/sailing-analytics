@@ -697,8 +697,9 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                             GPSFixMoving fix = fixIter.next();
                             while (fix != null && fix.getTimePoint().compareTo(toTimePointExcluding) < 0) {
                                 Tack tack = trackedRace.getTack(competitor, fix.getTimePoint());
-                                LegType legType = trackedRace.getTrackedLeg(trackedRace.getTrackedLeg(competitor, fix.getTimePoint()).getLeg()).
-                                        getLegType(fix.getTimePoint());
+                                TrackedLegOfCompetitor trackedLegOfCompetitor = trackedRace.getTrackedLeg(competitor, fix.getTimePoint());
+                                LegType legType = trackedLegOfCompetitor == null ? null : trackedRace.getTrackedLeg(
+                                        trackedLegOfCompetitor.getLeg()).getLegType(fix.getTimePoint());
                                 GPSFixDAO fixDAO = createGPSFixDAO(fix, fix.getSpeed(), tack, legType, /* extrapolate */false);
                                 fixesForCompetitor.add(fixDAO);
                                 if (fixIter.hasNext()) {
@@ -709,14 +710,15 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                                         Position position = track.getEstimatedPosition(toTimePointExcluding,
                                                 extrapolate);
                                         Tack tack2 = trackedRace.getTack(competitor, toTimePointExcluding);
-                                        LegType legType2 = trackedRace.getTrackedLeg(trackedRace.getTrackedLeg(competitor, fix.getTimePoint()).getLeg()).
-                                                getLegType(fix.getTimePoint());
+                                        LegType legType2 = trackedLegOfCompetitor == null ? null : trackedRace
+                                                .getTrackedLeg(trackedLegOfCompetitor.getLeg()).getLegType(
+                                                        fix.getTimePoint());
                                         SpeedWithBearing speedWithBearing = track
                                                 .getEstimatedSpeed(toTimePointExcluding);
                                         GPSFixDAO extrapolated = new GPSFixDAO(to.get(competitorDAO), new PositionDAO(
                                                 position.getLatDeg(), position.getLngDeg()),
                                                 createSpeedWithBearingDAO(speedWithBearing), tack2.name(), /* extrapolated */
-                                                legType2.name(), true);
+                                                legType2==null?null:legType2.name(), true);
                                         fixesForCompetitor.add(extrapolated);
                                     }
                                     fix = null;
@@ -738,7 +740,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     private GPSFixDAO createGPSFixDAO(GPSFix fix, SpeedWithBearing speedWithBearing, Tack tack, LegType legType, boolean extrapolated) {
         return new GPSFixDAO(fix.getTimePoint().asDate(), new PositionDAO(fix
                 .getPosition().getLatDeg(), fix.getPosition().getLngDeg()),
-                createSpeedWithBearingDAO(speedWithBearing), tack.name(), legType.name(), extrapolated);
+                createSpeedWithBearingDAO(speedWithBearing), tack.name(), legType==null?null:legType.name(), extrapolated);
     }
 
     @Override
@@ -1365,8 +1367,9 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                             speedWithBearing = gpsFixTrack.getEstimatedSpeed(fix.getTimePoint());
                         }
                         Tack tack = trackedRace.getTack(competitor, fix.getTimePoint());
-                        LegType legType = trackedRace.getTrackedLeg(trackedRace.getTrackedLeg(competitor, fix.getTimePoint()).getLeg()).
-                                getLegType(fix.getTimePoint());
+                        TrackedLegOfCompetitor trackedLegOfCompetitor = trackedRace.getTrackedLeg(competitor, fix.getTimePoint());
+                        LegType legType = trackedLegOfCompetitor == null ? null : trackedRace.getTrackedLeg(
+                                trackedLegOfCompetitor.getLeg()).getLegType(fix.getTimePoint());
                         GPSFixDAO fixDAO = createGPSFixDAO(fix, speedWithBearing, tack, legType, /* extrapolated */false);
                         gpsFixDouglasList.add(fixDAO);
                     }
