@@ -867,14 +867,6 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
                 });
     }
 
-    private void clearSelection() {
-        if (leaderboardList != null) {
-            for (LeaderboardDAO leaderboard : leaderboardList.getList()) {
-                tableSelectionModel.setSelected(leaderboard, false);
-            }
-        }
-    }
-
     private void fillRaceListFromAvailableLeaderboardsApplyingFilter() {
         String text = filterLeaderboardTextbox.getText();
         List<String> wordsToFilter = Arrays.asList(text.split(" "));

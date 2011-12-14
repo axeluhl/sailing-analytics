@@ -184,7 +184,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
     }
 
     @Override
-    public RacesHandle getRaceHandle() {
+    public RacesHandle getRacesHandle() {
         return new RaceHandleImpl(domainFactory, tractracEvent, getTrackedEvent(), this);
     }
     
