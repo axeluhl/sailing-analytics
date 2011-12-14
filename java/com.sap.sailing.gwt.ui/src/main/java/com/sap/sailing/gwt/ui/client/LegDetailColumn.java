@@ -18,7 +18,7 @@ public abstract class LegDetailColumn<FieldType extends Comparable<?>, Rendering
     private final String headerStyle;
     private final String columnStyle;
     private final String unit;
-    protected MinMaxRenderer minMaxRenderer;
+    private final MinMaxRenderer minMaxRenderer;
 
     public interface LegDetailField<T extends Comparable<?>> {
         T get(LeaderboardRowDAO row);
@@ -34,6 +34,11 @@ public abstract class LegDetailColumn<FieldType extends Comparable<?>, Rendering
         this.leaderboardTable = leaderboardTable;
         this.headerStyle = headerStyle;
         this.columnStyle = columnStyle;
+        minMaxRenderer = new MinMaxRenderer(this, getComparator());
+    }
+
+    protected MinMaxRenderer getMinMaxRenderer() {
+        return minMaxRenderer;
     }
 
     protected String getTitle() {
@@ -96,7 +101,6 @@ public abstract class LegDetailColumn<FieldType extends Comparable<?>, Rendering
 
     @Override
     protected void updateMinMax(LeaderboardDAO leaderboard) {
-        minMaxRenderer = new MinMaxRenderer(leaderboard, this, getComparator());
-        minMaxRenderer.updateMinMax(leaderboard);
+        minMaxRenderer.updateMinMax(leaderboard.rows.values());
     }
 }

@@ -76,7 +76,7 @@ public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> im
         this.raceNameProvider = raceNameProvider;
         this.headerStyle = headerStyle;
         this.columnStyle = columnStylee;
-        this.minmaxRenderer = new MinMaxRenderer(leaderboardPanel.getLeaderboard(), this, getComparator());
+        this.minmaxRenderer = new MinMaxRenderer(this, getComparator());
     }
 
     private Double getTotalNumberOfTacks(LeaderboardEntryDAO row) {
@@ -248,8 +248,7 @@ public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> im
 
     @Override
     protected void updateMinMax(LeaderboardDAO leaderboard) {
-        minmaxRenderer = new MinMaxRenderer(leaderboard, this, getComparator());
-        minmaxRenderer.updateMinMax(leaderboard);
+        minmaxRenderer.updateMinMax(leaderboard.rows.values());
     }
 
     @Override

@@ -5,19 +5,16 @@ import java.util.Comparator;
 
 import com.google.gwt.cell.client.Cell.Context;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
-import com.sap.sailing.gwt.ui.shared.LeaderboardDAO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDAO;
 
 public class MinMaxRenderer {
-    private LeaderboardDAO leaderboard;
     private HasStringValue valueProvider;
     private Comparator<LeaderboardRowDAO> comparator;
     private Double minimumValue;
     private Double maximumValue;
 
-    public MinMaxRenderer(LeaderboardDAO leaderboard, HasStringValue valueProvider,
+    public MinMaxRenderer(HasStringValue valueProvider,
             Comparator<LeaderboardRowDAO> comparator) {
-        this.leaderboard = leaderboard;
         this.valueProvider = valueProvider;
         this.comparator = comparator;
     }
@@ -35,15 +32,15 @@ public class MinMaxRenderer {
     }
 
     private int getPercentage(LeaderboardRowDAO row) {
-        updateMinMax(leaderboard);
-        Double value = getDoubleFromString(valueProvider.getStringValueToRender(row));
         int percentage = 0;
+        Double value = getDoubleFromString(valueProvider.getStringValueToRender(row));
         if (value != null) {
             if (value != null && getMinimumDouble() != null && getMaximumDouble() != null) {
                 int minBarLength = Math.abs(getMinimumDouble()) < 0.01 ? 0 : 10;
                 percentage = (int) (minBarLength + (100. - minBarLength) * (value - getMinimumDouble())
                         / (getMaximumDouble() - getMinimumDouble()));
             }
+
         }
         return percentage;
 
@@ -69,8 +66,7 @@ public class MinMaxRenderer {
         return result;
     }
 
-    public void updateMinMax(LeaderboardDAO leaderboard) {
-        Collection<LeaderboardRowDAO> values = leaderboard.rows.values();
+    public void updateMinMax(Collection<LeaderboardRowDAO> values) {
         LeaderboardRowDAO minimumRow = null;
         LeaderboardRowDAO maximumRow = null;
         for (LeaderboardRowDAO row : values) {
