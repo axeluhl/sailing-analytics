@@ -8,9 +8,14 @@ import com.sap.sailing.domain.base.TimePoint;
 
 /**
  * Manages a set of {@link TrackedRace} objects that belong to the same {@link Event} (regatta, sailing event for a
- * single boat class). It therefore represents the entry point into the tracking-related objects for such an
- * event. Allows clients to find a {@link TrackedRace} by the {@link RaceDefinition} for which it holds the
- * tracking data.
+ * single boat class). It therefore represents the entry point into the tracking-related objects for such an event.
+ * Allows clients to find a {@link TrackedRace} by the {@link RaceDefinition} for which it holds the tracking data.
+ * <p>
+ * 
+ * Please note that the result of calling {@link #getEvent()}.{@link Event#getAllRaces() getAllRaces()} is not
+ * guaranteed to match up with the races obtained by calling {@link TrackedRace#getRace()} on all {@link TrackedRaces}
+ * resulting from {@link #getTrackedRaces()}. In other words, the processes for adding and removing races to the
+ * server do not guarantee to update the master and tracking data for races atomically.
  * 
  * @author Axel Uhl (D043530)
  * 
@@ -38,9 +43,6 @@ public interface TrackedEvent {
     /**
      * Obtains the tracked race for <code>race</code>. Blocks until the tracked race has been created
      * and added to this tracked event (see {@link #addTrackedRace(TrackedRace)}).
-     * 
-     * Please note that the {@link RaceDefinition} of the {@link Event} must not be synchronized {@link RaceDefinition}
-     * of {@link TrackedEvent}. The values could be inconsistent.
      */
     TrackedRace getTrackedRace(RaceDefinition race);
 

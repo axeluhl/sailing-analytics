@@ -12,15 +12,17 @@ import com.sap.sailing.domain.tracking.TrackedEvent;
  */
 public interface Event extends Named {
     /**
-     * Please note that the {@link RaceDefinition}s of the {@link Event} must not be synchronized {@link RaceDefinition}s
-     * of {@link TrackedEvent}. The values could be inconsistent.
-     * @return
+     * Please note that the {@link RaceDefinition}s of the {@link Event} are not necessarily in sync with the
+     * {@link TrackedRace}s of the {@link TrackedEvent} whose {@link TrackedEvent#getEvent() event} is this event.
+     * For example, it may be the case that a {@link RaceDefinition} is returned by this method for which no
+     * {@link TrackedRace} exists in the corresponding {@link TrackedEvent}. This could be the case, e.g., during
+     * the initialization of the tracker as well as during removing a race from the server.
      */
     Iterable<RaceDefinition> getAllRaces();
     
     /**
-     * Please note that the {@link RaceDefinition} of {@link Event} must not be synchronized with the 
-     * {@link RaceDefinition} of {@link TrackedEvent}. The values could be inconsistent.
+     * Please note that the set of {@link RaceDefinition}s contained by this event may not match up with the 
+     * {@link TrackedRace}s of the {@link TrackedEvent} corresponding to this event. See also {@link #getAllRaces()}.
      * 
      * @return <code>null</code>, if this event does not contain a race (see {@link #getAllRaces}) whose
      * {@link RaceDefinition#getName()} equals <code>raceName</code>

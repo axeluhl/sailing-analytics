@@ -5,6 +5,8 @@ import java.util.List;
 import com.google.gwt.dom.client.EventTarget;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.ResizeEvent;
+import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Anchor;
@@ -22,7 +24,7 @@ public class CompareCompetitorsChartDialog extends DialogBox {
 
     public CompareCompetitorsChartDialog(SailingServiceAsync sailingService, List<CompetitorDAO> competitors, RaceIdentifier[] races, StringConstants stringConstants){
         super(false);
-        ChartsPanel ccp = new ChartsPanel(sailingService, competitors, races, stringConstants, (int) (Window.getClientWidth()-300), (int) (Window.getClientHeight()-200));
+        final ChartsPanel ccp = new ChartsPanel(sailingService, competitors, races, stringConstants, (int) (Window.getClientWidth()-320), (int) (Window.getClientHeight()-90));
         ccp.addDataLoadedHandler(new DataLoadedHandler() {
             
             @Override
@@ -64,7 +66,13 @@ public class CompareCompetitorsChartDialog extends DialogBox {
                 hide();
             }
         });
-
+        Window.addResizeHandler(new ResizeHandler() {
+			
+			@Override
+			public void onResize(ResizeEvent event) {
+				ccp.resize((int) (Window.getClientWidth()-250), (int) (Window.getClientHeight()-90));
+			}
+		});
     }
     
     public void addCloseHandler(ClickHandler handler) {

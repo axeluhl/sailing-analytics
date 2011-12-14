@@ -38,9 +38,10 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
-import com.sap.sailing.domain.tracking.RacesHandle;
 import com.sap.sailing.domain.tracking.RaceTracker;
+import com.sap.sailing.domain.tracking.RacesHandle;
 import com.sap.sailing.domain.tracking.TrackedEventRegistry;
+import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.util.Util;
@@ -63,10 +64,13 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
     private Course course;
     private StartList startList;
     private DynamicTrackedRace trackedRace;
+
+    private boolean loggedIgnore;
     
     protected SwissTimingRaceTrackerImpl(String raceID, String hostname, int port, WindStore windStore,
             DomainFactory domainFactory, SwissTimingFactory factory, RaceSpecificMessageLoader messageLoader,
-            TrackedEventRegistry trackedEventRegistry, boolean canSendRequests) throws InterruptedException, UnknownHostException, IOException, ParseException {
+            TrackedEventRegistry trackedEventRegistry, boolean canSendRequests) throws InterruptedException,
+            UnknownHostException, IOException, ParseException {
         super();
         this.connector = factory.getOrCreateSailMasterConnector(hostname, port, messageLoader, canSendRequests);
         this.domainFactory = domainFactory;
@@ -78,7 +82,6 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
         event = domainFactory.getOrCreateEvent(raceID);
         setTrackedEvent(trackedEventRegistry.getOrCreateTrackedEvent(event));
         connector.trackRace(raceID);
-        
     }
 
     @Override
@@ -92,7 +95,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
     }
 
     @Override
-    public RacesHandle getRaceHandle() {
+    public RacesHandle getRacesHandle() {
         return new RacesHandle() {
             @Override
             public Event getEvent() {
@@ -141,57 +144,79 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
             Long millisecondsSinceRaceStart, Integer nextMarkIndexForLeader, Distance distanceToNextMarkForLeader,
             Collection<Fix> fixes) {
         assert this.raceID.equals(raceID);
-        if (this.raceID.equals(raceID)) {
-            if (startTime != null) {
-                trackedRace.setStartTimeReceived(startTime);
-            }
-            for (Fix fix : fixes) {
-                GPSFixMoving gpsFix = domainFactory.createGPSFix(timePoint, fix);
-                switch (fix.getTrackerType()) {
-                case BUOY:
-                case COMMITTEE:
-                case JURY:
-                case TIMINGSCORING:
-                case UNIDENTIFIED:
-                    String trackerID = fix.getBoatID();
-                    Buoy buoy = domainFactory.getOrCreateBuoy(trackerID);
-                    DynamicGPSFixTrack<Buoy, GPSFix> buoyTrack = trackedRace.getOrCreateTrack(buoy);
-                    buoyTrack.addGPSFix(gpsFix);
-                    break;
-                case COMPETITOR:
-                    Competitor competitor = domainFactory.getCompetitorByBoatID(fix.getBoatID());
-                    DynamicGPSFixTrack<Competitor, GPSFixMoving> competitorTrack = trackedRace.getTrack(competitor);
-                    competitorTrack.addGPSFix(gpsFix);
-                    break;
-                default:
-                    logger.info("Unknown tracker type "+fix.getTrackerType());
+        if (isTrackedRaceStillReachable()) {
+            if (this.raceID.equals(raceID)) {
+                if (startTime != null) {
+                    trackedRace.setStartTimeReceived(startTime);
+                }
+                for (Fix fix : fixes) {
+                    GPSFixMoving gpsFix = domainFactory.createGPSFix(timePoint, fix);
+                    switch (fix.getTrackerType()) {
+                    case BUOY:
+                    case COMMITTEE:
+                    case JURY:
+                    case TIMINGSCORING:
+                    case UNIDENTIFIED:
+                        String trackerID = fix.getBoatID();
+                        Buoy buoy = domainFactory.getOrCreateBuoy(trackerID);
+                        DynamicGPSFixTrack<Buoy, GPSFix> buoyTrack = trackedRace.getOrCreateTrack(buoy);
+                        buoyTrack.addGPSFix(gpsFix);
+                        break;
+                    case COMPETITOR:
+                        Competitor competitor = domainFactory.getCompetitorByBoatID(fix.getBoatID());
+                        DynamicGPSFixTrack<Competitor, GPSFixMoving> competitorTrack = trackedRace.getTrack(competitor);
+                        competitorTrack.addGPSFix(gpsFix);
+                        break;
+                    default:
+                        logger.info("Unknown tracker type " + fix.getTrackerType());
+                    }
                 }
             }
+        } else {
+            if (!loggedIgnore) {
+                logger.info("Ignoring race position data " + fixes + " for SwissTiming race " + raceID
+                        + " because tracked race is no longer reachable. Was the race removed but is still tracked? "+
+                        "(Future occurrences of this message will be suppressed)");
+                loggedIgnore = true;
+            }
         }
+
     }
 
     @Override
     public void receivedTimingData(String raceID, String boatID,
             List<Triple<Integer, Integer, Long>> markIndicesRanksAndTimesSinceStartInMilliseconds) {
         assert this.raceID.equals(raceID);
-        Competitor competitor = domainFactory.getCompetitorByBoatID(boatID);
-        // the list of mark indices and time stamps is partial and usually only shows the last mark passing;
-        // we need to use this to *update* the competitor's mark passings list, not *replace* it
-        TreeMap<Integer, MarkPassing> markPassingsByMarkIndex = new TreeMap<Integer, MarkPassing>();
-        // now fill with the already existing mark passings for the competitor identified by boatID...
-        for (MarkPassing markPassing : trackedRace.getMarkPassings(competitor)) {
-            markPassingsByMarkIndex.put(trackedRace.getRace().getCourse().getIndexOfWaypoint(markPassing.getWaypoint()), markPassing);
+        if (isTrackedRaceStillReachable()) {
+            Competitor competitor = domainFactory.getCompetitorByBoatID(boatID);
+            // the list of mark indices and time stamps is partial and usually only shows the last mark passing;
+            // we need to use this to *update* the competitor's mark passings list, not *replace* it
+            TreeMap<Integer, MarkPassing> markPassingsByMarkIndex = new TreeMap<Integer, MarkPassing>();
+            // now fill with the already existing mark passings for the competitor identified by boatID...
+            for (MarkPassing markPassing : trackedRace.getMarkPassings(competitor)) {
+                markPassingsByMarkIndex.put(
+                        trackedRace.getRace().getCourse().getIndexOfWaypoint(markPassing.getWaypoint()), markPassing);
+            }
+            // ...and then overwrite those for which we received "new evidence"
+            for (Triple<Integer, Integer, Long> markIndexRankAndTimeSinceStartInMilliseconds : markIndicesRanksAndTimesSinceStartInMilliseconds) {
+                Waypoint waypoint = Util.get(trackedRace.getRace().getCourse().getWaypoints(),
+                        markIndexRankAndTimeSinceStartInMilliseconds.getA());
+                MillisecondsTimePoint timePoint = trackedRace.getStart() == null ? null : new MillisecondsTimePoint(
+                        trackedRace.getStart().asMillis() + markIndexRankAndTimeSinceStartInMilliseconds.getC());
+                MarkPassing markPassing = domainFactory.createMarkPassing(timePoint, waypoint,
+                        domainFactory.getCompetitorByBoatID(boatID));
+                markPassingsByMarkIndex.put(markIndexRankAndTimeSinceStartInMilliseconds.getA(), markPassing);
+            }
+            trackedRace.updateMarkPassings(competitor, markPassingsByMarkIndex.values());
+        } else {
+            if (!loggedIgnore) {
+                logger.info("Ignoring timing data " + markIndicesRanksAndTimesSinceStartInMilliseconds + " for SwissTiming race " + raceID
+                        + " because tracked race is no longer reachable. Was the race removed but is still tracked? "+
+                        "(Future occurrences of this message will be suppressed)");
+                loggedIgnore = true;
+            }
         }
-        // ...and then overwrite those for which we received "new evidence"
-        for (Triple<Integer, Integer, Long> markIndexRankAndTimeSinceStartInMilliseconds : markIndicesRanksAndTimesSinceStartInMilliseconds) {
-            Waypoint waypoint = Util.get(trackedRace.getRace().getCourse().getWaypoints(),
-                    markIndexRankAndTimeSinceStartInMilliseconds.getA());
-            MillisecondsTimePoint timePoint = trackedRace.getStart()==null?null:new MillisecondsTimePoint(trackedRace.getStart().asMillis()
-                    + markIndexRankAndTimeSinceStartInMilliseconds.getC());
-            MarkPassing markPassing = domainFactory.createMarkPassing(timePoint, waypoint, domainFactory.getCompetitorByBoatID(boatID));
-            markPassingsByMarkIndex.put(markIndexRankAndTimeSinceStartInMilliseconds.getA(), markPassing);
-        }
-        trackedRace.updateMarkPassings(competitor, markPassingsByMarkIndex.values());
+
     }
 
     @Override
@@ -228,6 +253,17 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
                 });
         logger.info("Created SwissTiming RaceDefinition and TrackedRace for "+race.getName());
     }
+    
+    /**
+     * Checks if {@link #getEvent()} still contains the {@link RaceDefinition} obtained when calling
+     * {@link TrackedRace#getRace()} on {@link #trackedRace} and if the {@link #getTrackedEvent() tracked event} for
+     * {@link #getEvent()} still contains {@link #trackedRace}. This is the precondition for updating the
+     * {@link #trackedRace} with data received from the trackers.
+     */
+    private boolean isTrackedRaceStillReachable() {
+        return Util.contains(getEvent().getAllRaces(), trackedRace.getRace()) &&
+                getTrackedEvent().getExistingTrackedRace(trackedRace.getRace()) == trackedRace;
+    }
 
     @Override
     public void receivedCourseConfiguration(String raceID, Course course) {
@@ -237,11 +273,20 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
                 createRaceDefinition(raceID);
             }
         } else {
-            try {
-                domainFactory.updateCourseWaypoints(trackedRace.getRace().getCourse(), course.getMarks());
-            } catch (PatchFailedException e) {
-                logger.info("Internal error trying to update course: "+e.getMessage());
-                logger.throwing(SwissTimingRaceTrackerImpl.class.getName(), "receivedCourseConfiguration", e);
+            if (isTrackedRaceStillReachable()) {
+                try {
+                    domainFactory.updateCourseWaypoints(trackedRace.getRace().getCourse(), course.getMarks());
+                } catch (PatchFailedException e) {
+                    logger.info("Internal error trying to update course: " + e.getMessage());
+                    logger.throwing(SwissTimingRaceTrackerImpl.class.getName(), "receivedCourseConfiguration", e);
+                }
+            } else {
+                if (!loggedIgnore) {
+                    logger.info("Ignoring course configuration "+course+" for SwissTiming race "+raceID+
+                            " because tracked race is no longer reachable. Was the race removed but is still tracked? "+
+                            "(Future occurrences of this message will be suppressed)");
+                    loggedIgnore = true;
+                }
             }
         }
     }
