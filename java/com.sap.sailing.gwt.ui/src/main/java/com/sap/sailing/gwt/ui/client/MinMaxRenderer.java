@@ -13,8 +13,7 @@ public class MinMaxRenderer {
     private Double minimumValue;
     private Double maximumValue;
 
-    public MinMaxRenderer(HasStringValue valueProvider,
-            Comparator<LeaderboardRowDAO> comparator) {
+    public MinMaxRenderer(HasStringValue valueProvider, Comparator<LeaderboardRowDAO> comparator) {
         this.valueProvider = valueProvider;
         this.comparator = comparator;
     }
