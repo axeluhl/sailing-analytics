@@ -284,9 +284,9 @@ public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> im
     @Override
     public String getStringValueToRender(LeaderboardRowDAO object) {
         String result = getValue(object);
-        if(!result.equals("")){
+        if (!result.equals("")) {
             return getValue(object);
-        }else{
+        } else {
             return null;
         }
     }
