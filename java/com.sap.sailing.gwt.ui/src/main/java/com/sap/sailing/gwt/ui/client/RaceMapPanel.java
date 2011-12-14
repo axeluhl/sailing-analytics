@@ -484,6 +484,9 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         mapZoomedOrPannedSinceLastRaceSelectionChange = false;
         if (!selectedRaces.isEmpty() && selectedRaces.get(selectedRaces.size() - 1) != null) {
             RaceDAO raceDAO = selectedRaces.get(selectedRaces.size() - 1).getC();
+            // set both timer to the start of the race
+            timePanel.timeChanged(raceDAO.startOfRace);
+            timer.setTime(raceDAO.startOfRace.getTime());
             updateSlider(raceDAO);
         }
         // force display of currently selected race
@@ -800,21 +803,22 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
                 }
             }
 //             FIXME here the new MapBounds are not set because the list of competitors is emtpty at this time
-            Set<MarkDAO> marks = buoyMarkers.keySet();
-            LatLng latLngZoomFirstTime = null;
-            if(newMapBounds == null && marks != null && !marks.isEmpty()){
-                MarkDAO mark = marks.iterator().next();
-                latLngZoomFirstTime = LatLng.newInstance(mark.position.latDeg, mark.position.lngDeg);
-            }
+//            Set<MarkDAO> marks = buoyMarkers.keySet();
+//            LatLng latLngZoomFirstTime = null;
+//            if(newMapBounds == null && marks != null && !marks.isEmpty()){
+//                MarkDAO mark = marks.iterator().next();
+//                latLngZoomFirstTime = LatLng.newInstance(mark.position.latDeg, mark.position.lngDeg);
+//            }
             
             if (!mapZoomedOrPannedSinceLastRaceSelectionChange && newMapBounds != null) {
                 map.setZoomLevel(map.getBoundsZoomLevel(newMapBounds));
                 map.setCenter(newMapBounds.getCenter());
-            }else if (latLngZoomFirstTime != null){
-                LatLngBounds zoomBound = LatLngBounds.newInstance(latLngZoomFirstTime, latLngZoomFirstTime);
-                map.setZoomLevel(map.getBoundsZoomLevel(zoomBound));
-                map.setCenter(zoomBound.getCenter());
             }
+//            else if (latLngZoomFirstTime != null){
+//                LatLngBounds zoomBound = LatLngBounds.newInstance(latLngZoomFirstTime, latLngZoomFirstTime);
+//                map.setZoomLevel(map.getBoundsZoomLevel(zoomBound));
+//                map.setCenter(zoomBound.getCenter());
+//            }
             for (CompetitorDAO unusedMarkerCompetitorDAO : competitorDAOsOfUnusedMarkers) {
                 map.removeOverlay(boatMarkers.remove(unusedMarkerCompetitorDAO));
             }
