@@ -799,9 +799,21 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
                     }
                 }
             }
+//             FIXME here the new MapBounds are not set because the list of competitors is emtpty at this time
+            Set<MarkDAO> marks = buoyMarkers.keySet();
+            LatLng latLngZoomFirstTime = null;
+            if(newMapBounds == null && marks != null && !marks.isEmpty()){
+                MarkDAO mark = marks.iterator().next();
+                latLngZoomFirstTime = LatLng.newInstance(mark.position.latDeg, mark.position.lngDeg);
+            }
+            
             if (!mapZoomedOrPannedSinceLastRaceSelectionChange && newMapBounds != null) {
                 map.setZoomLevel(map.getBoundsZoomLevel(newMapBounds));
                 map.setCenter(newMapBounds.getCenter());
+            }else if (latLngZoomFirstTime != null){
+                LatLngBounds zoomBound = LatLngBounds.newInstance(latLngZoomFirstTime, latLngZoomFirstTime);
+                map.setZoomLevel(map.getBoundsZoomLevel(zoomBound));
+                map.setCenter(zoomBound.getCenter());
             }
             for (CompetitorDAO unusedMarkerCompetitorDAO : competitorDAOsOfUnusedMarkers) {
                 map.removeOverlay(boatMarkers.remove(unusedMarkerCompetitorDAO));
@@ -867,6 +879,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         if (showOnlySelected.getValue()) {
             return competitorsSelectedInMap;
         } else {
+            // here the quickrankslist is emtpy, because of that te map is not zoomed correctly
             return quickRanksList;
         }
     }
