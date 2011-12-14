@@ -12,8 +12,6 @@ public class MinMaxRenderer {
     private LeaderboardDAO leaderboard;
     private HasStringValue valueProvider;
     private Comparator<LeaderboardRowDAO> comparator;
-    //private LeaderboardRowDAO minimumvalue;
-    //private LeaderboardRowDAO maximumValue;
     private Double minimumValue;
     private Double maximumValue;
 
@@ -76,10 +74,12 @@ public class MinMaxRenderer {
         LeaderboardRowDAO minimumRow = null;
         LeaderboardRowDAO maximumRow = null;
         for (LeaderboardRowDAO row : values) {
-            if (getDoubleFromString(valueProvider.getStringValueToRender(row)) != null && (minimumRow == null || comparator.compare(minimumRow, row) > 0)) {
+            if (getDoubleFromString(valueProvider.getStringValueToRender(row)) != null
+                    && (minimumRow == null || comparator.compare(minimumRow, row) > 0)) {
                 minimumRow = row;
             }
-            if (getDoubleFromString(valueProvider.getStringValueToRender(row)) != null && (maximumRow == null || comparator.compare(maximumRow, row) < 0)) {
+            if (getDoubleFromString(valueProvider.getStringValueToRender(row)) != null
+                    && (maximumRow == null || comparator.compare(maximumRow, row) < 0)) {
                 maximumRow = row;
             }
         }
