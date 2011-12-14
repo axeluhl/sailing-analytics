@@ -101,6 +101,6 @@ public abstract class LegDetailColumn<FieldType extends Comparable<?>, Rendering
 
     @Override
     protected void updateMinMax(LeaderboardDAO leaderboard) {
-        minMaxRenderer.updateMinMax(leaderboard.rows.values());
+        getMinMaxRenderer().updateMinMax(leaderboard.rows.values());
     }
 }

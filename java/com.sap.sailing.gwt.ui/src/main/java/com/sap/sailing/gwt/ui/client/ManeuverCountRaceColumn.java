@@ -26,7 +26,7 @@ public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> im
     private final String headerStyle;
     private final String columnStyle;
 
-    private MinMaxRenderer minmaxRenderer;
+    private final MinMaxRenderer minmaxRenderer;
 
     private abstract class AbstractManeuverDetailField<T extends Comparable<?>> implements LegDetailField<T> {
         public T get(LeaderboardRowDAO row) {
