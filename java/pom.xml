@@ -91,7 +91,7 @@
 					<groupId>${project.groupId}</groupId>
 					<artifactId>${project.artifactId}</artifactId>
 					<version>${project.version}</version>
-					<classifier>../com.sap.sailing.targetplatform/definitions/race-analysis-p2-maven-central</classifier>
+					<classifier>../com.sap.sailing.targetplatform/definitions/race-analysis-p2-maven-local</classifier>
                 </artifact>
               </target>
             </configuration>
@@ -150,7 +150,7 @@
 		<repository>
 			<id>equinox-sdk-3.7</id>
 			<layout>p2</layout>
-			<url>http://download.eclipse.org/equinox/drops/R-3.7-201106131736/</url>
+			<url>http://mirror.selfnet.de/eclipse/equinox/drops/R-3.7-201106131736/</url>
 		</repository>
 <!--		
 		<repository>
