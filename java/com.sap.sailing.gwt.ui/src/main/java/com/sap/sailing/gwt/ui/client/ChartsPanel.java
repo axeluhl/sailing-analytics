@@ -27,12 +27,14 @@ import ca.nanometrics.gflot.client.options.PointsSeriesOptions;
 import ca.nanometrics.gflot.client.options.SelectionOptions;
 import ca.nanometrics.gflot.client.options.TickFormatter;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -68,6 +70,7 @@ public class ChartsPanel extends FormPanel {
     private VerticalPanel chartPanel;
     private FlowPanel legendPanel;
     private VerticalPanel configPanel;
+    private Label title;
     private DeckPanel chart;
     private final RaceIdentifier[] races;
     private int colorCounter = 0;
@@ -112,6 +115,9 @@ public class ChartsPanel extends FormPanel {
         mainPanel = new HorizontalPanel();
         mainPanel.setSpacing(5);
         chartPanel = new VerticalPanel();
+        title = new Label(DetailTypeFormatter.format(dataToShow, stringConstants));
+        title.setStyleName("chartTitle");
+        chartPanel.add(title);
         HorizontalPanel raceChooserPanel = new HorizontalPanel();
         raceChooserPanel.setSpacing(5);
         for (int i = 0; i < races.length; i++) {
@@ -129,6 +135,7 @@ public class ChartsPanel extends FormPanel {
                     selectedRace = index;
                     competitorsAndTimePointsDAO = null;
                     colorCounter = 0;
+                    clearChart(true);
                     loadData();
                 }
             });
@@ -136,7 +143,7 @@ public class ChartsPanel extends FormPanel {
         chartPanel.add(raceChooserPanel);
 
         loadingPanel = new AbsolutePanel();
-        loadingPanel.setSize(width + "px", height + "px");
+        loadingPanel.setSize(width + "px", height - 60 + "px");
 
         Anchor a = new Anchor(new SafeHtmlBuilder().appendHtmlConstant("<img src=\"/images/ajax-loader.gif\"/>")
                 .toSafeHtml());
@@ -151,6 +158,7 @@ public class ChartsPanel extends FormPanel {
         
         legendPanel = new FlowPanel();
         legendPanel.setWidth("100%");
+        legendPanel.setHeight("21px");
         chartPanel.add(legendPanel);
         chart = new DeckPanel();
         chart.add(loadingPanel);
@@ -195,8 +203,8 @@ public class ChartsPanel extends FormPanel {
                         dataToShow = dt;
                     }
                 }
-                competitorID.clear();
-                competitorNr = 0;
+                title.setText(DetailTypeFormatter.format(dataToShow, stringConstants));
+                clearChart(false);
                 loadData();
             }
         });
@@ -212,6 +220,7 @@ public class ChartsPanel extends FormPanel {
             public void onClick(ClickEvent event) {
                 stepsToLoad = Integer.parseInt(txtbSteps.getText());
                 competitorsAndTimePointsDAO = null;
+                clearChart(true);
                 loadData();
             }
         });
@@ -221,6 +230,7 @@ public class ChartsPanel extends FormPanel {
     }
 
     private void loadData() {
+    	chart.showWidget(0);
         final Runnable loadData = new Runnable() {
             @Override
             public void run() {
@@ -228,7 +238,6 @@ public class ChartsPanel extends FormPanel {
             	for (CompetitorDAO competitor : competitorsAndTimePointsDAO.getCompetitor()){
             		if (isCompetitorVisible(competitor) && competitorID.get(competitor) == null){
             			competitorsToLoad.add(competitor);
-            			
             		}
             	}
             	final CompetitorsAndTimePointsDAO competitorsAndTimePointsToLoad = new CompetitorsAndTimePointsDAO(stepsToLoad);
@@ -253,6 +262,7 @@ public class ChartsPanel extends FormPanel {
                                 	chartData.setMarkPassingData(competitor, result.getMarkPassings(competitor));
                                 }
                                 updateTableData(competitorsAndTimePointsToLoad.getCompetitor());
+                                chart.showWidget(1);
                             }
                         });
             }
@@ -270,9 +280,6 @@ public class ChartsPanel extends FormPanel {
                         @Override
                         public void onSuccess(CompetitorsAndTimePointsDAO result) {
                             competitorsAndTimePointsDAO = result;
-                            selectCompetitors.clear();
-                            legendPanel.clear();
-                            competitorLabels.clear();
                             for (int i = 0; i < result.getCompetitor().length; i++) {
                                 final CheckBox cb = new CheckBox(result.getCompetitor()[i].name);
                                 final CompetitorDAO c = result.getCompetitor()[i];
@@ -282,7 +289,7 @@ public class ChartsPanel extends FormPanel {
                                 cb.addClickHandler(new ClickHandler() {
                                     @Override
                                     public void onClick(ClickEvent event) {
-                                    	if (cb.getValue() == true && chartData.getRaceData(c) == null){
+                                    	if (cb.getValue() == true && competitorID.get(c) == null){
                                     		setCompetitorVisible(c, cb.getValue());
                                     		loadData();
                                     	}
@@ -302,7 +309,6 @@ public class ChartsPanel extends FormPanel {
                             if (chart.getWidgetCount() == 1){
                             	chart.add(createChart());
                             }
-                            chart.showWidget(1);
                             loadData.run();
                         }
                     });
@@ -318,6 +324,7 @@ public class ChartsPanel extends FormPanel {
                 compSeries.clear();
                 markSeries.clear();
                 if (isCompetitorVisible(competitor) && chartData.getRaceData(competitor) != null){
+                	long starttime = System.currentTimeMillis();
                 	long[] markPassingTimes = competitorsAndTimePointsDAO.getMarkPassings(competitor);
                     Double[] markPassingValues = chartData.getMarkPassings(competitor);
                     for (int j = 0; j < markPassingTimes.length; j++){
@@ -325,12 +332,16 @@ public class ChartsPanel extends FormPanel {
                             markSeries.add(new DataPoint(markPassingTimes[j],markPassingValues[j]));
                         }
                     }
+                    GWT.log("Update mark passings time for " + competitor.name + ": " + (System.currentTimeMillis() - starttime));
+                    starttime = System.currentTimeMillis();
+                    Double[] data = chartData.getRaceData(competitor);
+                    long[] timepoints = competitorsAndTimePointsDAO.getTimePoints();
                     for (int j = 0; j < stepsToLoad; j++) {
-                        long time = competitorsAndTimePointsDAO.getTimePoints()[j];
-                        if (chartData.getRaceData(competitor)[j] != null) {
-                            compSeries.add(new DataPoint(time, chartData.getRaceData(competitor)[j]));
-                        }
+                    	if (data[j] != null){
+                    		compSeries.add(new DataPoint(timepoints[j], data[j]));
+                    	}
                     }
+                    GWT.log("Update data time for " + competitor.name + ": " + (System.currentTimeMillis() - starttime));
                 }
                 else {
                 	compSeries.add(new DataPoint(0,0));
@@ -436,8 +447,33 @@ public class ChartsPanel extends FormPanel {
                 		selectedPointLabel.setText(competitor.name + " passed mark at " + dateFormat.format(new Date((long) item.getDataPoint().getX())));
                 	}
                 	else {
+                		String unit = "";
+                		switch (dataToShow){
+                		case CURRENT_SPEED_OVER_GROUND_IN_KNOTS:
+                			unit = stringConstants.currentSpeedOverGroundInKnotsUnit();
+                			break;
+                		case DISTANCE_TRAVELED:
+                			unit = stringConstants.distanceInMetersUnit();
+                			break;
+                		case GAP_TO_LEADER_IN_SECONDS:
+                			unit = stringConstants.gapToLeaderInSecondsUnit();
+                			break;
+                		case VELOCITY_MADE_GOOD_IN_KNOTS:
+                			unit = stringConstants.velocityMadeGoodInKnotsUnit();
+                			break;
+                		case WINDWARD_DISTANCE_TO_OVERALL_LEADER:
+                			unit = stringConstants.windwardDistanceToGoInMetersUnit();
+                		}
+                		String decimalPlaces = "";
+                		for (int i = 0; i < dataToShow.getPrecision(); i++){
+                			if (i == 0){
+                				decimalPlaces += ".";
+                			}
+                			decimalPlaces += "0";
+                		}
+                		NumberFormat numberFormat = NumberFormat.getFormat("0" +decimalPlaces);
                 		selectedPointLabel.setText(competitor.name + " at " + dateFormat.format(new Date((long) item.getDataPoint().getX()))
-                                + ": " + item.getDataPoint().getY() + "[Unit]");
+                                + ": " + numberFormat.format(item.getDataPoint().getY()) + unit);
                 	}
                 } else {
                     selectedPointLabel.setText(stringConstants.noSelection());
@@ -447,7 +483,7 @@ public class ChartsPanel extends FormPanel {
         plot.addSelectionListener(new SelectionListener() {
 
             public void selected(double x1, double y1, double x2, double y2) {
-            	/*
+            	/* TODO
             	for (CompetitorDAO competitor : competitorsAndTimePointsDAO.getCompetitor()){
             		long[] markPassingTimes = competitorsAndTimePointsDAO.getMarkPassings(competitor);
                     Double[] markPassingValues = chartData.getMarkPassings(competitor);
@@ -556,5 +592,21 @@ public class ChartsPanel extends FormPanel {
     	this.width = width;
     	this.height = height;
     	this.setSize(width + "px", height + "px");
+    }
+    
+    private void clearChart(boolean clearCheckBoxes){
+    	if (clearCheckBoxes){
+    		selectCompetitors.clear();
+    	}
+    	competitorID.clear();
+        competitorNr = 0;
+        legendPanel.clear();
+        competitorLabels.clear();
+    	for (SeriesHandler series: seriesID.values()){
+    		series.clear();
+    	}
+    	for (SeriesHandler series: markSeriesID.values()){
+    		series.clear();
+    	}
     }
 }

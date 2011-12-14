@@ -15,7 +15,7 @@
 </listAttribute>
 <stringAttribute key="org.eclipse.jdt.launching.CLASSPATH_PROVIDER" value="com.google.gwt.eclipse.core.moduleClasspathProvider"/>
 <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="com.google.gwt.dev.DevMode"/>
-<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-noserver -remoteUI &quot;${gwt_remote_ui_server_port}:${unique_id}&quot; -logLevel INFO -codeServerPort 9997 -war C:\Projects\sailing\dev\git\java\com.sap.sailing.gwt.ui\war com.sap.sailing.gwt.ui.UserManagement com.sap.sailing.gwt.ui.AdminConsole com.sap.sailing.gwt.ui.LeaderboardEditing com.sap.sailing.gwt.ui.Leaderboard"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-war &quot;${project_loc:com.sap.sailing.gwt.ui}/war&quot; -noserver -remoteUI &quot;${gwt_remote_ui_server_port}:${unique_id}&quot; -logLevel INFO -codeServerPort 9997 com.sap.sailing.gwt.ui.AdminConsole com.sap.sailing.gwt.ui.Leaderboard com.sap.sailing.gwt.ui.LeaderboardEditing com.sap.sailing.gwt.ui.UserManagement"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="com.sap.sailing.gwt.ui"/>
 <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Xmx512m"/>
 </launchConfiguration>
