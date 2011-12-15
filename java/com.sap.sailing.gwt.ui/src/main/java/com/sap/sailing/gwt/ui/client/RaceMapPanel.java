@@ -765,7 +765,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         }
     }
 
-    /**
+/**
      * Zooms the map to the given marks if the map was not zoomed yet. If the map zoom to the marks was successful one
      * time, the initial zoom to these marks can not be done again except the race selection is changed via {@link RaceMapPanel#onRaceSelectionChange(List).
      * 
@@ -774,15 +774,24 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
      */
     private void zoomMapFirstTimeToMarks(Set<MarkDAO> marksToZoomAt) {
         if (!mapZoomedOrPannedSinceLastRaceSelectionChange && !mapFirstZoomDone) {
-            LatLng latLngZoomFirstTime = null;
+            LatLngBounds newBounds = null;
             if (marksToZoomAt != null && !marksToZoomAt.isEmpty()) {
-                MarkDAO mark = marksToZoomAt.iterator().next();
-                latLngZoomFirstTime = LatLng.newInstance(mark.position.latDeg, mark.position.lngDeg);
+                System.out.println(marksToZoomAt.size());
+                for (MarkDAO markDAO : marksToZoomAt) {
+                    LatLng latLngZoomFirstTime = LatLng.newInstance(markDAO.position.latDeg, markDAO.position.lngDeg);
+                    LatLngBounds bounds = LatLngBounds.newInstance(latLngZoomFirstTime, latLngZoomFirstTime);
+                    if (newBounds == null) {
+                        newBounds = bounds;
+                    } else {
+                        newBounds.extend(bounds.getNorthEast());
+                        newBounds.extend(bounds.getSouthWest());
+                    }
+                }
+
             }
-            LatLngBounds bounds = LatLngBounds.newInstance(latLngZoomFirstTime, latLngZoomFirstTime);
-            if (latLngZoomFirstTime != null) {
-                map.setZoomLevel(map.getBoundsZoomLevel(bounds));
-                map.setCenter(bounds.getCenter());
+            if (newBounds != null) {
+                map.setZoomLevel(map.getBoundsZoomLevel(newBounds));
+                map.setCenter(newBounds.getCenter());
                 mapFirstZoomDone = true;
                 /*
                  * Reset the mapZoomedOrPannedSinceLastRaceSelection: In spite of the fact that the map was just zoomed
@@ -805,7 +814,8 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
             LatLngBounds newMapBounds = null;
             Set<CompetitorDAO> competitorDAOsOfUnusedTails = new HashSet<CompetitorDAO>(tails.keySet());
             Set<CompetitorDAO> competitorDAOsOfUnusedMarkers = new HashSet<CompetitorDAO>(boatMarkers.keySet());
-            for (CompetitorDAO competitorDAO : getCompetitorsToShow()) {
+            Collection<CompetitorDAO> competitorsToShow = getCompetitorsToShow();
+            for (CompetitorDAO competitorDAO : competitorsToShow) {
                 if (fixes.containsKey(competitorDAO)) {
                     Polyline tail = tails.get(competitorDAO);
                     if (tail == null) {
