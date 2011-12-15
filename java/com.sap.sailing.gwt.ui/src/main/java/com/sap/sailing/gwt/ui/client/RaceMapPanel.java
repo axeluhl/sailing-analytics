@@ -776,7 +776,6 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         if (!mapZoomedOrPannedSinceLastRaceSelectionChange && !mapFirstZoomDone) {
             LatLngBounds newBounds = null;
             if (marksToZoomAt != null && !marksToZoomAt.isEmpty()) {
-                System.out.println(marksToZoomAt.size());
                 for (MarkDAO markDAO : marksToZoomAt) {
                     LatLng latLngZoomFirstTime = LatLng.newInstance(markDAO.position.latDeg, markDAO.position.lngDeg);
                     LatLngBounds bounds = LatLngBounds.newInstance(latLngZoomFirstTime, latLngZoomFirstTime);
