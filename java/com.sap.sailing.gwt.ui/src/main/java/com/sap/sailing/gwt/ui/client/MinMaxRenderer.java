@@ -29,10 +29,10 @@ public class MinMaxRenderer {
 
     /**
      * Renders the value of a {@link LeaderboardRowDAO}.
+     * @param title TODO
      */
-    public void render(Context context, LeaderboardRowDAO row, SafeHtmlBuilder sb) {
+    public void render(Context context, LeaderboardRowDAO row, String title, SafeHtmlBuilder sb) {
         int percent = getPercentage(row);
-        String title = null;
         String stringValue = valueProvider.getStringValueToRender(row);
         stringValue = stringValue == null ? "" : stringValue;
         sb.appendHtmlConstant(

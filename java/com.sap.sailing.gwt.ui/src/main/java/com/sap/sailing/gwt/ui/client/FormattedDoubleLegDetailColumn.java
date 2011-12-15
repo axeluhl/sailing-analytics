@@ -45,7 +45,7 @@ public class FormattedDoubleLegDetailColumn extends LegDetailColumn<Double, Stri
 
     @Override
     public void render(Context context, LeaderboardRowDAO row, SafeHtmlBuilder sb) {
-        getMinMaxRenderer().render(context, row, sb);
+        getMinMaxRenderer().render(context, row, getTitle(row), sb);
     }
 
     /**

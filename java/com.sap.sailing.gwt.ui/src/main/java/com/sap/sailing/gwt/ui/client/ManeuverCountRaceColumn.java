@@ -207,7 +207,7 @@ public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> im
 
     @Override
     public void render(Context context, LeaderboardRowDAO row, SafeHtmlBuilder sb) {
-        minmaxRenderer.render(context, row, sb);
+        minmaxRenderer.render(context, row, getTitle(row), sb);
     }
 
     /**
