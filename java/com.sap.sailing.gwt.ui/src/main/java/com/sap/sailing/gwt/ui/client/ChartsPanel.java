@@ -36,7 +36,6 @@ import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Anchor;
@@ -65,6 +64,7 @@ public class ChartsPanel extends FormPanel {
     private CompetitorInRaceDAO chartData;
     private CompetitorsAndTimePointsDAO competitorsAndTimePointsDAO = null;
     private final SailingServiceAsync sailingService;
+    private final ErrorReporter errorReporter;
     private DateTimeFormat dateFormat;
     private HorizontalPanel mainPanel;
     private VerticalPanel chartPanel;
@@ -94,9 +94,10 @@ public class ChartsPanel extends FormPanel {
     private AbsolutePanel loadingPanel;
 
     public ChartsPanel(SailingServiceAsync sailingService, final List<CompetitorDAO> competitors,
-            RaceIdentifier[] races, StringConstants stringConstants, int chartWidth, int chartHeight) {
+            RaceIdentifier[] races, StringConstants stringConstants, int chartWidth, int chartHeight, ErrorReporter errorReporter) {
     	width = chartWidth;
     	height = chartHeight;
+    	this.errorReporter = errorReporter;
     	chartData = new CompetitorInRaceDAO();
     	seriesID = new HashMap<Integer, SeriesHandler>();
     	competitorID = new HashMap<CompetitorDAO, Integer>();
@@ -251,7 +252,7 @@ public class ChartsPanel extends FormPanel {
                         dataToShow, new AsyncCallback<CompetitorInRaceDAO>() {
                             @Override
                             public void onFailure(Throwable caught) {
-                                Window.alert(stringConstants.failedToLoadRaceData() + ": " + caught.toString());
+                            	errorReporter.reportError(stringConstants.failedToLoadRaceData() + ": " + caught.toString());
                             }
 
                             @Override
@@ -274,7 +275,7 @@ public class ChartsPanel extends FormPanel {
                     new AsyncCallback<CompetitorsAndTimePointsDAO>() {
                         @Override
                         public void onFailure(Throwable caught) {
-                        	Window.alert("Failed to load race information: " + caught.toString());
+                        	errorReporter.reportError("Failed to load race information: " + caught.toString());
                         }
 
                         @Override
