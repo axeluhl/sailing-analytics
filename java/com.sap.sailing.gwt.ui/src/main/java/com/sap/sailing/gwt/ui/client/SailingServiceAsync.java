@@ -206,6 +206,21 @@ public interface SailingServiceAsync {
 
     void getCountryCodes(AsyncCallback<String[]> callback);
 
+    /**
+     * This method computes the in {@code dataType} selected data for the in {@code race} specified race
+     * for all competitors returned by {@link CompetitorsAndTimePointsDAO#getCompetitor()} at the timepoints 
+     * returned by {@link CompetitorsAndTimePointsDAO#getTimePoints()}.
+     * The returned {@link CompetitorInRaceDAO} contains the values for the timepoints as well as the values for the markpassings.
+     * 
+     * @see DetailType
+     * 
+     * @throws NullPointerException Thrown if any of the parameters is null.
+     * 
+     * @param race 
+     * @param competitorsAndTimePointsDAO An object that contains the competitors and timepoints.
+     * @param dataType The type of data that should be computed (eg {@link DetailType#WINDWARD_DISTANCE_TO_OVERALL_LEADER}).
+     * @param callback An AsyncCallback that returns the computed data as a parameter in the {@link AsyncCallback#onSuccess(Object)} method.
+     */
     void getCompetitorRaceData(RaceIdentifier race,
 			CompetitorsAndTimePointsDAO competitorsAndTimePointsDAO,
 			DetailType dataType, AsyncCallback<CompetitorInRaceDAO> callback);
