@@ -13,11 +13,23 @@ public class MinMaxRenderer {
     private Double minimumValue;
     private Double maximumValue;
 
+    /**
+     * Renders the value and the percentage bar of the columns {@link LegDetailColumn} and
+     * {@link ManeuverCountRaceColumn}.
+     * 
+     * @param valueProvider
+     *            Gets the String value of a {@link LeaderboardRowDAO}.
+     * @param comparator
+     *            The comparator to update the minimum and maximum values.
+     */
     public MinMaxRenderer(HasStringValue valueProvider, Comparator<LeaderboardRowDAO> comparator) {
         this.valueProvider = valueProvider;
         this.comparator = comparator;
     }
 
+    /**
+     * Renders the value of a {@link LeaderboardRowDAO}.
+     */
     public void render(Context context, LeaderboardRowDAO row, SafeHtmlBuilder sb) {
         int percent = getPercentage(row);
         String title = null;
@@ -30,6 +42,13 @@ public class MinMaxRenderer {
                         + "% 25px; \">").appendEscaped(stringValue).appendHtmlConstant("</div>");
     }
 
+    /**
+     * Gets the percentage of a {@link LeaderboardRowDAO}. If no minimum or maximum value was set by calling
+     * {@link MinMaxRenderer#updateMinMax(Collection)} before zero is returned.
+     * 
+     * @param row
+     *            The row to get the percentage for.
+     */
     private int getPercentage(LeaderboardRowDAO row) {
         int percentage = 0;
         Double value = getDoubleFromString(valueProvider.getStringValueToRender(row));
@@ -53,6 +72,13 @@ public class MinMaxRenderer {
         return maximumValue;
     }
 
+    /**
+     * Parses a <code>String</code> into a <code>Double</code>.
+     * 
+     * @param string
+     *            The <code>String</code> to be parsed.
+     * @return The <code>Double</code> result of the given <code>String</code>.
+     */
     private Double getDoubleFromString(String string) {
         Double result = null;
         if (string != null) {
@@ -65,6 +91,12 @@ public class MinMaxRenderer {
         return result;
     }
 
+    /**
+     * Updates the {@link MinMaxRenderer#minimumValue} and {@link MinMaxRenderer#maximumValue}.
+     * 
+     * @param values
+     *            The values of {@link LeaderboardRowDAO}s to determine the minimum and maximum values for.
+     */
     public void updateMinMax(Collection<LeaderboardRowDAO> values) {
         LeaderboardRowDAO minimumRow = null;
         LeaderboardRowDAO maximumRow = null;
