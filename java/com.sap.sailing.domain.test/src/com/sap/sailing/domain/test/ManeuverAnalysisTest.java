@@ -55,7 +55,6 @@ public class ManeuverAnalysisTest extends KielWeek2011BasedTest {
         Competitor competitor = getCompetitorByName("Findel");
         assertNotNull(competitor);
         Date fromDate = dateFormat.parse("06/23/2011-15:28:20");
-        // Date toDate = dateFormat.parse("06/23/2011-16:28:25");
         Date toDate = dateFormat.parse("06/23/2011-16:38:01");
         assertNotNull(fromDate);
         assertNotNull(toDate);
@@ -131,11 +130,11 @@ public class ManeuverAnalysisTest extends KielWeek2011BasedTest {
      * @param maneuverList
      *            The whole list of maneuvers to search for that maneuver type.
      * @param maneuverType
-     *            The type of maneuver that should have happend to the given time point.
+     *            The type of maneuver that should have happened to the given time point.
      * @param maneuverTimePoint
-     *            The time point the maneuver type should have happend.
+     *            The time point the maneuver type should have happened.
      * @param tolerance
-     *            The tolerance of time, the maneuver should have happend in milliseconds.
+     *            The tolerance of time, the maneuver should have happened in milliseconds.
      */
     private void assertManeuver(List<Maneuver> maneuverList, Maneuver.Type maneuverType,
             MillisecondsTimePoint maneuverTimePoint, int tolerance) {
