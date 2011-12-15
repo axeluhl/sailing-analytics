@@ -62,7 +62,6 @@ public class ManeuverAnalysisTest extends KielWeek2011BasedTest {
         List<Maneuver> maneuvers = getTrackedRace().getManeuvers(competitor, new MillisecondsTimePoint(fromDate),
                 new MillisecondsTimePoint(toDate));
         maneuversInvalid = new ArrayList<Maneuver>(maneuvers);
-        printManeuvers(maneuvers);
 
         assertManeuver(maneuvers, Maneuver.Type.TACK,
                 new MillisecondsTimePoint(dateFormat.parse("06/23/2011-15:28:30")), TACK_TOLERANCE);
