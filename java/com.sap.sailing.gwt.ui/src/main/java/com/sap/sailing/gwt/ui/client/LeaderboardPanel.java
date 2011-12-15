@@ -1348,7 +1348,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 competitors.add(leaderboardRowDAO.competitor);
             }
         }
-        CompareCompetitorsChartDialog chartDialog = new CompareCompetitorsChartDialog(sailingService, competitors, races.toArray(new LeaderboardNameAndRaceColumnName[0]), stringConstants);
+        CompareCompetitorsChartDialog chartDialog = new CompareCompetitorsChartDialog(sailingService, competitors, races.toArray(new LeaderboardNameAndRaceColumnName[0]), stringConstants, errorReporter);
         chartDialog.show();
     }
 }

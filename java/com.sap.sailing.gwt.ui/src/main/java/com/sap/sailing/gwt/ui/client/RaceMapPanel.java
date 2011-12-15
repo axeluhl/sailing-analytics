@@ -76,7 +76,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
     private final ListBox quickRanksBox;
     private final List<CompetitorDAO> quickRanksList;
     private final TimePanel timePanel;
-    
+
     /**
      * Two sails on downwind leg, wind from port (sails on starboard); no highlighting
      */
@@ -86,7 +86,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
      * Two sails on downwind leg, wind from port (sails on starboard); with highlighting
      */
     private ImageRotator boatIconHighlightedDownwindPortRotator;
-    
+
     /**
      * Two sails on downwind leg, wind from starboard (sails on port); no highlighting
      */
@@ -96,7 +96,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
      * Two sails on downwind leg, wind from starboard (sails on port); with highlighting
      */
     private ImageRotator boatIconHighlightedDownwindStarboardRotator;
-    
+
     /**
      * One sail, wind from port (sails on starboard); no highlighting
      */
@@ -106,7 +106,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
      * One sail, wind from port (sails on starboard); with highlighting
      */
     private ImageRotator boatIconHighlightedPortRotator;
-    
+
     /**
      * One sail, wind from starboard (sails on port); no highlighting
      */
@@ -116,7 +116,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
      * One sail, wind from starboard (sails on port); with highlighting
      */
     private ImageRotator boatIconHighlightedStarboardRotator;
-    
+
     private Icon buoyIcon;
     private Icon tackToStarboardIcon;
     private Icon tackToPortIcon;
@@ -143,6 +143,11 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
      * If the user explicitly zoomed or panned the map, don't adjust zoom/pan unless a new race is selected
      */
     private boolean mapZoomedOrPannedSinceLastRaceSelectionChange = false;
+
+    /**
+     * Used to check if the first initial zoom to the buoy markers was already done.
+     */
+    private boolean mapFirstZoomDone = false;
 
     /**
      * Tails of competitors currently displayed as overlays on the map.
@@ -238,10 +243,9 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         CheckBox checkBoxJibe = new CheckBox(stringConstants.jibe());
         checkBoxJibe.setValue(true);
         checkboxAndType.add(new Pair<CheckBox, String>(checkBoxJibe, "JIBE"));
-        CheckBox checkBoxPenalty=  new CheckBox(stringConstants.penaltyCircle());
+        CheckBox checkBoxPenalty = new CheckBox(stringConstants.penaltyCircle());
         checkBoxPenalty.setValue(true);
-        checkboxAndType
-                .add(new Pair<CheckBox, String>(checkBoxPenalty, "PENALTY_CIRCLE"));
+        checkboxAndType.add(new Pair<CheckBox, String>(checkBoxPenalty, "PENALTY_CIRCLE"));
         CheckBox checkBoxMarkPassing = new CheckBox(stringConstants.markPassing());
         checkBoxMarkPassing.setValue(true);
         checkboxAndType.add(new Pair<CheckBox, String>(checkBoxMarkPassing, "MARK_PASSING"));
@@ -266,7 +270,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
                 if (!timer.isPlaying() && lastDouglasPeuckerResult != null && event.getValue()) {
                     removeAllMarkDouglasPeuckerpoints();
                     showMarkDouglasPeuckerPoints(lastDouglasPeuckerResult);
-                } else if(!event.getValue()){
+                } else if (!event.getValue()) {
                     removeAllMarkDouglasPeuckerpoints();
                 }
             }
@@ -424,7 +428,8 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
                 boatIconDownwindPortRotator = new ImageRotator(resources.lowlightedBoatIconDW_Port());
                 boatIconHighlightedDownwindPortRotator = new ImageRotator(resources.highlightedBoatIconDW_Port());
                 boatIconDownwindStarboardRotator = new ImageRotator(resources.lowlightedBoatIconDW_Starboard());
-                boatIconHighlightedDownwindStarboardRotator = new ImageRotator(resources.highlightedBoatIconDW_Starboard());
+                boatIconHighlightedDownwindStarboardRotator = new ImageRotator(resources
+                        .highlightedBoatIconDW_Starboard());
                 boatIconPortRotator = new ImageRotator(resources.lowlightedBoatIcon_Port());
                 boatIconHighlightedPortRotator = new ImageRotator(resources.highlightedBoatIcon_Port());
                 boatIconStarboardRotator = new ImageRotator(resources.lowlightedBoatIcon_Starboard());
@@ -481,9 +486,12 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
 
     @Override
     public void onRaceSelectionChange(List<Triple<EventDAO, RegattaDAO, RaceDAO>> selectedRaces) {
+        mapFirstZoomDone = false;
         mapZoomedOrPannedSinceLastRaceSelectionChange = false;
         if (!selectedRaces.isEmpty() && selectedRaces.get(selectedRaces.size() - 1) != null) {
             RaceDAO raceDAO = selectedRaces.get(selectedRaces.size() - 1).getC();
+            timePanel.timeChanged(raceDAO.startOfRace);
+            timer.setTime(raceDAO.startOfRace.getTime());
             updateSlider(raceDAO);
         }
         // force display of currently selected race
@@ -753,6 +761,36 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
                 Marker marker = buoyMarkers.remove(toRemoveMarkDAO);
                 map.removeOverlay(marker);
             }
+            zoomMapFirstTimeToMarks(buoyMarkers.keySet());
+        }
+    }
+
+    /**
+     * Zooms the map to the given marks if the map was not zoomed yet. If the map zoom to the marks was successful one
+     * time, the initial zoom to these marks can not be done again except the race selection is changed via {@link RaceMapPanel#onRaceSelectionChange(List).
+     * 
+     * @param marksToZoomAt
+     *            the marks to zoom at
+     */
+    private void zoomMapFirstTimeToMarks(Set<MarkDAO> marksToZoomAt) {
+        if (!mapZoomedOrPannedSinceLastRaceSelectionChange && !mapFirstZoomDone) {
+            LatLng latLngZoomFirstTime = null;
+            if (marksToZoomAt != null && !marksToZoomAt.isEmpty()) {
+                MarkDAO mark = marksToZoomAt.iterator().next();
+                latLngZoomFirstTime = LatLng.newInstance(mark.position.latDeg, mark.position.lngDeg);
+            }
+            LatLngBounds bounds = LatLngBounds.newInstance(latLngZoomFirstTime, latLngZoomFirstTime);
+            if (latLngZoomFirstTime != null) {
+                map.setZoomLevel(map.getBoundsZoomLevel(bounds));
+                map.setCenter(bounds.getCenter());
+                mapFirstZoomDone = true;
+                /*
+                 * Reset the mapZoomedOrPannedSinceLastRaceSelection: In spite of the fact that the map was just zoomed
+                 * to the bounds of the buoys, it was not a zoom or pan triggered by the user. As a consequence the
+                 * mapZoomedOrPannedSinceLastRaceSelection option has to reset again.
+                 */
+                mapZoomedOrPannedSinceLastRaceSelectionChange = false;
+            }
         }
     }
 
@@ -794,7 +832,8 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
                         } else {
                             competitorDAOsOfUnusedMarkers.remove(competitorDAO);
                             boatMarker.setLatLng(LatLng.newInstance(lastPos.position.latDeg, lastPos.position.lngDeg));
-                            boatMarker.setImage(getBoatImageURL(lastPos, competitorsSelectedInMap.contains(competitorDAO)));
+                            boatMarker.setImage(getBoatImageURL(lastPos,
+                                    competitorsSelectedInMap.contains(competitorDAO)));
                         }
                     }
                 }
@@ -802,6 +841,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
             if (!mapZoomedOrPannedSinceLastRaceSelectionChange && newMapBounds != null) {
                 map.setZoomLevel(map.getBoundsZoomLevel(newMapBounds));
                 map.setCenter(newMapBounds.getCenter());
+                mapFirstZoomDone = true;
             }
             for (CompetitorDAO unusedMarkerCompetitorDAO : competitorDAOsOfUnusedMarkers) {
                 map.removeOverlay(boatMarkers.remove(unusedMarkerCompetitorDAO));
@@ -815,11 +855,11 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
     private String getBoatImageURL(GPSFixDAO boatFix, boolean highlighted) {
         return getBoatImageURL(getBoatImageRotator(boatFix, highlighted), boatFix);
     }
-    
+
     private String getBoatImageURL(ImageRotator boatImageRotator, GPSFixDAO boatFix) {
         return boatImageRotator.getRotatedImageURL(boatFix.speedWithBearing.bearingInDegrees);
     }
-    
+
     private Icon getBoatImageIcon(GPSFixDAO boatFix, boolean highlighted) {
         ImageRotator boatImageRotator = getBoatImageRotator(boatFix, highlighted);
         Icon icon = Icon.newInstance(getBoatImageURL(boatImageRotator, boatFix));
@@ -867,6 +907,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         if (showOnlySelected.getValue()) {
             return competitorsSelectedInMap;
         } else {
+            // here the quickrankslist is emtpy, because of that te map is not zoomed correctly
             return quickRanksList;
         }
     }
@@ -1024,7 +1065,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
                                     removeAllMarkDouglasPeuckerpoints();
                                 }
                                 if (!timer.isPlaying()) {
-                                    if(checkBoxDouglasPeuckerPoints.getValue()){
+                                    if (checkBoxDouglasPeuckerPoints.getValue()) {
                                         showMarkDouglasPeuckerPoints(result);
                                     }
                                 }
