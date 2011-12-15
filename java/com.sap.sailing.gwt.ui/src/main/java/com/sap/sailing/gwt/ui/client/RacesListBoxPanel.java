@@ -43,7 +43,12 @@ public class RacesListBoxPanel extends FormPanel implements RaceSelectionProvide
         raceListBox.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                fireRaceSelectionChanged(Collections.singletonList(getSelectedRace()));
+                Triple<EventDAO, RegattaDAO, RaceDAO> selectedRace = getSelectedRace();
+                List<Triple<EventDAO, RegattaDAO, RaceDAO>> selectedRacesCollection = Collections.emptyList();
+                if (selectedRace != null) {
+                    Collections.singletonList(selectedRace);
+                }
+                fireRaceSelectionChanged(selectedRacesCollection);
             }
         });
         raceList = new ArrayList<Triple<EventDAO, RegattaDAO, RaceDAO>>();

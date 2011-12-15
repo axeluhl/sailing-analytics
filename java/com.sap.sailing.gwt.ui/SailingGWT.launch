@@ -3,12 +3,6 @@
 <booleanAttribute key="com.google.gdt.eclipse.core.RUN_SERVER" value="false"/>
 <stringAttribute key="com.google.gdt.eclipse.suiteMainTypeProcessor.PREVIOUSLY_SET_MAIN_TYPE_NAME" value="com.google.gwt.dev.DevMode"/>
 <booleanAttribute key="com.google.gdt.eclipse.suiteWarArgumentProcessor.IS_WAR_FROM_PROJECT_PROPERTIES" value="true"/>
-<listAttribute key="com.google.gwt.eclipse.core.ENTRY_POINT_MODULES">
-<listEntry value="com.sap.sailing.gwt.ui.UserManagement"/>
-<listEntry value="com.sap.sailing.gwt.ui.AdminConsole"/>
-<listEntry value="com.sap.sailing.gwt.ui.LeaderboardEditing"/>
-<listEntry value="com.sap.sailing.gwt.ui.Leaderboard"/>
-</listAttribute>
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
 <listEntry value="/com.sap.sailing.gwt.ui"/>
 </listAttribute>
@@ -23,5 +17,5 @@
 <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="com.google.gwt.dev.DevMode"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-war &quot;${project_loc:com.sap.sailing.gwt.ui}/war&quot; -noserver -remoteUI &quot;${gwt_remote_ui_server_port}:${unique_id}&quot; -logLevel INFO -codeServerPort 9997 com.sap.sailing.gwt.ui.AdminConsole com.sap.sailing.gwt.ui.Leaderboard com.sap.sailing.gwt.ui.LeaderboardEditing com.sap.sailing.gwt.ui.UserManagement"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="com.sap.sailing.gwt.ui"/>
-<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Xmx1024m"/>
+<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Xmx512m"/>
 </launchConfiguration>

@@ -8,6 +8,7 @@ import java.net.URL;
 import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -17,8 +18,11 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.NavigableSet;
 import java.util.Set;
 import java.util.logging.Logger;
+
+import javax.servlet.ServletContext;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
@@ -49,18 +53,22 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard.Entry;
 import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
 import com.sap.sailing.domain.leaderboard.ScoreCorrection.MaxPointsReason;
+import com.sap.sailing.domain.leaderboard.impl.ResultDiscardingRuleImpl;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.MongoWindStoreFactory;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingConfiguration;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
 import com.sap.sailing.domain.swisstimingadapter.persistence.SwissTimingAdapterPersistence;
+import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.Maneuver;
+import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.NoWindException;
-import com.sap.sailing.domain.tracking.RaceHandle;
+import com.sap.sailing.domain.tracking.RacesHandle;
+import com.sap.sailing.domain.tracking.TrackedLeg.LegType;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
@@ -74,6 +82,8 @@ import com.sap.sailing.domain.tractracadapter.TracTracConfiguration;
 import com.sap.sailing.gwt.ui.client.SailingService;
 import com.sap.sailing.gwt.ui.shared.BoatClassDAO;
 import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
+import com.sap.sailing.gwt.ui.shared.CompetitorsAndTimePointsDAO;
+import com.sap.sailing.gwt.ui.shared.CompetitorInRaceDAO;
 import com.sap.sailing.gwt.ui.shared.EventDAO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDAO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDAO;
@@ -86,6 +96,7 @@ import com.sap.sailing.gwt.ui.shared.Pair;
 import com.sap.sailing.gwt.ui.shared.PositionDAO;
 import com.sap.sailing.gwt.ui.shared.QuickRankDAO;
 import com.sap.sailing.gwt.ui.shared.RaceDAO;
+import com.sap.sailing.gwt.ui.shared.RaceInLeaderboardDAO;
 import com.sap.sailing.gwt.ui.shared.RegattaDAO;
 import com.sap.sailing.gwt.ui.shared.SpeedWithBearingDAO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDAO;
@@ -96,12 +107,20 @@ import com.sap.sailing.gwt.ui.shared.WindDAO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDAO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDAO;
 import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.api.DetailType;
+import com.sap.sailing.server.api.EventAndRaceIdentifier;
+import com.sap.sailing.server.api.EventFetcher;
+import com.sap.sailing.server.api.EventIdentifier;
+import com.sap.sailing.server.api.EventNameAndRaceName;
+import com.sap.sailing.server.api.LeaderboardNameAndRaceColumnName;
+import com.sap.sailing.server.api.RaceFetcher;
+import com.sap.sailing.server.api.RaceIdentifier;
 import com.sap.sailing.util.CountryCode;
 
 /**
  * The server side implementation of the RPC service.
  */
-public class SailingServiceImpl extends RemoteServiceServlet implements SailingService {
+public class SailingServiceImpl extends RemoteServiceServlet implements SailingService, RaceFetcher, EventFetcher {
     private static final Logger logger = Logger.getLogger(SailingServiceImpl.class.getName());
     
     private static final long serialVersionUID = 9031688830194537489L;
@@ -146,7 +165,8 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     
     @Override
     public LeaderboardDAO getLeaderboardByName(String leaderboardName, Date date,
-            Collection<String> namesOfRacesForWhichToLoadLegDetails) throws Exception {
+            Collection<String> namesOfRacesForWhichToLoadLegDetails)
+            throws NoWindException {
         long startOfRequestHandling = System.currentTimeMillis();
         LeaderboardDAO result = null;
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
@@ -155,10 +175,8 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             TimePoint timePoint = new MillisecondsTimePoint(date);
             result.competitors = new ArrayList<CompetitorDAO>();
             result.name = leaderboard.getName();
-            result.displayNames = new HashMap<CompetitorDAO, String>();
+            result.competitorDisplayNames = new HashMap<CompetitorDAO, String>();
             for (RaceInLeaderboard raceColumn : leaderboard.getRaceColumns()) {
-                //result.raceNamesAndMedalRaceAndTracked.put(raceColumn.getName(),
-                //        new Pair<Boolean, Boolean>(raceColumn.isMedalRace(), raceColumn.getTrackedRace()!=null));
                 result.addRace(raceColumn.getName(), raceColumn.isMedalRace(), raceColumn.getTrackedRace() != null);
             }
             result.rows = new HashMap<CompetitorDAO, LeaderboardRowDAO>();
@@ -181,7 +199,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 }
                 String displayName = leaderboard.getDisplayName(competitor);
                 if (displayName != null) {
-                    result.displayNames.put(competitorDAO, displayName);
+                    result.competitorDisplayNames.put(competitorDAO, displayName);
                 }
             }
         }
@@ -205,28 +223,6 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             }
         } else {
             logger.warning("stressTestLeaderboardByName: couldn't find leaderboard "+leaderboardName);
-        }
-    }
-    
-    @Override
-    public LeaderboardEntryDAO getLeaderboardEntry(String leaderboardName, String competitorName, String raceName, Date date) throws NoWindException {
-        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
-        if (leaderboard != null) {
-            Competitor competitor = leaderboard.getCompetitorByName(competitorName);
-            if (competitor != null) {
-                RaceInLeaderboard raceColumn = leaderboard.getRaceColumnByName(raceName);
-                if (raceColumn != null) {
-                    MillisecondsTimePoint timePoint = new MillisecondsTimePoint(date);
-                    return getLeaderboardEntryDAO(leaderboard.getEntry(competitor, raceColumn, timePoint),
-                            raceColumn.getTrackedRace(), competitor, timePoint, /* addLegDetails */ false);
-                } else {
-                    throw new IllegalArgumentException("Didn't find race "+raceName+" in leaderboard "+leaderboardName);
-                }
-            } else {
-                throw new IllegalArgumentException("Didn't find competitor "+competitorName+" in leaderboard "+leaderboardName);
-            }
-        } else {
-            throw new IllegalArgumentException("Didn't find leaderboard "+leaderboardName);
         }
     }
     
@@ -277,6 +273,25 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             Distance windwardDistanceToGo = trackedLeg.getWindwardDistanceToGo(timePoint);
             result.windwardDistanceToGoInMeters = windwardDistanceToGo == null ? null : windwardDistanceToGo
                     .getMeters();
+            List<Maneuver> maneuvers = trackedLeg.getManeuvers(timePoint);
+            if (maneuvers != null) {
+                result.numberOfTacks = 0;
+                result.numberOfJibes = 0;
+                result.numberOfPenaltyCircles = 0;
+                for (Maneuver maneuver : maneuvers) {
+                    switch (maneuver.getType()) {
+                    case TACK:
+                        result.numberOfTacks++;
+                        break;
+                    case JIBE:
+                        result.numberOfJibes++;
+                        break;
+                    case PENALTY_CIRCLE:
+                        result.numberOfPenaltyCircles++;
+                        break;
+                    }
+                }
+            }
         }
         return result;
     }
@@ -371,7 +386,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         if (storedURI == null || storedURI.trim().length() == 0) {
             storedURI = rr.storedURI;
         }
-        final RaceHandle raceHandle = getService().addTracTracRace(new URL(rr.paramURL), new URI(liveURI), new URI(storedURI),
+        final RacesHandle raceHandle = getService().addTracTracRace(new URL(rr.paramURL), new URI(liveURI), new URI(storedURI),
                 MongoWindStoreFactory.INSTANCE.getMongoWindStore(mongoObjectFactory, domainObjectFactory), TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS);
         if (trackWind) {
             new Thread("Wind tracking starter for race "+rr.eventName+"/"+rr.name) {
@@ -404,63 +419,67 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
     
     @Override
-    public void stopTrackingEvent(String eventName) throws Exception {
-        getService().stopTracking(getService().getEventByName(eventName));
+    public void stopTrackingEvent(EventIdentifier eventIdentifier) throws Exception {
+        Event event = getEvent(eventIdentifier);
+        if (event != null) {
+            getService().stopTracking(event);
+        }
     }
 
     private RaceDefinition getRaceByName(Event event, String raceName) {
         if (event != null) {
-            for (RaceDefinition r : event.getAllRaces()) {
-                if (r.getName().equals(raceName)) {
-                    return r;
-                }
-            }
+            return event.getRaceByName(raceName);
+        } else {
+            return null;
         }
-        return null;
     }
     
     @Override
-    public void stopTrackingRace(String eventName, String raceName) throws Exception {
-        Event event = getService().getEventByName(eventName);
-        RaceDefinition r = getRaceByName(event, raceName);
-        if (r != null) {
-            getService().stopTracking(event, r);
+    public void stopTrackingRace(EventAndRaceIdentifier eventAndRaceIdentifier) throws Exception {
+        Event event = getEvent(eventAndRaceIdentifier);
+        if (event != null) {
+            RaceDefinition r = getRace(eventAndRaceIdentifier);
+            if (r != null) {
+                getService().stopTracking(event, r);
+            }
         }
     }
     
+    @Override
+    public void removeAndUntrackedRace(EventAndRaceIdentifier eventAndRaceidentifier) throws Exception{
+        Event event = getEvent(eventAndRaceidentifier);
+        if(event!= null){
+            RaceDefinition race = getRace(eventAndRaceidentifier);
+            if(race != null){
+                getService().removeRace(event, race);
+            }
+        }
+        
+    }
+    
     /**
-     * @param timeoutInMilliseconds eventually passed to {@link RaceHandle#getRace(long)}. If the race definition
+     * @param timeoutInMilliseconds eventually passed to {@link RacesHandle#getRaces(long)}. If the race definition
      * can be obtained within this timeout, wind for the race will be tracked; otherwise, the method returns without
      * taking any effect.
      */
-    private void startTrackingWind(RaceHandle raceHandle, boolean correctByDeclination, long timeoutInMilliseconds) throws Exception {
+    private void startTrackingWind(RacesHandle raceHandle, boolean correctByDeclination, long timeoutInMilliseconds) throws Exception {
         Event event = raceHandle.getEvent();
         if (event != null) {
-            RaceDefinition race = raceHandle.getRace(timeoutInMilliseconds);
-            if (race != null) {
-                getService().startTrackingWind(event, race, correctByDeclination);
-            } else {
-                log("RaceDefinition wasn't received within "+timeoutInMilliseconds+"ms for a race in event "+event.getName()+
-                        ". Aborting wait; no wind tracking for this race.");
+            for (RaceDefinition race : raceHandle.getRaces(timeoutInMilliseconds)) {
+                if (race != null) {
+                    getService().startTrackingWind(event, race, correctByDeclination);
+                } else {
+                    log("RaceDefinition wasn't received within " + timeoutInMilliseconds + "ms for a race in event "
+                            + event.getName() + ". Aborting wait; no wind tracking for this race.");
+                }
             }
         }
     }
 
-    private TrackedRace getTrackedRace(String eventName, String raceName) {
-        TrackedRace result = null;
-        Event event = getService().getEventByName(eventName);
-        if (event != null) {
-            RaceDefinition race = getRaceByName(event, raceName);
-            if (race != null) {
-                result = getService().getOrCreateTrackedEvent(event).getExistingTrackedRace(race);
-            }
-        }
-        return result;       
-    }
     @Override
-    public WindInfoForRaceDAO getWindInfo(String eventName, String raceName, Date fromDate, Date toDate, boolean includeTrackBasedWindEstimation) {
+    public WindInfoForRaceDAO getWindInfo(RaceIdentifier raceIdentifier, Date fromDate, Date toDate, boolean includeTrackBasedWindEstimation) {
         WindInfoForRaceDAO result = null;
-        TrackedRace trackedRace = getTrackedRace(eventName, raceName);
+        TrackedRace trackedRace = getTrackedRace(raceIdentifier);
         if (trackedRace != null) {
             MillisecondsTimePoint now = MillisecondsTimePoint.now();
             result = new WindInfoForRaceDAO();
@@ -561,121 +580,108 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
     
     @Override
-    public WindInfoForRaceDAO getWindInfo(String eventName, String raceName, Date from, long millisecondsStepWidth,
+    public WindInfoForRaceDAO getWindInfo(RaceIdentifier raceIdentifier, Date from, long millisecondsStepWidth,
             int numberOfFixes, double latDeg, double lngDeg, boolean includeTrackBasedWindEstimation)
             throws NoWindException {
         Position position = new DegreePosition(latDeg, lngDeg);
         WindInfoForRaceDAO result = null;
-        Event event = getService().getEventByName(eventName);
-        if (event != null) {
-            RaceDefinition race = getRaceByName(event, raceName);
-            if (race != null) {
-                TrackedRace trackedRace = getService().getOrCreateTrackedEvent(event)
-                        .getExistingTrackedRace(race);
-                if (trackedRace != null) {
-                    WindTrack estimatedTrack = null;
-                    result = new WindInfoForRaceDAO();
-                    WindSource windSource = trackedRace.getWindSource();
-                    result.selectedWindSourceName = windSource.name();
-                    TimePoint fromTimePoint = new MillisecondsTimePoint(from);
-                    Map<String, WindTrackInfoDAO> windTrackInfoDAOs = new HashMap<String, WindTrackInfoDAO>();
-                    result.windTrackInfoByWindSourceName = windTrackInfoDAOs;
-                    WindTrackInfoDAO windTrackInfoDAO = new WindTrackInfoDAO();
-                    windTrackInfoDAO.windFixes = new ArrayList<WindDAO>();
-                    WindTrack windTrack = trackedRace.getWindTrack(windSource);
-                    if (includeTrackBasedWindEstimation && windSource == WindSource.EXPEDITION) {
-                        estimatedTrack = new WindTrackImpl(windTrack.getMillisecondsOverWhichToAverageWind());
-                    }
-                    windTrackInfoDAOs.put(windSource.name(), windTrackInfoDAO);
-                    windTrackInfoDAO.dampeningIntervalInMilliseconds = windTrack
-                            .getMillisecondsOverWhichToAverageWind();
-                    TimePoint timePoint = fromTimePoint;
-                    for (int i=0; i<numberOfFixes; i++) {
-                        Wind wind = windTrack.getEstimatedWind(position, timePoint);
-                        if (wind != null) {
-                            WindDAO windDAO = createWindDAO(wind, windTrack);
-                            windTrackInfoDAO.windFixes.add(windDAO);
-                        }
-                        if (includeTrackBasedWindEstimation && windSource == WindSource.EXPEDITION && wind != null) {
-                            try {
-                                Wind estimatedWindDirection = trackedRace.getEstimatedWindDirection(wind.getPosition(),
-                                        wind.getTimePoint());
-                                estimatedTrack.add(estimatedWindDirection);
-                            } catch (NoWindException e) {
-                                // no show-stopper; it would just mean that the wind estimation isn't complete which we
-                                // can tolerate
-                                e.printStackTrace();
-                            }
-                        }
-                        timePoint = new MillisecondsTimePoint(timePoint.asMillis() + millisecondsStepWidth);
-                    }
-                    if (includeTrackBasedWindEstimation && estimatedTrack != null) {
-                        WindTrackInfoDAO windEstimations = createWindTrackInfoDAO(estimatedTrack);
-                        windTrackInfoDAOs.put("ESTIMATION", windEstimations);
+        TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
+        if (trackedRace != null) {
+            WindTrack estimatedTrack = null;
+            result = new WindInfoForRaceDAO();
+            WindSource windSource = trackedRace.getWindSource();
+            result.selectedWindSourceName = windSource.name();
+            TimePoint fromTimePoint = new MillisecondsTimePoint(from);
+            Map<String, WindTrackInfoDAO> windTrackInfoDAOs = new HashMap<String, WindTrackInfoDAO>();
+            result.windTrackInfoByWindSourceName = windTrackInfoDAOs;
+            WindTrackInfoDAO windTrackInfoDAO = new WindTrackInfoDAO();
+            windTrackInfoDAO.windFixes = new ArrayList<WindDAO>();
+            WindTrack windTrack = trackedRace.getWindTrack(windSource);
+            if (includeTrackBasedWindEstimation && windSource == WindSource.EXPEDITION) {
+                estimatedTrack = new WindTrackImpl(windTrack.getMillisecondsOverWhichToAverageWind());
+            }
+            windTrackInfoDAOs.put(windSource.name(), windTrackInfoDAO);
+            windTrackInfoDAO.dampeningIntervalInMilliseconds = windTrack.getMillisecondsOverWhichToAverageWind();
+            TimePoint timePoint = fromTimePoint;
+            for (int i = 0; i < numberOfFixes; i++) {
+                Wind wind = windTrack.getEstimatedWind(position, timePoint);
+                if (wind != null) {
+                    WindDAO windDAO = createWindDAO(wind, windTrack);
+                    windTrackInfoDAO.windFixes.add(windDAO);
+                }
+                if (includeTrackBasedWindEstimation && windSource == WindSource.EXPEDITION && wind != null) {
+                    try {
+                        Wind estimatedWindDirection = trackedRace.getEstimatedWindDirection(wind.getPosition(),
+                                wind.getTimePoint());
+                        estimatedTrack.add(estimatedWindDirection);
+                    } catch (NoWindException e) {
+                        // no show-stopper; it would just mean that the wind estimation isn't complete which we
+                        // can tolerate
+                        e.printStackTrace();
                     }
                 }
+                timePoint = new MillisecondsTimePoint(timePoint.asMillis() + millisecondsStepWidth);
+            }
+            if (includeTrackBasedWindEstimation && estimatedTrack != null) {
+                WindTrackInfoDAO windEstimations = createWindTrackInfoDAO(estimatedTrack);
+                windTrackInfoDAOs.put("ESTIMATION", windEstimations);
             }
         }
         return result;
     }
     
     @Override
-    public void setWind(String eventName, String raceName, WindDAO windDAO) {
-        Event event = getService().getEventByName(eventName);
-        RaceDefinition race = getRaceByName(event, raceName);
-        Position p = null;
-        if (windDAO.position != null) {
-            p = new DegreePosition(windDAO.position.latDeg, windDAO.position.lngDeg);
-        }
-        TimePoint at = null;
-        if (windDAO.timepoint != null) {
-            at = new MillisecondsTimePoint(windDAO.timepoint);
-        }
-        SpeedWithBearing speedWithBearing = null;
-        Speed speed = null;
-        if (windDAO.trueWindSpeedInKnots != null) {
-            speed = new KnotSpeedImpl(windDAO.trueWindSpeedInKnots);
-        } else if (windDAO.trueWindSpeedInMetersPerSecond != null) {
-            speed = new KilometersPerHourSpeedImpl(windDAO.trueWindSpeedInMetersPerSecond * 3600. / 1000.);
-        } else if (windDAO.dampenedTrueWindSpeedInKnots != null) {
-            speed = new KnotSpeedImpl(windDAO.dampenedTrueWindSpeedInKnots);
-        } else if (windDAO.dampenedTrueWindSpeedInMetersPerSecond != null) {
-            speed = new KilometersPerHourSpeedImpl(windDAO.dampenedTrueWindSpeedInMetersPerSecond * 3600. / 1000.);
-        }
-        if (speed != null) {
-            if (windDAO.trueWindBearingDeg != null) {
-                speedWithBearing = new KnotSpeedWithBearingImpl(speed.getKnots(), new DegreeBearingImpl(windDAO.trueWindBearingDeg));
-            } else if (windDAO.trueWindFromDeg != null) {
-                speedWithBearing = new KnotSpeedWithBearingImpl(speed.getKnots(), new DegreeBearingImpl(windDAO.trueWindFromDeg).reverse());
+    public void setWind(RaceIdentifier raceIdentifier, WindDAO windDAO) {
+        DynamicTrackedRace trackedRace = (DynamicTrackedRace) getTrackedRace(raceIdentifier);
+        if (trackedRace != null) {
+            Position p = null;
+            if (windDAO.position != null) {
+                p = new DegreePosition(windDAO.position.latDeg, windDAO.position.lngDeg);
             }
+            TimePoint at = null;
+            if (windDAO.timepoint != null) {
+                at = new MillisecondsTimePoint(windDAO.timepoint);
+            }
+            SpeedWithBearing speedWithBearing = null;
+            Speed speed = null;
+            if (windDAO.trueWindSpeedInKnots != null) {
+                speed = new KnotSpeedImpl(windDAO.trueWindSpeedInKnots);
+            } else if (windDAO.trueWindSpeedInMetersPerSecond != null) {
+                speed = new KilometersPerHourSpeedImpl(windDAO.trueWindSpeedInMetersPerSecond * 3600. / 1000.);
+            } else if (windDAO.dampenedTrueWindSpeedInKnots != null) {
+                speed = new KnotSpeedImpl(windDAO.dampenedTrueWindSpeedInKnots);
+            } else if (windDAO.dampenedTrueWindSpeedInMetersPerSecond != null) {
+                speed = new KilometersPerHourSpeedImpl(windDAO.dampenedTrueWindSpeedInMetersPerSecond * 3600. / 1000.);
+            }
+            if (speed != null) {
+                if (windDAO.trueWindBearingDeg != null) {
+                    speedWithBearing = new KnotSpeedWithBearingImpl(speed.getKnots(), new DegreeBearingImpl(
+                            windDAO.trueWindBearingDeg));
+                } else if (windDAO.trueWindFromDeg != null) {
+                    speedWithBearing = new KnotSpeedWithBearingImpl(speed.getKnots(), new DegreeBearingImpl(
+                            windDAO.trueWindFromDeg).reverse());
+                }
+            }
+            Wind wind = new WindImpl(p, at, speedWithBearing);
+            trackedRace.recordWind(wind, WindSource.WEB);
         }
-        Wind wind = new WindImpl(p, at, speedWithBearing);
-        getService().getOrCreateTrackedEvent(event).getTrackedRace(race).recordWind(wind, WindSource.WEB);
     }
     
     @Override
-    public void setWindSource(String eventName, String raceName, String windSourceName) {
-        Event event = getService().getEventByName(eventName);
-        if (event != null) {
-            RaceDefinition race = getRaceByName(event, raceName);
-            if (race != null) {
-                TrackedRace trackedRace = getService().getOrCreateTrackedEvent(event).getTrackedRace(race);
-                if (trackedRace != null) {
-                    trackedRace.setWindSource(WindSource.valueOf(windSourceName));
-                }
-            }
+    public void setWindSource(RaceIdentifier raceIdentifier, String windSourceName) {
+        TrackedRace trackedRace = getTrackedRace(raceIdentifier);
+        if (trackedRace != null) {
+            trackedRace.setWindSource(WindSource.valueOf(windSourceName));
         }
     }
 
     @Override
-    public Map<CompetitorDAO, List<GPSFixDAO>> getBoatPositions(String eventName, String raceName,
+    public Map<CompetitorDAO, List<GPSFixDAO>> getBoatPositions(RaceIdentifier raceIdentifier,
             Map<CompetitorDAO, Date> from, Map<CompetitorDAO, Date> to,
-            boolean extrapolate) {
+            boolean extrapolate) throws NoWindException {
         Map<CompetitorDAO, List<GPSFixDAO>> result = new HashMap<CompetitorDAO, List<GPSFixDAO>>();
-        Event event = getService().getEventByName(eventName);
-        if (event != null) {
-            RaceDefinition race = getRaceByName(event, raceName);
-            TrackedRace trackedRace = getService().getOrCreateTrackedEvent(event).getTrackedRace(race);
+        TrackedRace trackedRace = getTrackedRace(raceIdentifier);
+        if (trackedRace != null) {
             for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
                 CompetitorDAO competitorDAO = getCompetitorDAO(competitor);
                 if (from.containsKey(competitorDAO)) {
@@ -691,7 +697,10 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                             GPSFixMoving fix = fixIter.next();
                             while (fix != null && fix.getTimePoint().compareTo(toTimePointExcluding) < 0) {
                                 Tack tack = trackedRace.getTack(competitor, fix.getTimePoint());
-                                GPSFixDAO fixDAO = createGPSFixDAO(fix, fix.getSpeed(), tack, /* extrapolate */ false);
+                                TrackedLegOfCompetitor trackedLegOfCompetitor = trackedRace.getTrackedLeg(competitor, fix.getTimePoint());
+                                LegType legType = trackedLegOfCompetitor == null ? null : trackedRace.getTrackedLeg(
+                                        trackedLegOfCompetitor.getLeg()).getLegType(fix.getTimePoint());
+                                GPSFixDAO fixDAO = createGPSFixDAO(fix, fix.getSpeed(), tack, legType, /* extrapolate */false);
                                 fixesForCompetitor.add(fixDAO);
                                 if (fixIter.hasNext()) {
                                     fix = fixIter.next();
@@ -701,12 +710,15 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                                         Position position = track.getEstimatedPosition(toTimePointExcluding,
                                                 extrapolate);
                                         Tack tack2 = trackedRace.getTack(competitor, toTimePointExcluding);
+                                        LegType legType2 = trackedLegOfCompetitor == null ? null : trackedRace
+                                                .getTrackedLeg(trackedLegOfCompetitor.getLeg()).getLegType(
+                                                        fix.getTimePoint());
                                         SpeedWithBearing speedWithBearing = track
                                                 .getEstimatedSpeed(toTimePointExcluding);
                                         GPSFixDAO extrapolated = new GPSFixDAO(to.get(competitorDAO), new PositionDAO(
                                                 position.getLatDeg(), position.getLngDeg()),
                                                 createSpeedWithBearingDAO(speedWithBearing), tack2.name(), /* extrapolated */
-                                                true);
+                                                legType2==null?null:legType2.name(), true);
                                         fixesForCompetitor.add(extrapolated);
                                     }
                                     fix = null;
@@ -725,21 +737,19 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 .getBearing().getDegrees());
     }
 
-    private GPSFixDAO createGPSFixDAO(GPSFix fix, SpeedWithBearing speedWithBearing, Tack tack, boolean extrapolated) {
+    private GPSFixDAO createGPSFixDAO(GPSFix fix, SpeedWithBearing speedWithBearing, Tack tack, LegType legType, boolean extrapolated) {
         return new GPSFixDAO(fix.getTimePoint().asDate(), new PositionDAO(fix
                 .getPosition().getLatDeg(), fix.getPosition().getLngDeg()),
-                createSpeedWithBearingDAO(speedWithBearing), tack.name(), extrapolated);
+                createSpeedWithBearingDAO(speedWithBearing), tack.name(), legType==null?null:legType.name(), extrapolated);
     }
 
     @Override
-    public List<MarkDAO> getMarkPositions(String eventName, String raceName, Date date) {
+    public List<MarkDAO> getMarkPositions(RaceIdentifier raceIdentifier, Date date) {
         List<MarkDAO> result = new ArrayList<MarkDAO>();
         if (date != null) {
-            Event event = getService().getEventByName(eventName);
-            if (event != null) {
-                RaceDefinition race = getRaceByName(event, raceName);
-                TimePoint dateAsTimePoint = new MillisecondsTimePoint(date);
-                TrackedRace trackedRace = getService().getOrCreateTrackedEvent(event).getTrackedRace(race);
+            TimePoint dateAsTimePoint = new MillisecondsTimePoint(date);
+            TrackedRace trackedRace = getTrackedRace(raceIdentifier);
+            if (trackedRace != null) {
                 Set<Buoy> buoys = new HashSet<Buoy>();
                 for (Waypoint waypoint : trackedRace.getRace().getCourse().getWaypoints()) {
                     for (Buoy b : waypoint.getBuoys()) {
@@ -761,14 +771,13 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
 
     @Override
-    public List<QuickRankDAO> getQuickRanks(String eventName, String raceName, Date date) throws Exception {
-        Event event = getService().getEventByName(eventName);
+    public List<QuickRankDAO> getQuickRanks(RaceIdentifier raceIdentifier, Date date) throws NoWindException {
         List<QuickRankDAO> result = new ArrayList<QuickRankDAO>();
-        if (date != null && event != null) {
-            RaceDefinition race = getRaceByName(event, raceName);
-            if (race != null) {
-                TimePoint dateAsTimePoint = new MillisecondsTimePoint(date);
-                TrackedRace trackedRace = getService().getOrCreateTrackedEvent(event).getTrackedRace(race);
+        if (date != null) {
+            TimePoint dateAsTimePoint = new MillisecondsTimePoint(date);
+            TrackedRace trackedRace = getTrackedRace(raceIdentifier);
+            if (trackedRace != null) {
+                RaceDefinition race = trackedRace.getRace();
                 for (Competitor competitor : race.getCompetitors()) {
                     int rank = trackedRace.getRank(competitor, dateAsTimePoint);
                     TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(competitor, dateAsTimePoint);
@@ -790,37 +799,40 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
 
     @Override
-    public void removeWind(String eventName, String raceName, WindDAO windDAO) {
-        Event event = getService().getEventByName(eventName);
-        RaceDefinition race = getRaceByName(event, raceName);
-        Position p = null;
-        if (windDAO.position != null) {
-            p = new DegreePosition(windDAO.position.latDeg, windDAO.position.lngDeg);
-        }
-        TimePoint at = null;
-        if (windDAO.timepoint != null) {
-            at = new MillisecondsTimePoint(windDAO.timepoint);
-        }
-        SpeedWithBearing speedWithBearing = null;
-        Speed speed = null;
-        if (windDAO.trueWindSpeedInKnots != null) {
-            speed = new KnotSpeedImpl(windDAO.trueWindSpeedInKnots);
-        } else if (windDAO.trueWindSpeedInMetersPerSecond != null) {
-            speed = new KilometersPerHourSpeedImpl(windDAO.trueWindSpeedInMetersPerSecond * 3600. / 1000.);
-        } else if (windDAO.dampenedTrueWindSpeedInKnots != null) {
-            speed = new KnotSpeedImpl(windDAO.dampenedTrueWindSpeedInKnots);
-        } else if (windDAO.dampenedTrueWindSpeedInMetersPerSecond != null) {
-            speed = new KilometersPerHourSpeedImpl(windDAO.dampenedTrueWindSpeedInMetersPerSecond * 3600. / 1000.);
-        }
-        if (speed != null) {
-            if (windDAO.trueWindBearingDeg != null) {
-                speedWithBearing = new KnotSpeedWithBearingImpl(speed.getKnots(), new DegreeBearingImpl(windDAO.trueWindBearingDeg));
-            } else if (windDAO.trueWindFromDeg != null) {
-                speedWithBearing = new KnotSpeedWithBearingImpl(speed.getKnots(), new DegreeBearingImpl(windDAO.trueWindFromDeg).reverse());
+    public void removeWind(RaceIdentifier raceIdentifier, WindDAO windDAO) {
+        TrackedRace trackedRace = getTrackedRace(raceIdentifier);
+        if (trackedRace != null) {
+            Position p = null;
+            if (windDAO.position != null) {
+                p = new DegreePosition(windDAO.position.latDeg, windDAO.position.lngDeg);
             }
+            TimePoint at = null;
+            if (windDAO.timepoint != null) {
+                at = new MillisecondsTimePoint(windDAO.timepoint);
+            }
+            SpeedWithBearing speedWithBearing = null;
+            Speed speed = null;
+            if (windDAO.trueWindSpeedInKnots != null) {
+                speed = new KnotSpeedImpl(windDAO.trueWindSpeedInKnots);
+            } else if (windDAO.trueWindSpeedInMetersPerSecond != null) {
+                speed = new KilometersPerHourSpeedImpl(windDAO.trueWindSpeedInMetersPerSecond * 3600. / 1000.);
+            } else if (windDAO.dampenedTrueWindSpeedInKnots != null) {
+                speed = new KnotSpeedImpl(windDAO.dampenedTrueWindSpeedInKnots);
+            } else if (windDAO.dampenedTrueWindSpeedInMetersPerSecond != null) {
+                speed = new KilometersPerHourSpeedImpl(windDAO.dampenedTrueWindSpeedInMetersPerSecond * 3600. / 1000.);
+            }
+            if (speed != null) {
+                if (windDAO.trueWindBearingDeg != null) {
+                    speedWithBearing = new KnotSpeedWithBearingImpl(speed.getKnots(), new DegreeBearingImpl(
+                            windDAO.trueWindBearingDeg));
+                } else if (windDAO.trueWindFromDeg != null) {
+                    speedWithBearing = new KnotSpeedWithBearingImpl(speed.getKnots(), new DegreeBearingImpl(
+                            windDAO.trueWindFromDeg).reverse());
+                }
+            }
+            Wind wind = new WindImpl(p, at, speedWithBearing);
+            trackedRace.removeWind(wind, WindSource.WEB);
         }
-        Wind wind = new WindImpl(p, at, speedWithBearing);
-        getService().getOrCreateTrackedEvent(event).getTrackedRace(race).removeWind(wind, WindSource.WEB);
    }
 
     protected RacingEventService getService() {
@@ -838,8 +850,51 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
 
     @Override
-    public void createLeaderboard(String leaderboardName, int[] discardThresholds) {
-        getService().addLeaderboard(leaderboardName, discardThresholds);
+    public LeaderboardDAO createLeaderboard(String leaderboardName, int[] discardThresholds) {
+        return createStrippedLeaderboardDAO(getService().addLeaderboard(leaderboardName, discardThresholds));
+    }
+
+    @Override
+    public List<LeaderboardDAO> getLeaderboards() {
+        Map<String, Leaderboard> leaderboards = getService().getLeaderboards();
+        List<LeaderboardDAO> results = new ArrayList<LeaderboardDAO>();
+        for(Leaderboard leaderboard: leaderboards.values()) {
+            LeaderboardDAO dao = createStrippedLeaderboardDAO(leaderboard);
+            results.add(dao);
+        }
+        
+        return results;
+    }
+
+    /**
+     * Creates a {@link LeaderboardDAO} for <code>leaderboard</code> and fills in the name, race master data
+     * in the form of {@link RaceInLeaderboardDAO}s, whether or not there are {@link LeaderboardDAO#hasCarriedPoints carried points}
+     * and the {@link LeaderboardDAO#discardThresholds discarding thresholds} for the leaderboard. No data about the points
+     * is filled into the result object. No data about the competitor display names is filled in; instead, an empty map
+     * is used for {@link LeaderboardDAO#competitorDisplayNames}.
+     */
+    private LeaderboardDAO createStrippedLeaderboardDAO(Leaderboard leaderboard) {
+        LeaderboardDAO dao = new LeaderboardDAO();
+        dao.name = leaderboard.getName();
+        dao.competitorDisplayNames = new HashMap<CompetitorDAO, String>();
+        for (RaceInLeaderboard raceColumn : leaderboard.getRaceColumns()) {
+            dao.addRace(raceColumn.getName(), raceColumn.isMedalRace(), raceColumn.getTrackedRace() != null);
+        }
+        dao.hasCarriedPoints = leaderboard.hasCarriedPoints();
+        dao.discardThresholds = leaderboard.getResultDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces();
+        return dao;
+    }
+    
+    @Override
+    public void updateLeaderboard(String leaderboardName, String newLeaderboardName, int[] newDiscardingThreasholds) {
+        if (!leaderboardName.equals(newLeaderboardName)) {
+            getService().renameLeaderboard(leaderboardName, newLeaderboardName);
+        }
+        Leaderboard leaderboard = getService().getLeaderboardByName(newLeaderboardName);
+        if (!Arrays.equals(leaderboard.getResultDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces(), newDiscardingThreasholds)) {
+            leaderboard.setResultDiscardingRule(new ResultDiscardingRuleImpl(newDiscardingThreasholds));
+        }
+        getService().updateStoredLeaderboard(leaderboard);
     }
 
     @Override
@@ -886,19 +941,21 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
 
     @Override
-    public void connectTrackedRaceToLeaderboardColumn(String leaderboardName, String raceColumnName, String eventName,
-            String raceName) {
-        TrackedRace trackedRace = getTrackedRace(eventName, raceName);
+    public boolean connectTrackedRaceToLeaderboardColumn(String leaderboardName, String raceColumnName, RaceIdentifier raceIdentifier) {
+        boolean success = false;
+        TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
         if (trackedRace != null) {
             Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
             if (leaderboard != null) {
                 RaceInLeaderboard raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
                 if (raceColumn != null) {
                     raceColumn.setTrackedRace(trackedRace);
+                    success = true;
                     getService().updateStoredLeaderboard(leaderboard);
                 }
             }
         }
+        return success;
     }
 
     @Override
@@ -1087,7 +1144,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     @Override
     public void trackWithSwissTiming(SwissTimingRaceRecordDAO rr, String hostname, int port, boolean canSendRequests,
             boolean trackWind, final boolean correctWindByDeclination) throws Exception {
-        final RaceHandle raceHandle = getService().addSwissTimingRace(rr.ID, hostname, port, canSendRequests,
+        final RacesHandle raceHandle = getService().addSwissTimingRace(rr.ID, hostname, port, canSendRequests,
                 MongoWindStoreFactory.INSTANCE.getMongoWindStore(mongoObjectFactory, domainObjectFactory),
                 TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS);
         if (trackWind) {
@@ -1119,51 +1176,215 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         Collections.sort(countryCodes);
         return countryCodes.toArray(new String[0]);
     }
-    
+
     @Override
-    public Map<CompetitorDAO, List<GPSFixDAO>> getDouglasPoints(String eventName, String raceName,
-            Map<CompetitorDAO, Date> from, Map<CompetitorDAO, Date> to,
-            double meters) {
-        Map<CompetitorDAO, List<GPSFixDAO>> result = new HashMap<CompetitorDAO, List<GPSFixDAO>>();
-        TrackedRace trackedRace = getTrackedRace(eventName, raceName);
-        MeterDistance maxDistance = new MeterDistance(meters);
-        for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
-            CompetitorDAO competitorDAO = getCompetitorDAO(competitor);
-            if (from.containsKey(competitorDAO)) {
-                // get Track of competitor
-                GPSFixTrack<Competitor, GPSFixMoving> gpsFixTrack = trackedRace.getTrack(competitor);
-                // Distance for DouglasPeucker
-                TimePoint timePointFrom = new MillisecondsTimePoint(from.get(competitorDAO));
-                TimePoint timePointTo = new MillisecondsTimePoint(to.get(competitorDAO));
-                List<GPSFixMoving> gpsFixApproximation = trackedRace.approximate(competitor, maxDistance, timePointFrom, timePointTo);
-                List<GPSFixDAO> gpsFixDouglasList = new ArrayList<GPSFixDAO>();
-                for (int i = 0; i < gpsFixApproximation.size(); i++) {
-                    GPSFix fix = gpsFixApproximation.get(i);
-                    SpeedWithBearing speedWithBearing;
-                    if (i<gpsFixApproximation.size()-1) {
-                        GPSFix next = gpsFixApproximation.get(i+1);
-                        Bearing bearing = fix.getPosition().getBearingGreatCircle(next.getPosition());
-                        Speed speed = fix.getPosition().getDistance(next.getPosition()).inTime(
-                                next.getTimePoint().asMillis()-fix.getTimePoint().asMillis());
-                        speedWithBearing = new KnotSpeedWithBearingImpl(speed.getKnots(), bearing);
-                    } else {
-                        speedWithBearing = gpsFixTrack.getEstimatedSpeed(fix.getTimePoint());
-                    }
-                    Tack tack = trackedRace.getTack(competitor, fix.getTimePoint());
-                    GPSFixDAO fixDAO = createGPSFixDAO(fix, speedWithBearing, tack, /* extrapolated */ false);
-                    gpsFixDouglasList.add(fixDAO);
+    public CompetitorInRaceDAO getCompetitorRaceData(RaceIdentifier race,
+            CompetitorsAndTimePointsDAO competitorAndTimePointsDAO, DetailType dataType) throws NoWindException {
+        CompetitorInRaceDAO competitorData = new CompetitorInRaceDAO();
+        TrackedRace trackedRace = getTrackedRace(race);
+        Iterable<Competitor> competitors = trackedRace.getRace().getCompetitors();
+        List<Competitor> selectedCompetitor = new ArrayList<Competitor>();
+        for (CompetitorDAO cDAO : competitorAndTimePointsDAO.getCompetitor()){
+            for (Competitor c : competitors){
+                if (c.getId().toString().equals(cDAO.id)){
+                    selectedCompetitor.add(c);
                 }
-                result.put(competitorDAO, gpsFixDouglasList);
+            }
+        }
+        
+        switch (dataType){
+        case CURRENT_SPEED_OVER_GROUND_IN_KNOTS:
+            for (int c = 0; c < selectedCompetitor.size(); c++){
+                Double[] entries = new Double[competitorAndTimePointsDAO.getTimePoints().length];
+                for (int i = 0; i < competitorAndTimePointsDAO.getTimePoints().length; i++){
+                    MillisecondsTimePoint time = new MillisecondsTimePoint(competitorAndTimePointsDAO.getTimePoints()[i]);
+                    TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(selectedCompetitor.get(c), time);
+                    if (trackedLeg != null){
+                        SpeedWithBearing speedOverGround = trackedLeg.getSpeedOverGround(time);
+                        entries[i] = (speedOverGround == null) ? null : speedOverGround.getKnots();
+                    }
+                }
+                CompetitorDAO competitor = competitorAndTimePointsDAO.getCompetitor()[c];
+                competitorData.setRaceData(competitor, entries);
+                entries = new Double[competitorAndTimePointsDAO.getMarkPassings(competitor).length];
+                for (int i = 0; i < competitorAndTimePointsDAO.getMarkPassings(competitor).length; i++){
+                    MillisecondsTimePoint time = new MillisecondsTimePoint(competitorAndTimePointsDAO.getMarkPassings(competitor)[i]);
+                    TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(selectedCompetitor.get(c), time);
+                    if (trackedLeg != null){
+                        SpeedWithBearing speedOverGround = trackedLeg.getSpeedOverGround(time);
+                        entries[i] = (speedOverGround == null) ? null : speedOverGround.getKnots();
+                    }
+                }
+                competitorData.setMarkPassingData(competitor, entries);
+            }
+            break;
+        case VELOCITY_MADE_GOOD_IN_KNOTS:
+            for (int c = 0; c < selectedCompetitor.size(); c++){
+                Double[] entries = new Double[competitorAndTimePointsDAO.getTimePoints().length];
+                for (int i = 0; i < competitorAndTimePointsDAO.getTimePoints().length; i++){
+                    MillisecondsTimePoint time = new MillisecondsTimePoint(competitorAndTimePointsDAO.getTimePoints()[i]);
+                    TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(selectedCompetitor.get(c), time);
+                    if (trackedLeg != null){
+                        Speed velocityMadeGood = trackedLeg.getVelocityMadeGood(time);
+                        entries[i] = (velocityMadeGood == null) ? null : velocityMadeGood.getKnots();
+                    }
+                }
+                competitorData.setRaceData(competitorAndTimePointsDAO.getCompetitor()[c], entries);
+                CompetitorDAO competitor = competitorAndTimePointsDAO.getCompetitor()[c];
+                entries = new Double[competitorAndTimePointsDAO.getMarkPassings(competitor).length];
+                for (int i = 0; i < competitorAndTimePointsDAO.getMarkPassings(competitor).length; i++){
+                    MillisecondsTimePoint time = new MillisecondsTimePoint(competitorAndTimePointsDAO.getMarkPassings(competitor)[i]);
+                    TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(selectedCompetitor.get(c), time);
+                    if (trackedLeg != null){
+                        Speed velocityMadeGood = trackedLeg.getVelocityMadeGood(time);
+                        entries[i] = (velocityMadeGood == null) ? null : velocityMadeGood.getKnots();
+                    }
+                }
+                competitorData.setMarkPassingData(competitor, entries);
+            }
+            break;
+        case DISTANCE_TRAVELED:
+            for (int c = 0; c < selectedCompetitor.size(); c++){
+                Double[] entries = new Double[competitorAndTimePointsDAO.getTimePoints().length];
+                double distanceOfPreviousLegs = 0;
+                double lastTraveledDistance = 0;
+                for (int i = 0; i < competitorAndTimePointsDAO.getTimePoints().length; i++){
+                    MillisecondsTimePoint time = new MillisecondsTimePoint(competitorAndTimePointsDAO.getTimePoints()[i]);
+                    TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(selectedCompetitor.get(c), time);
+                    if (trackedLeg != null){
+                        Distance distanceTraveled = trackedLeg.getDistanceTraveled(time);
+                        if (distanceTraveled != null){
+                            double d = distanceTraveled.getMeters();
+                            if (d < lastTraveledDistance){
+                                distanceOfPreviousLegs += lastTraveledDistance;
+                            }
+                            lastTraveledDistance = d;
+                            entries[i] = d + distanceOfPreviousLegs;
+                        }
+                    }
+                }
+                competitorData.setRaceData(competitorAndTimePointsDAO.getCompetitor()[c], entries);
+                CompetitorDAO competitor = competitorAndTimePointsDAO.getCompetitor()[c];
+                entries = new Double[competitorAndTimePointsDAO.getMarkPassings(competitor).length];
+                for (int i = 0; i < competitorAndTimePointsDAO.getMarkPassings(competitor).length; i++){
+                    MillisecondsTimePoint time = new MillisecondsTimePoint(competitorAndTimePointsDAO.getMarkPassings(competitor)[i]);
+                    TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(selectedCompetitor.get(c), time);
+                    if (trackedLeg != null){
+                        Distance distanceTraveled = trackedLeg.getDistanceTraveled(time);
+                        if (distanceTraveled != null){
+                            double d = distanceTraveled.getMeters();
+                            if (d < lastTraveledDistance){
+                                distanceOfPreviousLegs += lastTraveledDistance;
+                            }
+                            lastTraveledDistance = d;
+                            entries[i] = d + distanceOfPreviousLegs;
+                        }
+                    }
+                }
+                competitorData.setMarkPassingData(competitor, entries);
+            }
+            break;
+        case GAP_TO_LEADER_IN_SECONDS:
+            for (int c = 0; c < selectedCompetitor.size(); c++){
+                Double[] entries = new Double[competitorAndTimePointsDAO.getTimePoints().length];
+                for (int i = 0; i < competitorAndTimePointsDAO.getTimePoints().length; i++){
+                    MillisecondsTimePoint time = new MillisecondsTimePoint(competitorAndTimePointsDAO.getTimePoints()[i]);
+                    TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(selectedCompetitor.get(c), time);
+                    if (trackedLeg != null){
+                        entries[i] = trackedLeg.getGapToLeaderInSeconds(time);
+                    }
+                }
+                competitorData.setRaceData(competitorAndTimePointsDAO.getCompetitor()[c], entries);
+                CompetitorDAO competitor = competitorAndTimePointsDAO.getCompetitor()[c];
+                entries = new Double[competitorAndTimePointsDAO.getMarkPassings(competitor).length];
+                for (int i = 0; i < competitorAndTimePointsDAO.getMarkPassings(competitor).length; i++){
+                    MillisecondsTimePoint time = new MillisecondsTimePoint(competitorAndTimePointsDAO.getMarkPassings(competitor)[i]);
+                    TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(selectedCompetitor.get(c), time);
+                    if (trackedLeg != null){
+                        entries[i] = trackedLeg.getGapToLeaderInSeconds(time);
+                    }
+                }
+                competitorData.setMarkPassingData(competitor, entries);
+            }
+            break;
+        case WINDWARD_DISTANCE_TO_OVERALL_LEADER:
+            for (int c = 0; c < selectedCompetitor.size(); c++){
+                Double[] entries = new Double[competitorAndTimePointsDAO.getTimePoints().length];
+                for (int i = 0; i < competitorAndTimePointsDAO.getTimePoints().length; i++){
+                    MillisecondsTimePoint time = new MillisecondsTimePoint(competitorAndTimePointsDAO.getTimePoints()[i]);
+                    TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(selectedCompetitor.get(c), time);
+                    if (trackedLeg != null){
+                        Distance distanceToLeader = trackedLeg.getWindwardDistanceToOverallLeader(time);
+                        entries[i] = (distanceToLeader == null) ? null : distanceToLeader.getMeters();
+                    }
+                }
+                competitorData.setRaceData(competitorAndTimePointsDAO.getCompetitor()[c], entries);
+                CompetitorDAO competitor = competitorAndTimePointsDAO.getCompetitor()[c];
+                entries = new Double[competitorAndTimePointsDAO.getMarkPassings(competitor).length];
+                for (int i = 0; i < competitorAndTimePointsDAO.getMarkPassings(competitor).length; i++){
+                    MillisecondsTimePoint time = new MillisecondsTimePoint(competitorAndTimePointsDAO.getMarkPassings(competitor)[i]);
+                    TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(selectedCompetitor.get(c), time);
+                    if (trackedLeg != null){
+                        Distance distanceToLeader = trackedLeg.getWindwardDistanceToOverallLeader(time);
+                        entries[i] = (distanceToLeader == null) ? null : distanceToLeader.getMeters();
+                    }
+                }
+                competitorData.setMarkPassingData(competitor, entries);
+            }
+            break;
+        }
+        return competitorData;
+    }
+    
+    public Map<CompetitorDAO, List<GPSFixDAO>> getDouglasPoints(RaceIdentifier raceIdentifier,
+            Map<CompetitorDAO, Date> from, Map<CompetitorDAO, Date> to,
+            double meters) throws NoWindException {
+        Map<CompetitorDAO, List<GPSFixDAO>> result = new HashMap<CompetitorDAO, List<GPSFixDAO>>();
+        TrackedRace trackedRace = getTrackedRace(raceIdentifier);
+        if (trackedRace != null) {
+            MeterDistance maxDistance = new MeterDistance(meters);
+            for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
+                CompetitorDAO competitorDAO = getCompetitorDAO(competitor);
+                if (from.containsKey(competitorDAO)) {
+                    // get Track of competitor
+                    GPSFixTrack<Competitor, GPSFixMoving> gpsFixTrack = trackedRace.getTrack(competitor);
+                    // Distance for DouglasPeucker
+                    TimePoint timePointFrom = new MillisecondsTimePoint(from.get(competitorDAO));
+                    TimePoint timePointTo = new MillisecondsTimePoint(to.get(competitorDAO));
+                    List<GPSFixMoving> gpsFixApproximation = trackedRace.approximate(competitor, maxDistance,
+                            timePointFrom, timePointTo);
+                    List<GPSFixDAO> gpsFixDouglasList = new ArrayList<GPSFixDAO>();
+                    for (int i = 0; i < gpsFixApproximation.size(); i++) {
+                        GPSFix fix = gpsFixApproximation.get(i);
+                        SpeedWithBearing speedWithBearing;
+                        if (i < gpsFixApproximation.size() - 1) {
+                            GPSFix next = gpsFixApproximation.get(i + 1);
+                            Bearing bearing = fix.getPosition().getBearingGreatCircle(next.getPosition());
+                            Speed speed = fix.getPosition().getDistance(next.getPosition())
+                                    .inTime(next.getTimePoint().asMillis() - fix.getTimePoint().asMillis());
+                            speedWithBearing = new KnotSpeedWithBearingImpl(speed.getKnots(), bearing);
+                        } else {
+                            speedWithBearing = gpsFixTrack.getEstimatedSpeed(fix.getTimePoint());
+                        }
+                        Tack tack = trackedRace.getTack(competitor, fix.getTimePoint());
+                        TrackedLegOfCompetitor trackedLegOfCompetitor = trackedRace.getTrackedLeg(competitor, fix.getTimePoint());
+                        LegType legType = trackedLegOfCompetitor == null ? null : trackedRace.getTrackedLeg(
+                                trackedLegOfCompetitor.getLeg()).getLegType(fix.getTimePoint());
+                        GPSFixDAO fixDAO = createGPSFixDAO(fix, speedWithBearing, tack, legType, /* extrapolated */false);
+                        gpsFixDouglasList.add(fixDAO);
+                    }
+                    result.put(competitorDAO, gpsFixDouglasList);
+                }
             }
         }
         return result;
     }
 
     @Override
-    public Map<CompetitorDAO, List<ManeuverDAO>> getManeuvers(String eventName, String raceName,
-            Map<CompetitorDAO, Date> from, Map<CompetitorDAO, Date> to) {
+    public Map<CompetitorDAO, List<ManeuverDAO>> getManeuvers(RaceIdentifier raceIdentifier,
+            Map<CompetitorDAO, Date> from, Map<CompetitorDAO, Date> to) throws NoWindException {
         Map<CompetitorDAO, List<ManeuverDAO>> result = new HashMap<CompetitorDAO, List<ManeuverDAO>>();
-        TrackedRace trackedRace = getTrackedRace(eventName, raceName);
+        TrackedRace trackedRace = getTrackedRace(raceIdentifier);
         for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
             CompetitorDAO competitorDAO = getCompetitorDAO(competitor);
             if (from.containsKey(competitorDAO)) {
@@ -1180,7 +1401,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     private List<ManeuverDAO> createManeuverDAOsForCompetitor(List<Maneuver> maneuvers, TrackedRace trackedRace, Competitor competitor) {
         List<ManeuverDAO> result = new ArrayList<ManeuverDAO>();
         for (Maneuver maneuver : maneuvers) {
-            ManeuverDAO maneuverDAO = new ManeuverDAO(maneuver.getType().name(),
+            ManeuverDAO maneuverDAO = new ManeuverDAO(maneuver.getType().name(), maneuver.getNewTack().name(),
                     new PositionDAO(maneuver.getPosition().getLatDeg(), maneuver.getPosition().getLngDeg()), 
                     maneuver.getTimePoint().asDate(),
                     createSpeedWithBearingDAO(maneuver.getSpeedWithBearingBefore()),
@@ -1189,5 +1410,114 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             result.add(maneuverDAO);
         }
         return result;
+    }
+
+    @Override
+    public RaceDefinition getRace(EventNameAndRaceName eventNameAndRaceName) {
+        Event event = getService().getEventByName(eventNameAndRaceName.getEventName());
+        RaceDefinition race = getRaceByName(event, eventNameAndRaceName.getRaceName());
+        return race;
+    }
+
+    @Override
+    public TrackedRace getTrackedRace(EventNameAndRaceName eventNameAndRaceName) {
+        Event event = getService().getEventByName(eventNameAndRaceName.getEventName());
+        RaceDefinition race = getRaceByName(event, eventNameAndRaceName.getRaceName());
+        TrackedRace trackedRace = getService().getOrCreateTrackedEvent(event).getTrackedRace(race);
+        return trackedRace;
+    }
+
+    @Override
+    public RaceDefinition getRace(LeaderboardNameAndRaceColumnName leaderboardNameAndRaceColumnName) {
+        RaceDefinition result = null;
+        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardNameAndRaceColumnName.getLeaderboardName());
+        if (leaderboard != null) {
+            RaceInLeaderboard raceColumn = leaderboard.getRaceColumnByName(leaderboardNameAndRaceColumnName
+                    .getRaceColumnName());
+            if (raceColumn != null && raceColumn.getTrackedRace() != null) {
+                result = raceColumn.getTrackedRace().getRace();
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public TrackedRace getTrackedRace(LeaderboardNameAndRaceColumnName leaderboardNameAndRaceColumnName) {
+        TrackedRace result = null;
+        Leaderboard leaderboard = getService().getLeaderboardByName(
+                leaderboardNameAndRaceColumnName.getLeaderboardName());
+        if (leaderboard != null) {
+            RaceInLeaderboard raceColumn = leaderboard.getRaceColumnByName(leaderboardNameAndRaceColumnName
+                    .getRaceColumnName());
+            if (raceColumn != null) {
+                result = raceColumn.getTrackedRace();
+            }
+        }
+        return result;
+    }
+    
+    @Override
+    public TrackedRace getExistingTrackedRace(LeaderboardNameAndRaceColumnName leaderboardNameAndRaceColumnName) {
+        return getTrackedRace(leaderboardNameAndRaceColumnName);
+    }
+    
+    @Override
+    public TrackedRace getExistingTrackedRace(EventNameAndRaceName eventNameAndRaceName) {
+        Event event = getService().getEventByName(eventNameAndRaceName.getEventName());
+        RaceDefinition race = getRaceByName(event, eventNameAndRaceName.getRaceName());
+        TrackedRace trackedRace = getService().getOrCreateTrackedEvent(event).getExistingTrackedRace(race);
+        return trackedRace;
+    }
+    
+    @Override
+    public Event getEvent(EventNameAndRaceName eventIdentifier) {
+        return getService().getEventByName(eventIdentifier.getEventName());
+    }
+
+    private RaceDefinition getRace(RaceIdentifier raceIdentifier) {
+        return (RaceDefinition) raceIdentifier.getRace(this);
+    }
+
+    private TrackedRace getTrackedRace(RaceIdentifier raceIdentifier) {
+        return (TrackedRace) raceIdentifier.getTrackedRace(this);
+    }
+    
+    private TrackedRace getExistingTrackedRace(RaceIdentifier raceIdentifier) {
+        return (TrackedRace) raceIdentifier.getExistingTrackedRace(this);
+    }
+    
+    private Event getEvent(EventIdentifier eventIdentifier) {
+        return (Event) eventIdentifier.getEvent(this);
+    }
+
+    @Override
+    public CompetitorsAndTimePointsDAO getCompetitorsAndTimePoints(RaceIdentifier race, int steps) {
+        CompetitorsAndTimePointsDAO competitorAndTimePointsDAO = new CompetitorsAndTimePointsDAO(steps);
+        TrackedRace trackedRace = getTrackedRace(race);
+        List<CompetitorDAO> competitors = new ArrayList<CompetitorDAO>();
+        for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
+            NavigableSet<MarkPassing> markPassings = trackedRace.getMarkPassings(competitor);
+            long[] markPassingTimes = new long[markPassings.size()];
+            int i=0;
+            for (MarkPassing markPassing : markPassings){
+                markPassingTimes[i++] = markPassing.getTimePoint().asMillis();
+            }
+            competitors.add(getCompetitorDAO(competitor));
+            competitorAndTimePointsDAO.setMarkPassings(getCompetitorDAO(competitor), markPassingTimes);
+        }
+        competitorAndTimePointsDAO.setCompetitor(competitors.toArray(new CompetitorDAO[0]));
+        competitorAndTimePointsDAO.setStartTime(trackedRace.getStart().asMillis());
+        competitorAndTimePointsDAO.setTimePointOfNewestEvent(trackedRace.getTimePointOfNewestEvent().asMillis());
+        return competitorAndTimePointsDAO;
+    }
+
+    /**
+     * Returns a servlet context that, when asked for a resource, first tries the original servlet context's implementation. If that
+     * fails, it prepends "war/" to the request because the war/ folder contains all the resources exposed externally
+     * through the HTTP server.
+     */
+    @Override
+    public ServletContext getServletContext() {
+        return new DelegatingServletContext(super.getServletContext());
     }
 }

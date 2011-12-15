@@ -15,6 +15,7 @@ import com.sap.sailing.gwt.ui.shared.RegattaDAO;
 import com.sap.sailing.gwt.ui.shared.Triple;
 import com.sap.sailing.gwt.ui.shared.WindDAO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDAO;
+import com.sap.sailing.server.api.EventNameAndRaceName;
 
 /**
  * Displays a bit of wind history around the time notified to this time listener.
@@ -68,7 +69,7 @@ public class SmallWindHistoryPanel extends FormPanel implements TimeListener, Ra
         if (date != null) {
             Date from = new Date(date.getTime() - windIndicators.length * millisecondStepsPerLabel);
             if (event != null && race != null) {
-                sailingService.getWindInfo(event.name, race.name, from, millisecondStepsPerLabel,
+                sailingService.getWindInfo(new EventNameAndRaceName(event.name, race.name), from, millisecondStepsPerLabel,
                         windIndicators.length, position.latDeg, position.lngDeg, /* includeTrackBasedWindEstimation */ true,
                         new AsyncCallback<WindInfoForRaceDAO>() {
                             @Override

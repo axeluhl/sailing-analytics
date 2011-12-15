@@ -11,6 +11,7 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.server.impl.Activator;
 import com.sap.sailing.util.DateParser;
 import com.sap.sailing.util.InvalidDateException;
 

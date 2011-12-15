@@ -62,7 +62,7 @@ public class TrackedEventImpl implements TrackedEvent {
     }
     
     @Override
-    public void removedTrackedRace(TrackedRace trackedRace) {
+    public void removeTrackedRace(TrackedRace trackedRace) {
         synchronized (trackedRaces) {
             trackedRaces.remove(trackedRace.getRace());
             Collection<TrackedRace> trbbc = trackedRacesByBoatClass.get(trackedRace.getRace().getBoatClass());
@@ -141,7 +141,9 @@ public class TrackedEventImpl implements TrackedEvent {
         logger.log(Level.INFO, "Creating DynamicTrackedRaceImpl for RaceDefinition "+raceDefinition.getName());
         DynamicTrackedRaceImpl result = new DynamicTrackedRaceImpl(this, raceDefinition,
                 windStore, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed);
-        raceDefinitionSetToUpdate.addRaceDefinition(raceDefinition);
+        if (raceDefinitionSetToUpdate != null) {
+            raceDefinitionSetToUpdate.addRaceDefinition(raceDefinition);
+        }
         return result;
     }
 

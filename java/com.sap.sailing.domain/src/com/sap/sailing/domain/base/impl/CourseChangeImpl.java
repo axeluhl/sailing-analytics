@@ -1,18 +1,12 @@
 package com.sap.sailing.domain.base.impl;
 
 import com.sap.sailing.domain.base.CourseChange;
-import com.sap.sailing.domain.base.Position;
-import com.sap.sailing.domain.base.SpeedWithBearing;
-import com.sap.sailing.domain.base.TimePoint;
-import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 
-public class CourseChangeImpl extends GPSFixMovingImpl implements CourseChange {
+public class CourseChangeImpl implements CourseChange {
     private final double courseChangeInDegrees;
     private final double speedChangeInKnots;
     
-    public CourseChangeImpl(double courseChangeInDegrees, double speedChangeInKnots, Position position,
-            TimePoint timePoint, SpeedWithBearing from) {
-        super(position, timePoint, from);
+    public CourseChangeImpl(double courseChangeInDegrees, double speedChangeInKnots) {
         this.courseChangeInDegrees = courseChangeInDegrees;
         this.speedChangeInKnots = speedChangeInKnots;
     }
@@ -27,4 +21,8 @@ public class CourseChangeImpl extends GPSFixMovingImpl implements CourseChange {
         return speedChangeInKnots;
     }
 
+    @Override
+    public String toString() {
+        return "changing course by "+getCourseChangeInDegrees()+"deg, "+getSpeedChangeInKnots()+"kn";
+    }
 }

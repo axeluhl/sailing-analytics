@@ -19,6 +19,7 @@ import com.sap.sailing.domain.base.impl.NauticalMileDistance;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
+import com.sap.sailing.domain.tracking.WithValidityCache;
 
 public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl<FixType> implements GPSFixTrack<ItemType, FixType> {
     private static final Speed DEFAULT_MAX_SPEED_FOR_SMOOTHING = new KnotSpeedImpl(50);
@@ -45,6 +46,27 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         @Override
         public Position getPosition() {
             return null;
+        }
+        @Override
+        public SpeedWithBearing getSpeedAndBearingRequiredToReach(GPSFix to) {
+            return null;
+        }
+        @Override
+        public boolean isValidityCached() {
+            return false;
+        }
+        
+        @Override
+        public boolean isValid() {
+            return false;
+        }
+        
+        @Override
+        public void invalidateCache() {
+        }
+        
+        @Override
+        public void cacheValidity(boolean isValid) {
         }
     }
     
@@ -278,34 +300,60 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         };
     }
 
+    /**
+     * When redefining this method, make sure to redefine {@link #invalidateValidityCaches(GPSFix)} accordingly.
+     * This implementation checks the immediate previous and next fix for <code>e</code>. Therefore, when
+     * adding a fix, only immediately adjacent fix's validity caches need to be invalidated.
+     */
     protected boolean isValid(PartialNavigableSetView<FixType> filteredView, FixType e) {
         boolean result;
         if (maxSpeedForSmoothening == null) {
             result = true;
         } else {
-            FixType previous = filteredView.lowerInternal(e);
-            FixType next = filteredView.higherInternal(e);
-            Speed speedToPrevious = Speed.NULL;
-            if (previous != null) {
-                speedToPrevious = previous.getPosition().getDistance(e.getPosition())
-                        .inTime(e.getTimePoint().asMillis() - previous.getTimePoint().asMillis());
+            if (e.isValidityCached()) {
+                result = e.isValid();
+            } else {
+                FixType previous = filteredView.lowerInternal(e);
+                FixType next = filteredView.higherInternal(e);
+                Speed speedToPrevious = Speed.NULL;
+                if (previous != null) {
+                    speedToPrevious = previous.getPosition().getDistance(e.getPosition())
+                            .inTime(e.getTimePoint().asMillis() - previous.getTimePoint().asMillis());
+                }
+                Speed speedToNext = Speed.NULL;
+                if (next != null) {
+                    speedToNext = e.getPosition().getDistance(next.getPosition())
+                            .inTime(next.getTimePoint().asMillis() - e.getTimePoint().asMillis());
+                }
+                result = ((previous == null || speedToPrevious.compareTo(maxSpeedForSmoothening) <= 0) || (next == null || speedToNext
+                        .compareTo(maxSpeedForSmoothening) <= 0));
+                e.cacheValidity(result);
             }
-            Speed speedToNext = Speed.NULL;
-            if (next != null) {
-                speedToNext = e.getPosition().getDistance(next.getPosition())
-                        .inTime(next.getTimePoint().asMillis() - e.getTimePoint().asMillis());
-            }
-            result = ((previous == null || speedToPrevious.compareTo(maxSpeedForSmoothening) <= 0)
-                    || (next == null || speedToNext.compareTo(maxSpeedForSmoothening) <= 0));
         }
         return result;
     }
 
+    /**
+     * After <code>gpsFix</code> was added to this track, invalidate the {@link WithValidityCache validity caches}
+     * of the fixes whose validity may be affected. If subclasses redefine {@link #isValid(PartialNavigableSetView, GPSFix)},
+     * they must make sure that this method is redefined accordingly.
+     */
+    protected synchronized void invalidateValidityCaches(FixType gpsFix) {
+        gpsFix.invalidateCache();
+        FixType lower = getInternalRawFixes().lower(gpsFix);
+        if (lower != null) {
+            lower.invalidateCache();
+        }
+        FixType higher = getInternalRawFixes().higher(gpsFix);
+        if (higher != null) {
+            higher.invalidateCache();
+        }
+    }
+
     @Override
     public boolean hasDirectionChange(TimePoint at, double minimumDegreeDifference) {
-        // TODO use boat-class specific time for a maneuver
-        TimePoint start = new MillisecondsTimePoint(at.asMillis()-5000);
-        TimePoint end = new MillisecondsTimePoint(at.asMillis()+5000);
+        TimePoint start = new MillisecondsTimePoint(at.asMillis()-getMillisecondsOverWhichToAverageSpeed());
+        TimePoint end = new MillisecondsTimePoint(at.asMillis()+getMillisecondsOverWhichToAverageSpeed());
         Bearing bearingAtStart = getEstimatedSpeed(start).getBearing();
         Bearing bearingAtEnd = getEstimatedSpeed(end).getBearing();
         // TODO also need to analyze the (smoothened) directions in between; example: two tacks within averaging interval

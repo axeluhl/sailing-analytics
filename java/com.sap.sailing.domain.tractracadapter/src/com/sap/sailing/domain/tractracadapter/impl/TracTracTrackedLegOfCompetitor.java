@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.tractracadapter.impl;
 
+import java.util.List;
+
 import com.sap.sailing.domain.base.Bearing;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Distance;
@@ -14,6 +16,7 @@ import com.sap.sailing.domain.base.impl.KilometersPerHourSpeedImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.NauticalMileDistance;
+import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.NoWindException;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
@@ -85,19 +88,19 @@ public class TracTracTrackedLegOfCompetitor implements TrackedLegOfCompetitor {
     }
 
     @Override
-    public int getNumberOfTacks(TimePoint timePoint) {
+    public Integer getNumberOfTacks(TimePoint timePoint) {
         // TODO Auto-generated method stub
         return 0;
     }
 
     @Override
-    public int getNumberOfJibes(TimePoint timePoint) {
+    public Integer getNumberOfJibes(TimePoint timePoint) {
         // TODO Auto-generated method stub
         return 0;
     }
 
     @Override
-    public int getNumberOfDirectionChanges(TimePoint timePoint) {
+    public Integer getNumberOfPenaltyCircles(TimePoint timePoint) {
         // TODO Auto-generated method stub
         return 0;
     }
@@ -154,6 +157,22 @@ public class TracTracTrackedLegOfCompetitor implements TrackedLegOfCompetitor {
     public Distance getWindwardDistanceToOverallLeader(TimePoint timePoint) throws NoWindException {
         // TODO Auto-generated method stub
         return null;
+    }
+
+    @Override
+    public List<Maneuver> getManeuvers(TimePoint timePoint) throws NoWindException {
+        List<Maneuver> result = null;
+        if (!hasStartedLeg(timePoint)) {
+            MarkPassing markPassingForLegStart = getTrackedRace().getMarkPassing(getCompetitor(), getLeg().getFrom());
+            MarkPassing legEnd = getTrackedRace().getMarkPassing(getCompetitor(), getLeg().getTo());
+            TimePoint end = timePoint;
+            if (legEnd != null && timePoint.compareTo(legEnd.getTimePoint()) > 0) {
+                // timePoint is after leg finish; take leg end and end time point
+                end = legEnd.getTimePoint();
+            }
+            result = getTrackedRace().getManeuvers(competitor, markPassingForLegStart.getTimePoint(), end);
+        }
+        return result;
     }
 
 }

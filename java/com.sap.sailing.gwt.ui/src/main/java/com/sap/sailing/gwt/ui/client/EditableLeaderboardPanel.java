@@ -78,11 +78,11 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
 
                                 @Override
                                 public void onSuccess(Void v) {
-                                    if (getLeaderboard().displayNames == null) {
-                                        getLeaderboard().displayNames = new HashMap<CompetitorDAO, String>();
+                                    if (getLeaderboard().competitorDisplayNames == null) {
+                                        getLeaderboard().competitorDisplayNames = new HashMap<CompetitorDAO, String>();
                                     }
                                     getCell().setViewData(row, null); // ensure that getValue() is called again
-                                    getLeaderboard().displayNames.put(row.competitor, value == null || value.trim().length() == 0 ? null : value.trim());
+                                    getLeaderboard().competitorDisplayNames.put(row.competitor, value == null || value.trim().length() == 0 ? null : value.trim());
                                     EditableLeaderboardPanel.this.getData().getList().set(rowIndex, row);
                                 }
                             });

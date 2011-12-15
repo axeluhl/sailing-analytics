@@ -33,6 +33,7 @@ import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.Maneuver;
+import com.sap.sailing.domain.tracking.Maneuver.Type;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.NoWindError;
 import com.sap.sailing.domain.tracking.NoWindException;
@@ -46,9 +47,12 @@ import com.sap.sailing.domain.tracking.WindSource;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.util.Util;
+import com.sap.sailing.util.Util.Pair;
 
 public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     private static final Logger logger = Logger.getLogger(TrackedRaceImpl.class.getName());
+
+    private static final double PENALTY_CIRCLE_DEGREES_THRESHOLD = 320;
 
     // TODO observe the race course; if it changes, update leg structures; consider fine-grained update events that tell what changed
     private final RaceDefinition race;
@@ -617,9 +621,17 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
      */
     @Override
     public Tack getTack(Competitor competitor, TimePoint timePoint) {
-        Bearing wind = getWind(getTrack(competitor).getEstimatedPosition(timePoint, /* extrapolate */ false), timePoint).getBearing();
-        Bearing boat = getTrack(competitor).getEstimatedSpeed(timePoint).getBearing();
-        Bearing difference = wind.getDifferenceTo(boat);
+        return getTack(getTrack(competitor).getEstimatedPosition(timePoint, /* extrapolate */false), timePoint,
+                getTrack(competitor).getEstimatedSpeed(timePoint).getBearing());
+    }
+    
+    /**
+     * Based on the wind direction at <code>timePoint</code> and at position <code>where</code>, compares the <code>boatBearing</code>
+     * to the wind's bearing at that time and place and determined the tack.
+     */
+    private Tack getTack(Position where, TimePoint timePoint, Bearing boatBearing) {
+        Bearing wind = getWind(where, timePoint).getBearing();
+        Bearing difference = wind.getDifferenceTo(boatBearing);
         return difference.getDegrees() <= 0 ? Tack.STARBOARD : Tack.PORT;
     }
 
@@ -635,102 +647,185 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     }
     
     @Override
-    public List<Maneuver> getManeuvers(Competitor competitor, TimePoint from, TimePoint to) {
+    public List<Maneuver> getManeuvers(Competitor competitor, TimePoint from, TimePoint to) throws NoWindException {
         return detectManeuvers(competitor, approximate(competitor, getRace().getBoatClass().getMaximumDistanceForCourseApproximation(), from, to));
     }
     
     /**
-     * Tries to detect a maneuver on the <code>competitor</code>'s track around a given time point. The time period is
-     * taken from the {@link BoatClass#getApproximateManeuverDurationInMilliseconds() boat class}. If no maneuver is
-     * detected, an empty list is returned. Maneuvers can only be expected to be detected if at least two fixes are
-     * provided in <code>approximatedFixesToAnalyze</code> that have their {@link GPSFixMoving#getSpeed() speed and
-     * bearing} propertly set.
+     * Tries to detect maneuvers on the <code>competitor</code>'s track based on a number of approximating fixes. The
+     * fixes contain bearing information, but this is not the bearing leading to the next approximation fix but the
+     * bearing the boat had at the time of the approximating fix which is taken from the original track.
+     * 
+     * The time period assumed for a maneuver duration is taken from the
+     * {@link BoatClass#getApproximateManeuverDurationInMilliseconds() boat class}. If no maneuver is detected, an empty
+     * list is returned. Maneuvers can only be expected to be detected if at least three fixes are provided in
+     * <code>approximatedFixesToAnalyze</code>. For the inner approximating fixes (all except the first and the last
+     * approximating fix), their course changes according to the approximated path (and not the underlying actual
+     * tracked fixes) are computed. Subsequent course changes to the same direction are then grouped. Those in closer
+     * timely distance than {@link #getApproximateManeuverDurationInMilliseconds()} (including single course changes
+     * that have no surrounding other course changes to group) are grouped into one {@link Maneuver}.
      * 
      * @return an empty list if no maneuver is detected for <code>competitor</code> between <code>from</code> and
      *         <code>to</code>, or else the list of maneuvers detected.
      */
-    private List<Maneuver> detectManeuvers(Competitor competitor, List<GPSFixMoving> approximatedFixesToAnalyze) {
+    private List<Maneuver> detectManeuvers(Competitor competitor, List<GPSFixMoving> approximatingFixesToAnalyze) throws NoWindException {
         List<Maneuver> result = new ArrayList<Maneuver>();
-        if (approximatedFixesToAnalyze.size() > 2) {
-            List<CourseChange> courseChangeSequenceInSameDirection = new ArrayList<CourseChange>();
-            Iterator<GPSFixMoving> iter = approximatedFixesToAnalyze.iterator();
-            GPSFixMoving current = iter.next();
-            while (iter.hasNext()) {
-                GPSFixMoving previous = current;
-                current = iter.next();
-                CourseChange courseChange = previous.getCourseChangeRequiredToReach(current.getSpeed());
+        if (approximatingFixesToAnalyze.size() > 2) {
+            List<Pair<GPSFixMoving, CourseChange>> courseChangeSequenceInSameDirection = new ArrayList<Pair<GPSFixMoving, CourseChange>>();
+            Iterator<GPSFixMoving> approximationPointsIter = approximatingFixesToAnalyze.iterator();
+            GPSFixMoving previous = approximationPointsIter.next();
+            GPSFixMoving current = approximationPointsIter.next();
+            // the bearings in these variables are between approximation points
+            SpeedWithBearing speedWithBearingOnApproximationFromPreviousToCurrent = previous.getSpeedAndBearingRequiredToReach(current);
+            SpeedWithBearing speedWithBearingOnApproximationAtBeginningOfUnidirectionalCourseChanges = speedWithBearingOnApproximationFromPreviousToCurrent;
+            SpeedWithBearing speedWithBearingOnApproximationFromCurrentToNext; // will certainly be assigned because iter's collection's size > 2
+            do {
+                GPSFixMoving next = approximationPointsIter.next();
+                speedWithBearingOnApproximationFromCurrentToNext = current.getSpeedAndBearingRequiredToReach(next);
+                // compute course change on "approximation track"
+                CourseChange courseChange = speedWithBearingOnApproximationFromPreviousToCurrent.getCourseChangeRequiredToReach(speedWithBearingOnApproximationFromCurrentToNext);
+                Pair<GPSFixMoving, CourseChange> courseChangeAtFix = new Pair<GPSFixMoving, CourseChange>(current, courseChange);
                 if (!courseChangeSequenceInSameDirection.isEmpty() &&
-                        Math.signum(courseChangeSequenceInSameDirection.get(0).getCourseChangeInDegrees()) !=
+                        Math.signum(courseChangeSequenceInSameDirection.get(0).getB().getCourseChangeInDegrees()) !=
                         Math.signum(courseChange.getCourseChangeInDegrees())) {
                     // course change in different direction; cluster the course changes in same direction so far, then start new list
-                    List<Maneuver> maneuvers = groupDirectionChangesIntoManeuvers(competitor, courseChangeSequenceInSameDirection);
+                    List<Maneuver> maneuvers = groupChangesInSameDirectionIntoManeuvers(competitor,
+                            speedWithBearingOnApproximationAtBeginningOfUnidirectionalCourseChanges, courseChangeSequenceInSameDirection);
                     result.addAll(maneuvers);
                     courseChangeSequenceInSameDirection.clear();
+                    speedWithBearingOnApproximationAtBeginningOfUnidirectionalCourseChanges = speedWithBearingOnApproximationFromPreviousToCurrent;
                 }
-                courseChangeSequenceInSameDirection.add(courseChange);
-            }
+                courseChangeSequenceInSameDirection.add(courseChangeAtFix);
+                previous = current;
+                current = next;
+                speedWithBearingOnApproximationFromPreviousToCurrent = speedWithBearingOnApproximationFromCurrentToNext;
+            } while (approximationPointsIter.hasNext());
             if (!courseChangeSequenceInSameDirection.isEmpty()) {
-                result.addAll(groupDirectionChangesIntoManeuvers(competitor, courseChangeSequenceInSameDirection));
+                result.addAll(groupChangesInSameDirectionIntoManeuvers(competitor, speedWithBearingOnApproximationAtBeginningOfUnidirectionalCourseChanges,
+                        courseChangeSequenceInSameDirection));
             }
         }
         return result;
     }
 
     /**
-     * Groups the {@link CourseChange} sequence into groups where the {@link CourseChange#getTimePoint() times} of the
-     * course changes are no further apart than {@link #getApproximateManeuverDurationInMilliseconds()} milliseconds.
-     * For those, a single {@link Maneuver} object is created and added to the resulting list. The maneuver sums up the
+     * Groups the {@link CourseChange} sequence into groups where the times of the fixes at which the course changes
+     * took place are no further apart than {@link #getApproximateManeuverDurationInMilliseconds()} milliseconds. For
+     * those, a single {@link Maneuver} object is created and added to the resulting list. The maneuver sums up the
      * direction changes of the individual {@link CourseChange} objects. This can result in direction changes of more
      * than 180 degrees in one direction which may, e.g., represent a penalty circle or a mark rounding maneuver. As the
      * maneuver's time point, the average time point of the course changes that went into the maneuver construction is
-     * used.
+     * used.<p>
      * 
+     * @param speedWithBearingOnApproximationAtBeginning
+     *            the speed/bearing before the first approximating fix passed in
+     *            <code>courseChangeSequenceInSameDirection</code>
      * @param courseChangeSequenceInSameDirection
      *            all expected to have equal {@link CourseChange#to()} values
      * 
      * @return a non-<code>null</code> list
      */
-    private List<Maneuver> groupDirectionChangesIntoManeuvers(Competitor competitor, List<CourseChange> courseChangeSequenceInSameDirection) {
+    private List<Maneuver> groupChangesInSameDirectionIntoManeuvers(Competitor competitor,
+            SpeedWithBearing speedWithBearingOnApproximationAtBeginning,
+            List<Pair<GPSFixMoving, CourseChange>> courseChangeSequenceInSameDirection) throws NoWindException {
         List<Maneuver> result = new ArrayList<Maneuver>();
-        List<CourseChange> group = new ArrayList<CourseChange>();
+        List<Pair<GPSFixMoving, CourseChange>> group = new ArrayList<Pair<GPSFixMoving, CourseChange>>();
         if (!courseChangeSequenceInSameDirection.isEmpty()) {
-            Iterator<CourseChange> iter = courseChangeSequenceInSameDirection.iterator();
+            SpeedWithBearing beforeGroupOnApproximation = speedWithBearingOnApproximationAtBeginning; // speed/bearing before group
+            SpeedWithBearing beforeCurrentCourseChangeOnApproximation = beforeGroupOnApproximation; // speed/bearing before current course change
+            Iterator<Pair<GPSFixMoving, CourseChange>> iter = courseChangeSequenceInSameDirection.iterator();
             double totalCourseChangeInDegrees = 0.0;
             long totalMilliseconds = 0l;
-            while (iter.hasNext()) {
-                CourseChange next = iter.next();
+            SpeedWithBearing afterCurrentCourseChange = null; // sure to be set because iter's collection is not empty
+            // and the first use requires group not to be empty which can only happen after the first group.add
+            do {
+                Pair<GPSFixMoving, CourseChange> currentFixAndCourseChange = iter.next();
                 if (!group.isEmpty()
-                        && next.getTimePoint().asMillis() - group.get(group.size() - 1).getTimePoint().asMillis() >
+                        && currentFixAndCourseChange.getA().getTimePoint().asMillis() - group.get(group.size() - 1).getA().getTimePoint().asMillis() >
                         getApproximateManeuverDurationInMilliseconds()) {
-                    // turn the group into a maneuver and add to result
-                    Maneuver maneuver = createManeuverFromGroupOfCourseChanges(competitor, group,
-                            totalCourseChangeInDegrees, totalMilliseconds);
+                    // if next is more then approximate maneuver duration later, turn the current group into a maneuver and add to result
+                    Maneuver maneuver = createManeuverFromGroupOfCourseChanges(competitor, beforeGroupOnApproximation,
+                            group, afterCurrentCourseChange, totalCourseChangeInDegrees, totalMilliseconds);
                     result.add(maneuver);
                     group.clear();
                     totalCourseChangeInDegrees = 0.0;
                     totalMilliseconds = 0l;
+                    beforeGroupOnApproximation = beforeCurrentCourseChangeOnApproximation;
                 }
-                totalMilliseconds += next.getTimePoint().asMillis();
-                totalCourseChangeInDegrees += next.getCourseChangeInDegrees();
-                group.add(next);
-            }
+                afterCurrentCourseChange = beforeCurrentCourseChangeOnApproximation.applyCourseChange(currentFixAndCourseChange.getB());
+                totalMilliseconds += currentFixAndCourseChange.getA().getTimePoint().asMillis();
+                totalCourseChangeInDegrees += currentFixAndCourseChange.getB().getCourseChangeInDegrees();
+                group.add(currentFixAndCourseChange);
+                beforeCurrentCourseChangeOnApproximation = afterCurrentCourseChange; // speed/bearing after course change
+            } while (iter.hasNext());
             if (!group.isEmpty()) {
-                result.add(createManeuverFromGroupOfCourseChanges(competitor, group,
-                            totalCourseChangeInDegrees, totalMilliseconds));
+                result.add(createManeuverFromGroupOfCourseChanges(competitor, beforeGroupOnApproximation,
+                            group, afterCurrentCourseChange, totalCourseChangeInDegrees, totalMilliseconds));
             }
         }
         return result;
     }
 
-    private Maneuver createManeuverFromGroupOfCourseChanges(Competitor competitor, List<CourseChange> group,
-            double totalCourseChangeInDegrees, long totalMilliseconds) {
+    private Maneuver createManeuverFromGroupOfCourseChanges(Competitor competitor,
+            SpeedWithBearing speedWithBearingOnApproximationAtBeginning, List<Pair<GPSFixMoving, CourseChange>> group,
+            SpeedWithBearing speedWithBearingOnApproximationAtEnd, double totalCourseChangeInDegrees, long totalMilliseconds)
+            throws NoWindException {
         TimePoint maneuverTimePoint = new MillisecondsTimePoint(totalMilliseconds/group.size());
         Position maneuverPosition = getTrack(competitor).getEstimatedPosition(maneuverTimePoint, /* extrapolate */ false);
-        SpeedWithBearing speedWithBearingBeforeManeuver = group.get(0).getSpeed();
-        SpeedWithBearing speedWithBearingAfterManeufer = group.get(group.size()-1).getSpeed();
-        Maneuver.Type maneuverType = null;
-        Maneuver maneuver = new ManeuverImpl(maneuverType, maneuverPosition, maneuverTimePoint, speedWithBearingBeforeManeuver,
-                speedWithBearingAfterManeufer, totalCourseChangeInDegrees);
+        MillisecondsTimePoint timePointBeforeManeuver = new MillisecondsTimePoint(group.get(0).getA().getTimePoint()
+                .asMillis() - getApproximateManeuverDurationInMilliseconds()/2);
+        MillisecondsTimePoint timePointAfterManeuver = new MillisecondsTimePoint(group.get(group.size() - 1).getA()
+                .getTimePoint().asMillis() + getApproximateManeuverDurationInMilliseconds()/2);
+        Tack tackBeforeManeuver = getTack(maneuverPosition, timePointBeforeManeuver, speedWithBearingOnApproximationAtBeginning.getBearing());
+        Tack tackAfterManeuver = getTack(maneuverPosition, timePointAfterManeuver, speedWithBearingOnApproximationAtEnd.getBearing());
+        // the TrackedLegOfCompetitor variables may be null, e.g., in case the time points are before or after the race
+        TrackedLegOfCompetitor legBeforeManeuver = getTrackedLeg(competitor, timePointBeforeManeuver);
+        TrackedLegOfCompetitor legAfterManeuver = getTrackedLeg(competitor, timePointAfterManeuver);
+        Maneuver.Type maneuverType;
+        if (totalCourseChangeInDegrees > PENALTY_CIRCLE_DEGREES_THRESHOLD) {
+            maneuverType = Type.PENALTY_CIRCLE;
+        } else if (legBeforeManeuver != legAfterManeuver &&
+                // a maneuver at the start line is not to be considered a MARK_PASSING maneuver; show a tack as a tack
+                legAfterManeuver != null && legAfterManeuver.getLeg().getFrom() != getRace().getCourse().getFirstWaypoint()) {
+            maneuverType = Type.MARK_PASSING;
+        } else {
+            if (tackBeforeManeuver != tackAfterManeuver) {
+                LegType legType = legBeforeManeuver!=null ?
+                        getTrackedLeg(legBeforeManeuver.getLeg()).getLegType(timePointBeforeManeuver) :
+                            legAfterManeuver!=null ? getTrackedLeg(legAfterManeuver.getLeg()).getLegType(timePointAfterManeuver) : null;
+                if (legType != null) {
+                    // tack or jibe
+                    switch (legType) {
+                    case UPWIND:
+                        maneuverType = Type.TACK;
+                        break;
+                    case DOWNWIND:
+                        maneuverType = Type.JIBE;
+                        break;
+                    default:
+                        maneuverType = Type.UNKNOWN;
+                        logger.fine("Unknown maneuver for " + competitor + " at " + maneuverTimePoint
+                                + (legBeforeManeuver != null ? " on reaching leg " + legBeforeManeuver.getLeg() : " before start"));
+                        break;
+                    }
+                } else {
+                    maneuverType = Type.UNKNOWN;
+                    logger.fine("Can't determine leg type because tracked legs for competitor "+competitor+
+                            " cannot be determined for time points "+timePointBeforeManeuver+" and "+
+                            timePointAfterManeuver);
+                }
+            } else {
+                // heading up or bearing away
+                Wind wind = getWind(maneuverPosition, maneuverTimePoint);
+                Bearing windBearing = wind.getBearing();
+                Bearing toWindBeforeManeuver = windBearing.getDifferenceTo(speedWithBearingOnApproximationAtBeginning.getBearing());
+                Bearing toWindAfterManeuver = windBearing.getDifferenceTo(speedWithBearingOnApproximationAtEnd.getBearing());
+                maneuverType = Math.abs(toWindBeforeManeuver.getDegrees()) < Math.abs(toWindAfterManeuver.getDegrees()) ?
+                        Type.HEAD_UP : Type.BEAR_AWAY;
+            }
+        }
+        Maneuver maneuver = new ManeuverImpl(maneuverType, tackAfterManeuver, maneuverPosition, maneuverTimePoint, speedWithBearingOnApproximationAtBeginning,
+                speedWithBearingOnApproximationAtEnd, totalCourseChangeInDegrees);
         return maneuver;
     }
 

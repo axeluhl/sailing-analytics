@@ -200,7 +200,7 @@ public interface Leaderboard extends Named {
     
     boolean hasCarriedPoints(Competitor competitor);
 
-    void removeRaceColumn(String name);
+    void removeRaceColumn(String columnName);
 
     SettableScoreCorrection getScoreCorrection();
 
@@ -227,4 +227,6 @@ public interface Leaderboard extends Named {
     boolean considerForDiscarding(RaceInLeaderboard raceInLeaderboard, TimePoint timePoint);
     
     void updateIsMedalRace(String raceName, boolean isMedalRace);
+    
+    public void setResultDiscardingRule(ThresholdBasedResultDiscardingRule discardingRule);
 }

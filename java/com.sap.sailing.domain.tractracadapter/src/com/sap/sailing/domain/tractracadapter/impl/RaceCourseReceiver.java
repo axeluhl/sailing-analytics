@@ -35,22 +35,16 @@ import difflib.PatchFailedException;
 public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteData, Race>  {
     private final static Logger logger = Logger.getLogger(RaceCourseReceiver.class.getName());
     
-    private final DynamicTrackedEvent trackedEvent;
-    private final com.tractrac.clientmodule.Event tractracEvent;
     private final long millisecondsOverWhichToAverageWind;
-    private final long millisecondsOverWhichToAverageSpeed;
     private final WindStore windStore;
     private final DynamicRaceDefinitionSet raceDefinitionSetToUpdate;
     
     public RaceCourseReceiver(DomainFactory domainFactory, DynamicTrackedEvent trackedEvent,
             com.tractrac.clientmodule.Event tractracEvent, WindStore windStore,
             DynamicRaceDefinitionSet raceDefinitionSetToUpdate,
-            long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed) {
-        super(domainFactory);
-        this.trackedEvent = trackedEvent;
-        this.tractracEvent = tractracEvent;
+            long millisecondsOverWhichToAverageWind) {
+        super(domainFactory, tractracEvent, trackedEvent);
         this.millisecondsOverWhichToAverageWind = millisecondsOverWhichToAverageWind;
-        this.millisecondsOverWhichToAverageSpeed = millisecondsOverWhichToAverageSpeed;
         this.windStore = windStore;
         this.raceDefinitionSetToUpdate = raceDefinitionSetToUpdate;
     }
@@ -63,7 +57,7 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
     @Override
     public Iterable<TypeController> getTypeControllersAndStart() {
         List<TypeController> result = new ArrayList<TypeController>();
-        for (final Race race : tractracEvent.getRaceList()) {
+        for (final Race race : getTracTracEvent().getRaceList()) {
             TypeController routeListener = RouteData.subscribe(race, new ICallbackData<Route, RouteData>() {
                 @Override
                 public void gotData(Route route, RouteData record, boolean isLiveData) {
@@ -87,7 +81,7 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
             // Therefore, don't create TrackedRace again because it already exists.
             try {
                 getDomainFactory().updateCourseWaypoints(course, event.getB().getPoints());
-                if (trackedEvent.getExistingTrackedRace(existingRaceDefinitionForRace) == null) {
+                if (getTrackedEvent().getExistingTrackedRace(existingRaceDefinitionForRace) == null) {
                     createTrackedRace(existingRaceDefinitionForRace);
                 }
             } catch (PatchFailedException e) {
@@ -99,20 +93,22 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
             // create race definition
             RaceDefinition raceDefinition = getDomainFactory().getOrCreateRaceDefinition(event.getC(), course);
             // add race only if boat class matches
-            if (raceDefinition.getBoatClass() == trackedEvent.getEvent().getBoatClass()) {
-                trackedEvent.getEvent().addRace(raceDefinition);
+            if (raceDefinition.getBoatClass() == getTrackedEvent().getEvent().getBoatClass()) {
+                getTrackedEvent().getEvent().addRace(raceDefinition);
                 createTrackedRace(raceDefinition);
             } else {
-                logger.warning("Not adding race "+raceDefinition+" to event "+trackedEvent.getEvent()+
+                logger.warning("Not adding race "+raceDefinition+" to event "+getTrackedEvent().getEvent()+
                         " because boat class "+raceDefinition.getBoatClass()+" doesn't match event's boat class "+
-                        trackedEvent.getEvent().getBoatClass());
+                        getTrackedEvent().getEvent().getBoatClass());
             }
         }
     }
 
     private void createTrackedRace(RaceDefinition race) {
-        trackedEvent.createTrackedRace(race,
-                windStore, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed, raceDefinitionSetToUpdate);
+        getTrackedEvent().createTrackedRace(race,
+                windStore, millisecondsOverWhichToAverageWind,
+                /* time over which to average speed: */ race.getBoatClass().getApproximateManeuverDurationInMilliseconds(),
+                raceDefinitionSetToUpdate);
     }
 
 }

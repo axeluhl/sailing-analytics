@@ -45,6 +45,11 @@ public class CompactGPSFixMovingImpl extends CompactGPSFixImpl implements GPSFix
         }
 
         @Override
+        public CourseChange getCourseChangeRequiredToReach(SpeedWithBearing targetSpeedWithBearing) {
+            return AbstractSpeedWithBearingImpl.getCourseChangeRequiredToReach(getSpeed(), targetSpeedWithBearing);
+        }
+
+        @Override
         public String toString() {
             return super.toString()+" to "+getBearing().getDegrees()+"°";
         }
@@ -85,11 +90,6 @@ public class CompactGPSFixMovingImpl extends CompactGPSFixImpl implements GPSFix
     @Override
     public SpeedWithBearing getSpeed() {
         return new CompactSpeedWithBearing();
-    }
-
-    @Override
-    public CourseChange getCourseChangeRequiredToReach(SpeedWithBearing targetSpeedWithBearing) {
-        return AbstractSpeedWithBearingImpl.getCourseChangeRequiredToReach(getSpeed(), targetSpeedWithBearing, getPosition(), getTimePoint());
     }
 
     @Override

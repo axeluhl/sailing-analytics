@@ -13,8 +13,11 @@ import com.sap.sailing.domain.base.Speed;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
+import com.sap.sailing.domain.base.impl.MeterDistance;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
+import com.sap.sailing.domain.tracking.Maneuver;
+import com.sap.sailing.domain.tracking.Maneuver.Type;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.NoWindException;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
@@ -56,15 +59,16 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
 
     @Override
     public long getTimeInMilliSeconds(TimePoint timePoint) {
-        long result = -1;
-        MarkPassing passedEndWaypoint = getTrackedRace().getMarkPassing(getCompetitor(), getTrackedLeg().getLeg().getTo());
-        if (passedEndWaypoint != null) {
-            MarkPassing passedStartWaypoint = getTrackedRace().getMarkPassing(getCompetitor(), getTrackedLeg().getLeg().getFrom());
-            if (passedStartWaypoint != null) {
+        long result = 0;
+        MarkPassing passedStartWaypoint = getTrackedRace().getMarkPassing(getCompetitor(),
+                getTrackedLeg().getLeg().getFrom());
+        if (passedStartWaypoint != null) {
+            MarkPassing passedEndWaypoint = getTrackedRace().getMarkPassing(getCompetitor(),
+                    getTrackedLeg().getLeg().getTo());
+            if (passedEndWaypoint != null) {
                 result = passedEndWaypoint.getTimePoint().asMillis() - passedStartWaypoint.getTimePoint().asMillis();
             } else {
-                throw new RuntimeException(""+getCompetitor()+" passed waypoint at end of leg "+
-                        getLeg()+" without having passed waypoint at beginning of leg");
+                result = timePoint.asMillis() - passedStartWaypoint.getTimePoint().asMillis();
             }
         }
         return result;
@@ -98,9 +102,10 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
 
     @Override
     public Speed getAverageSpeedOverGround(TimePoint timePoint) {
+        Speed result;
         MarkPassing legStart = getMarkPassingForLegStart();
         if (legStart == null) {
-            return null;
+            result = null;
         } else {
             TimePoint timePointToUse;
             if (hasFinishedLeg(timePoint)) {
@@ -112,13 +117,18 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
                     timePointToUse = lastFix.getTimePoint();
                 } else {
                     // No fix at all? Then we can't determine any speed 
-                    return null;
+                    timePointToUse = null;
                 }
             }
-            Distance d = getDistanceTraveled(timePointToUse);
-            long millis = timePointToUse.asMillis() - legStart.getTimePoint().asMillis();
-            return d.inTime(millis);
+            if (timePointToUse != null) {
+                Distance d = getDistanceTraveled(timePointToUse);
+                long millis = timePointToUse.asMillis() - legStart.getTimePoint().asMillis();
+                result = d.inTime(millis);
+            } else {
+                result = null;
+            }
         }
+        return result;
     }
 
     @Override
@@ -257,41 +267,95 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
         return result;
     }
 
-    @Override
-    public int getNumberOfTacks(TimePoint timePoint) {
-        // TODO implement getNumberOfTacks
-        // start looking at the track a bit after its beginning to skip the direction changes following the mark passing,
-        // then look for direction changes in smoothened track whose angle exceeds TrackedRaceImpl.MANEUVER_DEGREE_ANGLE_THRESHOLD.
-        // For this, enumerate all fixes in the leg and check, using an interval during which a maneuver for the current boat class
-        // would happen, if between two fixes that far apart a direction change can be observed.
-        // Keep in mind that we should keep iterations over tracks to a minimum. Perhaps, several key figures can be
-        // extracted during a single traversal.
-        return 0;
-    }
-
-    @Override
-    public int getNumberOfJibes(TimePoint timePoint) {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-
-    @Override
-    public int getNumberOfDirectionChanges(TimePoint timePoint) {
-        return getNumberOfTacks(timePoint)+getNumberOfJibes(timePoint); // FIXME non-sense; no jibes and tacks in the same leg!
-    }
     
+    @Override
+    public Integer getNumberOfTacks(TimePoint timePoint) throws NoWindException {
+        Integer result = null;
+        if (hasStartedLeg(timePoint)) {
+            List<Maneuver> maneuvers = getManeuvers(timePoint);
+            result = 0;
+            for (Maneuver maneuver : maneuvers) {
+                if (maneuver.getType() == Type.TACK) {
+                    result++;
+                }
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public List<Maneuver> getManeuvers(TimePoint timePoint) throws NoWindException {
+        MarkPassing legEnd = getMarkPassingForLegEnd();
+        TimePoint end = timePoint;
+        if (legEnd != null && timePoint.compareTo(legEnd.getTimePoint()) > 0) {
+            // timePoint is after leg finish; take leg end and end time point
+            end = legEnd.getTimePoint();
+        }
+        List<Maneuver> maneuvers = getTrackedRace().getManeuvers(getCompetitor(), getMarkPassingForLegStart().getTimePoint(), end);
+        return maneuvers;
+    }
+
+    @Override
+    public Integer getNumberOfJibes(TimePoint timePoint) throws NoWindException {
+        Integer result = null;
+        if (hasStartedLeg(timePoint)) {
+            List<Maneuver> maneuvers = getManeuvers(timePoint);
+            result = 0;
+            for (Maneuver maneuver : maneuvers) {
+                if (maneuver.getType() == Type.JIBE) {
+                    result++;
+                }
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public Integer getNumberOfPenaltyCircles(TimePoint timePoint) throws NoWindException {
+        Integer result = null;
+        if (hasStartedLeg(timePoint)) {
+            List<Maneuver> maneuvers = getManeuvers(timePoint);
+            result = 0;
+            for (Maneuver maneuver : maneuvers) {
+                if (maneuver.getType() == Type.PENALTY_CIRCLE) {
+                    result++;
+                }
+            }
+        }
+        return result;
+    }
+
     @Override
     public Distance getWindwardDistanceToOverallLeader(TimePoint timePoint) throws NoWindException {
         Competitor leader = getTrackedLeg().getRanks(timePoint).keySet().iterator().next();
         TrackedLegOfCompetitor leaderLeg = getTrackedRace().getCurrentLeg(leader, timePoint);
-        if (leaderLeg.getLeg() == getLeg()) {
-            // we're still in the same leg with leader; compute windward distance to leader
-            return getWindwardDistance(getTrackedRace().getTrack(leader).getEstimatedPosition(timePoint, /* extrapolate */ false),
-                    getTrackedRace().getTrack(getCompetitor()).getEstimatedPosition(timePoint, /* extrapolate */ false), timePoint);
-        } else {
-            return null;
-            // TODO special case leader has finished race already
+        Distance result = null;
+        Position leaderPosition = getTrackedRace().getTrack(leader).getEstimatedPosition(timePoint, /* extrapolate */ false);
+        Position currentPosition = getTrackedRace().getTrack(getCompetitor()).getEstimatedPosition(timePoint, /* extrapolate */ false);
+        if (leaderPosition != null && currentPosition != null) {
+            result = Distance.NULL;
+            boolean foundCompetitorsLeg = false;
+            for (Leg leg : getTrackedRace().getRace().getCourse().getLegs()) {
+                if (leg == getLeg()) {
+                    foundCompetitorsLeg = true;
+                }
+                if (foundCompetitorsLeg) {
+                    // if the leaderLeg is null, the leader has already arrived
+                    if (leaderLeg == null || leg != leaderLeg.getLeg()) {
+                        // add distance to next mark
+                        Position nextMarkPosition = getTrackedRace().getApproximatePosition(leg.getTo(), timePoint);
+                        Distance distanceToNextMark = getWindwardDistance(currentPosition, nextMarkPosition, timePoint);
+                        result = new MeterDistance(result.getMeters() + distanceToNextMark.getMeters());
+                    } else {
+                        // we're now in the same leg with leader; compute windward distance to leader
+                        result = new MeterDistance(result.getMeters()
+                                + getWindwardDistance(leaderPosition, currentPosition, timePoint).getMeters());
+                        break;
+                    }
+                }
+            }
         }
+        return result;
     }
 
     @Override

@@ -26,7 +26,7 @@ import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFix;
-import com.sap.sailing.domain.tracking.RaceHandle;
+import com.sap.sailing.domain.tracking.RacesHandle;
 import com.sap.sailing.domain.tracking.TrackedEvent;
 import com.sap.sailing.domain.tracking.TrackedEventRegistry;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -95,7 +95,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
     protected TracTracRaceTrackerImpl(DomainFactory domainFactory, URL paramURL, URI liveURI, URI storedURI,
             WindStore windStore, TrackedEventRegistry trackedEventRegistry) throws URISyntaxException,
             MalformedURLException, FileNotFoundException {
-        super(trackedEventRegistry);
+        super();
         urls = new Triple<URL, URI, URI>(paramURL, liveURI, storedURI);
         this.races = new HashSet<RaceDefinition>();
         this.windStore = windStore;
@@ -151,7 +151,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
                     logger.info("fetching paramURL to check for new ControlPoint positions...");
                     Event event = KeyValue.setup(paramURL);
                     for (ControlPoint controlPoint : event.getControlPointList()) {
-                        com.sap.sailing.domain.base.ControlPoint domainControlPoint = domainFactory.getControlPoint(controlPoint);
+                        com.sap.sailing.domain.base.ControlPoint domainControlPoint = domainFactory.getOrCreateControlPoint(controlPoint);
                         boolean first = true;
                         for (Buoy buoy : domainControlPoint.getBuoys()) {
                             for (RaceDefinition raceDefinition : raceDefinitions) {
@@ -184,7 +184,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
     }
 
     @Override
-    public RaceHandle getRaceHandle() {
+    public RacesHandle getRacesHandle() {
         return new RaceHandleImpl(domainFactory, tractracEvent, getTrackedEvent(), this);
     }
     
@@ -228,7 +228,6 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         }
         ioThread.join(3000); // wait no more than three seconds
         logger.info("Joined TracTrac IO thread for race(s) "+getRaces());
-        super.stop();
     }
 
     protected DataController getController() {

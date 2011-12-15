@@ -37,12 +37,12 @@ import com.sap.sailing.domain.swisstimingadapter.persistence.SwissTimingAdapterP
 import com.sap.sailing.domain.swisstimingadapter.persistence.impl.CollectionNames;
 import com.sap.sailing.domain.swisstimingadapter.persistence.impl.FieldNames;
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
-import com.sap.sailing.domain.tracking.RaceHandle;
+import com.sap.sailing.domain.tracking.RacesHandle;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.mongodb.MongoDBService;
 import com.sap.sailing.server.RacingEventService;
-import com.sap.sailing.server.RacingEventServiceImpl;
+import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sailing.util.Util;
 
 public class EndToEndListeningStoreAndFowardTest {
@@ -63,7 +63,7 @@ public class EndToEndListeningStoreAndFowardTest {
     private EmptyWindStore emptyWindStore;
     private RacingEventService racingEventService;
 
-    private List<RaceHandle> raceHandles;
+    private List<RacesHandle> raceHandles;
 
     @Before
     public void setUp() throws UnknownHostException, IOException, InterruptedException {
@@ -85,13 +85,13 @@ public class EndToEndListeningStoreAndFowardTest {
                 new BasicDBObject().append(FieldNames.LAST_MESSAGE_COUNT.name(), 0l),
                 /* upsert */true, /* multi */false);
         racingEventService = new RacingEventServiceImpl();
-        raceHandles = new ArrayList<RaceHandle>();
+        raceHandles = new ArrayList<RacesHandle>();
     }
 
     @After
     public void tearDown() throws InterruptedException, IOException {
         logger.entering(getClass().getName(), "tearDown");
-        for (RaceHandle raceHandle : raceHandles) {
+        for (RacesHandle raceHandle : raceHandles) {
             racingEventService.stopTracking(raceHandle.getEvent());
         }
         logger.info("Calling StoreAndForward.stop() in tearDown");
@@ -292,7 +292,7 @@ public class EndToEndListeningStoreAndFowardTest {
     private void setUpUsingScript(String[] racesToTrack, String... scriptNames) throws InterruptedException,
             UnknownHostException, IOException, ParseException {
         for (String raceToTrack : racesToTrack) {
-            RaceHandle raceHandle = racingEventService.addSwissTimingRace(raceToTrack, "localhost", CLIENT_PORT, /* canSendRequests */
+            RacesHandle raceHandle = racingEventService.addSwissTimingRace(raceToTrack, "localhost", CLIENT_PORT, /* canSendRequests */
                     false, emptyWindStore, -1);
             raceHandles.add(raceHandle);
             if (connector == null) {

@@ -43,8 +43,9 @@ import com.sap.sailing.gwt.ui.shared.Triple;
 import com.sap.sailing.gwt.ui.shared.WindDAO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDAO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDAO;
+import com.sap.sailing.server.api.EventNameAndRaceName;
 
-public class WindPanel extends FormPanel implements EventDisplayer, RaceSelectionProvider, WindShower {
+public class WindPanel extends FormPanel implements EventDisplayer, RaceSelectionProvider, WindShower, RaceSelectionChangeListener {
     private static final String WEB_WIND_SOURCE_NAME = "WEB";
     private final SailingServiceAsync sailingService;
     private final ErrorReporter errorReporter;
@@ -60,7 +61,8 @@ public class WindPanel extends FormPanel implements EventDisplayer, RaceSelectio
     private final TextColumn<WindDAO> dampenedSpeedInKnotsColumn;
     private final TextColumn<WindDAO> dampenedWindDirectionInDegColumn;
     private final Set<RaceSelectionChangeListener> raceSelectionChangeListeners;
-    private final RaceTreeView trackedRacesTree;
+    //private final RaceTreeView trackedRacesTree;
+    private final TrackedEventsComposite trackedEvnetsComposite;
     private final ListBox windSourceSelection;
     private final Map<String, ListDataProvider<WindDAO>> windLists;
     private final CheckBox showEstimatedWindBox;
@@ -84,7 +86,7 @@ public class WindPanel extends FormPanel implements EventDisplayer, RaceSelectio
             public void execute(final WindDAO wind) {
                 List<Triple<EventDAO, RegattaDAO, RaceDAO>> eventAndRaces = getSelectedEventAndRace();
                 final Triple<EventDAO, RegattaDAO, RaceDAO> eventAndRace = eventAndRaces.get(eventAndRaces.size()-1);
-                sailingService.removeWind(eventAndRace.getA().name, eventAndRace.getC().name, wind, new AsyncCallback<Void>() {
+                sailingService.removeWind(new EventNameAndRaceName(eventAndRace.getA().name, eventAndRace.getC().name), wind, new AsyncCallback<Void>() {
                     @Override
                     public void onSuccess(Void result) {
                         // remove row from underlying list:
@@ -130,16 +132,8 @@ public class WindPanel extends FormPanel implements EventDisplayer, RaceSelectio
             }
         };
         grid = new Grid(3, 2); // first row: event/race selection; second row: wind source selection; third row: wind display
-        trackedRacesTree = new RaceTreeView(stringConstants, /* multiselection */ false);
-        trackedRacesTree.addRaceSelectionChangeListener(new RaceSelectionChangeListener() {
-            @Override
-            public void onRaceSelectionChange(List<Triple<EventDAO, RegattaDAO, RaceDAO>> selectedRaces) {
-                clearOrShowWindBasedOnRaceSelection(selectedRaces);
-                fireRaceSelectionChanged(selectedRaces);
-            }
-
-        });
-        grid.setWidget(0, 0, trackedRacesTree);
+        trackedEvnetsComposite = new TrackedEventsComposite(sailingService, errorReporter, eventRefresher, stringConstants, false);
+        grid.setWidget(0, 0, trackedEvnetsComposite);
         Button btnRefresh = new Button(stringConstants.refresh());
         btnRefresh.addClickHandler(new ClickHandler() {
             @Override
@@ -158,7 +152,7 @@ public class WindPanel extends FormPanel implements EventDisplayer, RaceSelectio
         showEstimatedWindBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
             @Override
             public void onValueChange(ValueChangeEvent<Boolean> event) {
-                clearOrShowWindBasedOnRaceSelection(trackedRacesTree.getSelectedEventAndRace());
+                clearOrShowWindBasedOnRaceSelection(trackedEvnetsComposite.getSelectedEventAndRace());
             }
         });
         grid.setWidget(1, 0, windSourceSelectionPanel);
@@ -177,13 +171,13 @@ public class WindPanel extends FormPanel implements EventDisplayer, RaceSelectio
 
     @Override
     public void fillEvents(List<EventDAO> result) {
-        trackedRacesTree.fillEvents(result);
+        trackedEvnetsComposite.fillEvents(result);
     }
 
     @Override
     public void showWind(final EventDAO event, final RaceDAO race) {
         Date now = new Date();
-        sailingService.getWindInfo(event.name, race.name,
+        sailingService.getWindInfo(new EventNameAndRaceName(event.name, race.name),
                 // TODO what about the time interval?
                                   new Date(now.getTime()-60000 /* one minute */), new Date(/* toAsMilliseconds */),
                 showEstimatedWindBox.getValue(), new AsyncCallback<WindInfoForRaceDAO>() {
@@ -325,7 +319,8 @@ public class WindPanel extends FormPanel implements EventDisplayer, RaceSelectio
 
     @Override
     public List<Triple<EventDAO, RegattaDAO, RaceDAO>> getSelectedEventAndRace() {
-        return trackedRacesTree.getSelectedEventAndRace();
+//        return trackedRacesTree.getSelectedEventAndRace();
+        return trackedEvnetsComposite.getSelectedEventAndRace();
     }
 
     @Override
@@ -345,11 +340,11 @@ public class WindPanel extends FormPanel implements EventDisplayer, RaceSelectio
     }
 
     private void setWindSource() {
-        List<Triple<EventDAO, RegattaDAO, RaceDAO>> selection = trackedRacesTree.getSelectedEventAndRace();
+        List<Triple<EventDAO, RegattaDAO, RaceDAO>> selection = trackedEvnetsComposite.getSelectedEventAndRace();
         if (selection != null && !selection.isEmpty()) {
             final Triple<EventDAO, RegattaDAO, RaceDAO> selectedRace = selection.get(0);
             final String windSourceName = windSourceSelection.getItemText(windSourceSelection.getSelectedIndex());
-            sailingService.setWindSource(selectedRace.getA().name, selectedRace.getC().name,
+            sailingService.setWindSource(new EventNameAndRaceName(selectedRace.getA().name, selectedRace.getC().name),
                     windSourceName, new AsyncCallback<Void>() {
                         @Override
                         public void onFailure(Throwable caught) {
@@ -363,5 +358,11 @@ public class WindPanel extends FormPanel implements EventDisplayer, RaceSelectio
                         }
                     });
         }
+    }
+
+    @Override
+    public void onRaceSelectionChange(List<Triple<EventDAO, RegattaDAO, RaceDAO>> selectedRaces) {
+        clearOrShowWindBasedOnRaceSelection(selectedRaces);
+        fireRaceSelectionChanged(selectedRaces);
     }
 }

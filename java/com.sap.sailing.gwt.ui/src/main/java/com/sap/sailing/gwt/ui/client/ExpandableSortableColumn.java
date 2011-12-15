@@ -13,6 +13,7 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Header;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDAO;
+import com.sap.sailing.server.api.DetailType;
 
 /**
  * A column that is sortable and offers an expand/collapse button in its column header.
@@ -24,8 +25,8 @@ public abstract class ExpandableSortableColumn<C> extends SortableColumn<Leaderb
     private boolean enableExpansion;
     private boolean suppressSortingOnce;
     private final LeaderboardPanel leaderboardPanel;
-    private final Map<DetailColumnType, SortableColumn<LeaderboardRowDAO, ?>> detailColumnsMap;
-    private final List<DetailColumnType> detailSelection;
+    private final Map<DetailType, SortableColumn<LeaderboardRowDAO, ?>> detailColumnsMap;
+    private final List<DetailType> detailSelection;
     
     /**
      * Holds the child columns that represent expanded information for this column. If <code>null</code>,
@@ -44,7 +45,7 @@ public abstract class ExpandableSortableColumn<C> extends SortableColumn<Leaderb
 
     public ExpandableSortableColumn(LeaderboardPanel leaderboardPanel, boolean enableExpansion, Cell<C> cell,
             StringConstants stringConstants, String detailHeaderStyle, String detailColumnStyle,
-            List<DetailColumnType> detailSelection) {
+            List<DetailType> detailSelection) {
         super(cell);
         this.enableExpansion = enableExpansion;
         this.leaderboardPanel = leaderboardPanel;
@@ -56,7 +57,7 @@ public abstract class ExpandableSortableColumn<C> extends SortableColumn<Leaderb
      * By default, an expandable sortable column has no detail columns. Subclasses that want to offer detail columns must
      * override this method.
      */
-    protected Map<DetailColumnType, SortableColumn<LeaderboardRowDAO, ?>> getDetailColumnMap(
+    protected Map<DetailType, SortableColumn<LeaderboardRowDAO, ?>> getDetailColumnMap(
             LeaderboardPanel leaderboardPanel, StringConstants stringConstants, String detailHeaderStyle,
             String detailColumnStyle) {
         return Collections.emptyMap();
@@ -80,13 +81,15 @@ public abstract class ExpandableSortableColumn<C> extends SortableColumn<Leaderb
     
     /**
      * Fetches the cached {@link #directChildren}. If <code>null</code>, the child columns are determined by calling
-     * {@link #createExpansionColumns} and cached in {@link #directChildren}.
+     * {@link #createExpansionColumns} and cached in {@link #directChildren}. RaceName of Columns like
+     * ManeuverCountRaceColumn is not known at this point because it will be later set in the constructor of
+     * TextRaceColumn
      */
     protected Iterable<SortableColumn<LeaderboardRowDAO, ?>> getDirectChildren() {
         List<SortableColumn<LeaderboardRowDAO, ?>> result;
         if (isExpanded()) {
             result = new ArrayList<SortableColumn<LeaderboardRowDAO,?>>();
-            for (DetailColumnType detailColumnType : detailSelection) {
+            for (DetailType detailColumnType : detailSelection) {
                 SortableColumn<LeaderboardRowDAO, ?> selectedColumn = detailColumnsMap.get(detailColumnType);
                 if (selectedColumn != null) {
                     result.add(selectedColumn);
@@ -98,25 +101,14 @@ public abstract class ExpandableSortableColumn<C> extends SortableColumn<Leaderb
         return result;
     }
     
-    /**
-     * Subclasses that use this class with expansion enabled need to override this method to define what their expansion
-     * columns look like. They only need to create the direct child columns of this column. This default implementation
-     * will return an empty but valid list.
-     * 
-     * @return a valid but possibly empty list
-     */
-    protected List<SortableColumn<LeaderboardRowDAO, ?>> createExpansionColumns() {
-        return Collections.emptyList();
-    }
-
-    protected SortableColumn<LeaderboardRowDAO, ?> createExpansionColumn(DetailColumnType detailColumnType) {
+    protected SortableColumn<LeaderboardRowDAO, ?> createExpansionColumn(DetailType detailColumnType) {
         throw new RuntimeException("Detail column type "+detailColumnType+" not supported by column of type "+getClass().getName());
     }
     
     /**
      * @return the list of details supported by {@link #createExpansionColumn}
      */
-    protected List<DetailColumnType> getSupportedDetails() {
+    protected List<DetailType> getSupportedDetails() {
         return Collections.emptyList();
     }
 

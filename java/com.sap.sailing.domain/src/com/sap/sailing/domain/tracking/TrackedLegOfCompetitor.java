@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.tracking;
 
+import java.util.List;
+
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Distance;
 import com.sap.sailing.domain.base.Leg;
@@ -13,8 +15,10 @@ public interface TrackedLegOfCompetitor {
     Competitor getCompetitor();
 
     /**
-     * How long did it take the competitor to complete this {@link #getLeg() leg}? If the competitor hasn't finished the
-     * leg yet, -1 is returned.
+     * How much time did the {@link #getCompetitor competitor} spend in this {@link #getLeg() leg} at
+     * <code>timePoint</code>? If the competitor hasn't started the leg yet at <code>timePoint</code>, 0 is returned. If the
+     * competitor has finished the leg already at <code>timePoint</code>, the time it took the competitor to
+     * complete the leg is returned. 
      */
     long getTimeInMilliSeconds(TimePoint timePoint);
 
@@ -54,11 +58,29 @@ public interface TrackedLegOfCompetitor {
      */
     Speed getMaximumSpeedOverGround(TimePoint timePoint);
 
-    int getNumberOfTacks(TimePoint timePoint);
+    /**
+     * Infers the maneuvers of the competitor up to <code>timePoint</code> on this leg. If the competitor hasn't started
+     * the leg at the time point specified, <code>null</code> is returned. Otherwise, the list will be valid. If the
+     * time point is after the competitor has finished this leg, all of the competitor's maneuvers during this leg will
+     * be reported in chronological order. The list may be empty if no maneuvers happened between the point in time when
+     * the competitor started the leg and <code>timePoint</code>.
+     */
+    List<Maneuver> getManeuvers(TimePoint timePoint) throws NoWindException;
+    
+    /**
+     * @return <code>null</code> if the competitor hasn't started this leg yet
+     */
+    Integer getNumberOfTacks(TimePoint timePoint) throws NoWindException;
 
-    int getNumberOfJibes(TimePoint timePoint);
+    /**
+     * @return <code>null</code> if the competitor hasn't started this leg yet
+     */
+    Integer getNumberOfJibes(TimePoint timePoint) throws NoWindException;
 
-    int getNumberOfDirectionChanges(TimePoint timePoint);
+    /**
+     * @return <code>null</code> if the competitor hasn't started this leg yet
+     */
+    Integer getNumberOfPenaltyCircles(TimePoint timePoint) throws NoWindException;
 
     /**
      * Computes the competitor's rank within this leg. If the competitor has already finished this leg at

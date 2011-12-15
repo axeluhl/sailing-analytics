@@ -28,13 +28,8 @@ import com.tractrac.clientmodule.data.StartStopTimesData;
  * 
  */
 public class RaceStartedAndFinishedReceiver extends AbstractReceiverWithQueue<Race, StartStopTimesData, Boolean> {
-    private final DynamicTrackedEvent trackedEvent;
-    private final com.tractrac.clientmodule.Event tractracEvent;
-    
     public RaceStartedAndFinishedReceiver(DynamicTrackedEvent trackedEvent, com.tractrac.clientmodule.Event tractracEvent, DomainFactory domainFactory) {
-        super(domainFactory);
-        this.trackedEvent = trackedEvent;
-        this.tractracEvent = tractracEvent;
+        super(domainFactory, tractracEvent, trackedEvent);
     }
 
     /**
@@ -45,7 +40,7 @@ public class RaceStartedAndFinishedReceiver extends AbstractReceiverWithQueue<Ra
     @Override
     public Iterable<TypeController> getTypeControllersAndStart() {
         List<TypeController> result = new ArrayList<TypeController>();
-        for (final Race race : tractracEvent.getRaceList()) {
+        for (final Race race : getTracTracEvent().getRaceList()) {
             TypeController startStopListener = StartStopTimesData.subscribeRace(race, new ICallbackData<Race, StartStopTimesData>() {
                 @Override
                 public void gotData(Race race, StartStopTimesData record, boolean isLiveData) {
@@ -61,11 +56,12 @@ public class RaceStartedAndFinishedReceiver extends AbstractReceiverWithQueue<Ra
     @Override
     protected void handleEvent(Triple<Race, StartStopTimesData, Boolean> event) {
         System.out.print("StartStop");
-        RaceDefinition raceDefinition = getDomainFactory().getAndWaitForRaceDefinition(event.getA());
-        DynamicTrackedRace race = trackedEvent.getTrackedRace(raceDefinition);
-        MillisecondsTimePoint start = new MillisecondsTimePoint(event.getB().getStartTime());
-        if (race.getStart() == null || !race.getStart().equals(start)) {
-            race.setStartTimeReceived(start);
+        DynamicTrackedRace trackedRace = getTrackedRace(event.getA());
+        if (trackedRace != null) {
+            MillisecondsTimePoint start = new MillisecondsTimePoint(event.getB().getStartTime());
+            if (trackedRace.getStart() == null || !trackedRace.getStart().equals(start)) {
+                trackedRace.setStartTimeReceived(start);
+            }
         }
     }
 

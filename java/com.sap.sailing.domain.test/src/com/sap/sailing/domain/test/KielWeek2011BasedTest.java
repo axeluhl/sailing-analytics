@@ -71,7 +71,7 @@ public abstract class KielWeek2011BasedTest extends AbstractTracTracLiveTest {
     
     @Before
     public void setUp() throws MalformedURLException, IOException, InterruptedException, URISyntaxException {
-        domainFactory = new DomainFactoryImpl();
+        domainFactory = new DomainFactoryImpl(new com.sap.sailing.domain.base.impl.DomainFactoryImpl());
         // keep superclass implementation from automatically setting up for a Weymouth event and force subclasses
         // to select a race
     }
@@ -107,6 +107,7 @@ public abstract class KielWeek2011BasedTest extends AbstractTracTracLiveTest {
                 getSemaphor().wait();
             }
         }
+        Thread.sleep(1000); // storedDataEnd() isn't necessarily synchronized with the controllers/listeners pumping data; wait a bit to receive it all
         for (Receiver receiver : receivers) {
             receiver.stopAfterProcessingQueuedEvents();
             receiver.join();
@@ -126,7 +127,7 @@ public abstract class KielWeek2011BasedTest extends AbstractTracTracLiveTest {
                 tractracTunnel ? new URI("tcp://"+tractracTunnelHost+":4412") : new URI("tcp://germanmaster.traclive.dk:4400"),
                         tractracTunnel ? new URI("tcp://"+tractracTunnelHost+":4413") : new URI("tcp://germanmaster.traclive.dk:4401"));
         if (domainFactory == null) {
-            domainFactory = new DomainFactoryImpl();
+            domainFactory = new DomainFactoryImpl(new com.sap.sailing.domain.base.impl.DomainFactoryImpl());
         }
         domainEvent = domainFactory.getOrCreateEvent(getEvent());
         trackedEvent = new DynamicTrackedEventImpl(domainEvent);

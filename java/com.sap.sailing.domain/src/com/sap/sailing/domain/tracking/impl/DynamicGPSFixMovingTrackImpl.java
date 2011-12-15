@@ -5,7 +5,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.NavigableSet;
 
-import com.sap.sailing.domain.base.CourseChange;
 import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.Speed;
 import com.sap.sailing.domain.base.SpeedWithBearing;
@@ -13,6 +12,7 @@ import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.base.impl.KilometersPerHourSpeedImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
+import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 
 public class DynamicGPSFixMovingTrackImpl<ItemType> extends DynamicTrackImpl<ItemType, GPSFixMoving> {
@@ -123,8 +123,23 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends DynamicTrackImpl<Ite
             return null;
         }
         @Override
-        public CourseChange getCourseChangeRequiredToReach(SpeedWithBearing targetSpeedWithBearing) {
+        public SpeedWithBearing getSpeedAndBearingRequiredToReach(GPSFix to) {
             return null;
+        }
+        @Override
+        public boolean isValidityCached() {
+            return false;
+        }
+        @Override
+        public boolean isValid() {
+            return false;
+        }
+        @Override
+        public void invalidateCache() {
+            
+        }
+        @Override
+        public void cacheValidity(boolean isValid) {
         }
     }
     
@@ -156,22 +171,31 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends DynamicTrackImpl<Ite
      */
     @Override
     protected boolean isValid(PartialNavigableSetView<GPSFixMoving> filteredView, GPSFixMoving e) {
-        GPSFixMoving previous = filteredView.lowerInternal(e);
-        GPSFixMoving next = filteredView.higherInternal(e);
-        Speed speedToPrevious = Speed.NULL;
-        if (previous != null) {
-            speedToPrevious = previous.getPosition().getDistance(e.getPosition())
-                    .inTime(e.getTimePoint().asMillis() - previous.getTimePoint().asMillis());
+        boolean result;
+        if (e.isValidityCached()) {
+            result = e.isValid();
+        } else {
+            GPSFixMoving previous = filteredView.lowerInternal(e);
+            GPSFixMoving next = filteredView.higherInternal(e);
+            Speed speedToPrevious = Speed.NULL;
+            if (previous != null) {
+                speedToPrevious = previous.getPosition().getDistance(e.getPosition())
+                        .inTime(e.getTimePoint().asMillis() - previous.getTimePoint().asMillis());
+            }
+            Speed speedToNext = Speed.NULL;
+            if (next != null) {
+                speedToNext = e.getPosition().getDistance(next.getPosition())
+                        .inTime(next.getTimePoint().asMillis() - e.getTimePoint().asMillis());
+            }
+            result = (previous == null || speedToPrevious.getMetersPerSecond() <= MAX_SPEED_FACTOR_COMPARED_TO_MEASURED_SPEED_FOR_FILTERING
+                    * e.getSpeed().getMetersPerSecond())
+                    && (next == null || speedToNext.getMetersPerSecond() <= MAX_SPEED_FACTOR_COMPARED_TO_MEASURED_SPEED_FOR_FILTERING
+                            * e.getSpeed().getMetersPerSecond())
+                    && (maxSpeedForSmoothening == null
+                            || (previous == null || speedToPrevious.compareTo(maxSpeedForSmoothening) <= 0) || (next == null || speedToNext
+                            .compareTo(maxSpeedForSmoothening) <= 0));
+            e.cacheValidity(result);
         }
-        Speed speedToNext = Speed.NULL;
-        if (next != null) {
-            speedToNext = e.getPosition().getDistance(next.getPosition())
-                    .inTime(next.getTimePoint().asMillis() - e.getTimePoint().asMillis());
-        }
-        return (previous == null || speedToPrevious.getMetersPerSecond() <= MAX_SPEED_FACTOR_COMPARED_TO_MEASURED_SPEED_FOR_FILTERING*e.getSpeed().getMetersPerSecond()) &&
-                (next == null || speedToNext.getMetersPerSecond() <= MAX_SPEED_FACTOR_COMPARED_TO_MEASURED_SPEED_FOR_FILTERING*e.getSpeed().getMetersPerSecond()) &&
-                (maxSpeedForSmoothening == null ||
-                 (previous == null || speedToPrevious.compareTo(maxSpeedForSmoothening) <= 0) ||
-                        (next == null || speedToNext.compareTo(maxSpeedForSmoothening) <= 0)); 
+        return result;
     }
 }

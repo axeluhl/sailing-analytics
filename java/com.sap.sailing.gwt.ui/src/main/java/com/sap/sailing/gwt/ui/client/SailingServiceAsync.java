@@ -8,8 +8,9 @@ import java.util.Map;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
-import com.sap.sailing.domain.tracking.WindSource;
 import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
+import com.sap.sailing.gwt.ui.shared.CompetitorInRaceDAO;
+import com.sap.sailing.gwt.ui.shared.CompetitorsAndTimePointsDAO;
 import com.sap.sailing.gwt.ui.shared.EventDAO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDAO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDAO;
@@ -18,12 +19,17 @@ import com.sap.sailing.gwt.ui.shared.ManeuverDAO;
 import com.sap.sailing.gwt.ui.shared.MarkDAO;
 import com.sap.sailing.gwt.ui.shared.Pair;
 import com.sap.sailing.gwt.ui.shared.QuickRankDAO;
+import com.sap.sailing.gwt.ui.shared.RaceInLeaderboardDAO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDAO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDAO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDAO;
 import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDAO;
 import com.sap.sailing.gwt.ui.shared.WindDAO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDAO;
+import com.sap.sailing.server.api.DetailType;
+import com.sap.sailing.server.api.EventAndRaceIdentifier;
+import com.sap.sailing.server.api.EventIdentifier;
+import com.sap.sailing.server.api.RaceIdentifier;
 
 /**
  * The async counterpart of {@link SailingService}
@@ -50,36 +56,27 @@ public interface SailingServiceAsync {
     void storeTracTracConfiguration(String name, String jsonURL, String liveDataURI, String storedDataURI,
             AsyncCallback<Void> callback);
 
-    void stopTrackingEvent(String eventName, AsyncCallback<Void> callback);
+    void stopTrackingEvent(EventIdentifier eventIdentifier, AsyncCallback<Void> callback);
 
-    void stopTrackingRace(String eventName, String raceName, AsyncCallback<Void> asyncCallback);
-
-    /**
-     * Obtains wind data for an event/race based on the wind data as recorded in the currently
-     * selected wind track for the race, with raw and dampened numbers, for the time stamps as
-     * provided by the recording. The interval for which to retrieve wind data must be specified
-     * using <code>from</code> and <code>to</code>.
-     * 
-     * @param includeTrackBasedWindEstimation if <code>true</code>, for each time point for which an
-     * {@link WindSource#EXPEDITION} estimation exists for the event/race requested, a wind estimation
-     * based on the GPS tracks will be performed and included in the result. In this case, the
-     * result will contain a so far non-existing wind source name "ESTIMATION".
-     */
-    void getWindInfo(String eventName, String raceName, Date from, Date to,
-            boolean includeTrackBasedWindEstimation, AsyncCallback<WindInfoForRaceDAO> callback);
-
-    /**
-     * Obtains wind information starting at <code>from</code> and stepping in intervals as specified by
-     * <code>millisecondsStepWidth</code>, delivering <code>numberOfFixes</code> fixes. Those don't have to
-     * correspond exactly with when wind measurements were taken; instead, the selected race's selected wind
-     * source is interpolated to estimate the wind for the time/position requested.
-     */
-    void getWindInfo(String eventName, String raceName, Date from, long millisecondsStepWidth, int numberOfFixes,
-            double latDeg, double lngDeg, boolean includeTrackBasedWindEstimation, AsyncCallback<WindInfoForRaceDAO> callback);
-
-    void setWind(String eventName, String raceName, WindDAO wind, AsyncCallback<Void> callback);
+    void stopTrackingRace(EventAndRaceIdentifier raceIdentifier, AsyncCallback<Void> asyncCallback);
     
-    void removeWind(String eventName, String raceName, WindDAO wind, AsyncCallback<Void> callback);
+    /**
+     * Untracks the race and removes it from the event. It will also be removed in all leaerboards
+     * @param eventAndRaceidentifier The identifier for the event name, and the race name to remove
+     * @throws Exception
+     */
+    void removeAndUntrackedRace(EventAndRaceIdentifier eventAndRaceidentifier, AsyncCallback<Void> callback);
+
+    void getWindInfo(RaceIdentifier raceIdentifier, Date from, Date to, boolean includeTrackBasedWindEstimation,
+            AsyncCallback<WindInfoForRaceDAO> callback);
+
+    void getWindInfo(RaceIdentifier raceIdentifier, Date from, long millisecondsStepWidth, int numberOfFixes,
+            double latDeg, double lngDeg, boolean includeTrackBasedWindEstimation,
+            AsyncCallback<WindInfoForRaceDAO> callback);
+
+    void setWind(RaceIdentifier raceIdentifier, WindDAO wind, AsyncCallback<Void> callback);
+    
+    void removeWind(RaceIdentifier raceIdentifier, WindDAO windDAO, AsyncCallback<Void> callback);
 
     /**
      * @param from
@@ -96,34 +93,57 @@ public interface SailingServiceAsync {
      * @return a map where for each competitor participating in the race the list of GPS fixes in increasing
      *         chronological order is provided. The last one is the last position at or before <code>date</code>.
      */
-    void getBoatPositions(String eventName, String raceName,
+    void getBoatPositions(RaceIdentifier raceIdentifier,
             Map<CompetitorDAO, Date> from, Map<CompetitorDAO, Date> to,
             boolean extrapolate, AsyncCallback<Map<CompetitorDAO, List<GPSFixDAO>>> callback);
 
-    void getMarkPositions(String eventName, String raceName, Date date, AsyncCallback<List<MarkDAO>> asyncCallback);
+    void getMarkPositions(RaceIdentifier raceIdentifier, Date date, AsyncCallback<List<MarkDAO>> asyncCallback);
 
-    void getQuickRanks(String eventName, String raceName, Date date, AsyncCallback<List<QuickRankDAO>> callback);
+    void getQuickRanks(RaceIdentifier raceIdentifier, Date date, AsyncCallback<List<QuickRankDAO>> callback);
 
-    void setWindSource(String eventName, String raceName, String windSourceName, AsyncCallback<Void> callback);
+    void setWindSource(RaceIdentifier raceIdentifier, String windSourceName, AsyncCallback<Void> callback);
 
     /**
+     * Returns a {@link LeaderboardDAO} will information about all races, their points and competitor display names
+     * filled in. The column details are filled for the races whose named are provided in
+     * <code>namesOfRacesForWhichToLoadLegDetails</code>.
+     * 
      * @param namesOfRacesForWhichToLoadLegDetails
      *            if <code>null</code>, no {@link LeaderboardEntryDAO#legDetails leg details} will be present in the
      *            result ({@link LeaderboardEntryDAO#legDetails} will be <code>null</code> for all
      *            {@link LeaderboardEntryDAO} objects contained). Otherwise, the {@link LeaderboardEntryDAO#legDetails}
      *            list will contain one entry per leg of the race {@link Course} for those race columns whose
-     *            {@link RaceInLeaderboard#getName() name} is contained in <code>namesOfRacesForWhichToLoadLegDetails</code>.
-     *            For all other columns, {@link LeaderboardEntryDAO#legDetails} is <code>null</code>.
+     *            {@link RaceInLeaderboard#getName() name} is contained in
+     *            <code>namesOfRacesForWhichToLoadLegDetails</code>. For all other columns,
+     *            {@link LeaderboardEntryDAO#legDetails} is <code>null</code>.
      */
     void getLeaderboardByName(String leaderboardName, Date date,
             Collection<String> namesOfRacesForWhichToLoadLegDetails, AsyncCallback<LeaderboardDAO> callback);
 
     void getLeaderboardNames(AsyncCallback<List<String>> callback);
 
-    void createLeaderboard(String leaderboardName, int[] discardThresholds, AsyncCallback<Void> asyncCallback);
+    /**
+     * Creates a {@link LeaderboardDAO} for each leaderboard known by the server and fills in the name, race master data
+     * in the form of {@link RaceInLeaderboardDAO}s, whether or not there are {@link LeaderboardDAO#hasCarriedPoints carried points}
+     * and the {@link LeaderboardDAO#discardThresholds discarding thresholds} for the leaderboard. No data about the points
+     * is filled into the result object. No data about the competitor display names is filled in; instead, an empty map
+     * is used for {@link LeaderboardDAO#competitorDisplayNames}.
+     */
+    void getLeaderboards(AsyncCallback<List<LeaderboardDAO>> callback);
+    
+    void updateLeaderboard(String leaderboardName, String newLeaderboardName, int[] newDiscardingThreasholds,
+            AsyncCallback<Void> callback);
+
+    /**
+     * Creates a leaderboard with the name specified by <code>leaderboardName</code> and the initial discarding thesholds
+     * as specified by <code>discardThresholds</code>. The leaderboard returned has the leaderboard name and the master
+     * data about the race columns filled in, but no details about the race points. As such, the result structure
+     * equals that of the result of {@link #getLeaderboards(AsyncCallback)}.
+     */
+    void createLeaderboard(String leaderboardName, int[] discardThresholds, AsyncCallback<LeaderboardDAO> asyncCallback);
 
     void removeLeaderboard(String leaderboardName, AsyncCallback<Void> asyncCallback);
-
+    
     void renameLeaderboard(String leaderboardName, String newLeaderboardName, AsyncCallback<Void> asyncCallback);
 
     void addColumnToLeaderboard(String columnName, String leaderboardName, boolean medalRace,
@@ -133,8 +153,11 @@ public interface SailingServiceAsync {
 
     void removeLeaderboardColumn(String leaderboardName, String columnName, AsyncCallback<Void> callback);
 
-    void connectTrackedRaceToLeaderboardColumn(String selectedLeaderboardName, String selectedRaceColumnName,
-            String name, String name2, AsyncCallback<Void> asyncCallback);
+    /**
+     * @param asyncCallback receives <code>true</code> if connecting was successful
+     */
+    void connectTrackedRaceToLeaderboardColumn(String leaderboardName, String raceColumnName,
+            RaceIdentifier raceIdentifier, AsyncCallback<Boolean> asyncCallback);
 
     void getEventAndRaceNameOfTrackedRaceConnectedToLeaderboardColumn(String leaderboardName, String raceColumnName,
             AsyncCallback<Pair<String, String>> callback);
@@ -149,9 +172,6 @@ public interface SailingServiceAsync {
 
     void updateLeaderboardScoreCorrection(String leaderboardName, String competitorName, String raceName,
             Integer correctedScore, Date date, AsyncCallback<Pair<Integer, Integer>> asyncCallback);
-
-    void getLeaderboardEntry(String leaderboardName, String competitorName, String raceName, Date date,
-            AsyncCallback<LeaderboardEntryDAO> callback);
 
     void updateCompetitorDisplayNameInLeaderboard(String leaderboardName, String competitorName, String displayName,
             AsyncCallback<Void> callback);
@@ -176,6 +196,7 @@ public interface SailingServiceAsync {
             boolean trackWind, boolean correctWindByDeclination, AsyncCallback<Void> asyncCallback);
 
     void sendSwissTimingDummyRace(String racMessage, String stlMesssage, String ccgMessage, AsyncCallback<Void> callback);
+    
     /**
      * Requests the computation of the {@link LeaderboardDAO} for <code>leaderboardName</code> <code>times</code> times.
      * The date used for the {@link #getLeaderboardByName(String, Date, Collection, AsyncCallback)} call is iterated
@@ -186,16 +207,34 @@ public interface SailingServiceAsync {
     void getCountryCodes(AsyncCallback<String[]> callback);
 
     /**
-     * Approximates pieces of GPS tracks using a Douglas-Peucker algorithm and returns the approximation as a
-     * sequence of {@link GPSFixDAO}s for each competitors for which approximation was requested.
+     * This method computes the in {@code dataType} selected data for the in {@code race} specified race
+     * for all competitors returned by {@link CompetitorsAndTimePointsDAO#getCompetitor()} at the timepoints 
+     * returned by {@link CompetitorsAndTimePointsDAO#getTimePoints()}.
+     * The returned {@link CompetitorInRaceDAO} contains the values for the timepoints as well as the values for the markpassings.
+     * 
+     * @see DetailType
+     * 
+     * @throws NullPointerException Thrown if any of the parameters is null.
+     * 
+     * @param race 
+     * @param competitorsAndTimePointsDAO An object that contains the competitors and timepoints.
+     * @param dataType The type of data that should be computed (eg {@link DetailType#WINDWARD_DISTANCE_TO_OVERALL_LEADER}).
+     * @param callback An AsyncCallback that returns the computed data as a parameter in the {@link AsyncCallback#onSuccess(Object)} method.
      */
-    void getDouglasPoints(String eventName, String raceName, Map<CompetitorDAO, Date> from,
-            Map<CompetitorDAO, Date> to, double meters, AsyncCallback<Map<CompetitorDAO, List<GPSFixDAO>>> callback);
+    void getCompetitorRaceData(RaceIdentifier race,
+			CompetitorsAndTimePointsDAO competitorsAndTimePointsDAO,
+			DetailType dataType, AsyncCallback<CompetitorInRaceDAO> callback);
+    
+    void getDouglasPoints(RaceIdentifier raceIdentifier, Map<CompetitorDAO, Date> from, Map<CompetitorDAO, Date> to,
+            double meters, AsyncCallback<Map<CompetitorDAO, List<GPSFixDAO>>> callback);
+
+    void getManeuvers(RaceIdentifier raceIdentifier, Map<CompetitorDAO, Date> from, Map<CompetitorDAO, Date> to,
+            AsyncCallback<Map<CompetitorDAO, List<ManeuverDAO>>> callback);
 
     /**
-     * Approximates pieces of GPS tracks using a Douglas-Peucker algorithm and returns the approximation as a
-     * sequence of {@link GPSFixDAO}s for each competitors for which approximation was requested.
+     * For the race identified by <code>race</code> computes <code>steps</code> equidistant time points starting at a
+     * few seconds before the race starts, up to the end of the race. The result describes the race's competitors, their
+     * mark passing times, the race start time and the list of time points according to the above specification.
      */
-    void getManeuvers(String eventName, String raceName, Map<CompetitorDAO, Date> from,
-            Map<CompetitorDAO, Date> to, AsyncCallback<Map<CompetitorDAO, List<ManeuverDAO>>> callback);
+    void getCompetitorsAndTimePoints(RaceIdentifier race, int steps, AsyncCallback<CompetitorsAndTimePointsDAO> callback);
 }

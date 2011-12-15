@@ -314,13 +314,17 @@ public class MockedTrackedRace implements DynamicTrackedRace {
                     @Override
                     public void addRace(RaceDefinition race) {
                         // TODO Auto-generated method stub
-                        
                     }
 
                     @Override
                     public void removeRace(RaceDefinition raceDefinition) {
                         // TODO Auto-generated method stub
-                        
+                    }
+
+                    @Override
+                    public RaceDefinition getRaceByName(String raceName) {
+                        // TODO Auto-generated method stub
+                        return null;
                     }
                 };
             }
@@ -344,7 +348,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
             }
 
             @Override
-            public void removedTrackedRace(TrackedRace trackedRace) {
+            public void removeTrackedRace(TrackedRace trackedRace) {
                 // TODO Auto-generated method stub
                 
             }

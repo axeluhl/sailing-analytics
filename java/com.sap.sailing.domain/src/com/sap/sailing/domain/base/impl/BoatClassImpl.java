@@ -21,7 +21,7 @@ public class BoatClassImpl extends NamedImpl implements BoatClass {
 
     public BoatClassImpl(String name) {
         super(name);
-        approximateManeuverDurationInMilliseconds = 10000;
+        approximateManeuverDurationInMilliseconds = 8000; // as discussed with Dennis Gehrlein
     }
 
     @Override

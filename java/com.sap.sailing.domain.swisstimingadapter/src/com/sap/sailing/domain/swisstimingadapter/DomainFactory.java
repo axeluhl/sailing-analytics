@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.swisstimingadapter;
 
+import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
@@ -15,13 +16,13 @@ import com.sap.sailing.domain.tracking.MarkPassing;
 import difflib.PatchFailedException;
 
 public interface DomainFactory {
-    final static DomainFactory INSTANCE = new DomainFactoryImpl();
+    final static DomainFactory INSTANCE = new DomainFactoryImpl(com.sap.sailing.domain.base.DomainFactory.INSTANCE);
     
     Event getOrCreateEvent(String raceID);
 
     Nationality getOrCreateNationality(String nationalityName);
 
-    Competitor getOrCreateCompetitor(com.sap.sailing.domain.swisstimingadapter.Competitor competitor);
+    Competitor getOrCreateCompetitor(com.sap.sailing.domain.swisstimingadapter.Competitor competitor, BoatClass boatClass);
 
     RaceDefinition createRaceDefinition(Event event, Race race, StartList startList, com.sap.sailing.domain.swisstimingadapter.Course course);
 
@@ -33,7 +34,7 @@ public interface DomainFactory {
 
     void updateCourseWaypoints(Course courseToUpdate, Iterable<Mark> marks) throws PatchFailedException;
     
-    MarkPassing createMarkPassing(String raceID, String boatID, Waypoint waypoint, TimePoint timePoint);
+    MarkPassing createMarkPassing(TimePoint timePoint, Waypoint waypoint, Competitor competitor);
 
     void removeRace(String raceID);
 }

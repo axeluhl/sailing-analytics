@@ -31,7 +31,7 @@ public class MultipleClassesInEventTest {
     
     @Before
     public void setUp() {
-        domainFactory = new DomainFactoryImpl();
+        domainFactory = new DomainFactoryImpl(new com.sap.sailing.domain.base.impl.DomainFactoryImpl());
     }
     
     @Test

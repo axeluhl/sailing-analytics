@@ -34,7 +34,7 @@ public class DummyTrackedEventRegistry implements TrackedEventRegistry {
     }
 
     @Override
-    public void remove(Event event) {
+    public void removeTrackedEvent(Event event) {
         eventTrackingCache.remove(event);
     }
 }
