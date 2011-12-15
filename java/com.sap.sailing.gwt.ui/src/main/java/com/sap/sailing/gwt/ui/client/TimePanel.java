@@ -1,6 +1,11 @@
 package com.sap.sailing.gwt.ui.client;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.TimeZone;
 
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
@@ -8,11 +13,14 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.FocusEvent;
 import com.google.gwt.event.dom.client.FocusHandler;
+import com.google.gwt.event.dom.client.KeyPressEvent;
+import com.google.gwt.event.dom.client.KeyPressHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DoubleBox;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.ui.commons.client.SliderWidget;
 import com.sap.ui.core.client.event.Event;
@@ -26,7 +34,9 @@ public class TimePanel extends FormPanel implements TimeListener, PlayStateListe
     private final DoubleBox delayBox;
     private boolean delayBoxHasFocus;
     private final Label timeLabel;
-    
+    private final TextBox textBoxTimeInput;
+    private SimpleDateFormat dateFormatTextInput;
+
     public TimePanel(StringConstants stringConstants, Timer timer) {
         this.timer = timer;
         timer.addTimeListener(this);
@@ -95,6 +105,26 @@ public class TimePanel extends FormPanel implements TimeListener, PlayStateListe
         hp.add(new Label(stringConstants.time()));
         timeLabel = new Label();
         hp.add(timeLabel);
+        dateFormatTextInput = new SimpleDateFormat("MM/dd/yyyy-HH:mm:ss");
+        textBoxTimeInput = new TextBox();
+        textBoxTimeInput.addKeyPressHandler(new KeyPressHandler() {
+            @Override
+            public void onKeyPress(KeyPressEvent event) {
+                String text = textBoxTimeInput.getText();
+                try {
+                    Date date = dateFormatTextInput.parse(text);
+                    Calendar c = new GregorianCalendar(TimeZone.getTimeZone("Europe/Berlin"));
+                    c.setTimeInMillis(date.getTime());
+                    TimePanel.this.timer.setTime(date.getTime());
+                    TimePanel.this.timeChanged(date);
+                } catch (ParseException e) {
+                    // TODO remove and use error reporter
+                    e.printStackTrace();
+                }
+            }
+        });
+        hp.add(textBoxTimeInput);
+        textBoxTimeInput.setText("MM/dd/yyyy-HH:mm:ss");
         slider = new SliderWidget();
         slider.setTotalUnits(10);
         EventListener sliderListener = new EventListener() {
@@ -108,7 +138,7 @@ public class TimePanel extends FormPanel implements TimeListener, PlayStateListe
         vp.add(slider);
         setWidget(vp);
     }
-    
+
     @Override
     public void timeChanged(Date time) {
         long t = time.getTime();
@@ -120,7 +150,7 @@ public class TimePanel extends FormPanel implements TimeListener, PlayStateListe
         slider.setTitle(new Date((long) slider.getValue()).toString());
         timeLabel.setText(time.toString());
         if (!delayBoxHasFocus) {
-            delayBox.setValue((double) (timer.getDelay()/1000));
+            delayBox.setValue((double) (timer.getDelay() / 1000));
         }
     }
 
@@ -149,5 +179,5 @@ public class TimePanel extends FormPanel implements TimeListener, PlayStateListe
     public void playStateChanged(boolean isPlaying) {
         playPauseButton.setText(isPlaying ? "||" : ">");
     }
-    
+
 }
