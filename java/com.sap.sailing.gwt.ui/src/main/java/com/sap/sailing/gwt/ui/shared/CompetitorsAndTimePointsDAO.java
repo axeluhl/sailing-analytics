@@ -8,7 +8,7 @@ public class CompetitorsAndTimePointsDAO implements IsSerializable {
     private static final long MILLISECONDS_BEFORE_RACE_TO_INCLUDE = 20000;
     
     private CompetitorDAO[] competitors;
-    private HashMap<String, long[]> markPassings;
+    private HashMap<String, Pair<String, Long>[]> markPassings;
     private long startTime;
     private long timePointOfNewestEvent;
     private int steps;
@@ -16,7 +16,7 @@ public class CompetitorsAndTimePointsDAO implements IsSerializable {
     CompetitorsAndTimePointsDAO() {}
     
     public CompetitorsAndTimePointsDAO(int steps) {
-        markPassings = new HashMap<String, long[]>();
+        markPassings = new HashMap<String, Pair<String, Long>[]>();
         this.steps = steps;
     }
 
@@ -46,11 +46,11 @@ public class CompetitorsAndTimePointsDAO implements IsSerializable {
         this.startTime = startTime;
     }
 
-    public long[] getMarkPassings(CompetitorDAO competitor) {
+    public Pair<String, Long>[] getMarkPassings(CompetitorDAO competitor) {
         return markPassings.get(competitor.id);
     }
 
-    public void setMarkPassings(CompetitorDAO competitor, long[] markPassings) {
+    public void setMarkPassings(CompetitorDAO competitor, Pair<String, Long>[] markPassings) {
         this.markPassings.put(competitor.id, markPassings);
     }
 

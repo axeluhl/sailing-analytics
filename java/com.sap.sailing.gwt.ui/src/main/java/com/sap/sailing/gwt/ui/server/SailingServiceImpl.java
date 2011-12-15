@@ -1201,7 +1201,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 competitorData.setRaceData(competitor, entries);
                 entries = new Double[competitorAndTimePointsDAO.getMarkPassings(competitor).length];
                 for (int i = 0; i < competitorAndTimePointsDAO.getMarkPassings(competitor).length; i++){
-                    MillisecondsTimePoint time = new MillisecondsTimePoint(competitorAndTimePointsDAO.getMarkPassings(competitor)[i]);
+                    MillisecondsTimePoint time = new MillisecondsTimePoint(competitorAndTimePointsDAO.getMarkPassings(competitor)[i].getB());
                     TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(selectedCompetitor.get(c), time);
                     if (trackedLeg != null){
                         SpeedWithBearing speedOverGround = trackedLeg.getSpeedOverGround(time);
@@ -1226,7 +1226,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 CompetitorDAO competitor = competitorAndTimePointsDAO.getCompetitor()[c];
                 entries = new Double[competitorAndTimePointsDAO.getMarkPassings(competitor).length];
                 for (int i = 0; i < competitorAndTimePointsDAO.getMarkPassings(competitor).length; i++){
-                    MillisecondsTimePoint time = new MillisecondsTimePoint(competitorAndTimePointsDAO.getMarkPassings(competitor)[i]);
+                    MillisecondsTimePoint time = new MillisecondsTimePoint(competitorAndTimePointsDAO.getMarkPassings(competitor)[i].getB());
                     TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(selectedCompetitor.get(c), time);
                     if (trackedLeg != null){
                         Speed velocityMadeGood = trackedLeg.getVelocityMadeGood(time);
@@ -1260,7 +1260,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 CompetitorDAO competitor = competitorAndTimePointsDAO.getCompetitor()[c];
                 entries = new Double[competitorAndTimePointsDAO.getMarkPassings(competitor).length];
                 for (int i = 0; i < competitorAndTimePointsDAO.getMarkPassings(competitor).length; i++){
-                    MillisecondsTimePoint time = new MillisecondsTimePoint(competitorAndTimePointsDAO.getMarkPassings(competitor)[i]);
+                    MillisecondsTimePoint time = new MillisecondsTimePoint(competitorAndTimePointsDAO.getMarkPassings(competitor)[i].getB());
                     TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(selectedCompetitor.get(c), time);
                     if (trackedLeg != null){
                         Distance distanceTraveled = trackedLeg.getDistanceTraveled(time);
@@ -1291,7 +1291,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 CompetitorDAO competitor = competitorAndTimePointsDAO.getCompetitor()[c];
                 entries = new Double[competitorAndTimePointsDAO.getMarkPassings(competitor).length];
                 for (int i = 0; i < competitorAndTimePointsDAO.getMarkPassings(competitor).length; i++){
-                    MillisecondsTimePoint time = new MillisecondsTimePoint(competitorAndTimePointsDAO.getMarkPassings(competitor)[i]);
+                    MillisecondsTimePoint time = new MillisecondsTimePoint(competitorAndTimePointsDAO.getMarkPassings(competitor)[i].getB());
                     TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(selectedCompetitor.get(c), time);
                     if (trackedLeg != null){
                         entries[i] = trackedLeg.getGapToLeaderInSeconds(time);
@@ -1315,7 +1315,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 CompetitorDAO competitor = competitorAndTimePointsDAO.getCompetitor()[c];
                 entries = new Double[competitorAndTimePointsDAO.getMarkPassings(competitor).length];
                 for (int i = 0; i < competitorAndTimePointsDAO.getMarkPassings(competitor).length; i++){
-                    MillisecondsTimePoint time = new MillisecondsTimePoint(competitorAndTimePointsDAO.getMarkPassings(competitor)[i]);
+                    MillisecondsTimePoint time = new MillisecondsTimePoint(competitorAndTimePointsDAO.getMarkPassings(competitor)[i].getB());
                     TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(selectedCompetitor.get(c), time);
                     if (trackedLeg != null){
                         Distance distanceToLeader = trackedLeg.getWindwardDistanceToOverallLeader(time);
@@ -1480,20 +1480,22 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         return (Event) eventIdentifier.getEvent(this);
     }
 
-    @Override
+    @SuppressWarnings("unchecked")
+	@Override
     public CompetitorsAndTimePointsDAO getCompetitorsAndTimePoints(RaceIdentifier race, int steps) {
         CompetitorsAndTimePointsDAO competitorAndTimePointsDAO = new CompetitorsAndTimePointsDAO(steps);
         TrackedRace trackedRace = getTrackedRace(race);
         List<CompetitorDAO> competitors = new ArrayList<CompetitorDAO>();
         for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
             NavigableSet<MarkPassing> markPassings = trackedRace.getMarkPassings(competitor);
-            long[] markPassingTimes = new long[markPassings.size()];
-            int i=0;
+            List<Pair<String, Long>> markPassingTimes = new ArrayList<Pair<String,Long>>();
             for (MarkPassing markPassing : markPassings){
-                markPassingTimes[i++] = markPassing.getTimePoint().asMillis();
+            	markPassingTimes.add(new Pair<String, Long>(markPassing.getWaypoint().getName(), markPassing.getTimePoint().asMillis()));
             }
             competitors.add(getCompetitorDAO(competitor));
-            competitorAndTimePointsDAO.setMarkPassings(getCompetitorDAO(competitor), markPassingTimes);
+            //The following line will create a "Unchecked type safety warning".
+            //There is no way to solve this, so it is okay to suppress this warning.
+            competitorAndTimePointsDAO.setMarkPassings(getCompetitorDAO(competitor), markPassingTimes.toArray(new Pair[0]));
         }
         competitorAndTimePointsDAO.setCompetitor(competitors.toArray(new CompetitorDAO[0]));
         competitorAndTimePointsDAO.setStartTime(trackedRace.getStart().asMillis());
