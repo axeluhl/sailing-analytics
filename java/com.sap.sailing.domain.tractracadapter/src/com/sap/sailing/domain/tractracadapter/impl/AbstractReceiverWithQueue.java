@@ -1,6 +1,8 @@
 package com.sap.sailing.domain.tractracadapter.impl;
 
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
@@ -15,17 +17,27 @@ import com.tractrac.clientmodule.Race;
 
 /**
  * Some event receiver that can be executed in a thread because it's a runnable, and
- * manages a queue of events received. The events are expected to be triplets.
+ * manages a queue of events received. The events are expected to be triplets.<p>
+ * 
+ * The receiver can be stopped in different ways. 
  * 
  * @author Axel Uhl (d043530)
  */
 public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Receiver {
+    private static Logger logger = Logger.getLogger(AbstractReceiverWithQueue.class.getName());
+    
     private final LinkedBlockingQueue<Triple<A, B, C>> queue;
     private final DomainFactory domainFactory;
     private final com.tractrac.clientmodule.Event tractracEvent;
     private final DynamicTrackedEvent trackedEvent;
     private Thread thread;
 
+    /**
+     * used by {@link #stopAfterNotReceivingEventsForSomeTime(long)} and {@link #run()} to check if an event was received
+     * during the timeout period.
+     */
+    private boolean receivedEventSinceDuringTimeout;
+    
     public AbstractReceiverWithQueue(DomainFactory domainFactory, Event tractracEvent, DynamicTrackedEvent trackedEvent) {
         super();
         this.tractracEvent = tractracEvent;
@@ -61,6 +73,21 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
     public void stopAfterProcessingQueuedEvents() {
         queue.add(new Triple<A, B, C>(null, null, null));
     }
+    
+    @Override
+    public void stopAfterNotReceivingEventsForSomeTime(final long timeoutInMilliseconds) {
+        receivedEventSinceDuringTimeout = false;
+        TracTracRaceTrackerImpl.scheduler.schedule(new Runnable() {
+            public void run() {
+                if (!receivedEventSinceDuringTimeout) {
+                    logger.info("Stopping receiver "+this+" after not having received an event during "+timeoutInMilliseconds+"ms");
+                    stopAfterProcessingQueuedEvents();
+                } else {
+                    TracTracRaceTrackerImpl.scheduler.schedule(this, timeoutInMilliseconds, TimeUnit.MILLISECONDS);
+                }
+            }
+        }, timeoutInMilliseconds, TimeUnit.MILLISECONDS);
+    }
 
     protected void enqueue(Triple<A, B, C> event) {
         queue.add(event);
@@ -77,6 +104,7 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
             try {
                 event = queue.take();
                 if (!isStopEvent(event)) {
+                    receivedEventSinceDuringTimeout = true;
                     handleEvent(event);
                 }
             } catch (InterruptedException e) {
