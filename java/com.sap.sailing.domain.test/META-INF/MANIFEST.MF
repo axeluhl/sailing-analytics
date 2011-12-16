@@ -13,4 +13,5 @@ Export-Package: com.sap.sailing.domain.test,
  com.sap.sailing.domain.test.mock
 Import-Package: org.json.simple,
  org.json.simple.parser,
+ junit.framework;version="4.8.1",
  org.junit;version="4.8.1"

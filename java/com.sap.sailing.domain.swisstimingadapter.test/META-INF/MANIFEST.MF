@@ -15,4 +15,5 @@ Require-Bundle: com.sap.sailing.domain.swisstimingadapter.persistence,
 Bundle-ClassPath: resources/,
  .
 Import-Package: com.sap.sailing.server,
+ junit.framework;version="4.8.1",
  org.junit;version="4.8.1"
