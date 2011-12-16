@@ -48,6 +48,30 @@ public class ManeuverAnalysisTest505 extends KielWeek2011BasedTest {
     }
     
     /**
+     * Tests the 505 Race 2 for competitor "Findel" at a time where the maneuver detection test is likely to fail
+     */
+    @Test
+    public void testDouglasPeuckerForFindelCriticalDetection() throws ParseException, NoWindException {
+        Competitor competitor = getCompetitorByName("Findel");
+        assertNotNull(competitor);
+        Date fromDate = dateFormat.parse("06/23/2011-15:28:00");
+        Date toDate = dateFormat.parse("06/23/2011-15:29:50");
+        assertNotNull(fromDate);
+        assertNotNull(toDate);
+        List<Maneuver> maneuvers = getTrackedRace().getManeuvers(competitor, new MillisecondsTimePoint(fromDate),
+                new MillisecondsTimePoint(toDate));
+        maneuversInvalid = new ArrayList<Maneuver>(maneuvers);
+        printManeuvers(maneuvers);
+
+        assertManeuver(maneuvers, Maneuver.Type.TACK,
+                new MillisecondsTimePoint(dateFormat.parse("06/23/2011-15:28:24")), TACK_TOLERANCE);
+
+        List<Maneuver.Type> maneuverTypesFound = new ArrayList<Maneuver.Type>();
+        maneuverTypesFound.add(Maneuver.Type.TACK);
+        assertAllManeuversOfTypesDetected(maneuverTypesFound, maneuversInvalid);
+    }
+    
+    /**
      * Test for 505 Race 2 for competitor "Findel"
      */
     @Test
@@ -187,14 +211,17 @@ public class ManeuverAnalysisTest505 extends KielWeek2011BasedTest {
         System.out.println("\nTACKS:");
         for (Maneuver maneuver : tackManeuvers) {
             System.out.println(dateFormat.format(maneuver.getTimePoint().asDate()));
+            System.out.println(maneuver.getTimePoint().asMillis());
         }
         System.out.println("\nJIBES:");
         for (Maneuver maneuver : jibeManeuvers) {
             System.out.println(dateFormat.format(maneuver.getTimePoint().asDate()));
+            System.out.println(maneuver.getTimePoint().asMillis());
         }
         System.out.println("\nPENALTY CIRCLES:");
         for (Maneuver maneuver : penaltyManeuvers) {
             System.out.println(dateFormat.format(maneuver.getTimePoint().asDate()));
+            System.out.println(maneuver.getTimePoint().asMillis());
         }
     }
 }
