@@ -22,9 +22,9 @@ import com.sap.sailing.server.api.RaceIdentifier;
 public class CompareCompetitorsChartDialog extends DialogBox {
     private Anchor closeAnchor;
 
-    public CompareCompetitorsChartDialog(SailingServiceAsync sailingService, List<CompetitorDAO> competitors, RaceIdentifier[] races, StringConstants stringConstants){
+    public CompareCompetitorsChartDialog(SailingServiceAsync sailingService, List<CompetitorDAO> competitors, RaceIdentifier[] races, StringConstants stringConstants, ErrorReporter errorReporter){
         super(false);
-        final ChartsPanel ccp = new ChartsPanel(sailingService, competitors, races, stringConstants, (int) (Window.getClientWidth()-320), (int) (Window.getClientHeight()-90));
+        final ChartsPanel ccp = new ChartsPanel(sailingService, competitors, races, stringConstants, (int) (Window.getClientWidth()-350), (int) (Window.getClientHeight()-170),errorReporter);
         ccp.addDataLoadedHandler(new DataLoadedHandler() {
             
             @Override

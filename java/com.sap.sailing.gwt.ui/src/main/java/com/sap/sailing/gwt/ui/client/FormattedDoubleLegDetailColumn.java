@@ -5,10 +5,12 @@ import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTable;
+import com.sap.sailing.gwt.ui.shared.LeaderboardDAO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDAO;
 
-public class FormattedDoubleLegDetailColumn extends LegDetailColumn<Double, String> implements HasStringValue {
+public class FormattedDoubleLegDetailColumn extends LegDetailColumn<Double, String> implements HasStringAndDoubleValue {
     private final NumberFormat formatter;
+    private final MinMaxRenderer minMaxRenderer;
 
     public FormattedDoubleLegDetailColumn(String title, String unit,
             com.sap.sailing.gwt.ui.client.LegDetailColumn.LegDetailField<Double> field, int decimals,
@@ -22,6 +24,16 @@ public class FormattedDoubleLegDetailColumn extends LegDetailColumn<Double, Stri
             patternBuilder.append('0');
         }
         formatter = NumberFormat.getFormat(patternBuilder.toString());
+        this.minMaxRenderer = new MinMaxRenderer(this, getComparator());
+    }
+
+    protected MinMaxRenderer getMinMaxRenderer() {
+        return minMaxRenderer;
+    }
+
+    @Override
+    protected void updateMinMax(LeaderboardDAO leaderboard) {
+        getMinMaxRenderer().updateMinMax(leaderboard.rows.values());
     }
 
     protected NumberFormat getFormatter() {
@@ -42,10 +54,15 @@ public class FormattedDoubleLegDetailColumn extends LegDetailColumn<Double, Stri
         }
         return result;
     }
+    
+    @Override
+    public Double getDoubleValue(LeaderboardRowDAO row) {
+        return getFieldValue(row);
+    }
 
     @Override
     public void render(Context context, LeaderboardRowDAO row, SafeHtmlBuilder sb) {
-        getMinMaxRenderer().render(context, row, sb);
+        getMinMaxRenderer().render(context, row, getTitle(row), sb);
     }
 
     /**

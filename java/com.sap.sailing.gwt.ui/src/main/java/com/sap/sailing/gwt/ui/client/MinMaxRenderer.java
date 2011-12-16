@@ -7,8 +7,15 @@ import com.google.gwt.cell.client.Cell.Context;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDAO;
 
+/**
+ * Renders the values and the percentage bar of the {@link LegDetailColumn} and {@link ManeuverCountRaceColumn}.
+ * It is used to update the minimum and maximum values of the columns, and to render the column content.
+ * 
+ * @author Fabian Schwarz-Fritz
+ * 
+ */
 public class MinMaxRenderer {
-    private HasStringValue valueProvider;
+    private HasStringAndDoubleValue valueProvider;
     private Comparator<LeaderboardRowDAO> comparator;
     private Double minimumValue;
     private Double maximumValue;
@@ -22,17 +29,19 @@ public class MinMaxRenderer {
      * @param comparator
      *            The comparator to update the minimum and maximum values.
      */
-    public MinMaxRenderer(HasStringValue valueProvider, Comparator<LeaderboardRowDAO> comparator) {
+    public MinMaxRenderer(HasStringAndDoubleValue valueProvider, Comparator<LeaderboardRowDAO> comparator) {
         this.valueProvider = valueProvider;
         this.comparator = comparator;
     }
 
     /**
      * Renders the value of a {@link LeaderboardRowDAO}.
+     * 
+     * @param title
+     *            tool tip title to display; if <code>null</code>, no tool tip will be rendered
      */
-    public void render(Context context, LeaderboardRowDAO row, SafeHtmlBuilder sb) {
+    public void render(Context context, LeaderboardRowDAO row, String title, SafeHtmlBuilder sb) {
         int percent = getPercentage(row);
-        String title = null;
         String stringValue = valueProvider.getStringValueToRender(row);
         stringValue = stringValue == null ? "" : stringValue;
         sb.appendHtmlConstant(
@@ -51,7 +60,7 @@ public class MinMaxRenderer {
      */
     private int getPercentage(LeaderboardRowDAO row) {
         int percentage = 0;
-        Double value = getDoubleFromString(valueProvider.getStringValueToRender(row));
+        Double value = valueProvider.getDoubleValue(row);
         if (value != null) {
             if (value != null && getMinimumDouble() != null && getMaximumDouble() != null) {
                 int minBarLength = Math.abs(getMinimumDouble()) < 0.01 ? 0 : 10;
@@ -73,25 +82,6 @@ public class MinMaxRenderer {
     }
 
     /**
-     * Parses a <code>String</code> into a <code>Double</code>.
-     * 
-     * @param string
-     *            The <code>String</code> to be parsed.
-     * @return The <code>Double</code> result of the given <code>String</code>.
-     */
-    private Double getDoubleFromString(String string) {
-        Double result = null;
-        if (string != null) {
-            try {
-                result = Double.parseDouble(string);
-            } catch (NumberFormatException numberFormatException) {
-
-            }
-        }
-        return result;
-    }
-
-    /**
      * Updates the {@link MinMaxRenderer#minimumValue} and {@link MinMaxRenderer#maximumValue}.
      * 
      * @param values
@@ -101,20 +91,20 @@ public class MinMaxRenderer {
         LeaderboardRowDAO minimumRow = null;
         LeaderboardRowDAO maximumRow = null;
         for (LeaderboardRowDAO row : values) {
-            if (getDoubleFromString(valueProvider.getStringValueToRender(row)) != null
+            if (valueProvider.getDoubleValue(row) != null
                     && (minimumRow == null || comparator.compare(minimumRow, row) > 0)) {
                 minimumRow = row;
             }
-            if (getDoubleFromString(valueProvider.getStringValueToRender(row)) != null
+            if (valueProvider.getDoubleValue(row) != null
                     && (maximumRow == null || comparator.compare(maximumRow, row) < 0)) {
                 maximumRow = row;
             }
         }
         if (minimumRow != null) {
-            minimumValue = getDoubleFromString(valueProvider.getStringValueToRender(minimumRow));
+            minimumValue = valueProvider.getDoubleValue(minimumRow);
         }
         if (maximumRow != null) {
-            maximumValue = getDoubleFromString(valueProvider.getStringValueToRender(maximumRow));
+            maximumValue = valueProvider.getDoubleValue(maximumRow);
         }
     }
 }

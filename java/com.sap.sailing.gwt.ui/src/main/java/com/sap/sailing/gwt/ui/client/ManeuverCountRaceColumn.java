@@ -18,7 +18,7 @@ import com.sap.sailing.gwt.ui.shared.LegEntryDAO;
 import com.sap.sailing.gwt.ui.shared.Triple;
 import com.sap.sailing.server.api.DetailType;
 
-public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> implements HasStringValue {
+public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> implements HasStringAndDoubleValue {
 
     private final StringConstants stringConstants;
     private final RaceNameProvider raceNameProvider;
@@ -207,7 +207,7 @@ public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> im
 
     @Override
     public void render(Context context, LeaderboardRowDAO row, SafeHtmlBuilder sb) {
-        minmaxRenderer.render(context, row, sb);
+        minmaxRenderer.render(context, row, getTitle(row), sb);
     }
 
     /**
