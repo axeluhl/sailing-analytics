@@ -80,7 +80,8 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
         TracTracRaceTrackerImpl.scheduler.schedule(new Runnable() {
             public void run() {
                 if (!receivedEventSinceDuringTimeout) {
-                    logger.info("Stopping receiver "+this+" of class "+this.getClass().getName()+
+                    logger.info("Stopping receiver "+AbstractReceiverWithQueue.this+
+                                " of class "+AbstractReceiverWithQueue.this.getClass().getName()+
                                 " after not having received an event during "+timeoutInMilliseconds+"ms");
                     stopAfterProcessingQueuedEvents();
                 } else {
