@@ -52,7 +52,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
      * A scheduler for the periodic checks of the paramURL documents for the advent of {@link ControlPoint}s
      * with static position information otherwise not available through {@link MarkPassingReceiver}'s events.
      */
-    private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+    static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     
     private final Event tractracEvent;
     private final com.sap.sailing.domain.base.Event domainEvent;
