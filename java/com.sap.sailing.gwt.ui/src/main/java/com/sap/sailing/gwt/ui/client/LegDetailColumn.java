@@ -7,18 +7,16 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.cellview.client.SafeHtmlHeader;
-import com.sap.sailing.gwt.ui.shared.LeaderboardDAO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDAO;
 
 public abstract class LegDetailColumn<FieldType extends Comparable<?>, RenderingType> extends
-        SortableColumn<LeaderboardRowDAO, RenderingType> implements HasStringValue {
+        SortableColumn<LeaderboardRowDAO, RenderingType> {
     private final String title;
     private final LegDetailField<FieldType> field;
     private final CellTable<LeaderboardRowDAO> leaderboardTable;
     private final String headerStyle;
     private final String columnStyle;
     private final String unit;
-    private final MinMaxRenderer minMaxRenderer;
 
     public interface LegDetailField<T extends Comparable<?>> {
         T get(LeaderboardRowDAO row);
@@ -34,11 +32,6 @@ public abstract class LegDetailColumn<FieldType extends Comparable<?>, Rendering
         this.leaderboardTable = leaderboardTable;
         this.headerStyle = headerStyle;
         this.columnStyle = columnStyle;
-        minMaxRenderer = new MinMaxRenderer(this, getComparator());
-    }
-
-    protected MinMaxRenderer getMinMaxRenderer() {
-        return minMaxRenderer;
     }
 
     protected String getTitle() {
@@ -99,8 +92,4 @@ public abstract class LegDetailColumn<FieldType extends Comparable<?>, Rendering
         return getField().get(row);
     }
 
-    @Override
-    protected void updateMinMax(LeaderboardDAO leaderboard) {
-        getMinMaxRenderer().updateMinMax(leaderboard.rows.values());
-    }
 }

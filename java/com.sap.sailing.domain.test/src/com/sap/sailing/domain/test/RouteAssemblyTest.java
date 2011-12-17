@@ -70,6 +70,10 @@ public class RouteAssemblyTest extends AbstractTracTracLiveTest {
             @Override
             public void join(long timeoutInMilliseconds) {
             }
+
+            @Override
+            public void stopAfterNotReceivingEventsForSomeTime(long timeoutInMilliseconds) {
+            }
         };
         addListenersForStoredDataAndStartController(Collections.singleton(receiver));
         synchronized (semaphor) {

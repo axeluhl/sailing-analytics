@@ -490,8 +490,10 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         mapZoomedOrPannedSinceLastRaceSelectionChange = false;
         if (!selectedRaces.isEmpty() && selectedRaces.get(selectedRaces.size() - 1) != null) {
             RaceDAO raceDAO = selectedRaces.get(selectedRaces.size() - 1).getC();
-            timePanel.timeChanged(raceDAO.startOfRace);
-            timer.setTime(raceDAO.startOfRace.getTime());
+            if (raceDAO.startOfRace != null) {
+                timePanel.timeChanged(raceDAO.startOfRace);
+                timer.setTime(raceDAO.startOfRace.getTime());
+            }
             updateSlider(raceDAO);
         }
         // force display of currently selected race

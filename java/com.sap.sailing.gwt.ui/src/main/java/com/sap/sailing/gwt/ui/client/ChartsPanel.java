@@ -57,6 +57,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
 import com.sap.sailing.gwt.ui.shared.CompetitorInRaceDAO;
 import com.sap.sailing.gwt.ui.shared.CompetitorsAndTimePointsDAO;
+import com.sap.sailing.gwt.ui.shared.Pair;
 import com.sap.sailing.server.api.DetailType;
 import com.sap.sailing.server.api.RaceIdentifier;
 
@@ -87,6 +88,7 @@ public class ChartsPanel extends FormPanel {
     private HashMap<CompetitorDAO, Integer> competitorID;
     private HashMap<Integer, SeriesHandler> markSeriesID;
     private HashMap<CompetitorDAO, Widget> competitorLabels;
+    private HashMap<String, String> markPassingBuoyName;
     private int width = 800, height = 600;
     private int competitorNr = 0;
 
@@ -105,6 +107,7 @@ public class ChartsPanel extends FormPanel {
     	idColor = new HashMap<Integer, String>();
     	competitorVisible = new HashMap<CompetitorDAO, Boolean>();
     	competitorLabels = new HashMap<CompetitorDAO, Widget>();
+    	markPassingBuoyName = new HashMap<String, String>();
         this.sailingService = sailingService;
         this.races = races;
         this.stringConstants = stringConstants;
@@ -326,11 +329,12 @@ public class ChartsPanel extends FormPanel {
                 markSeries.clear();
                 if (isCompetitorVisible(competitor) && chartData.getRaceData(competitor) != null){
                 	long starttime = System.currentTimeMillis();
-                	long[] markPassingTimes = competitorsAndTimePointsDAO.getMarkPassings(competitor);
+                	Pair<String,Long>[] markPassingTimes = competitorsAndTimePointsDAO.getMarkPassings(competitor);
                     Double[] markPassingValues = chartData.getMarkPassings(competitor);
                     for (int j = 0; j < markPassingTimes.length; j++){
-                        if (markPassingValues[j] != null && markPassingTimes != null) {
-                            markSeries.add(new DataPoint(markPassingTimes[j],markPassingValues[j]));
+                        if (markPassingValues[j] != null && markPassingTimes[j].getB() != null) {
+                        	markPassingBuoyName.put(competitor.id + markPassingTimes[j].getB(), markPassingTimes[j].getA());
+                            markSeries.add(new DataPoint(markPassingTimes[j].getB(),markPassingValues[j]));
                         }
                     }
                     GWT.log("Update mark passings time for " + competitor.name + ": " + (System.currentTimeMillis() - starttime));
@@ -445,7 +449,7 @@ public class ChartsPanel extends FormPanel {
 				}
                 if (item != null && competitor != null) {
                 	if (item.getSeries().getLabel().toLowerCase().contains("mark")){
-                		selectedPointLabel.setText(competitor.name + " passed mark at " + dateFormat.format(new Date((long) item.getDataPoint().getX())));
+                		selectedPointLabel.setText(competitor.name + " passed " + markPassingBuoyName.get(competitor.id + (long) item.getDataPoint().getX()) +" at " + dateFormat.format(new Date((long) item.getDataPoint().getX())));
                 	}
                 	else {
                 		String unit = "";
