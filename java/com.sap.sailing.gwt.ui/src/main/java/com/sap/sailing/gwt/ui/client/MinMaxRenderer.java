@@ -7,6 +7,13 @@ import com.google.gwt.cell.client.Cell.Context;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDAO;
 
+/**
+ * Renders the values and the percentage bar of the {@link LegDetailColumn} and {@link ManeuverCountRaceColumn}.
+ * It is used to update the minimum and maximum values of the columns, and to render the column content.
+ * 
+ * @author Fabian Schwarz-Fritz
+ * 
+ */
 public class MinMaxRenderer {
     private HasStringAndDoubleValue valueProvider;
     private Comparator<LeaderboardRowDAO> comparator;
@@ -29,7 +36,9 @@ public class MinMaxRenderer {
 
     /**
      * Renders the value of a {@link LeaderboardRowDAO}.
-     * @param title tool tip title to display; if <code>null</code>, no tool tip will be rendered
+     * 
+     * @param title
+     *            tool tip title to display; if <code>null</code>, no tool tip will be rendered
      */
     public void render(Context context, LeaderboardRowDAO row, String title, SafeHtmlBuilder sb) {
         int percent = getPercentage(row);
