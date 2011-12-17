@@ -36,7 +36,7 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
      * used by {@link #stopAfterNotReceivingEventsForSomeTime(long)} and {@link #run()} to check if an event was received
      * during the timeout period.
      */
-    private boolean receivedEventSinceDuringTimeout;
+    private boolean receivedEventDuringTimeout;
     
     public AbstractReceiverWithQueue(DomainFactory domainFactory, Event tractracEvent, DynamicTrackedEvent trackedEvent) {
         super();
@@ -76,10 +76,10 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
     
     @Override
     public void stopAfterNotReceivingEventsForSomeTime(final long timeoutInMilliseconds) {
-        receivedEventSinceDuringTimeout = false;
+        receivedEventDuringTimeout = false;
         TracTracRaceTrackerImpl.scheduler.schedule(new Runnable() {
             public void run() {
-                if (!receivedEventSinceDuringTimeout) {
+                if (!receivedEventDuringTimeout) {
                     logger.info("Stopping receiver "+AbstractReceiverWithQueue.this+
                                 " of class "+AbstractReceiverWithQueue.this.getClass().getName()+
                                 " after not having received an event during "+timeoutInMilliseconds+"ms");
@@ -93,6 +93,7 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
 
     protected void enqueue(Triple<A, B, C> event) {
         queue.add(event);
+        receivedEventDuringTimeout = true;
     }
     
     private boolean isStopEvent(Triple<A, B, C> event) {
@@ -106,7 +107,6 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
             try {
                 event = queue.take();
                 if (!isStopEvent(event)) {
-                    receivedEventSinceDuringTimeout = true;
                     handleEvent(event);
                 }
             } catch (InterruptedException e) {
