@@ -29,7 +29,7 @@ public class UnicodeCharactersInCompetitorNamesTest {
         domainFactory = new DomainFactoryImpl(new com.sap.sailing.domain.base.impl.DomainFactoryImpl());
     }
     
-    public static void main(String[] args) throws URISyntaxException, IOException {
+    public static void main(String[] args) throws URISyntaxException, IOException, InterruptedException {
         UnicodeCharactersInCompetitorNamesTest t = new UnicodeCharactersInCompetitorNamesTest();
         t.setUp();
         t.readJSONURLAndCheckCompetitorNames();
