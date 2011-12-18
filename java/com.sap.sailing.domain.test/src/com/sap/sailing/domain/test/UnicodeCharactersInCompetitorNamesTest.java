@@ -37,7 +37,7 @@ public class UnicodeCharactersInCompetitorNamesTest {
     }
     
     @Test
-    public void testFindUnicodeCharactersInCompetitorNames() throws MalformedURLException, FileNotFoundException, URISyntaxException {
+    public void testFindUnicodeCharactersInCompetitorNames() throws MalformedURLException, FileNotFoundException, URISyntaxException, IOException, InterruptedException {
         TracTracRaceTracker fourtyninerYellow_2 = domainFactory
                 .createRaceTracker(
                         new URL(
@@ -50,6 +50,7 @@ public class UnicodeCharactersInCompetitorNamesTest {
         for (Competitor competitor : competitors) {
             System.out.println(competitor.getName());
         }
+        fourtyninerYellow_2.stop();
     }
     
     @Test
