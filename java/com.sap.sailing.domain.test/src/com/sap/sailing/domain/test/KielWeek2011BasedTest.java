@@ -108,8 +108,9 @@ public abstract class KielWeek2011BasedTest extends AbstractTracTracLiveTest {
             }
         }
         for (Receiver receiver : receivers) {
-            // TODO check if this can be parallelized so that all timeouts wait in parallel
             receiver.stopAfterNotReceivingEventsForSomeTime(/* timeoutInMilliseconds */ 5000l);
+        }
+        for (Receiver receiver : receivers) {
             receiver.join();
         }
         trackedRace = getTrackedEvent().getTrackedRace(race);
