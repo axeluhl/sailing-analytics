@@ -108,7 +108,7 @@ public abstract class KielWeek2011BasedTest extends AbstractTracTracLiveTest {
             }
         }
         for (Receiver receiver : receivers) {
-            receiver.stopAfterNotReceivingEventsForSomeTime(/* timeoutInMilliseconds */ 1000l);
+            receiver.stopAfterNotReceivingEventsForSomeTime(/* timeoutInMilliseconds */ 2000l);
             receiver.join();
         }
         trackedRace = getTrackedEvent().getTrackedRace(race);
