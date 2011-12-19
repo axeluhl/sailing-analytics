@@ -66,7 +66,7 @@ public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest impl
         // Initialize data controller using live and stored data sources
         controller = new DataController(liveUri, storedUri, this);
         // Start live and stored data streams
-        ioThread = new Thread(controller, "io");
+        ioThread = new Thread(controller, "I/O for event "+event.getName()+", paramURL "+paramUrl);
         // test cases need to start the thread calling startController
         // after adding their listeners
     }

@@ -98,7 +98,7 @@ public abstract class KielWeek2011BasedTest extends AbstractTracTracLiveTest {
         }
         addListenersForStoredDataAndStartController(receivers);
         Race tractracRace = getEvent().getRaceList().iterator().next();
-        // now we expect that there is no 
+        // now we expect that there is no RaceDefinition for the TracTrac race yet:
         assertNull(domainFactory.getExistingRaceDefinitionForRace(tractracRace));
         race = getDomainFactory().getAndWaitForRaceDefinition(tractracRace);
         assertNotNull(race);

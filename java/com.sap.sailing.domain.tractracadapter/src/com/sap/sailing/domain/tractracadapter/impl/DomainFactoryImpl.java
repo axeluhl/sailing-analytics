@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
@@ -45,6 +46,7 @@ import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedEvent;
 import com.sap.sailing.domain.tracking.TrackedEventRegistry;
+import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
@@ -65,6 +67,8 @@ import com.tractrac.clientmodule.data.ControlPointPositionData;
 import difflib.PatchFailedException;
 
 public class DomainFactoryImpl implements DomainFactory {
+    private static final Logger logger = Logger.getLogger(DomainFactoryImpl.class.getName());
+    
     private final com.sap.sailing.domain.base.DomainFactory baseDomainFactory;
     
     // TODO consider (re-)introducing WeakHashMaps for cache structures, but such that the cache is maintained as long as our domain objects are strongly referenced
@@ -326,24 +330,44 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public RaceDefinition getOrCreateRaceDefinition(Race race, Course course) {
+    public Pair<RaceDefinition, TrackedRace> getOrCreateRaceDefinitionAndTrackedRace(TrackedEvent trackedEvent,
+            Race race, Course course, WindStore windStore, long millisecondsOverWhichToAverageWind,
+            DynamicRaceDefinitionSet raceDefinitionSetToUpdate) {
         synchronized (raceCache) {
-            RaceDefinition result = raceCache.get(race);
-            if (result == null) {
+            RaceDefinition raceDefinition = raceCache.get(race);
+            if (raceDefinition == null) {
                 Pair<List<Competitor>, BoatClass> competitorsAndDominantBoatClass = getCompetitorsAndDominantBoatClass(race);
-                result = new RaceDefinitionImpl(race.getName(), course, competitorsAndDominantBoatClass.getB(),
+                raceDefinition = new RaceDefinitionImpl(race.getName(), course, competitorsAndDominantBoatClass.getB(),
                         competitorsAndDominantBoatClass.getA());
+                TrackedRace trackedRace = createTrackedRace(trackedEvent, raceDefinition, windStore,
+                        millisecondsOverWhichToAverageWind, raceDefinitionSetToUpdate);
+                // add to domain Event only if boat class matches
+                if (raceDefinition.getBoatClass() == trackedEvent.getEvent().getBoatClass()) {
+                    trackedEvent.getEvent().addRace(raceDefinition);
+                } else {
+                    logger.warning("Not adding race "+raceDefinition+" to event "+trackedEvent.getEvent()+
+                            " because boat class "+raceDefinition.getBoatClass()+" doesn't match event's boat class "+
+                            trackedEvent.getEvent().getBoatClass());
+                }
                 synchronized (raceCache) {
-                    raceCache.put(race, result);
+                    raceCache.put(race, raceDefinition);
                     raceCache.notifyAll();
                 }
+                return new Pair<RaceDefinition, TrackedRace>(raceDefinition, trackedRace);
             } else {
                 throw new RuntimeException("Race "+race.getName()+" already exists");
             }
-            return result;
         }
     }
 
+    private TrackedRace createTrackedRace(TrackedEvent trackedEvent, RaceDefinition race, WindStore windStore,
+            long millisecondsOverWhichToAverageWind, DynamicRaceDefinitionSet raceDefinitionSetToUpdate) {
+        return trackedEvent.createTrackedRace(race,
+                windStore, millisecondsOverWhichToAverageWind,
+                /* time over which to average speed: */ race.getBoatClass().getApproximateManeuverDurationInMilliseconds(),
+                raceDefinitionSetToUpdate);
+    }
+    
     @Override
     public Pair<List<Competitor>, BoatClass> getCompetitorsAndDominantBoatClass(Race race) {
         List<CompetitorClass> competitorClasses = new ArrayList<CompetitorClass>();

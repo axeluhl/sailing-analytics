@@ -92,6 +92,9 @@ public class MarkPassingReceiver extends AbstractReceiverWithQueue<RaceCompetito
             }
             trackedRace.updateMarkPassings(getDomainFactory().getOrCreateCompetitor(event.getA().getCompetitor()),
                     markPassings);
+        } else {
+            logger.warning("Couldn't find tracked race for race " + event.getA().getRace().getName()
+                    + ". Dropping mark passing event " + event);
         }
     }
 

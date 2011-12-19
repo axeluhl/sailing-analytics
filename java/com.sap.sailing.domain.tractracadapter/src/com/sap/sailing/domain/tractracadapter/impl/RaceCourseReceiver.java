@@ -90,17 +90,9 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
             }
         } else {
             logger.log(Level.INFO, "Received course for non-existing race "+event.getC().getName()+". Creating RaceDefinition.");
-            // create race definition
-            RaceDefinition raceDefinition = getDomainFactory().getOrCreateRaceDefinition(event.getC(), course);
-            // add race only if boat class matches
-            if (raceDefinition.getBoatClass() == getTrackedEvent().getEvent().getBoatClass()) {
-                getTrackedEvent().getEvent().addRace(raceDefinition);
-                createTrackedRace(raceDefinition);
-            } else {
-                logger.warning("Not adding race "+raceDefinition+" to event "+getTrackedEvent().getEvent()+
-                        " because boat class "+raceDefinition.getBoatClass()+" doesn't match event's boat class "+
-                        getTrackedEvent().getEvent().getBoatClass());
-            }
+            // create race definition and add to event
+            getDomainFactory().getOrCreateRaceDefinitionAndTrackedRace(getTrackedEvent(), event.getC(), course,
+                    windStore, millisecondsOverWhichToAverageWind, raceDefinitionSetToUpdate);
         }
     }
 

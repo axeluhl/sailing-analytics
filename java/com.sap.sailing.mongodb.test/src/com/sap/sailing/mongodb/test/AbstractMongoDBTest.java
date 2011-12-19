@@ -11,21 +11,29 @@ import com.mongodb.Mongo;
 import com.mongodb.MongoException;
 import com.sap.sailing.mongodb.MongoDBConfiguration;
 
-public abstract class AbstractMongoDBTest implements MongoDBTest {
+public abstract class AbstractMongoDBTest {
     protected Mongo mongo;
     protected DB db;
+    private final MongoDBConfiguration dbConfiguration;
+    
+    public AbstractMongoDBTest() {
+        dbConfiguration = MongoDBConfiguration.getDefaultTestConfiguration();
+    }
+    
+    protected MongoDBConfiguration getDBConfiguration() {
+        return dbConfiguration;
+    }
     
     protected Mongo newMongo() throws UnknownHostException, MongoException {
-        return new Mongo(System.getProperty("mongo.host", "127.0.0.1"),
-                MongoDBConfiguration.getDefaultConfiguration().getPort());
+        return new Mongo(System.getProperty("mongo.host", "127.0.0.1"), dbConfiguration.getPort());
     }
     
     @Before
     public void dropTestDB() throws UnknownHostException, MongoException {
         mongo = newMongo();
         assertNotNull(mongo);
-        mongo.dropDatabase(WIND_TEST_DB);
-        db = mongo.getDB(WIND_TEST_DB);
+        mongo.dropDatabase(getDBConfiguration().getDatabaseName());
+        db = mongo.getDB(getDBConfiguration().getDatabaseName());
         assertNotNull(db);
     }
 }
