@@ -2,6 +2,7 @@ package com.sap.sailing.domain.tractracadapter.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import com.maptrack.client.io.TypeController;
 import com.sap.sailing.domain.base.Competitor;
@@ -16,6 +17,8 @@ import com.tractrac.clientmodule.data.CompetitorPositionRawData;
 import com.tractrac.clientmodule.data.ICallbackData;
 
 public class RawPositionReceiver extends AbstractReceiverWithQueue<RaceCompetitor, CompetitorPositionRawData, Boolean> {
+    private static final Logger logger = Logger.getLogger(RawPositionReceiver.class.getName());
+
     public RawPositionReceiver(DynamicTrackedEvent trackedEvent, com.tractrac.clientmodule.Event tractracEvent, DomainFactory domainFactory) {
         super(domainFactory, tractracEvent, trackedEvent);
     }
@@ -50,6 +53,9 @@ public class RawPositionReceiver extends AbstractReceiverWithQueue<RaceCompetito
             GPSFixMoving fix = getDomainFactory().createGPSFixMoving(event.getB());
             Competitor competitor = getDomainFactory().getOrCreateCompetitor(event.getA().getCompetitor());
             trackedRace.recordFix(competitor, fix);
+        } else {
+            logger.warning("Couldn't find tracked race for race " + race.getName()
+                    + ". Dropping raw position event " + event);
         }
     }
 }

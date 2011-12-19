@@ -2,6 +2,7 @@ package com.sap.sailing.domain.tractracadapter.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import com.maptrack.client.io.TypeController;
 import com.sap.sailing.domain.base.Buoy;
@@ -38,6 +39,8 @@ import com.tractrac.clientmodule.data.ICallbackData;
  * 
  */
 public class MarkPositionReceiver extends AbstractReceiverWithQueue<ControlPoint, ControlPointPositionData, Boolean> {
+    private static final Logger logger = Logger.getLogger(MarkPositionReceiver.class.getName());
+    
     private int received;
     
     public MarkPositionReceiver(final DynamicTrackedEvent trackedEvent, com.tractrac.clientmodule.Event tractracEvent, final DomainFactory domainFactory) {
@@ -83,6 +86,9 @@ public class MarkPositionReceiver extends AbstractReceiverWithQueue<ControlPoint
             if (trackedRace != null) {
                 ((DynamicGPSFixTrack<Buoy, GPSFix>) trackedRace.getOrCreateTrack(buoy))
                         .addGPSFix(getDomainFactory().createGPSFixMoving(event.getB()));
+            } else {
+                logger.warning("Couldn't find tracked race for race " + tractracRace.getName()
+                        + ". Dropping mark position event " + event);
             }
         }
     }

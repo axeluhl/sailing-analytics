@@ -2,6 +2,7 @@ package com.sap.sailing.domain.tractracadapter.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import com.maptrack.client.io.TypeController;
 import com.sap.sailing.domain.base.ControlPoint;
@@ -28,6 +29,8 @@ import com.tractrac.clientmodule.data.StartStopTimesData;
  * 
  */
 public class RaceStartedAndFinishedReceiver extends AbstractReceiverWithQueue<Race, StartStopTimesData, Boolean> {
+    private static final Logger logger = Logger.getLogger(RaceStartedAndFinishedReceiver.class.getName());
+
     public RaceStartedAndFinishedReceiver(DynamicTrackedEvent trackedEvent, com.tractrac.clientmodule.Event tractracEvent, DomainFactory domainFactory) {
         super(domainFactory, tractracEvent, trackedEvent);
     }
@@ -62,6 +65,9 @@ public class RaceStartedAndFinishedReceiver extends AbstractReceiverWithQueue<Ra
             if (trackedRace.getStart() == null || !trackedRace.getStart().equals(start)) {
                 trackedRace.setStartTimeReceived(start);
             }
+        } else {
+            logger.warning("Couldn't find tracked race for race " + event.getA().getName()
+                    + ". Dropping start/stop event " + event);
         }
     }
 
