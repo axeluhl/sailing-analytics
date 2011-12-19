@@ -339,8 +339,6 @@ public class DomainFactoryImpl implements DomainFactory {
                 Pair<List<Competitor>, BoatClass> competitorsAndDominantBoatClass = getCompetitorsAndDominantBoatClass(race);
                 raceDefinition = new RaceDefinitionImpl(race.getName(), course, competitorsAndDominantBoatClass.getB(),
                         competitorsAndDominantBoatClass.getA());
-                TrackedRace trackedRace = createTrackedRace(trackedEvent, raceDefinition, windStore,
-                        millisecondsOverWhichToAverageWind, raceDefinitionSetToUpdate);
                 // add to domain Event only if boat class matches
                 if (raceDefinition.getBoatClass() == trackedEvent.getEvent().getBoatClass()) {
                     trackedEvent.getEvent().addRace(raceDefinition);
@@ -349,6 +347,8 @@ public class DomainFactoryImpl implements DomainFactory {
                             " because boat class "+raceDefinition.getBoatClass()+" doesn't match event's boat class "+
                             trackedEvent.getEvent().getBoatClass());
                 }
+                TrackedRace trackedRace = createTrackedRace(trackedEvent, raceDefinition, windStore,
+                        millisecondsOverWhichToAverageWind, raceDefinitionSetToUpdate);
                 synchronized (raceCache) {
                     raceCache.put(race, raceDefinition);
                     raceCache.notifyAll();
