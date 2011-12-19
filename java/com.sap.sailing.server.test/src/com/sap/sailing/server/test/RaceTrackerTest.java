@@ -56,6 +56,7 @@ public class RaceTrackerTest {
     public void setUp() throws MalformedURLException, FileNotFoundException, URISyntaxException, InterruptedException {
         service = new RacingEventServiceImpl();
         raceHandle = service.addTracTracRace(paramUrl, liveUri, storedUri, EmptyWindStore.INSTANCE, /* timeoutInMilliseconds */ 60000);
+        raceHandle.getRaces(); // wait for RaceDefinition to be completely wired in Event
     }
     
     @After
@@ -101,6 +102,7 @@ public class RaceTrackerTest {
         service.removeEvent(raceHandle.getEvent());
         RacesHandle myRaceHandle = service.addTracTracRace(paramUrl, liveUri, storedUri, EmptyWindStore.INSTANCE, /* timeoutInMilliseconds */ 60000);
         TrackedEvent newTrackedEvent = myRaceHandle.getTrackedEvent();
+        assertNotSame(oldTrackedEvent, newTrackedEvent);
         TrackedRace newTrackedRace = getTrackedRace(newTrackedEvent);
         // expecting a new tracked race to be created when starting over with tracking
         try {

@@ -456,7 +456,6 @@ public class RacingEventServiceImpl implements RacingEventService, EventFetcher,
     public synchronized void removeRace(Event event, RaceDefinition race) throws MalformedURLException,
             IOException, InterruptedException {
         logger.info("Removing the race + " + race + "...");
-
         stopAllTrackersForWhichRaceIsLastReachable(event, race);
         stopTrackingWind(event, race);
         TrackedRace trackedRace = getExistingTrackedRace(event, race);
