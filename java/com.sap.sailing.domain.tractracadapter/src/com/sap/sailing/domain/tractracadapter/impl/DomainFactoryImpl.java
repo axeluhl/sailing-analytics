@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
@@ -66,6 +67,8 @@ import com.tractrac.clientmodule.data.ControlPointPositionData;
 import difflib.PatchFailedException;
 
 public class DomainFactoryImpl implements DomainFactory {
+    private static final Logger logger = Logger.getLogger(DomainFactoryImpl.class.getName());
+    
     private final com.sap.sailing.domain.base.DomainFactory baseDomainFactory;
     
     // TODO consider (re-)introducing WeakHashMaps for cache structures, but such that the cache is maintained as long as our domain objects are strongly referenced
@@ -336,7 +339,16 @@ public class DomainFactoryImpl implements DomainFactory {
                 Pair<List<Competitor>, BoatClass> competitorsAndDominantBoatClass = getCompetitorsAndDominantBoatClass(race);
                 raceDefinition = new RaceDefinitionImpl(race.getName(), course, competitorsAndDominantBoatClass.getB(),
                         competitorsAndDominantBoatClass.getA());
-                TrackedRace trackedRace = createTrackedRace(trackedEvent, raceDefinition, windStore, millisecondsOverWhichToAverageWind, raceDefinitionSetToUpdate);
+                TrackedRace trackedRace = createTrackedRace(trackedEvent, raceDefinition, windStore,
+                        millisecondsOverWhichToAverageWind, raceDefinitionSetToUpdate);
+                // add to domain Event only if boat class matches
+                if (raceDefinition.getBoatClass() == trackedEvent.getEvent().getBoatClass()) {
+                    trackedEvent.getEvent().addRace(raceDefinition);
+                } else {
+                    logger.warning("Not adding race "+raceDefinition+" to event "+trackedEvent.getEvent()+
+                            " because boat class "+raceDefinition.getBoatClass()+" doesn't match event's boat class "+
+                            trackedEvent.getEvent().getBoatClass());
+                }
                 synchronized (raceCache) {
                     raceCache.put(race, raceDefinition);
                     raceCache.notifyAll();

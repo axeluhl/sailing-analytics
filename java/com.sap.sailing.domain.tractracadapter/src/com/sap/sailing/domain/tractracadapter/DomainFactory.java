@@ -134,12 +134,16 @@ public interface DomainFactory {
 
     /**
      * Creates a {@link RaceDefinition} from a TracTrac {@link Race} and a domain {@link Course} definition. The
-     * resulting {@link RaceDefinition} is <em>not</em> added to any {@link com.sap.sailing.domain.base.Event} yet. It
-     * is added to the internal race cache. The corresponding {@link TrackedRace} object is also created, and the
-     * notification of threads waiting on the race cache such as a blocking {@link #getAndWaitForRaceDefinition(Race)}
-     * happens only <em>after</em> the tracked race has been created. This ensures that waiters for the
-     * {@link RaceDefinition} are guaranteed to obtain a valid, non-<code>null</code> tracked race already immediately
-     * after the notification was sent.
+     * resulting {@link RaceDefinition} is added to the {@link com.sap.sailing.domain.base.Event} to which
+     * <code>trackedEvent</code> belongs (see {@link TrackedEvent#getEvent()}). It is added to the internal race cache.
+     * The corresponding {@link TrackedRace} object is also created, and the notification of threads waiting on the race
+     * cache such as a blocking {@link #getAndWaitForRaceDefinition(Race)} happens only <em>after</em> the tracked race
+     * has been created and the {@link RaceDefinition} was
+     * {@link com.sap.sailing.domain.base.Event#addRace(RaceDefinition) added} to the domain event. This ensures that
+     * waiters for the {@link RaceDefinition} are guaranteed to obtain a valid, non- <code>null</code> tracked race
+     * already immediately after the notification was sent, and that the {@link RaceDefinition} is already
+     * {@link com.sap.sailing.domain.base.Event#getAllRaces() known} by its containing
+     * {@link com.sap.sailing.domain.base.Event}.
      * 
      * @param raceDefinitionSetToUpdate
      *            if not <code>null</code>, after creating the {@link TrackedRace}, the {@link RaceDefinition} is

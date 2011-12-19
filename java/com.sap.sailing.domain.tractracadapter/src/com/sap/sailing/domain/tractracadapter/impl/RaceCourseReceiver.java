@@ -12,10 +12,8 @@ import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
-import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
-import com.sap.sailing.util.Util.Pair;
 import com.sap.sailing.util.Util.Triple;
 import com.tractrac.clientmodule.Race;
 import com.tractrac.clientmodule.Route;
@@ -92,18 +90,9 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
             }
         } else {
             logger.log(Level.INFO, "Received course for non-existing race "+event.getC().getName()+". Creating RaceDefinition.");
-            // create race definition
-            Pair<RaceDefinition, TrackedRace> raceDefinitionAndTrackedRace = getDomainFactory().getOrCreateRaceDefinitionAndTrackedRace(
-                    getTrackedEvent(), event.getC(), course, windStore, millisecondsOverWhichToAverageWind, raceDefinitionSetToUpdate);
-            // add race only if boat class matches
-            RaceDefinition raceDefinition = raceDefinitionAndTrackedRace.getA();
-            if (raceDefinition.getBoatClass() == getTrackedEvent().getEvent().getBoatClass()) {
-                getTrackedEvent().getEvent().addRace(raceDefinition);
-            } else {
-                logger.warning("Not adding race "+raceDefinition+" to event "+getTrackedEvent().getEvent()+
-                        " because boat class "+raceDefinition.getBoatClass()+" doesn't match event's boat class "+
-                        getTrackedEvent().getEvent().getBoatClass());
-            }
+            // create race definition and add to event
+            getDomainFactory().getOrCreateRaceDefinitionAndTrackedRace(getTrackedEvent(), event.getC(), course,
+                    windStore, millisecondsOverWhichToAverageWind, raceDefinitionSetToUpdate);
         }
     }
 
