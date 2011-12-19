@@ -45,6 +45,7 @@ import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedEvent;
 import com.sap.sailing.domain.tracking.TrackedEventRegistry;
+import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
@@ -326,24 +327,35 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public RaceDefinition getOrCreateRaceDefinition(Race race, Course course) {
+    public Pair<RaceDefinition, TrackedRace> getOrCreateRaceDefinitionAndTrackedRace(TrackedEvent trackedEvent,
+            Race race, Course course, WindStore windStore, long millisecondsOverWhichToAverageWind,
+            DynamicRaceDefinitionSet raceDefinitionSetToUpdate) {
         synchronized (raceCache) {
-            RaceDefinition result = raceCache.get(race);
-            if (result == null) {
+            RaceDefinition raceDefinition = raceCache.get(race);
+            if (raceDefinition == null) {
                 Pair<List<Competitor>, BoatClass> competitorsAndDominantBoatClass = getCompetitorsAndDominantBoatClass(race);
-                result = new RaceDefinitionImpl(race.getName(), course, competitorsAndDominantBoatClass.getB(),
+                raceDefinition = new RaceDefinitionImpl(race.getName(), course, competitorsAndDominantBoatClass.getB(),
                         competitorsAndDominantBoatClass.getA());
+                TrackedRace trackedRace = createTrackedRace(trackedEvent, raceDefinition, windStore, millisecondsOverWhichToAverageWind, raceDefinitionSetToUpdate);
                 synchronized (raceCache) {
-                    raceCache.put(race, result);
+                    raceCache.put(race, raceDefinition);
                     raceCache.notifyAll();
                 }
+                return new Pair<RaceDefinition, TrackedRace>(raceDefinition, trackedRace);
             } else {
                 throw new RuntimeException("Race "+race.getName()+" already exists");
             }
-            return result;
         }
     }
 
+    private TrackedRace createTrackedRace(TrackedEvent trackedEvent, RaceDefinition race, WindStore windStore,
+            long millisecondsOverWhichToAverageWind, DynamicRaceDefinitionSet raceDefinitionSetToUpdate) {
+        return trackedEvent.createTrackedRace(race,
+                windStore, millisecondsOverWhichToAverageWind,
+                /* time over which to average speed: */ race.getBoatClass().getApproximateManeuverDurationInMilliseconds(),
+                raceDefinitionSetToUpdate);
+    }
+    
     @Override
     public Pair<List<Competitor>, BoatClass> getCompetitorsAndDominantBoatClass(Race race) {
         List<CompetitorClass> competitorClasses = new ArrayList<CompetitorClass>();

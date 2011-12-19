@@ -72,9 +72,9 @@ public interface DomainFactory {
     Team getOrCreateTeam(String name, Nationality nationality);
 
     /**
-     * Fetch a race definition previously created by a call to {@link #getOrCreateRaceDefinition(Race, Course)}. If no such
+     * Fetch a race definition previously created by a call to {@link #getOrCreateRaceDefinitionAndTrackedRace}. If no such
      * race definition was created so far, the call blocks until such a definition is provided by a call to
-     * {@link #getOrCreateRaceDefinition(Race, Course)}.
+     * {@link #getOrCreateRaceDefinitionAndTrackedRace}.
      */
     RaceDefinition getAndWaitForRaceDefinition(Race race);
 
@@ -132,7 +132,22 @@ public interface DomainFactory {
     Iterable<Receiver> getUpdateReceivers(DynamicTrackedEvent trackedEvent, Event tractracEvent, WindStore windStore,
             DynamicRaceDefinitionSet raceDefinitionSetToUpdate);
 
-    RaceDefinition getOrCreateRaceDefinition(Race race, Course course);
+    /**
+     * Creates a {@link RaceDefinition} from a TracTrac {@link Race} and a domain {@link Course} definition. The
+     * resulting {@link RaceDefinition} is <em>not</em> added to any {@link com.sap.sailing.domain.base.Event} yet. It
+     * is added to the internal race cache. The corresponding {@link TrackedRace} object is also created, and the
+     * notification of threads waiting on the race cache such as a blocking {@link #getAndWaitForRaceDefinition(Race)}
+     * happens only <em>after</em> the tracked race has been created. This ensures that waiters for the
+     * {@link RaceDefinition} are guaranteed to obtain a valid, non-<code>null</code> tracked race already immediately
+     * after the notification was sent.
+     * 
+     * @param raceDefinitionSetToUpdate
+     *            if not <code>null</code>, after creating the {@link TrackedRace}, the {@link RaceDefinition} is
+     *            {@link DynamicRaceDefinitionSet#addRaceDefinition(RaceDefinition) added} to that object.
+     */
+    Pair<RaceDefinition, TrackedRace> getOrCreateRaceDefinitionAndTrackedRace(TrackedEvent trackedEvent, Race race,
+            Course course, WindStore windStore, long millisecondsOverWhichToAverageWind,
+            DynamicRaceDefinitionSet raceDefinitionSetToUpdate);
 
     /**
      * The record may be for a single buoy or a gate. If for a gate, the
@@ -172,7 +187,7 @@ public interface DomainFactory {
 
     /**
      * Fetch the race definition for <code>race</code>. If the race definition hasn't been created yet, the call blocks
-     * until such a definition is provided by a call to {@link #getOrCreateRaceDefinition(Race, Course)}. If
+     * until such a definition is provided by a call to {@link #getOrCreateRaceDefinitionAndTrackedRace}. If
      * <code>timeoutInMilliseconds</code> milliseconds have passed and the race definition is found not to have shown up
      * until then, <code>null</code> is returned. The unblocking may be deferred even beyond
      * <code>timeoutInMilliseconds</code> in case no modifications happen on the set of races cached by this factory.
@@ -193,7 +208,6 @@ public interface DomainFactory {
      * if the {@link TrackedRace} that was removed from the {@link TrackedEvent} was the last one, the
      * {@link TrackedEvent} is removed such that {@link #getOrCreateTrackedEvent(com.sap.sailing.domain.base.Event)}
      * will have to create a new one.
-     * @param trackedEventRegistry TODO
      */
     void removeRace(Event tractracEvent, Race tractracRace, TrackedEventRegistry trackedEventRegistry);
 
