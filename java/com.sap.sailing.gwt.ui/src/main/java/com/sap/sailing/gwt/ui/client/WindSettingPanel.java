@@ -52,7 +52,7 @@ public class WindSettingPanel extends FormPanel {
                     wind.position = new PositionDAO(latDegBox.getValue(), lngDegBox.getValue());
                 }
                 List<Triple<EventDAO, RegattaDAO, RaceDAO>> eventAndRaces = raceSelectionProvider.getSelectedEventAndRace();
-                // TODO can we be sure of single selection?
+                // Here we assume that single selection is enabled because the WindPanel creates a TrackedComposite with disabled multi selection.
                 final Triple<EventDAO, RegattaDAO, RaceDAO> eventAndRace = eventAndRaces.get(eventAndRaces.size()-1);
                 sailingService.setWind(new EventNameAndRaceName(eventAndRace.getA().name, eventAndRace.getC().name), wind, new AsyncCallback<Void>() {
                     @Override
