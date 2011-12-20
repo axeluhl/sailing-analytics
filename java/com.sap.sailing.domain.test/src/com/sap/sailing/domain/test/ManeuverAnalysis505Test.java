@@ -24,7 +24,7 @@ import com.sap.sailing.domain.tracking.WindSource;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
 
-public class ManeuverAnalysisTest505 extends KielWeek2011BasedTest {
+public class ManeuverAnalysis505Test extends KielWeek2011BasedTest {
 
     private SimpleDateFormat dateFormat;
     private static final int TACK_TOLERANCE = 7000;
@@ -33,7 +33,7 @@ public class ManeuverAnalysisTest505 extends KielWeek2011BasedTest {
 
     private List<Maneuver> maneuversInvalid;
 
-    public ManeuverAnalysisTest505() throws URISyntaxException, IOException, InterruptedException {
+    public ManeuverAnalysis505Test() throws URISyntaxException, IOException, InterruptedException {
         super();
         super.setUp();
         super.setUp("event_20110609_KielerWoch",
@@ -174,13 +174,13 @@ public class ManeuverAnalysisTest505 extends KielWeek2011BasedTest {
 
     /**
      * Checks if there where additional maneuvers of the given types listed in <code>maneuverTypesFound</code> found,
-     * that where not found by {@link ManeuverAnalysisTest505#assertManeuver(List, Type, MillisecondsTimePoint, int)}.
+     * that where not found by {@link ManeuverAnalysis505Test#assertManeuver(List, Type, MillisecondsTimePoint, int)}.
      * 
      * @param maneuverTypesFound
      *            The maneuver types that should be found.
      * @param maneuversNotDetected
      *            The maneuvers of the types listed in <code>maneuverTypesFound</code> that where not detected by
-     *            {@link ManeuverAnalysisTest505#assertManeuver(List, Type, MillisecondsTimePoint, int)}
+     *            {@link ManeuverAnalysis505Test#assertManeuver(List, Type, MillisecondsTimePoint, int)}
      */
     private void assertAllManeuversOfTypesDetected(List<Maneuver.Type> maneuverTypesFound,
             List<Maneuver> maneuversNotDetected) {
