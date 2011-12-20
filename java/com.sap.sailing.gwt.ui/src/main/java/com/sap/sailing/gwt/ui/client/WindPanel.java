@@ -58,10 +58,11 @@ public class WindPanel extends FormPanel implements EventDisplayer, RaceSelectio
     private final TextColumn<WindDAO> dampenedWindDirectionInDegColumn;
     private final Set<RaceSelectionChangeListener> raceSelectionChangeListeners;
     //private final RaceTreeView trackedRacesTree;
-    private final TrackedEventsComposite trackedEvnetsComposite;
+    private final TrackedEventsComposite trackedEventsComposite;
     private final ListBox windSourceSelection;
     private final Map<String, ListDataProvider<WindDAO>> windLists;
     private final CheckBox showEstimatedWindBox;
+    private final CheckBox raceIsKnownToStartUpwindBox;
 
     public WindPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
             EventRefresher eventRefresher, StringConstants stringConstants) {
@@ -74,7 +75,7 @@ public class WindPanel extends FormPanel implements EventDisplayer, RaceSelectio
         windSourceSelection.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
-                setWindSource();
+                setWindSource(/* runOnSuccess */ null);
             }
         });
         removeColumn = new IdentityColumn<WindDAO>(new ActionCell<WindDAO>(stringConstants.remove(), new Delegate<WindDAO>() {
@@ -128,19 +129,32 @@ public class WindPanel extends FormPanel implements EventDisplayer, RaceSelectio
             }
         };
         grid = new Grid(3, 2); // first row: event/race selection; second row: wind source selection; third row: wind display
-        trackedEvnetsComposite = new TrackedEventsComposite(sailingService, errorReporter, eventRefresher, stringConstants, false);
-        grid.setWidget(0, 0, trackedEvnetsComposite);
+        trackedEventsComposite = new TrackedEventsComposite(sailingService, errorReporter, eventRefresher, stringConstants, false);
+        trackedEventsComposite.addRaceSelectionChangeListener(this);
+        grid.setWidget(0, 0, trackedEventsComposite);
         windSettingPanel = new WindSettingPanel(sailingService, errorReporter, this, this);
         HorizontalPanel windSourceSelectionPanel = new HorizontalPanel();
         windSourceSelectionPanel.setSpacing(10);
         windSourceSelectionPanel.add(new Label(stringConstants.windSource()));
         windSourceSelectionPanel.add(windSourceSelection);
+        raceIsKnownToStartUpwindBox = new CheckBox(stringConstants.raceIsKnownToStartUpwind());
+        windSourceSelectionPanel.add(raceIsKnownToStartUpwindBox);
+        raceIsKnownToStartUpwindBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<Boolean> event) {
+                setWindSource(/* runOnSuccess */ new Runnable() {
+                    public void run() {
+                        clearOrShowWindBasedOnRaceSelection(trackedEventsComposite.getSelectedEventAndRace());
+                    }
+                });
+            }
+        });
         showEstimatedWindBox = new CheckBox(stringConstants.showEstimatedWind());
         windSourceSelectionPanel.add(showEstimatedWindBox);
         showEstimatedWindBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
             @Override
             public void onValueChange(ValueChangeEvent<Boolean> event) {
-                clearOrShowWindBasedOnRaceSelection(trackedEvnetsComposite.getSelectedEventAndRace());
+                clearOrShowWindBasedOnRaceSelection(trackedEventsComposite.getSelectedEventAndRace());
             }
         });
         grid.setWidget(1, 0, windSourceSelectionPanel);
@@ -159,7 +173,7 @@ public class WindPanel extends FormPanel implements EventDisplayer, RaceSelectio
 
     @Override
     public void fillEvents(List<EventDAO> result) {
-        trackedEvnetsComposite.fillEvents(result);
+        trackedEventsComposite.fillEvents(result);
     }
 
     @Override
@@ -217,6 +231,7 @@ public class WindPanel extends FormPanel implements EventDisplayer, RaceSelectio
     }
 
     private void showWindForRace(WindInfoForRaceDAO result) {
+        raceIsKnownToStartUpwindBox.setValue(result.raceIsKnownToStartUpwind);
         grid.setWidget(2, 0, null);
         VerticalPanel windDisplay = new VerticalPanel();
         grid.setWidget(2, 0, windDisplay);
@@ -308,7 +323,7 @@ public class WindPanel extends FormPanel implements EventDisplayer, RaceSelectio
     @Override
     public List<Triple<EventDAO, RegattaDAO, RaceDAO>> getSelectedEventAndRace() {
 //        return trackedRacesTree.getSelectedEventAndRace();
-        return trackedEvnetsComposite.getSelectedEventAndRace();
+        return trackedEventsComposite.getSelectedEventAndRace();
     }
 
     @Override
@@ -327,13 +342,13 @@ public class WindPanel extends FormPanel implements EventDisplayer, RaceSelectio
         }
     }
 
-    private void setWindSource() {
-        List<Triple<EventDAO, RegattaDAO, RaceDAO>> selection = trackedEvnetsComposite.getSelectedEventAndRace();
+    private void setWindSource(final Runnable runOnSuccess) {
+        List<Triple<EventDAO, RegattaDAO, RaceDAO>> selection = trackedEventsComposite.getSelectedEventAndRace();
         if (selection != null && !selection.isEmpty()) {
             final Triple<EventDAO, RegattaDAO, RaceDAO> selectedRace = selection.get(0);
             final String windSourceName = windSourceSelection.getItemText(windSourceSelection.getSelectedIndex());
             sailingService.setWindSource(new EventNameAndRaceName(selectedRace.getA().name, selectedRace.getC().name),
-                    windSourceName, new AsyncCallback<Void>() {
+                    windSourceName, raceIsKnownToStartUpwindBox.getValue(), new AsyncCallback<Void>() {
                         @Override
                         public void onFailure(Throwable caught) {
                             errorReporter.reportError(WindPanel.this.stringConstants.errorWhileTryingToSetWindSourceForRace()+
@@ -343,6 +358,9 @@ public class WindPanel extends FormPanel implements EventDisplayer, RaceSelectio
                         }
                         @Override
                         public void onSuccess(Void result) {
+                            if (runOnSuccess != null) {
+                                runOnSuccess.run();
+                            }
                         }
                     });
         }

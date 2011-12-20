@@ -37,6 +37,12 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     
     private boolean raceIsKnownToStartUpwind;
     
+    /**
+     * The wind source to be used for all computations based on wind. Used as key into
+     * {@link #windTracks}. The default value is {@link WindSource#EXPEDITION}.
+     */
+    private WindSource currentWindSource;
+
     public DynamicTrackedRaceImpl(TrackedEvent trackedEvent, RaceDefinition race,
             WindStore windStore, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed) {
         super(trackedEvent, race, windStore, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed);
@@ -48,6 +54,7 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
         for (WindSource windSource : WindSource.values()) {
             getWindTrack(windSource).addListener(this);
         }
+        currentWindSource = WindSource.EXPEDITION;
     }
 
     @Override
@@ -294,4 +301,14 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
         return raceIsKnownToStartUpwind;
     }
     
+    @Override
+    public WindSource getWindSource() {
+        return this.currentWindSource;
+    }
+    
+    @Override
+    public void setWindSource(WindSource windSource) {
+        this.currentWindSource = windSource;
+    }
+
 }

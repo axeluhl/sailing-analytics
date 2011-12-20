@@ -155,8 +155,6 @@ public interface TrackedRace {
      */
     Wind getWind(Position p, TimePoint at);
 
-    void setWindSource(WindSource windSource);
-
     WindSource getWindSource();
 
     WindTrack getWindTrack(WindSource windSource);
@@ -208,6 +206,17 @@ public interface TrackedRace {
 
     TrackedEvent getTrackedEvent();
 
+    /**
+     * Computes a default wind direction based on the direction of the first leg at time <code>at</code>, with a default
+     * speed of one knot. Note that this wind direction can only be used if {@link #raceIsKnownToStartUpwind()} returns
+     * <code>true</code>.
+     * 
+     * @param at
+     *            usually the {@link #getStart() start time} should be used; if no valid start time is provided, the
+     *            current time point may serve as a default
+     * @return <code>null</code> in case the first leg's direction cannot be determined, e.g., because the necessary
+     *         mark positions are not known (yet)
+     */
     Wind getDirectionFromStartToNextMark(TimePoint at);
     
     /**

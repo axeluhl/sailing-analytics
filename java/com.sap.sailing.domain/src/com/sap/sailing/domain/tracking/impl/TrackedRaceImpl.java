@@ -97,12 +97,6 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
      */
     private final Map<WindSource, WindTrack> windTracks;
     
-    /**
-     * The wind source to be used for all computations based on wind. Used as key into
-     * {@link #windTracks}. The default value is {@link WindSource#EXPEDITION}.
-     */
-    private WindSource currentWindSource;
-
     private final Map<Buoy, GPSFixTrack<Buoy, GPSFix>> buoyTracks;
     
     private final long millisecondsOverWhichToAverageSpeed;
@@ -147,7 +141,6 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             windTracks.put(windSource, windStore.getWindTrack(trackedEvent, this, windSource, millisecondsOverWhichToAverageWind));
         }
         this.trackedEvent = trackedEvent;
-        currentWindSource = WindSource.EXPEDITION;
         competitorRankings = new HashMap<TimePoint, List<Competitor>>();
     }
 
@@ -399,15 +392,15 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     @Override
     public Wind getWind(Position p, TimePoint at) {
-        Wind result = getWindTrack(currentWindSource).getEstimatedWind(p, at);
+        Wind result = getWindTrack(getWindSource()).getEstimatedWind(p, at);
         if (result == null) {
             if (!warnedOfNoWindFromSelectedSource) {
-                logger.warning("Couldn't find any wind information for race "+getRace()+" from currently selected source "+currentWindSource+
+                logger.warning("Couldn't find any wind information for race "+getRace()+" from currently selected source "+getWindSource()+
                         ". Future warnings of this type will be suppressed for this race.");
                 warnedOfNoWindFromSelectedSource = true;
             }
             for (WindSource alternativeWindSource : WindSource.values()) {
-                if (alternativeWindSource != currentWindSource) {
+                if (alternativeWindSource != getWindSource()) {
                     result = getWindTrack(alternativeWindSource).getEstimatedWind(p, at);
                     if (result != null) {
                         if (!warnedOfUsingWindFromAlternativeWindSource) {
@@ -438,20 +431,14 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         Leg firstLeg = getRace().getCourse().getLegs().iterator().next();
         Position firstLegEnd = getApproximatePosition(firstLeg.getTo(), at);
         Position firstLegStart = getApproximatePosition(firstLeg.getFrom(), at);
-        result = new WindImpl(firstLegStart, at, new KnotSpeedWithBearingImpl(1.0, firstLegEnd.getBearingGreatCircle(firstLegStart)));
+        if (firstLegStart != null && firstLegEnd != null) {
+            result = new WindImpl(firstLegStart, at, new KnotSpeedWithBearingImpl(1.0, firstLegEnd.getBearingGreatCircle(firstLegStart)));
+        } else {
+            result = null;
+        }
         return result;
     }
     
-    @Override
-    public WindSource getWindSource() {
-        return this.currentWindSource;
-    }
-    
-    @Override
-    public void setWindSource(WindSource windSource) {
-        this.currentWindSource = windSource;
-    }
-
     @Override
     public TimePoint getTimePointOfNewestEvent() {
         return timePointOfNewestEvent;
