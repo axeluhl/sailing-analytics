@@ -61,7 +61,6 @@ public class ManeuverAnalysisTest505 extends KielWeek2011BasedTest {
         List<Maneuver> maneuvers = getTrackedRace().getManeuvers(competitor, new MillisecondsTimePoint(fromDate),
                 new MillisecondsTimePoint(toDate));
         maneuversInvalid = new ArrayList<Maneuver>(maneuvers);
-        printManeuvers(maneuvers);
 
         assertManeuver(maneuvers, Maneuver.Type.TACK,
                 new MillisecondsTimePoint(dateFormat.parse("06/23/2011-15:28:24")), TACK_TOLERANCE);
@@ -85,7 +84,6 @@ public class ManeuverAnalysisTest505 extends KielWeek2011BasedTest {
         List<Maneuver> maneuvers = getTrackedRace().getManeuvers(competitor, new MillisecondsTimePoint(fromDate),
                 new MillisecondsTimePoint(toDate));
         maneuversInvalid = new ArrayList<Maneuver>(maneuvers);
-        printManeuvers(maneuvers);
         
         assertManeuver(maneuvers, Maneuver.Type.TACK,
                 new MillisecondsTimePoint(dateFormat.parse("06/23/2011-15:28:24")), TACK_TOLERANCE);
@@ -193,36 +191,6 @@ public class ManeuverAnalysisTest505 extends KielWeek2011BasedTest {
                             + maneuver.getTimePoint());
                 }
             }
-        }
-    }
-
-    private void printManeuvers(List<Maneuver> list) {
-        List<Maneuver> tackManeuvers = new ArrayList<Maneuver>();
-        List<Maneuver> jibeManeuvers = new ArrayList<Maneuver>();
-        List<Maneuver> penaltyManeuvers = new ArrayList<Maneuver>();
-        for (Maneuver maneuver : list) {
-            if (maneuver.getType().equals(Maneuver.Type.TACK)) {
-                tackManeuvers.add(maneuver);
-            } else if (maneuver.getType().equals(Maneuver.Type.JIBE)) {
-                jibeManeuvers.add(maneuver);
-            } else if (maneuver.getType().equals(Maneuver.Type.PENALTY_CIRCLE)) {
-                penaltyManeuvers.add(maneuver);
-            }
-        }
-        System.out.println("\nTACKS:");
-        for (Maneuver maneuver : tackManeuvers) {
-            System.out.println(dateFormat.format(maneuver.getTimePoint().asDate()));
-            System.out.println(maneuver.getTimePoint().asMillis());
-        }
-        System.out.println("\nJIBES:");
-        for (Maneuver maneuver : jibeManeuvers) {
-            System.out.println(dateFormat.format(maneuver.getTimePoint().asDate()));
-            System.out.println(maneuver.getTimePoint().asMillis());
-        }
-        System.out.println("\nPENALTY CIRCLES:");
-        for (Maneuver maneuver : penaltyManeuvers) {
-            System.out.println(dateFormat.format(maneuver.getTimePoint().asDate()));
-            System.out.println(maneuver.getTimePoint().asMillis());
         }
     }
 }
