@@ -51,7 +51,7 @@ public class ManeuverAnalysis505Test extends KielWeek2011BasedTest {
      * Tests the 505 Race 2 for competitor "Findel" at a time where the maneuver detection test is likely to fail
      */
     @Test
-    public void testDouglasPeuckerForFindelCriticalDetection() throws ParseException, NoWindException {
+    public void testManeuversForFindelCriticalDetection() throws ParseException, NoWindException {
         Competitor competitor = getCompetitorByName("Findel");
         assertNotNull(competitor);
         Date fromDate = dateFormat.parse("06/23/2011-15:28:00");
@@ -74,7 +74,7 @@ public class ManeuverAnalysis505Test extends KielWeek2011BasedTest {
      * Test for 505 Race 2 for competitor "Findel"
      */
     @Test
-    public void testDouglasPeuckerForFindel() throws ParseException, NoWindException {
+    public void testManeuversForFindel() throws ParseException, NoWindException {
         Competitor competitor = getCompetitorByName("Findel");
         assertNotNull(competitor);
         Date fromDate = dateFormat.parse("06/23/2011-15:28:04");
@@ -187,8 +187,7 @@ public class ManeuverAnalysis505Test extends KielWeek2011BasedTest {
         for (Maneuver maneuver : maneuversNotDetected) {
             for (Maneuver.Type type : maneuverTypesFound) {
                 if (maneuver.getType().equals(type)) {
-                    fail("The maneuver detectionTest did not detect the maneuver " + maneuver.getType() + " around "
-                            + maneuver.getTimePoint());
+                    fail("The maneuver "+maneuver+" was detected but not expected");
                 }
             }
         }
