@@ -52,7 +52,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
      * A scheduler for the periodic checks of the paramURL documents for the advent of {@link ControlPoint}s
      * with static position information otherwise not available through {@link MarkPassingReceiver}'s events.
      */
-    private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+    static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     
     private final Event tractracEvent;
     private final com.sap.sailing.domain.base.Event domainEvent;
@@ -112,7 +112,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         // Initialize data controller using live and stored data sources
         controller = new DataController(liveURI, storedURI, this);
         // Start live and stored data streams
-        ioThread = new Thread(controller, "io");
+        ioThread = new Thread(controller, "I/O for event "+tractracEvent.getName()+", race URL "+paramURL);
         for (Race tractracRace : tractracEvent.getRaceList()) {
             // removeRace may detach the domain event from the domain factory if that
             // removed the last race; therefore, it's important to getOrCreate the

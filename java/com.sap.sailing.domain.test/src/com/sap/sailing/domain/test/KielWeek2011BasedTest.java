@@ -98,7 +98,7 @@ public abstract class KielWeek2011BasedTest extends AbstractTracTracLiveTest {
         }
         addListenersForStoredDataAndStartController(receivers);
         Race tractracRace = getEvent().getRaceList().iterator().next();
-        // now we expect that there is no 
+        // now we expect that there is no RaceDefinition for the TracTrac race yet:
         assertNull(domainFactory.getExistingRaceDefinitionForRace(tractracRace));
         race = getDomainFactory().getAndWaitForRaceDefinition(tractracRace);
         assertNotNull(race);
@@ -107,9 +107,10 @@ public abstract class KielWeek2011BasedTest extends AbstractTracTracLiveTest {
                 getSemaphor().wait();
             }
         }
-        Thread.sleep(1000); // storedDataEnd() isn't necessarily synchronized with the controllers/listeners pumping data; wait a bit to receive it all
         for (Receiver receiver : receivers) {
-            receiver.stopAfterProcessingQueuedEvents();
+            receiver.stopAfterNotReceivingEventsForSomeTime(/* timeoutInMilliseconds */ 5000l);
+        }
+        for (Receiver receiver : receivers) {
             receiver.join();
         }
         trackedRace = getTrackedEvent().getTrackedRace(race);

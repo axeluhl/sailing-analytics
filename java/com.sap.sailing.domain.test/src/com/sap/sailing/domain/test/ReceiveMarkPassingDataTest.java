@@ -85,6 +85,10 @@ public class ReceiveMarkPassingDataTest extends AbstractTracTracLiveTest {
             @Override
             public void join(long timeoutInMilliseconds) {
             }
+
+            @Override
+            public void stopAfterNotReceivingEventsForSomeTime(long timeoutInMilliseconds) {
+            }
         };
         List<Receiver> receivers = new ArrayList<Receiver>();
         receivers.add(receiver);
