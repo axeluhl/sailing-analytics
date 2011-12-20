@@ -13,8 +13,6 @@ import com.google.gwt.cell.client.ActionCell;
 import com.google.gwt.cell.client.ActionCell.Delegate;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.cellview.client.CellTable;
@@ -26,7 +24,6 @@ import com.google.gwt.user.cellview.client.ColumnSortList.ColumnSortInfo;
 import com.google.gwt.user.cellview.client.IdentityColumn;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.Grid;
@@ -49,7 +46,6 @@ public class WindPanel extends FormPanel implements EventDisplayer, RaceSelectio
     private static final String WEB_WIND_SOURCE_NAME = "WEB";
     private final SailingServiceAsync sailingService;
     private final ErrorReporter errorReporter;
-    private EventRefresher eventRefresher;
     private final Grid grid;
     private final StringConstants stringConstants;
     private final WindSettingPanel windSettingPanel;
@@ -67,10 +63,10 @@ public class WindPanel extends FormPanel implements EventDisplayer, RaceSelectio
     private final Map<String, ListDataProvider<WindDAO>> windLists;
     private final CheckBox showEstimatedWindBox;
 
-    public WindPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter, EventRefresher eventRefresher, StringConstants stringConstants) {
+    public WindPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
+            EventRefresher eventRefresher, StringConstants stringConstants) {
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
-        this.eventRefresher = eventRefresher;
         this.stringConstants = stringConstants;
         raceSelectionChangeListeners = new HashSet<RaceSelectionChangeListener>();
         windLists = new HashMap<String, ListDataProvider<WindDAO>>();
@@ -134,14 +130,6 @@ public class WindPanel extends FormPanel implements EventDisplayer, RaceSelectio
         grid = new Grid(3, 2); // first row: event/race selection; second row: wind source selection; third row: wind display
         trackedEvnetsComposite = new TrackedEventsComposite(sailingService, errorReporter, eventRefresher, stringConstants, false);
         grid.setWidget(0, 0, trackedEvnetsComposite);
-        Button btnRefresh = new Button(stringConstants.refresh());
-        btnRefresh.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                WindPanel.this.eventRefresher.fillEvents();
-            }
-        });
-        grid.setWidget(0, 1, btnRefresh);
         windSettingPanel = new WindSettingPanel(sailingService, errorReporter, this, this);
         HorizontalPanel windSourceSelectionPanel = new HorizontalPanel();
         windSourceSelectionPanel.setSpacing(10);
