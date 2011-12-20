@@ -35,9 +35,12 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     
     private Set<RaceChangeListener<Competitor>> listeners;
     
+    private boolean raceIsKnownToStartUpwind;
+    
     public DynamicTrackedRaceImpl(TrackedEvent trackedEvent, RaceDefinition race,
             WindStore windStore, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed) {
         super(trackedEvent, race, windStore, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed);
+        this.raceIsKnownToStartUpwind = race.getBoatClass().typicallyStartsUpwind();
         for (Competitor competitor : getRace().getCompetitors()) {
             DynamicGPSFixTrack<Competitor, GPSFixMoving> track = getTrack(competitor);
             track.addListener(this);
@@ -281,4 +284,14 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
         return (DynamicTrackedEvent) super.getTrackedEvent();
     }
 
+    @Override
+    public void setRaceIsKnownToStartUpwind(boolean raceIsKnownToStartUpwind) {
+        this.raceIsKnownToStartUpwind = raceIsKnownToStartUpwind;
+    }
+
+    @Override
+    public boolean raceIsKnownToStartUpwind() {
+        return raceIsKnownToStartUpwind;
+    }
+    
 }

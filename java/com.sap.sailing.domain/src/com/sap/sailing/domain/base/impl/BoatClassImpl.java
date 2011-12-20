@@ -19,8 +19,11 @@ public class BoatClassImpl extends NamedImpl implements BoatClass {
     
     private final long approximateManeuverDurationInMilliseconds;
 
-    public BoatClassImpl(String name) {
+    private final  boolean alwaysStartsUpwind;
+
+    public BoatClassImpl(String name, boolean alwaysStartsUpwind) {
         super(name);
+        this.alwaysStartsUpwind = alwaysStartsUpwind;
         approximateManeuverDurationInMilliseconds = 8000; // as discussed with Dennis Gehrlein
     }
 
@@ -47,6 +50,11 @@ public class BoatClassImpl extends NamedImpl implements BoatClass {
     @Override
     public Distance getMaximumDistanceForCourseApproximation() {
         return MAXIMUM_DISTANCE_FOR_COURSE_APPROXIMATION;
+    }
+
+    @Override
+    public boolean typicallyStartsUpwind() {
+        return alwaysStartsUpwind;
     }
 
 }

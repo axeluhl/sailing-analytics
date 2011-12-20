@@ -14,6 +14,7 @@ import com.sap.sailing.domain.base.Tack;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.DouglasPeucker;
+import com.sap.sailing.domain.tracking.TrackedLeg.LegType;
 
 /**
  * Live tracking data of a single race. The race follows a defined {@link Course} with a sequence of {@link Leg}s. The
@@ -221,4 +222,12 @@ public interface TrackedRace {
      *         this race between <code>from</code> and <code>to</code>.
      */
     List<Maneuver> getManeuvers(Competitor competitor, TimePoint from, TimePoint to) throws NoWindException;
+
+    /**
+     * @return <code>true</code> if this race is known to start with an {@link LegType#UPWIND upwind} leg.
+     * If this is the case, the wind estimation may default to using the first leg's direction at race start
+     * time as the direction the wind comes from.
+     */
+    boolean raceIsKnownToStartUpwind();
+    
 }

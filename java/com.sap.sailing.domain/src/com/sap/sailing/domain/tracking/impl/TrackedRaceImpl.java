@@ -112,7 +112,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     private boolean warnedOfNoWindFromSelectedSource;
 
     private boolean warnedOfUsingLegDirectionAsWindEstimation;
-    
+
     public TrackedRaceImpl(TrackedEvent trackedEvent, RaceDefinition race, WindStore windStore,
             long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed) {
         super();
@@ -419,13 +419,14 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                     }
                 }
             }
-            if (result == null) {
+            if (result == null && raceIsKnownToStartUpwind()) {
                 if (!warnedOfUsingLegDirectionAsWindEstimation) {
-                    logger.warning("Found no other wind settings either; using starting leg direction as guess for wind direction. Force assumed as 1 knot."+
-                            " Future warnings of this type will be suppressed for this race.");
+                    logger.warning("Found no other wind settings either; using starting leg direction at start time as guess for wind direction. "
+                            + "Force assumed as 1 knot. Future warnings of this type will be suppressed for this race.");
                     warnedOfUsingLegDirectionAsWindEstimation = true;
                 }
-                result = getDirectionFromStartToNextMark(at);
+                TimePoint starttime = getStart();
+                result = getDirectionFromStartToNextMark(starttime == null ? at : starttime);
             }
         }
         return result;

@@ -423,4 +423,15 @@ public class MockedTrackedRace implements DynamicTrackedRace {
         return null;
     }
 
+    @Override
+    public boolean raceIsKnownToStartUpwind() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public void setRaceIsKnownToStartUpwind(boolean raceIsKnownToStartUpwind) {
+        // TODO Auto-generated method stub
+    }
+
 }

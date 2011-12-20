@@ -8,11 +8,14 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Boat;
@@ -89,9 +92,13 @@ public class DomainFactoryImpl implements DomainFactory {
             new HashMap<Pair<String, String>, com.sap.sailing.domain.base.Event>();
     
     private final Map<Race, RaceDefinition> raceCache = new HashMap<Race, RaceDefinition>();
+
+    private final Set<String> typicallyUpwindStartingBoatClassNames;
     
     public DomainFactoryImpl(com.sap.sailing.domain.base.DomainFactory baseDomainFactory) {
         this.baseDomainFactory = baseDomainFactory;
+        typicallyUpwindStartingBoatClassNames = new HashSet<String>(Arrays.asList(new String[] { "24mr", "Finn", "Radial",
+                "470", "Star", "49er" }));
     }
 
     @Override
@@ -196,7 +203,8 @@ public class DomainFactoryImpl implements DomainFactory {
 
     @Override
     public BoatClass getOrCreateBoatClass(CompetitorClass competitorClass) {
-        return baseDomainFactory.getOrCreateBoatClass(competitorClass == null ? "" : competitorClass.getName());
+        return baseDomainFactory.getOrCreateBoatClass(competitorClass == null ? "" : competitorClass.getName(),
+                /* typicallyStartsUpwind */ typicallyUpwindStartingBoatClassNames.contains(competitorClass.getName()));
     }
 
     @Override

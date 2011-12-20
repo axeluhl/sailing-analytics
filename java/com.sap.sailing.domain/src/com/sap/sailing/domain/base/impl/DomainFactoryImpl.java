@@ -76,11 +76,11 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public BoatClass getOrCreateBoatClass(String name) {
+    public BoatClass getOrCreateBoatClass(String name, boolean typicallyStartsUpwind) {
         synchronized (boatClassCache) {
             BoatClass result = boatClassCache.get(name);
             if (result == null) {
-                result = new BoatClassImpl(name);
+                result = new BoatClassImpl(name, typicallyStartsUpwind);
                 boatClassCache.put(name, result);
             }
             return result;
