@@ -43,7 +43,7 @@ public class ManeuverAnalysisTest505 extends KielWeek2011BasedTest {
         getTrackedRace().setWindSource(WindSource.WEB);
         getTrackedRace().recordWind(
                 new WindImpl(/* position */null, MillisecondsTimePoint.now(), new KnotSpeedWithBearingImpl(12,
-                        new DegreeBearingImpl(70))), WindSource.WEB);
+                        new DegreeBearingImpl(65))), WindSource.WEB);
         dateFormat = new SimpleDateFormat("MM/dd/yyyy-HH:mm:ss");
     }
     
@@ -78,16 +78,17 @@ public class ManeuverAnalysisTest505 extends KielWeek2011BasedTest {
     public void testDouglasPeuckerForFindel() throws ParseException, NoWindException {
         Competitor competitor = getCompetitorByName("Findel");
         assertNotNull(competitor);
-        Date fromDate = dateFormat.parse("06/23/2011-15:28:20");
+        Date fromDate = dateFormat.parse("06/23/2011-15:28:04");
         Date toDate = dateFormat.parse("06/23/2011-16:38:01");
         assertNotNull(fromDate);
         assertNotNull(toDate);
         List<Maneuver> maneuvers = getTrackedRace().getManeuvers(competitor, new MillisecondsTimePoint(fromDate),
                 new MillisecondsTimePoint(toDate));
         maneuversInvalid = new ArrayList<Maneuver>(maneuvers);
-
+        printManeuvers(maneuvers);
+        
         assertManeuver(maneuvers, Maneuver.Type.TACK,
-                new MillisecondsTimePoint(dateFormat.parse("06/23/2011-15:28:30")), TACK_TOLERANCE);
+                new MillisecondsTimePoint(dateFormat.parse("06/23/2011-15:28:24")), TACK_TOLERANCE);
         assertManeuver(maneuvers, Maneuver.Type.TACK,
                 new MillisecondsTimePoint(dateFormat.parse("06/23/2011-15:38:01")), TACK_TOLERANCE);
         assertManeuver(maneuvers, Maneuver.Type.TACK,
@@ -96,7 +97,7 @@ public class ManeuverAnalysisTest505 extends KielWeek2011BasedTest {
                 new MillisecondsTimePoint(dateFormat.parse("06/23/2011-15:40:52")), TACK_TOLERANCE);
 
         assertManeuver(maneuvers, Maneuver.Type.JIBE,
-                new MillisecondsTimePoint(dateFormat.parse("06/23/2011-15:46:13")), JIBE_TOLERANCE);
+                new MillisecondsTimePoint(dateFormat.parse("06/23/2011-15:46:07")), JIBE_TOLERANCE);
         assertManeuver(maneuvers, Maneuver.Type.JIBE,
                 new MillisecondsTimePoint(dateFormat.parse("06/23/2011-15:49:06")), JIBE_TOLERANCE);
         assertManeuver(maneuvers, Maneuver.Type.JIBE,
