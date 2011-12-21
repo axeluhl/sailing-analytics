@@ -4,6 +4,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -11,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.Competitor;
@@ -24,7 +26,7 @@ import com.sap.sailing.domain.tracking.WindSource;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
 
-public class ManeuverAnalysis505Test extends KielWeek2011BasedTest {
+public class ManeuverAnalysis505Test extends OnlineTracTracBasedTest {
 
     private SimpleDateFormat dateFormat;
     private static final int TACK_TOLERANCE = 7000;
@@ -33,13 +35,17 @@ public class ManeuverAnalysis505Test extends KielWeek2011BasedTest {
 
     private List<Maneuver> maneuversInvalid;
 
-    public ManeuverAnalysis505Test() throws URISyntaxException, IOException, InterruptedException {
+    public ManeuverAnalysis505Test() throws MalformedURLException, URISyntaxException {
         super();
+    }
+
+    @Before
+    public void setUp() throws URISyntaxException, IOException, InterruptedException {
         super.setUp();
         super.setUp("event_20110609_KielerWoch",
         /* raceId */"357c700a-9d9a-11e0-85be-406186cbf87c", new ReceiverType[] { ReceiverType.MARKPASSINGS,
                 ReceiverType.RACECOURSE, ReceiverType.RAWPOSITIONS });
-        KielWeek2011BasedTest.fixApproximateMarkPositionsForWindReadOut(getTrackedRace());
+        OnlineTracTracBasedTest.fixApproximateMarkPositionsForWindReadOut(getTrackedRace());
         getTrackedRace().setWindSource(WindSource.WEB);
         getTrackedRace().recordWind(
                 new WindImpl(/* position */null, MillisecondsTimePoint.now(), new KnotSpeedWithBearingImpl(12,

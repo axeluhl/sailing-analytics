@@ -20,6 +20,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.RunnableFuture;
 import java.util.logging.Logger;
 
 import javax.servlet.ServletContext;
@@ -66,6 +73,7 @@ import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
+import com.sap.sailing.domain.tracking.NoWindError;
 import com.sap.sailing.domain.tracking.NoWindException;
 import com.sap.sailing.domain.tracking.RacesHandle;
 import com.sap.sailing.domain.tracking.TrackedLeg.LegType;
@@ -82,8 +90,8 @@ import com.sap.sailing.domain.tractracadapter.TracTracConfiguration;
 import com.sap.sailing.gwt.ui.client.SailingService;
 import com.sap.sailing.gwt.ui.shared.BoatClassDAO;
 import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
-import com.sap.sailing.gwt.ui.shared.CompetitorsAndTimePointsDAO;
 import com.sap.sailing.gwt.ui.shared.CompetitorInRaceDAO;
+import com.sap.sailing.gwt.ui.shared.CompetitorsAndTimePointsDAO;
 import com.sap.sailing.gwt.ui.shared.EventDAO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDAO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDAO;
@@ -142,6 +150,8 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     private final com.sap.sailing.domain.tractracadapter.persistence.DomainObjectFactory tractracDomainObjectFactory;
     
     private final com.sap.sailing.util.CountryCodeFactory countryCodeFactory;
+    
+    private final Executor executor;
 
     public SailingServiceImpl() {
         BundleContext context = Activator.getDefault();
@@ -153,6 +163,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         tractracMongoObjectFactory = com.sap.sailing.domain.tractracadapter.persistence.MongoObjectFactory.INSTANCE;
         swissTimingFactory = SwissTimingFactory.INSTANCE;
         countryCodeFactory = com.sap.sailing.util.CountryCodeFactory.INSTANCE;
+        executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
     }
 
     protected ServiceTracker<RacingEventService, RacingEventService> createAndOpenRacingEventServiceTracker(
@@ -165,14 +176,14 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     
     @Override
     public LeaderboardDAO getLeaderboardByName(String leaderboardName, Date date,
-            Collection<String> namesOfRacesForWhichToLoadLegDetails)
+            final Collection<String> namesOfRacesForWhichToLoadLegDetails)
             throws NoWindException {
         long startOfRequestHandling = System.currentTimeMillis();
         LeaderboardDAO result = null;
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         if (leaderboard != null) {
             result = new LeaderboardDAO();
-            TimePoint timePoint = new MillisecondsTimePoint(date);
+            final TimePoint timePoint = new MillisecondsTimePoint(date);
             result.competitors = new ArrayList<CompetitorDAO>();
             result.name = leaderboard.getName();
             result.competitorDisplayNames = new HashMap<CompetitorDAO, String>();
@@ -182,21 +193,41 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             result.rows = new HashMap<CompetitorDAO, LeaderboardRowDAO>();
             result.hasCarriedPoints = leaderboard.hasCarriedPoints();
             result.discardThresholds = leaderboard.getResultDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces();
-            for (Competitor competitor : leaderboard.getCompetitors()) {
+            for (final Competitor competitor : leaderboard.getCompetitors()) {
                 CompetitorDAO competitorDAO = getCompetitorDAO(competitor);
                 LeaderboardRowDAO row = new LeaderboardRowDAO();
                 row.competitor = competitorDAO;
                 row.fieldsByRaceName = new HashMap<String, LeaderboardEntryDAO>();
                 row.carriedPoints = leaderboard.hasCarriedPoints(competitor) ? leaderboard.getCarriedPoints(competitor) : null;
                 result.competitors.add(competitorDAO);
-                for (RaceInLeaderboard raceColumn : leaderboard.getRaceColumns()) {
-                    Entry entry = leaderboard.getEntry(competitor, raceColumn, timePoint);
-                    LeaderboardEntryDAO entryDAO = getLeaderboardEntryDAO(entry, raceColumn.getTrackedRace(),
-                            competitor, timePoint, namesOfRacesForWhichToLoadLegDetails != null
-                                    && namesOfRacesForWhichToLoadLegDetails.contains(raceColumn.getName()));
-                    row.fieldsByRaceName.put(raceColumn.getName(), entryDAO);
-                    result.rows.put(competitorDAO, row);
+                Map<String, Future<LeaderboardEntryDAO>> futuresForColumnName = new HashMap<String, Future<LeaderboardEntryDAO>>();
+                for (final RaceInLeaderboard raceColumn : leaderboard.getRaceColumns()) {
+                    final Entry entry = leaderboard.getEntry(competitor, raceColumn, timePoint);
+                    RunnableFuture<LeaderboardEntryDAO> future = new FutureTask<LeaderboardEntryDAO>(new Callable<LeaderboardEntryDAO>() {
+                        @Override
+                                public LeaderboardEntryDAO call() {
+                                    try {
+                                        return getLeaderboardEntryDAO(entry, raceColumn.getTrackedRace(), competitor, timePoint,
+                                                namesOfRacesForWhichToLoadLegDetails != null
+                                                        && namesOfRacesForWhichToLoadLegDetails.contains(raceColumn.getName()));
+                                    } catch (NoWindException e) {
+                                        throw new NoWindError(e);
+                                    }
+                                }
+                    });
+                    executor.execute(future);
+                    futuresForColumnName.put(raceColumn.getName(), future);
                 }
+                for (Map.Entry<String, Future<LeaderboardEntryDAO>> raceColumnNameAndFuture : futuresForColumnName.entrySet()) {
+                    try {
+                        row.fieldsByRaceName.put(raceColumnNameAndFuture.getKey(), raceColumnNameAndFuture.getValue().get());
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    } catch (ExecutionException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+                result.rows.put(competitorDAO, row);
                 String displayName = leaderboard.getDisplayName(competitor);
                 if (displayName != null) {
                     result.competitorDisplayNames.put(competitorDAO, displayName);
