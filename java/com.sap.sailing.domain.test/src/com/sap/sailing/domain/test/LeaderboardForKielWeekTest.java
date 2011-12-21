@@ -22,7 +22,7 @@ import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
 import com.sap.sailing.util.Util.Pair;
 
-public class LeaderboardForKielWeekTest extends KielWeek2011BasedTest {
+public class LeaderboardForKielWeekTest extends OnlineTracTracBasedTest {
 
     private LeaderboardImpl leaderboard;
 

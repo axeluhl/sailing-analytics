@@ -22,7 +22,7 @@ import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
 import com.sap.sailing.util.Util;
 
-public class WindEstimationOnKielerWoche505Race2DataTest extends KielWeek2011BasedTest {
+public class WindEstimationOnKielerWoche505Race2DataTest extends OnlineTracTracBasedTest {
 
     public WindEstimationOnKielerWoche505Race2DataTest() throws MalformedURLException, URISyntaxException {
     }
@@ -32,7 +32,7 @@ public class WindEstimationOnKielerWoche505Race2DataTest extends KielWeek2011Bas
         super.setUp();
         super.setUp("event_20110609_KielerWoch",
                 /* raceId */ "357c700a-9d9a-11e0-85be-406186cbf87c", new ReceiverType[] { ReceiverType.MARKPASSINGS, ReceiverType.RACECOURSE, ReceiverType.RAWPOSITIONS });
-        KielWeek2011BasedTest.fixApproximateMarkPositionsForWindReadOut(getTrackedRace());
+        OnlineTracTracBasedTest.fixApproximateMarkPositionsForWindReadOut(getTrackedRace());
         getTrackedRace().setWindSource(WindSource.WEB);
         getTrackedRace().recordWind(new WindImpl(/* position */ null, MillisecondsTimePoint.now(),
                 new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(70))), WindSource.WEB);

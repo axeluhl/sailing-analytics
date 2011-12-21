@@ -39,17 +39,17 @@ import com.sap.sailing.domain.tractracadapter.impl.DomainFactoryImpl;
 import com.tractrac.clientmodule.Race;
 
 /**
- * Connects to the Kieler Woche 2011 TracTrac data of the 505 Race 2. Subclasses should implement a @Before method which
- * calls {@link #setUp(String, String, ReceiverType[])} with a useful set of receiver types and the race they want to observe /
- * load, or they should call {@link #setUp(String, String, ReceiverType[])} at the beginning of each respective test in case
- * they want to select/load different races for different tests. When all stored data has been received, the
+ * Connects to TracTrac data. Subclasses should implement a @Before method which calls
+ * {@link #setUp(String, String, ReceiverType[])} with a useful set of receiver types and the race they want to observe
+ * / load, or they should call {@link #setUp(String, String, ReceiverType[])} at the beginning of each respective test
+ * in case they want to select/load different races for different tests. When all stored data has been received, the
  * {@link #getSemaphor() semaphor} is notified. Therefore, a typical pattern for subclasses should be to invoke
  * {@link #setUp(ReceiverType[])}, then wait on the semaphor before starting with test processing.
  * 
  * @author Axel Uhl (d043530)
  * 
  */
-public abstract class KielWeek2011BasedTest extends AbstractTracTracLiveTest {
+public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
     private DomainFactoryImpl domainFactory;
     private Event domainEvent;
     private DynamicTrackedEvent trackedEvent;
@@ -64,7 +64,7 @@ public abstract class KielWeek2011BasedTest extends AbstractTracTracLiveTest {
      */
     private boolean storedDataLoaded;
 
-    protected KielWeek2011BasedTest() throws MalformedURLException, URISyntaxException {
+    protected OnlineTracTracBasedTest() throws MalformedURLException, URISyntaxException {
         super();
     }
     
