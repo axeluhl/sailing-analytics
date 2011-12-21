@@ -9,7 +9,6 @@ import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.Speed;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.TimePoint;
-import com.sap.sailing.domain.base.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.base.impl.KilometersPerHourSpeedImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.tracking.GPSFix;
@@ -42,30 +41,30 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends DynamicTrackImpl<Ite
     protected SpeedWithBearing getEstimatedSpeed(TimePoint at, NavigableSet<GPSFixMoving> fixesToUseForSpeedEstimation) {
         List<GPSFixMoving> relevantFixes = getFixesRelevantForSpeedEstimation(at, fixesToUseForSpeedEstimation);
         double knotSum = 0;
-        double bearingDegSum = 0; // FIXME can't just add bearing angles; consider 355deg and 005deg
+        BearingCluster bearingCluster = new BearingCluster();
         int count = 0;
         if (!relevantFixes.isEmpty()) {
             Iterator<GPSFixMoving> fixIter = relevantFixes.iterator();
             GPSFixMoving last = fixIter.next();
             knotSum = last.getSpeed().getKnots();
-            bearingDegSum = last.getSpeed().getBearing().getDegrees();
+            bearingCluster.add(last.getSpeed().getBearing());
             count = 1;
             while (fixIter.hasNext()) {
                 // add to average the position and time difference
                 GPSFixMoving next = fixIter.next();
                 knotSum += last.getPosition().getDistance(next.getPosition())
                         .inTime(next.getTimePoint().asMillis() - last.getTimePoint().asMillis()).getKnots();
-                bearingDegSum += last.getPosition().getBearingGreatCircle(next.getPosition()).getDegrees();
+                bearingCluster.add(last.getPosition().getBearingGreatCircle(next.getPosition()));
                 count++;
                 
                 // add to average the speed and bearing provided by the GPSFixMoving
                 knotSum += next.getSpeed().getKnots();
-                bearingDegSum += next.getSpeed().getBearing().getDegrees();
+                bearingCluster.add(next.getSpeed().getBearing());
                 count++;
                 last = next;
             }
         }
-        SpeedWithBearing avgSpeed = new KnotSpeedWithBearingImpl(knotSum / count, new DegreeBearingImpl(bearingDegSum/count));
+        SpeedWithBearing avgSpeed = new KnotSpeedWithBearingImpl(knotSum / count, bearingCluster.getAverage());
         return avgSpeed;
     }
     

@@ -15,7 +15,6 @@ import com.sap.sailing.domain.base.Speed;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.Timed;
-import com.sap.sailing.domain.base.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindListener;
@@ -111,7 +110,7 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
         Iterator<Wind> beforeIter = beforeSet.descendingIterator();
         Iterator<Wind> afterIter = afterSet.iterator();
         double knotSum = 0;
-        double bearingDegSum = 0; // FIXME can't just add up bearings; consider 355deg vs. 005 deg!!!
+        BearingCluster bearingCluster = new BearingCluster();
         int count = 0;
         long beforeDistanceToAt = 0;
         long afterDistanceToAt = 0;
@@ -135,7 +134,7 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
                     beforeIntervalEnd = beforeWind.getTimePoint();
                 }
                 knotSum += beforeWind.getKnots();
-                bearingDegSum += beforeWind.getBearing().getDegrees();
+                bearingCluster.add(beforeWind.getBearing());
                 count++;
                 if (beforeIter.hasNext()) {
                     beforeWind = beforeIter.next();
@@ -149,7 +148,7 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
                     afterIntervalStart = afterWind.getTimePoint();
                 }
                 knotSum += afterWind.getKnots();
-                bearingDegSum += afterWind.getBearing().getDegrees();
+                bearingCluster.add(afterWind.getBearing());
                 count++;
                 if (afterIter.hasNext()) {
                     afterWind = afterIter.next();
@@ -163,7 +162,7 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
         if (count == 0) {
             return null;
         } else {
-            SpeedWithBearing avgWindSpeed = new KnotSpeedWithBearingImpl(knotSum / count, new DegreeBearingImpl(bearingDegSum/count));
+            SpeedWithBearing avgWindSpeed = new KnotSpeedWithBearingImpl(knotSum / count, bearingCluster.getAverage());
             return new WindImpl(p, at, avgWindSpeed);
         }
     }

@@ -11,7 +11,6 @@ import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.Speed;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.TimePoint;
-import com.sap.sailing.domain.base.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
@@ -267,7 +266,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         NavigableSet<GPSFix> gpsFixesToUseForSpeedEstimation = (NavigableSet<GPSFix>) fixesToUseForSpeedEstimation;
         List<GPSFix> relevantFixes = getFixesRelevantForSpeedEstimation(at, gpsFixesToUseForSpeedEstimation);
         double knotSum = 0;
-        double bearingDegSum = 0; // FIXME can't just add bearings; consider 355deg vs. 005deg!!!
+        BearingCluster bearingCluster = new BearingCluster();
         int count = 0;
         if (!relevantFixes.isEmpty()) {
             Iterator<GPSFix> fixIter = relevantFixes.iterator();
@@ -276,12 +275,12 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
                 GPSFix next = fixIter.next();
                 knotSum += last.getPosition().getDistance(next.getPosition())
                         .inTime(next.getTimePoint().asMillis() - last.getTimePoint().asMillis()).getKnots();
-                bearingDegSum += last.getPosition().getBearingGreatCircle(next.getPosition()).getDegrees();
+                bearingCluster.add(last.getPosition().getBearingGreatCircle(next.getPosition()));
                 count++;
                 last = next;
             }
         }
-        SpeedWithBearing avgSpeed = new KnotSpeedWithBearingImpl(knotSum / count, new DegreeBearingImpl(bearingDegSum/count));
+        SpeedWithBearing avgSpeed = new KnotSpeedWithBearingImpl(knotSum / count, bearingCluster.getAverage());
         return avgSpeed;
     }
 
