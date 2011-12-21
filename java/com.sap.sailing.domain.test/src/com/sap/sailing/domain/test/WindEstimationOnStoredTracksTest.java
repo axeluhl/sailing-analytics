@@ -9,6 +9,7 @@ import java.io.IOException;
 
 import org.junit.Test;
 
+import com.sap.sailing.domain.base.Bearing;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.impl.DegreeBearingImpl;
@@ -38,6 +39,17 @@ public class WindEstimationOnStoredTracksTest extends StoredTrackBasedTestWithTr
         assertFalse(splitResult[1].isEmpty());
         assertEquals(322, splitResult[0].getAverage().getDegrees(), 1);
         assertEquals(30, splitResult[1].getAverage().getDegrees(), 1);
+    }
+    
+    @Test
+    public void testBearingClusterAverageAcrossZero() {
+        BearingCluster cluster = new BearingCluster();
+        Bearing b1 = new DegreeBearingImpl(355);
+        Bearing b2 = new DegreeBearingImpl(5);
+        cluster.add(b1);
+        cluster.add(b2);
+        Bearing average = cluster.getAverage();
+        assertEquals(0, average.getDegrees(), 0.00000001);
     }
     
     @Test
