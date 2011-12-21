@@ -196,6 +196,6 @@ public class WindTest {
         // expectation: take two from left (because they are closer than AVERAGING_INTERVAL_MILLIS apart), one from right side:
         assertEquals((wind1.getKnots() + wind2.getKnots() + wind3.getKnots()) / 3, result.getKnots(), 0.000000001);
         assertEquals((wind1.getBearing().getDegrees() + wind2.getBearing().getDegrees() + wind3.getBearing()
-                .getDegrees()) / 3, result.getBearing().getDegrees(), 0.0000000001);
+                .getDegrees()) / 3, result.getBearing().getDegrees(), 0.1);
     }
 }
