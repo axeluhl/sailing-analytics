@@ -1,0 +1,57 @@
+This file explains the development environment and some typical usecases you will need to work with race analysis project.
+
+IDE
+---
+We use Eclipse as development environment - version 3.7.x (www.eclipse.org)
+
+Additional mandatory installations:
+- Git (file versioning system)
+- Maven 3.x (build system)
+
+These further add-ons are recommended:
+- 
+
+
+Configure the IDE
+-----------------
+After the import of all required projects from git into your eclipse workspace you need to setup the target platform.
+A target platform is an Eclipse concept to define the set of java classes (from a set of jars) your compiler can use to build the sources.
+We have defined a target-platform for the project which can be found inside the project "com.sap.sailing.targetplatform" in the folder 'definitions'.
+There you will find 3 definitions: race-analysis-p2-ide-local, race-analysis-p2-maven-local and race-analysis-p2-maven-central
+The definition 'race-analysis-p2-ide-local' is intended to be used for the IDE whereas the other definitions are used for the local and central maven build.
+The target definition contains a list of URLs to different p2 repositories containing the actual bundles. The URLs can be either URLs to local or remote repositories
+depending on your access to those repositories. Normally you should bind your target platform to central (remote) repositories in order to keep the content up-to-date.
+In case you don't have access to specific remote repositories you can create a local copy of a p2 repository and change the URL to this local copy.
+
+Local maven build
+-----------------
+If you run a local build with maven the used target platform defintion is 'race-analysis-p2-maven-local'. The reference to this definition is defined in the pom.xml
+of the /git/java folder.
+
+Target-Platform related projects
+--------------------------------
+com.sap.sailing.targetplatform -> contains the libraries, the p2 repository generation scripts and the target platform definitions (.target files)
+com.sap.sailing.targetplatform.features -> contains the corresponding feature.xml files for the target platfrom folders (required for the p2 repository generation)
+
+com.sap.sailing.feature -> contains the feature.xml for the race analysis project itself (required for the product build)
+com.sap.sailing.feature.runtime -> contains the feature.xml for additional runtime libraries which are not required for the source build (e.g. jetty.osgi bundle) 
+com.sap.sailing.feature.p2build -> contains the product defintion (.product file) for the race analysis project (required for the product build)
+
+Typical usecases for changing the target platform definition
+-----------------------------------------------------
+
+1. Adding an external open source library to the target-platform
+
+To add a new library which can not be found in any SAP repository you need to follow some steps.
+a) Check if the library is already OSGi-enabled (normally this means there is a manifest.mf in the META-INF folder of the jar file containing valid OSGi metadata.
+b) In case the library is not OSGi-enabled someone has to create such a OSGI-enabled version (ask the technical lead of the project)
+c) Add the library to an appropriate target folder in the project com.sap.sailing.targetplatform (e.g. target-base)
+d) Add an entry to the corresponding feature.xml in the project com.sap.sailing.targetplatform.features
+e) Rebuild the target platform by running the script createp2repo.sh 
+f) Reload the target platform in the IDE
+g) Submit the changes to the git repository
+
+2. Adding a library from an internal SAP repository (e.g. Nexus)
+
+
+
