@@ -7,7 +7,7 @@ public class DegreeBearingImpl extends AbstractBearing implements Bearing {
     
     public DegreeBearingImpl(double bearingDeg) {
         super();
-        this.bearingDeg = bearingDeg;
+        this.bearingDeg = bearingDeg - 360*(int) (bearingDeg/360.);
     }
 
     @Override

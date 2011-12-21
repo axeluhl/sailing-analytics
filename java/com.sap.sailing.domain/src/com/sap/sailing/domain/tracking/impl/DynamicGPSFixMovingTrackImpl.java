@@ -83,7 +83,7 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends DynamicTrackImpl<Ite
             }
         }
         double knotSum = 0;
-        double bearingDegSum = 0;
+        double bearingDegSum = 0; // FIXME can't just add bearing angles; consider 355deg and 005deg
         int count = 0;
         if (!relevantFixes.isEmpty()) {
             Iterator<GPSFixMoving> fixIter = relevantFixes.iterator();

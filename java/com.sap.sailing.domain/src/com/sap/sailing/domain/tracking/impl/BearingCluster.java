@@ -96,18 +96,18 @@ public class BearingCluster {
     
     public void add(Bearing bearing) {
         bearings.add(bearing);
-        sumDegrees += bearing.getDegrees();
+        sumDegrees += bearing.getDegrees(); // FIXME can't just add bearing angles; consider 355deg and 005deg
     }
     
     public Bearing getAverage() {
-        return new DegreeBearingImpl(sumDegrees / bearings.size());
+        return new DegreeBearingImpl(sumDegrees / bearings.size()); // FIXME can't just add bearing angles; consider 355deg and 005deg
     }
     
     /**
      * If there is no bearing stored in this cluster yet, 0.0 is returned.
      */
     public double getDifferenceFromAverage(Bearing bearing) {
-        return bearings.size() == 0 ? 0.0 : Math.abs(sumDegrees / bearings.size() - bearing.getDegrees());
+        return bearings.size() == 0 ? 0.0 : Math.abs(sumDegrees / bearings.size() - bearing.getDegrees()); // FIXME can't just add bearing angles; consider 355deg and 005deg
     }
     
     @Override

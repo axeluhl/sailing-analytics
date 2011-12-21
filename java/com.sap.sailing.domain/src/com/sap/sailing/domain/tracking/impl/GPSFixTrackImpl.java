@@ -265,7 +265,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
             }
         }
         double knotSum = 0;
-        double bearingDegSum = 0;
+        double bearingDegSum = 0; // FIXME can't just add bearings; consider 355deg vs. 005deg!!!
         int count = 0;
         if (!relevantFixes.isEmpty()) {
             Iterator<GPSFix> fixIter = relevantFixes.iterator();
@@ -357,7 +357,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         Bearing bearingAtStart = getEstimatedSpeed(start).getBearing();
         Bearing bearingAtEnd = getEstimatedSpeed(end).getBearing();
         // TODO also need to analyze the (smoothened) directions in between; example: two tacks within averaging interval
-        return Math.abs(bearingAtStart.getDegrees() - bearingAtEnd.getDegrees()) > minimumDegreeDifference;
+        return Math.abs(bearingAtStart.getDifferenceTo(bearingAtEnd).getDegrees()) > minimumDegreeDifference;
     }
 
 }

@@ -111,7 +111,7 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
         Iterator<Wind> beforeIter = beforeSet.descendingIterator();
         Iterator<Wind> afterIter = afterSet.iterator();
         double knotSum = 0;
-        double bearingDegSum = 0;
+        double bearingDegSum = 0; // FIXME can't just add up bearings; consider 355deg vs. 005 deg!!!
         int count = 0;
         long beforeDistanceToAt = 0;
         long afterDistanceToAt = 0;
