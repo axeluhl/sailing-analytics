@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.sap.sailing.domain.base.Bearing;
-import com.sap.sailing.domain.base.impl.DegreeBearingImpl;
+import com.sap.sailing.domain.base.impl.RadianBearingImpl;
 import com.sap.sailing.util.Util.Pair;
 
 /**
@@ -20,11 +20,13 @@ import com.sap.sailing.util.Util.Pair;
  */
 public class BearingCluster {
     private final List<Bearing> bearings;
-    private double sumDegrees;
+    private double sumSin;
+    private double sumCos;
     
     public BearingCluster() {
         bearings = new ArrayList<Bearing>();
-        sumDegrees = 0.0;
+        sumSin = 0.0;
+        sumCos = 0.0;
     }
     
     /**
@@ -96,18 +98,28 @@ public class BearingCluster {
     
     public void add(Bearing bearing) {
         bearings.add(bearing);
-        sumDegrees += bearing.getDegrees(); // FIXME can't just add bearing angles; consider 355deg and 005deg
+        sumSin += Math.sin(bearing.getRadians());
+        sumCos += Math.cos(bearing.getRadians());
     }
     
     public Bearing getAverage() {
-        return new DegreeBearingImpl(sumDegrees / bearings.size()); // FIXME can't just add bearing angles; consider 355deg and 005deg
+        double angle;
+        if (sumCos == 0) {
+            angle = sumSin >= 0 ? Math.PI/2 : -Math.PI/2;
+        } else {
+            angle = Math.atan2(sumSin, sumCos);
+        }
+        return new RadianBearingImpl(angle < 0 ? angle+2*Math.PI : angle);
     }
     
     /**
-     * If there is no bearing stored in this cluster yet, 0.0 is returned.
+     * Absolute difference to {@link #getAverage() this cluster's average bearing} in degrees. If there is no bearing stored in
+     * this cluster yet, 0.0 is returned.
+     * 
+     * @return a value <code>&gt;=0.0</code>
      */
-    public double getDifferenceFromAverage(Bearing bearing) {
-        return bearings.size() == 0 ? 0.0 : Math.abs(sumDegrees / bearings.size() - bearing.getDegrees()); // FIXME can't just add bearing angles; consider 355deg and 005deg
+    private double getDifferenceFromAverage(Bearing bearing) {
+        return bearings.size() == 0 ? 0.0 : Math.abs(getAverage().getDifferenceTo(bearing).getDegrees());
     }
     
     @Override

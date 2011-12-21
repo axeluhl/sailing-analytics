@@ -53,6 +53,50 @@ public class WindEstimationOnStoredTracksTest extends StoredTrackBasedTestWithTr
     }
     
     @Test
+    public void testBearingClusterAverageWithZeroSinus() {
+        BearingCluster cluster = new BearingCluster();
+        Bearing b1 = new DegreeBearingImpl(0);
+        Bearing b2 = new DegreeBearingImpl(0);
+        cluster.add(b1);
+        cluster.add(b2);
+        Bearing average = cluster.getAverage();
+        assertEquals(0, average.getDegrees(), 0.00000001);
+    }
+    
+    @Test
+    public void testBearingClusterAverageWithZeroSinusAndNegativeCosinus() {
+        BearingCluster cluster = new BearingCluster();
+        Bearing b1 = new DegreeBearingImpl(180);
+        Bearing b2 = new DegreeBearingImpl(180);
+        cluster.add(b1);
+        cluster.add(b2);
+        Bearing average = cluster.getAverage();
+        assertEquals(180, average.getDegrees(), 0.00000001);
+    }
+    
+    @Test
+    public void testBearingClusterAverageWithZeroCosinus() {
+        BearingCluster cluster = new BearingCluster();
+        Bearing b1 = new DegreeBearingImpl(90);
+        Bearing b2 = new DegreeBearingImpl(90);
+        cluster.add(b1);
+        cluster.add(b2);
+        Bearing average = cluster.getAverage();
+        assertEquals(90, average.getDegrees(), 0.00000001);
+    }
+    
+    @Test
+    public void testBearingClusterAverageWithZeroCosinusAndNegativeSinus() {
+        BearingCluster cluster = new BearingCluster();
+        Bearing b1 = new DegreeBearingImpl(270);
+        Bearing b2 = new DegreeBearingImpl(270);
+        cluster.add(b1);
+        cluster.add(b2);
+        Bearing average = cluster.getAverage();
+        assertEquals(270, average.getDegrees(), 0.00000001);
+    }
+    
+    @Test
     public void testSuccessfulTrackedRaceCreation() throws FileNotFoundException, IOException {
         super.setUp();
         assertNotNull(getTrackedRace());
