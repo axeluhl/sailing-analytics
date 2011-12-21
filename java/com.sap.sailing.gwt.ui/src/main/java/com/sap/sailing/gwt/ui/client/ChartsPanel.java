@@ -188,6 +188,9 @@ public class ChartsPanel extends FormPanel {
         loadData();
     }
     
+    /**
+     * Initializes a configuration panel for the chart. This should only be called once in the constructor.
+     */
     private void initConfigPanel(){
     	configPanel = new VerticalPanel();
         configPanel.setSpacing(5);
@@ -369,17 +372,19 @@ public class ChartsPanel extends FormPanel {
                 series.remove(compSeries);
                 series.remove(markSeries);
             }
-            for (SeriesHandler sh : series){
-            	if (seriesIsUsed.get(sh) == null || !seriesIsUsed.get(sh)){
-            		sh.clear();
-                    Double[] data = chartData.getRaceData(firstCompetitor);
-                    long[] timepoints = competitorsAndTimePointsDAO.getTimePoints();
-                    for (int j = 0; j < stepsToLoad; j++) {
-                    	if (data[j] != null){
-                    		sh.add(new DataPoint(timepoints[j], data[j]));
-                    	}
-                    }
-            	}
+            if (firstCompetitor != null && chartData.getRaceData(firstCompetitor) != null){
+            	for (SeriesHandler sh : series){
+                	if (seriesIsUsed.get(sh) == null || !seriesIsUsed.get(sh)){
+                		sh.clear();
+                        Double[] data = chartData.getRaceData(firstCompetitor);
+                        long[] timepoints = competitorsAndTimePointsDAO.getTimePoints();
+                        for (int j = 0; j < stepsToLoad; j++) {
+                        	if (data[j] != null){
+                        		sh.add(new DataPoint(timepoints[j], data[j]));
+                        	}
+                        }
+                	}
+                }
             }
         }
         if (plot != null && plot.isAttached()){
@@ -548,6 +553,11 @@ public class ChartsPanel extends FormPanel {
         return panel;
     }
     
+    /** Returns a color that is computed once by using {@link ChartsPanel#createHexColor(int)} and then cached.
+     * 
+     * @param id An ID unique for a competitor.
+     * @return A color in hex/html-format (e.g. #ff0000)
+     */
     private String getColorByID(int id){
     	String color = idColor.get(id);
     	if (color == null || color.isEmpty()){
@@ -557,6 +567,12 @@ public class ChartsPanel extends FormPanel {
     	return color;
     }
     
+    /**Only use this if you don't want the color to be cached.
+     * You can use {@link ChartsPanel#getColorByID(int)} instead.
+     * 
+     * @param index The index of e.g. a competitor. Make sure, that each competitor has a unique index.
+     * @return A color computed using the {@code index}.
+     */
     private String createHexColor(int index){
         String rs, gs, bs;
         int r = 0, g = 0, b = 0;
@@ -585,14 +601,29 @@ public class ChartsPanel extends FormPanel {
         return "#" + rs + gs + bs;
     }
     
+    /**
+     * 
+     * @param competitor
+     * @return A series in the chart, that can be used to show the data of a specific competitor.
+     */
     private SeriesHandler getCompetitorSeries(CompetitorDAO competitor){
     	return seriesID.get(competitorID.get(competitor));
     }
     
+    /**
+     * 
+     * @param competitor
+     * @return A series in the chart, that can be used to show the mark passings.
+     */
     private SeriesHandler getCompetitorMarkPassingSeries(CompetitorDAO competitor){
     	return markSeriesID.get(competitorID.get(competitor));
     }
     
+    /** You can set, if the legend for a specific competitor should be shown or not.
+     * 
+     * @param competitor
+     * @param visible
+     */
     private void setLegendVisible(CompetitorDAO competitor, Boolean visible){
     	Widget label = competitorLabels.get(competitor);
     	if (label == null){
@@ -603,6 +634,12 @@ public class ChartsPanel extends FormPanel {
     	label.setVisible(visible);
     }
 
+    /**
+     * 
+     * @param competitor The competitor for the legend.
+     * @param color The color for the colored square next to the label.
+     * @return A widget, that can be used for the legend of the chart.
+     */
     private Widget createCompetitorLabel(String competitor, String color){
     	HorizontalPanel competitorLabel = new HorizontalPanel();
     	competitorLabel.setStyleName("chartLegend");
@@ -624,6 +661,11 @@ public class ChartsPanel extends FormPanel {
     	this.setSize(width + "px", height + "px");
     }
     
+    /**
+     * Clears the whole chart and empties cached data.
+     * 
+     * @param clearCheckBoxes Declares whether the checkboxes for the visibility of the competitors should be cleared too. Should be true, when you change the race to show.
+     */
     private void clearChart(boolean clearCheckBoxes){
     	if (clearCheckBoxes){
     		selectCompetitors.clear();
