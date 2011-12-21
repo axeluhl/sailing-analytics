@@ -35,7 +35,7 @@ import com.sap.sailing.domain.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
 
-public class ManeuverDetectionOnMdM2011SemifinalTest extends KielWeek2011BasedTest {
+public class ManeuverDetectionOnMdM2011SemifinalTest extends OnlineTracTracBasedTest {
 
     public ManeuverDetectionOnMdM2011SemifinalTest() throws MalformedURLException, URISyntaxException {
     }
