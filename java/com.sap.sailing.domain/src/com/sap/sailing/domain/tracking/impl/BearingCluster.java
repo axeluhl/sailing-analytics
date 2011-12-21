@@ -28,6 +28,10 @@ public class BearingCluster {
     }
     
     /**
+     * Finds the two bearings in the cluster that are farthest apart (at least <code>minimumDegreeDifferenceBetweenTacks</code>).
+     * Then, the remaining bearings in this cluster are associated with the one of the two extreme bearings to which they are
+     * closer. The two resulting clusters are returned.
+     * 
      * @param minimumDegreeDifferenceBetweenTacks
      *            tells the minimum degree difference that must exist between the two extreme bearings before they are
      *            considered to represent boats on different tacks. If more than one bearing exists in this cluster
@@ -74,6 +78,7 @@ public class BearingCluster {
             for (int j=i+1; j<bearings.size(); j++) {
                 if (Math.abs(bearings.get(i).getDifferenceTo(bearings.get(j)).getDegrees()) >= maxAbsDegDiff) {
                     result = new Pair<Bearing, Bearing>(bearings.get(i), bearings.get(j));
+                    maxAbsDegDiff = Math.abs(bearings.get(i).getDifferenceTo(bearings.get(j)).getDegrees());
                     assert Math.abs(result.getA().getDegrees()-result.getB().getDegrees()) <= 180.;
                 }
             }
@@ -83,6 +88,10 @@ public class BearingCluster {
 
     public boolean isEmpty() {
         return bearings.isEmpty();
+    }
+    
+    public int size() {
+        return bearings.size();
     }
     
     public void add(Bearing bearing) {
@@ -99,5 +108,10 @@ public class BearingCluster {
      */
     public double getDifferenceFromAverage(Bearing bearing) {
         return bearings.size() == 0 ? 0.0 : Math.abs(sumDegrees / bearings.size() - bearing.getDegrees());
+    }
+    
+    @Override
+    public String toString() {
+        return bearings.toString();
     }
 }
