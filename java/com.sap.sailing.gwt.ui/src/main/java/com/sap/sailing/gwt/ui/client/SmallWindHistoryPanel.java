@@ -75,14 +75,15 @@ public class SmallWindHistoryPanel extends FormPanel implements TimeListener, Ra
                             @Override
                             public void onSuccess(WindInfoForRaceDAO result) {
                                 // expecting to find windIndicators.length fixes
-                                if (result == null || result.windTrackInfoByWindSourceName.get(result.selectedWindSourceName).windFixes
+                                if (result == null || result.windTrackInfoByWindSourceName.get(
+                                        /* result.selectedWindSourceName TODO uncomment */ "ESTIMATION").windFixes
                                         .size() != windIndicators.length) {
                                     clearWindDisplay();
                                 } else {
                                     setSelectedWindSource(result.selectedWindSourceName);
                                     int i = 0;
                                     for (WindDAO fix : result.windTrackInfoByWindSourceName
-                                            .get(result.selectedWindSourceName).windFixes) {
+                                            .get(/* TODO uncomment again result.selectedWindSourceName */ "ESTIMATION").windFixes) {
                                         updateWindIndicator(i, fix);
                                         i++;
                                     }

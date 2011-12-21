@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.sap.sailing.domain.base.Bearing;
-import com.sap.sailing.domain.base.impl.DegreeBearingImpl;
+import com.sap.sailing.domain.base.impl.RadianBearingImpl;
 import com.sap.sailing.util.Util.Pair;
 
 /**
@@ -20,14 +20,20 @@ import com.sap.sailing.util.Util.Pair;
  */
 public class BearingCluster {
     private final List<Bearing> bearings;
-    private double sumDegrees;
+    private double sumSin;
+    private double sumCos;
     
     public BearingCluster() {
         bearings = new ArrayList<Bearing>();
-        sumDegrees = 0.0;
+        sumSin = 0.0;
+        sumCos = 0.0;
     }
     
     /**
+     * Finds the two bearings in the cluster that are farthest apart (at least <code>minimumDegreeDifferenceBetweenTacks</code>).
+     * Then, the remaining bearings in this cluster are associated with the one of the two extreme bearings to which they are
+     * closer. The two resulting clusters are returned.
+     * 
      * @param minimumDegreeDifferenceBetweenTacks
      *            tells the minimum degree difference that must exist between the two extreme bearings before they are
      *            considered to represent boats on different tacks. If more than one bearing exists in this cluster
@@ -74,6 +80,7 @@ public class BearingCluster {
             for (int j=i+1; j<bearings.size(); j++) {
                 if (Math.abs(bearings.get(i).getDifferenceTo(bearings.get(j)).getDegrees()) >= maxAbsDegDiff) {
                     result = new Pair<Bearing, Bearing>(bearings.get(i), bearings.get(j));
+                    maxAbsDegDiff = Math.abs(bearings.get(i).getDifferenceTo(bearings.get(j)).getDegrees());
                     assert Math.abs(result.getA().getDegrees()-result.getB().getDegrees()) <= 180.;
                 }
             }
@@ -85,19 +92,38 @@ public class BearingCluster {
         return bearings.isEmpty();
     }
     
+    public int size() {
+        return bearings.size();
+    }
+    
     public void add(Bearing bearing) {
         bearings.add(bearing);
-        sumDegrees += bearing.getDegrees();
+        sumSin += Math.sin(bearing.getRadians());
+        sumCos += Math.cos(bearing.getRadians());
     }
     
     public Bearing getAverage() {
-        return new DegreeBearingImpl(sumDegrees / bearings.size());
+        double angle;
+        if (sumCos == 0) {
+            angle = sumSin >= 0 ? Math.PI/2 : -Math.PI/2;
+        } else {
+            angle = Math.atan2(sumSin, sumCos);
+        }
+        return new RadianBearingImpl(angle < 0 ? angle+2*Math.PI : angle);
     }
     
     /**
-     * If there is no bearing stored in this cluster yet, 0.0 is returned.
+     * Absolute difference to {@link #getAverage() this cluster's average bearing} in degrees. If there is no bearing stored in
+     * this cluster yet, 0.0 is returned.
+     * 
+     * @return a value <code>&gt;=0.0</code>
      */
-    public double getDifferenceFromAverage(Bearing bearing) {
-        return bearings.size() == 0 ? 0.0 : Math.abs(sumDegrees / bearings.size() - bearing.getDegrees());
+    private double getDifferenceFromAverage(Bearing bearing) {
+        return bearings.size() == 0 ? 0.0 : Math.abs(getAverage().getDifferenceTo(bearing).getDegrees());
+    }
+    
+    @Override
+    public String toString() {
+        return bearings.toString();
     }
 }
