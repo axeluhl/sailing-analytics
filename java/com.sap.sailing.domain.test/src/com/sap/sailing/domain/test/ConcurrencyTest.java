@@ -1,11 +1,14 @@
 package com.sap.sailing.domain.test;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
+import java.util.List;
+import java.util.concurrent.Executors;
 import java.util.logging.Logger;
 
 import org.junit.Before;
@@ -51,8 +54,9 @@ public class ConcurrencyTest extends OnlineTracTracBasedTest {
 
     @Test
     public void comparSingleThreadedApproximationWithMultiThreaded() {
-        logger.info("Number of processors: "+Runtime.getRuntime().availableProcessors());
-        assertTrue(Runtime.getRuntime().availableProcessors() >= 1);
+        int numberOfCPUs = Runtime.getRuntime().availableProcessors();
+        logger.info("Number of processors: "+numberOfCPUs);
+        assertTrue(numberOfCPUs >= 1);
         Competitor competitor = getCompetitorByName("Team Aqua");
         assertNotNull(competitor);
         DynamicGPSFixTrack<Competitor, GPSFixMoving> teamAquaTrack = getTrackedRace().getTrack(competitor);
@@ -60,8 +64,17 @@ public class ConcurrencyTest extends OnlineTracTracBasedTest {
         MarkPassing lastMarkPassing = getTrackedRace().getMarkPassings(competitor).last();
         DouglasPeucker<Competitor, GPSFixMoving> dp = new DouglasPeucker<Competitor, GPSFixMoving>(teamAquaTrack);
         long start = System.nanoTime();
-        dp.approximate(new MeterDistance(3), firstMarkPassing.getTimePoint(), lastMarkPassing.getTimePoint());
+        List<GPSFixMoving> approximation1 = dp.approximate(new MeterDistance(3), firstMarkPassing.getTimePoint(), lastMarkPassing.getTimePoint());
         long duration = System.nanoTime()-start;
         logger.info("1 thread: "+duration+"ns");
+        logger.info("number of approximation points: "+approximation1.size());
+
+        dp = new DouglasPeucker<Competitor, GPSFixMoving>(teamAquaTrack, Executors.newFixedThreadPool(numberOfCPUs));
+        start = System.nanoTime();
+        List<GPSFixMoving> approximation2 = dp.approximate(new MeterDistance(3), firstMarkPassing.getTimePoint(), lastMarkPassing.getTimePoint());
+        duration = System.nanoTime()-start;
+        logger.info(""+numberOfCPUs+" threads: "+duration+"ns");
+        logger.info("number of approximation points: "+approximation2.size());
+        assertEquals(approximation1, approximation2);
     }
 }
