@@ -318,7 +318,7 @@ public class AdminApp extends Servlet {
                     if (race == null) {
                         resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Race not found");
                     } else {
-                        TrackedRace trackedRace = getService().getOrCreateTrackedEvent(event)
+                        DynamicTrackedRace trackedRace = getService().getOrCreateTrackedEvent(event)
                                 .getTrackedRace(race);
                         trackedRace.setWindSource(windSource);
                         resp.getWriter().println(

@@ -193,4 +193,5 @@ public interface StringConstants extends Constants {
     String no();
     String hoverOverAPoint();
     String noSelection();
+    String raceIsKnownToStartUpwind();
 }

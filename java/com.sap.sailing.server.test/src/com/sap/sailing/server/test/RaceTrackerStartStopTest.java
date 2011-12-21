@@ -56,7 +56,7 @@ public class RaceTrackerStartStopTest {
     @Before
     public void setUp() {
         racingEventService = new RacingEventServiceImplMock();
-        boatClass = new BoatClassImpl(BOATCLASSNAME);
+        boatClass = new BoatClassImpl(BOATCLASSNAME, /* typicallyStartsUpwind */ true);
         event = new EventImpl(EVENTNAME, boatClass);
         racingEventService.getEventsByName().put(EVENTNAME, event);
         TrackedEvent trackedEvent1 = racingEventService.getOrCreateTrackedEvent(event);

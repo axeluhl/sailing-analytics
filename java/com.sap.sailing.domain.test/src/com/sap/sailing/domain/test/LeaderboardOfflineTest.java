@@ -50,7 +50,7 @@ public class LeaderboardOfflineTest {
                 /* dateOfBirth */ null, "This is famous "+competitorName)),
                 new PersonImpl("Rigo van Maas", new NationalityImpl("The Netherlands", "NED"),
                 /* dateOfBirth */null, "This is Rigo, the coach")), new BoatImpl(competitorName + "'s boat",
-                new BoatClassImpl("505"), null));
+                new BoatClassImpl("505", /* typicallyStartsUpwind */ true), null));
     }
 
     public void setupRaces(int numberOfStartedRaces, int numberOfNotStartedRaces) {

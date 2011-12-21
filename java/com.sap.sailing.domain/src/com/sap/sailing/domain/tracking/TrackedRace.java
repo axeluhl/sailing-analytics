@@ -14,6 +14,7 @@ import com.sap.sailing.domain.base.Tack;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.DouglasPeucker;
+import com.sap.sailing.domain.tracking.TrackedLeg.LegType;
 
 /**
  * Live tracking data of a single race. The race follows a defined {@link Course} with a sequence of {@link Leg}s. The
@@ -154,8 +155,6 @@ public interface TrackedRace {
      */
     Wind getWind(Position p, TimePoint at);
 
-    void setWindSource(WindSource windSource);
-
     WindSource getWindSource();
 
     WindTrack getWindTrack(WindSource windSource);
@@ -207,6 +206,17 @@ public interface TrackedRace {
 
     TrackedEvent getTrackedEvent();
 
+    /**
+     * Computes a default wind direction based on the direction of the first leg at time <code>at</code>, with a default
+     * speed of one knot. Note that this wind direction can only be used if {@link #raceIsKnownToStartUpwind()} returns
+     * <code>true</code>.
+     * 
+     * @param at
+     *            usually the {@link #getStart() start time} should be used; if no valid start time is provided, the
+     *            current time point may serve as a default
+     * @return <code>null</code> in case the first leg's direction cannot be determined, e.g., because the necessary
+     *         mark positions are not known (yet)
+     */
     Wind getDirectionFromStartToNextMark(TimePoint at);
     
     /**
@@ -221,4 +231,12 @@ public interface TrackedRace {
      *         this race between <code>from</code> and <code>to</code>.
      */
     List<Maneuver> getManeuvers(Competitor competitor, TimePoint from, TimePoint to) throws NoWindException;
+
+    /**
+     * @return <code>true</code> if this race is known to start with an {@link LegType#UPWIND upwind} leg.
+     * If this is the case, the wind estimation may default to using the first leg's direction at race start
+     * time as the direction the wind comes from.
+     */
+    boolean raceIsKnownToStartUpwind();
+    
 }

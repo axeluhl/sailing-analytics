@@ -483,6 +483,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         if (trackedRace != null) {
             MillisecondsTimePoint now = MillisecondsTimePoint.now();
             result = new WindInfoForRaceDAO();
+            result.raceIsKnownToStartUpwind = trackedRace.raceIsKnownToStartUpwind();
             result.selectedWindSourceName = trackedRace.getWindSource().name();
             TimePoint from = new MillisecondsTimePoint(fromDate);
             TimePoint to = new MillisecondsTimePoint(toDate);
@@ -516,11 +517,15 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                     }
                 }
                 windTrackInfoDAOs.put(windSource.name(), windTrackInfoDAO);
-                // add one "track" with a single wind direction computed from the direction from the start gate to the
-                // first mark
-                WindTrack windwardMarkWindTrack = new WindTrackImpl(windTrack.getMillisecondsOverWhichToAverageWind());
-                windwardMarkWindTrack.add(trackedRace.getDirectionFromStartToNextMark(now));
-                windTrackInfoDAOs.put("COURSEBASED", createWindTrackInfoDAO(windwardMarkWindTrack));
+                if (trackedRace.raceIsKnownToStartUpwind()) {
+                    // add one "track" with a single wind direction computed from the direction from the start gate to
+                    // the first mark
+                    TimePoint startTime = trackedRace.getStart();
+                    WindTrack windwardMarkWindTrack = new WindTrackImpl(
+                            windTrack.getMillisecondsOverWhichToAverageWind());
+                    windwardMarkWindTrack.add(trackedRace.getDirectionFromStartToNextMark(startTime == null ? now : startTime));
+                    windTrackInfoDAOs.put("COURSEBASED", createWindTrackInfoDAO(windwardMarkWindTrack));
+                }
             }
             if (includeTrackBasedWindEstimation && estimatedTrack != null) {
                 boolean hasNext;
@@ -589,6 +594,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         if (trackedRace != null) {
             WindTrack estimatedTrack = null;
             result = new WindInfoForRaceDAO();
+            result.raceIsKnownToStartUpwind = trackedRace.raceIsKnownToStartUpwind();
             WindSource windSource = trackedRace.getWindSource();
             result.selectedWindSourceName = windSource.name();
             TimePoint fromTimePoint = new MillisecondsTimePoint(from);
@@ -625,6 +631,15 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             if (includeTrackBasedWindEstimation && estimatedTrack != null) {
                 WindTrackInfoDAO windEstimations = createWindTrackInfoDAO(estimatedTrack);
                 windTrackInfoDAOs.put("ESTIMATION", windEstimations);
+            }
+            if (trackedRace.raceIsKnownToStartUpwind()) {
+                // add one "track" with a single wind direction computed from the direction from the start gate to
+                // the first mark
+                TimePoint startTime = trackedRace.getStart();
+                WindTrack windwardMarkWindTrack = new WindTrackImpl(
+                        windTrack.getMillisecondsOverWhichToAverageWind());
+                windwardMarkWindTrack.add(trackedRace.getDirectionFromStartToNextMark(startTime == null ? fromTimePoint : startTime));
+                windTrackInfoDAOs.put("COURSEBASED", createWindTrackInfoDAO(windwardMarkWindTrack));
             }
         }
         return result;
@@ -668,10 +683,12 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
     
     @Override
-    public void setWindSource(RaceIdentifier raceIdentifier, String windSourceName) {
+    public void setWindSource(RaceIdentifier raceIdentifier, String windSourceName, boolean raceIsKnownToStartUpwind) {
         TrackedRace trackedRace = getTrackedRace(raceIdentifier);
-        if (trackedRace != null) {
-            trackedRace.setWindSource(WindSource.valueOf(windSourceName));
+        if (trackedRace != null && trackedRace instanceof DynamicTrackedRace) {
+            DynamicTrackedRace dtr = (DynamicTrackedRace) trackedRace;
+            dtr.setWindSource(WindSource.valueOf(windSourceName));
+            dtr.setRaceIsKnownToStartUpwind(raceIsKnownToStartUpwind);
         }
     }
 

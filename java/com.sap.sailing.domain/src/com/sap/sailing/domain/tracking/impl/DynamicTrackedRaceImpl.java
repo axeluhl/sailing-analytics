@@ -35,9 +35,18 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     
     private Set<RaceChangeListener<Competitor>> listeners;
     
+    private boolean raceIsKnownToStartUpwind;
+    
+    /**
+     * The wind source to be used for all computations based on wind. Used as key into
+     * {@link #windTracks}. The default value is {@link WindSource#EXPEDITION}.
+     */
+    private WindSource currentWindSource;
+
     public DynamicTrackedRaceImpl(TrackedEvent trackedEvent, RaceDefinition race,
             WindStore windStore, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed) {
         super(trackedEvent, race, windStore, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed);
+        this.raceIsKnownToStartUpwind = race.getBoatClass().typicallyStartsUpwind();
         for (Competitor competitor : getRace().getCompetitors()) {
             DynamicGPSFixTrack<Competitor, GPSFixMoving> track = getTrack(competitor);
             track.addListener(this);
@@ -45,6 +54,7 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
         for (WindSource windSource : WindSource.values()) {
             getWindTrack(windSource).addListener(this);
         }
+        currentWindSource = WindSource.EXPEDITION;
     }
 
     @Override
@@ -279,6 +289,26 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     @Override
     public DynamicTrackedEvent getTrackedEvent() {
         return (DynamicTrackedEvent) super.getTrackedEvent();
+    }
+
+    @Override
+    public void setRaceIsKnownToStartUpwind(boolean raceIsKnownToStartUpwind) {
+        this.raceIsKnownToStartUpwind = raceIsKnownToStartUpwind;
+    }
+
+    @Override
+    public boolean raceIsKnownToStartUpwind() {
+        return raceIsKnownToStartUpwind;
+    }
+    
+    @Override
+    public WindSource getWindSource() {
+        return this.currentWindSource;
+    }
+    
+    @Override
+    public void setWindSource(WindSource windSource) {
+        this.currentWindSource = windSource;
     }
 
 }

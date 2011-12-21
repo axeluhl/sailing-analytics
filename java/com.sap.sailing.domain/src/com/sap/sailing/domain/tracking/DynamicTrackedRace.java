@@ -45,4 +45,12 @@ public interface DynamicTrackedRace extends TrackedRace {
     void setMillisecondsOverWhichToAverageWind(long millisecondsOverWhichToAverageWind);
     
     DynamicTrackedEvent getTrackedEvent();
+
+    void setWindSource(WindSource windSource);
+
+    /**
+     * If and only if <code>raceIsKnownToStartUpwind</code> is <code>true</code>, this tracked race is allowed to use
+     * the start leg's direction as a fallback for estimating the wind direction.
+     */
+    void setRaceIsKnownToStartUpwind(boolean raceIsKnownToStartUpwind);
 }

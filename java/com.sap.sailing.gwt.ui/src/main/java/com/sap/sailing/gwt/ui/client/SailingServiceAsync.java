@@ -101,7 +101,7 @@ public interface SailingServiceAsync {
 
     void getQuickRanks(RaceIdentifier raceIdentifier, Date date, AsyncCallback<List<QuickRankDAO>> callback);
 
-    void setWindSource(RaceIdentifier raceIdentifier, String windSourceName, AsyncCallback<Void> callback);
+    void setWindSource(RaceIdentifier raceIdentifier, String windSourceName, boolean raceIsKnownToStartUpwind, AsyncCallback<Void> callback);
 
     /**
      * Returns a {@link LeaderboardDAO} will information about all races, their points and competitor display names

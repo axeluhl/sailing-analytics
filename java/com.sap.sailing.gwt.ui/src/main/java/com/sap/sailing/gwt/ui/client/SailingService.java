@@ -65,7 +65,7 @@ public interface SailingService extends RemoteService {
     WindInfoForRaceDAO getWindInfo(RaceIdentifier raceIdentifier, Date from, long millisecondsStepWidth,
             int numberOfFixes, double latDeg, double lngDeg, boolean includeTrackBasedWindEstimation) throws Exception;
 
-    void setWindSource(RaceIdentifier raceIdentifier, String windSourceName);
+    void setWindSource(RaceIdentifier raceIdentifier, String windSourceName, boolean raceIsKnownToStartUpwind);
 
     void removeWind(RaceIdentifier raceIdentifier, WindDAO windDAO);
 

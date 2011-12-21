@@ -76,15 +76,15 @@ public class DomainFactoryImpl implements DomainFactory {
         SAM007000 Men's Keelboat = Starboot Männer 
         SAW010000 Women's Match Racing = Matchrace Damen Elliott 6M (modified)
         */
-        olympicClassesByID.put("102", baseDomainFactory.getOrCreateBoatClass("RS:X"));
-        olympicClassesByID.put("004", baseDomainFactory.getOrCreateBoatClass("Laser"));
-        olympicClassesByID.put("103", baseDomainFactory.getOrCreateBoatClass("Laser Radial"));
-        olympicClassesByID.put("002", baseDomainFactory.getOrCreateBoatClass("Finn"));
-        olympicClassesByID.put("005", baseDomainFactory.getOrCreateBoatClass("470"));
-        olympicClassesByID.put("009", baseDomainFactory.getOrCreateBoatClass("49er"));
-        olympicClassesByID.put("007", baseDomainFactory.getOrCreateBoatClass("Star"));
-        olympicClassesByID.put("010", baseDomainFactory.getOrCreateBoatClass("Elliott 6M"));
-        unknownBoatClass = new BoatClassImpl("Unknown");
+        olympicClassesByID.put("102", baseDomainFactory.getOrCreateBoatClass("RS:X", /* typicallyStartsUpwind */ true));
+        olympicClassesByID.put("004", baseDomainFactory.getOrCreateBoatClass("Laser", /* typicallyStartsUpwind */ true));
+        olympicClassesByID.put("103", baseDomainFactory.getOrCreateBoatClass("Laser Radial", /* typicallyStartsUpwind */ true));
+        olympicClassesByID.put("002", baseDomainFactory.getOrCreateBoatClass("Finn", /* typicallyStartsUpwind */ true));
+        olympicClassesByID.put("005", baseDomainFactory.getOrCreateBoatClass("470", /* typicallyStartsUpwind */ true));
+        olympicClassesByID.put("009", baseDomainFactory.getOrCreateBoatClass("49er", /* alwaysStartsUpwind */ true));
+        olympicClassesByID.put("007", baseDomainFactory.getOrCreateBoatClass("Star", /* typicallyStartsUpwind */ true));
+        olympicClassesByID.put("010", baseDomainFactory.getOrCreateBoatClass("Elliott 6M", /* typicallyStartsUpwind */ true));
+        unknownBoatClass = new BoatClassImpl("Unknown", /* typicallyStartsUpwind */ false);
     }
 
     @Override
