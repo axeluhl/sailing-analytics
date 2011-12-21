@@ -58,17 +58,17 @@ The MongoDB is used to store wind information and general
 leaderboard-related information required by the Python web
 application.
 
- - log in as user "web"
+ - log in as user "root"
 
- - "cd project/dev/python"
+ - "cd ~web/project/dev/python"
 
- - "bin/supervisord"
+ - "/opt/mongodb/bin/supervisord"
 
 This will launch the MongoDB server, listening on port 10200. You can
 check whether the MongoDB server started successfully by issuing the
 following command:
 
- - "bin/supervisorctl"
+ - "/opt/mongodb/bin/supervisorctl"
 
 Launch Python Server
 ---------------------
