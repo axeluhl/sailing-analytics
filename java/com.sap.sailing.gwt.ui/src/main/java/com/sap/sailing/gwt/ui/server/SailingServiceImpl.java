@@ -1432,15 +1432,36 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     public Map<CompetitorDAO, List<ManeuverDAO>> getManeuvers(RaceIdentifier raceIdentifier,
             Map<CompetitorDAO, Date> from, Map<CompetitorDAO, Date> to) throws NoWindException {
         Map<CompetitorDAO, List<ManeuverDAO>> result = new HashMap<CompetitorDAO, List<ManeuverDAO>>();
-        TrackedRace trackedRace = getTrackedRace(raceIdentifier);
-        for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
+        final TrackedRace trackedRace = getTrackedRace(raceIdentifier);
+        Map<CompetitorDAO, Future<List<ManeuverDAO>>> futures = new HashMap<CompetitorDAO, Future<List<ManeuverDAO>>>(); 
+        for (final Competitor competitor : trackedRace.getRace().getCompetitors()) {
             CompetitorDAO competitorDAO = getCompetitorDAO(competitor);
             if (from.containsKey(competitorDAO)) {
-                TimePoint timePointFrom = new MillisecondsTimePoint(from.get(competitorDAO));
-                TimePoint timePointTo = new MillisecondsTimePoint(to.get(competitorDAO));
-                List<Maneuver> maneuversForCompetitor = trackedRace.getManeuvers(competitor, timePointFrom, timePointTo);
-                List<ManeuverDAO> maneuverDAOs = createManeuverDAOsForCompetitor(maneuversForCompetitor, trackedRace, competitor);
-                result.put(competitorDAO, maneuverDAOs);
+                final TimePoint timePointFrom = new MillisecondsTimePoint(from.get(competitorDAO));
+                final TimePoint timePointTo = new MillisecondsTimePoint(to.get(competitorDAO));
+                RunnableFuture<List<ManeuverDAO>> future = new FutureTask<List<ManeuverDAO>>(new Callable<List<ManeuverDAO>>() {
+                    @Override
+                    public List<ManeuverDAO> call() {
+                        List<Maneuver> maneuversForCompetitor;
+                        try {
+                            maneuversForCompetitor = trackedRace.getManeuvers(competitor, timePointFrom, timePointTo);
+                        } catch (NoWindException e) {
+                            throw new NoWindError(e);
+                        }
+                        return createManeuverDAOsForCompetitor(maneuversForCompetitor, trackedRace, competitor);
+                    }
+                });
+                executor.execute(future);
+                futures.put(competitorDAO, future);
+            }
+        }
+        for (Map.Entry<CompetitorDAO, Future<List<ManeuverDAO>>> competitorAndFuture : futures.entrySet()) {
+            try {
+                result.put(competitorAndFuture.getKey(), competitorAndFuture.getValue().get());
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            } catch (ExecutionException e) {
+                throw new RuntimeException(e);
             }
         }
         return result;
