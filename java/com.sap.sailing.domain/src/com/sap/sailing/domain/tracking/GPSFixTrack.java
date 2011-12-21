@@ -76,4 +76,6 @@ public interface GPSFixTrack<ItemType, FixType extends GPSFix> extends Track<Fix
      */
     boolean hasDirectionChange(TimePoint at, double minimumDegreeDifference);
 
+    SpeedWithBearing getRawEstimatedSpeed(TimePoint at);
+
 }

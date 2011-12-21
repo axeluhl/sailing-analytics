@@ -8,6 +8,7 @@ import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.Timed;
 import com.sap.sailing.domain.tracking.Track;
 import com.sap.sailing.util.impl.ArrayListNavigableSet;
+import com.sap.sailing.util.impl.UnmodifiableNavigableSet;
 
 public abstract class TrackImpl<FixType extends Timed> implements Track<FixType> {
     /**
@@ -70,8 +71,8 @@ public abstract class TrackImpl<FixType extends Timed> implements Track<FixType>
      */
     @SuppressWarnings("unchecked")
     @Override
-    public Iterable<FixType> getRawFixes() {
-        return (Iterable<FixType>) Collections.unmodifiableSet(fixes);
+    public NavigableSet<FixType> getRawFixes() {
+        return (NavigableSet<FixType>) new UnmodifiableNavigableSet<Timed>(fixes);
     }
 
     @SuppressWarnings("unchecked")

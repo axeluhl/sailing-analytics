@@ -238,32 +238,34 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
     }
 
     /**
+     * Here we know for sure that the GPS fixes are {@link GPSFixMoving} instances,
+     * so we can use their {@link GPSFixMoving#getSpeed() speed} in averaging. We're still
+     * using an interval of {@link #getMillisecondsOverWhichToAverage()} around <code>at</code>,
+     * but this time we add the speeds and bearings provided by the fix onto the values for
+     * averaging, so the result considers both, the GPS-provided speeds and bearings as well as
+     * the speeds/bearings determined by distance/time difference of the fixes themselves.
+     */
+    @Override
+    public synchronized SpeedWithBearing getEstimatedSpeed(TimePoint at) {
+        return getEstimatedSpeed(at, getInternalFixes());
+    }
+    
+    @Override
+    public synchronized SpeedWithBearing getRawEstimatedSpeed(TimePoint at) {
+        return getEstimatedSpeed(at, getRawFixes());
+    }
+
+    /**
      * Since we don't know for sure whether the GPS fixes are {@link GPSFixMoving} instances, here we only estimate
      * speed based on the distance and time between the fixes, averaged over an interval of
      * {@link #millisecondsOverWhichToAverage} milliseconds around <code>at</code>. Subclasses that know about the
      * particular fix type may redefine this to exploit a {@link SpeedWithBearing} attached, e.g., to a
      * {@link GPSFixMoving}.
      */
-    @Override
-    public SpeedWithBearing getEstimatedSpeed(TimePoint at) {
-        DummyGPSFix atTimed = new DummyGPSFix(at);
-        List<GPSFix> relevantFixes = new LinkedList<GPSFix>();
-        synchronized (this) {
-            NavigableSet<GPSFix> beforeSet = getGPSFixes().headSet(atTimed, /* inclusive */true);
-            NavigableSet<GPSFix> afterSet = getGPSFixes().tailSet(atTimed, /* inclusive */true);
-            for (GPSFix beforeFix : beforeSet.descendingSet()) {
-                if (at.asMillis() - beforeFix.getTimePoint().asMillis() > getMillisecondsOverWhichToAverage() / 2) {
-                    break;
-                }
-                relevantFixes.add(0, beforeFix);
-            }
-            for (GPSFix afterFix : afterSet) {
-                if (afterFix.getTimePoint().asMillis() - at.asMillis() > getMillisecondsOverWhichToAverage() / 2) {
-                    break;
-                }
-                relevantFixes.add(afterFix);
-            }
-        }
+    protected SpeedWithBearing getEstimatedSpeed(TimePoint at, NavigableSet<FixType> fixesToUseForSpeedEstimation) {
+        @SuppressWarnings("unchecked")
+        NavigableSet<GPSFix> gpsFixesToUseForSpeedEstimation = (NavigableSet<GPSFix>) fixesToUseForSpeedEstimation;
+        List<GPSFix> relevantFixes = getFixesRelevantForSpeedEstimation(at, gpsFixesToUseForSpeedEstimation);
         double knotSum = 0;
         double bearingDegSum = 0; // FIXME can't just add bearings; consider 355deg vs. 005deg!!!
         int count = 0;
@@ -281,6 +283,29 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         }
         SpeedWithBearing avgSpeed = new KnotSpeedWithBearingImpl(knotSum / count, new DegreeBearingImpl(bearingDegSum/count));
         return avgSpeed;
+    }
+
+    private List<GPSFix> getFixesRelevantForSpeedEstimation(TimePoint at,
+            NavigableSet<GPSFix> fixesToUseForSpeedEstimation) {
+        DummyGPSFix atTimed = new DummyGPSFix(at);
+        List<GPSFix> relevantFixes = new LinkedList<GPSFix>();
+        synchronized (this) {
+            NavigableSet<GPSFix> beforeSet = fixesToUseForSpeedEstimation.headSet(atTimed, /* inclusive */ false);
+            NavigableSet<GPSFix> afterSet = fixesToUseForSpeedEstimation.tailSet(atTimed, /* inclusive */ true);
+            for (GPSFix beforeFix : beforeSet.descendingSet()) {
+                if (at.asMillis() - beforeFix.getTimePoint().asMillis() > getMillisecondsOverWhichToAverage() / 2) {
+                    break;
+                }
+                relevantFixes.add(0, beforeFix);
+            }
+            for (GPSFix afterFix : afterSet) {
+                if (afterFix.getTimePoint().asMillis() - at.asMillis() > getMillisecondsOverWhichToAverage() / 2) {
+                    break;
+                }
+                relevantFixes.add(afterFix);
+            }
+        }
+        return relevantFixes;
     }
 
     protected long getMillisecondsOverWhichToAverage() {
