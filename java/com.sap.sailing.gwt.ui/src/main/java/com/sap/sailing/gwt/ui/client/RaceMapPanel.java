@@ -1212,7 +1212,6 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         }
     }
 
-    /* TODO see Bug #6, use checkboxes to select what to visualize */
     private void showMarkDouglasPeuckerPoints(Map<CompetitorDAO, List<GPSFixDAO>> gpsFixPointMapForCompetitors) {
         douglasMarkers = new HashSet<Marker>();
         if (map != null && gpsFixPointMapForCompetitors != null) {
@@ -1224,7 +1223,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
                 for (GPSFixDAO fix : gpsFix) {
                     LatLng latLng = LatLng.newInstance(fix.position.latDeg, fix.position.lngDeg);
                     MarkerOptions options = MarkerOptions.newInstance();
-                    options.setTitle(fix.speedWithBearing.toString());
+                    options.setTitle(fix.timepoint+": "+fix.position+", "+fix.speedWithBearing.toString());
                     Marker marker = new Marker(latLng, options);
                     douglasMarkers.add(marker);
                     map.addOverlay(marker);
