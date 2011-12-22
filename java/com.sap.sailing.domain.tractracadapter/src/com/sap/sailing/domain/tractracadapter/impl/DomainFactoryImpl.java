@@ -93,12 +93,11 @@ public class DomainFactoryImpl implements DomainFactory {
     
     private final Map<Race, RaceDefinition> raceCache = new HashMap<Race, RaceDefinition>();
 
-    private final Set<String> typicallyUpwindStartingBoatClassNamesLowercase;
+    private final Set<String> mayStartWithNoUpwindLeg;
     
     public DomainFactoryImpl(com.sap.sailing.domain.base.DomainFactory baseDomainFactory) {
         this.baseDomainFactory = baseDomainFactory;
-        typicallyUpwindStartingBoatClassNamesLowercase = new HashSet<String>(Arrays.asList(new String[] { "24mr", "finn", "radial",
-                "470", "star", "49er", "tornado" }));
+        mayStartWithNoUpwindLeg = new HashSet<String>(Arrays.asList(new String[] { "extreme40", "ess", "ess40" }));
     }
 
     @Override
@@ -204,7 +203,7 @@ public class DomainFactoryImpl implements DomainFactory {
     @Override
     public BoatClass getOrCreateBoatClass(CompetitorClass competitorClass) {
         return baseDomainFactory.getOrCreateBoatClass(competitorClass == null ? "" : competitorClass.getName(),
-        /* typicallyStartsUpwind */ typicallyUpwindStartingBoatClassNamesLowercase.contains(competitorClass.getName()
+        /* typicallyStartsUpwind */ !mayStartWithNoUpwindLeg.contains(competitorClass.getName()
                 .toLowerCase()));
     }
 
