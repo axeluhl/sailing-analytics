@@ -7,7 +7,7 @@ public class RadianBearingImpl extends AbstractBearing implements Bearing {
     
     public RadianBearingImpl(double bearingRad) {
         super();
-        this.bearingRad = bearingRad;
+        this.bearingRad = bearingRad - 2*Math.PI * (int) (bearingRad/2./Math.PI);
     }
 
     @Override

@@ -24,6 +24,25 @@ import com.sap.sailing.util.Util;
 public class WindTest {
     private static final int AVERAGING_INTERVAL_MILLIS = 30000 /* 30s averaging interval */;
     
+    /**
+     * Tests that averaging also works across the 0deg mark
+     */
+    @Test
+    public void testAveragingWind() throws InterruptedException {
+        WindTrack track = new WindTrackImpl(AVERAGING_INTERVAL_MILLIS);
+        TimePoint t1 = MillisecondsTimePoint.now();
+        Thread.sleep(10);
+        TimePoint t2 = MillisecondsTimePoint.now();
+        TimePoint middle = new MillisecondsTimePoint((t1.asMillis()+t2.asMillis())/2);
+        DegreePosition pos = new DegreePosition(0, 0);
+        Wind wind1 = new WindImpl(pos, t1, new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(355)));
+        Wind wind2 = new WindImpl(pos, t2, new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(5)));
+        track.add(wind1);
+        track.add(wind2);
+        Wind average = track.getEstimatedWind(pos, middle);
+        assertEquals(0, average.getBearing().getDegrees(), 0.00000001);
+    }
+    
     @Test
     public void testMultipleWindFixesWithSameTimestampInSameWindTrack() {
         WindTrack track = new WindTrackImpl(AVERAGING_INTERVAL_MILLIS);
@@ -177,6 +196,6 @@ public class WindTest {
         // expectation: take two from left (because they are closer than AVERAGING_INTERVAL_MILLIS apart), one from right side:
         assertEquals((wind1.getKnots() + wind2.getKnots() + wind3.getKnots()) / 3, result.getKnots(), 0.000000001);
         assertEquals((wind1.getBearing().getDegrees() + wind2.getBearing().getDegrees() + wind3.getBearing()
-                .getDegrees()) / 3, result.getBearing().getDegrees(), 0.0000000001);
+                .getDegrees()) / 3, result.getBearing().getDegrees(), 0.1);
     }
 }

@@ -25,7 +25,6 @@ import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.Tack;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.base.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.base.impl.DouglasPeucker;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
@@ -537,6 +536,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     @Override
     public Wind getEstimatedWindDirection(Position position, TimePoint timePoint) throws NoWindException {
+        int count = 0; // counts how many boats' courses were used in computing the result
         Map<LegType, BearingCluster> bearings = new HashMap<TrackedLeg.LegType, BearingCluster>();
         for (LegType legType : LegType.values()) {
             bearings.put(legType, new BearingCluster());
@@ -560,29 +560,31 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         BearingCluster[] bearingClustersUpwind = bearings.get(LegType.UPWIND).splitInTwo(getMinimumAngleBetweenDifferentTacksUpwind());
         if (!bearingClustersUpwind[0].isEmpty() && !bearingClustersUpwind[1].isEmpty()) {
             upwindAverage = bearingClustersUpwind[0].getAverage().middle(bearingClustersUpwind[1].getAverage());
+            count += bearingClustersUpwind[0].size() + bearingClustersUpwind[1].size();
         }
         Bearing downwindAverage = null;
         BearingCluster[] bearingClustersDownwind = bearings.get(LegType.DOWNWIND).splitInTwo(getMinimumAngleBetweenDifferentTacksDownwind());
         if (!bearingClustersDownwind[0].isEmpty() && !bearingClustersDownwind[1].isEmpty()) {
             downwindAverage = bearingClustersDownwind[0].getAverage().middle(bearingClustersDownwind[1].getAverage());
+            count += bearingClustersDownwind[0].size() + bearingClustersDownwind[1].size();
         }
-        double bearingDeg;
+        Bearing bearing;
         if (upwindAverage == null) {
             if (downwindAverage == null) {
                 throw new NoWindException(
                         "Can't determine estimated wind direction because no two distinct direction clusters found upwind nor downwind");
             } else {
-                bearingDeg = downwindAverage.getDegrees();
+                bearing = downwindAverage;
             }
         } else {
             if (downwindAverage == null) {
-                bearingDeg = upwindAverage.reverse().getDegrees();
+                bearing = upwindAverage.reverse();
             } else {
-                bearingDeg = (downwindAverage.getDegrees() + upwindAverage.reverse().getDegrees())/2.0;
+                bearing = downwindAverage.middle(upwindAverage.reverse());
             }
         }
         return new WindImpl(null, timePoint,
-                new KnotSpeedWithBearingImpl(/* speedInKnots */ 1, new DegreeBearingImpl(bearingDeg)));
+                new KnotSpeedWithBearingImpl(/* speedInKnots */ count, bearing));
     }
     
     /**

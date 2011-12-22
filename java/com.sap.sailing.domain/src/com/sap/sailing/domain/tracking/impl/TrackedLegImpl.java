@@ -135,11 +135,11 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener<Competitor
             for (Buoy endBuoy : getLeg().getTo().getBuoys()) {
                 Position endBuoyPos = getTrackedRace().getOrCreateTrack(endBuoy).getEstimatedPosition(at, false);
                 Bearing legBearing = startBuoyPos.getBearingGreatCircle(endBuoyPos);
-                double deltaDeg = legBearing.getDegrees() - wind.getBearing().getDegrees();
+                double deltaDeg = legBearing.getDifferenceTo(wind.getBearing()).getDegrees();
                 if (Math.abs(deltaDeg) < UPWIND_DOWNWIND_TOLERANCE_IN_DEG) {
                     return LegType.DOWNWIND;
                 } else {
-                    double deltaDegOpposite = legBearing.getDegrees() - wind.getBearing().reverse().getDegrees();
+                    double deltaDegOpposite = legBearing.getDifferenceTo(wind.getBearing().reverse()).getDegrees();
                     if (Math.abs(deltaDegOpposite) < UPWIND_DOWNWIND_TOLERANCE_IN_DEG) {
                         return LegType.UPWIND;
                     }
