@@ -21,10 +21,13 @@ public class BoatClassImpl extends NamedImpl implements BoatClass {
 
     private final  boolean typicallyStartsUpwind;
 
+    private final Distance hullLength;
+
     public BoatClassImpl(String name, boolean typicallyStartsUpwind) {
         super(name);
         this.typicallyStartsUpwind = typicallyStartsUpwind;
         approximateManeuverDurationInMilliseconds = 8000; // as discussed with Dennis Gehrlein
+        hullLength = new MeterDistance(5); // a good average for the olympic classes...
     }
 
     @Override
@@ -57,4 +60,8 @@ public class BoatClassImpl extends NamedImpl implements BoatClass {
         return typicallyStartsUpwind;
     }
 
+    @Override
+    public Distance getHullLength() {
+        return hullLength;
+    }
 }
