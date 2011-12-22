@@ -571,6 +571,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         Bearing bearing;
         if (upwindAverage == null) {
             if (downwindAverage == null) {
+                // TODO consider returning null instead of throwing exception
                 throw new NoWindException(
                         "Can't determine estimated wind direction because no two distinct direction clusters found upwind nor downwind");
             } else {
@@ -773,7 +774,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         TrackedLegOfCompetitor legBeforeManeuver = getTrackedLeg(competitor, timePointBeforeManeuver);
         TrackedLegOfCompetitor legAfterManeuver = getTrackedLeg(competitor, timePointAfterManeuver);
         Maneuver.Type maneuverType;
-        if (totalCourseChangeInDegrees > PENALTY_CIRCLE_DEGREES_THRESHOLD) {
+        if (Math.abs(totalCourseChangeInDegrees) > PENALTY_CIRCLE_DEGREES_THRESHOLD) {
             maneuverType = Type.PENALTY_CIRCLE;
         } else if (legBeforeManeuver != legAfterManeuver &&
                 // a maneuver at the start line is not to be considered a MARK_PASSING maneuver; show a tack as a tack

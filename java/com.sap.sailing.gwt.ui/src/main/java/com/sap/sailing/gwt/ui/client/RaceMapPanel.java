@@ -833,7 +833,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
                         newMapBounds.extend(bounds.getNorthEast());
                         newMapBounds.extend(bounds.getSouthWest());
                     }
-                    if (lastShownFix.containsKey(competitorDAO)) {
+                    if (lastShownFix.containsKey(competitorDAO) && lastShownFix.get(competitorDAO) != -1) {
                         GPSFixDAO lastPos = getBoatFix(competitorDAO);
                         Marker boatMarker = boatMarkers.get(competitorDAO);
                         if (boatMarker == null) {
