@@ -62,6 +62,15 @@ import com.sap.sailing.gwt.ui.shared.Pair;
 import com.sap.sailing.server.api.DetailType;
 import com.sap.sailing.server.api.RaceIdentifier;
 
+/** ChartsPanel is a gwt panel, that can show competitor data (e.g. current speed over ground, windward distance to leader) for different races in a chart.
+ * 
+ * When calling the consturcor a chart is created that creates a final amount of series (so the maximum number of competitors cannot be changed in one chart)
+ * which are connected to competitors, when the sailing service returns the data. So {@code seriesID, competitorID and markSeriesID} are linked with the index.
+ * So if u know for example the seriesID-index, you can get the competitor by calling competitorID.get(index).
+ * 
+ * @author D056866 Benjamin Ebling
+ *
+ */
 public class ChartsPanel extends FormPanel {
     private CompetitorInRaceDAO chartData;
     private CompetitorsAndTimePointsDAO competitorsAndTimePointsDAO = null;
@@ -514,7 +523,7 @@ public class ChartsPanel extends FormPanel {
         plot.addSelectionListener(new SelectionListener() {
 
             public void selected(double x1, double y1, double x2, double y2) {
-            	/* TODO
+            	/* TODO Remove not visible buoys from the series when user is zooming in or add them if he is zooming out.
             	for (CompetitorDAO competitor : competitorsAndTimePointsDAO.getCompetitor()){
             		long[] markPassingTimes = competitorsAndTimePointsDAO.getMarkPassings(competitor);
                     Double[] markPassingValues = chartData.getMarkPassings(competitor);
