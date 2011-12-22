@@ -271,7 +271,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public Wind getEstimatedWindDirection(Position position, TimePoint timePoint) throws NoWindException {
+    public Wind getEstimatedWindDirection(Position position, TimePoint timePoint) {
         // TODO Auto-generated method stub
         return null;
     }

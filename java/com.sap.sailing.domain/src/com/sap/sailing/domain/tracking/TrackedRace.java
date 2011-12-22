@@ -198,8 +198,14 @@ public interface TrackedRace {
      * This wind direction should not be used directly to compute the leg's wind direction and hence the {@link LegType
      * leg type} because an endless recursion may result: an implementation of this method signature will need to know
      * whether a leg is an upwind or downwind leg for which it has to know where the wind is coming from.
+     * 
+     * @return <code>null</code> if no sufficient boat track information is available or leg type identification (upwind
+     *         vs. downwind) is not possible; a valid {@link Wind} fix otherwise whose bearing is inferred from the boat
+     *         courses and whose speed in knots is currently a rough indication of how many boats' courses contributed
+     *         to determining the bearing. If in the future we have data about polar diagrams specific to boat classes,
+     *         we may be able to also infer the wind speed from the boat tracks.
      */
-    Wind getEstimatedWindDirection(Position position, TimePoint timePoint) throws NoWindException;
+    Wind getEstimatedWindDirection(Position position, TimePoint timePoint);
     
     /**
      * Determines whether the <code>competitor</code> is sailing on port or starboard tack at the
