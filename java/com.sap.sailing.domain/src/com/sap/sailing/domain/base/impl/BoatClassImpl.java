@@ -24,7 +24,8 @@ public class BoatClassImpl extends NamedImpl implements BoatClass {
     public BoatClassImpl(String name, boolean typicallyStartsUpwind) {
         super(name);
         this.typicallyStartsUpwind = typicallyStartsUpwind;
-        approximateManeuverDurationInMilliseconds = 8000; // as discussed with Dennis Gehrlein
+        approximateManeuverDurationInMilliseconds = 9500; // as discussed with Dennis Gehrlein (8000), then incremented
+                                                          // a bit to 9500 to better catch penalty circles
     }
 
     @Override

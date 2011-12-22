@@ -84,7 +84,7 @@ public class DomainFactoryImpl implements DomainFactory {
         olympicClassesByID.put("009", baseDomainFactory.getOrCreateBoatClass("49er", /* alwaysStartsUpwind */ true));
         olympicClassesByID.put("007", baseDomainFactory.getOrCreateBoatClass("Star", /* typicallyStartsUpwind */ true));
         olympicClassesByID.put("010", baseDomainFactory.getOrCreateBoatClass("Elliott 6M", /* typicallyStartsUpwind */ true));
-        unknownBoatClass = new BoatClassImpl("Unknown", /* typicallyStartsUpwind */ false);
+        unknownBoatClass = new BoatClassImpl("Unknown", /* typicallyStartsUpwind */ true);
     }
 
     @Override
