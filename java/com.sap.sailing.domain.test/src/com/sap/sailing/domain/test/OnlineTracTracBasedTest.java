@@ -150,7 +150,7 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
      * the marks' positions. Therefore, approximate mark positions are set here for all marks
      * of {@link #getTrackedRace()}'s courses for the time span starting at the epoch up to now.
      */
-    public static void fixApproximateMarkPositionsForWindReadOut(DynamicTrackedRace the505Race2) {
+    public static void fixApproximateMarkPositionsForWindReadOut(DynamicTrackedRace race) {
         TimePoint epoch = new MillisecondsTimePoint(0l);
         TimePoint now = MillisecondsTimePoint.now();
         Map<String, Position> buoyPositions = new HashMap<String, Position>();
@@ -161,10 +161,10 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
         buoyPositions.put("K Mark1", new DegreePosition(54.489738990000006, 10.17079423000015));
         buoyPositions.put("K Finish (left)", new DegreePosition(54.48918199999999, 10.17003714));
         buoyPositions.put("K Finish (right)", new DegreePosition(54.48891756, 10.170632146666675));
-        for (Waypoint w : the505Race2.getRace().getCourse().getWaypoints()) {
+        for (Waypoint w : race.getRace().getCourse().getWaypoints()) {
             for (Buoy buoy : w.getBuoys()) {
-                the505Race2.getOrCreateTrack(buoy).addGPSFix(new GPSFixImpl(buoyPositions.get(buoy.getName()), epoch));
-                the505Race2.getOrCreateTrack(buoy).addGPSFix(new GPSFixImpl(buoyPositions.get(buoy.getName()), now));
+                race.getOrCreateTrack(buoy).addGPSFix(new GPSFixImpl(buoyPositions.get(buoy.getName()), epoch));
+                race.getOrCreateTrack(buoy).addGPSFix(new GPSFixImpl(buoyPositions.get(buoy.getName()), now));
             }
         }
     }

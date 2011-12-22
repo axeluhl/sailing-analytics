@@ -1,7 +1,6 @@
 package com.sap.sailing.domain.test;
 
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -20,20 +19,12 @@ import com.sap.sailing.domain.base.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.tracking.Maneuver;
-import com.sap.sailing.domain.tracking.Maneuver.Type;
 import com.sap.sailing.domain.tracking.NoWindException;
 import com.sap.sailing.domain.tracking.WindSource;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
 
-public class ManeuverAnalysis505Test extends OnlineTracTracBasedTest {
-
-    private SimpleDateFormat dateFormat;
-    private static final int TACK_TOLERANCE = 7000;
-    private static final int JIBE_TOLERANCE = 7000;
-    private static final int PENALTYCIRCLE_TOLERANCE = 9000;
-
-    private List<Maneuver> maneuversInvalid;
+public class ManeuverAnalysis505Test extends AbstractManeuverDetectionTestCase {
 
     public ManeuverAnalysis505Test() throws MalformedURLException, URISyntaxException {
         super();
@@ -150,52 +141,5 @@ public class ManeuverAnalysis505Test extends OnlineTracTracBasedTest {
         maneuverTypesFound.add(Maneuver.Type.JIBE);
         maneuverTypesFound.add(Maneuver.Type.PENALTY_CIRCLE);
         assertAllManeuversOfTypesDetected(maneuverTypesFound, maneuversInvalid);
-    }
-
-    /**
-     * Checks that a maneuver of the type <code>maneuverType</code> to the time of <code>maneuverTimePoint</code> does
-     * exist.
-     * 
-     * @param maneuverList
-     *            The whole list of maneuvers to search for that maneuver type.
-     * @param maneuverType
-     *            The type of maneuver that should have happened to the given time point.
-     * @param maneuverTimePoint
-     *            The time point the maneuver type should have happened.
-     * @param tolerance
-     *            The tolerance of time, the maneuver should have happened in milliseconds.
-     */
-    private void assertManeuver(List<Maneuver> maneuverList, Maneuver.Type maneuverType,
-            MillisecondsTimePoint maneuverTimePoint, int tolerance) {
-        for (Maneuver maneuver : maneuverList) {
-            assertNotNull(maneuver.getTimePoint());
-            if (maneuver.getType() == maneuverType
-                    && Math.abs(maneuver.getTimePoint().asMillis() - maneuverTimePoint.asMillis()) <= tolerance) {
-                maneuversInvalid.remove(maneuver);
-                return;
-            }
-        }
-        fail("Didn't find maneuver type " + maneuverType + " in " + tolerance + "ms around " + maneuverTimePoint);
-    }
-
-    /**
-     * Checks if there where additional maneuvers of the given types listed in <code>maneuverTypesFound</code> found,
-     * that where not found by {@link ManeuverAnalysis505Test#assertManeuver(List, Type, MillisecondsTimePoint, int)}.
-     * 
-     * @param maneuverTypesFound
-     *            The maneuver types that should be found.
-     * @param maneuversNotDetected
-     *            The maneuvers of the types listed in <code>maneuverTypesFound</code> that where not detected by
-     *            {@link ManeuverAnalysis505Test#assertManeuver(List, Type, MillisecondsTimePoint, int)}
-     */
-    private void assertAllManeuversOfTypesDetected(List<Maneuver.Type> maneuverTypesFound,
-            List<Maneuver> maneuversNotDetected) {
-        for (Maneuver maneuver : maneuversNotDetected) {
-            for (Maneuver.Type type : maneuverTypesFound) {
-                if (maneuver.getType().equals(type)) {
-                    fail("The maneuver "+maneuver+" was detected but not expected");
-                }
-            }
-        }
     }
 }

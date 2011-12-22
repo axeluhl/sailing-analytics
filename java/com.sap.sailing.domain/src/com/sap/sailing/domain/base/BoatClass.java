@@ -35,4 +35,6 @@ public interface BoatClass extends Named {
      * start with a non-upwind leg even though this method returns <code>true</code>.
      */
     boolean typicallyStartsUpwind();
+    
+    Distance getHullLength();
 }

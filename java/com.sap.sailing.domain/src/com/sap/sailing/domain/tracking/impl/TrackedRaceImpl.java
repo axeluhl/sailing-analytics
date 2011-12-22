@@ -571,6 +571,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         Bearing bearing;
         if (upwindAverage == null) {
             if (downwindAverage == null) {
+                // TODO consider returning null instead of throwing exception
                 throw new NoWindException(
                         "Can't determine estimated wind direction because no two distinct direction clusters found upwind nor downwind");
             } else {
@@ -674,7 +675,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                 GPSFixMoving next = approximationPointsIter.next();
                 speedWithBearingOnApproximationFromCurrentToNext = current.getSpeedAndBearingRequiredToReach(next);
                 // compute course change on "approximation track"
-                CourseChange courseChange = speedWithBearingOnApproximationFromPreviousToCurrent.getCourseChangeRequiredToReach(speedWithBearingOnApproximationFromCurrentToNext);
+                CourseChange courseChange = speedWithBearingOnApproximationFromPreviousToCurrent
+                        .getCourseChangeRequiredToReach(speedWithBearingOnApproximationFromCurrentToNext);
                 Pair<GPSFixMoving, CourseChange> courseChangeAtFix = new Pair<GPSFixMoving, CourseChange>(current, courseChange);
                 if (!courseChangeSequenceInSameDirection.isEmpty() &&
                         Math.signum(courseChangeSequenceInSameDirection.get(0).getB().getCourseChangeInDegrees()) !=
@@ -701,12 +703,13 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     /**
      * Groups the {@link CourseChange} sequence into groups where the times of the fixes at which the course changes
-     * took place are no further apart than {@link #getApproximateManeuverDurationInMilliseconds()} milliseconds. For
-     * those, a single {@link Maneuver} object is created and added to the resulting list. The maneuver sums up the
-     * direction changes of the individual {@link CourseChange} objects. This can result in direction changes of more
-     * than 180 degrees in one direction which may, e.g., represent a penalty circle or a mark rounding maneuver. As the
-     * maneuver's time point, the average time point of the course changes that went into the maneuver construction is
-     * used.<p>
+     * took place are no further apart than {@link #getApproximateManeuverDurationInMilliseconds()} milliseconds or
+     * where the distances of those course changes are less than two hull lengths apart. For those, a single
+     * {@link Maneuver} object is created and added to the resulting list. The maneuver sums up the direction changes of
+     * the individual {@link CourseChange} objects. This can result in direction changes of more than 180 degrees in one
+     * direction which may, e.g., represent a penalty circle or a mark rounding maneuver. As the maneuver's time point,
+     * the average time point of the course changes that went into the maneuver construction is used.
+     * <p>
      * 
      * @param speedWithBearingOnApproximationAtBeginning
      *            the speed/bearing before the first approximating fix passed in
@@ -722,6 +725,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         List<Maneuver> result = new ArrayList<Maneuver>();
         List<Pair<GPSFixMoving, CourseChange>> group = new ArrayList<Pair<GPSFixMoving, CourseChange>>();
         if (!courseChangeSequenceInSameDirection.isEmpty()) {
+            Distance twoHullLengths = competitor.getBoat().getBoatClass().getHullLength().scale(2);
             SpeedWithBearing beforeGroupOnApproximation = speedWithBearingOnApproximationAtBeginning; // speed/bearing before group
             SpeedWithBearing beforeCurrentCourseChangeOnApproximation = beforeGroupOnApproximation; // speed/bearing before current course change
             Iterator<Pair<GPSFixMoving, CourseChange>> iter = courseChangeSequenceInSameDirection.iterator();
@@ -732,9 +736,12 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             do {
                 Pair<GPSFixMoving, CourseChange> currentFixAndCourseChange = iter.next();
                 if (!group.isEmpty()
-                        && currentFixAndCourseChange.getA().getTimePoint().asMillis() - group.get(group.size() - 1).getA().getTimePoint().asMillis() >
-                        getApproximateManeuverDurationInMilliseconds()) {
-                    // if next is more then approximate maneuver duration later, turn the current group into a maneuver and add to result
+                        && currentFixAndCourseChange.getA().getTimePoint().asMillis()
+                                - group.get(group.size() - 1).getA().getTimePoint().asMillis() > getApproximateManeuverDurationInMilliseconds()
+                        && currentFixAndCourseChange.getA().getPosition().getDistance(
+                                group.get(group.size() - 1).getA().getPosition()).compareTo(twoHullLengths) > 0) {
+                    // if next is more then approximate maneuver duration later or further apart than two hull lengths,
+                    // turn the current group into a maneuver and add to result
                     Maneuver maneuver = createManeuverFromGroupOfCourseChanges(competitor, beforeGroupOnApproximation,
                             group, afterCurrentCourseChange, totalCourseChangeInDegrees, totalMilliseconds);
                     result.add(maneuver);
@@ -773,7 +780,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         TrackedLegOfCompetitor legBeforeManeuver = getTrackedLeg(competitor, timePointBeforeManeuver);
         TrackedLegOfCompetitor legAfterManeuver = getTrackedLeg(competitor, timePointAfterManeuver);
         Maneuver.Type maneuverType;
-        if (totalCourseChangeInDegrees > PENALTY_CIRCLE_DEGREES_THRESHOLD) {
+        if (Math.abs(totalCourseChangeInDegrees) > PENALTY_CIRCLE_DEGREES_THRESHOLD) {
             maneuverType = Type.PENALTY_CIRCLE;
         } else if (legBeforeManeuver != legAfterManeuver &&
                 // a maneuver at the start line is not to be considered a MARK_PASSING maneuver; show a tack as a tack

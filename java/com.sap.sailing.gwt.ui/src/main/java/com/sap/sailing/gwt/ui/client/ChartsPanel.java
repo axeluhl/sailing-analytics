@@ -3,8 +3,9 @@ package com.sap.sailing.gwt.ui.client;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map.Entry;
+import java.util.Set;
 
 import ca.nanometrics.gflot.client.Axis;
 import ca.nanometrics.gflot.client.DataPoint;
@@ -61,6 +62,15 @@ import com.sap.sailing.gwt.ui.shared.Pair;
 import com.sap.sailing.server.api.DetailType;
 import com.sap.sailing.server.api.RaceIdentifier;
 
+/** ChartsPanel is a gwt panel, that can show competitor data (e.g. current speed over ground, windward distance to leader) for different races in a chart.
+ * 
+ * When calling the consturcor a chart is created that creates a final amount of series (so the maximum number of competitors cannot be changed in one chart)
+ * which are connected to competitors, when the sailing service returns the data. So {@code seriesID, competitorID and markSeriesID} are linked with the index.
+ * So if u know for example the seriesID-index, you can get the competitor by calling competitorID.get(index).
+ * 
+ * @author D056866 Benjamin Ebling
+ *
+ */
 public class ChartsPanel extends FormPanel {
     private CompetitorInRaceDAO chartData;
     private CompetitorsAndTimePointsDAO competitorsAndTimePointsDAO = null;
@@ -75,23 +85,20 @@ public class ChartsPanel extends FormPanel {
     private DeckPanel chart;
     private final RaceIdentifier[] races;
     private int colorCounter = 0;
-    private HashMap<Integer, String> idColor;
+    private final HashMap<Integer, String> idColor;
     private int selectedRace = 0;
     private int stepsToLoad = 100;
     private final StringConstants stringConstants;
-    private HashMap<CompetitorDAO, Boolean> competitorVisible;
+    private final Set<CompetitorDAO> competitorVisible;
     private VerticalPanel selectCompetitors;
     private PlotWithOverview plot;
-    private PlotWithOverviewModel model;
-    private PlotOptions plotOptions;
-    private HashMap<Integer, SeriesHandler> seriesID;
-    private HashMap<SeriesHandler, Boolean> seriesIsUsed;
-    private HashMap<CompetitorDAO, Integer> competitorID;
-    private HashMap<Integer, SeriesHandler> markSeriesID;
-    private HashMap<CompetitorDAO, Widget> competitorLabels;
-    private HashMap<String, String> markPassingBuoyName;
-    private int width = 800, height = 600;
-    private int competitorNr = 0;
+    private final List<SeriesHandler> seriesID;
+    private final Set<SeriesHandler> seriesIsUsed;
+    private final List<CompetitorDAO> competitorID;
+    private final List<SeriesHandler> markSeriesID;
+    private final HashMap<CompetitorDAO, Widget> competitorLabels;
+    private final HashMap<String, String> markPassingBuoyName;
+    private int width, height;
 
     private DetailType dataToShow = DetailType.WINDWARD_DISTANCE_TO_OVERALL_LEADER;
     private AbsolutePanel loadingPanel;
@@ -102,12 +109,12 @@ public class ChartsPanel extends FormPanel {
     	height = chartHeight;
     	this.errorReporter = errorReporter;
     	chartData = new CompetitorInRaceDAO();
-    	seriesID = new HashMap<Integer, SeriesHandler>();
-    	seriesIsUsed = new HashMap<SeriesHandler, Boolean>();
-    	competitorID = new HashMap<CompetitorDAO, Integer>();
-    	markSeriesID = new HashMap<Integer, SeriesHandler>();
+    	seriesID = new ArrayList<SeriesHandler>();
+    	seriesIsUsed = new HashSet<SeriesHandler>();
+    	competitorID = new ArrayList<CompetitorDAO>();
+    	markSeriesID = new ArrayList<SeriesHandler>();
     	idColor = new HashMap<Integer, String>();
-    	competitorVisible = new HashMap<CompetitorDAO, Boolean>();
+    	competitorVisible = new HashSet<CompetitorDAO>();
     	competitorLabels = new HashMap<CompetitorDAO, Widget>();
     	markPassingBuoyName = new HashMap<String, String>();
         this.sailingService = sailingService;
@@ -188,6 +195,9 @@ public class ChartsPanel extends FormPanel {
         loadData();
     }
     
+    /**
+     * Initializes a configuration panel for the chart. This should only be called once in the constructor.
+     */
     private void initConfigPanel(){
     	configPanel = new VerticalPanel();
         configPanel.setSpacing(5);
@@ -242,7 +252,7 @@ public class ChartsPanel extends FormPanel {
             public void run() {
             	final List<CompetitorDAO> competitorsToLoad = new ArrayList<CompetitorDAO>();
             	for (CompetitorDAO competitor : competitorsAndTimePointsDAO.getCompetitor()){
-            		if (isCompetitorVisible(competitor) && competitorID.get(competitor) == null){
+            		if (isCompetitorVisible(competitor) && !competitorID.contains(competitor)){
             			competitorsToLoad.add(competitor);
             		}
             	}
@@ -295,13 +305,13 @@ public class ChartsPanel extends FormPanel {
                                 cb.addClickHandler(new ClickHandler() {
                                     @Override
                                     public void onClick(ClickEvent event) {
-                                    	if (cb.getValue() == true && competitorID.get(c) == null){
+                                    	if (cb.getValue() == true && !competitorID.contains(c)){
                                     		setCompetitorVisible(c, cb.getValue());
                                     		loadData();
                                     	}
                                     	else {
                                     		setCompetitorVisible(c, cb.getValue());
-                                            if (competitorID.get(c) != null){
+                                            if (competitorID.contains(c)){
                                             	setLegendVisible(c,cb.getValue());
                                             	getCompetitorSeries(c).setVisible(cb.getValue());
                                                 getCompetitorMarkPassingSeries(c).setVisible(cb.getValue());
@@ -323,10 +333,10 @@ public class ChartsPanel extends FormPanel {
 
     private synchronized void updateTableData(CompetitorDAO[] competitorDAOs) {
     	List<SeriesHandler> series = new ArrayList<SeriesHandler>();
-    	for (SeriesHandler sh : seriesID.values()){
+    	for (SeriesHandler sh : seriesID){
     		series.add(sh);
     	}
-    	for (SeriesHandler sh : markSeriesID.values()){
+    	for (SeriesHandler sh : markSeriesID){
     		series.add(sh);
     	}
     	CompetitorDAO firstCompetitor = null;
@@ -335,11 +345,11 @@ public class ChartsPanel extends FormPanel {
             	if (firstCompetitor == null){
             		firstCompetitor = competitor;
             	}
-            	competitorID.put(competitor, competitorNr++);
+            	competitorID.add(competitor);
                 SeriesHandler compSeries = getCompetitorSeries(competitor);
-                seriesIsUsed.put(compSeries, true);
+                seriesIsUsed.add(compSeries);
                 SeriesHandler markSeries = getCompetitorMarkPassingSeries(competitor);
-                seriesIsUsed.put(markSeries, true);
+                seriesIsUsed.add(markSeries);
                 compSeries.clear();
                 markSeries.clear();
                 if (isCompetitorVisible(competitor) && chartData.getRaceData(competitor) != null){
@@ -369,17 +379,19 @@ public class ChartsPanel extends FormPanel {
                 series.remove(compSeries);
                 series.remove(markSeries);
             }
-            for (SeriesHandler sh : series){
-            	if (seriesIsUsed.get(sh) == null || !seriesIsUsed.get(sh)){
-            		sh.clear();
-                    Double[] data = chartData.getRaceData(firstCompetitor);
-                    long[] timepoints = competitorsAndTimePointsDAO.getTimePoints();
-                    for (int j = 0; j < stepsToLoad; j++) {
-                    	if (data[j] != null){
-                    		sh.add(new DataPoint(timepoints[j], data[j]));
-                    	}
-                    }
-            	}
+            if (firstCompetitor != null && chartData.getRaceData(firstCompetitor) != null){
+            	for (SeriesHandler sh : series){
+                	if (!seriesIsUsed.contains(sh)){
+                		sh.clear();
+                        Double[] data = chartData.getRaceData(firstCompetitor);
+                        long[] timepoints = competitorsAndTimePointsDAO.getTimePoints();
+                        for (int j = 0; j < stepsToLoad; j++) {
+                        	if (data[j] != null){
+                        		sh.add(new DataPoint(timepoints[j], data[j]));
+                        	}
+                        }
+                	}
+                }
             }
         }
         if (plot != null && plot.isAttached()){
@@ -422,18 +434,21 @@ public class ChartsPanel extends FormPanel {
     }
 
     private void setCompetitorVisible(CompetitorDAO competitor, boolean isVisible) {
-        competitorVisible.put(competitor, isVisible);
+		if (isVisible) {
+			competitorVisible.add(competitor);
+		} else {
+			competitorVisible.remove(competitor);
+		}
     }
 
     private boolean isCompetitorVisible(CompetitorDAO competitor) {
-        Boolean isVisible = competitorVisible.get(competitor);
-        return (isVisible != null) ? isVisible : false;
+        return competitorVisible.contains(competitor);
     }
 
     private Widget createChart() {
         final Label selectedPointLabel = new Label(stringConstants.hoverOverAPoint());
-        model = new PlotWithOverviewModel(PlotModelStrategy.defaultStrategy());
-        plotOptions = new PlotOptions();
+        PlotWithOverviewModel model = new PlotWithOverviewModel(PlotModelStrategy.defaultStrategy());
+        PlotOptions plotOptions = new PlotOptions();
         plotOptions.setDefaultLineSeriesOptions(new LineSeriesOptions().setLineWidth(1).setShow(true));
         plotOptions.setDefaultPointsOptions(new PointsSeriesOptions().setShow(false));
         plotOptions.setDefaultShadowSize(2);
@@ -455,23 +470,18 @@ public class ChartsPanel extends FormPanel {
     		series.setOptions(SeriesType.LINES, new LineSeriesOptions().setLineWidth(2.5).setShow(true));
     		series.setOptions(SeriesType.POINTS, new PointsSeriesOptions().setLineWidth(0).setShow(false));
     		series.setVisible(false);
-    		seriesID.put(i, series);
+    		seriesID.add(series);
     		series = model.addSeries(i + " passed mark", getColorByID(i));
     		series.setOptions(SeriesType.LINES, new LineSeriesOptions().setLineWidth(0).setShow(false));
     		series.setOptions(SeriesType.POINTS, new PointsSeriesOptions().setLineWidth(3).setShow(true));
     		series.setVisible(false);
-    		markSeriesID.put(i, series);
+    		markSeriesID.add(series);
         }
         plot = new PlotWithOverview(model, plotOptions);
         // add hover listener
         plot.addHoverListener(new PlotHoverListener() {
             public void onPlotHover(Plot plot, PlotPosition position, PlotItem item) {
-            	CompetitorDAO competitor = null;
-            	for (Entry<CompetitorDAO, Integer> competitorWithID : competitorID.entrySet()) {
-            		if (item != null && item.getSeries().getLabel().contains(""+competitorWithID.getValue())){
-            			competitor = competitorWithID.getKey();
-            		}
-				}
+            	CompetitorDAO competitor = competitorID.get(seriesID.indexOf(item.getSeries()));
                 if (item != null && competitor != null) {
                 	if (item.getSeries().getLabel().toLowerCase().contains("mark")){
                 		selectedPointLabel.setText(competitor.name + " passed " + markPassingBuoyName.get(competitor.id + (long) item.getDataPoint().getX()) +" at " + dateFormat.format(new Date((long) item.getDataPoint().getX())));
@@ -513,7 +523,7 @@ public class ChartsPanel extends FormPanel {
         plot.addSelectionListener(new SelectionListener() {
 
             public void selected(double x1, double y1, double x2, double y2) {
-            	/* TODO
+            	/* TODO Remove not visible buoys from the series when user is zooming in or add them if he is zooming out.
             	for (CompetitorDAO competitor : competitorsAndTimePointsDAO.getCompetitor()){
             		long[] markPassingTimes = competitorsAndTimePointsDAO.getMarkPassings(competitor);
                     Double[] markPassingValues = chartData.getMarkPassings(competitor);
@@ -548,6 +558,11 @@ public class ChartsPanel extends FormPanel {
         return panel;
     }
     
+    /** Returns a color that is computed once by using {@link ChartsPanel#createHexColor(int)} and then cached.
+     * 
+     * @param id An ID unique for a competitor.
+     * @return A color in hex/html-format (e.g. #ff0000)
+     */
     private String getColorByID(int id){
     	String color = idColor.get(id);
     	if (color == null || color.isEmpty()){
@@ -557,6 +572,12 @@ public class ChartsPanel extends FormPanel {
     	return color;
     }
     
+    /**Only use this if you don't want the color to be cached.
+     * You can use {@link ChartsPanel#getColorByID(int)} instead.
+     * 
+     * @param index The index of e.g. a competitor. Make sure, that each competitor has a unique index.
+     * @return A color computed using the {@code index}.
+     */
     private String createHexColor(int index){
         String rs, gs, bs;
         int r = 0, g = 0, b = 0;
@@ -585,24 +606,45 @@ public class ChartsPanel extends FormPanel {
         return "#" + rs + gs + bs;
     }
     
+    /**
+     * 
+     * @param competitor
+     * @return A series in the chart, that can be used to show the data of a specific competitor.
+     */
     private SeriesHandler getCompetitorSeries(CompetitorDAO competitor){
-    	return seriesID.get(competitorID.get(competitor));
+    	return seriesID.get(competitorID.indexOf(competitor));
     }
     
+    /**
+     * 
+     * @param competitor
+     * @return A series in the chart, that can be used to show the mark passings.
+     */
     private SeriesHandler getCompetitorMarkPassingSeries(CompetitorDAO competitor){
-    	return markSeriesID.get(competitorID.get(competitor));
+    	return markSeriesID.get(competitorID.indexOf(competitor));
     }
     
+    /** You can set, if the legend for a specific competitor should be shown or not.
+     * 
+     * @param competitor
+     * @param visible
+     */
     private void setLegendVisible(CompetitorDAO competitor, Boolean visible){
     	Widget label = competitorLabels.get(competitor);
     	if (label == null){
-    		label = createCompetitorLabel(competitor.name, getColorByID(competitorID.get(competitor)));
+    		label = createCompetitorLabel(competitor.name, getColorByID(competitorID.indexOf(competitor)));
     		competitorLabels.put(competitor, label);
     		legendPanel.add(label);
     	}
     	label.setVisible(visible);
     }
 
+    /**
+     * 
+     * @param competitor The competitor for the legend.
+     * @param color The color for the colored square next to the label.
+     * @return A widget, that can be used for the legend of the chart.
+     */
     private Widget createCompetitorLabel(String competitor, String color){
     	HorizontalPanel competitorLabel = new HorizontalPanel();
     	competitorLabel.setStyleName("chartLegend");
@@ -624,19 +666,23 @@ public class ChartsPanel extends FormPanel {
     	this.setSize(width + "px", height + "px");
     }
     
+    /**
+     * Clears the whole chart and empties cached data.
+     * 
+     * @param clearCheckBoxes Declares whether the checkboxes for the visibility of the competitors should be cleared too. Should be true, when you change the race to show.
+     */
     private void clearChart(boolean clearCheckBoxes){
     	if (clearCheckBoxes){
     		selectCompetitors.clear();
     		seriesIsUsed.clear();
     	}
     	competitorID.clear();
-        competitorNr = 0;
         legendPanel.clear();
         competitorLabels.clear();
-    	for (SeriesHandler series: seriesID.values()){
+    	for (SeriesHandler series: seriesID){
     		series.clear();
     	}
-    	for (SeriesHandler series: markSeriesID.values()){
+    	for (SeriesHandler series: markSeriesID){
     		series.clear();
     	}
     }

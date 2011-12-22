@@ -186,15 +186,18 @@ public interface TrackedRace {
      * Estimates the wind direction based on the observed boat courses at the time given for the position provided. The
      * estimate is based on the assumption that the boats which are on an upwind or a downwind leg sail with very
      * similar angles on the starboard and the port side. There should be clusters of courses which are close to each
-     * other (within a threshold of, say, +/- 5 degrees), whereas for the upwind group there should be two clusters
-     * with angles about 90 degrees apart; similarly, for the downwind leg there should be two clusters, only that the
-     * general jibing angle may vary more, based on the wind speed.<p>
+     * other (within a threshold of, say, +/- 5 degrees), whereas for the upwind group there should be two clusters with
+     * angles about 90 degrees apart; similarly, for the downwind leg there should be two clusters, only that the
+     * general jibing angle may vary more, based on the wind speed and the boat class.
+     * <p>
      * 
-     * Boats currently maneuvering are not considered for this analysis.<p>
+     * Boats {@link GPSFixTrack#hasDirectionChange(TimePoint, double) currently maneuvering} are not considered for this
+     * analysis.
+     * <p>
      * 
-     * This wind direction should not be used directly to compute the leg's wind direction because an endless
-     * recursion may result: an implementation will need to know whether a leg is an upwind or downwind leg for
-     * which it has to know where the wind is comoing from.
+     * This wind direction should not be used directly to compute the leg's wind direction and hence the {@link LegType
+     * leg type} because an endless recursion may result: an implementation of this method signature will need to know
+     * whether a leg is an upwind or downwind leg for which it has to know where the wind is coming from.
      */
     Wind getEstimatedWindDirection(Position position, TimePoint timePoint) throws NoWindException;
     
