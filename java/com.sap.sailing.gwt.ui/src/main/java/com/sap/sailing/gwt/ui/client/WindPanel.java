@@ -175,7 +175,7 @@ public class WindPanel extends FormPanel implements EventDisplayer, WindShower, 
     public void showWind(final EventDAO event, final RaceDAO race) {
         Date now = new Date();
         sailingService.getWindInfo(new EventNameAndRaceName(event.name, race.name),
-                // TODO what about the time interval?
+                // TODO what about the time interval? It should be determined by a selection in the chart but be at most 60s. See bug #121.
                                   new Date(now.getTime()-60000 /* one minute */), new Date(/* toAsMilliseconds */),
                 showEstimatedWindBox.getValue(), new AsyncCallback<WindInfoForRaceDAO>() {
                     @Override
