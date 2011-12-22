@@ -1357,7 +1357,12 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             break;
         case WINDWARD_DISTANCE_TO_OVERALL_LEADER:
             for (int c = 0; c < selectedCompetitor.size(); c++) {
+            	CompetitorDAO competitor = competitorAndTimePointsDAO.getCompetitor()[c];
                 Double[] entries = new Double[competitorAndTimePointsDAO.getTimePoints().length];
+                Double[] markEntries  = new Double[competitorAndTimePointsDAO.getMarkPassings(competitor).length];
+                MillisecondsTimePoint markTime = new MillisecondsTimePoint(competitorAndTimePointsDAO.getMarkPassings(competitor)[0].getB());
+                int markEntryCounter = 0;
+                TrackedLegOfCompetitor trackedLegforMark = trackedRace.getTrackedLeg(selectedCompetitor.get(c), markTime);
                 for (int i = 0; i < competitorAndTimePointsDAO.getTimePoints().length; i++) {
                     MillisecondsTimePoint time = new MillisecondsTimePoint(competitorAndTimePointsDAO.getTimePoints()[i]);
                     TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(selectedCompetitor.get(c), time);
@@ -1365,19 +1370,18 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                         Distance distanceToLeader = trackedLeg.getWindwardDistanceToOverallLeader(time);
                         entries[i] = (distanceToLeader == null) ? null : distanceToLeader.getMeters();
                     }
-                }
-                competitorData.setRaceData(competitorAndTimePointsDAO.getCompetitor()[c], entries);
-                CompetitorDAO competitor = competitorAndTimePointsDAO.getCompetitor()[c];
-                entries = new Double[competitorAndTimePointsDAO.getMarkPassings(competitor).length];
-                for (int i = 0; i < competitorAndTimePointsDAO.getMarkPassings(competitor).length; i++) {
-                    MillisecondsTimePoint time = new MillisecondsTimePoint(competitorAndTimePointsDAO.getMarkPassings(competitor)[i].getB());
-                    TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(selectedCompetitor.get(c), time);
-                    if (trackedLeg != null) {
-                        Distance distanceToLeader = trackedLeg.getWindwardDistanceToOverallLeader(time);
-                        entries[i] = (distanceToLeader == null) ? null : distanceToLeader.getMeters();
+                    if (trackedLegforMark != null && markTime.asMillis() > time.asMillis() && markEntryCounter < competitorAndTimePointsDAO.getMarkPassings(competitor).length){
+                    	Distance distanceToLeader = trackedLegforMark.getWindwardDistanceToOverallLeader(markTime);
+                        markEntries[markEntryCounter] = (distanceToLeader == null) ? null : distanceToLeader.getMeters();
+                        markEntryCounter++;
+                        if (markEntryCounter < competitorAndTimePointsDAO.getMarkPassings(competitor).length){
+                        	markTime = new MillisecondsTimePoint(competitorAndTimePointsDAO.getMarkPassings(competitor)[markEntryCounter].getB());
+                            trackedLegforMark = trackedRace.getTrackedLeg(selectedCompetitor.get(c), markTime);
+                        }
                     }
                 }
-                competitorData.setMarkPassingData(competitor, entries);
+                competitorData.setRaceData(competitor, entries);
+                competitorData.setMarkPassingData(competitor, markEntries);
             }
             break;
         }
