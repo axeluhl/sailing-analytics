@@ -535,7 +535,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     }
 
     @Override
-    public Wind getEstimatedWindDirection(Position position, TimePoint timePoint) throws NoWindException {
+    public Wind getEstimatedWindDirection(Position position, TimePoint timePoint) {
         int count = 0; // counts how many boats' courses were used in computing the result
         Map<LegType, BearingCluster> bearings = new HashMap<TrackedLeg.LegType, BearingCluster>();
         for (LegType legType : LegType.values()) {
@@ -545,7 +545,13 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             TrackedLegOfCompetitor leg = getTrackedLeg(competitor, timePoint);
             if (leg != null) {
                 TrackedLeg trackedLeg = getTrackedLeg(leg.getLeg());
-                LegType legType = trackedLeg.getLegType(timePoint);
+                LegType legType;
+                try {
+                    legType = trackedLeg.getLegType(timePoint);
+                } catch (NoWindException e) {
+                    logger.warning("Unable to determine leg type for race "+getRace().getName()+" while trying to estimate wind");
+                    return null;
+                }
                 if (legType != LegType.REACHING) {
                     GPSFixTrack<Competitor, GPSFixMoving> track = getTrack(competitor);
                     if (!track.hasDirectionChange(timePoint, getManeuverDegreeAngleThreshold())) {
@@ -571,9 +577,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         Bearing bearing;
         if (upwindAverage == null) {
             if (downwindAverage == null) {
-                // TODO consider returning null instead of throwing exception
-                throw new NoWindException(
-                        "Can't determine estimated wind direction because no two distinct direction clusters found upwind nor downwind");
+                return null;
             } else {
                 bearing = downwindAverage;
             }

@@ -538,12 +538,9 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                     WindDAO windDAO = createWindDAO(wind, windTrack);
                     windTrackInfoDAO.windFixes.add(windDAO);
                     if (includeTrackBasedWindEstimation && windSource == trackedRace.getWindSource()) {
-                        try {
-                            Wind estimatedWindDirection = trackedRace.getEstimatedWindDirection(wind.getPosition(), wind.getTimePoint());
+                        Wind estimatedWindDirection = trackedRace.getEstimatedWindDirection(wind.getPosition(), wind.getTimePoint());
+                        if (estimatedWindDirection != null) {
                             estimatedTrack.add(estimatedWindDirection);
-                        } catch (NoWindException e) {
-                            // no show-stopper; it would just mean that the wind estimation isn't complete which we can tolerate
-                            e.printStackTrace();
                         }
                     }
                 }
@@ -566,12 +563,10 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 if (!hasNext) {
                     // empty wind estimation track; add at least one estimate for the current time for the start gate
                     Wind estimatedWindDirectionForNow;
-                    try {
-                        estimatedWindDirectionForNow = trackedRace.getEstimatedWindDirection(
-                                trackedRace.getApproximatePosition(trackedRace.getRace().getCourse().getWaypoints().iterator().next(), now), now);
+                    estimatedWindDirectionForNow = trackedRace.getEstimatedWindDirection(
+                            trackedRace.getApproximatePosition(trackedRace.getRace().getCourse().getWaypoints().iterator().next(), now), now);
+                    if (estimatedWindDirectionForNow != null) {
                         estimatedTrack.add(estimatedWindDirectionForNow);
-                    } catch (NoWindException e) {
-                        e.printStackTrace(); // well, then we just can't add a wind estimate
                     }
                 }
                 WindTrackInfoDAO windEstimations = createWindTrackInfoDAO(estimatedTrack);
@@ -647,14 +642,9 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                     windTrackInfoDAO.windFixes.add(windDAO);
                 }
                 if (includeTrackBasedWindEstimation) {
-                    try {
-                        Wind estimatedWindDirection = trackedRace.getEstimatedWindDirection(wind==null?null:wind.getPosition(),
-                                timePoint);
+                    Wind estimatedWindDirection = trackedRace.getEstimatedWindDirection(wind==null?null:wind.getPosition(), timePoint);
+                    if (estimatedWindDirection != null) {
                         estimatedTrack.add(estimatedWindDirection);
-                    } catch (NoWindException e) {
-                        // no show-stopper; it would just mean that the wind estimation isn't complete which we
-                        // can tolerate
-                        e.printStackTrace();
                     }
                 }
                 timePoint = new MillisecondsTimePoint(timePoint.asMillis() + millisecondsStepWidth);
