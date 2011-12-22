@@ -1,7 +1,7 @@
 package com.sap.sailing.domain.test;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertNull;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -99,13 +99,10 @@ public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest 
         MillisecondsTimePoint now = MillisecondsTimePoint.now();
         setBearingForCompetitor(competitors.get(0), now, 320);
         setBearingForCompetitor(competitors.get(1), now, 330); // on the same tack, should give no read-out
-        try {
-            getTrackedRace().getEstimatedWindDirection(/* position */ null, now);
-            fail("Expected NoWindException");
-        } catch (NoWindException e) {
-            assertEquals("Can't determine estimated wind direction because no two distinct direction clusters found upwind nor downwind",
-                    e.getMessage());
-        }
+        Wind nullWind = getTrackedRace().getEstimatedWindDirection(/* position */null, now);
+        assertNull(
+                "Shouldn't have been able to determine estimated wind direction because no two distinct direction clusters found upwind nor downwind",
+                nullWind);
     }
 
     @Test
@@ -116,13 +113,10 @@ public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest 
         setBearingForCompetitor(competitors.get(1), now, 330); // on the same tack, should give no read-out
         setBearingForCompetitor(competitors.get(2), now, 135);
         setBearingForCompetitor(competitors.get(3), now, 145); // on the same tack, should give no read-out
-        try {
-            getTrackedRace().getEstimatedWindDirection(/* position */ null, now);
-            fail("Expected NoWindException");
-        } catch (NoWindException e) {
-            assertEquals("Can't determine estimated wind direction because no two distinct direction clusters found upwind nor downwind",
-                    e.getMessage());
-        }
+        Wind nullWind = getTrackedRace().getEstimatedWindDirection(/* position */null, now);
+        assertNull(
+                "Shouldn't have been able to determine estimated wind direction because no two distinct direction clusters found upwind nor downwind",
+                nullWind);
     }
 
     @Test
