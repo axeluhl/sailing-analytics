@@ -48,9 +48,8 @@ public class ManeuverDetectionOnMdM2011SemifinalTest extends OnlineTracTracBased
     @Before
     public void setUp() throws MalformedURLException, IOException, InterruptedException, URISyntaxException {
         super.setUp();
-        super.setUp("event_20110505_SailingTea",
+        super.setUp("event_20110505_SailingTea", // Semifinale
                 /* raceId */ "01ea3604-02ef-11e1-9efc-406186cbf87c", new ReceiverType[] { ReceiverType.MARKPASSINGS, ReceiverType.RACECOURSE, ReceiverType.RAWPOSITIONS });
-        // 53.562481999999996, 10.009855
         TimePoint epoch = new MillisecondsTimePoint(0l);
         TimePoint now = MillisecondsTimePoint.now();
         Map<String, Position> buoyPositions = new HashMap<String, Position>();
