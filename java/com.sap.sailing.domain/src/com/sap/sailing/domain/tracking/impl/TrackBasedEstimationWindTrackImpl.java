@@ -63,7 +63,7 @@ public class TrackBasedEstimationWindTrackImpl extends WindTrackImpl {
      * time point is used instead. If both time points are not known, <code>null</code> is returned immediately.
      */
     @Override
-    public synchronized Wind getEstimatedWind(Position p, TimePoint at) {
+    public Wind getEstimatedWind(Position p, TimePoint at) {
         Wind result = null;
         TimePoint adjustedAt;
         TimePoint raceStartTimePoint = trackedRace.getStart();
@@ -88,7 +88,9 @@ public class TrackBasedEstimationWindTrackImpl extends WindTrackImpl {
             }
         }
         if (adjustedAt != null) {
-            result = super.getEstimatedWind(p, adjustedAt);
+            // we can use the unsynchronized version here because our getInternalFixes() method operates
+            // only on a virtual sequence of wind fixes where no concurrency issues have to be observed
+            result = getEstimatedWindUnsynchronized(p, adjustedAt);
         }
         return result;
     }

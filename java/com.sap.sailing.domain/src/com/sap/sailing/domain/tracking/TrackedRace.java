@@ -214,7 +214,10 @@ public interface TrackedRace {
     
     /**
      * Determines whether the <code>competitor</code> is sailing on port or starboard tack at the
-     * <code>timePoint</code> requested.
+     * <code>timePoint</code> requested. Note that this will have to retrieve information about the wind.
+     * This, in turn, can lead to the current thread obtaining the monitor of the various wind tracks,
+     * and, if the {@link WindSource#TRACK_BASED_ESTIMATION} source is used, also the monitors of the
+     * competitors' GPS tracks.
      */
     Tack getTack(Competitor competitor, TimePoint timePoint);
 
