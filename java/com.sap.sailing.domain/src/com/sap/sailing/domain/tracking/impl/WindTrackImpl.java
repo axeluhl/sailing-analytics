@@ -41,6 +41,11 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
     }
     
     @Override
+    protected Wind getDummyFix(TimePoint timePoint) {
+        return new DummyWind(timePoint);
+    }
+
+    @Override
     public void setMillisecondsOverWhichToAverage(long millisecondsOverWhichToAverage) {
         long oldMillis = millisecondsOverWhichToAverage;
         this.millisecondsOverWhichToAverage = millisecondsOverWhichToAverage;

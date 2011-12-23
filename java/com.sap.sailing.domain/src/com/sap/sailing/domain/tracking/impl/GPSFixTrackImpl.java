@@ -69,6 +69,14 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         }
     }
     
+    
+    @Override
+    protected FixType getDummyFix(TimePoint timePoint) {
+        @SuppressWarnings("unchecked")
+        FixType result = (FixType) new DummyGPSFix(timePoint);
+        return result;
+    }
+
     protected void setMillisecondsOverWhichToAverage(long millisecondsOverWhichToAverage) {
         this.millisecondsOverWhichToAverage = millisecondsOverWhichToAverage;
     }

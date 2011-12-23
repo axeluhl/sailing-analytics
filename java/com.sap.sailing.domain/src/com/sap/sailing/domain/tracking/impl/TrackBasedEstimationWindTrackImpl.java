@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.NavigableSet;
 import java.util.SortedSet;
 
+import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -32,8 +33,11 @@ public class TrackBasedEstimationWindTrackImpl extends WindTrackImpl {
     
     private final EstimatedWindFixesAsNavigableSet virtualInternalRawFixes;
     
+    private final TrackedRace trackedRace;
+    
     public TrackBasedEstimationWindTrackImpl(TrackedRace trackedRace, long millisecondsOverWhichToAverage) {
         super(millisecondsOverWhichToAverage);
+        this.trackedRace = trackedRace;
         this.virtualInternalRawFixes = new EstimatedWindFixesAsNavigableSet(trackedRace);
     }
     
@@ -50,6 +54,43 @@ public class TrackBasedEstimationWindTrackImpl extends WindTrackImpl {
                 return e != null;
             }
         };
+    }
+
+    /**
+     * This redefinition avoids very long searches in case <code>at</code> is before the race start or after the race's
+     * newest event. Should <code>at</code> be out of this range, it is set to the closest border of this range before
+     * calling the base class's implementation. If either race start or time of newest event are not known, the known
+     * time point is used instead. If both time points are not known, <code>null</code> is returned immediately.
+     */
+    @Override
+    public synchronized Wind getEstimatedWind(Position p, TimePoint at) {
+        Wind result = null;
+        TimePoint adjustedAt;
+        TimePoint raceStartTimePoint = trackedRace.getStart();
+        TimePoint timePointOfNewestEvent = trackedRace.getTimePointOfNewestEvent();
+        if (raceStartTimePoint != null) {
+            if (timePointOfNewestEvent != null) {
+                if (at.compareTo(raceStartTimePoint) < 0) {
+                    adjustedAt = raceStartTimePoint;
+                } else if (at.compareTo(timePointOfNewestEvent) > 0) {
+                    adjustedAt = timePointOfNewestEvent;
+                } else {
+                    adjustedAt = at;
+                }
+            } else {
+                adjustedAt = raceStartTimePoint;
+            }
+        } else {
+            if (timePointOfNewestEvent != null) {
+                adjustedAt = timePointOfNewestEvent;
+            } else {
+                adjustedAt = null;
+            }
+        }
+        if (adjustedAt != null) {
+            result = super.getEstimatedWind(p, adjustedAt);
+        }
+        return result;
     }
 
     /**

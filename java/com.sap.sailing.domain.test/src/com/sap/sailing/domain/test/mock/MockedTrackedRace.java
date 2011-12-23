@@ -150,12 +150,6 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public Wind getWind(Position p, TimePoint at) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
     public void setWindSource(WindSource windSource) {
         // TODO Auto-generated method stub
 
@@ -432,6 +426,12 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     @Override
     public void setRaceIsKnownToStartUpwind(boolean raceIsKnownToStartUpwind) {
         // TODO Auto-generated method stub
+    }
+
+    @Override
+    public Wind getWind(Position p, TimePoint at, WindSource... windSourcesToConsider) {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

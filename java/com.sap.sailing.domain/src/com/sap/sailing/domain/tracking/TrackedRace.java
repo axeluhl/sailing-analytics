@@ -149,11 +149,12 @@ public interface TrackedRace {
     Position getApproximatePosition(Waypoint waypoint, TimePoint timePoint);
     
     /**
-     * Obtains estimated interpolated wind information for a given position and time point.
-     * The information is taken from the currently selected {@link WindSource wind source} which
-     * can be selected using {@link #setWindSource}.
+     * Obtains estimated interpolated wind information for a given position and time point. The information is taken
+     * from all wind sources available except for those listed in <code>windSourcesToExclude</code>, with preferences
+     * controlled by the {@link #getWindSource() current wind source} which can be selected using {@link #setWindSource},
+     * and by the order of the {@link WindSource} literals.
      */
-    Wind getWind(Position p, TimePoint at);
+    Wind getWind(Position p, TimePoint at, WindSource... windSourcesToExclude);
 
     WindSource getWindSource();
 

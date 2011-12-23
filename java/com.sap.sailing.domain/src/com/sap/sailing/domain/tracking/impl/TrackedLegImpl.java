@@ -22,6 +22,7 @@ import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
+import com.sap.sailing.domain.tracking.WindSource;
 import com.sap.sailing.util.Util;
 
 public class TrackedLegImpl implements TrackedLeg, RaceChangeListener<Competitor> {
@@ -163,14 +164,16 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener<Competitor
             throw new RuntimeException("No mark positions received yet for leg "+getLeg()+
                     ". Can't determine wind direction since position is not known.");
         }
+        // exclude track-based estimation; it is itself based on the leg type which is based on the getWindOnLeg result which
+        // would therefore lead to an endless recursion without further tricks being applied
         Wind wind = getWind(
                 approximateLegStartPosition.translateGreatCircle(approximateLegStartPosition.getBearingGreatCircle(approximateLegEndPosition),
-                        approximateLegStartPosition.getDistance(approximateLegEndPosition).scale(0.5)), at);
+                        approximateLegStartPosition.getDistance(approximateLegEndPosition).scale(0.5)), at, WindSource.TRACK_BASED_ESTIMATION);
         return wind;
     }
 
-    private Wind getWind(Position p, TimePoint at) {
-        return getTrackedRace().getWind(p, at);
+    private Wind getWind(Position p, TimePoint at, WindSource... windSourcesToExclude) {
+        return getTrackedRace().getWind(p, at, windSourcesToExclude);
     }
 
     @Override
