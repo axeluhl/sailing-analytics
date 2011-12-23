@@ -1,6 +1,5 @@
 package com.sap.sailing.domain.tracking.impl;
 
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.NavigableSet;
 
@@ -48,7 +47,7 @@ public abstract class TrackImpl<FixType extends Timed> implements Track<FixType>
     
     /**
      * @return the smoothened fixes; this implementation simply delegates to {@link #getFixes()} because for only
-     *         {@link Timed} fixes we can't know how to smoothen anything. Subclasses that constrain the
+     *         {@link Timed} fixes we can't know how to remove outliers. Subclasses that constrain the
      *         <code>FixType</code> may provide smoothening implementations.
      */
     protected NavigableSet<FixType> getInternalFixes() {
@@ -59,20 +58,19 @@ public abstract class TrackImpl<FixType extends Timed> implements Track<FixType>
 
     /**
      * Iterates the fixes with outliers getting skipped, in the order of their time points.
-     * Relies on {@link #getInternalFixes()} to smoothen the track.
+     * Relies on {@link #getInternalFixes()} to void the track view from outliers.
      */
     @Override
-    public Iterable<FixType> getFixes() {
-        return (Iterable<FixType>) Collections.unmodifiableSet(getInternalFixes());
+    public NavigableSet<FixType> getFixes() {
+        return new UnmodifiableNavigableSet<FixType>(getInternalFixes());
     }
 
     /**
      * Iterates over the raw sequence of fixes, all potential outliers included
      */
-    @SuppressWarnings("unchecked")
     @Override
     public NavigableSet<FixType> getRawFixes() {
-        return (NavigableSet<FixType>) new UnmodifiableNavigableSet<Timed>(fixes);
+        return new UnmodifiableNavigableSet<FixType>(getInternalRawFixes());
     }
 
     @SuppressWarnings("unchecked")
@@ -84,13 +82,13 @@ public abstract class TrackImpl<FixType extends Timed> implements Track<FixType>
     @SuppressWarnings("unchecked")
     @Override
     public FixType getLastRawFixAtOrBefore(TimePoint timePoint) {
-        return (FixType) fixes.floor(new DummyTimed(timePoint));
+        return (FixType) getInternalRawFixes().floor((FixType) new DummyTimed(timePoint));
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public FixType getFirstRawFixAtOrAfter(TimePoint timePoint) {
-        return (FixType) fixes.ceiling(new DummyTimed(timePoint));
+        return (FixType) getInternalRawFixes().ceiling((FixType) new DummyTimed(timePoint));
     }
 
     @SuppressWarnings("unchecked")
@@ -102,7 +100,7 @@ public abstract class TrackImpl<FixType extends Timed> implements Track<FixType>
     @SuppressWarnings("unchecked")
     @Override
     public FixType getLastRawFixBefore(TimePoint timePoint) {
-        return (FixType) fixes.lower(new DummyTimed(timePoint));
+        return (FixType) getInternalRawFixes().lower((FixType) new DummyTimed(timePoint));
     }
 
     @SuppressWarnings("unchecked")
@@ -114,26 +112,24 @@ public abstract class TrackImpl<FixType extends Timed> implements Track<FixType>
     @SuppressWarnings("unchecked")
     @Override
     public FixType getFirstRawFixAfter(TimePoint timePoint) {
-        return (FixType) fixes.higher(new DummyTimed(timePoint));
+        return (FixType) getInternalRawFixes().higher((FixType) new DummyTimed(timePoint));
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public FixType getFirstRawFix() {
-        if (fixes.isEmpty()) {
+        if (getInternalFixes().isEmpty()) {
             return null;
         } else {
-            return (FixType) fixes.first();
+            return (FixType) getInternalFixes().first();
         }
     }
     
-    @SuppressWarnings("unchecked")
     @Override
     public FixType getLastRawFix() {
-        if (fixes.isEmpty()) {
+        if (getInternalRawFixes().isEmpty()) {
             return null;
         } else {
-            return (FixType) fixes.last();
+            return (FixType) getInternalRawFixes().last();
         }
     }
     
@@ -148,8 +144,8 @@ public abstract class TrackImpl<FixType extends Timed> implements Track<FixType>
     @Override
     public Iterator<FixType> getRawFixesIterator(TimePoint startingAt, boolean inclusive) {
         @SuppressWarnings("unchecked")
-        Iterator<FixType> result = (Iterator<FixType>) fixes.tailSet(
-                new DummyTimed(startingAt), inclusive).iterator();
+        Iterator<FixType> result = (Iterator<FixType>) getInternalRawFixes().tailSet(
+                (FixType) new DummyTimed(startingAt), inclusive).iterator();
         return result;
     }
 
