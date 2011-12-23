@@ -61,7 +61,7 @@ public interface SailingServiceAsync {
     void stopTrackingRace(EventAndRaceIdentifier raceIdentifier, AsyncCallback<Void> asyncCallback);
     
     /**
-     * Untracks the race and removes it from the event. It will also be removed in all leaerboards
+     * Untracks the race and removes it from the event. It will also be removed in all leaderboards
      * @param eventAndRaceidentifier The identifier for the event name, and the race name to remove
      * @throws Exception
      */
