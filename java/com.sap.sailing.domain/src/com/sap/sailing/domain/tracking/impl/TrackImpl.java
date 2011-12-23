@@ -15,7 +15,7 @@ public abstract class TrackImpl<FixType extends Timed> implements Track<FixType>
      */
     private final NavigableSet<Timed> fixes;
     
-    protected class DummyTimed implements Timed {
+    protected static class DummyTimed implements Timed {
         private final TimePoint timePoint;
         public DummyTimed(TimePoint timePoint) {
             super();

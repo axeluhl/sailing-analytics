@@ -166,6 +166,10 @@ public interface TrackedRace {
 
     TimePoint getStartOfTracking();
 
+    /**
+     * Regardless of the order in which events were received, this method returns the latest time point contained by any of
+     * the events received and processed.
+     */
     TimePoint getTimePointOfNewestEvent();
 
     NavigableSet<MarkPassing> getMarkPassings(Competitor competitor);
@@ -173,7 +177,7 @@ public interface TrackedRace {
     void removeWind(Wind wind, WindSource windSource);
 
     /**
-     * Time stamp that the last event received from the underlying push service carried on it.
+     * Time stamp that the event received last from the underlying push service carried on it.
      * Note that these times may not increase monotonically.
      */
     TimePoint getTimePointOfLastEvent();

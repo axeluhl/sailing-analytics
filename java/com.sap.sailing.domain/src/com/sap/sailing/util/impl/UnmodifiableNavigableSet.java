@@ -12,7 +12,7 @@ import java.util.SortedSet;
  * 
  * @author Axel Uhl (D043530)
  */
-public class UnmodifiableNavigableSet<E> implements NavigableSet<E> {
+public class UnmodifiableNavigableSet<E> extends AbstractUnmodifiableNavigableSet<E> implements NavigableSet<E> {
     private final NavigableSet<E> set;
 
     public UnmodifiableNavigableSet(NavigableSet<E> delegate) {
@@ -60,38 +60,8 @@ public class UnmodifiableNavigableSet<E> implements NavigableSet<E> {
     }
 
     @Override
-    public boolean add(E e) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean remove(Object o) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public boolean containsAll(Collection<?> c) {
         return set.containsAll(c);
-    }
-
-    @Override
-    public boolean addAll(Collection<? extends E> c) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean retainAll(Collection<?> c) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean removeAll(Collection<?> c) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void clear() {
-        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -112,16 +82,6 @@ public class UnmodifiableNavigableSet<E> implements NavigableSet<E> {
     @Override
     public E higher(E e) {
         return set.higher(e);
-    }
-
-    @Override
-    public E pollFirst() {
-        return set.pollFirst();
-    }
-
-    @Override
-    public E pollLast() {
-        return set.pollLast();
     }
 
     @Override

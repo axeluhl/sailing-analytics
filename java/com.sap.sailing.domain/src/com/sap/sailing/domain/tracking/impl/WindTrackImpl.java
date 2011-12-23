@@ -203,7 +203,7 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
         result.append("\t");
     }
 
-    private class DummyWind extends DummyTimed implements Wind {
+    protected static class DummyWind extends DummyTimed implements Wind {
         public DummyWind(TimePoint timePoint) {
             super(timePoint);
         }
