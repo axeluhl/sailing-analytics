@@ -104,7 +104,7 @@ public class TrackBasedEstimationWindTrackImpl extends WindTrackImpl {
         }
         
         private TimePoint getTo() {
-            return to == null ? trackedRace.getTimePointOfNewestEvent() == null ? new MillisecondsTimePoint(0)
+            return to == null ? trackedRace.getTimePointOfNewestEvent() == null ? new MillisecondsTimePoint(1)
                     : trackedRace.getTimePointOfNewestEvent() : to;
         }
 
@@ -163,7 +163,26 @@ public class TrackBasedEstimationWindTrackImpl extends WindTrackImpl {
 
         @Override
         public Iterator<Wind> descendingIterator() {
-            return descendingSet().iterator();
+            return new Iterator<Wind>() {
+                private TimePoint timePoint = lowerToResolution(new DummyWind(getTo()));
+                
+                @Override
+                public boolean hasNext() {
+                    return timePoint.compareTo(getFrom()) >= 0;
+                }
+
+                @Override
+                public Wind next() {
+                    Wind result = floor(new DummyWind(timePoint));
+                    timePoint = new MillisecondsTimePoint(timePoint.asMillis()-RESOLUTION_IN_MILLISECONDS);
+                    return result;
+                }
+
+                @Override
+                public void remove() {
+                    throw new UnsupportedOperationException();
+                }
+            };
         }
 
         @Override

@@ -16,6 +16,7 @@ import com.sap.sailing.domain.base.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.tracking.NoWindException;
+import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindSource;
 import com.sap.sailing.domain.tracking.WindTrack;
@@ -41,6 +42,13 @@ public class WindEstimationOnKielerWoche505Race2DataTest extends OnlineTracTracB
                 new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(70))), WindSource.WEB);
     }
     
+    /**
+     * Checks that the {@link TrackBasedEstimationWindTrackImpl} data structure works. It does so by comparing the
+     * results obtained from such a track with the results of immediately calling
+     * {@link TrackedRace#getEstimatedWindDirection(com.sap.sailing.domain.base.Position, TimePoint)}. The results
+     * may not accurately equal each other because the track may consider more estimation values before and after
+     * the time point for which the estimation is requested.
+     */
     @Test
     public void testSimpleWindEstimationThroughEstimationTrack() throws NoWindException {
         // at this point in time, most boats are already going upwind again, and Köchlin, Neulen and Findel are tacking,
