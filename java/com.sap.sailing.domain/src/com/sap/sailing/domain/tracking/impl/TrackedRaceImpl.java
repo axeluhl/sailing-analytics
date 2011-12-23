@@ -605,7 +605,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
      * to the wind's bearing at that time and place and determined the tack.
      */
     private Tack getTack(Position where, TimePoint timePoint, Bearing boatBearing) {
-        Bearing wind = getWind(where, timePoint).getBearing();
+        // TODO See bug #20; once track-based wind estimation is cached and hence fast, include it again in tack determination for improved accuracy
+        Bearing wind = getWind(where, timePoint, WindSource.TRACK_BASED_ESTIMATION).getBearing();
         Bearing difference = wind.getDifferenceTo(boatBearing);
         return difference.getDegrees() <= 0 ? Tack.STARBOARD : Tack.PORT;
     }
@@ -798,7 +799,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                 }
             } else {
                 // heading up or bearing away
-                Wind wind = getWind(maneuverPosition, maneuverTimePoint);
+                // TODO See bug #20; once track-based wind estimation is cached and hence fast, include it to improve accuracy
+                Wind wind = getWind(maneuverPosition, maneuverTimePoint, WindSource.TRACK_BASED_ESTIMATION);
                 Bearing windBearing = wind.getBearing();
                 Bearing toWindBeforeManeuver = windBearing.getDifferenceTo(speedWithBearingOnApproximationAtBeginning.getBearing());
                 Bearing toWindAfterManeuver = windBearing.getDifferenceTo(speedWithBearingOnApproximationAtEnd.getBearing());
