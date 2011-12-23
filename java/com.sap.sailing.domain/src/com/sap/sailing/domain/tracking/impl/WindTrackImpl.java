@@ -107,6 +107,16 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
      */
     @Override
     public synchronized Wind getEstimatedWind(Position p, TimePoint at) {
+        return getEstimatedWindUnsynchronized(p, at);
+    }
+    
+    /**
+     * This method implements the functionality of the {@link #getEstimatedWind(Position, TimePoint)} interface
+     * method. However, not being <code>synchronized</code>, it does not obtain this object's monitor. Subclasses
+     * may use this carefully if they can guarantee there are no concurrency issues with the internal fixes
+     * while iterating over the result of {@link #getInternalFixes()}.
+     */
+    protected Wind getEstimatedWindUnsynchronized(Position p, TimePoint at) {
         DummyWind atTimed = new DummyWind(at);
         NavigableSet<Wind> beforeSet = getInternalFixes().headSet(atTimed, /* inclusive */ true);
         NavigableSet<Wind> afterSet = getInternalFixes().tailSet(atTimed, /* inclusive */ true);
