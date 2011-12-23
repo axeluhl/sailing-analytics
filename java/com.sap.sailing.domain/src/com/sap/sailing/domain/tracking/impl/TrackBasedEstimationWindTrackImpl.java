@@ -44,7 +44,7 @@ public class TrackBasedEstimationWindTrackImpl extends WindTrackImpl {
     
     @Override
     protected NavigableSet<Wind> getInternalFixes() {
-        return new PartialNavigableSetView<Wind>(super.getInternalFixes()) {
+        return new PartialNavigableSetView<Wind>(getInternalRawFixes()) {
             @Override
             protected boolean isValid(Wind e) {
                 return e != null;

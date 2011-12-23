@@ -18,6 +18,8 @@ import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.tracking.NoWindException;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindSource;
+import com.sap.sailing.domain.tracking.WindTrack;
+import com.sap.sailing.domain.tracking.impl.TrackBasedEstimationWindTrackImpl;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
 import com.sap.sailing.util.Util;
@@ -31,13 +33,27 @@ public class WindEstimationOnKielerWoche505Race2DataTest extends OnlineTracTracB
     public void setUp() throws MalformedURLException, IOException, InterruptedException, URISyntaxException {
         super.setUp();
         super.setUp("event_20110609_KielerWoch",
-                /* raceId */ "357c700a-9d9a-11e0-85be-406186cbf87c", new ReceiverType[] { ReceiverType.MARKPASSINGS, ReceiverType.RACECOURSE, ReceiverType.RAWPOSITIONS });
+        /* raceId */"357c700a-9d9a-11e0-85be-406186cbf87c", new ReceiverType[] { ReceiverType.MARKPASSINGS,
+                ReceiverType.RACECOURSE, ReceiverType.RAWPOSITIONS });
         OnlineTracTracBasedTest.fixApproximateMarkPositionsForWindReadOut(getTrackedRace());
         getTrackedRace().setWindSource(WindSource.WEB);
         getTrackedRace().recordWind(new WindImpl(/* position */ null, MillisecondsTimePoint.now(),
                 new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(70))), WindSource.WEB);
     }
     
+    @Test
+    public void testSimpleWindEstimationThroughEstimationTrack() throws NoWindException {
+        // at this point in time, most boats are already going upwind again, and Köchlin, Neulen and Findel are tacking,
+        // hence have a direction change.
+        TimePoint middle = new MillisecondsTimePoint(1308839492322l);
+        TrackBasedEstimationWindTrackImpl estimatedWindTrack = new TrackBasedEstimationWindTrackImpl(getTrackedRace(),
+                WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND);
+        Wind estimatedWindDirection = getTrackedRace().getEstimatedWindDirection(/* position */ null, middle);
+        assertNotNull(estimatedWindDirection);
+        Wind estimationBasedOnTrack = estimatedWindTrack.getEstimatedWind(null, middle);
+        assertEquals(estimatedWindDirection.getFrom().getDegrees(), estimationBasedOnTrack.getFrom().getDegrees(), 3.);
+    }
+
     @Test
     public void testSetUp() {
         assertNotNull(getTrackedRace());
