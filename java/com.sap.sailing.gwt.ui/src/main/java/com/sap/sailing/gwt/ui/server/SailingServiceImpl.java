@@ -557,10 +557,12 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             windDAO.timepoint = wind.getTimePoint().asMillis();
             Wind estimatedWind = windTrack
                     .getEstimatedWind(wind.getPosition(), wind.getTimePoint());
-            windDAO.dampenedTrueWindBearingDeg = estimatedWind.getBearing().getDegrees();
-            windDAO.dampenedTrueWindFromDeg = estimatedWind.getBearing().reverse().getDegrees();
-            windDAO.dampenedTrueWindSpeedInKnots = estimatedWind.getKnots();
-            windDAO.dampenedTrueWindSpeedInMetersPerSecond = estimatedWind.getMetersPerSecond();
+            if (estimatedWind != null) {
+                windDAO.dampenedTrueWindBearingDeg = estimatedWind.getBearing().getDegrees();
+                windDAO.dampenedTrueWindFromDeg = estimatedWind.getBearing().reverse().getDegrees();
+                windDAO.dampenedTrueWindSpeedInKnots = estimatedWind.getKnots();
+                windDAO.dampenedTrueWindSpeedInMetersPerSecond = estimatedWind.getMetersPerSecond();
+            }
         }
         return windDAO;
     }
@@ -664,39 +666,50 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                     GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
                     TimePoint fromTimePoint = new MillisecondsTimePoint(from.get(competitorDAO));
                     TimePoint toTimePointExcluding = new MillisecondsTimePoint(to.get(competitorDAO));
-                    Iterator<GPSFixMoving> fixIter;
+                    // copy the fixes into a list while holding the monitor; then release the monitor to avoid deadlocks
+                    // during wind estimations required for tack determination
+                    List<GPSFixMoving> fixes = new ArrayList<GPSFixMoving>();
                     synchronized (track) {
-                        fixIter = track.getFixesIterator(fromTimePoint, /* inclusive */true);
-                        if (fixIter.hasNext()) {
+                        Iterator<GPSFixMoving> fixIter = track.getFixesIterator(fromTimePoint, /* inclusive */true);
+                        while (fixIter.hasNext()) {
                             GPSFixMoving fix = fixIter.next();
-                            while (fix != null && fix.getTimePoint().compareTo(toTimePointExcluding) < 0) {
-                                Tack tack = trackedRace.getTack(competitor, fix.getTimePoint());
-                                TrackedLegOfCompetitor trackedLegOfCompetitor = trackedRace.getTrackedLeg(competitor, fix.getTimePoint());
-                                LegType legType = trackedLegOfCompetitor == null ? null : trackedRace.getTrackedLeg(
-                                        trackedLegOfCompetitor.getLeg()).getLegType(fix.getTimePoint());
-                                GPSFixDAO fixDAO = createGPSFixDAO(fix, fix.getSpeed(), tack, legType, /* extrapolate */false);
-                                fixesForCompetitor.add(fixDAO);
-                                if (fixIter.hasNext()) {
-                                    fix = fixIter.next();
-                                } else {
-                                    // check if fix was at date and if extrapolation is requested
-                                    if (!fix.getTimePoint().equals(toTimePointExcluding) && extrapolate) {
-                                        Position position = track.getEstimatedPosition(toTimePointExcluding,
-                                                extrapolate);
-                                        Tack tack2 = trackedRace.getTack(competitor, toTimePointExcluding);
-                                        LegType legType2 = trackedLegOfCompetitor == null ? null : trackedRace
-                                                .getTrackedLeg(trackedLegOfCompetitor.getLeg()).getLegType(
-                                                        fix.getTimePoint());
-                                        SpeedWithBearing speedWithBearing = track
-                                                .getEstimatedSpeed(toTimePointExcluding);
-                                        GPSFixDAO extrapolated = new GPSFixDAO(to.get(competitorDAO), new PositionDAO(
-                                                position.getLatDeg(), position.getLngDeg()),
-                                                createSpeedWithBearingDAO(speedWithBearing), tack2.name(), /* extrapolated */
-                                                legType2==null?null:legType2.name(), true);
-                                        fixesForCompetitor.add(extrapolated);
-                                    }
-                                    fix = null;
+                            if (fix.getTimePoint().compareTo(toTimePointExcluding) < 0) {
+                                fixes.add(fix);
+                            } else {
+                                break;
+                            }
+                        }
+                    }
+                    Iterator<GPSFixMoving> fixIter = fixes.iterator();
+                    if (fixIter.hasNext()) {
+                        GPSFixMoving fix = fixIter.next();
+                        while (fix != null && fix.getTimePoint().compareTo(toTimePointExcluding) < 0) {
+                            Tack tack = trackedRace.getTack(competitor, fix.getTimePoint());
+                            TrackedLegOfCompetitor trackedLegOfCompetitor = trackedRace.getTrackedLeg(competitor,
+                                    fix.getTimePoint());
+                            LegType legType = trackedLegOfCompetitor == null ? null : trackedRace.getTrackedLeg(
+                                    trackedLegOfCompetitor.getLeg()).getLegType(fix.getTimePoint());
+                            GPSFixDAO fixDAO = createGPSFixDAO(fix, fix.getSpeed(), tack, legType, /* extrapolate */
+                                    false);
+                            fixesForCompetitor.add(fixDAO);
+                            if (fixIter.hasNext()) {
+                                fix = fixIter.next();
+                            } else {
+                                // check if fix was at date and if extrapolation is requested
+                                if (!fix.getTimePoint().equals(toTimePointExcluding) && extrapolate) {
+                                    Position position = track.getEstimatedPosition(toTimePointExcluding, extrapolate);
+                                    Tack tack2 = trackedRace.getTack(competitor, toTimePointExcluding);
+                                    LegType legType2 = trackedLegOfCompetitor == null ? null : trackedRace
+                                            .getTrackedLeg(trackedLegOfCompetitor.getLeg()).getLegType(
+                                                    fix.getTimePoint());
+                                    SpeedWithBearing speedWithBearing = track.getEstimatedSpeed(toTimePointExcluding);
+                                    GPSFixDAO extrapolated = new GPSFixDAO(to.get(competitorDAO), new PositionDAO(
+                                            position.getLatDeg(), position.getLngDeg()),
+                                            createSpeedWithBearingDAO(speedWithBearing), tack2.name(), /* extrapolated */
+                                            legType2 == null ? null : legType2.name(), true);
+                                    fixesForCompetitor.add(extrapolated);
                                 }
+                                fix = null;
                             }
                         }
                     }
