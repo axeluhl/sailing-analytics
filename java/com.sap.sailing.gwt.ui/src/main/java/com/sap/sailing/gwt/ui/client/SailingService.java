@@ -50,8 +50,7 @@ public interface SailingService extends RemoteService {
     
     void removeAndUntrackedRace(EventAndRaceIdentifier eventAndRaceidentifier) throws Exception;
 
-    WindInfoForRaceDAO getWindInfo(RaceIdentifier raceIdentifier, Date from, Date to,
-            boolean includeTrackBasedWindEstimation);
+    WindInfoForRaceDAO getWindInfo(RaceIdentifier raceIdentifier, Date from, Date to, Collection<String> windSources);
 
     void setWind(RaceIdentifier raceIdentifier, WindDAO wind);
 
@@ -63,7 +62,7 @@ public interface SailingService extends RemoteService {
     List<QuickRankDAO> getQuickRanks(RaceIdentifier raceIdentifier, Date date) throws Exception;
 
     WindInfoForRaceDAO getWindInfo(RaceIdentifier raceIdentifier, Date from, long millisecondsStepWidth,
-            int numberOfFixes, double latDeg, double lngDeg, boolean includeTrackBasedWindEstimation) throws Exception;
+            int numberOfFixes, double latDeg, double lngDeg, Collection<String> windSources) throws Exception;
 
     void setWindSource(RaceIdentifier raceIdentifier, String windSourceName, boolean raceIsKnownToStartUpwind);
 

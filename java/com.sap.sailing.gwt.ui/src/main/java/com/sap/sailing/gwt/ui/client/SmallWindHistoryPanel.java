@@ -70,20 +70,20 @@ public class SmallWindHistoryPanel extends FormPanel implements TimeListener, Ra
             Date from = new Date(date.getTime() - windIndicators.length * millisecondStepsPerLabel);
             if (event != null && race != null) {
                 sailingService.getWindInfo(new EventNameAndRaceName(event.name, race.name), from, millisecondStepsPerLabel,
-                        windIndicators.length, position.latDeg, position.lngDeg, /* includeTrackBasedWindEstimation */ true,
+                        windIndicators.length, position.latDeg, position.lngDeg, /* all sources */ null,
                         new AsyncCallback<WindInfoForRaceDAO>() {
                             @Override
                             public void onSuccess(WindInfoForRaceDAO result) {
                                 // expecting to find windIndicators.length fixes
                                 if (result == null || result.windTrackInfoByWindSourceName.get(
-                                        /* result.selectedWindSourceName TODO uncomment */ "ESTIMATION").windFixes
+                                        /* result.selectedWindSourceName TODO uncomment */ "TRACK_BASED_ESTIMATION").windFixes
                                         .size() != windIndicators.length) {
                                     clearWindDisplay();
                                 } else {
-                                    setSelectedWindSource(/* TODO uncomment again: result.selectedWindSourceName */ "ESTIMATION");
+                                    setSelectedWindSource(/* TODO uncomment again: result.selectedWindSourceName */ "TRACK_BASED_ESTIMATION");
                                     int i = 0;
                                     for (WindDAO fix : result.windTrackInfoByWindSourceName
-                                            .get(/* TODO uncomment again: result.selectedWindSourceName */ "ESTIMATION").windFixes) {
+                                            .get(/* TODO uncomment again: result.selectedWindSourceName */ "TRACK_BASED_ESTIMATION").windFixes) {
                                         updateWindIndicator(i, fix);
                                         i++;
                                     }

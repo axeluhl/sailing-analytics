@@ -83,7 +83,6 @@ import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindSource;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
-import com.sap.sailing.domain.tracking.impl.WindTrackImpl;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.RaceRecord;
 import com.sap.sailing.domain.tractracadapter.TracTracConfiguration;
@@ -508,84 +507,40 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
 
     @Override
-    public WindInfoForRaceDAO getWindInfo(RaceIdentifier raceIdentifier, Date fromDate, Date toDate, boolean includeTrackBasedWindEstimation) {
+    public WindInfoForRaceDAO getWindInfo(RaceIdentifier raceIdentifier, Date fromDate, Date toDate, Collection<String> windSources) {
         WindInfoForRaceDAO result = null;
         TrackedRace trackedRace = getTrackedRace(raceIdentifier);
         if (trackedRace != null) {
-            MillisecondsTimePoint now = MillisecondsTimePoint.now();
             result = new WindInfoForRaceDAO();
             result.raceIsKnownToStartUpwind = trackedRace.raceIsKnownToStartUpwind();
             result.selectedWindSourceName = trackedRace.getWindSource().name();
-            TimePoint from = new MillisecondsTimePoint(fromDate);
-            TimePoint to = new MillisecondsTimePoint(toDate);
+            TimePoint from = fromDate == null ? trackedRace.getStart() : new MillisecondsTimePoint(fromDate);
+            TimePoint to = toDate == null ? trackedRace.getTimePointOfNewestEvent() : new MillisecondsTimePoint(toDate);
             Map<String, WindTrackInfoDAO> windTrackInfoDAOs = new HashMap<String, WindTrackInfoDAO>();
-            WindTrack estimatedTrack = null;
             result.windTrackInfoByWindSourceName = windTrackInfoDAOs;
-            for (WindSource windSource : WindSource.values()) {
-                WindTrackInfoDAO windTrackInfoDAO = new WindTrackInfoDAO();
-                windTrackInfoDAO.windFixes = new ArrayList<WindDAO>();
-                WindTrack windTrack = trackedRace.getWindTrack(windSource);
-                windTrackInfoDAO.dampeningIntervalInMilliseconds = windTrack.getMillisecondsOverWhichToAverageWind();
-                if (includeTrackBasedWindEstimation && windSource == trackedRace.getWindSource()) {
-                    estimatedTrack = new WindTrackImpl(windTrack.getMillisecondsOverWhichToAverageWind());
-                }
-                Iterator<Wind> windIter = windTrack.getFixesIterator(from, /* inclusive */true);
-                while (windIter.hasNext()) {
-                    Wind wind = windIter.next();
-                    if (wind.getTimePoint().compareTo(to) > 0) {
-                        break;
-                    }
-                    WindDAO windDAO = createWindDAO(wind, windTrack);
-                    windTrackInfoDAO.windFixes.add(windDAO);
-                    if (includeTrackBasedWindEstimation && windSource == trackedRace.getWindSource()) {
-                        Wind estimatedWindDirection = trackedRace.getEstimatedWindDirection(wind.getPosition(), wind.getTimePoint());
-                        if (estimatedWindDirection != null) {
-                            estimatedTrack.add(estimatedWindDirection);
+            if (from != null && to != null) {
+                for (WindSource windSource : WindSource.values()) {
+                    if (windSources == null || windSources.contains(windSource.name())) {
+                        WindTrackInfoDAO windTrackInfoDAO = new WindTrackInfoDAO();
+                        windTrackInfoDAO.windFixes = new ArrayList<WindDAO>();
+                        WindTrack windTrack = trackedRace.getWindTrack(windSource);
+                        windTrackInfoDAO.dampeningIntervalInMilliseconds = windTrack
+                                .getMillisecondsOverWhichToAverageWind();
+                        Iterator<Wind> windIter = windTrack.getFixesIterator(from, /* inclusive */true);
+                        while (windIter.hasNext()) {
+                            Wind wind = windIter.next();
+                            if (wind.getTimePoint().compareTo(to) > 0) {
+                                break;
+                            }
+                            WindDAO windDAO = createWindDAO(wind, windTrack);
+                            windTrackInfoDAO.windFixes.add(windDAO);
                         }
+                        windTrackInfoDAOs.put(windSource.name(), windTrackInfoDAO);
                     }
                 }
-                windTrackInfoDAOs.put(windSource.name(), windTrackInfoDAO);
-                if (trackedRace.raceIsKnownToStartUpwind()) {
-                    // add one "track" with a single wind direction computed from the direction from the start gate to
-                    // the first mark
-                    TimePoint startTime = trackedRace.getStart();
-                    WindTrack windwardMarkWindTrack = new WindTrackImpl(
-                            windTrack.getMillisecondsOverWhichToAverageWind());
-                    windwardMarkWindTrack.add(trackedRace.getDirectionFromStartToNextMark(startTime == null ? now : startTime));
-                    windTrackInfoDAOs.put("COURSEBASED", createWindTrackInfoDAO(windwardMarkWindTrack));
-                }
-            }
-            if (includeTrackBasedWindEstimation && estimatedTrack != null) {
-                boolean hasNext;
-                synchronized (estimatedTrack) {
-                    hasNext = estimatedTrack.getFixes().iterator().hasNext();
-                }
-                if (!hasNext) {
-                    // empty wind estimation track; add at least one estimate for the current time for the start gate
-                    Wind estimatedWindDirectionForNow;
-                    estimatedWindDirectionForNow = trackedRace.getEstimatedWindDirection(
-                            trackedRace.getApproximatePosition(trackedRace.getRace().getCourse().getWaypoints().iterator().next(), now), now);
-                    if (estimatedWindDirectionForNow != null) {
-                        estimatedTrack.add(estimatedWindDirectionForNow);
-                    }
-                }
-                WindTrackInfoDAO windEstimations = createWindTrackInfoDAO(estimatedTrack);
-                windTrackInfoDAOs.put("ESTIMATION", windEstimations);
             }
         }
         return result;
-    }
-
-    private WindTrackInfoDAO createWindTrackInfoDAO(WindTrack estimatedTrack) {
-        WindTrackInfoDAO windEstimations = new WindTrackInfoDAO();
-        windEstimations.dampeningIntervalInMilliseconds = estimatedTrack.getMillisecondsOverWhichToAverageWind();
-        windEstimations.windFixes = new ArrayList<WindDAO>();
-        synchronized (estimatedTrack) {
-            for (Wind estimatedWind : estimatedTrack.getFixes()) {
-                windEstimations.windFixes.add(createWindDAO(estimatedWind, estimatedTrack));
-            }
-        }
-        return windEstimations;
     }
 
     protected WindDAO createWindDAO(Wind wind, WindTrack windTrack) {
@@ -612,55 +567,36 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     
     @Override
     public WindInfoForRaceDAO getWindInfo(RaceIdentifier raceIdentifier, Date from, long millisecondsStepWidth,
-            int numberOfFixes, double latDeg, double lngDeg, boolean includeTrackBasedWindEstimation)
+            int numberOfFixes, double latDeg, double lngDeg, Collection<String> windSources)
             throws NoWindException {
         Position position = new DegreePosition(latDeg, lngDeg);
         WindInfoForRaceDAO result = null;
         TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
         if (trackedRace != null) {
-            WindTrack estimatedTrack = null;
             result = new WindInfoForRaceDAO();
             result.raceIsKnownToStartUpwind = trackedRace.raceIsKnownToStartUpwind();
-            WindSource windSource = trackedRace.getWindSource();
-            result.selectedWindSourceName = windSource.name();
-            TimePoint fromTimePoint = new MillisecondsTimePoint(from);
+            result.selectedWindSourceName = trackedRace.getWindSource().name();
             Map<String, WindTrackInfoDAO> windTrackInfoDAOs = new HashMap<String, WindTrackInfoDAO>();
             result.windTrackInfoByWindSourceName = windTrackInfoDAOs;
-            WindTrackInfoDAO windTrackInfoDAO = new WindTrackInfoDAO();
-            windTrackInfoDAO.windFixes = new ArrayList<WindDAO>();
-            WindTrack windTrack = trackedRace.getWindTrack(windSource);
-            if (includeTrackBasedWindEstimation) {
-                estimatedTrack = new WindTrackImpl(windTrack.getMillisecondsOverWhichToAverageWind());
-            }
-            windTrackInfoDAOs.put(windSource.name(), windTrackInfoDAO);
-            windTrackInfoDAO.dampeningIntervalInMilliseconds = windTrack.getMillisecondsOverWhichToAverageWind();
-            TimePoint timePoint = fromTimePoint;
-            for (int i = 0; i < numberOfFixes; i++) {
-                Wind wind = windTrack.getEstimatedWind(position, timePoint);
-                if (wind != null) {
-                    WindDAO windDAO = createWindDAO(wind, windTrack);
-                    windTrackInfoDAO.windFixes.add(windDAO);
-                }
-                if (includeTrackBasedWindEstimation) {
-                    Wind estimatedWindDirection = trackedRace.getEstimatedWindDirection(wind==null?null:wind.getPosition(), timePoint);
-                    if (estimatedWindDirection != null) {
-                        estimatedTrack.add(estimatedWindDirection);
+            for (WindSource windSource : WindSource.values()) {
+                if (windSources == null || windSources.contains(windSource.name())) {
+                    TimePoint fromTimePoint = new MillisecondsTimePoint(from);
+                    WindTrackInfoDAO windTrackInfoDAO = new WindTrackInfoDAO();
+                    windTrackInfoDAO.windFixes = new ArrayList<WindDAO>();
+                    WindTrack windTrack = trackedRace.getWindTrack(windSource);
+                    windTrackInfoDAOs.put(windSource.name(), windTrackInfoDAO);
+                    windTrackInfoDAO.dampeningIntervalInMilliseconds = windTrack
+                            .getMillisecondsOverWhichToAverageWind();
+                    TimePoint timePoint = fromTimePoint;
+                    for (int i = 0; i < numberOfFixes; i++) {
+                        Wind wind = windTrack.getEstimatedWind(position, timePoint);
+                        if (wind != null) {
+                            WindDAO windDAO = createWindDAO(wind, windTrack);
+                            windTrackInfoDAO.windFixes.add(windDAO);
+                        }
+                        timePoint = new MillisecondsTimePoint(timePoint.asMillis() + millisecondsStepWidth);
                     }
                 }
-                timePoint = new MillisecondsTimePoint(timePoint.asMillis() + millisecondsStepWidth);
-            }
-            if (includeTrackBasedWindEstimation && estimatedTrack != null) {
-                WindTrackInfoDAO windEstimations = createWindTrackInfoDAO(estimatedTrack);
-                windTrackInfoDAOs.put("ESTIMATION", windEstimations);
-            }
-            if (trackedRace.raceIsKnownToStartUpwind()) {
-                // add one "track" with a single wind direction computed from the direction from the start gate to
-                // the first mark
-                TimePoint startTime = trackedRace.getStart();
-                WindTrack windwardMarkWindTrack = new WindTrackImpl(
-                        windTrack.getMillisecondsOverWhichToAverageWind());
-                windwardMarkWindTrack.add(trackedRace.getDirectionFromStartToNextMark(startTime == null ? fromTimePoint : startTime));
-                windTrackInfoDAOs.put("COURSEBASED", createWindTrackInfoDAO(windwardMarkWindTrack));
             }
         }
         return result;

@@ -25,8 +25,6 @@ import com.sap.sailing.util.impl.ArrayListNavigableSet;
  * Records {@link Wind} objects over time and offers to average the last so many of them into an
  * estimated, stabilized wind bearing/direction.<p>
  * 
- * TODO extend WindTrackImpl such that it can record multiple wind read-outs with equal time stamp but different position
- * 
  * @author Axel Uhl (d043530)
  *
  */
@@ -42,6 +40,11 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
         listeners = new HashSet<WindListener>();
     }
     
+    @Override
+    protected Wind getDummyFix(TimePoint timePoint) {
+        return new DummyWind(timePoint);
+    }
+
     @Override
     public void setMillisecondsOverWhichToAverage(long millisecondsOverWhichToAverage) {
         long oldMillis = millisecondsOverWhichToAverage;
@@ -205,7 +208,7 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
         result.append("\t");
     }
 
-    private class DummyWind extends DummyTimed implements Wind {
+    protected static class DummyWind extends DummyTimed implements Wind {
         public DummyWind(TimePoint timePoint) {
             super(timePoint);
         }

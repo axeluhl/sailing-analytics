@@ -100,12 +100,6 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     
     private final long millisecondsOverWhichToAverageSpeed;
 
-    private boolean warnedOfUsingWindFromAlternativeWindSource;
-
-    private boolean warnedOfNoWindFromSelectedSource;
-
-    private boolean warnedOfUsingLegDirectionAsWindEstimation;
-
     public TrackedRaceImpl(TrackedEvent trackedEvent, RaceDefinition race, WindStore windStore,
             long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed) {
         super();
@@ -390,38 +384,24 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     }
 
     @Override
-    public Wind getWind(Position p, TimePoint at) {
-        Wind result = getWindTrack(getWindSource()).getEstimatedWind(p, at);
-        if (result == null) {
-            if (!warnedOfNoWindFromSelectedSource) {
-                logger.warning("Couldn't find any wind information for race "+getRace()+" from currently selected source "+getWindSource()+
-                        ". Future warnings of this type will be suppressed for this race.");
-                warnedOfNoWindFromSelectedSource = true;
-            }
-            for (WindSource alternativeWindSource : WindSource.values()) {
-                if (alternativeWindSource != getWindSource()) {
-                    result = getWindTrack(alternativeWindSource).getEstimatedWind(p, at);
-                    if (result != null) {
-                        if (!warnedOfUsingWindFromAlternativeWindSource) {
-                            logger.warning("Found wind settings in alternative wind source "+alternativeWindSource+
-                                    " which will be used as a fallback. Future warnings of this type will be suppressed for this race.");
-                            warnedOfUsingWindFromAlternativeWindSource = true;
-                        }
-                        break;
-                    }
-                }
-            }
-            if (result == null && raceIsKnownToStartUpwind()) {
-                if (!warnedOfUsingLegDirectionAsWindEstimation) {
-                    logger.warning("Found no other wind settings either; using starting leg direction at start time as guess for wind direction. "
-                            + "Force assumed as 1 knot. Future warnings of this type will be suppressed for this race.");
-                    warnedOfUsingLegDirectionAsWindEstimation = true;
-                }
-                TimePoint starttime = getStart();
-                result = getDirectionFromStartToNextMark(starttime == null ? at : starttime);
+    public Wind getWind(Position p, TimePoint at, WindSource... windSourcesToExclude) {
+        List<WindSource> windSourcesToConsider = new ArrayList<WindSource>();
+        windSourcesToConsider.add(getWindSource());
+        for (WindSource windSource : WindSource.values()) {
+            if (windSource != getWindSource()) {
+                windSourcesToConsider.add(windSource);
             }
         }
-        return result;
+        for (WindSource windSourceToExclude : windSourcesToExclude) {
+            windSourcesToConsider.remove(windSourceToExclude);
+        }
+        for (WindSource windSource : windSourcesToConsider) {
+            Wind result = getWindTrack(windSource).getEstimatedWind(p, at);
+            if (result != null) {
+                return result;
+            }
+        }
+        return null;
     }
 
     @Override

@@ -12,7 +12,14 @@ public class EmptyWindStore implements WindStore {
     @Override
     public WindTrack getWindTrack(TrackedEvent trackedEvent, TrackedRace trackedRace, WindSource windSource,
             long millisecondsOverWhichToAverage) {
-        return new WindTrackImpl(millisecondsOverWhichToAverage);
+        switch (windSource) {
+        case COURSE_BASED:
+            return new CourseBasedWindTrackImpl(trackedRace, millisecondsOverWhichToAverage);
+        case TRACK_BASED_ESTIMATION:
+            return new TrackBasedEstimationWindTrackImpl(trackedRace, millisecondsOverWhichToAverage);
+        default:
+            return new WindTrackImpl(millisecondsOverWhichToAverage);
+        }
     }
 
 }

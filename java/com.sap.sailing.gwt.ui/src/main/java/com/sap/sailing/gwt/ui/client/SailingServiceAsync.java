@@ -8,6 +8,8 @@ import java.util.Map;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
+import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.WindSource;
 import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
 import com.sap.sailing.gwt.ui.shared.CompetitorInRaceDAO;
 import com.sap.sailing.gwt.ui.shared.CompetitorsAndTimePointsDAO;
@@ -61,17 +63,34 @@ public interface SailingServiceAsync {
     void stopTrackingRace(EventAndRaceIdentifier raceIdentifier, AsyncCallback<Void> asyncCallback);
     
     /**
-     * Untracks the race and removes it from the event. It will also be removed in all leaerboards
+     * Untracks the race and removes it from the event. It will also be removed in all leaderboards
      * @param eventAndRaceidentifier The identifier for the event name, and the race name to remove
      * @throws Exception
      */
     void removeAndUntrackedRace(EventAndRaceIdentifier eventAndRaceidentifier, AsyncCallback<Void> callback);
 
-    void getWindInfo(RaceIdentifier raceIdentifier, Date from, Date to, boolean includeTrackBasedWindEstimation,
+    /**
+     * Retrieves wind information for the race identified by <code>raceIdentifier</code>.
+     * 
+     * @param from
+     *            if <code>null</code>, the race start time will be used instead
+     * @param to
+     *            if <code>null</code>, the {@link TrackedRace#getTimePointOfNewestEvent() time of the newest event} is
+     *            used instead.
+     * @param windWources
+     *            if <code>null</code>, all available wind sources will be queries; otherwise, only those whose
+     *            {@link WindSource} name is contained in this collection
+     */
+    void getWindInfo(RaceIdentifier raceIdentifier, Date from, Date to, Collection<String> windSources,
             AsyncCallback<WindInfoForRaceDAO> callback);
 
+    /**
+     * @param windSources
+     *            if <code>null</code>, data from all available wind sources will be returned, otherwise only from those
+     *            whose {@link WindSource} name is contained in the <code>windSources</code> collection.
+     */
     void getWindInfo(RaceIdentifier raceIdentifier, Date from, long millisecondsStepWidth, int numberOfFixes,
-            double latDeg, double lngDeg, boolean includeTrackBasedWindEstimation,
+            double latDeg, double lngDeg, Collection<String> windSources,
             AsyncCallback<WindInfoForRaceDAO> callback);
 
     void setWind(RaceIdentifier raceIdentifier, WindDAO wind, AsyncCallback<Void> callback);
