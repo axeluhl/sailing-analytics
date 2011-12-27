@@ -20,8 +20,6 @@ public interface DynamicTrackedRace extends TrackedRace {
      */
     DynamicGPSFixTrack<Buoy, GPSFix> getOrCreateTrack(Buoy buoy);
 
-    void addListener(RaceChangeListener<Competitor> listener);
-    
     // TODO need another listener protocol for general changes in ranking and leg completion
 
     /**

@@ -118,7 +118,7 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
      */
     protected Wind getEstimatedWindUnsynchronized(Position p, TimePoint at) {
         DummyWind atTimed = new DummyWind(at);
-        NavigableSet<Wind> beforeSet = getInternalFixes().headSet(atTimed, /* inclusive */ true);
+        NavigableSet<Wind> beforeSet = getInternalFixes().headSet(atTimed, /* inclusive */ false);
         NavigableSet<Wind> afterSet = getInternalFixes().tailSet(atTimed, /* inclusive */ true);
         Iterator<Wind> beforeIter = beforeSet.descendingIterator();
         Iterator<Wind> afterIter = afterSet.iterator();
@@ -188,8 +188,12 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
                 result.append(wind);
                 result.append(" avg(");
                 result.append(millisecondsOverWhichToAverage);
-                result.append("ms): ");
-                result.append(getEstimatedWind(wind.getPosition(), wind.getTimePoint()));
+                if (wind == null) {
+                    result.append("ms)");
+                } else {
+                    result.append("ms): ");
+                    result.append(getEstimatedWind(wind.getPosition(), wind.getTimePoint()));
+                }
                 result.append("\n");
             }
         }

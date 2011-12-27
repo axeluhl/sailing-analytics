@@ -62,7 +62,7 @@ public class FetchTracksAndStoreLocallyTest extends OnlineTracTracBasedTest {
                 track.addGPSFix((GPSFixMoving) fix);
             }
             @Override
-            public void markPassingReceived(MarkPassing markPassing) {
+            public void markPassingReceived(MarkPassing oldMarkPassing, MarkPassing markPassing) {
             }
             @Override
             public void windDataReceived(Wind wind) {

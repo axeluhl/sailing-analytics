@@ -273,7 +273,7 @@ public class ArrayListNavigableSet<E> implements NavigableSet<E> {
             }
             @Override
             public void remove() {
-                list.remove(i);
+                list.remove(--i);
             }
         };
     }

@@ -4,7 +4,15 @@ package com.sap.sailing.domain.tracking;
 public interface RaceChangeListener<ItemType> extends WindListener {
     void gpsFixReceived(GPSFix fix, ItemType competitor);
 
-    void markPassingReceived(MarkPassing markPassing);
+    /**
+     * Invoked after the mark passings have been updated in the {@link TrackedRace}.
+     * 
+     * @param oldMarkPassing
+     *            the mark passing replaced by <code>markPassing</code> or <code>null</code> if for the mark passing's
+     *            waypoint no previous {@link MarkPassing} was recorded for the {@link MarkPassing#getCompetitor()
+     *            competitor}.
+     */
+    void markPassingReceived(MarkPassing oldMarkPassing, MarkPassing markPassing);
 
     void speedAveragingChanged(long oldMillisecondsOverWhichToAverage, long newMillisecondsOverWhichToAverage);
 
