@@ -110,21 +110,16 @@ public class TrackBasedEstimationWindTrackImpl extends WindTrackImpl implements 
      */
     protected synchronized Wind getEstimatedWindDirection(Position p, TimePoint timePoint) {
         Wind result;
-        NavigableSet<Wind> cache = getCachedFixes();
-        Wind cachedFix = cache.floor(getDummyFix(timePoint));
-        if (cachedFix == null) {
-            if (getTimePointsWithCachedNullResult().contains(timePoint)) {
-                result = null;
-            } else {
-                result = trackedRace.getEstimatedWindDirection(p, timePoint);
-                cache(timePoint, result);
-            }
+        if (getTimePointsWithCachedNullResult().contains(timePoint)) {
+            result = null;
         } else {
-            if (cachedFix.getTimePoint().equals(timePoint)) {
-                result = cachedFix;
-            } else {
+            NavigableSet<Wind> cache = getCachedFixes();
+            Wind cachedFix = cache.floor(getDummyFix(timePoint));
+            if (cachedFix == null || !cachedFix.getTimePoint().equals(timePoint)) {
                 result = trackedRace.getEstimatedWindDirection(p, timePoint);
                 cache(timePoint, result);
+            } else {
+                result = cachedFix;
             }
         }
         return result;

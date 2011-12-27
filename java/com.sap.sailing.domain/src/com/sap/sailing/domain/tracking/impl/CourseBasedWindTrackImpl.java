@@ -33,7 +33,7 @@ public class CourseBasedWindTrackImpl extends WindTrackImpl {
         if (trackedRace.raceIsKnownToStartUpwind()) {
             TimePoint startTime = trackedRace.getStart();
             if (startTime != null) {
-                result = new ArrayListNavigableSet<Wind>(WindComparator.INSTANCE);
+                result = new ArrayListNavigableSet<Wind>(1, WindComparator.INSTANCE);
                 result.add(trackedRace.getDirectionFromStartToNextMark(startTime));
             } else {
                 result = empty;

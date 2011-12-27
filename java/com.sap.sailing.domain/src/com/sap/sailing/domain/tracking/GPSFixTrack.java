@@ -19,6 +19,11 @@ import com.sap.sailing.domain.base.TimePoint;
 public interface GPSFixTrack<ItemType, FixType extends GPSFix> extends Track<FixType> {
     static final long DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_SPEED = 10000; // makes for a 5s half-side interval
 
+    /**
+     * A listener is notified whenever a new fix is added to this track
+     */
+    void addListener(RaceChangeListener<ItemType> listener);
+    
     ItemType getTrackedItem();
 
     /**
