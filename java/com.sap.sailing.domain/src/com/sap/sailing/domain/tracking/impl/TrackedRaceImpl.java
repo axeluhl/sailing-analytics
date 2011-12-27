@@ -36,6 +36,7 @@ import com.sap.sailing.domain.tracking.Maneuver.Type;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.NoWindError;
 import com.sap.sailing.domain.tracking.NoWindException;
+import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.TrackedEvent;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLeg.LegType;
@@ -95,6 +96,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
      * {@link #currentWindSource}.
      */
     private final Map<WindSource, WindTrack> windTracks;
+    
+    private Wind directionFromStartToNextMarkCache;
     
     private final Map<Buoy, GPSFixTrack<Buoy, GPSFix>> buoyTracks;
     
@@ -406,18 +409,54 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     @Override
     public Wind getDirectionFromStartToNextMark(TimePoint at) {
-        Wind result;
-        Leg firstLeg = getRace().getCourse().getLegs().iterator().next();
-        Position firstLegEnd = getApproximatePosition(firstLeg.getTo(), at);
-        Position firstLegStart = getApproximatePosition(firstLeg.getFrom(), at);
-        if (firstLegStart != null && firstLegEnd != null) {
-            result = new WindImpl(firstLegStart, at, new KnotSpeedWithBearingImpl(1.0, firstLegEnd.getBearingGreatCircle(firstLegStart)));
-        } else {
-            result = null;
+        Wind result = directionFromStartToNextMarkCache;
+        if (result == null) {
+            Leg firstLeg = getRace().getCourse().getLegs().iterator().next();
+            Position firstLegEnd = getApproximatePosition(firstLeg.getTo(), at);
+            Position firstLegStart = getApproximatePosition(firstLeg.getFrom(), at);
+            if (firstLegStart != null && firstLegEnd != null) {
+                result = new WindImpl(firstLegStart, at, new KnotSpeedWithBearingImpl(1.0,
+                        firstLegEnd.getBearingGreatCircle(firstLegStart)));
+                directionFromStartToNextMarkCache = result;
+                addDirectionFromStartToNextMarkCacheInvalidationListener();
+            } else {
+                result = null;
+            }
         }
         return result;
     }
     
+    private void addDirectionFromStartToNextMarkCacheInvalidationListener() {
+        Leg firstLeg = getRace().getCourse().getLegs().iterator().next();
+        RaceChangeListener<Buoy> listener = new RaceChangeListener<Buoy>() {
+            @Override
+            public void windDataReceived(Wind wind) {}
+
+            @Override
+            public void windDataRemoved(Wind wind) {}
+
+            @Override
+            public void windAveragingChanged(long oldMillisecondsOverWhichToAverage, long newMillisecondsOverWhichToAverage) {}
+
+            @Override
+            public void gpsFixReceived(GPSFix fix, Buoy competitor) {
+                directionFromStartToNextMarkCache = null;
+            }
+
+            @Override
+            public void markPassingReceived(MarkPassing oldMarkPassing, MarkPassing markPassing) {}
+
+            @Override
+            public void speedAveragingChanged(long oldMillisecondsOverWhichToAverage, long newMillisecondsOverWhichToAverage) {}
+        };
+        for (Buoy buoy : firstLeg.getFrom().getBuoys()) {
+            getOrCreateTrack(buoy).addListener(listener);
+        }
+        for (Buoy buoy : firstLeg.getTo().getBuoys()) {
+            getOrCreateTrack(buoy).addListener(listener);
+        }
+    }
+
     @Override
     public TimePoint getTimePointOfNewestEvent() {
         return timePointOfNewestEvent;

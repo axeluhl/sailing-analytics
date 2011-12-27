@@ -64,34 +64,40 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
     }
 
     private void notifyListenersAboutReceive(Wind wind) {
-        for (WindListener listener : listeners) {
-            try {
-                listener.windDataReceived(wind);
-            } catch (Throwable t) {
-                logger.log(Level.SEVERE, "WindListener "+listener+" threw exception "+t.getMessage());
-                logger.throwing(WindTrackImpl.class.getName(), "notifyListenersAboutReceive(Wind)", t);
+        synchronized (listeners) {
+            for (WindListener listener : listeners) {
+                try {
+                    listener.windDataReceived(wind);
+                } catch (Throwable t) {
+                    logger.log(Level.SEVERE, "WindListener " + listener + " threw exception " + t.getMessage());
+                    logger.throwing(WindTrackImpl.class.getName(), "notifyListenersAboutReceive(Wind)", t);
+                }
             }
         }
     }
 
     private void notifyListenersAboutAveragingChange(long oldMillisecondsOverWhichToAverage, long newMillisecondsOverWhichToAverage) {
-        for (WindListener listener : listeners) {
-            try {
-                listener.windAveragingChanged(oldMillisecondsOverWhichToAverage, newMillisecondsOverWhichToAverage);
-            } catch (Throwable t) {
-                logger.log(Level.SEVERE, "WindListener "+listener+" threw exception "+t.getMessage());
-                logger.throwing(WindTrackImpl.class.getName(), "notifyListenersAboutAveragingChange(long, long)", t);
+        synchronized (listeners) {
+            for (WindListener listener : listeners) {
+                try {
+                    listener.windAveragingChanged(oldMillisecondsOverWhichToAverage, newMillisecondsOverWhichToAverage);
+                } catch (Throwable t) {
+                    logger.log(Level.SEVERE, "WindListener " + listener + " threw exception " + t.getMessage());
+                    logger.throwing(WindTrackImpl.class.getName(), "notifyListenersAboutAveragingChange(long, long)", t);
+                }
             }
         }
     }
 
     private void notifyListenersAboutRemoval(Wind wind) {
-        for (WindListener listener : listeners) {
-            try {
-                listener.windDataRemoved(wind);
-            } catch (Throwable t) {
-                logger.log(Level.SEVERE, "WindListener "+listener+" threw exception "+t.getMessage());
-                logger.throwing(WindTrackImpl.class.getName(), "notifyListenersAboutRemoval(Wind)", t);
+        synchronized (listeners) {
+            for (WindListener listener : listeners) {
+                try {
+                    listener.windDataRemoved(wind);
+                } catch (Throwable t) {
+                    logger.log(Level.SEVERE, "WindListener " + listener + " threw exception " + t.getMessage());
+                    logger.throwing(WindTrackImpl.class.getName(), "notifyListenersAboutRemoval(Wind)", t);
+                }
             }
         }
     }
@@ -278,7 +284,9 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
 
     @Override
     public void addListener(WindListener listener) {
-        listeners.add(listener);
+        synchronized (listeners) {
+            listeners.add(listener);
+        }
     }
 
     @Override

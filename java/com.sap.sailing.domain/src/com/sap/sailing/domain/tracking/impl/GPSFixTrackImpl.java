@@ -1,9 +1,12 @@
 package com.sap.sailing.domain.tracking.impl;
 
+import java.util.ConcurrentModificationException;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.NavigableSet;
+import java.util.Set;
 
 import com.sap.sailing.domain.base.Bearing;
 import com.sap.sailing.domain.base.Distance;
@@ -18,6 +21,7 @@ import com.sap.sailing.domain.base.impl.NauticalMileDistance;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
+import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.WithValidityCache;
 
 public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl<FixType> implements GPSFixTrack<ItemType, FixType> {
@@ -27,6 +31,8 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
     private final ItemType trackedItem;
     private long millisecondsOverWhichToAverage;
 
+    private final Set<RaceChangeListener<ItemType>> listeners;
+    
     public GPSFixTrackImpl(ItemType trackedItem, long millisecondsOverWhichToAverage) {
         this(trackedItem, millisecondsOverWhichToAverage, DEFAULT_MAX_SPEED_FOR_SMOOTHING);
     }
@@ -36,6 +42,23 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         this.trackedItem = trackedItem;
         this.millisecondsOverWhichToAverage = millisecondsOverWhichToAverage;
         this.maxSpeedForSmoothening = maxSpeedForSmoothening;
+        this.listeners = new HashSet<RaceChangeListener<ItemType>>();
+    }
+
+    @Override
+    public void addListener(RaceChangeListener<ItemType> listener) {
+        synchronized (listeners) {
+            listeners.add(listener);
+        }
+    }
+    
+    /**
+     * To iterate over the resulting listener list, synchronize on the iterable returned. Only this will avoid
+     * {@link ConcurrentModificationException}s because listeners may be added on the fly, and this object will
+     * synchronize on the listeners collection before adding on.
+     */
+    protected Iterable<RaceChangeListener<ItemType>> getListeners() {
+        return listeners;
     }
 
     private class DummyGPSFix extends DummyTimed implements GPSFix {
