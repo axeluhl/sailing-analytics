@@ -105,7 +105,9 @@ public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest 
                     @Override
                     protected void cache(TimePoint timePoint, Wind fix) {
                         super.cache(timePoint, fix);
-                        cachedFixes.put(timePoint, fix);
+                        if (fix != null) {
+                            cachedFixes.put(timePoint, fix);
+                        }
                     }
         };
         Wind estimatedWindDirection = track.getEstimatedWind(/* position */ null, now);

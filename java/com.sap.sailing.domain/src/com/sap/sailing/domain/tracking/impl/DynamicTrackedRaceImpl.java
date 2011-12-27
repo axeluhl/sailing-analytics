@@ -232,7 +232,8 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
 
     @Override
     public void gpsFixReceived(GPSFix fix, Competitor competitor) {
-        if (getStart() == null || getStart().compareTo(fix.getTimePoint())>0) {
+        TimePoint start = getStart();
+        if (start == null || start.compareTo(fix.getTimePoint())>0) {
             // infer race start time from fix; earliest fix received defines start if earlier than assumed start so far
             setStartTimeReceived(fix.getTimePoint());
         }
