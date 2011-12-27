@@ -1,8 +1,10 @@
 package com.sap.sailing.domain.tracking.impl;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Set;
 import java.util.logging.Level;
@@ -61,11 +63,6 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     public synchronized void recordFix(Competitor competitor, GPSFixMoving fix) {
         DynamicGPSFixTrack<Competitor, GPSFixMoving> track = getTrack(competitor);
         track.addGPSFix(fix); // the track notifies this tracked race which in turn notifies its listeners
-        if (getStart() == null || getStart().compareTo(fix.getTimePoint())>0) {
-            // infer race start time from fix; earliest fix received defines start if earlier than assumed start so far
-            setStartTimeReceived(fix.getTimePoint());
-        }
-        updated(fix.getTimePoint());
     }
     
     @Override
@@ -166,10 +163,10 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
         }
     }
 
-    private void notifyListeners(MarkPassing markPassing) {
+    private void notifyListeners(MarkPassing oldMarkPassing, MarkPassing markPassing) {
         for (RaceChangeListener<Competitor> listener : getListeners()) {
             try {
-                listener.markPassingReceived(markPassing);
+                listener.markPassingReceived(oldMarkPassing, markPassing);
             } catch (Throwable t) {
                 logger.log(Level.SEVERE, "RaceChangeListener "+listener+" threw exception "+t.getMessage());
                 logger.throwing(DynamicTrackedRaceImpl.class.getName(), "notifyListeners(MarkPassing)", t);
@@ -179,7 +176,11 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
 
     @Override
     public void updateMarkPassings(Competitor competitor, Iterable<MarkPassing> markPassings) {
+        Map<Waypoint, MarkPassing> oldMarkPassings = new HashMap<Waypoint, MarkPassing>();
         synchronized (this) {
+            for (MarkPassing oldMarkPassing : getMarkPassings(competitor)) {
+                oldMarkPassings.put(oldMarkPassing.getWaypoint(), oldMarkPassing);
+            }
             clearMarkPassings(competitor);
             NavigableSet<MarkPassing> competitorMarkPassings = getMarkPassings(competitor);
             TimePoint timePointOfLatestEvent = new MillisecondsTimePoint(0);
@@ -194,7 +195,7 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
         }
         // notify *after* all mark passings have been re-established; should avoid flicker
         for (MarkPassing markPassing : markPassings) {
-            notifyListeners(markPassing);
+            notifyListeners(oldMarkPassings.get(markPassing.getWaypoint()), markPassing);
         }
     }
     
@@ -231,6 +232,12 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
 
     @Override
     public void gpsFixReceived(GPSFix fix, Competitor competitor) {
+        TimePoint start = getStart();
+        if (start == null || start.compareTo(fix.getTimePoint())>0) {
+            // infer race start time from fix; earliest fix received defines start if earlier than assumed start so far
+            setStartTimeReceived(fix.getTimePoint());
+        }
+        updated(fix.getTimePoint());
         notifyListeners(fix, competitor);
     }
 
@@ -245,8 +252,8 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     }
 
     @Override
-    public void markPassingReceived(MarkPassing markPassing) {
-        notifyListeners(markPassing);
+    public void markPassingReceived(MarkPassing oldMarkPassing, MarkPassing markPassing) {
+        notifyListeners(oldMarkPassing, markPassing);
     }
 
     @Override

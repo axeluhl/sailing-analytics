@@ -192,7 +192,7 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener<Competitor
     }
 
     @Override
-    public void markPassingReceived(MarkPassing markPassing) {
+    public void markPassingReceived(MarkPassing oldMarkPassing, MarkPassing markPassing) {
         clearCaches();
     }
 

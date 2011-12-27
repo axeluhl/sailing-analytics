@@ -64,7 +64,7 @@ public class ReceiveTrackingDataTest extends AbstractTracTracLiveTest {
                 }
             }
             @Override
-            public void markPassingReceived(MarkPassing markPassing) {
+            public void markPassingReceived(MarkPassing oldMarkPassing, MarkPassing markPassing) {
             }
             @Override
             public void windDataReceived(Wind wind) {
