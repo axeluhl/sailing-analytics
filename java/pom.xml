@@ -151,8 +151,7 @@
 		<repository>
 			<id>equinox-sdk-3.7</id>
 			<layout>p2</layout>
-			<url>file:/home/trac/p2-repositories/eclipse/equinox-SDK-3.7/</url>
-			<!--<url>http://mirror.selfnet.de/eclipse/equinox/drops/R-3.7-201106131736/</url>-->
+			<url>http://download.eclipse.org/releases/indigo/</url>
 		</repository>
 <!--		
 		<repository>
