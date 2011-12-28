@@ -842,9 +842,23 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
                             boatMarkers.put(competitorDAO, boatMarker);
                         } else {
                             competitorDAOsOfUnusedMarkers.remove(competitorDAO);
-                            boatMarker.setLatLng(LatLng.newInstance(lastPos.position.latDeg, lastPos.position.lngDeg));
-                            boatMarker.setImage(getBoatImageURL(lastPos,
-                                    competitorsSelectedInMap.contains(competitorDAO)));
+                            // check if anchors match; re-use marker with setImage only if anchors match
+                            Point newAnchor = getBoatImageRotator(lastPos,
+                                    competitorsSelectedInMap.contains(competitorDAO)).getAnchor();
+                            Point oldAnchor = boatMarker.getIcon().getIconAnchor();
+                            if (oldAnchor.getX() == newAnchor.getX() && oldAnchor.getY() == newAnchor.getY()) {
+                                boatMarker.setLatLng(LatLng.newInstance(lastPos.position.latDeg,
+                                        lastPos.position.lngDeg));
+                                boatMarker.setImage(getBoatImageURL(lastPos,
+                                        competitorsSelectedInMap.contains(competitorDAO)));
+                            } else {
+                                // anchors don't match; replace marker
+                                map.removeOverlay(boatMarker);
+                                boatMarker = createBoatMarker(competitorDAO,
+                                        competitorsSelectedInMap.contains(competitorDAO));
+                                map.addOverlay(boatMarker);
+                                boatMarkers.put(competitorDAO, boatMarker);
+                            }
                         }
                     }
                 }
