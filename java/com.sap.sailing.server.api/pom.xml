@@ -14,9 +14,9 @@
   <build>
 	<plugins>
 		<plugin>
-			<groupId>org.sonatype.tycho</groupId>
-			<artifactId>maven-osgi-source-plugin</artifactId>
-			<version>0.10.0</version>
+			<groupId>org.eclipse.tycho</groupId>
+			<artifactId>tycho-source-plugin</artifactId>
+			<version>0.13.0</version>
 			<executions>
 				<execution>
 					<id>plugin-source</id>
