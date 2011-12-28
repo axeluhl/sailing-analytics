@@ -103,6 +103,13 @@ the console. The process will listen for inbound UDP packets on port
 well as localhost:2014. See also the list of ports as documented in
 the README file.
 
+Apache HTTP Server configuration
+--------------------------------
+To define the different URL's to access the java servers you need to configure 
+the corresponding virtual hosts of the Apache Http server. The configuration file
+can be found at /etc/httpd/conf.d/kiel.conf
+
+
 Re-Building the Java Server
 ---------------------------
 
