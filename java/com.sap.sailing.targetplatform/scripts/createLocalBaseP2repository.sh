@@ -2,11 +2,15 @@
 
 set -u
 
+ECLIPSE_HOME=C:/Projects/sailing/dev/eclipse_versions/v371_jee/eclipse
+SAILING_GIT_HOME=C:/Projects/sailing/dev/git
+TARGET_PLATFORM_BASE_DIR=${SAILING_GIT_HOME}/java/com.sap.sailing.targetplatform.base
+
 ECLIPSE_VM_ARGS="-Xmx256m"
-ECLIPSE_LAUNCHER=C:/Projects/sailing/dev/eclipse_versions/v371_jee/eclipse/plugins/org.eclipse.equinox.launcher_*.jar
+ECLIPSE_LAUNCHER=${ECLIPSE_HOME}/plugins/org.eclipse.equinox.launcher_*.jar
 
 java -jar ${ECLIPSE_LAUNCHER} -consolelog -nosplash -verbose -application org.eclipse.equinox.p2.publisher.UpdateSitePublisher \
-  -metadataRepository file:/C:/Projects/sailing/dev/p2-repositories/sailing \
-  -artifactRepository file:/C:/Projects/sailing/dev/p2-repositories/sailing \
-  -source C:/Projects/sailing/dev/p2-repositories/sailing_libs_source \
+  -metadataRepository file:/${TARGET_PLATFORM_BASE_DIR}/gen/p2 \
+  -artifactRepository file:/${TARGET_PLATFORM_BASE_DIR}/gen/p2 \
+  -source ${TARGET_PLATFORM_BASE_DIR} \
   -publishArtifacts -publishArtifactRepository -compress -noDefaultIUs -vmargs ${ECLIPSE_VM_ARGS}
