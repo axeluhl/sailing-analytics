@@ -63,7 +63,7 @@
 				<plugin>
 					<inherited>true</inherited>
 					<groupId>org.eclipse.tycho</groupId>
-					<artifactId>maven-osgi-test-plugin</artifactId>
+					<artifactId>eclipse-test-plugin</artifactId>
 					<version>${tycho-version}</version>
 				</plugin>
 				<plugin>
@@ -92,14 +92,15 @@
 					<groupId>${project.groupId}</groupId>
 					<artifactId>${project.artifactId}</artifactId>
 					<version>${project.version}</version>
-					<classifier>../com.sap.sailing.targetplatform/definitions/race-analysis-p2-maven-central</classifier>
+					<classifier>../com.sap.sailing.targetplatform/definitions/race-analysis-p2-maven-local</classifier>
                 </artifact>
               </target>
             </configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.eclipse.tycho</groupId>
-				<artifactId>maven-osgi-test-plugin</artifactId>
+				<artifactId>tycho-surefire-plugin</artifactId>
+				<version>${tycho-version}</version>
 				<configuration>
 <!-- non-debug -->
 <!-- proxy -->
