@@ -29,7 +29,7 @@ public class UnicodeCharactersInCompetitorNamesTest {
         domainFactory = new DomainFactoryImpl(new com.sap.sailing.domain.base.impl.DomainFactoryImpl());
     }
     
-    public static void main(String[] args) throws URISyntaxException, IOException {
+    public static void main(String[] args) throws URISyntaxException, IOException, InterruptedException {
         UnicodeCharactersInCompetitorNamesTest t = new UnicodeCharactersInCompetitorNamesTest();
         t.setUp();
         t.readJSONURLAndCheckCompetitorNames();
@@ -37,7 +37,7 @@ public class UnicodeCharactersInCompetitorNamesTest {
     }
     
     @Test
-    public void testFindUnicodeCharactersInCompetitorNames() throws MalformedURLException, FileNotFoundException, URISyntaxException {
+    public void testFindUnicodeCharactersInCompetitorNames() throws MalformedURLException, FileNotFoundException, URISyntaxException, IOException, InterruptedException {
         TracTracRaceTracker fourtyninerYellow_2 = domainFactory
                 .createRaceTracker(
                         new URL(
@@ -46,10 +46,11 @@ public class UnicodeCharactersInCompetitorNamesTest {
                                         tractracTunnel ? new URI("tcp://"+tractracTunnelHost+":4413") : new URI("tcp://germanmaster.traclive.dk:4401"),
                         EmptyWindStore.INSTANCE, new DummyTrackedEventRegistry());
         
-        Iterable<Competitor> competitors = fourtyninerYellow_2.getRaceHandle().getRaces().iterator().next().getCompetitors();
+        Iterable<Competitor> competitors = fourtyninerYellow_2.getRacesHandle().getRaces().iterator().next().getCompetitors();
         for (Competitor competitor : competitors) {
             System.out.println(competitor.getName());
         }
+        fourtyninerYellow_2.stop();
     }
     
     @Test

@@ -15,7 +15,6 @@ import com.sap.sailing.domain.base.Speed;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.Timed;
-import com.sap.sailing.domain.base.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindListener;
@@ -25,8 +24,6 @@ import com.sap.sailing.util.impl.ArrayListNavigableSet;
 /**
  * Records {@link Wind} objects over time and offers to average the last so many of them into an
  * estimated, stabilized wind bearing/direction.<p>
- * 
- * TODO extend WindTrackImpl such that it can record multiple wind read-outs with equal time stamp but different position
  * 
  * @author Axel Uhl (d043530)
  *
@@ -43,6 +40,11 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
         listeners = new HashSet<WindListener>();
     }
     
+    @Override
+    protected Wind getDummyFix(TimePoint timePoint) {
+        return new DummyWind(timePoint);
+    }
+
     @Override
     public void setMillisecondsOverWhichToAverage(long millisecondsOverWhichToAverage) {
         long oldMillis = millisecondsOverWhichToAverage;
@@ -62,34 +64,40 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
     }
 
     private void notifyListenersAboutReceive(Wind wind) {
-        for (WindListener listener : listeners) {
-            try {
-                listener.windDataReceived(wind);
-            } catch (Throwable t) {
-                logger.log(Level.SEVERE, "WindListener "+listener+" threw exception "+t.getMessage());
-                logger.throwing(WindTrackImpl.class.getName(), "notifyListenersAboutReceive(Wind)", t);
+        synchronized (listeners) {
+            for (WindListener listener : listeners) {
+                try {
+                    listener.windDataReceived(wind);
+                } catch (Throwable t) {
+                    logger.log(Level.SEVERE, "WindListener " + listener + " threw exception " + t.getMessage());
+                    logger.throwing(WindTrackImpl.class.getName(), "notifyListenersAboutReceive(Wind)", t);
+                }
             }
         }
     }
 
     private void notifyListenersAboutAveragingChange(long oldMillisecondsOverWhichToAverage, long newMillisecondsOverWhichToAverage) {
-        for (WindListener listener : listeners) {
-            try {
-                listener.windAveragingChanged(oldMillisecondsOverWhichToAverage, newMillisecondsOverWhichToAverage);
-            } catch (Throwable t) {
-                logger.log(Level.SEVERE, "WindListener "+listener+" threw exception "+t.getMessage());
-                logger.throwing(WindTrackImpl.class.getName(), "notifyListenersAboutAveragingChange(long, long)", t);
+        synchronized (listeners) {
+            for (WindListener listener : listeners) {
+                try {
+                    listener.windAveragingChanged(oldMillisecondsOverWhichToAverage, newMillisecondsOverWhichToAverage);
+                } catch (Throwable t) {
+                    logger.log(Level.SEVERE, "WindListener " + listener + " threw exception " + t.getMessage());
+                    logger.throwing(WindTrackImpl.class.getName(), "notifyListenersAboutAveragingChange(long, long)", t);
+                }
             }
         }
     }
 
     private void notifyListenersAboutRemoval(Wind wind) {
-        for (WindListener listener : listeners) {
-            try {
-                listener.windDataRemoved(wind);
-            } catch (Throwable t) {
-                logger.log(Level.SEVERE, "WindListener "+listener+" threw exception "+t.getMessage());
-                logger.throwing(WindTrackImpl.class.getName(), "notifyListenersAboutRemoval(Wind)", t);
+        synchronized (listeners) {
+            for (WindListener listener : listeners) {
+                try {
+                    listener.windDataRemoved(wind);
+                } catch (Throwable t) {
+                    logger.log(Level.SEVERE, "WindListener " + listener + " threw exception " + t.getMessage());
+                    logger.throwing(WindTrackImpl.class.getName(), "notifyListenersAboutRemoval(Wind)", t);
+                }
             }
         }
     }
@@ -105,13 +113,23 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
      */
     @Override
     public synchronized Wind getEstimatedWind(Position p, TimePoint at) {
+        return getEstimatedWindUnsynchronized(p, at);
+    }
+    
+    /**
+     * This method implements the functionality of the {@link #getEstimatedWind(Position, TimePoint)} interface
+     * method. However, not being <code>synchronized</code>, it does not obtain this object's monitor. Subclasses
+     * may use this carefully if they can guarantee there are no concurrency issues with the internal fixes
+     * while iterating over the result of {@link #getInternalFixes()}.
+     */
+    protected Wind getEstimatedWindUnsynchronized(Position p, TimePoint at) {
         DummyWind atTimed = new DummyWind(at);
-        NavigableSet<Wind> beforeSet = getInternalFixes().headSet(atTimed, /* inclusive */ true);
+        NavigableSet<Wind> beforeSet = getInternalFixes().headSet(atTimed, /* inclusive */ false);
         NavigableSet<Wind> afterSet = getInternalFixes().tailSet(atTimed, /* inclusive */ true);
         Iterator<Wind> beforeIter = beforeSet.descendingIterator();
         Iterator<Wind> afterIter = afterSet.iterator();
         double knotSum = 0;
-        double bearingDegSum = 0;
+        BearingCluster bearingCluster = new BearingCluster();
         int count = 0;
         long beforeDistanceToAt = 0;
         long afterDistanceToAt = 0;
@@ -135,7 +153,7 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
                     beforeIntervalEnd = beforeWind.getTimePoint();
                 }
                 knotSum += beforeWind.getKnots();
-                bearingDegSum += beforeWind.getBearing().getDegrees();
+                bearingCluster.add(beforeWind.getBearing());
                 count++;
                 if (beforeIter.hasNext()) {
                     beforeWind = beforeIter.next();
@@ -149,7 +167,7 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
                     afterIntervalStart = afterWind.getTimePoint();
                 }
                 knotSum += afterWind.getKnots();
-                bearingDegSum += afterWind.getBearing().getDegrees();
+                bearingCluster.add(afterWind.getBearing());
                 count++;
                 if (afterIter.hasNext()) {
                     afterWind = afterIter.next();
@@ -163,7 +181,7 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
         if (count == 0) {
             return null;
         } else {
-            SpeedWithBearing avgWindSpeed = new KnotSpeedWithBearingImpl(knotSum / count, new DegreeBearingImpl(bearingDegSum/count));
+            SpeedWithBearing avgWindSpeed = new KnotSpeedWithBearingImpl(knotSum / count, bearingCluster.getAverage());
             return new WindImpl(p, at, avgWindSpeed);
         }
     }
@@ -176,8 +194,12 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
                 result.append(wind);
                 result.append(" avg(");
                 result.append(millisecondsOverWhichToAverage);
-                result.append("ms): ");
-                result.append(getEstimatedWind(wind.getPosition(), wind.getTimePoint()));
+                if (wind == null) {
+                    result.append("ms)");
+                } else {
+                    result.append("ms): ");
+                    result.append(getEstimatedWind(wind.getPosition(), wind.getTimePoint()));
+                }
                 result.append("\n");
             }
         }
@@ -206,7 +228,7 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
         result.append("\t");
     }
 
-    private class DummyWind extends DummyTimed implements Wind {
+    protected static class DummyWind extends DummyTimed implements Wind {
         public DummyWind(TimePoint timePoint) {
             super(timePoint);
         }
@@ -262,7 +284,9 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
 
     @Override
     public void addListener(WindListener listener) {
-        listeners.add(listener);
+        synchronized (listeners) {
+            listeners.add(listener);
+        }
     }
 
     @Override

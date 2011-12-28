@@ -1,17 +1,25 @@
 package com.sap.sailing.domain.base.impl;
 
 import java.text.SimpleDateFormat;
+import java.util.Comparator;
 import java.util.Date;
 
 import com.sap.sailing.domain.base.TimePoint;
 
 public abstract class AbstractTimePoint implements TimePoint {
     private static SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+    
+    public static Comparator<TimePoint> TIMEPOINT_COMPARATOR = new Comparator<TimePoint>() {
+        @Override
+        public int compare(TimePoint o1, TimePoint o2) {
+            long milliDiff = o1.asMillis() - o2.asMillis();
+            return milliDiff<0 ?  -1 : milliDiff == 0 ? 0 : 1;
+        }
+    };
 
     @Override
     public int compareTo(TimePoint o) {
-        long milliDiff = asMillis() - o.asMillis();
-        return milliDiff<0 ?  -1 : milliDiff == 0 ? 0 : 1;
+        return TIMEPOINT_COMPARATOR.compare(this, o);
     }
     
     @Override

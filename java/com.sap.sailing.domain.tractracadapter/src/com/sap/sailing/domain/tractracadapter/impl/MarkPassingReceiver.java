@@ -28,14 +28,10 @@ import com.tractrac.clientmodule.data.MarkPassingsData;
 
 public class MarkPassingReceiver extends AbstractReceiverWithQueue<RaceCompetitor, MarkPassingsData, Boolean> {
     private static final Logger logger = Logger.getLogger(MarkPassingReceiver.class.getName());
-    private final DynamicTrackedEvent trackedEvent;
-    private final com.tractrac.clientmodule.Event tractracEvent;
     
     public MarkPassingReceiver(DynamicTrackedEvent trackedEvent, com.tractrac.clientmodule.Event tractracEvent,
             DomainFactory domainFactory) {
-        super(domainFactory);
-        this.trackedEvent = trackedEvent;
-        this.tractracEvent = tractracEvent;
+        super(domainFactory, tractracEvent, trackedEvent);
     }
 
     /**
@@ -48,7 +44,7 @@ public class MarkPassingReceiver extends AbstractReceiverWithQueue<RaceCompetito
     @Override
     public Iterable<TypeController> getTypeControllersAndStart() {
         List<TypeController> result = new ArrayList<TypeController>();
-        for (final Race race : tractracEvent.getRaceList()) {
+        for (final Race race : getTracTracEvent().getRaceList()) {
             TypeController controlPointListener = MarkPassingsData.subscribe(race,
                 new ICallbackData<RaceCompetitor, MarkPassingsData>() {
                     @Override
@@ -64,34 +60,42 @@ public class MarkPassingReceiver extends AbstractReceiverWithQueue<RaceCompetito
     
     protected void handleEvent(Triple<RaceCompetitor, MarkPassingsData, Boolean> event) {
         System.out.print("L"); // as in "Leg"
-        DynamicTrackedRace trackedRace = trackedEvent.getTrackedRace(getDomainFactory().getAndWaitForRaceDefinition(event
-                .getA().getRace()));
-        Course course = trackedRace.getRace().getCourse();
-        Iterator<Waypoint> waypointsIter = course.getWaypoints().iterator();
-        Map<Waypoint, MarkPassing> passingsByWaypoint = new HashMap<Waypoint, MarkPassing>();
-        // Note: the entries always describe all mark passings for the competitor so far in the current race in order
-        for (MarkPassingsData.Entry passing : event.getB().getPassings()) {
-            ControlPoint controlPointPassed = passing.getControlPoint();
-            com.sap.sailing.domain.base.ControlPoint domainControlPoint = getDomainFactory().getOrCreateControlPoint(controlPointPassed);
-            Waypoint passed = findWaypointForControlPoint(trackedRace, waypointsIter, domainControlPoint,
-                    getDomainFactory().getOrCreateCompetitor(event.getA().getCompetitor()));
-            if (passed != null) {
-                TimePoint time = new MillisecondsTimePoint(passing.getTimestamp());
-                MarkPassing markPassing = getDomainFactory().createMarkPassing(
-                        time, passed, getDomainFactory().getOrCreateCompetitor(event.getA().getCompetitor()));
-                passingsByWaypoint.put(passed, markPassing);
-            } else {
-                logger.warning("Didn't find waypoint in course "+course+" for mark passing around "+passing.getControlPoint());
+        DynamicTrackedRace trackedRace = getTrackedRace(event.getA().getRace());
+        if (trackedRace != null) {
+            Course course = trackedRace.getRace().getCourse();
+            Iterator<Waypoint> waypointsIter = course.getWaypoints().iterator();
+            Map<Waypoint, MarkPassing> passingsByWaypoint = new HashMap<Waypoint, MarkPassing>();
+            // Note: the entries always describe all mark passings for the competitor so far in the current race in
+            // order
+            for (MarkPassingsData.Entry passing : event.getB().getPassings()) {
+                ControlPoint controlPointPassed = passing.getControlPoint();
+                com.sap.sailing.domain.base.ControlPoint domainControlPoint = getDomainFactory()
+                        .getOrCreateControlPoint(controlPointPassed);
+                Waypoint passed = findWaypointForControlPoint(trackedRace, waypointsIter, domainControlPoint,
+                        getDomainFactory().getOrCreateCompetitor(event.getA().getCompetitor()));
+                if (passed != null) {
+                    TimePoint time = new MillisecondsTimePoint(passing.getTimestamp());
+                    MarkPassing markPassing = getDomainFactory().createMarkPassing(time, passed,
+                            getDomainFactory().getOrCreateCompetitor(event.getA().getCompetitor()));
+                    passingsByWaypoint.put(passed, markPassing);
+                } else {
+                    logger.warning("Didn't find waypoint in course " + course + " for mark passing around "
+                            + passing.getControlPoint());
+                }
             }
-        }
-        List<MarkPassing> markPassings = new ArrayList<MarkPassing>();
-        for (Waypoint waypoint : course.getWaypoints()) {
-            MarkPassing passing = passingsByWaypoint.get(waypoint);
-            if (passing != null) {
-                markPassings.add(passing);
+            List<MarkPassing> markPassings = new ArrayList<MarkPassing>();
+            for (Waypoint waypoint : course.getWaypoints()) {
+                MarkPassing passing = passingsByWaypoint.get(waypoint);
+                if (passing != null) {
+                    markPassings.add(passing);
+                }
             }
+            trackedRace.updateMarkPassings(getDomainFactory().getOrCreateCompetitor(event.getA().getCompetitor()),
+                    markPassings);
+        } else {
+            logger.warning("Couldn't find tracked race for race " + event.getA().getRace().getName()
+                    + ". Dropping mark passing event " + event);
         }
-        trackedRace.updateMarkPassings(getDomainFactory().getOrCreateCompetitor(event.getA().getCompetitor()), markPassings);
     }
 
     /**

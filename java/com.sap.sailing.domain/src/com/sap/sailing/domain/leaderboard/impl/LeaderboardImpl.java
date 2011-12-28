@@ -106,8 +106,8 @@ public class LeaderboardImpl implements Named, Leaderboard {
     }
     
     @Override
-    public void removeRaceColumn(String name) {
-        races.remove(getRaceColumnByName(name));
+    public void removeRaceColumn(String columnName) {
+        races.remove(getRaceColumnByName(columnName));
     }
     
     @Override

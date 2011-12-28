@@ -46,7 +46,7 @@ public abstract class TrackBasedTest {
      * competitors specified. The marks are laid out such that the upwind/downwind leg detection should be alright.
      */
     protected DynamicTrackedRace createTestTrackedRace(String eventName, String raceName, String boatClassName, Iterable<Competitor> competitors) {
-        BoatClassImpl boatClass = new BoatClassImpl(boatClassName);
+        BoatClassImpl boatClass = new BoatClassImpl(boatClassName, /* typicallyStartsUpwind */ true);
         Event event = new EventImpl(eventName, boatClass);
         TrackedEvent trackedEvent = new TrackedEventImpl(event);
         List<Waypoint> waypoints = new ArrayList<Waypoint>();

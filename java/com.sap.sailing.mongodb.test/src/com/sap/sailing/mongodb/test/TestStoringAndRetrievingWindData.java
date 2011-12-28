@@ -53,7 +53,7 @@ public class TestStoringAndRetrievingWindData extends AbstractMongoDBTest {
             Thread.sleep(1000); // wait until MongoDB has recorded the change and made it visible
             Mongo mongo = newMongo();
             assertNotNull(mongo);
-            DB db = mongo.getDB(WIND_TEST_DB);
+            DB db = mongo.getDB(getDBConfiguration().getDatabaseName());
             assertNotNull(db);
             DBCollection coll = db.getCollection(WIND_TEST_COLLECTION);
             assertNotNull(coll);
@@ -78,7 +78,7 @@ public class TestStoringAndRetrievingWindData extends AbstractMongoDBTest {
             Thread.sleep(1000); // wait until MongoDB has recorded the change and made it visible
             Mongo mongo = newMongo();
             assertNotNull(mongo);
-            DB db = mongo.getDB(WIND_TEST_DB);
+            DB db = mongo.getDB(getDBConfiguration().getDatabaseName());
             assertNotNull(db);
             DBCollection coll = db.getCollection(WIND_TEST_COLLECTION);
             assertNotNull(coll);

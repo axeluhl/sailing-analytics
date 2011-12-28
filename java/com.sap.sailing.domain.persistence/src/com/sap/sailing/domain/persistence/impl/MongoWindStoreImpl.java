@@ -11,8 +11,16 @@ import com.sap.sailing.domain.tracking.TrackedEvent;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindSource;
 import com.sap.sailing.domain.tracking.WindTrack;
+import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 
-public class MongoWindStoreImpl implements MongoWindStore {
+/**
+ * Stores wind tracks of sources that {@link WindSource#canBeStored() can be stored}. The {@link EmptyWindStore}'s
+ * factory method is used for wind tracks for other sources.
+ * 
+ * @author Axel Uhl (d043530)
+ *
+ */
+public class MongoWindStoreImpl extends EmptyWindStore implements MongoWindStore {
     private final DB db;
     private final MongoObjectFactory mongoObjectFactory;
     private final DomainObjectFactory domainObjectFactory;
@@ -31,9 +39,14 @@ public class MongoWindStoreImpl implements MongoWindStore {
     @Override
     public WindTrack getWindTrack(TrackedEvent trackedEvent, TrackedRace trackedRace, WindSource windSource,
             long millisecondsOverWhichToAverage) {
-        WindTrack result = domainObjectFactory.loadWindTrack(trackedEvent.getEvent(),
-                trackedRace.getRace(), windSource, millisecondsOverWhichToAverage);
-        result.addListener(new MongoWindListener(trackedEvent, trackedRace, windSource, mongoObjectFactory, db));
+        WindTrack result;
+        if (windSource.canBeStored()) {
+            result = domainObjectFactory.loadWindTrack(trackedEvent.getEvent(), trackedRace.getRace(), windSource,
+                    millisecondsOverWhichToAverage);
+            result.addListener(new MongoWindListener(trackedEvent, trackedRace, windSource, mongoObjectFactory, db));
+        } else {
+            result = super.getWindTrack(trackedEvent, trackedRace, windSource, millisecondsOverWhichToAverage);
+        }
         return result;
     }
 }

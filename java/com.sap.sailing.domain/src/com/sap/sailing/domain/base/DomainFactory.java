@@ -20,5 +20,5 @@ public interface DomainFactory {
 
     MarkPassing createMarkPassing(TimePoint timePoint, Waypoint waypoint, Competitor competitor);
     
-    BoatClass getOrCreateBoatClass(String name);
+    BoatClass getOrCreateBoatClass(String name, boolean typicallyStartsUpwind);
 }

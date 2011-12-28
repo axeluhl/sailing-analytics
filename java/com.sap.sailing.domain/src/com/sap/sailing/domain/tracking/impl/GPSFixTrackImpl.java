@@ -1,9 +1,12 @@
 package com.sap.sailing.domain.tracking.impl;
 
+import java.util.ConcurrentModificationException;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.NavigableSet;
+import java.util.Set;
 
 import com.sap.sailing.domain.base.Bearing;
 import com.sap.sailing.domain.base.Distance;
@@ -11,7 +14,6 @@ import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.Speed;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.TimePoint;
-import com.sap.sailing.domain.base.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
@@ -19,6 +21,7 @@ import com.sap.sailing.domain.base.impl.NauticalMileDistance;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
+import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.WithValidityCache;
 
 public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl<FixType> implements GPSFixTrack<ItemType, FixType> {
@@ -28,6 +31,8 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
     private final ItemType trackedItem;
     private long millisecondsOverWhichToAverage;
 
+    private final Set<RaceChangeListener<ItemType>> listeners;
+    
     public GPSFixTrackImpl(ItemType trackedItem, long millisecondsOverWhichToAverage) {
         this(trackedItem, millisecondsOverWhichToAverage, DEFAULT_MAX_SPEED_FOR_SMOOTHING);
     }
@@ -37,6 +42,23 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         this.trackedItem = trackedItem;
         this.millisecondsOverWhichToAverage = millisecondsOverWhichToAverage;
         this.maxSpeedForSmoothening = maxSpeedForSmoothening;
+        this.listeners = new HashSet<RaceChangeListener<ItemType>>();
+    }
+
+    @Override
+    public void addListener(RaceChangeListener<ItemType> listener) {
+        synchronized (listeners) {
+            listeners.add(listener);
+        }
+    }
+    
+    /**
+     * To iterate over the resulting listener list, synchronize on the iterable returned. Only this will avoid
+     * {@link ConcurrentModificationException}s because listeners may be added on the fly, and this object will
+     * synchronize on the listeners collection before adding on.
+     */
+    protected Iterable<RaceChangeListener<ItemType>> getListeners() {
+        return listeners;
     }
 
     private class DummyGPSFix extends DummyTimed implements GPSFix {
@@ -70,6 +92,14 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         }
     }
     
+    
+    @Override
+    protected FixType getDummyFix(TimePoint timePoint) {
+        @SuppressWarnings("unchecked")
+        FixType result = (FixType) new DummyGPSFix(timePoint);
+        return result;
+    }
+
     protected void setMillisecondsOverWhichToAverage(long millisecondsOverWhichToAverage) {
         this.millisecondsOverWhichToAverage = millisecondsOverWhichToAverage;
     }
@@ -238,19 +268,60 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
     }
 
     /**
+     * Here we know for sure that the GPS fixes are {@link GPSFixMoving} instances,
+     * so we can use their {@link GPSFixMoving#getSpeed() speed} in averaging. We're still
+     * using an interval of {@link #getMillisecondsOverWhichToAverage()} around <code>at</code>,
+     * but this time we add the speeds and bearings provided by the fix onto the values for
+     * averaging, so the result considers both, the GPS-provided speeds and bearings as well as
+     * the speeds/bearings determined by distance/time difference of the fixes themselves.
+     */
+    @Override
+    public synchronized SpeedWithBearing getEstimatedSpeed(TimePoint at) {
+        return getEstimatedSpeed(at, getInternalFixes());
+    }
+    
+    @Override
+    public synchronized SpeedWithBearing getRawEstimatedSpeed(TimePoint at) {
+        return getEstimatedSpeed(at, getRawFixes());
+    }
+
+    /**
      * Since we don't know for sure whether the GPS fixes are {@link GPSFixMoving} instances, here we only estimate
      * speed based on the distance and time between the fixes, averaged over an interval of
      * {@link #millisecondsOverWhichToAverage} milliseconds around <code>at</code>. Subclasses that know about the
      * particular fix type may redefine this to exploit a {@link SpeedWithBearing} attached, e.g., to a
      * {@link GPSFixMoving}.
      */
-    @Override
-    public SpeedWithBearing getEstimatedSpeed(TimePoint at) {
+    protected SpeedWithBearing getEstimatedSpeed(TimePoint at, NavigableSet<FixType> fixesToUseForSpeedEstimation) {
+        @SuppressWarnings("unchecked")
+        NavigableSet<GPSFix> gpsFixesToUseForSpeedEstimation = (NavigableSet<GPSFix>) fixesToUseForSpeedEstimation;
+        List<GPSFix> relevantFixes = getFixesRelevantForSpeedEstimation(at, gpsFixesToUseForSpeedEstimation);
+        double knotSum = 0;
+        BearingCluster bearingCluster = new BearingCluster();
+        int count = 0;
+        if (!relevantFixes.isEmpty()) {
+            Iterator<GPSFix> fixIter = relevantFixes.iterator();
+            GPSFix last = fixIter.next();
+            while (fixIter.hasNext()) {
+                GPSFix next = fixIter.next();
+                knotSum += last.getPosition().getDistance(next.getPosition())
+                        .inTime(next.getTimePoint().asMillis() - last.getTimePoint().asMillis()).getKnots();
+                bearingCluster.add(last.getPosition().getBearingGreatCircle(next.getPosition()));
+                count++;
+                last = next;
+            }
+        }
+        SpeedWithBearing avgSpeed = new KnotSpeedWithBearingImpl(knotSum / count, bearingCluster.getAverage());
+        return avgSpeed;
+    }
+
+    private List<GPSFix> getFixesRelevantForSpeedEstimation(TimePoint at,
+            NavigableSet<GPSFix> fixesToUseForSpeedEstimation) {
         DummyGPSFix atTimed = new DummyGPSFix(at);
         List<GPSFix> relevantFixes = new LinkedList<GPSFix>();
         synchronized (this) {
-            NavigableSet<GPSFix> beforeSet = getGPSFixes().headSet(atTimed, /* inclusive */true);
-            NavigableSet<GPSFix> afterSet = getGPSFixes().tailSet(atTimed, /* inclusive */true);
+            NavigableSet<GPSFix> beforeSet = fixesToUseForSpeedEstimation.headSet(atTimed, /* inclusive */ false);
+            NavigableSet<GPSFix> afterSet = fixesToUseForSpeedEstimation.tailSet(atTimed, /* inclusive */ true);
             for (GPSFix beforeFix : beforeSet.descendingSet()) {
                 if (at.asMillis() - beforeFix.getTimePoint().asMillis() > getMillisecondsOverWhichToAverage() / 2) {
                     break;
@@ -264,23 +335,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
                 relevantFixes.add(afterFix);
             }
         }
-        double knotSum = 0;
-        double bearingDegSum = 0;
-        int count = 0;
-        if (!relevantFixes.isEmpty()) {
-            Iterator<GPSFix> fixIter = relevantFixes.iterator();
-            GPSFix last = fixIter.next();
-            while (fixIter.hasNext()) {
-                GPSFix next = fixIter.next();
-                knotSum += last.getPosition().getDistance(next.getPosition())
-                        .inTime(next.getTimePoint().asMillis() - last.getTimePoint().asMillis()).getKnots();
-                bearingDegSum += last.getPosition().getBearingGreatCircle(next.getPosition()).getDegrees();
-                count++;
-                last = next;
-            }
-        }
-        SpeedWithBearing avgSpeed = new KnotSpeedWithBearingImpl(knotSum / count, new DegreeBearingImpl(bearingDegSum/count));
-        return avgSpeed;
+        return relevantFixes;
     }
 
     protected long getMillisecondsOverWhichToAverage() {
@@ -357,7 +412,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         Bearing bearingAtStart = getEstimatedSpeed(start).getBearing();
         Bearing bearingAtEnd = getEstimatedSpeed(end).getBearing();
         // TODO also need to analyze the (smoothened) directions in between; example: two tacks within averaging interval
-        return Math.abs(bearingAtStart.getDegrees() - bearingAtEnd.getDegrees()) > minimumDegreeDifference;
+        return Math.abs(bearingAtStart.getDifferenceTo(bearingAtEnd).getDegrees()) > minimumDegreeDifference;
     }
 
 }

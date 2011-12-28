@@ -9,13 +9,13 @@ import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.gwt.ui.shared.EventDAO;
-import com.sap.sailing.gwt.ui.shared.EventNameAndRaceName;
 import com.sap.sailing.gwt.ui.shared.PositionDAO;
 import com.sap.sailing.gwt.ui.shared.RaceDAO;
 import com.sap.sailing.gwt.ui.shared.RegattaDAO;
 import com.sap.sailing.gwt.ui.shared.Triple;
 import com.sap.sailing.gwt.ui.shared.WindDAO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDAO;
+import com.sap.sailing.server.api.EventNameAndRaceName;
 
 /**
  * Displays a bit of wind history around the time notified to this time listener.
@@ -70,19 +70,20 @@ public class SmallWindHistoryPanel extends FormPanel implements TimeListener, Ra
             Date from = new Date(date.getTime() - windIndicators.length * millisecondStepsPerLabel);
             if (event != null && race != null) {
                 sailingService.getWindInfo(new EventNameAndRaceName(event.name, race.name), from, millisecondStepsPerLabel,
-                        windIndicators.length, position.latDeg, position.lngDeg, /* includeTrackBasedWindEstimation */ true,
+                        windIndicators.length, position.latDeg, position.lngDeg, /* all sources */ null,
                         new AsyncCallback<WindInfoForRaceDAO>() {
                             @Override
                             public void onSuccess(WindInfoForRaceDAO result) {
                                 // expecting to find windIndicators.length fixes
-                                if (result == null || result.windTrackInfoByWindSourceName.get(result.selectedWindSourceName).windFixes
+                                if (result == null || result.windTrackInfoByWindSourceName.get(
+                                        /* result.selectedWindSourceName TODO uncomment */ "TRACK_BASED_ESTIMATION").windFixes
                                         .size() != windIndicators.length) {
                                     clearWindDisplay();
                                 } else {
-                                    setSelectedWindSource(result.selectedWindSourceName);
+                                    setSelectedWindSource(/* TODO uncomment again: result.selectedWindSourceName */ "TRACK_BASED_ESTIMATION");
                                     int i = 0;
                                     for (WindDAO fix : result.windTrackInfoByWindSourceName
-                                            .get(result.selectedWindSourceName).windFixes) {
+                                            .get(/* TODO uncomment again: result.selectedWindSourceName */ "TRACK_BASED_ESTIMATION").windFixes) {
                                         updateWindIndicator(i, fix);
                                         i++;
                                     }

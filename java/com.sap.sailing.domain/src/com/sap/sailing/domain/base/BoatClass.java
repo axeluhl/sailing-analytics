@@ -22,4 +22,19 @@ public interface BoatClass extends Named {
     double getMinimumAngleBetweenDifferentTacksDownwind();
 
     double getMinimumAngleBetweenDifferentTacksUpwind();
+    
+    /**
+     * Most olympic boat classes start their race with an upwind leg. Some other classes such
+     * as the Extreme Sailing Series / Extreme40 do not necessarily start with an upwind leg.
+     * Knowing this is relevant for the wind estimation fallback strategy. If the first leg of
+     * a boat class doesn't have to be an upwind leg it's not permissible to estimate the wind
+     * based on the course layout.<p>
+     * 
+     * The result of calling this method suggests a good default for this boat class. It is
+     * <em>not</em> an authoritative, prescriptive value. Races with this boat class may still
+     * start with a non-upwind leg even though this method returns <code>true</code>.
+     */
+    boolean typicallyStartsUpwind();
+    
+    Distance getHullLength();
 }

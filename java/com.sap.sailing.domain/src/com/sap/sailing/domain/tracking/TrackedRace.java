@@ -14,6 +14,7 @@ import com.sap.sailing.domain.base.Tack;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.DouglasPeucker;
+import com.sap.sailing.domain.tracking.TrackedLeg.LegType;
 
 /**
  * Live tracking data of a single race. The race follows a defined {@link Course} with a sequence of {@link Leg}s. The
@@ -148,13 +149,12 @@ public interface TrackedRace {
     Position getApproximatePosition(Waypoint waypoint, TimePoint timePoint);
     
     /**
-     * Obtains estimated interpolated wind information for a given position and time point.
-     * The information is taken from the currently selected {@link WindSource wind source} which
-     * can be selected using {@link #setWindSource}.
+     * Obtains estimated interpolated wind information for a given position and time point. The information is taken
+     * from all wind sources available except for those listed in <code>windSourcesToExclude</code>, with preferences
+     * controlled by the {@link #getWindSource() current wind source} which can be selected using {@link #setWindSource},
+     * and by the order of the {@link WindSource} literals.
      */
-    Wind getWind(Position p, TimePoint at);
-
-    void setWindSource(WindSource windSource);
+    Wind getWind(Position p, TimePoint at, WindSource... windSourcesToExclude);
 
     WindSource getWindSource();
 
@@ -167,6 +167,10 @@ public interface TrackedRace {
 
     TimePoint getStartOfTracking();
 
+    /**
+     * Regardless of the order in which events were received, this method returns the latest time point contained by any of
+     * the events received and processed.
+     */
     TimePoint getTimePointOfNewestEvent();
 
     NavigableSet<MarkPassing> getMarkPassings(Competitor competitor);
@@ -174,7 +178,7 @@ public interface TrackedRace {
     void removeWind(Wind wind, WindSource windSource);
 
     /**
-     * Time stamp that the last event received from the underlying push service carried on it.
+     * Time stamp that the event received last from the underlying push service carried on it.
      * Note that these times may not increase monotonically.
      */
     TimePoint getTimePointOfLastEvent();
@@ -187,26 +191,49 @@ public interface TrackedRace {
      * Estimates the wind direction based on the observed boat courses at the time given for the position provided. The
      * estimate is based on the assumption that the boats which are on an upwind or a downwind leg sail with very
      * similar angles on the starboard and the port side. There should be clusters of courses which are close to each
-     * other (within a threshold of, say, +/- 5 degrees), whereas for the upwind group there should be two clusters
-     * with angles about 90 degrees apart; similarly, for the downwind leg there should be two clusters, only that the
-     * general jibing angle may vary more, based on the wind speed.<p>
+     * other (within a threshold of, say, +/- 5 degrees), whereas for the upwind group there should be two clusters with
+     * angles about 90 degrees apart; similarly, for the downwind leg there should be two clusters, only that the
+     * general jibing angle may vary more, based on the wind speed and the boat class.
+     * <p>
      * 
-     * Boats currently maneuvering are not considered for this analysis.<p>
+     * Boats {@link GPSFixTrack#hasDirectionChange(TimePoint, double) currently maneuvering} are not considered for this
+     * analysis.
+     * <p>
      * 
-     * This wind direction should not be used directly to compute the leg's wind direction because an endless
-     * recursion may result: an implementation will need to know whether a leg is an upwind or downwind leg for
-     * which it has to know where the wind is comoing from.
+     * This wind direction should not be used directly to compute the leg's wind direction and hence the {@link LegType
+     * leg type} because an endless recursion may result: an implementation of this method signature will need to know
+     * whether a leg is an upwind or downwind leg for which it has to know where the wind is coming from.
+     * 
+     * @return <code>null</code> if no sufficient boat track information is available or leg type identification (upwind
+     *         vs. downwind) is not possible; a valid {@link Wind} fix otherwise whose bearing is inferred from the boat
+     *         courses and whose speed in knots is currently a rough indication of how many boats' courses contributed
+     *         to determining the bearing. If in the future we have data about polar diagrams specific to boat classes,
+     *         we may be able to also infer the wind speed from the boat tracks.
      */
-    Wind getEstimatedWindDirection(Position position, TimePoint timePoint) throws NoWindException;
+    Wind getEstimatedWindDirection(Position position, TimePoint timePoint);
     
     /**
      * Determines whether the <code>competitor</code> is sailing on port or starboard tack at the
-     * <code>timePoint</code> requested.
+     * <code>timePoint</code> requested. Note that this will have to retrieve information about the wind.
+     * This, in turn, can lead to the current thread obtaining the monitor of the various wind tracks,
+     * and, if the {@link WindSource#TRACK_BASED_ESTIMATION} source is used, also the monitors of the
+     * competitors' GPS tracks.
      */
     Tack getTack(Competitor competitor, TimePoint timePoint);
 
     TrackedEvent getTrackedEvent();
 
+    /**
+     * Computes a default wind direction based on the direction of the first leg at time <code>at</code>, with a default
+     * speed of one knot. Note that this wind direction can only be used if {@link #raceIsKnownToStartUpwind()} returns
+     * <code>true</code>.
+     * 
+     * @param at
+     *            usually the {@link #getStart() start time} should be used; if no valid start time is provided, the
+     *            current time point may serve as a default
+     * @return <code>null</code> in case the first leg's direction cannot be determined, e.g., because the necessary
+     *         mark positions are not known (yet)
+     */
     Wind getDirectionFromStartToNextMark(TimePoint at);
     
     /**
@@ -221,4 +248,14 @@ public interface TrackedRace {
      *         this race between <code>from</code> and <code>to</code>.
      */
     List<Maneuver> getManeuvers(Competitor competitor, TimePoint from, TimePoint to) throws NoWindException;
+
+    /**
+     * @return <code>true</code> if this race is known to start with an {@link LegType#UPWIND upwind} leg.
+     * If this is the case, the wind estimation may default to using the first leg's direction at race start
+     * time as the direction the wind comes from.
+     */
+    boolean raceIsKnownToStartUpwind();
+    
+    void addListener(RaceChangeListener<Competitor> listener);
+    
 }

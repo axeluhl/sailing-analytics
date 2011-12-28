@@ -6,8 +6,13 @@ import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.Timed;
 
 /**
- * A track records {@link Timed} items for an object of type <code>ItemType</code>. It allows clients to ask for a
- * value close to a given {@link TimePoint}.
+ * A track records {@link Timed} items for an object of type <code>ItemType</code>. It allows clients to ask for a value
+ * close to a given {@link TimePoint}. The track manages a time-based set of raw fixes. An implementation may have an
+ * understanding of how to eliminate outliers. For example, if a track implementation knows it's tracking boats, it may
+ * consider fixes that the boat cannot possibly have reached due to its speed and direction change limitations as
+ * outliers. The set of fixes with outliers filtered out can be obtained using {@link #getFixes} whereas
+ * {@link #getRawFixes()} returns the unfilteres, raw fixes. If an implementation has no idea what an outlier is,
+ * both methods will return the same fix sequence.
  * 
  * @author Axel Uhl (d043530)
  */

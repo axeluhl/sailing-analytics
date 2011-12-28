@@ -10,7 +10,19 @@ public interface Receiver {
      */
     void stopPreemptively();
     
+    /**
+     * Processes the events queued so far, then stops. Any other events received after this call will not be handled
+     * anymore and therefore get discarded.
+     */
     void stopAfterProcessingQueuedEvents();
+    
+    /**
+     * Waits for <code>timeoutInMilliseconds</code>. If no event is received in that time, the receiver is stopped.
+     * Otherwise, the timeout is renewed after the first timeout period has expired (not after the last event was received).
+     * Therefore, <code>timeoutInMilliseconds</code> is the <em>minimum</em> timeout period. The maximum timeout period
+     * that may occur is <code>2*timeoutInMilliseconds</code>.
+     */
+    void stopAfterNotReceivingEventsForSomeTime(long timeoutInMilliseconds);
 
     Iterable<TypeController> getTypeControllersAndStart();
     

@@ -11,12 +11,12 @@ import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.sap.sailing.gwt.ui.shared.EventDAO;
-import com.sap.sailing.gwt.ui.shared.EventNameAndRaceName;
 import com.sap.sailing.gwt.ui.shared.PositionDAO;
 import com.sap.sailing.gwt.ui.shared.RaceDAO;
 import com.sap.sailing.gwt.ui.shared.RegattaDAO;
 import com.sap.sailing.gwt.ui.shared.Triple;
 import com.sap.sailing.gwt.ui.shared.WindDAO;
+import com.sap.sailing.server.api.EventNameAndRaceName;
 
 public class WindSettingPanel extends FormPanel {
     private final Button setWindButton;
@@ -52,7 +52,7 @@ public class WindSettingPanel extends FormPanel {
                     wind.position = new PositionDAO(latDegBox.getValue(), lngDegBox.getValue());
                 }
                 List<Triple<EventDAO, RegattaDAO, RaceDAO>> eventAndRaces = raceSelectionProvider.getSelectedEventAndRace();
-                // TODO can we be sure of single selection?
+                // Here we assume that single selection is enabled because the WindPanel creates a TrackedComposite with disabled multi selection.
                 final Triple<EventDAO, RegattaDAO, RaceDAO> eventAndRace = eventAndRaces.get(eventAndRaces.size()-1);
                 sailingService.setWind(new EventNameAndRaceName(eventAndRace.getA().name, eventAndRace.getC().name), wind, new AsyncCallback<Void>() {
                     @Override

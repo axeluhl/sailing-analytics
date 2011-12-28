@@ -150,12 +150,6 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public Wind getWind(Position p, TimePoint at) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
     public void setWindSource(WindSource windSource) {
         // TODO Auto-generated method stub
 
@@ -271,7 +265,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public Wind getEstimatedWindDirection(Position position, TimePoint timePoint) throws NoWindException {
+    public Wind getEstimatedWindDirection(Position position, TimePoint timePoint) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -314,13 +308,17 @@ public class MockedTrackedRace implements DynamicTrackedRace {
                     @Override
                     public void addRace(RaceDefinition race) {
                         // TODO Auto-generated method stub
-                        
                     }
 
                     @Override
                     public void removeRace(RaceDefinition raceDefinition) {
                         // TODO Auto-generated method stub
-                        
+                    }
+
+                    @Override
+                    public RaceDefinition getRaceByName(String raceName) {
+                        // TODO Auto-generated method stub
+                        return null;
                     }
                 };
             }
@@ -344,7 +342,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
             }
 
             @Override
-            public void removedTrackedRace(TrackedRace trackedRace) {
+            public void removeTrackedRace(TrackedRace trackedRace) {
                 // TODO Auto-generated method stub
                 
             }
@@ -415,6 +413,23 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
     @Override
     public List<Maneuver> getManeuvers(Competitor competitor, TimePoint from, TimePoint to) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public boolean raceIsKnownToStartUpwind() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public void setRaceIsKnownToStartUpwind(boolean raceIsKnownToStartUpwind) {
+        // TODO Auto-generated method stub
+    }
+
+    @Override
+    public Wind getWind(Position p, TimePoint at, WindSource... windSourcesToConsider) {
         // TODO Auto-generated method stub
         return null;
     }

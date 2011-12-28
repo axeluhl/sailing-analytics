@@ -16,13 +16,16 @@ import com.sap.sailing.domain.base.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.tracking.NoWindException;
+import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindSource;
+import com.sap.sailing.domain.tracking.WindTrack;
+import com.sap.sailing.domain.tracking.impl.TrackBasedEstimationWindTrackImpl;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
 import com.sap.sailing.util.Util;
 
-public class WindEstimationOnKielerWoche505Race2DataTest extends KielWeek2011BasedTest {
+public class WindEstimationOnKielerWoche505Race2DataTest extends OnlineTracTracBasedTest {
 
     public WindEstimationOnKielerWoche505Race2DataTest() throws MalformedURLException, URISyntaxException {
     }
@@ -31,13 +34,34 @@ public class WindEstimationOnKielerWoche505Race2DataTest extends KielWeek2011Bas
     public void setUp() throws MalformedURLException, IOException, InterruptedException, URISyntaxException {
         super.setUp();
         super.setUp("event_20110609_KielerWoch",
-                /* raceId */ "357c700a-9d9a-11e0-85be-406186cbf87c", new ReceiverType[] { ReceiverType.MARKPASSINGS, ReceiverType.RACECOURSE, ReceiverType.RAWPOSITIONS });
-        KielWeek2011BasedTest.fixApproximateMarkPositionsForWindReadOut(getTrackedRace());
+        /* raceId */"357c700a-9d9a-11e0-85be-406186cbf87c", new ReceiverType[] { ReceiverType.MARKPASSINGS,
+                ReceiverType.RACECOURSE, ReceiverType.RAWPOSITIONS });
+        OnlineTracTracBasedTest.fixApproximateMarkPositionsForWindReadOut(getTrackedRace());
         getTrackedRace().setWindSource(WindSource.WEB);
         getTrackedRace().recordWind(new WindImpl(/* position */ null, MillisecondsTimePoint.now(),
                 new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(70))), WindSource.WEB);
     }
     
+    /**
+     * Checks that the {@link TrackBasedEstimationWindTrackImpl} data structure works. It does so by comparing the
+     * results obtained from such a track with the results of immediately calling
+     * {@link TrackedRace#getEstimatedWindDirection(com.sap.sailing.domain.base.Position, TimePoint)}. The results
+     * may not accurately equal each other because the track may consider more estimation values before and after
+     * the time point for which the estimation is requested.
+     */
+    @Test
+    public void testSimpleWindEstimationThroughEstimationTrack() throws NoWindException {
+        // at this point in time, most boats are already going upwind again, and Köchlin, Neulen and Findel are tacking,
+        // hence have a direction change.
+        TimePoint middle = new MillisecondsTimePoint(1308839492322l);
+        TrackBasedEstimationWindTrackImpl estimatedWindTrack = new TrackBasedEstimationWindTrackImpl(getTrackedRace(),
+                WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND);
+        Wind estimatedWindDirection = getTrackedRace().getEstimatedWindDirection(/* position */ null, middle);
+        assertNotNull(estimatedWindDirection);
+        Wind estimationBasedOnTrack = estimatedWindTrack.getEstimatedWind(null, middle);
+        assertEquals(estimatedWindDirection.getFrom().getDegrees(), estimationBasedOnTrack.getFrom().getDegrees(), 3.);
+    }
+
     @Test
     public void testSetUp() {
         assertNotNull(getTrackedRace());

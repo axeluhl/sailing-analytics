@@ -20,8 +20,6 @@ public interface DynamicTrackedRace extends TrackedRace {
      */
     DynamicGPSFixTrack<Buoy, GPSFix> getOrCreateTrack(Buoy buoy);
 
-    void addListener(RaceChangeListener<Competitor> listener);
-    
     // TODO need another listener protocol for general changes in ranking and leg completion
 
     /**
@@ -45,4 +43,12 @@ public interface DynamicTrackedRace extends TrackedRace {
     void setMillisecondsOverWhichToAverageWind(long millisecondsOverWhichToAverageWind);
     
     DynamicTrackedEvent getTrackedEvent();
+
+    void setWindSource(WindSource windSource);
+
+    /**
+     * If and only if <code>raceIsKnownToStartUpwind</code> is <code>true</code>, this tracked race is allowed to use
+     * the start leg's direction as a fallback for estimating the wind direction.
+     */
+    void setRaceIsKnownToStartUpwind(boolean raceIsKnownToStartUpwind);
 }

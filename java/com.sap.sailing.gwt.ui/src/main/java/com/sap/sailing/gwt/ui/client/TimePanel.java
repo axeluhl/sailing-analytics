@@ -26,7 +26,7 @@ public class TimePanel extends FormPanel implements TimeListener, PlayStateListe
     private final DoubleBox delayBox;
     private boolean delayBoxHasFocus;
     private final Label timeLabel;
-    
+
     public TimePanel(StringConstants stringConstants, Timer timer) {
         this.timer = timer;
         timer.addTimeListener(this);
@@ -108,7 +108,7 @@ public class TimePanel extends FormPanel implements TimeListener, PlayStateListe
         vp.add(slider);
         setWidget(vp);
     }
-    
+
     @Override
     public void timeChanged(Date time) {
         long t = time.getTime();
@@ -120,7 +120,7 @@ public class TimePanel extends FormPanel implements TimeListener, PlayStateListe
         slider.setTitle(new Date((long) slider.getValue()).toString());
         timeLabel.setText(time.toString());
         if (!delayBoxHasFocus) {
-            delayBox.setValue((double) (timer.getDelay()/1000));
+            delayBox.setValue((double) (timer.getDelay() / 1000));
         }
     }
 
@@ -149,5 +149,5 @@ public class TimePanel extends FormPanel implements TimeListener, PlayStateListe
     public void playStateChanged(boolean isPlaying) {
         playPauseButton.setText(isPlaying ? "||" : ">");
     }
-    
+
 }

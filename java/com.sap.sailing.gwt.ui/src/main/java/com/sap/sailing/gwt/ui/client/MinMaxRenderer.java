@@ -1,0 +1,110 @@
+package com.sap.sailing.gwt.ui.client;
+
+import java.util.Collection;
+import java.util.Comparator;
+
+import com.google.gwt.cell.client.Cell.Context;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.sap.sailing.gwt.ui.shared.LeaderboardRowDAO;
+
+/**
+ * Renders the values and the percentage bar of the {@link LegDetailColumn} and {@link ManeuverCountRaceColumn}.
+ * It is used to update the minimum and maximum values of the columns, and to render the column content.
+ * 
+ * @author Fabian Schwarz-Fritz
+ * 
+ */
+public class MinMaxRenderer {
+    private HasStringAndDoubleValue valueProvider;
+    private Comparator<LeaderboardRowDAO> comparator;
+    private Double minimumValue;
+    private Double maximumValue;
+
+    /**
+     * Renders the value and the percentage bar of the columns {@link LegDetailColumn} and
+     * {@link ManeuverCountRaceColumn}.
+     * 
+     * @param valueProvider
+     *            Gets the String value of a {@link LeaderboardRowDAO}.
+     * @param comparator
+     *            The comparator to update the minimum and maximum values.
+     */
+    public MinMaxRenderer(HasStringAndDoubleValue valueProvider, Comparator<LeaderboardRowDAO> comparator) {
+        this.valueProvider = valueProvider;
+        this.comparator = comparator;
+    }
+
+    /**
+     * Renders the value of a {@link LeaderboardRowDAO}.
+     * 
+     * @param title
+     *            tool tip title to display; if <code>null</code>, no tool tip will be rendered
+     */
+    public void render(Context context, LeaderboardRowDAO row, String title, SafeHtmlBuilder sb) {
+        int percent = getPercentage(row);
+        String stringValue = valueProvider.getStringValueToRender(row);
+        stringValue = stringValue == null ? "" : stringValue;
+        sb.appendHtmlConstant(
+                "<div " + (title == null ? "" : "title=\"" + title + "\" ")
+                        + "style=\"left: 0px; background-image: url(/images/greyBar.png); "
+                        + " background-position: left; background-repeat: no-repeat; background-size: " + percent
+                        + "% 25px; \">").appendEscaped(stringValue).appendHtmlConstant("</div>");
+    }
+
+    /**
+     * Gets the percentage of a {@link LeaderboardRowDAO}. If no minimum or maximum value was set by calling
+     * {@link MinMaxRenderer#updateMinMax(Collection)} before zero is returned.
+     * 
+     * @param row
+     *            The row to get the percentage for.
+     */
+    private int getPercentage(LeaderboardRowDAO row) {
+        int percentage = 0;
+        Double value = valueProvider.getDoubleValue(row);
+        if (value != null) {
+            if (value != null && getMinimumDouble() != null && getMaximumDouble() != null) {
+                int minBarLength = Math.abs(getMinimumDouble()) < 0.01 ? 0 : 10;
+                percentage = (int) (minBarLength + (100. - minBarLength) * (value - getMinimumDouble())
+                        / (getMaximumDouble() - getMinimumDouble()));
+            }
+
+        }
+        return percentage;
+
+    }
+
+    private Double getMinimumDouble() {
+        return minimumValue;
+    }
+
+    private Double getMaximumDouble() {
+        return maximumValue;
+    }
+
+    /**
+     * Updates the {@link MinMaxRenderer#minimumValue} and {@link MinMaxRenderer#maximumValue}.
+     * 
+     * @param values
+     *            The values of {@link LeaderboardRowDAO}s to determine the minimum and maximum values for.
+     */
+    public void updateMinMax(Collection<LeaderboardRowDAO> values) {
+        LeaderboardRowDAO minimumRow = null;
+        LeaderboardRowDAO maximumRow = null;
+        for (LeaderboardRowDAO row : values) {
+            if (valueProvider.getDoubleValue(row) != null
+                    && (minimumRow == null || comparator.compare(minimumRow, row) > 0)) {
+                minimumRow = row;
+            }
+            if (valueProvider.getDoubleValue(row) != null
+                    && (maximumRow == null || comparator.compare(maximumRow, row) < 0)) {
+                maximumRow = row;
+            }
+        }
+        if (minimumRow != null) {
+            minimumValue = valueProvider.getDoubleValue(minimumRow);
+        }
+        if (maximumRow != null) {
+            maximumValue = valueProvider.getDoubleValue(maximumRow);
+        }
+    }
+}

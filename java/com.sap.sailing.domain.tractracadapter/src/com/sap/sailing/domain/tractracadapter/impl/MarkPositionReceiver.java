@@ -10,6 +10,8 @@ import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
+import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
+import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.TrackedEvent;
@@ -39,45 +41,16 @@ import com.tractrac.clientmodule.data.ICallbackData;
 public class MarkPositionReceiver extends AbstractReceiverWithQueue<ControlPoint, ControlPointPositionData, Boolean> {
     private static final Logger logger = Logger.getLogger(MarkPositionReceiver.class.getName());
     
-    private TrackedRace trackedRace;
-    private final com.tractrac.clientmodule.Event tractracEvent;
     private int received;
     
-    public MarkPositionReceiver(final TrackedEvent trackedEvent, com.tractrac.clientmodule.Event tractracEvent, final DomainFactory domainFactory) {
-        super(domainFactory);
-        this.tractracEvent = tractracEvent;
+    public MarkPositionReceiver(final DynamicTrackedEvent trackedEvent, com.tractrac.clientmodule.Event tractracEvent, final DomainFactory domainFactory) {
+        super(domainFactory, tractracEvent, trackedEvent);
         // assumption: there is currently only one race per TracTrac Event object
         if (tractracEvent.getRaceList().isEmpty()) {
             throw new IllegalArgumentException("Can't receive mark positions from event "+tractracEvent.getName()+" that has no race");
         }
-        if (tractracEvent.getRaceList().size() > 1) {
-            logger.warning("Received event "+tractracEvent.getName()+" that has more than one race ("+tractracEvent.getRaceList().size()+")");
-        }
-        final Race race = tractracEvent.getRaceList().iterator().next();
-        new Thread("MarkPositionReceiver waiting for RaceDefinition for "+race.getName()) {
-            public void run() {
-                RaceDefinition raceDefinition = domainFactory.getAndWaitForRaceDefinition(race);
-                // the following call blocks until a tracked race for the race definition was entered into the tracked event
-                TrackedRace blockingTrackedRace = trackedEvent.getTrackedRace(raceDefinition);
-                synchronized(MarkPositionReceiver.this) {
-                    trackedRace = blockingTrackedRace;
-                    MarkPositionReceiver.this.notifyAll();
-                }
-            }
-        }.start();
     }
     
-    private synchronized TrackedRace getTrackedRaceBlocking() {
-        while (trackedRace == null) {
-            try {
-                wait();
-            } catch (InterruptedException e) {
-                logger.warning("Interrupted wait for trackedRace: "+e.getMessage()+". Continuing to wait.");
-            }
-        }
-        return trackedRace;
-    }
-
     /**
      * The listeners returned will, when added to a controller, receive events about the
      * position changes of marks during a race. Receiving such an event updates the Buoy's
@@ -87,7 +60,7 @@ public class MarkPositionReceiver extends AbstractReceiverWithQueue<ControlPoint
     @Override
     public Iterable<TypeController> getTypeControllersAndStart() {
         List<TypeController> result = new ArrayList<TypeController>();
-        TypeController controlPointListener = ControlPointPositionData.subscribe(tractracEvent,
+        TypeController controlPointListener = ControlPointPositionData.subscribe(getTracTracEvent(),
                 new ICallbackData<ControlPoint, ControlPointPositionData>() {
                     @Override
                     public void gotData(ControlPoint controlPoint, ControlPointPositionData record, boolean isLiveData) {
@@ -108,9 +81,16 @@ public class MarkPositionReceiver extends AbstractReceiverWithQueue<ControlPoint
             }
         }
         Buoy buoy = getDomainFactory().getBuoy(event.getA(), event.getB());
-        // FIXME during getTrackedRaceBlocking it seems as if trackedRace gets assigned a new, invalid instance
-        ((DynamicGPSFixTrack<Buoy, GPSFix>) getTrackedRaceBlocking().getOrCreateTrack(buoy)).addGPSFix(getDomainFactory()
-                .createGPSFixMoving(event.getB()));
+        for (Race tractracRace : getTracTracEvent().getRaceList()) {
+            DynamicTrackedRace trackedRace = getTrackedRace(tractracRace);
+            if (trackedRace != null) {
+                ((DynamicGPSFixTrack<Buoy, GPSFix>) trackedRace.getOrCreateTrack(buoy))
+                        .addGPSFix(getDomainFactory().createGPSFixMoving(event.getB()));
+            } else {
+                logger.warning("Couldn't find tracked race for race " + tractracRace.getName()
+                        + ". Dropping mark position event " + event);
+            }
+        }
     }
 
 }

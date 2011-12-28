@@ -17,13 +17,14 @@
   <!-- Google Maps API -->
   <inherits name='com.google.gwt.maps.GoogleMaps' />
   
-  <!-- Google Visualization API -->
-  <inherits name='com.google.gwt.visualization.Visualization'/>
+  <!-- Flot-Gwt API -->
+  <inherits name='ca.nanometrics.gflot.GFlot'/>
   
   <!-- Phoenix Stuff -->
   <inherits name='com.sap.ui.commons.Module' />
   
   <!-- Other module inherits                                      -->
+  <inherits name="com.sap.sailing.server.SailingServer" />
 
   <!-- Specify the app entry point class.                         -->
   <entry-point class='com.sap.sailing.gwt.ui.client.LeaderboardEditPage'/>

@@ -52,5 +52,4 @@ public class RankGainColumn extends LegDetailColumn<Integer, Integer> {
             }
         }
     }
-
 }

@@ -4,19 +4,34 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+
+import ca.nanometrics.gflot.client.Axis;
+import ca.nanometrics.gflot.client.PlotItem;
+import ca.nanometrics.gflot.client.PlotModelStrategy;
+import ca.nanometrics.gflot.client.PlotPosition;
+import ca.nanometrics.gflot.client.PlotWithOverview;
+import ca.nanometrics.gflot.client.PlotWithOverviewModel;
+import ca.nanometrics.gflot.client.event.PlotHoverListener;
+import ca.nanometrics.gflot.client.event.SelectionListener;
+import ca.nanometrics.gflot.client.jsni.Plot;
+import ca.nanometrics.gflot.client.options.AxisOptions;
+import ca.nanometrics.gflot.client.options.GridOptions;
+import ca.nanometrics.gflot.client.options.LegendOptions;
+import ca.nanometrics.gflot.client.options.LineSeriesOptions;
+import ca.nanometrics.gflot.client.options.PlotOptions;
+import ca.nanometrics.gflot.client.options.PointsSeriesOptions;
+import ca.nanometrics.gflot.client.options.SelectionOptions;
+import ca.nanometrics.gflot.client.options.TickFormatter;
 
 import com.google.gwt.cell.client.ActionCell;
 import com.google.gwt.cell.client.ActionCell.Delegate;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.Handler;
@@ -26,7 +41,6 @@ import com.google.gwt.user.cellview.client.ColumnSortList.ColumnSortInfo;
 import com.google.gwt.user.cellview.client.IdentityColumn;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.Grid;
@@ -35,21 +49,21 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sailing.gwt.ui.shared.EventDAO;
-import com.sap.sailing.gwt.ui.shared.EventNameAndRaceName;
 import com.sap.sailing.gwt.ui.shared.RaceDAO;
 import com.sap.sailing.gwt.ui.shared.RegattaDAO;
 import com.sap.sailing.gwt.ui.shared.Triple;
 import com.sap.sailing.gwt.ui.shared.WindDAO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDAO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDAO;
+import com.sap.sailing.server.api.EventNameAndRaceName;
 
-public class WindPanel extends FormPanel implements EventDisplayer, RaceSelectionProvider, WindShower {
+public class WindPanel extends FormPanel implements EventDisplayer, WindShower, RaceSelectionChangeListener {
     private static final String WEB_WIND_SOURCE_NAME = "WEB";
     private final SailingServiceAsync sailingService;
     private final ErrorReporter errorReporter;
-    private EventRefresher eventRefresher;
     private final Grid grid;
     private final StringConstants stringConstants;
     private final WindSettingPanel windSettingPanel;
@@ -60,30 +74,32 @@ public class WindPanel extends FormPanel implements EventDisplayer, RaceSelectio
     private final TextColumn<WindDAO> windDirectionInDegColumn;
     private final TextColumn<WindDAO> dampenedSpeedInKnotsColumn;
     private final TextColumn<WindDAO> dampenedWindDirectionInDegColumn;
-    private final Set<RaceSelectionChangeListener> raceSelectionChangeListeners;
-    private final RaceTreeView trackedRacesTree;
+    private final TrackedEventsComposite trackedEventsComposite;
     private final ListBox windSourceSelection;
     private final Map<String, ListDataProvider<WindDAO>> windLists;
     private final CheckBox showEstimatedWindBox;
+    private final CheckBox raceIsKnownToStartUpwindBox;
+    private final Widget stripChart;
+    private final DateTimeFormat dateFormat;
 
-    public WindPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter, EventRefresher eventRefresher, StringConstants stringConstants) {
+    public WindPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
+            EventRefresher eventRefresher, StringConstants stringConstants) {
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
-        this.eventRefresher = eventRefresher;
         this.stringConstants = stringConstants;
-        raceSelectionChangeListeners = new HashSet<RaceSelectionChangeListener>();
+        dateFormat = DateTimeFormat.getFormat("HH:mm:ss");
         windLists = new HashMap<String, ListDataProvider<WindDAO>>();
         windSourceSelection = new ListBox();
         windSourceSelection.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
-                setWindSource();
+                setWindSource(/* runOnSuccess */ null);
             }
         });
         removeColumn = new IdentityColumn<WindDAO>(new ActionCell<WindDAO>(stringConstants.remove(), new Delegate<WindDAO>() {
             @Override
             public void execute(final WindDAO wind) {
-                List<Triple<EventDAO, RegattaDAO, RaceDAO>> eventAndRaces = getSelectedEventAndRace();
+                List<Triple<EventDAO, RegattaDAO, RaceDAO>> eventAndRaces = trackedEventsComposite.getSelectedEventAndRace();
                 final Triple<EventDAO, RegattaDAO, RaceDAO> eventAndRace = eventAndRaces.get(eventAndRaces.size()-1);
                 sailingService.removeWind(new EventNameAndRaceName(eventAndRace.getA().name, eventAndRace.getC().name), wind, new AsyncCallback<Void>() {
                     @Override
@@ -130,42 +146,154 @@ public class WindPanel extends FormPanel implements EventDisplayer, RaceSelectio
                 return ""+object.dampenedTrueWindFromDeg;
             }
         };
-        grid = new Grid(3, 2); // first row: event/race selection; second row: wind source selection; third row: wind display
-        trackedRacesTree = new RaceTreeView(stringConstants, /* multiselection */ false);
-        trackedRacesTree.addRaceSelectionChangeListener(new RaceSelectionChangeListener() {
-            @Override
-            public void onRaceSelectionChange(List<Triple<EventDAO, RegattaDAO, RaceDAO>> selectedRaces) {
-                clearOrShowWindBasedOnRaceSelection(selectedRaces);
-                fireRaceSelectionChanged(selectedRaces);
-            }
-
-        });
-        grid.setWidget(0, 0, trackedRacesTree);
-        Button btnRefresh = new Button(stringConstants.refresh());
-        btnRefresh.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                WindPanel.this.eventRefresher.fillEvents();
-            }
-        });
-        grid.setWidget(0, 1, btnRefresh);
-        windSettingPanel = new WindSettingPanel(sailingService, errorReporter, this, this);
+        grid = new Grid(4, 2); // first row: event/race selection; second row: wind source selection; third row: wind display
+        trackedEventsComposite = new TrackedEventsComposite(sailingService, errorReporter, eventRefresher, stringConstants, false);
+        trackedEventsComposite.addRaceSelectionChangeListener(this);
+        grid.setWidget(0, 0, trackedEventsComposite);
+        windSettingPanel = new WindSettingPanel(sailingService, errorReporter, trackedEventsComposite, this);
+        grid.setWidget(0, 1, windSettingPanel);
         HorizontalPanel windSourceSelectionPanel = new HorizontalPanel();
         windSourceSelectionPanel.setSpacing(10);
         windSourceSelectionPanel.add(new Label(stringConstants.windSource()));
         windSourceSelectionPanel.add(windSourceSelection);
+        raceIsKnownToStartUpwindBox = new CheckBox(stringConstants.raceIsKnownToStartUpwind());
+        windSourceSelectionPanel.add(raceIsKnownToStartUpwindBox);
+        raceIsKnownToStartUpwindBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<Boolean> event) {
+                setWindSource(/* runOnSuccess */ new Runnable() {
+                    public void run() {
+                        clearOrShowWindBasedOnRaceSelection(trackedEventsComposite.getSelectedEventAndRace());
+                    }
+                });
+            }
+        });
         showEstimatedWindBox = new CheckBox(stringConstants.showEstimatedWind());
         windSourceSelectionPanel.add(showEstimatedWindBox);
         showEstimatedWindBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
             @Override
             public void onValueChange(ValueChangeEvent<Boolean> event) {
-                clearOrShowWindBasedOnRaceSelection(trackedRacesTree.getSelectedEventAndRace());
+                clearOrShowWindBasedOnRaceSelection(trackedEventsComposite.getSelectedEventAndRace());
             }
         });
         grid.setWidget(1, 0, windSourceSelectionPanel);
-        grid.setWidget(2, 1, windSettingPanel);
+        stripChart = createStripChart();
+        grid.setWidget(2, 0, stripChart);
         grid.getCellFormatter().setVerticalAlignment(1, 1, HasVerticalAlignment.ALIGN_TOP);
         this.setWidget(grid);
+    }
+
+    private Widget createStripChart() {
+        PlotWithOverviewModel model = new PlotWithOverviewModel(PlotModelStrategy.defaultStrategy());
+        PlotOptions plotOptions = new PlotOptions();
+        plotOptions.setDefaultLineSeriesOptions(new LineSeriesOptions().setLineWidth(1).setShow(true));
+        plotOptions.setDefaultPointsOptions(new PointsSeriesOptions().setShow(false));
+        plotOptions.setDefaultShadowSize(2);
+        AxisOptions hAxisOptions = new AxisOptions();
+        hAxisOptions.setTickFormatter(new TickFormatter() {
+            @Override
+            public String formatTickValue(double tickValue, Axis axis) {
+                return dateFormat.format(new Date((long) tickValue));
+            }
+        });
+        plotOptions.setXAxisOptions(hAxisOptions);
+        plotOptions.setLegendOptions(new LegendOptions().setShow(false));
+        plotOptions.setGridOptions(new GridOptions().setHoverable(true).setMouseActiveRadius(5).setAutoHighlight(true));
+        plotOptions.setSelectionOptions(new SelectionOptions().setDragging(true).setMode("x")); // select along x-axis only
+        /*
+        for (int i = 0; i <  competitorsAndTimePointsDAO.getCompetitor().length; i++){
+                SeriesHandler series = model.addSeries(""+i, getColorByID(i));
+                series.setOptions(SeriesType.LINES, new LineSeriesOptions().setLineWidth(2.5).setShow(true));
+                series.setOptions(SeriesType.POINTS, new PointsSeriesOptions().setLineWidth(0).setShow(false));
+                series.setVisible(false);
+                seriesID.add(series);
+                series = model.addSeries(i + " passed mark", getColorByID(i));
+                series.setOptions(SeriesType.LINES, new LineSeriesOptions().setLineWidth(0).setShow(false));
+                series.setOptions(SeriesType.POINTS, new PointsSeriesOptions().setLineWidth(3).setShow(true));
+                series.setVisible(false);
+                markSeriesID.add(series);
+        }
+        */
+        final PlotWithOverview plot = new PlotWithOverview(model, plotOptions) {
+            @Override
+            protected void onLoad() {
+                super.onLoad();
+                // onLoad is called immediately after a widget becomes attached to the browser's document.
+                // Use this time point to ask the chart to redraw
+                redraw();
+            }
+        };
+        // add hover listener
+        plot.addHoverListener(new PlotHoverListener() {
+            public void onPlotHover(Plot plot, PlotPosition position, PlotItem item) {
+                /*
+                CompetitorDAO competitor = competitorID.get(seriesID.indexOf(item.getSeries()));
+                if (item != null && competitor != null) {
+                        if (item.getSeries().getLabel().toLowerCase().contains("mark")){
+                                selectedPointLabel.setText(competitor.name + " passed " + markPassingBuoyName.get(competitor.id + (long) item.getDataPoint().getX()) +" at " + dateFormat.format(new Date((long) item.getDataPoint().getX())));
+                        }
+                        else {
+                                String unit = "";
+                                switch (dataToShow){
+                                case CURRENT_SPEED_OVER_GROUND_IN_KNOTS:
+                                        unit = stringConstants.currentSpeedOverGroundInKnotsUnit();
+                                        break;
+                                case DISTANCE_TRAVELED:
+                                        unit = stringConstants.distanceInMetersUnit();
+                                        break;
+                                case GAP_TO_LEADER_IN_SECONDS:
+                                        unit = stringConstants.gapToLeaderInSecondsUnit();
+                                        break;
+                                case VELOCITY_MADE_GOOD_IN_KNOTS:
+                                        unit = stringConstants.velocityMadeGoodInKnotsUnit();
+                                        break;
+                                case WINDWARD_DISTANCE_TO_OVERALL_LEADER:
+                                        unit = stringConstants.windwardDistanceToGoInMetersUnit();
+                                }
+                                String decimalPlaces = "";
+                                for (int i = 0; i < dataToShow.getPrecision(); i++){
+                                        if (i == 0){
+                                                decimalPlaces += ".";
+                                        }
+                                        decimalPlaces += "0";
+                                }
+                                NumberFormat numberFormat = NumberFormat.getFormat("0" +decimalPlaces);
+                                selectedPointLabel.setText(competitor.name + " at " + dateFormat.format(new Date((long) item.getDataPoint().getX()))
+                                + ": " + numberFormat.format(item.getDataPoint().getY()) + unit);
+                        }
+                } else {
+                    selectedPointLabel.setText(stringConstants.noSelection());
+                }
+                */
+            }
+        }, true);
+        plot.addSelectionListener(new SelectionListener() {
+
+            public void selected(double x1, double y1, double x2, double y2) {
+                /* TODO Remove not visible buoys from the series when user is zooming in or add them if he is zooming out.
+                for (CompetitorDAO competitor : competitorsAndTimePointsDAO.getCompetitor()){
+                        long[] markPassingTimes = competitorsAndTimePointsDAO.getMarkPassings(competitor);
+                    Double[] markPassingValues = chartData.getMarkPassings(competitor);
+                    SeriesHandler markSeries = getCompetitorMarkPassingSeries(competitor);
+                    markSeries.clear();
+                    int visibleMarkPassings = 0;
+                    for (int j = 0; j < markPassingTimes.length; j++){
+                        if (markPassingValues[j] != null && markPassingTimes[j] > x1 && markPassingTimes[j] < x2) {
+                            markSeries.add(new DataPoint(markPassingTimes[j],markPassingValues[j]));
+                            visibleMarkPassings++;
+                        }
+                    }
+                    if (visibleMarkPassings == 0){
+                        markSeries.setVisible(false);
+                    }
+                }*/
+                plot.setLinearSelection(x1, x2);
+            }
+        });
+//        plot.setHeight(height);
+//        plot.setWidth(width);
+        plot.setOverviewHeight(60);
+        return plot;
     }
 
     private void clearOrShowWindBasedOnRaceSelection(List<Triple<EventDAO, RegattaDAO, RaceDAO>> selectedRaces) {
@@ -178,16 +306,16 @@ public class WindPanel extends FormPanel implements EventDisplayer, RaceSelectio
 
     @Override
     public void fillEvents(List<EventDAO> result) {
-        trackedRacesTree.fillEvents(result);
+        trackedEventsComposite.fillEvents(result);
     }
 
     @Override
     public void showWind(final EventDAO event, final RaceDAO race) {
-        Date now = new Date();
         sailingService.getWindInfo(new EventNameAndRaceName(event.name, race.name),
-                // TODO what about the time interval?
-                                  new Date(now.getTime()-60000 /* one minute */), new Date(/* toAsMilliseconds */),
-                showEstimatedWindBox.getValue(), new AsyncCallback<WindInfoForRaceDAO>() {
+        // TODO Time interval should be determined by a selection in the chart but be at most 60s. See bug #121.
+                null, null, // use race start and time of newest event as default time period
+                null, // retrieve data on all wind sources
+                new AsyncCallback<WindInfoForRaceDAO>() {
                     @Override
                     public void onSuccess(WindInfoForRaceDAO result) {
                         if (result != null) {
@@ -236,9 +364,10 @@ public class WindPanel extends FormPanel implements EventDisplayer, RaceSelectio
     }
 
     private void showWindForRace(WindInfoForRaceDAO result) {
-        grid.setWidget(2, 0, null);
+        raceIsKnownToStartUpwindBox.setValue(result.raceIsKnownToStartUpwind);
+        grid.setWidget(3, 0, null);
         VerticalPanel windDisplay = new VerticalPanel();
-        grid.setWidget(2, 0, windDisplay);
+        grid.setWidget(3, 0, windDisplay);
         for (Map.Entry<String, WindTrackInfoDAO> e : result.windTrackInfoByWindSourceName.entrySet()) {
             Label windSourceLabel = new Label(stringConstants.windSource()+": "+e.getKey()+
                     ", "+stringConstants.dampeningInterval()+" "+e.getValue().dampeningIntervalInMilliseconds+"ms");
@@ -324,34 +453,13 @@ public class WindPanel extends FormPanel implements EventDisplayer, RaceSelectio
         return result;
     }
 
-    @Override
-    public List<Triple<EventDAO, RegattaDAO, RaceDAO>> getSelectedEventAndRace() {
-        return trackedRacesTree.getSelectedEventAndRace();
-    }
-
-    @Override
-    public void addRaceSelectionChangeListener(RaceSelectionChangeListener listener) {
-        raceSelectionChangeListeners.add(listener);
-    }
-
-    @Override
-    public void removeRaceSelectionChangeListener(RaceSelectionChangeListener listener) {
-        raceSelectionChangeListeners.remove(listener);
-    }
-
-    private void fireRaceSelectionChanged(List<Triple<EventDAO, RegattaDAO, RaceDAO>> selectedRaces) {
-        for (RaceSelectionChangeListener listener : raceSelectionChangeListeners) {
-            listener.onRaceSelectionChange(selectedRaces);
-        }
-    }
-
-    private void setWindSource() {
-        List<Triple<EventDAO, RegattaDAO, RaceDAO>> selection = trackedRacesTree.getSelectedEventAndRace();
+    private void setWindSource(final Runnable runOnSuccess) {
+        List<Triple<EventDAO, RegattaDAO, RaceDAO>> selection = trackedEventsComposite.getSelectedEventAndRace();
         if (selection != null && !selection.isEmpty()) {
             final Triple<EventDAO, RegattaDAO, RaceDAO> selectedRace = selection.get(0);
             final String windSourceName = windSourceSelection.getItemText(windSourceSelection.getSelectedIndex());
             sailingService.setWindSource(new EventNameAndRaceName(selectedRace.getA().name, selectedRace.getC().name),
-                    windSourceName, new AsyncCallback<Void>() {
+                    windSourceName, raceIsKnownToStartUpwindBox.getValue(), new AsyncCallback<Void>() {
                         @Override
                         public void onFailure(Throwable caught) {
                             errorReporter.reportError(WindPanel.this.stringConstants.errorWhileTryingToSetWindSourceForRace()+
@@ -361,8 +469,20 @@ public class WindPanel extends FormPanel implements EventDisplayer, RaceSelectio
                         }
                         @Override
                         public void onSuccess(Void result) {
+                            if (runOnSuccess != null) {
+                                runOnSuccess.run();
+                            }
                         }
                     });
         }
+    }
+
+    @Override
+    public void onRaceSelectionChange(List<Triple<EventDAO, RegattaDAO, RaceDAO>> selectedRaces) {
+        clearOrShowWindBasedOnRaceSelection(selectedRaces);
+    }
+    
+    public List<Triple<EventDAO, RegattaDAO, RaceDAO>> getSelectedRaces(){
+        return trackedEventsComposite.getSelectedEventAndRace();
     }
 }

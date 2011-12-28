@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.client;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -13,11 +14,9 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
-import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
-import com.google.gwt.text.client.DateTimeFormatRenderer;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
+import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.Handler;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
@@ -25,7 +24,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.CheckBox;
-import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -53,9 +51,7 @@ import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDAO;
  * @author Axel Uhl (D043530)
  * 
  */
-public class SwissTimingEventManagementPanel extends FormPanel implements EventDisplayer {
-    private final SailingServiceAsync sailingService;
-    private final ErrorReporter errorReporter;
+public class SwissTimingEventManagementPanel extends AbstractEventManagementPanel {
     private final IntegerBox portIntegerbox;
     private final TextBox hostnameTextbox;
     private final TextBox filterEventsTextbox;
@@ -63,25 +59,19 @@ public class SwissTimingEventManagementPanel extends FormPanel implements EventD
     private final CellTable<SwissTimingRaceRecordDAO> raceTable;
     private final Map<String, SwissTimingConfigurationDAO> previousConfigurations;
     private final ListBox previousConfigurationsComboBox;
-    private final TrackedEventsComposite trackedEventsComposite;
-    private final EventRefresher eventRefresher;
     private final CheckBox canSendRequestsCheckbox;
-    private DateTimeFormatRenderer dateFormatter = new DateTimeFormatRenderer(DateTimeFormat.getFormat(PredefinedFormat.DATE_SHORT));
-    private DateTimeFormatRenderer timeFormatter = new DateTimeFormatRenderer(DateTimeFormat.getFormat(PredefinedFormat.TIME_LONG));
     private final List<SwissTimingRaceRecordDAO> availableSwissTimingRaces = new ArrayList<SwissTimingRaceRecordDAO>();
 
     public SwissTimingEventManagementPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
             EventRefresher eventRefresher, StringConstants stringConstants) {
-        
-        this.sailingService = sailingService;
+        super(sailingService, eventRefresher, errorReporter, stringConstants);
         this.errorReporter = errorReporter;
-        this.eventRefresher = eventRefresher;
 
         VerticalPanel mainPanel = new VerticalPanel();
         this.setWidget(mainPanel);
         mainPanel.setWidth("100%");
         
-        CaptionPanel captionPanelConnections = new CaptionPanel("Connections");
+        CaptionPanel captionPanelConnections = new CaptionPanel(stringConstants.connections());
         mainPanel.add(captionPanelConnections);
 
         VerticalPanel verticalPanel = new VerticalPanel();
@@ -92,8 +82,7 @@ public class SwissTimingEventManagementPanel extends FormPanel implements EventD
         verticalPanel.add(connectionsGrid);
         verticalPanel.setCellWidth(connectionsGrid, "100%");
         
-//        Label lblPredefined = new Label(stringConstants.trackedBefore() + ":");
-        Label lblPredefined = new Label("History of connections:");
+        Label lblPredefined = new Label(stringConstants.connections() +":");
         connectionsGrid.setWidget(0, 0, lblPredefined);
         
         previousConfigurations = new HashMap<String, SwissTimingConfigurationDAO>();
@@ -113,8 +102,7 @@ public class SwissTimingEventManagementPanel extends FormPanel implements EventD
         });
         fillConfigurations();
 
-//        Label lblTrackNewEvent = new Label(stringConstants.trackNewEvent());
-        Label lblTrackNewEvent = new Label("Define a new connection");
+        Label lblTrackNewEvent = new Label(stringConstants.defineNewConnection());
         connectionsGrid.setWidget(2, 0, lblTrackNewEvent);
         
         Label lblHostname = new Label(stringConstants.hostname() + ":");
@@ -130,16 +118,14 @@ public class SwissTimingEventManagementPanel extends FormPanel implements EventD
         portIntegerbox = new IntegerBox();
         connectionsGrid.setWidget(4, 1, portIntegerbox);
 
-        Label lblCanSendRequests = new Label("Can send requests:");
+        Label lblCanSendRequests = new Label(stringConstants.canSendRequests());
         connectionsGrid.setWidget(5, 0, lblCanSendRequests);
 
         canSendRequestsCheckbox = new CheckBox();
         canSendRequestsCheckbox.setValue(false);
         connectionsGrid.setWidget(5, 1, canSendRequestsCheckbox);
 
-        
-//        Button btnListRaces = new Button(stringConstants.listRaces());
-        Button btnListRaces = new Button("Connect and read races");
+        Button btnListRaces = new Button(stringConstants.connectAndReadRaces());
         connectionsGrid.setWidget(6, 1, btnListRaces);
         btnListRaces.addClickHandler(new ClickHandler() {
             @Override
@@ -171,7 +157,7 @@ public class SwissTimingEventManagementPanel extends FormPanel implements EventD
         racesSplitPanel.add(racesCaptionPanel);
         racesCaptionPanel.setWidth("50%");
 
-        CaptionPanel trackedRacesCaptionPanel = new CaptionPanel("Tracked Races");
+        CaptionPanel trackedRacesCaptionPanel = new CaptionPanel(stringConstants.trackedRaces());
         racesSplitPanel.add(trackedRacesCaptionPanel);
         trackedRacesCaptionPanel.setWidth("50%");
 
@@ -189,7 +175,7 @@ public class SwissTimingEventManagementPanel extends FormPanel implements EventD
         filterPanel.setSpacing(5);
         racesPanel.add(filterPanel);
         
-        Label lblFilterEvents = new Label("Filter races by name:");
+        Label lblFilterEvents = new Label(stringConstants.filterRacesByName() + ":");
         filterPanel.add(lblFilterEvents);
         filterPanel.setCellVerticalAlignment(lblFilterEvents, HasVerticalAlignment.ALIGN_MIDDLE);
         
@@ -197,21 +183,7 @@ public class SwissTimingEventManagementPanel extends FormPanel implements EventD
         filterEventsTextbox.addKeyUpHandler(new KeyUpHandler() {
             @Override
             public void onKeyUp(KeyUpEvent event) {
-                String text = filterEventsTextbox.getText();
-
-                raceList.getList().clear();
-                
-                if(text == null || text.isEmpty()) {
-                    raceList.getList().addAll(availableSwissTimingRaces);
-                } else {
-                    String textAsUppercase = text.toUpperCase();
-                    for(SwissTimingRaceRecordDAO dao: availableSwissTimingRaces) {
-                        if(dao.ID != null) {
-                            if(dao.ID.toUpperCase().contains(textAsUppercase))
-                                raceList.getList().add(dao);
-                        }
-                    }
-                }
+                fillRaceListFromAvailableRacesApplyingFilter(SwissTimingEventManagementPanel.this.filterEventsTextbox.getText());
             }
         });
         
@@ -241,7 +213,7 @@ public class SwissTimingEventManagementPanel extends FormPanel implements EventD
         Handler columnSortHandler = getRaceTableColumnSortHandler(raceList.getList(), raceNameColumn, raceStartTrackingColumn);
         raceTable.addColumnSortHandler(columnSortHandler);
 
-        Label lblTrackSettings = new Label("Track settings");
+        Label lblTrackSettings = new Label(stringConstants.trackSettings());
         trackPanel.add(lblTrackSettings);
         
         final CheckBox trackWindCheckbox = new CheckBox(stringConstants.trackWind());
@@ -253,17 +225,12 @@ public class SwissTimingEventManagementPanel extends FormPanel implements EventD
         declinationCheckbox.setWordWrap(false);
         declinationCheckbox.setValue(true);
         trackPanel.add(declinationCheckbox);
-        
-        trackedEventsComposite = new TrackedEventsComposite(sailingService, errorReporter, eventRefresher,
-                    stringConstants, /* multiselection */ true);
         trackedRacesPanel.add(trackedEventsComposite);
 
         HorizontalPanel racesButtonPanel = new HorizontalPanel();
         racesPanel.add(racesButtonPanel);
 
-        Button btnTrack = new Button("Start tracking");
-        
-//        Button btnTrack = new Button(stringConstants.btnTrack());
+        Button btnTrack = new Button(stringConstants.startTracking());
         racesButtonPanel.add(btnTrack);
         racesButtonPanel.setSpacing(10);
         btnTrack.addClickHandler(new ClickHandler() {
@@ -403,5 +370,21 @@ public class SwissTimingEventManagementPanel extends FormPanel implements EventD
     public void fillEvents(List<EventDAO> result) {
         trackedEventsComposite.fillEvents(result);
     }
-
+    
+    private void fillRaceListFromAvailableRacesApplyingFilter(String text) {
+        List<String> wordsToFilter = Arrays.asList(text.split(" "));
+        raceList.getList().clear();
+        if (text != null && !text.isEmpty()) {
+            for (SwissTimingRaceRecordDAO triple : availableSwissTimingRaces) {
+                boolean failed = textContainingStringsToCheck(wordsToFilter, triple.ID);
+                if (!failed) {
+                    raceList.getList().add(triple);
+                }
+            }
+        } else {
+            raceList.getList().addAll(availableSwissTimingRaces);
+        }
+        // now sort again according to selected criterion
+        ColumnSortEvent.fire(raceTable, raceTable.getColumnSortList());
+    }
 }
