@@ -30,8 +30,8 @@ of the /git/java folder.
 
 Target-Platform related projects
 --------------------------------
-com.sap.sailing.targetplatform -> contains the libraries, the p2 repository generation scripts and the target platform definitions (.target files)
-com.sap.sailing.targetplatform.features -> contains the corresponding feature.xml files for the target platfrom folders (required for the p2 repository generation)
+com.sap.sailing.targetplatform.base-> contains all files required to build a p2 repository for all library files defining the base target platform for the sailing project
+com.sap.sailing.targetplatform -> contains the p2 repository generation scripts and the target platform definitions (.target files)
 
 com.sap.sailing.feature -> contains the feature.xml for the race analysis project itself (required for the product build)
 com.sap.sailing.feature.runtime -> contains the feature.xml for additional runtime libraries which are not required for the source build (e.g. jetty.osgi bundle) 
@@ -45,9 +45,9 @@ Typical usecases for changing the target platform definition
 To add a new library which can not be found in any SAP repository you need to follow some steps.
 a) Check if the library is already OSGi-enabled (normally this means there is a manifest.mf in the META-INF folder of the jar file containing valid OSGi metadata.
 b) In case the library is not OSGi-enabled someone has to create such a OSGI-enabled version (ask the technical lead of the project)
-c) Add the library to an appropriate target folder in the project com.sap.sailing.targetplatform (e.g. target-base)
-d) Add an entry to the corresponding feature.xml in the project com.sap.sailing.targetplatform.features
-e) Rebuild the target platform by running the script createp2repo.sh 
+c) Add the library to an appropriate target folder in the project com.sap.sailing.targetplatform.base (e.g. target-base)
+d) Add an corresponding entry to the corresponding feature.xml in the project com.sap.sailing.targetplatform.base
+e) Rebuild the base target platform by running the script createLocalBaseP2repository.sh (com.sap.sailing.targetplatform/scripts)
 f) Reload the target platform in the IDE
 g) Submit the changes to the git repository
 
