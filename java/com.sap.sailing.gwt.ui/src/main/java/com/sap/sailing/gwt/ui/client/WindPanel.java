@@ -13,6 +13,8 @@ import ca.nanometrics.gflot.client.PlotModelStrategy;
 import ca.nanometrics.gflot.client.PlotPosition;
 import ca.nanometrics.gflot.client.PlotWithOverview;
 import ca.nanometrics.gflot.client.PlotWithOverviewModel;
+import ca.nanometrics.gflot.client.SeriesHandler;
+import ca.nanometrics.gflot.client.SeriesType;
 import ca.nanometrics.gflot.client.event.PlotHoverListener;
 import ca.nanometrics.gflot.client.event.SelectionListener;
 import ca.nanometrics.gflot.client.jsni.Plot;
@@ -81,12 +83,16 @@ public class WindPanel extends FormPanel implements EventDisplayer, WindShower, 
     private final CheckBox raceIsKnownToStartUpwindBox;
     private final Widget stripChart;
     private final DateTimeFormat dateFormat;
+    private final ColorMap<WindSource> colorMap;
+    private final Map<WindSource, SeriesHandler> stripChartSeries;
 
     public WindPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
             EventRefresher eventRefresher, StringConstants stringConstants) {
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.stringConstants = stringConstants;
+        this.colorMap = new ColorMap<WindSource>();
+        this.stripChartSeries = new HashMap<WindSource, SeriesHandler>();
         dateFormat = DateTimeFormat.getFormat("HH:mm:ss");
         windLists = new HashMap<WindSource, ListDataProvider<WindDAO>>();
         windSourceSelection = new ListBox();
@@ -200,20 +206,13 @@ public class WindPanel extends FormPanel implements EventDisplayer, WindShower, 
         plotOptions.setLegendOptions(new LegendOptions().setShow(false));
         plotOptions.setGridOptions(new GridOptions().setHoverable(true).setMouseActiveRadius(5).setAutoHighlight(true));
         plotOptions.setSelectionOptions(new SelectionOptions().setDragging(true).setMode("x")); // select along x-axis only
-        /*
-        for (int i = 0; i <  competitorsAndTimePointsDAO.getCompetitor().length; i++){
-                SeriesHandler series = model.addSeries(""+i, getColorByID(i));
-                series.setOptions(SeriesType.LINES, new LineSeriesOptions().setLineWidth(2.5).setShow(true));
-                series.setOptions(SeriesType.POINTS, new PointsSeriesOptions().setLineWidth(0).setShow(false));
-                series.setVisible(false);
-                seriesID.add(series);
-                series = model.addSeries(i + " passed mark", getColorByID(i));
-                series.setOptions(SeriesType.LINES, new LineSeriesOptions().setLineWidth(0).setShow(false));
-                series.setOptions(SeriesType.POINTS, new PointsSeriesOptions().setLineWidth(3).setShow(true));
-                series.setVisible(false);
-                markSeriesID.add(series);
+        for (WindSource windSource : WindSource.values()) {
+            SeriesHandler series = model.addSeries(""+windSource.name(), colorMap.getColorByID(windSource));
+            series.setOptions(SeriesType.LINES, new LineSeriesOptions().setLineWidth(2.5).setShow(true));
+            series.setOptions(SeriesType.POINTS, new PointsSeriesOptions().setLineWidth(0).setShow(false));
+            series.setVisible(false);
+            stripChartSeries.put(windSource, series);
         }
-        */
         final PlotWithOverview plot = new PlotWithOverview(model, plotOptions) {
             @Override
             protected void onLoad() {
@@ -312,7 +311,7 @@ public class WindPanel extends FormPanel implements EventDisplayer, WindShower, 
     @Override
     public void showWind(final EventDAO event, final RaceDAO race) {
         sailingService.getWindInfo(new EventNameAndRaceName(event.name, race.name),
-        // TODO Time interval should be determined by a selection in the chart but be at most 60s. See bug #121.
+        // TODO Time interval should be determined by a selection in the chart but be at most 60s. See bug #121. Consider incremental updates for new data only.
                 null, null, // use race start and time of newest event as default time period
                 null, // retrieve data on all wind sources
                 new AsyncCallback<WindInfoForRaceDAO>() {
