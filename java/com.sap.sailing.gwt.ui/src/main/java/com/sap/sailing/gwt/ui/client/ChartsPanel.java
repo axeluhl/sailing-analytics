@@ -310,7 +310,7 @@ public class ChartsPanel extends FormPanel {
                                     	else {
                                     		setCompetitorVisible(c, cb.getValue());
                                             if (competitorID.contains(c)){
-                                            	setLegendVisible(c,cb.getValue());
+                                            	setLegendVisible(c, cb.getValue());
                                             	getCompetitorSeries(c).setVisible(cb.getValue());
                                                 getCompetitorMarkPassingSeries(c).setVisible(cb.getValue());
                                             }
@@ -371,7 +371,7 @@ public class ChartsPanel extends FormPanel {
                     }
                     GWT.log("Update data time for " + competitor.name + ": " + (System.currentTimeMillis() - starttime));
                 }
-                setLegendVisible(competitor,isCompetitorVisible(competitor));
+                setLegendVisible(competitor, isCompetitorVisible(competitor));
                 compSeries.setVisible(isCompetitorVisible(competitor));
                 markSeries.setVisible(isCompetitorVisible(competitor));
                 series.remove(compSeries);
@@ -573,12 +573,10 @@ public class ChartsPanel extends FormPanel {
     	return markSeriesID.get(competitorID.indexOf(competitor));
     }
     
-    /** You can set, if the legend for a specific competitor should be shown or not.
-     * 
-     * @param competitor
-     * @param visible
+    /**
+     * Decide if the legend for a specific competitor should be shown or not.
      */
-    private void setLegendVisible(CompetitorDAO competitor, Boolean visible){
+    private void setLegendVisible(CompetitorDAO competitor, boolean visible) {
     	Widget label = competitorLabels.get(competitor);
     	if (label == null){
     		label = createCompetitorLabel(competitor.name, colorMap.getColorByID(competitorID.indexOf(competitor)));

@@ -79,7 +79,6 @@ public class WindPanel extends FormPanel implements EventDisplayer, WindShower, 
     private final TrackedEventsComposite trackedEventsComposite;
     private final ListBox windSourceSelection;
     private final Map<WindSource, ListDataProvider<WindDAO>> windLists;
-    private final CheckBox showEstimatedWindBox;
     private final CheckBox raceIsKnownToStartUpwindBox;
     private final PlotWithOverview stripChart;
     private final DateTimeFormat dateFormat;
@@ -172,14 +171,6 @@ public class WindPanel extends FormPanel implements EventDisplayer, WindShower, 
                         clearOrShowWindBasedOnRaceSelection(trackedEventsComposite.getSelectedEventAndRace());
                     }
                 });
-            }
-        });
-        showEstimatedWindBox = new CheckBox(stringConstants.showEstimatedWind());
-        windSourceSelectionPanel.add(showEstimatedWindBox);
-        showEstimatedWindBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-            @Override
-            public void onValueChange(ValueChangeEvent<Boolean> event) {
-                clearOrShowWindBasedOnRaceSelection(trackedEventsComposite.getSelectedEventAndRace());
             }
         });
         grid.setWidget(1, 0, windSourceSelectionPanel);
