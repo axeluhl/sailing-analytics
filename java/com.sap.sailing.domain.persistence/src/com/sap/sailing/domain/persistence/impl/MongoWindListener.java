@@ -3,11 +3,11 @@ package com.sap.sailing.domain.persistence.impl;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
+import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.tracking.TrackedEvent;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
-import com.sap.sailing.domain.tracking.WindSource;
 
 public class MongoWindListener implements com.sap.sailing.domain.tracking.WindListener {
     private final TrackedEvent trackedEvent;

@@ -1,4 +1,5 @@
-package com.sap.sailing.domain.tracking;
+package com.sap.sailing.domain.common;
+
 
 /**
  * Possible sources for wind data. Used to key and select between different {@link WindTrack}s. Literals
