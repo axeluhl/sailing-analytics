@@ -507,7 +507,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
 
     @Override
-    public WindInfoForRaceDAO getWindInfo(RaceIdentifier raceIdentifier, Date fromDate, Date toDate, Collection<String> windSources) {
+    public WindInfoForRaceDAO getWindInfo(RaceIdentifier raceIdentifier, Date fromDate, Date toDate, WindSource[] windSources) {
         WindInfoForRaceDAO result = null;
         TrackedRace trackedRace = getTrackedRace(raceIdentifier);
         if (trackedRace != null) {
@@ -519,24 +519,22 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             Map<WindSource, WindTrackInfoDAO> windTrackInfoDAOs = new HashMap<WindSource, WindTrackInfoDAO>();
             result.windTrackInfoByWindSource = windTrackInfoDAOs;
             if (from != null && to != null) {
-                for (WindSource windSource : WindSource.values()) {
-                    if (windSources == null || windSources.contains(windSource.name())) {
-                        WindTrackInfoDAO windTrackInfoDAO = new WindTrackInfoDAO();
-                        windTrackInfoDAO.windFixes = new ArrayList<WindDAO>();
-                        WindTrack windTrack = trackedRace.getWindTrack(windSource);
-                        windTrackInfoDAO.dampeningIntervalInMilliseconds = windTrack
-                                .getMillisecondsOverWhichToAverageWind();
-                        Iterator<Wind> windIter = windTrack.getFixesIterator(from, /* inclusive */true);
-                        while (windIter.hasNext()) {
-                            Wind wind = windIter.next();
-                            if (wind.getTimePoint().compareTo(to) > 0) {
-                                break;
-                            }
-                            WindDAO windDAO = createWindDAO(wind, windTrack);
-                            windTrackInfoDAO.windFixes.add(windDAO);
+                for (WindSource windSource : (windSources == null ? WindSource.values() : windSources)) {
+                    WindTrackInfoDAO windTrackInfoDAO = new WindTrackInfoDAO();
+                    windTrackInfoDAO.windFixes = new ArrayList<WindDAO>();
+                    WindTrack windTrack = trackedRace.getWindTrack(windSource);
+                    windTrackInfoDAO.dampeningIntervalInMilliseconds = windTrack
+                            .getMillisecondsOverWhichToAverageWind();
+                    Iterator<Wind> windIter = windTrack.getFixesIterator(from, /* inclusive */true);
+                    while (windIter.hasNext()) {
+                        Wind wind = windIter.next();
+                        if (wind.getTimePoint().compareTo(to) > 0) {
+                            break;
                         }
-                        windTrackInfoDAOs.put(windSource, windTrackInfoDAO);
+                        WindDAO windDAO = createWindDAO(wind, windTrack);
+                        windTrackInfoDAO.windFixes.add(windDAO);
                     }
+                    windTrackInfoDAOs.put(windSource, windTrackInfoDAO);
                 }
             }
         }
