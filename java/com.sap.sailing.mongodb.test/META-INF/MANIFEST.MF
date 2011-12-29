@@ -13,7 +13,8 @@ Require-Bundle: com.mongodb.driver;bundle-version="2.6.2",
  com.sap.sailing.domain.tractracadapter,
  org.eclipse.osgi,
  com.sap.sailing.domain.persistence,
- com.sap.sailing.server
+ com.sap.sailing.server,
+ com.sap.sailing.domain.common
 Import-Package: junit.framework;version="4.8.1",
  org.junit;version="4.8.1"
 
