@@ -337,7 +337,7 @@ public class WindPanel extends FormPanel implements EventDisplayer, WindShower, 
     
     private void updateWindSources(WindInfoForRaceDAO result) {
         int selectedIndex = -1;
-        for (WindSource windSource : result.windTrackInfoByWindSourceName.keySet()) {
+        for (WindSource windSource : result.windTrackInfoByWindSource.keySet()) {
             boolean found = false;
             int i=0;
             while (!found && i<windSourceSelection.getItemCount()) {
@@ -368,7 +368,7 @@ public class WindPanel extends FormPanel implements EventDisplayer, WindShower, 
         grid.setWidget(3, 0, null);
         VerticalPanel windDisplay = new VerticalPanel();
         grid.setWidget(3, 0, windDisplay);
-        for (Map.Entry<WindSource, WindTrackInfoDAO> e : result.windTrackInfoByWindSourceName.entrySet()) {
+        for (Map.Entry<WindSource, WindTrackInfoDAO> e : result.windTrackInfoByWindSource.entrySet()) {
             Label windSourceLabel = new Label(stringConstants.windSource()+": "+e.getKey()+
                     ", "+stringConstants.dampeningInterval()+" "+e.getValue().dampeningIntervalInMilliseconds+"ms");
             windDisplay.add(windSourceLabel);
