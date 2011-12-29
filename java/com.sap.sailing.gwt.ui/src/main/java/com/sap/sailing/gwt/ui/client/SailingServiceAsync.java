@@ -9,7 +9,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
-import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
 import com.sap.sailing.gwt.ui.shared.CompetitorInRaceDAO;
 import com.sap.sailing.gwt.ui.shared.CompetitorsAndTimePointsDAO;
@@ -70,18 +69,9 @@ public interface SailingServiceAsync {
     void removeAndUntrackedRace(EventAndRaceIdentifier eventAndRaceidentifier, AsyncCallback<Void> callback);
 
     /**
-     * Retrieves wind information for the race identified by <code>raceIdentifier</code>.
-     * 
-     * @param from
-     *            if <code>null</code>, the race start time will be used instead
-     * @param to
-     *            if <code>null</code>, the {@link TrackedRace#getTimePointOfNewestEvent() time of the newest event} is
-     *            used instead.
-     * @param windWources
-     *            if <code>null</code>, all available wind sources will be queries; otherwise, only those whose
-     *            {@link WindSource} name is contained in this collection
+     * @param windSources if <code>null</code>, information about all available wind sources will be provided
      */
-    void getWindInfo(RaceIdentifier raceIdentifier, Date from, Date to, Collection<String> windSources,
+    void getWindInfo(RaceIdentifier raceIdentifier, Date from, Date to, WindSource[] windSources,
             AsyncCallback<WindInfoForRaceDAO> callback);
 
     /**

@@ -7,6 +7,7 @@ import java.util.Map;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
+import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
 import com.sap.sailing.gwt.ui.shared.CompetitorInRaceDAO;
 import com.sap.sailing.gwt.ui.shared.CompetitorsAndTimePointsDAO;
@@ -50,7 +51,7 @@ public interface SailingService extends RemoteService {
     
     void removeAndUntrackedRace(EventAndRaceIdentifier eventAndRaceidentifier) throws Exception;
 
-    WindInfoForRaceDAO getWindInfo(RaceIdentifier raceIdentifier, Date from, Date to, Collection<String> windSources);
+    WindInfoForRaceDAO getWindInfo(RaceIdentifier raceIdentifier, Date from, Date to, WindSource[] windSources);
 
     void setWind(RaceIdentifier raceIdentifier, WindDAO wind);
 
