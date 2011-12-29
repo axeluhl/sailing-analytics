@@ -51,6 +51,7 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
+import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.gwt.ui.shared.EventDAO;
 import com.sap.sailing.gwt.ui.shared.RaceDAO;
 import com.sap.sailing.gwt.ui.shared.RegattaDAO;
@@ -61,7 +62,6 @@ import com.sap.sailing.gwt.ui.shared.WindTrackInfoDAO;
 import com.sap.sailing.server.api.EventNameAndRaceName;
 
 public class WindPanel extends FormPanel implements EventDisplayer, WindShower, RaceSelectionChangeListener {
-    private static final String WEB_WIND_SOURCE_NAME = "WEB";
     private final SailingServiceAsync sailingService;
     private final ErrorReporter errorReporter;
     private final Grid grid;
@@ -76,7 +76,7 @@ public class WindPanel extends FormPanel implements EventDisplayer, WindShower, 
     private final TextColumn<WindDAO> dampenedWindDirectionInDegColumn;
     private final TrackedEventsComposite trackedEventsComposite;
     private final ListBox windSourceSelection;
-    private final Map<String, ListDataProvider<WindDAO>> windLists;
+    private final Map<WindSource, ListDataProvider<WindDAO>> windLists;
     private final CheckBox showEstimatedWindBox;
     private final CheckBox raceIsKnownToStartUpwindBox;
     private final Widget stripChart;
@@ -88,7 +88,7 @@ public class WindPanel extends FormPanel implements EventDisplayer, WindShower, 
         this.errorReporter = errorReporter;
         this.stringConstants = stringConstants;
         dateFormat = DateTimeFormat.getFormat("HH:mm:ss");
-        windLists = new HashMap<String, ListDataProvider<WindDAO>>();
+        windLists = new HashMap<WindSource, ListDataProvider<WindDAO>>();
         windSourceSelection = new ListBox();
         windSourceSelection.addChangeHandler(new ChangeHandler() {
             @Override
@@ -105,7 +105,7 @@ public class WindPanel extends FormPanel implements EventDisplayer, WindShower, 
                     @Override
                     public void onSuccess(Void result) {
                         // remove row from underlying list:
-                        windLists.get(WEB_WIND_SOURCE_NAME).getList().remove(wind);
+                        windLists.get(WindSource.WEB).getList().remove(wind);
                     }
                     @Override
                     public void onFailure(Throwable caught) {
@@ -337,20 +337,20 @@ public class WindPanel extends FormPanel implements EventDisplayer, WindShower, 
     
     private void updateWindSources(WindInfoForRaceDAO result) {
         int selectedIndex = -1;
-        for (String windSourceName : result.windTrackInfoByWindSourceName.keySet()) {
+        for (WindSource windSource : result.windTrackInfoByWindSourceName.keySet()) {
             boolean found = false;
             int i=0;
             while (!found && i<windSourceSelection.getItemCount()) {
-                if (windSourceName.equals(windSourceSelection.getItemText(i))) {
+                if (windSource.name().equals(windSourceSelection.getItemText(i))) {
                     found = true;
                 } else {
                     i++;
                 }
             }
             if (!found) {
-                windSourceSelection.addItem(windSourceName);
+                windSourceSelection.addItem(windSource.name());
             }
-            if (windSourceName.equals(result.selectedWindSourceName)) {
+            if (windSource == result.selectedWindSource) {
                 selectedIndex = i;
             }
         }
@@ -368,7 +368,7 @@ public class WindPanel extends FormPanel implements EventDisplayer, WindShower, 
         grid.setWidget(3, 0, null);
         VerticalPanel windDisplay = new VerticalPanel();
         grid.setWidget(3, 0, windDisplay);
-        for (Map.Entry<String, WindTrackInfoDAO> e : result.windTrackInfoByWindSourceName.entrySet()) {
+        for (Map.Entry<WindSource, WindTrackInfoDAO> e : result.windTrackInfoByWindSourceName.entrySet()) {
             Label windSourceLabel = new Label(stringConstants.windSource()+": "+e.getKey()+
                     ", "+stringConstants.dampeningInterval()+" "+e.getValue().dampeningIntervalInMilliseconds+"ms");
             windDisplay.add(windSourceLabel);
@@ -378,7 +378,7 @@ public class WindPanel extends FormPanel implements EventDisplayer, WindShower, 
             dampenedSpeedInKnotsColumn.setSortable(true);
             dampenedWindDirectionInDegColumn.setSortable(true);
             CellTable<WindDAO> windTable = new CellTable<WindDAO>(/* pageSize */ 10000);
-            if (e.getKey().equals(WEB_WIND_SOURCE_NAME)) {
+            if (e.getKey() == WindSource.WEB) {
                 // only the WEB wind source is editable, hence has a "Remove" column
                 windTable.addColumn(removeColumn, "Remove");
             }

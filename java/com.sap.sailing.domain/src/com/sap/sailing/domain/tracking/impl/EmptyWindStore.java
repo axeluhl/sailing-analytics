@@ -1,8 +1,8 @@
 package com.sap.sailing.domain.tracking.impl;
 
+import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.tracking.TrackedEvent;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.domain.tracking.WindSource;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 

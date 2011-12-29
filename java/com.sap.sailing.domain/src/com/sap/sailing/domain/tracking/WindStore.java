@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.tracking;
 
+import com.sap.sailing.domain.common.WindSource;
+
 
 /**
  * Capable of providing a {@link WindTrack} for a given event / race / {@link WindSource} combination.

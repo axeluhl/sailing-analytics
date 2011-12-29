@@ -56,6 +56,7 @@ import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MeterDistance;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard.Entry;
 import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
@@ -80,7 +81,6 @@ import com.sap.sailing.domain.tracking.TrackedLeg.LegType;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
-import com.sap.sailing.domain.tracking.WindSource;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
@@ -513,10 +513,10 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         if (trackedRace != null) {
             result = new WindInfoForRaceDAO();
             result.raceIsKnownToStartUpwind = trackedRace.raceIsKnownToStartUpwind();
-            result.selectedWindSourceName = trackedRace.getWindSource().name();
+            result.selectedWindSource = trackedRace.getWindSource();
             TimePoint from = fromDate == null ? trackedRace.getStart() : new MillisecondsTimePoint(fromDate);
             TimePoint to = toDate == null ? trackedRace.getTimePointOfNewestEvent() : new MillisecondsTimePoint(toDate);
-            Map<String, WindTrackInfoDAO> windTrackInfoDAOs = new HashMap<String, WindTrackInfoDAO>();
+            Map<WindSource, WindTrackInfoDAO> windTrackInfoDAOs = new HashMap<WindSource, WindTrackInfoDAO>();
             result.windTrackInfoByWindSourceName = windTrackInfoDAOs;
             if (from != null && to != null) {
                 for (WindSource windSource : WindSource.values()) {
@@ -535,7 +535,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                             WindDAO windDAO = createWindDAO(wind, windTrack);
                             windTrackInfoDAO.windFixes.add(windDAO);
                         }
-                        windTrackInfoDAOs.put(windSource.name(), windTrackInfoDAO);
+                        windTrackInfoDAOs.put(windSource, windTrackInfoDAO);
                     }
                 }
             }
@@ -577,8 +577,8 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         if (trackedRace != null) {
             result = new WindInfoForRaceDAO();
             result.raceIsKnownToStartUpwind = trackedRace.raceIsKnownToStartUpwind();
-            result.selectedWindSourceName = trackedRace.getWindSource().name();
-            Map<String, WindTrackInfoDAO> windTrackInfoDAOs = new HashMap<String, WindTrackInfoDAO>();
+            result.selectedWindSource = trackedRace.getWindSource();
+            Map<WindSource, WindTrackInfoDAO> windTrackInfoDAOs = new HashMap<WindSource, WindTrackInfoDAO>();
             result.windTrackInfoByWindSourceName = windTrackInfoDAOs;
             for (WindSource windSource : WindSource.values()) {
                 if (windSources == null || windSources.contains(windSource.name())) {
@@ -586,7 +586,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                     WindTrackInfoDAO windTrackInfoDAO = new WindTrackInfoDAO();
                     windTrackInfoDAO.windFixes = new ArrayList<WindDAO>();
                     WindTrack windTrack = trackedRace.getWindTrack(windSource);
-                    windTrackInfoDAOs.put(windSource.name(), windTrackInfoDAO);
+                    windTrackInfoDAOs.put(windSource, windTrackInfoDAO);
                     windTrackInfoDAO.dampeningIntervalInMilliseconds = windTrack
                             .getMillisecondsOverWhichToAverageWind();
                     TimePoint timePoint = fromTimePoint;

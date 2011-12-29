@@ -14,6 +14,7 @@
     <packaging>pom</packaging>
 
     <modules>
+		<module>com.sap.sailing.domain.common</module>
         <module>com.sap.sailing.domain</module>
         <module>com.sap.sailing.domain.persistence</module>
         <module>com.sap.sailing.domain.test</module>
