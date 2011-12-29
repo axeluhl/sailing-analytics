@@ -26,6 +26,7 @@
   
   <!-- Other module inherits                                      -->
   <inherits name="com.sap.sailing.server.SailingServer" />
+  <inherits name="com.sap.sailing.domain.SailingDomain" />
 
   <!-- Specify the app entry point class.                         -->
   <entry-point class='com.sap.sailing.gwt.ui.client.LeaderboardPage'/>

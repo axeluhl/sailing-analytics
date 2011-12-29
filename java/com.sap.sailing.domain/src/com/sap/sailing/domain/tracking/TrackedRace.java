@@ -14,6 +14,7 @@ import com.sap.sailing.domain.base.Tack;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.DouglasPeucker;
+import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.tracking.TrackedLeg.LegType;
 
 /**

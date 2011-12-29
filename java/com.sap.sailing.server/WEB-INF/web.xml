@@ -6,7 +6,7 @@
 	http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" version="2.5">
 	<servlet>
 		<servlet-name>AdminApp</servlet-name>
-		<servlet-class>com.sap.sailing.server.AdminApp</servlet-class>
+		<servlet-class>com.sap.sailing.server.impl.AdminApp</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>AdminApp</servlet-name>
@@ -14,7 +14,7 @@
 	</servlet-mapping>
 	<servlet>
 		<servlet-name>ModeratorApp</servlet-name>
-		<servlet-class>com.sap.sailing.server.ModeratorApp</servlet-class>
+		<servlet-class>com.sap.sailing.server.impl.ModeratorApp</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>ModeratorApp</servlet-name>

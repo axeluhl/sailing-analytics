@@ -2,9 +2,9 @@ package com.sap.sailing.domain.persistence;
 
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.persistence.impl.DomainObjectFactoryImpl;
-import com.sap.sailing.domain.tracking.WindSource;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.mongodb.MongoDBService;
 

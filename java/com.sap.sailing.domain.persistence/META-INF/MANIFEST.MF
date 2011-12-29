@@ -7,6 +7,7 @@ Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Require-Bundle: com.sap.sailing.mongodb,
  com.sap.sailing.domain,
- com.mongodb.driver;bundle-version="2.6.2"
+ com.mongodb.driver;bundle-version="2.6.2",
+ com.sap.sailing.domain.common
 Export-Package: com.sap.sailing.domain.persistence,
  com.sap.sailing.domain.persistence.impl;x-friends:="com.sap.sailing.mongodb.test"
