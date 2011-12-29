@@ -42,32 +42,35 @@ public class RankPerRace extends Action {
         final Event event = getEvent();
         final RaceDefinition race = getRace(event);
         final TrackedRace trackedRace = getTrackedRace(event, race);
-        final TimePoint time = getTimePoint(trackedRace);
-        // Prepare document
-        final Document table = getTable("data");
+        if (trackedRace != null) {
+            final TimePoint time = getTimePoint(trackedRace);
+            // Prepare document
+            final Document table = getTable("data");
 
-        // Get Legs data
-        List<Leg> legs = race.getCourse().getLegs();
-        TrackedLeg trackedLeg = trackedRace.getTrackedLeg(legs.get(legs.size() - 1));
-        LinkedHashMap<Competitor, Integer> ranks = trackedLeg.getRanks(time);
-        // Get competitor data
-        for (final Map.Entry<Competitor, Integer> competitorAndRank : ranks.entrySet()) {
-            if (competitorNameSet == null || competitorNameSet.contains(competitorAndRank.getKey().getName())) {
-                // Get data
-                final String competitorName = competitorAndRank.getKey().getName();
-                final String nationality = competitorAndRank.getKey().getTeam().getNationality().getThreeLetterIOCAcronym();
-                final String sailID = competitorAndRank.getKey().getBoat().getSailID();
-                final int overallRank = competitorAndRank.getValue();
+            // Get Legs data
+            List<Leg> legs = race.getCourse().getLegs();
+            TrackedLeg trackedLeg = trackedRace.getTrackedLeg(legs.get(legs.size() - 1));
+            LinkedHashMap<Competitor, Integer> ranks = trackedLeg.getRanks(time);
+            // Get competitor data
+            for (final Map.Entry<Competitor, Integer> competitorAndRank : ranks.entrySet()) {
+                if (competitorNameSet == null || competitorNameSet.contains(competitorAndRank.getKey().getName())) {
+                    // Get data
+                    final String competitorName = competitorAndRank.getKey().getName();
+                    final String nationality = competitorAndRank.getKey().getTeam().getNationality()
+                            .getThreeLetterIOCAcronym();
+                    final String sailID = competitorAndRank.getKey().getBoat().getSailID();
+                    final int overallRank = competitorAndRank.getValue();
 
-                // Write data
-                addRow();
-                addColumn("" + overallRank);
-                addColumn(nationality);
-                addColumn(sailID == null ? "null" : sailID);
-                addColumn(competitorName);
-                addColumn(URLEncoder.encode(competitorName, "UTF-8"));
+                    // Write data
+                    addRow();
+                    addColumn("" + overallRank);
+                    addColumn(nationality);
+                    addColumn(sailID == null ? "null" : sailID);
+                    addColumn(competitorName);
+                    addColumn(URLEncoder.encode(competitorName, "UTF-8"));
+                }
             }
+            say(table);
         }
-        say(table);
     }
 }

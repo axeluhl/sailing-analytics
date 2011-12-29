@@ -16,4 +16,4 @@ Require-Bundle: com.sap.sailing.server,
  com.sap.sailing.domain.common
 Bundle-ClassPath: lib/jdom.jar,
  .
-Web-ContextPath: /wind
+Web-ContextPath: /xcelsius
