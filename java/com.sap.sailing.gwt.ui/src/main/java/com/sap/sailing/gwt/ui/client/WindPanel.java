@@ -350,7 +350,7 @@ public class WindPanel extends FormPanel implements EventDisplayer, WindShower, 
             if (!found) {
                 windSourceSelection.addItem(windSource.name());
             }
-            if (windSource.name().equals(result.selectedWindSourceName)) {
+            if (windSource == result.selectedWindSource) {
                 selectedIndex = i;
             }
         }

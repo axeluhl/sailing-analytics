@@ -513,7 +513,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         if (trackedRace != null) {
             result = new WindInfoForRaceDAO();
             result.raceIsKnownToStartUpwind = trackedRace.raceIsKnownToStartUpwind();
-            result.selectedWindSourceName = trackedRace.getWindSource().name();
+            result.selectedWindSource = trackedRace.getWindSource();
             TimePoint from = fromDate == null ? trackedRace.getStart() : new MillisecondsTimePoint(fromDate);
             TimePoint to = toDate == null ? trackedRace.getTimePointOfNewestEvent() : new MillisecondsTimePoint(toDate);
             Map<WindSource, WindTrackInfoDAO> windTrackInfoDAOs = new HashMap<WindSource, WindTrackInfoDAO>();
@@ -577,7 +577,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         if (trackedRace != null) {
             result = new WindInfoForRaceDAO();
             result.raceIsKnownToStartUpwind = trackedRace.raceIsKnownToStartUpwind();
-            result.selectedWindSourceName = trackedRace.getWindSource().name();
+            result.selectedWindSource = trackedRace.getWindSource();
             Map<WindSource, WindTrackInfoDAO> windTrackInfoDAOs = new HashMap<WindSource, WindTrackInfoDAO>();
             result.windTrackInfoByWindSourceName = windTrackInfoDAOs;
             for (WindSource windSource : WindSource.values()) {
