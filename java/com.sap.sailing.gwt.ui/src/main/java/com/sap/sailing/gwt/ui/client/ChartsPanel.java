@@ -84,8 +84,7 @@ public class ChartsPanel extends FormPanel {
     private Label title;
     private DeckPanel chart;
     private final RaceIdentifier[] races;
-    private int colorCounter = 0;
-    private final HashMap<Integer, String> idColor;
+    private final ColorMap<Integer> colorMap;
     private int selectedRace = 0;
     private int stepsToLoad = 100;
     private final StringConstants stringConstants;
@@ -113,7 +112,7 @@ public class ChartsPanel extends FormPanel {
     	seriesIsUsed = new HashSet<SeriesHandler>();
     	competitorID = new ArrayList<CompetitorDAO>();
     	markSeriesID = new ArrayList<SeriesHandler>();
-    	idColor = new HashMap<Integer, String>();
+    	colorMap = new ColorMap<Integer>();
     	competitorVisible = new HashSet<CompetitorDAO>();
     	competitorLabels = new HashMap<CompetitorDAO, Widget>();
     	markPassingBuoyName = new HashMap<String, String>();
@@ -147,7 +146,6 @@ public class ChartsPanel extends FormPanel {
                 public void onClick(ClickEvent event) {
                     selectedRace = index;
                     competitorsAndTimePointsDAO = null;
-                    colorCounter = 0;
                     clearChart(true);
                     loadData();
                 }
@@ -466,12 +464,12 @@ public class ChartsPanel extends FormPanel {
 
         plotOptions.setSelectionOptions(new SelectionOptions().setDragging(true).setMode("x"));
         for (int i = 0; i <  competitorsAndTimePointsDAO.getCompetitor().length; i++){
-        	SeriesHandler series = model.addSeries(""+i, getColorByID(i));
+        	SeriesHandler series = model.addSeries(""+i, colorMap.getColorByID(i));
     		series.setOptions(SeriesType.LINES, new LineSeriesOptions().setLineWidth(2.5).setShow(true));
     		series.setOptions(SeriesType.POINTS, new PointsSeriesOptions().setLineWidth(0).setShow(false));
     		series.setVisible(false);
     		seriesID.add(series);
-    		series = model.addSeries(i + " passed mark", getColorByID(i));
+    		series = model.addSeries(i + " passed mark", colorMap.getColorByID(i));
     		series.setOptions(SeriesType.LINES, new LineSeriesOptions().setLineWidth(0).setShow(false));
     		series.setOptions(SeriesType.POINTS, new PointsSeriesOptions().setLineWidth(3).setShow(true));
     		series.setVisible(false);
@@ -558,54 +556,6 @@ public class ChartsPanel extends FormPanel {
         return panel;
     }
     
-    /** Returns a color that is computed once by using {@link ChartsPanel#createHexColor(int)} and then cached.
-     * 
-     * @param id An ID unique for a competitor.
-     * @return A color in hex/html-format (e.g. #ff0000)
-     */
-    private String getColorByID(int id){
-    	String color = idColor.get(id);
-    	if (color == null || color.isEmpty()){
-    		color = createHexColor(colorCounter++);
-    		idColor.put(id, color);
-    	}
-    	return color;
-    }
-    
-    /**Only use this if you don't want the color to be cached.
-     * You can use {@link ChartsPanel#getColorByID(int)} instead.
-     * 
-     * @param index The index of e.g. a competitor. Make sure, that each competitor has a unique index.
-     * @return A color computed using the {@code index}.
-     */
-    private String createHexColor(int index){
-        String rs, gs, bs;
-        int r = 0, g = 0, b = 0;
-        double factor = 1 - ((index/6)/6.0);
-        if (index%6 < 2 || index%6 > 4){
-            r = (int) (255*factor);
-        }
-        rs = Integer.toHexString(r);
-        while(rs.length() < 2){
-            rs = "0" + rs;
-        }
-        if (index%6 > 0 && index%6 < 4){
-            g = (int) (220*factor);
-        }
-        gs = Integer.toHexString(g);
-        while(gs.length() < 2){
-            gs = "0" + gs;
-        }
-        if (index%6 > 2){
-            b = (int) (255*factor);
-        }
-        bs = Integer.toHexString(b);
-        while(bs.length() < 2){
-            bs = "0" + bs;
-        }
-        return "#" + rs + gs + bs;
-    }
-    
     /**
      * 
      * @param competitor
@@ -632,7 +582,7 @@ public class ChartsPanel extends FormPanel {
     private void setLegendVisible(CompetitorDAO competitor, Boolean visible){
     	Widget label = competitorLabels.get(competitor);
     	if (label == null){
-    		label = createCompetitorLabel(competitor.name, getColorByID(competitorID.indexOf(competitor)));
+    		label = createCompetitorLabel(competitor.name, colorMap.getColorByID(competitorID.indexOf(competitor)));
     		competitorLabels.put(competitor, label);
     		legendPanel.add(label);
     	}
