@@ -377,29 +377,28 @@ public class ChartsPanel extends FormPanel {
                 series.remove(compSeries);
                 series.remove(markSeries);
             }
-            if (firstCompetitor != null && chartData.getRaceData(firstCompetitor) != null){
-            	for (SeriesHandler sh : series){
-                	if (!seriesIsUsed.contains(sh)){
-                		sh.clear();
+            if (firstCompetitor != null && chartData.getRaceData(firstCompetitor) != null) {
+                for (SeriesHandler sh : series) {
+                    if (!seriesIsUsed.contains(sh)) {
+                        sh.clear();
                         Double[] data = chartData.getRaceData(firstCompetitor);
                         long[] timepoints = competitorsAndTimePointsDAO.getTimePoints();
                         for (int j = 0; j < stepsToLoad; j++) {
-                        	if (data[j] != null){
-                        		sh.add(new DataPoint(timepoints[j], data[j]));
-                        	}
+                            if (data[j] != null) {
+                                sh.add(new DataPoint(timepoints[j], data[j]));
+                            }
                         }
-                	}
+                    }
                 }
             }
         }
-        if (plot != null && plot.isAttached()){
-        	try {
-        		plot.setLinearSelection(0, 1);
+        if (plot != null && plot.isAttached()) {
+            try {
+                plot.setLinearSelection(0, 1);
                 plot.redraw();
-        	}
-        	catch (Exception e){
-        		
-        	}
+            } catch (Exception e) {
+
+            }
         }
         return;
     }
