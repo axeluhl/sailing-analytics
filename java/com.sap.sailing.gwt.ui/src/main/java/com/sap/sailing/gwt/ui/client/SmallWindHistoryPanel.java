@@ -8,6 +8,7 @@ import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.gwt.ui.shared.EventDAO;
 import com.sap.sailing.gwt.ui.shared.PositionDAO;
 import com.sap.sailing.gwt.ui.shared.RaceDAO;
@@ -75,15 +76,13 @@ public class SmallWindHistoryPanel extends FormPanel implements TimeListener, Ra
                             @Override
                             public void onSuccess(WindInfoForRaceDAO result) {
                                 // expecting to find windIndicators.length fixes
-                                if (result == null || result.windTrackInfoByWindSourceName.get(
-                                        /* result.selectedWindSourceName TODO uncomment */ "TRACK_BASED_ESTIMATION").windFixes
+                                if (result == null || result.windTrackInfoByWindSource.get(result.selectedWindSource).windFixes
                                         .size() != windIndicators.length) {
                                     clearWindDisplay();
                                 } else {
-                                    setSelectedWindSource(/* TODO uncomment again: result.selectedWindSourceName */ "TRACK_BASED_ESTIMATION");
+                                    setSelectedWindSource(result.selectedWindSource);
                                     int i = 0;
-                                    for (WindDAO fix : result.windTrackInfoByWindSourceName
-                                            .get(/* TODO uncomment again: result.selectedWindSourceName */ "TRACK_BASED_ESTIMATION").windFixes) {
+                                    for (WindDAO fix : result.windTrackInfoByWindSource.get(result.selectedWindSource).windFixes) {
                                         updateWindIndicator(i, fix);
                                         i++;
                                     }
@@ -112,8 +111,8 @@ public class SmallWindHistoryPanel extends FormPanel implements TimeListener, Ra
         windIndicators[i].setSpeedInKnots(fix.dampenedTrueWindSpeedInKnots);
     }
 
-    private void setSelectedWindSource(String selectedWindSourceName) {
-        selectedWindSourceLabel.setText(stringConstants.windSource()+": "+selectedWindSourceName);
+    private void setSelectedWindSource(WindSource selectedWindSource) {
+        selectedWindSourceLabel.setText(stringConstants.windSource()+": "+selectedWindSource.name());
     }
 
     @Override
