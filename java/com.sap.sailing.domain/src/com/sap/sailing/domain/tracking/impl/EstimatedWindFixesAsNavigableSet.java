@@ -15,7 +15,7 @@ import com.sap.sailing.util.impl.DescendingNavigableSet;
 
 /**
  * Emulates a collection of {@link Wind} fixes for a {@link TrackedRace}, computed using
- * {@link TrackedRace#getEstimatedWindDirection(com.sap.sailing.domain.base.Position, TimePoint)}. If not contrained
+ * {@link TrackedRace#getEstimatedWindDirection(com.sap.sailing.domain.base.Position, TimePoint)}. If not constrained
  * by a {@link #from} and/or a {@link #to} time point, an equidistant time field is assumed, starting at
  * {@link TrackedRace#getStart()} and leading up to {@link TrackedRace#getTimePointOfNewestEvent()}. If
  * {@link TrackedRace#getStart()} returns <code>null</code>, {@link Long#MAX_VALUE} is used as the {@link #from}

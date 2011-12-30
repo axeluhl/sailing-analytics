@@ -555,7 +555,6 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     @Override
     public Wind getEstimatedWindDirection(Position position, TimePoint timePoint) {
-        int count = 0; // counts how many boats' courses were used in computing the result
         Map<LegType, BearingCluster> bearings = new HashMap<LegType, BearingCluster>();
         for (LegType legType : LegType.values()) {
             bearings.put(legType, new BearingCluster());
@@ -573,6 +572,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                 }
                 if (legType != LegType.REACHING) {
                     GPSFixTrack<Competitor, GPSFixMoving> track = getTrack(competitor);
+                    // TODO bug #167 could be fixed here by excluding competitors that are x seconds before/after a mark passing
                     if (!track.hasDirectionChange(timePoint, getManeuverDegreeAngleThreshold())) {
                         Bearing bearing = track.getEstimatedSpeed(timePoint).getBearing();
                         BearingCluster bearingClusters = bearings.get(legType);
@@ -582,17 +582,20 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             }
         }
         Bearing upwindAverage = null;
+        int upwindConfidence = 0;
         BearingCluster[] bearingClustersUpwind = bearings.get(LegType.UPWIND).splitInTwo(getMinimumAngleBetweenDifferentTacksUpwind());
         if (!bearingClustersUpwind[0].isEmpty() && !bearingClustersUpwind[1].isEmpty()) {
             upwindAverage = bearingClustersUpwind[0].getAverage().middle(bearingClustersUpwind[1].getAverage());
-            count += bearingClustersUpwind[0].size() + bearingClustersUpwind[1].size();
+            upwindConfidence = Math.min(bearingClustersUpwind[0].size(), bearingClustersUpwind[1].size());
         }
         Bearing downwindAverage = null;
+        int downwindConfidence = 0;
         BearingCluster[] bearingClustersDownwind = bearings.get(LegType.DOWNWIND).splitInTwo(getMinimumAngleBetweenDifferentTacksDownwind());
         if (!bearingClustersDownwind[0].isEmpty() && !bearingClustersDownwind[1].isEmpty()) {
             downwindAverage = bearingClustersDownwind[0].getAverage().middle(bearingClustersDownwind[1].getAverage());
-            count += bearingClustersDownwind[0].size() + bearingClustersDownwind[1].size();
+            downwindConfidence = Math.min(bearingClustersDownwind[0].size(), bearingClustersDownwind[1].size());
         }
+        int confidence = upwindConfidence + downwindConfidence;
         Bearing bearing;
         if (upwindAverage == null) {
             if (downwindAverage == null) {
@@ -608,7 +611,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             }
         }
         return new WindImpl(null, timePoint,
-                new KnotSpeedWithBearingImpl(/* speedInKnots */ count, bearing));
+                new KnotSpeedWithBearingImpl(/* speedInKnots */ confidence, bearing));
     }
     
     /**
