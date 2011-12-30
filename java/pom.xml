@@ -161,7 +161,6 @@
             <url>http://nexus.wdf.sap.corp:8081/nexus/content/groups/build.snapshots</url>
         </repository>
 --> 
-            </repository> -->
  
 		<repository>
             <id>uni-luebeck</id>
