@@ -101,8 +101,13 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     
     @Override
     public DynamicGPSFixTrack<Buoy, GPSFix> getOrCreateTrack(Buoy buoy) {
-        final DynamicGPSFixTrack<Buoy, GPSFix> finalResult = (DynamicGPSFixTrack<Buoy, GPSFix>) super.getOrCreateTrack(buoy);
-        finalResult.addListener(new GPSTrackListener<Buoy>() {
+        return (DynamicGPSFixTrack<Buoy, GPSFix>) super.getOrCreateTrack(buoy);
+    }
+    
+    @Override
+    protected DynamicGPSFixTrackImpl<Buoy> createBuoyTrack(Buoy buoy) {
+        DynamicGPSFixTrackImpl<Buoy> result = super.createBuoyTrack(buoy);
+        result.addListener(new GPSTrackListener<Buoy>() {
             @Override
             public void gpsFixReceived(GPSFix fix, Buoy buoy) {
                 notifyListeners(fix, buoy);
@@ -114,7 +119,7 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
                 // nobody can currently listen for the change of the buoy speed averaging because buoy speed is not a value used
             }
         });
-        return finalResult;
+        return result;
     }
     
     private synchronized Set<RaceChangeListener> getListeners() {

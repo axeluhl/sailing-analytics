@@ -360,24 +360,15 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         synchronized (buoyTracks) {
             GPSFixTrack<Buoy, GPSFix> result = buoyTracks.get(buoy);
             if (result == null) {
-                final GPSFixTrack<Buoy, GPSFix> finalResult = new DynamicGPSFixTrackImpl<Buoy>(buoy, millisecondsOverWhichToAverageSpeed);
-                result = finalResult;
-                result.addListener(new GPSTrackListener<Buoy>() {
-                    @Override
-                    public void gpsFixReceived(GPSFix fix, Buoy buoy) {
-                        // TODO notify listeners
-                    }
-
-                    @Override
-                    public void speedAveragingChanged(long oldMillisecondsOverWhichToAverage,
-                            long newMillisecondsOverWhichToAverage) {
-                        // TODO notify listeners
-                    }
-                });
+                result = createBuoyTrack(buoy);
                 buoyTracks.put(buoy, result);
             }
             return result;
         }
+    }
+
+    protected DynamicGPSFixTrackImpl<Buoy> createBuoyTrack(Buoy buoy) {
+        return new DynamicGPSFixTrackImpl<Buoy>(buoy, millisecondsOverWhichToAverageSpeed);
     }
 
     @Override

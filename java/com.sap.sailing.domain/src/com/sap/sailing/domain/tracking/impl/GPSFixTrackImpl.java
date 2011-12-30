@@ -18,6 +18,7 @@ import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.base.impl.NauticalMileDistance;
+import com.sap.sailing.domain.common.Util.Pair;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
@@ -114,11 +115,23 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         return millisecondsOverWhichToAverage;
     }
 
+    private Pair<FixType, FixType> getFixesForPositionEstimation(TimePoint timePoint, boolean inclusive) {
+        FixType lastFix = inclusive ? getLastFixAtOrBefore(timePoint) : getLastFixBefore(timePoint);
+        FixType firstFix = inclusive ? getFirstFixAtOrAfter(timePoint) : getFirstFixAfter(timePoint);
+        return new Pair<FixType, FixType>(lastFix, firstFix);
+    }
+    
     @Override
     public Position getEstimatedPosition(TimePoint timePoint, boolean extrapolate) {
-        FixType lastFixAtOrBefore = getLastFixAtOrBefore(timePoint);
-        FixType firstFixAtOrAfter = getFirstFixAtOrAfter(timePoint);
-        return getEstimatedPosition(timePoint, extrapolate, lastFixAtOrBefore, firstFixAtOrAfter);
+        Pair<FixType, FixType> fixesForPositionEstimation = getFixesForPositionEstimation(timePoint, /* inclusive */ true);
+        return getEstimatedPosition(timePoint, extrapolate, fixesForPositionEstimation.getA(), fixesForPositionEstimation.getB());
+    }
+
+    @Override
+    public Pair<TimePoint, TimePoint> getEstimatedPositionTimePeriodAffectedBy(GPSFix fix) {
+        Pair<FixType, FixType> fixesForPositionEstimation = getFixesForPositionEstimation(fix.getTimePoint(), /* inclusive */ false);
+        return new Pair<TimePoint, TimePoint>(fixesForPositionEstimation.getA() == null ? null : fixesForPositionEstimation.getA().getTimePoint(),
+                fixesForPositionEstimation.getB() == null ? null : fixesForPositionEstimation.getB().getTimePoint());
     }
 
     @Override

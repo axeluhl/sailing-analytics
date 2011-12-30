@@ -10,6 +10,7 @@ import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.impl.AbstractTimePoint;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.common.Util.Pair;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
@@ -83,20 +84,21 @@ public class TrackBasedEstimationWindTrackImpl extends WindTrackImpl implements 
     
     private synchronized void invalidateCache(Wind startOfInvalidation, TimePoint endOfInvalidation) {
         NavigableSet<Wind> cache = getCachedFixes();
-        Iterator<Wind> iter = cache.tailSet(startOfInvalidation, /* inclusive */ true).iterator();
+        Iterator<Wind> iter = (startOfInvalidation == null ? cache : cache.tailSet(startOfInvalidation, /* inclusive */ true)).iterator();
         while (iter.hasNext()) {
             Wind next = iter.next();
-            if (next.getTimePoint().compareTo(endOfInvalidation) < 0) {
+            if (endOfInvalidation == null || next.getTimePoint().compareTo(endOfInvalidation) < 0) {
                 iter.remove();
             } else {
                 break;
             }
         }
-        Iterator<TimePoint> nullIter = getTimePointsWithCachedNullResult().tailSet(startOfInvalidation.getTimePoint(), /* inclusive */
-                true).iterator();
+        Iterator<TimePoint> nullIter = (startOfInvalidation == null ? getTimePointsWithCachedNullResult()
+                : getTimePointsWithCachedNullResult().tailSet(startOfInvalidation.getTimePoint(), /* inclusive */
+                true)).iterator();
         while (nullIter.hasNext()) {
             TimePoint next = nullIter.next();
-            if (next.compareTo(endOfInvalidation) < 0) {
+            if (endOfInvalidation == null || next.compareTo(endOfInvalidation) < 0) {
                 nullIter.remove();
             } else {
                 break;
@@ -188,12 +190,19 @@ public class TrackBasedEstimationWindTrackImpl extends WindTrackImpl implements 
 
     @Override
     public void windDataReceived(Wind wind) {
-        // we ignore wind updates for cache invalidations; however, TODO we'd like to invalidate in case a leg changes its type
+        invalidateForNewWind(wind);
+    }
+
+    private void invalidateForNewWind(Wind wind) {
+        long averagingInterval = trackedRace.getMillisecondsOverWhichToAverageWind();
+        Wind startOfInvalidation = getDummyFix(new MillisecondsTimePoint(wind.getTimePoint().asMillis()-averagingInterval));
+        TimePoint endOfInvalidation = new MillisecondsTimePoint(wind.getTimePoint().asMillis()+averagingInterval);
+        invalidateCache(startOfInvalidation, endOfInvalidation);
     }
 
     @Override
     public void windDataRemoved(Wind wind) {
-        // we ignore wind updates for cache invalidations; however, TODO we'd like to invalidate in case a leg changes its type
+        invalidateForNewWind(wind);
     }
 
     @Override
@@ -233,7 +242,12 @@ public class TrackBasedEstimationWindTrackImpl extends WindTrackImpl implements 
 
     @Override
     public void buoyPositionChanged(GPSFix fix, Buoy buoy) {
-        clearCache(); // TODO invalidate cache around fix's time point
+        // A buoy position change can mean a leg type change. The interval over which the wind estimation is affected
+        // depends on how the GPS track computes the estimated buoy position. Ask it:
+        Pair<TimePoint, TimePoint> interval = trackedRace.getOrCreateTrack(buoy).getEstimatedPositionTimePeriodAffectedBy(fix);
+        Wind startOfInvalidation = interval.getA() == null ? null : getDummyFix(interval.getA());
+        TimePoint endOfInvalidation = interval.getB();
+        invalidateCache(startOfInvalidation, endOfInvalidation);
     }
 
 }
