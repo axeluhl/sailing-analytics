@@ -6,9 +6,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
 
+import com.sap.sailing.domain.common.Util.Pair;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterMessage;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterTransceiver;
-import com.sap.sailing.util.Util.Pair;
 
 /**
  * A sender / receiver for a SwissTiming Sail Master system.

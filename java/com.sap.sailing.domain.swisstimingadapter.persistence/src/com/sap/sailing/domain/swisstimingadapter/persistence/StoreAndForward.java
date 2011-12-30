@@ -14,6 +14,7 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
+import com.sap.sailing.domain.common.Util.Pair;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterMessage;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterTransceiver;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
@@ -21,7 +22,6 @@ import com.sap.sailing.domain.swisstimingadapter.persistence.impl.CollectionName
 import com.sap.sailing.domain.swisstimingadapter.persistence.impl.FieldNames;
 import com.sap.sailing.mongodb.MongoDBConfiguration;
 import com.sap.sailing.mongodb.MongoDBService;
-import com.sap.sailing.util.Util.Pair;
 
 /**
  * Receives events from a SwissTiming SailMaster server, stores valid messages received persistently and forward them

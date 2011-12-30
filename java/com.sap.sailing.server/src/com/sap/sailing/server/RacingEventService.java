@@ -14,6 +14,8 @@ import java.util.Map;
 
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.common.Util.Pair;
+import com.sap.sailing.domain.common.Util.Triple;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
@@ -28,8 +30,6 @@ import com.sap.sailing.domain.tractracadapter.RaceRecord;
 import com.sap.sailing.domain.tractracadapter.TracTracRaceTracker;
 import com.sap.sailing.server.api.EventIdentifier;
 import com.sap.sailing.server.api.RaceIdentifier;
-import com.sap.sailing.util.Util.Pair;
-import com.sap.sailing.util.Util.Triple;
 
 /**
  * An OSGi service that can be used to track boat races using a TracTrac connector that pushes

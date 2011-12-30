@@ -1,8 +1,8 @@
 package com.sap.sailing.domain.leaderboard;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.common.Util.Pair;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.util.Util.Pair;
 
 /**
  * A column in a {@link Leaderboard} that represents the data of a race. Over the life time of this object it can be

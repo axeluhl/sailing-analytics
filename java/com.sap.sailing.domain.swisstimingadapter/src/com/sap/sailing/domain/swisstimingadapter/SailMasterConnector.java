@@ -9,8 +9,8 @@ import java.util.Map;
 import com.sap.sailing.domain.base.Distance;
 import com.sap.sailing.domain.base.Speed;
 import com.sap.sailing.domain.base.TimePoint;
-import com.sap.sailing.util.Util.Pair;
-import com.sap.sailing.util.Util.Triple;
+import com.sap.sailing.domain.common.Util.Pair;
+import com.sap.sailing.domain.common.Util.Triple;
 
 public interface SailMasterConnector {
     SailMasterMessage sendRequestAndGetResponse(MessageType messageType, String... args) throws UnknownHostException, IOException, InterruptedException;

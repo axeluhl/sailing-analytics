@@ -1,5 +1,6 @@
-package com.sap.sailing.util;
+package com.sap.sailing.domain.common;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -54,7 +55,8 @@ public class Util {
         }
     }
 
-    public static class Pair<A, B> {
+    public static class Pair<A, B> implements Serializable {
+        private static final long serialVersionUID = -7631774746419135931L;
 
         private A a;
 
@@ -62,6 +64,9 @@ public class Util {
 
         private int hashCode;
 
+        @SuppressWarnings("unused") // required for some serialization frameworks such as GWT RPC
+        private Pair() {}
+        
         public Pair( A a, B b ) {
 
             this.a = a;
@@ -125,7 +130,8 @@ public class Util {
         }
     }
 
-    public static class Triple<A, B, C> {
+    public static class Triple<A, B, C> implements Serializable {
+        private static final long serialVersionUID = 6806146864367514601L;
 
         private A a;
 
@@ -134,6 +140,9 @@ public class Util {
         private C c;
 
         private int hashCode;
+
+        @SuppressWarnings("unused") // required for some serialization frameworks such as GWT RPC
+        private Triple() {}
 
         public Triple( A a, B b, C c ) {
 

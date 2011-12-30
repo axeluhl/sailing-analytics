@@ -3,7 +3,8 @@ package com.sap.sailing.gwt.ui.shared;
 import java.util.Date;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import com.sap.sailing.domain.base.Tack;
+import com.sap.sailing.domain.common.LegType;
+import com.sap.sailing.domain.common.Tack;
 
 public class GPSFixDAO implements IsSerializable {
     public Date timepoint;
@@ -19,18 +20,19 @@ public class GPSFixDAO implements IsSerializable {
     /**
      * Contains one of the literals of the {@link Tack} enumeration ("STARBOARD" or "PORT")
      */
-    public String tack;
+    public Tack tack;
     
     /**
      * Contains one of the literals of the {@link LegType} enumeration ("UPWIND", "DOWNWIND" or "REACHING") or
      * <code>null</code> if the leg type is not known, e.g., because the competitor is not currently on any of the
      * race's legs.
      */
-    public String legType;
+    public LegType legType;
     
     public GPSFixDAO() {}
 
-    public GPSFixDAO(Date timepoint, PositionDAO position, SpeedWithBearingDAO speedWithBearing, String tack, String legType, boolean extrapolated) {
+    public GPSFixDAO(Date timepoint, PositionDAO position, SpeedWithBearingDAO speedWithBearing, Tack tack,
+            LegType legType, boolean extrapolated) {
         super();
         this.timepoint = timepoint;
         this.position = position;

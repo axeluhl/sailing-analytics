@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.tracking;
+package com.sap.sailing.domain.common;
 
 /**
  * The runtime exception variant of {@link NoWindException}. Can be used where no
@@ -10,6 +10,9 @@ package com.sap.sailing.domain.tracking;
 public class NoWindError extends RuntimeException {
     private static final long serialVersionUID = -6279617486075805721L;
 
+    @SuppressWarnings("unused") // required for some serialization frameworks such as GWT RPC
+    private NoWindError() {}
+    
     public NoWindError(NoWindException noWindException) {
         super(noWindException);
     }

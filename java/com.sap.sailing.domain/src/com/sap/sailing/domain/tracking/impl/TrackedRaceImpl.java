@@ -22,32 +22,32 @@ import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.SpeedWithBearing;
-import com.sap.sailing.domain.base.Tack;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.DouglasPeucker;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.common.LegType;
+import com.sap.sailing.domain.common.NoWindError;
+import com.sap.sailing.domain.common.NoWindException;
+import com.sap.sailing.domain.common.Tack;
+import com.sap.sailing.domain.common.Util;
 import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.Util.Pair;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.Maneuver.Type;
 import com.sap.sailing.domain.tracking.MarkPassing;
-import com.sap.sailing.domain.tracking.NoWindError;
-import com.sap.sailing.domain.tracking.NoWindException;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.TrackedEvent;
 import com.sap.sailing.domain.tracking.TrackedLeg;
-import com.sap.sailing.domain.tracking.TrackedLeg.LegType;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
-import com.sap.sailing.util.Util;
-import com.sap.sailing.util.Util.Pair;
 
 public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     private static final Logger logger = Logger.getLogger(TrackedRaceImpl.class.getName());
@@ -556,7 +556,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     @Override
     public Wind getEstimatedWindDirection(Position position, TimePoint timePoint) {
         int count = 0; // counts how many boats' courses were used in computing the result
-        Map<LegType, BearingCluster> bearings = new HashMap<TrackedLeg.LegType, BearingCluster>();
+        Map<LegType, BearingCluster> bearings = new HashMap<LegType, BearingCluster>();
         for (LegType legType : LegType.values()) {
             bearings.put(legType, new BearingCluster());
         }

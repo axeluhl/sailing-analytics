@@ -5,10 +5,10 @@ import java.util.LinkedHashMap;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.TimePoint;
+import com.sap.sailing.domain.common.LegType;
+import com.sap.sailing.domain.common.NoWindException;
 
 public interface TrackedLeg {
-    enum LegType { UPWIND, DOWNWIND, REACHING };
-    
     Leg getLeg();
     
     Iterable<TrackedLegOfCompetitor> getTrackedLegsOfCompetitors();

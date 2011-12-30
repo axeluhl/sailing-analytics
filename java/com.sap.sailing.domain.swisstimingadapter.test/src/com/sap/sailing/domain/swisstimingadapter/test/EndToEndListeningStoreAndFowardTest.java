@@ -28,6 +28,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.common.Util;
 import com.sap.sailing.domain.swisstimingadapter.MessageType;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterConnector;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterTransceiver;
@@ -43,7 +44,6 @@ import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.mongodb.MongoDBService;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
-import com.sap.sailing.util.Util;
 
 public class EndToEndListeningStoreAndFowardTest {
     private static final Logger logger = Logger.getLogger(EndToEndListeningStoreAndFowardTest.class.getName());
