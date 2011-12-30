@@ -258,6 +258,6 @@ public interface TrackedRace {
      */
     boolean raceIsKnownToStartUpwind();
     
-    void addListener(RaceChangeListener<Competitor> listener);
+    void addListener(RaceChangeListener listener);
     
 }

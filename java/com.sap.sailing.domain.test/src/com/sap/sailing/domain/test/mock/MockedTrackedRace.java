@@ -205,7 +205,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public void addListener(RaceChangeListener<Competitor> listener) {
+    public void addListener(RaceChangeListener listener) {
         // TODO Auto-generated method stub
         
     }

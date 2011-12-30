@@ -12,6 +12,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.CourseListener;
@@ -153,6 +154,46 @@ public class CourseImpl extends NamedImpl implements Course {
         Integer indexEntry = waypointIndexes.get(waypoint);
         if (indexEntry != null) {
             result = indexEntry;
+        }
+        return result;
+    }
+    
+    private Set<ControlPoint> getControlPoints() {
+        Set<ControlPoint> result = new HashSet<ControlPoint>();
+        for (Waypoint waypoint : getWaypoints()) {
+            result.add(waypoint.getControlPoint());
+        }
+        return result;
+    }
+    
+    private ControlPoint getControlPointForBuoy(Buoy buoy) {
+        for (ControlPoint controlPoint : getControlPoints()) {
+            for (Buoy controlPointBuoy : controlPoint.getBuoys()) {
+                if (buoy == controlPointBuoy) {
+                    return controlPoint;
+                }
+            }
+        }
+        return null;
+    }
+    
+    @Override
+    public Iterable<Leg> getLegsAdjacentTo(Buoy buoy) {
+        Set<Leg> result = new HashSet<Leg>();
+        ControlPoint controlPointForBuoy = getControlPointForBuoy(buoy);
+        if (controlPointForBuoy != null) {
+            boolean first = true;
+            for (Leg leg : getLegs()) {
+                if (first) {
+                    if (leg.getFrom().getControlPoint() == controlPointForBuoy) {
+                        result.add(leg);
+                    }
+                    first = false;
+                }
+                if (leg.getTo().getControlPoint() == controlPointForBuoy) {
+                    result.add(leg);
+                }
+            }
         }
         return result;
     }
