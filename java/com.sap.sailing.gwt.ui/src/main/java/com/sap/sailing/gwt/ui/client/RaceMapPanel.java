@@ -53,6 +53,8 @@ import com.google.gwt.user.client.ui.ProvidesResize;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.LegType;
+import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.Util.Pair;
 import com.sap.sailing.domain.common.Util.Triple;
 import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
@@ -893,8 +895,8 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
     }
 
     private ImageRotator getBoatImageRotator(GPSFixDAO boatFix, boolean highlighted) {
-        if (boatFix.tack.equals("PORT")) {
-            if ("DOWNWIND".equals(boatFix.legType)) {
+        if (boatFix.tack == Tack.PORT) {
+            if (LegType.DOWNWIND == boatFix.legType) {
                 if (highlighted) {
                     return boatIconHighlightedDownwindStarboardRotator;
                 } else {
@@ -908,7 +910,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
                 }
             }
         } else {
-            if ("DOWNWIND".equals(boatFix.legType)) {
+            if (LegType.DOWNWIND == boatFix.legType) {
                 if (highlighted) {
                     return boatIconHighlightedDownwindPortRotator;
                 } else {
@@ -1065,7 +1067,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         result.add(new Label("" + lastFix.position));
         result.add(new Label(lastFix.speedWithBearing.speedInKnots + "kts " + lastFix.speedWithBearing.bearingInDegrees
                 + "deg"));
-        result.add(new Label("Tack: " + lastFix.tack));
+        result.add(new Label("Tack: " + lastFix.tack.name()));
         List<Triple<EventDAO, RegattaDAO, RaceDAO>> selection = newRaceListBox.getSelectedEventAndRace();
         if (!selection.isEmpty()) {
             EventDAO event = selection.get(selection.size() - 1).getA();
