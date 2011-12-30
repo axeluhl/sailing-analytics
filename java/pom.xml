@@ -93,7 +93,7 @@
 					<groupId>${project.groupId}</groupId>
 					<artifactId>${project.artifactId}</artifactId>
 					<version>${project.version}</version>
-					<classifier>../com.sap.sailing.targetplatform/definitions/race-analysis-p2-maven-local</classifier>
+					<classifier>../com.sap.sailing.targetplatform/definitions/race-analysis-p2-maven-central</classifier>
                 </artifact>
               </target>
             </configuration>
@@ -106,9 +106,10 @@
                     <!-- non-debug -->
 <!-- proxy
 		    <argLine>-Dfile.encoding=cp1252 -Dhttp.proxyHost=proxy -Dhttp.proxyPort=8080 -Dtractrac.tunnel=true -Dtractrac.tunnel.host=10.18.10.38 -Dmongo.host=10.18.10.38 -Xmx1024m -XX:PermSize=256m -XX:-UseGCOverheadLimit -XX:+UseParallelGC</argLine>
- -->
+-->
 <!-- no proxy -->
 					<argLine>-Dfile.encoding=cp1252 -Xmx1024m -XX:PermSize=256m -XX:-UseGCOverheadLimit -XX:+UseParallelGC</argLine>
+<!-- -->
 <!-- -->
 <!-- debug
                     <argLine>-Dfile.encoding=cp1252 -Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=y -Dhttp.proxyHost=proxy -Dhttp.proxyPort=8080 -Xmx1024m -XX:PermSize=256m -XX:-UseGCOverheadLimit -XX:+UseParallelGC</argLine>
