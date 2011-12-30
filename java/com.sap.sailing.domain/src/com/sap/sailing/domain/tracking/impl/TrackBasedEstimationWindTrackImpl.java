@@ -26,6 +26,12 @@ import com.sap.sailing.util.impl.ArrayListNavigableSet;
  * computed from the tracked race's boat tracks.
  * <p>
  * 
+ * The estimation is integrated into the {@link WindTrackImpl} concepts by redefining the {@link #getInternalRawFixes()}
+ * method such that it returns an {@link EstimatedWindFixesAsNavigableSet} object. It computes its values by asking back
+ * to {@link #getEstimatedWindDirection(Position, TimePoint)} which first performs a cache look-up. In case of a cache
+ * miss it determines the result based on {@link TrackedRace#getEstimatedWindDirection(Position, TimePoint)}.
+ * <p>
+ * 
  * Caching is done using the base class's {@link TrackImpl#fixes} field which is made accessible through
  * {@link #getCachedFixes()}. This track observes the {@link TrackedRace} for which it provides wind estimations.
  * Whenever a change occurs, all fixes whose derivation is potentially affected by the change are removed from the
