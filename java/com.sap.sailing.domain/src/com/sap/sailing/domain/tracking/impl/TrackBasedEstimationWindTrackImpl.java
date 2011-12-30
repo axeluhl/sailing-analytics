@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.NavigableSet;
 
+import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.TimePoint;
@@ -45,7 +46,7 @@ import com.sap.sailing.util.impl.ArrayListNavigableSet;
  * @author Axel Uhl (d043530)
  * 
  */
-public class TrackBasedEstimationWindTrackImpl extends WindTrackImpl implements RaceChangeListener<Competitor> {
+public class TrackBasedEstimationWindTrackImpl extends WindTrackImpl implements RaceChangeListener {
     private final EstimatedWindFixesAsNavigableSet virtualInternalRawFixes;
 
     private final TrackedRace trackedRace;
@@ -197,11 +198,11 @@ public class TrackBasedEstimationWindTrackImpl extends WindTrackImpl implements 
 
     @Override
     public void windAveragingChanged(long oldMillisecondsOverWhichToAverage, long newMillisecondsOverWhichToAverage) {
-        // we ignore wind updates for cache invalidations; however, TODO we'd like to invalidate in case a leg changes its type
+        clearCache();
     }
 
     @Override
-    public void gpsFixReceived(GPSFix fix, Competitor competitor) {
+    public void competitorPositionChanged(GPSFix fix, Competitor competitor) {
         long averagingInterval = trackedRace.getMillisecondsOverWhichToAverageSpeed();
         Wind startOfInvalidation = getDummyFix(new MillisecondsTimePoint(fix.getTimePoint().asMillis()-averagingInterval));
         TimePoint endOfInvalidation = new MillisecondsTimePoint(fix.getTimePoint().asMillis()+averagingInterval);
@@ -228,6 +229,11 @@ public class TrackBasedEstimationWindTrackImpl extends WindTrackImpl implements 
     @Override
     public void speedAveragingChanged(long oldMillisecondsOverWhichToAverage, long newMillisecondsOverWhichToAverage) {
         clearCache();
+    }
+
+    @Override
+    public void buoyPositionChanged(GPSFix fix, Buoy buoy) {
+        clearCache(); // TODO invalidate cache around fix's time point
     }
 
 }

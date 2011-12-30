@@ -18,11 +18,10 @@ import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFix;
-import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.domain.tracking.Wind;
+import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedEventImpl;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
@@ -48,11 +47,11 @@ public class ReceiveTrackingDataTest extends AbstractTracTracLiveTest {
     @Before
     public void setupListener() {
         final DomainFactory domainFactory = DomainFactory.INSTANCE;
-        final RaceChangeListener<Competitor> positionListener = new RaceChangeListener<Competitor>() {
+        final RaceChangeListener positionListener = new AbstractRaceChangeListener() {
             private boolean first = true;
             
             @Override
-            public void gpsFixReceived(GPSFix fix, Competitor competitor) {
+            public void competitorPositionChanged(GPSFix fix, Competitor competitor) {
                 System.out.println("Received fix "+fix);
                 synchronized (semaphor) {
                     if (first) {
@@ -62,22 +61,6 @@ public class ReceiveTrackingDataTest extends AbstractTracTracLiveTest {
                     }
                     semaphor.notifyAll();
                 }
-            }
-            @Override
-            public void markPassingReceived(MarkPassing oldMarkPassing, MarkPassing markPassing) {
-            }
-            @Override
-            public void windDataReceived(Wind wind) {
-            }
-            @Override
-            public void windDataRemoved(Wind wind) {
-            }
-            @Override
-            public void speedAveragingChanged(long oldMillisecondsOverWhichToAverage, long newMillisecondsOverWhichToAverage) {
-            }
-            @Override
-            public void windAveragingChanged(long oldMillisecondsOverWhichToAverage,
-                    long newMillisecondsOverWhichToAverage) {
             }
         };
         List<TypeController> listeners = new ArrayList<TypeController>();
