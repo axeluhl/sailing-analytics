@@ -25,6 +25,7 @@ import com.sap.sailing.domain.tracking.impl.WindTrackImpl;
 public class WindTest {
     private static final int AVERAGING_INTERVAL_MILLIS = 30000 /* 30s averaging interval */;
 
+    @Test
     public void testToFail() {
         fail("Failing in order to fail");
     }
