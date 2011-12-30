@@ -64,6 +64,9 @@ public class Util {
 
         private int hashCode;
 
+        @SuppressWarnings("unused") // required for some serialization frameworks such as GWT RPC
+        private Pair() {}
+        
         public Pair( A a, B b ) {
 
             this.a = a;
@@ -137,6 +140,9 @@ public class Util {
         private C c;
 
         private int hashCode;
+
+        @SuppressWarnings("unused") // required for some serialization frameworks such as GWT RPC
+        private Triple() {}
 
         public Triple( A a, B b, C c ) {
 

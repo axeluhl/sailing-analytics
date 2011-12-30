@@ -10,6 +10,9 @@ package com.sap.sailing.domain.common;
 public class NoWindError extends RuntimeException {
     private static final long serialVersionUID = -6279617486075805721L;
 
+    @SuppressWarnings("unused") // required for some serialization frameworks such as GWT RPC
+    private NoWindError() {}
+    
     public NoWindError(NoWindException noWindException) {
         super(noWindException);
     }
