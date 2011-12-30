@@ -3,6 +3,7 @@ package com.sap.sailing.domain.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -22,6 +23,11 @@ import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.impl.BearingCluster;
 
 public class WindEstimationOnStoredTracksTest extends StoredTrackBasedTestWithTrackedRace {
+    @Test
+    public void testEmptyClusterHasNullAverage() {
+        assertNull(new BearingCluster().getAverage());
+    }
+    
     @Test
     public void testBearingClusterSplit() {
         BearingCluster cluster = new BearingCluster();

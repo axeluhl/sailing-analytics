@@ -18,10 +18,11 @@ import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.base.impl.NauticalMileDistance;
+import com.sap.sailing.domain.common.Util.Pair;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
-import com.sap.sailing.domain.tracking.RaceChangeListener;
+import com.sap.sailing.domain.tracking.GPSTrackListener;
 import com.sap.sailing.domain.tracking.WithValidityCache;
 
 public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl<FixType> implements GPSFixTrack<ItemType, FixType> {
@@ -31,7 +32,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
     private final ItemType trackedItem;
     private long millisecondsOverWhichToAverage;
 
-    private final Set<RaceChangeListener<ItemType>> listeners;
+    private final Set<GPSTrackListener<ItemType>> listeners;
     
     public GPSFixTrackImpl(ItemType trackedItem, long millisecondsOverWhichToAverage) {
         this(trackedItem, millisecondsOverWhichToAverage, DEFAULT_MAX_SPEED_FOR_SMOOTHING);
@@ -42,11 +43,11 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         this.trackedItem = trackedItem;
         this.millisecondsOverWhichToAverage = millisecondsOverWhichToAverage;
         this.maxSpeedForSmoothening = maxSpeedForSmoothening;
-        this.listeners = new HashSet<RaceChangeListener<ItemType>>();
+        this.listeners = new HashSet<GPSTrackListener<ItemType>>();
     }
 
     @Override
-    public void addListener(RaceChangeListener<ItemType> listener) {
+    public void addListener(GPSTrackListener<ItemType> listener) {
         synchronized (listeners) {
             listeners.add(listener);
         }
@@ -57,7 +58,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
      * {@link ConcurrentModificationException}s because listeners may be added on the fly, and this object will
      * synchronize on the listeners collection before adding on.
      */
-    protected Iterable<RaceChangeListener<ItemType>> getListeners() {
+    protected Iterable<GPSTrackListener<ItemType>> getListeners() {
         return listeners;
     }
 
@@ -114,11 +115,23 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         return millisecondsOverWhichToAverage;
     }
 
+    private Pair<FixType, FixType> getFixesForPositionEstimation(TimePoint timePoint, boolean inclusive) {
+        FixType lastFix = inclusive ? getLastFixAtOrBefore(timePoint) : getLastFixBefore(timePoint);
+        FixType firstFix = inclusive ? getFirstFixAtOrAfter(timePoint) : getFirstFixAfter(timePoint);
+        return new Pair<FixType, FixType>(lastFix, firstFix);
+    }
+    
     @Override
     public Position getEstimatedPosition(TimePoint timePoint, boolean extrapolate) {
-        FixType lastFixAtOrBefore = getLastFixAtOrBefore(timePoint);
-        FixType firstFixAtOrAfter = getFirstFixAtOrAfter(timePoint);
-        return getEstimatedPosition(timePoint, extrapolate, lastFixAtOrBefore, firstFixAtOrAfter);
+        Pair<FixType, FixType> fixesForPositionEstimation = getFixesForPositionEstimation(timePoint, /* inclusive */ true);
+        return getEstimatedPosition(timePoint, extrapolate, fixesForPositionEstimation.getA(), fixesForPositionEstimation.getB());
+    }
+
+    @Override
+    public Pair<TimePoint, TimePoint> getEstimatedPositionTimePeriodAffectedBy(GPSFix fix) {
+        Pair<FixType, FixType> fixesForPositionEstimation = getFixesForPositionEstimation(fix.getTimePoint(), /* inclusive */ false);
+        return new Pair<TimePoint, TimePoint>(fixesForPositionEstimation.getA() == null ? null : fixesForPositionEstimation.getA().getTimePoint(),
+                fixesForPositionEstimation.getB() == null ? null : fixesForPositionEstimation.getB().getTimePoint());
     }
 
     @Override

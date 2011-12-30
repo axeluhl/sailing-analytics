@@ -104,14 +104,22 @@ public class BearingCluster {
         sumCos += Math.cos(bearing.getRadians());
     }
     
+    /**
+     * If the cluster contains no bearings, <code>null</code> is returned. Otherwise, the average angle is computed
+     * by adding up the sin and cos values of the individual bearings, then computing the atan2 of the ratio.
+     */
     public Bearing getAverage() {
-        double angle;
-        if (sumCos == 0) {
-            angle = sumSin >= 0 ? Math.PI/2 : -Math.PI/2;
-        } else {
-            angle = Math.atan2(sumSin, sumCos);
+        Bearing result = null;
+        if (!bearings.isEmpty()) {
+            double angle;
+            if (sumCos == 0) {
+                angle = sumSin >= 0 ? Math.PI / 2 : -Math.PI / 2;
+            } else {
+                angle = Math.atan2(sumSin, sumCos);
+            }
+            result = new RadianBearingImpl(angle < 0 ? angle + 2 * Math.PI : angle);
         }
-        return new RadianBearingImpl(angle < 0 ? angle+2*Math.PI : angle);
+        return result;
     }
     
     /**

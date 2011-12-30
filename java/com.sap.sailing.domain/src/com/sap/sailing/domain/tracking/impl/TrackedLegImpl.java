@@ -26,7 +26,7 @@ import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
 
-public class TrackedLegImpl implements TrackedLeg, RaceChangeListener<Competitor> {
+public class TrackedLegImpl implements TrackedLeg, RaceChangeListener {
     private final static Logger logger = Logger.getLogger(TrackedLegImpl.class.getName());
     
     private final static double UPWIND_DOWNWIND_TOLERANCE_IN_DEG = 40; // TracTrac does 22.5, Marcus Baur suggest 40
@@ -131,7 +131,7 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener<Competitor
             throw new NoWindException("Need to know wind direction to determine whether leg "+getLeg()+
                     " is an upwind or downwind leg");
         }
-        // check for all combinations of start/end waypoint buoys:
+        // check for all combinations of start/end waypoint buoys and respond for the first that's within bounds
         for (Buoy startBuoy : getLeg().getFrom().getBuoys()) {
             Position startBuoyPos = getTrackedRace().getOrCreateTrack(startBuoy).getEstimatedPosition(at, false);
             for (Buoy endBuoy : getLeg().getTo().getBuoys()) {
@@ -178,7 +178,7 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener<Competitor
     }
 
     @Override
-    public void gpsFixReceived(GPSFix fix, Competitor competitor) {
+    public void competitorPositionChanged(GPSFix fix, Competitor competitor) {
         clearCaches();
     }
 
@@ -194,6 +194,11 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener<Competitor
 
     @Override
     public void markPassingReceived(MarkPassing oldMarkPassing, MarkPassing markPassing) {
+        clearCaches();
+    }
+
+    @Override
+    public void buoyPositionChanged(GPSFix fix, Buoy buoy) {
         clearCaches();
     }
 

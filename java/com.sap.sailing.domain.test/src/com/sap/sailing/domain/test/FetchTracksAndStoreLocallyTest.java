@@ -16,11 +16,10 @@ import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
-import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.domain.tracking.Wind;
+import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 import com.sap.sailing.domain.tracking.impl.DynamicGPSFixMovingTrackImpl;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
@@ -51,31 +50,15 @@ public class FetchTracksAndStoreLocallyTest extends OnlineTracTracBasedTest {
      */
     private void setUp(String eventName, String raceId) throws MalformedURLException, IOException, InterruptedException, URISyntaxException {
         super.setUpWithoutLaunchingController(eventName, raceId);
-        final RaceChangeListener<Competitor> positionListener = new RaceChangeListener<Competitor>() {
+        final RaceChangeListener positionListener = new AbstractRaceChangeListener() {
             @Override
-            public void gpsFixReceived(GPSFix fix, Competitor competitor) {
+            public void competitorPositionChanged(GPSFix fix, Competitor competitor) {
                 DynamicGPSFixTrack<Competitor, GPSFixMoving> track = tracks.get(competitor);
                 if (track == null) {
                     track = new DynamicGPSFixMovingTrackImpl<Competitor>(competitor, /* millisecondsOverWhichToAverage */ 40000);
                     tracks.put(competitor, track);
                 }
                 track.addGPSFix((GPSFixMoving) fix);
-            }
-            @Override
-            public void markPassingReceived(MarkPassing oldMarkPassing, MarkPassing markPassing) {
-            }
-            @Override
-            public void windDataReceived(Wind wind) {
-            }
-            @Override
-            public void windDataRemoved(Wind wind) {
-            }
-            @Override
-            public void speedAveragingChanged(long oldMillisecondsOverWhichToAverage, long newMillisecondsOverWhichToAverage) {
-            }
-            @Override
-            public void windAveragingChanged(long oldMillisecondsOverWhichToAverage,
-                    long newMillisecondsOverWhichToAverage) {
             }
         };
         DynamicTrackedEvent trackedEvent = getTrackedEvent();

@@ -49,4 +49,7 @@ public interface Course extends Named {
      * had been used.
      */
     void update(List<ControlPoint> newControlPoints, DomainFactory baseDomainFactory) throws PatchFailedException;
+
+    Iterable<Leg> getLegsAdjacentTo(Buoy buoy);
+
 }

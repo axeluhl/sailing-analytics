@@ -34,6 +34,8 @@ public interface Track<FixType extends Timed> {
 
     FixType getLastFixAtOrBefore(TimePoint timePoint);
 
+    FixType getLastFixBefore(TimePoint timePoint);
+
     FixType getLastRawFixAtOrBefore(TimePoint timePoint);
 
     FixType getFirstFixAtOrAfter(TimePoint timePoint);
@@ -77,4 +79,5 @@ public interface Track<FixType extends Timed> {
      * modifications.
      */
     Iterator<FixType> getRawFixesIterator(TimePoint startingAt, boolean inclusive);
+
 }
