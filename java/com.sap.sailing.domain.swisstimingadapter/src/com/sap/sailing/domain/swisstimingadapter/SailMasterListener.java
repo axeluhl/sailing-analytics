@@ -5,7 +5,7 @@ import java.util.List;
 
 import com.sap.sailing.domain.base.Distance;
 import com.sap.sailing.domain.base.TimePoint;
-import com.sap.sailing.util.Util.Triple;
+import com.sap.sailing.domain.common.Util.Triple;
 
 public interface SailMasterListener {
     void receivedRacePositionData(String raceID, RaceStatus status, TimePoint timePoint, TimePoint startTime,

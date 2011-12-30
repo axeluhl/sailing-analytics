@@ -28,7 +28,9 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.DouglasPeucker;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.common.Util;
 import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.Util.Pair;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
@@ -46,8 +48,6 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
-import com.sap.sailing.util.Util;
-import com.sap.sailing.util.Util.Pair;
 
 public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     private static final Logger logger = Logger.getLogger(TrackedRaceImpl.class.getName());

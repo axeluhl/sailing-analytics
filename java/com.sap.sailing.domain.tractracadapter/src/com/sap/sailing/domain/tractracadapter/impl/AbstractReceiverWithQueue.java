@@ -5,13 +5,13 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.common.Util.Triple;
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.TrackedEvent;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.Receiver;
-import com.sap.sailing.util.Util.Triple;
 import com.tractrac.clientmodule.Event;
 import com.tractrac.clientmodule.Race;
 

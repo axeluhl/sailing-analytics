@@ -15,6 +15,7 @@ import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.common.Util;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.tracking.NoWindException;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -23,7 +24,6 @@ import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.TrackBasedEstimationWindTrackImpl;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
-import com.sap.sailing.util.Util;
 
 public class WindEstimationOnKielerWoche505Race2DataTest extends OnlineTracTracBasedTest {
 

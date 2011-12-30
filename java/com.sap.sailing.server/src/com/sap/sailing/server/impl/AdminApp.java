@@ -32,6 +32,7 @@ import com.sap.sailing.domain.base.impl.DegreePosition;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.Util.Triple;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.MongoWindStoreFactory;
@@ -46,7 +47,6 @@ import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tractracadapter.RaceRecord;
 import com.sap.sailing.server.Servlet;
 import com.sap.sailing.util.InvalidDateException;
-import com.sap.sailing.util.Util.Triple;
 
 public class AdminApp extends Servlet {
     private static final long serialVersionUID = -6849138354941569249L;

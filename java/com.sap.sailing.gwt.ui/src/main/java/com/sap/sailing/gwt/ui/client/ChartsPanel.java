@@ -55,10 +55,10 @@ import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.Util.Pair;
 import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
 import com.sap.sailing.gwt.ui.shared.CompetitorInRaceDAO;
 import com.sap.sailing.gwt.ui.shared.CompetitorsAndTimePointsDAO;
-import com.sap.sailing.gwt.ui.shared.Pair;
 import com.sap.sailing.server.api.DetailType;
 import com.sap.sailing.server.api.RaceIdentifier;
 

@@ -56,6 +56,7 @@ import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MeterDistance;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.common.Util.Pair;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard.Entry;
@@ -99,7 +100,6 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardRowDAO;
 import com.sap.sailing.gwt.ui.shared.LegEntryDAO;
 import com.sap.sailing.gwt.ui.shared.ManeuverDAO;
 import com.sap.sailing.gwt.ui.shared.MarkDAO;
-import com.sap.sailing.gwt.ui.shared.Pair;
 import com.sap.sailing.gwt.ui.shared.PositionDAO;
 import com.sap.sailing.gwt.ui.shared.QuickRankDAO;
 import com.sap.sailing.gwt.ui.shared.RaceDAO;
@@ -396,7 +396,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     @Override
     public Pair<String, List<TracTracRaceRecordDAO>> listTracTracRacesInEvent(String eventJsonURL) throws MalformedURLException, IOException,
             ParseException, org.json.simple.parser.ParseException, URISyntaxException {
-        com.sap.sailing.util.Util.Pair<String,List<RaceRecord>> raceRecords;
+        com.sap.sailing.domain.common.Util.Pair<String,List<RaceRecord>> raceRecords;
         raceRecords = getService().getTracTracRaceRecords(new URL(eventJsonURL));
         List<TracTracRaceRecordDAO> result = new ArrayList<TracTracRaceRecordDAO>();
         for (RaceRecord raceRecord : raceRecords.getB()) {

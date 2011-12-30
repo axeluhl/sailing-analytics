@@ -13,8 +13,8 @@ import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.common.Util.Triple;
 import com.sap.sailing.server.RacingEventService;
-import com.sap.sailing.util.Util.Triple;
 
 public class Activator implements BundleActivator, ServiceListener {
     private static final Logger logger = Logger.getLogger(Activator.class.getName());

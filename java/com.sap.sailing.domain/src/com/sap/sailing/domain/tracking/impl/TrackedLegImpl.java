@@ -14,6 +14,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.TimePoint;
+import com.sap.sailing.domain.common.Util;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.MarkPassing;
@@ -23,7 +24,6 @@ import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
-import com.sap.sailing.util.Util;
 
 public class TrackedLegImpl implements TrackedLeg, RaceChangeListener<Competitor> {
     private final static Logger logger = Logger.getLogger(TrackedLegImpl.class.getName());
