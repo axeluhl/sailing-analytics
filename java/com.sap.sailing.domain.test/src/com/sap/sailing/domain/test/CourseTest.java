@@ -13,7 +13,7 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.BuoyImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
-import com.sap.sailing.util.Util;
+import com.sap.sailing.domain.common.Util;
 
 public class CourseTest {
     @Test

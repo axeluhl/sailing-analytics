@@ -9,11 +9,11 @@ import java.util.TreeSet;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.TimePoint;
+import com.sap.sailing.domain.common.NoWindError;
+import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
-import com.sap.sailing.domain.tracking.NoWindError;
-import com.sap.sailing.domain.tracking.NoWindException;
 
 /**
  * Discards <code>i</code> results if the number of races started is greater or equal to

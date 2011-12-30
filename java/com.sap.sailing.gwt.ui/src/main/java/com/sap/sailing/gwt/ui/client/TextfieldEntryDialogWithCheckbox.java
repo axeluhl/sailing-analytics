@@ -5,7 +5,7 @@ import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.ui.shared.Pair;
+import com.sap.sailing.domain.common.Util.Pair;
 
 public class TextfieldEntryDialogWithCheckbox extends DataEntryDialog<Pair<String, Boolean>> {
     private final CheckBox checkbox;

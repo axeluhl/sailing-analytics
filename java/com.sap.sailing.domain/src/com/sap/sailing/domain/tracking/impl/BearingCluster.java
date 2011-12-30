@@ -5,12 +5,14 @@ import java.util.List;
 
 import com.sap.sailing.domain.base.Bearing;
 import com.sap.sailing.domain.base.impl.RadianBearingImpl;
-import com.sap.sailing.util.Util.Pair;
+import com.sap.sailing.domain.common.Util.Pair;
 
 /**
  * Contains a number of {@link Bearing} objects and maintains the average bearing. For a given {@link Bearing} it
  * can determine the difference to this cluster's average bearing. It can also split the cluster into two, based
- * on the two bearings farthest apart.<p>
+ * on the two bearings farthest apart. The cluster can contain multiple occurrences of the same and also
+ * multiple occurrences of mutually equal {@link Bearing} objects which is one possible way of computing a
+ * weighted average.<p>
  * 
  * It is assumed that bearings added to this cluster are no further than 180 degrees apart. Violating this
  * rule will lead to unpredictable results.

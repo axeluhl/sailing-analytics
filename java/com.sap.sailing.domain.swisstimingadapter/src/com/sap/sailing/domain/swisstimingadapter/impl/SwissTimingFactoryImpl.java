@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.sap.sailing.domain.base.TimePoint;
+import com.sap.sailing.domain.common.Util.Triple;
 import com.sap.sailing.domain.swisstimingadapter.DomainFactory;
 import com.sap.sailing.domain.swisstimingadapter.Race;
 import com.sap.sailing.domain.swisstimingadapter.RaceSpecificMessageLoader;
@@ -20,7 +21,6 @@ import com.sap.sailing.domain.swisstimingadapter.SwissTimingMessageParser;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingRaceTracker;
 import com.sap.sailing.domain.tracking.TrackedEventRegistry;
 import com.sap.sailing.domain.tracking.WindStore;
-import com.sap.sailing.util.Util.Triple;
 
 public class SwissTimingFactoryImpl implements SwissTimingFactory {
     private final Map<Triple<String, Integer, RaceSpecificMessageLoader>, SailMasterConnector> connectors;

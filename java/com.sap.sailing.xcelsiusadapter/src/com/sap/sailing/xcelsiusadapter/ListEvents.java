@@ -20,11 +20,11 @@ import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.common.Util;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.server.RacingEventService;
-import com.sap.sailing.util.Util;
 
 public class ListEvents extends Action {
     public ListEvents(HttpServletRequest req, HttpServletResponse res, RacingEventService service, int maxRows) {

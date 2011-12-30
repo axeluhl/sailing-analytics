@@ -3,7 +3,7 @@ package com.sap.sailing.domain.leaderboard;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Named;
 import com.sap.sailing.domain.base.TimePoint;
-import com.sap.sailing.domain.tracking.NoWindException;
+import com.sap.sailing.domain.common.NoWindException;
 
 /**
  * Represents the data common to all columns in a {@link Leaderboard}. A column enables

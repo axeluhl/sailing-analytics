@@ -2,8 +2,8 @@ package com.sap.sailing.domain.tracking.impl;
 
 import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.SpeedWithBearing;
-import com.sap.sailing.domain.base.Tack;
 import com.sap.sailing.domain.base.TimePoint;
+import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.tracking.Maneuver;
 
 public class ManeuverImpl extends AbstractGPSFixImpl implements Maneuver {

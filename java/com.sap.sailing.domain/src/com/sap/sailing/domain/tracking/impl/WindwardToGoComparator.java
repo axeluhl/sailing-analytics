@@ -6,8 +6,8 @@ import java.util.SortedSet;
 
 import com.sap.sailing.domain.base.Distance;
 import com.sap.sailing.domain.base.TimePoint;
-import com.sap.sailing.domain.tracking.NoWindError;
-import com.sap.sailing.domain.tracking.NoWindException;
+import com.sap.sailing.domain.common.NoWindError;
+import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 
