@@ -18,9 +18,9 @@ import java.util.regex.Pattern;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import com.sap.sailing.domain.common.Util;
 import com.sap.sailing.util.CountryCode;
 import com.sap.sailing.util.CountryCodeFactory;
-import com.sap.sailing.util.Util;
 
 public class CountryCodeTest {
     private static final int NUMBER_OF_COUNTRY_CODES = 259;

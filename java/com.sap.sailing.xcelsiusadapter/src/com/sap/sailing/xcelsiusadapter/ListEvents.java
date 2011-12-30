@@ -20,11 +20,11 @@ import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.common.Util;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.server.RacingEventService;
-import com.sap.sailing.util.Util;
 
 public class ListEvents extends Action {
     public ListEvents(HttpServletRequest req, HttpServletResponse res, RacingEventService service, int maxRows) {
@@ -41,44 +41,47 @@ public class ListEvents extends Action {
             for (final String raceName : races.keySet()) {
                 RaceDefinition race = races.get(raceName);
                 final TrackedRace trackedRace = getTrackedRace(event, race);
-                addRow();
-                addColumn(race.getBoatClass().getName());
-                addColumn(eventName);
-                addColumn(raceName);
-                addColumn(trackedRace.getStart()==null?" ":dateFormat.format(trackedRace.getStart().asDate()));
-                addColumn(""+Util.size(race.getCompetitors()));
-                Iterator<Waypoint> waypointsIter = race.getCourse().getWaypoints().iterator();
-                Position startPos = trackedRace.getApproximatePosition(waypointsIter.next(),
-                        trackedRace.getStart());
-                Position secondMarkPos = trackedRace.getApproximatePosition(waypointsIter.next(),
-                        trackedRace.getStart());
-                Wind wind = trackedRace.getWind(startPos, trackedRace.getStart());
-                addColumn(""+wind.getBeaufort());
-                addColumn(""+wind.getFrom().getDegrees());
-                addColumn("0"); // gusts
-                List<Leg> legs = race.getCourse().getLegs();
-                TrackedLeg lastTrackedLeg = trackedRace.getTrackedLeg(legs.get(legs.size()-1));
-                LinkedHashMap<Competitor, Integer> finalRanks = lastTrackedLeg.getRanks(trackedRace.getTimePointOfNewestEvent());
-                Iterator<Map.Entry<Competitor, Integer>> entryIter = finalRanks.entrySet().iterator();
-                for (int i=0; i<3; i++) {
-                    String nationality = "";
-                    String sailID = "";
-                    String competitorName = "";
-                    if (entryIter.hasNext()) {
-                        Map.Entry<Competitor, Integer> next = entryIter.next();
-                        nationality = next.getKey().getTeam().getNationality().getThreeLetterIOCAcronym();
-                        sailID = next.getKey().getBoat().getSailID();
-                        competitorName = next.getKey().getName();
+                if (trackedRace != null) {
+                    addRow();
+                    addColumn(race.getBoatClass().getName());
+                    addColumn(eventName);
+                    addColumn(raceName);
+                    addColumn(trackedRace.getStart() == null ? " " : dateFormat.format(trackedRace.getStart().asDate()));
+                    addColumn("" + Util.size(race.getCompetitors()));
+                    Iterator<Waypoint> waypointsIter = race.getCourse().getWaypoints().iterator();
+                    Position startPos = trackedRace
+                            .getApproximatePosition(waypointsIter.next(), trackedRace.getStart());
+                    Position secondMarkPos = trackedRace.getApproximatePosition(waypointsIter.next(),
+                            trackedRace.getStart());
+                    Wind wind = trackedRace.getWind(startPos, trackedRace.getStart());
+                    addColumn("" + wind.getBeaufort());
+                    addColumn("" + wind.getFrom().getDegrees());
+                    addColumn("0"); // gusts
+                    List<Leg> legs = race.getCourse().getLegs();
+                    TrackedLeg lastTrackedLeg = trackedRace.getTrackedLeg(legs.get(legs.size() - 1));
+                    LinkedHashMap<Competitor, Integer> finalRanks = lastTrackedLeg.getRanks(trackedRace
+                            .getTimePointOfNewestEvent());
+                    Iterator<Map.Entry<Competitor, Integer>> entryIter = finalRanks.entrySet().iterator();
+                    for (int i = 0; i < 3; i++) {
+                        String nationality = "";
+                        String sailID = "";
+                        String competitorName = "";
+                        if (entryIter.hasNext()) {
+                            Map.Entry<Competitor, Integer> next = entryIter.next();
+                            nationality = next.getKey().getTeam().getNationality().getThreeLetterIOCAcronym();
+                            sailID = next.getKey().getBoat().getSailID();
+                            competitorName = next.getKey().getName();
+                        }
+                        addColumn(nationality);
+                        addColumn(sailID);
+                        addColumn(competitorName);
                     }
-                    addColumn(nationality);
-                    addColumn(sailID);
-                    addColumn(competitorName);
+                    addColumn("" + startPos.getBearingGreatCircle(secondMarkPos).getDegrees());
+                    addColumn("" + startPos.getLatDeg());
+                    addColumn("" + startPos.getLngDeg());
+                    addColumn(URLEncoder.encode(eventName, "UTF-8"));
+                    addColumn(URLEncoder.encode(raceName, "UTF-8"));
                 }
-                addColumn(""+startPos.getBearingGreatCircle(secondMarkPos).getDegrees());
-                addColumn(""+startPos.getLatDeg());
-                addColumn(""+startPos.getLngDeg());
-                addColumn(URLEncoder.encode(eventName, "UTF-8"));
-                addColumn(URLEncoder.encode(raceName, "UTF-8"));
             }
         }
         say(table);

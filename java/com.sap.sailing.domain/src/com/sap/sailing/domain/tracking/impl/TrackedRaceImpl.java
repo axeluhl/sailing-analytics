@@ -22,32 +22,32 @@ import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.SpeedWithBearing;
-import com.sap.sailing.domain.base.Tack;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.DouglasPeucker;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.common.LegType;
+import com.sap.sailing.domain.common.NoWindError;
+import com.sap.sailing.domain.common.NoWindException;
+import com.sap.sailing.domain.common.Tack;
+import com.sap.sailing.domain.common.Util;
+import com.sap.sailing.domain.common.Util.Pair;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
+import com.sap.sailing.domain.tracking.GPSTrackListener;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.Maneuver.Type;
 import com.sap.sailing.domain.tracking.MarkPassing;
-import com.sap.sailing.domain.tracking.NoWindError;
-import com.sap.sailing.domain.tracking.NoWindException;
-import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.TrackedEvent;
 import com.sap.sailing.domain.tracking.TrackedLeg;
-import com.sap.sailing.domain.tracking.TrackedLeg.LegType;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
-import com.sap.sailing.util.Util;
-import com.sap.sailing.util.Util.Pair;
 
 public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     private static final Logger logger = Logger.getLogger(TrackedRaceImpl.class.getName());
@@ -360,11 +360,15 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         synchronized (buoyTracks) {
             GPSFixTrack<Buoy, GPSFix> result = buoyTracks.get(buoy);
             if (result == null) {
-                result = new DynamicGPSFixTrackImpl<Buoy>(buoy, millisecondsOverWhichToAverageSpeed);
+                result = createBuoyTrack(buoy);
                 buoyTracks.put(buoy, result);
             }
             return result;
         }
+    }
+
+    protected DynamicGPSFixTrackImpl<Buoy> createBuoyTrack(Buoy buoy) {
+        return new DynamicGPSFixTrackImpl<Buoy>(buoy, millisecondsOverWhichToAverageSpeed);
     }
 
     @Override
@@ -418,6 +422,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                 result = new WindImpl(firstLegStart, at, new KnotSpeedWithBearingImpl(1.0,
                         firstLegEnd.getBearingGreatCircle(firstLegStart)));
                 directionFromStartToNextMarkCache = result;
+                // FIXME don't we have to expect that after cache invalidation the listeners are still subscribed?
                 addDirectionFromStartToNextMarkCacheInvalidationListener();
             } else {
                 result = null;
@@ -428,26 +433,17 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     
     private void addDirectionFromStartToNextMarkCacheInvalidationListener() {
         Leg firstLeg = getRace().getCourse().getLegs().iterator().next();
-        RaceChangeListener<Buoy> listener = new RaceChangeListener<Buoy>() {
-            @Override
-            public void windDataReceived(Wind wind) {}
-
-            @Override
-            public void windDataRemoved(Wind wind) {}
-
-            @Override
-            public void windAveragingChanged(long oldMillisecondsOverWhichToAverage, long newMillisecondsOverWhichToAverage) {}
-
+        GPSTrackListener<Buoy> listener = new GPSTrackListener<Buoy>() {
             @Override
             public void gpsFixReceived(GPSFix fix, Buoy competitor) {
                 directionFromStartToNextMarkCache = null;
             }
 
             @Override
-            public void markPassingReceived(MarkPassing oldMarkPassing, MarkPassing markPassing) {}
-
-            @Override
-            public void speedAveragingChanged(long oldMillisecondsOverWhichToAverage, long newMillisecondsOverWhichToAverage) {}
+            public void speedAveragingChanged(long oldMillisecondsOverWhichToAverage,
+                    long newMillisecondsOverWhichToAverage) {
+                directionFromStartToNextMarkCache = null;
+            }
         };
         for (Buoy buoy : firstLeg.getFrom().getBuoys()) {
             getOrCreateTrack(buoy).addListener(listener);
@@ -555,8 +551,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     @Override
     public Wind getEstimatedWindDirection(Position position, TimePoint timePoint) {
-        int count = 0; // counts how many boats' courses were used in computing the result
-        Map<LegType, BearingCluster> bearings = new HashMap<TrackedLeg.LegType, BearingCluster>();
+        Map<LegType, BearingCluster> bearings = new HashMap<LegType, BearingCluster>();
         for (LegType legType : LegType.values()) {
             bearings.put(legType, new BearingCluster());
         }
@@ -573,6 +568,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                 }
                 if (legType != LegType.REACHING) {
                     GPSFixTrack<Competitor, GPSFixMoving> track = getTrack(competitor);
+                    // TODO bug #167 could be fixed here by excluding competitors that are x seconds before/after a mark passing
                     if (!track.hasDirectionChange(timePoint, getManeuverDegreeAngleThreshold())) {
                         Bearing bearing = track.getEstimatedSpeed(timePoint).getBearing();
                         BearingCluster bearingClusters = bearings.get(legType);
@@ -581,34 +577,33 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                 }
             }
         }
-        Bearing upwindAverage = null;
+        Bearing reversedUpwindAverage = null;
+        int upwindConfidence = 0;
         BearingCluster[] bearingClustersUpwind = bearings.get(LegType.UPWIND).splitInTwo(getMinimumAngleBetweenDifferentTacksUpwind());
         if (!bearingClustersUpwind[0].isEmpty() && !bearingClustersUpwind[1].isEmpty()) {
-            upwindAverage = bearingClustersUpwind[0].getAverage().middle(bearingClustersUpwind[1].getAverage());
-            count += bearingClustersUpwind[0].size() + bearingClustersUpwind[1].size();
+            reversedUpwindAverage = bearingClustersUpwind[0].getAverage().middle(bearingClustersUpwind[1].getAverage()).reverse();
+            upwindConfidence = Math.min(bearingClustersUpwind[0].size(), bearingClustersUpwind[1].size());
         }
         Bearing downwindAverage = null;
+        int downwindConfidence = 0;
         BearingCluster[] bearingClustersDownwind = bearings.get(LegType.DOWNWIND).splitInTwo(getMinimumAngleBetweenDifferentTacksDownwind());
         if (!bearingClustersDownwind[0].isEmpty() && !bearingClustersDownwind[1].isEmpty()) {
             downwindAverage = bearingClustersDownwind[0].getAverage().middle(bearingClustersDownwind[1].getAverage());
-            count += bearingClustersDownwind[0].size() + bearingClustersDownwind[1].size();
+            downwindConfidence = Math.min(bearingClustersDownwind[0].size(), bearingClustersDownwind[1].size());
         }
-        Bearing bearing;
-        if (upwindAverage == null) {
-            if (downwindAverage == null) {
-                return null;
-            } else {
-                bearing = downwindAverage;
-            }
-        } else {
-            if (downwindAverage == null) {
-                bearing = upwindAverage.reverse();
-            } else {
-                bearing = downwindAverage.middle(upwindAverage.reverse());
-            }
+        int confidence = upwindConfidence + downwindConfidence;
+        BearingCluster resultCluster = new BearingCluster();
+        assert upwindConfidence == 0 || reversedUpwindAverage != null;
+        for (int i=0; i<upwindConfidence; i++) {
+            resultCluster.add(reversedUpwindAverage);
         }
-        return new WindImpl(null, timePoint,
-                new KnotSpeedWithBearingImpl(/* speedInKnots */ count, bearing));
+        assert downwindConfidence == 0 || downwindAverage != null;
+        for (int i=0; i<downwindConfidence; i++) {
+            resultCluster.add(downwindAverage);
+        }
+        Bearing resultBearing = resultCluster.getAverage();
+        return resultBearing == null ? null : new WindImpl(null, timePoint,
+                new KnotSpeedWithBearingImpl(/* speedInKnots */ confidence, resultBearing));
     }
     
     /**

@@ -7,8 +7,8 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.TimePoint;
+import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.test.mock.MockedTrackedRace;
-import com.sap.sailing.domain.tracking.NoWindException;
 
 public class MockedTrackedRaceWithFixedRank extends MockedTrackedRace {
     private final int rank;

@@ -6,20 +6,18 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: com.sap.sailing.server.impl.Activator
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: org.osgi.framework;version="1.3.0",
+Import-Package: org.json.simple,
+ org.json.simple.parser,
+ org.osgi.framework;version="1.3.0",
  org.osgi.util.tracker;version="1.3.1"
 Bundle-ActivationPolicy: lazy
-Require-Bundle: org.eclipse.equinox.http.registry;bundle-version="1.1.1",
- javax.servlet;bundle-version="2.5.0",
- com.sap.sailing.domain,
+Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.domain.tractracadapter,
- org.json.simple;bundle-version="1.1.0",
  com.sap.sailing.expeditionconnector,
  com.sap.sailing.declination,
  com.sap.sailing.mongodb,
+ javax.servlet;bundle-version="2.5.0",
  com.mongodb.driver;bundle-version="2.6.2",
- org.eclipse.osgi.services;bundle-version="3.3.0",
- com.sap.sailing.httpservicetracker,
  com.sap.sailing.domain.swisstimingadapter,
  com.sap.sailing.domain.persistence,
  com.sap.sailing.domain.swisstimingadapter.persistence,
@@ -32,3 +30,4 @@ Export-Package: com.sap.sailing.server,
    com.sap.sailing.server.test,
    com.sap.sailing.domain.swisstimingadapter.test,
    com.sap.sailing.gwt.ui.test"
+Web-ContextPath: /sailingserver

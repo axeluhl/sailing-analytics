@@ -7,10 +7,10 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.logging.Logger;
 
+import com.sap.sailing.domain.common.Util.Pair;
 import com.sap.sailing.domain.swisstimingadapter.MessageType;
 import com.sap.sailing.domain.swisstimingadapter.impl.SailMasterMessageImpl;
 import com.sap.sailing.domain.swisstimingadapter.impl.SailMasterTransceiverImpl;
-import com.sap.sailing.util.Util.Pair;
 
 public class SailMasterDummy implements Runnable {
     private static final Logger logger = Logger.getLogger(SailMasterDummy.class.getName());

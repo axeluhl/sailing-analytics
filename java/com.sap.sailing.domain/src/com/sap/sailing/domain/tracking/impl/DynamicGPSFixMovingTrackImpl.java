@@ -33,7 +33,7 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends DynamicTrackImpl<Ite
      * memory compared to the original, "naive" implementation. It gets along with a single object.
      */
     @Override
-    public synchronized void addGPSFix(GPSFixMoving gpsFix) {
+    public void addGPSFix(GPSFixMoving gpsFix) {
         super.addGPSFix(new CompactGPSFixMovingImpl(gpsFix));
     }
 

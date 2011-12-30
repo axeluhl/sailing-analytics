@@ -3,7 +3,7 @@ package com.sap.sailing.domain.tracking.impl;
 import com.sap.sailing.domain.base.Speed;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSFix;
-import com.sap.sailing.domain.tracking.RaceChangeListener;
+import com.sap.sailing.domain.tracking.GPSTrackListener;
 
 public class DynamicTrackImpl<ItemType, FixType extends GPSFix> extends
         GPSFixTrackImpl<ItemType, FixType> implements DynamicGPSFixTrack<ItemType, FixType> {
@@ -21,9 +21,9 @@ public class DynamicTrackImpl<ItemType, FixType extends GPSFix> extends
             getInternalRawFixes().add(gpsFix);
             invalidateValidityCaches(gpsFix);
         }
-        Iterable<RaceChangeListener<ItemType>> listeners = getListeners();
+        Iterable<GPSTrackListener<ItemType>> listeners = getListeners();
         synchronized (listeners) {
-            for (RaceChangeListener<ItemType> listener : listeners) {
+            for (GPSTrackListener<ItemType> listener : listeners) {
                 listener.gpsFixReceived(gpsFix, getTrackedItem());
             }
         }
@@ -33,9 +33,9 @@ public class DynamicTrackImpl<ItemType, FixType extends GPSFix> extends
     public void setMillisecondsOverWhichToAverage(long millisecondsOverWhichToAverage) {
         long oldMillis = getMillisecondsOverWhichToAverage();
         super.setMillisecondsOverWhichToAverage(millisecondsOverWhichToAverage);
-        Iterable<RaceChangeListener<ItemType>> listeners = getListeners();
+        Iterable<GPSTrackListener<ItemType>> listeners = getListeners();
         synchronized (listeners) {
-            for (RaceChangeListener<ItemType> listener : listeners) {
+            for (GPSTrackListener<ItemType> listener : listeners) {
                 listener.speedAveragingChanged(oldMillis, millisecondsOverWhichToAverage);
             }
         }

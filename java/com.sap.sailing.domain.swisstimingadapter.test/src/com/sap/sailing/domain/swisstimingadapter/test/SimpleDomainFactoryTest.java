@@ -13,6 +13,7 @@ import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.EventImpl;
+import com.sap.sailing.domain.common.Util;
 import com.sap.sailing.domain.swisstimingadapter.Competitor;
 import com.sap.sailing.domain.swisstimingadapter.Course;
 import com.sap.sailing.domain.swisstimingadapter.DomainFactory;
@@ -23,7 +24,6 @@ import com.sap.sailing.domain.swisstimingadapter.impl.CourseImpl;
 import com.sap.sailing.domain.swisstimingadapter.impl.MarkImpl;
 import com.sap.sailing.domain.swisstimingadapter.impl.RaceImpl;
 import com.sap.sailing.domain.swisstimingadapter.impl.StartListImpl;
-import com.sap.sailing.util.Util;
 
 import difflib.PatchFailedException;
 

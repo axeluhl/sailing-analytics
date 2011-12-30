@@ -21,6 +21,9 @@ import org.junit.Test;
 import com.sap.sailing.domain.base.Distance;
 import com.sap.sailing.domain.base.Speed;
 import com.sap.sailing.domain.base.TimePoint;
+import com.sap.sailing.domain.common.Util;
+import com.sap.sailing.domain.common.Util.Pair;
+import com.sap.sailing.domain.common.Util.Triple;
 import com.sap.sailing.domain.swisstimingadapter.Competitor;
 import com.sap.sailing.domain.swisstimingadapter.Course;
 import com.sap.sailing.domain.swisstimingadapter.Fix;
@@ -32,9 +35,6 @@ import com.sap.sailing.domain.swisstimingadapter.SailMasterListener;
 import com.sap.sailing.domain.swisstimingadapter.StartList;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
 import com.sap.sailing.domain.swisstimingadapter.persistence.SwissTimingAdapterPersistence;
-import com.sap.sailing.util.Util;
-import com.sap.sailing.util.Util.Pair;
-import com.sap.sailing.util.Util.Triple;
 
 @Ignore("This test doesn't work as long as the server doesn't play an actual race")
 public class SwissTimingSailMasterLiveTest implements SailMasterListener {

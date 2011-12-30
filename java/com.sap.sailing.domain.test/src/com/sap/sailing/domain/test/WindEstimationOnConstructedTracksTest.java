@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -18,6 +19,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.Distance;
+import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
@@ -28,13 +31,18 @@ import com.sap.sailing.domain.base.impl.DegreePosition;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.base.impl.NationalityImpl;
+import com.sap.sailing.domain.base.impl.NauticalMileDistance;
 import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
+import com.sap.sailing.domain.common.LegType;
+import com.sap.sailing.domain.common.NoWindException;
+import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
-import com.sap.sailing.domain.tracking.NoWindException;
+import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.Wind;
+import com.sap.sailing.domain.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
 import com.sap.sailing.domain.tracking.impl.TrackBasedEstimationWindTrackImpl;
@@ -91,6 +99,52 @@ public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest 
                 new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(bearingDeg))));
     }
 
+    /**
+     * See <a href="http://sapcoe-app01.pironet-ndh.com/show_bug.cgi?id=166">bug #166</a>
+     */
+    @Test
+    public void testWindEstimationCacheInvalidationAfterLegTypeChange() throws NoWindException {
+        initRace(2, new int[] { 1, 1 });
+        getTrackedRace().setRaceIsKnownToStartUpwind(false); // use only WEB wind to determine leg type
+        TimePoint now = getTrackedRace()
+                .getMarkPassingsInOrder(getTrackedRace().getRace().getCourse().getFirstWaypoint()).iterator().next()
+                .getTimePoint();
+        setBearingForCompetitor(competitors.get(0), now, 320);
+        setBearingForCompetitor(competitors.get(1), now, 50);
+        TrackedLeg firstLeg = getTrackedRace().getTrackedLeg(getTrackedRace().getRace().getCourse().getLegs().iterator().next());
+        assertEquals(LegType.UPWIND, firstLeg.getLegType(new MillisecondsTimePoint(MillisecondsTimePoint.now().asMillis()/2)));
+        final Map<TimePoint, Wind> cachedFixes = new HashMap<TimePoint, Wind>();
+        TrackBasedEstimationWindTrackImpl track = new TrackBasedEstimationWindTrackImpl(
+                getTrackedRace(), /* millisecondsOverWhichToAverage */ 30000) {
+                    @Override
+                    protected void cache(TimePoint timePoint, Wind fix) {
+                        super.cache(timePoint, fix);
+                        if (fix != null) {
+                            cachedFixes.put(timePoint, fix);
+                        }
+                    }
+        };
+        Wind estimatedWindDirection = track.getEstimatedWind(/* position */ null, now);
+        assertNotNull(estimatedWindDirection);
+        assertEquals(185., estimatedWindDirection.getBearing().getDegrees(), 0.00000001);
+        assertFalse(cachedFixes.isEmpty());
+        assertEquals(185., cachedFixes.values().iterator().next().getBearing().getDegrees(), 0.00000001);
+        // now invert leg's type by moving the top mark along the wind from the leeward gate:
+        Iterator<Waypoint> waypointsIter = getTrackedRace().getRace().getCourse().getWaypoints().iterator();
+        Waypoint leewardMark = waypointsIter.next();
+        Waypoint windwardMark = waypointsIter.next();
+        Position leewardGatePosition = getTrackedRace().getApproximatePosition(leewardMark, MillisecondsTimePoint.now());
+        Distance d = new NauticalMileDistance(1);
+        Wind wind = getTrackedRace().getWind(null, MillisecondsTimePoint.now(), WindSource.TRACK_BASED_ESTIMATION);
+        Position newWindwardMarkPosition = leewardGatePosition.translateGreatCircle(wind.getBearing(), d);
+        getTrackedRace().getOrCreateTrack(windwardMark.getBuoys().iterator().next()).addGPSFix(
+                new GPSFixImpl(newWindwardMarkPosition, MillisecondsTimePoint.now()));
+        assertEquals(LegType.DOWNWIND, firstLeg.getLegType(MillisecondsTimePoint.now()));
+        Wind estimatedWindDirectionDownwind = track.getEstimatedWind(/* position */ null, now);
+        assertNotNull(estimatedWindDirectionDownwind);
+        assertEquals(5., estimatedWindDirectionDownwind.getBearing().getDegrees(), 0.00000001);
+    }
+    
     @Test
     public void testWindEstimationCaching() {
         initRace(2, new int[] { 1, 1 });

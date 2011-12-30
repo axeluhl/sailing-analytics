@@ -19,6 +19,8 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.common.Util;
+import com.sap.sailing.domain.common.Util.Triple;
 import com.sap.sailing.domain.swisstimingadapter.Course;
 import com.sap.sailing.domain.swisstimingadapter.DomainFactory;
 import com.sap.sailing.domain.swisstimingadapter.Fix;
@@ -44,8 +46,6 @@ import com.sap.sailing.domain.tracking.TrackedEventRegistry;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
-import com.sap.sailing.util.Util;
-import com.sap.sailing.util.Util.Triple;
 
 import difflib.PatchFailedException;
 

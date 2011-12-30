@@ -11,9 +11,10 @@ import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.RaceDefinition;
-import com.sap.sailing.domain.base.Tack;
 import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.common.NoWindException;
+import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
@@ -23,7 +24,6 @@ import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
-import com.sap.sailing.domain.tracking.NoWindException;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.TrackedLeg;
@@ -205,7 +205,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public void addListener(RaceChangeListener<Competitor> listener) {
+    public void addListener(RaceChangeListener listener) {
         // TODO Auto-generated method stub
         
     }

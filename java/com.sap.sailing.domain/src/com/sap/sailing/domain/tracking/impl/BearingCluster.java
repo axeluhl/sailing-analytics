@@ -5,12 +5,14 @@ import java.util.List;
 
 import com.sap.sailing.domain.base.Bearing;
 import com.sap.sailing.domain.base.impl.RadianBearingImpl;
-import com.sap.sailing.util.Util.Pair;
+import com.sap.sailing.domain.common.Util.Pair;
 
 /**
  * Contains a number of {@link Bearing} objects and maintains the average bearing. For a given {@link Bearing} it
  * can determine the difference to this cluster's average bearing. It can also split the cluster into two, based
- * on the two bearings farthest apart.<p>
+ * on the two bearings farthest apart. The cluster can contain multiple occurrences of the same and also
+ * multiple occurrences of mutually equal {@link Bearing} objects which is one possible way of computing a
+ * weighted average.<p>
  * 
  * It is assumed that bearings added to this cluster are no further than 180 degrees apart. Violating this
  * rule will lead to unpredictable results.
@@ -102,14 +104,22 @@ public class BearingCluster {
         sumCos += Math.cos(bearing.getRadians());
     }
     
+    /**
+     * If the cluster contains no bearings, <code>null</code> is returned. Otherwise, the average angle is computed
+     * by adding up the sin and cos values of the individual bearings, then computing the atan2 of the ratio.
+     */
     public Bearing getAverage() {
-        double angle;
-        if (sumCos == 0) {
-            angle = sumSin >= 0 ? Math.PI/2 : -Math.PI/2;
-        } else {
-            angle = Math.atan2(sumSin, sumCos);
+        Bearing result = null;
+        if (!bearings.isEmpty()) {
+            double angle;
+            if (sumCos == 0) {
+                angle = sumSin >= 0 ? Math.PI / 2 : -Math.PI / 2;
+            } else {
+                angle = Math.atan2(sumSin, sumCos);
+            }
+            result = new RadianBearingImpl(angle < 0 ? angle + 2 * Math.PI : angle);
         }
-        return new RadianBearingImpl(angle < 0 ? angle+2*Math.PI : angle);
+        return result;
     }
     
     /**

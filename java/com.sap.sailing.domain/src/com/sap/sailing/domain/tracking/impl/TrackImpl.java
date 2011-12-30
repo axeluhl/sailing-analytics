@@ -76,6 +76,11 @@ public abstract class TrackImpl<FixType extends Timed> implements Track<FixType>
     public FixType getLastFixAtOrBefore(TimePoint timePoint) {
         return (FixType) getInternalFixes().floor(getDummyFix(timePoint));
     }
+    
+    @Override
+    public FixType getLastFixBefore(TimePoint timePoint) {
+        return (FixType) getInternalFixes().lower(getDummyFix(timePoint));
+    }
 
     @Override
     public FixType getLastRawFixAtOrBefore(TimePoint timePoint) {

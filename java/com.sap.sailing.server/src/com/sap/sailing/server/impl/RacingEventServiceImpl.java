@@ -28,6 +28,9 @@ import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.TimePoint;
+import com.sap.sailing.domain.common.Util;
+import com.sap.sailing.domain.common.Util.Pair;
+import com.sap.sailing.domain.common.Util.Triple;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
 import com.sap.sailing.domain.leaderboard.impl.LeaderboardImpl;
@@ -62,9 +65,6 @@ import com.sap.sailing.server.api.EventNameAndRaceName;
 import com.sap.sailing.server.api.LeaderboardNameAndRaceColumnName;
 import com.sap.sailing.server.api.RaceFetcher;
 import com.sap.sailing.server.api.RaceIdentifier;
-import com.sap.sailing.util.Util;
-import com.sap.sailing.util.Util.Pair;
-import com.sap.sailing.util.Util.Triple;
 
 public class RacingEventServiceImpl implements RacingEventService, EventFetcher, RaceFetcher {
     private static final Logger logger = Logger.getLogger(RacingEventServiceImpl.class.getName());

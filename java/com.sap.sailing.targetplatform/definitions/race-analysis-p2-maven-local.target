@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?pde version="3.6"?>
+
+<target name="Race Analysis Target (Maven - local build)" sequenceNumber="31">
+<locations>
+<location includeAllPlatforms="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
+<unit id="com.sap.ui5.runtime.feature.feature.group" version="1.1.0"/>
+<unit id="com.sap.ui5.uilib.feature.feature.group" version="1.1.0"/>
+<unit id="com.sap.ui5.gwt.core.feature.feature.group" version="1.1.0"/>
+<repository location="http://nexus.wdf.sap.corp:8081/nexus/content/repositories/build.snapshots.unzip/com/sap/ui5/com.sap.ui5.updatesite/1.1.0/com.sap.ui5.updatesite-1.1.0-assembly.zip-unzip/"/>
+</location>
+<location includeAllPlatforms="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
+<unit id="com.sap.sailing.target.base.feature.group" version="1.0.0"/>
+<unit id="com.sap.sailing.target.test.feature.group" version="1.0.0"/>
+<repository location="http://sapcoe-app01.pironet-ndh.com/p2/sailing/"/>
+</location>
+<location includeAllPlatforms="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
+<unit id="org.eclipse.jetty.bundles.f.feature.group" version="7.5.4"/>
+<repository location="http://download.eclipse.org/jetty/updates/jetty-bundles-7.x/7.5.4.v20111024/"/>
+</location>
+<location includeAllPlatforms="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
+<unit id="org.eclipse.equinox.core.sdk.feature.group" version="3.7.0.v20110506-0800-7uF9LFp7FWmE7gTBiKg15LDD"/>
+<repository location="http://download.eclipse.org/equinox/drops/R-3.7-201106131736/"/>
+</location>
+</locations>
+</target>

@@ -17,9 +17,9 @@ import com.sap.sailing.domain.base.Bearing;
 import com.sap.sailing.domain.base.Distance;
 import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.TimePoint;
+import com.sap.sailing.domain.common.Util.Pair;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
-import com.sap.sailing.util.Util.Pair;
 
 /**
  * Implements the (Ramer)-Douglas-Peucker algorithm on a segment of a {@link GPSFixTrack} with a configurable distance

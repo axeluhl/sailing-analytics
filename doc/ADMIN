@@ -58,17 +58,17 @@ The MongoDB is used to store wind information and general
 leaderboard-related information required by the Python web
 application.
 
- - log in as user "root"
+ - log in as user "web"
 
- - "cd ~web/project/dev/python"
+ - "cd project/dev/python"
 
- - "/opt/mongodb/bin/supervisord"
+ - "bin/supervisord"
 
 This will launch the MongoDB server, listening on port 10200. You can
 check whether the MongoDB server started successfully by issuing the
 following command:
 
- - "/opt/mongodb/bin/supervisorctl"
+ - "bin/supervisorctl"
 
 Launch Python Server
 ---------------------
@@ -102,6 +102,13 @@ the console. The process will listen for inbound UDP packets on port
 2012 and forward anything received on that port to localhost:2013 as
 well as localhost:2014. See also the list of ports as documented in
 the README file.
+
+Apache HTTP Server configuration
+--------------------------------
+To define the different URL's to access the java servers you need to configure 
+the corresponding virtual hosts of the Apache Http server. The configuration file
+can be found at /etc/httpd/conf.d/kiel.conf
+
 
 Re-Building the Java Server
 ---------------------------

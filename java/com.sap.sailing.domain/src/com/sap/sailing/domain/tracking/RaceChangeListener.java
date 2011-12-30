@@ -1,9 +1,14 @@
 package com.sap.sailing.domain.tracking;
 
+import com.sap.sailing.domain.base.Buoy;
+import com.sap.sailing.domain.base.Competitor;
 
-public interface RaceChangeListener<ItemType> extends WindListener {
-    void gpsFixReceived(GPSFix fix, ItemType competitor);
 
+public interface RaceChangeListener extends WindListener {
+    void competitorPositionChanged(GPSFix fix, Competitor competitor);
+    
+    void buoyPositionChanged(GPSFix fix, Buoy buoy);
+    
     /**
      * Invoked after the mark passings have been updated in the {@link TrackedRace}.
      * 

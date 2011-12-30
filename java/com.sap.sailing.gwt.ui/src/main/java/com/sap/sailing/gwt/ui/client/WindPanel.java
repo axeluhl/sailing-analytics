@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import ca.nanometrics.gflot.client.Axis;
+import ca.nanometrics.gflot.client.DataPoint;
 import ca.nanometrics.gflot.client.PlotItem;
 import ca.nanometrics.gflot.client.PlotModelStrategy;
 import ca.nanometrics.gflot.client.PlotPosition;
@@ -51,13 +52,12 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
+import com.sap.sailing.domain.common.Util.Triple;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.gwt.ui.shared.EventDAO;
 import com.sap.sailing.gwt.ui.shared.RaceDAO;
 import com.sap.sailing.gwt.ui.shared.RegattaDAO;
-import com.sap.sailing.gwt.ui.shared.Triple;
 import com.sap.sailing.gwt.ui.shared.WindDAO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDAO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDAO;
@@ -79,9 +79,8 @@ public class WindPanel extends FormPanel implements EventDisplayer, WindShower, 
     private final TrackedEventsComposite trackedEventsComposite;
     private final ListBox windSourceSelection;
     private final Map<WindSource, ListDataProvider<WindDAO>> windLists;
-    private final CheckBox showEstimatedWindBox;
     private final CheckBox raceIsKnownToStartUpwindBox;
-    private final Widget stripChart;
+    private final PlotWithOverview stripChart;
     private final DateTimeFormat dateFormat;
     private final ColorMap<WindSource> colorMap;
     private final Map<WindSource, SeriesHandler> stripChartSeries;
@@ -174,14 +173,6 @@ public class WindPanel extends FormPanel implements EventDisplayer, WindShower, 
                 });
             }
         });
-        showEstimatedWindBox = new CheckBox(stringConstants.showEstimatedWind());
-        windSourceSelectionPanel.add(showEstimatedWindBox);
-        showEstimatedWindBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-            @Override
-            public void onValueChange(ValueChangeEvent<Boolean> event) {
-                clearOrShowWindBasedOnRaceSelection(trackedEventsComposite.getSelectedEventAndRace());
-            }
-        });
         grid.setWidget(1, 0, windSourceSelectionPanel);
         stripChart = createStripChart();
         grid.setWidget(2, 0, stripChart);
@@ -189,7 +180,7 @@ public class WindPanel extends FormPanel implements EventDisplayer, WindShower, 
         this.setWidget(grid);
     }
 
-    private Widget createStripChart() {
+    private PlotWithOverview createStripChart() {
         PlotWithOverviewModel model = new PlotWithOverviewModel(PlotModelStrategy.defaultStrategy());
         PlotOptions plotOptions = new PlotOptions();
         plotOptions.setDefaultLineSeriesOptions(new LineSeriesOptions().setLineWidth(1).setShow(true));
@@ -367,6 +358,7 @@ public class WindPanel extends FormPanel implements EventDisplayer, WindShower, 
         grid.setWidget(3, 0, null);
         VerticalPanel windDisplay = new VerticalPanel();
         grid.setWidget(3, 0, windDisplay);
+        updateStripChartSeries(result);
         for (Map.Entry<WindSource, WindTrackInfoDAO> e : result.windTrackInfoByWindSource.entrySet()) {
             Label windSourceLabel = new Label(stringConstants.windSource()+": "+e.getKey()+
                     ", "+stringConstants.dampeningInterval()+" "+e.getValue().dampeningIntervalInMilliseconds+"ms");
@@ -411,6 +403,45 @@ public class WindPanel extends FormPanel implements EventDisplayer, WindShower, 
         }
     }
     
+    private void updateStripChartSeries(WindInfoForRaceDAO result) {
+        long min = Long.MAX_VALUE;
+        long max = Long.MIN_VALUE;
+        for (Map.Entry<WindSource, WindTrackInfoDAO> e : result.windTrackInfoByWindSource.entrySet()) {
+            WindSource windSource = e.getKey();
+            SeriesHandler seriesHandler = stripChartSeries.get(windSource);
+            if (e.getValue().windFixes.isEmpty()) {
+                if (seriesHandler != null) {
+                    stripChart.getModel().removeSeries(seriesHandler);
+                    stripChartSeries.remove(windSource);
+                }
+            } else {
+                if (seriesHandler == null) {
+                    seriesHandler = stripChart.getModel().addSeries("" + windSource.name(),
+                            colorMap.getColorByID(windSource));
+                    seriesHandler.setOptions(SeriesType.LINES, new LineSeriesOptions().setLineWidth(2.5).setShow(true));
+                    seriesHandler.setOptions(SeriesType.POINTS, new PointsSeriesOptions().setLineWidth(0).setShow(false));
+                    stripChartSeries.put(windSource, seriesHandler);
+                } else {
+                    seriesHandler.clear();
+                }
+                for (WindDAO windFix : e.getValue().windFixes) {
+                    seriesHandler.add(new DataPoint(windFix.timepoint, windFix.dampenedTrueWindFromDeg));
+                    min = Math.min(min, windFix.timepoint);
+                    max = Math.max(max, windFix.timepoint);
+                }
+                seriesHandler.setVisible(true);
+            }
+        }
+        if (stripChart != null && stripChart.isAttached()) {
+            try {
+                stripChart.setLinearSelection(min, max); // TODO maintain previous selection
+                stripChart.redraw();
+            } catch (Exception ex) {
+                errorReporter.reportError("Error trying to update strip chart: " + ex.getMessage());
+            }
+        }
+    }
+
     private Handler getWindTableColumnSortHandler(List<WindDAO> list, TextColumn<WindDAO> timeColumn,
             TextColumn<WindDAO> speedInKnotsColumn, TextColumn<WindDAO> windDirectionInDegColumn,
             TextColumn<WindDAO> dampenedSpeedInKnotsColumn, TextColumn<WindDAO> dampenedWindDirectionInDegColumn) {

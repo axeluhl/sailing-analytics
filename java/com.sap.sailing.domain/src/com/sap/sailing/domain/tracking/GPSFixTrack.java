@@ -5,6 +5,7 @@ import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.Speed;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.TimePoint;
+import com.sap.sailing.domain.common.Util.Pair;
 
 /**
  * A track records the {@link GPSFix}es received for an object of type
@@ -22,7 +23,7 @@ public interface GPSFixTrack<ItemType, FixType extends GPSFix> extends Track<Fix
     /**
      * A listener is notified whenever a new fix is added to this track
      */
-    void addListener(RaceChangeListener<ItemType> listener);
+    void addListener(GPSTrackListener<ItemType> listener);
     
     ItemType getTrackedItem();
 
@@ -82,5 +83,17 @@ public interface GPSFixTrack<ItemType, FixType extends GPSFix> extends Track<Fix
     boolean hasDirectionChange(TimePoint at, double minimumDegreeDifference);
 
     SpeedWithBearing getRawEstimatedSpeed(TimePoint at);
+
+    /**
+     * Finds out which position estimation time interval has been affected by inserting <code>fix</code>.
+     * 
+     * @param fix
+     *            assumed to already have been inserted into this track, but it's OK to pass a fix that's not in the
+     *            track yet
+     * 
+     * @return if no fix before <code>fix</code> is found, the first component is <code>null</code>. If no fix after
+     *         <code>fix</code> is found, the second component is <code>null</code>.
+     */
+    Pair<TimePoint, TimePoint> getEstimatedPositionTimePeriodAffectedBy(GPSFix fix);
 
 }

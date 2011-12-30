@@ -36,6 +36,8 @@ import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MeterDistance;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.common.Util.Pair;
+import com.sap.sailing.domain.common.Util.Triple;
 import com.sap.sailing.domain.swisstimingadapter.Competitor;
 import com.sap.sailing.domain.swisstimingadapter.Course;
 import com.sap.sailing.domain.swisstimingadapter.Fix;
@@ -49,8 +51,6 @@ import com.sap.sailing.domain.swisstimingadapter.SailMasterListener;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterMessage;
 import com.sap.sailing.domain.swisstimingadapter.StartList;
 import com.sap.sailing.domain.swisstimingadapter.TrackerType;
-import com.sap.sailing.util.Util.Pair;
-import com.sap.sailing.util.Util.Triple;
 
 /**
  * Implements the connector to the SwissTiming Sail Master system. It uses a host name and port number to establish the
