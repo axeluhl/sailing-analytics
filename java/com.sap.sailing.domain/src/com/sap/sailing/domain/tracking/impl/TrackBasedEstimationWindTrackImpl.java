@@ -233,7 +233,7 @@ public class TrackBasedEstimationWindTrackImpl extends WindTrackImpl implements 
 
     @Override
     public void buoyPositionChanged(GPSFix fix, Buoy buoy) {
-        // TODO invalidate cache around fix's time point
+        clearCache(); // TODO invalidate cache around fix's time point
     }
 
 }
