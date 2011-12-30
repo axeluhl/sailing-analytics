@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.tracking;
+package com.sap.sailing.domain.common;
 
 /**
  * The runtime exception variant of {@link NoWindException}. Can be used where no

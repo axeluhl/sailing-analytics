@@ -7,6 +7,7 @@ import java.util.Map;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
+import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Util.Pair;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
@@ -56,14 +57,14 @@ public interface SailingService extends RemoteService {
     void setWind(RaceIdentifier raceIdentifier, WindDAO wind);
 
     Map<CompetitorDAO, List<GPSFixDAO>> getBoatPositions(RaceIdentifier raceIdentifier, Map<CompetitorDAO, Date> from,
-            Map<CompetitorDAO, Date> to, boolean extrapolate) throws Exception;
+            Map<CompetitorDAO, Date> to, boolean extrapolate) throws NoWindException;
 
     List<MarkDAO> getMarkPositions(RaceIdentifier raceIdentifier, Date date);
 
-    List<QuickRankDAO> getQuickRanks(RaceIdentifier raceIdentifier, Date date) throws Exception;
+    List<QuickRankDAO> getQuickRanks(RaceIdentifier raceIdentifier, Date date) throws NoWindException;
 
     WindInfoForRaceDAO getWindInfo(RaceIdentifier raceIdentifier, Date from, long millisecondsStepWidth,
-            int numberOfFixes, double latDeg, double lngDeg, Collection<String> windSources) throws Exception;
+            int numberOfFixes, double latDeg, double lngDeg, Collection<String> windSources) throws NoWindException;
 
     void setWindSource(RaceIdentifier raceIdentifier, String windSourceName, boolean raceIsKnownToStartUpwind);
 
@@ -73,7 +74,7 @@ public interface SailingService extends RemoteService {
     
     LeaderboardDAO getLeaderboardByName(String leaderboardName, Date date,
             Collection<String> namesOfRacesForWhichToLoadLegDetails)
-            throws Exception;
+            throws NoWindException;
 
     List<LeaderboardDAO> getLeaderboards();
     
@@ -108,10 +109,10 @@ public interface SailingService extends RemoteService {
      * @return the new net points in {@link Pair#getA()} and the new total points in {@link Pair#getB()}
      */
     Pair<Integer, Integer> updateLeaderboardMaxPointsReason(String leaderboardName, String competitorName,
-            String raceColumnName, String maxPointsReasonAsString, Date date) throws Exception;
+            String raceColumnName, String maxPointsReasonAsString, Date date) throws NoWindException;
 
     Pair<Integer, Integer> updateLeaderboardScoreCorrection(String leaderboardName, String competitorName,
-            String raceName, Integer correctedScore, Date date) throws Exception;
+            String raceName, Integer correctedScore, Date date) throws NoWindException;
 
     void updateCompetitorDisplayNameInLeaderboard(String leaderboardName, String competitorName, String displayName);
     
@@ -132,13 +133,14 @@ public interface SailingService extends RemoteService {
     
     String[] getCountryCodes();
     
-    CompetitorInRaceDAO getCompetitorRaceData(RaceIdentifier race, CompetitorsAndTimePointsDAO competitorsAndTimePointsDAO, DetailType dataType) throws Exception;
+    CompetitorInRaceDAO getCompetitorRaceData(RaceIdentifier race,
+            CompetitorsAndTimePointsDAO competitorsAndTimePointsDAO, DetailType dataType) throws NoWindException;
 
     CompetitorsAndTimePointsDAO getCompetitorsAndTimePoints(RaceIdentifier race, int steps);
     
     Map<CompetitorDAO, List<GPSFixDAO>> getDouglasPoints(RaceIdentifier raceIdentifier,
-            Map<CompetitorDAO, Date> from, Map<CompetitorDAO, Date> to, double meters) throws Exception;
+            Map<CompetitorDAO, Date> from, Map<CompetitorDAO, Date> to, double meters) throws NoWindException;
 
     Map<CompetitorDAO, List<ManeuverDAO>> getManeuvers(RaceIdentifier raceIdentifier,
-            Map<CompetitorDAO, Date> from, Map<CompetitorDAO, Date> to) throws Exception;
+            Map<CompetitorDAO, Date> from, Map<CompetitorDAO, Date> to) throws NoWindException;
 }

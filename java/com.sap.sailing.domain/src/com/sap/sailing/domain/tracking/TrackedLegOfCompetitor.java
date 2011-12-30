@@ -8,6 +8,7 @@ import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Speed;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.TimePoint;
+import com.sap.sailing.domain.common.NoWindException;
 
 public interface TrackedLegOfCompetitor {
     Leg getLeg();

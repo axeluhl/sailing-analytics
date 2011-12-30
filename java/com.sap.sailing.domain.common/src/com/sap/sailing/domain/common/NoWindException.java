@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.tracking;
+package com.sap.sailing.domain.common;
 
 /**
  * Thrown when wind information is missing where it's desperately needed. This can,

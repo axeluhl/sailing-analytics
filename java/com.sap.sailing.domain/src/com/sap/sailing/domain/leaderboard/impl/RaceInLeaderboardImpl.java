@@ -2,10 +2,10 @@ package com.sap.sailing.domain.leaderboard.impl;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.TimePoint;
+import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Util.Pair;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
-import com.sap.sailing.domain.tracking.NoWindException;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
 public class RaceInLeaderboardImpl implements RaceInLeaderboard {
