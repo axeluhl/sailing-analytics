@@ -581,11 +581,11 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                 }
             }
         }
-        Bearing upwindAverage = null;
+        Bearing reversedUpwindAverage = null;
         int upwindConfidence = 0;
         BearingCluster[] bearingClustersUpwind = bearings.get(LegType.UPWIND).splitInTwo(getMinimumAngleBetweenDifferentTacksUpwind());
         if (!bearingClustersUpwind[0].isEmpty() && !bearingClustersUpwind[1].isEmpty()) {
-            upwindAverage = bearingClustersUpwind[0].getAverage().middle(bearingClustersUpwind[1].getAverage());
+            reversedUpwindAverage = bearingClustersUpwind[0].getAverage().middle(bearingClustersUpwind[1].getAverage()).reverse();
             upwindConfidence = Math.min(bearingClustersUpwind[0].size(), bearingClustersUpwind[1].size());
         }
         Bearing downwindAverage = null;
@@ -596,22 +596,18 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             downwindConfidence = Math.min(bearingClustersDownwind[0].size(), bearingClustersDownwind[1].size());
         }
         int confidence = upwindConfidence + downwindConfidence;
-        Bearing bearing;
-        if (upwindAverage == null) {
-            if (downwindAverage == null) {
-                return null;
-            } else {
-                bearing = downwindAverage;
-            }
-        } else {
-            if (downwindAverage == null) {
-                bearing = upwindAverage.reverse();
-            } else {
-                bearing = downwindAverage.middle(upwindAverage.reverse());
-            }
+        BearingCluster resultCluster = new BearingCluster();
+        assert upwindConfidence == 0 || reversedUpwindAverage != null;
+        for (int i=0; i<upwindConfidence; i++) {
+            resultCluster.add(reversedUpwindAverage);
         }
-        return new WindImpl(null, timePoint,
-                new KnotSpeedWithBearingImpl(/* speedInKnots */ confidence, bearing));
+        assert downwindConfidence == 0 || downwindAverage != null;
+        for (int i=0; i<downwindConfidence; i++) {
+            resultCluster.add(downwindAverage);
+        }
+        Bearing resultBearing = resultCluster.getAverage();
+        return resultBearing == null ? null : new WindImpl(null, timePoint,
+                new KnotSpeedWithBearingImpl(/* speedInKnots */ confidence, resultBearing));
     }
     
     /**
