@@ -2,7 +2,6 @@ package com.sap.sailing.domain.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.fail;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -25,11 +24,6 @@ import com.sap.sailing.domain.tracking.impl.WindTrackImpl;
 public class WindTest {
     private static final int AVERAGING_INTERVAL_MILLIS = 30000 /* 30s averaging interval */;
 
-    @Test
-    public void testToFail() {
-        fail("Failing in order to fail");
-    }
-    
     /**
      * Tests that averaging also works across the 0deg mark
      */
