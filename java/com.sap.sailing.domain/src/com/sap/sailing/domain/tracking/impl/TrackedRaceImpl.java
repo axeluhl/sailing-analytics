@@ -570,9 +570,12 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                     GPSFixTrack<Competitor, GPSFixMoving> track = getTrack(competitor);
                     // TODO bug #167 could be fixed here by excluding competitors that are x seconds before/after a mark passing
                     if (!track.hasDirectionChange(timePoint, getManeuverDegreeAngleThreshold())) {
-                        Bearing bearing = track.getEstimatedSpeed(timePoint).getBearing();
-                        BearingCluster bearingClusters = bearings.get(legType);
-                        bearingClusters.add(bearing);
+                        SpeedWithBearing estimatedSpeed = track.getEstimatedSpeed(timePoint);
+                        if (estimatedSpeed != null) {
+                            Bearing bearing = estimatedSpeed.getBearing();
+                            BearingCluster bearingClusters = bearings.get(legType);
+                            bearingClusters.add(bearing);
+                        }
                     }
                 }
             }
