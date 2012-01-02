@@ -53,6 +53,13 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         }
     }
     
+    @Override
+    public void removeListener(GPSTrackListener<ItemType> listener) {
+        synchronized (listeners) {
+            listeners.remove(listener);
+        }
+    }
+    
     /**
      * To iterate over the resulting listener list, synchronize on the iterable returned. Only this will avoid
      * {@link ConcurrentModificationException}s because listeners may be added on the fly, and this object will
