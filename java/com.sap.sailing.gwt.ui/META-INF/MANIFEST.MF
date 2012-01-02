@@ -38,5 +38,5 @@ Import-Package: org.osgi.framework,
  javax.servlet.http;version="2.5.0",
  org.json.simple,
  org.json.simple.parser
-Web-ContextPath: /
+Web-ContextPath: /gwt
 Jetty-WarFolderPath: war

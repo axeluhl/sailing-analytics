@@ -64,7 +64,7 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends DynamicTrackImpl<Ite
                 last = next;
             }
         }
-        SpeedWithBearing avgSpeed = new KnotSpeedWithBearingImpl(knotSum / count, bearingCluster.getAverage());
+        SpeedWithBearing avgSpeed = count == 0 ? null : new KnotSpeedWithBearingImpl(knotSum / count, bearingCluster.getAverage());
         return avgSpeed;
     }
     
