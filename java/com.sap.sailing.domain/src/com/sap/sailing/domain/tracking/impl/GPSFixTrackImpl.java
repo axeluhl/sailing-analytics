@@ -324,7 +324,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
                 last = next;
             }
         }
-        SpeedWithBearing avgSpeed = new KnotSpeedWithBearingImpl(knotSum / count, bearingCluster.getAverage());
+        SpeedWithBearing avgSpeed = count == 0 ? null : new KnotSpeedWithBearingImpl(knotSum / count, bearingCluster.getAverage());
         return avgSpeed;
     }
 
@@ -420,12 +420,20 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
 
     @Override
     public boolean hasDirectionChange(TimePoint at, double minimumDegreeDifference) {
+        boolean result = false;
         TimePoint start = new MillisecondsTimePoint(at.asMillis()-getMillisecondsOverWhichToAverageSpeed());
         TimePoint end = new MillisecondsTimePoint(at.asMillis()+getMillisecondsOverWhichToAverageSpeed());
-        Bearing bearingAtStart = getEstimatedSpeed(start).getBearing();
-        Bearing bearingAtEnd = getEstimatedSpeed(end).getBearing();
-        // TODO also need to analyze the (smoothened) directions in between; example: two tacks within averaging interval
-        return Math.abs(bearingAtStart.getDifferenceTo(bearingAtEnd).getDegrees()) > minimumDegreeDifference;
+        SpeedWithBearing estimatedSpeedAtStart = getEstimatedSpeed(start);
+        if (estimatedSpeedAtStart != null) {
+            Bearing bearingAtStart = estimatedSpeedAtStart.getBearing();
+            SpeedWithBearing estimatedSpeedAtEnd = getEstimatedSpeed(end);
+            if (estimatedSpeedAtEnd != null) {
+                Bearing bearingAtEnd = estimatedSpeedAtEnd.getBearing();
+                // TODO also need to analyze the (smoothened) directions in between; example: two tacks within averaging interval
+                result = Math.abs(bearingAtStart.getDifferenceTo(bearingAtEnd).getDegrees()) > minimumDegreeDifference;
+            }
+        }
+        return result;
     }
 
 }
