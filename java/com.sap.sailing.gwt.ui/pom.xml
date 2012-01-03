@@ -77,7 +77,7 @@
 		        <module>com.sap.sailing.gwt.ui.UserManagement</module>
 		      </modules>
 		      <gen>${basedir}/.generated</gen>
-		      <localWorkers>3</localWorkers>
+		      <localWorkers>6</localWorkers>
 		      <webappDirectory>src/main/resources</webappDirectory>
 		      <warSourceDirectory>${basedir}</warSourceDirectory>
 	        </configuration>
