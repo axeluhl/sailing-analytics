@@ -39,7 +39,6 @@
   </dependencies>
 
   <build>
-    <outputDirectory>WEB-INF/classes</outputDirectory>
     <plugins>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
