@@ -145,7 +145,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
         Column<LeaderboardDAO, SafeHtml> linkColumn = new Column<LeaderboardDAO, SafeHtml>(anchorCell) {
             @Override
             public SafeHtml getValue(LeaderboardDAO object) {
-                return ANCHORTEMPLATE.cell("/Leaderboard.html?name=" + object.name, object.name);
+                return ANCHORTEMPLATE.cell("/gwt/Leaderboard.html?name=" + object.name, object.name);
             }
 
         };
@@ -209,7 +209,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
                             });
                     dialog.show();
                 } else if ("ACTION_EDIT_SCORES".equals(value)) {
-                    Window.open("/LeaderboardEditing.html?name=" + object.name, "_blank", null);
+                    Window.open("/gwt/LeaderboardEditing.html?name=" + object.name, "_blank", null);
                 }
             }
         });
