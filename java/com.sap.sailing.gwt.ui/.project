@@ -30,11 +30,6 @@
 			<arguments>
 			</arguments>
 		</buildCommand>
-			<triggers>full,incremental,</triggers>
-				<dictionary>
-					<key>LaunchConfigHandle</key>
-					<value>&lt;project&gt;/.externalToolBuilders/org.eclipse.m2e.core.maven2Builder.launch</value>
-				</dictionary>
 	</buildSpec>
 	<natures>
 		<nature>org.eclipse.pde.PluginNature</nature>

@@ -24,15 +24,4 @@
 		<url-pattern>/resources/*</url-pattern>
 	</servlet-mapping>
 	
-<!-- 
-	<servlet-mapping>
-    <servlet-name>ResourceServlet</servlet-name>
-    <url-pattern>/test-resources/*</url-pattern>
-  </servlet-mapping>
-  <context-param>
-    <param-name>com.sap.ui5.resource.DEV_MODE</param-name>
-    <param-value>false</param-value>
-  </context-param>
- -->	
-	
 </web-app>
