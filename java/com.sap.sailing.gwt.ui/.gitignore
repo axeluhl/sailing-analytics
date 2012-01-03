@@ -1,4 +1,4 @@
-/bin
 /.gwt
 /.generated
 /gwt-unitCache
+/com.sap.sailing.gwt.ui.*

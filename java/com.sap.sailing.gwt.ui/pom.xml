@@ -79,7 +79,7 @@
 		      <gen>${basedir}/.generated</gen>
 		      <localWorkers>3</localWorkers>
 		      <webappDirectory>src/main/resources</webappDirectory>
-		      <warSourceDirectory>${basedir}/war</warSourceDirectory>
+		      <warSourceDirectory>${basedir}/src/main/resources</warSourceDirectory>
 	        </configuration>
             <goals>
               <goal>compile</goal>
