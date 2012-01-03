@@ -891,18 +891,27 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         
         @Override
         public void gpsFixReceived(GPSFix fix, Buoy buoy) {
-            synchronized (directionFromStartToNextMarkCacheLock) {
-                directionFromStartToNextMarkCache = null;
-                listeningTo.removeListener(this);
-            }
+            new Thread("StartToNextMarkCacheInvalidationListener.gpsFixReceived for buoy " + buoy.getName()) {
+                public void run() {
+                    synchronized (directionFromStartToNextMarkCacheLock) {
+                        directionFromStartToNextMarkCache = null;
+                        listeningTo.removeListener(StartToNextMarkCacheInvalidationListener.this);
+                    }
+                }
+            }.start();
         }
 
         @Override
         public void speedAveragingChanged(long oldMillisecondsOverWhichToAverage, long newMillisecondsOverWhichToAverage) {
-            synchronized (directionFromStartToNextMarkCacheLock) {
-                directionFromStartToNextMarkCache = null;
-                listeningTo.removeListener(this);
-            }
+            new Thread("StartToNextMarkCacheInvalidationListener.gpsFixReceived for buoy "
+                    + listeningTo.getTrackedItem().getName()) {
+                public void run() {
+                    synchronized (directionFromStartToNextMarkCacheLock) {
+                        directionFromStartToNextMarkCache = null;
+                        listeningTo.removeListener(StartToNextMarkCacheInvalidationListener.this);
+                    }
+                }
+            }.start();
         }
     }
 }
