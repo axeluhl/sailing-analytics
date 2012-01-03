@@ -12,28 +12,6 @@
   <packaging>eclipse-plugin</packaging>
 
   <dependencies>
-  <!--
-    <dependency>
-      <groupId>com.sap.ui.phoenix</groupId>
-      <artifactId>pwt-sap.ui.commons</artifactId>
-      <version>0.18.0</version>
-    </dependency>
-    <dependency>
-    	<groupId>com.sap.ui.phoenix</groupId>
-    	<artifactId>pwt-sap.ui.core</artifactId>
-    	<version>0.18.0</version>
-    </dependency>
-    <dependency>
-    	<groupId>com.sap.ui.phoenix</groupId>
-    	<artifactId>core</artifactId>
-    	<version>0.18.0</version>
-    </dependency>
-    <dependency>
-    	<groupId>com.sap.ui.phoenix</groupId>
-    	<artifactId>commons</artifactId>
-    	<version>0.18.0</version>
-    </dependency>
-	-->
     <dependency>
         <!-- This dependency is required because the GWT Maven Plugin searches other GWT modules only in Maven dependencies -->
     	<groupId>com.google.code</groupId>
