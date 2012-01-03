@@ -39,4 +39,3 @@ Import-Package: org.osgi.framework,
  org.json.simple,
  org.json.simple.parser
 Web-ContextPath: /gwt
-Jetty-WarFolderPath: war

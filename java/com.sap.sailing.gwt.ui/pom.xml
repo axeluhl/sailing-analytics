@@ -78,7 +78,7 @@
 		      </modules>
 		      <gen>${basedir}/.generated</gen>
 		      <localWorkers>4</localWorkers>
-		      <webappDirectory>war</webappDirectory>
+		      <webappDirectory>src/main/resources</webappDirectory>
 		      <warSourceDirectory>${basedir}/src/main/resources</warSourceDirectory>
 	        </configuration>
             <goals>
