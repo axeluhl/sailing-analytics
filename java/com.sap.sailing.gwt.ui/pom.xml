@@ -39,21 +39,7 @@
   </dependencies>
 
   <build>
-    <sourceDirectory>${project.basedir}/src/main/java</sourceDirectory>
-    <directory>WEB-INF/classes</directory>
-    <outputDirectory>WEB-INF/classes</outputDirectory>
     <plugins>
-
-	<plugin>
-		<groupId>org.eclipse.tycho</groupId>
-		<artifactId>maven-osgi-compiler-plugin</artifactId>
-		<version>${tycho-version}</version>
-		<configuration>
-			<source>${project.basedir}/src/main/java</source>
-			<usePdeSourceRoots>false</usePdeSourceRoots>
-		</configuration>
-	</plugin>
-    
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>gwt-maven-plugin</artifactId>
