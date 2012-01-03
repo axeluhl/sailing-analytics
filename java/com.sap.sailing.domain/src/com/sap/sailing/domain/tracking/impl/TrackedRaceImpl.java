@@ -98,6 +98,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     private final Map<WindSource, WindTrack> windTracks;
     
     private Wind directionFromStartToNextMarkCache;
+    private final Object directionFromStartToNextMarkCacheLock = new Object();
     
     private final Map<Buoy, GPSFixTrack<Buoy, GPSFix>> buoyTracks;
     
@@ -421,9 +422,23 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             if (firstLegStart != null && firstLegEnd != null) {
                 result = new WindImpl(firstLegStart, at, new KnotSpeedWithBearingImpl(1.0,
                         firstLegEnd.getBearingGreatCircle(firstLegStart)));
-                directionFromStartToNextMarkCache = result;
-                // FIXME don't we have to expect that after cache invalidation the listeners are still subscribed?
-                addDirectionFromStartToNextMarkCacheInvalidationListener();
+                final Wind finalResult = result;
+                // Deadlock prevention: This method may have been called during wind estimation which holds the monitor
+                // of the TrackBasedEstimationWindTrackImpl. Adding a cache
+                // invalidation listener will request the monitor of the listener collection.
+                // This may be owned by the MarkPositionReceiver thread which is currently notifying
+                // the track's listeners about the receipt of a new GPS fix which leads to the
+                // invalidation of the TrackBasedEstimationWindTrackImpl's cache which requests
+                // the TrackBasedEstimationWindTrackImpl's monitor. --> deadlock
+                new Thread("Adding cache invalidation listener for start/first-mark direction for "+getRace().getName()) {
+                    public void run() {
+                        synchronized (directionFromStartToNextMarkCacheLock) {
+                            // FIXME don't we have to expect that after cache invalidation the listeners are still subscribed?
+                            addDirectionFromStartToNextMarkCacheInvalidationListener();
+                            directionFromStartToNextMarkCache = finalResult;
+                        }                        
+                    }
+                }.start();
             } else {
                 result = null;
             }
@@ -433,23 +448,13 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     
     private void addDirectionFromStartToNextMarkCacheInvalidationListener() {
         Leg firstLeg = getRace().getCourse().getLegs().iterator().next();
-        GPSTrackListener<Buoy> listener = new GPSTrackListener<Buoy>() {
-            @Override
-            public void gpsFixReceived(GPSFix fix, Buoy competitor) {
-                directionFromStartToNextMarkCache = null;
-            }
-
-            @Override
-            public void speedAveragingChanged(long oldMillisecondsOverWhichToAverage,
-                    long newMillisecondsOverWhichToAverage) {
-                directionFromStartToNextMarkCache = null;
-            }
-        };
         for (Buoy buoy : firstLeg.getFrom().getBuoys()) {
-            getOrCreateTrack(buoy).addListener(listener);
+            GPSFixTrack<Buoy, GPSFix> track = getOrCreateTrack(buoy);
+            track.addListener(new StartToNextMarkCacheInvalidationListener(track));
         }
         for (Buoy buoy : firstLeg.getTo().getBuoys()) {
-            getOrCreateTrack(buoy).addListener(listener);
+            GPSFixTrack<Buoy, GPSFix> track = getOrCreateTrack(buoy);
+            track.addListener(new StartToNextMarkCacheInvalidationListener(track));
         }
     }
 
@@ -497,6 +502,11 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     @Override
     public synchronized void waypointAdded(int zeroBasedIndex, Waypoint waypointThatGotAdded) {
+        synchronized (directionFromStartToNextMarkCacheLock) {
+            // the observing listener on any previous buoy will be GCed; we need to ensure
+            // that the cache is recomputed
+            directionFromStartToNextMarkCache = null;
+        }
         markPassingsForWaypoint.put(waypointThatGotAdded, new ConcurrentSkipListSet<MarkPassing>(TimedComparator.INSTANCE));
         for (Buoy buoy : waypointThatGotAdded.getBuoys()) {
             getOrCreateTrack(buoy);
@@ -523,6 +533,11 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     @Override
     public synchronized void waypointRemoved(int zeroBasedIndex, Waypoint waypointThatGotRemoved) {
+        synchronized (directionFromStartToNextMarkCacheLock) {
+            // the observing listener on any previous buoy will be GCed; we need to ensure
+            // that the cache is recomputed
+            directionFromStartToNextMarkCache = null;
+        }
         Leg toRemove = null;
         Leg last = null;
         int i=0;
@@ -570,9 +585,12 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                     GPSFixTrack<Competitor, GPSFixMoving> track = getTrack(competitor);
                     // TODO bug #167 could be fixed here by excluding competitors that are x seconds before/after a mark passing
                     if (!track.hasDirectionChange(timePoint, getManeuverDegreeAngleThreshold())) {
-                        Bearing bearing = track.getEstimatedSpeed(timePoint).getBearing();
-                        BearingCluster bearingClusters = bearings.get(legType);
-                        bearingClusters.add(bearing);
+                        SpeedWithBearing estimatedSpeed = track.getEstimatedSpeed(timePoint);
+                        if (estimatedSpeed != null) {
+                            Bearing bearing = estimatedSpeed.getBearing();
+                            BearingCluster bearingClusters = bearings.get(legType);
+                            bearingClusters.add(bearing);
+                        }
                     }
                 }
             }
@@ -864,4 +882,27 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         return getRace().getBoatClass().getApproximateManeuverDurationInMilliseconds();
     }
 
+    private class StartToNextMarkCacheInvalidationListener implements GPSTrackListener<Buoy> {
+        private final GPSFixTrack<Buoy, GPSFix> listeningTo;
+        
+        public StartToNextMarkCacheInvalidationListener(GPSFixTrack<Buoy, GPSFix> listeningTo) {
+            this.listeningTo = listeningTo;
+        }
+        
+        @Override
+        public void gpsFixReceived(GPSFix fix, Buoy buoy) {
+            synchronized (directionFromStartToNextMarkCacheLock) {
+                directionFromStartToNextMarkCache = null;
+                listeningTo.removeListener(this);
+            }
+        }
+
+        @Override
+        public void speedAveragingChanged(long oldMillisecondsOverWhichToAverage, long newMillisecondsOverWhichToAverage) {
+            synchronized (directionFromStartToNextMarkCacheLock) {
+                directionFromStartToNextMarkCache = null;
+                listeningTo.removeListener(this);
+            }
+        }
+    }
 }
