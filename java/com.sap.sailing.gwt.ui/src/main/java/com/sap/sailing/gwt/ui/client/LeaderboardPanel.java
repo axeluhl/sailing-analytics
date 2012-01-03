@@ -311,7 +311,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         }
 
         private String getFlagURL(String twoLetterIsoCountryCode) {
-            return "/images/flags/" + twoLetterIsoCountryCode.toLowerCase() + ".png";
+            return "/gwt/images/flags/" + twoLetterIsoCountryCode.toLowerCase() + ".png";
         }
 
         @Override
@@ -425,7 +425,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         public Header<SafeHtml> getHeader() {
             SortableExpandableColumnHeader header = new SortableExpandableColumnHeader(
             /* title */raceName,
-            /* iconURL */medalRace ? "/images/medal_small.png" : null, LeaderboardPanel.this, this, stringConstants);
+            /* iconURL */medalRace ? "/gwt/images/medal_small.png" : null, LeaderboardPanel.this, this, stringConstants);
             return header;
         }
 
@@ -809,7 +809,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         playStateChanged(timer.isPlaying());
         refreshPanel.add(playPause);
         Anchor chartsAnchor = new Anchor(new SafeHtmlBuilder().appendHtmlConstant(
-                "<img class=\"linkNoBorder\" src=\"/images/chart_small.png\"/>").toSafeHtml());
+                "<img class=\"linkNoBorder\" src=\"/gwt/images/chart_small.png\"/>").toSafeHtml());
         chartsAnchor.setTitle(stringConstants.showCharts());
         chartsAnchor.addClickHandler(new ClickHandler() {
             
@@ -819,7 +819,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             }
         });
         Anchor settingsAnchor = new Anchor(new SafeHtmlBuilder().appendHtmlConstant(
-                "<img class=\"linkNoBorder\" src=\"/images/settings.png\"/>").toSafeHtml());
+                "<img class=\"linkNoBorder\" src=\"/gwt/images/settings.png\"/>").toSafeHtml());
         settingsAnchor.setTitle(stringConstants.settings());
         settingsAnchor.addClickHandler(new SettingsClickHandler(stringConstants));
         refreshAndSettingsPanel.add(chartsAnchor);
@@ -835,7 +835,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
 
     private SafeHtml getPlayPauseImgHtml(boolean playing) {
         return new SafeHtmlBuilder().appendHtmlConstant(
-                "<img class=\"linkNoBorder\" src=\"/images/" + (playing ? "pause" : "play") + "_16.png\"/>")
+                "<img class=\"linkNoBorder\" src=\"/gwt/images/" + (playing ? "pause" : "play") + "_16.png\"/>")
                 .toSafeHtml();
     }
 

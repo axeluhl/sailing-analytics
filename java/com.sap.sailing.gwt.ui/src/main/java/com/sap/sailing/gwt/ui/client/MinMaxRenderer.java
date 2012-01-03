@@ -46,7 +46,7 @@ public class MinMaxRenderer {
         stringValue = stringValue == null ? "" : stringValue;
         sb.appendHtmlConstant(
                 "<div " + (title == null ? "" : "title=\"" + title + "\" ")
-                        + "style=\"left: 0px; background-image: url(/images/greyBar.png); "
+                        + "style=\"left: 0px; background-image: url(/gwt/images/greyBar.png); "
                         + " background-position: left; background-repeat: no-repeat; background-size: " + percent
                         + "% 25px; \">").appendEscaped(stringValue).appendHtmlConstant("</div>");
     }
