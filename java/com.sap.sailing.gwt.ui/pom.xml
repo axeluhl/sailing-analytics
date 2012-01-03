@@ -61,6 +61,9 @@
   </dependencies>
 
   <build>
+  <directory>WEB-INF/classes</directory>
+  <outputDirectory>WEB-INF/classes</outputDirectory>
+  <testOutputDirectory>WEB-INF/classes</testOutputDirectory>
     <plugins>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
@@ -78,8 +81,8 @@
 		      </modules>
 		      <gen>${basedir}/.generated</gen>
 		      <localWorkers>6</localWorkers>
-		      <webappDirectory>src/main/resources</webappDirectory>
-		      <warSourceDirectory>${basedir}</warSourceDirectory>
+		      <webappDirectory>${basedir}</webappDirectory>
+		      <warSourceDirectory>${basedir}/src/main/resources</warSourceDirectory>
 	        </configuration>
             <goals>
               <goal>compile</goal>
