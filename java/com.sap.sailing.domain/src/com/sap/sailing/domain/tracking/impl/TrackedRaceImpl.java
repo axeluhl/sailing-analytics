@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
 import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Bearing;
@@ -103,7 +105,9 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     private final Map<Buoy, GPSFixTrack<Buoy, GPSFix>> buoyTracks;
     
     private final long millisecondsOverWhichToAverageSpeed;
-
+    
+    private static final Executor executor = Executors.newSingleThreadExecutor();
+    
     public TrackedRaceImpl(TrackedEvent trackedEvent, RaceDefinition race, WindStore windStore,
             long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed) {
         super();
@@ -139,6 +143,10 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         }
         this.trackedEvent = trackedEvent;
         competitorRankings = new HashMap<TimePoint, List<Competitor>>();
+    }
+    
+    private Executor getExecutor() {
+        return executor;
     }
 
     /**
@@ -430,15 +438,14 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                 // the track's listeners about the receipt of a new GPS fix which leads to the
                 // invalidation of the TrackBasedEstimationWindTrackImpl's cache which requests
                 // the TrackBasedEstimationWindTrackImpl's monitor. --> deadlock
-                new Thread("Adding cache invalidation listener for start/first-mark direction for "+getRace().getName()) {
+                getExecutor().execute(new Runnable() {
                     public void run() {
                         synchronized (directionFromStartToNextMarkCacheLock) {
-                            // FIXME don't we have to expect that after cache invalidation the listeners are still subscribed?
                             addDirectionFromStartToNextMarkCacheInvalidationListener();
                             directionFromStartToNextMarkCache = finalResult;
                         }                        
                     }
-                }.start();
+                });
             } else {
                 result = null;
             }
@@ -891,27 +898,26 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         
         @Override
         public void gpsFixReceived(GPSFix fix, Buoy buoy) {
-            new Thread("StartToNextMarkCacheInvalidationListener.gpsFixReceived for buoy " + buoy.getName()) {
+            getExecutor().execute(new Runnable() {
                 public void run() {
                     synchronized (directionFromStartToNextMarkCacheLock) {
                         directionFromStartToNextMarkCache = null;
                         listeningTo.removeListener(StartToNextMarkCacheInvalidationListener.this);
                     }
                 }
-            }.start();
+            });
         }
 
         @Override
         public void speedAveragingChanged(long oldMillisecondsOverWhichToAverage, long newMillisecondsOverWhichToAverage) {
-            new Thread("StartToNextMarkCacheInvalidationListener.gpsFixReceived for buoy "
-                    + listeningTo.getTrackedItem().getName()) {
+            getExecutor().execute(new Runnable() {
                 public void run() {
                     synchronized (directionFromStartToNextMarkCacheLock) {
                         directionFromStartToNextMarkCache = null;
                         listeningTo.removeListener(StartToNextMarkCacheInvalidationListener.this);
                     }
                 }
-            }.start();
+            });
         }
     }
 }
