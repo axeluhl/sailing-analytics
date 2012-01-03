@@ -34,11 +34,11 @@ public class RankGainColumn extends LegDetailColumn<Integer, Integer> {
                         builder.append(Math.abs(rankDelta));
                         builder.appendHtmlConstant("&nbsp;");
                         if (rankDelta < 0) {
-                            builder.appendHtmlConstant("<img src=\"/images/arrow-gain.png\"/>");
+                            builder.appendHtmlConstant("<img src=\"/gwt/images/arrow-gain.png\"/>");
                         } else if (rankDelta > 0) {
-                            builder.appendHtmlConstant("<img src=\"/images/arrow-loss.png\"/>");
+                            builder.appendHtmlConstant("<img src=\"/gwt/images/arrow-loss.png\"/>");
                         } else {
-                            builder.appendHtmlConstant("<img src=\"/images/arrow-gain-loss.png\"/>");
+                            builder.appendHtmlConstant("<img src=\"/gwt/images/arrow-gain-loss.png\"/>");
                         }
                     }
                 }

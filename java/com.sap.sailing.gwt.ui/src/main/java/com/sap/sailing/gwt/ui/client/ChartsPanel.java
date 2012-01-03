@@ -156,7 +156,7 @@ public class ChartsPanel extends FormPanel {
         loadingPanel = new AbsolutePanel();
         loadingPanel.setSize(width + "px", height + "px");
 
-        Anchor a = new Anchor(new SafeHtmlBuilder().appendHtmlConstant("<img src=\"/images/ajax-loader.gif\"/>")
+        Anchor a = new Anchor(new SafeHtmlBuilder().appendHtmlConstant("<img src=\"/gwt/images/ajax-loader.gif\"/>")
                 .toSafeHtml());
         loadingPanel.add(a, width / 2 - 32 / 2, height / 2 - 32 - 2);
         chartPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
@@ -177,7 +177,7 @@ public class ChartsPanel extends FormPanel {
         chartPanel.add(chart);
         mainPanel.add(chartPanel);
         Anchor showConfigAnchor = new Anchor(new SafeHtmlBuilder().appendHtmlConstant(
-                "<img class=\"linkNoBorder\" src=\"/images/settings.png\"/>").toSafeHtml());
+                "<img class=\"linkNoBorder\" src=\"/gwt/images/settings.png\"/>").toSafeHtml());
         showConfigAnchor.setTitle(stringConstants.configuration());
         showConfigAnchor.addClickHandler(new ClickHandler() {
 
