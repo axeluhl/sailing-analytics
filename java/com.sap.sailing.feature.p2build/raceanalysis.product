@@ -3,6 +3,7 @@
 
 <product name="Raceanalysis Product" uid="raceanalysis.product.id" id="raceanalysis.product" application="raceanalysis.application" version="1.1.0" useFeatures="true" includeLaunchers="false">
 
+
    <configIni use="default">
    </configIni>
 
@@ -14,12 +15,14 @@
 
    <windowImages/>
 
+
    <launcher>
       <solaris/>
       <win useIco="false">
          <bmp/>
       </win>
    </launcher>
+
 
    <vm>
    </vm>
@@ -33,12 +36,15 @@
    </features>
 
    <configurations>
-      <plugin id="org.eclipse.core.runtime" autoStart="true" startLevel="4" />
+      <plugin id="com.sap.sailing.gwt.ui" autoStart="true" startLevel="4" />
+      <plugin id="com.sap.sailing.server" autoStart="true" startLevel="4" />
       <plugin id="org.eclipse.equinox.common" autoStart="true" startLevel="2" />
-      <plugin id="org.eclipse.equinox.ds" autoStart="true" startLevel="2" />
-      <plugin id="org.eclipse.equinox.p2.reconciler.dropins" autoStart="true" startLevel="4" />
-      <plugin id="org.eclipse.equinox.simpleconfigurator" autoStart="true" startLevel="1" />
-      <plugin id="org.eclipse.update.configurator" autoStart="true" startLevel="4" />
+      <plugin id="org.eclipse.equinox.simpleconfigurator" autoStart="true" startLevel="2" />
+      <plugin id="org.eclipse.jetty.osgi.boot" autoStart="true" startLevel="3" />
+      <property name="eclipse.ignoreApp" value="true" />
+      <property name="expedition.udp.port" value="2011" />
+      <property name="mongo.port" value="10201" />
+      <property name="osgi.noShutdown" value="true" />
    </configurations>
 
 </product>

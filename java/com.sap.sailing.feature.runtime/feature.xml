@@ -27,6 +27,7 @@
       <import plugin="org.eclipse.osgi"/>
       <import plugin="org.eclipse.osgi.services"/>
       <import plugin="org.eclipse.jetty.nested" version="7.5.4" match="greaterOrEqual"/>
+      <import plugin="slf4j.api"/>
    </requires>
 
    <plugin
@@ -56,6 +57,27 @@
          download-size="0"
          install-size="0"
          version="1.6.4"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.equinox.common"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.equinox.simpleconfigurator"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.equinox.launcher"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
          unpack="false"/>
 
 </feature>
