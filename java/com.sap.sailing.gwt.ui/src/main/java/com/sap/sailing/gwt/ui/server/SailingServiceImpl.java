@@ -476,7 +476,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
     
     @Override
-    public void removeAndUntrackedRace(EventAndRaceIdentifier eventAndRaceidentifier) throws Exception{
+    public void removeAndUntrackRace(EventAndRaceIdentifier eventAndRaceidentifier) throws Exception{
         Event event = getEvent(eventAndRaceidentifier);
         if(event!= null) {
             RaceDefinition race = getRace(eventAndRaceidentifier);
@@ -484,7 +484,6 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 getService().removeRace(event, race);
             }
         }
-        
     }
     
     /**

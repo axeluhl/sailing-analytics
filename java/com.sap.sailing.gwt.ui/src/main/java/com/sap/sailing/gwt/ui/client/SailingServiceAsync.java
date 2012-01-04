@@ -66,7 +66,7 @@ public interface SailingServiceAsync {
      * @param eventAndRaceidentifier The identifier for the event name, and the race name to remove
      * @throws Exception
      */
-    void removeAndUntrackedRace(EventAndRaceIdentifier eventAndRaceidentifier, AsyncCallback<Void> callback);
+    void removeAndUntrackRace(EventAndRaceIdentifier eventAndRaceidentifier, AsyncCallback<Void> callback);
 
     /**
      * @param windSources if <code>null</code>, information about all available wind sources will be provided
