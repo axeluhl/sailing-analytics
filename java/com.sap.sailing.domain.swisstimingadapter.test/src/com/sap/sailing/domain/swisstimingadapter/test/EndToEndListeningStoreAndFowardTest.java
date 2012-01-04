@@ -153,8 +153,8 @@ public class EndToEndListeningStoreAndFowardTest {
             RaceDefinition race = trackedRace.getRace();
             raceIDs.add(race.getName());
             assertEquals(46, Util.size(race.getCompetitors()));
-            assertEquals(6, Util.size(race.getCourse().getWaypoints()));
-            assertEquals(5, Util.size(race.getCourse().getLegs()));
+            assertEquals(7, Util.size(race.getCourse().getWaypoints()));
+            assertEquals(6, Util.size(race.getCourse().getLegs()));
             for (Competitor competitor : race.getCompetitors()) {
                 if (!competitor.getName().equals("Competitor 35") && !competitor.getName().equals("Competitor 20")) {
                     assertTrue("Track of competitor " + competitor + " empty",
