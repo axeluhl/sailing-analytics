@@ -19,11 +19,7 @@
 <repository location="http://sapcoe-app01.pironet-ndh.com/p2/sailing/"/>
 </location>
 <location includeAllPlatforms="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
-<unit id="org.eclipse.equinox.core.sdk.feature.group" version="3.7.0.v20110506-0800-7uF9LFp7FWmE7gTBiKg15LDD"/>
-<repository location="http://download.eclipse.org/equinox/drops/R-3.7-201106131736/"/>
-</location>
-<location includeAllPlatforms="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
-<unit id="org.eclipse.rcp.source.feature.group" version="3.7.1.r37x_v20110729-9DB5FmNFnFLSFCtLxnRfMqt15A4A"/>
+<unit id="org.eclipse.equinox.core.sdk.feature.group" version="3.7.1.R37x_v20110907-7uF9LFpFFSuN6-tKJIXPMYaq7NTP"/>
 <repository location="http://download.eclipse.org/releases/indigo"/>
 </location>
 </locations>
