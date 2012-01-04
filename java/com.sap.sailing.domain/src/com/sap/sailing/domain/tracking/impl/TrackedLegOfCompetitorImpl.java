@@ -157,7 +157,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
             Distance result = null;
             for (Buoy buoy : getLeg().getTo().getBuoys()) {
                 Distance d = getWindwardDistanceTo(buoy, timePoint);
-                if (result == null || d.compareTo(result) < 0) {
+                if (result == null || d != null && d.compareTo(result) < 0) {
                     result = d;
                 }
             }
@@ -430,7 +430,8 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     @Override
     public Speed getVelocityMadeGood(TimePoint at) throws NoWindException {
         if (hasStartedLeg(at)) {
-            return getWindwardSpeed(getSpeedOverGround(at), at);
+            SpeedWithBearing speedOverGround = getSpeedOverGround(at);
+            return speedOverGround == null ? null : getWindwardSpeed(speedOverGround, at);
         } else {
             return null;
         }
@@ -454,7 +455,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
             if (hasStartedLeg(timePoint)) {
                 Distance windwardDistanceToGo = getWindwardDistanceToGo(timePoint);
                 Speed vmg = getVelocityMadeGood(timePoint);
-                result = windwardDistanceToGo.getMeters() / vmg.getMetersPerSecond();
+                result = vmg == null ? null : windwardDistanceToGo.getMeters() / vmg.getMetersPerSecond();
             } else {
                 result = null;
             }
