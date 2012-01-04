@@ -8,12 +8,11 @@ Additional mandatory installations:
 - Git (file versioning system)
 - Maven 3.x (build system)
 
-These further add-ons are recommended:
-- 
-
-
 Configure the IDE
 -----------------
+
+1. Target Platform
+
 After the import of all required projects from git into your eclipse workspace you need to setup the target platform.
 A target platform is an Eclipse concept to define the set of java classes (from a set of jars) your compiler can use to build the sources.
 We have defined a target-platform for the project which can be found inside the project "com.sap.sailing.targetplatform" in the folder 'definitions'.
@@ -23,10 +22,26 @@ The target definition contains a list of URLs to different p2 repositories conta
 depending on your access to those repositories. Normally you should bind your target platform to central (remote) repositories in order to keep the content up-to-date.
 In case you don't have access to specific remote repositories you can create a local copy of a p2 repository and change the URL to this local copy.
 
+The used target platform sources are:
+a) Remote p2 repositories (like http://download.eclipse.org/releases/indigo)
+b) SAP Nexus repositories (like http://nexus:8081/nexus/content/...)
+c) Our own p2 repository served by our central server via Apache WebServer (http://sapcoe-app01.pironet-ndh.com/p2/...)
+
 Local maven build
 -----------------
 If you run a local build with maven the used target platform defintion is 'race-analysis-p2-maven-local'. The reference to this definition is defined in the pom.xml
 of the /git/java folder.
+
+The "SAP Race Analysis" Product
+-------------------------------
+The project com.sap.sailing.feature.p2build contains an eclipse product definition with the name "SAP Race Analysis".
+This product contains a list of features defining the product.
+These features are:
+- com.sap.sailing.feature (contains all development bundles and it's dependencies)
+- com.sap.sailing.feature.runtime (contains additional libraries only needed at runtime)
+
+The maven/tycho build creates an deployable eclipse product based on this product defintion which is the basis for the server installation.
+The resulting deployable files can be found in /bin/products/raceanalysis.product.id/<os>/<ws>/<arch>/...
 
 Target-Platform related projects
 --------------------------------
@@ -53,5 +68,6 @@ g) Submit the changes to the git repository
 
 2. Adding a library from an internal SAP repository (e.g. Nexus)
 
+3. Adding a p2 repository as new source of libraries
 
 
