@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.ui.client;
 
-import java.io.Console;
 import java.util.List;
 
 import com.google.gwt.cell.client.AbstractCell;
