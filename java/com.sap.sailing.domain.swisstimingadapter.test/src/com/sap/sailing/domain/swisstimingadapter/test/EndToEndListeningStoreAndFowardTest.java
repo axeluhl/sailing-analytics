@@ -184,7 +184,7 @@ public class EndToEndListeningStoreAndFowardTest {
         String[] racesToTrack = new String[] { "W4702" };
         String scriptName1 = "/SailMasterDataInterfaceRACandSTL.txt";
         String scriptName2 = "/SailMasterDataInterface-ExampleAsText.txt";
-         String scriptNewCourseConfig = "/SailMasterDataInterfaceNewCourseConfig.txt";
+        String scriptNewCourseConfig = "/SailMasterDataInterfaceNewCourseConfig.txt";
         setUpUsingScript(racesToTrack, scriptName1, scriptName2, scriptNewCourseConfig);
         Set<TrackedRace> allNewTrackedRaces = new HashSet<TrackedRace>();
         Iterable<Event> allNewEvents = racingEventService.getAllEvents();
