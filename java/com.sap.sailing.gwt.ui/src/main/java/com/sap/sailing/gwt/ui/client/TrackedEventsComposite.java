@@ -431,7 +431,7 @@ public class TrackedEventsComposite extends FormPanel implements EventDisplayer,
 
     private void removeAndUntrackRace(final EventDAO event, final RaceDAO race) {
         final EventNameAndRaceName eventNameAndRaceName = new EventNameAndRaceName(event.name, race.name);
-        sailingService.removeAndUntrackedRace(eventNameAndRaceName,
+        sailingService.removeAndUntrackRace(eventNameAndRaceName,
                 new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {

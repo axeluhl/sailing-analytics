@@ -50,7 +50,7 @@ public interface SailingService extends RemoteService {
 
     void stopTrackingRace(EventAndRaceIdentifier eventAndRaceIdentifier) throws Exception;
     
-    void removeAndUntrackedRace(EventAndRaceIdentifier eventAndRaceidentifier) throws Exception;
+    void removeAndUntrackRace(EventAndRaceIdentifier eventAndRaceidentifier) throws Exception;
 
     WindInfoForRaceDAO getWindInfo(RaceIdentifier raceIdentifier, Date from, Date to, WindSource[] windSources);
 
