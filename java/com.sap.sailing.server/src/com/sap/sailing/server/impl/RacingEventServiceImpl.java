@@ -61,6 +61,7 @@ import com.sap.sailing.expeditionconnector.ExpeditionWindTrackerFactory;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.api.EventFetcher;
 import com.sap.sailing.server.api.EventIdentifier;
+import com.sap.sailing.server.api.EventName;
 import com.sap.sailing.server.api.EventNameAndRaceName;
 import com.sap.sailing.server.api.LeaderboardNameAndRaceColumnName;
 import com.sap.sailing.server.api.RaceFetcher;
@@ -659,7 +660,7 @@ public class RacingEventServiceImpl implements RacingEventService, EventFetcher,
     }
 
     @Override
-    public Event getEvent(EventNameAndRaceName eventIdentifier) {
+    public Event getEvent(EventName eventIdentifier) {
         // TODO Auto-generated method stub
         return null;
     }

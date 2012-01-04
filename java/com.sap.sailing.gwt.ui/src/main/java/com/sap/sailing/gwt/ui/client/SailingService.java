@@ -78,6 +78,8 @@ public interface SailingService extends RemoteService {
 
     List<LeaderboardDAO> getLeaderboards();
     
+    List<LeaderboardDAO> getLeaderboardsByEvent(EventIdentifier eventIdentifier);
+    
     void updateLeaderboard(String leaderboardName, String newLeaderboardName, int[] newDiscardingThreasholds);
 
     LeaderboardDAO createLeaderboard(String leaderboardName, int[] discardThresholds);

@@ -133,12 +133,18 @@ public interface SailingServiceAsync {
 
     /**
      * Creates a {@link LeaderboardDAO} for each leaderboard known by the server and fills in the name, race master data
-     * in the form of {@link RaceInLeaderboardDAO}s, whether or not there are {@link LeaderboardDAO#hasCarriedPoints carried points}
-     * and the {@link LeaderboardDAO#discardThresholds discarding thresholds} for the leaderboard. No data about the points
-     * is filled into the result object. No data about the competitor display names is filled in; instead, an empty map
-     * is used for {@link LeaderboardDAO#competitorDisplayNames}.
+     * in the form of {@link RaceInLeaderboardDAO}s, whether or not there are {@link LeaderboardDAO#hasCarriedPoints
+     * carried points} and the {@link LeaderboardDAO#discardThresholds discarding thresholds} for the leaderboard. No
+     * data about the points is filled into the result object. No data about the competitor display names is filled in;
+     * instead, an empty map is used for {@link LeaderboardDAO#competitorDisplayNames}.
      */
     void getLeaderboards(AsyncCallback<List<LeaderboardDAO>> callback);
+    
+    /**
+     * Does the same as {@link SailingServiceAsync#getLeaderboards(AsyncCallback) getLeaderboards} but returns only
+     * leaderboards which have the given event as race
+     */
+    void getLeaderboardsByEvent(EventIdentifier eventIdentifier, AsyncCallback<List<LeaderboardDAO>> callback);
     
     void updateLeaderboard(String leaderboardName, String newLeaderboardName, int[] newDiscardingThreasholds,
             AsyncCallback<Void> callback);

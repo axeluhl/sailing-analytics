@@ -55,11 +55,12 @@ import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MeterDistance;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.Util.Pair;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindError;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Tack;
+import com.sap.sailing.domain.common.Util;
+import com.sap.sailing.domain.common.Util.Pair;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard.Entry;
@@ -118,6 +119,7 @@ import com.sap.sailing.server.api.DetailType;
 import com.sap.sailing.server.api.EventAndRaceIdentifier;
 import com.sap.sailing.server.api.EventFetcher;
 import com.sap.sailing.server.api.EventIdentifier;
+import com.sap.sailing.server.api.EventName;
 import com.sap.sailing.server.api.EventNameAndRaceName;
 import com.sap.sailing.server.api.LeaderboardNameAndRaceColumnName;
 import com.sap.sailing.server.api.RaceFetcher;
@@ -849,6 +851,24 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         
         return results;
     }
+    
+    @Override
+    public List<LeaderboardDAO> getLeaderboardsByEvent(EventIdentifier eventIdentifier) {
+        Event event = getEvent(eventIdentifier);
+        Map<String, Leaderboard> leaderboards = getService().getLeaderboards();
+        List<LeaderboardDAO> results = new ArrayList<LeaderboardDAO>();
+        
+        for (Leaderboard leaderboard : leaderboards.values()) {
+            for (RaceInLeaderboard race : leaderboard.getRaceColumns()) {
+                if (Util.contains(event.getAllRaces(), race.getTrackedRace().getRace())) {
+                    LeaderboardDAO dao = createStrippedLeaderboardDAO(leaderboard);
+                    results.add(dao);
+                }
+            }
+        }
+        
+        return results;
+    }
 
     /**
      * Creates a {@link LeaderboardDAO} for <code>leaderboard</code> and fills in the name, race master data
@@ -1479,7 +1499,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
     
     @Override
-    public Event getEvent(EventNameAndRaceName eventIdentifier) {
+    public Event getEvent(EventName eventIdentifier) {
         return getService().getEventByName(eventIdentifier.getEventName());
     }
 
