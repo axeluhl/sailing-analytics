@@ -203,7 +203,7 @@ public class DomainFactoryImpl implements DomainFactory {
     @Override
     public BoatClass getOrCreateBoatClass(CompetitorClass competitorClass) {
         return baseDomainFactory.getOrCreateBoatClass(competitorClass == null ? "" : competitorClass.getName(),
-        /* typicallyStartsUpwind */ !mayStartWithNoUpwindLeg.contains(competitorClass.getName()
+        /* typicallyStartsUpwind */ !mayStartWithNoUpwindLeg.contains(competitorClass == null ? "" : competitorClass.getName()
                 .toLowerCase()));
     }
 
