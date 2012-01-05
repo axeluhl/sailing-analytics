@@ -820,7 +820,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
    }
 
     protected RacingEventService getService() {
-        return (RacingEventService) racingEventServiceTracker.getService(); // grab the service
+        return racingEventServiceTracker.getService(); // grab the service
     }
 
     @Override
