@@ -16,7 +16,6 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
-import com.google.gwt.view.client.SelectionModel;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.gwt.ui.shared.EventDAO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDAO;
@@ -29,11 +28,16 @@ import com.sap.sailing.server.api.EventName;
  *
  */
 public class OverviewEventManagementPanel extends AbstractEventManagementPanel {
-    
-    private ListDataProvider<LeaderboardDAO> listLeaderboards;
-    private CellList<LeaderboardDAO> cellListLeaderboards;
+
     private ListDataProvider<EventDAO> listEvents;
     private CellList<EventDAO> cellListEvents;
+    
+    private CaptionPanel captionPanelLeaderboards;
+    private ListDataProvider<LeaderboardDAO> listLeaderboards;
+    private CellList<LeaderboardDAO> cellListLeaderboards;
+    
+    private EventDAO selectedEventBuffer = null;
+    private LeaderboardDAO selectedLeaderboardBuffer = null;
 
     public OverviewEventManagementPanel(SailingServiceAsync sailingService, EventRefresher eventRefresher,
             ErrorReporter errorReporter, final StringConstants stringConstants) {
@@ -61,14 +65,25 @@ public class OverviewEventManagementPanel extends AbstractEventManagementPanel {
         HorizontalPanel functionPanelEvents = new HorizontalPanel();
         eventsPanel.add(functionPanelEvents);
         
-        Button refreshEvents = new Button(stringConstants.refresh());
-        refreshEvents.addClickHandler(new ClickHandler() {
+        Button btnRefreshEvents = new Button(stringConstants.refresh());
+        btnRefreshEvents.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                loadEvents();
+                EventDAO selectedEvent = getSelectedEvent();
+                loadEvents(true);
             }
         });
-        functionPanelEvents.add(refreshEvents);
+        functionPanelEvents.add(btnRefreshEvents);
+        
+        Button btnShowLeaderboards = new Button(">");
+        btnShowLeaderboards.addClickHandler(new ClickHandler() {
+            
+            @Override
+            public void onClick(ClickEvent c) {
+                captionPanelLeaderboards.setVisible(true);
+            }
+        });
+        functionPanelEvents.add(btnShowLeaderboards);
         
         //Create event list
         AbstractCell<EventDAO> cellEvents = new AbstractCell<EventDAO>() {
@@ -90,12 +105,12 @@ public class OverviewEventManagementPanel extends AbstractEventManagementPanel {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
                 EventDAO selectedEvent = getSelectedEvent();
-                EventIdentifier identifier;
+                EventIdentifier identifier = null;
                 if (selectedEvent != null) {
                     identifier = new EventName(selectedEvent.name);
                     loadLeaderboards(identifier);
-                    if (!cellListLeaderboards.isVisible()) {
-                        cellListLeaderboards.setVisible(true);
+                    if (!captionPanelLeaderboards.isVisible()) {
+                        captionPanelLeaderboards.setVisible(true);
                     }
                 }
             }
@@ -106,22 +121,32 @@ public class OverviewEventManagementPanel extends AbstractEventManagementPanel {
         listEvents.addDataDisplay(cellListEvents);
         
         //Build leaderboards GUI
-        CaptionPanel leaderboardsCaptionPanel = new CaptionPanel(stringConstants.leaderboards());
-        leaderboardsCaptionPanel.setVisible(false);
-        leaderboardsCaptionPanel.setWidth("50%");
-        leaderboardsCaptionPanel.setStyleName("bold");
-        listsSplitPanel.add(leaderboardsCaptionPanel);
+        captionPanelLeaderboards = new CaptionPanel(stringConstants.leaderboards());
+        captionPanelLeaderboards.setVisible(false);
+        captionPanelLeaderboards.setWidth("50%");
+        captionPanelLeaderboards.setStyleName("bold");
+        listsSplitPanel.add(captionPanelLeaderboards);
         
         VerticalPanel leaderboardsPanel = new VerticalPanel();
-        leaderboardsCaptionPanel.setContentWidget(leaderboardsPanel);
+        captionPanelLeaderboards.setContentWidget(leaderboardsPanel);
         leaderboardsPanel.setWidth("100%");
         
         //Create leaderboard functional elements
         HorizontalPanel functionPanelLeaderboards = new HorizontalPanel();
         leaderboardsPanel.add(functionPanelLeaderboards);
         
-        Button refreshLeaderboards = new Button(stringConstants.refresh());
-        refreshLeaderboards.addClickHandler(new ClickHandler() {
+        Button btnHideLeaderboards = new Button("<");
+        btnHideLeaderboards.addClickHandler(new ClickHandler() {
+            
+            @Override
+            public void onClick(ClickEvent arg0) {
+                captionPanelLeaderboards.setVisible(false);
+            }
+        });
+        functionPanelLeaderboards.add(btnHideLeaderboards);
+        
+        Button btnRefreshLeaderboards = new Button(stringConstants.refresh());
+        btnRefreshLeaderboards.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent click) {
                 EventDAO selectedEvent = getSelectedEvent();
@@ -134,7 +159,7 @@ public class OverviewEventManagementPanel extends AbstractEventManagementPanel {
                 }
             }
         });
-        functionPanelLeaderboards.add(refreshLeaderboards);
+        functionPanelLeaderboards.add(btnRefreshLeaderboards);
         
         //Create leaderboard list
         AbstractCell<LeaderboardDAO> cellLeaderboards = new AbstractCell<LeaderboardDAO>() {
@@ -160,6 +185,7 @@ public class OverviewEventManagementPanel extends AbstractEventManagementPanel {
                 
             }
         });
+        cellListLeaderboards.setSelectionModel(selectionModelLeaderboards);
 
         listLeaderboards = new ListDataProvider<LeaderboardDAO>();
         listLeaderboards.addDataDisplay(cellListLeaderboards);
@@ -170,7 +196,29 @@ public class OverviewEventManagementPanel extends AbstractEventManagementPanel {
     }
     
     private void loadLeaderboards(EventIdentifier eventIdentifier) {
-        sailingService.getLeaderboardsByEvent(eventIdentifier, new AsyncCallback<List<LeaderboardDAO>>() {
+//        sailingService.getLeaderboardsByEvent(eventIdentifier, new AsyncCallback<List<LeaderboardDAO>>() {
+//            @Override
+//            public void onSuccess(List<LeaderboardDAO> leaderboards) {
+//                listLeaderboards.getList().clear();
+//                if (leaderboards != null) {
+//                    listLeaderboards.getList().addAll(leaderboards);
+//                }
+//            }
+//
+//            @Override
+//            public void onFailure(Throwable t) {
+//                OverviewEventManagementPanel.super.errorReporter
+//                        .reportError("Error trying to obtain list of leaderboards: " + t.getMessage());
+//            }
+//        });
+        sailingService.getLeaderboards(new AsyncCallback<List<LeaderboardDAO>>() {
+
+            @Override
+            public void onFailure(Throwable t) {
+                OverviewEventManagementPanel.super.errorReporter
+                .reportError("Error trying to obtain list of leaderboards: " + t.getMessage());
+            }
+
             @Override
             public void onSuccess(List<LeaderboardDAO> leaderboards) {
                 listLeaderboards.getList().clear();
@@ -178,16 +226,10 @@ public class OverviewEventManagementPanel extends AbstractEventManagementPanel {
                     listLeaderboards.getList().addAll(leaderboards);
                 }
             }
-
-            @Override
-            public void onFailure(Throwable t) {
-                OverviewEventManagementPanel.super.errorReporter
-                        .reportError("Error trying to obtain list of leaderboards: " + t.getMessage());
-            }
         });
     }
     
-    private void loadEvents() {
+    private void loadEvents(final boolean reselect) {
         sailingService.listEvents(new AsyncCallback<List<EventDAO>>() {
 
             @Override
@@ -195,6 +237,9 @@ public class OverviewEventManagementPanel extends AbstractEventManagementPanel {
                 listEvents.getList().clear();
                 if (result != null) {
                     listEvents.setList(result);
+                }
+                if (reselect) {
+                    cellListEvents.getSelectionModel().setSelected(selectedEventBuffer, true);
                 }
             }
 
@@ -206,9 +251,12 @@ public class OverviewEventManagementPanel extends AbstractEventManagementPanel {
         });
     }
     
+    private void loadEvents() {
+        loadEvents(false);
+    }
+    
     private EventDAO getSelectedEvent() {
         EventDAO result = null;
-        SelectionModel<?> t = cellListEvents.getSelectionModel();
         for (EventDAO event : listEvents.getList()) {
             if (cellListEvents.getSelectionModel().isSelected(event)) {
                 result = event;
