@@ -2,6 +2,9 @@ package com.sap.sailing.gwt.ui.client;
 
 import java.util.HashMap;
 
+import com.sap.sailing.gwt.ui.leaderboard.ChartsPanel;
+
+
 /**
  * Manages color assignments to objects.
  * 

@@ -29,9 +29,10 @@
   <inherits name="com.sap.sailing.domain.SailingDomain" />
 
   <!-- Specify the app entry point class.                         -->
-  <entry-point class='com.sap.sailing.gwt.ui.client.LeaderboardPage'/>
+  <entry-point class='com.sap.sailing.gwt.ui.leaderboard.LeaderboardPage'/>
   <!-- Specify the paths for translatable code                    -->
   <extend-property name="locale" values="de"/>
   <source path='client'/>
+  <source path='leaderboard'/>
   <source path='shared'/>
 </module>

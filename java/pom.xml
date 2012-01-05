@@ -30,6 +30,7 @@
         <module>com.sap.sailing.expeditionconnector.test</module>
         <module>com.sap.sailing.server</module>
 		<module>com.sap.sailing.server.api</module>
+		<module>com.sap.sailing.www</module>
         <module>com.sap.sailing.xcelsiusadapter</module>
         <module>com.sap.sailing.gwt.ui</module>
         <module>com.sap.sailing.gwt.ui.test</module>
