@@ -198,4 +198,9 @@ public interface StringConstants extends Constants {
     String noEventsFound();
     String noEventSelected();
     String noLeaderboardsFound();
+    String searchEvents();
+    String location();
+    String from();
+    String until();
+    String onlyLiveEvents();
 }
