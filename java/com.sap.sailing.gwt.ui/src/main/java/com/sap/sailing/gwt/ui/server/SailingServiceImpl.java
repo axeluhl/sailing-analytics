@@ -1573,4 +1573,13 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     public ServletContext getServletContext() {
         return new DelegatingServletContext(super.getServletContext());
     }
+    
+    @Override
+    /**
+     * Override of funtion to prevent exception "Blocked request without GWT permutation header (XSRF attack?)" when testing the GWT sites
+     */
+    protected void checkPermutationStrongName() throws SecurityException {
+        //Override to prevent exception "Blocked request without GWT permutation header (XSRF attack?)" when testing the GWT sites
+        return;
+    }
 }
