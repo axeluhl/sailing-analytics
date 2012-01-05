@@ -2,10 +2,10 @@ package com.sap.sailing.gwt.ui.test;
 
 import com.google.gwt.user.cellview.client.CellTable;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
-import com.sap.sailing.gwt.ui.client.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
-import com.sap.sailing.gwt.ui.client.SortableColumn;
 import com.sap.sailing.gwt.ui.client.StringConstants;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
+import com.sap.sailing.gwt.ui.leaderboard.SortableColumn;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDAO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDAO;
 
