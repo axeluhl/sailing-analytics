@@ -15,6 +15,9 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
+import com.google.gwt.view.client.SelectionChangeEvent;
+import com.google.gwt.view.client.SelectionModel;
+import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.gwt.ui.shared.EventDAO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDAO;
 import com.sap.sailing.server.api.EventIdentifier;
@@ -33,7 +36,7 @@ public class OverviewEventManagementPanel extends AbstractEventManagementPanel {
     private CellList<EventDAO> cellListEvents;
 
     public OverviewEventManagementPanel(SailingServiceAsync sailingService, EventRefresher eventRefresher,
-            ErrorReporter errorReporter, StringConstants stringConstants) {
+            ErrorReporter errorReporter, final StringConstants stringConstants) {
         super(sailingService, eventRefresher, errorReporter, stringConstants);
         
         VerticalPanel mainPanel = new VerticalPanel();
@@ -79,17 +82,35 @@ public class OverviewEventManagementPanel extends AbstractEventManagementPanel {
         
         cellListEvents = new CellList<EventDAO>(cellEvents);
         eventsPanel.add(cellListEvents);
-        Label emptyLabelEvents = new Label("No events were found.");
+        Label emptyLabelEvents = new Label(stringConstants.noEventsFound());
         cellListEvents.setEmptyListWidget(emptyLabelEvents);
+        
+        SingleSelectionModel<EventDAO> selectionModelEvents = new SingleSelectionModel<EventDAO>();
+        selectionModelEvents.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+            @Override
+            public void onSelectionChange(SelectionChangeEvent event) {
+                EventDAO selectedEvent = getSelectedEvent();
+                EventIdentifier identifier;
+                if (selectedEvent != null) {
+                    identifier = new EventName(selectedEvent.name);
+                    loadLeaderboards(identifier);
+                    if (!cellListLeaderboards.isVisible()) {
+                        cellListLeaderboards.setVisible(true);
+                    }
+                }
+            }
+        });
+        cellListEvents.setSelectionModel(selectionModelEvents);
 
         listEvents = new ListDataProvider<EventDAO>();
         listEvents.addDataDisplay(cellListEvents);
         
         //Build leaderboards GUI
         CaptionPanel leaderboardsCaptionPanel = new CaptionPanel(stringConstants.leaderboards());
-        listsSplitPanel.add(leaderboardsCaptionPanel);
+        leaderboardsCaptionPanel.setVisible(false);
         leaderboardsCaptionPanel.setWidth("50%");
         leaderboardsCaptionPanel.setStyleName("bold");
+        listsSplitPanel.add(leaderboardsCaptionPanel);
         
         VerticalPanel leaderboardsPanel = new VerticalPanel();
         leaderboardsCaptionPanel.setContentWidget(leaderboardsPanel);
@@ -103,19 +124,13 @@ public class OverviewEventManagementPanel extends AbstractEventManagementPanel {
         refreshLeaderboards.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent click) {
-                //Get selected event
-                EventDAO selectedEvent = null;
-                for (EventDAO event : listEvents.getList()) {
-                    if (cellListEvents.getSelectionModel().isSelected(event)) {
-                        selectedEvent = event;
-                    }
-                }
+                EventDAO selectedEvent = getSelectedEvent();
                 EventIdentifier identifier;
                 if (selectedEvent != null) {
                     identifier = new EventName(selectedEvent.name);
                     loadLeaderboards(identifier);
                 } else {
-                    Window.alert("No event selected");
+                    Window.alert(stringConstants.noEventSelected());
                 }
             }
         });
@@ -133,11 +148,22 @@ public class OverviewEventManagementPanel extends AbstractEventManagementPanel {
         
         cellListLeaderboards = new CellList<LeaderboardDAO>(cellLeaderboards);
         leaderboardsPanel.add(cellListLeaderboards);
-        Label emptyLabelLeaderboards = new Label("No leaderboards were found.");
+        Label emptyLabelLeaderboards = new Label();
         cellListLeaderboards.setEmptyListWidget(emptyLabelLeaderboards);
+        
+        SingleSelectionModel<LeaderboardDAO> selectionModelLeaderboards = new SingleSelectionModel<LeaderboardDAO>();
+        selectionModelLeaderboards.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+            
+            @Override
+            public void onSelectionChange(SelectionChangeEvent arg0) {
+                // TODO Auto-generated method stub
+                
+            }
+        });
 
         listLeaderboards = new ListDataProvider<LeaderboardDAO>();
         listLeaderboards.addDataDisplay(cellListLeaderboards);
+        
         
         //Fill lists
         loadEvents();
@@ -178,6 +204,17 @@ public class OverviewEventManagementPanel extends AbstractEventManagementPanel {
                 .reportError("Error trying to obtain list of leaderboards: " + caught.getMessage());
             }
         });
+    }
+    
+    private EventDAO getSelectedEvent() {
+        EventDAO result = null;
+        SelectionModel<?> t = cellListEvents.getSelectionModel();
+        for (EventDAO event : listEvents.getList()) {
+            if (cellListEvents.getSelectionModel().isSelected(event)) {
+                result = event;
+            }
+        }
+        return result;
     }
 
     @Override
