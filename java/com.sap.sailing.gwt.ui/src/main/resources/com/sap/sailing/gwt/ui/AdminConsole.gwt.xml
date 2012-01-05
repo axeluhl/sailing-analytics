@@ -31,7 +31,7 @@
   <inherits name="com.sap.sailing.domain.SailingDomain" />
 
   <!-- Specify the app entry point class.                         -->
-  <entry-point class='com.sap.sailing.gwt.ui.client.AdminConsole'/>
+  <entry-point class='com.sap.sailing.gwt.ui.adminconsole.AdminConsole'/>
 
   <set-property name="gwt.logging.enabled" value="TRUE"/> 
   <set-property name="gwt.logging.logLevel" value="FINE"/>
@@ -46,6 +46,8 @@
   <!-- Specify the paths for translatable code                    -->
   <extend-property name="locale" values="de"/>
   <source path='client'/>
+  <source path='adminconsole'/>
+  <source path='leaderboard'/>
   <source path='shared'/>
   <source path='test'/>
 </module>
