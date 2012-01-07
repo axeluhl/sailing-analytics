@@ -43,5 +43,5 @@ public interface LeaderboardTableResources extends CellTable.Resources {
 
     @Override
     @Source({ CellTable.Style.DEFAULT_CSS, "LeaderboardTable.css" })
-    LeaderboardTableStyle cellTableStyle();
+    LeaderboardTableResources.LeaderboardTableStyle cellTableStyle();
 }
