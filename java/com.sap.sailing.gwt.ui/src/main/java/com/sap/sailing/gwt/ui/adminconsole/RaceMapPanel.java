@@ -234,7 +234,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
             final EventRefresher eventRefresher, StringConstants stringConstants) {
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
-        this.timer = new Timer(/* delayBetweenAutoAdvancesInMilliseconds */3000);
+        this.timer = new Timer(/* delayBetweenAutoAdvancesInMilliseconds */500);
         competitorsSelectedInMap = new HashSet<CompetitorDAO>();
         tails = new HashMap<CompetitorDAO, Polyline>();
         firstShownFix = new HashMap<CompetitorDAO, Integer>();
