@@ -89,8 +89,8 @@ public class LeaderboardSettingsPanel extends DataEntryDialog<Result> {
         maneuverDetailCheckboxes = new LinkedHashMap<DetailType, CheckBox>();
         legDetailCheckboxes = new LinkedHashMap<DetailType, CheckBox>();
         raceDetailCheckboxes = new LinkedHashMap<DetailType, CheckBox>();
-        delayBetweenAutoAdvancesInSecondsBox = createLongBox((int) delayBetweenAutoAdvancesInMilliseconds/1000, 4);
-        delayInSecondsBox = createLongBox((int) delayInMilliseconds/1000, 4);
+        delayBetweenAutoAdvancesInSecondsBox = createLongBox(delayBetweenAutoAdvancesInMilliseconds/1000l, 4);
+        delayInSecondsBox = createLongBox(delayInMilliseconds/1000l, 4);
     }
 
     @Override
@@ -176,7 +176,7 @@ public class LeaderboardSettingsPanel extends DataEntryDialog<Result> {
         }
         Long delayBetweenAutoAdvancesValue = delayBetweenAutoAdvancesInSecondsBox.getValue();
         Long delayInSecondsValue = delayInSecondsBox.getValue();
-        return new Result(maneuverDetailsToShow, legDetailsToShow, raceDetailsToShow, raceColumnsToShow, 1000*(delayBetweenAutoAdvancesValue==null?0:delayBetweenAutoAdvancesValue.longValue()),
+        return new Result(maneuverDetailsToShow, legDetailsToShow, raceDetailsToShow, raceColumnsToShow, 1000l*(delayBetweenAutoAdvancesValue==null?0l:delayBetweenAutoAdvancesValue.longValue()),
                 1000*(delayInSecondsValue==null?0:delayInSecondsValue.longValue()));
     }
 
