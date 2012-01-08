@@ -8,8 +8,8 @@ import java.util.Map;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.IntegerBox;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.LongBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog;
@@ -29,8 +29,8 @@ public class LeaderboardSettingsPanel extends DataEntryDialog<Result> {
     private final Map<DetailType, CheckBox> legDetailCheckboxes;
     private final Map<DetailType, CheckBox> raceDetailCheckboxes;
     private final StringConstants stringConstants;
-    private final IntegerBox delayBetweenAutoAdvancesInSecondsBox;
-    private final IntegerBox delayInSecondsBox;
+    private final LongBox delayBetweenAutoAdvancesInSecondsBox;
+    private final LongBox delayInSecondsBox;
     
     public static class Result {
         private final List<String> raceColumnsToShow;
@@ -89,8 +89,8 @@ public class LeaderboardSettingsPanel extends DataEntryDialog<Result> {
         maneuverDetailCheckboxes = new LinkedHashMap<DetailType, CheckBox>();
         legDetailCheckboxes = new LinkedHashMap<DetailType, CheckBox>();
         raceDetailCheckboxes = new LinkedHashMap<DetailType, CheckBox>();
-        delayBetweenAutoAdvancesInSecondsBox = createIntegerBox((int) delayBetweenAutoAdvancesInMilliseconds/1000, 4);
-        delayInSecondsBox = createIntegerBox((int) delayInMilliseconds/1000, 4);
+        delayBetweenAutoAdvancesInSecondsBox = createLongBox((int) delayBetweenAutoAdvancesInMilliseconds/1000, 4);
+        delayInSecondsBox = createLongBox((int) delayInMilliseconds/1000, 4);
     }
 
     @Override
@@ -174,8 +174,8 @@ public class LeaderboardSettingsPanel extends DataEntryDialog<Result> {
                 raceColumnsToShow.add(entry.getKey());
             }
         }
-        Integer delayBetweenAutoAdvancesValue = delayBetweenAutoAdvancesInSecondsBox.getValue();
-        Integer delayInSecondsValue = delayInSecondsBox.getValue();
+        Long delayBetweenAutoAdvancesValue = delayBetweenAutoAdvancesInSecondsBox.getValue();
+        Long delayInSecondsValue = delayInSecondsBox.getValue();
         return new Result(maneuverDetailsToShow, legDetailsToShow, raceDetailsToShow, raceColumnsToShow, 1000*(delayBetweenAutoAdvancesValue==null?0:delayBetweenAutoAdvancesValue.longValue()),
                 1000*(delayInSecondsValue==null?0:delayInSecondsValue.longValue()));
     }

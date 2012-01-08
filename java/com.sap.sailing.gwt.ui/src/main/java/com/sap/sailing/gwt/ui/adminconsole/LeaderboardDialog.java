@@ -6,8 +6,8 @@ import java.util.List;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.IntegerBox;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.LongBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -22,7 +22,7 @@ public abstract class LeaderboardDialog extends DataEntryDialog<LeaderboardDAO> 
     protected TextBox entryField;
     protected LeaderboardDAO leaderboard;
     
-    protected IntegerBox[] discardThresholdBoxes;
+    protected LongBox[] discardThresholdBoxes;
     protected static final int MAX_NUMBER_OF_DISCARDED_RESULTS = 4;
 
     protected static class LeaderboardParameterValidator implements Validator<LeaderboardDAO> {
@@ -83,7 +83,7 @@ public abstract class LeaderboardDialog extends DataEntryDialog<LeaderboardDAO> 
         for (int i = 0; i < discardThresholdBoxes.length; i++) {
             if (discardThresholdBoxes[i].getValue() != null
                     && discardThresholdBoxes[i].getValue().toString().length() > 0) {
-                discardThresholds.add(discardThresholdBoxes[i].getValue());
+                discardThresholds.add(discardThresholdBoxes[i].getValue().intValue());
             }
         }
         int[] discardThresholdsBoxContents = new int[discardThresholds.size()];
