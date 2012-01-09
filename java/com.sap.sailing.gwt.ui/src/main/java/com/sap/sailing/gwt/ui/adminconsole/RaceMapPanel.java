@@ -802,6 +802,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
             if (newBounds != null) {
                 map.setZoomLevel(map.getBoundsZoomLevel(newBounds));
                 map.setCenter(newBounds.getCenter());
+                map.checkResizeAndCenter();
                 mapFirstZoomDone = true;
                 /*
                  * Reset the mapZoomedOrPannedSinceLastRaceSelection: In spite of the fact that the map was just zoomed
@@ -891,7 +892,16 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
     }
 
     private String getBoatImageURL(ImageRotator boatImageRotator, GPSFixDAO boatFix) {
-        return boatImageRotator.getRotatedImageURL(boatFix.speedWithBearing.bearingInDegrees);
+        // the possible zoom level range is 0 to 21 (zoom level 0 would show the whole world)
+        int zoomLevel = map.getZoomLevel();
+        double minScaleFactor = 0.1; 
+        double maxScaleFactor = 1.0;
+        
+        double scaleDiffPerZoomLevel = (maxScaleFactor - minScaleFactor) / 21.0;   
+        
+        double scaleFactor = minScaleFactor + scaleDiffPerZoomLevel * zoomLevel;
+        
+        return boatImageRotator.getRotatedImageURL(boatFix.speedWithBearing.bearingInDegrees, scaleFactor);
     }
 
     private Icon getBoatImageIcon(GPSFixDAO boatFix, boolean highlighted) {

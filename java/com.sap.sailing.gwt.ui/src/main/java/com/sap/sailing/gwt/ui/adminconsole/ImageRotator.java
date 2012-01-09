@@ -61,7 +61,7 @@ public class ImageRotator {
      * If the platform supports the {@link Canvas} element, returns a view rotated by <code>degrees</code> degrees. Otherwise,
      * the {@link #getUnrotatedImageURL() unrotated image's URL} is returned.
      */
-    public String getRotatedImageURL(double angleInDegrees) {
+    public String getRotatedImageURL(double angleInDegrees, double scaleFactor) {
         String result = getUnrotatedImageURL();
         if (canvas != null) {
             if (imageElement != null) {
@@ -70,6 +70,7 @@ public class ImageRotator {
                 context.save();
                 context.translate(canvasRadius, canvasRadius);
                 context.rotate(angleInRadians);
+                context.scale(scaleFactor,  scaleFactor);
                 context.drawImage(imageElement, -imageWidth/2, -imageHeight/2);
                 result = canvas.toDataUrl("image/png");
                 context.restore();
