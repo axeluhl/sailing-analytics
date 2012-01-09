@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.ui.client;
 
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import com.google.gwt.cell.client.AbstractCell;
@@ -16,7 +18,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.CheckBox;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment.HorizontalAlignmentConstant;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
@@ -41,8 +42,9 @@ public class OverviewEventManagementPanel extends AbstractEventManagementPanel {
     private TextBox textBoxFrom;
     private TextBox textBoxUntil;
     private CheckBox checkBoxLive;
+    private Button btnSearch;
     
-    private CaptionPanel eventsCaptionPanel;
+    private CaptionPanel captionPanelEvents;
     private ListDataProvider<EventDAO> listEvents;
     private CellList<EventDAO> cellListEvents;
     private Button btnShowLeaderboards;
@@ -50,10 +52,13 @@ public class OverviewEventManagementPanel extends AbstractEventManagementPanel {
     private CaptionPanel captionPanelLeaderboards;
     private ListDataProvider<LeaderboardDAO> listLeaderboards;
     private CellList<LeaderboardDAO> cellListLeaderboards;
+    
+    private List<EventDAO> availableEvents;
 
     public OverviewEventManagementPanel(SailingServiceAsync sailingService, EventRefresher eventRefresher,
             ErrorReporter errorReporter, final StringConstants stringConstants) {
         super(sailingService, eventRefresher, errorReporter, stringConstants);
+        availableEvents = new ArrayList<EventDAO>();
 
         VerticalPanel mainPanel = new VerticalPanel();
         this.setWidget(mainPanel);
@@ -65,7 +70,6 @@ public class OverviewEventManagementPanel extends AbstractEventManagementPanel {
         captionPanelSearch.setWidth("100%");
         
         HorizontalPanel panelSearch = new HorizontalPanel();
-        panelSearch.setHorizontalAlignment(HorizontalPanel.ALIGN_LEFT);
         captionPanelSearch.add(panelSearch);
         panelSearch.setWidth("100%");
         
@@ -74,8 +78,8 @@ public class OverviewEventManagementPanel extends AbstractEventManagementPanel {
         textBoxLocation = new TextBox();
         textBoxLocation.addKeyUpHandler(new KeyUpHandler() {
             @Override
-            public void onKeyUp(KeyUpEvent arg0) {
-                // TODO Auto-generated method stub
+            public void onKeyUp(KeyUpEvent event) {
+                // TODO What heappens when the location field is changed -> Event List changes
                 
             }
         });
@@ -86,8 +90,8 @@ public class OverviewEventManagementPanel extends AbstractEventManagementPanel {
         textBoxName = new TextBox();
         textBoxName.addKeyUpHandler(new KeyUpHandler() {
             @Override
-            public void onKeyUp(KeyUpEvent arg0) {
-                // TODO Auto-generated method stub
+            public void onKeyUp(KeyUpEvent event) {
+                // TODO What heappens when the name field is changed -> Event List changes
                 
             }
         });
@@ -97,12 +101,23 @@ public class OverviewEventManagementPanel extends AbstractEventManagementPanel {
         checkBoxLive.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
             
             @Override
-            public void onValueChange(ValueChangeEvent<Boolean> arg0) {
-                // TODO Auto-generated method stub
-                
+            public void onValueChange(ValueChangeEvent<Boolean> event) {
+                if (checkBoxLive.getValue()) {
+                    //Get Actual Date
+//                    DateTimeFormat formatter = new DateTimeFormat("dd.MM.yyyy");
+                    Date actualDate = new Date();
+                    
+                    textBoxFrom.setValue(actualDate.toString(), true);
+                    textBoxFrom.setEnabled(false);
+
+                    textBoxUntil.setValue(actualDate.toString(), true);
+                    textBoxUntil.setEnabled(false);
+                } else {
+                    textBoxFrom.setEnabled(true);
+                    textBoxUntil.setEnabled(true);
+                }
             }
         });
-        checkBoxLive.setEnabled(false);
         panelSearch.add(checkBoxLive);
         
         Label lblFromDate = new Label(stringConstants.from() + ":");
@@ -110,8 +125,8 @@ public class OverviewEventManagementPanel extends AbstractEventManagementPanel {
         textBoxFrom = new TextBox();
         textBoxFrom.addKeyUpHandler(new KeyUpHandler() {
             @Override
-            public void onKeyUp(KeyUpEvent arg0) {
-                // TODO Auto-generated method stub
+            public void onKeyUp(KeyUpEvent event) {
+                // TODO What heappens when a date field is changed -> Event List changes
                 
             }
         });
@@ -123,23 +138,37 @@ public class OverviewEventManagementPanel extends AbstractEventManagementPanel {
         textBoxUntil.addKeyUpHandler(new KeyUpHandler() {
             @Override
             public void onKeyUp(KeyUpEvent arg0) {
-                // TODO Auto-generated method stub
+                // TODO What heappens when a date field is changed -> Event List changes
                 
             }
         });
+        panelSearch.add(textBoxUntil);
+        
+        btnSearch = new Button(stringConstants.searchEvents());
+        btnSearch.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent arg0) {
+                // TODO Implement search action
+                captionPanelEvents.setVisible(true);
+                btnSearch.setVisible(false);
+                // TODO Change list for made entries
+            }
+        });
+        panelSearch.add(btnSearch);
 
         // Build events GUI
         HorizontalPanel listsSplitPanel = new HorizontalPanel();
         mainPanel.add(listsSplitPanel);
         listsSplitPanel.setWidth("100%");
         
-        eventsCaptionPanel = new CaptionPanel(stringConstants.events());
-        listsSplitPanel.add(eventsCaptionPanel);
-        eventsCaptionPanel.setWidth("50%");
-        eventsCaptionPanel.setStyleName("bold");
+        captionPanelEvents = new CaptionPanel(stringConstants.events());
+        captionPanelEvents.setWidth("95%");
+        captionPanelEvents.setStyleName("bold");
+        captionPanelEvents.setVisible(false);
+        listsSplitPanel.add(captionPanelEvents);
 
         VerticalPanel eventsPanel = new VerticalPanel();
-        eventsCaptionPanel.setContentWidget(eventsPanel);
+        captionPanelEvents.setContentWidget(eventsPanel);
         eventsPanel.setWidth("100%");
 
         // Create event functional elements
@@ -181,6 +210,8 @@ public class OverviewEventManagementPanel extends AbstractEventManagementPanel {
             public void onClick(ClickEvent c) {
                 if (getSelectedEvent() != null) {
                     captionPanelLeaderboards.setVisible(true);
+                } else {
+                    Window.alert(stringConstants.noEventSelected());
                 }
             }
         });
@@ -229,7 +260,7 @@ public class OverviewEventManagementPanel extends AbstractEventManagementPanel {
         // Build leaderboards GUI
         captionPanelLeaderboards = new CaptionPanel(stringConstants.leaderboards());
         captionPanelLeaderboards.setVisible(false);
-        captionPanelLeaderboards.setWidth("50%");
+        captionPanelLeaderboards.setWidth("95%");
         captionPanelLeaderboards.setStyleName("bold");
         listsSplitPanel.add(captionPanelLeaderboards);
 
@@ -303,10 +334,9 @@ public class OverviewEventManagementPanel extends AbstractEventManagementPanel {
 
         SingleSelectionModel<LeaderboardDAO> selectionModelLeaderboards = new SingleSelectionModel<LeaderboardDAO>();
         selectionModelLeaderboards.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
-
             @Override
             public void onSelectionChange(SelectionChangeEvent arg0) {
-                // TODO Auto-generated method stub
+                // TODO What happens when a leaderboard is selected -> Display Leaderboard under the lists
 
             }
         });
@@ -321,24 +351,29 @@ public class OverviewEventManagementPanel extends AbstractEventManagementPanel {
         //Set checkbox as true, because we can't search for old events right now
         //TODO Remove after searching for old events is possible
         checkBoxLive.setValue(true, true);
+        checkBoxLive.setEnabled(false);
+        
+        listEvents.getList().clear();
+        listEvents.setList(availableEvents);
+        //Until here
     }
 
     private void loadLeaderboards(EventIdentifier eventIdentifier, final Runnable r) {
-        // sailingService.getLeaderboardsByEvent(eventIdentifier, new AsyncCallback<List<LeaderboardDAO>>() {
-        // @Override
-        // public void onSuccess(List<LeaderboardDAO> leaderboards) {
-        // listLeaderboards.getList().clear();
-        // if (leaderboards != null) {
-        // listLeaderboards.getList().addAll(leaderboards);
-        // }
-        // }
-        //
-        // @Override
-        // public void onFailure(Throwable t) {
-        // OverviewEventManagementPanel.super.errorReporter
-        // .reportError("Error trying to obtain list of leaderboards: " + t.getMessage());
-        // }
-        // });
+//        sailingService.getLeaderboardsByEvent(eventIdentifier, new AsyncCallback<List<LeaderboardDAO>>() {
+//            @Override
+//            public void onSuccess(List<LeaderboardDAO> leaderboards) {
+//                listLeaderboards.getList().clear();
+//                if (leaderboards != null) {
+//                    listLeaderboards.getList().addAll(leaderboards);
+//                }
+//            }
+//
+//            @Override
+//            public void onFailure(Throwable t) {
+//                OverviewEventManagementPanel.super.errorReporter
+//                        .reportError("Error trying to obtain list of leaderboards: " + t.getMessage());
+//            }
+//        });
         sailingService.getLeaderboards(new AsyncCallback<List<LeaderboardDAO>>() {
 
             @Override
@@ -368,9 +403,10 @@ public class OverviewEventManagementPanel extends AbstractEventManagementPanel {
 
             @Override
             public void onSuccess(List<EventDAO> result) {
-                listEvents.getList().clear();
                 if (result != null) {
-                    listEvents.setList(result);
+                    java.util.Collections.copy(availableEvents, result);
+                } else {
+                    
                 }
                 if (r != null) {
                     r.run();
