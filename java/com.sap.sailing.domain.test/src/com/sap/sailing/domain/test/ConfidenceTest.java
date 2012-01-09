@@ -167,4 +167,14 @@ public class ConfidenceTest {
         assertEquals(0, average.getDegrees(), 0.00000001);
     }
     
+    @Test
+    public void testAveragingWithThreeoBearings() {
+        ScalableBearingWithConfidence d1 = new ScalableBearingWithConfidence(new DegreeBearingImpl(350.), 1.);
+        ScalableBearingWithConfidence d2 = new ScalableBearingWithConfidence(new DegreeBearingImpl(10.), 1.);
+        ScalableBearingWithConfidence d3 = new ScalableBearingWithConfidence(new DegreeBearingImpl(20.), 2.);
+        @SuppressWarnings("unchecked")
+        Bearing average = new ConfidenceBasedAveragerImpl<Pair<Double, Double>, Bearing>().getAverage(d1, d2, d3);
+        assertEquals(10, average.getDegrees(), 0.1);
+    }
+    
 }
