@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.client;
 
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TabPanel;
+import com.sap.sailing.gwt.ui.adminconsole.EventRefresher;
 
 /**
  * 
