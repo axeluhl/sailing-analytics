@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import javax.print.attribute.standard.DateTimeAtCompleted;
+
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -11,6 +13,7 @@ import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellList;
 import com.google.gwt.user.client.Window;
@@ -103,14 +106,12 @@ public class OverviewEventManagementPanel extends AbstractEventManagementPanel {
             @Override
             public void onValueChange(ValueChangeEvent<Boolean> event) {
                 if (checkBoxLive.getValue()) {
-                    //Get Actual Date
-//                    DateTimeFormat formatter = new DateTimeFormat("dd.MM.yyyy");
-                    Date actualDate = new Date();
+                    String actualDate = DateTimeFormat.getFormat("dd.MM.yyyy").format(new Date());
                     
-                    textBoxFrom.setValue(actualDate.toString(), true);
+                    textBoxFrom.setValue(actualDate, true);
                     textBoxFrom.setEnabled(false);
 
-                    textBoxUntil.setValue(actualDate.toString(), true);
+                    textBoxUntil.setValue(actualDate, true);
                     textBoxUntil.setEnabled(false);
                 } else {
                     textBoxFrom.setEnabled(true);
@@ -143,18 +144,6 @@ public class OverviewEventManagementPanel extends AbstractEventManagementPanel {
             }
         });
         panelSearch.add(textBoxUntil);
-        
-        btnSearch = new Button(stringConstants.searchEvents());
-        btnSearch.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent arg0) {
-                // TODO Implement search action
-                captionPanelEvents.setVisible(true);
-                btnSearch.setVisible(false);
-                // TODO Change list for made entries
-            }
-        });
-        panelSearch.add(btnSearch);
 
         // Build events GUI
         HorizontalPanel listsSplitPanel = new HorizontalPanel();
@@ -335,9 +324,9 @@ public class OverviewEventManagementPanel extends AbstractEventManagementPanel {
         SingleSelectionModel<LeaderboardDAO> selectionModelLeaderboards = new SingleSelectionModel<LeaderboardDAO>();
         selectionModelLeaderboards.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             @Override
-            public void onSelectionChange(SelectionChangeEvent arg0) {
+            public void onSelectionChange(SelectionChangeEvent event) {
                 // TODO What happens when a leaderboard is selected -> Display Leaderboard under the lists
-
+                
             }
         });
         cellListLeaderboards.setSelectionModel(selectionModelLeaderboards);
