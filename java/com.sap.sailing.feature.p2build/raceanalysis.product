@@ -35,6 +35,7 @@
    <configurations>
       <plugin id="com.sap.sailing.gwt.ui" autoStart="true" startLevel="4" />
       <plugin id="com.sap.sailing.server" autoStart="true" startLevel="4" />
+      <plugin id="com.sap.sailing.www" autoStart="true" startLevel="4" />
       <plugin id="org.eclipse.equinox.common" autoStart="true" startLevel="2" />
       <plugin id="org.eclipse.equinox.simpleconfigurator" autoStart="true" startLevel="2" />
       <plugin id="org.eclipse.jetty.osgi.boot" autoStart="true" startLevel="3" />

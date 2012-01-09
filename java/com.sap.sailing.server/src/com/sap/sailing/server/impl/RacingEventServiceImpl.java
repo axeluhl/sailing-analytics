@@ -418,6 +418,7 @@ public class RacingEventServiceImpl implements RacingEventService, EventFetcher,
                             stopTracking(event);
                         }
                     } catch (Exception e) {
+                        logger.throwing(RacingEventServiceImpl.class.getName(), "scheduleAbortTrackerAfterInitialTimeout", e);
                         e.printStackTrace();
                     }
                 }

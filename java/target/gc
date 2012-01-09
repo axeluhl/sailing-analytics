@@ -1,6 +1,4 @@
 #!/bin/sh
-rm plugins/com.googlecode.java-diff-utils*
-rm plugins/org.json.simple*
-rm plugins/com.sap.sailing*
-rm plugins/com.tractrac*
-rm plugins/com.mongodb*
+rm -rf plugins/*.*
+rm -rf org.eclipse.*
+rm -rf configuration/org.eclipse.*

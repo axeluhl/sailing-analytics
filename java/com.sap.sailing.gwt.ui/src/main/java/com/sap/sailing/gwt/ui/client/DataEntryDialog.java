@@ -11,8 +11,8 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.IntegerBox;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.LongBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -123,36 +123,36 @@ public abstract class DataEntryDialog<T> {
      * 
      * @param initialValue initial value to show in text box; <code>null</code> is permissible
      */
-    protected IntegerBox createIntegerBox(int initialValue, int visibleLength) {
-        IntegerBox integerBox = new IntegerBox();
-        integerBox.setVisibleLength(visibleLength);
-        integerBox.setValue(initialValue);
-        AbstractEntryPoint.addFocusUponKeyUpToggler(integerBox);
-        integerBox.addChangeHandler(new ChangeHandler() {
+    protected LongBox createLongBox(long initialValue, int visibleLength) {
+        LongBox longBox = new LongBox();
+        longBox.setVisibleLength(visibleLength);
+        longBox.setValue(initialValue);
+        AbstractEntryPoint.addFocusUponKeyUpToggler(longBox);
+        longBox.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
                 validate();
             }
         });
-        AbstractEntryPoint.linkEnterToButton(getOkButton(), integerBox);
-        AbstractEntryPoint.linkEscapeToButton(getCancelButton(), integerBox);
-        return integerBox;
+        AbstractEntryPoint.linkEnterToButton(getOkButton(), longBox);
+        AbstractEntryPoint.linkEscapeToButton(getCancelButton(), longBox);
+        return longBox;
     }
 
-    protected IntegerBox createIntegerBoxWithOptionalValue(Integer initialValue, int visibleLength) {
-        IntegerBox integerBox = new IntegerBox();
-        integerBox.setVisibleLength(visibleLength);
-        integerBox.setValue(initialValue);
-        AbstractEntryPoint.addFocusUponKeyUpToggler(integerBox);
-        integerBox.addChangeHandler(new ChangeHandler() {
+    protected LongBox createIntegerBoxWithOptionalValue(Long initialValue, int visibleLength) {
+        LongBox longBox = new LongBox();
+        longBox.setVisibleLength(visibleLength);
+        longBox.setValue(initialValue);
+        AbstractEntryPoint.addFocusUponKeyUpToggler(longBox);
+        longBox.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
                 validate();
             }
         });
-        AbstractEntryPoint.linkEnterToButton(getOkButton(), integerBox);
-        AbstractEntryPoint.linkEscapeToButton(getCancelButton(), integerBox);
-        return integerBox;
+        AbstractEntryPoint.linkEnterToButton(getOkButton(), longBox);
+        AbstractEntryPoint.linkEscapeToButton(getCancelButton(), longBox);
+        return longBox;
     }
 
     protected CheckBox createCheckbox(String checkboxLabel) {

@@ -30,6 +30,7 @@
 		<module>com.sap.sailing.expeditionconnector.test</module>
 		<module>com.sap.sailing.server</module>
 		<module>com.sap.sailing.server.api</module>
+		<module>com.sap.sailing.www</module>
 		<module>com.sap.sailing.xcelsiusadapter</module>
 		<module>com.sap.sailing.gwt.ui</module>
 		<module>com.sap.sailing.gwt.ui.test</module>
@@ -195,6 +196,11 @@
 		<repository>
 			<id>uni-luebeck</id>
 			<url>http://www.itm.uni-luebeck.de/projects/maven/releases</url>
+		</repository>
+
+		<repository>
+			<id>sailing-server-maven</id>
+			<url>http://sapcoe-app01.pironet-ndh.com/maven</url>
 		</repository>
 	</repositories>
 </project>

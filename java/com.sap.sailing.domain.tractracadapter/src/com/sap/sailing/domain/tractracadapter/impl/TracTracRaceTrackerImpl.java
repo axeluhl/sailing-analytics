@@ -23,8 +23,8 @@ import com.sap.sailing.domain.base.impl.DegreePosition;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.Util.Triple;
 import com.sap.sailing.domain.tracking.AbstractRaceTrackerImpl;
-import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
+import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.RacesHandle;
@@ -219,6 +219,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         ioThread.start();
     }
     
+    @SuppressWarnings("deprecation") // explicitly calling Thread.stop in case IO thread didn't join in three seconds time
     @Override
     public void stop() throws MalformedURLException, IOException, InterruptedException {
         controlPointPositionPoller.cancel(/* mayInterruptIfRunning */ false);
@@ -227,7 +228,12 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
             receiver.stopPreemptively();
         }
         ioThread.join(3000); // wait no more than three seconds
-        logger.info("Joined TracTrac IO thread for race(s) "+getRaces());
+        if (ioThread.isAlive()) {
+            ioThread.stop();
+            logger.warning("Tractrac IO thread for race(s) "+getRaces()+" didn't join in 3s. Stopped forcefully.");
+        } else {
+            logger.info("Joined TracTrac IO thread for race(s) "+getRaces());
+        }
     }
 
     protected DataController getController() {
