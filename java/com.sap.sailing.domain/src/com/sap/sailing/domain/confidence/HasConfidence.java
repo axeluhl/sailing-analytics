@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.base;
+package com.sap.sailing.domain.confidence;
 
 /**
  * Some values, particularly those obtained from real-world measurements, are not always accurate. Some
@@ -10,9 +10,11 @@ package com.sap.sailing.domain.base;
  * averaging these values more properly than would be possible without a confidence value.
  * 
  * @author Axel Uhl (d043530)
+ * 
+ * @param <ValueType> the type of the scalable value. See particularly the {@link #scale()} method.
  *
  */
-public interface HasConfidence {
+public interface HasConfidence<ValueType, AveragesTo> {
     /**
      * A confidence is a number between 0.0 and 1.0 (inclusive) where 0.0 means that the value is randomly guessed while
      * 1.0 means the value is authoritatively known for a fact. It represents the weight with which a value is to be
@@ -37,4 +39,7 @@ public interface HasConfidence {
      * measurement devices produce some statistical errors, no matter how small (cf. Heisenberg ;-) ).
      */
     double getConfidence();
+    
+    ScalableValue<ValueType, AveragesTo> getScalableValue();
+    
 }
