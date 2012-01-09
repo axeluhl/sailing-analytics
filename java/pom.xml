@@ -197,5 +197,10 @@
 			<id>uni-luebeck</id>
 			<url>http://www.itm.uni-luebeck.de/projects/maven/releases</url>
 		</repository>
+
+		<repository>
+			<id>sailing-server-maven</id>
+			<url>http://sapcoe-app01.pironet-ndh.com/maven</url>
+		</repository>
 	</repositories>
 </project>
