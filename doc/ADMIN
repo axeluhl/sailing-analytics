@@ -145,20 +145,18 @@ First, check out the branch you want to re-build:
 
  - ensure that there is an ssh tunnel to localhost that 
 
- - "mvn deploy"
+ - "mvn install"
 
 This will compile the sources, bundle them up in to OSGi bundle JAR
 files, run all tests which required online access to the TracTrac
-servers, and, if successful, deploy the new JAR files to
-maven-repositories/<instancename> where <instancename> is one of dev,
-test or prod.
+servers, and, if successful, creates an eclipse product in the directory
+/home/trac/git/java/com.sap.sailing.feature.p2build/bin/products/raceanalysis.product.id/linux/gtk/x86_64
+which contains all files required to install and run the build result.
 
-Note that the running server(s) are not updated automatically by
-deploying the new bundle versions to the maven-repositories
-subdirectory. See next topic.
+Note that the running server(s) are not updated automatically. See next topic.
 
-Updating an OSGi Server Instance
---------------------------------
+OSGi Server Instances
+---------------------
 
 We usually have four OSGi consoles running with a terminal window
 each, visible at the VNC server running on por 5902. The title bar
@@ -170,11 +168,36 @@ At the "osgi>" prompt of the OSGi console you can type
 
  - "exit"
 
-to terminate the particular Java server instance. To update the server
-instance from its respective maven repository (located under
-~/maven-repositories/...) you can issue
+to terminate the particular Java server instance.
+You can either install a complete new server instance or just update an existing one.
+
+Install a new OSGi Server Instance
+----------------------------------
+
+To install a complete new server instance you can issue
+
+ - "./install"
+ 
+This command will delete the old installation and copy all required files
+from the build result to the right directories of the server instance.
+
+To start the server instance again, type
+
+ - "./start"
+
+and the server should welcome you again with the "osgi>" prompt after
+a successful start.
+
+
+Update an existing OSGi Server Instance
+-----------------------------------------
+
+To update the server you can issue
 
  - "./update"
+
+This command will NOT delete the old installation but copy the updated plugins
+from the build result to the right directories of the server instance.
 
 To start the server instance again, type
 

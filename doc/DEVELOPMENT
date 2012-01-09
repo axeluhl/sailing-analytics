@@ -52,8 +52,8 @@ com.sap.sailing.feature -> contains the feature.xml for the race analysis projec
 com.sap.sailing.feature.runtime -> contains the feature.xml for additional runtime libraries which are not required for the source build (e.g. jetty.osgi bundle) 
 com.sap.sailing.feature.p2build -> contains the product defintion (.product file) for the race analysis project (required for the product build)
 
-Typical usecases for changing the target platform definition
------------------------------------------------------
+Typical usecases changing the target platform definition
+--------------------------------------------------------
 
 1. Adding an external open source library to the target-platform
 
@@ -69,5 +69,11 @@ g) Submit the changes to the git repository
 2. Adding a library from an internal SAP repository (e.g. Nexus)
 
 3. Adding a p2 repository as new source of libraries
+
+Typical usecases changing the features and product definition
+-------------------------------------------------------------
+
+4. Adding a new bundle project
+
 
 
