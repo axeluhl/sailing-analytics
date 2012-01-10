@@ -71,7 +71,7 @@ public class ImageRotator {
                 context.translate(canvasRadius, canvasRadius);
                 context.rotate(angleInRadians);
                 context.scale(scaleFactor,  scaleFactor);
-                context.drawImage(imageElement, -imageWidth/2, -imageHeight/2);
+                context.drawImage(imageElement, (-imageWidth/2) * scaleFactor, (-imageHeight/2) * scaleFactor);
                 result = canvas.toDataUrl("image/png");
                 context.restore();
             }
