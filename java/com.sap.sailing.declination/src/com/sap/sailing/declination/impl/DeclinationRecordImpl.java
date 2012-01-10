@@ -1,10 +1,10 @@
 package com.sap.sailing.declination.impl;
 
 import com.sap.sailing.declination.Declination;
-import com.sap.sailing.domain.base.Bearing;
-import com.sap.sailing.domain.base.Position;
-import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.impl.DegreeBearingImpl;
+import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.TimePoint;
 
 public class DeclinationRecordImpl implements Declination {
     private final Position position;

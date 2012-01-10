@@ -10,8 +10,8 @@ import java.util.Set;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Named;
-import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.common.NoWindException;
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.Util;
 import com.sap.sailing.domain.common.Util.Pair;
 import com.sap.sailing.domain.leaderboard.Leaderboard;

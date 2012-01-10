@@ -27,7 +27,7 @@ import java.util.logging.Logger;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
-import com.sap.sailing.domain.base.TimePoint;
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.Util;
 import com.sap.sailing.domain.common.Util.Pair;
 import com.sap.sailing.domain.common.Util.Triple;

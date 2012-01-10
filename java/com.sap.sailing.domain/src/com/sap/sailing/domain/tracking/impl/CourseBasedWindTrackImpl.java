@@ -2,7 +2,7 @@ package com.sap.sailing.domain.tracking.impl;
 
 import java.util.NavigableSet;
 
-import com.sap.sailing.domain.base.TimePoint;
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.util.impl.ArrayListNavigableSet;

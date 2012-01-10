@@ -5,12 +5,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.NavigableSet;
 
-import com.sap.sailing.domain.base.Position;
-import com.sap.sailing.domain.base.Speed;
 import com.sap.sailing.domain.base.SpeedWithBearing;
-import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.impl.KilometersPerHourSpeedImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
+import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.Speed;
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 

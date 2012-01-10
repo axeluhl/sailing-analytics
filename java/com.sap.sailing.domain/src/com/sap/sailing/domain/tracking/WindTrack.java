@@ -1,7 +1,7 @@
 package com.sap.sailing.domain.tracking;
 
-import com.sap.sailing.domain.base.Position;
-import com.sap.sailing.domain.base.TimePoint;
+import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.TimePoint;
 
 public interface WindTrack extends Track<Wind> {
     static final long DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND = 30000;

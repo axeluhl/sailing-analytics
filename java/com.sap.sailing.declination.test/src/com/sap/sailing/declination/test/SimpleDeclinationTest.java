@@ -8,10 +8,10 @@ import java.text.ParseException;
 import org.junit.Test;
 
 import com.sap.sailing.declination.Declination;
-import com.sap.sailing.domain.base.Bearing;
-import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.impl.DegreePosition;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.TimePoint;
 
 public class SimpleDeclinationTest extends AbstractDeclinationTest {
     @Test

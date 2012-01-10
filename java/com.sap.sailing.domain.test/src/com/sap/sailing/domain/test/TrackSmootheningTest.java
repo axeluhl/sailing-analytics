@@ -15,9 +15,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.Distance;
-import com.sap.sailing.domain.base.Speed;
-import com.sap.sailing.domain.base.TimePoint;
+import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.common.Speed;
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFixMoving;

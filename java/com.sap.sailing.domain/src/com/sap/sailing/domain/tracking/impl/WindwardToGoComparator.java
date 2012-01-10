@@ -4,10 +4,10 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.SortedSet;
 
-import com.sap.sailing.domain.base.Distance;
-import com.sap.sailing.domain.base.TimePoint;
+import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.NoWindError;
 import com.sap.sailing.domain.common.NoWindException;
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 

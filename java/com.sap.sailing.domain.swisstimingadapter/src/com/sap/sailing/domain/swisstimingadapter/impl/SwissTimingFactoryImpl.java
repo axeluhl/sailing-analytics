@@ -7,7 +7,7 @@ import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.sap.sailing.domain.base.TimePoint;
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.Util.Triple;
 import com.sap.sailing.domain.swisstimingadapter.DomainFactory;
 import com.sap.sailing.domain.swisstimingadapter.Race;

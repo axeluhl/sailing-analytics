@@ -1,6 +1,6 @@
 package com.sap.sailing.util;
 
-import com.sap.sailing.domain.base.Position;
+import com.sap.sailing.domain.common.Position;
 
 public class Bounds {
     private final Position southWest;

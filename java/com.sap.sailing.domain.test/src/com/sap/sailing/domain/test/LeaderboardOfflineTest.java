@@ -15,7 +15,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.CompetitorImpl;
@@ -24,6 +23,7 @@ import com.sap.sailing.domain.base.impl.NationalityImpl;
 import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.common.NoWindException;
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.Util;
 import com.sap.sailing.domain.common.Util.Pair;
 import com.sap.sailing.domain.leaderboard.Leaderboard;

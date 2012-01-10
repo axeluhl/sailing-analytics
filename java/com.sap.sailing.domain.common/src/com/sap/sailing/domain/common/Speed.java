@@ -1,5 +1,4 @@
-package com.sap.sailing.domain.base;
-
+package com.sap.sailing.domain.common;
 
 /**
  * A speed, convertable in various units of measure. Can be negative.

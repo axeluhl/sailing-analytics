@@ -9,3 +9,4 @@ Bundle-ActivationPolicy: lazy
 Require-Bundle: com.sap.sailing.domain
 Export-Package: com.sap.sailing.declination,
  com.sap.sailing.declination.impl;x-friends:="com.sap.sailing.declination.test"
+Import-Package: com.sap.sailing.domain.common

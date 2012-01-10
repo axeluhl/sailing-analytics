@@ -11,8 +11,8 @@ import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Gate;
 import com.sap.sailing.domain.base.Nationality;
-import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
 

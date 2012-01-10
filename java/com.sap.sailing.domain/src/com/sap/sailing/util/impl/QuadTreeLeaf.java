@@ -26,7 +26,7 @@ package com.sap.sailing.util.impl;
 
 import java.io.Serializable;
 
-import com.sap.sailing.domain.base.Position;
+import com.sap.sailing.domain.common.Position;
 
 public class QuadTreeLeaf<T> implements Serializable {
 

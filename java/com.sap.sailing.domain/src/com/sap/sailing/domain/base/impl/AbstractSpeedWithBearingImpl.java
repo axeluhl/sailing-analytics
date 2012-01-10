@@ -1,10 +1,10 @@
 package com.sap.sailing.domain.base.impl;
 
-import com.sap.sailing.domain.base.Bearing;
 import com.sap.sailing.domain.base.CourseChange;
-import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.SpeedWithBearing;
-import com.sap.sailing.domain.base.TimePoint;
+import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.TimePoint;
 
 public abstract class AbstractSpeedWithBearingImpl extends AbstractSpeedImpl implements SpeedWithBearing {
     private final Bearing bearing;

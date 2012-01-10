@@ -1,8 +1,8 @@
 package com.sap.sailing.domain.leaderboard.impl;
 
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.common.NoWindException;
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.Util.Pair;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;

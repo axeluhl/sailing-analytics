@@ -26,8 +26,8 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.Vector;
 
-import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.impl.DegreePosition;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.util.impl.QuadTreeNode;
 
 /**

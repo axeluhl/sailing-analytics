@@ -3,8 +3,8 @@ package com.sap.sailing.domain.tracking.impl;
 import java.util.Iterator;
 import java.util.NavigableSet;
 
-import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.Timed;
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.Track;
 import com.sap.sailing.util.impl.ArrayListNavigableSet;
 import com.sap.sailing.util.impl.UnmodifiableNavigableSet;

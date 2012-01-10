@@ -6,16 +6,16 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-import com.sap.sailing.domain.base.Bearing;
-import com.sap.sailing.domain.base.Distance;
 import com.sap.sailing.domain.base.Mile;
-import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.base.impl.DegreePosition;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.base.impl.NauticalMileDistance;
+import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.tracking.impl.CompactGPSFixImpl;
 import com.sap.sailing.domain.tracking.impl.CompactGPSFixMovingImpl;
 

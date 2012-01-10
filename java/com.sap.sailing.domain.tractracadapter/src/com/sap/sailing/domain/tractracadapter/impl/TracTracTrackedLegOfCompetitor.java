@@ -2,21 +2,21 @@ package com.sap.sailing.domain.tractracadapter.impl;
 
 import java.util.List;
 
-import com.sap.sailing.domain.base.Bearing;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.Distance;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Mile;
-import com.sap.sailing.domain.base.Position;
-import com.sap.sailing.domain.base.Speed;
 import com.sap.sailing.domain.base.SpeedWithBearing;
-import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.base.impl.KilometersPerHourSpeedImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.NauticalMileDistance;
+import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.NoWindException;
+import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.Speed;
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;

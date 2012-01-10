@@ -14,9 +14,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.sap.sailing.declination.Declination;
-import com.sap.sailing.domain.base.Position;
-import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.impl.DegreeBearingImpl;
+import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.TimePoint;
 
 /**
  * Imports magnetic declination data for earth from NOAA (http://www.ngdc.noaa.gov)
