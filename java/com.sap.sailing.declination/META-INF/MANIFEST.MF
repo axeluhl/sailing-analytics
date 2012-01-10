@@ -6,6 +6,7 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
-Require-Bundle: com.sap.sailing.domain
+Require-Bundle: com.sap.sailing.domain,
+ com.sap.sailing.domain.common
 Export-Package: com.sap.sailing.declination,
  com.sap.sailing.declination.impl;x-friends:="com.sap.sailing.declination.test"

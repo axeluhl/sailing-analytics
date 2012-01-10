@@ -12,7 +12,6 @@ import java.util.Set;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.maps.client.InfoWindowContent;
-import com.google.gwt.maps.client.MapType;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.Maps;
 import com.google.gwt.maps.client.control.LargeMapControl3D;
@@ -30,7 +29,6 @@ import com.google.gwt.maps.client.event.PolylineMouseOverHandler;
 import com.google.gwt.maps.client.geom.LatLng;
 import com.google.gwt.maps.client.geom.LatLngBounds;
 import com.google.gwt.maps.client.geom.Point;
-import com.google.gwt.maps.client.geom.Projection;
 import com.google.gwt.maps.client.overlay.Icon;
 import com.google.gwt.maps.client.overlay.Marker;
 import com.google.gwt.maps.client.overlay.MarkerOptions;

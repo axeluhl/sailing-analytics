@@ -67,6 +67,11 @@ public class CompactGPSFixMovingImpl extends CompactGPSFixImpl implements GPSFix
     
     private class CompactBearing extends AbstractBearing {
         @Override
+        public double getConfidence() {
+            return DEFAULT_BEARING_CONFIDENCE;
+        }
+
+        @Override
         public double getDegrees() {
             return degBearing;
         }
