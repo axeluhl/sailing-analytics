@@ -178,8 +178,8 @@ public class RaceMap {
                 map.setScrollWheelZoomEnabled(true);
                 map.setContinuousZoom(true);
 
-                MapType currentMapType = map.getCurrentMapType();
-                Projection projection = currentMapType.getProjection();
+//                MapType currentMapType = map.getCurrentMapType();
+//                Projection projection = currentMapType.getProjection();
                 
                 grid.setWidget(gridRow, gridColumn, map);
                 
