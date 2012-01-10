@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Require-Bundle: com.sap.sailing.geocoding;bundle-version="1.0.0",org.j
+ unit;bundle-version="4.8.2"
+Bundle-Vendor: SAP
+Bundle-Version: 1.0.0.201201101036
+Bundle-Name: Test
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: com.sap.sailing.geocoding.test
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+

@@ -58,6 +58,8 @@ import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.Util.Pair;
 import com.sap.sailing.domain.common.Util.Triple;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
+import com.sap.sailing.gwt.ui.client.EventDisplayer;
+import com.sap.sailing.gwt.ui.client.EventRefresher;
 import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringConstants;

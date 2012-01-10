@@ -31,7 +31,7 @@
   <inherits name="com.sap.sailing.domain.SailingDomain" />
 
   <!-- Specify the app entry point class.                         -->
-  <entry-point class='com.sap.sailing.gwt.ui.client.Spectator'/>
+  <entry-point class='com.sap.sailing.gwt.ui.spectator.SpectatorEntryPoint'/>
 
   <set-property name="gwt.logging.enabled" value="TRUE"/> 
   <set-property name="gwt.logging.logLevel" value="FINE"/>
@@ -47,5 +47,6 @@
   <extend-property name="locale" values="de"/>
   <source path='client'/>
   <source path='shared'/>
+  <source path='spectator'/>
   <source path='test'/>
 </module>

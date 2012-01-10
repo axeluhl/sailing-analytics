@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.client;
+package com.sap.sailing.gwt.ui.spectator;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -27,7 +27,11 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.gwt.ui.adminconsole.AbstractEventManagementPanel;
-import com.sap.sailing.gwt.ui.adminconsole.EventRefresher;
+import com.sap.sailing.gwt.ui.client.AbstractEventPanel;
+import com.sap.sailing.gwt.ui.client.ErrorReporter;
+import com.sap.sailing.gwt.ui.client.EventRefresher;
+import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.StringConstants;
 import com.sap.sailing.gwt.ui.shared.EventDAO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDAO;
 import com.sap.sailing.server.api.EventIdentifier;
@@ -38,14 +42,13 @@ import com.sap.sailing.server.api.EventName;
  * @author Lennart Hensler (D054527)
  * 
  */
-public class OverviewEventManagementPanel extends AbstractEventManagementPanel {
+public class OverviewEventPanel extends AbstractEventPanel {
 
     private TextBox textBoxLocation;
     private TextBox textBoxName;
     private TextBox textBoxFrom;
     private TextBox textBoxUntil;
     private CheckBox checkBoxLive;
-    private Button btnSearch;
     
     private CaptionPanel captionPanelEvents;
     private ListDataProvider<EventDAO> listEvents;
@@ -58,7 +61,7 @@ public class OverviewEventManagementPanel extends AbstractEventManagementPanel {
     
     private List<EventDAO> availableEvents;
 
-    public OverviewEventManagementPanel(SailingServiceAsync sailingService, EventRefresher eventRefresher,
+    public OverviewEventPanel(SailingServiceAsync sailingService, EventRefresher eventRefresher,
             ErrorReporter errorReporter, final StringConstants stringConstants) {
         super(sailingService, eventRefresher, errorReporter, stringConstants);
         availableEvents = new ArrayList<EventDAO>();
@@ -367,7 +370,7 @@ public class OverviewEventManagementPanel extends AbstractEventManagementPanel {
 
             @Override
             public void onFailure(Throwable t) {
-                OverviewEventManagementPanel.super.errorReporter
+                OverviewEventPanel.super.errorReporter
                         .reportError("Error trying to obtain list of leaderboards: " + t.getMessage());
             }
 
@@ -404,7 +407,7 @@ public class OverviewEventManagementPanel extends AbstractEventManagementPanel {
 
             @Override
             public void onFailure(Throwable caught) {
-                OverviewEventManagementPanel.super.errorReporter
+                OverviewEventPanel.super.errorReporter
                         .reportError("Error trying to obtain list of leaderboards: " + caught.getMessage());
             }
         });
@@ -435,7 +438,7 @@ public class OverviewEventManagementPanel extends AbstractEventManagementPanel {
 
     @Override
     public void fillEvents(List<EventDAO> result) {
-        trackedEventsComposite.fillEvents(result);
+        
     }
 
 }

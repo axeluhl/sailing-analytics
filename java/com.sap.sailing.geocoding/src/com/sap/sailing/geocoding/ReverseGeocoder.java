@@ -7,7 +7,7 @@ import com.sap.sailing.geocoding.impl.ReverseGeocoderImpl;
 
 public interface ReverseGeocoder {
     final ReverseGeocoder INSTANCE = new ReverseGeocoderImpl();
-    final String GEONAMES_USER = "sailtrackint";
+    final String GEONAMES_USER = "sailtracking";
     
     Placemark getPlacemark(double latDeg, double lngDeg);
 

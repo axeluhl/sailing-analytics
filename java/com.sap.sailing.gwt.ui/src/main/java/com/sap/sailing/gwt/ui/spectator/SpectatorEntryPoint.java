@@ -1,15 +1,16 @@
-package com.sap.sailing.gwt.ui.client;
+package com.sap.sailing.gwt.ui.spectator;
 
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TabPanel;
-import com.sap.sailing.gwt.ui.adminconsole.EventRefresher;
+import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
+import com.sap.sailing.gwt.ui.client.EventRefresher;
 
 /**
  * 
  * @author Lennart Hensler (D054527)
  *
  */
-public class Spectator extends AbstractEntryPoint implements EventRefresher {
+public class SpectatorEntryPoint extends AbstractEntryPoint implements EventRefresher {
     
     @Override
     public void onModuleLoad() {
@@ -22,7 +23,7 @@ public class Spectator extends AbstractEntryPoint implements EventRefresher {
         rootPanel.add(tabPanel, 10, 10);
         tabPanel.setSize("95%", "95%");
         
-        OverviewEventManagementPanel overviewEventManagementPanel = new OverviewEventManagementPanel(sailingService, this, this, stringConstants);
+        OverviewEventPanel overviewEventManagementPanel = new OverviewEventPanel(sailingService, this, this, stringConstants);
         overviewEventManagementPanel.setSize("90%", "90%");
         tabPanel.add(overviewEventManagementPanel, "Overview", false);
         
