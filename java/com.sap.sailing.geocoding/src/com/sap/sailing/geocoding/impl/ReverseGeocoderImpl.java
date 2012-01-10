@@ -24,16 +24,9 @@ public class ReverseGeocoderImpl implements ReverseGeocoder {
     
     private final String NEARBY_PLACE_SERVICE = "http://api.geonames.org/findNearbyPlaceNameJSON?";
     private int maxRows = 500;
-    
-    public static void main(String[] args) {
-        ReverseGeocoder g = ReverseGeocoder.INSTANCE;
-        Placemark p = g.getPlacemark(55, 10);
-        
-        System.out.println(p.getName());
-    }
 
     @Override
-    public Placemark getPlacemark(double latDeg, double lngDeg) {
+    public Placemark getPlacemark(double latDeg, double lngDeg) throws IOException, ParseException {
         Placemark p = null;
 
         StringBuilder url = new StringBuilder(NEARBY_PLACE_SERVICE);
@@ -41,25 +34,13 @@ public class ReverseGeocoderImpl implements ReverseGeocoder {
         url.append("&lng=" + Double.toString(lngDeg));
         url.append("&username=" + GEONAMES_USER);
         
-        try {
             URL request = new URL(url.toString());
             URLConnection connection = request.openConnection();
             BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
             JSONParser parser = new JSONParser();
             JSONObject obj = (JSONObject) parser.parse(in);
-//            JSONObject obj = (JSONObject) parser.parse(new FileReader("C:\\JSON Test\\Geonames Single JSON"));
             JSONArray geonames = (JSONArray) obj.get("geonames");
             p = JSONToPlacemark((JSONObject) geonames.get(0));
-        } catch (MalformedURLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (ParseException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
         
         return p;
     }

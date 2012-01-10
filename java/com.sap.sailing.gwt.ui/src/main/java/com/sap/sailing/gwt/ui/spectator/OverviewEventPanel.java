@@ -156,7 +156,6 @@ public class OverviewEventPanel extends AbstractEventPanel {
         captionPanelEvents = new CaptionPanel(stringConstants.events());
         captionPanelEvents.setWidth("95%");
         captionPanelEvents.setStyleName("bold");
-        captionPanelEvents.setVisible(false);
         listsSplitPanel.add(captionPanelEvents);
 
         VerticalPanel eventsPanel = new VerticalPanel();
@@ -338,16 +337,49 @@ public class OverviewEventPanel extends AbstractEventPanel {
         listLeaderboards.addDataDisplay(cellListLeaderboards);
 
         // Fill lists
+//        Runnable displayList = new Runnable() {
+//            @Override
+//            public void run() {
+//                listEvents.getList().clear();
+//                listEvents.setList(availableEvents);
+//            }
+//        };
+//        loadEvents(displayList);
         loadEvents();
         
         //Set checkbox as true, because we can't search for old events right now
         //TODO Remove after searching for old events is possible
         checkBoxLive.setValue(true, true);
         checkBoxLive.setEnabled(false);
-        
-        listEvents.getList().clear();
-        listEvents.setList(availableEvents);
         //Until here
+    }
+
+    private void loadEvents(final Runnable actionAfterLoading) {
+        sailingService.listEvents(new AsyncCallback<List<EventDAO>>() {
+
+            @Override
+            public void onSuccess(List<EventDAO> result) {
+                if (result != null) {
+//                    java.util.Collections.copy(availableEvents, result);
+                    listEvents.getList().clear();
+                    listEvents.setList(result);
+                } else {
+                    availableEvents.clear();
+                }
+                if (actionAfterLoading != null) {
+                    actionAfterLoading.run();
+                }
+            }
+
+            @Override
+            public void onFailure(Throwable caught) {
+                OverviewEventPanel.super.errorReporter
+                        .reportError("Error trying to obtain list of leaderboards: " + caught.getMessage());
+            }
+        });
+    }
+    private void loadEvents() {
+        loadEvents(null);
     }
 
     private void loadLeaderboards(EventIdentifier eventIdentifier, final Runnable r) {
@@ -388,32 +420,6 @@ public class OverviewEventPanel extends AbstractEventPanel {
     }
     private void loadLeaderboards(EventIdentifier eventIdentifier) {
         loadLeaderboards(eventIdentifier, null);
-    }
-
-    private void loadEvents(final Runnable r) {
-        sailingService.listEvents(new AsyncCallback<List<EventDAO>>() {
-
-            @Override
-            public void onSuccess(List<EventDAO> result) {
-                if (result != null) {
-                    java.util.Collections.copy(availableEvents, result);
-                } else {
-                    
-                }
-                if (r != null) {
-                    r.run();
-                }
-            }
-
-            @Override
-            public void onFailure(Throwable caught) {
-                OverviewEventPanel.super.errorReporter
-                        .reportError("Error trying to obtain list of leaderboards: " + caught.getMessage());
-            }
-        });
-    }
-    private void loadEvents() {
-        loadEvents(null);
     }
 
     private EventDAO getSelectedEvent() {

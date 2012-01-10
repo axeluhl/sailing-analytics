@@ -59,5 +59,19 @@ public class PlacemarkImpl implements Placemark {
         // TODO Get country name from CountryCodeFactoryImpl with countryCode
         return null;
     }
+    
+    @Override
+    public boolean equals(Object obj) {
+        boolean equals = true;
+        
+        if (equals = (obj instanceof Placemark)) {
+            Placemark p = (Placemark) obj;
+            equals = name.equals(p.getName()) && countryCode.equals(p.getCountryCode())
+                    && Double.compare(latDeg, p.getLatDeg()) == 0 && Double.compare(lngDeg, p.getLngDeg()) == 0
+                    && type.equals(p.getType()) && population == p.getPopulation();
+        }
+        
+        return equals;
+    }
 
 }
