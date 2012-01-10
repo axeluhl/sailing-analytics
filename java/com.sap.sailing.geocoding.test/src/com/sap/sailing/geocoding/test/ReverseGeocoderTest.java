@@ -1,6 +1,7 @@
 package com.sap.sailing.geocoding.test;
 
 import java.io.IOException;
+import java.util.List;
 
 import junit.framework.Assert;
 
@@ -16,7 +17,7 @@ public class ReverseGeocoderTest {
     ReverseGeocoder geocoder = ReverseGeocoder.INSTANCE;
     
     @Test
-    public void getPlacemarkTest() {
+    public void getPlacemarkSimpleTest() {
         //Simple Test in Kiel center to check the connection and the parsing from JSONObject to Placemark
         double latSmplKiel = 54.3231063453431;
         double lngSmplKiel = 10.12265682220459;
@@ -28,6 +29,22 @@ public class ReverseGeocoderTest {
         } catch (IOException e) {
             Assert.fail(e.getMessage());
         } catch (ParseException e) {
+            Assert.fail(e.getMessage());
+        }
+    }
+    
+    @Test
+    public void getPlacemarkNearSimpleTest() {
+        double latDeg = 54.3231063453431;
+        double lngDeg = 10.12265682220459;
+        
+        try {
+            List<Placemark> placemarks = geocoder.getPlacemarkNear(latDeg, lngDeg, 20);
+        } catch (IOException e) {
+            e.printStackTrace();
+            Assert.fail(e.getMessage());
+        } catch (ParseException e) {
+            e.printStackTrace();
             Assert.fail(e.getMessage());
         }
     }

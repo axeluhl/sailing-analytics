@@ -14,7 +14,7 @@ public interface ReverseGeocoder {
     
     Placemark getPlacemark(double latDeg, double lngDeg) throws IOException, ParseException;
 
-    List<Placemark> getPlacemarkNear(double latDeg, double lngDeg, float radius);
+    List<Placemark> getPlacemarkNear(double latDeg, double lngDeg, float radius) throws IOException, ParseException;
     
-    Placemark getPlacemarkBest(double latDeg, double lngDeg, float radius, Comparator<Placemark> comp);
+    Placemark getPlacemarkBest(double latDeg, double lngDeg, float radius, Comparator<Placemark> comp) throws IOException, ParseException;
 }

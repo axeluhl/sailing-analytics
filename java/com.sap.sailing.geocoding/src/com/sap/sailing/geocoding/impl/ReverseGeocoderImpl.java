@@ -46,7 +46,7 @@ public class ReverseGeocoderImpl implements ReverseGeocoder {
     }
 
     @Override
-    public List<Placemark> getPlacemarkNear(double latDeg, double lngDeg, float radius) {
+    public List<Placemark> getPlacemarkNear(double latDeg, double lngDeg, float radius) throws IOException, ParseException {
         List<Placemark> placemarks = new ArrayList<Placemark>();
         
         StringBuilder url = new StringBuilder(NEARBY_PLACE_SERVICE);
@@ -56,34 +56,23 @@ public class ReverseGeocoderImpl implements ReverseGeocoder {
         url.append("&maxRows=" + Integer.toString(maxRows));
         url.append("&username=" + GEONAMES_USER);
         
-        try {
-            URL request = new URL(url.toString());
-            URLConnection connection = request.openConnection();
-            BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-            JSONParser parser = new JSONParser();
-            JSONObject obj = (JSONObject) parser.parse(in);
-            JSONArray geonames = (JSONArray) obj.get("geonames");
-            Iterator<Object> iterator = geonames.iterator();
-            while (iterator.hasNext()) {
-                JSONObject object = (JSONObject) iterator.next();
-                placemarks.add(JSONToPlacemark(object));
-            }
-        } catch (MalformedURLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (ParseException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+        URL request = new URL(url.toString());
+        URLConnection connection = request.openConnection();
+        BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+        JSONParser parser = new JSONParser();
+        JSONObject obj = (JSONObject) parser.parse(in);
+        JSONArray geonames = (JSONArray) obj.get("geonames");
+        Iterator<Object> iterator = geonames.iterator();
+        while (iterator.hasNext()) {
+            JSONObject object = (JSONObject) iterator.next();
+            placemarks.add(JSONToPlacemark(object));
         }
         
         return placemarks;
     }
 
     @Override
-    public Placemark getPlacemarkBest(double latDeg, double lngDeg, float radius, Comparator<Placemark> comp) {
+    public Placemark getPlacemarkBest(double latDeg, double lngDeg, float radius, Comparator<Placemark> comp) throws IOException, ParseException {
         List<Placemark> placemarks = getPlacemarkNear(latDeg, lngDeg, radius);
         Collections.sort(placemarks, comp);
         
@@ -93,12 +82,26 @@ public class ReverseGeocoderImpl implements ReverseGeocoder {
     private Placemark JSONToPlacemark(JSONObject json) {
         String name = (String) json.get("toponymName");
         String countryCode = (String) json.get("countryCode");
-        double latDeg = (Double) json.get("lat");
-        double lngDeg = (Double) json.get("lng");
+        Double latDeg = null;
+        
+        //Tries are necessary, becaus some lat or lng values delivered by geonames have no decimal places and are interpreted as Long
+        //Casting a Long to a Double raises a ClassCastException
+        try {
+            latDeg = (Double) json.get("lat");
+        } catch (ClassCastException e) {
+            latDeg = ((Long) json.get("lat")).doubleValue();
+        }
+        Double lngDeg = null;
+        try {
+            lngDeg = (Double) json.get("lng");
+        } catch (ClassCastException e) {
+            lngDeg = ((Long) json.get("lng")).doubleValue();
+        }
+        
         String type = (String) json.get("fcl");
         long population = (Long) json.get("population");
         
-        if (name != null) {
+        if (name != null && lngDeg != null && latDeg != null) {
             return new PlacemarkImpl(name, countryCode, latDeg, lngDeg, type, population);
         } else {
             return null;
