@@ -9,58 +9,13 @@ import com.sap.sailing.domain.base.Bearing;
 import com.sap.sailing.domain.base.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.base.impl.RadianBearingImpl;
 import com.sap.sailing.domain.common.Util.Pair;
+import com.sap.sailing.domain.confidence.ConfidenceBasedAverager;
+import com.sap.sailing.domain.confidence.ConfidenceBasedAveragerFactory;
 import com.sap.sailing.domain.confidence.HasConfidence;
 import com.sap.sailing.domain.confidence.ScalableValue;
-import com.sap.sailing.domain.confidence.impl.ConfidenceBasedAveragerImpl;
+import com.sap.sailing.domain.confidence.impl.ScalableDoubleWithConfidence;
 
 public class ConfidenceTest {
-    private static class ScalableDouble implements ScalableValue<Double, Double> {
-        private final Double d;
-        
-        public ScalableDouble(Double d) {
-            this.d = d;
-        }
-
-        @Override
-        public ScalableValue<Double, Double> multiply(double factor) {
-            return new ScalableDouble(d * factor);
-        }
-
-        @Override
-        public ScalableValue<Double, Double> add(ScalableValue<Double, Double> t) {
-            return new ScalableDouble(d+t.getValue());
-        }
-
-        @Override
-        public Double divide(double divisor) {
-            return d / divisor;
-        }
-
-        @Override
-        public Double getValue() {
-            return d;
-        }
-    }
-    
-    private static class ScalableDoubleWithConfidence extends ScalableDouble implements HasConfidence<Double, Double> {
-        private final double confidence;
-        
-        public ScalableDoubleWithConfidence(double d, double confidence) {
-            super(d);
-            this.confidence = confidence;
-        }
-        
-        @Override
-        public double getConfidence() {
-            return confidence;
-        }
-
-        @Override
-        public ScalableValue<Double, Double> getScalableValue() {
-            return this;
-        }
-    }
-    
     private static class ScalableBearing implements ScalableValue<Pair<Double, Double>, Bearing> {
         private final double sin;
         private final double cos;
@@ -128,14 +83,16 @@ public class ConfidenceTest {
     
     @Test
     public void testAveragingWithEmptyListYieldsNull() {
+        ConfidenceBasedAverager<Double, Double> averager = ConfidenceBasedAveragerFactory.INSTANCE.createAverager();
         @SuppressWarnings("unchecked")
-        Double average = new ConfidenceBasedAveragerImpl<Double, Double>().getAverage();
+        Double average = averager.getAverage();
         assertNull(average);
     }
 
     @Test
     public void testAveragingWithNullArrayYieldsNull() {
-        Double average = new ConfidenceBasedAveragerImpl<Double, Double>().getAverage((HasConfidence<Double, Double>[]) null);
+        ConfidenceBasedAverager<Double, Double> averager = ConfidenceBasedAveragerFactory.INSTANCE.createAverager();
+        Double average = averager.getAverage((HasConfidence<Double, Double>[]) null);
         assertNull(average);
     }
 
@@ -143,8 +100,9 @@ public class ConfidenceTest {
     public void testAveragingWithTwoDoubles() {
         ScalableDoubleWithConfidence d1 = new ScalableDoubleWithConfidence(1., 0.5);
         ScalableDoubleWithConfidence d2 = new ScalableDoubleWithConfidence(2., 0.5);
+        ConfidenceBasedAverager<Double, Double> averager = ConfidenceBasedAveragerFactory.INSTANCE.createAverager();
         @SuppressWarnings("unchecked")
-        Double average = new ConfidenceBasedAveragerImpl<Double, Double>().getAverage(d1, d2);
+        Double average = averager.getAverage(d1, d2);
         assertEquals(1.5, average, 0.00000001);
     }
 
@@ -153,8 +111,9 @@ public class ConfidenceTest {
         ScalableDoubleWithConfidence d1 = new ScalableDoubleWithConfidence(1., 1.);
         ScalableDoubleWithConfidence d2 = new ScalableDoubleWithConfidence(2., 1.);
         ScalableDoubleWithConfidence d3 = new ScalableDoubleWithConfidence(3., 2.);
+        ConfidenceBasedAverager<Double, Double> averager = ConfidenceBasedAveragerFactory.INSTANCE.createAverager();
         @SuppressWarnings("unchecked")
-        Double average = new ConfidenceBasedAveragerImpl<Double, Double>().getAverage(d1, d2, d3);
+        Double average = averager.getAverage(d1, d2, d3);
         assertEquals(2.25, average, 0.00000001);
     }
     
@@ -162,8 +121,9 @@ public class ConfidenceTest {
     public void testAveragingWithTwoBearings() {
         ScalableBearingWithConfidence d1 = new ScalableBearingWithConfidence(new DegreeBearingImpl(350.), 1.);
         ScalableBearingWithConfidence d2 = new ScalableBearingWithConfidence(new DegreeBearingImpl(10.), 1.);
+        ConfidenceBasedAverager<Pair<Double, Double>, Bearing> averager = ConfidenceBasedAveragerFactory.INSTANCE.createAverager();
         @SuppressWarnings("unchecked")
-        Bearing average = new ConfidenceBasedAveragerImpl<Pair<Double, Double>, Bearing>().getAverage(d1, d2);
+        Bearing average = averager.getAverage(d1, d2);
         assertEquals(0, average.getDegrees(), 0.00000001);
     }
     
@@ -172,8 +132,9 @@ public class ConfidenceTest {
         ScalableBearingWithConfidence d1 = new ScalableBearingWithConfidence(new DegreeBearingImpl(350.), 1.);
         ScalableBearingWithConfidence d2 = new ScalableBearingWithConfidence(new DegreeBearingImpl(10.), 1.);
         ScalableBearingWithConfidence d3 = new ScalableBearingWithConfidence(new DegreeBearingImpl(20.), 2.);
+        ConfidenceBasedAverager<Pair<Double, Double>, Bearing> averager = ConfidenceBasedAveragerFactory.INSTANCE.createAverager();
         @SuppressWarnings("unchecked")
-        Bearing average = new ConfidenceBasedAveragerImpl<Pair<Double, Double>, Bearing>().getAverage(d1, d2, d3);
+        Bearing average = averager.getAverage(d1, d2, d3);
         assertEquals(10, average.getDegrees(), 0.1);
     }
     

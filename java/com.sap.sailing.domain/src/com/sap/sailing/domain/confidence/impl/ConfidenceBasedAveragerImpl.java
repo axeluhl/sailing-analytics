@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.confidence.impl;
 
+import com.sap.sailing.domain.confidence.ConfidenceBasedAverager;
 import com.sap.sailing.domain.confidence.HasConfidence;
 import com.sap.sailing.domain.confidence.ScalableValue;
 
@@ -25,11 +26,9 @@ import com.sap.sailing.domain.confidence.ScalableValue;
  * devices produce some statistical errors, no matter how small (cf. Heisenberg ;-) ).
  * 
  * @author Axel Uhl (d043530)
- * 
- * @param <T>
- *            the type of value to be scaled / averaged using their confidence
  */
-public class ConfidenceBasedAveragerImpl<ValueType, AveragesTo> {
+public class ConfidenceBasedAveragerImpl<ValueType, AveragesTo> implements ConfidenceBasedAverager<ValueType, AveragesTo> {
+    @Override
     public AveragesTo getAverage(HasConfidence<ValueType, AveragesTo>... values) {
         if (values == null || values.length == 0) {
             return null;
