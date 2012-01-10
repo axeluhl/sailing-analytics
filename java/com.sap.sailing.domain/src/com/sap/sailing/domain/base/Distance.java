@@ -1,6 +1,5 @@
 package com.sap.sailing.domain.base;
 
-import com.sap.sailing.domain.base.impl.NauticalMileDistance;
 
 /**
  * A distance which can be converted to various units of measure. Can be negative.
@@ -9,7 +8,58 @@ import com.sap.sailing.domain.base.impl.NauticalMileDistance;
  *
  */
 public interface Distance extends Comparable<Distance> {
-    static final Distance NULL = new NauticalMileDistance(0);
+    static final Distance NULL = new Distance() {
+        @Override
+        public int compareTo(Distance o) {
+            return getMeters() > o.getMeters() ? 1 : getMeters() == o.getMeters() ? 0 : -1;
+        }
+
+        @Override
+        public double getGeographicalMiles() {
+            return 0;
+        }
+
+        @Override
+        public double getSeaMiles() {
+            return 0;
+        }
+
+        @Override
+        public double getNauticalMiles() {
+            return 0;
+        }
+
+        @Override
+        public double getMeters() {
+            return 0;
+        }
+
+        @Override
+        public double getKilometers() {
+            return 0;
+        }
+
+        @Override
+        public double getCentralAngleDeg() {
+            return 0;
+        }
+
+        @Override
+        public double getCentralAngleRad() {
+            return 0;
+        }
+
+        @Override
+        public Distance scale(double factor) {
+            return this;
+        }
+
+        @Override
+        public Speed inTime(long milliseconds) {
+            return Speed.NULL;
+        }
+        
+    };
     
     double getGeographicalMiles();
 

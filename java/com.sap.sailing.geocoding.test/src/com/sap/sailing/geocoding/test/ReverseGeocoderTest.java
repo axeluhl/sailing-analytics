@@ -40,11 +40,25 @@ public class ReverseGeocoderTest {
         
         try {
             List<Placemark> placemarks = geocoder.getPlacemarkNear(latDeg, lngDeg, 20);
+            Assert.assertFalse(placemarks.isEmpty());
         } catch (IOException e) {
-            e.printStackTrace();
             Assert.fail(e.getMessage());
         } catch (ParseException e) {
-            e.printStackTrace();
+            Assert.fail(e.getMessage());
+        }
+    }
+    
+    @Test
+    public void getPlacemarkBestTest() {
+        double latDeg = 54.3231063453431;
+        double lngDeg = 10.12265682220459;
+        
+        try {
+            Placemark p = geocoder.getPlacemarkBest(latDeg, lngDeg, 20, new Placemark.ByPopulation());
+            Assert.assertNotNull(p);
+        } catch (IOException e) {
+            Assert.fail(e.getMessage());
+        } catch (ParseException e) {
             Assert.fail(e.getMessage());
         }
     }

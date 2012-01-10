@@ -61,17 +61,52 @@ public class PlacemarkImpl implements Placemark {
     }
     
     @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((countryCode == null) ? 0 : countryCode.hashCode());
+        long temp;
+        temp = Double.doubleToLongBits(latDeg);
+        result = prime * result + (int) (temp ^ (temp >>> 32));
+        temp = Double.doubleToLongBits(lngDeg);
+        result = prime * result + (int) (temp ^ (temp >>> 32));
+        result = prime * result + ((name == null) ? 0 : name.hashCode());
+        result = prime * result + (int) (population ^ (population >>> 32));
+        result = prime * result + ((type == null) ? 0 : type.hashCode());
+        return result;
+    }
+
+    @Override
     public boolean equals(Object obj) {
-        boolean equals = true;
-        
-        if (equals = (obj instanceof Placemark)) {
-            Placemark p = (Placemark) obj;
-            equals = name.equals(p.getName()) && countryCode.equals(p.getCountryCode())
-                    && Double.compare(latDeg, p.getLatDeg()) == 0 && Double.compare(lngDeg, p.getLngDeg()) == 0
-                    && type.equals(p.getType()) && population == p.getPopulation();
-        }
-        
-        return equals;
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        PlacemarkImpl other = (PlacemarkImpl) obj;
+        if (countryCode == null) {
+            if (other.countryCode != null)
+                return false;
+        } else if (!countryCode.equals(other.countryCode))
+            return false;
+        if (Double.doubleToLongBits(latDeg) != Double.doubleToLongBits(other.latDeg))
+            return false;
+        if (Double.doubleToLongBits(lngDeg) != Double.doubleToLongBits(other.lngDeg))
+            return false;
+        if (name == null) {
+            if (other.name != null)
+                return false;
+        } else if (!name.equals(other.name))
+            return false;
+        if (population != other.population)
+            return false;
+        if (type == null) {
+            if (other.type != null)
+                return false;
+        } else if (!type.equals(other.type))
+            return false;
+        return true;
     }
 
 }

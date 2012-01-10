@@ -33,15 +33,15 @@ public class ReverseGeocoderImpl implements ReverseGeocoder {
         url.append("&lat=" + Double.toString(latDeg));
         url.append("&lng=" + Double.toString(lngDeg));
         url.append("&username=" + GEONAMES_USER);
-        
-            URL request = new URL(url.toString());
-            URLConnection connection = request.openConnection();
-            BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-            JSONParser parser = new JSONParser();
-            JSONObject obj = (JSONObject) parser.parse(in);
-            JSONArray geonames = (JSONArray) obj.get("geonames");
-            p = JSONToPlacemark((JSONObject) geonames.get(0));
-        
+
+        URL request = new URL(url.toString());
+        URLConnection connection = request.openConnection();
+        BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+        JSONParser parser = new JSONParser();
+        JSONObject obj = (JSONObject) parser.parse(in);
+        JSONArray geonames = (JSONArray) obj.get("geonames");
+        p = JSONToPlacemark((JSONObject) geonames.get(0));
+
         return p;
     }
 
@@ -76,7 +76,7 @@ public class ReverseGeocoderImpl implements ReverseGeocoder {
         List<Placemark> placemarks = getPlacemarkNear(latDeg, lngDeg, radius);
         Collections.sort(placemarks, comp);
         
-        return placemarks.get(0);
+        return placemarks.get(placemarks.size() - 1);
     }
     
     private Placemark JSONToPlacemark(JSONObject json) {
@@ -84,7 +84,7 @@ public class ReverseGeocoderImpl implements ReverseGeocoder {
         String countryCode = (String) json.get("countryCode");
         Double latDeg = null;
         
-        //Tries are necessary, becaus some lat or lng values delivered by geonames have no decimal places and are interpreted as Long
+        //Tries are necessary, because some latitude or longitude values delivered by Geonames have no decimal places and are interpreted as Long
         //Casting a Long to a Double raises a ClassCastException
         try {
             latDeg = (Double) json.get("lat");

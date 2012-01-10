@@ -1,7 +1,5 @@
 package com.sap.sailing.domain.base;
 
-import com.sap.sailing.domain.base.impl.DegreeBearingImpl;
-import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 
 /**
  * A speed, convertable in various units of measure. Can be negative.
@@ -10,7 +8,38 @@ import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
  *
  */
 public interface Speed extends Comparable<Speed> {
-    final static Speed NULL = new KnotSpeedWithBearingImpl(0, new DegreeBearingImpl(0));
+    final static Speed NULL = new Speed() {
+        @Override
+        public int compareTo(Speed o) {
+            return getMetersPerSecond() > o.getMetersPerSecond() ? 1 : getMetersPerSecond() == o.getMetersPerSecond() ? 0 : -1;
+        }
+
+        @Override
+        public double getKnots() {
+            return 0;
+        }
+
+        @Override
+        public double getMetersPerSecond() {
+            return 0;
+        }
+
+        @Override
+        public double getKilometersPerHour() {
+            return 0;
+        }
+
+        @Override
+        public double getBeaufort() {
+            return 0;
+        }
+
+        @Override
+        public Distance travel(TimePoint from, TimePoint to) {
+            return Distance.NULL;
+        }
+        
+    };
     
     double getKnots();
 
