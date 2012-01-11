@@ -4,26 +4,37 @@ import com.sap.sailing.domain.common.DegreePosition;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.geocoding.Placemark;
+import com.sap.sailing.geocoding.ReverseGeocoder;
 import com.sap.sailing.util.CountryCodeFactory;
 
+/**
+ * Used to define a populated place in the world.<br />
+ * Used by {@link ReverseGeocoder}.
+ * @author Lennart Hensler (D054527)
+ *
+ */
 public class PlacemarkImpl implements Placemark {
     
     private String name;
     private String countryCode;
     private Position position;
-    private String type;
     private long population;
     
-    public PlacemarkImpl(String name, String countryCode, Position position, String type, long population) {
+    /**
+     * Creates a new Placemark with the given parameters as attributes.
+     */
+    public PlacemarkImpl(String name, String countryCode, Position position, long population) {
         this.name = name;
         this.countryCode = countryCode;
         this.position = position;
-        this.type = type;
         this.population = population;
     }
     
+    /**
+     * Creates a new Placemark with the given parameters as attributes and a <code>population</code> of <code>0</code>;
+     */
     public PlacemarkImpl(String name, String countryCode, Position position, String type) {
-        this(name, countryCode, position, type, 0);
+        this(name, countryCode, position, 0);
     }
 
     public String getName() {
@@ -36,10 +47,6 @@ public class PlacemarkImpl implements Placemark {
     
     public Position getPosition() {
         return position;
-    }
-
-    public String getType() {
-        return type;
     }
 
     public long getPopulation() {
@@ -68,7 +75,6 @@ public class PlacemarkImpl implements Placemark {
         b.append(name + ", ");
         b.append(countryCode + ", ");
         b.append(position.toString() + ", ");
-        b.append(type + ", ");
         b.append(population + "]");
         
         return b.toString();
@@ -82,7 +88,6 @@ public class PlacemarkImpl implements Placemark {
         result = prime * result + ((name == null) ? 0 : name.hashCode());
         result = prime * result + (int) (population ^ (population >>> 32));
         result = prime * result + ((position == null) ? 0 : position.hashCode());
-        result = prime * result + ((type == null) ? 0 : type.hashCode());
         return result;
     }
 
@@ -111,11 +116,6 @@ public class PlacemarkImpl implements Placemark {
             if (other.position != null)
                 return false;
         } else if (!position.equals(other.position))
-            return false;
-        if (type == null) {
-            if (other.type != null)
-                return false;
-        } else if (!type.equals(other.type))
             return false;
         return true;
     }

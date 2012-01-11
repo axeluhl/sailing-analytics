@@ -5,12 +5,26 @@ import java.util.Comparator;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
 
+/**
+ * Used to define a populated place in the world.<br />
+ * Used by {@link ReverseGeocoder}.
+ * @author Lennart Hensler (D054527)
+ *
+ */
 public interface Placemark {
     
+    /**
+     * @return The name of the Placemark
+     */
     String getName();
+    /**
+     * @return The 2 letters country code of the Placemark
+     */
     String getCountryCode();
+    /**
+     * @return The  {@link Position} of the Placemark
+     */
     Position getPosition();
-    String getType();
     long getPopulation();
 
     Distance distanceFrom(Position p);

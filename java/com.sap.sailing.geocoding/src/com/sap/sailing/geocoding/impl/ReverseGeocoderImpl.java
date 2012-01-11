@@ -137,11 +137,10 @@ public class ReverseGeocoderImpl implements ReverseGeocoder {
         }
         Position p = new DegreePosition(latDeg, lngDeg);
 
-        String type = (String) json.get("fcl");
         long population = (Long) json.get("population");
 
         if (name != null && lngDeg != null && latDeg != null) {
-            return new PlacemarkImpl(name, countryCode, p, type, population);
+            return new PlacemarkImpl(name, countryCode, p, population);
         } else {
             return null;
         }
