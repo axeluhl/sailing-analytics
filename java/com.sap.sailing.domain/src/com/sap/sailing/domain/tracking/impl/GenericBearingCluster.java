@@ -52,10 +52,9 @@ public class GenericBearingCluster<BearingType extends Bearing> {
      *         bearing to which it's closer.
      */
     public GenericBearingCluster<BearingType>[] splitInTwo(double minimumDegreeDifferenceBetweenTacks) {
-        @SuppressWarnings("unchecked")
-        GenericBearingCluster<BearingType>[] result = (GenericBearingCluster<BearingType>[]) new GenericBearingCluster<?>[2];
-        result[0] = new GenericBearingCluster<BearingType>();
-        result[1] = new GenericBearingCluster<BearingType>();
+        GenericBearingCluster<BearingType>[] result = createBearingClusterArraySizeTwo();
+        result[0] = createEmptyCluster();
+        result[1] = createEmptyCluster();
         if (bearings.size() >= 2) {
             Pair<BearingType, BearingType> extremeBearings = getExtremeBearings(minimumDegreeDifferenceBetweenTacks);
             if (extremeBearings != null) {
@@ -76,6 +75,15 @@ public class GenericBearingCluster<BearingType extends Bearing> {
             result[0].add(bearings.get(0));
         }
         return result;
+    }
+
+    protected GenericBearingCluster<BearingType> createEmptyCluster() {
+        return new GenericBearingCluster<BearingType>();
+    }
+
+    @SuppressWarnings("unchecked")
+    protected GenericBearingCluster<BearingType>[] createBearingClusterArraySizeTwo() {
+        return (GenericBearingCluster<BearingType>[]) new GenericBearingCluster<?>[2];
     }
     
     private Pair<BearingType, BearingType> getExtremeBearings(double minimumDegreeDifferenceBetweenTacks) {

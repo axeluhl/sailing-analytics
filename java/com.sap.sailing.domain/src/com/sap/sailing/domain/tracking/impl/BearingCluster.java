@@ -16,8 +16,16 @@ import com.sap.sailing.domain.base.Bearing;
  *
  */
 public class BearingCluster extends GenericBearingCluster<Bearing> {
-
     @Override
+    protected BearingCluster[] createBearingClusterArraySizeTwo() {
+        return new BearingCluster[2];
+    }
+    
+    @Override
+    protected BearingCluster createEmptyCluster() {
+        return new BearingCluster();
+    }
+
     public BearingCluster[] splitInTwo(double minimumDegreeDifferenceBetweenTacks) {
         return (BearingCluster[]) super.splitInTwo(minimumDegreeDifferenceBetweenTacks);
     }

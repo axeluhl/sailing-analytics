@@ -31,6 +31,16 @@ public class BearingWithConfidenceCluster extends GenericBearingCluster<BearingW
     }
 
     @Override
+    protected BearingWithConfidenceCluster[] createBearingClusterArraySizeTwo() {
+        return new BearingWithConfidenceCluster[2];
+    }
+
+    @Override
+    protected BearingWithConfidenceCluster createEmptyCluster() {
+        return new BearingWithConfidenceCluster();
+    }
+
+    @Override
     public BearingWithConfidenceCluster[] splitInTwo(double minimumDegreeDifferenceBetweenTacks) {
         return (BearingWithConfidenceCluster[]) super.splitInTwo(minimumDegreeDifferenceBetweenTacks);
     }
