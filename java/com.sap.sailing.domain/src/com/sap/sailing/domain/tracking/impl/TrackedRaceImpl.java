@@ -52,7 +52,9 @@ import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.geocoding.Placemark;
+import com.sap.sailing.geocoding.RacePlaceOrder;
 import com.sap.sailing.geocoding.ReverseGeocoder;
+import com.sap.sailing.geocoding.impl.RacePlaceOrderImpl;
 
 public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     private static final Logger logger = Logger.getLogger(TrackedRaceImpl.class.getName());
@@ -946,8 +948,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         }
     }
     
-    public String getPlace() {
-        String place = "";
+    public RacePlaceOrder getPlace() {
+        RacePlaceOrder order = new RacePlaceOrderImpl(getRace().getName());
         Placemark startBest = null;
         Placemark finishBest = null;
         
@@ -998,14 +1000,12 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             e.printStackTrace();
         }
         
-        if (startBest.equals(finishBest)) {
-            place = startBest.getCountryCode() + ", " + startBest.getName();
-        } else {
-            place = startBest.getCountryCode() + ", " + startBest.getName();
-            place = place + " -> " + finishBest.getCountryCode() + ", " + finishBest.getName();
+        order.addPlace(startBest);
+        if (!startBest.equals(finishBest)) {
+            order.addPlace(finishBest);
         }
         
-        return place;
+        return order;
     }
     
 }
