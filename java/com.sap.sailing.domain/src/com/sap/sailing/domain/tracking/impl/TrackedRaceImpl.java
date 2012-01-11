@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.tracking.impl;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -10,6 +11,8 @@ import java.util.Map;
 import java.util.NavigableSet;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.logging.Logger;
+
+import org.json.simple.parser.ParseException;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Buoy;
@@ -48,6 +51,8 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
+import com.sap.sailing.geocoding.Placemark;
+import com.sap.sailing.geocoding.ReverseGeocoder;
 
 public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     private static final Logger logger = Logger.getLogger(TrackedRaceImpl.class.getName());
@@ -939,6 +944,68 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         @Override
         public void speedAveragingChanged(long oldMillisecondsOverWhichToAverage, long newMillisecondsOverWhichToAverage) {
         }
+    }
+    
+    public String getPlace() {
+        String place = "";
+        Placemark startBest = null;
+        Placemark finishBest = null;
+        
+        //Get start postition
+        Waypoint start = getRace().getCourse().getFirstWaypoint();
+        Iterable<MarkPassing> startPassings = getMarkPassingsInOrder(start);
+        MarkPassing startPassing = startPassings.iterator().next();
+        Position startPosition = getApproximatePosition(start, startPassing.getTimePoint());
+        
+        try {
+            //Get distance to nearest placemark and calculate the search radius
+            Placemark startNearest = ReverseGeocoder.INSTANCE.getPlacemarkNearest(startPosition);
+            Distance startNearestDistance = startNearest.distanceFrom(startPosition);
+            //TODO Move the 2.5 factor to an final static variable or somewhere else
+            double startRadius = startNearestDistance.getKilometers() * 2.5;
+            
+            //Get the estimated best start place
+            startBest = ReverseGeocoder.INSTANCE.getPlacemarkLast(startPosition, startRadius,
+                    new Placemark.ByPopulationDistanceRatio(startPosition));
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        //Get finish position
+        Waypoint finish = getRace().getCourse().getLastWaypoint();
+        Iterable<MarkPassing> finishPassings = getMarkPassingsInOrder(finish);
+        MarkPassing finishPassing = null;
+        while (finishPassings.iterator().hasNext()) {
+            finishPassing = (MarkPassing) finishPassings.iterator().next();
+        }
+        Position finishPosition = getApproximatePosition(finish, finishPassing.getTimePoint());
+        
+        try {
+            //Get distance to nearest placemark and calculate the search radius
+            Placemark finishNearest = ReverseGeocoder.INSTANCE.getPlacemarkNearest(finishPosition);
+            Distance finishNearestDistance = finishNearest.distanceFrom(finishPosition);
+            //TODO Move the 2.5 factor to an final static variable or somewhere else
+            double finishRadius = finishNearestDistance.getKilometers() * 2.5;
+            
+            //Get the estimated best finish place
+            finishBest = ReverseGeocoder.INSTANCE.getPlacemarkLast(finishPosition, finishRadius,
+                    new Placemark.ByPopulationDistanceRatio(finishPosition));
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        
+        if (startBest.equals(finishBest)) {
+            place = startBest.getCountryCode() + ", " + startBest.getName();
+        } else {
+            place = startBest.getCountryCode() + ", " + startBest.getName();
+            place = place + " -> " + finishBest.getCountryCode() + ", " + finishBest.getName();
+        }
+        
+        return place;
     }
     
 }

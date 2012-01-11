@@ -52,14 +52,14 @@ public class ReverseGeocoderImpl implements ReverseGeocoder {
     }
 
     @Override
-    public List<Placemark> getPlacemarksNear(double latDeg, double lngDeg, float radius) throws IOException,
+    public List<Placemark> getPlacemarksNear(double latDeg, double lngDeg, double radius) throws IOException,
             ParseException {
         List<Placemark> placemarks = new ArrayList<Placemark>();
 
         StringBuilder url = new StringBuilder(NEARBY_PLACE_SERVICE);
         url.append("&lat=" + Double.toString(latDeg));
         url.append("&lng=" + Double.toString(lngDeg));
-        url.append("&radius=" + Float.toString(radius));
+        url.append("&radius=" + Double.toString(radius));
         url.append("&maxRows=" + Integer.toString(maxRows));
         url.append("&username=" + GEONAMES_USER);
 
@@ -79,36 +79,36 @@ public class ReverseGeocoderImpl implements ReverseGeocoder {
     }
 
     @Override
-    public List<Placemark> getPlacemarksNear(Position position, float radius) throws IOException, ParseException {
+    public List<Placemark> getPlacemarksNear(Position position, double radius) throws IOException, ParseException {
         return getPlacemarksNear(position.getLatDeg(), position.getLngDeg(), radius);
     }
 
     @Override
-    public Placemark getPlacemarkLast(double latDeg, double lngDeg, float radius, Comparator<Placemark> comp)
+    public Placemark getPlacemarkLast(double latDeg, double lngDeg, double radius, Comparator<Placemark> comp)
             throws IOException, ParseException {
         List<Placemark> placemarks = getPlacemarksNearSorted(latDeg, lngDeg, radius, comp);
         return placemarks.get(placemarks.size() - 1);
     }
 
     @Override
-    public Placemark getPlacemarkLast(Position position, float radius, Comparator<Placemark> comp) throws IOException,
+    public Placemark getPlacemarkLast(Position position, double radius, Comparator<Placemark> comp) throws IOException,
             ParseException {
         return getPlacemarkLast(position.getLatDeg(), position.getLngDeg(), radius, comp);
     }
 
     @Override
-    public Placemark getPlacemarkFirst(double latDeg, double lngDeg, float radius, Comparator<Placemark> comp)
+    public Placemark getPlacemarkFirst(double latDeg, double lngDeg, double radius, Comparator<Placemark> comp)
             throws IOException, ParseException {
         return getPlacemarksNearSorted(latDeg, lngDeg, radius, comp).get(0);
     }
 
     @Override
-    public Placemark getPlacemarkFirst(Position position, float radius, Comparator<Placemark> comp) throws IOException,
+    public Placemark getPlacemarkFirst(Position position, double radius, Comparator<Placemark> comp) throws IOException,
             ParseException {
         return getPlacemarkFirst(position.getLatDeg(), position.getLngDeg(), radius, comp);
     }
 
-    private List<Placemark> getPlacemarksNearSorted(double latDeg, double lngDeg, float radius,
+    private List<Placemark> getPlacemarksNearSorted(double latDeg, double lngDeg, double radius,
             Comparator<Placemark> comp) throws IOException, ParseException {
         List<Placemark> placemarks = getPlacemarksNear(latDeg, lngDeg, radius);
         Collections.sort(placemarks, comp);

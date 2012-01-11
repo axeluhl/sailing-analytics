@@ -44,7 +44,7 @@ public interface ReverseGeocoder {
      * @throws IOException
      * @throws ParseException
      */
-    List<Placemark> getPlacemarksNear(double latDeg, double lngDeg, float radius) throws IOException, ParseException;
+    List<Placemark> getPlacemarksNear(double latDeg, double lngDeg, double radius) throws IOException, ParseException;
 
     /**
      * Returns a list of {@link Placemark Placemarks} near the given {@link Position}.
@@ -55,7 +55,7 @@ public interface ReverseGeocoder {
      * @throws IOException
      * @throws ParseException
      */
-    List<Placemark> getPlacemarksNear(Position position, float radius) throws IOException, ParseException;
+    List<Placemark> getPlacemarksNear(Position position, double radius) throws IOException, ParseException;
 
     /**
      * Searches for {@link Placemark Placemarks} near the given coordinates via
@@ -71,7 +71,7 @@ public interface ReverseGeocoder {
      * @throws IOException
      * @throws ParseException
      */
-    Placemark getPlacemarkLast(double latDeg, double lngDeg, float radius, Comparator<Placemark> comp)
+    Placemark getPlacemarkLast(double latDeg, double lngDeg, double radius, Comparator<Placemark> comp)
             throws IOException, ParseException;
 
     /**
@@ -87,7 +87,7 @@ public interface ReverseGeocoder {
      * @throws IOException
      * @throws ParseException
      */
-    Placemark getPlacemarkLast(Position position, float radius, Comparator<Placemark> comp) throws IOException,
+    Placemark getPlacemarkLast(Position position, double radius, Comparator<Placemark> comp) throws IOException,
             ParseException;
 
     /**
@@ -104,7 +104,7 @@ public interface ReverseGeocoder {
      * @throws IOException
      * @throws ParseException
      */
-    Placemark getPlacemarkFirst(double latDeg, double lngDeg, float radius, Comparator<Placemark> comp)
+    Placemark getPlacemarkFirst(double latDeg, double lngDeg, double radius, Comparator<Placemark> comp)
             throws IOException, ParseException;
 
     /**
@@ -120,6 +120,6 @@ public interface ReverseGeocoder {
      * @throws IOException
      * @throws ParseException
      */
-    Placemark getPlacemarkFirst(Position position, float radius, Comparator<Placemark> comp) throws IOException,
+    Placemark getPlacemarkFirst(Position position, double radius, Comparator<Placemark> comp) throws IOException,
             ParseException;
 }
