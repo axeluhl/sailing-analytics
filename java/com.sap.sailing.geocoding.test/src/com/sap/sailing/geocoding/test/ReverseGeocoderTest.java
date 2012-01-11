@@ -9,6 +9,7 @@ import org.json.simple.parser.ParseException;
 import org.junit.Test;
 
 import com.sap.sailing.domain.common.DegreePosition;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.geocoding.Placemark;
 import com.sap.sailing.geocoding.ReverseGeocoder;
 import com.sap.sailing.geocoding.impl.PlacemarkImpl;
@@ -17,15 +18,13 @@ public class ReverseGeocoderTest {
     
     private ReverseGeocoder geocoder = ReverseGeocoder.INSTANCE;
     private static final Placemark KIEL = new PlacemarkImpl("Kiel", "DE", new DegreePosition(54.32132926107913, 10.1348876953125), "P", 232758);
+    private static final Position KIEL_POSITION = new DegreePosition(54.3231063453431, 10.12265682220459);
     
     @Test
     public void getPlacemarkSimpleTest() {
         //Simple Test in Kiel center to check the connection and the parsing from JSONObject to Placemark
-        double latSmplKiel = 54.3231063453431;
-        double lngSmplKiel = 10.12265682220459;
-        
         try {
-            Placemark kielReversed = geocoder.getPlacemark(latSmplKiel, lngSmplKiel);
+            Placemark kielReversed = geocoder.getPlacemarkNearest(KIEL_POSITION);
             Assert.assertEquals(KIEL, kielReversed);
         } catch (IOException e) {
             Assert.fail(e.getMessage());
@@ -36,11 +35,8 @@ public class ReverseGeocoderTest {
     
     @Test
     public void getPlacemarkNearSimpleTest() {
-        double latDeg = 54.3231063453431;
-        double lngDeg = 10.12265682220459;
-        
         try {
-            List<Placemark> placemarks = geocoder.getPlacemarkNear(latDeg, lngDeg, 20);
+            List<Placemark> placemarks = geocoder.getPlacemarksNear(KIEL_POSITION, 20);
             Assert.assertFalse(placemarks.isEmpty());
         } catch (IOException e) {
             Assert.fail(e.getMessage());
@@ -51,11 +47,17 @@ public class ReverseGeocoderTest {
     
     @Test
     public void getPlacemarkBestTest() {
-        double latDeg = 54.3231063453431;
-        double lngDeg = 10.12265682220459;
+        Position abroad = new DegreePosition(54.43334, 10.299999);
+        Placemark getFirstByDistance = new PlacemarkImpl("Wendtorf", "DE", new DegreePosition(54.4166667, 10.3), "P", 1139);
         
         try {
-            Placemark p = geocoder.getPlacemarkBest(latDeg, lngDeg, 20, new Placemark.ByPopulation());
+            Placemark p = geocoder.getPlacemarkLast(abroad, 20, new Placemark.ByPopulation());
+            Assert.assertEquals(KIEL, p);
+            
+            p = geocoder.getPlacemarkFirst(abroad, 20, new Placemark.ByDistance(abroad));
+            Assert.assertEquals(getFirstByDistance, p);
+            
+            p = geocoder.getPlacemarkLast(abroad, 20, new Placemark.ByPopulationDistanceRatio(abroad));
             Assert.assertEquals(KIEL, p);
         } catch (IOException e) {
             Assert.fail(e.getMessage());

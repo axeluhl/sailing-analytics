@@ -22,12 +22,12 @@ import com.sap.sailing.geocoding.Placemark;
 import com.sap.sailing.geocoding.ReverseGeocoder;
 
 public class ReverseGeocoderImpl implements ReverseGeocoder {
-    
+
     private final String NEARBY_PLACE_SERVICE = "http://api.geonames.org/findNearbyPlaceNameJSON?";
     private int maxRows = 500;
 
     @Override
-    public Placemark getPlacemark(double latDeg, double lngDeg) throws IOException, ParseException {
+    public Placemark getPlacemarkNearest(double latDeg, double lngDeg) throws IOException, ParseException {
         Placemark p = null;
 
         StringBuilder url = new StringBuilder(NEARBY_PLACE_SERVICE);
@@ -45,22 +45,24 @@ public class ReverseGeocoderImpl implements ReverseGeocoder {
 
         return p;
     }
+
     @Override
-    public Placemark getPlacemark(Position p) throws IOException, ParseException {
-        return getPlacemark(p.getLatDeg(), p.getLngDeg());
+    public Placemark getPlacemarkNearest(Position position) throws IOException, ParseException {
+        return getPlacemarkNearest(position.getLatDeg(), position.getLngDeg());
     }
 
     @Override
-    public List<Placemark> getPlacemarkNear(double latDeg, double lngDeg, float radius) throws IOException, ParseException {
+    public List<Placemark> getPlacemarksNear(double latDeg, double lngDeg, float radius) throws IOException,
+            ParseException {
         List<Placemark> placemarks = new ArrayList<Placemark>();
-        
+
         StringBuilder url = new StringBuilder(NEARBY_PLACE_SERVICE);
         url.append("&lat=" + Double.toString(latDeg));
         url.append("&lng=" + Double.toString(lngDeg));
         url.append("&radius=" + Float.toString(radius));
         url.append("&maxRows=" + Integer.toString(maxRows));
         url.append("&username=" + GEONAMES_USER);
-        
+
         URL request = new URL(url.toString());
         URLConnection connection = request.openConnection();
         BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
@@ -72,33 +74,55 @@ public class ReverseGeocoderImpl implements ReverseGeocoder {
             JSONObject object = (JSONObject) iterator.next();
             placemarks.add(JSONToPlacemark(object));
         }
-        
+
         return placemarks;
-    }
-    @Override
-    public List<Placemark> getPlacemarkNear(Position p, float radius) throws IOException, ParseException {
-        return getPlacemarkNear(p.getLatDeg(), p.getLngDeg(), radius);
     }
 
     @Override
-    public Placemark getPlacemarkBest(double latDeg, double lngDeg, float radius, Comparator<Placemark> comp) throws IOException, ParseException {
-        List<Placemark> placemarks = getPlacemarkNear(latDeg, lngDeg, radius);
-        Collections.sort(placemarks, comp);
-        
+    public List<Placemark> getPlacemarksNear(Position position, float radius) throws IOException, ParseException {
+        return getPlacemarksNear(position.getLatDeg(), position.getLngDeg(), radius);
+    }
+
+    @Override
+    public Placemark getPlacemarkLast(double latDeg, double lngDeg, float radius, Comparator<Placemark> comp)
+            throws IOException, ParseException {
+        List<Placemark> placemarks = getPlacemarksNearSorted(latDeg, lngDeg, radius, comp);
         return placemarks.get(placemarks.size() - 1);
     }
+
     @Override
-    public Placemark getPlacemarkBest(Position p, float radius, Comparator<Placemark> comp) throws IOException,
+    public Placemark getPlacemarkLast(Position position, float radius, Comparator<Placemark> comp) throws IOException,
             ParseException {
-        return getPlacemarkBest(p.getLatDeg(), p.getLngDeg(), radius, comp);
+        return getPlacemarkLast(position.getLatDeg(), position.getLngDeg(), radius, comp);
     }
-    
+
+    @Override
+    public Placemark getPlacemarkFirst(double latDeg, double lngDeg, float radius, Comparator<Placemark> comp)
+            throws IOException, ParseException {
+        return getPlacemarksNearSorted(latDeg, lngDeg, radius, comp).get(0);
+    }
+
+    @Override
+    public Placemark getPlacemarkFirst(Position position, float radius, Comparator<Placemark> comp) throws IOException,
+            ParseException {
+        return getPlacemarkFirst(position.getLatDeg(), position.getLngDeg(), radius, comp);
+    }
+
+    private List<Placemark> getPlacemarksNearSorted(double latDeg, double lngDeg, float radius,
+            Comparator<Placemark> comp) throws IOException, ParseException {
+        List<Placemark> placemarks = getPlacemarksNear(latDeg, lngDeg, radius);
+        Collections.sort(placemarks, comp);
+
+        return placemarks;
+    }
+
     private Placemark JSONToPlacemark(JSONObject json) {
         String name = (String) json.get("toponymName");
         String countryCode = (String) json.get("countryCode");
-        
-        //Tries are necessary, because some latitude or longitude values delivered by Geonames have no decimal places and are interpreted as Long
-        //Casting a Long to a Double raises a ClassCastException
+
+        // Tries are necessary, because some latitude or longitude values delivered by Geonames have no decimal places
+        // and are interpreted as Long 
+        // Casting a Long to a Double raises a ClassCastException
         Double latDeg = null;
         try {
             latDeg = (Double) json.get("lat");
@@ -112,15 +136,15 @@ public class ReverseGeocoderImpl implements ReverseGeocoder {
             lngDeg = ((Long) json.get("lng")).doubleValue();
         }
         Position p = new DegreePosition(latDeg, lngDeg);
-        
+
         String type = (String) json.get("fcl");
         long population = (Long) json.get("population");
-        
+
         if (name != null && lngDeg != null && latDeg != null) {
             return new PlacemarkImpl(name, countryCode, p, type, population);
         } else {
             return null;
         }
     }
-    
+
 }

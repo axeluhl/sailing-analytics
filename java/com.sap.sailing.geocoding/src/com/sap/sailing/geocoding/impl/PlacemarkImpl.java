@@ -47,8 +47,8 @@ public class PlacemarkImpl implements Placemark {
 
 
     @Override
-    public Distance distanceFrom(Position p) {
-        return position.getDistance(p);
+    public Distance distanceFrom(Position position) {
+        return this.position.getDistance(position);
     }
     @Override
     public Distance distanceFrom(double latDeg, double lngDeg) {
@@ -60,6 +60,18 @@ public class PlacemarkImpl implements Placemark {
     public String getCountryName() {
         // TODO Get country name from CountryCodeFactoryImpl with countryCode
         return null;
+    }
+    
+    @Override
+    public String toString() {
+        StringBuilder b = new StringBuilder(Placemark.class.getSimpleName() + "[");
+        b.append(name + ", ");
+        b.append(countryCode + ", ");
+        b.append(position.toString() + ", ");
+        b.append(type + ", ");
+        b.append(population + "]");
+        
+        return b.toString();
     }
 
     @Override
