@@ -119,6 +119,7 @@ public class ReverseGeocoderImpl implements ReverseGeocoder {
     private Placemark JSONToPlacemark(JSONObject json) {
         String name = (String) json.get("toponymName");
         String countryCode = (String) json.get("countryCode");
+        String countryName = (String) json.get("countryName");
 
         // Tries are necessary, because some latitude or longitude values delivered by Geonames have no decimal places
         // and are interpreted as Long 
@@ -140,7 +141,7 @@ public class ReverseGeocoderImpl implements ReverseGeocoder {
         long population = (Long) json.get("population");
 
         if (name != null && lngDeg != null && latDeg != null) {
-            return new PlacemarkImpl(name, countryCode, p, population);
+            return new PlacemarkImpl(name, countryCode, countryName, p, population);
         } else {
             return null;
         }

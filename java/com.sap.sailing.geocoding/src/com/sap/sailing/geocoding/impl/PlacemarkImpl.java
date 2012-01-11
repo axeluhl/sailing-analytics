@@ -5,7 +5,6 @@ import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.geocoding.Placemark;
 import com.sap.sailing.geocoding.ReverseGeocoder;
-import com.sap.sailing.util.CountryCodeFactory;
 
 /**
  * Used to define a populated place in the world.<br />
@@ -17,15 +16,17 @@ public class PlacemarkImpl implements Placemark {
     
     private String name;
     private String countryCode;
+    private String countryName;
     private Position position;
     private long population;
     
     /**
      * Creates a new Placemark with the given parameters as attributes.
      */
-    public PlacemarkImpl(String name, String countryCode, Position position, long population) {
+    public PlacemarkImpl(String name, String countryCode, String countryName,Position position, long population) {
         this.name = name;
         this.countryCode = countryCode;
+        this.countryName = countryName;
         this.position = position;
         this.population = population;
     }
@@ -33,8 +34,8 @@ public class PlacemarkImpl implements Placemark {
     /**
      * Creates a new Placemark with the given parameters as attributes and a <code>population</code> of <code>0</code>;
      */
-    public PlacemarkImpl(String name, String countryCode, Position position, String type) {
-        this(name, countryCode, position, 0);
+    public PlacemarkImpl(String name, String countryCode, String countryName, Position position, String type) {
+        this(name, countryCode, countryName, position, 0);
     }
 
     public String getName() {
@@ -66,7 +67,7 @@ public class PlacemarkImpl implements Placemark {
 
     @Override
     public String getCountryName() {
-        return CountryCodeFactory.INSTANCE.getFromTwoLetterISOName(countryCode).getName();
+        return countryName;
     }
     
     @Override

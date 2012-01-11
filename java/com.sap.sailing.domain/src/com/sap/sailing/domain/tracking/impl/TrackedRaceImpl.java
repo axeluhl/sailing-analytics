@@ -940,4 +940,5 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         public void speedAveragingChanged(long oldMillisecondsOverWhichToAverage, long newMillisecondsOverWhichToAverage) {
         }
     }
+    
 }
