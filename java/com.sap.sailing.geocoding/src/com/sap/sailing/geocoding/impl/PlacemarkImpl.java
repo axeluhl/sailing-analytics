@@ -1,5 +1,7 @@
 package com.sap.sailing.geocoding.impl;
 
+import com.sap.sailing.domain.common.DegreePosition;
+import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.geocoding.Placemark;
 
@@ -43,10 +45,15 @@ public class PlacemarkImpl implements Placemark {
         return population;
     }
 
+
     @Override
-    public float distanceFrom(double latDeg, double lngDeg) {
-        // TODO Auto-generated method stub
-        return 0;
+    public Distance distanceFrom(Position p) {
+        return position.getDistance(p);
+    }
+    @Override
+    public Distance distanceFrom(double latDeg, double lngDeg) {
+        Position p = new DegreePosition(latDeg, lngDeg);
+        return distanceFrom(p);
     }
 
     @Override
@@ -100,7 +107,5 @@ public class PlacemarkImpl implements Placemark {
             return false;
         return true;
     }
-    
-    
 
 }

@@ -15,18 +15,18 @@ import com.sap.sailing.geocoding.impl.PlacemarkImpl;
 
 public class ReverseGeocoderTest {
     
-    ReverseGeocoder geocoder = ReverseGeocoder.INSTANCE;
+    private ReverseGeocoder geocoder = ReverseGeocoder.INSTANCE;
+    private static final Placemark KIEL = new PlacemarkImpl("Kiel", "DE", new DegreePosition(54.32132926107913, 10.1348876953125), "P", 232758);
     
     @Test
     public void getPlacemarkSimpleTest() {
         //Simple Test in Kiel center to check the connection and the parsing from JSONObject to Placemark
         double latSmplKiel = 54.3231063453431;
         double lngSmplKiel = 10.12265682220459;
-        Placemark kielCorrect = new PlacemarkImpl("Kiel", "DE", new DegreePosition(54.32132926107913, 10.1348876953125), "P", 232758);
         
         try {
             Placemark kielReversed = geocoder.getPlacemark(latSmplKiel, lngSmplKiel);
-            Assert.assertEquals(kielCorrect, kielReversed);
+            Assert.assertEquals(KIEL, kielReversed);
         } catch (IOException e) {
             Assert.fail(e.getMessage());
         } catch (ParseException e) {
@@ -56,7 +56,7 @@ public class ReverseGeocoderTest {
         
         try {
             Placemark p = geocoder.getPlacemarkBest(latDeg, lngDeg, 20, new Placemark.ByPopulation());
-            Assert.assertNotNull(p);
+            Assert.assertEquals(KIEL, p);
         } catch (IOException e) {
             Assert.fail(e.getMessage());
         } catch (ParseException e) {

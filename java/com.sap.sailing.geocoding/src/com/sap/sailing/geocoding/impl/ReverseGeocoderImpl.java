@@ -45,6 +45,10 @@ public class ReverseGeocoderImpl implements ReverseGeocoder {
 
         return p;
     }
+    @Override
+    public Placemark getPlacemark(Position p) throws IOException, ParseException {
+        return getPlacemark(p.getLatDeg(), p.getLngDeg());
+    }
 
     @Override
     public List<Placemark> getPlacemarkNear(double latDeg, double lngDeg, float radius) throws IOException, ParseException {
@@ -71,6 +75,10 @@ public class ReverseGeocoderImpl implements ReverseGeocoder {
         
         return placemarks;
     }
+    @Override
+    public List<Placemark> getPlacemarkNear(Position p, float radius) throws IOException, ParseException {
+        return getPlacemarkNear(p.getLatDeg(), p.getLngDeg(), radius);
+    }
 
     @Override
     public Placemark getPlacemarkBest(double latDeg, double lngDeg, float radius, Comparator<Placemark> comp) throws IOException, ParseException {
@@ -78,6 +86,11 @@ public class ReverseGeocoderImpl implements ReverseGeocoder {
         Collections.sort(placemarks, comp);
         
         return placemarks.get(placemarks.size() - 1);
+    }
+    @Override
+    public Placemark getPlacemarkBest(Position p, float radius, Comparator<Placemark> comp) throws IOException,
+            ParseException {
+        return getPlacemarkBest(p.getLatDeg(), p.getLngDeg(), radius, comp);
     }
     
     private Placemark JSONToPlacemark(JSONObject json) {
