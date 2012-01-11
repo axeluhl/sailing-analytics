@@ -70,11 +70,11 @@ public abstract class AbstractBearing implements BearingWithConfidence {
     }
 
     @Override
-    public ScalableValue<Pair<Double, Double>, Bearing> getScalableValue() {
+    public ScalableValue<Pair<Double, Double>, BearingWithConfidence> getScalableValue() {
         return new ScalableBearing(this);
     }
 
-    private static class ScalableBearing implements ScalableValue<Pair<Double, Double>, Bearing> {
+    private static class ScalableBearing implements ScalableValue<Pair<Double, Double>, BearingWithConfidence> {
         private final double sin;
         private final double cos;
         
@@ -89,27 +89,27 @@ public abstract class AbstractBearing implements BearingWithConfidence {
         }
         
         @Override
-        public ScalableValue<Pair<Double, Double>, Bearing> multiply(double factor) {
+        public ScalableValue<Pair<Double, Double>, BearingWithConfidence> multiply(double factor) {
             Pair<Double, Double> pair = getValue();
             return new ScalableBearing(factor*pair.getA(), factor*pair.getB());
         }
 
         @Override
-        public ScalableValue<Pair<Double, Double>, Bearing> add(ScalableValue<Pair<Double, Double>, Bearing> t) {
+        public ScalableValue<Pair<Double, Double>, BearingWithConfidence> add(ScalableValue<Pair<Double, Double>, BearingWithConfidence> t) {
             Pair<Double, Double> value = getValue();
             Pair<Double, Double> tValue = t.getValue();
             return new ScalableBearing(value.getA()+tValue.getA(), value.getB()+tValue.getB());
         }
 
         @Override
-        public Bearing divide(double divisor) {
+        public BearingWithConfidence divide(double divisor) {
             double angle;
             if (cos == 0) {
                 angle = sin >= 0 ? Math.PI / 2 : -Math.PI / 2;
             } else {
                 angle = Math.atan2(sin, cos);
             }
-            Bearing result = new RadianBearingImpl(angle < 0 ? angle + 2 * Math.PI : angle);
+            BearingWithConfidence result = new RadianBearingImpl(angle < 0 ? angle + 2 * Math.PI : angle);
             return result;
         }
 
