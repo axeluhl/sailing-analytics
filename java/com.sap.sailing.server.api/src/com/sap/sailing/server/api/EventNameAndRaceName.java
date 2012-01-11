@@ -31,4 +31,29 @@ public class EventNameAndRaceName extends EventName implements EventAndRaceIdent
     public String toString() {
         return raceName;
     }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + ((raceName == null) ? 0 : raceName.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (!super.equals(obj))
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        EventNameAndRaceName other = (EventNameAndRaceName) obj;
+        if (raceName == null) {
+            if (other.raceName != null)
+                return false;
+        } else if (!raceName.equals(other.raceName))
+            return false;
+        return true;
+    }
 }

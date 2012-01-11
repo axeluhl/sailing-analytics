@@ -1,6 +1,8 @@
 package com.sap.sailing.server.api;
 
 public class EventName implements EventIdentifier {
+    private static final long serialVersionUID = 5975000495693192305L;
+    
     private String eventName;
 
     EventName() {}
@@ -18,16 +20,30 @@ public class EventName implements EventIdentifier {
     public Object getEvent(EventFetcher eventFetcher) {
         return eventFetcher.getEvent(this);
     }
-    
+
     @Override
-    public boolean equals(Object obj) {
-        boolean result = false;
-        
-        if (obj instanceof EventName) {
-            EventName e = (EventName) obj;
-            result = e.eventName.equals(this.eventName);
-        }
-        
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((eventName == null) ? 0 : eventName.hashCode());
         return result;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        EventName other = (EventName) obj;
+        if (eventName == null) {
+            if (other.eventName != null)
+                return false;
+        } else if (!eventName.equals(other.eventName))
+            return false;
+        return true;
+    }
+    
 }
