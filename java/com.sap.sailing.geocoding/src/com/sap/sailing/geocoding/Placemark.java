@@ -15,7 +15,15 @@ public interface Placemark {
 
     Distance distanceFrom(Position p);
     Distance distanceFrom(double latDeg, double lngDeg);
-    String getCountryName(); 
+    String getCountryName();
+    
+    
+    
+    
+    
+    
+    
+    
     
     /**
      * Sorts the Placemarks by Population from low to high.

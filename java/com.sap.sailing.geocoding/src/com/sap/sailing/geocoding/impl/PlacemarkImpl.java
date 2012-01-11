@@ -4,6 +4,7 @@ import com.sap.sailing.domain.common.DegreePosition;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.geocoding.Placemark;
+import com.sap.sailing.util.CountryCodeFactory;
 
 public class PlacemarkImpl implements Placemark {
     
@@ -58,8 +59,7 @@ public class PlacemarkImpl implements Placemark {
 
     @Override
     public String getCountryName() {
-        // TODO Get country name from CountryCodeFactoryImpl with countryCode
-        return null;
+        return CountryCodeFactory.INSTANCE.getFromTwoLetterISOName(countryCode).getName();
     }
     
     @Override
