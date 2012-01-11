@@ -2,9 +2,9 @@ package com.sap.sailing.domain.tracking.impl;
 
 import com.sap.sailing.domain.base.CourseChange;
 import com.sap.sailing.domain.base.SpeedWithBearing;
-import com.sap.sailing.domain.base.impl.AbstractBearing;
-import com.sap.sailing.domain.base.impl.AbstractSpeedImpl;
 import com.sap.sailing.domain.base.impl.AbstractSpeedWithBearingImpl;
+import com.sap.sailing.domain.common.AbstractBearing;
+import com.sap.sailing.domain.common.AbstractSpeedImpl;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;

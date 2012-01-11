@@ -27,7 +27,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Vector;
 
-import com.sap.sailing.domain.base.impl.DegreePosition;
+import com.sap.sailing.domain.common.DegreePosition;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.util.Bounds;
 import com.sap.sailing.util.QuadTree;

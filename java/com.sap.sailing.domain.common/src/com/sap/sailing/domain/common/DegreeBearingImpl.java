@@ -1,6 +1,5 @@
-package com.sap.sailing.domain.base.impl;
+package com.sap.sailing.domain.common;
 
-import com.sap.sailing.domain.common.Bearing;
 
 public class DegreeBearingImpl extends AbstractBearing implements Bearing {
     private final double bearingDeg;

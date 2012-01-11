@@ -1,7 +1,4 @@
-package com.sap.sailing.domain.base.impl;
-
-import com.sap.sailing.domain.base.Mile;
-import com.sap.sailing.domain.common.Speed;
+package com.sap.sailing.domain.common;
 
 public class KilometersPerHourSpeedImpl extends AbstractSpeedImpl implements Speed {
     private final double speedInKilometersPerHour;

@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.base;
+package com.sap.sailing.domain.common;
 
 public interface Mile {
     static double METERS_PER_SEA_MILE = 1852.3;

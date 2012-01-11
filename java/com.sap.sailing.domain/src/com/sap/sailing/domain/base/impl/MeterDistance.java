@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.base.impl;
 
+import com.sap.sailing.domain.common.AbstractDistance;
 import com.sap.sailing.domain.common.Distance;
 
 public class MeterDistance extends AbstractDistance {

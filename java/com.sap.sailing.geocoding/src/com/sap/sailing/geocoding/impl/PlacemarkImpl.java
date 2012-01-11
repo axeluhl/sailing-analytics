@@ -1,27 +1,26 @@
 package com.sap.sailing.geocoding.impl;
 
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.geocoding.Placemark;
 
 public class PlacemarkImpl implements Placemark {
     
     private String name;
     private String countryCode;
-    private double latDeg;
-    private double lngDeg;
+    private Position position;
     private String type;
     private long population;
     
-    public PlacemarkImpl(String name, String countryCode, double latDeg, double lngDeg, String type, long population) {
+    public PlacemarkImpl(String name, String countryCode, Position position, String type, long population) {
         this.name = name;
         this.countryCode = countryCode;
-        this.latDeg = latDeg;
-        this.lngDeg = lngDeg;
+        this.position = position;
         this.type = type;
         this.population = population;
     }
     
-    public PlacemarkImpl(String name, String countryCode, double latDeg, double lngDeg, String type) {
-        this(name, countryCode, latDeg, lngDeg, type, 0);
+    public PlacemarkImpl(String name, String countryCode, Position position, String type) {
+        this(name, countryCode, position, type, 0);
     }
 
     public String getName() {
@@ -31,13 +30,9 @@ public class PlacemarkImpl implements Placemark {
     public String getCountryCode() {
         return countryCode;
     }
-
-    public double getLatDeg() {
-        return latDeg;
-    }
-
-    public double getLngDeg() {
-        return lngDeg;
+    
+    public Position getPosition() {
+        return position;
     }
 
     public String getType() {
@@ -59,19 +54,15 @@ public class PlacemarkImpl implements Placemark {
         // TODO Get country name from CountryCodeFactoryImpl with countryCode
         return null;
     }
-    
+
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((countryCode == null) ? 0 : countryCode.hashCode());
-        long temp;
-        temp = Double.doubleToLongBits(latDeg);
-        result = prime * result + (int) (temp ^ (temp >>> 32));
-        temp = Double.doubleToLongBits(lngDeg);
-        result = prime * result + (int) (temp ^ (temp >>> 32));
         result = prime * result + ((name == null) ? 0 : name.hashCode());
         result = prime * result + (int) (population ^ (population >>> 32));
+        result = prime * result + ((position == null) ? 0 : position.hashCode());
         result = prime * result + ((type == null) ? 0 : type.hashCode());
         return result;
     }
@@ -90,16 +81,17 @@ public class PlacemarkImpl implements Placemark {
                 return false;
         } else if (!countryCode.equals(other.countryCode))
             return false;
-        if (Double.doubleToLongBits(latDeg) != Double.doubleToLongBits(other.latDeg))
-            return false;
-        if (Double.doubleToLongBits(lngDeg) != Double.doubleToLongBits(other.lngDeg))
-            return false;
         if (name == null) {
             if (other.name != null)
                 return false;
         } else if (!name.equals(other.name))
             return false;
         if (population != other.population)
+            return false;
+        if (position == null) {
+            if (other.position != null)
+                return false;
+        } else if (!position.equals(other.position))
             return false;
         if (type == null) {
             if (other.type != null)
@@ -108,5 +100,7 @@ public class PlacemarkImpl implements Placemark {
             return false;
         return true;
     }
+    
+    
 
 }

@@ -7,4 +7,5 @@ Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: com.sap.sailing.geocoding,
  com.sap.sailing.geocoding.impl
-Require-Bundle: org.json.simple;bundle-version="1.1.0"
+Require-Bundle: org.json.simple;bundle-version="1.1.0",
+ com.sap.sailing.domain.common

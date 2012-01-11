@@ -1,6 +1,4 @@
-package com.sap.sailing.domain.base.impl;
-
-import com.sap.sailing.domain.common.Bearing;
+package com.sap.sailing.domain.common;
 
 public abstract class AbstractBearing implements Bearing {
     @Override

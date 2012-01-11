@@ -1,8 +1,8 @@
 package com.sap.sailing.declination.impl;
 
 import com.sap.sailing.declination.Declination;
-import com.sap.sailing.domain.base.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.DegreeBearingImpl;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
 

@@ -2,12 +2,13 @@ package com.sap.sailing.geocoding;
 
 import java.util.Comparator;
 
+import com.sap.sailing.domain.common.Position;
+
 public interface Placemark {
     
     String getName();
     String getCountryCode();
-    double getLatDeg();
-    double getLngDeg();
+    Position getPosition();
     String getType();
     long getPopulation();
     

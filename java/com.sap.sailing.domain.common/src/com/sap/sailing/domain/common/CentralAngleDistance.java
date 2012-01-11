@@ -1,8 +1,4 @@
-package com.sap.sailing.domain.base.impl;
-
-import com.sap.sailing.domain.base.Mile;
-import com.sap.sailing.domain.common.Distance;
-
+package com.sap.sailing.domain.common;
 
 public class CentralAngleDistance extends AbstractDistance {
     private final double centralAngleRad;

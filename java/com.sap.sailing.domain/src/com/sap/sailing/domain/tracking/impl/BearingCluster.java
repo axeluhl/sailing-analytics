@@ -3,8 +3,8 @@ package com.sap.sailing.domain.tracking.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.sap.sailing.domain.base.impl.RadianBearingImpl;
 import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.RadianBearingImpl;
 import com.sap.sailing.domain.common.Util.Pair;
 
 /**

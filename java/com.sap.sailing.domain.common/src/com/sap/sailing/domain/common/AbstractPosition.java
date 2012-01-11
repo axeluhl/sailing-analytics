@@ -1,8 +1,4 @@
-package com.sap.sailing.domain.base.impl;
-
-import com.sap.sailing.domain.common.Bearing;
-import com.sap.sailing.domain.common.Distance;
-import com.sap.sailing.domain.common.Position;
+package com.sap.sailing.domain.common;
 
 public class AbstractPosition implements Position {
     public int hashCode() {

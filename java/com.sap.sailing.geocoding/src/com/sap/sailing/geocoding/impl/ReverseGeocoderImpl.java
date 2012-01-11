@@ -16,6 +16,8 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import com.sap.sailing.domain.common.DegreePosition;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.geocoding.Placemark;
 import com.sap.sailing.geocoding.ReverseGeocoder;
 
@@ -81,10 +83,10 @@ public class ReverseGeocoderImpl implements ReverseGeocoder {
     private Placemark JSONToPlacemark(JSONObject json) {
         String name = (String) json.get("toponymName");
         String countryCode = (String) json.get("countryCode");
-        Double latDeg = null;
         
         //Tries are necessary, because some latitude or longitude values delivered by Geonames have no decimal places and are interpreted as Long
         //Casting a Long to a Double raises a ClassCastException
+        Double latDeg = null;
         try {
             latDeg = (Double) json.get("lat");
         } catch (ClassCastException e) {
@@ -96,12 +98,13 @@ public class ReverseGeocoderImpl implements ReverseGeocoder {
         } catch (ClassCastException e) {
             lngDeg = ((Long) json.get("lng")).doubleValue();
         }
+        Position p = new DegreePosition(latDeg, lngDeg);
         
         String type = (String) json.get("fcl");
         long population = (Long) json.get("population");
         
         if (name != null && lngDeg != null && latDeg != null) {
-            return new PlacemarkImpl(name, countryCode, latDeg, lngDeg, type, population);
+            return new PlacemarkImpl(name, countryCode, p, type, population);
         } else {
             return null;
         }

@@ -1,7 +1,7 @@
 package com.sap.sailing.domain.tracking.impl;
 
-import com.sap.sailing.domain.base.impl.AbstractPosition;
 import com.sap.sailing.domain.base.impl.AbstractTimePoint;
+import com.sap.sailing.domain.common.AbstractPosition;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.GPSFix;
