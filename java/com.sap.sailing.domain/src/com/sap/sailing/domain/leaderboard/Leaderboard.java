@@ -3,7 +3,7 @@ package com.sap.sailing.domain.leaderboard;
 import java.util.Map;
 
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.Named;
+import com.sap.sailing.domain.common.Named;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.Util.Pair;

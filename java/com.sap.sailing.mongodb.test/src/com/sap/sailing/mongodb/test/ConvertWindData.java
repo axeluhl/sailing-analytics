@@ -2,7 +2,7 @@ package com.sap.sailing.mongodb.test;
 
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
-import com.sap.sailing.domain.common.DegreeBearingImpl;
+import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.persistence.impl.FieldNames;
 import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
 import com.sap.sailing.mongodb.MongoDBService;

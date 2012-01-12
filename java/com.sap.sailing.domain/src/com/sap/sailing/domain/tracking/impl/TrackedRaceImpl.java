@@ -21,23 +21,24 @@ import com.sap.sailing.domain.base.CourseChange;
 import com.sap.sailing.domain.base.CourseListener;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.RaceDefinition;
-import com.sap.sailing.domain.base.RacePlaceOrder;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.DouglasPeucker;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.base.impl.RacePlaceOrderImpl;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindError;
 import com.sap.sailing.domain.common.NoWindException;
+import com.sap.sailing.domain.common.Placemark;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.RacePlaceOrder;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.Util;
 import com.sap.sailing.domain.common.Util.Pair;
+import com.sap.sailing.domain.common.impl.RacePlaceOrderImpl;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
@@ -53,13 +54,18 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
-import com.sap.sailing.geocoding.Placemark;
 import com.sap.sailing.geocoding.ReverseGeocoder;
 
 public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     private static final Logger logger = Logger.getLogger(TrackedRaceImpl.class.getName());
 
     private static final double PENALTY_CIRCLE_DEGREES_THRESHOLD = 320;
+    
+    /**
+     * Used in {@link #getPlaceOrder()} to calculate the radius for the
+     * {@link ReverseGeocoder#getPlacemarksNear(Position, double) GetPlacemarksNear-Service}.
+     */
+    private static final double GEONAMES_RADIUS_CACLCULATION_FACTOR = 2.5;
 
     // TODO observe the race course; if it changes, update leg structures; consider fine-grained update events that tell what changed
     private final RaceDefinition race;
@@ -963,16 +969,15 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             //Get distance to nearest placemark and calculate the search radius
             Placemark startNearest = ReverseGeocoder.INSTANCE.getPlacemarkNearest(startPosition);
             Distance startNearestDistance = startNearest.distanceFrom(startPosition);
-            //TODO Move the 2.5 factor to an final static variable or somewhere else
-            double startRadius = startNearestDistance.getKilometers() * 2.5;
+            double startRadius = startNearestDistance.getKilometers() * GEONAMES_RADIUS_CACLCULATION_FACTOR;
             
             //Get the estimated best start place
             startBest = ReverseGeocoder.INSTANCE.getPlacemarkLast(startPosition, startRadius,
                     new Placemark.ByPopulationDistanceRatio(startPosition));
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.throwing(TrackedRaceImpl.class.getName(), "getPlaceOrder()", e);
         } catch (ParseException e) {
-            e.printStackTrace();
+            logger.throwing(TrackedRaceImpl.class.getName(), "getPlaceOrder()", e);
         }
 
         //Get finish position
@@ -988,24 +993,24 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             //Get distance to nearest placemark and calculate the search radius
             Placemark finishNearest = ReverseGeocoder.INSTANCE.getPlacemarkNearest(finishPosition);
             Distance finishNearestDistance = finishNearest.distanceFrom(finishPosition);
-            //TODO Move the 2.5 factor to an final static variable or somewhere else
-            double finishRadius = finishNearestDistance.getKilometers() * 2.5;
+            double finishRadius = finishNearestDistance.getKilometers() * GEONAMES_RADIUS_CACLCULATION_FACTOR;
             
             //Get the estimated best finish place
             finishBest = ReverseGeocoder.INSTANCE.getPlacemarkLast(finishPosition, finishRadius,
                     new Placemark.ByPopulationDistanceRatio(finishPosition));
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.throwing(TrackedRaceImpl.class.getName(), "getPlaceOrder()", e);
         } catch (ParseException e) {
-            e.printStackTrace();
+            logger.throwing(TrackedRaceImpl.class.getName(), "getPlaceOrder()", e);
         }
         
         if (startBest != null) {
-            order = new RacePlaceOrderImpl(getRace().getName());
-            order.addPlace(startBest);
+            final List<Placemark> places = new ArrayList<Placemark>();
+            places.add(startBest);
             if (!startBest.equals(finishBest)) {
-                order.addPlace(finishBest);
+                places.add(finishBest);
             }
+            order = new RacePlaceOrderImpl(getRace().getName(), places);
         }
         
         return order;

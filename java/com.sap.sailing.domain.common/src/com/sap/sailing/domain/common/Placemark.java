@@ -1,9 +1,6 @@
-package com.sap.sailing.geocoding;
+package com.sap.sailing.domain.common;
 
 import java.util.Comparator;
-
-import com.sap.sailing.domain.common.Distance;
-import com.sap.sailing.domain.common.Position;
 
 /**
  * Used to define a populated place in the world.<br />

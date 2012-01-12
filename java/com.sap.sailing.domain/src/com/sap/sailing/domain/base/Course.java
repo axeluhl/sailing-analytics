@@ -2,6 +2,8 @@ package com.sap.sailing.domain.base;
 
 import java.util.List;
 
+import com.sap.sailing.domain.common.Named;
+
 import difflib.PatchFailedException;
 
 /**

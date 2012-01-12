@@ -1,10 +1,9 @@
-package com.sap.sailing.geocoding.impl;
+package com.sap.sailing.domain.common.impl;
 
 import com.sap.sailing.domain.common.DegreePosition;
 import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.common.Placemark;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.geocoding.Placemark;
-import com.sap.sailing.geocoding.ReverseGeocoder;
 
 /**
  * Used to define a populated place in the world.<br />

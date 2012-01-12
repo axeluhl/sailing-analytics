@@ -13,6 +13,7 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.RacePlaceOrder;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
@@ -430,6 +431,12 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
     @Override
     public Wind getWind(Position p, TimePoint at, WindSource... windSourcesToConsider) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public RacePlaceOrder getPlaceOrder() {
         // TODO Auto-generated method stub
         return null;
     }

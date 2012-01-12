@@ -2,6 +2,7 @@ package com.sap.sailing.domain.base.impl;
 
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.common.impl.NamedImpl;
 
 public class BoatImpl extends NamedImpl implements Boat {
     private final BoatClass boatClass;

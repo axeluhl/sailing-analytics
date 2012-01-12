@@ -3,7 +3,7 @@ package com.sap.sailing.gwt.ui.shared;
 import java.util.Date;
 import java.util.List;
 
-import com.sap.sailing.domain.base.RacePlaceOrder;
+import com.sap.sailing.domain.common.RacePlaceOrder;
 
 public class AdvancedEventDAO extends EventDAO {
 

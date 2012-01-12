@@ -1,7 +1,5 @@
 package com.sap.sailing.util;
 
-import java.util.Locale;
-
 import com.sap.sailing.util.impl.CountryCodeFactoryImpl;
 
 public interface CountryCodeFactory {
@@ -13,9 +11,13 @@ public interface CountryCodeFactory {
 
     CountryCode getFromTwoLetterISOName(String twoLetterISOName);
 
+    /**
+     * Note that the three-letter ISO names can also be retrieved from a Java Locale, as follows:
+     * <pre>
+     *          getFromThreeLetterISOName(Locale.GERMANY.getISO3Country().toUpperCase())
+     * </pre>
+     */
     CountryCode getFromThreeLetterISOName(String threeLetterISOName);
-    
-    CountryCode getFromLocale(Locale locale);
     
     CountryCode getFromIANAInternet(String ianaInternet);
 

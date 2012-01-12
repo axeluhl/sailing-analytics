@@ -3,7 +3,6 @@ package com.sap.sailing.util.impl;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -303,11 +302,6 @@ public class CountryCodeFactoryImpl implements CountryCodeFactory {
             byIanaInternet.put(countryCode.getIANAInternet().toLowerCase(), countryCode);
         }
         all.add(countryCode);
-    }
-
-    @Override
-    public CountryCode getFromLocale(Locale locale) {
-        return getFromThreeLetterISOName(locale.getISO3Country().toUpperCase());
     }
 
     @Override

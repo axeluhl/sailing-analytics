@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.common;
 
+import com.sap.sailing.domain.common.impl.KilometersPerHourSpeedImpl;
+
 public abstract class AbstractDistance implements Distance {
 
     @Override

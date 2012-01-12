@@ -19,6 +19,7 @@ import com.sap.sailing.domain.base.CourseListener;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.common.impl.NamedImpl;
 import com.sap.sailing.util.CourseAsWaypointList;
 
 import difflib.DiffUtils;

@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.common;
 
+import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
+
 public abstract class AbstractBearing implements Bearing {
     @Override
     public Bearing reverse() {

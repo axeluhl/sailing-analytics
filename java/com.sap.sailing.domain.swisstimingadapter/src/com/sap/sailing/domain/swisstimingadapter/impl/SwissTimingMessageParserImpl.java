@@ -4,8 +4,8 @@ import java.net.DatagramPacket;
 
 import com.sap.sailing.domain.base.impl.KilometersPerHourSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.DegreeBearingImpl;
 import com.sap.sailing.domain.common.DegreePosition;
+import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFormatException;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingMessage;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingMessageParser;

@@ -3,6 +3,7 @@ package com.sap.sailing.domain.base.impl;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.Person;
 import com.sap.sailing.domain.base.Team;
+import com.sap.sailing.domain.common.impl.NamedImpl;
 
 public class TeamImpl extends NamedImpl implements Team {
     private final Iterable<? extends Person> sailors;

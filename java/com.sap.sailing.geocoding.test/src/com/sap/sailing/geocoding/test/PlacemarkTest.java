@@ -4,8 +4,8 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.sap.sailing.domain.common.DegreePosition;
-import com.sap.sailing.geocoding.Placemark;
-import com.sap.sailing.geocoding.impl.PlacemarkImpl;
+import com.sap.sailing.domain.common.Placemark;
+import com.sap.sailing.domain.common.impl.PlacemarkImpl;
 
 public class PlacemarkTest {
 

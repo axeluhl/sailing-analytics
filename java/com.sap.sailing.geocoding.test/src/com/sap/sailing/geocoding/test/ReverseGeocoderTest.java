@@ -9,10 +9,10 @@ import org.json.simple.parser.ParseException;
 import org.junit.Test;
 
 import com.sap.sailing.domain.common.DegreePosition;
+import com.sap.sailing.domain.common.Placemark;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.geocoding.Placemark;
+import com.sap.sailing.domain.common.impl.PlacemarkImpl;
 import com.sap.sailing.geocoding.ReverseGeocoder;
-import com.sap.sailing.geocoding.impl.PlacemarkImpl;
 
 public class ReverseGeocoderTest {
     

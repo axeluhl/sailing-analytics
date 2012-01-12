@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.json.simple.parser.ParseException;
 
+import com.sap.sailing.domain.common.Placemark;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.geocoding.impl.ReverseGeocoderImpl;
 

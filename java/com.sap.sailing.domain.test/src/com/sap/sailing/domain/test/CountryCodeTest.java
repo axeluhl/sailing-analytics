@@ -90,7 +90,7 @@ public class CountryCodeTest {
         cc = ccf.getFromThreeLetterIOCName("GER");
         assertEquals("DE", cc.getTwoLetterISOCode().toUpperCase());
         assertEquals("DEU", cc.getThreeLetterISOCode().toUpperCase());
-        cc = ccf.getFromLocale(Locale.GERMANY);
+        cc = ccf.getFromThreeLetterISOName(Locale.GERMANY.getISO3Country().toUpperCase());
         assertEquals("DE", cc.getTwoLetterISOCode().toUpperCase());
         assertEquals("DEU", cc.getThreeLetterISOCode().toUpperCase());
         cc = ccf.getFromIANAInternet("sd");

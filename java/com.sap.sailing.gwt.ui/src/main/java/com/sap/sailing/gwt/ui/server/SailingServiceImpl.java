@@ -41,7 +41,6 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.RaceDefinition;
-import com.sap.sailing.domain.base.RacePlaceOrder;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
@@ -49,20 +48,21 @@ import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MeterDistance;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.Bearing;
-import com.sap.sailing.domain.common.DegreeBearingImpl;
 import com.sap.sailing.domain.common.DegreePosition;
 import com.sap.sailing.domain.common.Distance;
-import com.sap.sailing.domain.common.KilometersPerHourSpeedImpl;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindError;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.RacePlaceOrder;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.Util;
 import com.sap.sailing.domain.common.Util.Pair;
 import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
+import com.sap.sailing.domain.common.impl.KilometersPerHourSpeedImpl;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard.Entry;
 import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
@@ -85,7 +85,6 @@ import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindTrack;
-import com.sap.sailing.domain.tracking.impl.TrackedRaceImpl;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.RaceRecord;
@@ -350,8 +349,12 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             List<CompetitorDAO> competitorList = getCompetitorDAOs(event.getCompetitors());
             List<RegattaDAO> regattasList = getRegattaDAOs(event);
             List<RacePlaceOrder> racePlaces = getRacePlaces(event);
-            //TODO add start Date to AdvancedEventDAO
-            Date start = new Date();
+            
+            //Get start date
+            RaceDefinition raceDefinition = event.getAllRaces().iterator().next();
+            EventNameAndRaceName id = new EventNameAndRaceName(event.getName(), raceDefinition.getName());
+            TrackedRace race = getTrackedRace(id);
+            Date start = race.getStart().asDate();
             
             AdvancedEventDAO eventDAO = new AdvancedEventDAO(event.getName(), regattasList, competitorList, racePlaces, start);
             if (!eventDAO.regattas.isEmpty()) {
@@ -365,8 +368,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         List<RacePlaceOrder> result = new ArrayList<RacePlaceOrder>();
         for (RaceDefinition raceDefinition : event.getAllRaces()) {
             EventNameAndRaceName id = new EventNameAndRaceName(event.getName(), raceDefinition.getName());
-            //TODO Switch to TrackeRace after .getPlaceOrder() was moved to the interface
-            TrackedRaceImpl race = (TrackedRaceImpl) getTrackedRace(id);
+            TrackedRace race = getTrackedRace(id);
             result.add(race.getPlaceOrder());
         }
         return result;

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.sap.sailing.domain.base.EventRacePlaces;
-import com.sap.sailing.domain.base.RacePlaceOrder;
+import com.sap.sailing.domain.common.RacePlaceOrder;
 
 public class EventRacePlacesImpl implements EventRacePlaces {
     

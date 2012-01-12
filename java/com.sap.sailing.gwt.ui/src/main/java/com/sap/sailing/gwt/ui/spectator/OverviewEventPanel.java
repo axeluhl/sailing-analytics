@@ -372,8 +372,7 @@ public class OverviewEventPanel extends AbstractEventPanel {
 
             @Override
             public void onFailure(Throwable caught) {
-                OverviewEventPanel.super.errorReporter
-                        .reportError("Error trying to obtain list of leaderboards: " + caught.getMessage());
+                errorReporter.reportError("Error trying to obtain list of leaderboards: " + caught.getMessage());
             }
         });
     }
@@ -401,8 +400,7 @@ public class OverviewEventPanel extends AbstractEventPanel {
 
             @Override
             public void onFailure(Throwable t) {
-                OverviewEventPanel.super.errorReporter
-                        .reportError("Error trying to obtain list of leaderboards: " + t.getMessage());
+                errorReporter.reportError("Error trying to obtain list of leaderboards: " + t.getMessage());
             }
 
             @Override

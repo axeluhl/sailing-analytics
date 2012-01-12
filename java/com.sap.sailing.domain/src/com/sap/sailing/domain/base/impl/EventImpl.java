@@ -7,6 +7,7 @@ import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.common.impl.NamedImpl;
 
 public class EventImpl extends NamedImpl implements Event {
     private final Set<RaceDefinition> races;

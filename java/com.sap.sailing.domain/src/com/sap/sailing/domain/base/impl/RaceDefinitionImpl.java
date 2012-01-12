@@ -4,6 +4,7 @@ import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.common.impl.NamedImpl;
 
 public class RaceDefinitionImpl extends NamedImpl implements RaceDefinition {
     private final Course course;
