@@ -1,4 +1,4 @@
-package com.sap.sailing.util;
+package com.sap.sailing.domain.common.quadtree.impl;
 
 import com.sap.sailing.domain.common.Position;
 

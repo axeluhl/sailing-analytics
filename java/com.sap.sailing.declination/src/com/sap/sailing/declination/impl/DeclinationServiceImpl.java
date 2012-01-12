@@ -12,7 +12,7 @@ import com.sap.sailing.declination.DeclinationService;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.util.QuadTree;
+import com.sap.sailing.domain.common.quadtree.QuadTree;
 
 public class DeclinationServiceImpl implements DeclinationService {
     private final Distance defaultMaxDistance;

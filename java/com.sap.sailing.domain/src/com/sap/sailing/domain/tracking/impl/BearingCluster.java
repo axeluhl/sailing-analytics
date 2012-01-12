@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.sap.sailing.domain.common.Bearing;
-import com.sap.sailing.domain.common.Util.Pair;
 import com.sap.sailing.domain.common.impl.RadianBearingImpl;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 
 /**
  * Contains a number of {@link Bearing} objects and maintains the average bearing. For a given {@link Bearing} it

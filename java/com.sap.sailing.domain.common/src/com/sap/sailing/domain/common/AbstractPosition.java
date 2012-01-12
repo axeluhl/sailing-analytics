@@ -1,6 +1,8 @@
 package com.sap.sailing.domain.common;
 
+import com.sap.sailing.domain.common.impl.CentralAngleDistance;
 import com.sap.sailing.domain.common.impl.RadianBearingImpl;
+import com.sap.sailing.domain.common.impl.RadianPosition;
 
 public class AbstractPosition implements Position {
     public int hashCode() {

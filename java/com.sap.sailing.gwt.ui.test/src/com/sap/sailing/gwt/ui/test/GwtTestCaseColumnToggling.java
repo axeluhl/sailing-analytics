@@ -8,7 +8,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.junit.client.GWTTestCase;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.sap.sailing.domain.common.Util.Pair;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.client.StringConstants;
 import com.sap.sailing.gwt.ui.leaderboard.ExpandableSortableColumn;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDAO;

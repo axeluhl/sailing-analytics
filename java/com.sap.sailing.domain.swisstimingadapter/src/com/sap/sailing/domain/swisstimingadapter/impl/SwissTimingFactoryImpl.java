@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.Util.Triple;
+import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.swisstimingadapter.DomainFactory;
 import com.sap.sailing.domain.swisstimingadapter.Race;
 import com.sap.sailing.domain.swisstimingadapter.RaceSpecificMessageLoader;

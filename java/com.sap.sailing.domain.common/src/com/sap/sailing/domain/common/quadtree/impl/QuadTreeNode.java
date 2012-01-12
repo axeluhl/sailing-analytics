@@ -20,17 +20,16 @@
 // 
 // **********************************************************************
 
-package com.sap.sailing.util.impl;
+package com.sap.sailing.domain.common.quadtree.impl;
 
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Vector;
 
-import com.sap.sailing.domain.common.DegreePosition;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.util.Bounds;
-import com.sap.sailing.util.QuadTree;
+import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.domain.common.quadtree.QuadTree;
 
 /**
  * The QuadTreeNode is the part of the QuadTree that either holds

@@ -5,7 +5,7 @@ import java.util.List;
 
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.Util.Triple;
+import com.sap.sailing.domain.common.impl.Util.Triple;
 
 public abstract class SailMasterAdapter implements SailMasterListener {
 

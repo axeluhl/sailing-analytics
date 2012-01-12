@@ -4,11 +4,11 @@ import java.io.IOException;
 import java.text.ParseException;
 
 import com.sap.sailing.declination.impl.DeclinationServiceImpl;
-import com.sap.sailing.domain.common.CentralAngleDistance;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Mile;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.CentralAngleDistance;
 
 public interface DeclinationService {
     /**

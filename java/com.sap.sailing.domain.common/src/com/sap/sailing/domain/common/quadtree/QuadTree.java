@@ -20,15 +20,16 @@
 // 
 // **********************************************************************
 
-package com.sap.sailing.util;
+package com.sap.sailing.domain.common.quadtree;
 
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Vector;
 
-import com.sap.sailing.domain.common.DegreePosition;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.util.impl.QuadTreeNode;
+import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.domain.common.quadtree.impl.Bounds;
+import com.sap.sailing.domain.common.quadtree.impl.QuadTreeNode;
 
 /**
  * The QuadTree lets you organize objects in a grid, that redefines

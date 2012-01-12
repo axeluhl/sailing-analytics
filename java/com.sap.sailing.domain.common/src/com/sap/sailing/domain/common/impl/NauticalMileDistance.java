@@ -1,4 +1,7 @@
-package com.sap.sailing.domain.common;
+package com.sap.sailing.domain.common.impl;
+
+import com.sap.sailing.domain.common.AbstractDistance;
+import com.sap.sailing.domain.common.Distance;
 
 public class NauticalMileDistance extends AbstractDistance {
     private final double nauticalMiles;

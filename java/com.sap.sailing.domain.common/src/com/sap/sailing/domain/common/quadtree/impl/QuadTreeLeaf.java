@@ -22,7 +22,7 @@
 // 
 // **********************************************************************
 
-package com.sap.sailing.util.impl;
+package com.sap.sailing.domain.common.quadtree.impl;
 
 import java.io.Serializable;
 

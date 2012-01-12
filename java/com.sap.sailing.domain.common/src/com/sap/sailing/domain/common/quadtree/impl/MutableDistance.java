@@ -20,7 +20,7 @@
 // 
 // **********************************************************************
 
-package com.sap.sailing.util.impl;
+package com.sap.sailing.domain.common.quadtree.impl;
 
 /**
  * A *really* simple class used as a changable double.

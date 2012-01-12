@@ -1,4 +1,6 @@
-package com.sap.sailing.domain.common;
+package com.sap.sailing.domain.common.impl;
+
+import com.sap.sailing.domain.common.AbstractPosition;
 
 public class RadianPosition extends AbstractPosition {
     private final double latRad;

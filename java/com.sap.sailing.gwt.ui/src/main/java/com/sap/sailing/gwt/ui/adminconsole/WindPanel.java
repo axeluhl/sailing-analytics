@@ -53,7 +53,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
-import com.sap.sailing.domain.common.Util.Triple;
+import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.gwt.ui.client.ColorMap;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;

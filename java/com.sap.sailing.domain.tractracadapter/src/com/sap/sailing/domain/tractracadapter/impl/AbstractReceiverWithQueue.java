@@ -5,7 +5,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.RaceDefinition;
-import com.sap.sailing.domain.common.Util.Triple;
+import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.TrackedEvent;

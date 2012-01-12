@@ -5,7 +5,7 @@ import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.Util.Pair;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 
 /**
  * A track records the {@link GPSFix}es received for an object of type

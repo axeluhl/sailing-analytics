@@ -8,7 +8,7 @@ import java.util.Map;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import com.sap.sailing.domain.common.NoWindException;
-import com.sap.sailing.domain.common.Util.Pair;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.gwt.ui.shared.AdvancedEventDAO;
 import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
