@@ -1,9 +1,6 @@
-package com.sap.sailing.util;
-
-import java.util.Locale;
+package com.sap.sailing.domain.common;
 
 public interface CountryCode {
-    Locale getLocale();
 
     String getTwoLetterISOCode();
 

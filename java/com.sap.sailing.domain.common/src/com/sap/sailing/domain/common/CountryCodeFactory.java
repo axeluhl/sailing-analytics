@@ -1,6 +1,6 @@
-package com.sap.sailing.util;
+package com.sap.sailing.domain.common;
 
-import com.sap.sailing.util.impl.CountryCodeFactoryImpl;
+import com.sap.sailing.domain.common.impl.CountryCodeFactoryImpl;
 
 public interface CountryCodeFactory {
     CountryCodeFactory INSTANCE = new CountryCodeFactoryImpl();

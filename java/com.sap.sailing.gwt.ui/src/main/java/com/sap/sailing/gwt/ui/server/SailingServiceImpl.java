@@ -48,6 +48,7 @@ import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MeterDistance;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.CountryCode;
 import com.sap.sailing.domain.common.DegreePosition;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
@@ -126,7 +127,6 @@ import com.sap.sailing.server.api.EventNameAndRaceName;
 import com.sap.sailing.server.api.LeaderboardNameAndRaceColumnName;
 import com.sap.sailing.server.api.RaceFetcher;
 import com.sap.sailing.server.api.RaceIdentifier;
-import com.sap.sailing.util.CountryCode;
 
 /**
  * The server side implementation of the RPC service.
@@ -152,7 +152,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
 
     private final com.sap.sailing.domain.tractracadapter.persistence.DomainObjectFactory tractracDomainObjectFactory;
     
-    private final com.sap.sailing.util.CountryCodeFactory countryCodeFactory;
+    private final com.sap.sailing.domain.common.CountryCodeFactory countryCodeFactory;
     
     private final Executor executor;
 
@@ -165,7 +165,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         tractracDomainObjectFactory = com.sap.sailing.domain.tractracadapter.persistence.DomainObjectFactory.INSTANCE;
         tractracMongoObjectFactory = com.sap.sailing.domain.tractracadapter.persistence.MongoObjectFactory.INSTANCE;
         swissTimingFactory = SwissTimingFactory.INSTANCE;
-        countryCodeFactory = com.sap.sailing.util.CountryCodeFactory.INSTANCE;
+        countryCodeFactory = com.sap.sailing.domain.common.CountryCodeFactory.INSTANCE;
         executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
     }
 

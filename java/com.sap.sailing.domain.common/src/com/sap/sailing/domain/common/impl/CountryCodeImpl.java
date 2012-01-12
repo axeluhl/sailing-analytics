@@ -1,8 +1,6 @@
-package com.sap.sailing.util.impl;
+package com.sap.sailing.domain.common.impl;
 
-import java.util.Locale;
-
-import com.sap.sailing.util.CountryCode;
+import com.sap.sailing.domain.common.CountryCode;
 
 public class CountryCodeImpl implements CountryCode {
     private final String name;
@@ -40,16 +38,6 @@ public class CountryCodeImpl implements CountryCode {
     @Override
     public String getTwoLetterISOCode() {
         return twoLetterISOCode;
-    }
-
-    @Override
-    public Locale getLocale() {
-        for (Locale l : Locale.getAvailableLocales()) {
-            if (l.getISO3Country().equalsIgnoreCase(getThreeLetterISOCode())) {
-                return l;
-            }
-        }
-        return new Locale(getTwoLetterISOCode(), getTwoLetterISOCode());
     }
 
     @Override
