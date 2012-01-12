@@ -1,6 +1,8 @@
-package com.sap.sailing.geocoding;
+package com.sap.sailing.domain.base;
 
 import java.util.List;
+
+import com.sap.sailing.geocoding.Placemark;
 
 public interface RacePlaceOrder {
 

@@ -1,10 +1,10 @@
-package com.sap.sailing.geocoding.impl;
+package com.sap.sailing.domain.base.impl;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import com.sap.sailing.domain.base.RacePlaceOrder;
 import com.sap.sailing.geocoding.Placemark;
-import com.sap.sailing.geocoding.RacePlaceOrder;
 
 public class RacePlaceOrderImpl implements RacePlaceOrder {
     

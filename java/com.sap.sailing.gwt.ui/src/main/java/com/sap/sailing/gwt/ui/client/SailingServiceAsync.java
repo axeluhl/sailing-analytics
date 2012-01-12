@@ -10,6 +10,7 @@ import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.common.Util.Pair;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
+import com.sap.sailing.gwt.ui.shared.AdvancedEventDAO;
 import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
 import com.sap.sailing.gwt.ui.shared.CompetitorInRaceDAO;
 import com.sap.sailing.gwt.ui.shared.CompetitorsAndTimePointsDAO;
@@ -36,7 +37,10 @@ import com.sap.sailing.server.api.RaceIdentifier;
  * The async counterpart of {@link SailingService}
  */
 public interface SailingServiceAsync {
+    
     void listEvents(AsyncCallback<List<EventDAO>> callback);
+    
+    void listAdvancedEvents(AsyncCallback<List<AdvancedEventDAO>> callback);
 
     /**
      * The string returned in the callback's pair is the common event name

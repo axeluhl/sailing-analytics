@@ -10,6 +10,7 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Util.Pair;
 import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.gwt.ui.shared.AdvancedEventDAO;
 import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
 import com.sap.sailing.gwt.ui.shared.CompetitorInRaceDAO;
 import com.sap.sailing.gwt.ui.shared.CompetitorsAndTimePointsDAO;
@@ -39,6 +40,8 @@ public interface SailingService extends RemoteService {
     List<TracTracConfigurationDAO> getPreviousTracTracConfigurations() throws Exception;
     
     List<EventDAO> listEvents();
+    
+    List<AdvancedEventDAO> listAdvancedEvents();
 
     Pair<String, List<TracTracRaceRecordDAO>> listTracTracRacesInEvent(String eventJsonURL) throws Exception;
 

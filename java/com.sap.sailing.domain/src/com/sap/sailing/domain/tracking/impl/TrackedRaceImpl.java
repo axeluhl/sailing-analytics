@@ -21,11 +21,13 @@ import com.sap.sailing.domain.base.CourseChange;
 import com.sap.sailing.domain.base.CourseListener;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.RacePlaceOrder;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.DouglasPeucker;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.base.impl.RacePlaceOrderImpl;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
@@ -52,9 +54,7 @@ import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.geocoding.Placemark;
-import com.sap.sailing.geocoding.RacePlaceOrder;
 import com.sap.sailing.geocoding.ReverseGeocoder;
-import com.sap.sailing.geocoding.impl.RacePlaceOrderImpl;
 
 public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     private static final Logger logger = Logger.getLogger(TrackedRaceImpl.class.getName());
@@ -948,8 +948,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         }
     }
     
-    public RacePlaceOrder getPlace() {
-        RacePlaceOrder order = new RacePlaceOrderImpl(getRace().getName());
+    public RacePlaceOrder getPlaceOrder() {
+        RacePlaceOrder order = null;
         Placemark startBest = null;
         Placemark finishBest = null;
         
@@ -1000,9 +1000,12 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             e.printStackTrace();
         }
         
-        order.addPlace(startBest);
-        if (!startBest.equals(finishBest)) {
-            order.addPlace(finishBest);
+        if (startBest != null) {
+            order = new RacePlaceOrderImpl(getRace().getName());
+            order.addPlace(startBest);
+            if (!startBest.equals(finishBest)) {
+                order.addPlace(finishBest);
+            }
         }
         
         return order;

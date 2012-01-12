@@ -41,6 +41,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.RacePlaceOrder;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
@@ -84,11 +85,13 @@ import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindTrack;
+import com.sap.sailing.domain.tracking.impl.TrackedRaceImpl;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.RaceRecord;
 import com.sap.sailing.domain.tractracadapter.TracTracConfiguration;
 import com.sap.sailing.gwt.ui.client.SailingService;
+import com.sap.sailing.gwt.ui.shared.AdvancedEventDAO;
 import com.sap.sailing.gwt.ui.shared.BoatClassDAO;
 import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
 import com.sap.sailing.gwt.ui.shared.CompetitorInRaceDAO;
@@ -337,6 +340,34 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             if (!eventDAO.regattas.isEmpty()) {
                 result.add(eventDAO);
             }
+        }
+        return result;
+    }
+    
+    public List<AdvancedEventDAO> listAdvancedEvents() {
+        List<AdvancedEventDAO> result = new ArrayList<AdvancedEventDAO>();
+        for (Event event : getService().getAllEvents()) {
+            List<CompetitorDAO> competitorList = getCompetitorDAOs(event.getCompetitors());
+            List<RegattaDAO> regattasList = getRegattaDAOs(event);
+            List<RacePlaceOrder> racePlaces = getRacePlaces(event);
+            //TODO add start Date to AdvancedEventDAO
+            Date start = new Date();
+            
+            AdvancedEventDAO eventDAO = new AdvancedEventDAO(event.getName(), regattasList, competitorList, racePlaces, start);
+            if (!eventDAO.regattas.isEmpty()) {
+                result.add(eventDAO);
+            }
+        }
+        return result;
+    }
+    
+    private List<RacePlaceOrder> getRacePlaces(Event event) {
+        List<RacePlaceOrder> result = new ArrayList<RacePlaceOrder>();
+        for (RaceDefinition raceDefinition : event.getAllRaces()) {
+            EventNameAndRaceName id = new EventNameAndRaceName(event.getName(), raceDefinition.getName());
+            //TODO Switch to TrackeRace after .getPlaceOrder() was moved to the interface
+            TrackedRaceImpl race = (TrackedRaceImpl) getTrackedRace(id);
+            result.add(race.getPlaceOrder());
         }
         return result;
     }
