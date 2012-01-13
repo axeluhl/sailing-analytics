@@ -18,7 +18,7 @@ public class LeaderboardCreateDialog extends LeaderboardDialog{
 
         discardThresholdBoxes = new LongBox[MAX_NUMBER_OF_DISCARDED_RESULTS];
         for (int i = 0; i < discardThresholdBoxes.length; i++) {
-            discardThresholdBoxes[i] = createIntegerBoxWithOptionalValue(null, 2);
+            discardThresholdBoxes[i] = createLongBoxWithOptionalValue(null, 2);
             discardThresholdBoxes[i].setVisibleLength(2);
         }
     }
