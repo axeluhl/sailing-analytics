@@ -155,37 +155,36 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     
     @Override
     public void updateSettings(LeaderboardSettings result) {
-                List<ExpandableSortableColumn<?>> columnsToExpandAgain = new ArrayList<ExpandableSortableColumn<?>>();
-                for (int i = 0; i < getLeaderboardTable().getColumnCount(); i++) {
-                    Column<LeaderboardRowDAO, ?> c = getLeaderboardTable().getColumn(i);
-                    if (c instanceof ExpandableSortableColumn<?>) {
-                        ExpandableSortableColumn<?> expandableSortableColumn = (ExpandableSortableColumn<?>) c;
-                        if (expandableSortableColumn.isExpanded()) {
-                            // now toggle expansion back and forth,
-                            // enforcing a re-build of the visible
-                            // child columns
-                            expandableSortableColumn.toggleExpansion();
-                            columnsToExpandAgain.add(expandableSortableColumn);
-                        }
-                    }
-                }
-                selectedManeuverDetails.clear();
-                selectedManeuverDetails.addAll(result.getManeuverDetailsToShow());
-                selectedLegDetails.clear();
-                selectedLegDetails.addAll(result.getLegDetailsToShow());
-                selectedRaceDetails.clear();
-                selectedRaceDetails.addAll(result.getRaceDetailsToShow());
-                selectedRaceColumns.clear();
-                selectedRaceColumns.addAll(result.getRaceColumnsToShow());
-                // update leaderboard after settings panel column selection change
-                updateLeaderboard(leaderboard);
-                
-                timer.setDelayBetweenAutoAdvancesInMilliseconds(result
-                        .getDelayBetweenAutoAdvancesInMilliseconds());
-                setDelayInMilliseconds(result.getDelayInMilliseconds());
-                for (ExpandableSortableColumn<?> expandableSortableColumn : columnsToExpandAgain) {
+        List<ExpandableSortableColumn<?>> columnsToExpandAgain = new ArrayList<ExpandableSortableColumn<?>>();
+        for (int i = 0; i < getLeaderboardTable().getColumnCount(); i++) {
+            Column<LeaderboardRowDAO, ?> c = getLeaderboardTable().getColumn(i);
+            if (c instanceof ExpandableSortableColumn<?>) {
+                ExpandableSortableColumn<?> expandableSortableColumn = (ExpandableSortableColumn<?>) c;
+                if (expandableSortableColumn.isExpanded()) {
+                    // now toggle expansion back and forth,
+                    // enforcing a re-build of the visible
+                    // child columns
                     expandableSortableColumn.toggleExpansion();
+                    columnsToExpandAgain.add(expandableSortableColumn);
                 }
+            }
+        }
+        selectedManeuverDetails.clear();
+        selectedManeuverDetails.addAll(result.getManeuverDetailsToShow());
+        selectedLegDetails.clear();
+        selectedLegDetails.addAll(result.getLegDetailsToShow());
+        selectedRaceDetails.clear();
+        selectedRaceDetails.addAll(result.getRaceDetailsToShow());
+        selectedRaceColumns.clear();
+        selectedRaceColumns.addAll(result.getRaceColumnsToShow());
+        // update leaderboard after settings panel column selection change
+        updateLeaderboard(leaderboard);
+
+        timer.setDelayBetweenAutoAdvancesInMilliseconds(result.getDelayBetweenAutoAdvancesInMilliseconds());
+        setDelayInMilliseconds(result.getDelayInMilliseconds());
+        for (ExpandableSortableColumn<?> expandableSortableColumn : columnsToExpandAgain) {
+            expandableSortableColumn.toggleExpansion();
+        }
     }
 
     protected class CompetitorColumn extends SortableColumn<LeaderboardRowDAO, String> {
