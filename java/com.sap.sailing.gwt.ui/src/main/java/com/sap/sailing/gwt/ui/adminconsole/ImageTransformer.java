@@ -16,7 +16,7 @@ import com.google.gwt.user.client.ui.Image;
  * @author Axel Uhl (d043530)
  *
  */
-public class ImageTransformator {
+public class ImageTransformer {
     private final String untransformedImageURL;
     private final Canvas canvas;
     private final int imageWidth;
@@ -25,16 +25,18 @@ public class ImageTransformator {
     private int canvasWidth;
     private int canvasHeight;
     
+    private double currentScale;
+    
     private ImageElement imageElement;
 
     private Context2d context;
     
-    public ImageTransformator(ImageResource untransformedImage) {
+    public ImageTransformer(ImageResource untransformedImage) {
         this.untransformedImageURL = untransformedImage.getSafeUri().asString();
         canvas = Canvas.createIfSupported();
         imageWidth = untransformedImage.getWidth();
         imageHeight = untransformedImage.getHeight();
-        calculateCanvasSize(1.0);
+        scale(1.0);
         final Image image = new Image(untransformedImageURL.toString());
         imageElement = (ImageElement) image.getElement().cast();
         if (imageElement == null) {
@@ -47,18 +49,21 @@ public class ImageTransformator {
         }
     }
     
-    private void calculateCanvasSize(double scaleFactor)
-    {
-        canvasWidth = (int) Math.round(imageWidth * scaleFactor);
-        canvasHeight = (int) Math.round(imageHeight * scaleFactor);
-        canvasRadius = (int) Math.sqrt(canvasWidth*canvasWidth/4 + canvasHeight*canvasHeight/4);
-        canvas.setSize(""+2*canvasRadius+"px", ""+2*canvasRadius+"px");
-        canvas.setCoordinateSpaceWidth(2*canvasRadius);
-        canvas.setCoordinateSpaceHeight(2*canvasRadius);
-        context = canvas.getContext2d();
+    private void scale(double scaleFactor) {
+        if (scaleFactor != currentScale) {
+            canvasWidth = (int) Math.round(imageWidth * scaleFactor);
+            canvasHeight = (int) Math.round(imageHeight * scaleFactor);
+            canvasRadius = (int) Math.sqrt(canvasWidth * canvasWidth / 4 + canvasHeight * canvasHeight / 4);
+            canvas.setSize("" + 2 * canvasRadius + "px", "" + 2 * canvasRadius + "px");
+            canvas.setCoordinateSpaceWidth(2 * canvasRadius);
+            canvas.setCoordinateSpaceHeight(2 * canvasRadius);
+            context = canvas.getContext2d();
+            currentScale = scaleFactor;
+        }
     }
     
-    public Point getAnchor() {
+    public Point getAnchor(double scaleFactor) {
+        scale(scaleFactor);
         return Point.newInstance(canvasRadius, canvasRadius);
     }
 
@@ -74,8 +79,8 @@ public class ImageTransformator {
         String result = getUntransformedImageURL();
         if (canvas != null) {
             if (imageElement != null) {
+                scale(scaleFactor);
                 double angleInRadians = angleInDegrees/180.*Math.PI;
-                calculateCanvasSize(scaleFactor);
                 context.clearRect(0, 0, 2*canvasRadius, 2*canvasRadius);
                 context.save();
                 context.translate(canvasRadius, canvasRadius);
