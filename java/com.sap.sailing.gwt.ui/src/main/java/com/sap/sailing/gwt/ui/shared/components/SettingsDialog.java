@@ -1,20 +1,17 @@
 package com.sap.sailing.gwt.ui.shared.components;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog;
 import com.sap.sailing.gwt.ui.client.StringConstants;
-import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public class SettingsDialog<SettingsType> extends DataEntryDialog<SettingsType> {
-    private static StringMessages stringMessages = GWT.create(StringMessages.class);
     private final SettingsDialogComponent<SettingsType> settingsDialogComponent;
     
     public SettingsDialog(final Component<SettingsType> component, StringConstants stringConstants) {
-        super(stringMessages.settingsForComponent(component.getLocalizedShortName()),
-                stringMessages.settingsForComponent(component.getLocalizedShortName()),
+        super(stringConstants.settingsForComponent(component.getLocalizedShortName()),
+                stringConstants.settingsForComponent(component.getLocalizedShortName()),
                 stringConstants.ok(), stringConstants.cancel(), component.getSettingsDialogComponent().getValidator(),
                 new AsyncCallback<SettingsType>() {
                     @Override

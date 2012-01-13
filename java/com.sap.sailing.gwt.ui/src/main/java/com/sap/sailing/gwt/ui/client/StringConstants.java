@@ -1,8 +1,8 @@
 package com.sap.sailing.gwt.ui.client;
 
-import com.google.gwt.i18n.client.Constants;
+import com.google.gwt.i18n.client.Messages;
 
-public interface StringConstants extends Constants {
+public interface StringConstants extends Messages {
     String helloWorld();
     String kielWeel2011();
     String stgAccount();
@@ -193,4 +193,5 @@ public interface StringConstants extends Constants {
     String hoverOverAPoint();
     String noSelection();
     String raceIsKnownToStartUpwind();
+    String settingsForComponent(String localizedComponentName);
 }
