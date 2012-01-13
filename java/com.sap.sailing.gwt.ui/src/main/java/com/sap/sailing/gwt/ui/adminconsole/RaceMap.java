@@ -203,6 +203,16 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
                     @Override
                     public void onZoomEnd(MapZoomEndEvent event) {
                         mapZoomedOrPannedSinceLastRaceSelectionChange = true;
+                        Set<CompetitorDAO> competitorDAOsOfUnusedMarkers = new HashSet<CompetitorDAO>(boatMarkers.keySet());
+                        for (CompetitorDAO competitorDAO : getCompetitorsToShow()) {
+                                boolean usedExistingMarker = updateMarkerForCompetitor(competitorDAO);
+                                if (usedExistingMarker) {
+                                    competitorDAOsOfUnusedMarkers.remove(competitorDAO);
+                                }
+                        }
+                        for (CompetitorDAO unusedMarkerCompetitorDAO : competitorDAOsOfUnusedMarkers) {
+                            map.removeOverlay(boatMarkers.remove(unusedMarkerCompetitorDAO));
+                        }
                     }
                 });
                 map.addMapDragEndHandler(new MapDragEndHandler() {
@@ -498,33 +508,9 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
                         newMapBounds.extend(bounds.getNorthEast());
                         newMapBounds.extend(bounds.getSouthWest());
                     }
-                    if (lastShownFix.containsKey(competitorDAO) && lastShownFix.get(competitorDAO) != -1) {
-                        GPSFixDAO lastPos = getBoatFix(competitorDAO);
-                        Marker boatMarker = boatMarkers.get(competitorDAO);
-                        if (boatMarker == null) {
-                            boatMarker = createBoatMarker(competitorDAO, false);
-                            map.addOverlay(boatMarker);
-                            boatMarkers.put(competitorDAO, boatMarker);
-                        } else {
-                            competitorDAOsOfUnusedMarkers.remove(competitorDAO);
-                            // check if anchors match; re-use marker with setImage only if anchors match
-                            Point newAnchor = imageResources.getBoatImageTransformator(lastPos,
-                                    selectedMapCompetitors.contains(competitorDAO)).getAnchor();
-                            Point oldAnchor = boatMarker.getIcon().getIconAnchor();
-                            if (oldAnchor.getX() == newAnchor.getX() && oldAnchor.getY() == newAnchor.getY()) {
-                                boatMarker.setLatLng(LatLng.newInstance(lastPos.position.latDeg,
-                                        lastPos.position.lngDeg));
-                                boatMarker.setImage(imageResources.getBoatImageURL(lastPos,
-                                        selectedMapCompetitors.contains(competitorDAO)));
-                            } else {
-                                // anchors don't match; replace marker
-                                map.removeOverlay(boatMarker);
-                                boatMarker = createBoatMarker(competitorDAO,
-                                        selectedMapCompetitors.contains(competitorDAO));
-                                map.addOverlay(boatMarker);
-                                boatMarkers.put(competitorDAO, boatMarker);
-                            }
-                        }
+                    boolean usedExistingMarker = updateMarkerForCompetitor(competitorDAO);
+                    if (usedExistingMarker) {
+                        competitorDAOsOfUnusedMarkers.remove(competitorDAO);
                     }
                 }
             }
@@ -540,6 +526,39 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
                 map.removeOverlay(tails.remove(unusedTailCompetitorDAO));
             }
         }
+    }
+
+    private boolean updateMarkerForCompetitor(CompetitorDAO competitorDAO) {
+        boolean usedExistingMarker = false;
+        if (lastShownFix.containsKey(competitorDAO) && lastShownFix.get(competitorDAO) != -1) {
+            GPSFixDAO lastPos = getBoatFix(competitorDAO);
+            Marker boatMarker = boatMarkers.get(competitorDAO);
+            if (boatMarker == null) {
+                boatMarker = createBoatMarker(competitorDAO, false);
+                map.addOverlay(boatMarker);
+                boatMarkers.put(competitorDAO, boatMarker);
+            } else {
+                usedExistingMarker = true;
+                // check if anchors match; re-use marker with setImage only if anchors match
+                Point newAnchor = imageResources.getBoatImageTransformator(lastPos,
+                        selectedMapCompetitors.contains(competitorDAO)).getAnchor();
+                Point oldAnchor = boatMarker.getIcon().getIconAnchor();
+                if (oldAnchor.getX() == newAnchor.getX() && oldAnchor.getY() == newAnchor.getY()) {
+                    boatMarker.setLatLng(LatLng.newInstance(lastPos.position.latDeg,
+                            lastPos.position.lngDeg));
+                    boatMarker.setImage(imageResources.getBoatImageURL(lastPos,
+                            selectedMapCompetitors.contains(competitorDAO)));
+                } else {
+                    // anchors don't match; replace marker
+                    map.removeOverlay(boatMarker);
+                    boatMarker = createBoatMarker(competitorDAO,
+                            selectedMapCompetitors.contains(competitorDAO));
+                    map.addOverlay(boatMarker);
+                    boatMarkers.put(competitorDAO, boatMarker);
+                }
+            }
+        }
+        return usedExistingMarker;
     }
     
     protected Marker createBuoyMarker(final MarkDAO markDAO) {
