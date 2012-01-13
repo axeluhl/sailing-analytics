@@ -72,7 +72,6 @@ public interface StringConstants extends Constants {
     String leaderboard();
     String leaderboards();
     String leaderboardSettings();
-    String selectLegDetails();
     String settings();
     String selectAtLeastOneLegDetail();
     String currentSpeedOverGroundInKnots();

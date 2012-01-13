@@ -40,7 +40,9 @@ public class LeaderboardSettingsPanel extends DataEntryDialog<Result> {
         private final long delayBetweenAutoAdvancesInMilliseconds;
         private final long delayInMilliseconds;
         
-        public Result(List<DetailType> meneuverDetailsToShow, List<DetailType> legDetailsToShow, List<DetailType> raceDetailsToShow, List<String> raceColumnsToShow, long delayBetweenAutoAdvancesInMilliseconds, long delayInMilliseconds) {
+        public Result(List<DetailType> meneuverDetailsToShow, List<DetailType> legDetailsToShow,
+                List<DetailType> raceDetailsToShow, List<String> raceColumnsToShow,
+                long delayBetweenAutoAdvancesInMilliseconds, long delayInMilliseconds) {
             this.legDetailsToShow = legDetailsToShow;
             this.raceDetailsToShow = raceDetailsToShow;
             this.raceColumnsToShow = raceColumnsToShow;
@@ -74,10 +76,11 @@ public class LeaderboardSettingsPanel extends DataEntryDialog<Result> {
         }
     }
     
-    public LeaderboardSettingsPanel(List<DetailType> maneuverDetailSelection, List<DetailType> legDetailSelection, List<DetailType> raceDetailSelection, List<String> raceAllRaceColumns, List<String> raceColumnSelection,
-            long delayBetweenAutoAdvancesInMilliseconds, String title, String message,
-            String okButtonName,
-            String cancelButtonName, com.sap.sailing.gwt.ui.client.DataEntryDialog.Validator<Result> validator, AsyncCallback<Result> callback, StringConstants stringConstants, long delayInMilliseconds) {
+    public LeaderboardSettingsPanel(List<DetailType> maneuverDetailSelection, List<DetailType> legDetailSelection,
+            List<DetailType> raceDetailSelection, List<String> raceAllRaceColumns, List<String> raceColumnSelection,
+            long delayBetweenAutoAdvancesInMilliseconds, String title, String message, String okButtonName,
+            String cancelButtonName, com.sap.sailing.gwt.ui.client.DataEntryDialog.Validator<Result> validator,
+            AsyncCallback<Result> callback, StringConstants stringConstants, long delayInMilliseconds) {
         super(title, message, okButtonName, cancelButtonName, validator, callback);
         this.maneuverDetailSelection = maneuverDetailSelection;
         this.raceColumnSelection = raceColumnSelection;

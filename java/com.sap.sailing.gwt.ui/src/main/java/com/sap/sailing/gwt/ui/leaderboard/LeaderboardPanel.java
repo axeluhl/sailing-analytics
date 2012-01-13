@@ -36,7 +36,6 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.sap.sailing.gwt.ui.client.Collator;
-import com.sap.sailing.gwt.ui.client.DataEntryDialog.Validator;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.PlayStateListener;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -50,6 +49,9 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDAO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDAO;
 import com.sap.sailing.gwt.ui.shared.LegEntryDAO;
 import com.sap.sailing.gwt.ui.shared.RaceInLeaderboardDAO;
+import com.sap.sailing.gwt.ui.shared.components.Component;
+import com.sap.sailing.gwt.ui.shared.components.SettingsDialog;
+import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
 import com.sap.sailing.server.api.DetailType;
 import com.sap.sailing.server.api.LeaderboardNameAndRaceColumnName;
 import com.sap.sailing.server.api.RaceIdentifier;
@@ -60,7 +62,7 @@ import com.sap.sailing.server.api.RaceIdentifier;
  * @author Axel Uhl (D043530)
  * 
  */
-public class LeaderboardPanel extends FormPanel implements TimeListener, PlayStateListener {
+public class LeaderboardPanel extends FormPanel implements TimeListener, PlayStateListener, Component<LeaderboardSettings> {
     private static final int RANK_COLUMN_INDEX = 0;
 
     private static final int SAIL_ID_COLUMN_INDEX = 1;
@@ -147,62 +149,43 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
 
         @Override
         public void onClick(ClickEvent event) {
-            new LeaderboardSettingsPanel(Collections.unmodifiableList(selectedManeuverDetails), Collections.unmodifiableList(selectedLegDetails),
-                    Collections.unmodifiableList(selectedRaceDetails), /* All races to select */
-                    leaderboard.getRaceColumnNameList(), selectedRaceColumns, timer.getDelayBetweenAutoAdvancesInMilliseconds(),
-                    stringConstants.leaderboardSettings(), stringConstants.selectLegDetails(), stringConstants.ok(),
-                    stringConstants.cancel(), new Validator<LeaderboardSettingsPanel.Result>() {
-                        @Override
-                        public String getErrorMessage(LeaderboardSettingsPanel.Result valueToValidate) {
-                            if (valueToValidate.getLegDetailsToShow().isEmpty()) {
-                                return stringConstants.selectAtLeastOneLegDetail();
-                            } else if (valueToValidate.getDelayBetweenAutoAdvancesInMilliseconds() < 1000) {
-                                return stringConstants.chooseUpdateIntervalOfAtLeastOneSecond();
-                            } else {
-                                return null;
-                            }
-                        }
-                    }, new AsyncCallback<LeaderboardSettingsPanel.Result>() {
-                        @Override
-                        public void onSuccess(LeaderboardSettingsPanel.Result result) {
-                            List<ExpandableSortableColumn<?>> columnsToExpandAgain = new ArrayList<ExpandableSortableColumn<?>>();
-                            for (int i = 0; i < getLeaderboardTable().getColumnCount(); i++) {
-                                Column<LeaderboardRowDAO, ?> c = getLeaderboardTable().getColumn(i);
-                                if (c instanceof ExpandableSortableColumn<?>) {
-                                    ExpandableSortableColumn<?> expandableSortableColumn = (ExpandableSortableColumn<?>) c;
-                                    if (expandableSortableColumn.isExpanded()) {
-                                        // now toggle expansion back and forth,
-                                        // enforcing a re-build of the visible
-                                        // child columns
-                                        expandableSortableColumn.toggleExpansion();
-                                        columnsToExpandAgain.add(expandableSortableColumn);
-                                    }
-                                }
-                            }
-                            selectedManeuverDetails.clear();
-                            selectedManeuverDetails.addAll(result.getManeuverDetailsToShow());
-                            selectedLegDetails.clear();
-                            selectedLegDetails.addAll(result.getLegDetailsToShow());
-                            selectedRaceDetails.clear();
-                            selectedRaceDetails.addAll(result.getRaceDetailsToShow());
-                            selectedRaceColumns.clear();
-                            selectedRaceColumns.addAll(result.getRaceColumnsToShow());
-                            // update leaderboard after settings panel column selection change
-                            updateLeaderboard(leaderboard);
-                            
-                            timer.setDelayBetweenAutoAdvancesInMilliseconds(result
-                                    .getDelayBetweenAutoAdvancesInMilliseconds());
-                            setDelayInMilliseconds(result.getDelayInMilliseconds());
-                            for (ExpandableSortableColumn<?> expandableSortableColumn : columnsToExpandAgain) {
-                                expandableSortableColumn.toggleExpansion();
-                            }
-                        }
-
-                        @Override
-                        public void onFailure(Throwable caught) {
-                        }
-                    }, stringConstants, getDelayInMilliseconds()).show();
+            new SettingsDialog<LeaderboardSettings>(LeaderboardPanel.this, stringConstants).show();
         }
+    }
+    
+    @Override
+    public void updateSettings(LeaderboardSettings result) {
+                List<ExpandableSortableColumn<?>> columnsToExpandAgain = new ArrayList<ExpandableSortableColumn<?>>();
+                for (int i = 0; i < getLeaderboardTable().getColumnCount(); i++) {
+                    Column<LeaderboardRowDAO, ?> c = getLeaderboardTable().getColumn(i);
+                    if (c instanceof ExpandableSortableColumn<?>) {
+                        ExpandableSortableColumn<?> expandableSortableColumn = (ExpandableSortableColumn<?>) c;
+                        if (expandableSortableColumn.isExpanded()) {
+                            // now toggle expansion back and forth,
+                            // enforcing a re-build of the visible
+                            // child columns
+                            expandableSortableColumn.toggleExpansion();
+                            columnsToExpandAgain.add(expandableSortableColumn);
+                        }
+                    }
+                }
+                selectedManeuverDetails.clear();
+                selectedManeuverDetails.addAll(result.getManeuverDetailsToShow());
+                selectedLegDetails.clear();
+                selectedLegDetails.addAll(result.getLegDetailsToShow());
+                selectedRaceDetails.clear();
+                selectedRaceDetails.addAll(result.getRaceDetailsToShow());
+                selectedRaceColumns.clear();
+                selectedRaceColumns.addAll(result.getRaceColumnsToShow());
+                // update leaderboard after settings panel column selection change
+                updateLeaderboard(leaderboard);
+                
+                timer.setDelayBetweenAutoAdvancesInMilliseconds(result
+                        .getDelayBetweenAutoAdvancesInMilliseconds());
+                setDelayInMilliseconds(result.getDelayInMilliseconds());
+                for (ExpandableSortableColumn<?> expandableSortableColumn : columnsToExpandAgain) {
+                    expandableSortableColumn.toggleExpansion();
+                }
     }
 
     protected class CompetitorColumn extends SortableColumn<LeaderboardRowDAO, String> {
@@ -1313,5 +1296,24 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         }
         CompareCompetitorsChartDialog chartDialog = new CompareCompetitorsChartDialog(sailingService, competitors, races.toArray(new LeaderboardNameAndRaceColumnName[0]), stringConstants, errorReporter);
         chartDialog.show();
+    }
+    
+    @Override
+    public boolean hasSettings() {
+        return true;
+    }
+
+    @Override
+    public SettingsDialogComponent<LeaderboardSettings> getSettingsDialogComponent() {
+        return new LeaderboardSettingsDialogComponent(Collections.unmodifiableList(selectedManeuverDetails),
+                Collections.unmodifiableList(selectedLegDetails),
+                Collections.unmodifiableList(selectedRaceDetails), /* All races to select */
+                leaderboard.getRaceColumnNameList(), selectedRaceColumns, timer.getDelayBetweenAutoAdvancesInMilliseconds(),
+                delayInMilliseconds, stringConstants);
+    }
+
+    @Override
+    public String getLocalizedShortName() {
+        return stringConstants.leaderboard();
     }
 }
