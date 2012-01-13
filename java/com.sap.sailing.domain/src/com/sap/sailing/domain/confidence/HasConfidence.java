@@ -32,7 +32,7 @@ import com.sap.sailing.domain.base.Distance;
  * @author Axel Uhl (d043530)
  * 
  * @param <ValueType>
- *            the type of the scalable value. See particularly the {@link #scale()} method.
+ *            the type of the scalable value
  * 
  */
 public interface HasConfidence<ValueType, AveragesTo> {
