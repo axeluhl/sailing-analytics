@@ -8,7 +8,7 @@ import com.google.gwt.text.client.DateTimeFormatRenderer;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
-import com.sap.sailing.gwt.ui.client.StringConstants;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDAO;
 
 public abstract class AbstractEventManagementPanel extends FormPanel implements EventDisplayer{
@@ -18,10 +18,10 @@ public abstract class AbstractEventManagementPanel extends FormPanel implements 
     protected final TrackedEventsComposite trackedEventsComposite;
     protected final EventRefresher eventRefresher;
     protected ErrorReporter errorReporter;
-    protected StringConstants stringConstants;
+    protected StringMessages stringConstants;
     
     public AbstractEventManagementPanel(SailingServiceAsync sailingService,
-            EventRefresher eventRefresher, ErrorReporter errorReporter, StringConstants stringConstants) {
+            EventRefresher eventRefresher, ErrorReporter errorReporter, StringMessages stringConstants) {
         super();
         this.sailingService = sailingService;
         this.eventRefresher = eventRefresher;

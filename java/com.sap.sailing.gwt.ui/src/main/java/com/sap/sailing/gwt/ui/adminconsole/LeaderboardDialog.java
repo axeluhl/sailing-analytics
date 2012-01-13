@@ -13,12 +13,12 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
-import com.sap.sailing.gwt.ui.client.StringConstants;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDAO;
 
 
 public abstract class LeaderboardDialog extends DataEntryDialog<LeaderboardDAO> {
-    protected final StringConstants stringConstants;
+    protected final StringMessages stringConstants;
     protected TextBox entryField;
     protected LeaderboardDAO leaderboard;
     
@@ -26,10 +26,10 @@ public abstract class LeaderboardDialog extends DataEntryDialog<LeaderboardDAO> 
     protected static final int MAX_NUMBER_OF_DISCARDED_RESULTS = 4;
 
     protected static class LeaderboardParameterValidator implements Validator<LeaderboardDAO> {
-        protected final StringConstants stringConstants;
+        protected final StringMessages stringConstants;
         protected final Collection<LeaderboardDAO> existingLeaderboards;
         
-        public LeaderboardParameterValidator(StringConstants stringConstants, Collection<LeaderboardDAO> existingLeaderboards){
+        public LeaderboardParameterValidator(StringMessages stringConstants, Collection<LeaderboardDAO> existingLeaderboards){
             super();
             this.stringConstants = stringConstants;
             this.existingLeaderboards = existingLeaderboards;
@@ -69,7 +69,7 @@ public abstract class LeaderboardDialog extends DataEntryDialog<LeaderboardDAO> 
         }
     }
     
-    public LeaderboardDialog(LeaderboardDAO leaderboardDAO,  StringConstants stringConstants,
+    public LeaderboardDialog(LeaderboardDAO leaderboardDAO,  StringMessages stringConstants,
             ErrorReporter errorReporter, LeaderboardParameterValidator validator,  AsyncCallback<LeaderboardDAO> callback) {
         super(stringConstants.leaderboardName(), stringConstants.leaderboardName(), stringConstants.ok(),
                 stringConstants.cancel(), validator, callback);

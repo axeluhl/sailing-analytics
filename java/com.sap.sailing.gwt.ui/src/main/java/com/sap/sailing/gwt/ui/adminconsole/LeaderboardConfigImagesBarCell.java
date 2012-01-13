@@ -7,7 +7,7 @@ import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.text.shared.SafeHtmlRenderer;
-import com.sap.sailing.gwt.ui.client.StringConstants;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public class LeaderboardConfigImagesBarCell extends ImagesBarCell {
 
@@ -16,12 +16,12 @@ public class LeaderboardConfigImagesBarCell extends ImagesBarCell {
         SafeHtml cell(String name, SafeStyles styles, String title, SafeHtml value);
     }
 
-    public LeaderboardConfigImagesBarCell(StringConstants stringConstants) {
+    public LeaderboardConfigImagesBarCell(StringMessages stringConstants) {
         super();
         this.stringConstants = stringConstants;
     }
 
-    public LeaderboardConfigImagesBarCell(SafeHtmlRenderer<String> renderer, StringConstants stringConstants) {
+    public LeaderboardConfigImagesBarCell(SafeHtmlRenderer<String> renderer, StringMessages stringConstants) {
         super();
         this.stringConstants = stringConstants;
     }
@@ -36,7 +36,7 @@ public class LeaderboardConfigImagesBarCell extends ImagesBarCell {
     
     private static final SafeHtml ICON_EDIT_SCORES = makeImage(resources.scoresIcon());
 
-    private StringConstants stringConstants;
+    private StringMessages stringConstants;
     
     @Override
     protected void render(com.google.gwt.cell.client.Cell.Context context, SafeHtml data, SafeHtmlBuilder sb) {

@@ -15,7 +15,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog.Validator;
 import com.sap.sailing.gwt.ui.client.DetailTypeFormatter;
-import com.sap.sailing.gwt.ui.client.StringConstants;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
 import com.sap.sailing.server.api.DetailType;
 
@@ -29,7 +29,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
     private final Map<DetailType, CheckBox> maneuverDetailCheckboxes;
     private final Map<DetailType, CheckBox> legDetailCheckboxes;
     private final Map<DetailType, CheckBox> raceDetailCheckboxes;
-    private final StringConstants stringConstants;
+    private final StringMessages stringConstants;
     private LongBox delayBetweenAutoAdvancesInSecondsBox;
     private LongBox delayInSecondsBox;
     private final long delayBetweenAutoAdvancesInMilliseconds;
@@ -38,7 +38,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
     public LeaderboardSettingsDialogComponent(List<DetailType> maneuverDetailSelection,
             List<DetailType> legDetailSelection, List<DetailType> raceDetailSelection, List<String> raceAllRaceColumns,
             List<String> raceColumnSelection, long delayBetweenAutoAdvancesInMilliseconds, long delayInMilliseconds,
-            StringConstants stringConstants) {
+            StringMessages stringConstants) {
         this.maneuverDetailSelection = maneuverDetailSelection;
         this.raceColumnSelection = raceColumnSelection;
         this.raceAllRaceColumns = raceAllRaceColumns;

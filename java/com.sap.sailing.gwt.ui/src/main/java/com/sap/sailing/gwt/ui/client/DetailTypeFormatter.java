@@ -3,7 +3,7 @@ package com.sap.sailing.gwt.ui.client;
 import com.sap.sailing.server.api.DetailType;
 
 public class DetailTypeFormatter {
-    public static String format(DetailType detailType, StringConstants stringConstants) {
+    public static String format(DetailType detailType, StringMessages stringConstants) {
         switch (detailType) {
         case DISTANCE_TRAVELED:
             return stringConstants.distanceInMeters();

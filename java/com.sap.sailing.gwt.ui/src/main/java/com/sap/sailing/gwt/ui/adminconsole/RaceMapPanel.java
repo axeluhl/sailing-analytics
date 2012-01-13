@@ -24,7 +24,7 @@ import com.sap.sailing.domain.common.Util.Triple;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
-import com.sap.sailing.gwt.ui.client.StringConstants;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.TimeListener;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.leaderboard.SmallWindHistoryPanel;
@@ -55,7 +55,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
     private final QuickRanksListBoxComposite quickRanksListBox;
     
     public RaceMapPanel(SailingServiceAsync sailingService, ErrorReporter errorReporter,
-            final EventRefresher eventRefresher, StringConstants stringConstants) {
+            final EventRefresher eventRefresher, StringMessages stringConstants) {
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.timer = new Timer(/* delayBetweenAutoAdvancesInMilliseconds */500);

@@ -38,7 +38,7 @@ import com.sap.sailing.domain.common.Util.Triple;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
-import com.sap.sailing.gwt.ui.client.StringConstants;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDAO;
 import com.sap.sailing.gwt.ui.shared.RaceDAO;
 import com.sap.sailing.gwt.ui.shared.RegattaDAO;
@@ -86,7 +86,7 @@ public class TrackedEventsComposite extends FormPanel implements EventDisplayer,
     private Triple<EventDAO, RegattaDAO, RaceDAO> lastSelectedTriple;
 
     public TrackedEventsComposite(final SailingServiceAsync sailingService, final ErrorReporter errorReporter,
-            final EventRefresher eventRefresher, StringConstants stringConstants, boolean hasMultiSelection) {
+            final EventRefresher eventRefresher, StringMessages stringConstants, boolean hasMultiSelection) {
         if (eventRefresher == null) {
             throw new IllegalArgumentException("eventRefresher must not be null");
         }

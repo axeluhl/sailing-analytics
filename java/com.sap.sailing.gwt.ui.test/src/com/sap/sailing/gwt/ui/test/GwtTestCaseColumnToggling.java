@@ -9,7 +9,7 @@ import com.google.gwt.junit.client.GWTTestCase;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.Util.Pair;
-import com.sap.sailing.gwt.ui.client.StringConstants;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.ExpandableSortableColumn;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDAO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDAO;
@@ -21,7 +21,7 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
     //These objects should be created by calling GWT.create(Class c);
     private LeaderboardPanelMock leaderboardPanel;
     private MyTestSailingServiceAsync service;
-    private StringConstants sc;
+    private StringMessages sc;
     
     //Test data.
     private final String LEADERBOARD_NAME = "test";
@@ -43,7 +43,7 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
     protected void gwtSetUp() throws Exception {
         super.gwtSetUp();
         service = GWT.create(MyTestSailingService.class);
-        sc = GWT.create(StringConstants.class);
+        sc = GWT.create(StringMessages.class);
     }
 
     public void testColumnDeleting() {

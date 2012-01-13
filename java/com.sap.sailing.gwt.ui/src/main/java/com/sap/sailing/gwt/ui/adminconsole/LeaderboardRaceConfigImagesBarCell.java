@@ -7,23 +7,23 @@ import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.text.shared.SafeHtmlRenderer;
-import com.sap.sailing.gwt.ui.client.StringConstants;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public class LeaderboardRaceConfigImagesBarCell extends ImagesBarCell {
 
-    private StringConstants stringConstants;
+    private StringMessages stringConstants;
 
     interface ImagesBarTemplates extends SafeHtmlTemplates {
         @SafeHtmlTemplates.Template("<div name=\"{0}\" style=\"{1}\" title=\"{2}\">{3}</div>")
         SafeHtml cell(String name, SafeStyles styles, String title, SafeHtml value);
     }
 
-    public LeaderboardRaceConfigImagesBarCell(StringConstants stringConstants) {
+    public LeaderboardRaceConfigImagesBarCell(StringMessages stringConstants) {
         super();
         this.stringConstants = stringConstants;
     }
 
-    public LeaderboardRaceConfigImagesBarCell(SafeHtmlRenderer<String> renderer, StringConstants stringConstants) {
+    public LeaderboardRaceConfigImagesBarCell(SafeHtmlRenderer<String> renderer, StringMessages stringConstants) {
         super();
         this.stringConstants = stringConstants;
     }
