@@ -235,10 +235,9 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
 
     @Override
     public void onCompetitorSelectionChange(List<CompetitorDAO> newSelectedCompetitors) {
-
         for (CompetitorDAO competitorDAO : newSelectedCompetitors) {
             
-            if (selectedMapCompetitors.contains(competitorDAO)) {
+            if (!selectedMapCompetitors.contains(competitorDAO)) {
                 // "lowlight" currently selected competitor
                 Marker highlightedMarker = boatMarkers.get(competitorDAO);
                 if (highlightedMarker != null) {

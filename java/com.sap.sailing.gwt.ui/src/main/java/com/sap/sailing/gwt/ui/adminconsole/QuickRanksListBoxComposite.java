@@ -55,9 +55,12 @@ public class QuickRanksListBoxComposite extends Composite implements CompetitorS
     }
 
     public void fillQuickRanks(List<QuickRankDAO> quickRanks, boolean isSorted) {
+        List<CompetitorDAO> oldSelection = getSelectedCompetitors();
+
         quickRankList.clear();
         competitorList.clear();
         quickRankListBox.clear();
+        
         for (QuickRankDAO quickRank: quickRanks) {
             quickRankList.add(quickRank);
             competitorList.add(quickRank.competitor);
@@ -73,8 +76,12 @@ public class QuickRanksListBoxComposite extends Composite implements CompetitorS
 
             });
         }
-        for (QuickRankDAO c : quickRankList) {
-            quickRankListBox.addItem(toString(c));
+        int index = 0;
+        for (QuickRankDAO quickRank : quickRankList) {
+            quickRankListBox.addItem(toString(quickRank));
+            if(oldSelection.contains(quickRank.competitor))
+                quickRankListBox.setItemSelected(index, true);
+            index++;
         }
         fireCompetitorSelectionChanged(getSelectedCompetitors());
     }
@@ -121,7 +128,7 @@ public class QuickRanksListBoxComposite extends Composite implements CompetitorS
         }
     }
 
-    private String toString(QuickRankDAO quickRank) {
+    protected String toString(QuickRankDAO quickRank) {
         return quickRank.rank + ". " + quickRank.competitor.name + " ("
                 + quickRank.competitor.threeLetterIocCountryCode + ") in leg #" + (quickRank.legNumber + 1);
     }

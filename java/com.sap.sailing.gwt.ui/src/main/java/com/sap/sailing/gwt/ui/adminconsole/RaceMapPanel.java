@@ -245,14 +245,6 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
     private void showQuickRanks(List<QuickRankDAO> result) {
         quickRanksListBox.fillQuickRanks(result, true);
         raceMap.fillCompetitors(quickRanksListBox.getCompetitors());
-        int i = 0;
-        for (QuickRankDAO quickRank : result) {
-            // maintain previous selection, based on competitorsSelectedInMap
-            if (raceMap.getSelectedMapCompetitors().contains(quickRank.competitor)) {
-                quickRanksListBox.getListBox().setItemSelected(i, /* selected */true);
-            }
-            i++;
-        }
     }
 
     /*
