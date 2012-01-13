@@ -1,21 +1,13 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.maps.client.geom.LatLng;
-import com.google.gwt.maps.client.overlay.Marker;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FormPanel;
@@ -23,7 +15,6 @@ import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.IntegerBox;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.ProvidesResize;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -39,9 +30,7 @@ import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.leaderboard.SmallWindHistoryPanel;
 import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
 import com.sap.sailing.gwt.ui.shared.EventDAO;
-import com.sap.sailing.gwt.ui.shared.GPSFixDAO;
 import com.sap.sailing.gwt.ui.shared.ManeuverDAO;
-import com.sap.sailing.gwt.ui.shared.MarkDAO;
 import com.sap.sailing.gwt.ui.shared.PositionDAO;
 import com.sap.sailing.gwt.ui.shared.QuickRankDAO;
 import com.sap.sailing.gwt.ui.shared.RaceDAO;
@@ -53,44 +42,23 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
     private final SailingServiceAsync sailingService;
     private final ErrorReporter errorReporter;
     private final Grid grid;
-    private final RacesListBoxPanel newRaceListBox;
-    private final ListBox quickRanksBox;
-    private final List<CompetitorDAO> quickRanksList;
+    private final RacesListBoxPanel raceListBox;
     private final TimePanel timePanel;
 
-    private final Set<CompetitorDAO> competitorsSelectedInMap;
     private final Timer timer;
     private List<Pair<CheckBox, String>> checkboxAndType;
     private CheckBox checkBoxDouglasPeuckerPoints;
-
-    private final CheckBox showOnlySelected;
-
+    private final CheckBox showOnlySelectedCompetitors;
     private final IntegerBox tailLengthBox;
 
-    /**
-     * RPC calls may receive responses out of order if there are multiple calls in-flight at the same time. If the time
-     * slider is moved quickly it generates many requests for boat positions quickly after each other. Sometimes,
-     * responses for requests send later may return before the responses to all earlier requests have been received and
-     * processed. This counter is used to number the requests. When processing of a response for a later request has
-     * already begun, responses to earlier requests will be ignored.
-     */
-    private int boatPositionRequestIDCounter;
-
-    /**
-     * Corresponds to {@link #boatPositionRequestIDCounter}. As soon as the processing of a response for a request ID
-     * begins, this attribute is set to the ID. A response won't be processed if a later response is already being
-     * processed.
-     */
-    private int startedProcessingRequestID;
-
     private final RaceMap raceMap;
-
+    private final QuickRanksListBoxComposite quickRanksListBox;
+    
     public RaceMapPanel(SailingServiceAsync sailingService, ErrorReporter errorReporter,
             final EventRefresher eventRefresher, StringConstants stringConstants) {
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.timer = new Timer(/* delayBetweenAutoAdvancesInMilliseconds */500);
-        competitorsSelectedInMap = new HashSet<CompetitorDAO>();
         checkboxAndType = new ArrayList<Pair<CheckBox, String>>();
         final VerticalPanel verticalCheckBoxPanel = new VerticalPanel();
         verticalCheckBoxPanel.add(new Label(stringConstants.maneuverTypes()));
@@ -114,9 +82,9 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
             pair.getA().addValueChangeHandler(new ValueChangeHandler<Boolean>() {
                 @Override
                 public void onValueChange(ValueChangeEvent<Boolean> event) {
-                    if (!timer.isPlaying() && raceMap.data.lastManeuverResult != null) {
+                    if (!timer.isPlaying() && raceMap.lastManeuverResult != null) {
                         raceMap.removeAllManeuverMarkers();
-                        showManeuvers(raceMap.data.lastManeuverResult);
+                        showManeuvers(raceMap.lastManeuverResult);
                     }
                 }
             });
@@ -128,12 +96,12 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
 
             @Override
             public void onValueChange(ValueChangeEvent<Boolean> event) {
-                if (!timer.isPlaying() && raceMap.data.lastDouglasPeuckerResult != null && event.getValue()) {
-                    raceMap.showDouglasPeuckerPoints = true;
+                if (!timer.isPlaying() && raceMap.lastDouglasPeuckerResult != null && event.getValue()) {
+                    raceMap.getSettings().setShowDouglasPeuckerPoints(true);
                     raceMap.removeAllMarkDouglasPeuckerpoints();
-                    raceMap.showMarkDouglasPeuckerPoints(raceMap.data.lastDouglasPeuckerResult);
+                    raceMap.showMarkDouglasPeuckerPoints(raceMap.lastDouglasPeuckerResult);
                 } else if (!event.getValue()) {
-                    raceMap.showDouglasPeuckerPoints = false;
+                    raceMap.getSettings().setShowDouglasPeuckerPoints(false);
                     raceMap.removeAllMarkDouglasPeuckerpoints();
                 }
             }
@@ -151,61 +119,53 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
 
         setMapDisplayOptions();
 
-        newRaceListBox = new RacesListBoxPanel(eventRefresher, stringConstants);
-        newRaceListBox.addRaceSelectionChangeListener(this);
-        grid.setWidget(0, 0, newRaceListBox);
+        raceListBox = new RacesListBoxPanel(eventRefresher, stringConstants);
+        raceListBox.addRaceSelectionChangeListener(this);
+        grid.setWidget(0, 0, raceListBox);
         PositionDAO pos = new PositionDAO();
-        if (!raceMap.data.boatMarkers.isEmpty()) {
-            LatLng latLng = raceMap.data.boatMarkers.values().iterator().next().getLatLng();
+        if (!raceMap.boatMarkers.isEmpty()) {
+            LatLng latLng = raceMap.boatMarkers.values().iterator().next().getLatLng();
             pos.latDeg = latLng.getLatitude();
             pos.lngDeg = latLng.getLongitude();
         }
         SmallWindHistoryPanel windHistory = new SmallWindHistoryPanel(sailingService, pos,
         /* number of wind displays */5,
         /* time interval between displays in milliseconds */5000, stringConstants, errorReporter);
-        newRaceListBox.addRaceSelectionChangeListener(windHistory);
+        raceListBox.addRaceSelectionChangeListener(windHistory);
         grid.setWidget(1, 0, windHistory);
         HorizontalPanel horizontalRanksVerticalAndCheckboxesManeuversPanel = new HorizontalPanel();
         horizontalRanksVerticalAndCheckboxesManeuversPanel.setSpacing(15);
-        VerticalPanel ranksAndCheckboxAndTailLength = new VerticalPanel();
-        HorizontalPanel labelAndTailLengthBox = new HorizontalPanel();
-        labelAndTailLengthBox.add(new Label(stringConstants.tailLength()));
+        VerticalPanel ranksAndCheckboxAndTailLengthPanel = new VerticalPanel();
+        HorizontalPanel labelAndTailLengthBoxPanel = new HorizontalPanel();
+        labelAndTailLengthBoxPanel.add(new Label(stringConstants.tailLength()));
         tailLengthBox = new IntegerBox();
-        tailLengthBox.setValue((int) (raceMap.tailLengthInMilliSeconds / 1000));
+        tailLengthBox.setValue((int) (raceMap.getSettings().getTailLengthInMilliSeconds() / 1000));
         tailLengthBox.addValueChangeHandler(new ValueChangeHandler<Integer>() {
             @Override
             public void onValueChange(ValueChangeEvent<Integer> event) {
-                raceMap.tailLengthInMilliSeconds = 1000l * event.getValue();
-                refreshMapContents();
+                raceMap.getSettings().setTailLengthInMilliSeconds(1000l * event.getValue());
+                raceMap.redraw();
             }
         });
-        labelAndTailLengthBox.add(tailLengthBox);
-        ranksAndCheckboxAndTailLength.add(labelAndTailLengthBox);
-        showOnlySelected = new CheckBox(stringConstants.showOnlySelected());
-        showOnlySelected.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+        labelAndTailLengthBoxPanel.add(tailLengthBox);
+        ranksAndCheckboxAndTailLengthPanel.add(labelAndTailLengthBoxPanel);
+        showOnlySelectedCompetitors = new CheckBox(stringConstants.showOnlySelected());
+        showOnlySelectedCompetitors.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
             @Override
             public void onValueChange(ValueChangeEvent<Boolean> event) {
-                refreshMapContents();
+                raceMap.getSettings().setShowOnlySelectedCompetitors(event.getValue());
+                raceMap.redraw();
             }
         });
-        ranksAndCheckboxAndTailLength.add(showOnlySelected);
-        quickRanksList = new ArrayList<CompetitorDAO>();
-        quickRanksBox = new ListBox(/* isMultipleSelect */true);
-        quickRanksBox.setVisibleItemCount(20);
-        quickRanksBox.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                updateBoatSelection();
-            }
-        });
-        quickRanksBox.addChangeHandler(new ChangeHandler() {
-            @Override
-            public void onChange(ChangeEvent event) {
-                updateBoatSelection();
-            }
-        });
-        ranksAndCheckboxAndTailLength.add(quickRanksBox);
-        horizontalRanksVerticalAndCheckboxesManeuversPanel.add(ranksAndCheckboxAndTailLength);
+        ranksAndCheckboxAndTailLengthPanel.add(showOnlySelectedCompetitors);
+        
+        quickRanksListBox = new QuickRanksListBoxComposite(true);
+        quickRanksListBox.addCompetitorSelectionChangeListener(raceMap);
+        quickRanksListBox.getListBox().setVisibleItemCount(20);
+
+        ranksAndCheckboxAndTailLengthPanel.add(quickRanksListBox);
+
+        horizontalRanksVerticalAndCheckboxesManeuversPanel.add(ranksAndCheckboxAndTailLengthPanel);
 
         VerticalPanel verticalPanelRadioAndCheckboxes = new VerticalPanel();
         verticalPanelRadioAndCheckboxes.add(verticalCheckBoxPanel);
@@ -213,6 +173,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
 
         grid.setWidget(2, 0, horizontalRanksVerticalAndCheckboxesManeuversPanel);
         timePanel = new TimePanel(stringConstants, timer);
+        timer.addTimeListener(raceMap);
         timer.addTimeListener(this);
         timer.addTimeListener(windHistory);
         grid.setWidget(1, 1, timePanel);
@@ -227,51 +188,14 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         return false;
     }
 
-    private void updateBoatSelection() {
-        for (int i = 0; i < quickRanksBox.getItemCount(); i++) {
-            setSelectedInMap(quickRanksList.get(i), quickRanksBox.isItemSelected(i));
-        }
-        if (showOnlySelected.getValue()) {
-            refreshMapContents();
-        }
-    }
-
-    private void setSelectedInMap(CompetitorDAO competitorDAO, boolean itemSelected) {
-        if (!itemSelected && competitorsSelectedInMap.contains(competitorDAO)) {
-            // "lowlight" currently selected competitor
-            Marker highlightedMarker = raceMap.data.boatMarkers.get(competitorDAO);
-            if (highlightedMarker != null) {
-                Marker lowlightedMarker = raceMap.createBoatMarker(competitorDAO, false);
-                raceMap.map.removeOverlay(highlightedMarker);
-                raceMap.map.addOverlay(lowlightedMarker);
-                raceMap.data.boatMarkers.put(competitorDAO, lowlightedMarker);
-                competitorsSelectedInMap.remove(competitorDAO);
-            }
-        } else if (itemSelected && !competitorsSelectedInMap.contains(competitorDAO)) {
-            Marker lowlightedMarker = raceMap.data.boatMarkers.get(competitorDAO);
-            if (lowlightedMarker != null) {
-                Marker highlightedMarker = raceMap.createBoatMarker(competitorDAO, true);
-                raceMap.map.removeOverlay(lowlightedMarker);
-                raceMap.map.addOverlay(highlightedMarker);
-                raceMap.data.boatMarkers.put(competitorDAO, highlightedMarker);
-                int selectionIndex = quickRanksList.indexOf(competitorDAO);
-                quickRanksBox.setItemSelected(selectionIndex, true);
-            }
-            // add the competitor even if not currently contained in map
-            competitorsSelectedInMap.add(competitorDAO);
-        }
-    }
-
     @Override
     public void fillEvents(List<EventDAO> result) {
-        newRaceListBox.fillEvents(result);
-        raceMap.selectedEventAndRace = newRaceListBox.getSelectedEventAndRace();
+        raceListBox.fillEvents(result);
     }
 
     @Override
     public void onRaceSelectionChange(List<Triple<EventDAO, RegattaDAO, RaceDAO>> selectedRaces) {
-        raceMap.mapFirstZoomDone = false;
-        raceMap.mapZoomedOrPannedSinceLastRaceSelectionChange = false;
+        
         if (!selectedRaces.isEmpty() && selectedRaces.get(selectedRaces.size() - 1) != null) {
             RaceDAO raceDAO = selectedRaces.get(selectedRaces.size() - 1).getC();
             if (raceDAO.startOfRace != null) {
@@ -280,12 +204,8 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
             }
             updateSlider(raceDAO);
         }
-        // force display of currently selected race
-        refreshMapContents();
-    }
-
-    private void refreshMapContents() {
-        timeChanged(timer.getTime());
+        
+        raceMap.onRaceSelectionChange(selectedRaces);
     }
 
     private void updateSlider(RaceDAO selectedRace) {
@@ -300,51 +220,11 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
     @Override
     public void timeChanged(final Date date) {
         if (date != null) {
-            List<Triple<EventDAO, RegattaDAO, RaceDAO>> selection = newRaceListBox.getSelectedEventAndRace();
+            List<Triple<EventDAO, RegattaDAO, RaceDAO>> selection = raceListBox.getSelectedEventAndRace();
             if (!selection.isEmpty()) {
                 EventDAO event = selection.get(selection.size() - 1).getA();
                 RaceDAO race = selection.get(selection.size() - 1).getC();
                 if (event != null && race != null) {
-                    final Triple<Map<CompetitorDAO, Date>, Map<CompetitorDAO, Date>, Map<CompetitorDAO, Boolean>> fromAndToAndOverlap = raceMap.computeFromAndTo(date,this.getCompetitorsToShow());
-                    final int requestID = boatPositionRequestIDCounter++;
-                    sailingService.getBoatPositions(new EventNameAndRaceName(event.name, race.name),
-                            fromAndToAndOverlap.getA(), fromAndToAndOverlap.getB(), true,
-                            new AsyncCallback<Map<CompetitorDAO, List<GPSFixDAO>>>() {
-                                @Override
-                                public void onFailure(Throwable caught) {
-                                    errorReporter.reportError("Error obtaining boat positions: " + caught.getMessage());
-                                }
-
-                                @Override
-                                public void onSuccess(Map<CompetitorDAO, List<GPSFixDAO>> result) {
-                                    // process response only if not received out of order
-                                    if (startedProcessingRequestID < requestID) {
-                                        startedProcessingRequestID = requestID;
-                                        Date from = new Date(date.getTime() - raceMap.tailLengthInMilliSeconds);
-                                        raceMap.updateFixes(result, fromAndToAndOverlap.getC());
-                                        raceMap.showBoatsOnMap(from, date, getCompetitorsToShow(), competitorsSelectedInMap);
-                                        if (raceMap.data.douglasMarkers != null) {
-                                            raceMap.removeAllMarkDouglasPeuckerpoints();
-                                        }
-                                        if (raceMap.data.maneuverMarkers != null) {
-                                            raceMap.removeAllManeuverMarkers();
-                                        }
-                                    }
-                                }
-                            });
-                    sailingService.getMarkPositions(new EventNameAndRaceName(event.name, race.name), date,
-                            new AsyncCallback<List<MarkDAO>>() {
-                                @Override
-                                public void onFailure(Throwable caught) {
-                                    errorReporter.reportError("Error trying to obtain mark positions: "
-                                            + caught.getMessage());
-                                }
-
-                                @Override
-                                public void onSuccess(List<MarkDAO> result) {
-                                    raceMap.showMarksOnMap(result);
-                                }
-                            });
                     sailingService.getQuickRanks(new EventNameAndRaceName(event.name, race.name), date,
                             new AsyncCallback<List<QuickRankDAO>>() {
                                 @Override
@@ -363,27 +243,15 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
     }
 
     private void showQuickRanks(List<QuickRankDAO> result) {
-        quickRanksBox.clear();
-        quickRanksList.clear();
+        quickRanksListBox.fillQuickRanks(result, true);
+        raceMap.fillCompetitors(quickRanksListBox.getCompetitors());
         int i = 0;
         for (QuickRankDAO quickRank : result) {
-            quickRanksList.add(quickRank.competitor);
-            quickRanksBox.addItem("" + quickRank.rank + ". " + quickRank.competitor.name + " ("
-                    + quickRank.competitor.threeLetterIocCountryCode + ") in leg #" + (quickRank.legNumber + 1));
             // maintain previous selection, based on competitorsSelectedInMap
-            if (competitorsSelectedInMap.contains(quickRank.competitor)) {
-                quickRanksBox.setItemSelected(i, /* selected */true);
+            if (raceMap.getSelectedMapCompetitors().contains(quickRank.competitor)) {
+                quickRanksListBox.getListBox().setItemSelected(i, /* selected */true);
             }
             i++;
-        }
-    }
-
-    private Collection<CompetitorDAO> getCompetitorsToShow() {
-        if (showOnlySelected.getValue()) {
-            return competitorsSelectedInMap;
-        } else {
-            // here the quickrankslist is emtpy, because of that te map is not zoomed correctly
-            return quickRanksList;
         }
     }
 
@@ -407,15 +275,15 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
 
     private void setMapDisplayOptions()
     {
-        raceMap.showManeuverTack = getCheckboxValueManeuver("TACK");
-        raceMap.showManeuverJibe = getCheckboxValueManeuver("JIBE");
-        raceMap.showManeuverHeadUp = getCheckboxValueManeuver("HEAD_UP");
-        raceMap.showManeuverBearAway = getCheckboxValueManeuver("BEAR_AWAY");
-        raceMap.showManeuverPenaltyCircle = getCheckboxValueManeuver("PENALTY_CIRCLE");
-        raceMap.showManeuverMarkPassing = getCheckboxValueManeuver("MARK_PASSING");
-        raceMap.showManeuverOther = getCheckboxValueManeuver("OTHER");
-        
-        raceMap.showDouglasPeuckerPoints = checkBoxDouglasPeuckerPoints.getValue();
+        RaceMapSettings settings = raceMap.getSettings();
+        settings.setShowManeuverTack(getCheckboxValueManeuver("TACK"));
+        settings.setShowManeuverJibe(getCheckboxValueManeuver("JIBE"));
+        settings.setShowManeuverHeadUp(getCheckboxValueManeuver("HEAD_UP"));
+        settings.setShowManeuverBearAway(getCheckboxValueManeuver("BEAR_AWAY"));
+        settings.setShowManeuverPenaltyCircle(getCheckboxValueManeuver("PENALTY_CIRCLE"));
+        settings.setShowManeuverMarkPassing(getCheckboxValueManeuver("MARK_PASSING"));
+        settings.setShowManeuverOther(getCheckboxValueManeuver("OTHER"));
+        settings.setShowDouglasPeuckerPoints(checkBoxDouglasPeuckerPoints.getValue());
     }
     
     private void showManeuvers(Map<CompetitorDAO, List<ManeuverDAO>> maneuvers) {
