@@ -19,7 +19,7 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.domain.common.Util.Triple;
 import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
-import com.sap.sailing.gwt.ui.client.StringConstants;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDAO;
 import com.sap.sailing.gwt.ui.shared.RaceDAO;
 import com.sap.sailing.gwt.ui.shared.RegattaDAO;
@@ -29,9 +29,9 @@ public class RacesListBoxPanel extends FormPanel implements RaceSelectionProvide
     private final List<Triple<EventDAO, RegattaDAO, RaceDAO>> raceList;
     private final ListBox raceListBox;
     private final EventRefresher eventRefresher;
-    private final StringConstants stringConstants;
+    private final StringMessages stringConstants;
     
-    public RacesListBoxPanel(EventRefresher eventRefresher, StringConstants stringConstants) {
+    public RacesListBoxPanel(EventRefresher eventRefresher, StringMessages stringConstants) {
         this.eventRefresher = eventRefresher;
         this.stringConstants = stringConstants;
         this.raceSelectionChangeListeners = new HashSet<RaceSelectionChangeListener>();

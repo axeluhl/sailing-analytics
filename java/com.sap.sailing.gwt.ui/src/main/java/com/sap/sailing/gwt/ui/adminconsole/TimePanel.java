@@ -15,7 +15,7 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.gwt.ui.client.PlayStateListener;
-import com.sap.sailing.gwt.ui.client.StringConstants;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.TimeListener;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.ui.commons.client.SliderWidget;
@@ -31,7 +31,7 @@ public class TimePanel extends FormPanel implements TimeListener, PlayStateListe
     private boolean delayBoxHasFocus;
     private final Label timeLabel;
 
-    public TimePanel(StringConstants stringConstants, Timer timer) {
+    public TimePanel(StringMessages stringConstants, Timer timer) {
         this.timer = timer;
         timer.addTimeListener(this);
         timer.addPlayStateListener(this);

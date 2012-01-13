@@ -39,7 +39,7 @@ import com.sap.sailing.gwt.ui.client.Collator;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.PlayStateListener;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
-import com.sap.sailing.gwt.ui.client.StringConstants;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.TimeListener;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.leaderboard.LegDetailColumn.LegDetailField;
@@ -80,7 +80,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
 
     private final ErrorReporter errorReporter;
 
-    private final StringConstants stringConstants;
+    private final StringMessages stringConstants;
 
     private final CellTable<LeaderboardRowDAO> leaderboardTable;
     
@@ -141,9 +141,9 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
      */
     private final Anchor playPause;
     private class SettingsClickHandler implements ClickHandler {
-        private final StringConstants stringConstants;
+        private final StringMessages stringConstants;
 
-        private SettingsClickHandler(StringConstants stringConstants) {
+        private SettingsClickHandler(StringMessages stringConstants) {
             this.stringConstants = stringConstants;
         }
 
@@ -155,37 +155,36 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     
     @Override
     public void updateSettings(LeaderboardSettings result) {
-                List<ExpandableSortableColumn<?>> columnsToExpandAgain = new ArrayList<ExpandableSortableColumn<?>>();
-                for (int i = 0; i < getLeaderboardTable().getColumnCount(); i++) {
-                    Column<LeaderboardRowDAO, ?> c = getLeaderboardTable().getColumn(i);
-                    if (c instanceof ExpandableSortableColumn<?>) {
-                        ExpandableSortableColumn<?> expandableSortableColumn = (ExpandableSortableColumn<?>) c;
-                        if (expandableSortableColumn.isExpanded()) {
-                            // now toggle expansion back and forth,
-                            // enforcing a re-build of the visible
-                            // child columns
-                            expandableSortableColumn.toggleExpansion();
-                            columnsToExpandAgain.add(expandableSortableColumn);
-                        }
-                    }
-                }
-                selectedManeuverDetails.clear();
-                selectedManeuverDetails.addAll(result.getManeuverDetailsToShow());
-                selectedLegDetails.clear();
-                selectedLegDetails.addAll(result.getLegDetailsToShow());
-                selectedRaceDetails.clear();
-                selectedRaceDetails.addAll(result.getRaceDetailsToShow());
-                selectedRaceColumns.clear();
-                selectedRaceColumns.addAll(result.getRaceColumnsToShow());
-                // update leaderboard after settings panel column selection change
-                updateLeaderboard(leaderboard);
-                
-                timer.setDelayBetweenAutoAdvancesInMilliseconds(result
-                        .getDelayBetweenAutoAdvancesInMilliseconds());
-                setDelayInMilliseconds(result.getDelayInMilliseconds());
-                for (ExpandableSortableColumn<?> expandableSortableColumn : columnsToExpandAgain) {
+        List<ExpandableSortableColumn<?>> columnsToExpandAgain = new ArrayList<ExpandableSortableColumn<?>>();
+        for (int i = 0; i < getLeaderboardTable().getColumnCount(); i++) {
+            Column<LeaderboardRowDAO, ?> c = getLeaderboardTable().getColumn(i);
+            if (c instanceof ExpandableSortableColumn<?>) {
+                ExpandableSortableColumn<?> expandableSortableColumn = (ExpandableSortableColumn<?>) c;
+                if (expandableSortableColumn.isExpanded()) {
+                    // now toggle expansion back and forth,
+                    // enforcing a re-build of the visible
+                    // child columns
                     expandableSortableColumn.toggleExpansion();
+                    columnsToExpandAgain.add(expandableSortableColumn);
                 }
+            }
+        }
+        selectedManeuverDetails.clear();
+        selectedManeuverDetails.addAll(result.getManeuverDetailsToShow());
+        selectedLegDetails.clear();
+        selectedLegDetails.addAll(result.getLegDetailsToShow());
+        selectedRaceDetails.clear();
+        selectedRaceDetails.addAll(result.getRaceDetailsToShow());
+        selectedRaceColumns.clear();
+        selectedRaceColumns.addAll(result.getRaceColumnsToShow());
+        // update leaderboard after settings panel column selection change
+        updateLeaderboard(leaderboard);
+
+        timer.setDelayBetweenAutoAdvancesInMilliseconds(result.getDelayBetweenAutoAdvancesInMilliseconds());
+        setDelayInMilliseconds(result.getDelayInMilliseconds());
+        for (ExpandableSortableColumn<?> expandableSortableColumn : columnsToExpandAgain) {
+            expandableSortableColumn.toggleExpansion();
+        }
     }
 
     protected class CompetitorColumn extends SortableColumn<LeaderboardRowDAO, String> {
@@ -429,7 +428,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
 
         @Override
         protected Map<DetailType, SortableColumn<LeaderboardRowDAO, ?>> getDetailColumnMap(
-                LeaderboardPanel leaderboardPanel, StringConstants stringConstants, String detailHeaderStyle,
+                LeaderboardPanel leaderboardPanel, StringMessages stringConstants, String detailHeaderStyle,
                 String detailColumnStyle) {
             Map<DetailType, SortableColumn<LeaderboardRowDAO, ?>> result = new HashMap<DetailType, SortableColumn<LeaderboardRowDAO, ?>>();
             result.put(DetailType.RACE_DISTANCE_TRAVELED,
@@ -679,7 +678,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     }
 
     public LeaderboardPanel(SailingServiceAsync sailingService, String leaderboardName, ErrorReporter errorReporter,
-            final StringConstants stringConstants) {
+            final StringMessages stringConstants) {
         this.sailingService = sailingService;
         this.setLeaderboardName(leaderboardName);
         this.errorReporter = errorReporter;

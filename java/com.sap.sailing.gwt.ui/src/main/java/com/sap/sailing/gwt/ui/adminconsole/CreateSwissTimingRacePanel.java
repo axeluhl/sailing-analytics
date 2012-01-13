@@ -24,7 +24,7 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
-import com.sap.sailing.gwt.ui.client.StringConstants;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public class CreateSwissTimingRacePanel extends FormPanel {
     private TextBox txtbRaceName;
@@ -40,7 +40,7 @@ public class CreateSwissTimingRacePanel extends FormPanel {
     private final SailingServiceAsync service;
     private ErrorReporter errorReporter;
 
-    public CreateSwissTimingRacePanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter, final StringConstants stringConstants){
+    public CreateSwissTimingRacePanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter, final StringMessages stringConstants){
         this.service = sailingService;
         this.errorReporter = errorReporter;
         competitors = new ArrayList<CreateSwissTimingRacePanel.Competitor>();

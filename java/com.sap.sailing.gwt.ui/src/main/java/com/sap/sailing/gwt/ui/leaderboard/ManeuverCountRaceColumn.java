@@ -10,7 +10,7 @@ import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.Header;
-import com.sap.sailing.gwt.ui.client.StringConstants;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LegDetailColumn.LegDetailField;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDAO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDAO;
@@ -21,7 +21,7 @@ import com.sap.sailing.domain.common.Util.Triple;
 
 public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> implements HasStringAndDoubleValue {
 
-    private final StringConstants stringConstants;
+    private final StringMessages stringConstants;
     private final RaceNameProvider raceNameProvider;
 
     private final String headerStyle;
@@ -68,7 +68,7 @@ public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> im
     }
 
     public ManeuverCountRaceColumn(LeaderboardPanel leaderboardPanel, RaceNameProvider raceNameProvider,
-            StringConstants stringConstants, List<DetailType> maneuverDetailSelection, String headerStyle,
+            StringMessages stringConstants, List<DetailType> maneuverDetailSelection, String headerStyle,
             String columnStylee, String detailHeaderStyle, String detailColumnStyle) {
         super(leaderboardPanel, /* expandable */true /* all legs have details */, new TextCell(), stringConstants,
                 detailHeaderStyle, detailColumnStyle, maneuverDetailSelection);
@@ -254,7 +254,7 @@ public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> im
 
     @Override
     protected Map<DetailType, SortableColumn<LeaderboardRowDAO, ?>> getDetailColumnMap(
-            LeaderboardPanel leaderboardPanel, StringConstants stringConstants, String detailHeaderStyle,
+            LeaderboardPanel leaderboardPanel, StringMessages stringConstants, String detailHeaderStyle,
             String detailColumnStyle) {
         Map<DetailType, SortableColumn<LeaderboardRowDAO, ?>> result = new HashMap<DetailType, SortableColumn<LeaderboardRowDAO, ?>>();
         result.put(DetailType.TACK, new FormattedDoubleLegDetailColumn(stringConstants.tack(), "", new NumberOfTacks(),

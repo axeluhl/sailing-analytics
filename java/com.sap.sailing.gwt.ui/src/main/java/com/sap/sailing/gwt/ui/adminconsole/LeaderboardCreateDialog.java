@@ -5,12 +5,12 @@ import java.util.Collection;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.LongBox;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
-import com.sap.sailing.gwt.ui.client.StringConstants;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDAO;
 
 public class LeaderboardCreateDialog extends LeaderboardDialog{
     
-    public LeaderboardCreateDialog(Collection<LeaderboardDAO> existingLeaderboards, StringConstants stringConstants,
+    public LeaderboardCreateDialog(Collection<LeaderboardDAO> existingLeaderboards, StringMessages stringConstants,
             ErrorReporter errorReporter, AsyncCallback<LeaderboardDAO> callback) {
         super(new LeaderboardDAO(), stringConstants, errorReporter, new LeaderboardDialog.LeaderboardParameterValidator(stringConstants, existingLeaderboards), callback);
 

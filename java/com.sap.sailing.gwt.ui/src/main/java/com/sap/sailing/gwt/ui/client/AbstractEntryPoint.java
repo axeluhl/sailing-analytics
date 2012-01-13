@@ -22,7 +22,7 @@ public abstract class AbstractEntryPoint implements EntryPoint, ErrorReporter {
     private DialogBox errorDialogBox;
     private HTML serverResponseLabel;
     private Button dialogCloseButton;
-    protected StringConstants stringConstants;
+    protected StringMessages stringConstants;
     
     /**
      * Create a remote service proxy to talk to the server-side sailing service.
@@ -38,7 +38,7 @@ public abstract class AbstractEntryPoint implements EntryPoint, ErrorReporter {
 
     @Override
     public void onModuleLoad() {
-        stringConstants = GWT.create(StringConstants.class);
+        stringConstants = GWT.create(StringMessages.class);
         errorDialogBox = createErrorDialog();
         ServiceDefTarget serviceDef = (ServiceDefTarget) sailingService;
         String moduleBaseURL = GWT.getModuleBaseURL();

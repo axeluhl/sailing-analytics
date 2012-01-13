@@ -22,7 +22,7 @@ import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Header;
-import com.sap.sailing.gwt.ui.client.StringConstants;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 
 /**
  * A {@link CellTable} {@link Header} implementation that uses a {@link CompositeCell} containing a
@@ -51,12 +51,12 @@ public class SortableExpandableColumnHeader extends Header<SafeHtml> {
     private static RaceCellTemplates template = GWT.create(RaceCellTemplates.class);
     
     public SortableExpandableColumnHeader(String title, String iconURL, LeaderboardPanel leaderboardPanel,
-            ExpandableSortableColumn<?> column, StringConstants stringConstants) {
+            ExpandableSortableColumn<?> column, StringMessages stringConstants) {
         super(constructCell(title, iconURL, column.isExpansionEnabled(), leaderboardPanel, column, stringConstants));
     }
 
     private static <T> Cell<SafeHtml> constructCell(final String title, final String iconURL, boolean isExpansionEnabled,
-            final LeaderboardPanel leaderboardPanel, final ExpandableSortableColumn<?> column, final StringConstants stringConstants) {
+            final LeaderboardPanel leaderboardPanel, final ExpandableSortableColumn<?> column, final StringMessages stringConstants) {
         final List<HasCell<SafeHtml, ?>> cells = new ArrayList<HasCell<SafeHtml, ?>>(3);
         // if it's a medal race, add the cell rendering the medal image
         // add the cell rendering the expand/collapse button:

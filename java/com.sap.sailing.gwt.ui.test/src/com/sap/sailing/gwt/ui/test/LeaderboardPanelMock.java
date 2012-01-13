@@ -3,7 +3,7 @@ package com.sap.sailing.gwt.ui.test;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
-import com.sap.sailing.gwt.ui.client.StringConstants;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.SortableColumn;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDAO;
@@ -13,7 +13,7 @@ public class LeaderboardPanelMock extends LeaderboardPanel {
 
     public LeaderboardPanelMock(SailingServiceAsync sailingService,
             String leaderboardName, ErrorReporter errorReporter,
-            StringConstants stringConstants) {
+            StringMessages stringConstants) {
         super(sailingService, leaderboardName, errorReporter, stringConstants);
         // TODO Auto-generated constructor stub
     }

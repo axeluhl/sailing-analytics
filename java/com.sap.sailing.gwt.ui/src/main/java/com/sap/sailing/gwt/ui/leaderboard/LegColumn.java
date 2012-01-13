@@ -9,7 +9,7 @@ import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Header;
-import com.sap.sailing.gwt.ui.client.StringConstants;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LegDetailColumn.LegDetailField;
 import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDAO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDAO;
@@ -26,7 +26,7 @@ import com.sap.sailing.server.api.DetailType;
 public class LegColumn extends ExpandableSortableColumn<String> {
     private final String raceName;
     private final int legIndex;
-    private final StringConstants stringConstants;
+    private final StringMessages stringConstants;
     private final String headerStyle;
     private final String columnStyle;
     
@@ -188,7 +188,7 @@ public class LegColumn extends ExpandableSortableColumn<String> {
         }
 
     }
-    public LegColumn(LeaderboardPanel leaderboardPanel, String raceName, int legIndex, StringConstants stringConstants,
+    public LegColumn(LeaderboardPanel leaderboardPanel, String raceName, int legIndex, StringMessages stringConstants,
             List<DetailType> legDetailSelection, String headerStyle, String columnStyle,
             String detailHeaderStyle, String detailColumnStyle) {
         super(leaderboardPanel, /* expandable */true /* all legs have details */, new TextCell(), stringConstants,
@@ -213,7 +213,7 @@ public class LegColumn extends ExpandableSortableColumn<String> {
 
     @Override
     protected Map<DetailType, SortableColumn<LeaderboardRowDAO, ?>> getDetailColumnMap(
-            LeaderboardPanel leaderboardPanel, StringConstants stringConstants, String detailHeaderStyle,
+            LeaderboardPanel leaderboardPanel, StringMessages stringConstants, String detailHeaderStyle,
             String detailColumnStyle) {
         Map<DetailType, SortableColumn<LeaderboardRowDAO, ?>> result = new HashMap<DetailType, SortableColumn<LeaderboardRowDAO, ?>>();
         result.put(DetailType.DISTANCE_TRAVELED,
