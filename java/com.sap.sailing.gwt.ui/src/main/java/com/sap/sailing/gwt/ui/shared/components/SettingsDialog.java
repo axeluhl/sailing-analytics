@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.shared.components;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FocusWidget;
+import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog;
 import com.sap.sailing.gwt.ui.client.StringConstants;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -24,6 +25,11 @@ public class SettingsDialog<SettingsType> extends DataEntryDialog<SettingsType> 
                     }
         });
         this.settingsDialogComponent = component.getSettingsDialogComponent();
+    }
+
+    @Override
+    protected Widget getAdditionalWidget() {
+        return settingsDialogComponent.getAdditionalWidget(this);
     }
 
     @Override
