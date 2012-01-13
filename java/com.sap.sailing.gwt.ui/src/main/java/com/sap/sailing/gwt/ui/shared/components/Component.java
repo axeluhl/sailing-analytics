@@ -9,12 +9,7 @@ package com.sap.sailing.gwt.ui.shared.components;
  *            the type that describes this component's settings (if any). Use {@link Object} in case your components
  *            doesn't support any settings.
  */
-public interface Component<SettingsType> {
-    /**
-     * @return the name to display to a user for quick navigation to this component
-     */
-    String getLocalizedShortName();
-    
+public interface Component<SettingsType> extends ComponentForestEntry {
     /**
      * @return whether this component has settings that a user may change; if so, 
      */

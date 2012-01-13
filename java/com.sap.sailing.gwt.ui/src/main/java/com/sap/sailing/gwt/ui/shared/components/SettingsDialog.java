@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.shared.components;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.FocusWidget;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog;
 import com.sap.sailing.gwt.ui.client.StringConstants;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -30,4 +31,13 @@ public class SettingsDialog<SettingsType> extends DataEntryDialog<SettingsType> 
         return settingsDialogComponent.getResult();
     }
 
+    @Override
+    public void show() {
+        super.show();
+        FocusWidget focusWidget = settingsDialogComponent.getFocusWidget();
+        if (focusWidget != null) {
+            focusWidget.setFocus(true);
+        }
+    }
+    
 }
