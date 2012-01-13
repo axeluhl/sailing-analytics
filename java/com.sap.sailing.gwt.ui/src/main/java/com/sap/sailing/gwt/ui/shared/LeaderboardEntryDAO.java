@@ -3,8 +3,6 @@ package com.sap.sailing.gwt.ui.shared;
 import java.util.List;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import com.sap.sailing.domain.base.Course;
-import com.sap.sailing.domain.base.Leg;
 
 /**
  * Holds a single competitor's scoring details for a single race. It may optionally contain
