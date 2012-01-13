@@ -22,7 +22,7 @@ public class LeaderboardEditDialog extends LeaderboardDialog {
             if (i < leaderboard.discardThresholds.length) {
                 discardThresholdBoxes[i] = createLongBox(leaderboard.discardThresholds[i], 2);
             } else {
-                discardThresholdBoxes[i] = createIntegerBoxWithOptionalValue(null, 2);
+                discardThresholdBoxes[i] = createLongBoxWithOptionalValue(null, 2);
             }
             discardThresholdBoxes[i].setVisibleLength(2);
         }

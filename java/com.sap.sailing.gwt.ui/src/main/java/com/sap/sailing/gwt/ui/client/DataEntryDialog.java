@@ -20,6 +20,8 @@ import com.google.gwt.user.client.ui.Widget;
 /**
  * An abstract data entry dialog class, capturing data of type <code>T</code>, with generic OK/Cancel buttons, title and
  * message. Subclasses may override the {@link #show()} method to set the focus on their favorable initial entry field.
+ * Subclasses can specify a widget to show in the dialog to capture properties specific to the result type <code>T</code> by
+ * overriding the {@link #getAdditionalWidget()} method.
  * 
  * @author Axel Uhl (d043530)
  */
@@ -38,6 +40,15 @@ public abstract class DataEntryDialog<T> {
         String getErrorMessage(T valueToValidate);
     }
     
+    /**
+     * @param validator
+     *            an optional validator; if <code>null</code>, no validation of data entered is performed; otherwise,
+     *            data validation is triggered upon any noticeable change in any of the elements constructed by
+     *            {@link #createCheckbox(String)}, {@link #createTextBox(String)}, etc.
+     * @param callback
+     *            will be called when the dialog if {@link AsyncCallback#onFailure(Throwable) cancelled} or
+     *            {@link AsyncCallback#onSuccess(Object) confirmed}
+     */
     public DataEntryDialog(String title, String message, String okButtonName, String cancelButtonName,
             Validator<T> validator, final AsyncCallback<T> callback) {
         dateEntryDialog = new DialogBox();
@@ -102,7 +113,7 @@ public abstract class DataEntryDialog<T> {
      * 
      * @param initialValue initial value to show in text box; <code>null</code> is permissible
      */
-    protected TextBox createTextBox(String initialValue) {
+    public TextBox createTextBox(String initialValue) {
         TextBox textBox = new TextBox();
         textBox.setText(initialValue == null ? "" : initialValue);
         AbstractEntryPoint.addFocusUponKeyUpToggler(textBox);
@@ -123,7 +134,7 @@ public abstract class DataEntryDialog<T> {
      * 
      * @param initialValue initial value to show in text box; <code>null</code> is permissible
      */
-    protected LongBox createLongBox(long initialValue, int visibleLength) {
+    public LongBox createLongBox(long initialValue, int visibleLength) {
         LongBox longBox = new LongBox();
         longBox.setVisibleLength(visibleLength);
         longBox.setValue(initialValue);
@@ -139,7 +150,7 @@ public abstract class DataEntryDialog<T> {
         return longBox;
     }
 
-    protected LongBox createIntegerBoxWithOptionalValue(Long initialValue, int visibleLength) {
+    public LongBox createLongBoxWithOptionalValue(Long initialValue, int visibleLength) {
         LongBox longBox = new LongBox();
         longBox.setVisibleLength(visibleLength);
         longBox.setValue(initialValue);
@@ -155,7 +166,7 @@ public abstract class DataEntryDialog<T> {
         return longBox;
     }
 
-    protected CheckBox createCheckbox(String checkboxLabel) {
+    public CheckBox createCheckbox(String checkboxLabel) {
         CheckBox result = new CheckBox(checkboxLabel);
         result.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
             @Override
