@@ -27,4 +27,10 @@ public interface Component<SettingsType> {
      * settings.
      */
     SettingsDialogComponent<SettingsType> getSettingsDialogComponent();
+    
+    /**
+     * Updates the settings of this component. Expected to be called when a settings dialog using this component's
+     * {@link #getSettingsDialogComponent()} has been confirmed.
+     */
+    void updateSettings(SettingsType newSettings);
 }
