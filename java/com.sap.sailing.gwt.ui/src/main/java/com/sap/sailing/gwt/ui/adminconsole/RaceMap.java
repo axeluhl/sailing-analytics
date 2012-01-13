@@ -540,8 +540,9 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
             } else {
                 usedExistingMarker = true;
                 // check if anchors match; re-use marker with setImage only if anchors match
-                Point newAnchor = imageResources.getBoatImageTransformator(lastPos,
-                        selectedMapCompetitors.contains(competitorDAO)).getAnchor();
+                ImageTransformer transformer = imageResources.getBoatImageTransformer(lastPos,
+                        selectedMapCompetitors.contains(competitorDAO));
+                Point newAnchor = transformer.getAnchor(imageResources.getRealBoatSizeScaleFactor());
                 Point oldAnchor = boatMarker.getIcon().getIconAnchor();
                 if (oldAnchor.getX() == newAnchor.getX() && oldAnchor.getY() == newAnchor.getY()) {
                     boatMarker.setLatLng(LatLng.newInstance(lastPos.position.latDeg,
