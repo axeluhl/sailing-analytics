@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.shared.components;
 
+import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog.Validator;
@@ -26,4 +27,11 @@ public interface SettingsDialogComponent<SettingsType> {
      * changes. If <code>null</code> is returned, no validation will be performed.
      */
     Validator<SettingsType> getValidator();
+    
+    /**
+     * @return <code>null</code> if no initial focus on any widget is desired, or a widget from the
+     *         {@link #getAdditionalWidget(DataEntryDialog)} result that will then receive the focus when the settings
+     *         dialog is shown
+     */
+    FocusWidget getFocusWidget();
 }
