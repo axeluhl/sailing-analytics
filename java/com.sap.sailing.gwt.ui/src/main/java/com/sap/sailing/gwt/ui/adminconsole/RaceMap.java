@@ -7,10 +7,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.maps.client.InfoWindowContent;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.Maps;
@@ -39,11 +39,12 @@ import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.LegType;
-import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.Util.Triple;
+import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
+import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.TimeListener;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
 import com.sap.sailing.gwt.ui.shared.EventDAO;
@@ -54,116 +55,134 @@ import com.sap.sailing.gwt.ui.shared.RaceDAO;
 import com.sap.sailing.gwt.ui.shared.RegattaDAO;
 import com.sap.sailing.server.api.EventNameAndRaceName;
 
-public class RaceMap {
+public class RaceMap implements TimeListener, CompetitorSelectionChangeListener, RaceSelectionChangeListener, CompetitorsDisplayer {
     protected MapWidget map;
 
     private final SailingServiceAsync sailingService;
     private final ErrorReporter errorReporter;
 
     /**
-     * Two sails on downwind leg, wind from port (sails on starboard); no highlighting
+     * Tails of competitors currently displayed as overlays on the map.
      */
-    protected ImageRotator boatIconDownwindPortRotator;
+    private final Map<CompetitorDAO, Polyline> tails;
 
     /**
-     * Two sails on downwind leg, wind from port (sails on starboard); with highlighting
+     * Key set is equal to that of {@link #tails} and tells what the index in in {@link #fixes} of the first fix shown
+     * in {@link #tails} is .
      */
-    protected ImageRotator boatIconHighlightedDownwindPortRotator;
+    private final Map<CompetitorDAO, Integer> firstShownFix;
 
     /**
-     * Two sails on downwind leg, wind from starboard (sails on port); no highlighting
+     * Key set is equal to that of {@link #tails} and tells what the index in in {@link #fixes} of the last fix shown in
+     * {@link #tails} is .
      */
-    protected ImageRotator boatIconDownwindStarboardRotator;
+    private  final Map<CompetitorDAO, Integer> lastShownFix;
 
     /**
-     * Two sails on downwind leg, wind from starboard (sails on port); with highlighting
+     * Fixes of each competitors tail. If a list is contained for a competitor, the list contains a timely "contiguous"
+     * list of fixes for the competitor. This means the server has no more data for the time interval covered, unless
+     * the last fix was {@link GPSFixDAO#extrapolated obtained by extrapolation}.
      */
-    protected ImageRotator boatIconHighlightedDownwindStarboardRotator;
+    private final Map<CompetitorDAO, List<GPSFixDAO>> fixes;
 
     /**
-     * One sail, wind from port (sails on starboard); no highlighting
+     * Markers used as boat display on the map
      */
-    protected ImageRotator boatIconPortRotator;
+    protected final Map<CompetitorDAO, Marker> boatMarkers;
+
+    private final Map<MarkDAO, Marker> buoyMarkers;
 
     /**
-     * One sail, wind from port (sails on starboard); with highlighting
+     * markers displayed in response to
+     * {@link SailingServiceAsync#getDouglasPoints(String, String, Map, Map, double, AsyncCallback)}
      */
-    protected ImageRotator boatIconHighlightedPortRotator;
+    protected Set<Marker> douglasMarkers;
 
     /**
-     * One sail, wind from starboard (sails on port); no highlighting
+     * markers displayed in response to
+     * {@link SailingServiceAsync#getDouglasPoints(String, String, Map, Map, double, AsyncCallback)}
      */
-    protected ImageRotator boatIconStarboardRotator;
+    protected Set<Marker> maneuverMarkers;
 
-    /**
-     * One sail, wind from starboard (sails on port); with highlighting
-     */
-    protected ImageRotator boatIconHighlightedStarboardRotator;
+    protected Map<CompetitorDAO, List<ManeuverDAO>> lastManeuverResult;
 
-    protected Icon buoyIcon;
-    protected Icon tackToStarboardIcon;
-    protected Icon tackToPortIcon;
-    protected Icon jibeToStarboardIcon;
-    protected Icon jibeToPortIcon;
-    protected Icon markPassingToStarboardIcon;
-    protected Icon markPassingToPortIcon;
-    protected Icon headUpOnStarboardIcon;
-    protected Icon headUpOnPortIcon;
-    protected Icon bearAwayOnStarboardIcon;
-    protected Icon bearAwayOnPortIcon;
-    protected Icon unknownManeuverIcon;
-    protected Icon penaltyCircleToStarboardIcon;
-    protected Icon penaltyCircleToPortIcon;
-    protected LatLng lastMousePosition;
+    protected Map<CompetitorDAO, List<GPSFixDAO>> lastDouglasPeuckerResult;
+    
+    private LatLng lastMousePosition;
 
-    protected long tailLengthInMilliSeconds = 30000l;
+    private List<CompetitorDAO> allCompetitors;
 
-    protected List<Triple<EventDAO, RegattaDAO, RaceDAO>> selectedEventAndRace;
+    private Set<CompetitorDAO> selectedMapCompetitors;
+
+    private List<Triple<EventDAO, RegattaDAO, RaceDAO>> selectedEventAndRace;
 
     /**
      * If the user explicitly zoomed or panned the map, don't adjust zoom/pan unless a new race is selected
      */
-    protected boolean mapZoomedOrPannedSinceLastRaceSelectionChange = false;
+    private boolean mapZoomedOrPannedSinceLastRaceSelectionChange = false;
 
     /**
      * Used to check if the first initial zoom to the buoy markers was already done.
      */
-    protected boolean mapFirstZoomDone = false;
-
+    private boolean mapFirstZoomDone = false;
 
     // key for domain web4sap.com
-    protected final String mapsAPIKey = "ABQIAAAAmvjPh3ZpHbnwuX3a66lDqRRLCigyC_gRDASMpyomD2do5awpNhRCyD_q-27hwxKe_T6ivSZ_0NgbUg";
+    private final String mapsAPIKey = "ABQIAAAAmvjPh3ZpHbnwuX3a66lDqRRLCigyC_gRDASMpyomD2do5awpNhRCyD_q-27hwxKe_T6ivSZ_0NgbUg";
 
-    protected static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
-
-    protected final RaceMapData data;
-    
     private final Timer timer;
 
-    protected boolean showDouglasPeuckerPoints = false;
+    /**
+     * RPC calls may receive responses out of order if there are multiple calls in-flight at the same time. If the time
+     * slider is moved quickly it generates many requests for boat positions quickly after each other. Sometimes,
+     * responses for requests send later may return before the responses to all earlier requests have been received and
+     * processed. This counter is used to number the requests. When processing of a response for a later request has
+     * already begun, responses to earlier requests will be ignored.
+     */
+    private int boatPositionRequestIDCounter;
 
-    protected boolean showManeuverHeadUp = false;
+    /**
+     * Corresponds to {@link #boatPositionRequestIDCounter}. As soon as the processing of a response for a request ID
+     * begins, this attribute is set to the ID. A response won't be processed if a later response is already being
+     * processed.
+     */
+    private int startedProcessingRequestID;
 
-    protected boolean showManeuverBearAway = false;
+    private RaceMapResources imageResources; 
 
-    protected boolean showManeuverTack = false;
-
-    protected boolean showManeuverJibe = false;
-
-    protected boolean showManeuverPenaltyCircle = false;
-
-    protected boolean showManeuverMarkPassing = false;
-
-    protected boolean showManeuverOther = false;
+    private RaceMapSettings settings;
     
     public RaceMap(SailingServiceAsync sailingService, ErrorReporter errorReporter, Timer timer) {
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.timer = timer;
 
-        data = new RaceMapData();
+        tails = new HashMap<CompetitorDAO, Polyline>();
+        firstShownFix = new HashMap<CompetitorDAO, Integer>();
+        lastShownFix = new HashMap<CompetitorDAO, Integer>();
+        buoyMarkers = new HashMap<MarkDAO, Marker>();
+        boatMarkers = new HashMap<CompetitorDAO, Marker>();
+        fixes = new HashMap<CompetitorDAO, List<GPSFixDAO>>();
+        
+        selectedMapCompetitors = new HashSet<CompetitorDAO>();
+        allCompetitors = new ArrayList<CompetitorDAO>();
+        
+        settings = new RaceMapSettings();
     }
 
+    public double calculateDistance(double lat1, double lng1, double lat2, double lng2) {
+        // the calculation is based on the Haversine formula
+        double earthRadius = 6371; // in km
+        double dLat = Math.toRadians(lat2-lat1);
+        double dLng = Math.toRadians(lng2-lng1);
+        double a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                   Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) *
+                   Math.sin(dLng/2) * Math.sin(dLng/2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        double dist = earthRadius * c;
+
+        return dist;
+    }
+    
     public void loadMapsAPI(final Grid grid, final int gridRow, final int gridColumn) {
         Maps.loadMapsApi(mapsAPIKey, "2", false, new Runnable() {
             public void run() {
@@ -176,10 +195,9 @@ public class RaceMap {
                 map.setScrollWheelZoomEnabled(true);
                 map.setContinuousZoom(true);
 
-//                MapType currentMapType = map.getCurrentMapType();
-//                Projection projection = currentMapType.getProjection();
-                
                 grid.setWidget(gridRow, gridColumn, map);
+                
+                imageResources = new RaceMapResources(map);
                 
                 map.addMapZoomEndHandler(new MapZoomEndHandler() {
                     @Override
@@ -199,63 +217,111 @@ public class RaceMap {
                         lastMousePosition = event.getLatLng();
                     }
                 });
-                boatIconDownwindPortRotator = new ImageRotator(resources.lowlightedBoatIconDW_Port());
-                boatIconHighlightedDownwindPortRotator = new ImageRotator(resources.highlightedBoatIconDW_Port());
-                boatIconDownwindStarboardRotator = new ImageRotator(resources.lowlightedBoatIconDW_Starboard());
-                boatIconHighlightedDownwindStarboardRotator = new ImageRotator(resources
-                        .highlightedBoatIconDW_Starboard());
-                boatIconPortRotator = new ImageRotator(resources.lowlightedBoatIcon_Port());
-                boatIconHighlightedPortRotator = new ImageRotator(resources.highlightedBoatIcon_Port());
-                boatIconStarboardRotator = new ImageRotator(resources.lowlightedBoatIcon_Starboard());
-                boatIconHighlightedStarboardRotator = new ImageRotator(resources.highlightedBoatIcon_Starboard());
-                buoyIcon = Icon.newInstance(resources.buoyIcon().getSafeUri().asString());
-                buoyIcon.setIconAnchor(Point.newInstance(4, 4));
-                tackToStarboardIcon = Icon
-                        .newInstance("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=T|00FF00|000000");
-                tackToStarboardIcon.setIconAnchor(Point.newInstance(10, 33));
-                tackToPortIcon = Icon
-                        .newInstance("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=T|FF0000|000000");
-                tackToPortIcon.setIconAnchor(Point.newInstance(10, 33));
-                jibeToStarboardIcon = Icon
-                        .newInstance("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=J|00FF00|000000");
-                jibeToStarboardIcon.setIconAnchor(Point.newInstance(10, 33));
-                jibeToPortIcon = Icon
-                        .newInstance("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=J|FF0000|000000");
-                jibeToPortIcon.setIconAnchor(Point.newInstance(10, 33));
-                headUpOnStarboardIcon = Icon
-                        .newInstance("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=H|00FF00|000000");
-                headUpOnStarboardIcon.setIconAnchor(Point.newInstance(10, 33));
-                headUpOnPortIcon = Icon
-                        .newInstance("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=H|FF0000|000000");
-                headUpOnPortIcon.setIconAnchor(Point.newInstance(10, 33));
-                bearAwayOnStarboardIcon = Icon
-                        .newInstance("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=B|00FF00|000000");
-                bearAwayOnStarboardIcon.setIconAnchor(Point.newInstance(10, 33));
-                bearAwayOnPortIcon = Icon
-                        .newInstance("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=B|FF0000|000000");
-                bearAwayOnPortIcon.setIconAnchor(Point.newInstance(10, 33));
-                markPassingToStarboardIcon = Icon
-                        .newInstance("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=M|00FF00|000000");
-                markPassingToStarboardIcon.setIconAnchor(Point.newInstance(10, 33));
-                markPassingToPortIcon = Icon
-                        .newInstance("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=M|FF0000|000000");
-                markPassingToPortIcon.setIconAnchor(Point.newInstance(10, 33));
-                unknownManeuverIcon = Icon
-                        .newInstance("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=?|FFFFFF|000000");
-                unknownManeuverIcon.setIconAnchor(Point.newInstance(10, 33));
-                penaltyCircleToStarboardIcon = Icon
-                        .newInstance("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=P|00FF00|000000");
-                penaltyCircleToStarboardIcon.setIconAnchor(Point.newInstance(10, 33));
-                penaltyCircleToPortIcon = Icon
-                        .newInstance("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=P|FF0000|000000");
-                penaltyCircleToPortIcon.setIconAnchor(Point.newInstance(10, 33));
             }
         });
     }
 
+    public void redraw() {
+        timeChanged(timer.getTime());
+    }
+    
+    @Override
+    public void onRaceSelectionChange(List<Triple<EventDAO, RegattaDAO, RaceDAO>> selectedRaces) {
+        mapFirstZoomDone = false;
+        mapZoomedOrPannedSinceLastRaceSelectionChange = false;
+        
+        this.selectedEventAndRace = selectedRaces;
+    }
+
+    @Override
+    public void onCompetitorSelectionChange(List<CompetitorDAO> newSelectedCompetitors) {
+        for (CompetitorDAO competitorDAO : newSelectedCompetitors) {
+            
+            if (!selectedMapCompetitors.contains(competitorDAO)) {
+                // "lowlight" currently selected competitor
+                Marker highlightedMarker = boatMarkers.get(competitorDAO);
+                if (highlightedMarker != null) {
+                    Marker lowlightedMarker = createBoatMarker(competitorDAO, false);
+                    map.removeOverlay(highlightedMarker);
+                    map.addOverlay(lowlightedMarker);
+                    boatMarkers.put(competitorDAO, lowlightedMarker);
+                    selectedMapCompetitors.remove(competitorDAO);
+                }
+            } else {
+                Marker lowlightedMarker = boatMarkers.get(competitorDAO);
+                if (lowlightedMarker != null) {
+                    Marker highlightedMarker = createBoatMarker(competitorDAO, true);
+                    map.removeOverlay(lowlightedMarker);
+                    map.addOverlay(highlightedMarker);
+                    boatMarkers.put(competitorDAO, highlightedMarker);
+                }
+                // add the competitor even if not currently contained in map
+                selectedMapCompetitors.add(competitorDAO);
+            }
+        }
+    }
+
+    @Override
+    public void timeChanged(final Date date) {
+        if (date != null) {
+            if (selectedEventAndRace != null && !selectedEventAndRace.isEmpty()) {
+                EventDAO event = selectedEventAndRace.get(selectedEventAndRace.size() - 1).getA();
+                RaceDAO race = selectedEventAndRace.get(selectedEventAndRace.size() - 1).getC();
+                if (event != null && race != null) {
+                    final Triple<Map<CompetitorDAO, Date>, Map<CompetitorDAO, Date>, Map<CompetitorDAO, Boolean>> fromAndToAndOverlap = 
+                            computeFromAndTo(date, getCompetitorsToShow());
+                    final int requestID = boatPositionRequestIDCounter++;
+                    sailingService.getBoatPositions(new EventNameAndRaceName(event.name, race.name),
+                            fromAndToAndOverlap.getA(), fromAndToAndOverlap.getB(), true,
+                            new AsyncCallback<Map<CompetitorDAO, List<GPSFixDAO>>>() {
+                                @Override
+                                public void onFailure(Throwable caught) {
+                                    errorReporter.reportError("Error obtaining boat positions: " + caught.getMessage());
+                                }
+
+                                @Override
+                                public void onSuccess(Map<CompetitorDAO, List<GPSFixDAO>> result) {
+                                    // process response only if not received out of order
+                                    if (startedProcessingRequestID < requestID) {
+                                        startedProcessingRequestID = requestID;
+                                        Date from = new Date(date.getTime() - settings.getTailLengthInMilliSeconds());
+                                        updateFixes(result, fromAndToAndOverlap.getC());
+                                        showBoatsOnMap(from, date, getCompetitorsToShow());
+                                        if (douglasMarkers != null) {
+                                            removeAllMarkDouglasPeuckerpoints();
+                                        }
+                                        if (maneuverMarkers != null) {
+                                            removeAllManeuverMarkers();
+                                        }
+                                    }
+                                }
+                            });
+                    sailingService.getMarkPositions(new EventNameAndRaceName(event.name, race.name), date,
+                            new AsyncCallback<List<MarkDAO>>() {
+                                @Override
+                                public void onFailure(Throwable caught) {
+                                    errorReporter.reportError("Error trying to obtain mark positions: "
+                                            + caught.getMessage());
+                                }
+
+                                @Override
+                                public void onSuccess(List<MarkDAO> result) {
+                                    showMarksOnMap(result);
+                                }
+                            });
+                }
+            }
+        }
+    }
+
+    public void fillCompetitors(List<CompetitorDAO> competitors) {
+        allCompetitors.clear();
+        allCompetitors.addAll(competitors);
+    }
+
     /**
-     * From {@link #data.fixes} as well as the selection of {@link #getCompetitorsToShow competitors to show}, computes the
-     * from/to times for which to request GPS raceMapData.fixes from the server. No update is performed here to {@link #data.fixes}. The
+     * From {@link #fixes} as well as the selection of {@link #getCompetitorsToShow competitors to show}, computes the
+     * from/to times for which to request GPS raceMapData.fixes from the server. No update is performed here to {@link #fixes}. The
      * result guarantees that, when used in
      * {@link SailingServiceAsync#getBoatPositions(String, String, Map, Map, boolean, AsyncCallback)}, for each
      * competitor from {@link #competitorsToShow} there are all raceMapData.fixes known by the server for that competitor starting
@@ -268,19 +334,17 @@ public class RaceMap {
      */
     protected Triple<Map<CompetitorDAO, Date>, Map<CompetitorDAO, Date>, Map<CompetitorDAO, Boolean>> computeFromAndTo(
             Date upTo, Collection<CompetitorDAO> competitorsToShow) {
-        Date tailstart = new Date(upTo.getTime() - tailLengthInMilliSeconds);
+        Date tailstart = new Date(upTo.getTime() - settings.getTailLengthInMilliSeconds());
         Map<CompetitorDAO, Date> from = new HashMap<CompetitorDAO, Date>();
         Map<CompetitorDAO, Date> to = new HashMap<CompetitorDAO, Date>();
         Map<CompetitorDAO, Boolean> overlapWithKnownFixes = new HashMap<CompetitorDAO, Boolean>();
         
         for (CompetitorDAO competitor : competitorsToShow) {
-            List<GPSFixDAO> fixesForCompetitor = data.fixes.get(competitor);
+            List<GPSFixDAO> fixesForCompetitor = fixes.get(competitor);
             Date fromDate;
             Date toDate;
-            Date timepointOfLastKnownFix = fixesForCompetitor == null ? null
-                    : data.getTimepointOfLastNonExtrapolated(fixesForCompetitor);
-            Date timepointOfFirstKnownFix = fixesForCompetitor == null ? null
-                    : data.getTimepointOfFirstNonExtrapolated(fixesForCompetitor);
+            Date timepointOfLastKnownFix = fixesForCompetitor == null ? null : getTimepointOfLastNonExtrapolated(fixesForCompetitor);
+            Date timepointOfFirstKnownFix = fixesForCompetitor == null ? null : getTimepointOfFirstNonExtrapolated(fixesForCompetitor);
             boolean overlap = false;
             if (fixesForCompetitor != null && timepointOfFirstKnownFix != null
                     && !tailstart.before(timepointOfFirstKnownFix) && timepointOfLastKnownFix != null
@@ -313,7 +377,7 @@ public class RaceMap {
 
 
     /**
-     * Adds the raceMapData.fixes received in <code>result</code> to {@link #data.fixes} and ensures they are still contiguous for each
+     * Adds the raceMapData.fixes received in <code>result</code> to {@link #fixes} and ensures they are still contiguous for each
      * competitor. If <code>overlapsWithKnownraceMapData.fixes</code> indicates that the raceMapData.fixes received in <code>result</code>
      * overlap with those already known, the raceMapData.fixes are merged into the list of already known raceMapData.fixes for the competitor.
      * Otherwise, the raceMapData.fixes received in <code>result</code> replace those known so far for the respective competitor.
@@ -322,24 +386,24 @@ public class RaceMap {
             Map<CompetitorDAO, Boolean> overlapsWithKnownFixes) {
         for (Map.Entry<CompetitorDAO, List<GPSFixDAO>> e : result.entrySet()) {
             if (e.getValue() != null && !e.getValue().isEmpty()) {
-                List<GPSFixDAO> fixesForCompetitor = data.fixes.get(e.getKey());
+                List<GPSFixDAO> fixesForCompetitor = fixes.get(e.getKey());
                 if (fixesForCompetitor == null) {
                     fixesForCompetitor = new ArrayList<GPSFixDAO>();
-                    data.fixes.put(e.getKey(), fixesForCompetitor);
+                    fixes.put(e.getKey(), fixesForCompetitor);
                 }
                 if (!overlapsWithKnownFixes.get(e.getKey())) {
                     fixesForCompetitor.clear();
                     // to re-establish the invariants for raceMapData.tails, raceMapData.firstShownFix and raceMapData.lastShownFix, we now need to remove
                     // all
                     // points from the competitor's polyline and clear the entries in raceMapData.firstShownFix and raceMapData.lastShownFix
-                    if (map != null && data.tails.containsKey(e.getKey())) {
-                        map.removeOverlay(data.tails.remove(e.getKey()));
+                    if (map != null && tails.containsKey(e.getKey())) {
+                        map.removeOverlay(tails.remove(e.getKey()));
                     }
-                    data.firstShownFix.remove(e.getKey());
-                    data.lastShownFix.remove(e.getKey());
+                    firstShownFix.remove(e.getKey());
+                    lastShownFix.remove(e.getKey());
                     fixesForCompetitor.addAll(e.getValue());
                 } else {
-                    data.mergeFixes(e.getKey(), e.getValue());
+                    mergeFixes(e.getKey(), e.getValue());
                 }
             }
         }
@@ -347,12 +411,12 @@ public class RaceMap {
 
     protected void showMarksOnMap(List<MarkDAO> result) {
         if (map != null) {
-            Set<MarkDAO> toRemove = new HashSet<MarkDAO>(data.buoyMarkers.keySet());
+            Set<MarkDAO> toRemove = new HashSet<MarkDAO>(buoyMarkers.keySet());
             for (MarkDAO markDAO : result) {
-                Marker buoyMarker = data.buoyMarkers.get(markDAO);
+                Marker buoyMarker = buoyMarkers.get(markDAO);
                 if (buoyMarker == null) {
                     buoyMarker = createBuoyMarker(markDAO);
-                    data.buoyMarkers.put(markDAO, buoyMarker);
+                    buoyMarkers.put(markDAO, buoyMarker);
                     map.addOverlay(buoyMarker);
                 } else {
                     buoyMarker.setLatLng(LatLng.newInstance(markDAO.position.latDeg, markDAO.position.lngDeg));
@@ -360,10 +424,10 @@ public class RaceMap {
                 }
             }
             for (MarkDAO toRemoveMarkDAO : toRemove) {
-                Marker marker = data.buoyMarkers.remove(toRemoveMarkDAO);
+                Marker marker = buoyMarkers.remove(toRemoveMarkDAO);
                 map.removeOverlay(marker);
             }
-            zoomMapFirstTimeToMarks(data.buoyMarkers.keySet());
+            zoomMapFirstTimeToMarks(buoyMarkers.keySet());
         }
     }
 
@@ -407,25 +471,24 @@ public class RaceMap {
 
     /**
      * @param from
-     *            time point for first fix to show in raceMapData.tails
+     *            time point for first fix to show in tails
      * @param to
-     *            time point for last fix to show in raceMapData.tails
+     *            time point for last fix to show in tails
      */
-    protected void showBoatsOnMap(Date from, Date to, Collection<CompetitorDAO> competitorsToShow,
-            Set<CompetitorDAO> competitorsSelectedInMap) {
+    protected void showBoatsOnMap(Date from, Date to, Collection<CompetitorDAO> competitorsToShow) {
         if (map != null) {
             LatLngBounds newMapBounds = null;
-            Set<CompetitorDAO> competitorDAOsOfUnusedTails = new HashSet<CompetitorDAO>(data.tails.keySet());
-            Set<CompetitorDAO> competitorDAOsOfUnusedMarkers = new HashSet<CompetitorDAO>(data.boatMarkers.keySet());
+            Set<CompetitorDAO> competitorDAOsOfUnusedTails = new HashSet<CompetitorDAO>(tails.keySet());
+            Set<CompetitorDAO> competitorDAOsOfUnusedMarkers = new HashSet<CompetitorDAO>(boatMarkers.keySet());
 
             for (CompetitorDAO competitorDAO : competitorsToShow) {
-                if (data.fixes.containsKey(competitorDAO)) {
-                    Polyline tail = data.tails.get(competitorDAO);
+                if (fixes.containsKey(competitorDAO)) {
+                    Polyline tail = tails.get(competitorDAO);
                     if (tail == null) {
                         tail = createTailAndUpdateIndices(competitorDAO, from, to);
                         map.addOverlay(tail);
                     } else {
-                        data.updateTail(tail, competitorDAO, from, to);
+                        updateTail(tail, competitorDAO, from, to);
                         competitorDAOsOfUnusedTails.remove(competitorDAO);
                     }
                     LatLngBounds bounds = tail.getBounds();
@@ -435,31 +498,31 @@ public class RaceMap {
                         newMapBounds.extend(bounds.getNorthEast());
                         newMapBounds.extend(bounds.getSouthWest());
                     }
-                    if (data.lastShownFix.containsKey(competitorDAO) && data.lastShownFix.get(competitorDAO) != -1) {
-                        GPSFixDAO lastPos = data.getBoatFix(competitorDAO);
-                        Marker boatMarker = data.boatMarkers.get(competitorDAO);
+                    if (lastShownFix.containsKey(competitorDAO) && lastShownFix.get(competitorDAO) != -1) {
+                        GPSFixDAO lastPos = getBoatFix(competitorDAO);
+                        Marker boatMarker = boatMarkers.get(competitorDAO);
                         if (boatMarker == null) {
                             boatMarker = createBoatMarker(competitorDAO, false);
                             map.addOverlay(boatMarker);
-                            data.boatMarkers.put(competitorDAO, boatMarker);
+                            boatMarkers.put(competitorDAO, boatMarker);
                         } else {
                             competitorDAOsOfUnusedMarkers.remove(competitorDAO);
                             // check if anchors match; re-use marker with setImage only if anchors match
-                            Point newAnchor = getBoatImageRotator(lastPos,
-                                    competitorsSelectedInMap.contains(competitorDAO)).getAnchor();
+                            Point newAnchor = imageResources.getBoatImageTransformator(lastPos,
+                                    selectedMapCompetitors.contains(competitorDAO)).getAnchor();
                             Point oldAnchor = boatMarker.getIcon().getIconAnchor();
                             if (oldAnchor.getX() == newAnchor.getX() && oldAnchor.getY() == newAnchor.getY()) {
                                 boatMarker.setLatLng(LatLng.newInstance(lastPos.position.latDeg,
                                         lastPos.position.lngDeg));
-                                boatMarker.setImage(getBoatImageURL(lastPos,
-                                        competitorsSelectedInMap.contains(competitorDAO)));
+                                boatMarker.setImage(imageResources.getBoatImageURL(lastPos,
+                                        selectedMapCompetitors.contains(competitorDAO)));
                             } else {
                                 // anchors don't match; replace marker
                                 map.removeOverlay(boatMarker);
                                 boatMarker = createBoatMarker(competitorDAO,
-                                        competitorsSelectedInMap.contains(competitorDAO));
+                                        selectedMapCompetitors.contains(competitorDAO));
                                 map.addOverlay(boatMarker);
-                                data.boatMarkers.put(competitorDAO, boatMarker);
+                                boatMarkers.put(competitorDAO, boatMarker);
                             }
                         }
                     }
@@ -471,75 +534,18 @@ public class RaceMap {
                 mapFirstZoomDone = true;
             }
             for (CompetitorDAO unusedMarkerCompetitorDAO : competitorDAOsOfUnusedMarkers) {
-                map.removeOverlay(data.boatMarkers.remove(unusedMarkerCompetitorDAO));
+                map.removeOverlay(boatMarkers.remove(unusedMarkerCompetitorDAO));
             }
             for (CompetitorDAO unusedTailCompetitorDAO : competitorDAOsOfUnusedTails) {
-                map.removeOverlay(data.tails.remove(unusedTailCompetitorDAO));
+                map.removeOverlay(tails.remove(unusedTailCompetitorDAO));
             }
         }
     }
-
     
-    private String getBoatImageURL(GPSFixDAO boatFix, boolean highlighted) {
-        return getBoatImageURL(getBoatImageRotator(boatFix, highlighted), boatFix);
-    }
-
-    private String getBoatImageURL(ImageRotator boatImageRotator, GPSFixDAO boatFix) {
-        // the possible zoom level range is 0 to 21 (zoom level 0 would show the whole world)
-        int zoomLevel = map.getZoomLevel();
-        double minScaleFactor = 0.1; 
-        double maxScaleFactor = 1.0;
-        
-        double scaleDiffPerZoomLevel = (maxScaleFactor - minScaleFactor) / 21.0;   
-        
-        double scaleFactor = minScaleFactor + scaleDiffPerZoomLevel * zoomLevel;
-        
-        return boatImageRotator.getRotatedImageURL(boatFix.speedWithBearing.bearingInDegrees, scaleFactor);
-    }
-
-    private Icon getBoatImageIcon(GPSFixDAO boatFix, boolean highlighted) {
-        ImageRotator boatImageRotator = getBoatImageRotator(boatFix, highlighted);
-        Icon icon = Icon.newInstance(getBoatImageURL(boatImageRotator, boatFix));
-        icon.setIconAnchor(boatImageRotator.getAnchor());
-        return icon;
-    }
-
-    private ImageRotator getBoatImageRotator(GPSFixDAO boatFix, boolean highlighted) {
-        if (boatFix.tack == Tack.PORT) {
-            if (LegType.DOWNWIND == boatFix.legType) {
-                if (highlighted) {
-                    return boatIconHighlightedDownwindStarboardRotator;
-                } else {
-                    return boatIconDownwindStarboardRotator;
-                }
-            } else {
-                if (highlighted) {
-                    return boatIconHighlightedStarboardRotator;
-                } else {
-                    return boatIconStarboardRotator;
-                }
-            }
-        } else {
-            if (LegType.DOWNWIND == boatFix.legType) {
-                if (highlighted) {
-                    return boatIconHighlightedDownwindPortRotator;
-                } else {
-                    return boatIconDownwindPortRotator;
-                }
-            } else {
-                if (highlighted) {
-                    return boatIconHighlightedPortRotator;
-                } else {
-                    return boatIconPortRotator;
-                }
-            }
-        }
-    }
-
     protected Marker createBuoyMarker(final MarkDAO markDAO) {
         MarkerOptions options = MarkerOptions.newInstance();
-        if (buoyIcon != null) {
-            options.setIcon(buoyIcon);
+        if (imageResources.buoyIcon != null) {
+            options.setIcon(imageResources.buoyIcon);
         }
         options.setTitle(markDAO.name);
         final Marker buoyMarker = new Marker(LatLng.newInstance(markDAO.position.latDeg, markDAO.position.lngDeg),
@@ -555,11 +561,11 @@ public class RaceMap {
     }
 
     protected Marker createBoatMarker(final CompetitorDAO competitorDAO, boolean highlighted) {
-        GPSFixDAO boatFix = data.getBoatFix(competitorDAO);
+        GPSFixDAO boatFix = getBoatFix(competitorDAO);
         double latDeg = boatFix.position.latDeg;
         double lngDeg = boatFix.position.lngDeg;
         MarkerOptions options = MarkerOptions.newInstance();
-        Icon icon = getBoatImageIcon(boatFix, highlighted);
+        Icon icon = imageResources.getBoatImageIcon(boatFix, highlighted);
         options.setIcon(icon);
         options.setTitle(competitorDAO.name);
         final Marker boatMarker = new Marker(LatLng.newInstance(latDeg, lngDeg), options);
@@ -592,7 +598,7 @@ public class RaceMap {
     }
 
     private void showCompetitorInfoWindow(final CompetitorDAO competitorDAO, LatLng where) {
-        GPSFixDAO latestFixForCompetitor = data.getBoatFix(competitorDAO);
+        GPSFixDAO latestFixForCompetitor = getBoatFix(competitorDAO);
         map.getInfoWindow().open(where,
                 new InfoWindowContent(getInfoWindowContent(competitorDAO, latestFixForCompetitor)));
     }
@@ -616,9 +622,9 @@ public class RaceMap {
             RaceDAO race = selectedEventAndRace.get(selectedEventAndRace.size() - 1).getC();
             if (event != null && race != null) {
                 Map<CompetitorDAO, Date> from = new HashMap<CompetitorDAO, Date>();
-                from.put(competitorDAO, data.fixes.get(competitorDAO).get(data.firstShownFix.get(competitorDAO)).timepoint);
+                from.put(competitorDAO, fixes.get(competitorDAO).get(firstShownFix.get(competitorDAO)).timepoint);
                 Map<CompetitorDAO, Date> to = new HashMap<CompetitorDAO, Date>();
-                to.put(competitorDAO, data.getBoatFix(competitorDAO).timepoint);
+                to.put(competitorDAO, getBoatFix(competitorDAO).timepoint);
                 /* currently not showing Douglas-Peucker points; TODO use checkboxes to select what to show (Bug #6) */
                 sailingService.getDouglasPoints(new EventNameAndRaceName(event.name, race.name), from, to, 3,
                         new AsyncCallback<Map<CompetitorDAO, List<GPSFixDAO>>>() {
@@ -629,12 +635,12 @@ public class RaceMap {
 
                             @Override
                             public void onSuccess(Map<CompetitorDAO, List<GPSFixDAO>> result) {
-                                data.lastDouglasPeuckerResult = result;
-                                if (data.douglasMarkers != null) {
+                                lastDouglasPeuckerResult = result;
+                                if (douglasMarkers != null) {
                                     removeAllMarkDouglasPeuckerpoints();
                                 }
                                 if (!timer.isPlaying()) {
-                                    if (showDouglasPeuckerPoints) {
+                                    if (settings.isShowDouglasPeuckerPoints()) {
                                         showMarkDouglasPeuckerPoints(result);
                                     }
                                 }
@@ -649,8 +655,8 @@ public class RaceMap {
 
                             @Override
                             public void onSuccess(Map<CompetitorDAO, List<ManeuverDAO>> result) {
-                                data.lastManeuverResult = result;
-                                if (data.maneuverMarkers != null) {
+                                lastManeuverResult = result;
+                                if (maneuverMarkers != null) {
                                     removeAllManeuverMarkers();
                                 }
                                 if (!timer.isPlaying()) {
@@ -664,20 +670,28 @@ public class RaceMap {
         return result;
     }
 
+    private Collection<CompetitorDAO> getCompetitorsToShow() {
+        if (settings.isShowOnlySelectedCompetitors()) {
+            return selectedMapCompetitors;
+        } else {
+            return allCompetitors;
+        }
+    }
+    
     private String getColorString(CompetitorDAO competitorDAO) {
         // TODO green no more than 70, red no less than 120
         return "#" + (Integer.toHexString(competitorDAO.hashCode()) + "000000").substring(0, 4).toUpperCase() + "00";
     }
 
     /**
-     * Creates a polyline for the competitor represented by <code>competitorDAO</code>, taking the raceMapData.fixes from
-     * {@link #data.fixes raceMapData.fixes.get(competitorDAO)} and using the raceMapData.fixes starting at time point <code>from</code> (inclusive)
+     * Creates a polyline for the competitor represented by <code>competitorDAO</code>, taking the fixes from
+     * {@link #fixes fixes.get(competitorDAO)} and using the fixes starting at time point <code>from</code> (inclusive)
      * up to the last fix with time point before <code>to</code>. The polyline is returned. Updates are applied to
-     * {@link #data.lastShownFix}, {@link #data.firstShownFix} and {@link #data.tails}.
+     * {@link #lastShownFix}, {@link #firstShownFix} and {@link #tails}.
      */
     protected Polyline createTailAndUpdateIndices(final CompetitorDAO competitorDAO, Date from, Date to) {
         List<LatLng> points = new ArrayList<LatLng>();
-        List<GPSFixDAO> fixesForCompetitor = data.fixes.get(competitorDAO);
+        List<GPSFixDAO> fixesForCompetitor = fixes.get(competitorDAO);
         int indexOfFirst = -1;
         int indexOfLast = -1;
         int i = 0;
@@ -705,8 +719,8 @@ public class RaceMap {
             indexOfLast = i - 1;
         }
         if (indexOfFirst != -1 && indexOfLast != -1) {
-            data.firstShownFix.put(competitorDAO, indexOfFirst);
-            data.lastShownFix.put(competitorDAO, indexOfLast);
+            firstShownFix.put(competitorDAO, indexOfFirst);
+            lastShownFix.put(competitorDAO, indexOfLast);
         }
         PolylineOptions options = PolylineOptions.newInstance(
         /* clickable */true, /* geodesic */true);
@@ -730,30 +744,30 @@ public class RaceMap {
                 map.setTitle("");
             }
         });
-        data.tails.put(competitorDAO, result);
+        tails.put(competitorDAO, result);
         return result;
     }
 
     protected void removeAllMarkDouglasPeuckerpoints() {
-        if (data.douglasMarkers != null) {
-            for (Marker marker : data.douglasMarkers) {
+        if (douglasMarkers != null) {
+            for (Marker marker : douglasMarkers) {
                 map.removeOverlay(marker);
             }
         }
-        data.douglasMarkers = null;
+        douglasMarkers = null;
     }
 
     protected void removeAllManeuverMarkers() {
-        if (data.maneuverMarkers != null) {
-            for (Marker marker : data.maneuverMarkers) {
+        if (maneuverMarkers != null) {
+            for (Marker marker : maneuverMarkers) {
                 map.removeOverlay(marker);
             }
-            data.maneuverMarkers = null;
+            maneuverMarkers = null;
         }
     }
 
     protected void showMarkDouglasPeuckerPoints(Map<CompetitorDAO, List<GPSFixDAO>> gpsFixPointMapForCompetitors) {
-        data.douglasMarkers = new HashSet<Marker>();
+        douglasMarkers = new HashSet<Marker>();
         if (map != null && gpsFixPointMapForCompetitors != null) {
             Set<CompetitorDAO> keySet = gpsFixPointMapForCompetitors.keySet();
             Iterator<CompetitorDAO> iter = keySet.iterator();
@@ -765,7 +779,7 @@ public class RaceMap {
                     MarkerOptions options = MarkerOptions.newInstance();
                     options.setTitle(fix.timepoint+": "+fix.position+", "+fix.speedWithBearing.toString());
                     Marker marker = new Marker(latLng, options);
-                    data.douglasMarkers.add(marker);
+                    douglasMarkers.add(marker);
                     map.addOverlay(marker);
                 }
             }
@@ -773,7 +787,7 @@ public class RaceMap {
     }
 
     protected void showManeuvers(Map<CompetitorDAO, List<ManeuverDAO>> maneuvers) {
-        data.maneuverMarkers = new HashSet<Marker>();
+        maneuverMarkers = new HashSet<Marker>();
         if (map != null && maneuvers != null) {
             Set<CompetitorDAO> keySet = maneuvers.keySet();
             Iterator<CompetitorDAO> iter = keySet.iterator();
@@ -787,56 +801,188 @@ public class RaceMap {
                     options.setTitle("" + maneuver.timepoint + ": " + maneuver.type + " "
                             + maneuver.directionChangeInDegrees + "deg from " + maneuver.speedWithBearingBefore
                             + " to " + maneuver.speedWithBearingAfter);
-                    if (maneuver.type.equals("TACK") && showManeuverTack) {
+                    if (maneuver.type.equals("TACK") && settings.isShowManeuverTack()) {
                         if (maneuver.newTack.equals("PORT")) {
-                            options.setIcon(tackToPortIcon);
+                            options.setIcon(imageResources.tackToPortIcon);
                         } else {
-                            options.setIcon(tackToStarboardIcon);
+                            options.setIcon(imageResources.tackToStarboardIcon);
                         }
-                    } else if (maneuver.type.equals("JIBE") && showManeuverJibe) {
+                    } else if (maneuver.type.equals("JIBE") && settings.isShowManeuverJibe()) {
                         if (maneuver.newTack.equals("PORT")) {
-                            options.setIcon(jibeToPortIcon);
+                            options.setIcon(imageResources.jibeToPortIcon);
                         } else {
-                            options.setIcon(jibeToStarboardIcon);
+                            options.setIcon(imageResources.jibeToStarboardIcon);
                         }
-                    } else if (maneuver.type.equals("HEAD_UP") && showManeuverHeadUp) {
+                    } else if (maneuver.type.equals("HEAD_UP") && settings.isShowManeuverHeadUp()) {
                         if (maneuver.newTack.equals("PORT")) {
-                            options.setIcon(headUpOnPortIcon);
+                            options.setIcon(imageResources.headUpOnPortIcon);
                         } else {
-                            options.setIcon(headUpOnStarboardIcon);
+                            options.setIcon(imageResources.headUpOnStarboardIcon);
                         }
-                    } else if (maneuver.type.equals("BEAR_AWAY") && showManeuverBearAway) {
+                    } else if (maneuver.type.equals("BEAR_AWAY") && settings.isShowManeuverBearAway()) {
                         if (maneuver.newTack.equals("PORT")) {
-                            options.setIcon(bearAwayOnPortIcon);
+                            options.setIcon(imageResources.bearAwayOnPortIcon);
                         } else {
-                            options.setIcon(bearAwayOnStarboardIcon);
+                            options.setIcon(imageResources.bearAwayOnStarboardIcon);
                         }
-                    } else if (maneuver.type.equals("PENALTY_CIRCLE") && showManeuverPenaltyCircle) {
+                    } else if (maneuver.type.equals("PENALTY_CIRCLE") && settings.isShowManeuverPenaltyCircle()) {
                         if (maneuver.newTack.equals("PORT")) {
-                            options.setIcon(penaltyCircleToPortIcon);
+                            options.setIcon(imageResources.penaltyCircleToPortIcon);
                         } else {
-                            options.setIcon(penaltyCircleToStarboardIcon);
+                            options.setIcon(imageResources.penaltyCircleToStarboardIcon);
                         }
-                    } else if (maneuver.type.equals("MARK_PASSING") && showManeuverMarkPassing) {
+                    } else if (maneuver.type.equals("MARK_PASSING") && settings.isShowManeuverMarkPassing()) {
                         if (maneuver.newTack.equals("PORT")) {
-                            options.setIcon(markPassingToPortIcon);
+                            options.setIcon(imageResources.markPassingToPortIcon);
                         } else {
-                            options.setIcon(markPassingToStarboardIcon);
+                            options.setIcon(imageResources.markPassingToStarboardIcon);
                         }
                     } else {
-                        if (maneuver.type.equals("UNKNOWN") && showManeuverOther) {
-                            options.setIcon(unknownManeuverIcon);
+                        if (maneuver.type.equals("UNKNOWN") && settings.isShowManeuverOther()) {
+                            options.setIcon(imageResources.unknownManeuverIcon);
                         } else {
                             showThisManeuver = false;
                         }
                     }
                     if (showThisManeuver) {
                         Marker marker = new Marker(latLng, options);
-                        data.maneuverMarkers.add(marker);
+                        maneuverMarkers.add(marker);
                         map.addOverlay(marker);
                     }
                 }
             }
         }
     }
+    
+    protected Date getTimepointOfFirstNonExtrapolated(List<GPSFixDAO> fixesForCompetitor) {
+        for (GPSFixDAO fix : fixesForCompetitor) {
+            if (!fix.extrapolated) {
+                return fix.timepoint;
+            }
+        }
+        return null;
+    }
+
+    protected Date getTimepointOfLastNonExtrapolated(List<GPSFixDAO> fixesForCompetitor) {
+        if (!fixesForCompetitor.isEmpty()) {
+            for (ListIterator<GPSFixDAO> fixIter = fixesForCompetitor.listIterator(fixesForCompetitor.size() - 1); fixIter
+                    .hasPrevious();) {
+                GPSFixDAO fix = fixIter.previous();
+                if (!fix.extrapolated) {
+                    return fix.timepoint;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * While updating the {@link #fixes} for <code>competitorDAO</code>, the invariants for {@link #tails} and
+     * {@link #firstShownFix} and {@link #lastShownFix} are maintained: each time a fix is inserted, the
+     * {@link #firstShownFix}/{@link #lastShownFix} records for <code>competitorDAO</code> are incremented if they are
+     * greater or equal to the insertion index and we have a tail in {@link #tails} for <code>competitorDAO</code>.
+     * Additionally, if the fix is in between the fixes shown in the competitor's tail, the tail is adjusted by
+     * inserting the corresponding fix.
+     */
+    protected void mergeFixes(CompetitorDAO competitorDAO, List<GPSFixDAO> mergeThis) {
+        List<GPSFixDAO> intoThis = fixes.get(competitorDAO);
+        int indexOfFirstShownFix = firstShownFix.get(competitorDAO) == null ? -1 : firstShownFix.get(competitorDAO);
+        int indexOfLastShownFix = lastShownFix.get(competitorDAO) == null ? -1 : lastShownFix.get(competitorDAO);
+        Polyline tail = tails.get(competitorDAO);
+        int intoThisIndex = 0;
+        for (GPSFixDAO mergeThisFix : mergeThis) {
+            while (intoThisIndex < intoThis.size()
+                    && intoThis.get(intoThisIndex).timepoint.before(mergeThisFix.timepoint)) {
+                intoThisIndex++;
+            }
+            if (intoThisIndex < intoThis.size() && intoThis.get(intoThisIndex).timepoint.equals(mergeThisFix.timepoint)) {
+                // exactly same time point; replace with fix from mergeThis
+                intoThis.set(intoThisIndex, mergeThisFix);
+            } else {
+                intoThis.add(intoThisIndex, mergeThisFix);
+                if (indexOfFirstShownFix >= intoThisIndex) {
+                    indexOfFirstShownFix++;
+                }
+                if (indexOfLastShownFix >= intoThisIndex) {
+                    indexOfLastShownFix++;
+                }
+                if (tail != null && intoThisIndex >= indexOfFirstShownFix && intoThisIndex <= indexOfLastShownFix) {
+                    tail.insertVertex(intoThisIndex - indexOfFirstShownFix,
+                            LatLng.newInstance(mergeThisFix.position.latDeg, mergeThisFix.position.lngDeg));
+                }
+            }
+            intoThisIndex++;
+        }
+    }
+
+    protected GPSFixDAO getBoatFix(CompetitorDAO competitorDAO) {
+        return fixes.get(competitorDAO).get(lastShownFix.get(competitorDAO));
+    }
+
+    /**
+     * If the tail starts before <code>from</code>, removes leading vertices from <code>tail</code> that are before
+     * <code>from</code>. This is determined by using the {@link #firstShownFix} index which tells us where in
+     * {@link #fixes} we find the sequence of fixes currently represented in the tail.
+     * <p>
+     * 
+     * If the tail starts after <code>from</code>, vertices for those {@link #fixes} for <code>competitorDAO</code> at
+     * or after time point <code>from</code> and before the time point of the first fix displayed so far in the tail and
+     * before <code>to</code> are prepended to the tail.
+     * <p>
+     * 
+     * Now to the end of the tail: if the existing tail's end exceeds <code>to</code>, the vertices in excess are
+     * removed (aided by {@link #lastShownFix}). Otherwise, for the competitor's fixes starting at the tail's end up to
+     * <code>to</code> are appended to the tail.
+     * <p>
+     * 
+     * When this method returns, {@link #firstShownFix} and {@link #lastShownFix} have been updated accordingly.
+     */
+    protected void updateTail(Polyline tail, CompetitorDAO competitorDAO, Date from, Date to) {
+        List<GPSFixDAO> fixesForCompetitor = fixes.get(competitorDAO);
+        int indexOfFirstShownFix = firstShownFix.get(competitorDAO) == null ? -1 : firstShownFix.get(competitorDAO);
+        while (indexOfFirstShownFix != -1 && tail.getVertexCount() > 0
+                && fixesForCompetitor.get(indexOfFirstShownFix).timepoint.before(from)) {
+            tail.deleteVertex(0);
+            indexOfFirstShownFix++;
+        }
+        // now the polyline contains no more vertices representing fixes before "from";
+        // go back in time starting at indexOfFirstShownFix while the fixes are still at or after "from"
+        // and insert corresponding vertices into the polyline
+        while (indexOfFirstShownFix > 0 && !fixesForCompetitor.get(indexOfFirstShownFix - 1).timepoint.before(from)) {
+            indexOfFirstShownFix--;
+            GPSFixDAO fix = fixesForCompetitor.get(indexOfFirstShownFix);
+            tail.insertVertex(0, LatLng.newInstance(fix.position.latDeg, fix.position.lngDeg));
+        }
+        // now adjust the polylines tail: remove excess vertices that are after "to"
+        int indexOfLastShownFix = lastShownFix.get(competitorDAO) == null ? -1 : lastShownFix.get(competitorDAO);
+        while (indexOfLastShownFix != -1 && tail.getVertexCount() > 0
+                && fixesForCompetitor.get(indexOfLastShownFix).timepoint.after(to)) {
+            tail.deleteVertex(tail.getVertexCount() - 1);
+            indexOfLastShownFix--;
+        }
+        // now the polyline contains no more vertices representing fixes after "to";
+        // go forward in time starting at indexOfLastShownFix while the fixes are still at or before "to"
+        // and insert corresponding vertices into the polyline
+        while (indexOfLastShownFix < fixesForCompetitor.size() - 1
+                && !fixesForCompetitor.get(indexOfLastShownFix + 1).timepoint.after(to)) {
+            indexOfLastShownFix++;
+            GPSFixDAO fix = fixesForCompetitor.get(indexOfLastShownFix);
+            tail.insertVertex(tail.getVertexCount(), LatLng.newInstance(fix.position.latDeg, fix.position.lngDeg));
+        }
+        firstShownFix.put(competitorDAO, indexOfFirstShownFix);
+        lastShownFix.put(competitorDAO, indexOfLastShownFix);
+    }
+
+    public Set<CompetitorDAO> getSelectedMapCompetitors() {
+        return selectedMapCompetitors;
+    }
+
+    public RaceMapSettings getSettings() {
+        return settings;
+    }
+
+    public void setSettings(RaceMapSettings settings) {
+        this.settings = settings;
+    }
+
 }
