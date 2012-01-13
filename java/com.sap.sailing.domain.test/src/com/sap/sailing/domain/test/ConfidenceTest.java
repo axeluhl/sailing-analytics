@@ -3,6 +3,11 @@ package com.sap.sailing.domain.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.Bearing;
@@ -84,15 +89,15 @@ public class ConfidenceTest {
     @Test
     public void testAveragingWithEmptyListYieldsNull() {
         ConfidenceBasedAverager<Double, Double> averager = ConfidenceBasedAveragerFactory.INSTANCE.createAverager();
-        @SuppressWarnings("unchecked")
-        Double average = averager.getAverage();
+        Set<HasConfidence<Double, Double>> emptySet = Collections.emptySet();
+        Double average = averager.getAverage(emptySet);
         assertNull(average);
     }
 
     @Test
     public void testAveragingWithNullArrayYieldsNull() {
         ConfidenceBasedAverager<Double, Double> averager = ConfidenceBasedAveragerFactory.INSTANCE.createAverager();
-        Double average = averager.getAverage((HasConfidence<Double, Double>[]) null);
+        Double average = averager.getAverage(null);
         assertNull(average);
     }
 
@@ -101,8 +106,8 @@ public class ConfidenceTest {
         ScalableDoubleWithConfidence d1 = new ScalableDoubleWithConfidence(1., 0.5);
         ScalableDoubleWithConfidence d2 = new ScalableDoubleWithConfidence(2., 0.5);
         ConfidenceBasedAverager<Double, Double> averager = ConfidenceBasedAveragerFactory.INSTANCE.createAverager();
-        @SuppressWarnings("unchecked")
-        Double average = averager.getAverage(d1, d2);
+        List<ScalableDoubleWithConfidence> list = Arrays.asList(d1, d2);
+        Double average = averager.getAverage(list);
         assertEquals(1.5, average, 0.00000001);
     }
 
@@ -112,8 +117,8 @@ public class ConfidenceTest {
         ScalableDoubleWithConfidence d2 = new ScalableDoubleWithConfidence(2., 1.);
         ScalableDoubleWithConfidence d3 = new ScalableDoubleWithConfidence(3., 2.);
         ConfidenceBasedAverager<Double, Double> averager = ConfidenceBasedAveragerFactory.INSTANCE.createAverager();
-        @SuppressWarnings("unchecked")
-        Double average = averager.getAverage(d1, d2, d3);
+        List<ScalableDoubleWithConfidence> list = Arrays.asList(d1, d2, d3);
+        Double average = averager.getAverage(list);
         assertEquals(2.25, average, 0.00000001);
     }
     
@@ -122,8 +127,8 @@ public class ConfidenceTest {
         ScalableBearingWithConfidence d1 = new ScalableBearingWithConfidence(new DegreeBearingImpl(350.), 1.);
         ScalableBearingWithConfidence d2 = new ScalableBearingWithConfidence(new DegreeBearingImpl(10.), 1.);
         ConfidenceBasedAverager<Pair<Double, Double>, Bearing> averager = ConfidenceBasedAveragerFactory.INSTANCE.createAverager();
-        @SuppressWarnings("unchecked")
-        Bearing average = averager.getAverage(d1, d2);
+        List<ScalableBearingWithConfidence> list = Arrays.asList(d1, d2);
+        Bearing average = averager.getAverage(list);
         assertEquals(0, average.getDegrees(), 0.00000001);
     }
     
@@ -133,8 +138,8 @@ public class ConfidenceTest {
         ScalableBearingWithConfidence d2 = new ScalableBearingWithConfidence(new DegreeBearingImpl(10.), 1.);
         ScalableBearingWithConfidence d3 = new ScalableBearingWithConfidence(new DegreeBearingImpl(20.), 2.);
         ConfidenceBasedAverager<Pair<Double, Double>, Bearing> averager = ConfidenceBasedAveragerFactory.INSTANCE.createAverager();
-        @SuppressWarnings("unchecked")
-        Bearing average = averager.getAverage(d1, d2, d3);
+        List<ScalableBearingWithConfidence> list = Arrays.asList(d1, d2, d3);
+        Bearing average = averager.getAverage(list);
         assertEquals(10, average.getDegrees(), 0.1);
     }
     

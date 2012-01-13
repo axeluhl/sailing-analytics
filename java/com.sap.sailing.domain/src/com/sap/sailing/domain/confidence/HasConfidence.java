@@ -1,18 +1,39 @@
 package com.sap.sailing.domain.confidence;
 
+import com.sap.sailing.domain.base.Distance;
+
 /**
- * Some values, particularly those obtained from real-world measurements, are not always accurate. Some
- * values are derived by interpolating or extrapolating data series obtained through measurement or
- * even estimation. Some values are simply guessed by humans and entered into the system.<p>
+ * Some values, particularly those obtained from real-world measurements, are not always accurate. Some values are
+ * derived by interpolating or extrapolating data series obtained through measurement or even estimation. Some values
+ * are simply guessed by humans and entered into the system.
+ * <p>
  * 
- * All those values have a certain level of confidence. In case multiple sources of information about the
- * same entity or phenomenon are available, knowing the confidence of each value helps in weighing and
- * averaging these values more properly than would be possible without a confidence value.
+ * All those values have a certain level of confidence. In case multiple sources of information about the same entity or
+ * phenomenon are available, knowing the confidence of each value helps in weighing and averaging these values more
+ * properly than would be possible without a confidence value.
+ * <p>
+ * 
+ * In simple cases, the type used to compute a weighed average over the things equipped with a confidence level is the
+ * same as the type of the things themselves. In particular, this is the case for scalar types such as {@link Double}
+ * and {@link Distance}. For non-scalar values, averaging may be non-trivial. For example, averaging a bearing cannot
+ * simply happen by computing the arithmetic average of the bearing's angles. Instead, an intermediate structure
+ * providing the sinus and cosinus values of the bearing's angle is used to compute the weighed average tangens.
+ * <p>
+ * 
+ * Generally, the relationship between the type implementing this interface, the <code>ValueType</code> and the
+ * <code>AveragesTo</code> type is this: an instance of the implementing type can transform itself into a
+ * {@link ScalableValue} which is then used for computing a weighed sum. The values' weight is their
+ * {@link #getConfidence() confidence}. The sum (which is still a {@link ScalableValue} because
+ * {@link ScalableValue#add(ScalableValue)} returns again a {@link ScalableValue}) is then
+ * {@link ScalableValue#divide(double) divided} by the sum of the confidences. This "division" is expected to
+ * produce an object of type <code>AveragesTo</code>. Usually, <code>AveragesTo</code> would be the same as
+ * the class implementing this interface.
  * 
  * @author Axel Uhl (d043530)
  * 
- * @param <ValueType> the type of the scalable value. See particularly the {@link #scale()} method.
- *
+ * @param <ValueType>
+ *            the type of the scalable value. See particularly the {@link #scale()} method.
+ * 
  */
 public interface HasConfidence<ValueType, AveragesTo> {
     /**
