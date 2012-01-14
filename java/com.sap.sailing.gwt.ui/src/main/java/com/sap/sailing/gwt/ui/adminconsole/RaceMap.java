@@ -744,7 +744,7 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
         }
         PolylineOptions options = PolylineOptions.newInstance(
         /* clickable */true, /* geodesic */true);
-        Polyline result = new Polyline(points.toArray(new LatLng[0]), getColorString(competitorDAO), /* width */3,
+        Polyline result = new Polyline(points.toArray(new LatLng[0]), getColorString(competitorDAO), /* width */ 1,
         /* opacity */0.5, options);
         result.addPolylineClickHandler(new PolylineClickHandler() {
             @Override
