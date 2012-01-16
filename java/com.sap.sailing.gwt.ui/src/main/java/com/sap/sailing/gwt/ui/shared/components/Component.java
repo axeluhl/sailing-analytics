@@ -1,8 +1,5 @@
 package com.sap.sailing.gwt.ui.shared.components;
 
-import com.google.gwt.user.client.ui.Widget;
-
-
 /**
  * 
  * @author Axel Uhl (d043530)
@@ -16,11 +13,6 @@ public interface Component<SettingsType> extends ComponentForestEntry {
      * @return whether this component has settings that a user may change; if so, 
      */
     boolean hasSettings();
-    
-    /**
-     * Obtains a {@link Widget} which represents this component for embedding in a panel or other layout container
-     */
-    Widget getComponentWidget();
     
     /**
      * If this component {@link #hasSettings has settings}, this method may return a component for the settings dialog.

@@ -155,7 +155,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     }
     
     @Override
-    public Widget getComponentWidget() {
+    public Widget getEntryWidget() {
         return this;
     }
     

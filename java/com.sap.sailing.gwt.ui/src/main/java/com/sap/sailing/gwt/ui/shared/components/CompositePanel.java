@@ -1,9 +1,6 @@
 package com.sap.sailing.gwt.ui.shared.components;
 
-import java.util.Iterator;
-
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.VerticalPanel;
 
 /**
  * A GWT component that visualizes a {@link ComponentForest} including menus to scroll quickly to the embedded view
@@ -13,24 +10,12 @@ import com.google.gwt.user.client.ui.Widget;
  * @author Axel Uhl (d043530)
  *
  */
-public class CompositePanel extends Panel {
-    private final ComponentForest components;
+public class CompositePanel extends VerticalPanel {
     
     public CompositePanel(ComponentForest components) {
         super();
-        this.components = components;
+        for (ComponentForestEntry entry : components.getEntries()) {
+            entry.toString(); // TODO continue here...
+        }
     }
-
-    @Override
-    public Iterator<Widget> iterator() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public boolean remove(Widget arg0) {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
 }
