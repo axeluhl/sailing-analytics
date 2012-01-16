@@ -19,8 +19,9 @@ import org.json.simple.parser.ParseException;
 
 import com.sap.sailing.domain.common.Placemark;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.domain.common.SerializablePosition;
 import com.sap.sailing.domain.common.impl.PlacemarkImpl;
+import com.sap.sailing.domain.common.impl.SerializablePositionImpl;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.quadtree.QuadTree;
 import com.sap.sailing.geocoding.ReverseGeocoder;
@@ -47,16 +48,18 @@ public class ReverseGeocoderImpl implements ReverseGeocoder {
         Placemark p = null;
         Triple<Position, Double, List<Placemark>> cachedPlacemarks = checkCache(position);
 
-        if (cachedPlacemarks != null) {
+        if (cachedPlacemarks != null && cachedPlacemarks.getC() != null && !cachedPlacemarks.getC().isEmpty()) {
             p = cachedPlacemarks.getC().get(0);
         } else {
             JSONArray geonames = callNearestService(position);
             if (!geonames.isEmpty()) {
                 p = JSONToPlacemark((JSONObject) geonames.get(0));
 
-                List<Placemark> placemarks = new ArrayList<Placemark>();
-                placemarks.add(p);
-                cachePlacemarks(position, 0.0, placemarks);
+                if (p != null) {
+                    List<Placemark> placemarks = new ArrayList<Placemark>();
+                    placemarks.add(p);
+                    cachePlacemarks(position, 0.0, placemarks);
+                }
             }
         }
 
@@ -164,12 +167,12 @@ public class ReverseGeocoderImpl implements ReverseGeocoder {
         } catch (ClassCastException e) {
             lngDeg = ((Long) json.get("lng")).doubleValue();
         }
-        Position p = new DegreePosition(latDeg, lngDeg);
+        SerializablePosition position = new SerializablePositionImpl(latDeg, lngDeg);
 
         long population = (Long) json.get("population");
 
-        if (name != null && lngDeg != null && latDeg != null && population != 0) {
-            return new PlacemarkImpl(name, countryCode, p, population);
+        if (name != null && lngDeg != null && latDeg != null) {
+            return new PlacemarkImpl(name, countryCode, position, population);
         } else {
             return null;
         }

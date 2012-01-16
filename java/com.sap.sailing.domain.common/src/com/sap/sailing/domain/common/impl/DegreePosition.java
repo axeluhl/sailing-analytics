@@ -3,6 +3,7 @@ package com.sap.sailing.domain.common.impl;
 import com.sap.sailing.domain.common.AbstractPosition;
 
 public class DegreePosition extends AbstractPosition {
+    
     private final double lat;
     private final double lng;
 

@@ -30,6 +30,7 @@ public class CompactGPSFixImpl extends AbstractGPSFixImpl {
     private byte validityCache = -1;
     
     private class CompactPosition extends AbstractPosition {
+
         @Override
         public double getLatDeg() {
             return latDeg;
