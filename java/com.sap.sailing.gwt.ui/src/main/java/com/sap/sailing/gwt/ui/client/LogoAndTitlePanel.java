@@ -7,7 +7,7 @@ import com.google.gwt.user.client.ui.Label;
 
 public class LogoAndTitlePanel extends FlowPanel {
 
-    public LogoAndTitlePanel(StringConstants stringConstants) {
+    public LogoAndTitlePanel(StringMessages stringConstants) {
         Anchor sapLogo = new Anchor(new SafeHtmlBuilder().appendHtmlConstant(
                 "<img class=\"linkNoBorder\" src=\"/gwt/images/sap_66_transparent.png\"/>").toSafeHtml());
         sapLogo.setHref("http://www.sap.com");

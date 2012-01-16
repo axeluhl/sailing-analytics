@@ -61,7 +61,7 @@ import com.sap.sailing.gwt.ui.client.EventDisplayer;
 import com.sap.sailing.gwt.ui.client.EventRefresher;
 import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
-import com.sap.sailing.gwt.ui.client.StringConstants;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDAO;
 import com.sap.sailing.gwt.ui.shared.RaceDAO;
 import com.sap.sailing.gwt.ui.shared.RegattaDAO;
@@ -74,7 +74,7 @@ public class WindPanel extends FormPanel implements EventDisplayer, WindShower, 
     private final SailingServiceAsync sailingService;
     private final ErrorReporter errorReporter;
     private final Grid grid;
-    private final StringConstants stringConstants;
+    private final StringMessages stringConstants;
     private final WindSettingPanel windSettingPanel;
     private ColumnSortList columnSortList;
     private final IdentityColumn<WindDAO> removeColumn;
@@ -93,7 +93,7 @@ public class WindPanel extends FormPanel implements EventDisplayer, WindShower, 
     private final Map<WindSource, SeriesHandler> stripChartSeries;
 
     public WindPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
-            EventRefresher eventRefresher, StringConstants stringConstants) {
+            EventRefresher eventRefresher, StringMessages stringConstants) {
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.stringConstants = stringConstants;

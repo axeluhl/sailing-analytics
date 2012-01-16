@@ -16,7 +16,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
-import com.sap.sailing.gwt.ui.client.StringConstants;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDAO;
@@ -247,7 +247,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
     }
 
     public EditableLeaderboardPanel(SailingServiceAsync sailingService, String leaderboardName,
-            ErrorReporter errorReporter, StringConstants stringConstants) {
+            ErrorReporter errorReporter, StringMessages stringConstants) {
         super(sailingService, leaderboardName, errorReporter, stringConstants);
     }
 

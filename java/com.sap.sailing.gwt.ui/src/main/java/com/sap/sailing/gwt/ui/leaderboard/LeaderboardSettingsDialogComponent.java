@@ -5,20 +5,21 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.CheckBox;
+import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.LongBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog;
+import com.sap.sailing.gwt.ui.client.DataEntryDialog.Validator;
 import com.sap.sailing.gwt.ui.client.DetailTypeFormatter;
-import com.sap.sailing.gwt.ui.client.StringConstants;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettingsPanel.Result;
+import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
 import com.sap.sailing.server.api.DetailType;
 
-public class LeaderboardSettingsPanel extends DataEntryDialog<Result> {
+public class LeaderboardSettingsDialogComponent implements SettingsDialogComponent<LeaderboardSettings> {
     private final List<String> raceColumnSelection;
     private final List<String> raceAllRaceColumns;
     private final List<DetailType> maneuverDetailSelection;
@@ -28,57 +29,16 @@ public class LeaderboardSettingsPanel extends DataEntryDialog<Result> {
     private final Map<DetailType, CheckBox> maneuverDetailCheckboxes;
     private final Map<DetailType, CheckBox> legDetailCheckboxes;
     private final Map<DetailType, CheckBox> raceDetailCheckboxes;
-    private final StringConstants stringConstants;
-    private final LongBox delayBetweenAutoAdvancesInSecondsBox;
-    private final LongBox delayInSecondsBox;
-    
-    public static class Result {
-        private final List<String> raceColumnsToShow;
-        private final List<DetailType> maneuverDetailsToShow;
-        private final List<DetailType> legDetailsToShow;
-        private final List<DetailType> raceDetailsToShow;
-        private final long delayBetweenAutoAdvancesInMilliseconds;
-        private final long delayInMilliseconds;
-        
-        public Result(List<DetailType> meneuverDetailsToShow, List<DetailType> legDetailsToShow, List<DetailType> raceDetailsToShow, List<String> raceColumnsToShow, long delayBetweenAutoAdvancesInMilliseconds, long delayInMilliseconds) {
-            this.legDetailsToShow = legDetailsToShow;
-            this.raceDetailsToShow = raceDetailsToShow;
-            this.raceColumnsToShow = raceColumnsToShow;
-            this.delayBetweenAutoAdvancesInMilliseconds = delayBetweenAutoAdvancesInMilliseconds;
-            this.delayInMilliseconds = delayInMilliseconds;
-            this.maneuverDetailsToShow = meneuverDetailsToShow;
-        }
-      
-        public List<DetailType> getManeuverDetailsToShow() {
-            return maneuverDetailsToShow;
-        }
+    private final StringMessages stringConstants;
+    private LongBox delayBetweenAutoAdvancesInSecondsBox;
+    private LongBox delayInSecondsBox;
+    private final long delayBetweenAutoAdvancesInMilliseconds;
+    private final long delayInMilliseconds;
 
-        public List<DetailType> getLegDetailsToShow() {
-            return legDetailsToShow;
-        }
-
-        public List<DetailType> getRaceDetailsToShow() {
-            return raceDetailsToShow;
-        }
-        
-        public List<String> getRaceColumnsToShow(){
-            return raceColumnsToShow;
-        }
-
-        public long getDelayBetweenAutoAdvancesInMilliseconds() {
-            return delayBetweenAutoAdvancesInMilliseconds;
-        }
-
-        public long getDelayInMilliseconds() {
-            return delayInMilliseconds;
-        }
-    }
-    
-    public LeaderboardSettingsPanel(List<DetailType> maneuverDetailSelection, List<DetailType> legDetailSelection, List<DetailType> raceDetailSelection, List<String> raceAllRaceColumns, List<String> raceColumnSelection,
-            long delayBetweenAutoAdvancesInMilliseconds, String title, String message,
-            String okButtonName,
-            String cancelButtonName, com.sap.sailing.gwt.ui.client.DataEntryDialog.Validator<Result> validator, AsyncCallback<Result> callback, StringConstants stringConstants, long delayInMilliseconds) {
-        super(title, message, okButtonName, cancelButtonName, validator, callback);
+    public LeaderboardSettingsDialogComponent(List<DetailType> maneuverDetailSelection,
+            List<DetailType> legDetailSelection, List<DetailType> raceDetailSelection, List<String> raceAllRaceColumns,
+            List<String> raceColumnSelection, long delayBetweenAutoAdvancesInMilliseconds, long delayInMilliseconds,
+            StringMessages stringConstants) {
         this.maneuverDetailSelection = maneuverDetailSelection;
         this.raceColumnSelection = raceColumnSelection;
         this.raceAllRaceColumns = raceAllRaceColumns;
@@ -89,19 +49,21 @@ public class LeaderboardSettingsPanel extends DataEntryDialog<Result> {
         maneuverDetailCheckboxes = new LinkedHashMap<DetailType, CheckBox>();
         legDetailCheckboxes = new LinkedHashMap<DetailType, CheckBox>();
         raceDetailCheckboxes = new LinkedHashMap<DetailType, CheckBox>();
-        delayBetweenAutoAdvancesInSecondsBox = createLongBox(delayBetweenAutoAdvancesInMilliseconds/1000l, 4);
-        delayInSecondsBox = createLongBox(delayInMilliseconds/1000l, 4);
+        this.delayBetweenAutoAdvancesInMilliseconds = delayBetweenAutoAdvancesInMilliseconds;
+        this.delayInMilliseconds = delayInMilliseconds;
     }
-
+    
     @Override
-    protected Widget getAdditionalWidget() {
+    public Widget getAdditionalWidget(DataEntryDialog<LeaderboardSettings> dialog) {
+        delayBetweenAutoAdvancesInSecondsBox = dialog.createLongBox(delayBetweenAutoAdvancesInMilliseconds/1000l, 4);
+        delayInSecondsBox = dialog.createLongBox(delayInMilliseconds/1000l, 4);
         HorizontalPanel hp = new HorizontalPanel();
         VerticalPanel vpMeneuvers = new VerticalPanel();
         vpMeneuvers.setSpacing(5);
         vpMeneuvers.add(new Label(stringConstants.maneuverTypes()));
         List<DetailType> currentMeneuverDetailSelection = maneuverDetailSelection;
         for (DetailType detailType : ManeuverCountRaceColumn.getAvailableManeuverDetailColumnTypes()) {
-            CheckBox checkbox = createCheckbox(DetailTypeFormatter.format(detailType, stringConstants));
+            CheckBox checkbox = dialog.createCheckbox(DetailTypeFormatter.format(detailType, stringConstants));
             checkbox.setValue(currentMeneuverDetailSelection.contains(detailType));
             maneuverDetailCheckboxes.put(detailType, checkbox);
             vpMeneuvers.add(checkbox);
@@ -121,7 +83,7 @@ public class LeaderboardSettingsPanel extends DataEntryDialog<Result> {
         vpLeft.add(new Label(stringConstants.raceDetailsToShow()));
         List<DetailType> currentRaceDetailSelection = raceDetailSelection;
         for (DetailType type : LeaderboardPanel.getAvailableRaceDetailColumnTypes()) {
-            CheckBox checkbox = createCheckbox(DetailTypeFormatter.format(type, stringConstants));
+            CheckBox checkbox = dialog.createCheckbox(DetailTypeFormatter.format(type, stringConstants));
             checkbox.setValue(currentRaceDetailSelection.contains(type));
             raceDetailCheckboxes.put(type, checkbox);
             vpLeft.add(checkbox);
@@ -129,7 +91,7 @@ public class LeaderboardSettingsPanel extends DataEntryDialog<Result> {
         vpLeft.add(new Label(stringConstants.legDetailsToShow()));
         List<DetailType> currentLegDetailSelection = legDetailSelection;
         for (DetailType type : LegColumn.getAvailableLegDetailColumnTypes()) {
-            CheckBox checkbox = createCheckbox(DetailTypeFormatter.format(type, stringConstants));
+            CheckBox checkbox = dialog.createCheckbox(DetailTypeFormatter.format(type, stringConstants));
             checkbox.setValue(currentLegDetailSelection.contains(type));
             legDetailCheckboxes.put(type, checkbox);
             vpLeft.add(checkbox);
@@ -139,7 +101,7 @@ public class LeaderboardSettingsPanel extends DataEntryDialog<Result> {
         vpRight.add(new Label(stringConstants.selectedRaces()));
         List<String> allColumns = raceAllRaceColumns;
         for (String expandableSortableColumn : allColumns) {
-            CheckBox checkbox = createCheckbox(expandableSortableColumn);
+            CheckBox checkbox = dialog.createCheckbox(expandableSortableColumn);
             checkbox.setValue(raceColumnSelection.contains(expandableSortableColumn));
             raceColumnCheckboxes.put(expandableSortableColumn, checkbox);
             vpRight.add(checkbox);
@@ -149,7 +111,7 @@ public class LeaderboardSettingsPanel extends DataEntryDialog<Result> {
     }
 
     @Override
-    protected Result getResult() {
+    public LeaderboardSettings getResult() {
         List<DetailType> maneuverDetailsToShow = new ArrayList<DetailType>();
         for (Map.Entry<DetailType, CheckBox> entry : maneuverDetailCheckboxes.entrySet()) {
             if (entry.getValue().getValue()) {
@@ -176,14 +138,30 @@ public class LeaderboardSettingsPanel extends DataEntryDialog<Result> {
         }
         Long delayBetweenAutoAdvancesValue = delayBetweenAutoAdvancesInSecondsBox.getValue();
         Long delayInSecondsValue = delayInSecondsBox.getValue();
-        return new Result(maneuverDetailsToShow, legDetailsToShow, raceDetailsToShow, raceColumnsToShow, 1000l*(delayBetweenAutoAdvancesValue==null?0l:delayBetweenAutoAdvancesValue.longValue()),
-                1000*(delayInSecondsValue==null?0:delayInSecondsValue.longValue()));
+        return new LeaderboardSettings(maneuverDetailsToShow, legDetailsToShow, raceDetailsToShow, raceColumnsToShow,
+                1000l * (delayBetweenAutoAdvancesValue == null ? 0l : delayBetweenAutoAdvancesValue.longValue()),
+                1000 * (delayInSecondsValue==null?0:delayInSecondsValue.longValue()));
     }
 
     @Override
-    public void show() {
-        super.show();
-        delayInSecondsBox.setFocus(true);
+    public Validator<LeaderboardSettings> getValidator() {
+        return new Validator<LeaderboardSettings>() {
+            @Override
+            public String getErrorMessage(LeaderboardSettings valueToValidate) {
+                if (valueToValidate.getLegDetailsToShow().isEmpty()) {
+                    return stringConstants.selectAtLeastOneLegDetail();
+                } else if (valueToValidate.getDelayBetweenAutoAdvancesInMilliseconds() < 1000) {
+                    return stringConstants.chooseUpdateIntervalOfAtLeastOneSecond();
+                } else {
+                    return null;
+                }
+            }
+        };
     }
-    
+
+    @Override
+    public FocusWidget getFocusWidget() {
+        return delayInSecondsBox;
+    }
+
 }

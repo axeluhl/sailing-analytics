@@ -14,7 +14,7 @@ import com.sap.sailing.gwt.ui.adminconsole.WindIndicator;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
-import com.sap.sailing.gwt.ui.client.StringConstants;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.TimeListener;
 import com.sap.sailing.gwt.ui.shared.EventDAO;
 import com.sap.sailing.gwt.ui.shared.PositionDAO;
@@ -40,7 +40,7 @@ public class SmallWindHistoryPanel extends FormPanel implements TimeListener, Ra
     private final SailingServiceAsync sailingService;
     private final long millisecondStepsPerLabel;
     private final ErrorReporter errorReporter;
-    private final StringConstants stringConstants;
+    private final StringMessages stringConstants;
     
     /**
      * @param position
@@ -52,7 +52,7 @@ public class SmallWindHistoryPanel extends FormPanel implements TimeListener, Ra
      *            the wind track to visualize using this panel
      */
     public SmallWindHistoryPanel(SailingServiceAsync sailingService, PositionDAO position,
-            int numberOfTimepoints, long millisecondStepsPerLabel, StringConstants stringConstants, ErrorReporter errorReporter) {
+            int numberOfTimepoints, long millisecondStepsPerLabel, StringMessages stringConstants, ErrorReporter errorReporter) {
         this.sailingService = sailingService;
         this.position = position;
         this.stringConstants = stringConstants;

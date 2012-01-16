@@ -47,7 +47,7 @@ import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.EventDisplayer;
 import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
-import com.sap.sailing.gwt.ui.client.StringConstants;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDAO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDAO;
 import com.sap.sailing.gwt.ui.shared.RaceDAO;
@@ -60,7 +60,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
 
     private final TrackedEventsComposite trackedEventsComposite;
 
-    private final StringConstants stringConstants;
+    private final StringMessages stringConstants;
 
     private final SailingServiceAsync sailingService;
 
@@ -111,7 +111,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
     private static AnchorTemplates ANCHORTEMPLATE = GWT.create(AnchorTemplates.class);
 
     public LeaderboardConfigPanel(SailingServiceAsync sailingService, AdminConsole adminConsole,
-            final ErrorReporter errorReporter, StringConstants theStringConstants) {
+            final ErrorReporter errorReporter, StringMessages theStringConstants) {
         this.stringConstants = theStringConstants;
         this.sailingService = sailingService;
         leaderboardList = new ListDataProvider<LeaderboardDAO>();

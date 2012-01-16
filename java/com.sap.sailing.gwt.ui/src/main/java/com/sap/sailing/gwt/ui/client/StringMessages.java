@@ -1,8 +1,8 @@
 package com.sap.sailing.gwt.ui.client;
 
-import com.google.gwt.i18n.client.Constants;
+import com.google.gwt.i18n.client.Messages;
 
-public interface StringConstants extends Constants {
+public interface StringMessages extends Messages {
     String helloWorld();
     String kielWeel2011();
     String stgAccount();
@@ -72,7 +72,6 @@ public interface StringConstants extends Constants {
     String leaderboard();
     String leaderboards();
     String leaderboardSettings();
-    String selectLegDetails();
     String settings();
     String selectAtLeastOneLegDetail();
     String currentSpeedOverGroundInKnots();
@@ -195,6 +194,7 @@ public interface StringConstants extends Constants {
     String noSelection();
     String raceIsKnownToStartUpwind();
     String events();
+    String settingsForComponent(String localizedComponentName);
     String noEventsFound();
     String noEventSelected();
     String noLeaderboardsFound();

@@ -59,6 +59,7 @@ import com.sap.sailing.domain.tractracadapter.RaceRecord;
 import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sailing.expeditionconnector.ExpeditionWindTrackerFactory;
 import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.api.DefaultLeaderboardName;
 import com.sap.sailing.server.api.EventFetcher;
 import com.sap.sailing.server.api.EventIdentifier;
 import com.sap.sailing.server.api.EventName;
@@ -102,8 +103,6 @@ public class RacingEventServiceImpl implements RacingEventService, EventFetcher,
      */
     private final Map<String, Leaderboard> leaderboardsByName;
     
-    private static final String DEFAULT_LEADERBOARD_NAME = "Default Leaderboard";
-    
     private Set<DynamicTrackedEvent> eventsObservedForDefaultLeaderboard = new HashSet<DynamicTrackedEvent>();
     
     private final MongoObjectFactory mongoObjectFactory;
@@ -132,7 +131,7 @@ public class RacingEventServiceImpl implements RacingEventService, EventFetcher,
         leaderboardsByName = new HashMap<String, Leaderboard>();
         // Add one default leaderboard that aggregates all races currently tracked by this service.
         // This is more for debugging purposes than for anything else.
-        addLeaderboard(DEFAULT_LEADERBOARD_NAME, new int[] { 5, 8 });
+        addLeaderboard(DefaultLeaderboardName.DEFAULT_LEADERBOARD_NAME, new int[] { 5, 8 });
         loadStoredLeaderboards();
     }
     
@@ -354,7 +353,7 @@ public class RacingEventServiceImpl implements RacingEventService, EventFetcher,
 
                     @Override
                     public void raceAdded(TrackedRace trackedRace) {
-                        leaderboardsByName.get(DEFAULT_LEADERBOARD_NAME).addRace(trackedRace,
+                        leaderboardsByName.get(DefaultLeaderboardName.DEFAULT_LEADERBOARD_NAME).addRace(trackedRace,
                                 trackedRace.getRace().getName(), /* medalRace */ false);
                     }
                 });
@@ -384,7 +383,7 @@ public class RacingEventServiceImpl implements RacingEventService, EventFetcher,
             for (RaceDefinition race : event.getAllRaces()) {
                 stopTrackingWind(event, race);
                 // remove from default leaderboard
-                Leaderboard defaultLeaderboard = getLeaderboardByName(DEFAULT_LEADERBOARD_NAME);
+                Leaderboard defaultLeaderboard = getLeaderboardByName(DefaultLeaderboardName.DEFAULT_LEADERBOARD_NAME);
                 defaultLeaderboard.removeRaceColumn(race.getName());
             }
         }

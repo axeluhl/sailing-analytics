@@ -8,7 +8,7 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog;
-import com.sap.sailing.gwt.ui.client.StringConstants;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RaceInLeaderboardDAO;
 
 public class RaceInLeaderboardDialog extends DataEntryDialog<RaceInLeaderboardDAO> {
@@ -20,10 +20,10 @@ public class RaceInLeaderboardDialog extends DataEntryDialog<RaceInLeaderboardDA
 
     private static class RaceDialogValidator implements Validator<RaceInLeaderboardDAO> {
 
-        private StringConstants stringConstants;
+        private StringMessages stringConstants;
         private Collection<RaceInLeaderboardDAO> existingRaces;
 
-        public RaceDialogValidator(StringConstants stringConstants, Collection<RaceInLeaderboardDAO> existingRaces) {
+        public RaceDialogValidator(StringMessages stringConstants, Collection<RaceInLeaderboardDAO> existingRaces) {
             this.stringConstants = stringConstants;
             this.existingRaces = existingRaces;
         }
@@ -58,7 +58,7 @@ public class RaceInLeaderboardDialog extends DataEntryDialog<RaceInLeaderboardDA
     }
 
     public RaceInLeaderboardDialog(Collection<RaceInLeaderboardDAO> existingRaces,
-            RaceInLeaderboardDAO raceInLeaderboard, StringConstants stringConstants,
+            RaceInLeaderboardDAO raceInLeaderboard, StringMessages stringConstants,
             AsyncCallback<RaceInLeaderboardDAO> callback) {
         super(stringConstants.name(), stringConstants.name(), stringConstants.ok(), stringConstants.cancel(),
                 new RaceDialogValidator(stringConstants, existingRaces), callback);

@@ -9,7 +9,7 @@ public class KnotSpeedWithBearingImpl extends AbstractSpeedWithBearingImpl {
         super(bearing);
         this.speedInKnots = speedInKnots;
     }
-
+    
     @Override
     public double getKnots() {
         return speedInKnots;

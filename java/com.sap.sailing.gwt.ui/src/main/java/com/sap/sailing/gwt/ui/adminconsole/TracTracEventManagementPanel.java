@@ -38,7 +38,7 @@ import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.EventRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
-import com.sap.sailing.gwt.ui.client.StringConstants;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDAO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDAO;
 import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDAO;
@@ -74,7 +74,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
     private final List<TracTracRaceRecordDAO> availableTracTracRaces;
     
     public TracTracEventManagementPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
-            EventRefresher eventRefresher, StringConstants stringConstants) {
+            EventRefresher eventRefresher, StringMessages stringConstants) {
         super(sailingService, eventRefresher, errorReporter, stringConstants);
         this.errorReporter = errorReporter;
         availableTracTracRaces = new ArrayList<TracTracRaceRecordDAO>();

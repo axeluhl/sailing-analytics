@@ -37,7 +37,7 @@ import com.google.gwt.view.client.MultiSelectionModel;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.EventRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
-import com.sap.sailing.gwt.ui.client.StringConstants;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDAO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDAO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDAO;
@@ -67,7 +67,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
     private final List<SwissTimingRaceRecordDAO> availableSwissTimingRaces = new ArrayList<SwissTimingRaceRecordDAO>();
 
     public SwissTimingEventManagementPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
-            EventRefresher eventRefresher, StringConstants stringConstants) {
+            EventRefresher eventRefresher, StringMessages stringConstants) {
         super(sailingService, eventRefresher, errorReporter, stringConstants);
         this.errorReporter = errorReporter;
 

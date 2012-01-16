@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
 import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.json.simple.parser.ParseException;
@@ -889,8 +890,12 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                         break;
                     default:
                         maneuverType = Type.UNKNOWN;
-                        logger.fine("Unknown maneuver for " + competitor + " at " + maneuverTimePoint
-                                + (legBeforeManeuver != null ? " on reaching leg " + legBeforeManeuver.getLeg() : " before start"));
+                        if (logger.isLoggable(Level.FINE)) {
+                            logger.fine("Unknown maneuver for "
+                                    + competitor + " at " + maneuverTimePoint
+                                    + (legBeforeManeuver != null ? " on reaching leg " + legBeforeManeuver.getLeg()
+                                            : " before start"));
+                        }
                         break;
                     }
                 } else {

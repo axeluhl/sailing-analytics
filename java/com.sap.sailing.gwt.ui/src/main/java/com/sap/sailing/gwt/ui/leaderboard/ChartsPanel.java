@@ -60,7 +60,7 @@ import com.sap.sailing.gwt.ui.client.ColorMap;
 import com.sap.sailing.gwt.ui.client.DetailTypeFormatter;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
-import com.sap.sailing.gwt.ui.client.StringConstants;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
 import com.sap.sailing.gwt.ui.shared.CompetitorInRaceDAO;
 import com.sap.sailing.gwt.ui.shared.CompetitorsAndTimePointsDAO;
@@ -92,7 +92,7 @@ public class ChartsPanel extends FormPanel {
     private final ColorMap<Integer> colorMap;
     private int selectedRace = 0;
     private int stepsToLoad = 100;
-    private final StringConstants stringConstants;
+    private final StringMessages stringConstants;
     private final Set<CompetitorDAO> competitorVisible;
     private VerticalPanel selectCompetitors;
     private PlotWithOverview plot;
@@ -108,7 +108,7 @@ public class ChartsPanel extends FormPanel {
     private AbsolutePanel loadingPanel;
 
     public ChartsPanel(SailingServiceAsync sailingService, final List<CompetitorDAO> competitors,
-            RaceIdentifier[] races, StringConstants stringConstants, int chartWidth, int chartHeight, ErrorReporter errorReporter) {
+            RaceIdentifier[] races, StringMessages stringConstants, int chartWidth, int chartHeight, ErrorReporter errorReporter) {
     	width = chartWidth;
     	height = chartHeight;
     	this.errorReporter = errorReporter;

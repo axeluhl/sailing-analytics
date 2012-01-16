@@ -12,7 +12,7 @@ import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Header;
-import com.sap.sailing.gwt.ui.client.StringConstants;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDAO;
 import com.sap.sailing.server.api.DetailType;
 
@@ -45,7 +45,7 @@ public abstract class ExpandableSortableColumn<C> extends SortableColumn<Leaderb
     private boolean expanded;
 
     public ExpandableSortableColumn(LeaderboardPanel leaderboardPanel, boolean enableExpansion, Cell<C> cell,
-            StringConstants stringConstants, String detailHeaderStyle, String detailColumnStyle,
+            StringMessages stringConstants, String detailHeaderStyle, String detailColumnStyle,
             List<DetailType> detailSelection) {
         super(cell);
         this.enableExpansion = enableExpansion;
@@ -59,7 +59,7 @@ public abstract class ExpandableSortableColumn<C> extends SortableColumn<Leaderb
      * override this method.
      */
     protected Map<DetailType, SortableColumn<LeaderboardRowDAO, ?>> getDetailColumnMap(
-            LeaderboardPanel leaderboardPanel, StringConstants stringConstants, String detailHeaderStyle,
+            LeaderboardPanel leaderboardPanel, StringMessages stringConstants, String detailHeaderStyle,
             String detailColumnStyle) {
         return Collections.emptyMap();
     }

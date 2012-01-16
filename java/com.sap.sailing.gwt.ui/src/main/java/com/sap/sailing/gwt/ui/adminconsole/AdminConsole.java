@@ -14,6 +14,7 @@ import com.sap.sailing.gwt.ui.client.EventDisplayer;
 import com.sap.sailing.gwt.ui.client.EventRefresher;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.shared.EventDAO;
+import com.sap.sailing.server.api.DefaultLeaderboardName;
 
 public class AdminConsole extends AbstractEntryPoint implements EventRefresher {
     private Set<EventDisplayer> eventDisplayers;
@@ -49,7 +50,8 @@ public class AdminConsole extends AbstractEntryPoint implements EventRefresher {
         eventDisplayers.add(raceMapPanel);
         raceMapPanel.setSize("90%", "90%");
         tabPanel.add(raceMapPanel, stringConstants.map(), /* asHTML */ false);
-        LeaderboardPanel defaultLeaderboardPanel = new LeaderboardPanel(sailingService, stringConstants.defaultLeaderboard(), this, stringConstants);
+        LeaderboardPanel defaultLeaderboardPanel = new LeaderboardPanel(sailingService,
+                DefaultLeaderboardName.DEFAULT_LEADERBOARD_NAME, this, stringConstants);
         defaultLeaderboardPanel.setSize("90%", "90%");
         tabPanel.add(defaultLeaderboardPanel, stringConstants.defaultLeaderboard(), /* asHTML */ false);
         LeaderboardConfigPanel leaderboardConfigPanel = new LeaderboardConfigPanel(sailingService, this, this, stringConstants);
