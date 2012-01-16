@@ -10,10 +10,10 @@ import java.util.Set;
 
 import org.junit.Test;
 
-import com.sap.sailing.domain.base.Bearing;
-import com.sap.sailing.domain.base.impl.DegreeBearingImpl;
-import com.sap.sailing.domain.base.impl.RadianBearingImpl;
-import com.sap.sailing.domain.common.Util.Pair;
+import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
+import com.sap.sailing.domain.common.impl.RadianBearingImpl;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.confidence.ConfidenceBasedAverager;
 import com.sap.sailing.domain.confidence.ConfidenceBasedAveragerFactory;
 import com.sap.sailing.domain.confidence.HasConfidence;
