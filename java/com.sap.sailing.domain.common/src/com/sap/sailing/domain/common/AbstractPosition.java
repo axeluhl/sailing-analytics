@@ -5,6 +5,7 @@ import com.sap.sailing.domain.common.impl.RadianBearingImpl;
 import com.sap.sailing.domain.common.impl.RadianPosition;
 
 public class AbstractPosition implements Position {
+
     public int hashCode() {
         return (int) (4711. * getLngRad() * getLatRad());
     }

@@ -1015,7 +1015,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             if (!startBest.equals(finishBest)) {
                 places.add(finishBest);
             }
-            order = new RacePlaceOrderImpl(getRace().getName(), places);
+            order = new RacePlaceOrderImpl(places);
         }
         
         return order;

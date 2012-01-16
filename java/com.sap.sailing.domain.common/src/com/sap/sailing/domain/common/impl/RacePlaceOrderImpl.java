@@ -3,12 +3,14 @@ package com.sap.sailing.domain.common.impl;
 import com.sap.sailing.domain.common.Placemark;
 import com.sap.sailing.domain.common.RacePlaceOrder;
 
-public class RacePlaceOrderImpl extends NamedImpl implements RacePlaceOrder {
+public class RacePlaceOrderImpl implements RacePlaceOrder {
+    private static final long serialVersionUID = 7590835541329816755L;
     
-    private final Iterable<Placemark> places;
+    private Iterable<Placemark> places;
     
-    public RacePlaceOrderImpl(String raceName, Iterable<Placemark> places) {
-        super(raceName);
+    RacePlaceOrderImpl() {}
+    
+    public RacePlaceOrderImpl(Iterable<Placemark> places) {
         this.places = places;
     }
 
@@ -19,7 +21,7 @@ public class RacePlaceOrderImpl extends NamedImpl implements RacePlaceOrder {
     
     @Override
     public String toString() {
-        StringBuilder b = new StringBuilder(getName() + "(");
+        StringBuilder b = new StringBuilder();
         boolean first = true;
         for (Placemark place : places) {
             if (first) {
@@ -29,7 +31,6 @@ public class RacePlaceOrderImpl extends NamedImpl implements RacePlaceOrder {
                 b.append(" -> " + place.getCountryCode() + ", " + place.getName());
             }
         }
-        b.append(")");
         return b.toString();
     }
 
@@ -38,7 +39,6 @@ public class RacePlaceOrderImpl extends NamedImpl implements RacePlaceOrder {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((places == null) ? 0 : places.hashCode());
-        result = prime * result + ((getName() == null) ? 0 : getName().hashCode());
         return result;
     }
 
@@ -55,11 +55,6 @@ public class RacePlaceOrderImpl extends NamedImpl implements RacePlaceOrder {
             if (other.places != null)
                 return false;
         } else if (!places.equals(other.places))
-            return false;
-        if (getName() == null) {
-            if (other.getName() != null)
-                return false;
-        } else if (!getName().equals(other.getName()))
             return false;
         return true;
     }
