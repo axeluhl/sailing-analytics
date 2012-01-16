@@ -18,7 +18,7 @@ public interface ReverseGeocoder {
      * Returns the nearest {@link Placemark} towards the given {@link Position}.
      * 
      * @param position The position where to search
-     * @return The nearest {@link Placemark} towards the given {@link Position}
+     * @return The nearest {@link Placemark} towards the given {@link Position} or null if there is none within 300km
      * @throws IOException
      * @throws ParseException
      */
@@ -29,7 +29,7 @@ public interface ReverseGeocoder {
      * 
      * @param position The position where to search
      * @param radius The search radius
-     * @return A list of {@link Placemark Placemarks} near the given {@link Position}
+     * @return A list of {@link Placemark Placemarks} near the given {@link Position} or null if there are none within 300km
      * @throws IOException
      * @throws ParseException
      */

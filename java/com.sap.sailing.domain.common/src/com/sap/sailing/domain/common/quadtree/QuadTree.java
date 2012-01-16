@@ -79,6 +79,10 @@ public class QuadTree<T> implements Serializable {
     public T remove(Position point, T obj) {
         return getTop().remove(point, obj);
     }
+    
+    public void replace(Position point, T newObj) {
+        getTop().replace(point, newObj);
+    }
 
     /** Clear the tree. */
     public void clear() {

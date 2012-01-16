@@ -168,6 +168,26 @@ public class QuadTreeNode<T> implements Serializable {
     public void put(Position point, T obj) {
         put(new QuadTreeLeaf<T>(point, obj));
     }
+    
+    public void replace(Position point, T newObj) {
+        boolean inThis = false;
+        
+        if (children == null) {
+            inThis = true;
+        } else {
+            QuadTreeNode<T> child = getChild(point);
+            if (child == null) {
+                inThis = true;
+            } else {
+                child.replace(point, newObj);
+            }
+        }
+        
+        if (inThis) {
+            items.clear();
+            items.add(new QuadTreeLeaf<T>(point, newObj));
+        }
+    }
 
     /**
      * Add a QuadTreeLeaf into the tree at a location.

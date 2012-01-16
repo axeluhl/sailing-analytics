@@ -48,17 +48,31 @@ public class ReverseGeocoderTest {
     @Test
     public void getPlacemarkBestTest() {
         Position abroad = new DegreePosition(54.43334, 10.299999);
-        Placemark getFirstByDistance = new PlacemarkImpl("Wendtorf", "DE", new DegreePosition(54.4166667, 10.3), 1139);
+        Placemark firstByDistance = new PlacemarkImpl("Wendtorf", "DE", new DegreePosition(54.4166667, 10.3), 1139);
         
         try {
             Placemark p = geocoder.getPlacemarkLast(abroad, 20, new Placemark.ByPopulation());
             Assert.assertEquals(KIEL, p);
             
             p = geocoder.getPlacemarkFirst(abroad, 20, new Placemark.ByDistance(abroad));
-            Assert.assertEquals(getFirstByDistance, p);
+            Assert.assertEquals(firstByDistance, p);
             
             p = geocoder.getPlacemarkLast(abroad, 20, new Placemark.ByPopulationDistanceRatio(abroad));
             Assert.assertEquals(KIEL, p);
+        } catch (IOException e) {
+            Assert.fail(e.getMessage());
+        } catch (ParseException e) {
+            Assert.fail(e.getMessage());
+        }
+    }
+    
+    @Test
+    public void getPlacemarkNearWithOffshorePosition() {
+        Position offshore = new DegreePosition(75.16330024622059, -0.087890625);
+        long radius = 300; 
+        try {
+            List<Placemark> placemarks = geocoder.getPlacemarksNear(offshore, radius);
+            Assert.assertNull(placemarks);
         } catch (IOException e) {
             Assert.fail(e.getMessage());
         } catch (ParseException e) {
