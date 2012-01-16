@@ -6,7 +6,7 @@ import java.util.NavigableSet;
 import java.util.SortedSet;
 
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.TimePoint;
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;

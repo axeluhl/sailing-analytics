@@ -1,5 +1,7 @@
 package com.sap.sailing.server.api;
 
-public interface EventIdentifier {
+import java.io.Serializable;
+
+public interface EventIdentifier extends Serializable {
     Object getEvent(EventFetcher eventFetcher);
 }

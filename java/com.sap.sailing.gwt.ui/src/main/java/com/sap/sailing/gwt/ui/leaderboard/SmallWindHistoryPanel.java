@@ -8,7 +8,7 @@ import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.sap.sailing.domain.common.Util.Triple;
+import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.gwt.ui.adminconsole.WindIndicator;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;

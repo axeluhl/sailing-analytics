@@ -4,7 +4,7 @@ import java.util.AbstractList;
 
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.common.Util;
+import com.sap.sailing.domain.common.impl.Util;
 
 import difflib.Patch;
 

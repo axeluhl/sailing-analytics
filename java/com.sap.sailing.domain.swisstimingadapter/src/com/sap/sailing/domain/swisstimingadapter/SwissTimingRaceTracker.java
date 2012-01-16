@@ -1,6 +1,6 @@
 package com.sap.sailing.domain.swisstimingadapter;
 
-import com.sap.sailing.domain.common.Util.Triple;
+import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.tracking.RaceTracker;
 
 public interface SwissTimingRaceTracker extends RaceTracker {

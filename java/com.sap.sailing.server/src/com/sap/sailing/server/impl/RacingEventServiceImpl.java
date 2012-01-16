@@ -27,10 +27,10 @@ import java.util.logging.Logger;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
-import com.sap.sailing.domain.base.TimePoint;
-import com.sap.sailing.domain.common.Util;
-import com.sap.sailing.domain.common.Util.Pair;
-import com.sap.sailing.domain.common.Util.Triple;
+import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
 import com.sap.sailing.domain.leaderboard.impl.LeaderboardImpl;
@@ -62,6 +62,7 @@ import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.api.DefaultLeaderboardName;
 import com.sap.sailing.server.api.EventFetcher;
 import com.sap.sailing.server.api.EventIdentifier;
+import com.sap.sailing.server.api.EventName;
 import com.sap.sailing.server.api.EventNameAndRaceName;
 import com.sap.sailing.server.api.LeaderboardNameAndRaceColumnName;
 import com.sap.sailing.server.api.RaceFetcher;
@@ -659,7 +660,7 @@ public class RacingEventServiceImpl implements RacingEventService, EventFetcher,
     }
 
     @Override
-    public Event getEvent(EventNameAndRaceName eventIdentifier) {
+    public Event getEvent(EventName eventIdentifier) {
         // TODO Auto-generated method stub
         return null;
     }

@@ -1,8 +1,8 @@
 package com.sap.sailing.domain.tracking.impl;
 
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.MarkPassing;
 
 public class DummyMarkPassingWithTimePointOnly implements MarkPassing {

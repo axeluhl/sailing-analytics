@@ -8,5 +8,5 @@ package com.sap.sailing.gwt.ui.shared.components;
  *
  */
 public interface ComponentForest extends ComponentForestEntry {
-    Iterable<ComponentForest> getEntries();
+    Iterable<ComponentForestEntry> getEntries();
 }

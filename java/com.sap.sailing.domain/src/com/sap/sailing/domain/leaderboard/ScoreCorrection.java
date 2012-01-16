@@ -1,7 +1,7 @@
 package com.sap.sailing.domain.leaderboard;
 
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.TimePoint;
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
 /**

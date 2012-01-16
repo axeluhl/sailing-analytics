@@ -2,10 +2,10 @@ package com.sap.sailing.domain.tractracadapter.impl;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
-import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.RaceDefinition;
-import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.TrackedEvent;
 import com.sap.sailing.domain.tracking.TrackedLeg;

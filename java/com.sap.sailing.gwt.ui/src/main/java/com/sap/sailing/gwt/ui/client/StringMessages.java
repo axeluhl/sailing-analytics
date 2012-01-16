@@ -193,5 +193,14 @@ public interface StringMessages extends Messages {
     String hoverOverAPoint();
     String noSelection();
     String raceIsKnownToStartUpwind();
+    String events();
     String settingsForComponent(String localizedComponentName);
+    String noEventsFound();
+    String noEventSelected();
+    String noLeaderboardsFound();
+    String searchEvents();
+    String location();
+    String from();
+    String until();
+    String onlyLiveEvents();
 }
