@@ -30,14 +30,18 @@ public class SpeedWithBearingWithConfidenceImpl extends
      */
     @Override
     public ScalableValue<Triple<Speed, Double, Double>, SpeedWithBearingWithConfidence> getScalableValue() {
-        return new ScalableSpeedWithBearing(new KnotSpeedImpl(getSpeedWithBearing().getKnots()),
-                Math.sin(getSpeedWithBearing().getBearing().getRadians()), Math.cos(getSpeedWithBearing().getBearing().getRadians()));
+        return new ScalableSpeedWithBearing(getSpeedWithBearing());
     }
 
     private static class ScalableSpeedWithBearing implements ScalableValue<Triple<Speed, Double, Double>, SpeedWithBearingWithConfidence> {
         private final Speed speed;
         private final double sin;
         private final double cos;
+        
+        public ScalableSpeedWithBearing(SpeedWithBearing speedWithBearing) {
+            this(new KnotSpeedImpl(speedWithBearing.getKnots()), Math.sin(speedWithBearing.getBearing()
+                    .getRadians()), Math.cos(speedWithBearing.getBearing().getRadians()));
+        }
         
         public ScalableSpeedWithBearing(Speed speed, double sin, double cos) {
             this.speed = speed;

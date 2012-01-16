@@ -150,6 +150,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
 
     private Position getEstimatedPosition(TimePoint timePoint, boolean extrapolate, FixType lastFixAtOrBefore,
             FixType firstFixAtOrAfter) {
+        // TODO bug #169: compute a confidence value for the position returned based on time difference between fix(es) and timePoint 
         if (lastFixAtOrBefore != null && lastFixAtOrBefore == firstFixAtOrAfter) {
             return lastFixAtOrBefore.getPosition(); // exact match; how unlikely is that?
         } else {
@@ -317,13 +318,15 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         NavigableSet<GPSFix> gpsFixesToUseForSpeedEstimation = (NavigableSet<GPSFix>) fixesToUseForSpeedEstimation;
         List<GPSFix> relevantFixes = getFixesRelevantForSpeedEstimation(at, gpsFixesToUseForSpeedEstimation);
         double knotSum = 0;
-        BearingCluster bearingCluster = new BearingCluster();
+        BearingCluster bearingCluster = new BearingCluster(); // TODO bug #169: use confidence-based cluster
         int count = 0;
         if (!relevantFixes.isEmpty()) {
             Iterator<GPSFix> fixIter = relevantFixes.iterator();
             GPSFix last = fixIter.next();
             while (fixIter.hasNext()) {
+                // TODO bug #169: consider time difference between next.getTimepoint() and at to compute a confidence
                 GPSFix next = fixIter.next();
+                // TODO bug #169: use SpeedWithConfidence to aggregate confidence-tagged speed values
                 knotSum += last.getPosition().getDistance(next.getPosition())
                         .inTime(next.getTimePoint().asMillis() - last.getTimePoint().asMillis()).getKnots();
                 bearingCluster.add(last.getPosition().getBearingGreatCircle(next.getPosition()));
