@@ -25,9 +25,10 @@ public class BearingWithConfidenceCluster extends GenericBearingCluster<BearingW
      * by adding up the sin and cos values of the individual bearings, then computing the atan2 of the ratio.
      */
     @Override
-    public BearingWithConfidence getAverage() {
+    public Bearing getAverage() {
         ConfidenceBasedAverager<Pair<Double, Double>, BearingWithConfidence> averager = ConfidenceBasedAveragerFactory.INSTANCE.createAverager();
-        return averager.getAverage(getBearings());
+        BearingWithConfidence average = averager.getAverage(getBearings());
+        return average == null ? null : average.getBearing();
     }
 
     @Override
@@ -43,5 +44,10 @@ public class BearingWithConfidenceCluster extends GenericBearingCluster<BearingW
     @Override
     public BearingWithConfidenceCluster[] splitInTwo(double minimumDegreeDifferenceBetweenTacks) {
         return (BearingWithConfidenceCluster[]) super.splitInTwo(minimumDegreeDifferenceBetweenTacks);
+    }
+
+    @Override
+    protected Bearing getBearing(BearingWithConfidence b) {
+        return b.getBearing();
     }
 }

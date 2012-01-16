@@ -5,7 +5,7 @@ public interface ScalableValue<ValueType, AveragesTo> {
 
     ScalableValue<ValueType, AveragesTo> add(ScalableValue<ValueType, AveragesTo> t);
     
-    AveragesTo divide(double divisor);
+    AveragesTo divide(double divisor, double confidence);
     
     ValueType getValue();
 }

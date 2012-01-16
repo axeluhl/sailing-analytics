@@ -45,7 +45,9 @@ public class ConfidenceBasedAveragerImpl<ValueType, AveragesTo> implements Confi
                 numerator = numerator.add(next.getScalableValue().multiply(next.getConfidence()));
                 confidenceSum += next.getConfidence();
             }
-            AveragesTo result = numerator.divide(confidenceSum);
+            // TODO determine new confidence, e.g., based on the variance of estimates averaged
+            double newConfidence = confidenceSum / Util.size(values);
+            AveragesTo result = numerator.divide(confidenceSum, newConfidence);
             return result;
         }
     }

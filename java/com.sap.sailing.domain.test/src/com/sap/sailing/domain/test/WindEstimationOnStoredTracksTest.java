@@ -14,6 +14,7 @@ import com.sap.sailing.domain.base.Bearing;
 import com.sap.sailing.domain.base.BearingWithConfidence;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.TimePoint;
+import com.sap.sailing.domain.base.impl.BearingWithConfidenceImpl;
 import com.sap.sailing.domain.base.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.NoWindException;
@@ -39,7 +40,7 @@ public class WindEstimationOnStoredTracksTest extends StoredTrackBasedTestWithTr
                 27.2860810183163, 319.47157698009613, 325.1617832132204, 31.678409742672212, 35.00547108150359,
                 23.934778873669256, 29.76599976685808, 33.19487072661667, 19.0, 33.29318052266396, 32.7371445230587,
                 38.26627143611533 }) {
-            cluster.add(new DegreeBearingImpl(bearingInDegrees));
+            cluster.add(new BearingWithConfidenceImpl(new DegreeBearingImpl(bearingInDegrees), /* confidence */ 0.9));
         }
         BearingWithConfidenceCluster[] splitResult = cluster.splitInTwo(/* minimumDegreeDifferenceBetweenTacks */ 15);
         assertEquals(2, splitResult.length);
@@ -54,55 +55,55 @@ public class WindEstimationOnStoredTracksTest extends StoredTrackBasedTestWithTr
     @Test
     public void testBearingWithConfidenceClusterAverageAcrossZero() {
         BearingWithConfidenceCluster cluster = new BearingWithConfidenceCluster();
-        BearingWithConfidence b1 = new DegreeBearingImpl(355);
-        BearingWithConfidence b2 = new DegreeBearingImpl(5);
+        BearingWithConfidence b1 = new BearingWithConfidenceImpl(new DegreeBearingImpl(355), /* confidence */ 0.9);
+        BearingWithConfidence b2 = new BearingWithConfidenceImpl(new DegreeBearingImpl(5), /* confidence */ 0.9);
         cluster.add(b1);
         cluster.add(b2);
-        BearingWithConfidence average = cluster.getAverage();
+        Bearing average = cluster.getAverage();
         assertEquals(0, average.getDegrees(), 0.00000001);
     }
     
     @Test
     public void testBearingWithConfidenceClusterAverageWithZeroSinus() {
         BearingWithConfidenceCluster cluster = new BearingWithConfidenceCluster();
-        BearingWithConfidence b1 = new DegreeBearingImpl(0);
-        BearingWithConfidence b2 = new DegreeBearingImpl(0);
+        BearingWithConfidence b1 = new BearingWithConfidenceImpl(new DegreeBearingImpl(0), /* confidence */ 0.9);
+        BearingWithConfidence b2 = new BearingWithConfidenceImpl(new DegreeBearingImpl(0), /* confidence */ 0.9);
         cluster.add(b1);
         cluster.add(b2);
-        BearingWithConfidence average = cluster.getAverage();
+        Bearing average = cluster.getAverage();
         assertEquals(0, average.getDegrees(), 0.00000001);
     }
     
     @Test
     public void testBearingWithConfidenceClusterAverageWithZeroSinusAndNegativeCosinus() {
         BearingWithConfidenceCluster cluster = new BearingWithConfidenceCluster();
-        BearingWithConfidence b1 = new DegreeBearingImpl(180);
-        BearingWithConfidence b2 = new DegreeBearingImpl(180);
+        BearingWithConfidence b1 = new BearingWithConfidenceImpl(new DegreeBearingImpl(180), /* confidence */ 0.9);
+        BearingWithConfidence b2 = new BearingWithConfidenceImpl(new DegreeBearingImpl(180), /* confidence */ 0.9);
         cluster.add(b1);
         cluster.add(b2);
-        BearingWithConfidence average = cluster.getAverage();
+        Bearing average = cluster.getAverage();
         assertEquals(180, average.getDegrees(), 0.00000001);
     }
     
     @Test
     public void testBearingWithConfidenceClusterAverageWithZeroCosinus() {
         BearingWithConfidenceCluster cluster = new BearingWithConfidenceCluster();
-        BearingWithConfidence b1 = new DegreeBearingImpl(90);
-        BearingWithConfidence b2 = new DegreeBearingImpl(90);
+        BearingWithConfidence b1 = new BearingWithConfidenceImpl(new DegreeBearingImpl(90), /* confidence */ 0.9);
+        BearingWithConfidence b2 = new BearingWithConfidenceImpl(new DegreeBearingImpl(90), /* confidence */ 0.9);
         cluster.add(b1);
         cluster.add(b2);
-        BearingWithConfidence average = cluster.getAverage();
+        Bearing average = cluster.getAverage();
         assertEquals(90, average.getDegrees(), 0.00000001);
     }
     
     @Test
     public void testBearingWithConfidenceClusterAverageWithZeroCosinusAndNegativeSinus() {
         BearingWithConfidenceCluster cluster = new BearingWithConfidenceCluster();
-        BearingWithConfidence b1 = new DegreeBearingImpl(270);
-        BearingWithConfidence b2 = new DegreeBearingImpl(270);
+        BearingWithConfidence b1 = new BearingWithConfidenceImpl(new DegreeBearingImpl(270), /* confidence */ 0.9);
+        BearingWithConfidence b2 = new BearingWithConfidenceImpl(new DegreeBearingImpl(270), /* confidence */ 0.9);
         cluster.add(b1);
         cluster.add(b2);
-        BearingWithConfidence average = cluster.getAverage();
+        Bearing average = cluster.getAverage();
         assertEquals(270, average.getDegrees(), 0.00000001);
     }
     
