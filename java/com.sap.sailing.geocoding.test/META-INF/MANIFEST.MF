@@ -6,6 +6,7 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Require-Bundle: com.sap.sailing.geocoding,
- org.junit;bundle-version="4.8.2",
  com.sap.sailing.domain.common
-Import-Package: org.json.simple.parser
+Import-Package: junit.framework;version="4.8.2",
+ org.json.simple.parser,
+ org.junit;version="4.8.2"
