@@ -5,7 +5,6 @@ Bundle-SymbolicName: com.sap.sailing.gwt.ui
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Eclipse-RegisterBuddy: com.google.gwt.osgi
 Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.server,
  com.sap.sailing.domain.tractracadapter,
