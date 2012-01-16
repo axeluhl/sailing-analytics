@@ -160,6 +160,10 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     }
     
     @Override
+    public Widget getEntryWidget() {
+        return this;
+    }
+
     public void updateSettings(LeaderboardSettings result) {
         List<ExpandableSortableColumn<?>> columnsToExpandAgain = new ArrayList<ExpandableSortableColumn<?>>();
         for (int i = 0; i < getLeaderboardTable().getColumnCount(); i++) {
