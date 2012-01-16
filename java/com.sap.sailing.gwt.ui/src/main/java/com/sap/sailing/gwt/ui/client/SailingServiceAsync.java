@@ -7,8 +7,8 @@ import java.util.Map;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.base.Course;
-import com.sap.sailing.domain.common.Util.Pair;
 import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
 import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
 import com.sap.sailing.gwt.ui.shared.CompetitorInRaceDAO;
@@ -36,7 +36,8 @@ import com.sap.sailing.server.api.RaceIdentifier;
  * The async counterpart of {@link SailingService}
  */
 public interface SailingServiceAsync {
-    void listEvents(AsyncCallback<List<EventDAO>> callback);
+    
+    void listEvents(boolean withRacePlaces, AsyncCallback<List<EventDAO>> callback);
 
     /**
      * The string returned in the callback's pair is the common event name
@@ -133,12 +134,18 @@ public interface SailingServiceAsync {
 
     /**
      * Creates a {@link LeaderboardDAO} for each leaderboard known by the server and fills in the name, race master data
-     * in the form of {@link RaceInLeaderboardDAO}s, whether or not there are {@link LeaderboardDAO#hasCarriedPoints carried points}
-     * and the {@link LeaderboardDAO#discardThresholds discarding thresholds} for the leaderboard. No data about the points
-     * is filled into the result object. No data about the competitor display names is filled in; instead, an empty map
-     * is used for {@link LeaderboardDAO#competitorDisplayNames}.
+     * in the form of {@link RaceInLeaderboardDAO}s, whether or not there are {@link LeaderboardDAO#hasCarriedPoints
+     * carried points} and the {@link LeaderboardDAO#discardThresholds discarding thresholds} for the leaderboard. No
+     * data about the points is filled into the result object. No data about the competitor display names is filled in;
+     * instead, an empty map is used for {@link LeaderboardDAO#competitorDisplayNames}.
      */
     void getLeaderboards(AsyncCallback<List<LeaderboardDAO>> callback);
+    
+    /**
+     * Does the same as {@link SailingServiceAsync#getLeaderboards(AsyncCallback) getLeaderboards} but returns only
+     * leaderboards which have the given event as race
+     */
+    void getLeaderboardsByEvent(EventIdentifier eventIdentifier, AsyncCallback<List<LeaderboardDAO>> callback);
     
     void updateLeaderboard(String leaderboardName, String newLeaderboardName, int[] newDiscardingThreasholds,
             AsyncCallback<Void> callback);

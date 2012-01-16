@@ -1,5 +1,10 @@
 package com.sap.sailing.domain.base;
 
+import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.Speed;
+import com.sap.sailing.domain.common.TimePoint;
+
 
 public interface SpeedWithBearing extends Speed {
     Bearing getBearing();

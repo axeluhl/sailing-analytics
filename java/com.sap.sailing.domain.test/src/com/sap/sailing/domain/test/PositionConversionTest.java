@@ -10,7 +10,7 @@ import java.util.Collections;
 import org.junit.Test;
 
 import com.maptrack.client.io.TypeController;
-import com.sap.sailing.domain.base.Position;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.tractrac.clientmodule.ControlPoint;

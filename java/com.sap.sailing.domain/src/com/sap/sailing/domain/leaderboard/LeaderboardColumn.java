@@ -1,9 +1,9 @@
 package com.sap.sailing.domain.leaderboard;
 
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.Named;
-import com.sap.sailing.domain.base.TimePoint;
+import com.sap.sailing.domain.common.Named;
 import com.sap.sailing.domain.common.NoWindException;
+import com.sap.sailing.domain.common.TimePoint;
 
 /**
  * Represents the data common to all columns in a {@link Leaderboard}. A column enables

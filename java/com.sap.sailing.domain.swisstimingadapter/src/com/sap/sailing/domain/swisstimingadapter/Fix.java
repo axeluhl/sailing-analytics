@@ -1,9 +1,9 @@
 package com.sap.sailing.domain.swisstimingadapter;
 
-import com.sap.sailing.domain.base.Distance;
-import com.sap.sailing.domain.base.Position;
-import com.sap.sailing.domain.base.Speed;
 import com.sap.sailing.domain.base.SpeedWithBearing;
+import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.Speed;
 
 /**
  * Data fix transmitted periodically from the SwissTiming Sail Master system, telling boat position and speed

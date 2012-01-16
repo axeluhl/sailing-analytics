@@ -3,10 +3,10 @@ package com.sap.sailing.domain.leaderboard;
 import java.util.Map;
 
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.Named;
-import com.sap.sailing.domain.base.TimePoint;
+import com.sap.sailing.domain.common.Named;
 import com.sap.sailing.domain.common.NoWindException;
-import com.sap.sailing.domain.common.Util.Pair;
+import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.ScoreCorrection.MaxPointsReason;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
@@ -57,7 +57,7 @@ public interface Leaderboard extends Named {
     int getCarriedPoints(Competitor competitor);
 
     /**
-     * Shorthand for {@link TrackedRace#getRank(Competitor, com.sap.sailing.domain.base.TimePoint)} with the
+     * Shorthand for {@link TrackedRace#getRank(Competitor, com.sap.sailing.domain.common.TimePoint)} with the
      * additional logic that in case the <code>race</code> hasn't {@link TrackedRace#hasStarted(TimePoint) started}
      * yet, 0 points will be allotted to the race for all competitors.
      * 

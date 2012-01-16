@@ -6,15 +6,16 @@ import java.util.NavigableSet;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.Distance;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Leg;
-import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.RaceDefinition;
-import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.NoWindException;
+import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.RacePlaceOrder;
 import com.sap.sailing.domain.common.Tack;
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
@@ -430,6 +431,12 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
     @Override
     public Wind getWind(Position p, TimePoint at, WindSource... windSourcesToConsider) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public RacePlaceOrder getPlaceOrder() {
         // TODO Auto-generated method stub
         return null;
     }

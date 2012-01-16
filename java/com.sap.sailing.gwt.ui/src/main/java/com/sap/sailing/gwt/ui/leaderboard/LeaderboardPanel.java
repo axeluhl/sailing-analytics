@@ -33,6 +33,7 @@ import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.sap.sailing.gwt.ui.client.Collator;
@@ -154,6 +155,10 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     }
     
     @Override
+    public Widget getEntryWidget() {
+        return this;
+    }
+
     public void updateSettings(LeaderboardSettings result) {
         List<ExpandableSortableColumn<?>> columnsToExpandAgain = new ArrayList<ExpandableSortableColumn<?>>();
         for (int i = 0; i < getLeaderboardTable().getColumnCount(); i++) {

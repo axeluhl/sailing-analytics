@@ -3,7 +3,7 @@ package com.sap.sailing.gwt.ui.shared;
 import java.util.HashMap;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import com.sap.sailing.domain.common.Util.Pair;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 
 public class CompetitorsAndTimePointsDAO implements IsSerializable {
     private static final long MILLISECONDS_BEFORE_RACE_TO_INCLUDE = 20000;

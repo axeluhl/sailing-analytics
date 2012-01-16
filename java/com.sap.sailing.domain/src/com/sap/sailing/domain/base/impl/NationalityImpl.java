@@ -3,8 +3,8 @@ package com.sap.sailing.domain.base.impl;
 import java.io.InputStream;
 
 import com.sap.sailing.domain.base.Nationality;
-import com.sap.sailing.util.CountryCode;
-import com.sap.sailing.util.CountryCodeFactory;
+import com.sap.sailing.domain.common.CountryCode;
+import com.sap.sailing.domain.common.CountryCodeFactory;
 
 public class NationalityImpl implements Nationality {
     private final String threeLetterIOCAcronym;

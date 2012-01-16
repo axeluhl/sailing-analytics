@@ -1,6 +1,6 @@
 package com.sap.sailing.domain.swisstimingadapter;
 
-import com.sap.sailing.domain.base.TimePoint;
+import com.sap.sailing.domain.common.TimePoint;
 
 public interface Race extends WithDescription {
     String getRaceID();

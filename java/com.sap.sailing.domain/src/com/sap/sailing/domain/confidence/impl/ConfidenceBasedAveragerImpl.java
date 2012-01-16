@@ -2,7 +2,7 @@ package com.sap.sailing.domain.confidence.impl;
 
 import java.util.Iterator;
 
-import com.sap.sailing.domain.common.Util;
+import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.confidence.ConfidenceBasedAverager;
 import com.sap.sailing.domain.confidence.HasConfidence;
 import com.sap.sailing.domain.confidence.ScalableValue;

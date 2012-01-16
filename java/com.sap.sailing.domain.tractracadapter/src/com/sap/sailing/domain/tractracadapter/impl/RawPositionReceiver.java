@@ -6,7 +6,7 @@ import java.util.logging.Logger;
 
 import com.maptrack.client.io.TypeController;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.common.Util.Triple;
+import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFixMoving;

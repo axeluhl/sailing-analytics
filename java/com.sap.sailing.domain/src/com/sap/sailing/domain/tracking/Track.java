@@ -2,8 +2,8 @@ package com.sap.sailing.domain.tracking;
 
 import java.util.Iterator;
 
-import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.Timed;
+import com.sap.sailing.domain.common.TimePoint;
 
 /**
  * A track records {@link Timed} items for an object of type <code>ItemType</code>. It allows clients to ask for a value

@@ -1,20 +1,15 @@
 package com.sap.sailing.server.api;
 
 
-public class EventNameAndRaceName implements EventAndRaceIdentifier {
+public class EventNameAndRaceName extends EventName implements EventAndRaceIdentifier {
     private static final long serialVersionUID = 3599904513673776450L;
-    private String eventName;
     private String raceName;
     
     EventNameAndRaceName() {}
     
     public EventNameAndRaceName(String eventName, String raceName) {
-        super();
-        this.eventName = eventName;
+        super(eventName);
         this.raceName = raceName;
-    }
-    public String getEventName() {
-        return eventName;
     }
     public String getRaceName() {
         return raceName;
@@ -33,12 +28,32 @@ public class EventNameAndRaceName implements EventAndRaceIdentifier {
         return raceFetcher.getExistingTrackedRace(this);
     }
     @Override
-    public Object getEvent(EventFetcher eventFetcher) {
-        return eventFetcher.getEvent(this);
+    public String toString() {
+        return raceName;
     }
 
     @Override
-    public String toString() {
-        return raceName;
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + ((raceName == null) ? 0 : raceName.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (!super.equals(obj))
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        EventNameAndRaceName other = (EventNameAndRaceName) obj;
+        if (raceName == null) {
+            if (other.raceName != null)
+                return false;
+        } else if (!raceName.equals(other.raceName))
+            return false;
+        return true;
     }
 }

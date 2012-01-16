@@ -11,8 +11,8 @@ import java.util.regex.Matcher;
 import org.junit.Test;
 
 import com.sap.sailing.declination.Declination;
-import com.sap.sailing.domain.base.impl.DegreePosition;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.common.impl.DegreePosition;
 
 public class DeclinationImportTest extends AbstractDeclinationTest {
     @Test

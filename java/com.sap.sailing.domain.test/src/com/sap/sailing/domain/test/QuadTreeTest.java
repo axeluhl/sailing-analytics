@@ -4,9 +4,9 @@ import static org.junit.Assert.assertNotNull;
 
 import org.junit.Test;
 
-import com.sap.sailing.domain.base.Position;
-import com.sap.sailing.domain.base.impl.DegreePosition;
-import com.sap.sailing.util.QuadTree;
+import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.domain.common.quadtree.QuadTree;
 
 public class QuadTreeTest {
     private class GLatLngQuadTree extends QuadTree<Position> {

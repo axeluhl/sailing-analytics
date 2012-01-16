@@ -6,16 +6,17 @@ import java.util.NavigableSet;
 import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
-import com.sap.sailing.domain.base.Distance;
 import com.sap.sailing.domain.base.Leg;
-import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.RaceDefinition;
-import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.DouglasPeucker;
+import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
+import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.RacePlaceOrder;
 import com.sap.sailing.domain.common.Tack;
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
 
 /**
@@ -37,6 +38,12 @@ public interface TrackedRace {
     final long MAX_TIME_BETWEEN_START_AND_FIRST_MARK_PASSING_IN_MILLISECONDS = 30000;
     
     RaceDefinition getRace();
+    
+    /**
+     * @return The locations (start, finish, ...) of the race in form of {@link RacePlaceOrder} or null if there are no
+     *         valid locations
+     */
+    RacePlaceOrder getPlaceOrder();
     
     /**
      * Computes the estimated start time for this race. When there are no {@link MarkPassing}s for the first mark, the
