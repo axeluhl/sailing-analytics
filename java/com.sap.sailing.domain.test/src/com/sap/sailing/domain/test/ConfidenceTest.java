@@ -49,7 +49,7 @@ public class ConfidenceTest {
         }
 
         @Override
-        public Bearing divide(double divisor) {
+        public Bearing divide(double divisor, double confidence) {
             double angle;
             if (cos == 0) {
                 angle = sin >= 0 ? Math.PI / 2 : -Math.PI / 2;

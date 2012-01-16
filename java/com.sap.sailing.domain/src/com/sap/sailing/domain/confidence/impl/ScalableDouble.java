@@ -21,7 +21,7 @@ public class ScalableDouble implements AbstractScalarValue<Double> {
     }
 
     @Override
-    public Double divide(double divisor) {
+    public Double divide(double divisor, double confidence) {
         return getValue()/divisor;
     }
 

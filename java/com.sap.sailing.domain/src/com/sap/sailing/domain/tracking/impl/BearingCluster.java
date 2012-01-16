@@ -29,4 +29,9 @@ public class BearingCluster extends GenericBearingCluster<Bearing> {
     public BearingCluster[] splitInTwo(double minimumDegreeDifferenceBetweenTacks) {
         return (BearingCluster[]) super.splitInTwo(minimumDegreeDifferenceBetweenTacks);
     }
+
+    @Override
+    protected Bearing getBearing(Bearing b) {
+        return b;
+    }
 }

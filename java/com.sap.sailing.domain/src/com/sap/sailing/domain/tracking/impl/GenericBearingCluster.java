@@ -16,14 +16,11 @@ import com.sap.sailing.domain.common.Util.Pair;
  * average.
  * <p>
  * 
- * It is assumed that bearings added to this cluster are no further than 180 degrees apart. Violating this rule will
- * lead to unpredictable results.
- * 
  * @author Axel Uhl (d043530)
  * 
  * @param <BearingType> the class used for the bearing objects
  */
-public class GenericBearingCluster<BearingType extends Bearing> {
+public abstract class GenericBearingCluster<BearingType> {
     private final List<BearingType> bearings;
     private double sumSin;
     private double sumCos;
@@ -33,6 +30,8 @@ public class GenericBearingCluster<BearingType extends Bearing> {
         sumSin = 0.0;
         sumCos = 0.0;
     }
+    
+    abstract protected Bearing getBearing(BearingType b);
     
     /**
      * Finds the two bearings in the cluster that are farthest apart (at least <code>minimumDegreeDifferenceBetweenTacks</code>).
@@ -63,7 +62,9 @@ public class GenericBearingCluster<BearingType extends Bearing> {
             }
             for (BearingType bearing : bearings) {
                 if (extremeBearings == null || (bearing != extremeBearings.getA() && bearing != extremeBearings.getB())) {
-                    if (extremeBearings == null || result[0].getDifferenceFromAverage(bearing) <= result[1].getDifferenceFromAverage(bearing)) {
+                    if (extremeBearings == null
+                            || result[0].getDifferenceFromAverage(getBearing(bearing)) <= result[1]
+                                    .getDifferenceFromAverage(getBearing(bearing))) {
                         result[0].add(bearing);
                     } else {
                         result[1].add(bearing);
@@ -77,9 +78,7 @@ public class GenericBearingCluster<BearingType extends Bearing> {
         return result;
     }
 
-    protected GenericBearingCluster<BearingType> createEmptyCluster() {
-        return new GenericBearingCluster<BearingType>();
-    }
+    abstract protected GenericBearingCluster<BearingType> createEmptyCluster();
 
     @SuppressWarnings("unchecked")
     protected GenericBearingCluster<BearingType>[] createBearingClusterArraySizeTwo() {
@@ -92,10 +91,10 @@ public class GenericBearingCluster<BearingType extends Bearing> {
         Pair<BearingType, BearingType> result = null;
         for (int i=0; i<bearings.size(); i++) {
             for (int j=i+1; j<bearings.size(); j++) {
-                if (Math.abs(bearings.get(i).getDifferenceTo(bearings.get(j)).getDegrees()) >= maxAbsDegDiff) {
+                if (Math.abs(getBearing(bearings.get(i)).getDifferenceTo(getBearing(bearings.get(j))).getDegrees()) >= maxAbsDegDiff) {
                     result = new Pair<BearingType, BearingType>(bearings.get(i), bearings.get(j));
-                    maxAbsDegDiff = Math.abs(bearings.get(i).getDifferenceTo(bearings.get(j)).getDegrees());
-                    assert Math.abs(result.getA().getDegrees()-result.getB().getDegrees()) <= 180.;
+                    maxAbsDegDiff = Math.abs(getBearing(bearings.get(i)).getDifferenceTo(getBearing(bearings.get(j))).getDegrees());
+                    assert Math.abs(getBearing(result.getA()).getDegrees()-getBearing(result.getB()).getDegrees()) <= 180.;
                 }
             }
         }
@@ -112,8 +111,8 @@ public class GenericBearingCluster<BearingType extends Bearing> {
     
     public void add(BearingType bearing) {
         bearings.add(bearing);
-        sumSin += Math.sin(bearing.getRadians());
-        sumCos += Math.cos(bearing.getRadians());
+        sumSin += Math.sin(getBearing(bearing).getRadians());
+        sumCos += Math.cos(getBearing(bearing).getRadians());
     }
     
     /**
