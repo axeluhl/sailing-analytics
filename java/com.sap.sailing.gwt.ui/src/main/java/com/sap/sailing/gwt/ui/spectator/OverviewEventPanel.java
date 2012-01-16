@@ -354,7 +354,7 @@ public class OverviewEventPanel extends AbstractEventPanel {
     }
 
     private void loadEvents(final Runnable actionAfterLoading) {
-        sailingService.listEvents(new AsyncCallback<List<EventDAO>>() {
+        sailingService.listEvents(true, new AsyncCallback<List<EventDAO>>() {
 
             @Override
             public void onSuccess(List<EventDAO> result) {

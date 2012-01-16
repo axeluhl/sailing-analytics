@@ -7,10 +7,9 @@ import java.util.Map;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.base.Course;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
-import com.sap.sailing.gwt.ui.shared.AdvancedEventDAO;
 import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
 import com.sap.sailing.gwt.ui.shared.CompetitorInRaceDAO;
 import com.sap.sailing.gwt.ui.shared.CompetitorsAndTimePointsDAO;
@@ -38,9 +37,7 @@ import com.sap.sailing.server.api.RaceIdentifier;
  */
 public interface SailingServiceAsync {
     
-    void listEvents(AsyncCallback<List<EventDAO>> callback);
-    
-    void listAdvancedEvents(AsyncCallback<List<AdvancedEventDAO>> callback);
+    void listEvents(boolean withRacePlaces, AsyncCallback<List<EventDAO>> callback);
 
     /**
      * The string returned in the callback's pair is the common event name

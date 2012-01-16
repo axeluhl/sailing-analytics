@@ -54,7 +54,6 @@ import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindError;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.RacePlaceOrder;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TimePoint;
@@ -91,7 +90,6 @@ import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.RaceRecord;
 import com.sap.sailing.domain.tractracadapter.TracTracConfiguration;
 import com.sap.sailing.gwt.ui.client.SailingService;
-import com.sap.sailing.gwt.ui.shared.AdvancedEventDAO;
 import com.sap.sailing.gwt.ui.shared.BoatClassDAO;
 import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
 import com.sap.sailing.gwt.ui.shared.CompetitorInRaceDAO;
@@ -330,11 +328,11 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         return result;
     }
 
-    public List<EventDAO> listEvents() throws IllegalArgumentException {
+    public List<EventDAO> listEvents(boolean withRacePlaces) throws IllegalArgumentException {
         List<EventDAO> result = new ArrayList<EventDAO>();
         for (Event event : getService().getAllEvents()) {
             List<CompetitorDAO> competitorList = getCompetitorDAOs(event.getCompetitors());
-            List<RegattaDAO> regattasList = getRegattaDAOs(event);
+            List<RegattaDAO> regattasList = getRegattaDAOs(event, withRacePlaces);
             EventDAO eventDAO = new EventDAO(event.getName(), regattasList, competitorList);
             if (!eventDAO.regattas.isEmpty()) {
                 result.add(eventDAO);
@@ -342,39 +340,8 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         }
         return result;
     }
-    
-    public List<AdvancedEventDAO> listAdvancedEvents() {
-        List<AdvancedEventDAO> result = new ArrayList<AdvancedEventDAO>();
-        for (Event event : getService().getAllEvents()) {
-            List<CompetitorDAO> competitorList = getCompetitorDAOs(event.getCompetitors());
-            List<RegattaDAO> regattasList = getRegattaDAOs(event);
-            List<RacePlaceOrder> racePlaces = getRacePlaces(event);
-            
-            //Get start date
-            RaceDefinition raceDefinition = event.getAllRaces().iterator().next();
-            EventNameAndRaceName id = new EventNameAndRaceName(event.getName(), raceDefinition.getName());
-            TrackedRace race = getTrackedRace(id);
-            Date start = race.getStart().asDate();
-            
-            AdvancedEventDAO eventDAO = new AdvancedEventDAO(event.getName(), regattasList, competitorList, racePlaces, start);
-            if (!eventDAO.regattas.isEmpty()) {
-                result.add(eventDAO);
-            }
-        }
-        return result;
-    }
-    
-    private List<RacePlaceOrder> getRacePlaces(Event event) {
-        List<RacePlaceOrder> result = new ArrayList<RacePlaceOrder>();
-        for (RaceDefinition raceDefinition : event.getAllRaces()) {
-            EventNameAndRaceName id = new EventNameAndRaceName(event.getName(), raceDefinition.getName());
-            TrackedRace race = getTrackedRace(id);
-            result.add(race.getPlaceOrder());
-        }
-        return result;
-    }
 
-    private List<RegattaDAO> getRegattaDAOs(Event event) {
+    private List<RegattaDAO> getRegattaDAOs(Event event, boolean withRacePlaces) {
         Map<BoatClass, Set<RaceDefinition>> racesByBoatClass = new HashMap<BoatClass, Set<RaceDefinition>>();
         for (RaceDefinition r : event.getAllRaces()) {
             Set<RaceDefinition> racesForBoatClass = racesByBoatClass.get(r.getBoatClass());
@@ -386,7 +353,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         }
         List<RegattaDAO> result = new ArrayList<RegattaDAO>();
         for (Map.Entry<BoatClass, Set<RaceDefinition>> e : racesByBoatClass.entrySet()) {
-            List<RaceDAO> raceDAOsInBoatClass = getRaceDAOs(event, e.getValue());
+            List<RaceDAO> raceDAOsInBoatClass = getRaceDAOs(event, e.getValue(), withRacePlaces);
             if (!raceDAOsInBoatClass.isEmpty()) {
                 RegattaDAO regatta = new RegattaDAO(new BoatClassDAO(e.getKey()==null?"":e.getKey().getName()), raceDAOsInBoatClass);
                 result.add(regatta);
@@ -395,7 +362,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         return result;
     }
 
-    private List<RaceDAO> getRaceDAOs(Event event, Set<RaceDefinition> races) {
+    private List<RaceDAO> getRaceDAOs(Event event, Set<RaceDefinition> races, boolean withRacePlaces) {
         List<RaceDAO> result = new ArrayList<RaceDAO>();
         for (RaceDefinition r : races) {
             RaceDAO raceDAO = new RaceDAO(r.getName(), getCompetitorDAOs(r.getCompetitors()), getService().isRaceBeingTracked(r));
@@ -405,6 +372,9 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 raceDAO.startOfTracking = trackedRace.getStartOfTracking() == null ? null : trackedRace.getStartOfTracking().asDate();
                 raceDAO.timePointOfLastEvent = trackedRace.getTimePointOfLastEvent() == null ? null : trackedRace.getTimePointOfLastEvent().asDate();
                 raceDAO.timePointOfNewestEvent = trackedRace.getTimePointOfNewestEvent() == null ? null : trackedRace.getTimePointOfNewestEvent().asDate();
+                if (withRacePlaces) {
+                    raceDAO.racePlaces = trackedRace.getPlaceOrder();
+                }
             }
             result.add(raceDAO);
         }

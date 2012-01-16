@@ -71,7 +71,7 @@ public class AdminConsole extends AbstractEntryPoint implements EventRefresher {
 
     @Override
     public void fillEvents() {
-        sailingService.listEvents(new AsyncCallback<List<EventDAO>>() {
+        sailingService.listEvents(false, new AsyncCallback<List<EventDAO>>() {
             @Override
             public void onSuccess(List<EventDAO> result) {
                 for (EventDisplayer eventDisplayer : eventDisplayers) {
