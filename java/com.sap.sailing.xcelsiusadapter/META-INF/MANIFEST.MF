@@ -9,7 +9,8 @@ Import-Package: javax.servlet;version="2.5.0",
  javax.servlet.http;version="2.5.0",
  org.osgi.framework;version="1.6.0"
 Bundle-ActivationPolicy: lazy
-Require-Bundle: com.sap.sailing.server,
+Require-Bundle: javax.servlet;bundle-version="2.5.0",
+ com.sap.sailing.server,
  com.sap.sailing.domain,
  com.sap.sailing.domain.tractracadapter,
  com.sap.sailing.domain.common
