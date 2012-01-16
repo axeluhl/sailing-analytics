@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.common;
 
+import java.io.Serializable;
 import java.util.Comparator;
 
 /**
@@ -8,20 +9,23 @@ import java.util.Comparator;
  * @author Lennart Hensler (D054527)
  *
  */
-public interface Placemark {
+public interface Placemark extends Serializable {
     
     /**
      * @return The name of the Placemark
      */
     String getName();
+    
     /**
      * @return The 2 letters country code of the Placemark
      */
     String getCountryCode();
+    
     /**
      * @return The {@link Position} of the Placemark
      */
     Position getPosition();
+    
     /**
      * @return The population of the Placemark
      */
@@ -32,6 +36,7 @@ public interface Placemark {
      * @return The {@link Distance} between the given {@link Position} and the Placemark
      */
     Distance distanceFrom(Position position);
+    
     /**
      * Creates a new {@link Position} out of the given coordinates and calculates the distance between {@link Position} and
      * the Placemark via {@link Placemark#distanceFrom(Position) distanceFrom(Position)}.
@@ -40,13 +45,11 @@ public interface Placemark {
      * @return The {@link Distance} between the given coordinates and the Placemark
      */
     Distance distanceFrom(double latDeg, double lngDeg);
+    
     /**
      * @return The name of the country where the Placemark is located
      */
     String getCountryName();
-    
-    
-    
     
     
     

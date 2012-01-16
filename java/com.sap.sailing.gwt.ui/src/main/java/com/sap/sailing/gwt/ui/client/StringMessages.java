@@ -203,4 +203,7 @@ public interface StringMessages extends Messages {
     String from();
     String until();
     String onlyLiveEvents();
+    String locationNotAvailable();
+    String startDateNotAvailable();
+    String startDate();
 }

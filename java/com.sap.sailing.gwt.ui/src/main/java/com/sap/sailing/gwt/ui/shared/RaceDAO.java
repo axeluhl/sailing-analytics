@@ -20,7 +20,7 @@ public class RaceDAO extends NamedDAO implements IsSerializable {
     public Date timePointOfLastEvent;
     public Date timePointOfNewestEvent;
     
-    public RacePlaceOrder racePlaces;
+    public RacePlaceOrder racePlaces = null;
     
     public RaceDAO() {}
 
