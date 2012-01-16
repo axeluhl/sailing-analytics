@@ -23,8 +23,15 @@
   top: -1000px; }
 
 body {
-  background: url(images/header_bg.png) 0 0 repeat-x;
-  font-family: Arial, Verdana, sans-serif;
+  background: url(images/header_bg_modern.png) 0 0 repeat-x #ebebeb;
+  font-family: 'Terminal Dosis', sans-serif;
   line-height: 1;
   font-size: 62.5%;
-  margin-top: 0; }
+  margin-top: 0;
+  padding: 0 12px;
+  height: 100%; }
+  
+.outerPanel {
+	background: #dddcdc;
+	height: 100%;
+}
