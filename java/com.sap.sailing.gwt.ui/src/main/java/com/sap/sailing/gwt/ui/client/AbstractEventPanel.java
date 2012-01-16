@@ -14,10 +14,10 @@ public abstract class AbstractEventPanel extends FormPanel implements EventDispl
     protected DateTimeFormatRenderer timeFormatter = new DateTimeFormatRenderer(DateTimeFormat.getFormat(PredefinedFormat.TIME_LONG));
     protected final EventRefresher eventRefresher;
     protected ErrorReporter errorReporter;
-    protected StringConstants stringConstants;
+    protected StringMessages stringConstants;
     
     public AbstractEventPanel(SailingServiceAsync sailingService,
-            EventRefresher eventRefresher, ErrorReporter errorReporter, StringConstants stringConstants) {
+            EventRefresher eventRefresher, ErrorReporter errorReporter, StringMessages stringConstants) {
         super();
         this.sailingService = sailingService;
         this.eventRefresher = eventRefresher;

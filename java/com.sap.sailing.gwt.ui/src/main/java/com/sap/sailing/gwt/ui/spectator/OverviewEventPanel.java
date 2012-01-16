@@ -30,7 +30,7 @@ import com.sap.sailing.gwt.ui.client.AbstractEventPanel;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.EventRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
-import com.sap.sailing.gwt.ui.client.StringConstants;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDAO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDAO;
 import com.sap.sailing.server.api.EventIdentifier;
@@ -61,7 +61,7 @@ public class OverviewEventPanel extends AbstractEventPanel {
     private List<EventDAO> availableEvents;
 
     public OverviewEventPanel(SailingServiceAsync sailingService, EventRefresher eventRefresher,
-            ErrorReporter errorReporter, final StringConstants stringConstants) {
+            ErrorReporter errorReporter, final StringMessages stringConstants) {
         super(sailingService, eventRefresher, errorReporter, stringConstants);
         availableEvents = new ArrayList<EventDAO>();
 
