@@ -2,6 +2,7 @@ package com.sap.sailing.domain.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -168,5 +169,18 @@ public class ConfidenceTest {
         Position average = averager.getAverage(list);
         assertEquals(90, average.getLatDeg(), 0.1);
         assertEquals(0, average.getLngDeg(), 0.1);
+    }
+
+    @Test
+    public void testAveragingThreePositions() {
+        PositionWithConfidence p1 = new PositionWithConfidenceImpl(new DegreePosition(49, 8), 0.9);
+        PositionWithConfidence p2 = new PositionWithConfidenceImpl(new DegreePosition(49, 9), 0.9);
+        PositionWithConfidence p3 = new PositionWithConfidenceImpl(new DegreePosition(50, 8.5), 0.9);
+        ConfidenceBasedAverager<Triple<Double, Double, Double>, Position> averager = ConfidenceBasedAveragerFactory.INSTANCE.createAverager();
+        List<PositionWithConfidence> list = Arrays.asList(p1, p2, p3);
+        Position average = averager.getAverage(list);
+        assertTrue(average.getLatDeg() > 49);
+        assertTrue(average.getLatDeg() < 50);
+        assertEquals(8.5, average.getLngDeg(), 0.000000001);
     }
 }
