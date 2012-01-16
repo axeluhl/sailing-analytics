@@ -1,8 +1,9 @@
 package com.sap.sailing.domain.base.impl;
 
-import com.sap.sailing.domain.base.Bearing;
 import com.sap.sailing.domain.base.BearingWithConfidence;
-import com.sap.sailing.domain.common.Util.Pair;
+import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.impl.RadianBearingImpl;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.confidence.ScalableValue;
 
 public class BearingWithConfidenceImpl implements BearingWithConfidence {

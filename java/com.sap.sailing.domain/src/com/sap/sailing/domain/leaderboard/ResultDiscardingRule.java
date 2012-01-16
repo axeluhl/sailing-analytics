@@ -3,7 +3,7 @@ package com.sap.sailing.domain.leaderboard;
 import java.util.Set;
 
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.TimePoint;
+import com.sap.sailing.domain.common.TimePoint;
 
 /**
  * A result discarding rule is used to determine for a competitor those races from a list of

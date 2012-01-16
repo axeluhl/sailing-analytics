@@ -30,13 +30,13 @@ import org.junit.Test;
 import com.sap.sailing.declination.Declination;
 import com.sap.sailing.declination.impl.DeclinationRecordImpl;
 import com.sap.sailing.declination.impl.DeclinationStore;
-import com.sap.sailing.domain.base.Bearing;
-import com.sap.sailing.domain.base.Position;
-import com.sap.sailing.domain.base.TimePoint;
-import com.sap.sailing.domain.base.impl.DegreeBearingImpl;
-import com.sap.sailing.domain.base.impl.DegreePosition;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
-import com.sap.sailing.util.QuadTree;
+import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
+import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.domain.common.quadtree.QuadTree;
 
 public class DeclinationStoreTest extends AbstractDeclinationTest {
     private DeclinationStore store;

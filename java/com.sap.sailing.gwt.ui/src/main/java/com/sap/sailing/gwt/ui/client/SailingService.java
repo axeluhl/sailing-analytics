@@ -8,8 +8,8 @@ import java.util.Map;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import com.sap.sailing.domain.common.NoWindException;
-import com.sap.sailing.domain.common.Util.Pair;
 import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
 import com.sap.sailing.gwt.ui.shared.CompetitorInRaceDAO;
 import com.sap.sailing.gwt.ui.shared.CompetitorsAndTimePointsDAO;
@@ -38,7 +38,7 @@ import com.sap.sailing.server.api.RaceIdentifier;
 public interface SailingService extends RemoteService {
     List<TracTracConfigurationDAO> getPreviousTracTracConfigurations() throws Exception;
     
-    List<EventDAO> listEvents();
+    List<EventDAO> listEvents(boolean withRacePlaces);
 
     Pair<String, List<TracTracRaceRecordDAO>> listTracTracRacesInEvent(String eventJsonURL) throws Exception;
 
@@ -77,6 +77,8 @@ public interface SailingService extends RemoteService {
             throws NoWindException;
 
     List<LeaderboardDAO> getLeaderboards();
+    
+    List<LeaderboardDAO> getLeaderboardsByEvent(EventIdentifier eventIdentifier);
     
     void updateLeaderboard(String leaderboardName, String newLeaderboardName, int[] newDiscardingThreasholds);
 

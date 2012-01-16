@@ -48,6 +48,7 @@
           <execution>
 	        <configuration>
 	          <modules>
+		        <module>com.sap.sailing.gwt.ui.Spectator</module>
 		        <module>com.sap.sailing.gwt.ui.LeaderboardEditing</module>
 		        <module>com.sap.sailing.gwt.ui.AdminConsole</module>
 		        <module>com.sap.sailing.gwt.ui.Leaderboard</module>

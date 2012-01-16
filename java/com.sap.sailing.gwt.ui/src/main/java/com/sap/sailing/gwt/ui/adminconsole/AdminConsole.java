@@ -10,6 +10,8 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TabPanel;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
+import com.sap.sailing.gwt.ui.client.EventDisplayer;
+import com.sap.sailing.gwt.ui.client.EventRefresher;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.shared.EventDAO;
 import com.sap.sailing.server.api.DefaultLeaderboardName;
@@ -27,7 +29,7 @@ public class AdminConsole extends AbstractEntryPoint implements EventRefresher {
         tabPanel.setAnimationEnabled(true);
         rootPanel.add(tabPanel, 10, 10);
         tabPanel.setSize("95%", "95%");
-
+        
         eventDisplayers = new HashSet<EventDisplayer>();
         TracTracEventManagementPanel tractracEventManagementPanel = new TracTracEventManagementPanel(sailingService, this, this, stringConstants);
         eventDisplayers.add(tractracEventManagementPanel);
@@ -71,7 +73,7 @@ public class AdminConsole extends AbstractEntryPoint implements EventRefresher {
 
     @Override
     public void fillEvents() {
-        sailingService.listEvents(new AsyncCallback<List<EventDAO>>() {
+        sailingService.listEvents(false, new AsyncCallback<List<EventDAO>>() {
             @Override
             public void onSuccess(List<EventDAO> result) {
                 for (EventDisplayer eventDisplayer : eventDisplayers) {

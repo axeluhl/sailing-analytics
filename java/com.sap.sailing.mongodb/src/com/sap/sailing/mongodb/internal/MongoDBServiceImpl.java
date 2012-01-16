@@ -7,7 +7,7 @@ import java.util.logging.Logger;
 
 import com.mongodb.DB;
 import com.mongodb.Mongo;
-import com.sap.sailing.domain.common.Util;
+import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.mongodb.MongoDBConfiguration;
 import com.sap.sailing.mongodb.MongoDBService;
 

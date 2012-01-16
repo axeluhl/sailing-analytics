@@ -18,9 +18,9 @@ import java.util.regex.Pattern;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import com.sap.sailing.domain.common.Util;
-import com.sap.sailing.util.CountryCode;
-import com.sap.sailing.util.CountryCodeFactory;
+import com.sap.sailing.domain.common.CountryCode;
+import com.sap.sailing.domain.common.CountryCodeFactory;
+import com.sap.sailing.domain.common.impl.Util;
 
 public class CountryCodeTest {
     private static final int NUMBER_OF_COUNTRY_CODES = 259;
@@ -90,7 +90,7 @@ public class CountryCodeTest {
         cc = ccf.getFromThreeLetterIOCName("GER");
         assertEquals("DE", cc.getTwoLetterISOCode().toUpperCase());
         assertEquals("DEU", cc.getThreeLetterISOCode().toUpperCase());
-        cc = ccf.getFromLocale(Locale.GERMANY);
+        cc = ccf.getFromThreeLetterISOName(Locale.GERMANY.getISO3Country().toUpperCase());
         assertEquals("DE", cc.getTwoLetterISOCode().toUpperCase());
         assertEquals("DEU", cc.getThreeLetterISOCode().toUpperCase());
         cc = ccf.getFromIANAInternet("sd");

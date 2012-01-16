@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.shared;
 import java.util.Date;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import com.sap.sailing.domain.common.RacePlaceOrder;
 
 public class RaceDAO extends NamedDAO implements IsSerializable {
     public Iterable<CompetitorDAO> competitors;
@@ -18,6 +19,8 @@ public class RaceDAO extends NamedDAO implements IsSerializable {
     public Date startOfTracking;
     public Date timePointOfLastEvent;
     public Date timePointOfNewestEvent;
+    
+    public RacePlaceOrder racePlaces;
     
     public RaceDAO() {}
 

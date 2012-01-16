@@ -17,9 +17,9 @@ import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.Person;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Team;
-import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.common.Util.Pair;
+import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
@@ -47,9 +47,9 @@ import difflib.PatchFailedException;
 public interface DomainFactory {
     static DomainFactory INSTANCE = new DomainFactoryImpl(com.sap.sailing.domain.base.DomainFactory.INSTANCE);
 
-    com.sap.sailing.domain.base.Position createPosition(Position position);
+    com.sap.sailing.domain.common.Position createPosition(Position position);
 
-    com.sap.sailing.domain.base.TimePoint createTimePoint(long timestamp);
+    com.sap.sailing.domain.common.TimePoint createTimePoint(long timestamp);
 
     Course createCourse(String name, Iterable<ControlPoint> controlPoints);
 

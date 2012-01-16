@@ -12,7 +12,7 @@ public class MongoDBConfiguration {
     public static final String MONGO_DB_NAME = "mongo.dbName";
 
     private static String DEFAULT_DB_NAME = "winddb"; 
-    private static String DEFAULT_TEST_DB_NAME = "winddbTest"; 
+    private static String DEFAULT_TEST_DB_NAME = "winddb"; 
 
     private String hostName;
     private int port;

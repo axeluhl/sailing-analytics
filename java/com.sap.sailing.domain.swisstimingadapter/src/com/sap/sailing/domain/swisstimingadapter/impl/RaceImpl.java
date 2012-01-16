@@ -1,6 +1,6 @@
 package com.sap.sailing.domain.swisstimingadapter.impl;
 
-import com.sap.sailing.domain.base.TimePoint;
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.swisstimingadapter.Race;
 
 public class RaceImpl implements Race {
