@@ -14,7 +14,7 @@ import com.sap.sailing.domain.common.SerializablePosition;
  * @author Lennart Hensler (D054527)
  *
  */
-public class PlacemarkImpl implements Placemark, Serializable {
+public class PlacemarkImpl implements Placemark {
     private static final long serialVersionUID = -7287453946921815463L;
     
     private String name;
