@@ -2,6 +2,7 @@ package com.sap.sailing.domain.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -10,10 +11,15 @@ import java.util.Set;
 
 import org.junit.Test;
 
+import com.sap.sailing.domain.base.PositionWithConfidence;
+import com.sap.sailing.domain.base.impl.PositionWithConfidenceImpl;
 import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
+import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.RadianBearingImpl;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.confidence.ConfidenceBasedAverager;
 import com.sap.sailing.domain.confidence.ConfidenceBasedAveragerFactory;
 import com.sap.sailing.domain.confidence.HasConfidence;
@@ -133,7 +139,7 @@ public class ConfidenceTest {
     }
     
     @Test
-    public void testAveragingWithThreeoBearings() {
+    public void testAveragingWithThreeBearings() {
         ScalableBearingWithConfidence d1 = new ScalableBearingWithConfidence(new DegreeBearingImpl(350.), 1.);
         ScalableBearingWithConfidence d2 = new ScalableBearingWithConfidence(new DegreeBearingImpl(10.), 1.);
         ScalableBearingWithConfidence d3 = new ScalableBearingWithConfidence(new DegreeBearingImpl(20.), 2.);
@@ -142,5 +148,39 @@ public class ConfidenceTest {
         Bearing average = averager.getAverage(list);
         assertEquals(10, average.getDegrees(), 0.1);
     }
-    
+
+    @Test
+    public void testAveragingTwoPositions() {
+        PositionWithConfidence p1 = new PositionWithConfidenceImpl(new DegreePosition(0, 45), 0.9);
+        PositionWithConfidence p2 = new PositionWithConfidenceImpl(new DegreePosition(0, -45), 0.9);
+        ConfidenceBasedAverager<Triple<Double, Double, Double>, Position> averager = ConfidenceBasedAveragerFactory.INSTANCE.createAverager();
+        List<PositionWithConfidence> list = Arrays.asList(p1, p2);
+        Position average = averager.getAverage(list);
+        assertEquals(0, average.getLatDeg(), 0.1);
+        assertEquals(0, average.getLngDeg(), 0.1);
+    }
+
+    @Test
+    public void testAveragingTwoPositionsToNorthPole() {
+        PositionWithConfidence p1 = new PositionWithConfidenceImpl(new DegreePosition(45, 90), 0.9);
+        PositionWithConfidence p2 = new PositionWithConfidenceImpl(new DegreePosition(45, -90), 0.9);
+        ConfidenceBasedAverager<Triple<Double, Double, Double>, Position> averager = ConfidenceBasedAveragerFactory.INSTANCE.createAverager();
+        List<PositionWithConfidence> list = Arrays.asList(p1, p2);
+        Position average = averager.getAverage(list);
+        assertEquals(90, average.getLatDeg(), 0.1);
+        assertEquals(0, average.getLngDeg(), 0.1);
+    }
+
+    @Test
+    public void testAveragingThreePositions() {
+        PositionWithConfidence p1 = new PositionWithConfidenceImpl(new DegreePosition(49, 8), 0.9);
+        PositionWithConfidence p2 = new PositionWithConfidenceImpl(new DegreePosition(49, 9), 0.9);
+        PositionWithConfidence p3 = new PositionWithConfidenceImpl(new DegreePosition(50, 8.5), 0.9);
+        ConfidenceBasedAverager<Triple<Double, Double, Double>, Position> averager = ConfidenceBasedAveragerFactory.INSTANCE.createAverager();
+        List<PositionWithConfidence> list = Arrays.asList(p1, p2, p3);
+        Position average = averager.getAverage(list);
+        assertTrue(average.getLatDeg() > 49);
+        assertTrue(average.getLatDeg() < 50);
+        assertEquals(8.5, average.getLngDeg(), 0.000000001);
+    }
 }
