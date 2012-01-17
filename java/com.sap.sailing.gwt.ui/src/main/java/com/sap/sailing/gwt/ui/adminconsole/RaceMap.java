@@ -656,15 +656,11 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
 
     private Iterable<CompetitorDAO> getCompetitorsToShow() {
         Iterable<CompetitorDAO> result;
-        if (getSettings().isShowOnlySelectedCompetitors() && Util.isEmpty(competitorSelection.getSelectedCompetitors())) {
+        Iterable<CompetitorDAO> selection = competitorSelection.getSelectedCompetitors();
+        if (!getSettings().isShowOnlySelectedCompetitors() || Util.isEmpty(selection)) {
             result = competitorSelection.getAllCompetitors();
         } else {
-            Iterable<CompetitorDAO> selection = competitorSelection.getSelectedCompetitors();
-            if (Util.isEmpty(selection)) {
-                result = competitorSelection.getAllCompetitors();
-            } else {
-                result = selection;
-            }
+            result = selection;
         }
         return result;
     }
