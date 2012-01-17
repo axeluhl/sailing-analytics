@@ -58,7 +58,11 @@ public abstract class AbstractChartSettingsComponent<SettingsType extends ChartS
     }
 
     public ChartSettings getAbstractResult() {
-        return new ChartSettings(getStepsBox().getValue().intValue());
+        Long value = getStepsBox().getValue();
+        if (value == null) {
+            value = -1l;
+        }
+        return new ChartSettings(value.intValue());
     }
 
 }
