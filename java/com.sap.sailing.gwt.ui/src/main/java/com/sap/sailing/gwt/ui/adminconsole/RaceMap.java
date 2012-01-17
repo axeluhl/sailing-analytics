@@ -35,8 +35,8 @@ import com.google.gwt.maps.client.overlay.MarkerOptions;
 import com.google.gwt.maps.client.overlay.Polyline;
 import com.google.gwt.maps.client.overlay.PolylineOptions;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.impl.Util.Triple;
@@ -183,7 +183,7 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
         return dist;
     }
     
-    public void loadMapsAPI(final Grid grid, final int gridRow, final int gridColumn) {
+    public void loadMapsAPI(final Panel parentPanel) {
         Maps.loadMapsApi(mapsAPIKey, "2", false, new Runnable() {
             public void run() {
                 map = new MapWidget();
@@ -191,11 +191,10 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
                 map.addControl(new MenuMapTypeControl());
                 map.addControl(new ScaleControl());
                 // Add the map to the HTML host page
-                map.setSize("100%", "100%");
                 map.setScrollWheelZoomEnabled(true);
                 map.setContinuousZoom(true);
-
-                grid.setWidget(gridRow, gridColumn, map);
+                parentPanel.add(map);
+                map.setSize("100%", "100%");
                 
                 imageResources = new RaceMapResources(map);
                 
