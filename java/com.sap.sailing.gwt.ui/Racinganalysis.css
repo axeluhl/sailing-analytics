@@ -27,25 +27,25 @@ html {
 }
 
 body {
-  background: url(images/header_bg_modern.png) 0 0 repeat-x #ebebeb;
+  background: #ebebeb;
   font-family: 'Terminal Dosis', sans-serif;
   line-height: 1;
   font-size: 10px;
   margin-top: 0;
-  padding: 0 12px;
-  height: 100%; }
+   }
   
-.outerPanel {
+.contentOuterPanel {	
 	background: #dddcdc;
-	height: 100%;
-}
-
+	margin: 115px 12px 0 12px;
+	}
 
 .LogoAndTitlePanel {
-  margin: 0 0 24px 0;
-  height: 58px;
+  height: 85px;
   font-family: Arial, Verdana, sans-serif;
-   }
+  position: fixed;
+  width: 100%;
+  top: 0;
+  background: url(images/header_bg_modern.png) 0 0 repeat-x;}
 
 .LogoAndTitlePanel:after {
 	content: " ";
@@ -56,7 +56,7 @@ body {
 
 .sapLogo {
 	float: left; 
-  margin: 13px 0 0 0; }
+  margin: 13px 0 0 12px; }
 
 .sailingAnalyticsLabelPanel {
   margin: 10px 0 0 0;
@@ -68,3 +68,24 @@ body {
   font-size: 14px;
   font-weight: bold;
   margin: 25px 0 0 0; }
+
+.timelinePanel {
+	width: 100%;
+	position: fixed;
+	bottom: 0;
+	height: 101px;
+}
+
+.timelineInnerPanel {
+	height: 100%;
+	margin: 0 12px;
+	background: #dddcdc;
+}
+
+.footerShadowPanel {
+	position: fixed;
+	height: 50px;
+	bottom: 0;
+	background: url(images/footer_shadow.png) left bottom repeat-x;	
+	width: 100%;
+}
