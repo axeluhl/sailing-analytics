@@ -130,10 +130,10 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
     public void setSelection(Iterable<CompetitorDAO> newSelection, CompetitorSelectionChangeListener... listenersNotToNotify) {
         Set<CompetitorDAO> competitorsToRemoveFromSelection = new HashSet<CompetitorDAO>(selectedCompetitors);
         for (CompetitorDAO newSelectedCompetitor : newSelection) {
-            setSelected(newSelectedCompetitor, true);
+            setSelected(newSelectedCompetitor, true, listenersNotToNotify);
         }
         for (CompetitorDAO competitorToRemoveFromSelection : competitorsToRemoveFromSelection) {
-            setSelected(competitorToRemoveFromSelection, false);
+            setSelected(competitorToRemoveFromSelection, false, listenersNotToNotify);
         }
     }
 
