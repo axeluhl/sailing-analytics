@@ -1,8 +1,10 @@
 package com.sap.sailing.gwt.ui.client;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
@@ -10,14 +12,17 @@ import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
 public class CompetitorSelectionModel implements CompetitorSelectionProvider {
     private final Set<CompetitorDAO> allCompetitors;
     
-    private final Set<CompetitorDAO> selectedCompetitors;
+    private final LinkedHashSet<CompetitorDAO> selectedCompetitors;
     
     private final Set<CompetitorSelectionChangeListener> listeners;
     
-    public CompetitorSelectionModel() {
+    private final boolean hasMultiSelection;
+    
+    public CompetitorSelectionModel(boolean hasMultiSelection) {
         super();
+        this.hasMultiSelection = hasMultiSelection;
         this.allCompetitors = new HashSet<CompetitorDAO>();
-        this.selectedCompetitors = new HashSet<CompetitorDAO>();
+        this.selectedCompetitors = new LinkedHashSet<CompetitorDAO>();
         this.listeners = new HashSet<CompetitorSelectionChangeListener>();
     }
     
@@ -27,6 +32,11 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
      */
     public void add(CompetitorDAO competitor) {
         allCompetitors.add(competitor);
+    }
+    
+    @Override
+    public boolean hasMultiSelection() {
+        return hasMultiSelection;
     }
     
     /**
@@ -54,7 +64,7 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
      * Removes the competitor from the {@link #getAllCompetitors() set of all competitor}. If the competitor was previously
      * contained and selected, it is deselected first.
      */
-    public void removeCompetitor(CompetitorDAO competitor) {
+    public void remove(CompetitorDAO competitor) {
         if (isSelected(competitor)) {
             setSelected(competitor, false);
         }
@@ -71,16 +81,36 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
         return Collections.unmodifiableCollection(allCompetitors);
     }
     
-    public void setSelected(CompetitorDAO competitor, boolean selected) {
+    public void setSelected(CompetitorDAO competitor, boolean selected, CompetitorSelectionChangeListener... listenersNotToNotify) {
         if (selected) {
-            if (allCompetitors.contains(competitor)) {
+            if (allCompetitors.contains(competitor) && !selectedCompetitors.contains(competitor)) {
                 selectedCompetitors.add(competitor);
+                fireAddedToSelection(competitor, listenersNotToNotify);
             }
         } else {
-            selectedCompetitors.remove(competitor);
+            if (selectedCompetitors.contains(competitor)) {
+                selectedCompetitors.remove(competitor);
+                fireRemovedFromSelection(competitor, listenersNotToNotify);
+            }
         }
     }
     
+    private void fireAddedToSelection(CompetitorDAO competitor, CompetitorSelectionChangeListener... listenersNotToNotify) {
+        for (CompetitorSelectionChangeListener listener : listeners) {
+            if (listenersNotToNotify == null || !Arrays.asList(listenersNotToNotify).contains(listener)) {
+                listener.addedToSelection(competitor);
+            }
+        }
+    }
+    
+    private void fireRemovedFromSelection(CompetitorDAO competitor, CompetitorSelectionChangeListener... listenersNotToNotify) {
+        for (CompetitorSelectionChangeListener listener : listeners) {
+            if (listenersNotToNotify == null || !Arrays.asList(listenersNotToNotify).contains(listener)) {
+                listener.removedFromSelection(competitor);
+            }
+        }
+    }
+
     @Override
     public boolean isSelected(CompetitorDAO competitor) {
         return selectedCompetitors.contains(competitor);
@@ -96,4 +126,29 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
         listeners.remove(listener);
     }
 
+    @Override
+    public void setSelection(Iterable<CompetitorDAO> newSelection, CompetitorSelectionChangeListener... listenersNotToNotify) {
+        Set<CompetitorDAO> competitorsToRemoveFromSelection = new HashSet<CompetitorDAO>(selectedCompetitors);
+        for (CompetitorDAO newSelectedCompetitor : newSelection) {
+            setSelected(newSelectedCompetitor, true);
+        }
+        for (CompetitorDAO competitorToRemoveFromSelection : competitorsToRemoveFromSelection) {
+            setSelected(competitorToRemoveFromSelection, false);
+        }
+    }
+
+    @Override
+    public void setCompetitors(Iterable<CompetitorDAO> newCompetitors) {
+        Set<CompetitorDAO> oldCompetitorsToRemove = new HashSet<CompetitorDAO>(allCompetitors);
+        for (CompetitorDAO newCompetitor : newCompetitors) {
+            if (allCompetitors.contains(newCompetitor)) {
+                oldCompetitorsToRemove.remove(newCompetitor);
+            } else {
+                add(newCompetitor);
+            }
+        }
+        for (CompetitorDAO oldCompetitorToRemove : oldCompetitorsToRemove) {
+            remove(oldCompetitorToRemove);
+        }
+    }
 }

@@ -22,6 +22,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
+import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.EventDisplayer;
 import com.sap.sailing.gwt.ui.client.EventRefresher;
@@ -42,6 +43,7 @@ import com.sap.sailing.server.api.EventNameAndRaceName;
 
 public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListener, ProvidesResize, RequiresResize,
         RaceSelectionChangeListener {
+    private final CompetitorSelectionModel competitorSelectionModel;
     private final SailingServiceAsync sailingService;
     private final ErrorReporter errorReporter;
     private final Grid grid;
@@ -61,6 +63,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
             final EventRefresher eventRefresher, StringMessages stringConstants) {
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
+        this.competitorSelectionModel = new CompetitorSelectionModel(/* hasMultiSelection */ true);
         this.timer = new Timer(/* delayBetweenAutoAdvancesInMilliseconds */500);
         checkboxAndType = new ArrayList<Pair<CheckBox, String>>();
         final VerticalPanel verticalCheckBoxPanel = new VerticalPanel();
@@ -164,7 +167,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         });
         ranksAndCheckboxAndTailLengthPanel.add(showOnlySelectedCompetitors);
         
-        quickRanksListBox = new QuickRanksListBoxComposite(true, competitorSelectionProvider);
+        quickRanksListBox = new QuickRanksListBoxComposite(competitorSelectionModel);
         quickRanksListBox.addCompetitorSelectionChangeListener(raceMap);
         quickRanksListBox.getListBox().setVisibleItemCount(20);
 
