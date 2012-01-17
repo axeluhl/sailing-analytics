@@ -59,6 +59,8 @@ public class RaceMapResources {
     protected Icon buoyIcon;
     
     protected Map<Pair<ManeuverType, Tack>, Icon> maneuverIconsForTypeAndTargetTack;
+
+    private MapWidget map;
     
     private static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
 
@@ -73,6 +75,14 @@ public class RaceMapResources {
         boatIconHighlightedPortRotator = new ImageTransformer(resources.highlightedBoatIcon_Port());
         boatIconStarboardRotator = new ImageTransformer(resources.lowlightedBoatIcon_Starboard());
         boatIconHighlightedStarboardRotator = new ImageTransformer(resources.highlightedBoatIcon_Starboard());
+    }
+    
+    /**
+     * Call this when the map API has finished loading. Up to this point, {@link #buoyIcon} and the {@link #maneuverIconsForTypeAndTargetTack}
+     * are not propertly initialized.
+     */
+    public void setMap(MapWidget map) {
+        this.map = map;
         buoyIcon = Icon.newInstance(resources.buoyIcon().getSafeUri().asString());
         buoyIcon.setIconAnchor(Point.newInstance(4, 4));
         
@@ -163,16 +173,16 @@ public class RaceMapResources {
         }
     }
 
-    public String getBoatImageURL(GPSFixDAO boatFix, boolean highlighted, MapWidget map) {
-        return getBoatImageURL(getBoatImageTransformer(boatFix, highlighted), boatFix, map);
+    public String getBoatImageURL(GPSFixDAO boatFix, boolean highlighted) {
+        return getBoatImageURL(getBoatImageTransformer(boatFix, highlighted), boatFix);
     }
 
-    public String getBoatImageURL(ImageTransformer boatImageTransformer, GPSFixDAO boatFix, MapWidget map) {
-        double realBoatSizeScaleFactor = getRealBoatSizeScaleFactor(map);
+    public String getBoatImageURL(ImageTransformer boatImageTransformer, GPSFixDAO boatFix) {
+        double realBoatSizeScaleFactor = getRealBoatSizeScaleFactor();
         return boatImageTransformer.getTransformedImageURL(boatFix.speedWithBearing.bearingInDegrees, realBoatSizeScaleFactor);
     }
 
-    public double getRealBoatSizeScaleFactor(MapWidget map) {
+    public double getRealBoatSizeScaleFactor() {
         // the possible zoom level range is 0 to 21 (zoom level 0 would show the whole world)
         int zoomLevel = map == null ? 1 : map.getZoomLevel();
         double minScaleFactor = 0.33;
@@ -195,10 +205,10 @@ public class RaceMapResources {
         return realBoatSizeScaleFactor;
     }
 
-    public Icon getBoatImageIcon(GPSFixDAO boatFix, boolean highlighted, MapWidget map) {
+    public Icon getBoatImageIcon(GPSFixDAO boatFix, boolean highlighted) {
         ImageTransformer boatImageTransformer = getBoatImageTransformer(boatFix, highlighted);
-        Icon icon = Icon.newInstance(getBoatImageURL(boatImageTransformer, boatFix, map));
-        icon.setIconAnchor(boatImageTransformer.getAnchor(getRealBoatSizeScaleFactor(map)));
+        Icon icon = Icon.newInstance(getBoatImageURL(boatImageTransformer, boatFix));
+        icon.setIconAnchor(boatImageTransformer.getAnchor(getRealBoatSizeScaleFactor()));
         return icon;
     }
 }

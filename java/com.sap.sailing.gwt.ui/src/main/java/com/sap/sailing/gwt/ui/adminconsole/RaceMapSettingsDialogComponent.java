@@ -51,8 +51,8 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
             vp.add(checkbox);
         }
         checkBoxDouglasPeuckerPoints = dialog.createCheckbox(stringMessages.douglasPeuckerPoints());
+        checkBoxDouglasPeuckerPoints.setValue(initialSettings.isShowDouglasPeuckerPoints());
         vp.add(checkBoxDouglasPeuckerPoints);
-        vp.add(new Label(stringMessages.tailLength()));
         return vp;
     }
 
@@ -64,7 +64,7 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         }
         result.setShowDouglasPeuckerPoints(checkBoxDouglasPeuckerPoints.getValue());
         result.setShowOnlySelectedCompetitors(showOnlySelectedCompetitors.getValue());
-        result.setTailLengthInMilliseconds(tailLengthBox.getValue() == null ? -1 : tailLengthBox.getValue());
+        result.setTailLengthInMilliseconds(tailLengthBox.getValue() == null ? -1 : tailLengthBox.getValue()*1000l);
         return result;
     }
 
