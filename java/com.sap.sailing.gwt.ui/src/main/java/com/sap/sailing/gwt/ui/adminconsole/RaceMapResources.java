@@ -1,9 +1,9 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dev.util.collect.HashMap;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.geom.LatLng;
 import com.google.gwt.maps.client.geom.LatLngBounds;
