@@ -34,6 +34,7 @@ public class QuickRanksListBoxComposite extends Composite implements CompetitorS
     
     public QuickRanksListBoxComposite(CompetitorSelectionProvider competitorSelectionProvider) {
         this.competitorSelectionProvider = competitorSelectionProvider;
+        competitorSelectionProvider.addCompetitorSelectionChangeListener(this);
         quickRankListBox = new ListBox(competitorSelectionProvider.hasMultiSelection());
         quickRankListBox.addChangeHandler(new ChangeHandler() {
             @Override

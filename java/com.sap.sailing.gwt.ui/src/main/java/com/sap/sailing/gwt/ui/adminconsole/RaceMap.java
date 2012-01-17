@@ -234,7 +234,6 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
     public void onRaceSelectionChange(List<Triple<EventDAO, RegattaDAO, RaceDAO>> selectedRaces) {
         mapFirstZoomDone = false;
         mapZoomedOrPannedSinceLastRaceSelectionChange = false;
-        
         this.selectedEventAndRace = selectedRaces;
     }
 
@@ -247,7 +246,7 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
                 if (event != null && race != null) {
                     final Triple<Map<CompetitorDAO, Date>, Map<CompetitorDAO, Date>, Map<CompetitorDAO, Boolean>> fromAndToAndOverlap = 
                             computeFromAndTo(date, getCompetitorsToShow());
-                    final int requestID = boatPositionRequestIDCounter++;
+                    final int requestID = ++boatPositionRequestIDCounter;
                     sailingService.getBoatPositions(new EventNameAndRaceName(event.name, race.name),
                             fromAndToAndOverlap.getA(), fromAndToAndOverlap.getB(), true,
                             new AsyncCallback<Map<CompetitorDAO, List<GPSFixDAO>>>() {
@@ -968,8 +967,9 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
     @Override
     public void addedToSelection(CompetitorDAO competitor) {
         Marker lowlightedMarker = boatMarkers.get(competitor);
-        if (lowlightedMarker == null) {
+        if (lowlightedMarker != null) {
             Marker highlightedMarker = createBoatMarker(competitor, true);
+            map.removeOverlay(lowlightedMarker);
             map.addOverlay(highlightedMarker);
             boatMarkers.put(competitor, highlightedMarker);
         }
