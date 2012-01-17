@@ -9,6 +9,7 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.maps.client.geom.LatLng;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.Grid;
@@ -115,9 +116,11 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         grid.getColumnFormatter().setWidth(0, "20%");
         grid.getColumnFormatter().setWidth(1, "80%");
         grid.getCellFormatter().setHeight(2, 1, "100%");
-        
+        AbsolutePanel mapPanel = new AbsolutePanel();
+        mapPanel.setSize("100%", "100%");
+        grid.setWidget(2, 1, mapPanel);
         raceMap = new RaceMap(sailingService, errorReporter, timer);
-        raceMap.loadMapsAPI(grid, 2, 1);
+        raceMap.loadMapsAPI(mapPanel);
 
         setMapDisplayOptions();
 
