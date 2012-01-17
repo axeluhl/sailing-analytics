@@ -25,11 +25,11 @@ public interface Placemark extends Serializable {
 //     * @return The {@link Position} of the Placemark
 //     */
 //    Position getPosition();
-//    
-//    /**
-//     * @return The population of the Placemark
-//     */
-//    long getPopulation();
+    
+    /**
+     * @return The population of the Placemark
+     */
+    long getPopulation();
 //
 //    /**
 //     * @param position The {@link Position} from which the distance is calculated

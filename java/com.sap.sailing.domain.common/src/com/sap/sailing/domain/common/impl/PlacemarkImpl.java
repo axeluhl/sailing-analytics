@@ -20,18 +20,18 @@ public class PlacemarkImpl implements Placemark {
     private String name;
     private String countryCode;
 //    private SerializablePosition position;
-//    private long population;
-//    
+    private long population;
+    
     PlacemarkImpl() {}
     
     /**
      * Creates a new Placemark with the given parameters as attributes.
      */
-    public PlacemarkImpl(String name, String countryCode/*, SerializablePosition position, long population*/) {
+    public PlacemarkImpl(String name, String countryCode/*, SerializablePosition position*/, long population) {
         this.name = name;
         this.countryCode = countryCode;
 //        this.position = position;
-//        this.population = population;
+        this.population = population;
     }
     
 //    /**
@@ -52,10 +52,10 @@ public class PlacemarkImpl implements Placemark {
 //    public Position getPosition() {
 //        return position.getPosition();
 //    }
-//
-//    public long getPopulation() {
-//        return population;
-//    }
+
+    public long getPopulation() {
+        return population;
+    }
 //
 //
 //    @Override
