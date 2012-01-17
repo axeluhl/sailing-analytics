@@ -29,8 +29,6 @@ import ca.nanometrics.gflot.client.options.SelectionOptions;
 import ca.nanometrics.gflot.client.options.TickFormatter;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.GwtEvent;
@@ -40,19 +38,15 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Anchor;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DeckPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.RadioButton;
-import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.impl.Util.Pair;
@@ -64,35 +58,39 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
 import com.sap.sailing.gwt.ui.shared.CompetitorInRaceDAO;
 import com.sap.sailing.gwt.ui.shared.CompetitorsAndTimePointsDAO;
+import com.sap.sailing.gwt.ui.shared.components.Component;
+import com.sap.sailing.gwt.ui.shared.components.SettingsDialog;
 import com.sap.sailing.server.api.DetailType;
 import com.sap.sailing.server.api.RaceIdentifier;
 
-/** ChartsPanel is a gwt panel, that can show competitor data (e.g. current speed over ground, windward distance to leader) for different races in a chart.
+/**
+ * ChartPanel is a GWT panel that can show one sort of competitor data (e.g. current speed over ground, windward distance to
+ * leader) for different races in a chart.
  * 
- * When calling the consturcor a chart is created that creates a final amount of series (so the maximum number of competitors cannot be changed in one chart)
- * which are connected to competitors, when the sailing service returns the data. So {@code seriesID, competitorID and markSeriesID} are linked with the index.
- * So if u know for example the seriesID-index, you can get the competitor by calling competitorID.get(index).
+ * When calling the constructor a chart is created that creates a final amount of series (so the maximum number of
+ * competitors cannot be changed in one chart) which are connected to competitors, when the sailing service returns the
+ * data. So {@code seriesID, competitorID and markSeriesID} are linked with the index. So if u know for example the
+ * seriesID-index, you can get the competitor by calling competitorID.get(index).
  * 
- * @author D056866 Benjamin Ebling
- *
+ * @author Benjamin Ebling (D056866)
+ * 
  */
-public class ChartsPanel extends FormPanel {
+public abstract class AbstractChartPanel<SettingsType extends ChartSettings> extends SimplePanel {
     private CompetitorInRaceDAO chartData;
     private CompetitorsAndTimePointsDAO competitorsAndTimePointsDAO = null;
     private final SailingServiceAsync sailingService;
     private final ErrorReporter errorReporter;
-    private DateTimeFormat dateFormat;
-    private HorizontalPanel mainPanel;
-    private VerticalPanel chartPanel;
-    private FlowPanel legendPanel;
-    private VerticalPanel configPanel;
-    private Label title;
-    private DeckPanel chart;
+    private final DateTimeFormat dateFormat;
+    private final HorizontalPanel mainPanel;
+    private final VerticalPanel chartPanel;
+    private final FlowPanel legendPanel;
+    private final Label title;
+    private final DeckPanel chart;
     private final RaceIdentifier[] races;
     private final ColorMap<Integer> colorMap;
     private int selectedRace = 0;
     private int stepsToLoad = 100;
-    private final StringMessages stringConstants;
+    private final StringMessages stringMessages;
     private final Set<CompetitorDAO> competitorVisible;
     private VerticalPanel selectCompetitors;
     private PlotWithOverview plot;
@@ -107,8 +105,8 @@ public class ChartsPanel extends FormPanel {
     private DetailType dataToShow = DetailType.WINDWARD_DISTANCE_TO_OVERALL_LEADER;
     private AbsolutePanel loadingPanel;
 
-    public ChartsPanel(SailingServiceAsync sailingService, final List<CompetitorDAO> competitors,
-            RaceIdentifier[] races, StringMessages stringConstants, int chartWidth, int chartHeight, ErrorReporter errorReporter) {
+    public AbstractChartPanel(SailingServiceAsync sailingService, final List<CompetitorDAO> competitors,
+            RaceIdentifier[] races, final StringMessages stringMessages, int chartWidth, int chartHeight, ErrorReporter errorReporter) {
     	width = chartWidth;
     	height = chartHeight;
     	this.errorReporter = errorReporter;
@@ -123,7 +121,7 @@ public class ChartsPanel extends FormPanel {
     	markPassingBuoyName = new HashMap<String, String>();
         this.sailingService = sailingService;
         this.races = races;
-        this.stringConstants = stringConstants;
+        this.stringMessages = stringMessages;
         dateFormat = DateTimeFormat.getFormat("HH:mm:ss");
 
         for (CompetitorDAO competitor : competitors) {
@@ -132,7 +130,7 @@ public class ChartsPanel extends FormPanel {
         mainPanel = new HorizontalPanel();
         mainPanel.setSpacing(5);
         chartPanel = new VerticalPanel();
-        title = new Label(DetailTypeFormatter.format(dataToShow, stringConstants));
+        title = new Label(DetailTypeFormatter.format(dataToShow, stringMessages));
         title.setStyleName("chartTitle");
         chartPanel.add(title);
         HorizontalPanel raceChooserPanel = new HorizontalPanel();
@@ -150,28 +148,20 @@ public class ChartsPanel extends FormPanel {
                 @Override
                 public void onClick(ClickEvent event) {
                     selectedRace = index;
-                    competitorsAndTimePointsDAO = null;
+                    setCompetitorsAndTimePointsDAO(null);
                     clearChart(true);
                     loadData();
                 }
             });
         }
         chartPanel.add(raceChooserPanel);
-
         loadingPanel = new AbsolutePanel();
         loadingPanel.setSize(width + "px", height + "px");
-
         Anchor a = new Anchor(new SafeHtmlBuilder().appendHtmlConstant("<img src=\"/gwt/images/ajax-loader.gif\"/>")
                 .toSafeHtml());
         loadingPanel.add(a, width / 2 - 32 / 2, height / 2 - 32 - 2);
         chartPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
         chartPanel.setSpacing(5);
-        final CaptionPanel configCaption = new CaptionPanel(stringConstants.configuration());
-        configCaption.setHeight("100%");
-        configCaption.setVisible(false);
-        initConfigPanel();
-        configCaption.setContentWidget(configPanel);
-        
         legendPanel = new FlowPanel();
         legendPanel.setWidth("100%");
         legendPanel.setHeight("21px");
@@ -183,102 +173,55 @@ public class ChartsPanel extends FormPanel {
         mainPanel.add(chartPanel);
         Anchor showConfigAnchor = new Anchor(new SafeHtmlBuilder().appendHtmlConstant(
                 "<img class=\"linkNoBorder\" src=\"/gwt/images/settings.png\"/>").toSafeHtml());
-        showConfigAnchor.setTitle(stringConstants.configuration());
+        showConfigAnchor.setTitle(stringMessages.configuration());
         showConfigAnchor.addClickHandler(new ClickHandler() {
-
             @Override
             public void onClick(ClickEvent event) {
-                configCaption.setVisible(!configCaption.isVisible());
+                new SettingsDialog<SettingsType>(getComponent(), stringMessages).show();
             }
         });
-
         mainPanel.add(showConfigAnchor);
-        mainPanel.add(configCaption);
         this.add(mainPanel);
         loadData();
     }
     
-    /**
-     * Initializes a configuration panel for the chart. This should only be called once in the constructor.
-     */
-    private void initConfigPanel(){
-    	configPanel = new VerticalPanel();
-        configPanel.setSpacing(5);
-
-        Label lblChart = new Label(stringConstants.chooseChart());
-        configPanel.add(lblChart);
-        final ListBox dataSelection = new ListBox();
-        dataSelection.addItem(DetailTypeFormatter.format(DetailType.WINDWARD_DISTANCE_TO_OVERALL_LEADER, stringConstants),DetailType.WINDWARD_DISTANCE_TO_OVERALL_LEADER.toString());
-        dataSelection.addItem(DetailTypeFormatter.format(DetailType.DISTANCE_TRAVELED, stringConstants),DetailType.DISTANCE_TRAVELED.toString());
-        dataSelection.addItem(DetailTypeFormatter.format(DetailType.VELOCITY_MADE_GOOD_IN_KNOTS, stringConstants),DetailType.VELOCITY_MADE_GOOD_IN_KNOTS.toString());
-        dataSelection.addItem(DetailTypeFormatter.format(DetailType.GAP_TO_LEADER_IN_SECONDS, stringConstants),DetailType.GAP_TO_LEADER_IN_SECONDS.toString());
-        dataSelection.addItem(DetailTypeFormatter.format(DetailType.CURRENT_SPEED_OVER_GROUND_IN_KNOTS, stringConstants),DetailType.CURRENT_SPEED_OVER_GROUND_IN_KNOTS.toString());
-        dataSelection.addChangeHandler(new ChangeHandler() {
-
-            @Override
-            public void onChange(ChangeEvent event) {
-                for (DetailType dt : DetailType.values()){
-                    if (dt.toString().equals(dataSelection.getValue(dataSelection.getSelectedIndex()))){
-                        dataToShow = dt;
-                    }
-                }
-                title.setText(DetailTypeFormatter.format(dataToShow, stringConstants));
-                clearChart(false);
-                loadData();
-            }
-        });
-        configPanel.add(dataSelection);
-        Label lblSteps = new Label(stringConstants.pointsToLoad());
-        configPanel.add(lblSteps);
-        final TextBox txtbSteps = new TextBox();
-        txtbSteps.setText("" + stepsToLoad);
-        configPanel.add(txtbSteps);
-        Button bttSteps = new Button(stringConstants.refresh());
-        bttSteps.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                stepsToLoad = Integer.parseInt(txtbSteps.getText());
-                competitorsAndTimePointsDAO = null;
-                clearChart(true);
-                loadData();
-            }
-        });
-        configPanel.add(bttSteps);
-        selectCompetitors = new VerticalPanel();
-        configPanel.add(selectCompetitors);
-    }
-
-    private void loadData() {
+    protected abstract Component<SettingsType> getComponent();
+    
+    protected void loadData() {
     	chart.showWidget(0);
         final Runnable loadData = new Runnable() {
             @Override
             public void run() {
-            	final List<CompetitorDAO> competitorsToLoad = new ArrayList<CompetitorDAO>();
-            	for (CompetitorDAO competitor : competitorsAndTimePointsDAO.getCompetitor()){
-            		if (isCompetitorVisible(competitor) && !competitorID.contains(competitor)){
-            			competitorsToLoad.add(competitor);
-            		}
-            	}
-            	final CompetitorsAndTimePointsDAO competitorsAndTimePointsToLoad = new CompetitorsAndTimePointsDAO(stepsToLoad);
-            	competitorsAndTimePointsToLoad.setStartTime(competitorsAndTimePointsDAO.getStartTime());
-            	competitorsAndTimePointsToLoad.setTimePointOfNewestEvent(competitorsAndTimePointsDAO.getTimePointOfNewestEvent());
-            	for (CompetitorDAO competitor : competitorsToLoad){
-            		competitorsAndTimePointsToLoad.setMarkPassings(competitor, competitorsAndTimePointsDAO.getMarkPassings(competitor));
-            	}
-            	competitorsAndTimePointsToLoad.setCompetitor(competitorsToLoad.toArray(new CompetitorDAO[0]));
-                ChartsPanel.this.sailingService.getCompetitorRaceData(races[selectedRace], competitorsAndTimePointsToLoad,
-                        dataToShow, new AsyncCallback<CompetitorInRaceDAO>() {
+                final List<CompetitorDAO> competitorsToLoad = new ArrayList<CompetitorDAO>();
+                for (CompetitorDAO competitor : getCompetitorsAndTimePointsDAO().getCompetitor()) {
+                    if (isCompetitorVisible(competitor) && !competitorID.contains(competitor)) {
+                        competitorsToLoad.add(competitor);
+                    }
+                }
+                final CompetitorsAndTimePointsDAO competitorsAndTimePointsToLoad = new CompetitorsAndTimePointsDAO(
+                        getStepsToLoad());
+                competitorsAndTimePointsToLoad.setStartTime(getCompetitorsAndTimePointsDAO().getStartTime());
+                competitorsAndTimePointsToLoad.setTimePointOfNewestEvent(getCompetitorsAndTimePointsDAO()
+                        .getTimePointOfNewestEvent());
+                for (CompetitorDAO competitor : competitorsToLoad) {
+                    competitorsAndTimePointsToLoad.setMarkPassings(competitor,
+                            getCompetitorsAndTimePointsDAO().getMarkPassings(competitor));
+                }
+                competitorsAndTimePointsToLoad.setCompetitor(competitorsToLoad.toArray(new CompetitorDAO[0]));
+                AbstractChartPanel.this.sailingService.getCompetitorRaceData(races[selectedRace],
+                        competitorsAndTimePointsToLoad, dataToShow, new AsyncCallback<CompetitorInRaceDAO>() {
                             @Override
                             public void onFailure(Throwable caught) {
-                            	errorReporter.reportError(stringConstants.failedToLoadRaceData() + ": " + caught.toString());
+                                errorReporter.reportError(getStringMessages().failedToLoadRaceData() + ": "
+                                        + caught.toString());
                             }
 
                             @Override
                             public void onSuccess(CompetitorInRaceDAO result) {
                                 fireEvent(new DataLoadedEvent());
-                                for (CompetitorDAO competitor : competitorsToLoad){
-                                	chartData.setRaceData(competitor, result.getRaceData(competitor));
-                                	chartData.setMarkPassingData(competitor, result.getMarkPassings(competitor));
+                                for (CompetitorDAO competitor : competitorsToLoad) {
+                                    chartData.setRaceData(competitor, result.getRaceData(competitor));
+                                    chartData.setMarkPassingData(competitor, result.getMarkPassings(competitor));
                                 }
                                 updateTableData(competitorsAndTimePointsToLoad.getCompetitor());
                                 chart.showWidget(1);
@@ -286,10 +229,10 @@ public class ChartsPanel extends FormPanel {
                         });
             }
         };
-        if (competitorsAndTimePointsDAO != null) {
+        if (getCompetitorsAndTimePointsDAO() != null) {
             loadData.run();
         } else {
-            this.sailingService.getCompetitorsAndTimePoints(races[selectedRace], stepsToLoad,
+            this.sailingService.getCompetitorsAndTimePoints(races[selectedRace], getStepsToLoad(),
                     new AsyncCallback<CompetitorsAndTimePointsDAO>() {
                         @Override
                         public void onFailure(Throwable caught) {
@@ -298,7 +241,7 @@ public class ChartsPanel extends FormPanel {
 
                         @Override
                         public void onSuccess(CompetitorsAndTimePointsDAO result) {
-                            competitorsAndTimePointsDAO = result;
+                            setCompetitorsAndTimePointsDAO(result);
                             for (int i = 0; i < result.getCompetitor().length; i++) {
                                 final CheckBox cb = new CheckBox(result.getCompetitor()[i].name);
                                 final CompetitorDAO c = result.getCompetitor()[i];
@@ -343,7 +286,7 @@ public class ChartsPanel extends FormPanel {
     		series.add(sh);
     	}
     	CompetitorDAO firstCompetitor = null;
-        if (competitorsAndTimePointsDAO != null && chartData != null) {
+        if (getCompetitorsAndTimePointsDAO() != null && chartData != null) {
             for (CompetitorDAO competitor : competitorDAOs) {
             	if (firstCompetitor == null){
             		firstCompetitor = competitor;
@@ -357,7 +300,7 @@ public class ChartsPanel extends FormPanel {
                 markSeries.clear();
                 if (isCompetitorVisible(competitor) && chartData.getRaceData(competitor) != null){
                 	long starttime = System.currentTimeMillis();
-                	Pair<String,Long>[] markPassingTimes = competitorsAndTimePointsDAO.getMarkPassings(competitor);
+                	Pair<String,Long>[] markPassingTimes = getCompetitorsAndTimePointsDAO().getMarkPassings(competitor);
                     Double[] markPassingValues = chartData.getMarkPassings(competitor);
                     for (int j = 0; j < markPassingTimes.length; j++){
                         if (markPassingValues[j] != null && markPassingTimes[j].getB() != null) {
@@ -368,8 +311,8 @@ public class ChartsPanel extends FormPanel {
                     GWT.log("Update mark passings time for " + competitor.name + ": " + (System.currentTimeMillis() - starttime));
                     starttime = System.currentTimeMillis();
                     Double[] data = chartData.getRaceData(competitor);
-                    long[] timepoints = competitorsAndTimePointsDAO.getTimePoints();
-                    for (int j = 0; j < stepsToLoad; j++) {
+                    long[] timepoints = getCompetitorsAndTimePointsDAO().getTimePoints();
+                    for (int j = 0; j < getStepsToLoad(); j++) {
                     	if (data[j] != null){
                     		compSeries.add(new DataPoint(timepoints[j], data[j]));
                     	}
@@ -387,8 +330,8 @@ public class ChartsPanel extends FormPanel {
                     if (!seriesIsUsed.contains(sh)) {
                         sh.clear();
                         Double[] data = chartData.getRaceData(firstCompetitor);
-                        long[] timepoints = competitorsAndTimePointsDAO.getTimePoints();
-                        for (int j = 0; j < stepsToLoad; j++) {
+                        long[] timepoints = getCompetitorsAndTimePointsDAO().getTimePoints();
+                        for (int j = 0; j < getStepsToLoad(); j++) {
                             if (data[j] != null) {
                                 sh.add(new DataPoint(timepoints[j], data[j]));
                             }
@@ -413,7 +356,7 @@ public class ChartsPanel extends FormPanel {
         this.addHandler(handler, DataLoadedEvent.TYPE);
     }
 
-    interface DataLoadedHandler extends com.google.gwt.event.shared.EventHandler {
+    public interface DataLoadedHandler extends com.google.gwt.event.shared.EventHandler {
         public void onDataLoaded(DataLoadedEvent event);
     }
 
@@ -448,7 +391,7 @@ public class ChartsPanel extends FormPanel {
     }
 
     private Widget createChart() {
-        final Label selectedPointLabel = new Label(stringConstants.hoverOverAPoint());
+        final Label selectedPointLabel = new Label(getStringMessages().hoverOverAPoint());
         PlotWithOverviewModel model = new PlotWithOverviewModel(PlotModelStrategy.defaultStrategy());
         PlotOptions plotOptions = new PlotOptions();
         plotOptions.setDefaultLineSeriesOptions(new LineSeriesOptions().setLineWidth(1).setShow(true));
@@ -467,7 +410,7 @@ public class ChartsPanel extends FormPanel {
         plotOptions.setGridOptions(new GridOptions().setHoverable(true).setMouseActiveRadius(5).setAutoHighlight(true));
 
         plotOptions.setSelectionOptions(new SelectionOptions().setDragging(true).setMode("x"));
-        for (int i = 0; i <  competitorsAndTimePointsDAO.getCompetitor().length; i++){
+        for (int i = 0; i <  getCompetitorsAndTimePointsDAO().getCompetitor().length; i++){
         	SeriesHandler series = model.addSeries(""+i, colorMap.getColorByID(i));
     		series.setOptions(SeriesType.LINES, new LineSeriesOptions().setLineWidth(2.5).setShow(true));
     		series.setOptions(SeriesType.POINTS, new PointsSeriesOptions().setLineWidth(0).setShow(false));
@@ -485,26 +428,27 @@ public class ChartsPanel extends FormPanel {
             public void onPlotHover(Plot plot, PlotPosition position, PlotItem item) {
             	CompetitorDAO competitor = competitorID.get(seriesID.indexOf(item.getSeries()));
                 if (item != null && competitor != null) {
-                	if (item.getSeries().getLabel().toLowerCase().contains("mark")){
-                		selectedPointLabel.setText(competitor.name + " passed " + markPassingBuoyName.get(competitor.id + (long) item.getDataPoint().getX()) +" at " + dateFormat.format(new Date((long) item.getDataPoint().getX())));
-                	}
-                	else {
+                    if (item.getSeries().getLabel().toLowerCase().contains("mark")) {
+                        selectedPointLabel.setText(competitor.name + " passed "
+                                + markPassingBuoyName.get(competitor.id + (long) item.getDataPoint().getX()) + " at "
+                                + dateFormat.format(new Date((long) item.getDataPoint().getX())));
+                    } else {
                 		String unit = "";
                 		switch (dataToShow){
                 		case CURRENT_SPEED_OVER_GROUND_IN_KNOTS:
-                			unit = stringConstants.currentSpeedOverGroundInKnotsUnit();
+                			unit = getStringMessages().currentSpeedOverGroundInKnotsUnit();
                 			break;
                 		case DISTANCE_TRAVELED:
-                			unit = stringConstants.distanceInMetersUnit();
+                			unit = getStringMessages().distanceInMetersUnit();
                 			break;
                 		case GAP_TO_LEADER_IN_SECONDS:
-                			unit = stringConstants.gapToLeaderInSecondsUnit();
+                			unit = getStringMessages().gapToLeaderInSecondsUnit();
                 			break;
                 		case VELOCITY_MADE_GOOD_IN_KNOTS:
-                			unit = stringConstants.velocityMadeGoodInKnotsUnit();
+                			unit = getStringMessages().velocityMadeGoodInKnotsUnit();
                 			break;
                 		case WINDWARD_DISTANCE_TO_OVERALL_LEADER:
-                			unit = stringConstants.windwardDistanceToGoInMetersUnit();
+                			unit = getStringMessages().windwardDistanceToGoInMetersUnit();
                 		}
                 		String decimalPlaces = "";
                 		for (int i = 0; i < dataToShow.getPrecision(); i++){
@@ -518,7 +462,7 @@ public class ChartsPanel extends FormPanel {
                                 + ": " + numberFormat.format(item.getDataPoint().getY()) + unit);
                 	}
                 } else {
-                    selectedPointLabel.setText(stringConstants.noSelection());
+                    selectedPointLabel.setText(getStringMessages().noSelection());
                 }
             }
         }, true);
@@ -623,19 +567,66 @@ public class ChartsPanel extends FormPanel {
      * 
      * @param clearCheckBoxes Declares whether the checkboxes for the visibility of the competitors should be cleared too. Should be true, when you change the race to show.
      */
-    private void clearChart(boolean clearCheckBoxes){
-    	if (clearCheckBoxes){
-    		selectCompetitors.clear();
-    		seriesIsUsed.clear();
-    	}
-    	competitorID.clear();
+    protected void clearChart(boolean clearCheckBoxes) {
+        if (clearCheckBoxes) {
+            selectCompetitors.clear();
+            seriesIsUsed.clear();
+        }
+        competitorID.clear();
         legendPanel.clear();
         competitorLabels.clear();
-    	for (SeriesHandler series: seriesID){
-    		series.clear();
-    	}
-    	for (SeriesHandler series: markSeriesID){
-    		series.clear();
-    	}
+        for (SeriesHandler series : seriesID) {
+            series.clear();
+        }
+        for (SeriesHandler series : markSeriesID) {
+            series.clear();
+        }
+    }
+
+    public String getLocalizedShortName() {
+        return DetailTypeFormatter.format(dataToShow, getStringMessages());
+    }
+
+    public Widget getEntryWidget() {
+        return this;
+    }
+
+    public boolean hasSettings() {
+        return true;
+    }
+    
+    public ChartSettings getAbstractSettings() {
+        return new ChartSettings(getStepsToLoad());
+    }
+    
+    public void updateSettings(ChartSettings newSettings) {
+        setStepsToLoad(newSettings.getStepsToLoad());
+        setCompetitorsAndTimePointsDAO(null);
+        clearChart(true);
+        loadData();
+    }
+
+    protected StringMessages getStringMessages() {
+        return stringMessages;
+    }
+
+    protected int getStepsToLoad() {
+        return stepsToLoad;
+    }
+
+    protected void setStepsToLoad(int stepsToLoad) {
+        this.stepsToLoad = stepsToLoad;
+    }
+    
+    protected DetailType getDataToShow() {
+        return this.dataToShow;
+    }
+
+    protected CompetitorsAndTimePointsDAO getCompetitorsAndTimePointsDAO() {
+        return competitorsAndTimePointsDAO;
+    }
+
+    protected void setCompetitorsAndTimePointsDAO(CompetitorsAndTimePointsDAO competitorsAndTimePointsDAO) {
+        this.competitorsAndTimePointsDAO = competitorsAndTimePointsDAO;
     }
 }

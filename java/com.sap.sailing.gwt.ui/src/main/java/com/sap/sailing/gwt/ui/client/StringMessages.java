@@ -206,4 +206,5 @@ public interface StringMessages extends Messages {
     String locationNotAvailable();
     String startDateNotAvailable();
     String startDate();
+    String numberOfStepsToLoadMustAtLeastBeTwo();
 }

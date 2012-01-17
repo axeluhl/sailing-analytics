@@ -17,19 +17,19 @@ import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.leaderboard.ChartsPanel.DataLoadedEvent;
-import com.sap.sailing.gwt.ui.leaderboard.ChartsPanel.DataLoadedHandler;
+import com.sap.sailing.gwt.ui.leaderboard.AbstractChartPanel.DataLoadedEvent;
+import com.sap.sailing.gwt.ui.leaderboard.AbstractChartPanel.DataLoadedHandler;
 import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
 import com.sap.sailing.server.api.RaceIdentifier;
 
 public class CompareCompetitorsChartDialog extends DialogBox {
     private Anchor closeAnchor;
 
-    public CompareCompetitorsChartDialog(SailingServiceAsync sailingService, List<CompetitorDAO> competitors, RaceIdentifier[] races, StringMessages stringConstants, ErrorReporter errorReporter){
+    public CompareCompetitorsChartDialog(SailingServiceAsync sailingService, List<CompetitorDAO> competitors,
+            RaceIdentifier[] races, StringMessages stringConstants, ErrorReporter errorReporter) {
         super(false);
-        final ChartsPanel ccp = new ChartsPanel(sailingService, competitors, races, stringConstants, (int) (Window.getClientWidth()-350), (int) (Window.getClientHeight()-170),errorReporter);
+        final MultiChartPanel ccp = new MultiChartPanel(sailingService, competitors, races, stringConstants, (int) (Window.getClientWidth()-350), (int) (Window.getClientHeight()-170),errorReporter);
         ccp.addDataLoadedHandler(new DataLoadedHandler() {
-            
             @Override
             public void onDataLoaded(DataLoadedEvent event) {
                 CompareCompetitorsChartDialog.this.setPopupPosition(5, 5);
@@ -38,7 +38,6 @@ public class CompareCompetitorsChartDialog extends DialogBox {
             }
         });
         this.add(ccp);
-
         this.setPopupPosition(5, 5);
         //this.setSize((int) (Window.getClientWidth()*0.9) + "px", (int) (Window.getClientHeight() * 0.9) + "px");
         closeAnchor = new Anchor("x");
@@ -70,14 +69,13 @@ public class CompareCompetitorsChartDialog extends DialogBox {
             }
         });
         Window.addResizeHandler(new ResizeHandler() {
-			
-			@Override
-			public void onResize(ResizeEvent event) {
-				ccp.resize((int) (Window.getClientWidth()-250), (int) (Window.getClientHeight()-90));
-			}
-		});
+            @Override
+            public void onResize(ResizeEvent event) {
+                ccp.resize((int) (Window.getClientWidth() - 250), (int) (Window.getClientHeight() - 90));
+            }
+        });
     }
-    
+
     public void addCloseHandler(ClickHandler handler) {
         closeAnchor.addClickHandler(handler);
     }

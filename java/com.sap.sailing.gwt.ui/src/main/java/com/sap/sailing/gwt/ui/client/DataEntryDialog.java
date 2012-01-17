@@ -12,6 +12,7 @@ import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.LongBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -171,6 +172,19 @@ public abstract class DataEntryDialog<T> {
         result.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
             @Override
             public void onValueChange(ValueChangeEvent<Boolean> event) {
+                validate();
+            }
+        });
+        AbstractEntryPoint.linkEnterToButton(getOkButton(), result);
+        AbstractEntryPoint.linkEscapeToButton(getCancelButton(), result);
+        return result;
+    }
+
+    public ListBox createListBox(boolean isMultipleSelect) {
+        ListBox result = new ListBox(isMultipleSelect);
+        result.addChangeHandler(new ChangeHandler() {
+            @Override
+            public void onChange(ChangeEvent event) {
                 validate();
             }
         });
