@@ -35,6 +35,10 @@ public class MultiChartPanel extends AbstractChartPanel<MultiChartSettings> impl
 
     @Override
     public void updateSettings(MultiChartSettings newSettings) {
+        updateSettingsOnly(newSettings);
+        setDataToShow(newSettings.getDataToShow());
+        clearChart(true);
+        loadData();
     }
 
     @Override

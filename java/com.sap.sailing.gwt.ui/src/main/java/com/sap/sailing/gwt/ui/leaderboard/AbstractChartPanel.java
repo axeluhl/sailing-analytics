@@ -598,12 +598,15 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
     public ChartSettings getAbstractSettings() {
         return new ChartSettings(getStepsToLoad());
     }
-    
-    public void updateSettings(ChartSettings newSettings) {
+
+    /**
+     * Updates the settings known to be contained in {@link ChartSettings}. Subclasses have to update settings provided
+     * by subclasses thereof. Subclasses also need to call {@link #clearChart(boolean)} and {@link #loadData()} after
+     * updating all settings.
+     */
+    public void updateSettingsOnly(ChartSettings newSettings) {
         setStepsToLoad(newSettings.getStepsToLoad());
         setCompetitorsAndTimePointsDAO(null);
-        clearChart(true);
-        loadData();
     }
 
     protected StringMessages getStringMessages() {
@@ -620,6 +623,14 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
     
     protected DetailType getDataToShow() {
         return this.dataToShow;
+    }
+    
+    /**
+     * Updates the {@link #dataToShow} field but does not yet {@link #clearChart(boolean) clear the chart} nor
+     * {@link #loadData load the data}.
+     */
+    protected void setDataToShow(DetailType dataToShow) {
+        this.dataToShow = dataToShow;
     }
 
     protected CompetitorsAndTimePointsDAO getCompetitorsAndTimePointsDAO() {

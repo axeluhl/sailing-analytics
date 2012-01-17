@@ -39,4 +39,11 @@ public class ChartPanel extends AbstractChartPanel<ChartSettings> implements Com
         return new ChartSettingsComponent(getAbstractSettings(), getStringMessages());
     }
 
+    @Override
+    public void updateSettings(ChartSettings newSettings) {
+        updateSettingsOnly(newSettings);
+        clearChart(true);
+        loadData();
+    }
+
 }
