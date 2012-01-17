@@ -207,4 +207,6 @@ public interface StringMessages extends Messages {
     String startDateNotAvailable();
     String startDate();
     String numberOfStepsToLoadMustAtLeastBeTwo();
+    String unknownManeuver();
+    String tailLengthMustBeNonNegative();
 }

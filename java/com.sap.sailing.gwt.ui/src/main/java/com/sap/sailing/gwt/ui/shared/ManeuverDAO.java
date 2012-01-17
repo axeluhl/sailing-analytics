@@ -3,17 +3,13 @@ package com.sap.sailing.gwt.ui.shared;
 import java.util.Date;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import com.sap.sailing.domain.common.ManeuverType;
+import com.sap.sailing.domain.common.Tack;
 
 public class ManeuverDAO implements IsSerializable {
-    /**
-     * One of HEAD_UP, BEAR_AWAY, TACK, JIBE, PENALTY_CIRCLE, MARK_PASSING, UNKNOWN
-     */
-    public String type;
+    public ManeuverType type;
     
-    /**
-     * One of PORT or STARBOARD
-     */
-    public String newTack;
+    public Tack newTack;
     
     public PositionDAO position;
     
@@ -27,7 +23,7 @@ public class ManeuverDAO implements IsSerializable {
 
     public ManeuverDAO() {}
     
-    public ManeuverDAO(String type, String newTack, PositionDAO position, Date timepoint, SpeedWithBearingDAO speedWithBearingBefore,
+    public ManeuverDAO(ManeuverType type, Tack newTack, PositionDAO position, Date timepoint, SpeedWithBearingDAO speedWithBearingBefore,
             SpeedWithBearingDAO speedWithBearingAfter, double directionChangeInDegrees) {
         super();
         this.type = type;

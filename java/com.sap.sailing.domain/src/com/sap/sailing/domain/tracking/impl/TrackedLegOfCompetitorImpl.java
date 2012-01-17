@@ -11,6 +11,7 @@ import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MeterDistance;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
@@ -18,7 +19,6 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.Maneuver;
-import com.sap.sailing.domain.tracking.Maneuver.Type;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -278,7 +278,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
             List<Maneuver> maneuvers = getManeuvers(timePoint);
             result = 0;
             for (Maneuver maneuver : maneuvers) {
-                if (maneuver.getType() == Type.TACK) {
+                if (maneuver.getType() == ManeuverType.TACK) {
                     result++;
                 }
             }
@@ -305,7 +305,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
             List<Maneuver> maneuvers = getManeuvers(timePoint);
             result = 0;
             for (Maneuver maneuver : maneuvers) {
-                if (maneuver.getType() == Type.JIBE) {
+                if (maneuver.getType() == ManeuverType.JIBE) {
                     result++;
                 }
             }
@@ -320,7 +320,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
             List<Maneuver> maneuvers = getManeuvers(timePoint);
             result = 0;
             for (Maneuver maneuver : maneuvers) {
-                if (maneuver.getType() == Type.PENALTY_CIRCLE) {
+                if (maneuver.getType() == ManeuverType.PENALTY_CIRCLE) {
                     result++;
                 }
             }

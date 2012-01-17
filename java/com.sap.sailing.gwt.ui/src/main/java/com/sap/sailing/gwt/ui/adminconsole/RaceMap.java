@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import com.google.gwt.dev.json.Pair;
 import com.google.gwt.maps.client.InfoWindowContent;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.Maps;
@@ -39,6 +40,8 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.ManeuverType;
+import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
@@ -46,6 +49,7 @@ import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.TimeListener;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
@@ -55,9 +59,12 @@ import com.sap.sailing.gwt.ui.shared.ManeuverDAO;
 import com.sap.sailing.gwt.ui.shared.MarkDAO;
 import com.sap.sailing.gwt.ui.shared.RaceDAO;
 import com.sap.sailing.gwt.ui.shared.RegattaDAO;
+import com.sap.sailing.gwt.ui.shared.components.Component;
+import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
 import com.sap.sailing.server.api.EventNameAndRaceName;
 
-public class RaceMap implements TimeListener, CompetitorSelectionChangeListener, RaceSelectionChangeListener {
+public class RaceMap implements TimeListener, CompetitorSelectionChangeListener, RaceSelectionChangeListener,
+        Component<RaceMapSettings> {
     protected MapWidget map;
 
     private final SailingServiceAsync sailingService;
@@ -150,8 +157,12 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
     private RaceMapResources imageResources; 
 
     private final RaceMapSettings settings;
+    
+    private final StringMessages stringMessages;
 
-    public RaceMap(SailingServiceAsync sailingService, ErrorReporter errorReporter, Timer timer, CompetitorSelectionProvider competitorSelection) {
+    public RaceMap(SailingServiceAsync sailingService, ErrorReporter errorReporter, Timer timer,
+            CompetitorSelectionProvider competitorSelection, StringMessages stringMessages) {
+        this.stringMessages = stringMessages;
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.timer = timer;
@@ -609,7 +620,6 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
                 from.put(competitorDAO, fixes.get(competitorDAO).get(firstShownFix.get(competitorDAO)).timepoint);
                 Map<CompetitorDAO, Date> to = new HashMap<CompetitorDAO, Date>();
                 to.put(competitorDAO, getBoatFix(competitorDAO).timepoint);
-                /* currently not showing Douglas-Peucker points; TODO use checkboxes to select what to show (Bug #6) */
                 sailingService.getDouglasPoints(new EventNameAndRaceName(event.name, race.name), from, to, 3,
                         new AsyncCallback<Map<CompetitorDAO, List<GPSFixDAO>>>() {
                             @Override
@@ -782,56 +792,14 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
                 CompetitorDAO competitorDAO = iter.next();
                 List<ManeuverDAO> maneuversForCompetitor = maneuvers.get(competitorDAO);
                 for (ManeuverDAO maneuver : maneuversForCompetitor) {
-                    boolean showThisManeuver = true;
-                    LatLng latLng = LatLng.newInstance(maneuver.position.latDeg, maneuver.position.lngDeg);
-                    MarkerOptions options = MarkerOptions.newInstance();
-                    options.setTitle("" + maneuver.timepoint + ": " + maneuver.type + " "
-                            + maneuver.directionChangeInDegrees + "deg from " + maneuver.speedWithBearingBefore
-                            + " to " + maneuver.speedWithBearingAfter);
-                    if (maneuver.type.equals("TACK") && settings.isShowManeuverTack()) {
-                        if (maneuver.newTack.equals("PORT")) {
-                            options.setIcon(imageResources.tackToPortIcon);
-                        } else {
-                            options.setIcon(imageResources.tackToStarboardIcon);
-                        }
-                    } else if (maneuver.type.equals("JIBE") && settings.isShowManeuverJibe()) {
-                        if (maneuver.newTack.equals("PORT")) {
-                            options.setIcon(imageResources.jibeToPortIcon);
-                        } else {
-                            options.setIcon(imageResources.jibeToStarboardIcon);
-                        }
-                    } else if (maneuver.type.equals("HEAD_UP") && settings.isShowManeuverHeadUp()) {
-                        if (maneuver.newTack.equals("PORT")) {
-                            options.setIcon(imageResources.headUpOnPortIcon);
-                        } else {
-                            options.setIcon(imageResources.headUpOnStarboardIcon);
-                        }
-                    } else if (maneuver.type.equals("BEAR_AWAY") && settings.isShowManeuverBearAway()) {
-                        if (maneuver.newTack.equals("PORT")) {
-                            options.setIcon(imageResources.bearAwayOnPortIcon);
-                        } else {
-                            options.setIcon(imageResources.bearAwayOnStarboardIcon);
-                        }
-                    } else if (maneuver.type.equals("PENALTY_CIRCLE") && settings.isShowManeuverPenaltyCircle()) {
-                        if (maneuver.newTack.equals("PORT")) {
-                            options.setIcon(imageResources.penaltyCircleToPortIcon);
-                        } else {
-                            options.setIcon(imageResources.penaltyCircleToStarboardIcon);
-                        }
-                    } else if (maneuver.type.equals("MARK_PASSING") && settings.isShowManeuverMarkPassing()) {
-                        if (maneuver.newTack.equals("PORT")) {
-                            options.setIcon(imageResources.markPassingToPortIcon);
-                        } else {
-                            options.setIcon(imageResources.markPassingToStarboardIcon);
-                        }
-                    } else {
-                        if (maneuver.type.equals("UNKNOWN") && settings.isShowManeuverOther()) {
-                            options.setIcon(imageResources.unknownManeuverIcon);
-                        } else {
-                            showThisManeuver = false;
-                        }
-                    }
-                    if (showThisManeuver) {
+                    if (getSettings().isShowManeuverType(maneuver.type)) {
+                        LatLng latLng = LatLng.newInstance(maneuver.position.latDeg, maneuver.position.lngDeg);
+                        MarkerOptions options = MarkerOptions.newInstance();
+                        options.setTitle("" + maneuver.timepoint + ": " + maneuver.type.name() + " "
+                                + maneuver.directionChangeInDegrees + "deg from " + maneuver.speedWithBearingBefore
+                                + " to " + maneuver.speedWithBearingAfter);
+                        options.setIcon(imageResources.maneuverIconsForTypeAndTargetTack
+                                .get(new Pair<ManeuverType, Tack>(maneuver.type, maneuver.newTack)));
                         Marker marker = new Marker(latLng, options);
                         maneuverMarkers.add(marker);
                         map.addOverlay(marker);
@@ -1029,6 +997,61 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
             }
             map.addOverlay(lowlightedMarker);
             boatMarkers.put(competitor, lowlightedMarker);
+        }
+    }
+
+    @Override
+    public String getLocalizedShortName() {
+        return stringMessages.map();
+    }
+
+    @Override
+    public Widget getEntryWidget() {
+        return map;
+    }
+
+    @Override
+    public boolean hasSettings() {
+        return true;
+    }
+
+    @Override
+    public SettingsDialogComponent<RaceMapSettings> getSettingsDialogComponent() {
+        return new RaceMapSettingsDialogComponent(getSettings(), stringMessages);
+    }
+
+    @Override
+    public void updateSettings(RaceMapSettings newSettings) {
+        boolean maneuverTypeSelectionChanged = false;
+        for (ManeuverType maneuverType : ManeuverType.values()) {
+            if (newSettings.isShowManeuverType(maneuverType) != getSettings().isShowManeuverType(maneuverType)) {
+                maneuverTypeSelectionChanged = true;
+                getSettings().showManeuverType(maneuverType, newSettings.isShowManeuverType(maneuverType));
+            }
+        }
+        if (maneuverTypeSelectionChanged) {
+            if (!timer.isPlaying() && lastManeuverResult != null) {
+                removeAllManeuverMarkers();
+                showManeuvers(lastManeuverResult);
+            }
+        }
+        if (newSettings.isShowDouglasPeuckerPoints() != getSettings().isShowDouglasPeuckerPoints()) {
+            if (!timer.isPlaying() && lastDouglasPeuckerResult != null && newSettings.isShowDouglasPeuckerPoints()) {
+                getSettings().setShowDouglasPeuckerPoints(true);
+                removeAllMarkDouglasPeuckerpoints();
+                showMarkDouglasPeuckerPoints(lastDouglasPeuckerResult);
+            } else if (!newSettings.isShowDouglasPeuckerPoints()) {
+                getSettings().setShowDouglasPeuckerPoints(false);
+                removeAllMarkDouglasPeuckerpoints();
+            }
+        }
+        if (newSettings.getTailLengthInMilliseconds() != getSettings().getTailLengthInMilliseconds()) {
+            getSettings().setTailLengthInMilliseconds(newSettings.getTailLengthInMilliseconds());
+            redraw();
+        }
+        if (newSettings.isShowOnlySelectedCompetitors() != getSettings().isShowOnlySelectedCompetitors()) {
+            getSettings().setShowOnlySelectedCompetitors(newSettings.isShowOnlySelectedCompetitors());
+            redraw();
         }
     }
 }

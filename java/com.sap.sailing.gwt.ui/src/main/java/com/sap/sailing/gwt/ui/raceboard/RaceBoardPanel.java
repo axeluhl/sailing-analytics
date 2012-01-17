@@ -53,7 +53,7 @@ public class RaceBoardPanel extends FormPanel implements Component<RaceBoardSett
         setWidget(mainPanel);
         competitorSelectionProvider = new CompetitorSelectionModel(/* hasMultiSelection */ true);
         RaceMap raceMap = new RaceMap(sailingService, errorReporter, new Timer(
-                /* delayBetweenAutoAdvancesInMilliseconds */500), competitorSelectionProvider);
+                /* delayBetweenAutoAdvancesInMilliseconds */500), competitorSelectionProvider, stringMessages);
         for(int i = 0; i < 4; i++) {
             if(i == 0) {
                 AbsolutePanel contentPanel = new AbsolutePanel();

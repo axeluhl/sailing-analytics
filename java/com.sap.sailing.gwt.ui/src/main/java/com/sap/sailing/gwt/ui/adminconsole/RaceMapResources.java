@@ -1,13 +1,18 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import java.util.Map;
+
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dev.util.collect.HashMap;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.geom.LatLng;
 import com.google.gwt.maps.client.geom.LatLngBounds;
 import com.google.gwt.maps.client.geom.Point;
 import com.google.gwt.maps.client.overlay.Icon;
 import com.sap.sailing.domain.common.LegType;
+import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.Tack;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.shared.GPSFixDAO;
 
 public class RaceMapResources {
@@ -55,26 +60,15 @@ public class RaceMapResources {
     protected ImageTransformer boatIconHighlightedStarboardRotator;
 
     protected Icon buoyIcon;
-    protected Icon tackToStarboardIcon;
-    protected Icon tackToPortIcon;
-    protected Icon jibeToStarboardIcon;
-    protected Icon jibeToPortIcon;
-    protected Icon markPassingToStarboardIcon;
-    protected Icon markPassingToPortIcon;
-    protected Icon headUpOnStarboardIcon;
-    protected Icon headUpOnPortIcon;
-    protected Icon bearAwayOnStarboardIcon;
-    protected Icon bearAwayOnPortIcon;
-    protected Icon unknownManeuverIcon;
-    protected Icon penaltyCircleToStarboardIcon;
-    protected Icon penaltyCircleToPortIcon;
-
+    
+    protected Map<Pair<ManeuverType, Tack>, Icon> maneuverIconsForTypeAndTargetTack;
+    
     private static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
 
     public RaceMapResources(final MapWidget map)
     {
         this.map = map;
-        
+        maneuverIconsForTypeAndTargetTack = new HashMap<Pair<ManeuverType, Tack>, Icon>();
         boatIconDownwindPortRotator = new ImageTransformer(resources.lowlightedBoatIconDW_Port());
         boatIconHighlightedDownwindPortRotator = new ImageTransformer(resources.highlightedBoatIconDW_Port());
         boatIconDownwindStarboardRotator = new ImageTransformer(resources.lowlightedBoatIconDW_Starboard());
@@ -86,45 +80,60 @@ public class RaceMapResources {
         boatIconHighlightedStarboardRotator = new ImageTransformer(resources.highlightedBoatIcon_Starboard());
         buoyIcon = Icon.newInstance(resources.buoyIcon().getSafeUri().asString());
         buoyIcon.setIconAnchor(Point.newInstance(4, 4));
-        tackToStarboardIcon = Icon
+        
+        Icon tackToStarboardIcon = Icon
                 .newInstance("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=T|00FF00|000000");
         tackToStarboardIcon.setIconAnchor(Point.newInstance(10, 33));
-        tackToPortIcon = Icon
+        maneuverIconsForTypeAndTargetTack.put(new Pair<ManeuverType, Tack>(ManeuverType.TACK, Tack.STARBOARD), tackToStarboardIcon);
+        Icon tackToPortIcon = Icon
                 .newInstance("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=T|FF0000|000000");
         tackToPortIcon.setIconAnchor(Point.newInstance(10, 33));
-        jibeToStarboardIcon = Icon
+        maneuverIconsForTypeAndTargetTack.put(new Pair<ManeuverType, Tack>(ManeuverType.TACK, Tack.PORT), tackToPortIcon);
+        Icon jibeToStarboardIcon = Icon
                 .newInstance("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=J|00FF00|000000");
         jibeToStarboardIcon.setIconAnchor(Point.newInstance(10, 33));
-        jibeToPortIcon = Icon
+        maneuverIconsForTypeAndTargetTack.put(new Pair<ManeuverType, Tack>(ManeuverType.JIBE, Tack.STARBOARD), jibeToStarboardIcon);
+        Icon jibeToPortIcon = Icon
                 .newInstance("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=J|FF0000|000000");
         jibeToPortIcon.setIconAnchor(Point.newInstance(10, 33));
-        headUpOnStarboardIcon = Icon
+        maneuverIconsForTypeAndTargetTack.put(new Pair<ManeuverType, Tack>(ManeuverType.JIBE, Tack.PORT), jibeToPortIcon);
+        Icon headUpOnStarboardIcon = Icon
                 .newInstance("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=H|00FF00|000000");
         headUpOnStarboardIcon.setIconAnchor(Point.newInstance(10, 33));
-        headUpOnPortIcon = Icon
+        maneuverIconsForTypeAndTargetTack.put(new Pair<ManeuverType, Tack>(ManeuverType.HEAD_UP, Tack.STARBOARD), headUpOnStarboardIcon);
+        Icon headUpOnPortIcon = Icon
                 .newInstance("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=H|FF0000|000000");
         headUpOnPortIcon.setIconAnchor(Point.newInstance(10, 33));
-        bearAwayOnStarboardIcon = Icon
+        maneuverIconsForTypeAndTargetTack.put(new Pair<ManeuverType, Tack>(ManeuverType.HEAD_UP, Tack.PORT), headUpOnPortIcon);
+        Icon bearAwayOnStarboardIcon = Icon
                 .newInstance("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=B|00FF00|000000");
         bearAwayOnStarboardIcon.setIconAnchor(Point.newInstance(10, 33));
-        bearAwayOnPortIcon = Icon
+        maneuverIconsForTypeAndTargetTack.put(new Pair<ManeuverType, Tack>(ManeuverType.BEAR_AWAY, Tack.STARBOARD), bearAwayOnStarboardIcon);
+        Icon bearAwayOnPortIcon = Icon
                 .newInstance("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=B|FF0000|000000");
         bearAwayOnPortIcon.setIconAnchor(Point.newInstance(10, 33));
-        markPassingToStarboardIcon = Icon
+        maneuverIconsForTypeAndTargetTack.put(new Pair<ManeuverType, Tack>(ManeuverType.BEAR_AWAY, Tack.PORT), bearAwayOnPortIcon);
+        Icon markPassingToStarboardIcon = Icon
                 .newInstance("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=M|00FF00|000000");
         markPassingToStarboardIcon.setIconAnchor(Point.newInstance(10, 33));
-        markPassingToPortIcon = Icon
+        maneuverIconsForTypeAndTargetTack.put(new Pair<ManeuverType, Tack>(ManeuverType.MARK_PASSING, Tack.STARBOARD), markPassingToStarboardIcon);
+        Icon markPassingToPortIcon = Icon
                 .newInstance("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=M|FF0000|000000");
         markPassingToPortIcon.setIconAnchor(Point.newInstance(10, 33));
-        unknownManeuverIcon = Icon
+        maneuverIconsForTypeAndTargetTack.put(new Pair<ManeuverType, Tack>(ManeuverType.MARK_PASSING, Tack.PORT), markPassingToPortIcon);
+        Icon unknownManeuverIcon = Icon
                 .newInstance("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=?|FFFFFF|000000");
         unknownManeuverIcon.setIconAnchor(Point.newInstance(10, 33));
-        penaltyCircleToStarboardIcon = Icon
+        maneuverIconsForTypeAndTargetTack.put(new Pair<ManeuverType, Tack>(ManeuverType.UNKNOWN, Tack.STARBOARD), tackToStarboardIcon);
+        maneuverIconsForTypeAndTargetTack.put(new Pair<ManeuverType, Tack>(ManeuverType.UNKNOWN, Tack.PORT), tackToStarboardIcon);
+        Icon penaltyCircleToStarboardIcon = Icon
                 .newInstance("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=P|00FF00|000000");
         penaltyCircleToStarboardIcon.setIconAnchor(Point.newInstance(10, 33));
-        penaltyCircleToPortIcon = Icon
+        maneuverIconsForTypeAndTargetTack.put(new Pair<ManeuverType, Tack>(ManeuverType.PENALTY_CIRCLE, Tack.STARBOARD), penaltyCircleToStarboardIcon);
+        Icon penaltyCircleToPortIcon = Icon
                 .newInstance("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=P|FF0000|000000");
         penaltyCircleToPortIcon.setIconAnchor(Point.newInstance(10, 33));
+        maneuverIconsForTypeAndTargetTack.put(new Pair<ManeuverType, Tack>(ManeuverType.PENALTY_CIRCLE, Tack.PORT), penaltyCircleToPortIcon);
     }
     
     public ImageTransformer getBoatImageTransformer(GPSFixDAO boatFix, boolean highlighted) {
