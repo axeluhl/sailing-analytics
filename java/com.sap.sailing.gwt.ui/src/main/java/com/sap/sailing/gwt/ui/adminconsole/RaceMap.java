@@ -245,9 +245,9 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
 
     @Override
     public void onCompetitorSelectionChange(List<CompetitorDAO> newSelectedCompetitors) {
-        for (CompetitorDAO competitorDAO : newSelectedCompetitors) {
+        for (CompetitorDAO competitorDAO : selectedMapCompetitors) {
             
-            if (!selectedMapCompetitors.contains(competitorDAO)) {
+            if (!newSelectedCompetitors.contains(competitorDAO)) {
                 // "lowlight" currently selected competitor
                 Marker highlightedMarker = boatMarkers.get(competitorDAO);
                 if (highlightedMarker != null) {
@@ -255,20 +255,18 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
                     map.removeOverlay(highlightedMarker);
                     map.addOverlay(lowlightedMarker);
                     boatMarkers.put(competitorDAO, lowlightedMarker);
-                    selectedMapCompetitors.remove(competitorDAO);
                 }
             } else {
                 Marker lowlightedMarker = boatMarkers.get(competitorDAO);
-                if (lowlightedMarker != null) {
+                if (lowlightedMarker == null) {
                     Marker highlightedMarker = createBoatMarker(competitorDAO, true);
-                    map.removeOverlay(lowlightedMarker);
                     map.addOverlay(highlightedMarker);
                     boatMarkers.put(competitorDAO, highlightedMarker);
                 }
-                // add the competitor even if not currently contained in map
-                selectedMapCompetitors.add(competitorDAO);
             }
         }
+        selectedMapCompetitors.clear();
+        selectedMapCompetitors.addAll(newSelectedCompetitors);
     }
 
     @Override
@@ -991,10 +989,6 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
         }
         firstShownFix.put(competitorDAO, indexOfFirstShownFix);
         lastShownFix.put(competitorDAO, indexOfLastShownFix);
-    }
-
-    public Set<CompetitorDAO> getSelectedMapCompetitors() {
-        return selectedMapCompetitors;
     }
 
     public RaceMapSettings getSettings() {
