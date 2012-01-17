@@ -1,15 +1,17 @@
 package com.sap.sailing.domain.common.impl;
 
+import java.io.Serializable;
+
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SerializablePosition;
 
-public class SerializablePositionImpl implements SerializablePosition {
+public class SerializablePositionImpl implements SerializablePosition, Serializable {
     private static final long serialVersionUID = -5649921262460723024L;
     
     private double latDeg;
     private double lngDeg;
     
-    public SerializablePositionImpl() {}
+    SerializablePositionImpl() {}
 
     public SerializablePositionImpl(double latDeg, double lngDeg) {
         super();
@@ -20,6 +22,11 @@ public class SerializablePositionImpl implements SerializablePosition {
     @Override
     public Position getPosition() {
         return new DegreePosition(latDeg, lngDeg);
+    }
+    
+    @Override
+    public String toString() {
+        return "(" + latDeg + ", " + lngDeg + ")";
     }
 
     @Override

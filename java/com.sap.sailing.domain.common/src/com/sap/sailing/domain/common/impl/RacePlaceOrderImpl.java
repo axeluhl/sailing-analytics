@@ -1,22 +1,26 @@
 package com.sap.sailing.domain.common.impl;
 
+import java.io.Serializable;
+import java.util.Collections;
+import java.util.List;
+
 import com.sap.sailing.domain.common.Placemark;
 import com.sap.sailing.domain.common.RacePlaceOrder;
 
-public class RacePlaceOrderImpl implements RacePlaceOrder {
+public class RacePlaceOrderImpl implements RacePlaceOrder, Serializable {
     private static final long serialVersionUID = 7590835541329816755L;
     
-    private Iterable<Placemark> places;
+    private List<Placemark> places;
     
     RacePlaceOrderImpl() {}
     
-    public RacePlaceOrderImpl(Iterable<Placemark> places) {
+    public RacePlaceOrderImpl(List<Placemark> places) {
         this.places = places;
     }
 
     @Override
     public Iterable<Placemark> getPlaces() {
-        return places;
+        return Collections.unmodifiableCollection(places);
     }
     
     @Override

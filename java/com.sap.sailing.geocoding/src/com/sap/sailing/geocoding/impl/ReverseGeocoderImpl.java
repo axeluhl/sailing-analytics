@@ -34,7 +34,7 @@ public class ReverseGeocoderImpl implements ReverseGeocoder {
      * The first number is the distance in kilometers and the second number is a needed calculation factor and mustn't
      * be changed! To change the distance just change the first number!
      */
-    private final double POSITION_CACHE_DISTANCE_LIMIT = 5.0 * 0.00899928005759539236861051115911;
+    private final double POSITION_CACHE_DISTANCE_LIMIT = ReverseGeocoder.POSITION_CACHE_DISTANCE_LIMIT_IN_KM * 0.00899928005759539236861051115911;
     private final int XKM_RADIUS = 5;
     private final int ROWS_PER_XKM_RADIUS = 15;
     

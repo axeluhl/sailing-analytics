@@ -53,6 +53,7 @@ import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindError;
 import com.sap.sailing.domain.common.NoWindException;
+import com.sap.sailing.domain.common.Placemark;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.Tack;
@@ -130,6 +131,13 @@ import com.sap.sailing.server.api.RaceIdentifier;
  * The server side implementation of the RPC service.
  */
 public class SailingServiceImpl extends RemoteServiceServlet implements SailingService, RaceFetcher, EventFetcher {
+    //
+    @Override
+    public Placemark testPlacemarkSerialization() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+    //
     private static final Logger logger = Logger.getLogger(SailingServiceImpl.class.getName());
     
     private static final long serialVersionUID = 9031688830194537489L;
@@ -1585,4 +1593,5 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         //Override to prevent exception "Blocked request without GWT permutation header (XSRF attack?)" when testing the GWT sites
         return;
     }
+
 }

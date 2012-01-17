@@ -13,10 +13,9 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.cellview.client.CellTable;
-import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.Handler;
-import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
+import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
@@ -29,7 +28,6 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
-import com.google.gwt.view.client.SelectionModel;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.gwt.ui.client.AbstractEventPanel;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
@@ -289,11 +287,11 @@ public class OverviewEventPanel extends AbstractEventPanel {
             public void onSuccess(List<EventDAO> result) {
                 if (result != null) {
                     availableEvents = new ArrayList<EventDAO>(result);
-                    eventTableProvider.getList().clear();
-                    eventTableProvider.setList(availableEvents);
                 } else {
                     availableEvents.clear();
                 }
+                eventTableProvider.getList().clear();
+                eventTableProvider.setList(availableEvents);
                 if (actionAfterLoading != null) {
                     actionAfterLoading.run();
                 }
