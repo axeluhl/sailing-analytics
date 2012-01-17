@@ -1455,7 +1455,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     private List<ManeuverDAO> createManeuverDAOsForCompetitor(List<Maneuver> maneuvers, TrackedRace trackedRace, Competitor competitor) {
         List<ManeuverDAO> result = new ArrayList<ManeuverDAO>();
         for (Maneuver maneuver : maneuvers) {
-            ManeuverDAO maneuverDAO = new ManeuverDAO(maneuver.getType().name(), maneuver.getNewTack().name(),
+            ManeuverDAO maneuverDAO = new ManeuverDAO(maneuver.getType(), maneuver.getNewTack(),
                     new PositionDAO(maneuver.getPosition().getLatDeg(), maneuver.getPosition().getLngDeg()), 
                     maneuver.getTimePoint().asDate(),
                     createSpeedWithBearingDAO(maneuver.getSpeedWithBearingBefore()),

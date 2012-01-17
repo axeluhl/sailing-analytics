@@ -13,10 +13,9 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.cellview.client.CellTable;
-import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.Handler;
-import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
+import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
@@ -29,7 +28,6 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
-import com.google.gwt.view.client.SelectionModel;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.gwt.ui.client.AbstractEventPanel;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
@@ -37,8 +35,6 @@ import com.sap.sailing.gwt.ui.client.EventRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDAO;
-import com.sap.sailing.gwt.ui.shared.LeaderboardDAO;
-import com.sap.sailing.server.api.EventIdentifier;
 
 /**
  * 
@@ -309,30 +305,10 @@ public class OverviewEventPanel extends AbstractEventPanel {
         loadEvents(null);
     }
     
-    private void fillEventsList(final Runnable r) {
-        // TODO
-    }
-    private void fillEventsList() {
-        fillEventsList(null);
-    }
-
-    private void fillLeaderboardsList(EventIdentifier eventIdentifier, final Runnable r) {
-        // TODO
-    }
-    private void loadLeaderboards(EventIdentifier eventIdentifier) {
-        fillLeaderboardsList(eventIdentifier, null);
-    }
-
     protected void eventSelectionChanged(SelectionChangeEvent event) {
         // TODO Actions when the event selection changed
     }
     
-    private LeaderboardDAO getSelectedLeaderboard() {
-        LeaderboardDAO result = null;
-        //TODO Get seleceted Leaderboard
-        return result;
-    }
-
     private void onCheckBoxLiveChange() {
         if (checkBoxLive.getValue()) {
             //Disable Date-Input-Fields and fill them with the current Date

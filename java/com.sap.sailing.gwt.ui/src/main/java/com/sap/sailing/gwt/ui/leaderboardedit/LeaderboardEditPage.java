@@ -18,10 +18,10 @@ public class LeaderboardEditPage extends AbstractEntryPoint {
             public void onSuccess(List<String> leaderboardNames) {
                 String leaderboardName = Window.Location.getParameter("name");
                 if (leaderboardNames.contains(leaderboardName)) {
-                    LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(stringConstants);
+                    LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(stringMessages);
                     logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
                     EditableLeaderboardPanel leaderboardPanel = new EditableLeaderboardPanel(sailingService, leaderboardName,
-                            LeaderboardEditPage.this, stringConstants);
+                            LeaderboardEditPage.this, stringMessages);
                     String padding = Window.Location.getParameter("padding");
 
                     if (padding != null && Boolean.valueOf(padding)) {
@@ -30,7 +30,7 @@ public class LeaderboardEditPage extends AbstractEntryPoint {
                     RootPanel.get().add(logoAndTitlePanel);
                     RootPanel.get().add(leaderboardPanel);
                 } else {
-                    RootPanel.get().add(new Label(stringConstants.noSuchLeaderboard()));
+                    RootPanel.get().add(new Label(stringMessages.noSuchLeaderboard()));
                 }
             }
             @Override

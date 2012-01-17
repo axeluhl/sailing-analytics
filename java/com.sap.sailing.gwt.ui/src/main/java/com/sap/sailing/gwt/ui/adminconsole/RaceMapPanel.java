@@ -1,26 +1,24 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.maps.client.geom.LatLng;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.CheckBox;
+import com.google.gwt.user.client.ui.AbsolutePanel;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.IntegerBox;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ProvidesResize;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
+import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.EventDisplayer;
 import com.sap.sailing.gwt.ui.client.EventRefresher;
@@ -30,98 +28,44 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.TimeListener;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.leaderboard.SmallWindHistoryPanel;
-import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
 import com.sap.sailing.gwt.ui.shared.EventDAO;
-import com.sap.sailing.gwt.ui.shared.ManeuverDAO;
 import com.sap.sailing.gwt.ui.shared.PositionDAO;
 import com.sap.sailing.gwt.ui.shared.QuickRankDAO;
 import com.sap.sailing.gwt.ui.shared.RaceDAO;
 import com.sap.sailing.gwt.ui.shared.RegattaDAO;
+import com.sap.sailing.gwt.ui.shared.components.SettingsDialog;
 import com.sap.sailing.server.api.EventNameAndRaceName;
 
 public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListener, ProvidesResize, RequiresResize,
         RaceSelectionChangeListener {
+    private final CompetitorSelectionProvider competitorSelectionProvider;
     private final SailingServiceAsync sailingService;
     private final ErrorReporter errorReporter;
     private final Grid grid;
     private final RacesListBoxPanel raceListBox;
     private final TimePanel timePanel;
-
     private final Timer timer;
-    private List<Pair<CheckBox, String>> checkboxAndType;
-    private CheckBox checkBoxDouglasPeuckerPoints;
-    private final CheckBox showOnlySelectedCompetitors;
-    private final IntegerBox tailLengthBox;
-
     private final RaceMap raceMap;
     private final QuickRanksListBoxComposite quickRanksListBox;
     
-    public RaceMapPanel(SailingServiceAsync sailingService, ErrorReporter errorReporter,
-            final EventRefresher eventRefresher, StringMessages stringConstants) {
+    public RaceMapPanel(SailingServiceAsync sailingService, CompetitorSelectionProvider competitorSelectionProvider,
+            ErrorReporter errorReporter, final EventRefresher eventRefresher, final StringMessages stringMessages) {
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
+        this.competitorSelectionProvider = competitorSelectionProvider;
         this.timer = new Timer(/* delayBetweenAutoAdvancesInMilliseconds */500);
-        checkboxAndType = new ArrayList<Pair<CheckBox, String>>();
-        final VerticalPanel verticalCheckBoxPanel = new VerticalPanel();
-        verticalCheckBoxPanel.add(new Label(stringConstants.maneuverTypes()));
-        checkboxAndType.add(new Pair<CheckBox, String>(new CheckBox(stringConstants.headUp()), "HEAD_UP"));
-        checkboxAndType.add(new Pair<CheckBox, String>(new CheckBox(stringConstants.bearAway()), "BEAR_AWAY"));
-        CheckBox checkBoxTack = new CheckBox(stringConstants.tack());
-        checkBoxTack.setValue(true);
-        checkboxAndType.add(new Pair<CheckBox, String>(checkBoxTack, "TACK"));
-        CheckBox checkBoxJibe = new CheckBox(stringConstants.jibe());
-        checkBoxJibe.setValue(true);
-        checkboxAndType.add(new Pair<CheckBox, String>(checkBoxJibe, "JIBE"));
-        CheckBox checkBoxPenalty = new CheckBox(stringConstants.penaltyCircle());
-        checkBoxPenalty.setValue(true);
-        checkboxAndType.add(new Pair<CheckBox, String>(checkBoxPenalty, "PENALTY_CIRCLE"));
-        CheckBox checkBoxMarkPassing = new CheckBox(stringConstants.markPassing());
-        checkBoxMarkPassing.setValue(true);
-        checkboxAndType.add(new Pair<CheckBox, String>(checkBoxMarkPassing, "MARK_PASSING"));
-        checkboxAndType.add(new Pair<CheckBox, String>(new CheckBox(stringConstants.otherManeuver()), "OTHER"));
-        
-        for (Pair<CheckBox, String> pair : checkboxAndType) {
-            pair.getA().addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-                @Override
-                public void onValueChange(ValueChangeEvent<Boolean> event) {
-                    if (!timer.isPlaying() && raceMap.lastManeuverResult != null) {
-                        raceMap.removeAllManeuverMarkers();
-                        showManeuvers(raceMap.lastManeuverResult);
-                    }
-                }
-            });
-            verticalCheckBoxPanel.add(pair.getA());
-        }
-
-        checkBoxDouglasPeuckerPoints = new CheckBox(stringConstants.douglasPeuckerPoints());
-        checkBoxDouglasPeuckerPoints.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-
-            @Override
-            public void onValueChange(ValueChangeEvent<Boolean> event) {
-                if (!timer.isPlaying() && raceMap.lastDouglasPeuckerResult != null && event.getValue()) {
-                    raceMap.getSettings().setShowDouglasPeuckerPoints(true);
-                    raceMap.removeAllMarkDouglasPeuckerpoints();
-                    raceMap.showMarkDouglasPeuckerPoints(raceMap.lastDouglasPeuckerResult);
-                } else if (!event.getValue()) {
-                    raceMap.getSettings().setShowDouglasPeuckerPoints(false);
-                    raceMap.removeAllMarkDouglasPeuckerpoints();
-                }
-            }
-        });
-        verticalCheckBoxPanel.add(checkBoxDouglasPeuckerPoints);
-        this.grid = new Grid(3, 2);
+        this.grid = new Grid(3, 3);
         setWidget(grid);
         grid.setSize("100%", "100%");
         grid.getColumnFormatter().setWidth(0, "20%");
         grid.getColumnFormatter().setWidth(1, "80%");
         grid.getCellFormatter().setHeight(2, 1, "100%");
-        
-        raceMap = new RaceMap(sailingService, errorReporter, timer);
-        raceMap.loadMapsAPI(grid, 2, 1);
-
-        setMapDisplayOptions();
-
-        raceListBox = new RacesListBoxPanel(eventRefresher, stringConstants);
+        AbsolutePanel mapPanel = new AbsolutePanel();
+        mapPanel.setSize("100%", "100%");
+        grid.setWidget(2, 1, mapPanel);
+        raceMap = new RaceMap(sailingService, errorReporter, timer, competitorSelectionProvider, stringMessages);
+        raceMap.loadMapsAPI(mapPanel);
+        raceListBox = new RacesListBoxPanel(eventRefresher, stringMessages);
         raceListBox.addRaceSelectionChangeListener(this);
         grid.setWidget(0, 0, raceListBox);
         PositionDAO pos = new PositionDAO();
@@ -132,62 +76,34 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         }
         SmallWindHistoryPanel windHistory = new SmallWindHistoryPanel(sailingService, pos,
         /* number of wind displays */5,
-        /* time interval between displays in milliseconds */5000, stringConstants, errorReporter);
+        /* time interval between displays in milliseconds */5000, stringMessages, errorReporter);
         raceListBox.addRaceSelectionChangeListener(windHistory);
         grid.setWidget(1, 0, windHistory);
+        Anchor showConfigAnchor = new Anchor(new SafeHtmlBuilder().appendHtmlConstant(
+                "<img class=\"linkNoBorder\" src=\"/gwt/images/settings.png\"/>").toSafeHtml());
+        showConfigAnchor.setTitle(stringMessages.configuration());
+        showConfigAnchor.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                new SettingsDialog<RaceMapSettings>(raceMap, stringMessages).show();
+            }
+        });
+        grid.setWidget(1, 2, showConfigAnchor);
         HorizontalPanel horizontalRanksVerticalAndCheckboxesManeuversPanel = new HorizontalPanel();
         horizontalRanksVerticalAndCheckboxesManeuversPanel.setSpacing(15);
         VerticalPanel ranksAndCheckboxAndTailLengthPanel = new VerticalPanel();
-        HorizontalPanel labelAndTailLengthBoxPanel = new HorizontalPanel();
-        labelAndTailLengthBoxPanel.add(new Label(stringConstants.tailLength()));
-        tailLengthBox = new IntegerBox();
-        tailLengthBox.setValue((int) (raceMap.getSettings().getTailLengthInMilliSeconds() / 1000));
-        tailLengthBox.addValueChangeHandler(new ValueChangeHandler<Integer>() {
-            @Override
-            public void onValueChange(ValueChangeEvent<Integer> event) {
-                raceMap.getSettings().setTailLengthInMilliSeconds(1000l * event.getValue());
-                raceMap.redraw();
-            }
-        });
-        labelAndTailLengthBoxPanel.add(tailLengthBox);
-        ranksAndCheckboxAndTailLengthPanel.add(labelAndTailLengthBoxPanel);
-        showOnlySelectedCompetitors = new CheckBox(stringConstants.showOnlySelected());
-        showOnlySelectedCompetitors.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-            @Override
-            public void onValueChange(ValueChangeEvent<Boolean> event) {
-                raceMap.getSettings().setShowOnlySelectedCompetitors(event.getValue());
-                raceMap.redraw();
-            }
-        });
-        ranksAndCheckboxAndTailLengthPanel.add(showOnlySelectedCompetitors);
-        
-        quickRanksListBox = new QuickRanksListBoxComposite(true);
-        quickRanksListBox.addCompetitorSelectionChangeListener(raceMap);
+        quickRanksListBox = new QuickRanksListBoxComposite(competitorSelectionProvider);
         quickRanksListBox.getListBox().setVisibleItemCount(20);
-
         ranksAndCheckboxAndTailLengthPanel.add(quickRanksListBox);
-
         horizontalRanksVerticalAndCheckboxesManeuversPanel.add(ranksAndCheckboxAndTailLengthPanel);
-
         VerticalPanel verticalPanelRadioAndCheckboxes = new VerticalPanel();
-        verticalPanelRadioAndCheckboxes.add(verticalCheckBoxPanel);
         horizontalRanksVerticalAndCheckboxesManeuversPanel.add(verticalPanelRadioAndCheckboxes);
-
         grid.setWidget(2, 0, horizontalRanksVerticalAndCheckboxesManeuversPanel);
-        timePanel = new TimePanel(stringConstants, timer);
+        timePanel = new TimePanel(stringMessages, timer);
         timer.addTimeListener(raceMap);
         timer.addTimeListener(this);
         timer.addTimeListener(windHistory);
         grid.setWidget(1, 1, timePanel);
-    }
-
-    private boolean getCheckboxValueManeuver(String maneuverType) {
-        for (Pair<CheckBox, String> pair : checkboxAndType) {
-            if (pair.getB().equals(maneuverType)) {
-                return pair.getA().getValue();
-            }
-        }
-        return false;
     }
 
     @Override
@@ -197,16 +113,15 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
 
     @Override
     public void onRaceSelectionChange(List<Triple<EventDAO, RegattaDAO, RaceDAO>> selectedRaces) {
-        
         if (!selectedRaces.isEmpty() && selectedRaces.get(selectedRaces.size() - 1) != null) {
             RaceDAO raceDAO = selectedRaces.get(selectedRaces.size() - 1).getC();
+            competitorSelectionProvider.setCompetitors(raceDAO.competitors);
             if (raceDAO.startOfRace != null) {
                 timePanel.timeChanged(raceDAO.startOfRace);
                 timer.setTime(raceDAO.startOfRace.getTime());
             }
             updateSlider(raceDAO);
         }
-        
         raceMap.onRaceSelectionChange(selectedRaces);
     }
 
@@ -236,17 +151,12 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
 
                                 @Override
                                 public void onSuccess(List<QuickRankDAO> result) {
-                                    showQuickRanks(result);
+                                    quickRanksListBox.fillQuickRanks(result);
                                 }
                             });
                 }
             }
         }
-    }
-
-    private void showQuickRanks(List<QuickRankDAO> result) {
-        quickRanksListBox.fillQuickRanks(result, true);
-        raceMap.fillCompetitors(quickRanksListBox.getCompetitors());
     }
 
     /*
@@ -265,24 +175,5 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         if (raceMap.map != null) {
             raceMap.map.onResize();
         }
-    }
-
-    private void setMapDisplayOptions()
-    {
-        RaceMapSettings settings = raceMap.getSettings();
-        settings.setShowManeuverTack(getCheckboxValueManeuver("TACK"));
-        settings.setShowManeuverJibe(getCheckboxValueManeuver("JIBE"));
-        settings.setShowManeuverHeadUp(getCheckboxValueManeuver("HEAD_UP"));
-        settings.setShowManeuverBearAway(getCheckboxValueManeuver("BEAR_AWAY"));
-        settings.setShowManeuverPenaltyCircle(getCheckboxValueManeuver("PENALTY_CIRCLE"));
-        settings.setShowManeuverMarkPassing(getCheckboxValueManeuver("MARK_PASSING"));
-        settings.setShowManeuverOther(getCheckboxValueManeuver("OTHER"));
-        settings.setShowDouglasPeuckerPoints(checkBoxDouglasPeuckerPoints.getValue());
-    }
-    
-    private void showManeuvers(Map<CompetitorDAO, List<ManeuverDAO>> maneuvers) {
-        setMapDisplayOptions();
-        
-        raceMap.showManeuvers(maneuvers);
     }
 }

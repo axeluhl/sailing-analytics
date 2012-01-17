@@ -7,6 +7,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
+import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
 
 
@@ -24,11 +25,12 @@ public class LeaderboardPage extends AbstractEntryPoint {
 
                 if (leaderboardNames.contains(leaderboardName)) {
 
-                    LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(stringConstants);
+                    LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(stringMessages);
                     logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
 
-                    LeaderboardPanel leaderboardPanel = new LeaderboardPanel(sailingService, leaderboardName,
-                            LeaderboardPage.this, stringConstants);
+                    LeaderboardPanel leaderboardPanel = new LeaderboardPanel(sailingService,
+                            new CompetitorSelectionModel(/* hasMultiSelection */ true), leaderboardName,
+                            LeaderboardPage.this, stringMessages);
 
                     String padding = Window.Location.getParameter("padding");
 
@@ -40,7 +42,7 @@ public class LeaderboardPage extends AbstractEntryPoint {
                     RootPanel.get().add(leaderboardPanel);
 
                 } else {
-                    RootPanel.get().add(new Label(stringConstants.noSuchLeaderboard()));
+                    RootPanel.get().add(new Label(stringMessages.noSuchLeaderboard()));
                 }
             }
 
