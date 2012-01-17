@@ -8,11 +8,13 @@ import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
 public class RacingAnalysisPage extends AbstractEntryPoint {
     public void onModuleLoad() {
         super.onModuleLoad();
-        // defines FlowPanel
+        
         FlowPanel outerPanel = new FlowPanel(); // outer div which centered page content
         outerPanel.addStyleName("outerPanel");
+        
         LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(stringConstants);
         logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
+        
         RootPanel.get().add(logoAndTitlePanel);
         RootPanel.get().add(outerPanel);
     }
