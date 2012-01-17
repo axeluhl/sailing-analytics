@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import com.google.gwt.dev.json.Pair;
 import com.google.gwt.maps.client.InfoWindowContent;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.Maps;
@@ -797,7 +796,7 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
                                 + maneuver.directionChangeInDegrees + "deg from " + maneuver.speedWithBearingBefore
                                 + " to " + maneuver.speedWithBearingAfter);
                         options.setIcon(imageResources.maneuverIconsForTypeAndTargetTack
-                                .get(new Pair<ManeuverType, Tack>(maneuver.type, maneuver.newTack)));
+                                .get(new Util.Pair<ManeuverType, Tack>(maneuver.type, maneuver.newTack)));
                         Marker marker = new Marker(latLng, options);
                         maneuverMarkers.add(marker);
                         map.addOverlay(marker);
