@@ -23,7 +23,7 @@ import com.sap.sailing.server.api.RaceIdentifier;
 public class CompareCompetitorsChartDialog extends DialogBox {
     private Anchor closeAnchor;
 
-    public CompareCompetitorsChartDialog(SailingServiceAsync sailingService, CompetitorSelectionProvider competitorSelectionProvider,
+    public CompareCompetitorsChartDialog(SailingServiceAsync sailingService, final CompetitorSelectionProvider competitorSelectionProvider,
             RaceIdentifier[] races, StringMessages stringConstants, ErrorReporter errorReporter) {
         super(false);
         final MultiChartPanel ccp = new MultiChartPanel(sailingService, competitorSelectionProvider, races,
@@ -62,9 +62,10 @@ public class CompareCompetitorsChartDialog extends DialogBox {
                 }
             }
         });
-        addCloseHandler(new ClickHandler() {
+        closeAnchor.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
+                competitorSelectionProvider.removeCompetitorSelectionChangeListener(ccp);
                 hide();
             }
         });
@@ -74,9 +75,5 @@ public class CompareCompetitorsChartDialog extends DialogBox {
                 ccp.resize((int) (Window.getClientWidth() - 250), (int) (Window.getClientHeight() - 90));
             }
         });
-    }
-
-    public void addCloseHandler(ClickHandler handler) {
-        closeAnchor.addClickHandler(handler);
     }
 }
