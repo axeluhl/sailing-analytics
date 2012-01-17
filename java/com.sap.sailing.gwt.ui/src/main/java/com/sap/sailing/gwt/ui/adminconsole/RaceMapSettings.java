@@ -1,8 +1,8 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import java.util.HashSet;
 import java.util.Set;
 
-import com.google.gwt.dev.util.collect.HashSet;
 import com.sap.sailing.domain.common.ManeuverType;
 
 public class RaceMapSettings {
