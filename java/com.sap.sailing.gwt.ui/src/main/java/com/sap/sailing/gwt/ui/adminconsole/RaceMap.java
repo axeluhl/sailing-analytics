@@ -166,6 +166,7 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.timer = timer;
+        imageResources = new RaceMapResources();
         tails = new HashMap<CompetitorDAO, Polyline>();
         firstShownFix = new HashMap<CompetitorDAO, Integer>();
         lastShownFix = new HashMap<CompetitorDAO, Integer>();
@@ -203,7 +204,6 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
                 map.setContinuousZoom(true);
                 parentPanel.add(map);
                 map.setSize("100%", "100%");
-                imageResources = new RaceMapResources();
                 map.addMapZoomEndHandler(new MapZoomEndHandler() {
                     @Override
                     public void onZoomEnd(MapZoomEndEvent event) {
