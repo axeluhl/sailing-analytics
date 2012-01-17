@@ -172,7 +172,7 @@ public class ReverseGeocoderImpl implements ReverseGeocoder {
         long population = (Long) json.get("population");
 
         if (name != null && lngDeg != null && latDeg != null) {
-            return new PlacemarkImpl(name, countryCode, position, population);
+            return new PlacemarkImpl(name, countryCode/*, position, population*/);
         } else {
             return null;
         }
@@ -190,8 +190,8 @@ public class ReverseGeocoderImpl implements ReverseGeocoder {
      *            The results of the search
      */
     private void cachePlacemarks(Position position, Double radius, List<Placemark> placemarks) {
-        Collections.sort(placemarks, new Placemark.ByDistance(position));
-        cache.put(position, new Triple<Position, Double, List<Placemark>>(position, radius, placemarks));
+//        Collections.sort(placemarks, new Placemark.ByDistance(position));
+//        cache.put(position, new Triple<Position, Double, List<Placemark>>(position, radius, placemarks));
     }
     
     /**
