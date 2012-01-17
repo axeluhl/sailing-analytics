@@ -148,17 +148,18 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         HorizontalPanel labelAndTailLengthBoxPanel = new HorizontalPanel();
         labelAndTailLengthBoxPanel.add(new Label(stringConstants.tailLength()));
         tailLengthBox = new IntegerBox();
-        tailLengthBox.setValue((int) (raceMap.getSettings().getTailLengthInMilliSeconds() / 1000));
+        tailLengthBox.setValue((int) (raceMap.getSettings().getTailLengthInMilliseconds() / 1000));
         tailLengthBox.addValueChangeHandler(new ValueChangeHandler<Integer>() {
             @Override
             public void onValueChange(ValueChangeEvent<Integer> event) {
-                raceMap.getSettings().setTailLengthInMilliSeconds(1000l * event.getValue());
+                raceMap.getSettings().setTailLengthInMilliseconds(1000l * event.getValue());
                 raceMap.redraw();
             }
         });
         labelAndTailLengthBoxPanel.add(tailLengthBox);
         ranksAndCheckboxAndTailLengthPanel.add(labelAndTailLengthBoxPanel);
         showOnlySelectedCompetitors = new CheckBox(stringConstants.showOnlySelected());
+        showOnlySelectedCompetitors.setValue(raceMap.getSettings().isShowOnlySelectedCompetitors());
         showOnlySelectedCompetitors.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
             @Override
             public void onValueChange(ValueChangeEvent<Boolean> event) {
@@ -267,8 +268,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         }
     }
 
-    private void setMapDisplayOptions()
-    {
+    private void setMapDisplayOptions() {
         RaceMapSettings settings = raceMap.getSettings();
         settings.setShowManeuverTack(getCheckboxValueManeuver("TACK"));
         settings.setShowManeuverJibe(getCheckboxValueManeuver("JIBE"));
@@ -282,7 +282,6 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
     
     private void showManeuvers(Map<CompetitorDAO, List<ManeuverDAO>> maneuvers) {
         setMapDisplayOptions();
-        
         raceMap.showManeuvers(maneuvers);
     }
 }

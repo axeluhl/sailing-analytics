@@ -18,16 +18,16 @@ public class RaceMapSettings {
 
     private boolean showManeuverOther = false;
 
-    private boolean showOnlySelectedCompetitors = false;
+    private boolean showOnlySelectedCompetitors = true;
+    
+    private long tailLengthInMilliseconds = 30000l;
 
-    private long tailLengthInMilliSeconds = 30000l;
-
-    public long getTailLengthInMilliSeconds() {
-        return tailLengthInMilliSeconds;
+    public long getTailLengthInMilliseconds() {
+        return tailLengthInMilliseconds;
     }
 
-    public void setTailLengthInMilliSeconds(long tailLengthInMilliSeconds) {
-        this.tailLengthInMilliSeconds = tailLengthInMilliSeconds;
+    public void setTailLengthInMilliseconds(long tailLengthInMilliseconds) {
+        this.tailLengthInMilliseconds = tailLengthInMilliseconds;
     }
 
     public boolean isShowDouglasPeuckerPoints() {

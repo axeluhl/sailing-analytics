@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import com.google.gwt.maps.client.InfoWindowContent;
@@ -148,7 +149,13 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
 
     private RaceMapResources imageResources; 
 
-    private RaceMapSettings settings;
+    private final RaceMapSettings settings;
+
+    /**
+     * The time point for which {@link #timeChanged(Date)} was called last. Can be used, e.g., to refresh the boat displays
+     * after the selection of visible boats increased and therefore new data needs to be fetched.
+     */
+    private Date lastDate;
     
     public RaceMap(SailingServiceAsync sailingService, ErrorReporter errorReporter, Timer timer, CompetitorSelectionProvider competitorSelection) {
         this.sailingService = sailingService;
@@ -239,6 +246,7 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
 
     @Override
     public void timeChanged(final Date date) {
+        lastDate = date;
         if (date != null) {
             if (selectedEventAndRace != null && !selectedEventAndRace.isEmpty()) {
                 EventDAO event = selectedEventAndRace.get(selectedEventAndRace.size() - 1).getA();
@@ -260,7 +268,7 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
                                     // process response only if not received out of order
                                     if (startedProcessingRequestID < requestID) {
                                         startedProcessingRequestID = requestID;
-                                        Date from = new Date(date.getTime() - settings.getTailLengthInMilliSeconds());
+                                        Date from = new Date(date.getTime() - settings.getTailLengthInMilliseconds());
                                         updateFixes(result, fromAndToAndOverlap.getC());
                                         showBoatsOnMap(from, date, getCompetitorsToShow());
                                         if (douglasMarkers != null) {
@@ -305,7 +313,7 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
      */
     protected Triple<Map<CompetitorDAO, Date>, Map<CompetitorDAO, Date>, Map<CompetitorDAO, Boolean>> computeFromAndTo(
             Date upTo, Iterable<CompetitorDAO> competitorsToShow) {
-        Date tailstart = new Date(upTo.getTime() - settings.getTailLengthInMilliSeconds());
+        Date tailstart = new Date(upTo.getTime() - settings.getTailLengthInMilliseconds());
         Map<CompetitorDAO, Date> from = new HashMap<CompetitorDAO, Date>();
         Map<CompetitorDAO, Date> to = new HashMap<CompetitorDAO, Date>();
         Map<CompetitorDAO, Boolean> overlapWithKnownFixes = new HashMap<CompetitorDAO, Boolean>();
@@ -365,8 +373,7 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
                 if (!overlapsWithKnownFixes.get(e.getKey())) {
                     fixesForCompetitor.clear();
                     // to re-establish the invariants for raceMapData.tails, raceMapData.firstShownFix and raceMapData.lastShownFix, we now need to remove
-                    // all
-                    // points from the competitor's polyline and clear the entries in raceMapData.firstShownFix and raceMapData.lastShownFix
+                    // all points from the competitor's polyline and clear the entries in raceMapData.firstShownFix and raceMapData.lastShownFix
                     if (map != null && tails.containsKey(e.getKey())) {
                         map.removeOverlay(tails.remove(e.getKey()));
                     }
@@ -652,11 +659,15 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
 
     private Iterable<CompetitorDAO> getCompetitorsToShow() {
         Iterable<CompetitorDAO> result;
-        Iterable<CompetitorDAO> selection = competitorSelection.getSelectedCompetitors();
-        if (Util.isEmpty(selection)) {
+        if (getSettings().isShowOnlySelectedCompetitors()) {
             result = competitorSelection.getAllCompetitors();
         } else {
-            result = selection;
+            Iterable<CompetitorDAO> selection = competitorSelection.getSelectedCompetitors();
+            if (Util.isEmpty(selection)) {
+                result = competitorSelection.getAllCompetitors();
+            } else {
+                result = selection;
+            }
         }
         return result;
     }
@@ -960,31 +971,71 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
         return settings;
     }
 
-    public void setSettings(RaceMapSettings settings) {
-        this.settings = settings;
-    }
-
     @Override
     public void addedToSelection(CompetitorDAO competitor) {
-        Marker lowlightedMarker = boatMarkers.get(competitor);
-        if (lowlightedMarker != null) {
-            Marker highlightedMarker = createBoatMarker(competitor, true);
-            map.removeOverlay(lowlightedMarker);
-            map.addOverlay(highlightedMarker);
-            boatMarkers.put(competitor, highlightedMarker);
+        if (getSettings().isShowOnlySelectedCompetitors()) {
+            if (Util.size(competitorSelection.getSelectedCompetitors()) == 1) {
+                // first competitors selected; remove all others from map
+                Iterator<Map.Entry<CompetitorDAO, Marker>> i = boatMarkers.entrySet().iterator();
+                while (i.hasNext()) {
+                    Entry<CompetitorDAO, Marker> next = i.next();
+                    if (!next.getKey().equals(competitor)) {
+                        map.removeOverlay(next.getValue());
+                        removeTail(next.getKey());
+                        i.remove(); // only this way a ConcurrentModificationException while looping can be avoided
+                    }
+                }
+            } else {
+                // adding a single competitor; may need to re-load data, so refresh:
+                timeChanged(lastDate);
+            }
+        } else {
+            // only change highlighting
+            Marker lowlightedMarker = boatMarkers.get(competitor);
+            if (lowlightedMarker != null) {
+                Marker highlightedMarker = createBoatMarker(competitor, true);
+                map.removeOverlay(lowlightedMarker);
+                map.addOverlay(highlightedMarker);
+                boatMarkers.put(competitor, highlightedMarker);
+            } else {
+                // seems like an internal error not to find the lowlighted marker; but maybe the
+                // competitor was added late to the race;
+                // data for newly selected competitor supposedly missing; refresh
+                timeChanged(lastDate);
+            }
         }
+    }
+    
+    /**
+     * Consistently removes the <code>competitor</code>'s tail from {@link #tails} and from the map, and the corresponding position
+     * data from {@link #firstShownFix} and {@link #lastShownFix}.
+     */
+    private void removeTail(CompetitorDAO competitor) {
+        map.removeOverlay(tails.remove(competitor));
+        firstShownFix.remove(competitor);
+        lastShownFix.remove(competitor);
     }
 
     @Override
     public void removedFromSelection(CompetitorDAO competitor) {
-        // "lowlight" currently selected competitor
-        Marker highlightedMarker = boatMarkers.get(competitor);
-        if (highlightedMarker != null) {
+        if (getSettings().isShowOnlySelectedCompetitors()) {
+            // if selection is now empty, show all competitors
+            if (Util.isEmpty(competitorSelection.getSelectedCompetitors())) {
+                timeChanged(lastDate);
+            } else {
+                // otherwise remove only deselected competitor's boat marker and tail
+                map.removeOverlay(boatMarkers.remove(competitor));
+                removeTail(competitor);
+            }
+        } else {
+            // "lowlight" currently selected competitor
+            Marker highlightedMarker = boatMarkers.get(competitor);
             Marker lowlightedMarker = createBoatMarker(competitor, false);
-            map.removeOverlay(highlightedMarker);
+            if (highlightedMarker != null) {
+                map.removeOverlay(highlightedMarker);
+            }
             map.addOverlay(lowlightedMarker);
             boatMarkers.put(competitor, lowlightedMarker);
         }
     }
-
 }
