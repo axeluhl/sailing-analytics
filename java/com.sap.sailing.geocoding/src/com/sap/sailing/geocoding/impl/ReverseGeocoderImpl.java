@@ -167,7 +167,7 @@ public class ReverseGeocoderImpl implements ReverseGeocoder {
         } catch (ClassCastException e) {
             lngDeg = ((Long) json.get("lng")).doubleValue();
         }
-        SerializablePosition position = new SerializablePositionImpl(latDeg, lngDeg);
+//        SerializablePosition position = new SerializablePositionImpl(latDeg, lngDeg);
 
         long population = (Long) json.get("population");
 

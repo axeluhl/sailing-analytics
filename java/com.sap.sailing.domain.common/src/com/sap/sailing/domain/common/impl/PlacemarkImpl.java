@@ -19,7 +19,7 @@ public class PlacemarkImpl implements Placemark {
     
     private String name;
     private String countryCode;
-//    private SerializablePosition position;
+    private SerializablePosition position;
     private long population;
     
     PlacemarkImpl() {}
