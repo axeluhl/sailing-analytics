@@ -38,7 +38,6 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Anchor;
-import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DeckPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
@@ -51,6 +50,8 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.client.ColorMap;
+import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
+import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.DetailTypeFormatter;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -75,7 +76,7 @@ import com.sap.sailing.server.api.RaceIdentifier;
  * @author Benjamin Ebling (D056866)
  * 
  */
-public abstract class AbstractChartPanel<SettingsType extends ChartSettings> extends SimplePanel {
+public abstract class AbstractChartPanel<SettingsType extends ChartSettings> extends SimplePanel implements CompetitorSelectionChangeListener {
     private CompetitorInRaceDAO chartData;
     private CompetitorsAndTimePointsDAO competitorsAndTimePointsDAO = null;
     private final SailingServiceAsync sailingService;
@@ -91,8 +92,6 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
     private int selectedRace = 0;
     private int stepsToLoad = 100;
     private final StringMessages stringMessages;
-    private final Set<CompetitorDAO> competitorVisible;
-    private VerticalPanel selectCompetitors;
     private PlotWithOverview plot;
     private final List<SeriesHandler> seriesID;
     private final Set<SeriesHandler> seriesIsUsed;
@@ -104,11 +103,14 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
 
     private DetailType dataToShow = DetailType.WINDWARD_DISTANCE_TO_OVERALL_LEADER;
     private AbsolutePanel loadingPanel;
+    private final CompetitorSelectionProvider competitorSelectionProvider;
 
-    public AbstractChartPanel(SailingServiceAsync sailingService, final List<CompetitorDAO> competitors,
+    public AbstractChartPanel(SailingServiceAsync sailingService, CompetitorSelectionProvider competitorSelectionProvider,
             RaceIdentifier[] races, final StringMessages stringMessages, int chartWidth, int chartHeight, ErrorReporter errorReporter) {
     	width = chartWidth;
     	height = chartHeight;
+    	this.competitorSelectionProvider = competitorSelectionProvider;
+    	competitorSelectionProvider.addCompetitorSelectionChangeListener(this);
     	this.errorReporter = errorReporter;
     	chartData = new CompetitorInRaceDAO();
     	seriesID = new ArrayList<SeriesHandler>();
@@ -116,17 +118,12 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
     	competitorID = new ArrayList<CompetitorDAO>();
     	markSeriesID = new ArrayList<SeriesHandler>();
     	colorMap = new ColorMap<Integer>();
-    	competitorVisible = new HashSet<CompetitorDAO>();
     	competitorLabels = new HashMap<CompetitorDAO, Widget>();
     	markPassingBuoyName = new HashMap<String, String>();
         this.sailingService = sailingService;
         this.races = races;
         this.stringMessages = stringMessages;
         dateFormat = DateTimeFormat.getFormat("HH:mm:ss");
-
-        for (CompetitorDAO competitor : competitors) {
-            setCompetitorVisible(competitor, true);
-        }
         mainPanel = new HorizontalPanel();
         mainPanel.setSpacing(5);
         chartPanel = new VerticalPanel();
@@ -242,32 +239,6 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
                         @Override
                         public void onSuccess(CompetitorsAndTimePointsDAO result) {
                             setCompetitorsAndTimePointsDAO(result);
-                            for (int i = 0; i < result.getCompetitor().length; i++) {
-                                final CheckBox cb = new CheckBox(result.getCompetitor()[i].name);
-                                final CompetitorDAO c = result.getCompetitor()[i];
-                                if (isCompetitorVisible(c)) {
-                                    cb.setValue(true);
-                                }
-                                cb.addClickHandler(new ClickHandler() {
-                                    @Override
-                                    public void onClick(ClickEvent event) {
-                                    	if (cb.getValue() == true && !competitorID.contains(c)){
-                                    		setCompetitorVisible(c, cb.getValue());
-                                    		loadData();
-                                    	}
-                                    	else {
-                                    		setCompetitorVisible(c, cb.getValue());
-                                            if (competitorID.contains(c)){
-                                            	setLegendVisible(c, cb.getValue());
-                                            	getCompetitorSeries(c).setVisible(cb.getValue());
-                                                getCompetitorMarkPassingSeries(c).setVisible(cb.getValue());
-                                            }
-                                            plot.redraw();
-                                    	}
-                                    }
-                                });
-                                selectCompetitors.add(cb);
-                            }
                             if (chart.getWidgetCount() == 1){
                             	chart.add(createChart());
                             }
@@ -277,6 +248,21 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
         }
     }
 
+    @Override
+    public void addedToSelection(CompetitorDAO competitor) {
+        loadData();
+    }
+    
+    @Override
+    public void removedFromSelection(CompetitorDAO competitor) {
+        if (competitorID.contains(competitor)) {
+            setLegendVisible(competitor, false);
+            getCompetitorSeries(competitor).setVisible(false);
+            getCompetitorMarkPassingSeries(competitor).setVisible(false);
+        }
+        plot.redraw();
+    }
+    
     private synchronized void updateTableData(CompetitorDAO[] competitorDAOs) {
     	List<SeriesHandler> series = new ArrayList<SeriesHandler>();
     	for (SeriesHandler sh : seriesID){
@@ -378,16 +364,8 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
         }
     }
 
-    private void setCompetitorVisible(CompetitorDAO competitor, boolean isVisible) {
-		if (isVisible) {
-			competitorVisible.add(competitor);
-		} else {
-			competitorVisible.remove(competitor);
-		}
-    }
-
     private boolean isCompetitorVisible(CompetitorDAO competitor) {
-        return competitorVisible.contains(competitor);
+        return competitorSelectionProvider.isSelected(competitor);
     }
 
     private Widget createChart() {
@@ -569,7 +547,6 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
      */
     protected void clearChart(boolean clearCheckBoxes) {
         if (clearCheckBoxes) {
-            selectCompetitors.clear();
             seriesIsUsed.clear();
         }
         competitorID.clear();

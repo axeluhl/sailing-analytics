@@ -36,7 +36,11 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
+import com.google.gwt.view.client.SelectionChangeEvent;
+import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.gwt.ui.client.Collator;
+import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
+import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.PlayStateListener;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -63,7 +67,8 @@ import com.sap.sailing.server.api.RaceIdentifier;
  * @author Axel Uhl (D043530)
  * 
  */
-public class LeaderboardPanel extends FormPanel implements TimeListener, PlayStateListener, Component<LeaderboardSettings> {
+public class LeaderboardPanel extends FormPanel implements TimeListener, PlayStateListener,
+        Component<LeaderboardSettings>, CompetitorSelectionChangeListener {
     private static final int RANK_COLUMN_INDEX = 0;
 
     private static final int SAIL_ID_COLUMN_INDEX = 1;
@@ -141,6 +146,9 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
      * changes its playing state
      */
     private final Anchor playPause;
+
+    private final CompetitorSelectionProvider competitorSelectionProvider;
+    
     private class SettingsClickHandler implements ClickHandler {
         private final StringMessages stringConstants;
 
@@ -682,9 +690,11 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         }
     }
 
-    public LeaderboardPanel(SailingServiceAsync sailingService, String leaderboardName, ErrorReporter errorReporter,
+    public LeaderboardPanel(SailingServiceAsync sailingService, CompetitorSelectionProvider competitorSelectionProvider,
+            String leaderboardName, ErrorReporter errorReporter,
             final StringMessages stringConstants) {
         this.sailingService = sailingService;
+        this.competitorSelectionProvider = competitorSelectionProvider;
         this.setLeaderboardName(leaderboardName);
         this.errorReporter = errorReporter;
         this.stringConstants = stringConstants;
@@ -717,6 +727,17 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         /* pageSize */100, resources);
         getLeaderboardTable().setWidth("100%");
         leaderboardSelectionModel = new MultiSelectionModel<LeaderboardRowDAO>() {};
+        leaderboardSelectionModel.addSelectionChangeHandler(new Handler() {
+            @Override
+            public void onSelectionChange(SelectionChangeEvent event) {
+                List<CompetitorDAO> selection = new ArrayList<CompetitorDAO>();
+                for (LeaderboardRowDAO row : leaderboardSelectionModel.getSelectedSet()) {
+                    selection.add(row.competitor);
+                }
+                LeaderboardPanel.this.competitorSelectionProvider.setSelection(selection,
+                        /* listenersNotToNotify */ LeaderboardPanel.this);
+            }
+        });
         getLeaderboardTable().setSelectionModel(leaderboardSelectionModel);
         setData(new ListDataProvider<LeaderboardRowDAO>());
         getData().addDataDisplay(getLeaderboardTable());
@@ -1298,7 +1319,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 competitors.add(leaderboardRowDAO.competitor);
             }
         }
-        CompareCompetitorsChartDialog chartDialog = new CompareCompetitorsChartDialog(sailingService, competitors, races.toArray(new LeaderboardNameAndRaceColumnName[0]), stringConstants, errorReporter);
+        CompareCompetitorsChartDialog chartDialog = new CompareCompetitorsChartDialog(sailingService, competitorSelectionProvider,
+                races.toArray(new LeaderboardNameAndRaceColumnName[0]), stringConstants, errorReporter);
         chartDialog.show();
     }
     
@@ -1319,5 +1341,30 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     @Override
     public String getLocalizedShortName() {
         return stringConstants.leaderboard();
+    }
+    
+    private LeaderboardRowDAO getRow(CompetitorDAO competitor) {
+        for (LeaderboardRowDAO row : getData().getList()) {
+            if (row.competitor.equals(competitor)) {
+                return row;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public void addedToSelection(CompetitorDAO competitor) {
+        LeaderboardRowDAO row = getRow(competitor);
+        if (row != null) {
+            leaderboardSelectionModel.setSelected(row, true);
+        }
+    }
+
+    @Override
+    public void removedFromSelection(CompetitorDAO competitor) {
+        LeaderboardRowDAO row = getRow(competitor);
+        if (row != null) {
+            leaderboardSelectionModel.setSelected(row, false);
+        }
     }
 }

@@ -1,11 +1,9 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
-import java.util.List;
-
+import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
 import com.sap.sailing.gwt.ui.shared.components.Component;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
 import com.sap.sailing.server.api.RaceIdentifier;
@@ -24,9 +22,10 @@ import com.sap.sailing.server.api.RaceIdentifier;
  */
 public class ChartPanel extends AbstractChartPanel<ChartSettings> implements Component<ChartSettings> {
 
-    public ChartPanel(SailingServiceAsync sailingService, List<CompetitorDAO> competitors, RaceIdentifier[] races,
-            StringMessages stringMessages, int chartWidth, int chartHeight, ErrorReporter errorReporter) {
-        super(sailingService, competitors, races, stringMessages, chartWidth, chartHeight, errorReporter);
+    public ChartPanel(SailingServiceAsync sailingService, CompetitorSelectionProvider competitorSelectionProvider,
+            RaceIdentifier[] races, StringMessages stringMessages, int chartWidth, int chartHeight,
+            ErrorReporter errorReporter) {
+        super(sailingService, competitorSelectionProvider, races, stringMessages, chartWidth, chartHeight, errorReporter);
     }
 
     @Override

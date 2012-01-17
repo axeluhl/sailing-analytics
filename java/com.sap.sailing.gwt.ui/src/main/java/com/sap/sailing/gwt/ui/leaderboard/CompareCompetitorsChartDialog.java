@@ -1,7 +1,5 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
-import java.util.List;
-
 import com.google.gwt.dom.client.EventTarget;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -14,21 +12,23 @@ import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.AbstractChartPanel.DataLoadedEvent;
 import com.sap.sailing.gwt.ui.leaderboard.AbstractChartPanel.DataLoadedHandler;
-import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
 import com.sap.sailing.server.api.RaceIdentifier;
 
 public class CompareCompetitorsChartDialog extends DialogBox {
     private Anchor closeAnchor;
 
-    public CompareCompetitorsChartDialog(SailingServiceAsync sailingService, List<CompetitorDAO> competitors,
+    public CompareCompetitorsChartDialog(SailingServiceAsync sailingService, CompetitorSelectionProvider competitorSelectionProvider,
             RaceIdentifier[] races, StringMessages stringConstants, ErrorReporter errorReporter) {
         super(false);
-        final MultiChartPanel ccp = new MultiChartPanel(sailingService, competitors, races, stringConstants, (int) (Window.getClientWidth()-350), (int) (Window.getClientHeight()-170),errorReporter);
+        final MultiChartPanel ccp = new MultiChartPanel(sailingService, competitorSelectionProvider, races,
+                stringConstants, (int) (Window.getClientWidth() - 350), (int) (Window.getClientHeight() - 170),
+                errorReporter);
         ccp.addDataLoadedHandler(new DataLoadedHandler() {
             @Override
             public void onDataLoaded(DataLoadedEvent event) {

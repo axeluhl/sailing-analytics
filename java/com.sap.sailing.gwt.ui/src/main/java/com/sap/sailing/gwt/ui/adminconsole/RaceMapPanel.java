@@ -22,7 +22,6 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
-import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.EventDisplayer;
@@ -44,7 +43,7 @@ import com.sap.sailing.server.api.EventNameAndRaceName;
 
 public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListener, ProvidesResize, RequiresResize,
         RaceSelectionChangeListener {
-    private final CompetitorSelectionProvider competitorSelectionModel;
+    private final CompetitorSelectionProvider competitorSelectionProvider;
     private final SailingServiceAsync sailingService;
     private final ErrorReporter errorReporter;
     private final Grid grid;
@@ -60,11 +59,11 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
     private final RaceMap raceMap;
     private final QuickRanksListBoxComposite quickRanksListBox;
     
-    public RaceMapPanel(SailingServiceAsync sailingService, ErrorReporter errorReporter,
-            final EventRefresher eventRefresher, StringMessages stringConstants) {
+    public RaceMapPanel(SailingServiceAsync sailingService, CompetitorSelectionProvider competitorSelectionProvider,
+            ErrorReporter errorReporter, final EventRefresher eventRefresher, StringMessages stringConstants) {
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
-        this.competitorSelectionModel = new CompetitorSelectionModel(/* hasMultiSelection */ true);
+        this.competitorSelectionProvider = competitorSelectionProvider;
         this.timer = new Timer(/* delayBetweenAutoAdvancesInMilliseconds */500);
         checkboxAndType = new ArrayList<Pair<CheckBox, String>>();
         final VerticalPanel verticalCheckBoxPanel = new VerticalPanel();
@@ -123,7 +122,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         AbsolutePanel mapPanel = new AbsolutePanel();
         mapPanel.setSize("100%", "100%");
         grid.setWidget(2, 1, mapPanel);
-        raceMap = new RaceMap(sailingService, errorReporter, timer, competitorSelectionModel);
+        raceMap = new RaceMap(sailingService, errorReporter, timer, competitorSelectionProvider);
         raceMap.loadMapsAPI(mapPanel);
 
         setMapDisplayOptions();
@@ -169,7 +168,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         });
         ranksAndCheckboxAndTailLengthPanel.add(showOnlySelectedCompetitors);
         
-        quickRanksListBox = new QuickRanksListBoxComposite(competitorSelectionModel);
+        quickRanksListBox = new QuickRanksListBoxComposite(competitorSelectionProvider);
         quickRanksListBox.getListBox().setVisibleItemCount(20);
 
         ranksAndCheckboxAndTailLengthPanel.add(quickRanksListBox);
@@ -206,7 +205,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
     public void onRaceSelectionChange(List<Triple<EventDAO, RegattaDAO, RaceDAO>> selectedRaces) {
         if (!selectedRaces.isEmpty() && selectedRaces.get(selectedRaces.size() - 1) != null) {
             RaceDAO raceDAO = selectedRaces.get(selectedRaces.size() - 1).getC();
-            competitorSelectionModel.setCompetitors(raceDAO.competitors);
+            competitorSelectionProvider.setCompetitors(raceDAO.competitors);
             if (raceDAO.startOfRace != null) {
                 timePanel.timeChanged(raceDAO.startOfRace);
                 timer.setTime(raceDAO.startOfRace.getTime());

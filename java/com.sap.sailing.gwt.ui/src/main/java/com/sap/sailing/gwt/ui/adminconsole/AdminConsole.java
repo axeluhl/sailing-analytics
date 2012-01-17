@@ -10,6 +10,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TabPanel;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
+import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.EventDisplayer;
 import com.sap.sailing.gwt.ui.client.EventRefresher;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
@@ -46,11 +47,12 @@ public class AdminConsole extends AbstractEntryPoint implements EventRefresher {
         eventDisplayers.add(windPanel);
         windPanel.setSize("90%", "90%");
         tabPanel.add(windPanel, stringMessages.wind(), /* asHTML */ false);
-        final RaceMapPanel raceMapPanel = new RaceMapPanel(sailingService, this, this, stringMessages);
+        CompetitorSelectionModel competitorSelectionModel = new CompetitorSelectionModel(/* hasMultiSelection */ true);
+        final RaceMapPanel raceMapPanel = new RaceMapPanel(sailingService, competitorSelectionModel, this, this, stringMessages);
         eventDisplayers.add(raceMapPanel);
         raceMapPanel.setSize("90%", "90%");
         tabPanel.add(raceMapPanel, stringMessages.map(), /* asHTML */ false);
-        LeaderboardPanel defaultLeaderboardPanel = new LeaderboardPanel(sailingService,
+        LeaderboardPanel defaultLeaderboardPanel = new LeaderboardPanel(sailingService, competitorSelectionModel,
                 DefaultLeaderboardName.DEFAULT_LEADERBOARD_NAME, this, stringMessages);
         defaultLeaderboardPanel.setSize("90%", "90%");
         tabPanel.add(defaultLeaderboardPanel, stringMessages.defaultLeaderboard(), /* asHTML */ false);

@@ -1,11 +1,9 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
-import java.util.List;
-
+import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
 import com.sap.sailing.gwt.ui.shared.components.Component;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
 import com.sap.sailing.server.api.RaceIdentifier;
@@ -19,13 +17,13 @@ import com.sap.sailing.server.api.RaceIdentifier;
  * data. So {@code seriesID, competitorID and markSeriesID} are linked with the index. So if u know for example the
  * seriesID-index, you can get the competitor by calling competitorID.get(index).
  * 
- * @author Benjamin Ebling (D056866)
+ * @author Benjamin Ebling (D056866), Axel Uhl (d043530)
  * 
  */
 public class MultiChartPanel extends AbstractChartPanel<MultiChartSettings> implements Component<MultiChartSettings> {
-    public MultiChartPanel(SailingServiceAsync sailingService, final List<CompetitorDAO> competitors,
+    public MultiChartPanel(SailingServiceAsync sailingService, CompetitorSelectionProvider competitorSelectionProvider,
             RaceIdentifier[] races, final StringMessages stringMessages, int chartWidth, int chartHeight, ErrorReporter errorReporter) {
-        super(sailingService, competitors, races, stringMessages, chartWidth, chartHeight, errorReporter);
+        super(sailingService, competitorSelectionProvider, races, stringMessages, chartWidth, chartHeight, errorReporter);
     }
 
     @Override

@@ -105,12 +105,18 @@ public class QuickRanksListBoxComposite extends Composite implements CompetitorS
 
     @Override
     public void addedToSelection(CompetitorDAO competitor) {
-        quickRankListBox.setItemSelected(quickRankList.indexOf(competitor), true);
+        int pos = quickRankList.indexOf(competitor);
+        if (pos >= 0) {
+            quickRankListBox.setItemSelected(pos, true);
+        }
     }
 
     @Override
     public void removedFromSelection(CompetitorDAO competitor) {
-        quickRankListBox.setItemSelected(quickRankList.indexOf(competitor), false);
+        int pos = quickRankList.indexOf(competitor);
+        if (pos >= 0) {
+            quickRankListBox.setItemSelected(pos, false);
+        }
     }
 
 }
