@@ -16,6 +16,10 @@ public class RaceMapSettings {
 
     public RaceMapSettings() {
         maneuverTypesToShow = new HashSet<ManeuverType>();
+        maneuverTypesToShow.add(ManeuverType.TACK);
+        maneuverTypesToShow.add(ManeuverType.JIBE);
+        maneuverTypesToShow.add(ManeuverType.PENALTY_CIRCLE);
+        maneuverTypesToShow.add(ManeuverType.MARK_PASSING);
     }
 
     public long getTailLengthInMilliseconds() {

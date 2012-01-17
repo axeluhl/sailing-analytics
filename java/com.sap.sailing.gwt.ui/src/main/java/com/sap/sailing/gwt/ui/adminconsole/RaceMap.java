@@ -203,9 +203,7 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
                 map.setContinuousZoom(true);
                 parentPanel.add(map);
                 map.setSize("100%", "100%");
-                
-                imageResources = new RaceMapResources(map);
-                
+                imageResources = new RaceMapResources();
                 map.addMapZoomEndHandler(new MapZoomEndHandler() {
                     @Override
                     public void onZoomEnd(MapZoomEndEvent event) {
@@ -514,13 +512,13 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
                 // check if anchors match; re-use marker with setImage only if anchors match
                 ImageTransformer transformer = imageResources.getBoatImageTransformer(lastPos,
                         competitorSelection.isSelected(competitorDAO));
-                Point newAnchor = transformer.getAnchor(imageResources.getRealBoatSizeScaleFactor());
+                Point newAnchor = transformer.getAnchor(imageResources.getRealBoatSizeScaleFactor(map));
                 Point oldAnchor = boatMarker.getIcon().getIconAnchor();
                 if (oldAnchor.getX() == newAnchor.getX() && oldAnchor.getY() == newAnchor.getY()) {
                     boatMarker.setLatLng(LatLng.newInstance(lastPos.position.latDeg,
                             lastPos.position.lngDeg));
                     boatMarker.setImage(imageResources.getBoatImageURL(lastPos,
-                            displayHighlighted(competitorDAO)));
+                            displayHighlighted(competitorDAO), map));
                 } else {
                     // anchors don't match; replace marker
                     map.removeOverlay(boatMarker);
@@ -560,7 +558,7 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
         double latDeg = boatFix.position.latDeg;
         double lngDeg = boatFix.position.lngDeg;
         MarkerOptions options = MarkerOptions.newInstance();
-        Icon icon = imageResources.getBoatImageIcon(boatFix, highlighted);
+        Icon icon = imageResources.getBoatImageIcon(boatFix, highlighted, map);
         options.setIcon(icon);
         options.setTitle(competitorDAO.name);
         final Marker boatMarker = new Marker(LatLng.newInstance(latDeg, lngDeg), options);

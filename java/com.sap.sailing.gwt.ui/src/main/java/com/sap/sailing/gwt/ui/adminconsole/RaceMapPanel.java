@@ -3,9 +3,13 @@ package com.sap.sailing.gwt.ui.adminconsole;
 import java.util.Date;
 import java.util.List;
 
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.maps.client.geom.LatLng;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbsolutePanel;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -29,6 +33,7 @@ import com.sap.sailing.gwt.ui.shared.PositionDAO;
 import com.sap.sailing.gwt.ui.shared.QuickRankDAO;
 import com.sap.sailing.gwt.ui.shared.RaceDAO;
 import com.sap.sailing.gwt.ui.shared.RegattaDAO;
+import com.sap.sailing.gwt.ui.shared.components.SettingsDialog;
 import com.sap.sailing.server.api.EventNameAndRaceName;
 
 public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListener, ProvidesResize, RequiresResize,
@@ -39,19 +44,17 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
     private final Grid grid;
     private final RacesListBoxPanel raceListBox;
     private final TimePanel timePanel;
-
     private final Timer timer;
-
     private final RaceMap raceMap;
     private final QuickRanksListBoxComposite quickRanksListBox;
     
     public RaceMapPanel(SailingServiceAsync sailingService, CompetitorSelectionProvider competitorSelectionProvider,
-            ErrorReporter errorReporter, final EventRefresher eventRefresher, StringMessages stringMessages) {
+            ErrorReporter errorReporter, final EventRefresher eventRefresher, final StringMessages stringMessages) {
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.competitorSelectionProvider = competitorSelectionProvider;
         this.timer = new Timer(/* delayBetweenAutoAdvancesInMilliseconds */500);
-        this.grid = new Grid(3, 2);
+        this.grid = new Grid(3, 3);
         setWidget(grid);
         grid.setSize("100%", "100%");
         grid.getColumnFormatter().setWidth(0, "20%");
@@ -76,6 +79,16 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         /* time interval between displays in milliseconds */5000, stringMessages, errorReporter);
         raceListBox.addRaceSelectionChangeListener(windHistory);
         grid.setWidget(1, 0, windHistory);
+        Anchor showConfigAnchor = new Anchor(new SafeHtmlBuilder().appendHtmlConstant(
+                "<img class=\"linkNoBorder\" src=\"/gwt/images/settings.png\"/>").toSafeHtml());
+        showConfigAnchor.setTitle(stringMessages.configuration());
+        showConfigAnchor.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                new SettingsDialog<RaceMapSettings>(raceMap, stringMessages).show();
+            }
+        });
+        grid.setWidget(1, 2, showConfigAnchor);
         HorizontalPanel horizontalRanksVerticalAndCheckboxesManeuversPanel = new HorizontalPanel();
         horizontalRanksVerticalAndCheckboxesManeuversPanel.setSpacing(15);
         VerticalPanel ranksAndCheckboxAndTailLengthPanel = new VerticalPanel();
