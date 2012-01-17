@@ -131,6 +131,7 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
         Set<CompetitorDAO> competitorsToRemoveFromSelection = new HashSet<CompetitorDAO>(selectedCompetitors);
         for (CompetitorDAO newSelectedCompetitor : newSelection) {
             setSelected(newSelectedCompetitor, true, listenersNotToNotify);
+            competitorsToRemoveFromSelection.remove(newSelectedCompetitor);
         }
         for (CompetitorDAO competitorToRemoveFromSelection : competitorsToRemoveFromSelection) {
             setSelected(competitorToRemoveFromSelection, false, listenersNotToNotify);
