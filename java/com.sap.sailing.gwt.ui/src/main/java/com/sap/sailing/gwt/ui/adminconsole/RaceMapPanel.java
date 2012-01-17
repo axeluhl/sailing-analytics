@@ -161,7 +161,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         });
         ranksAndCheckboxAndTailLengthPanel.add(showOnlySelectedCompetitors);
         
-        quickRanksListBox = new QuickRanksListBoxComposite(true);
+        quickRanksListBox = new QuickRanksListBoxComposite(true, competitorSelectionProvider);
         quickRanksListBox.addCompetitorSelectionChangeListener(raceMap);
         quickRanksListBox.getListBox().setVisibleItemCount(20);
 
