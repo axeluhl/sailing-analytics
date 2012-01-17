@@ -151,12 +151,6 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
 
     private final RaceMapSettings settings;
 
-    /**
-     * The time point for which {@link #timeChanged(Date)} was called last. Can be used, e.g., to refresh the boat displays
-     * after the selection of visible boats increased and therefore new data needs to be fetched.
-     */
-    private Date lastDate;
-    
     public RaceMap(SailingServiceAsync sailingService, ErrorReporter errorReporter, Timer timer, CompetitorSelectionProvider competitorSelection) {
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
@@ -246,7 +240,6 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
 
     @Override
     public void timeChanged(final Date date) {
-        lastDate = date;
         if (date != null) {
             if (selectedEventAndRace != null && !selectedEventAndRace.isEmpty()) {
                 EventDAO event = selectedEventAndRace.get(selectedEventAndRace.size() - 1).getA();
@@ -502,7 +495,7 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
             GPSFixDAO lastPos = getBoatFix(competitorDAO);
             Marker boatMarker = boatMarkers.get(competitorDAO);
             if (boatMarker == null) {
-                boatMarker = createBoatMarker(competitorDAO, false);
+                boatMarker = createBoatMarker(competitorDAO, displayHighlighted(competitorDAO));
                 map.addOverlay(boatMarker);
                 boatMarkers.put(competitorDAO, boatMarker);
             } else {
@@ -516,11 +509,11 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
                     boatMarker.setLatLng(LatLng.newInstance(lastPos.position.latDeg,
                             lastPos.position.lngDeg));
                     boatMarker.setImage(imageResources.getBoatImageURL(lastPos,
-                            competitorSelection.isSelected(competitorDAO)));
+                            displayHighlighted(competitorDAO)));
                 } else {
                     // anchors don't match; replace marker
                     map.removeOverlay(boatMarker);
-                    boatMarker = createBoatMarker(competitorDAO, competitorSelection.isSelected(competitorDAO));
+                    boatMarker = createBoatMarker(competitorDAO, displayHighlighted(competitorDAO));
                     map.addOverlay(boatMarker);
                     boatMarkers.put(competitorDAO, boatMarker);
                 }
@@ -529,6 +522,10 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
         return usedExistingMarker;
     }
     
+    private boolean displayHighlighted(CompetitorDAO competitorDAO) {
+        return !getSettings().isShowOnlySelectedCompetitors() && competitorSelection.isSelected(competitorDAO);
+    }
+
     protected Marker createBuoyMarker(final MarkDAO markDAO) {
         MarkerOptions options = MarkerOptions.newInstance();
         if (imageResources.buoyIcon != null) {
@@ -659,7 +656,7 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
 
     private Iterable<CompetitorDAO> getCompetitorsToShow() {
         Iterable<CompetitorDAO> result;
-        if (getSettings().isShowOnlySelectedCompetitors()) {
+        if (getSettings().isShowOnlySelectedCompetitors() && Util.isEmpty(competitorSelection.getSelectedCompetitors())) {
             result = competitorSelection.getAllCompetitors();
         } else {
             Iterable<CompetitorDAO> selection = competitorSelection.getSelectedCompetitors();
@@ -987,13 +984,13 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
                 }
             } else {
                 // adding a single competitor; may need to re-load data, so refresh:
-                timeChanged(lastDate);
+                timeChanged(timer.getTime());
             }
         } else {
             // only change highlighting
             Marker lowlightedMarker = boatMarkers.get(competitor);
             if (lowlightedMarker != null) {
-                Marker highlightedMarker = createBoatMarker(competitor, true);
+                Marker highlightedMarker = createBoatMarker(competitor, displayHighlighted(competitor));
                 map.removeOverlay(lowlightedMarker);
                 map.addOverlay(highlightedMarker);
                 boatMarkers.put(competitor, highlightedMarker);
@@ -1001,7 +998,7 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
                 // seems like an internal error not to find the lowlighted marker; but maybe the
                 // competitor was added late to the race;
                 // data for newly selected competitor supposedly missing; refresh
-                timeChanged(lastDate);
+                timeChanged(timer.getTime());
             }
         }
     }
@@ -1021,7 +1018,7 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
         if (getSettings().isShowOnlySelectedCompetitors()) {
             // if selection is now empty, show all competitors
             if (Util.isEmpty(competitorSelection.getSelectedCompetitors())) {
-                timeChanged(lastDate);
+                timeChanged(timer.getTime());
             } else {
                 // otherwise remove only deselected competitor's boat marker and tail
                 map.removeOverlay(boatMarkers.remove(competitor));
@@ -1030,7 +1027,7 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
         } else {
             // "lowlight" currently selected competitor
             Marker highlightedMarker = boatMarkers.get(competitor);
-            Marker lowlightedMarker = createBoatMarker(competitor, false);
+            Marker lowlightedMarker = createBoatMarker(competitor, displayHighlighted(competitor));
             if (highlightedMarker != null) {
                 map.removeOverlay(highlightedMarker);
             }
