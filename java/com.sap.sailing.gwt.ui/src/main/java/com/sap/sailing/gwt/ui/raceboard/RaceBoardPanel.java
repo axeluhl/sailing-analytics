@@ -1,7 +1,5 @@
 package com.sap.sailing.gwt.ui.raceboard;
 
-import java.util.List;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
@@ -15,6 +13,8 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.adminconsole.RaceMap;
+import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
+import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -28,71 +28,65 @@ public class RaceBoardPanel extends FormPanel implements Component<RaceBoardSett
 
     private final ErrorReporter errorReporter;
 
-    private final StringMessages stringConstants;
+    // TODO Frank to use these later
+//    private final StringMessages stringMessages;
 
     private String raceBoardName;
 
     private static RaceBoardResources resources = GWT.create(RaceBoardResources.class);
 
-    private List<DisclosurePanel> collapsablePanels;
+    // TODO Frank to use these later
+//    private List<DisclosurePanel> collapsablePanels;
+    
+    private final CompetitorSelectionProvider competitorSelectionProvider;
     
     public RaceBoardPanel(SailingServiceAsync sailingService, String raceBoardName, ErrorReporter errorReporter,
-            final StringMessages stringConstants) {
+            final StringMessages stringMessages) {
         this.sailingService = sailingService;
         this.setRaceBoardName(raceBoardName);
         this.errorReporter = errorReporter;
-        this.stringConstants = stringConstants;
+        // TODO Frank to use these later
+//        this.stringMessages = stringMessages;
 
         VerticalPanel mainPanel = new VerticalPanel();
         mainPanel.setSize("100%", "100%");
         setWidget(mainPanel);
-
-        RaceMap raceMap = new RaceMap(sailingService, errorReporter,  new Timer(/* delayBetweenAutoAdvancesInMilliseconds */500));
-        
-        for(int i = 0; i < 4; i++)
-        {
-
-            if(i == 0)
-            {
+        competitorSelectionProvider = new CompetitorSelectionModel(/* hasMultiSelection */ true);
+        RaceMap raceMap = new RaceMap(sailingService, errorReporter, new Timer(
+                /* delayBetweenAutoAdvancesInMilliseconds */500), competitorSelectionProvider);
+        for(int i = 0; i < 4; i++) {
+            if(i == 0) {
                 AbsolutePanel contentPanel = new AbsolutePanel();
                 DisclosurePanel panel = createDisclosePanel(contentPanel, "Panel " + i, 300);
 
                 raceMap.loadMapsAPI(contentPanel);
                 mainPanel.add(panel);
-            }
-            else
-            {
+            } else {
                 VerticalPanel contentPanel = new VerticalPanel();
                 DisclosurePanel panel = createDisclosePanel(contentPanel, "Panel " + i, 100);
-
                 contentPanel.add(new Label("Content of panel " + i));
                 mainPanel.add(panel);
             }
         }
     }
 
-    private DisclosurePanel createDisclosePanel(Panel contentPanel, String panelTitle, int heightInPx)
-    {
+    private DisclosurePanel createDisclosePanel(Panel contentPanel, String panelTitle, int heightInPx) {
         DisclosurePanel disclosurePanel = new DisclosurePanel (resources.openIcon(), resources.closeIcon(), panelTitle);
         disclosurePanel.setSize("100%", "100%");
         disclosurePanel.setOpen(true);
-        
         contentPanel.setSize("100%", heightInPx + "px");
         disclosurePanel.setContent(contentPanel);
-        
+
         disclosurePanel.addOpenHandler(new OpenHandler<DisclosurePanel>() {
             @Override
             public void onOpen(OpenEvent<DisclosurePanel> event) {
             }
         });
-
-        
-          disclosurePanel.addCloseHandler(new CloseHandler<DisclosurePanel>() {
+        disclosurePanel.addCloseHandler(new CloseHandler<DisclosurePanel>() {
             @Override
             public void onClose(CloseEvent<DisclosurePanel> event) {
             }
         });
-        
         return disclosurePanel;
     }
     

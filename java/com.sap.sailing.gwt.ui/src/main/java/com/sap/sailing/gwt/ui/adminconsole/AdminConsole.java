@@ -31,32 +31,32 @@ public class AdminConsole extends AbstractEntryPoint implements EventRefresher {
         tabPanel.setSize("95%", "95%");
         
         eventDisplayers = new HashSet<EventDisplayer>();
-        TracTracEventManagementPanel tractracEventManagementPanel = new TracTracEventManagementPanel(sailingService, this, this, stringConstants);
+        TracTracEventManagementPanel tractracEventManagementPanel = new TracTracEventManagementPanel(sailingService, this, this, stringMessages);
         eventDisplayers.add(tractracEventManagementPanel);
         tractracEventManagementPanel.setSize("90%", "90%");
-        tabPanel.add(tractracEventManagementPanel, stringConstants.tracTracEvents(), false);
-        SwissTimingEventManagementPanel swisstimingEventManagementPanel = new SwissTimingEventManagementPanel(sailingService, this, this, stringConstants);
+        tabPanel.add(tractracEventManagementPanel, stringMessages.tracTracEvents(), false);
+        SwissTimingEventManagementPanel swisstimingEventManagementPanel = new SwissTimingEventManagementPanel(sailingService, this, this, stringMessages);
         eventDisplayers.add(swisstimingEventManagementPanel);
         swisstimingEventManagementPanel.setSize("90%", "90%");
-        tabPanel.add(swisstimingEventManagementPanel, stringConstants.swissTimingEvents(), false);
-        CreateSwissTimingRacePanel createSwissTimingRacePanel = new CreateSwissTimingRacePanel(sailingService,this,stringConstants);
+        tabPanel.add(swisstimingEventManagementPanel, stringMessages.swissTimingEvents(), false);
+        CreateSwissTimingRacePanel createSwissTimingRacePanel = new CreateSwissTimingRacePanel(sailingService,this,stringMessages);
         createSwissTimingRacePanel.setSize("90%", "90%");
         tabPanel.add(createSwissTimingRacePanel,"Create SwissTiming race",false);
-        WindPanel windPanel = new WindPanel(sailingService, this, this, stringConstants);
+        WindPanel windPanel = new WindPanel(sailingService, this, this, stringMessages);
         eventDisplayers.add(windPanel);
         windPanel.setSize("90%", "90%");
-        tabPanel.add(windPanel, stringConstants.wind(), /* asHTML */ false);
-        final RaceMapPanel raceMapPanel = new RaceMapPanel(sailingService, this, this, stringConstants);
+        tabPanel.add(windPanel, stringMessages.wind(), /* asHTML */ false);
+        final RaceMapPanel raceMapPanel = new RaceMapPanel(sailingService, this, this, stringMessages);
         eventDisplayers.add(raceMapPanel);
         raceMapPanel.setSize("90%", "90%");
-        tabPanel.add(raceMapPanel, stringConstants.map(), /* asHTML */ false);
+        tabPanel.add(raceMapPanel, stringMessages.map(), /* asHTML */ false);
         LeaderboardPanel defaultLeaderboardPanel = new LeaderboardPanel(sailingService,
-                DefaultLeaderboardName.DEFAULT_LEADERBOARD_NAME, this, stringConstants);
+                DefaultLeaderboardName.DEFAULT_LEADERBOARD_NAME, this, stringMessages);
         defaultLeaderboardPanel.setSize("90%", "90%");
-        tabPanel.add(defaultLeaderboardPanel, stringConstants.defaultLeaderboard(), /* asHTML */ false);
-        LeaderboardConfigPanel leaderboardConfigPanel = new LeaderboardConfigPanel(sailingService, this, this, stringConstants);
+        tabPanel.add(defaultLeaderboardPanel, stringMessages.defaultLeaderboard(), /* asHTML */ false);
+        LeaderboardConfigPanel leaderboardConfigPanel = new LeaderboardConfigPanel(sailingService, this, this, stringMessages);
         leaderboardConfigPanel.setSize("90%", "90%");
-        tabPanel.add(leaderboardConfigPanel, stringConstants.leaderboardConfiguration(), /* asHTML */ false);
+        tabPanel.add(leaderboardConfigPanel, stringMessages.leaderboardConfiguration(), /* asHTML */ false);
         eventDisplayers.add(leaderboardConfigPanel);
         
         tabPanel.selectTab(0);

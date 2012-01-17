@@ -11,27 +11,19 @@ import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
 public class RaceBoardEntryPoint extends AbstractEntryPoint {
     @Override
     public void onModuleLoad() {     
-        
         super.onModuleLoad();
         sailingService.getLeaderboardNames(new AsyncCallback<List<String>>() {
-
             @Override
             public void onSuccess(List<String> leaderboardNames) {
-
                 String leaderboardName = Window.Location.getParameter("name");
-
-                    LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(stringConstants);
+                    LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(stringMessages);
                     logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
-
                     RaceBoardPanel raceBoardPanel = new RaceBoardPanel(sailingService, leaderboardName,
-                            RaceBoardEntryPoint.this, stringConstants);
-
+                            RaceBoardEntryPoint.this, stringMessages);
                     String padding = Window.Location.getParameter("padding");
-
                     if (padding != null && Boolean.valueOf(padding)) {
                         raceBoardPanel.addStyleName("leftPaddedPanel");
                     }
-
                     RootPanel.get().add(logoAndTitlePanel);
                     RootPanel.get().add(raceBoardPanel);
             }

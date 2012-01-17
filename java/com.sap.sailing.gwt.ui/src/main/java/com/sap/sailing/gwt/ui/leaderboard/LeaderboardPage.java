@@ -24,11 +24,11 @@ public class LeaderboardPage extends AbstractEntryPoint {
 
                 if (leaderboardNames.contains(leaderboardName)) {
 
-                    LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(stringConstants);
+                    LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(stringMessages);
                     logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
 
                     LeaderboardPanel leaderboardPanel = new LeaderboardPanel(sailingService, leaderboardName,
-                            LeaderboardPage.this, stringConstants);
+                            LeaderboardPage.this, stringMessages);
 
                     String padding = Window.Location.getParameter("padding");
 
@@ -40,7 +40,7 @@ public class LeaderboardPage extends AbstractEntryPoint {
                     RootPanel.get().add(leaderboardPanel);
 
                 } else {
-                    RootPanel.get().add(new Label(stringConstants.noSuchLeaderboard()));
+                    RootPanel.get().add(new Label(stringMessages.noSuchLeaderboard()));
                 }
             }
 

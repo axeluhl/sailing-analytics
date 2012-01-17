@@ -17,7 +17,7 @@ public class SpectatorEntryPoint extends AbstractEntryPoint implements EventRefr
         RootPanel rootPanel = RootPanel.get();
         rootPanel.setSize("100%", "100%");
         
-        OverviewEventPanel overviewEventManagementPanel = new OverviewEventPanel(sailingService, this, this, stringConstants);
+        OverviewEventPanel overviewEventManagementPanel = new OverviewEventPanel(sailingService, this, this, stringMessages);
         overviewEventManagementPanel.setSize("100%", "100%");
         rootPanel.add(overviewEventManagementPanel);
 

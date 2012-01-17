@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -39,8 +38,10 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
+import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -55,7 +56,7 @@ import com.sap.sailing.gwt.ui.shared.RaceDAO;
 import com.sap.sailing.gwt.ui.shared.RegattaDAO;
 import com.sap.sailing.server.api.EventNameAndRaceName;
 
-public class RaceMap implements TimeListener, CompetitorSelectionChangeListener, RaceSelectionChangeListener, CompetitorsDisplayer {
+public class RaceMap implements TimeListener, CompetitorSelectionChangeListener, RaceSelectionChangeListener {
     protected MapWidget map;
 
     private final SailingServiceAsync sailingService;
@@ -110,9 +111,7 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
     
     private LatLng lastMousePosition;
 
-    private List<CompetitorDAO> allCompetitors;
-
-    private Set<CompetitorDAO> selectedMapCompetitors;
+    private CompetitorSelectionProvider competitorSelection;
 
     private List<Triple<EventDAO, RegattaDAO, RaceDAO>> selectedEventAndRace;
 
@@ -151,21 +150,18 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
 
     private RaceMapSettings settings;
     
-    public RaceMap(SailingServiceAsync sailingService, ErrorReporter errorReporter, Timer timer) {
+    public RaceMap(SailingServiceAsync sailingService, ErrorReporter errorReporter, Timer timer, CompetitorSelectionProvider competitorSelection) {
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.timer = timer;
-
         tails = new HashMap<CompetitorDAO, Polyline>();
         firstShownFix = new HashMap<CompetitorDAO, Integer>();
         lastShownFix = new HashMap<CompetitorDAO, Integer>();
         buoyMarkers = new HashMap<MarkDAO, Marker>();
         boatMarkers = new HashMap<CompetitorDAO, Marker>();
         fixes = new HashMap<CompetitorDAO, List<GPSFixDAO>>();
-        
-        selectedMapCompetitors = new HashSet<CompetitorDAO>();
-        allCompetitors = new ArrayList<CompetitorDAO>();
-        
+        this.competitorSelection = competitorSelection;
+        competitorSelection.addCompetitorSelectionChangeListener(this);
         settings = new RaceMapSettings();
     }
 
@@ -243,31 +239,6 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
     }
 
     @Override
-    public void onCompetitorSelectionChange(List<CompetitorDAO> newSelectedCompetitors) {
-        for (CompetitorDAO competitorDAO : selectedMapCompetitors) {
-            if (!newSelectedCompetitors.contains(competitorDAO)) {
-                // "lowlight" currently selected competitor
-                Marker highlightedMarker = boatMarkers.get(competitorDAO);
-                if (highlightedMarker != null) {
-                    Marker lowlightedMarker = createBoatMarker(competitorDAO, false);
-                    map.removeOverlay(highlightedMarker);
-                    map.addOverlay(lowlightedMarker);
-                    boatMarkers.put(competitorDAO, lowlightedMarker);
-                }
-            } else {
-                Marker lowlightedMarker = boatMarkers.get(competitorDAO);
-                if (lowlightedMarker == null) {
-                    Marker highlightedMarker = createBoatMarker(competitorDAO, true);
-                    map.addOverlay(highlightedMarker);
-                    boatMarkers.put(competitorDAO, highlightedMarker);
-                }
-            }
-        }
-        selectedMapCompetitors.clear();
-        selectedMapCompetitors.addAll(newSelectedCompetitors);
-    }
-
-    @Override
     public void timeChanged(final Date date) {
         if (date != null) {
             if (selectedEventAndRace != null && !selectedEventAndRace.isEmpty()) {
@@ -320,11 +291,6 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
         }
     }
 
-    public void fillCompetitors(List<CompetitorDAO> competitors) {
-        allCompetitors.clear();
-        allCompetitors.addAll(competitors);
-    }
-
     /**
      * From {@link #fixes} as well as the selection of {@link #getCompetitorsToShow competitors to show}, computes the
      * from/to times for which to request GPS raceMapData.fixes from the server. No update is performed here to {@link #fixes}. The
@@ -339,7 +305,7 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
      *         those requested or need to be replaced
      */
     protected Triple<Map<CompetitorDAO, Date>, Map<CompetitorDAO, Date>, Map<CompetitorDAO, Boolean>> computeFromAndTo(
-            Date upTo, Collection<CompetitorDAO> competitorsToShow) {
+            Date upTo, Iterable<CompetitorDAO> competitorsToShow) {
         Date tailstart = new Date(upTo.getTime() - settings.getTailLengthInMilliSeconds());
         Map<CompetitorDAO, Date> from = new HashMap<CompetitorDAO, Date>();
         Map<CompetitorDAO, Date> to = new HashMap<CompetitorDAO, Date>();
@@ -481,7 +447,7 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
      * @param to
      *            time point for last fix to show in tails
      */
-    protected void showBoatsOnMap(Date from, Date to, Collection<CompetitorDAO> competitorsToShow) {
+    protected void showBoatsOnMap(Date from, Date to, Iterable<CompetitorDAO> competitorsToShow) {
         if (map != null) {
             LatLngBounds newMapBounds = null;
             Set<CompetitorDAO> competitorDAOsOfUnusedTails = new HashSet<CompetitorDAO>(tails.keySet());
@@ -537,19 +503,18 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
                 usedExistingMarker = true;
                 // check if anchors match; re-use marker with setImage only if anchors match
                 ImageTransformer transformer = imageResources.getBoatImageTransformer(lastPos,
-                        selectedMapCompetitors.contains(competitorDAO));
+                        competitorSelection.isSelected(competitorDAO));
                 Point newAnchor = transformer.getAnchor(imageResources.getRealBoatSizeScaleFactor());
                 Point oldAnchor = boatMarker.getIcon().getIconAnchor();
                 if (oldAnchor.getX() == newAnchor.getX() && oldAnchor.getY() == newAnchor.getY()) {
                     boatMarker.setLatLng(LatLng.newInstance(lastPos.position.latDeg,
                             lastPos.position.lngDeg));
                     boatMarker.setImage(imageResources.getBoatImageURL(lastPos,
-                            selectedMapCompetitors.contains(competitorDAO)));
+                            competitorSelection.isSelected(competitorDAO)));
                 } else {
                     // anchors don't match; replace marker
                     map.removeOverlay(boatMarker);
-                    boatMarker = createBoatMarker(competitorDAO,
-                            selectedMapCompetitors.contains(competitorDAO));
+                    boatMarker = createBoatMarker(competitorDAO, competitorSelection.isSelected(competitorDAO));
                     map.addOverlay(boatMarker);
                     boatMarkers.put(competitorDAO, boatMarker);
                 }
@@ -686,12 +651,15 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
         return result;
     }
 
-    private Collection<CompetitorDAO> getCompetitorsToShow() {
-        if (settings.isShowOnlySelectedCompetitors()) {
-            return selectedMapCompetitors;
+    private Iterable<CompetitorDAO> getCompetitorsToShow() {
+        Iterable<CompetitorDAO> result;
+        Iterable<CompetitorDAO> selection = competitorSelection.getSelectedCompetitors();
+        if (Util.isEmpty(selection)) {
+            result = competitorSelection.getAllCompetitors();
         } else {
-            return allCompetitors;
+            result = selection;
         }
+        return result;
     }
     
     private String getColorString(CompetitorDAO competitorDAO) {
@@ -995,6 +963,28 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
 
     public void setSettings(RaceMapSettings settings) {
         this.settings = settings;
+    }
+
+    @Override
+    public void addedToSelection(CompetitorDAO competitor) {
+        Marker lowlightedMarker = boatMarkers.get(competitor);
+        if (lowlightedMarker == null) {
+            Marker highlightedMarker = createBoatMarker(competitor, true);
+            map.addOverlay(highlightedMarker);
+            boatMarkers.put(competitor, highlightedMarker);
+        }
+    }
+
+    @Override
+    public void removedFromSelection(CompetitorDAO competitor) {
+        // "lowlight" currently selected competitor
+        Marker highlightedMarker = boatMarkers.get(competitor);
+        if (highlightedMarker != null) {
+            Marker lowlightedMarker = createBoatMarker(competitor, false);
+            map.removeOverlay(highlightedMarker);
+            map.addOverlay(lowlightedMarker);
+            boatMarkers.put(competitor, lowlightedMarker);
+        }
     }
 
 }
