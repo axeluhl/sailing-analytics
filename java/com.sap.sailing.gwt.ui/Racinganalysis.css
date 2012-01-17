@@ -31,12 +31,13 @@ body {
   font-family: 'Terminal Dosis', sans-serif;
   line-height: 1;
   font-size: 10px;
-  margin-top: 0;
+  padding: 0 0 120px 0;
    }
   
 .contentOuterPanel {	
 	background: #dddcdc;
 	margin: 115px 12px 0 12px;
+	padding: 12px;
 	}
 
 .LogoAndTitlePanel {
