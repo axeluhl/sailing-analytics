@@ -23,8 +23,9 @@ import com.sap.sailing.server.api.RaceIdentifier;
 public class CompareCompetitorsChartDialog extends DialogBox {
     private Anchor closeAnchor;
 
-    public CompareCompetitorsChartDialog(SailingServiceAsync sailingService, final CompetitorSelectionProvider competitorSelectionProvider,
-            RaceIdentifier[] races, StringMessages stringConstants, ErrorReporter errorReporter) {
+    public CompareCompetitorsChartDialog(SailingServiceAsync sailingService,
+            final CompetitorSelectionProvider competitorSelectionProvider, RaceIdentifier[] races,
+            StringMessages stringConstants, ErrorReporter errorReporter) {
         super(false);
         final MultiChartPanel ccp = new MultiChartPanel(sailingService, competitorSelectionProvider, races,
                 stringConstants, (int) (Window.getClientWidth() - 350), (int) (Window.getClientHeight() - 170),

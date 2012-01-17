@@ -17,30 +17,21 @@ public class LeaderboardPage extends AbstractEntryPoint {
         
         super.onModuleLoad();
         sailingService.getLeaderboardNames(new AsyncCallback<List<String>>() {
-
             @Override
             public void onSuccess(List<String> leaderboardNames) {
-
                 String leaderboardName = Window.Location.getParameter("name");
-
                 if (leaderboardNames.contains(leaderboardName)) {
-
                     LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(stringMessages);
                     logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
-
                     LeaderboardPanel leaderboardPanel = new LeaderboardPanel(sailingService,
                             new CompetitorSelectionModel(/* hasMultiSelection */ true), leaderboardName,
                             LeaderboardPage.this, stringMessages);
-
                     String padding = Window.Location.getParameter("padding");
-
                     if (padding != null && Boolean.valueOf(padding)) {
                         leaderboardPanel.addStyleName("leftPaddedPanel");
                     }
-
                     RootPanel.get().add(logoAndTitlePanel);
                     RootPanel.get().add(leaderboardPanel);
-
                 } else {
                     RootPanel.get().add(new Label(stringMessages.noSuchLeaderboard()));
                 }
@@ -52,5 +43,4 @@ public class LeaderboardPage extends AbstractEntryPoint {
             }
         });
     }
-
 }

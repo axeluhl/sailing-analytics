@@ -695,6 +695,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             final StringMessages stringConstants) {
         this.sailingService = sailingService;
         this.competitorSelectionProvider = competitorSelectionProvider;
+        competitorSelectionProvider.addCompetitorSelectionChangeListener(this);
         this.setLeaderboardName(leaderboardName);
         this.errorReporter = errorReporter;
         this.stringConstants = stringConstants;
@@ -783,7 +784,6 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 "<img class=\"linkNoBorder\" src=\"/gwt/images/chart_small.png\"/>").toSafeHtml());
         chartsAnchor.setTitle(stringConstants.showCharts());
         chartsAnchor.addClickHandler(new ClickHandler() {
-            
             @Override
             public void onClick(ClickEvent event) {
                compareCompetitors();
@@ -932,6 +932,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
      * Also updates the min/max values on the columns
      */
     protected void updateLeaderboard(LeaderboardDAO leaderboard) {
+        competitorSelectionProvider.setCompetitors(leaderboard.competitors);
         selectedRaceColumns.addAll(getRacesAddedNew(getLeaderboard(), leaderboard));
         setLeaderboard(leaderboard);
         adjustColumnLayout(leaderboard);
@@ -1302,21 +1303,10 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     }
     
     private void compareCompetitors(){
-        List<CompetitorDAO> competitors = new ArrayList<CompetitorDAO>();
         List<RaceIdentifier> races = new ArrayList<RaceIdentifier>();
         for (RaceInLeaderboardDAO race : getLeaderboard().getRaceList()) {
             if (race.isTrackedRace()){
                 races.add(new LeaderboardNameAndRaceColumnName(leaderboardName, race.getRaceColumnName()));
-            }
-        }
-        if (leaderboardSelectionModel.getSelectedSet().size() > 0){
-            for (LeaderboardRowDAO leaderboardRowDAO : leaderboardSelectionModel.getSelectedSet()) {
-                competitors.add(leaderboardRowDAO.competitor);
-            }
-        }
-        else {
-            for (LeaderboardRowDAO leaderboardRowDAO : leaderboardTable.getVisibleItems()){
-                competitors.add(leaderboardRowDAO.competitor);
             }
         }
         CompareCompetitorsChartDialog chartDialog = new CompareCompetitorsChartDialog(sailingService, competitorSelectionProvider,

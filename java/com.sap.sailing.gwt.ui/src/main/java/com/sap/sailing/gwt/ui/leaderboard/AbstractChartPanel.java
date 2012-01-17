@@ -190,7 +190,7 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
             @Override
             public void run() {
                 final List<CompetitorDAO> competitorsToLoad = new ArrayList<CompetitorDAO>();
-                for (CompetitorDAO competitor : getCompetitorsAndTimePointsDAO().getCompetitor()) {
+                for (CompetitorDAO competitor : competitorSelectionProvider.getAllCompetitors()) {
                     if (isCompetitorVisible(competitor) && !competitorID.contains(competitor)) {
                         competitorsToLoad.add(competitor);
                     }
@@ -328,7 +328,9 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
         }
         if (plot != null && plot.isAttached()) {
             try {
-                plot.setLinearSelection(0, 1);
+                if (competitorDAOs != null && competitorDAOs.length > 0) {
+                    plot.setLinearSelection(0, 1);
+                }
                 plot.redraw();
             } catch (Exception e) {
 
