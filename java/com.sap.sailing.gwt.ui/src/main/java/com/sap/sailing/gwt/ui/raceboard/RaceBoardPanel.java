@@ -74,6 +74,7 @@ public class RaceBoardPanel extends FormPanel implements Component<RaceBoardSett
     private DisclosurePanel createDisclosePanel(Panel contentPanel, String panelTitle, int heightInPx) {
         DisclosurePanel disclosurePanel = new DisclosurePanel (resources.openIcon(), resources.closeIcon(), panelTitle);
         disclosurePanel.setSize("100%", "100%");
+        disclosurePanel.addStyleName("disclosePanel");
         disclosurePanel.setOpen(true);
         contentPanel.setSize("100%", heightInPx + "px");
         disclosurePanel.setContent(contentPanel);
