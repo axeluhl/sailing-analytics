@@ -17,8 +17,11 @@ import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DockPanel;
+import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HasAnimation;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HasText;
+import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
@@ -192,8 +195,10 @@ public final class CollapsablePanel extends Composite implements HasWidgets.ForI
     /**
      * holds the header widget.
      */
-    private final DockPanel header = new DockPanel();
-    
+//    private final DockPanel header = new DockPanel();
+
+    private final Grid header = new Grid(1,2);
+
     private final ClickableHeader clickableHeader = new ClickableHeader();
 
     private boolean isAnimationEnabled = false;
@@ -206,7 +211,13 @@ public final class CollapsablePanel extends Composite implements HasWidgets.ForI
     private CollapsablePanel() {
         initWidget(mainPanel);
 
-        header.setStyleName("hallo");
+        header.setWidth("100%");
+        header.getCellFormatter().setWidth(0,  0, "50%");
+        header.getCellFormatter().setWidth(0,  1, "50%");
+        header.getCellFormatter().setAlignment(0, 0, HasHorizontalAlignment.ALIGN_LEFT, HasVerticalAlignment.ALIGN_MIDDLE); 
+        header.getCellFormatter().setAlignment(0, 1, HasHorizontalAlignment.ALIGN_RIGHT, HasVerticalAlignment.ALIGN_MIDDLE); 
+        
+        //header.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
         mainPanel.add(header);
         mainPanel.add(contentWrapper);
         DOM.setStyleAttribute(contentWrapper.getElement(), "padding", "0px");
@@ -243,11 +254,13 @@ public final class CollapsablePanel extends Composite implements HasWidgets.ForI
 
     private void setClickableHeader(Widget widget) {
         clickableHeader.add(widget);
-        header.add(clickableHeader, DockPanel.WEST);
+        header.setWidget(0, 0, clickableHeader);
+//        header.add(clickableHeader, DockPanel.WEST);
     }
 
     public void setHeaderToolbar(HorizontalPanel toolbar) {
-        header.add(toolbar, DockPanel.EAST);
+//        header.add(toolbar, DockPanel.EAST);
+        header.setWidget(0, 1, toolbar);
     }
 
     public void add(Widget w) {

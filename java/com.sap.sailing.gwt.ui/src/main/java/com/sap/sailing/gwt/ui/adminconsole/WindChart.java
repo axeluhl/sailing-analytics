@@ -31,6 +31,7 @@ import ca.nanometrics.gflot.client.options.SeriesOptions;
 import ca.nanometrics.gflot.client.options.TickFormatter;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -76,7 +77,10 @@ public class WindChart implements Component<WindChartSettings> {
     @Override
     public Widget getEntryWidget() {
         VerticalPanel vp = new VerticalPanel();
-        vp.add(selectedPointLabel);
+        HorizontalPanel hp = new HorizontalPanel();
+        hp.add(selectedPointLabel);
+        hp.setHeight("2em");
+        vp.add(hp);
         model = new PlotWithOverviewModel(PlotModelStrategy.defaultStrategy());
         PlotOptions plotOptions = new PlotOptions();
         plotOptions.setDefaultLineSeriesOptions(new LineSeriesOptions().setLineWidth(1).setShow(true));
@@ -114,12 +118,13 @@ public class WindChart implements Component<WindChartSettings> {
                 if (item != null) {
                     SeriesHandler seriesHandler = seriesHandlersInOrder.get(item.getSeriesIndex());
                     WindSource windSource = getWindSource(seriesHandler);
-                    selectedPointLabel.setText(windSource.name());
+                    selectedPointLabel.setText(windSource.name()+": "+position.getY().intValue());
+                    selectedPointLabel.setVisible(true);
                 } else {
-                    selectedPointLabel.setText("");
+                    selectedPointLabel.setVisible(false);
                 }
             }
-        }, true);
+        }, /* only on data point */ false);
         plot.addSelectionListener(new SelectionListener() {
             public void selected(double x1, double y1, double x2, double y2) {
                 /* TODO Remove not visible buoys from the series when user is zooming in or add them if he is zooming out.
@@ -229,6 +234,7 @@ public class WindChart implements Component<WindChartSettings> {
         for (Map.Entry<WindSource, SeriesHandler> e : stripChartSeries.entrySet()) {
             e.getValue().setVisible(windSourcesToDisplay.contains(e.getKey()));
         }
+        plot.redraw();
     }
 
 }
