@@ -30,16 +30,9 @@ public class SerializablePositionImpl implements SerializablePosition {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-<<<<<<< HEAD
-        int temp = (int) latDeg;
-        result = prime * result + (int) (temp ^ (temp >>> 32));
-        temp = (int) lngDeg;
-=======
-        long temp;
-        temp = (int) latDeg;
+        long temp = (int) latDeg;
         result = prime * result + (int) (temp ^ (temp >>> 32));
         temp = (int) latDeg;
->>>>>>> placemark
         result = prime * result + (int) (temp ^ (temp >>> 32));
         return result;
     }
@@ -53,15 +46,9 @@ public class SerializablePositionImpl implements SerializablePosition {
         if (getClass() != obj.getClass())
             return false;
         SerializablePositionImpl other = (SerializablePositionImpl) obj;
-<<<<<<< HEAD
-        if (new Double(latDeg).equals(other.latDeg))
-            return false;
-        if (new Double(lngDeg).equals(other.lngDeg))
-=======
         if (!new Double(latDeg).equals(other.latDeg))
             return false;
         if (!new Double(lngDeg).equals(other.lngDeg))
->>>>>>> placemark
             return false;
         return true;
     }
