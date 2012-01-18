@@ -72,56 +72,57 @@ public class PlacemarkImpl implements Placemark {
 //    public String getCountryName() {
 //        return CountryCodeFactory.INSTANCE.getFromTwoLetterISOName(countryCode).getName();
 //    }
-//    
-//    @Override
-//    public String toString() {
-//        StringBuilder b = new StringBuilder(Placemark.class.getSimpleName() + "[");
-//        b.append(name + ", ");
-//        b.append(countryCode + ", ");
-//        b.append(position.toString() + ", ");
-//        b.append(population + "]");
-//        
-//        return b.toString();
-//    }
+    
+    @Override
+    public String toString() {
+        StringBuilder b = new StringBuilder();
+        
+        b.append(name + ", ");
+        b.append(countryCode + ", ");
+        b.append(position.toString() + ", ");
+        b.append(population);
+        
+        return b.toString();
+    }
 
-//    @Override
-//    public int hashCode() {
-//        final int prime = 31;
-//        int result = 1;
-//        result = prime * result + ((countryCode == null) ? 0 : countryCode.hashCode());
-//        result = prime * result + ((name == null) ? 0 : name.hashCode());
-//        result = prime * result + (int) (population ^ (population >>> 32));
-//        result = prime * result + ((position == null) ? 0 : position.hashCode());
-//        return result;
-//    }
-//
-//    @Override
-//    public boolean equals(Object obj) {
-//        if (this == obj)
-//            return true;
-//        if (obj == null)
-//            return false;
-//        if (getClass() != obj.getClass())
-//            return false;
-//        PlacemarkImpl other = (PlacemarkImpl) obj;
-//        if (countryCode == null) {
-//            if (other.countryCode != null)
-//                return false;
-//        } else if (!countryCode.equals(other.countryCode))
-//            return false;
-//        if (name == null) {
-//            if (other.name != null)
-//                return false;
-//        } else if (!name.equals(other.name))
-//            return false;
-//        if (population != other.population)
-//            return false;
-//        if (position == null) {
-//            if (other.position != null)
-//                return false;
-//        } else if (!position.equals(other.position))
-//            return false;
-//        return true;
-//    }
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((countryCode == null) ? 0 : countryCode.hashCode());
+        result = prime * result + ((name == null) ? 0 : name.hashCode());
+        result = prime * result + (int) (population ^ (population >>> 32));
+        result = prime * result + ((position == null) ? 0 : position.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        PlacemarkImpl other = (PlacemarkImpl) obj;
+        if (countryCode == null) {
+            if (other.countryCode != null)
+                return false;
+        } else if (!countryCode.equals(other.countryCode))
+            return false;
+        if (name == null) {
+            if (other.name != null)
+                return false;
+        } else if (!name.equals(other.name))
+            return false;
+        if (population != other.population)
+            return false;
+        if (position == null) {
+            if (other.position != null)
+                return false;
+        } else if (!position.equals(other.position))
+            return false;
+        return true;
+    }
 
 }

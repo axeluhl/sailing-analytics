@@ -27,32 +27,32 @@ public class SerializablePositionImpl implements SerializablePosition {
         return "(" + latDeg + ", " + lngDeg + ")";
     }
 
-//    @Override
-//    public int hashCode() {
-//        final int prime = 31;
-//        int result = 1;
-//        long temp;
-//        temp = (int) latDeg;
-//        result = prime * result + (int) (temp ^ (temp >>> 32));
-//        temp = (int) latDeg;
-//        result = prime * result + (int) (temp ^ (temp >>> 32));
-//        return result;
-//    }
-//
-//    @Override
-//    public boolean equals(Object obj) {
-//        if (this == obj)
-//            return true;
-//        if (obj == null)
-//            return false;
-//        if (getClass() != obj.getClass())
-//            return false;
-//        SerializablePositionImpl other = (SerializablePositionImpl) obj;
-//        if (!new Double(latDeg).equals(other.latDeg))
-//            return false;
-//        if (!new Double(lngDeg).equals(other.lngDeg))
-//            return false;
-//        return true;
-//    }
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        long temp;
+        temp = (int) latDeg;
+        result = prime * result + (int) (temp ^ (temp >>> 32));
+        temp = (int) latDeg;
+        result = prime * result + (int) (temp ^ (temp >>> 32));
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        SerializablePositionImpl other = (SerializablePositionImpl) obj;
+        if (!new Double(latDeg).equals(other.latDeg))
+            return false;
+        if (!new Double(lngDeg).equals(other.lngDeg))
+            return false;
+        return true;
+    }
 
 }
