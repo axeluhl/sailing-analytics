@@ -165,7 +165,6 @@ public class OverviewEventPanel extends AbstractEventPanel {
         functionPanelEvents.add(btnShowLeaderboards);
 
         // Create event table
-        // TODO
         {
             eventTable = new CellTable<EventDAO>();
             eventTable.setWidth("100%");
@@ -178,6 +177,7 @@ public class OverviewEventPanel extends AbstractEventPanel {
                     return locations != null ? locations : stringConstants.locationNotAvailable();
                 }
             };
+            locationColumn.setSortable(true);
             //Creating event name column
             TextColumn<EventDAO> nameColumn = new TextColumn<EventDAO>() {
                 @Override
@@ -185,14 +185,16 @@ public class OverviewEventPanel extends AbstractEventPanel {
                     return eventDAO.name;
                 }
             };
+            nameColumn.setSortable(true);
             //Creating start date column
             TextColumn<EventDAO> startDateColumn = new TextColumn<EventDAO>() {
                 @Override
                 public String getValue(EventDAO eventDAO) {
                     Date start = eventDAO.regattas.get(0).races.get(0).startOfRace;
-                    return start != null ? start.toString() : stringConstants.startDateNotAvailable();
+                    return start != null ? dateFormatter.render(start) : stringConstants.startDateNotAvailable();
                 }
             };
+            startDateColumn.setSortable(true);
             
             eventTable.addColumn(locationColumn, stringConstants.location());
             eventTable.addColumn(nameColumn, stringConstants.eventName());
@@ -243,7 +245,7 @@ public class OverviewEventPanel extends AbstractEventPanel {
         functionPanelLeaderboards.add(btnHideLeaderboards);
 
         // Create leaderboard list
-        //  TODO
+        // TODO
         
         loadEvents();
         
@@ -252,30 +254,6 @@ public class OverviewEventPanel extends AbstractEventPanel {
         checkBoxLive.setValue(true, true);
         checkBoxLive.setEnabled(false);
         //Until here
-    }
-
-    private ListHandler<EventDAO> getEventSortHandler(List<EventDAO> list, TextColumn<EventDAO> locationColumn,
-            TextColumn<EventDAO> nameColumn, TextColumn<EventDAO> startDateColumn) {
-        ListHandler<EventDAO> sortHandler = new ListHandler<EventDAO>(list);
-        sortHandler.setComparator(locationColumn, new Comparator<EventDAO>() {
-            @Override
-            public int compare(EventDAO e1, EventDAO e2) {
-                return e1.getLocationAsString().compareTo(e2.getLocationAsString());
-            }
-        });
-        sortHandler.setComparator(nameColumn, new Comparator<EventDAO>() {
-            @Override
-            public int compare(EventDAO e1, EventDAO e2) {
-                return e1.name.compareTo(e2.name);
-            }
-        });
-        sortHandler.setComparator(startDateColumn, new Comparator<EventDAO>() {
-            @Override
-            public int compare(EventDAO e1, EventDAO e2) {
-                return e1.getStartDate().compareTo(e2.getStartDate());
-            }
-        });
-        return sortHandler;
     }
 
     private void loadEvents(final Runnable actionAfterLoading) {
@@ -342,6 +320,31 @@ public class OverviewEventPanel extends AbstractEventPanel {
     @Override
     public void fillEvents(List<EventDAO> result) {
         
+    }
+
+    private ListHandler<EventDAO> getEventSortHandler(List<EventDAO> list, TextColumn<EventDAO> locationColumn,
+            TextColumn<EventDAO> nameColumn, TextColumn<EventDAO> startDateColumn) {
+        //TODO Check if comparators are correct
+        ListHandler<EventDAO> sortHandler = new ListHandler<EventDAO>(list);
+        sortHandler.setComparator(locationColumn, new Comparator<EventDAO>() {
+            @Override
+            public int compare(EventDAO e1, EventDAO e2) {
+                return e1.getLocationAsString().compareTo(e2.getLocationAsString());
+            }
+        });
+        sortHandler.setComparator(nameColumn, new Comparator<EventDAO>() {
+            @Override
+            public int compare(EventDAO e1, EventDAO e2) {
+                return e1.name.compareTo(e2.name);
+            }
+        });
+        sortHandler.setComparator(startDateColumn, new Comparator<EventDAO>() {
+            @Override
+            public int compare(EventDAO e1, EventDAO e2) {
+                return e1.getStartDate().compareTo(e2.getStartDate());
+            }
+        });
+        return sortHandler;
     }
 
 }

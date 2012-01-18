@@ -73,12 +73,12 @@ public class PlacemarkImpl implements Placemark {
     
     @Override
     public String toString() {
-        StringBuilder b = new StringBuilder();
+        StringBuilder b = new StringBuilder("[");
         
         b.append(name + ", ");
         b.append(countryCode + ", ");
         b.append(position.toString() + ", ");
-        b.append(population);
+        b.append(population + "]");
         
         return b.toString();
     }
