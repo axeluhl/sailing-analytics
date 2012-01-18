@@ -129,8 +129,8 @@ public class RaceMapResources {
         Icon unknownManeuverIcon = Icon
                 .newInstance("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=?|FFFFFF|000000");
         unknownManeuverIcon.setIconAnchor(Point.newInstance(10, 33));
-        maneuverIconsForTypeAndTargetTack.put(new Pair<ManeuverType, Tack>(ManeuverType.UNKNOWN, Tack.STARBOARD), tackToStarboardIcon);
-        maneuverIconsForTypeAndTargetTack.put(new Pair<ManeuverType, Tack>(ManeuverType.UNKNOWN, Tack.PORT), tackToStarboardIcon);
+        maneuverIconsForTypeAndTargetTack.put(new Pair<ManeuverType, Tack>(ManeuverType.UNKNOWN, Tack.STARBOARD), unknownManeuverIcon);
+        maneuverIconsForTypeAndTargetTack.put(new Pair<ManeuverType, Tack>(ManeuverType.UNKNOWN, Tack.PORT), unknownManeuverIcon);
         Icon penaltyCircleToStarboardIcon = Icon
                 .newInstance("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=P|00FF00|000000");
         penaltyCircleToStarboardIcon.setIconAnchor(Point.newInstance(10, 33));
