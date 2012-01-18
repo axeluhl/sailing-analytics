@@ -34,6 +34,7 @@
   <extend-property name="locale" values="de"/>
   <source path='client'/>
   <source path='raceboard'/>
+  <source path='leaderboard'/>
   <source path='adminconsole'/>
   <source path='shared'/>
 </module>

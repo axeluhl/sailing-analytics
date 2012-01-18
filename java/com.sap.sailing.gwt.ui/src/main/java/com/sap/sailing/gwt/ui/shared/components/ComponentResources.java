@@ -1,9 +1,9 @@
-package com.sap.sailing.gwt.ui.raceboard;
+package com.sap.sailing.gwt.ui.shared.components;
 
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.ImageResource;
 
-interface RaceBoardResources extends ClientBundle {
+interface ComponentResources extends ClientBundle {
 
     @Source("com/sap/sailing/gwt/ui/client/images/open.png")
     ImageResource openIcon();
