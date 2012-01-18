@@ -233,7 +233,7 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
                     new AsyncCallback<CompetitorsAndTimePointsDAO>() {
                         @Override
                         public void onFailure(Throwable caught) {
-                        	errorReporter.reportError("Failed to load race information: " + caught.toString());
+                            errorReporter.reportError(stringMessages.failedToLoadRaceInformation(caught.toString()));
                         }
 
                         @Override
@@ -409,9 +409,9 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
             	CompetitorDAO competitor = competitorID.get(seriesID.indexOf(item.getSeries()));
                 if (item != null && competitor != null) {
                     if (item.getSeries().getLabel().toLowerCase().contains("mark")) {
-                        selectedPointLabel.setText(competitor.name + " passed "
-                                + markPassingBuoyName.get(competitor.id + (long) item.getDataPoint().getX()) + " at "
-                                + dateFormat.format(new Date((long) item.getDataPoint().getX())));
+                        selectedPointLabel.setText(stringMessages.competitorPassedMarkAtDate(competitor.name,
+                                markPassingBuoyName.get(competitor.id + (long) item.getDataPoint().getX()),
+                                dateFormat.format(new Date((long) item.getDataPoint().getX()))));
                     } else {
                 		String unit = "";
                 		switch (dataToShow){
@@ -438,8 +438,9 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
                 			decimalPlaces += "0";
                 		}
                 		NumberFormat numberFormat = NumberFormat.getFormat("0" +decimalPlaces);
-                		selectedPointLabel.setText(competitor.name + " at " + dateFormat.format(new Date((long) item.getDataPoint().getX()))
-                                + ": " + numberFormat.format(item.getDataPoint().getY()) + unit);
+                		selectedPointLabel.setText(stringMessages.valueForCompetitorAt(competitor.name,
+                		        dateFormat.format(new Date((long) item.getDataPoint().getX())),
+                		        numberFormat.format(item.getDataPoint().getY()) + unit));
                 	}
                 } else {
                     selectedPointLabel.setText(getStringMessages().noSelection());
