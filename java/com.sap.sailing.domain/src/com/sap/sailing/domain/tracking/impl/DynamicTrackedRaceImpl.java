@@ -373,6 +373,7 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     @Override
     public void setWindSource(WindSource windSource) {
         this.currentWindSource = windSource;
+        updated(/* timepoint */ null);
     }
 
 }
