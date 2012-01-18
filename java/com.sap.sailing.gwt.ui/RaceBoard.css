@@ -103,3 +103,24 @@ input.magnifier{
 	display: block;
 	margin: 3px auto 0 auto !important;
 }
+
+.timelinePanel {
+	width: 100%;
+	position: fixed;
+	bottom: 0;
+	height: 101px;
+}
+
+.timelineInnerPanel {
+	height: 100%;
+	margin: 0 12px;
+	background: #dddcdc;
+}
+
+.footerShadowPanel {
+	position: fixed;
+	height: 50px;
+	bottom: 0;
+	background: url(images/footer_shadow.png) left bottom repeat-x;	
+	width: 100%;
+}
