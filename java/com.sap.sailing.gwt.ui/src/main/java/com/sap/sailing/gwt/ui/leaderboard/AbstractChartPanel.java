@@ -73,7 +73,7 @@ import com.sap.sailing.server.api.RaceIdentifier;
  * data. So {@code seriesID, competitorID and markSeriesID} are linked with the index. So if u know for example the
  * seriesID-index, you can get the competitor by calling competitorID.get(index).
  * 
- * @author Benjamin Ebling (D056866)
+ * @author Benjamin Ebling (D056866), Axel Uhl (d043530)
  * 
  */
 public abstract class AbstractChartPanel<SettingsType extends ChartSettings> extends SimplePanel implements CompetitorSelectionChangeListener {
