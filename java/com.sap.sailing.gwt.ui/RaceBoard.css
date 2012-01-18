@@ -47,8 +47,12 @@ table td, table th {
 
 
 .LogoAndTitlePanel {
-  margin: 0 0 24px 0;
-  height: 58px; }
+  height: 85px;
+  font-family: Arial, Verdana, sans-serif;
+  position: fixed;
+  width: 100%;
+  top: 0;
+  background: url(images/header_bg_modern.png) 0 0 repeat-x;}
 
 .LogoAndTitlePanel:after {
 	content: " ";
@@ -59,7 +63,7 @@ table td, table th {
 
 .sapLogo {
 	float: left; 
-  margin: 8px 0 0 0; }
+  margin: 13px 0 0 12px; }
 
 .sailingAnalyticsLabelPanel {
   margin: 10px 0 0 0;
@@ -68,9 +72,9 @@ table td, table th {
 .sailingAnalyticsLabel {
   float: left;
   color: #fff;
-  font-size: 1.2em;
+  font-size: 14px;
   font-weight: bold;
-  margin: 20px 0 0 0; }
+  margin: 25px 0 0 0; }
 
 .leaderboardLabel {
   border-bottom: 2px solid #007dc0; 
