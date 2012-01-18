@@ -1,7 +1,5 @@
 package com.sap.sailing.domain.common.impl;
 
-import java.io.Serializable;
-
 import com.sap.sailing.domain.common.CountryCodeFactory;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Placemark;
@@ -27,19 +25,19 @@ public class PlacemarkImpl implements Placemark {
     /**
      * Creates a new Placemark with the given parameters as attributes.
      */
-    public PlacemarkImpl(String name, String countryCode/*, SerializablePosition position*/, long population) {
+    public PlacemarkImpl(String name, String countryCode, SerializablePosition position, long population) {
         this.name = name;
         this.countryCode = countryCode;
-//        this.position = position;
+        this.position = position;
         this.population = population;
     }
     
-//    /**
-//     * Creates a new Placemark with the given parameters as attributes and a <code>population</code> of <code>0</code>;
-//     */
-//    public PlacemarkImpl(String name, String countryCode, String countryName, SerializablePosition position, String type) {
-//        this(name, countryCode, position, 0);
-//    }
+    /**
+     * Creates a new Placemark with the given parameters as attributes and a <code>population</code> of <code>0</code>;
+     */
+    public PlacemarkImpl(String name, String countryCode, String countryName, SerializablePosition position, String type) {
+        this(name, countryCode, position, 0);
+    }
 
     public String getName() {
         return name;
@@ -56,22 +54,22 @@ public class PlacemarkImpl implements Placemark {
     public long getPopulation() {
         return population;
     }
-//
-//
-//    @Override
-//    public Distance distanceFrom(Position position) {
-//        return this.position.getPosition().getDistance(position);
-//    }
-//    @Override
-//    public Distance distanceFrom(double latDeg, double lngDeg) {
-//        Position p = new DegreePosition(latDeg, lngDeg);
-//        return distanceFrom(p);
-//    }
-//
-//    @Override
-//    public String getCountryName() {
-//        return CountryCodeFactory.INSTANCE.getFromTwoLetterISOName(countryCode).getName();
-//    }
+
+
+    @Override
+    public Distance distanceFrom(Position position) {
+        return this.position.getPosition().getDistance(position);
+    }
+    @Override
+    public Distance distanceFrom(double latDeg, double lngDeg) {
+        Position p = new DegreePosition(latDeg, lngDeg);
+        return distanceFrom(p);
+    }
+
+    @Override
+    public String getCountryName() {
+        return CountryCodeFactory.INSTANCE.getFromTwoLetterISOName(countryCode).getName();
+    }
     
     @Override
     public String toString() {

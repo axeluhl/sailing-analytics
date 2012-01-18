@@ -18,8 +18,7 @@ public class SerializablePositionImpl implements SerializablePosition {
 
     @Override
     public Position getPosition() {
-//        return new DegreePosition(latDeg, lngDeg);
-        return null;
+        return new DegreePosition(latDeg, lngDeg);
     }
     
     @Override

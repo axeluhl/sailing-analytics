@@ -39,7 +39,7 @@ public abstract class AbstractSpeedImpl implements Speed {
 
     @Override
     public int hashCode() {
-        return (int) (31 * Double.doubleToLongBits(getMetersPerSecond()));
+        return 31 * (int) getMetersPerSecond();
     }
     
     @Override
