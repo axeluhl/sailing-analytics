@@ -9,13 +9,14 @@ import java.util.Map;
 
 import com.google.gwt.cell.client.ActionCell;
 import com.google.gwt.cell.client.ActionCell.Delegate;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.Handler;
@@ -25,6 +26,7 @@ import com.google.gwt.user.cellview.client.ColumnSortList.ColumnSortInfo;
 import com.google.gwt.user.cellview.client.IdentityColumn;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FormPanel;
@@ -70,6 +72,7 @@ public class WindPanel extends FormPanel implements EventDisplayer, WindShower, 
     private final Map<WindSource, ListDataProvider<WindDAO>> windLists;
     private final CheckBox raceIsKnownToStartUpwindBox;
     private final WindChart windChart;
+    private static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
 
     public WindPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
             EventRefresher eventRefresher, final StringMessages stringMessages) {
@@ -156,8 +159,8 @@ public class WindPanel extends FormPanel implements EventDisplayer, WindShower, 
                 });
             }
         });
-        Anchor showConfigAnchor = new Anchor(new SafeHtmlBuilder().appendHtmlConstant(
-                "<img class=\"linkNoBorder\" src=\"/gwt/images/settings.png\"/>").toSafeHtml());
+        ImageResource settingsImage = resources.settingsIcon();
+        Anchor showConfigAnchor = new Anchor(AbstractImagePrototype.create(settingsImage).getSafeHtml());
         showConfigAnchor.setTitle(stringMessages.configuration());
         showConfigAnchor.addClickHandler(new ClickHandler() {
             @Override
