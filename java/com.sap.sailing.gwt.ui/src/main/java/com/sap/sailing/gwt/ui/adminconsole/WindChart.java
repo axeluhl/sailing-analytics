@@ -1,8 +1,10 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -29,6 +31,8 @@ import ca.nanometrics.gflot.client.options.SeriesOptions;
 import ca.nanometrics.gflot.client.options.TickFormatter;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.gwt.ui.client.ColorMap;
@@ -46,7 +50,9 @@ public class WindChart implements Component<WindChartSettings> {
     private PlotWithOverviewModel model;
     private final Set<WindSource> windSourcesToDisplay;
     private final ColorMap<WindSource> colorMap;
-    private final HashMap<WindSource, SeriesHandler> stripChartSeries;
+    private final Map<WindSource, SeriesHandler> stripChartSeries;
+    private final List<SeriesHandler> seriesHandlersInOrder;
+    private final Label selectedPointLabel;
     private final ErrorReporter errorReporter;
     private PlotWithOverview plot;
 
@@ -58,6 +64,8 @@ public class WindChart implements Component<WindChartSettings> {
         dateFormat = DateTimeFormat.getFormat("HH:mm:ss");
         this.colorMap = new ColorMap<WindSource>();
         this.stripChartSeries = new HashMap<WindSource, SeriesHandler>();
+        this.seriesHandlersInOrder = new ArrayList<SeriesHandler>();
+        this.selectedPointLabel = new Label();
     }
 
     @Override
@@ -67,6 +75,8 @@ public class WindChart implements Component<WindChartSettings> {
 
     @Override
     public Widget getEntryWidget() {
+        VerticalPanel vp = new VerticalPanel();
+        vp.add(selectedPointLabel);
         model = new PlotWithOverviewModel(PlotModelStrategy.defaultStrategy());
         PlotOptions plotOptions = new PlotOptions();
         plotOptions.setDefaultLineSeriesOptions(new LineSeriesOptions().setLineWidth(1).setShow(true));
@@ -84,11 +94,10 @@ public class WindChart implements Component<WindChartSettings> {
         plotOptions.setGridOptions(new GridOptions().setHoverable(true).setMouseActiveRadius(5).setAutoHighlight(true));
         plotOptions.setSelectionOptions(new SelectionOptions().setDragging(true).setMode("x")); // select along x-axis only
         for (WindSource windSource : windSourcesToDisplay) {
-            SeriesHandler series = model.addSeries(""+windSource.name(), colorMap.getColorByID(windSource));
+            SeriesHandler series = addSeries(windSource);
             series.setOptions(SeriesType.LINES, getLinesOptions(/* visible */ windSourcesToDisplay.contains(windSource)));
             series.setOptions(SeriesType.POINTS, getPointsOptions(/* visible */ false));
             series.setVisible(false);
-            stripChartSeries.put(windSource, series);
         }
         this.plot = new PlotWithOverview(model, plotOptions) {
             @Override
@@ -102,45 +111,13 @@ public class WindChart implements Component<WindChartSettings> {
         // add hover listener
         plot.addHoverListener(new PlotHoverListener() {
             public void onPlotHover(Plot plot, PlotPosition position, PlotItem item) {
-                /* TODO show some reasonable hover tooltip in wind strip chart
-                CompetitorDAO competitor = competitorID.get(seriesID.indexOf(item.getSeries()));
-                if (item != null && competitor != null) {
-                        if (item.getSeries().getLabel().toLowerCase().contains("mark")){
-                                selectedPointLabel.setText(competitor.name + " passed " + markPassingBuoyName.get(competitor.id + (long) item.getDataPoint().getX()) +" at " + dateFormat.format(new Date((long) item.getDataPoint().getX())));
-                        }
-                        else {
-                                String unit = "";
-                                switch (dataToShow){
-                                case CURRENT_SPEED_OVER_GROUND_IN_KNOTS:
-                                        unit = stringConstants.currentSpeedOverGroundInKnotsUnit();
-                                        break;
-                                case DISTANCE_TRAVELED:
-                                        unit = stringConstants.distanceInMetersUnit();
-                                        break;
-                                case GAP_TO_LEADER_IN_SECONDS:
-                                        unit = stringConstants.gapToLeaderInSecondsUnit();
-                                        break;
-                                case VELOCITY_MADE_GOOD_IN_KNOTS:
-                                        unit = stringConstants.velocityMadeGoodInKnotsUnit();
-                                        break;
-                                case WINDWARD_DISTANCE_TO_OVERALL_LEADER:
-                                        unit = stringConstants.windwardDistanceToGoInMetersUnit();
-                                }
-                                String decimalPlaces = "";
-                                for (int i = 0; i < dataToShow.getPrecision(); i++){
-                                        if (i == 0){
-                                                decimalPlaces += ".";
-                                        }
-                                        decimalPlaces += "0";
-                                }
-                                NumberFormat numberFormat = NumberFormat.getFormat("0" +decimalPlaces);
-                                selectedPointLabel.setText(competitor.name + " at " + dateFormat.format(new Date((long) item.getDataPoint().getX()))
-                                + ": " + numberFormat.format(item.getDataPoint().getY()) + unit);
-                        }
+                if (item != null) {
+                    SeriesHandler seriesHandler = seriesHandlersInOrder.get(item.getSeriesIndex());
+                    WindSource windSource = getWindSource(seriesHandler);
+                    selectedPointLabel.setText(windSource.name());
                 } else {
-                    selectedPointLabel.setText(stringConstants.noSelection());
+                    selectedPointLabel.setText("");
                 }
-                */
             }
         }, true);
         plot.addSelectionListener(new SelectionListener() {
@@ -165,10 +142,25 @@ public class WindChart implements Component<WindChartSettings> {
                 plot.setLinearSelection(x1, x2);
             }
         });
-//        plot.setHeight(height);
-//        plot.setWidth(width);
         plot.setOverviewHeight(60);
-        return plot;
+        vp.add(plot);
+        return vp;
+    }
+
+    private WindSource getWindSource(SeriesHandler seriesHandler) {
+        for (Map.Entry<WindSource, SeriesHandler> e : stripChartSeries.entrySet()) {
+            if (e.getValue() == seriesHandler) {
+                return e.getKey();
+            }
+        }
+        return null;
+    }
+
+    private SeriesHandler addSeries(WindSource windSource) {
+        SeriesHandler series = model.addSeries(windSource.name(), colorMap.getColorByID(windSource));
+        seriesHandlersInOrder.add(series);
+        stripChartSeries.put(windSource, series);
+        return series;
     }
 
     public void updateStripChartSeries(WindInfoForRaceDAO result) {
@@ -184,11 +176,9 @@ public class WindChart implements Component<WindChartSettings> {
                 }
             } else {
                 if (seriesHandler == null) {
-                    seriesHandler = model.addSeries("" + windSource.name(),
-                            colorMap.getColorByID(windSource));
+                    seriesHandler = addSeries(windSource);
                     seriesHandler.setOptions(SeriesType.LINES, getLinesOptions(/* visible */ windSourcesToDisplay.contains(windSource)));
                     seriesHandler.setOptions(SeriesType.POINTS, getPointsOptions(/* visible */ false));
-                    stripChartSeries.put(windSource, seriesHandler);
                 } else {
                     seriesHandler.clear();
                 }
@@ -237,8 +227,7 @@ public class WindChart implements Component<WindChartSettings> {
         windSourcesToDisplay.clear();
         windSourcesToDisplay.addAll(newSettings.getWindSourcesToDisplay());
         for (Map.Entry<WindSource, SeriesHandler> e : stripChartSeries.entrySet()) {
-            e.getValue().setOptions(SeriesType.LINES, getLinesOptions(windSourcesToDisplay.contains(e.getKey())));
-            e.getValue().setOptions(SeriesType.POINTS, getPointsOptions(windSourcesToDisplay.contains(e.getKey())));
+            e.getValue().setVisible(windSourcesToDisplay.contains(e.getKey()));
         }
     }
 
