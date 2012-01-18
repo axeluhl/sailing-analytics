@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
@@ -26,8 +27,23 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
                         raceBoardPanel.addStyleName("leftPaddedPanel");
                     }*/
                     
+                    FlowPanel timelinePanel = new FlowPanel();
+                    timelinePanel.addStyleName("timelinePanel");
+                    
+                    FlowPanel timelineInnerPanel = new FlowPanel();
+                    timelineInnerPanel.addStyleName("timelineInnerPanel");
+                    
+                    FlowPanel footerShadowPanel = new FlowPanel();
+                    footerShadowPanel.addStyleName("footerShadowPanel");
+                    
+                    timelinePanel.add(timelineInnerPanel);
+                    
                     RootPanel.get().add(raceBoardPanel);
-                    RootPanel.get().add(logoAndTitlePanel);
+                    
+                    // Don't change this order because of the inner logic in html of "position fixed"-elements
+                    RootPanel.get().add(logoAndTitlePanel);                 // position:fixed        
+                    RootPanel.get().add(timelinePanel);                     // position:fixed
+                    RootPanel.get().add(footerShadowPanel);                 // position:fixed
             }
 
             @Override
