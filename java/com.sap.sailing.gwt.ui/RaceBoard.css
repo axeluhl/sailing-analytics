@@ -149,3 +149,9 @@ input.magnifier{
 	border-radius: 7px;
 	overflow: hidden;
 }
+
+.gwt-DisclosurePanel .content {
+	border: none;
+	padding: 0;
+	margin: 0;
+}
