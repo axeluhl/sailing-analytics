@@ -10,7 +10,7 @@ public class EventDAO extends NamedDAO implements IsSerializable {
     public List<RegattaDAO> regattas;
     public List<CompetitorDAO> competitors;
     
-    private String locations = null;
+    public String locations;
 
     public EventDAO() {
     }
@@ -20,31 +20,35 @@ public class EventDAO extends NamedDAO implements IsSerializable {
         this.name = name;
         this.regattas = regattas;
         this.competitors = competitors;
+        fillLocations();
     }
 
-    /**
-     * Returns the locations of the event as String.<br />
-     * It has a format like this "Location1 -> Location2 -> ..." if the event has more than one location. Otherwhise it
-     * returns just the name of the location.<br />
-     * The locations are retrieved from the {@link RaceDAO RaceDAOs} in the {@link RegattaDAO RegattaDAOs}.
-     * 
-     * @return The locations of the event as String
-     */
-    public String getLocationAsString() {
+    private void fillLocations() {
         //TODO Finish the format of the location string
-        if (locations == null) {
-            locations = "";
-            for (RegattaDAO regattaDAO : regattas) {
-                for (RaceDAO raceDAO : regattaDAO.races) {
-                    RacePlaceOrder placeOrder = raceDAO.racePlaces;
-                    if (placeOrder != null) {
-                        locations += placeOrder.toString() + "; ";
+        StringBuilder b = new StringBuilder();
+        boolean first = true;
+        RacePlaceOrder previousOrder = null;
+        locations = "";
+        for (RegattaDAO regattaDAO : regattas) {
+            for (RaceDAO raceDAO : regattaDAO.races) {
+                RacePlaceOrder order = raceDAO.racePlaces;
+                if (order != null) {
+                    if (first) {
+                        b.append(order.toString());
+                        previousOrder = order;
+                        first = false;
+                    } else {
+                        if (previousOrder.getFinishPlace().equals(order.getStartPlace())) {
+                            b.append(" -> " + order.getStartPlace().getCountryCode() + ", " + order.getStartPlace().getName());
+                        } else {
+                            b.append("; " + order.toString());
+                        }
+                        previousOrder = order;
                     }
                 }
             }
         }
-
-        return locations;
+        locations = b.toString().equals("") ? null : b.toString();
     }
 
     /**

@@ -173,7 +173,7 @@ public class OverviewEventPanel extends AbstractEventPanel {
             TextColumn<EventDAO> locationColumn = new TextColumn<EventDAO>() {
                 @Override
                 public String getValue(EventDAO eventDAO) {
-                    String locations = eventDAO.getLocationAsString();
+                    String locations = eventDAO.locations;
                     return locations != null ? locations : stringConstants.locationNotAvailable();
                 }
             };
@@ -329,7 +329,7 @@ public class OverviewEventPanel extends AbstractEventPanel {
         sortHandler.setComparator(locationColumn, new Comparator<EventDAO>() {
             @Override
             public int compare(EventDAO e1, EventDAO e2) {
-                return e1.getLocationAsString().compareTo(e2.getLocationAsString());
+                return e1.locations.compareTo(e2.locations);
             }
         });
         sortHandler.setComparator(nameColumn, new Comparator<EventDAO>() {
