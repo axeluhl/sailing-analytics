@@ -7,6 +7,10 @@ import com.sap.sailing.gwt.ui.client.DataEntryDialog.Validator;
 
 public interface SettingsDialogComponent<SettingsType> {
     /**
+     * Called by the framework to obtain the widget to show in the settings dialog. Called each time before the
+     * settings dialog is shown, therefore also before {@link #getResult()} is called and before any method on
+     * the validator returned by {@link #getValidator()} is called.
+     * 
      * @param dialog
      *            can be used to {@link DataEntryDialog#createCheckbox(String) produce a checkbox}, a
      *            {@link DataEntryDialog#createTextBox(String)} or other data entry elements that participate in key

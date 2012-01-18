@@ -35,32 +35,34 @@ import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
-import com.sap.sailing.domain.base.Bearing;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.Distance;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Leg;
-import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.RaceDefinition;
-import com.sap.sailing.domain.base.Speed;
 import com.sap.sailing.domain.base.SpeedWithBearing;
-import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.base.impl.DegreeBearingImpl;
-import com.sap.sailing.domain.base.impl.DegreePosition;
-import com.sap.sailing.domain.base.impl.KilometersPerHourSpeedImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MeterDistance;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.Util.Pair;
+import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.CountryCode;
+import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindError;
 import com.sap.sailing.domain.common.NoWindException;
+import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.Tack;
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
+import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.domain.common.impl.KilometersPerHourSpeedImpl;
+import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard.Entry;
 import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
@@ -118,11 +120,11 @@ import com.sap.sailing.server.api.DetailType;
 import com.sap.sailing.server.api.EventAndRaceIdentifier;
 import com.sap.sailing.server.api.EventFetcher;
 import com.sap.sailing.server.api.EventIdentifier;
+import com.sap.sailing.server.api.EventName;
 import com.sap.sailing.server.api.EventNameAndRaceName;
 import com.sap.sailing.server.api.LeaderboardNameAndRaceColumnName;
 import com.sap.sailing.server.api.RaceFetcher;
 import com.sap.sailing.server.api.RaceIdentifier;
-import com.sap.sailing.util.CountryCode;
 
 /**
  * The server side implementation of the RPC service.
@@ -148,7 +150,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
 
     private final com.sap.sailing.domain.tractracadapter.persistence.DomainObjectFactory tractracDomainObjectFactory;
     
-    private final com.sap.sailing.util.CountryCodeFactory countryCodeFactory;
+    private final com.sap.sailing.domain.common.CountryCodeFactory countryCodeFactory;
     
     private final Executor executor;
 
@@ -161,7 +163,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         tractracDomainObjectFactory = com.sap.sailing.domain.tractracadapter.persistence.DomainObjectFactory.INSTANCE;
         tractracMongoObjectFactory = com.sap.sailing.domain.tractracadapter.persistence.MongoObjectFactory.INSTANCE;
         swissTimingFactory = SwissTimingFactory.INSTANCE;
-        countryCodeFactory = com.sap.sailing.util.CountryCodeFactory.INSTANCE;
+        countryCodeFactory = com.sap.sailing.domain.common.CountryCodeFactory.INSTANCE;
         executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
     }
 
@@ -326,11 +328,11 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         return result;
     }
 
-    public List<EventDAO> listEvents() throws IllegalArgumentException {
+    public List<EventDAO> listEvents(boolean withRacePlaces) throws IllegalArgumentException {
         List<EventDAO> result = new ArrayList<EventDAO>();
         for (Event event : getService().getAllEvents()) {
             List<CompetitorDAO> competitorList = getCompetitorDAOs(event.getCompetitors());
-            List<RegattaDAO> regattasList = getRegattaDAOs(event);
+            List<RegattaDAO> regattasList = getRegattaDAOs(event, withRacePlaces);
             EventDAO eventDAO = new EventDAO(event.getName(), regattasList, competitorList);
             if (!eventDAO.regattas.isEmpty()) {
                 result.add(eventDAO);
@@ -339,7 +341,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         return result;
     }
 
-    private List<RegattaDAO> getRegattaDAOs(Event event) {
+    private List<RegattaDAO> getRegattaDAOs(Event event, boolean withRacePlaces) {
         Map<BoatClass, Set<RaceDefinition>> racesByBoatClass = new HashMap<BoatClass, Set<RaceDefinition>>();
         for (RaceDefinition r : event.getAllRaces()) {
             Set<RaceDefinition> racesForBoatClass = racesByBoatClass.get(r.getBoatClass());
@@ -351,7 +353,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         }
         List<RegattaDAO> result = new ArrayList<RegattaDAO>();
         for (Map.Entry<BoatClass, Set<RaceDefinition>> e : racesByBoatClass.entrySet()) {
-            List<RaceDAO> raceDAOsInBoatClass = getRaceDAOs(event, e.getValue());
+            List<RaceDAO> raceDAOsInBoatClass = getRaceDAOs(event, e.getValue(), withRacePlaces);
             if (!raceDAOsInBoatClass.isEmpty()) {
                 RegattaDAO regatta = new RegattaDAO(new BoatClassDAO(e.getKey()==null?"":e.getKey().getName()), raceDAOsInBoatClass);
                 result.add(regatta);
@@ -360,7 +362,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         return result;
     }
 
-    private List<RaceDAO> getRaceDAOs(Event event, Set<RaceDefinition> races) {
+    private List<RaceDAO> getRaceDAOs(Event event, Set<RaceDefinition> races, boolean withRacePlaces) {
         List<RaceDAO> result = new ArrayList<RaceDAO>();
         for (RaceDefinition r : races) {
             RaceDAO raceDAO = new RaceDAO(r.getName(), getCompetitorDAOs(r.getCompetitors()), getService().isRaceBeingTracked(r));
@@ -370,6 +372,9 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 raceDAO.startOfTracking = trackedRace.getStartOfTracking() == null ? null : trackedRace.getStartOfTracking().asDate();
                 raceDAO.timePointOfLastEvent = trackedRace.getTimePointOfLastEvent() == null ? null : trackedRace.getTimePointOfLastEvent().asDate();
                 raceDAO.timePointOfNewestEvent = trackedRace.getTimePointOfNewestEvent() == null ? null : trackedRace.getTimePointOfNewestEvent().asDate();
+                if (withRacePlaces) {
+                    raceDAO.racePlaces = trackedRace.getPlaceOrder();
+                }
             }
             result.add(raceDAO);
         }
@@ -396,7 +401,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     @Override
     public Pair<String, List<TracTracRaceRecordDAO>> listTracTracRacesInEvent(String eventJsonURL) throws MalformedURLException, IOException,
             ParseException, org.json.simple.parser.ParseException, URISyntaxException {
-        com.sap.sailing.domain.common.Util.Pair<String,List<RaceRecord>> raceRecords;
+        com.sap.sailing.domain.common.impl.Util.Pair<String,List<RaceRecord>> raceRecords;
         raceRecords = getService().getTracTracRaceRecords(new URL(eventJsonURL));
         List<TracTracRaceRecordDAO> result = new ArrayList<TracTracRaceRecordDAO>();
         for (RaceRecord raceRecord : raceRecords.getB()) {
@@ -845,6 +850,24 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         for(Leaderboard leaderboard: leaderboards.values()) {
             LeaderboardDAO dao = createStrippedLeaderboardDAO(leaderboard);
             results.add(dao);
+        }
+        
+        return results;
+    }
+    
+    @Override
+    public List<LeaderboardDAO> getLeaderboardsByEvent(EventIdentifier eventIdentifier) {
+        Event event = getEvent(eventIdentifier);
+        Map<String, Leaderboard> leaderboards = getService().getLeaderboards();
+        List<LeaderboardDAO> results = new ArrayList<LeaderboardDAO>();
+        
+        for (Leaderboard leaderboard : leaderboards.values()) {
+            for (RaceInLeaderboard race : leaderboard.getRaceColumns()) {
+                if (Util.contains(event.getAllRaces(), race.getTrackedRace().getRace())) {
+                    LeaderboardDAO dao = createStrippedLeaderboardDAO(leaderboard);
+                    results.add(dao);
+                }
+            }
         }
         
         return results;
@@ -1432,7 +1455,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     private List<ManeuverDAO> createManeuverDAOsForCompetitor(List<Maneuver> maneuvers, TrackedRace trackedRace, Competitor competitor) {
         List<ManeuverDAO> result = new ArrayList<ManeuverDAO>();
         for (Maneuver maneuver : maneuvers) {
-            ManeuverDAO maneuverDAO = new ManeuverDAO(maneuver.getType().name(), maneuver.getNewTack().name(),
+            ManeuverDAO maneuverDAO = new ManeuverDAO(maneuver.getType(), maneuver.getNewTack(),
                     new PositionDAO(maneuver.getPosition().getLatDeg(), maneuver.getPosition().getLngDeg()), 
                     maneuver.getTimePoint().asDate(),
                     createSpeedWithBearingDAO(maneuver.getSpeedWithBearingBefore()),
@@ -1501,7 +1524,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
     
     @Override
-    public Event getEvent(EventNameAndRaceName eventIdentifier) {
+    public Event getEvent(EventName eventIdentifier) {
         return getService().getEventByName(eventIdentifier.getEventName());
     }
 
@@ -1552,5 +1575,14 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     @Override
     public ServletContext getServletContext() {
         return new DelegatingServletContext(super.getServletContext());
+    }
+    
+    @Override
+    /**
+     * Override of funtion to prevent exception "Blocked request without GWT permutation header (XSRF attack?)" when testing the GWT sites
+     */
+    protected void checkPermutationStrongName() throws SecurityException {
+        //Override to prevent exception "Blocked request without GWT permutation header (XSRF attack?)" when testing the GWT sites
+        return;
     }
 }

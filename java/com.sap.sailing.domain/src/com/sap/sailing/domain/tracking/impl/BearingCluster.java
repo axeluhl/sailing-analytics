@@ -1,6 +1,6 @@
 package com.sap.sailing.domain.tracking.impl;
 
-import com.sap.sailing.domain.base.Bearing;
+import com.sap.sailing.domain.common.Bearing;
 
 /**
  * Contains a number of {@link Bearing} objects and maintains the average bearing. For a given {@link Bearing} it

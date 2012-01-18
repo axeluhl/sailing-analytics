@@ -4,9 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.TimePoint;
-import com.sap.sailing.domain.common.Util;
-import com.sap.sailing.domain.common.Util.Pair;
+import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
 import com.sap.sailing.domain.leaderboard.ScoreCorrection;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;

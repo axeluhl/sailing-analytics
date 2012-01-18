@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.tracking.impl;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -12,35 +13,40 @@ import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.sap.sailing.domain.base.Bearing;
+import org.json.simple.parser.ParseException;
+
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseChange;
 import com.sap.sailing.domain.base.CourseListener;
-import com.sap.sailing.domain.base.Distance;
 import com.sap.sailing.domain.base.Leg;
-import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.SpeedWithBearing;
-import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.DouglasPeucker;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
+import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.NoWindError;
 import com.sap.sailing.domain.common.NoWindException;
+import com.sap.sailing.domain.common.Placemark;
+import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.RacePlaceOrder;
 import com.sap.sailing.domain.common.Tack;
-import com.sap.sailing.domain.common.Util;
-import com.sap.sailing.domain.common.Util.Pair;
+import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.RacePlaceOrderImpl;
+import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSTrackListener;
 import com.sap.sailing.domain.tracking.Maneuver;
-import com.sap.sailing.domain.tracking.Maneuver.Type;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedEvent;
 import com.sap.sailing.domain.tracking.TrackedLeg;
@@ -49,11 +55,18 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
+import com.sap.sailing.geocoding.ReverseGeocoder;
 
 public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     private static final Logger logger = Logger.getLogger(TrackedRaceImpl.class.getName());
 
     private static final double PENALTY_CIRCLE_DEGREES_THRESHOLD = 320;
+    
+    /**
+     * Used in {@link #getPlaceOrder()} to calculate the radius for the
+     * {@link ReverseGeocoder#getPlacemarksNear(Position, double) GetPlacemarksNear-Service}.
+     */
+    private static final double GEONAMES_RADIUS_CACLCULATION_FACTOR = 2.5;
 
     // TODO observe the race course; if it changes, update leg structures; consider fine-grained update events that tell what changed
     private final RaceDefinition race;
@@ -854,13 +867,13 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         // the TrackedLegOfCompetitor variables may be null, e.g., in case the time points are before or after the race
         TrackedLegOfCompetitor legBeforeManeuver = getTrackedLeg(competitor, timePointBeforeManeuver);
         TrackedLegOfCompetitor legAfterManeuver = getTrackedLeg(competitor, timePointAfterManeuver);
-        Maneuver.Type maneuverType;
+        ManeuverType maneuverType;
         if (Math.abs(totalCourseChangeInDegrees) > PENALTY_CIRCLE_DEGREES_THRESHOLD) {
-            maneuverType = Type.PENALTY_CIRCLE;
+            maneuverType = ManeuverType.PENALTY_CIRCLE;
         } else if (legBeforeManeuver != legAfterManeuver &&
                 // a maneuver at the start line is not to be considered a MARK_PASSING maneuver; show a tack as a tack
                 legAfterManeuver != null && legAfterManeuver.getLeg().getFrom() != getRace().getCourse().getFirstWaypoint()) {
-            maneuverType = Type.MARK_PASSING;
+            maneuverType = ManeuverType.MARK_PASSING;
         } else {
             if (tackBeforeManeuver != tackAfterManeuver) {
                 LegType legType = legBeforeManeuver!=null ?
@@ -870,13 +883,13 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                     // tack or jibe
                     switch (legType) {
                     case UPWIND:
-                        maneuverType = Type.TACK;
+                        maneuverType = ManeuverType.TACK;
                         break;
                     case DOWNWIND:
-                        maneuverType = Type.JIBE;
+                        maneuverType = ManeuverType.JIBE;
                         break;
                     default:
-                        maneuverType = Type.UNKNOWN;
+                        maneuverType = ManeuverType.UNKNOWN;
                         if (logger.isLoggable(Level.FINE)) {
                             logger.fine("Unknown maneuver for "
                                     + competitor + " at " + maneuverTimePoint
@@ -886,7 +899,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                         break;
                     }
                 } else {
-                    maneuverType = Type.UNKNOWN;
+                    maneuverType = ManeuverType.UNKNOWN;
                     logger.fine("Can't determine leg type because tracked legs for competitor "+competitor+
                             " cannot be determined for time points "+timePointBeforeManeuver+" and "+
                             timePointAfterManeuver);
@@ -898,7 +911,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                 Bearing toWindBeforeManeuver = windBearing.getDifferenceTo(speedWithBearingOnApproximationAtBeginning.getBearing());
                 Bearing toWindAfterManeuver = windBearing.getDifferenceTo(speedWithBearingOnApproximationAtEnd.getBearing());
                 maneuverType = Math.abs(toWindBeforeManeuver.getDegrees()) < Math.abs(toWindAfterManeuver.getDegrees()) ?
-                        Type.HEAD_UP : Type.BEAR_AWAY;
+                        ManeuverType.HEAD_UP : ManeuverType.BEAR_AWAY;
             }
         }
         Maneuver maneuver = new ManeuverImpl(maneuverType, tackAfterManeuver, maneuverPosition, maneuverTimePoint, speedWithBearingOnApproximationAtBeginning,
@@ -945,4 +958,67 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         public void speedAveragingChanged(long oldMillisecondsOverWhichToAverage, long newMillisecondsOverWhichToAverage) {
         }
     }
+    
+    public RacePlaceOrder getPlaceOrder() {
+        RacePlaceOrder order = null;
+        Placemark startBest = null;
+        Placemark finishBest = null;
+        
+        //Get start postition
+        Waypoint start = getRace().getCourse().getFirstWaypoint();
+        Iterable<MarkPassing> startPassings = getMarkPassingsInOrder(start);
+        MarkPassing startPassing = startPassings.iterator().next();
+        Position startPosition = getApproximatePosition(start, startPassing.getTimePoint());
+        
+        try {
+            //Get distance to nearest placemark and calculate the search radius
+            Placemark startNearest = ReverseGeocoder.INSTANCE.getPlacemarkNearest(startPosition);
+            Distance startNearestDistance = startNearest.distanceFrom(startPosition);
+            double startRadius = startNearestDistance.getKilometers() * GEONAMES_RADIUS_CACLCULATION_FACTOR;
+            
+            //Get the estimated best start place
+            startBest = ReverseGeocoder.INSTANCE.getPlacemarkLast(startPosition, startRadius,
+                    new Placemark.ByPopulationDistanceRatio(startPosition));
+        } catch (IOException e) {
+            logger.throwing(TrackedRaceImpl.class.getName(), "getPlaceOrder()", e);
+        } catch (ParseException e) {
+            logger.throwing(TrackedRaceImpl.class.getName(), "getPlaceOrder()", e);
+        }
+
+        //Get finish position
+        Waypoint finish = getRace().getCourse().getLastWaypoint();
+        Iterable<MarkPassing> finishPassings = getMarkPassingsInOrder(finish);
+        MarkPassing finishPassing = null;
+        while (finishPassings.iterator().hasNext()) {
+            finishPassing = (MarkPassing) finishPassings.iterator().next();
+        }
+        Position finishPosition = getApproximatePosition(finish, finishPassing.getTimePoint());
+        
+        try {
+            //Get distance to nearest placemark and calculate the search radius
+            Placemark finishNearest = ReverseGeocoder.INSTANCE.getPlacemarkNearest(finishPosition);
+            Distance finishNearestDistance = finishNearest.distanceFrom(finishPosition);
+            double finishRadius = finishNearestDistance.getKilometers() * GEONAMES_RADIUS_CACLCULATION_FACTOR;
+            
+            //Get the estimated best finish place
+            finishBest = ReverseGeocoder.INSTANCE.getPlacemarkLast(finishPosition, finishRadius,
+                    new Placemark.ByPopulationDistanceRatio(finishPosition));
+        } catch (IOException e) {
+            logger.throwing(TrackedRaceImpl.class.getName(), "getPlaceOrder()", e);
+        } catch (ParseException e) {
+            logger.throwing(TrackedRaceImpl.class.getName(), "getPlaceOrder()", e);
+        }
+        
+        if (startBest != null) {
+            final List<Placemark> places = new ArrayList<Placemark>();
+            places.add(startBest);
+            if (!startBest.equals(finishBest)) {
+                places.add(finishBest);
+            }
+            order = new RacePlaceOrderImpl(places);
+        }
+        
+        return order;
+    }
+    
 }

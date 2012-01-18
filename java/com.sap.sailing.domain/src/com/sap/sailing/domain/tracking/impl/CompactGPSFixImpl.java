@@ -1,9 +1,9 @@
 package com.sap.sailing.domain.tracking.impl;
 
-import com.sap.sailing.domain.base.Position;
-import com.sap.sailing.domain.base.TimePoint;
-import com.sap.sailing.domain.base.impl.AbstractPosition;
 import com.sap.sailing.domain.base.impl.AbstractTimePoint;
+import com.sap.sailing.domain.common.AbstractPosition;
+import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.GPSFix;
 
 /**
@@ -30,6 +30,7 @@ public class CompactGPSFixImpl extends AbstractGPSFixImpl {
     private byte validityCache = -1;
     
     private class CompactPosition extends AbstractPosition {
+
         @Override
         public double getLatDeg() {
             return latDeg;

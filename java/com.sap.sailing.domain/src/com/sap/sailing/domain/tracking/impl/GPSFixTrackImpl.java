@@ -8,17 +8,17 @@ import java.util.List;
 import java.util.NavigableSet;
 import java.util.Set;
 
-import com.sap.sailing.domain.base.Bearing;
-import com.sap.sailing.domain.base.Distance;
-import com.sap.sailing.domain.base.Position;
-import com.sap.sailing.domain.base.Speed;
 import com.sap.sailing.domain.base.SpeedWithBearing;
-import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.base.impl.NauticalMileDistance;
-import com.sap.sailing.domain.common.Util.Pair;
+import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.Speed;
+import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.NauticalMileDistance;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
@@ -150,6 +150,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
 
     private Position getEstimatedPosition(TimePoint timePoint, boolean extrapolate, FixType lastFixAtOrBefore,
             FixType firstFixAtOrAfter) {
+        // TODO bug #169: compute a confidence value for the position returned based on time difference between fix(es) and timePoint 
         if (lastFixAtOrBefore != null && lastFixAtOrBefore == firstFixAtOrAfter) {
             return lastFixAtOrBefore.getPosition(); // exact match; how unlikely is that?
         } else {
@@ -317,13 +318,15 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         NavigableSet<GPSFix> gpsFixesToUseForSpeedEstimation = (NavigableSet<GPSFix>) fixesToUseForSpeedEstimation;
         List<GPSFix> relevantFixes = getFixesRelevantForSpeedEstimation(at, gpsFixesToUseForSpeedEstimation);
         double knotSum = 0;
-        BearingCluster bearingCluster = new BearingCluster();
+        BearingCluster bearingCluster = new BearingCluster(); // TODO bug #169: use confidence-based cluster
         int count = 0;
         if (!relevantFixes.isEmpty()) {
             Iterator<GPSFix> fixIter = relevantFixes.iterator();
             GPSFix last = fixIter.next();
             while (fixIter.hasNext()) {
+                // TODO bug #169: consider time difference between next.getTimepoint() and at to compute a confidence
                 GPSFix next = fixIter.next();
+                // TODO bug #169: use SpeedWithConfidence to aggregate confidence-tagged speed values
                 knotSum += last.getPosition().getDistance(next.getPosition())
                         .inTime(next.getTimePoint().asMillis() - last.getTimePoint().asMillis()).getKnots();
                 bearingCluster.add(last.getPosition().getBearingGreatCircle(next.getPosition()));

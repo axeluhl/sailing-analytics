@@ -1,11 +1,7 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
@@ -19,113 +15,83 @@ import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
 import com.sap.sailing.gwt.ui.shared.QuickRankDAO;
 
-public class QuickRanksListBoxComposite extends Composite implements CompetitorSelectionProvider {
-    private final Set<CompetitorSelectionChangeListener> competitorSelectionChangeListeners;
+/**
+ * Shows a lean view of a race's competitors' ranks in a list. The list shows a subset of the race's competitors because
+ * not at all times may the ranks for all competitors be known. The list selection is tied to a
+ * {@link CompetitorSelectionProvider}. Regarding selection propagation from this view to the selection provider
+ * there is a minor glitch: since this view may show only a subset of all available competitors, this view's selection
+ * may also be just a subset of the current selection. If the selection is changed through this view, other previously
+ * selected competitors that are not shown in this view will be deselected.
+ * 
+ * @author Frank Mittag (C5163874), Axel Uhl (d043530)
+ * 
+ */
+public class QuickRanksListBoxComposite extends Composite implements CompetitorSelectionChangeListener {
+    private final CompetitorSelectionProvider competitorSelectionProvider;
     private final List<QuickRankDAO> quickRankList;
     private final List<CompetitorDAO> competitorList;
     private final ListBox quickRankListBox;
     
-    public QuickRanksListBoxComposite(boolean hasMultiSelection) {
-        this.competitorSelectionChangeListeners = new HashSet<CompetitorSelectionChangeListener>();
-        quickRankListBox = new ListBox(hasMultiSelection);
+    public QuickRanksListBoxComposite(CompetitorSelectionProvider competitorSelectionProvider) {
+        this.competitorSelectionProvider = competitorSelectionProvider;
+        competitorSelectionProvider.addCompetitorSelectionChangeListener(this);
+        quickRankListBox = new ListBox(competitorSelectionProvider.hasMultiSelection());
         quickRankListBox.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
-                fireCompetitorSelectionChanged(Collections.singletonList(getSelectedCompetitor()));
+                onLocalSelectionChanged();
             }
         });
         quickRankListBox.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                CompetitorDAO selectedCompetitor = getSelectedCompetitor();
-                List<CompetitorDAO> selectedCompetitorsCollection = Collections.emptyList();
-                if (selectedCompetitor != null) {
-                    Collections.singletonList(selectedCompetitor);
-                }
-                fireCompetitorSelectionChanged(selectedCompetitorsCollection);
+                onLocalSelectionChanged();
             }
         });
         quickRankList = new ArrayList<QuickRankDAO>();
         competitorList = new ArrayList<CompetitorDAO>();
         VerticalPanel vp = new VerticalPanel();
         vp.add(quickRankListBox);
-        
         // All composites must call initWidget() in their constructors.
         initWidget(vp);
     }
 
-    public void fillQuickRanks(List<QuickRankDAO> quickRanks, boolean isSorted) {
-        List<CompetitorDAO> oldSelection = getSelectedCompetitors();
-
+    /**
+     * propagates changes in the local selection to the selection provider
+     */
+    private void onLocalSelectionChanged() {
+        competitorSelectionProvider.setSelection(getSelectedCompetitors(), this);
+    }
+    
+    /**
+     * @param quickRanks list of quick ranks, ordered by ascending rank
+     */
+    public void fillQuickRanks(List<QuickRankDAO> quickRanks) {
         quickRankList.clear();
         competitorList.clear();
         quickRankListBox.clear();
-        
         for (QuickRankDAO quickRank: quickRanks) {
             quickRankList.add(quickRank);
             competitorList.add(quickRank.competitor);
         }
-        if(!isSorted) {
-            Collections.sort(quickRankList, new Comparator<QuickRankDAO>() {
-                @Override
-                public int compare(QuickRankDAO o1, QuickRankDAO o2) {
-                    Integer rank1 = o1.rank;
-                    Integer rank2 = o2.rank;
-                    return rank1.compareTo(rank2);
-                }
-
-            });
-        }
         int index = 0;
         for (QuickRankDAO quickRank : quickRankList) {
             quickRankListBox.addItem(toString(quickRank));
-            if(oldSelection.contains(quickRank.competitor))
+            if (competitorSelectionProvider.isSelected(quickRank.competitor)) {
                 quickRankListBox.setItemSelected(index, true);
+            }
             index++;
         }
-        fireCompetitorSelectionChanged(getSelectedCompetitors());
     }
 
-    public List<CompetitorDAO> getCompetitors() {
-        return competitorList;            
-    }
-    
-    private CompetitorDAO getSelectedCompetitor() {
-        int i = quickRankListBox.getSelectedIndex();
-        CompetitorDAO result = null;
-        if (i >= 0) {
-            result = quickRankList.get(i).competitor;
-        }
-        return result;
-    }
-
-    @Override
-    public List<CompetitorDAO> getSelectedCompetitors() {
-        int i=0;
+    private Iterable<CompetitorDAO> getSelectedCompetitors() {
         List<CompetitorDAO> result = new ArrayList<CompetitorDAO>();
-        for (QuickRankDAO quickRank: quickRankList) {
+        for (int i=0; i<quickRankListBox.getItemCount(); i++) {
             if (quickRankListBox.isItemSelected(i)) {
-                result.add(quickRank.competitor);
+                result.add(quickRankList.get(i).competitor);
             }
-            i++;
         }
         return result;
-    }
-
-    @Override
-    public void addCompetitorSelectionChangeListener(CompetitorSelectionChangeListener listener) {
-        competitorSelectionChangeListeners.add(listener);
-    }
-
-    @Override
-    public void removeCompetitorSelectionChangeListener(CompetitorSelectionChangeListener listener) {
-        competitorSelectionChangeListeners.remove(listener);
-    }
-
-    private void fireCompetitorSelectionChanged(List<CompetitorDAO> selectedCompetitors) {
-        for (CompetitorSelectionChangeListener listener : competitorSelectionChangeListeners) {
-            listener.onCompetitorSelectionChange(selectedCompetitors);
-        }
     }
 
     protected String toString(QuickRankDAO quickRank) {
@@ -135,6 +101,22 @@ public class QuickRanksListBoxComposite extends Composite implements CompetitorS
 
     public ListBox getListBox() {
         return quickRankListBox;
+    }
+
+    @Override
+    public void addedToSelection(CompetitorDAO competitor) {
+        int pos = quickRankList.indexOf(competitor);
+        if (pos >= 0) {
+            quickRankListBox.setItemSelected(pos, true);
+        }
+    }
+
+    @Override
+    public void removedFromSelection(CompetitorDAO competitor) {
+        int pos = quickRankList.indexOf(competitor);
+        if (pos >= 0) {
+            quickRankListBox.setItemSelected(pos, false);
+        }
     }
 
 }

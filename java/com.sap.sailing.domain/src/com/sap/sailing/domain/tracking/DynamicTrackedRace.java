@@ -2,7 +2,7 @@ package com.sap.sailing.domain.tracking;
 
 import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.TimePoint;
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
 
 public interface DynamicTrackedRace extends TrackedRace {

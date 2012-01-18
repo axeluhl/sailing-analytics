@@ -1,16 +1,17 @@
 package com.sap.sailing.domain.tracking.impl;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.NavigableSet;
 
 import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.Position;
-import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.impl.AbstractTimePoint;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.Util.Pair;
+import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
@@ -53,6 +54,11 @@ public class TrackBasedEstimationWindTrackImpl extends WindTrackImpl implements 
     private final TrackedRace trackedRace;
     
     private final NavigableSet<TimePoint> timePointsWithCachedNullResult;
+    
+    /**
+     * A copy of the {@link #timePointsWithCachedNullResult} contents offering fast contains checks.
+     */
+    private final HashSet<TimePoint> timePointsWithCachedNullResultFastContains;
 
     public TrackBasedEstimationWindTrackImpl(TrackedRace trackedRace, long millisecondsOverWhichToAverage) {
         super(millisecondsOverWhichToAverage);
@@ -60,6 +66,7 @@ public class TrackBasedEstimationWindTrackImpl extends WindTrackImpl implements 
         trackedRace.addListener(this);
         this.virtualInternalRawFixes = new EstimatedWindFixesAsNavigableSet(this, trackedRace);
         this.timePointsWithCachedNullResult = new ArrayListNavigableSet<TimePoint>(AbstractTimePoint.TIMEPOINT_COMPARATOR);
+        this.timePointsWithCachedNullResultFastContains = new HashSet<TimePoint>();
     }
 
     private NavigableSet<Wind> getCachedFixes() {
@@ -73,6 +80,7 @@ public class TrackBasedEstimationWindTrackImpl extends WindTrackImpl implements 
     protected synchronized void cache(TimePoint timePoint, Wind fix) {
         if (fix == null) {
             getTimePointsWithCachedNullResult().add(timePoint);
+            timePointsWithCachedNullResultFastContains.add(timePoint);
         } else {
             getCachedFixes().add(fix);
         }
@@ -80,6 +88,7 @@ public class TrackBasedEstimationWindTrackImpl extends WindTrackImpl implements 
     
     protected synchronized void cacheNull(TimePoint timePoint) {
         timePointsWithCachedNullResult.add(timePoint);
+        timePointsWithCachedNullResultFastContains.add(timePoint);
     }
     
     private synchronized void invalidateCache(Wind startOfInvalidation, TimePoint endOfInvalidation) {
@@ -100,6 +109,7 @@ public class TrackBasedEstimationWindTrackImpl extends WindTrackImpl implements 
             TimePoint next = nullIter.next();
             if (endOfInvalidation == null || next.compareTo(endOfInvalidation) < 0) {
                 nullIter.remove();
+                timePointsWithCachedNullResultFastContains.remove(next);
             } else {
                 break;
             }
@@ -108,7 +118,8 @@ public class TrackBasedEstimationWindTrackImpl extends WindTrackImpl implements 
 
     private synchronized void clearCache() {
         getCachedFixes().clear();
-        getTimePointsWithCachedNullResult().clear();
+        timePointsWithCachedNullResult.clear();
+        timePointsWithCachedNullResultFastContains.clear();
     }
 
     /**
@@ -119,7 +130,7 @@ public class TrackBasedEstimationWindTrackImpl extends WindTrackImpl implements 
      */
     protected synchronized Wind getEstimatedWindDirection(Position p, TimePoint timePoint) {
         Wind result;
-        if (getTimePointsWithCachedNullResult().contains(timePoint)) {
+        if (nullResultCacheContains(timePoint)) {
             result = null;
         } else {
             NavigableSet<Wind> cache = getCachedFixes();
@@ -132,6 +143,10 @@ public class TrackBasedEstimationWindTrackImpl extends WindTrackImpl implements 
             }
         }
         return result;
+    }
+
+    private boolean nullResultCacheContains(TimePoint timePoint) {
+        return timePointsWithCachedNullResultFastContains.contains(timePoint);
     }
 
     @Override

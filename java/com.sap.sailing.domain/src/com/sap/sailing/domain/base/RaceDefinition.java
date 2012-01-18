@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.base;
 
+import com.sap.sailing.domain.common.Named;
+
 /**
  * Tells the {@link BoatClass boat class} and the {@link Course course} for a single race that is usually part of a
  * regatta. Note, that a course may change over time, even while the race is on, because the race committee may decide,

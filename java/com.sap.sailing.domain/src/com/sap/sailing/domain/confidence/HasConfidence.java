@@ -1,6 +1,6 @@
 package com.sap.sailing.domain.confidence;
 
-import com.sap.sailing.domain.base.Distance;
+import com.sap.sailing.domain.common.Distance;
 
 /**
  * Some values, particularly those obtained from real-world measurements, are not always accurate. Some values are

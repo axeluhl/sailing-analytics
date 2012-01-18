@@ -1,13 +1,14 @@
 package com.sap.sailing.domain.tracking.impl;
 
-import com.sap.sailing.domain.base.Position;
 import com.sap.sailing.domain.base.SpeedWithBearing;
-import com.sap.sailing.domain.base.TimePoint;
+import com.sap.sailing.domain.common.ManeuverType;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Tack;
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.Maneuver;
 
 public class ManeuverImpl extends AbstractGPSFixImpl implements Maneuver {
-    private final Type type;
+    private final ManeuverType type;
     private final Tack newTack;
     private final Position position;
     private final TimePoint timePoint;
@@ -15,7 +16,7 @@ public class ManeuverImpl extends AbstractGPSFixImpl implements Maneuver {
     private final SpeedWithBearing speedWithBearingAfter;
     private final double directionChangeInDegrees;
 
-    public ManeuverImpl(Type type, Tack newTack, Position position, TimePoint timePoint, SpeedWithBearing speedWithBearingBefore,
+    public ManeuverImpl(ManeuverType type, Tack newTack, Position position, TimePoint timePoint, SpeedWithBearing speedWithBearingBefore,
             SpeedWithBearing speedWithBearingAfter, double directionChangeInDegrees) {
         super();
         this.type = type;
@@ -28,7 +29,7 @@ public class ManeuverImpl extends AbstractGPSFixImpl implements Maneuver {
     }
     
     @Override
-    public Type getType() {
+    public ManeuverType getType() {
         return type;
     }
 

@@ -18,15 +18,16 @@ import org.junit.Test;
 
 import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.Position;
-import com.sap.sailing.domain.base.TimePoint;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.base.impl.DegreeBearingImpl;
-import com.sap.sailing.domain.base.impl.DegreePosition;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.NoWindException;
+import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
+import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.impl.GPSFixImpl;
@@ -94,10 +95,10 @@ public class ManeuverAnalysisIDMChampionsFinalTest extends AbstractManeuverDetec
         List<Maneuver> maneuvers = getTrackedRace().getManeuvers(competitor, new MillisecondsTimePoint(fromDate),
                 new MillisecondsTimePoint(toDate));
         maneuversInvalid = new ArrayList<Maneuver>(maneuvers);
-        assertManeuver(maneuvers, Maneuver.Type.PENALTY_CIRCLE,
+        assertManeuver(maneuvers, ManeuverType.PENALTY_CIRCLE,
                 new MillisecondsTimePoint(maneuverTime), PENALTYCIRCLE_TOLERANCE);
-        List<Maneuver.Type> maneuverTypesFound = new ArrayList<Maneuver.Type>();
-        maneuverTypesFound.add(Maneuver.Type.PENALTY_CIRCLE);
+        List<ManeuverType> maneuverTypesFound = new ArrayList<ManeuverType>();
+        maneuverTypesFound.add(ManeuverType.PENALTY_CIRCLE);
         assertAllManeuversOfTypesDetected(maneuverTypesFound, maneuversInvalid);
     }
     
