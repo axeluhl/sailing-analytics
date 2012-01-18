@@ -101,14 +101,17 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
     private final HashMap<String, String> markPassingBuoyName;
     private int width, height;
 
-    private DetailType dataToShow = DetailType.WINDWARD_DISTANCE_TO_OVERALL_LEADER;
+    private DetailType dataToShow;
     private AbsolutePanel loadingPanel;
     private final CompetitorSelectionProvider competitorSelectionProvider;
 
-    public AbstractChartPanel(SailingServiceAsync sailingService, CompetitorSelectionProvider competitorSelectionProvider,
-            RaceIdentifier[] races, final StringMessages stringMessages, int chartWidth, int chartHeight, ErrorReporter errorReporter) {
-    	width = chartWidth;
+    public AbstractChartPanel(SailingServiceAsync sailingService,
+            CompetitorSelectionProvider competitorSelectionProvider, RaceIdentifier[] races,
+            final StringMessages stringMessages, int chartWidth, int chartHeight, ErrorReporter errorReporter,
+            DetailType dataToShow) {
+        width = chartWidth;
     	height = chartHeight;
+    	this.dataToShow = dataToShow;
     	this.competitorSelectionProvider = competitorSelectionProvider;
     	competitorSelectionProvider.addCompetitorSelectionChangeListener(this);
     	this.errorReporter = errorReporter;

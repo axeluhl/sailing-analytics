@@ -6,6 +6,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.components.Component;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
+import com.sap.sailing.server.api.DetailType;
 import com.sap.sailing.server.api.RaceIdentifier;
 
 /**
@@ -22,8 +23,10 @@ import com.sap.sailing.server.api.RaceIdentifier;
  */
 public class MultiChartPanel extends AbstractChartPanel<MultiChartSettings> implements Component<MultiChartSettings> {
     public MultiChartPanel(SailingServiceAsync sailingService, CompetitorSelectionProvider competitorSelectionProvider,
-            RaceIdentifier[] races, final StringMessages stringMessages, int chartWidth, int chartHeight, ErrorReporter errorReporter) {
-        super(sailingService, competitorSelectionProvider, races, stringMessages, chartWidth, chartHeight, errorReporter);
+            RaceIdentifier[] races, final StringMessages stringMessages, int chartWidth, int chartHeight,
+            ErrorReporter errorReporter) {
+        super(sailingService, competitorSelectionProvider, races, stringMessages, chartWidth, chartHeight,
+                errorReporter, /* show initially: */ DetailType.WINDWARD_DISTANCE_TO_OVERALL_LEADER);
     }
 
     @Override

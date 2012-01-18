@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
@@ -23,6 +24,7 @@ import com.sap.sailing.domain.base.CourseListener;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.SpeedWithBearing;
+import com.sap.sailing.domain.base.Timed;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.DouglasPeucker;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
@@ -42,6 +44,7 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.impl.RacePlaceOrderImpl;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
@@ -104,6 +107,12 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     private final Map<Waypoint, NavigableSet<MarkPassing>> markPassingsForWaypoint;
     
     /**
+     * Values are the <code>from</code> and <code>to</code> time points between which the maneuvers have been previously
+     * computed. Clients wanting to know maneuvers for the competitor outside of this time interval need to (re-)compute them.
+     */
+    private final Map<Competitor, Triple<TimePoint, TimePoint, List<Maneuver>>> maneuverCache;
+    
+    /**
      * A tracked race can maintain a number of sources for wind information from which a client
      * can select. As all intra-leg computations are done dynamically based on wind information,
      * selecting a different wind information source can alter the intra-leg results. See
@@ -126,6 +135,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         this.race = race;
         this.millisecondsOverWhichToAverageSpeed = millisecondsOverWhichToAverageSpeed;
         this.startToNextMarkCacheInvalidationListeners = new HashMap<Buoy, TrackedRaceImpl.StartToNextMarkCacheInvalidationListener>();
+        this.maneuverCache = new HashMap<Competitor, Util.Triple<TimePoint,TimePoint,List<Maneuver>>>();
         this.buoyTracks = new HashMap<Buoy, GPSFixTrack<Buoy, GPSFix>>();
         int i = 0;
         for (Waypoint waypoint : race.getCourse().getWaypoints()) {
@@ -485,6 +495,9 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         synchronized (competitorRankings) {
             competitorRankings.clear();
         }
+        synchronized (maneuverCache) {
+            maneuverCache.clear();
+        }
     }
 
     @Override
@@ -726,9 +739,53 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         return douglasPeucker.approximate(maxDistance, from, to);
     }
     
+    /**
+     * Caches results in {@link #maneuverCache}. The cache is {@link #clearAllCaches() invalidated} by any
+     * {@link #updated(TimePoint) update}. Therefore, it is mainly useful for completed races. The cache tries to grow
+     * the time interval for which the maneuvers of a competitor have been computed. If <code>from</code> and
+     * <code>to</code> are within an interval already cached, the interval requested is
+     * {@link #extractInterval(TimePoint, TimePoint, List) extracted} from the maneuver list cached. Otherwise,
+     * the cached interval (empty in case no maneuvers were cached for <code>competitor</code> yet) is extended to
+     * include <code>from..to</code> by computing and caching the maneuvers for the new, extended interval. From the resulting
+     * extended maneuver list the interval requested is then {@link #extractInterval(TimePoint, TimePoint, List) extracted}.
+     */
     @Override
     public List<Maneuver> getManeuvers(Competitor competitor, TimePoint from, TimePoint to) throws NoWindException {
-        return detectManeuvers(competitor, approximate(competitor, getRace().getBoatClass().getMaximumDistanceForCourseApproximation(), from, to));
+        List<Maneuver> result;
+        Triple<TimePoint, TimePoint, List<Maneuver>> fromToAndManeuvers;
+        synchronized (maneuverCache) {
+            fromToAndManeuvers = maneuverCache.get(competitor);
+        }
+        if (fromToAndManeuvers != null && from.compareTo(fromToAndManeuvers.getA()) >= 0
+                && to.compareTo(fromToAndManeuvers.getB()) <= 0) {
+            // cached maneuver list contains interval requested
+            result = extractInterval(from, to, fromToAndManeuvers.getC());
+        } else {
+            TimePoint extendedFrom = fromToAndManeuvers == null ? from
+                    : from.compareTo(fromToAndManeuvers.getA()) <= 0 ? from : fromToAndManeuvers.getA();
+            TimePoint extendedTo = fromToAndManeuvers == null ? to : to.compareTo(fromToAndManeuvers.getB()) >= 0 ? to
+                    : fromToAndManeuvers.getB();
+            List<Maneuver> extendedResultForCache = detectManeuvers(competitor,
+                    approximate(competitor, getRace().getBoatClass().getMaximumDistanceForCourseApproximation(),
+                            extendedFrom, extendedTo));
+            result = extractInterval(from, to, extendedResultForCache);
+            synchronized (maneuverCache) {
+                maneuverCache.put(competitor, new Triple<TimePoint, TimePoint, List<Maneuver>>(extendedFrom,
+                        extendedTo, extendedResultForCache));
+            }
+        }
+        return result;
+    }
+
+    private <T extends Timed> List<T> extractInterval(TimePoint from, TimePoint to, List<T> listOfTimed) {
+        List<T> result;
+        result = new LinkedList<T>();
+        for (T timed : listOfTimed) {
+            if (timed.getTimePoint().compareTo(from) >= 0 && timed.getTimePoint().compareTo(to) <= 0) {
+                result.add(timed);
+            }
+        }
+        return result;
     }
     
     /**
