@@ -9,14 +9,14 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
-public class ComponentToolbar extends HorizontalPanel {
+public class ComponentToolbar<SettingsType> extends HorizontalPanel {
     
     private static ComponentResources resources = GWT.create(ComponentResources.class);
 
-    private final Component<?> component;
+    private final Component<SettingsType> component;
     final StringMessages stringMessages;
     
-    public ComponentToolbar(final Component<?> component, final StringMessages stringMessages) {
+    public ComponentToolbar(final Component<SettingsType> component, final StringMessages stringMessages) {
         super();
         
         this.setSpacing(10);
@@ -32,7 +32,7 @@ public class ComponentToolbar extends HorizontalPanel {
             showConfigAnchor.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
-                    new SettingsDialog(component, stringMessages).show();
+                    new SettingsDialog<SettingsType>(component, stringMessages).show();
                 }
             });
     

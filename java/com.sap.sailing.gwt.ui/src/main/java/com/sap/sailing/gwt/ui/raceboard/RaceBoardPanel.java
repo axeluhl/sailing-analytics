@@ -11,6 +11,7 @@ import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.shared.components.Component;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
 import com.sap.sailing.server.api.DefaultLeaderboardName;
@@ -25,48 +26,39 @@ public class RaceBoardPanel extends FormPanel implements Component<RaceBoardSett
 
     private String raceBoardName;
 
-    private final List<CollapsableComponentViewer> collapsableViewers;
+    private final List<CollapsableComponentViewer<?>> collapsableViewers;
     
     public RaceBoardPanel(SailingServiceAsync sailingService, String raceBoardName, ErrorReporter errorReporter,
             final StringMessages stringMessages) {
         this.sailingService = sailingService;
         this.setRaceBoardName(raceBoardName);
         this.errorReporter = errorReporter;
-//        this.stringMessages = stringMessages;
-
         VerticalPanel mainPanel = new VerticalPanel();
         mainPanel.setSize("100%", "100%");
         setWidget(mainPanel);
-
-        collapsableViewers = new ArrayList<CollapsableComponentViewer>();
-        
-        
-        for(int i = 0; i < 4; i++)
-        {
-            if(i == 0)
-            {
+        collapsableViewers = new ArrayList<CollapsableComponentViewer<?>>();
+        for(int i = 0; i < 4; i++) {
+            if(i == 0) {
                 CompetitorSelectionModel competitorSelectionModel = new CompetitorSelectionModel(/* hasMultiSelection */ true);
                 //final RaceMapPanel raceMapPanel = new RaceMapPanel(sailingService, competitorSelectionModel, this, this, stringMessages);
                 LeaderboardPanel defaultLeaderboardPanel = new LeaderboardPanel(sailingService, competitorSelectionModel,
                         DefaultLeaderboardName.DEFAULT_LEADERBOARD_NAME, errorReporter, stringMessages);
 
-                CollapsableComponentViewer viewer = new CollapsableComponentViewer(defaultLeaderboardPanel, stringMessages);
+                CollapsableComponentViewer<LeaderboardSettings> viewer = new CollapsableComponentViewer<LeaderboardSettings>(
+                        defaultLeaderboardPanel, stringMessages);
                 collapsableViewers.add(viewer);
-            }
-            else
-            {
+            } else {
                 SimpleComponentGroup<Object> componentGroup = new SimpleComponentGroup<Object>("Component Group " + i);
                 componentGroup.addComponent(new SimpleComponent("My Component"));
                 componentGroup.addComponent(new SimpleComponent("My Component 2"));
                 componentGroup.addComponent(new SimpleComponent("My Component 3"));
 
                 //LeaderboardPanel leaderboardPanel = LeaderboardPanel(); 
-                CollapsableComponentViewer viewer = new CollapsableComponentViewer(componentGroup, stringMessages);
+                CollapsableComponentViewer<Object> viewer = new CollapsableComponentViewer<Object>(componentGroup, stringMessages);
                 collapsableViewers.add(viewer);
             }
         }
-                
-        for (CollapsableComponentViewer viewer : collapsableViewers) {
+        for (CollapsableComponentViewer<?> viewer : collapsableViewers) {
             mainPanel.add(viewer.getViewerWidget());
         }
     }

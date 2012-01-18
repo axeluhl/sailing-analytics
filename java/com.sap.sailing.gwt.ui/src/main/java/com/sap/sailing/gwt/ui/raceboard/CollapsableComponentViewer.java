@@ -17,14 +17,14 @@ import com.sap.sailing.gwt.ui.shared.components.ComponentToolbar;
  * @author Axel Uhl (d043530)
  *
  */
-public class CollapsableComponentViewer {
+public class CollapsableComponentViewer<SettingsType> {
     private final CollapsablePanel disclosurePanel;
     
-    private final Component<?> component;
+    private final Component<SettingsType> component;
 
     private final StringMessages stringMessages;
     
-    public CollapsableComponentViewer(Component<?> component, StringMessages stringMessages) {
+    public CollapsableComponentViewer(Component<SettingsType> component, StringMessages stringMessages) {
         this.component = component;
         this.stringMessages = stringMessages;
         
@@ -46,7 +46,7 @@ public class CollapsableComponentViewer {
         disclosurePanel.setSize("100%", "100%");
         disclosurePanel.setOpen(true);
         
-        ComponentToolbar toolbar = new ComponentToolbar(component, stringMessages);
+        ComponentToolbar<SettingsType> toolbar = new ComponentToolbar<SettingsType>(component, stringMessages);
         toolbar.addSettingsButton();
         disclosurePanel.setHeaderToolbar(toolbar);
         
