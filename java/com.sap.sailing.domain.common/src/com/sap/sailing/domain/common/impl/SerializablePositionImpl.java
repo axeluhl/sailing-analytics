@@ -9,10 +9,9 @@ public class SerializablePositionImpl implements SerializablePosition {
     private double latDeg;
     private double lngDeg;
     
-    public SerializablePositionImpl() {}
+    SerializablePositionImpl() {}
 
     public SerializablePositionImpl(double latDeg, double lngDeg) {
-        super();
         this.latDeg = latDeg;
         this.lngDeg = lngDeg;
     }
@@ -21,15 +20,19 @@ public class SerializablePositionImpl implements SerializablePosition {
     public Position getPosition() {
         return new DegreePosition(latDeg, lngDeg);
     }
+    
+    @Override
+    public String toString() {
+        return "(" + latDeg + ", " + lngDeg + ")";
+    }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        long temp;
-        temp = Double.doubleToLongBits(latDeg);
+        long temp = (int) latDeg;
         result = prime * result + (int) (temp ^ (temp >>> 32));
-        temp = Double.doubleToLongBits(lngDeg);
+        temp = (int) latDeg;
         result = prime * result + (int) (temp ^ (temp >>> 32));
         return result;
     }
@@ -43,9 +46,9 @@ public class SerializablePositionImpl implements SerializablePosition {
         if (getClass() != obj.getClass())
             return false;
         SerializablePositionImpl other = (SerializablePositionImpl) obj;
-        if (Double.doubleToLongBits(latDeg) != Double.doubleToLongBits(other.latDeg))
+        if (!new Double(latDeg).equals(other.latDeg))
             return false;
-        if (Double.doubleToLongBits(lngDeg) != Double.doubleToLongBits(other.lngDeg))
+        if (!new Double(lngDeg).equals(other.lngDeg))
             return false;
         return true;
     }

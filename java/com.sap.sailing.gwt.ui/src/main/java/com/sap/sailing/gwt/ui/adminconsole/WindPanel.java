@@ -223,7 +223,7 @@ public class WindPanel extends FormPanel implements EventDisplayer, WindShower, 
         // add hover listener
         plot.addHoverListener(new PlotHoverListener() {
             public void onPlotHover(Plot plot, PlotPosition position, PlotItem item) {
-                /*
+                /* TODO show some reasonable hover tooltip in wind strip chart
                 CompetitorDAO competitor = competitorID.get(seriesID.indexOf(item.getSeries()));
                 if (item != null && competitor != null) {
                         if (item.getSeries().getLabel().toLowerCase().contains("mark")){
@@ -265,7 +265,6 @@ public class WindPanel extends FormPanel implements EventDisplayer, WindShower, 
             }
         }, true);
         plot.addSelectionListener(new SelectionListener() {
-
             public void selected(double x1, double y1, double x2, double y2) {
                 /* TODO Remove not visible buoys from the series when user is zooming in or add them if he is zooming out.
                 for (CompetitorDAO competitor : competitorsAndTimePointsDAO.getCompetitor()){
