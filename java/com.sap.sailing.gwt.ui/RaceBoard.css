@@ -31,6 +31,12 @@ body {
   margin: 0;
    }
 
+.contentOuterPanel {	
+	background: #dddcdc;
+	margin: 0 12px 0 12px;
+	padding: 12px;
+	}
+
 /** Example rules used by the template application (remove for your app) */
 h1 {
   font-size: 2em;
@@ -54,7 +60,9 @@ table td, table th {
   position: fixed;
   width: 100%;
   top: 0;
-  background: url(images/header_bg_modern.png) 0 0 repeat-x;}
+  background-image: url(images/white_gradient_header.png), url(images/header_bg_modern.png);
+  background-position: center top, 0 0;
+  background-repeat: no-repeat, repeat-x;}
 
 .LogoAndTitlePanel:after {
 	content: " ";
@@ -123,4 +131,9 @@ input.magnifier{
 	bottom: 0;
 	background: url(images/footer_shadow.png) left bottom repeat-x;	
 	width: 100%;
+}
+
+.breadcrumbPanel {
+	height: 30px;
+	margin: 0 12px 0 12px;
 }
