@@ -69,7 +69,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
      * Used in {@link #getPlaceOrder()} to calculate the radius for the
      * {@link ReverseGeocoder#getPlacemarksNear(Position, double) GetPlacemarksNear-Service}.
      */
-    private static final double GEONAMES_RADIUS_CACLCULATION_FACTOR = 2.5;
+    private static final double GEONAMES_RADIUS_CACLCULATION_FACTOR = 10.0;
 
     // TODO observe the race course; if it changes, update leg structures; consider fine-grained update events that tell what changed
     private final RaceDefinition race;

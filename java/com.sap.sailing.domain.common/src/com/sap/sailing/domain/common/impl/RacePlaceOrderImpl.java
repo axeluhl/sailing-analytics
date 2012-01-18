@@ -23,20 +23,20 @@ public class RacePlaceOrderImpl implements RacePlaceOrder, Serializable {
         return Collections.unmodifiableCollection(places);
     }
     
-//    @Override
-//    public String toString() {
-//        StringBuilder b = new StringBuilder();
-//        boolean first = true;
-//        for (Placemark place : places) {
-//            if (first) {
-//                b.append(place.getCountryCode() + ", " + place.getName());
-//                first = false;
-//            } else {
-//                b.append(" -> " + place.getCountryCode() + ", " + place.getName());
-//            }
-//        }
-//        return b.toString();
-//    }
+    @Override
+    public String toString() {
+        StringBuilder b = new StringBuilder();
+        boolean first = true;
+        for (Placemark place : places) {
+            if (place != null && first) {
+                b.append(place.getCountryCode() + ", " + place.getName());
+                first = false;
+            } else if (place != null) {
+                b.append(" -> " + place.getCountryCode() + ", " + place.getName());
+            }
+        }
+        return b.toString();
+    }
 
     @Override
     public int hashCode() {
