@@ -50,7 +50,7 @@ public abstract class AbstractBearing implements Bearing {
     
     @Override
     public int hashCode() {
-        return (int) (1023 ^ Double.doubleToLongBits(getDegrees()));
+        return 1023 ^ (int) getDegrees();
     }
     
     @Override

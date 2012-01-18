@@ -1,7 +1,5 @@
 package com.sap.sailing.domain.common.impl;
 
-import java.io.Serializable;
-
 import com.sap.sailing.domain.common.CountryCodeFactory;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Placemark;
@@ -14,7 +12,7 @@ import com.sap.sailing.domain.common.SerializablePosition;
  * @author Lennart Hensler (D054527)
  *
  */
-public class PlacemarkImpl implements Placemark, Serializable {
+public class PlacemarkImpl implements Placemark {
     private static final long serialVersionUID = -7287453946921815463L;
     
     private String name;
@@ -75,11 +73,12 @@ public class PlacemarkImpl implements Placemark, Serializable {
     
     @Override
     public String toString() {
-        StringBuilder b = new StringBuilder(Placemark.class.getSimpleName() + "[");
+        StringBuilder b = new StringBuilder();
+        
         b.append(name + ", ");
         b.append(countryCode + ", ");
         b.append(position.toString() + ", ");
-        b.append(population + "]");
+        b.append(population);
         
         return b.toString();
     }

@@ -1,11 +1,9 @@
 package com.sap.sailing.domain.common.impl;
 
-import java.io.Serializable;
-
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SerializablePosition;
 
-public class SerializablePositionImpl implements SerializablePosition, Serializable {
+public class SerializablePositionImpl implements SerializablePosition {
     private static final long serialVersionUID = -5649921262460723024L;
     
     private double latDeg;
@@ -14,7 +12,6 @@ public class SerializablePositionImpl implements SerializablePosition, Serializa
     SerializablePositionImpl() {}
 
     public SerializablePositionImpl(double latDeg, double lngDeg) {
-        super();
         this.latDeg = latDeg;
         this.lngDeg = lngDeg;
     }
@@ -33,9 +30,16 @@ public class SerializablePositionImpl implements SerializablePosition, Serializa
     public int hashCode() {
         final int prime = 31;
         int result = 1;
+<<<<<<< HEAD
         int temp = (int) latDeg;
         result = prime * result + (int) (temp ^ (temp >>> 32));
         temp = (int) lngDeg;
+=======
+        long temp;
+        temp = (int) latDeg;
+        result = prime * result + (int) (temp ^ (temp >>> 32));
+        temp = (int) latDeg;
+>>>>>>> placemark
         result = prime * result + (int) (temp ^ (temp >>> 32));
         return result;
     }
@@ -49,9 +53,15 @@ public class SerializablePositionImpl implements SerializablePosition, Serializa
         if (getClass() != obj.getClass())
             return false;
         SerializablePositionImpl other = (SerializablePositionImpl) obj;
+<<<<<<< HEAD
         if (new Double(latDeg).equals(other.latDeg))
             return false;
         if (new Double(lngDeg).equals(other.lngDeg))
+=======
+        if (!new Double(latDeg).equals(other.latDeg))
+            return false;
+        if (!new Double(lngDeg).equals(other.lngDeg))
+>>>>>>> placemark
             return false;
         return true;
     }

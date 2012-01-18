@@ -190,8 +190,8 @@ public class ReverseGeocoderImpl implements ReverseGeocoder {
      *            The results of the search
      */
     private void cachePlacemarks(Position position, Double radius, List<Placemark> placemarks) {
-        Collections.sort(placemarks, new Placemark.ByDistance(position));
-        cache.put(position, new Triple<Position, Double, List<Placemark>>(position, radius, placemarks));
+//        Collections.sort(placemarks, new Placemark.ByDistance(position));
+//        cache.put(position, new Triple<Position, Double, List<Placemark>>(position, radius, placemarks));
     }
     
     /**
