@@ -8,7 +8,6 @@ import java.util.Map;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import com.sap.sailing.domain.common.NoWindException;
-import com.sap.sailing.domain.common.Placemark;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
@@ -37,9 +36,6 @@ import com.sap.sailing.server.api.RaceIdentifier;
  */
 @RemoteServiceRelativePath("sailing")
 public interface SailingService extends RemoteService {
-    //
-    Placemark testPlacemarkSerialization();
-    //
     List<TracTracConfigurationDAO> getPreviousTracTracConfigurations() throws Exception;
     
     List<EventDAO> listEvents(boolean withRacePlaces);
