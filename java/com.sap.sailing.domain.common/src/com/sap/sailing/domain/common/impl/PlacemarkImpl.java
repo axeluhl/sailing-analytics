@@ -48,10 +48,10 @@ public class PlacemarkImpl implements Placemark {
     public String getCountryCode() {
         return countryCode;
     }
-//    
-//    public Position getPosition() {
-//        return position.getPosition();
-//    }
+    
+    public Position getPosition() {
+        return position.getPosition();
+    }
 
     public long getPopulation() {
         return population;
@@ -83,7 +83,7 @@ public class PlacemarkImpl implements Placemark {
 //        
 //        return b.toString();
 //    }
-//
+
 //    @Override
 //    public int hashCode() {
 //        final int prime = 31;

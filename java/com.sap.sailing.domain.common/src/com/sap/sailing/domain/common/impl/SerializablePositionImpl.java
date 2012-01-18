@@ -18,7 +18,8 @@ public class SerializablePositionImpl implements SerializablePosition {
 
     @Override
     public Position getPosition() {
-        return new DegreePosition(latDeg, lngDeg);
+//        return new DegreePosition(latDeg, lngDeg);
+        return null;
     }
     
     @Override
@@ -31,9 +32,9 @@ public class SerializablePositionImpl implements SerializablePosition {
 //        final int prime = 31;
 //        int result = 1;
 //        long temp;
-//        temp = Double.doubleToLongBits(latDeg);
+//        temp = (int) latDeg;
 //        result = prime * result + (int) (temp ^ (temp >>> 32));
-//        temp = Double.doubleToLongBits(lngDeg);
+//        temp = (int) latDeg;
 //        result = prime * result + (int) (temp ^ (temp >>> 32));
 //        return result;
 //    }
@@ -47,9 +48,9 @@ public class SerializablePositionImpl implements SerializablePosition {
 //        if (getClass() != obj.getClass())
 //            return false;
 //        SerializablePositionImpl other = (SerializablePositionImpl) obj;
-//        if (Double.doubleToLongBits(latDeg) != Double.doubleToLongBits(other.latDeg))
+//        if (!new Double(latDeg).equals(other.latDeg))
 //            return false;
-//        if (Double.doubleToLongBits(lngDeg) != Double.doubleToLongBits(other.lngDeg))
+//        if (!new Double(lngDeg).equals(other.lngDeg))
 //            return false;
 //        return true;
 //    }
