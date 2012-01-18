@@ -6,6 +6,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.components.Component;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
+import com.sap.sailing.server.api.DetailType;
 import com.sap.sailing.server.api.RaceIdentifier;
 
 /**
@@ -23,9 +24,10 @@ import com.sap.sailing.server.api.RaceIdentifier;
 public class ChartPanel extends AbstractChartPanel<ChartSettings> implements Component<ChartSettings> {
 
     public ChartPanel(SailingServiceAsync sailingService, CompetitorSelectionProvider competitorSelectionProvider,
-            RaceIdentifier[] races, StringMessages stringMessages, int chartWidth, int chartHeight,
-            ErrorReporter errorReporter) {
-        super(sailingService, competitorSelectionProvider, races, stringMessages, chartWidth, chartHeight, errorReporter);
+            RaceIdentifier[] races, DetailType dataToShow, StringMessages stringMessages, int chartWidth,
+            int chartHeight, ErrorReporter errorReporter) {
+        super(sailingService, competitorSelectionProvider, races, stringMessages, chartWidth, chartHeight,
+                errorReporter, dataToShow);
     }
 
     @Override
