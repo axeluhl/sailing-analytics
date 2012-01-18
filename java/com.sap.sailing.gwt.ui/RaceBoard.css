@@ -137,3 +137,15 @@ input.magnifier{
 	height: 30px;
 	margin: 0 12px 0 12px;
 }
+
+.mainPanel {
+	width: 100%;
+
+}
+
+.disclosePanel {
+	background: #b6b6b6;
+	margin: 0 0 12px 0;
+	border-radius: 7px;
+	overflow: hidden;
+}
