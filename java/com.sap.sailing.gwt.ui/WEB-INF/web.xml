@@ -23,5 +23,17 @@
 		<servlet-name>ResourceServlet</servlet-name>
 		<url-pattern>/resources/*</url-pattern>
 	</servlet-mapping>
+
+	<!-- enabling remote logging -->
+	<servlet>
+		<servlet-name>remoteLoggingServlet</servlet-name>
+		<servlet-class>com.google.gwt.logging.server.RemoteLoggingServiceImpl</servlet-class>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>remoteLoggingServlet</servlet-name>
+		<url-pattern>/remote_logging</url-pattern>
+	</servlet-mapping>
+
 	
 </web-app>

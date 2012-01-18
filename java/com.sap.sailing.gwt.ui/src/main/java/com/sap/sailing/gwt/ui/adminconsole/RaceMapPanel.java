@@ -3,12 +3,14 @@ package com.sap.sailing.gwt.ui.adminconsole;
 import java.util.Date;
 import java.util.List;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.maps.client.geom.LatLng;
-import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbsolutePanel;
+import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.Grid;
@@ -48,6 +50,8 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
     private final RaceMap raceMap;
     private final QuickRanksListBoxComposite quickRanksListBox;
     
+    private static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
+
     public RaceMapPanel(SailingServiceAsync sailingService, CompetitorSelectionProvider competitorSelectionProvider,
             ErrorReporter errorReporter, final EventRefresher eventRefresher, final StringMessages stringMessages) {
         this.sailingService = sailingService;
@@ -79,8 +83,9 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         /* time interval between displays in milliseconds */5000, stringMessages, errorReporter);
         raceListBox.addRaceSelectionChangeListener(windHistory);
         grid.setWidget(1, 0, windHistory);
-        Anchor showConfigAnchor = new Anchor(new SafeHtmlBuilder().appendHtmlConstant(
-                "<img class=\"linkNoBorder\" src=\"/gwt/images/settings.png\"/>").toSafeHtml());
+
+        ImageResource settingsImage = resources.settingsIcon();
+        Anchor showConfigAnchor = new Anchor(AbstractImagePrototype.create(settingsImage).getSafeHtml());
         showConfigAnchor.setTitle(stringMessages.configuration());
         showConfigAnchor.addClickHandler(new ClickHandler() {
             @Override

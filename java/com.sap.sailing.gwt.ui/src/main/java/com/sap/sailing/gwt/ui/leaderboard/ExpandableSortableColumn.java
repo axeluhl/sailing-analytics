@@ -113,19 +113,6 @@ public abstract class ExpandableSortableColumn<C> extends SortableColumn<Leaderb
         return Collections.emptyList();
     }
 
-    private Collection<SortableColumn<LeaderboardRowDAO, ?>> getAllChildren() {
-        List<SortableColumn<LeaderboardRowDAO, ?>> transitiveChildren = new ArrayList<SortableColumn<LeaderboardRowDAO,?>>();
-        for (SortableColumn<LeaderboardRowDAO, ?> childColumn : getDirectChildren()) {
-            transitiveChildren.add(childColumn);
-            if (childColumn instanceof ExpandableSortableColumn<?>) {
-                @SuppressWarnings("unchecked")
-                ExpandableSortableColumn<C> expandableChild = (ExpandableSortableColumn<C>) childColumn;
-                transitiveChildren.addAll(expandableChild.getAllChildren());
-            }
-        }
-        return transitiveChildren;
-    }
-    
     /**
      * Determines the direct and transitive child columns that due to the current expansion state should be
      * visible. Note that for columns not currently visible or currently being expanded (see {@link #toggleExpansion()}),

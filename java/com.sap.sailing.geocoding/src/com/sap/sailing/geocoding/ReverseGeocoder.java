@@ -13,6 +13,7 @@ import com.sap.sailing.geocoding.impl.ReverseGeocoderImpl;
 public interface ReverseGeocoder {
     final ReverseGeocoder INSTANCE = new ReverseGeocoderImpl();
     final String GEONAMES_USER = "sailtracking";
+    final double POSITION_CACHE_DISTANCE_LIMIT_IN_KM = 5.0;
 
     /**
      * Returns the nearest {@link Placemark} towards the given {@link Position}.

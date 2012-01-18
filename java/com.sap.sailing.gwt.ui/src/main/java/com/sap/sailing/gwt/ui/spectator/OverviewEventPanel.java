@@ -285,11 +285,11 @@ public class OverviewEventPanel extends AbstractEventPanel {
             public void onSuccess(List<EventDAO> result) {
                 if (result != null) {
                     availableEvents = new ArrayList<EventDAO>(result);
-                    eventTableProvider.getList().clear();
-                    eventTableProvider.setList(availableEvents);
                 } else {
                     availableEvents.clear();
                 }
+                eventTableProvider.getList().clear();
+                eventTableProvider.setList(availableEvents);
                 if (actionAfterLoading != null) {
                     actionAfterLoading.run();
                 }
