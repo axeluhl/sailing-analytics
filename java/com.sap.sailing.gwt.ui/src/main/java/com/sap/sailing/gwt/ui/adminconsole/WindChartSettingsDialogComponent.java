@@ -29,6 +29,7 @@ public class WindChartSettingsDialogComponent implements SettingsDialogComponent
         VerticalPanel vp = new VerticalPanel();
         for (WindSource windSource : WindSource.values()) {
             CheckBox checkbox = dialog.createCheckbox(windSource.name());
+            checkboxes.put(windSource, checkbox);
             checkbox.setValue(initialSettings.getWindSourcesToDisplay().contains(windSource));
             vp.add(checkbox);
         }
