@@ -24,8 +24,9 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
                     if (padding != null && Boolean.valueOf(padding)) {
                         raceBoardPanel.addStyleName("leftPaddedPanel");
                     }
-                    RootPanel.get().add(logoAndTitlePanel);
+                    
                     RootPanel.get().add(raceBoardPanel);
+                    RootPanel.get().add(logoAndTitlePanel);
             }
 
             @Override
