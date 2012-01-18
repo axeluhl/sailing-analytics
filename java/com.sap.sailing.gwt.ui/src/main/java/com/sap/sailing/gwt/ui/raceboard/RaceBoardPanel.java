@@ -49,7 +49,8 @@ public class RaceBoardPanel extends FormPanel implements Component<RaceBoardSett
 //        this.stringMessages = stringMessages;
 
         VerticalPanel mainPanel = new VerticalPanel();
-        mainPanel.setSize("100%", "100%");
+        // TODO marcus: add styles in css
+        mainPanel.addStyleName("mainPanel");
         setWidget(mainPanel);
         competitorSelectionProvider = new CompetitorSelectionModel(/* hasMultiSelection */ true);
         RaceMap raceMap = new RaceMap(sailingService, errorReporter, new Timer(
