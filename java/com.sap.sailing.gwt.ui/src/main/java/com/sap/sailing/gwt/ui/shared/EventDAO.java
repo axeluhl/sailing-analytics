@@ -33,6 +33,7 @@ public class EventDAO extends NamedDAO implements IsSerializable {
     public String getLocationAsString() {
         //TODO Finish the format of the location string
         if (locations == null) {
+            locations = "";
             for (RegattaDAO regattaDAO : regattas) {
                 for (RaceDAO raceDAO : regattaDAO.races) {
                     RacePlaceOrder placeOrder = raceDAO.racePlaces;
