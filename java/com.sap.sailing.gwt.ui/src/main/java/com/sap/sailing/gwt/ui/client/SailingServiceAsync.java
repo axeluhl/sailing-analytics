@@ -7,6 +7,7 @@ import java.util.Map;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.base.Course;
+import com.sap.sailing.domain.common.Placemark;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
@@ -36,6 +37,9 @@ import com.sap.sailing.server.api.RaceIdentifier;
  * The async counterpart of {@link SailingService}
  */
 public interface SailingServiceAsync {
+    //
+    void testPlacemarkSerialization(AsyncCallback<Placemark> callback);
+    //
     
     void listEvents(boolean withRacePlaces, AsyncCallback<List<EventDAO>> callback);
 
@@ -253,4 +257,5 @@ public interface SailingServiceAsync {
      * mark passing times, the race start time and the list of time points according to the above specification.
      */
     void getCompetitorsAndTimePoints(RaceIdentifier race, int steps, AsyncCallback<CompetitorsAndTimePointsDAO> callback);
+
 }

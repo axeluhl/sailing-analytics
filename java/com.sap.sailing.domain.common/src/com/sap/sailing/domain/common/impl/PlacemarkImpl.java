@@ -20,7 +20,7 @@ public class PlacemarkImpl implements Placemark {
     private SerializablePosition position;
     private long population;
     
-    public PlacemarkImpl() {}
+    PlacemarkImpl() {}
     
     /**
      * Creates a new Placemark with the given parameters as attributes.
@@ -73,11 +73,12 @@ public class PlacemarkImpl implements Placemark {
     
     @Override
     public String toString() {
-        StringBuilder b = new StringBuilder(Placemark.class.getSimpleName() + "[");
+        StringBuilder b = new StringBuilder();
+        
         b.append(name + ", ");
         b.append(countryCode + ", ");
         b.append(position.toString() + ", ");
-        b.append(population + "]");
+        b.append(population);
         
         return b.toString();
     }
