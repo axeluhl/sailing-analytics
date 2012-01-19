@@ -1071,12 +1071,11 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         }
         
         if (startBest != null) {
-            final List<Placemark> places = new ArrayList<Placemark>();
-            places.add(startBest);
-            if (!startBest.equals(finishBest)) {
-                places.add(finishBest);
+            if (finishBest != null) {
+                order = new RacePlaceOrderImpl(startBest, finishBest);
+            } else {
+                order = new RacePlaceOrderImpl(startBest, startBest);
             }
-            order = new RacePlaceOrderImpl(places);
         }
         
         return order;

@@ -1,9 +1,9 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
-import com.sap.sailing.gwt.ui.shared.LeaderboardRowDAO;
+import com.sap.sailing.gwt.ui.shared.LeaderboardRowDTO;
 
 /**
- * This interface helps to get the String or the Double values of a {@link LeaderboardRowDAO}.
+ * This interface helps to get the String or the Double values of a {@link LeaderboardRowDTO}.
  */
 public interface HasStringAndDoubleValue {
     /**
@@ -12,7 +12,7 @@ public interface HasStringAndDoubleValue {
      * 
      * @return the value of the Column
      */
-    String getStringValueToRender(LeaderboardRowDAO row);
+    String getStringValueToRender(LeaderboardRowDTO row);
 
-    Double getDoubleValue(LeaderboardRowDAO row);
+    Double getDoubleValue(LeaderboardRowDTO row);
 }

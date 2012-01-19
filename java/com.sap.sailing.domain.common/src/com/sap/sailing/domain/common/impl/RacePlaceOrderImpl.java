@@ -1,8 +1,6 @@
 package com.sap.sailing.domain.common.impl;
 
 import java.io.Serializable;
-import java.util.Collections;
-import java.util.List;
 
 import com.sap.sailing.domain.common.Placemark;
 import com.sap.sailing.domain.common.RacePlaceOrder;
@@ -10,39 +8,44 @@ import com.sap.sailing.domain.common.RacePlaceOrder;
 public class RacePlaceOrderImpl implements RacePlaceOrder, Serializable {
     private static final long serialVersionUID = 7590835541329816755L;
     
-    private List<Placemark> places;
+    private Placemark start;
+    private Placemark finish;
     
     RacePlaceOrderImpl() {}
     
-    public RacePlaceOrderImpl(List<Placemark> places) {
-        this.places = places;
+    public RacePlaceOrderImpl(Placemark startPlace, Placemark finishPlace) {
+        this.start = startPlace;
+        this.finish = finishPlace;
     }
 
     @Override
-    public Iterable<Placemark> getPlaces() {
-        return Collections.unmodifiableCollection(places);
+    public Placemark getStartPlace() {
+        return start;
+    }
+
+    @Override
+    public Placemark getFinishPlace() {
+        return finish;
     }
     
     @Override
     public String toString() {
-        StringBuilder b = new StringBuilder();
-        boolean first = true;
-        for (Placemark place : places) {
-            if (place != null && first) {
-                b.append(place.getCountryCode() + ", " + place.getName());
-                first = false;
-            } else if (place != null) {
-                b.append(" -> " + place.getCountryCode() + ", " + place.getName());
+        String result = "";
+        if (start != null) {
+            result += start.getCountryCode() + ", " + start.getName();
+            if (!start.equals(finish)) {
+                result += " -> " + finish.getCountryCode() + ", " + finish.getName();
             }
         }
-        return b.toString();
+        return result;
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((places == null) ? 0 : places.hashCode());
+        result = prime * result + ((finish == null) ? 0 : finish.hashCode());
+        result = prime * result + ((start == null) ? 0 : start.hashCode());
         return result;
     }
 
@@ -55,10 +58,15 @@ public class RacePlaceOrderImpl implements RacePlaceOrder, Serializable {
         if (getClass() != obj.getClass())
             return false;
         RacePlaceOrderImpl other = (RacePlaceOrderImpl) obj;
-        if (places == null) {
-            if (other.places != null)
+        if (finish == null) {
+            if (other.finish != null)
                 return false;
-        } else if (!places.equals(other.places))
+        } else if (!finish.equals(other.finish))
+            return false;
+        if (start == null) {
+            if (other.start != null)
+                return false;
+        } else if (!start.equals(other.start))
             return false;
         return true;
     }

@@ -39,9 +39,9 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.gwt.ui.client.ColorMap;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.WindDAO;
-import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDAO;
-import com.sap.sailing.gwt.ui.shared.WindTrackInfoDAO;
+import com.sap.sailing.gwt.ui.shared.WindDTO;
+import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
+import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
 import com.sap.sailing.gwt.ui.shared.components.Component;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
 
@@ -168,10 +168,10 @@ public class WindChart implements Component<WindChartSettings> {
         return series;
     }
 
-    public void updateStripChartSeries(WindInfoForRaceDAO result) {
+    public void updateStripChartSeries(WindInfoForRaceDTO result) {
         long min = Long.MAX_VALUE;
         long max = Long.MIN_VALUE;
-        for (Map.Entry<WindSource, WindTrackInfoDAO> e : result.windTrackInfoByWindSource.entrySet()) {
+        for (Map.Entry<WindSource, WindTrackInfoDTO> e : result.windTrackInfoByWindSource.entrySet()) {
             WindSource windSource = e.getKey();
             SeriesHandler seriesHandler = stripChartSeries.get(windSource);
             if (e.getValue().windFixes.isEmpty()) {
@@ -187,7 +187,7 @@ public class WindChart implements Component<WindChartSettings> {
                 } else {
                     seriesHandler.clear();
                 }
-                for (WindDAO windFix : e.getValue().windFixes) {
+                for (WindDTO windFix : e.getValue().windFixes) {
                     seriesHandler.add(new DataPoint(windFix.timepoint, windFix.dampenedTrueWindFromDeg));
                     min = Math.min(min, windFix.timepoint);
                     max = Math.max(max, windFix.timepoint);
@@ -225,7 +225,7 @@ public class WindChart implements Component<WindChartSettings> {
 
     /**
      * Sets the visibilities of the wind source series based on the new settings. Note that this does not
-     * re-load any wind data. This has to happen by calling {@link #updateStripChartSeries(WindInfoForRaceDAO)}.
+     * re-load any wind data. This has to happen by calling {@link #updateStripChartSeries(WindInfoForRaceDTO)}.
      */
     @Override
     public void updateSettings(WindChartSettings newSettings) {

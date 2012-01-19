@@ -3,9 +3,9 @@ package com.sap.sailing.gwt.ui.client;
 import java.util.List;
 
 import com.sap.sailing.domain.common.impl.Util.Triple;
-import com.sap.sailing.gwt.ui.shared.EventDAO;
-import com.sap.sailing.gwt.ui.shared.RaceDAO;
-import com.sap.sailing.gwt.ui.shared.RegattaDAO;
+import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.ui.shared.RaceDTO;
+import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 
 
 /**
@@ -21,6 +21,6 @@ public interface RaceSelectionChangeListener {
      * 
      * @param selectedRaces a non-<code>null</code> list which is empty if nothing is selected
      */
-    void onRaceSelectionChange(List<Triple<EventDAO, RegattaDAO, RaceDAO>> selectedRaces);
+    void onRaceSelectionChange(List<Triple<EventDTO, RegattaDTO, RaceDTO>> selectedRaces);
 
 }

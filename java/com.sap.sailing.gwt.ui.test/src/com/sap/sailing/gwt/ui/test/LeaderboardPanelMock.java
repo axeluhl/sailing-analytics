@@ -7,8 +7,8 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.SortableColumn;
-import com.sap.sailing.gwt.ui.shared.LeaderboardDAO;
-import com.sap.sailing.gwt.ui.shared.LeaderboardRowDAO;
+import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
+import com.sap.sailing.gwt.ui.shared.LeaderboardRowDTO;
 
 public class LeaderboardPanelMock extends LeaderboardPanel {
 
@@ -20,7 +20,7 @@ public class LeaderboardPanelMock extends LeaderboardPanel {
     }
 
     @Override
-    public void addColumn(SortableColumn<LeaderboardRowDAO, ?> column) {
+    public void addColumn(SortableColumn<LeaderboardRowDTO, ?> column) {
         // TODO Auto-generated method stub
         super.addColumn(column);
     }
@@ -39,13 +39,13 @@ public class LeaderboardPanelMock extends LeaderboardPanel {
     }
 
     @Override
-    public void updateLeaderboard(LeaderboardDAO leaderboard) {
+    public void updateLeaderboard(LeaderboardDTO leaderboard) {
         // TODO Auto-generated method stub
         super.updateLeaderboard(leaderboard);
     }
 
     @Override
-    public CellTable<LeaderboardRowDAO> getLeaderboardTable() {
+    public CellTable<LeaderboardRowDTO> getLeaderboardTable() {
         // TODO Auto-generated method stub
         return super.getLeaderboardTable();
     }

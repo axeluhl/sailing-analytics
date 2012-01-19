@@ -1,6 +1,6 @@
 package com.sap.sailing.gwt.ui.client;
 
-import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
+import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 
 public interface CompetitorSelectionProvider {
 
@@ -9,16 +9,16 @@ public interface CompetitorSelectionProvider {
      *         which elements were selected; all competitors contained in the structure returned are also in the
      *         structure returned by {@link #getAllCompetitors()} at the time of the call.
      */
-    Iterable<CompetitorDAO> getSelectedCompetitors();
+    Iterable<CompetitorDTO> getSelectedCompetitors();
     
-    Iterable<CompetitorDAO> getAllCompetitors();
+    Iterable<CompetitorDTO> getAllCompetitors();
 
     /**
      * Updates the selection state of <code>competitor</code> if contained in {@link #getAllCompetitors()}. If this
      * means a change in <code>competitor</code>'s selection state, all listeners except for those in
      * <code>listenersNotToNotify</code> will be informed.
      */
-    void setSelected(CompetitorDAO competitor, boolean selected, CompetitorSelectionChangeListener... listenersNotToNotify);
+    void setSelected(CompetitorDTO competitor, boolean selected, CompetitorSelectionChangeListener... listenersNotToNotify);
 
     /**
      * Those competitors in <code>newSelection</code> that are also in {@link #getAllCompetitors()} will be selected,
@@ -29,7 +29,7 @@ public interface CompetitorSelectionProvider {
      * @param listenersNotToNotify
      *            if provided, these listeners will not be notified about the selection changes caused by this call
      */
-    void setSelection(Iterable<CompetitorDAO> newSelection, CompetitorSelectionChangeListener... listenersNotToNotify);
+    void setSelection(Iterable<CompetitorDTO> newSelection, CompetitorSelectionChangeListener... listenersNotToNotify);
     
     /**
      * Deselects and removes all competitors from {@link #getAllCompetitors()} which are not in <code>newCompetitor</code> and
@@ -37,9 +37,9 @@ public interface CompetitorSelectionProvider {
      * of {@link #getAllCompetitors()} are equal to <code>newCompetitors</code> except for ordering which is not guaranteed
      * to be stable.
      */
-    void setCompetitors(Iterable<CompetitorDAO> newCompetitors);
+    void setCompetitors(Iterable<CompetitorDTO> newCompetitors);
     
-    boolean isSelected(CompetitorDAO competitor);
+    boolean isSelected(CompetitorDTO competitor);
     
     boolean hasMultiSelection();
 

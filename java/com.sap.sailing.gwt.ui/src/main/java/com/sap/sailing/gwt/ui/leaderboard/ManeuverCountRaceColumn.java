@@ -12,10 +12,10 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.Header;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LegDetailColumn.LegDetailField;
-import com.sap.sailing.gwt.ui.shared.LeaderboardDAO;
-import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDAO;
-import com.sap.sailing.gwt.ui.shared.LeaderboardRowDAO;
-import com.sap.sailing.gwt.ui.shared.LegEntryDAO;
+import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
+import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDTO;
+import com.sap.sailing.gwt.ui.shared.LeaderboardRowDTO;
+import com.sap.sailing.gwt.ui.shared.LegEntryDTO;
 import com.sap.sailing.server.api.DetailType;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 
@@ -30,8 +30,8 @@ public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> im
     private final MinMaxRenderer minmaxRenderer;
 
     private abstract class AbstractManeuverDetailField<T extends Comparable<?>> implements LegDetailField<T> {
-        public T get(LeaderboardRowDAO row) {
-            LeaderboardEntryDAO fieldsForRace = row.fieldsByRaceName.get(getRaceName());
+        public T get(LeaderboardRowDTO row) {
+            LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceName.get(getRaceName());
             if (fieldsForRace == null) {
                 return null;
             } else {
@@ -40,13 +40,13 @@ public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> im
             }
         }
 
-        protected abstract T getFromNonNullEntry(LeaderboardEntryDAO entry);
+        protected abstract T getFromNonNullEntry(LeaderboardEntryDTO entry);
     }
 
     private class NumberOfTacks extends AbstractManeuverDetailField<Double> {
 
         @Override
-        protected Double getFromNonNullEntry(LeaderboardEntryDAO entry) {
+        protected Double getFromNonNullEntry(LeaderboardEntryDTO entry) {
             return ManeuverCountRaceColumn.this.getTotalNumberOfTacks(entry);
         }
     }
@@ -54,7 +54,7 @@ public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> im
     private class NumberOfJibes extends AbstractManeuverDetailField<Double> {
 
         @Override
-        protected Double getFromNonNullEntry(LeaderboardEntryDAO entry) {
+        protected Double getFromNonNullEntry(LeaderboardEntryDTO entry) {
             return ManeuverCountRaceColumn.this.getTotalNumberOfJibes(entry);
         }
     }
@@ -62,7 +62,7 @@ public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> im
     private class NumberOfPenaltyCircles extends AbstractManeuverDetailField<Double> {
 
         @Override
-        protected Double getFromNonNullEntry(LeaderboardEntryDAO entry) {
+        protected Double getFromNonNullEntry(LeaderboardEntryDTO entry) {
             return ManeuverCountRaceColumn.this.getTotalNumberOfPenaltyCircles(entry);
         }
     }
@@ -80,10 +80,10 @@ public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> im
         this.minmaxRenderer = new MinMaxRenderer(this, getComparator());
     }
 
-    private Double getTotalNumberOfTacks(LeaderboardEntryDAO row) {
+    private Double getTotalNumberOfTacks(LeaderboardEntryDTO row) {
         Double totalNumberOfTacks = null;
         if (row != null && row.legDetails != null) {
-            for (LegEntryDAO legDetail : row.legDetails) {
+            for (LegEntryDTO legDetail : row.legDetails) {
                 if (legDetail != null) {
                     if (legDetail.numberOfTacks != null) {
                         if (totalNumberOfTacks == null) {
@@ -98,10 +98,10 @@ public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> im
         return totalNumberOfTacks;
     }
 
-    private Double getTotalNumberOfJibes(LeaderboardEntryDAO row) {
+    private Double getTotalNumberOfJibes(LeaderboardEntryDTO row) {
         Double totalNumberOfJibes = null;
         if (row != null && row.legDetails != null) {
-            for (LegEntryDAO legDetail : row.legDetails) {
+            for (LegEntryDTO legDetail : row.legDetails) {
                 if (legDetail != null) {
                     if (legDetail.numberOfJibes != null) {
                         if (totalNumberOfJibes == null) {
@@ -116,10 +116,10 @@ public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> im
         return totalNumberOfJibes;
     }
 
-    private Double getTotalNumberOfPenaltyCircles(LeaderboardEntryDAO row) {
+    private Double getTotalNumberOfPenaltyCircles(LeaderboardEntryDTO row) {
         Double totalNumberOfPnaltyCicles = null;
         if (row != null && row.legDetails != null) {
-            for (LegEntryDAO legDetail : row.legDetails) {
+            for (LegEntryDTO legDetail : row.legDetails) {
                 if (legDetail != null) {
                     if (legDetail.numberOfPenaltyCircles != null) {
                         if (totalNumberOfPnaltyCicles == null) {
@@ -134,13 +134,13 @@ public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> im
         return totalNumberOfPnaltyCicles;
     }
 
-    private Triple<Double, Double, Double> getTotalNumberOfTacksJibesAndPenaltyCircles(LeaderboardRowDAO row) {
+    private Triple<Double, Double, Double> getTotalNumberOfTacksJibesAndPenaltyCircles(LeaderboardRowDTO row) {
         Double totalNumberOfTacks = null;
         Double totalNumberOfJibes = null;
         Double totalNumberOfPenaltyCircles = null;
-        LeaderboardEntryDAO fieldsForRace = row.fieldsByRaceName.get(getRaceName());
+        LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceName.get(getRaceName());
         if (fieldsForRace != null && fieldsForRace.legDetails != null) {
-            for (LegEntryDAO legDetail : fieldsForRace.legDetails) {
+            for (LegEntryDTO legDetail : fieldsForRace.legDetails) {
                 if (legDetail != null) {
                     if (legDetail.numberOfTacks != null) {
                         if (totalNumberOfTacks == null) {
@@ -182,10 +182,10 @@ public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> im
     }
 
     @Override
-    public Comparator<LeaderboardRowDAO> getComparator() {
-        return new Comparator<LeaderboardRowDAO>() {
+    public Comparator<LeaderboardRowDTO> getComparator() {
+        return new Comparator<LeaderboardRowDTO>() {
             @Override
-            public int compare(LeaderboardRowDAO o1, LeaderboardRowDAO o2) {
+            public int compare(LeaderboardRowDTO o1, LeaderboardRowDTO o2) {
                 boolean ascending = isSortedAscendingForThisColumn(getLeaderboardPanel().getLeaderboardTable());
                 Double val1 = getDoubleValue(o1);
                 Double val2 = getDoubleValue(o2);
@@ -196,7 +196,7 @@ public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> im
     }
 
     @Override
-    public String getValue(LeaderboardRowDAO object) {
+    public String getValue(LeaderboardRowDTO object) {
         Double result = getDoubleValue(object);
         if (result == null) {
             return "";
@@ -207,21 +207,21 @@ public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> im
     }
 
     @Override
-    public void render(Context context, LeaderboardRowDAO row, SafeHtmlBuilder sb) {
+    public void render(Context context, LeaderboardRowDTO row, SafeHtmlBuilder sb) {
         minmaxRenderer.render(context, row, getTitle(row), sb);
     }
 
     /**
      * Computes a tool-tip text to add to the table cell's content as rendered by
-     * {@link #render(Context, LeaderboardRowDAO, SafeHtmlBuilder)}.
+     * {@link #render(Context, LeaderboardRowDTO, SafeHtmlBuilder)}.
      * 
      * @return This default implementation returns <code>null</code> for no tool tip / title
      */
-    protected String getTitle(LeaderboardRowDAO row) {
+    protected String getTitle(LeaderboardRowDTO row) {
         return null;
     }
 
-    public Double getDoubleValue(LeaderboardRowDAO row) {
+    public Double getDoubleValue(LeaderboardRowDTO row) {
         Double result = null;
         Triple<Double, Double, Double> tacksJibesAndPenalties = getTotalNumberOfTacksJibesAndPenaltyCircles(row);
         Double totalNumberOfTacks = tacksJibesAndPenalties.getA();
@@ -248,15 +248,15 @@ public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> im
     }
 
     @Override
-    protected void updateMinMax(LeaderboardDAO leaderboard) {
+    protected void updateMinMax(LeaderboardDTO leaderboard) {
         minmaxRenderer.updateMinMax(leaderboard.rows.values());
     }
 
     @Override
-    protected Map<DetailType, SortableColumn<LeaderboardRowDAO, ?>> getDetailColumnMap(
+    protected Map<DetailType, SortableColumn<LeaderboardRowDTO, ?>> getDetailColumnMap(
             LeaderboardPanel leaderboardPanel, StringMessages stringConstants, String detailHeaderStyle,
             String detailColumnStyle) {
-        Map<DetailType, SortableColumn<LeaderboardRowDAO, ?>> result = new HashMap<DetailType, SortableColumn<LeaderboardRowDAO, ?>>();
+        Map<DetailType, SortableColumn<LeaderboardRowDTO, ?>> result = new HashMap<DetailType, SortableColumn<LeaderboardRowDTO, ?>>();
         result.put(DetailType.TACK, new FormattedDoubleLegDetailColumn(stringConstants.tack(), "", new NumberOfTacks(),
                 0, getLeaderboardPanel().getLeaderboardTable(), detailHeaderStyle, detailColumnStyle));
         result.put(DetailType.JIBE, new FormattedDoubleLegDetailColumn(stringConstants.jibe(), "", new NumberOfJibes(),
@@ -282,7 +282,7 @@ public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> im
     }
 
     @Override
-    public String getStringValueToRender(LeaderboardRowDAO object) {
+    public String getStringValueToRender(LeaderboardRowDTO object) {
         String result = getValue(object);
         if (!result.equals("")) {
             return getValue(object);

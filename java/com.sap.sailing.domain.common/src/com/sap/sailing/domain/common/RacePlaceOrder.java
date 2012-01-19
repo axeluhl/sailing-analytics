@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 public interface RacePlaceOrder extends Serializable {
 
-    Iterable<Placemark> getPlaces();
+    Placemark getStartPlace();
+    Placemark getFinishPlace();
     
 }
