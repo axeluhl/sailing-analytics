@@ -32,7 +32,7 @@ public abstract class AbstractEventPanel extends FormPanel implements EventDispl
      * Returns if <code>wordsToFilter</code> contain a value of the <code>valuesToCheck</code>  
      * @param wordsToFilter the words to filter on
      * @param valuesToCheck the values to check for. These values contain the values of the current rows.
-     * @return
+     * @return <code>false</code> if the <code>valuesToCheck</code> contains all <code>wordsToFilter</code>, <code>true</code> if not
      */
     protected boolean textContainingStringsToCheck(List<String> wordsToFilter, String... valuesToCheck){
         boolean failed = false;

@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.spectator;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
@@ -84,7 +85,7 @@ public class OverviewEventPanel extends AbstractEventPanel {
         textBoxLocation.addKeyUpHandler(new KeyUpHandler() {
             @Override
             public void onKeyUp(KeyUpEvent event) {
-                onSearchCriteriaChange(event.getSource());
+                onSearchCriteriaChange();
             }
         });
         panelSearch.add(textBoxLocation);
@@ -95,7 +96,7 @@ public class OverviewEventPanel extends AbstractEventPanel {
         textBoxName.addKeyUpHandler(new KeyUpHandler() {
             @Override
             public void onKeyUp(KeyUpEvent event) {
-                onSearchCriteriaChange(event.getSource());
+                onSearchCriteriaChange();
             }
         });
         panelSearch.add(textBoxName);
@@ -115,7 +116,7 @@ public class OverviewEventPanel extends AbstractEventPanel {
         textBoxFrom.addKeyUpHandler(new KeyUpHandler() {
             @Override
             public void onKeyUp(KeyUpEvent event) {
-                onSearchCriteriaChange(event.getSource());
+                onSearchCriteriaChange();
             }
         });
         panelSearch.add(textBoxFrom);
@@ -126,7 +127,7 @@ public class OverviewEventPanel extends AbstractEventPanel {
         textBoxUntil.addKeyUpHandler(new KeyUpHandler() {
             @Override
             public void onKeyUp(KeyUpEvent event) {
-                onSearchCriteriaChange(event.getSource());
+                onSearchCriteriaChange();
             }
         });
         panelSearch.add(textBoxUntil);
@@ -289,26 +290,34 @@ public class OverviewEventPanel extends AbstractEventPanel {
     
     private void onCheckBoxLiveChange() {
         if (checkBoxLive.getValue()) {
-            //Disable Date-Input-Fields and fill them with the current Date
-            //Event list will be refreshed by the listeners of the Date-Input-Fields
-            String actualDate = DateTimeFormat.getFormat("dd.MM.yyyy").format(new Date());
-            
-            textBoxFrom.setValue(actualDate, true);
             textBoxFrom.setEnabled(false);
-
-            textBoxUntil.setValue(actualDate, true);
             textBoxUntil.setEnabled(false);
         } else {
             textBoxFrom.setEnabled(true);
             textBoxUntil.setEnabled(true);
         }
+        onSearchCriteriaChange();
     }
     
-    private void onSearchCriteriaChange(Object source) {
-        //TODO Refresh event list
+    private void onSearchCriteriaChange() {
+        //Get search criteria
+        String location = textBoxLocation.getText();
+        String name = textBoxName.getText();
+        boolean onlyLive = checkBoxLive.getValue();
+        Date from = null;
+        Date until = null;
+        try {
+            from = DateTimeFormat.getFormat("dd.MM.yyyy").parse(textBoxFrom.getText());
+            until = DateTimeFormat.getFormat("dd.MM.yyyy").parse(textBoxUntil.getText());
+            //Adding 24 hours to until, so that it doesn't result in an empty table if 'from' and 'until' are equal.
+            //Instead you would have a 24 hour range
+            long time = until.getTime() + 24 * 60 * 60 * 1000;
+            until = new Date(time);
+        } catch (IllegalArgumentException e) {}
+        //Filter list by criteria
         eventTableProvider.getList().clear();
         for (EventDTO event : availableEvents) {
-            if (checkSearchCriteria(event)) {
+            if (checkSearchCriteria(event, location, name, onlyLive, from, until)) {
                 eventTableProvider.getList().add(event);
             }
         }
@@ -316,14 +325,29 @@ public class OverviewEventPanel extends AbstractEventPanel {
         ColumnSortEvent.fire(eventTable, eventTable.getColumnSortList());
     }
     
-    private boolean checkSearchCriteria(EventDTO forEvent) {
-        //TODO
+    private boolean checkSearchCriteria(EventDTO forEvent, String location, String name, boolean onlyLive, Date from, Date until) {
         boolean result = true;
-        String location = textBoxLocation.getText();
-        String name = textBoxName.getText();
-        boolean onlyLive = checkBoxLive.getValue();
-        Date from = DateTimeFormat.getFormat("dd.MM.yyyy").parse(textBoxFrom.getText());
-        Date until = DateTimeFormat.getFormat("dd.MM.yyyy").parse(textBoxUntil.getText());
+        
+        if (result && !location.equals("")) {
+            result = !textContainingStringsToCheck(Arrays.asList(location.split("\\s")), forEvent.locations);
+        }
+        if (result && !name.equals("")) {
+            result = !textContainingStringsToCheck(Arrays.asList(name.split("\\s")), forEvent.name);
+        }
+        //If only live events are allowed the check of the dates isn't needed
+        if (result && onlyLive) {
+            result = forEvent.currentlyTracked();
+        } else if (result) {
+            Date startDate = forEvent.getStartDate();
+            if (from != null && until != null) {
+                result = from.before(startDate) && until.after(startDate); 
+            } else if (from != null) {
+                result = from.before(startDate);
+            } else if (until != null) {
+                result = until.after(startDate); 
+            }
+        }
+        
         return result;
     }
 

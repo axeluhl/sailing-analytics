@@ -59,4 +59,23 @@ public class EventDTO extends NamedDTO implements IsSerializable {
     public Date getStartDate() {
         return regattas.get(0).races.get(0).startOfRace;
     }
+    
+    /**
+     * @return <code>true</code> if at least one race of the event is currently tracked, else it returns <code>false</code>
+     */
+    public boolean currentlyTracked() {
+        boolean tracked = false;
+        
+        regattaLoop:
+        for (RegattaDTO regatta : regattas) {
+            for (RaceDTO race : regatta.races) {
+                tracked = race.currentlyTracked;
+                if (tracked) {
+                    break regattaLoop;
+                }
+            }
+        }
+        
+        return tracked;
+    }
 }
