@@ -207,7 +207,7 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
                     competitorsAndTimePointsToLoad.setMarkPassings(competitor,
                             getCompetitorsAndTimePointsDTO().getMarkPassings(competitor));
                 }
-                competitorsAndTimePointsToLoad.setCompetitor(competitorsToLoad.toArray(new CompetitorDTO[0]));
+                competitorsAndTimePointsToLoad.setCompetitors(competitorsToLoad.toArray(new CompetitorDTO[0]));
                 AbstractChartPanel.this.sailingService.getCompetitorRaceData(races[selectedRace],
                         competitorsAndTimePointsToLoad, dataToShow, new AsyncCallback<CompetitorInRaceDTO>() {
                             @Override
@@ -223,7 +223,7 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
                                     chartData.setRaceData(competitor, result.getRaceData(competitor));
                                     chartData.setMarkPassingData(competitor, result.getMarkPassings(competitor));
                                 }
-                                updateTableData(competitorsAndTimePointsToLoad.getCompetitor());
+                                updateTableData(competitorsAndTimePointsToLoad.getCompetitors());
                                 chart.showWidget(1);
                             }
                         });
@@ -393,7 +393,7 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
         plotOptions.setGridOptions(new GridOptions().setHoverable(true).setMouseActiveRadius(5).setAutoHighlight(true));
 
         plotOptions.setSelectionOptions(new SelectionOptions().setDragging(true).setMode("x"));
-        for (int i = 0; i <  getCompetitorsAndTimePointsDTO().getCompetitor().length; i++){
+        for (int i = 0; i <  getCompetitorsAndTimePointsDTO().getCompetitors().length; i++){
         	SeriesHandler series = model.addSeries(""+i, colorMap.getColorByID(i));
     		series.setOptions(SeriesType.LINES, new LineSeriesOptions().setLineWidth(2.5).setShow(true));
     		series.setOptions(SeriesType.POINTS, new PointsSeriesOptions().setLineWidth(0).setShow(false));

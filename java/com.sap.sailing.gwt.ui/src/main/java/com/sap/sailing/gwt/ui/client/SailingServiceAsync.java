@@ -224,7 +224,7 @@ public interface SailingServiceAsync {
 
     /**
      * This method computes the in {@code dataType} selected data for the in {@code race} specified race
-     * for all competitors returned by {@link CompetitorsAndTimePointsDTO#getCompetitor()} at the timepoints 
+     * for all competitors returned by {@link CompetitorsAndTimePointsDTO#getCompetitors()} at the timepoints 
      * returned by {@link CompetitorsAndTimePointsDTO#getTimePoints()}.
      * The returned {@link CompetitorInRaceDTO} contains the values for the timepoints as well as the values for the markpassings.
      * 

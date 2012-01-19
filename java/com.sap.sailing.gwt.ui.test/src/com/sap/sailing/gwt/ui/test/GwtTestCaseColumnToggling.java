@@ -77,8 +77,8 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
     }
     
     private void trackRace(){
-        service.track(rrDao, tractracTunnel ? "tcp://"+tractracTunnelHost+":4412" : "tcp://germanmaster.traclive.dk:4400",
-                tractracTunnel ? "tcp://"+tractracTunnelHost+":4413" : "tcp://germanmaster.traclive.dk:4401", false, false, new AsyncCallback<Void>() {
+        service.track(rrDao, tractracTunnel ? "tcp://"+tractracTunnelHost+":4412" : "tcp://germanmaster.traclive.dk:1520",
+                tractracTunnel ? "tcp://"+tractracTunnelHost+":4413" : "tcp://germanmaster.traclive.dk:1521", false, false, new AsyncCallback<Void>() {
 
             @Override
             public void onFailure(Throwable caught) {

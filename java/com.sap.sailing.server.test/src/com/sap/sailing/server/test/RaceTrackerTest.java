@@ -47,8 +47,8 @@ public class RaceTrackerTest {
             storedUri = new URI("tcp://"+tractracTunnelHost+":4413");
         } else {
             // no tunnel:
-            liveUri = new URI("tcp://germanmaster.traclive.dk:4400");
-            storedUri = new URI("tcp://germanmaster.traclive.dk:4401");
+            liveUri = new URI("tcp://germanmaster.traclive.dk:1520");
+            storedUri = new URI("tcp://germanmaster.traclive.dk:1521");
         }
     }
     

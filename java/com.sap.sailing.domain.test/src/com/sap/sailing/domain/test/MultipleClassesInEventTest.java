@@ -37,8 +37,8 @@ public class MultipleClassesInEventTest {
     @Test
     public void testLoadTwoRacesWithEqualEventNameButDifferentClasses() throws MalformedURLException, FileNotFoundException, URISyntaxException {
         String httpAndHost = "http://germanmaster.traclive.dk";
-        String liveURI = "tcp://germanmaster.traclive.dk:4400";
-        String storedURI = "tcp://germanmaster.traclive.dk:4401";
+        String liveURI = "tcp://germanmaster.traclive.dk:1520";
+        String storedURI = "tcp://germanmaster.traclive.dk:1521";
         if (tractracTunnel) {
             liveURI   = "tcp://"+tractracTunnelHost+":4412";
             storedURI = "tcp://"+tractracTunnelHost+":4413";
