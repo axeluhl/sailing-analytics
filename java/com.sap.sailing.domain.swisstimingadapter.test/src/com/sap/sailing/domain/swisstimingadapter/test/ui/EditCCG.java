@@ -10,11 +10,12 @@
  */
 package com.sap.sailing.domain.swisstimingadapter.test.ui;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.sap.sailing.domain.swisstimingadapter.Mark;
 import com.sap.sailing.domain.swisstimingadapter.classes.messages.CCGMessage;
 import com.sap.sailing.domain.swisstimingadapter.impl.MarkImpl;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  *
@@ -39,7 +40,7 @@ public class EditCCG extends javax.swing.JDialog {
             ccg = new CCGMessage();
         marks = ccg.getMarkList();
         jRaceID.setText(ccg.getRaceId());
-        jMarkList.setListData(marks.toArray());
+        jMarkList.setListData(marks.toArray(new CCGMessage[0]));
     }
 
     /** This method is called from within the constructor to
@@ -69,7 +70,7 @@ public class EditCCG extends javax.swing.JDialog {
         jButton2 = new javax.swing.JButton();
         jButton3 = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
-        jMarkList = new javax.swing.JList();
+        jMarkList = new javax.swing.JList<CCGMessage>();
         jButton1 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
@@ -127,10 +128,14 @@ public class EditCCG extends javax.swing.JDialog {
             }
         });
 
-        jMarkList.setModel(new javax.swing.AbstractListModel() {
-            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
-            public int getSize() { return strings.length; }
-            public Object getElementAt(int i) { return strings[i]; }
+        jMarkList.setModel(new javax.swing.AbstractListModel<CCGMessage>() {
+            CCGMessage[] ccgMessages = { new CCGMessage("Item 1", new ArrayList<Mark>()),
+                    new CCGMessage("Item 2", new ArrayList<Mark>()),
+                    new CCGMessage("Item 3", new ArrayList<Mark>()),
+                    new CCGMessage("Item 4", new ArrayList<Mark>()),
+                    new CCGMessage("Item 5", new ArrayList<Mark>()) };
+            public int getSize() { return ccgMessages.length; }
+            public CCGMessage getElementAt(int i) { return ccgMessages[i]; }
         });
         jScrollPane1.setViewportView(jMarkList);
 
@@ -248,14 +253,14 @@ public class EditCCG extends javax.swing.JDialog {
         if (jRadioButton2.isSelected())
             devices.add(jSailNumber2.getText());
         marks.add(new MarkWithDesc(jMarkDescription.getText(), Integer.parseInt(jMarkIndex.getText()),devices));
-        jMarkList.setListData(marks.toArray());
+        jMarkList.setListData(marks.toArray(new CCGMessage[0]));
     }//GEN-LAST:event_jButton2ActionPerformed
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
         // TODO add your handling code here:
-        for (Object o : jMarkList.getSelectedValues())
+        for (CCGMessage o : jMarkList.getSelectedValuesList())
             marks.remove(o);
-        jMarkList.setListData(marks.toArray());
+        jMarkList.setListData(marks.toArray(new CCGMessage[0]));
     }//GEN-LAST:event_jButton3ActionPerformed
 
     public CCGMessage getMessage(){
@@ -286,7 +291,7 @@ public class EditCCG extends javax.swing.JDialog {
     private javax.swing.JLabel jLabelSailNumber2;
     private javax.swing.JTextField jMarkDescription;
     private javax.swing.JTextField jMarkIndex;
-    private javax.swing.JList jMarkList;
+    private javax.swing.JList<CCGMessage> jMarkList;
     private javax.swing.JTextField jRaceID;
     private javax.swing.JRadioButton jRadioButton1;
     private javax.swing.JRadioButton jRadioButton2;

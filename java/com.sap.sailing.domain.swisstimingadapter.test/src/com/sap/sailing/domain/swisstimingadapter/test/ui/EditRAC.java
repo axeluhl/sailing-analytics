@@ -10,11 +10,12 @@
  */
 package com.sap.sailing.domain.swisstimingadapter.test.ui;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.sap.sailing.domain.swisstimingadapter.Race;
 import com.sap.sailing.domain.swisstimingadapter.classes.messages.RACMessage;
 import com.sap.sailing.domain.swisstimingadapter.impl.RaceImpl;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  *
@@ -41,7 +42,7 @@ public class EditRAC extends javax.swing.JDialog {
             this.races = new ArrayList<Race>();
             this.rac = new RACMessage(races);
         }
-        jRaceList.setListData(races.toArray());
+        jRaceList.setListData(races.toArray(new Race[0]));
     }
 
     /** This method is called from within the constructor to
@@ -61,7 +62,7 @@ public class EditRAC extends javax.swing.JDialog {
         jAdd = new javax.swing.JButton();
         jRemove = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
-        jRaceList = new javax.swing.JList();
+        jRaceList = new javax.swing.JList<Race>();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
@@ -149,16 +150,16 @@ public class EditRAC extends javax.swing.JDialog {
     private void jAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jAddActionPerformed
         // TODO add your handling code here:
         races.add(new DescriptionRace(jRaceID.getText(), jRaceDesc.getText()));
-        jRaceList.setListData(races.toArray());
+        jRaceList.setListData(races.toArray(new Race[0]));
     }//GEN-LAST:event_jAddActionPerformed
 
     private void jRemoveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRemoveActionPerformed
         // TODO add your handling code here:
-        for (Object o : jRaceList.getSelectedValues()){
+        for (Object o : jRaceList.getSelectedValuesList()){
             if (o instanceof Race)
                 races.remove((Race) o);
         }
-        jRaceList.setListData(races.toArray());
+        jRaceList.setListData(races.toArray(new Race[0]));
     }//GEN-LAST:event_jRemoveActionPerformed
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
@@ -189,7 +190,7 @@ public class EditRAC extends javax.swing.JDialog {
     private javax.swing.JLabel jLabel2;
     private javax.swing.JTextField jRaceDesc;
     private javax.swing.JTextField jRaceID;
-    private javax.swing.JList jRaceList;
+    private javax.swing.JList<Race> jRaceList;
     private javax.swing.JButton jRemove;
     private javax.swing.JScrollPane jScrollPane1;
     // End of variables declaration//GEN-END:variables
