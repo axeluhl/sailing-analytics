@@ -68,7 +68,7 @@ public interface SailingService extends RemoteService {
 
     void setWindSource(RaceIdentifier raceIdentifier, String windSourceName, boolean raceIsKnownToStartUpwind);
 
-    void removeWind(RaceIdentifier raceIdentifier, WindDTO windDAO);
+    void removeWind(RaceIdentifier raceIdentifier, WindDTO windDTO);
 
     public List<String> getLeaderboardNames() throws Exception;
     
@@ -136,7 +136,7 @@ public interface SailingService extends RemoteService {
     String[] getCountryCodes();
     
     CompetitorInRaceDTO getCompetitorRaceData(RaceIdentifier race,
-            CompetitorsAndTimePointsDTO competitorsAndTimePointsDAO, DetailType dataType) throws NoWindException;
+            CompetitorsAndTimePointsDTO competitorsAndTimePointsDTO, DetailType dataType) throws NoWindException;
 
     CompetitorsAndTimePointsDTO getCompetitorsAndTimePoints(RaceIdentifier race, int steps);
     

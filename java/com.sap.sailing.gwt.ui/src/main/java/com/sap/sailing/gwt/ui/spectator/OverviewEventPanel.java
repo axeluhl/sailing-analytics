@@ -172,8 +172,8 @@ public class OverviewEventPanel extends AbstractEventPanel {
             //Creating location column
             TextColumn<EventDTO> locationColumn = new TextColumn<EventDTO>() {
                 @Override
-                public String getValue(EventDTO eventDAO) {
-                    String locations = eventDAO.locations;
+                public String getValue(EventDTO eventDTO) {
+                    String locations = eventDTO.locations;
                     return locations != null ? locations : stringConstants.locationNotAvailable();
                 }
             };
@@ -181,16 +181,16 @@ public class OverviewEventPanel extends AbstractEventPanel {
             //Creating event name column
             TextColumn<EventDTO> nameColumn = new TextColumn<EventDTO>() {
                 @Override
-                public String getValue(EventDTO eventDAO) {
-                    return eventDAO.name;
+                public String getValue(EventDTO eventDTO) {
+                    return eventDTO.name;
                 }
             };
             nameColumn.setSortable(true);
             //Creating start date column
             TextColumn<EventDTO> startDateColumn = new TextColumn<EventDTO>() {
                 @Override
-                public String getValue(EventDTO eventDAO) {
-                    Date start = eventDAO.regattas.get(0).races.get(0).startOfRace;
+                public String getValue(EventDTO eventDTO) {
+                    Date start = eventDTO.regattas.get(0).races.get(0).startOfRace;
                     return start != null ? dateFormatter.render(start) : stringConstants.startDateNotAvailable();
                 }
             };

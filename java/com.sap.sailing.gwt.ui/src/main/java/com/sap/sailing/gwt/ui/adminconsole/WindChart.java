@@ -128,8 +128,8 @@ public class WindChart implements Component<WindChartSettings> {
         plot.addSelectionListener(new SelectionListener() {
             public void selected(double x1, double y1, double x2, double y2) {
                 /* TODO Remove not visible buoys from the series when user is zooming in or add them if he is zooming out.
-                for (CompetitorDAO competitor : competitorsAndTimePointsDAO.getCompetitor()){
-                        long[] markPassingTimes = competitorsAndTimePointsDAO.getMarkPassings(competitor);
+                for (CompetitorDTO competitor : competitorsAndTimePointsDTO.getCompetitor()){
+                        long[] markPassingTimes = competitorsAndTimePointsDTO.getMarkPassings(competitor);
                     Double[] markPassingValues = chartData.getMarkPassings(competitor);
                     SeriesHandler markSeries = getCompetitorMarkPassingSeries(competitor);
                     markSeries.clear();
