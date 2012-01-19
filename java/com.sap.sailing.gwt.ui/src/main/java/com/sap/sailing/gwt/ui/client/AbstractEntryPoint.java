@@ -15,6 +15,7 @@ import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 public abstract class AbstractEntryPoint implements EntryPoint, ErrorReporter {
@@ -54,7 +55,15 @@ public abstract class AbstractEntryPoint implements EntryPoint, ErrorReporter {
         errorDialogBox.center();
         dialogCloseButton.setFocus(true);
     }
-    
+
+    public void createErrorPage(String message) {
+        LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(stringMessages);
+        logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
+
+        RootPanel.get().add(logoAndTitlePanel);
+        RootPanel.get().add(new Label(message));
+    }
+
     private DialogBox createErrorDialog() {
         // Create the popup dialog box
         final DialogBox myErrorDialogBox = new DialogBox();

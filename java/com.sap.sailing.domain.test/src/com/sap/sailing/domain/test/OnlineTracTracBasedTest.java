@@ -125,8 +125,8 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
     protected void setUpWithoutLaunchingController(String eventName, String raceId) throws FileNotFoundException, MalformedURLException,
             URISyntaxException {
         super.setUp(new URL("http://germanmaster.traclive.dk/events/"+eventName+"/clientparams.php?event="+eventName+"&race="+raceId),
-                tractracTunnel ? new URI("tcp://"+tractracTunnelHost+":4412") : new URI("tcp://germanmaster.traclive.dk:4400"),
-                        tractracTunnel ? new URI("tcp://"+tractracTunnelHost+":4413") : new URI("tcp://germanmaster.traclive.dk:4401"));
+                tractracTunnel ? new URI("tcp://"+tractracTunnelHost+":1520") : new URI("tcp://germanmaster.traclive.dk:1520"),
+                        tractracTunnel ? new URI("tcp://"+tractracTunnelHost+":1521") : new URI("tcp://germanmaster.traclive.dk:1521"));
         if (domainFactory == null) {
             domainFactory = new DomainFactoryImpl(new com.sap.sailing.domain.base.impl.DomainFactoryImpl());
         }
