@@ -40,8 +40,8 @@ public class MultipleClassesInEventTest {
         String liveURI = "tcp://germanmaster.traclive.dk:1520";
         String storedURI = "tcp://germanmaster.traclive.dk:1521";
         if (tractracTunnel) {
-            liveURI   = "tcp://"+tractracTunnelHost+":4412";
-            storedURI = "tcp://"+tractracTunnelHost+":4413";
+            liveURI   = "tcp://"+tractracTunnelHost+":1520";
+            storedURI = "tcp://"+tractracTunnelHost+":1521";
         }
         kiwotest1 = domainFactory
                 .createRaceTracker(
