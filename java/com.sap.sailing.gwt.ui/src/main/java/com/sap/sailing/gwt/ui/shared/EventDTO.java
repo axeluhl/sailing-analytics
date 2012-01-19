@@ -29,9 +29,9 @@ public class EventDTO extends NamedDTO implements IsSerializable {
         boolean first = true;
         RacePlaceOrder previousOrder = null;
         locations = "";
-        for (RegattaDTO regattaDAO : regattas) {
-            for (RaceDTO raceDAO : regattaDAO.races) {
-                RacePlaceOrder order = raceDAO.racePlaces;
+        for (RegattaDTO regattaDTO : regattas) {
+            for (RaceDTO raceDTO : regattaDTO.races) {
+                RacePlaceOrder order = raceDTO.racePlaces;
                 if (order != null) {
                     if (first) {
                         b.append(order.toString());
