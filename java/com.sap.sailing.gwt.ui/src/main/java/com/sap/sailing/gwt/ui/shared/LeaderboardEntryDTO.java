@@ -6,13 +6,13 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 
 /**
  * Holds a single competitor's scoring details for a single race. It may optionally contain
- * a list of {@link LegEntryDAO} objects providing details about the individual legs sailed
+ * a list of {@link LegEntryDTO} objects providing details about the individual legs sailed
  * during the race.
  * 
  * @author Axel Uhl (D043530)
  *
  */
-public class LeaderboardEntryDAO implements IsSerializable {
+public class LeaderboardEntryDTO implements IsSerializable {
     /**
      * Either <code>null</code> in case no max points, or one of "DNS", "DNF", "OCS", "DND", "RAF", "BFD", "DNC", or "DSQ"
      */
@@ -29,6 +29,6 @@ public class LeaderboardEntryDAO implements IsSerializable {
      * haven't been requested from the server yet. Otherwise, the list holds one entry per {@link Leg} of the
      * {@link Course} being sailed in the race for which this object holds the scoring details.
      */
-    public List<LegEntryDAO> legDetails;
+    public List<LegEntryDTO> legDetails;
     
 }

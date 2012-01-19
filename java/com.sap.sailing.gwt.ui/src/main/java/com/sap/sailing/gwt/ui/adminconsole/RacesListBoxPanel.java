@@ -22,13 +22,13 @@ import com.sap.sailing.gwt.ui.client.EventDisplayer;
 import com.sap.sailing.gwt.ui.client.EventRefresher;
 import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.EventDAO;
-import com.sap.sailing.gwt.ui.shared.RaceDAO;
-import com.sap.sailing.gwt.ui.shared.RegattaDAO;
+import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.ui.shared.RaceDTO;
+import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 
 public class RacesListBoxPanel extends FormPanel implements RaceSelectionProvider, EventDisplayer {
     private final Set<RaceSelectionChangeListener> raceSelectionChangeListeners;
-    private final List<Triple<EventDAO, RegattaDAO, RaceDAO>> raceList;
+    private final List<Triple<EventDTO, RegattaDTO, RaceDTO>> raceList;
     private final ListBox raceListBox;
     private final EventRefresher eventRefresher;
     private final StringMessages stringConstants;
@@ -47,15 +47,15 @@ public class RacesListBoxPanel extends FormPanel implements RaceSelectionProvide
         raceListBox.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                Triple<EventDAO, RegattaDAO, RaceDAO> selectedRace = getSelectedRace();
-                List<Triple<EventDAO, RegattaDAO, RaceDAO>> selectedRacesCollection = Collections.emptyList();
+                Triple<EventDTO, RegattaDTO, RaceDTO> selectedRace = getSelectedRace();
+                List<Triple<EventDTO, RegattaDTO, RaceDTO>> selectedRacesCollection = Collections.emptyList();
                 if (selectedRace != null) {
                     selectedRacesCollection = Collections.singletonList(selectedRace);
                 }
                 fireRaceSelectionChanged(selectedRacesCollection);
             }
         });
-        raceList = new ArrayList<Triple<EventDAO, RegattaDAO, RaceDAO>>();
+        raceList = new ArrayList<Triple<EventDTO, RegattaDTO, RaceDTO>>();
         VerticalPanel vp = new VerticalPanel();
         HorizontalPanel labelAndRefreshButton = new HorizontalPanel();
         labelAndRefreshButton.setSpacing(20);
@@ -73,9 +73,9 @@ public class RacesListBoxPanel extends FormPanel implements RaceSelectionProvide
         setWidget(vp);
     }
 
-    private Triple<EventDAO, RegattaDAO, RaceDAO> getSelectedRace() {
+    private Triple<EventDTO, RegattaDTO, RaceDTO> getSelectedRace() {
         int i = raceListBox.getSelectedIndex();
-        Triple<EventDAO, RegattaDAO, RaceDAO> result = null;
+        Triple<EventDTO, RegattaDTO, RaceDTO> result = null;
         if (i >= 0) {
             result = raceList.get(i);
         }
@@ -83,36 +83,36 @@ public class RacesListBoxPanel extends FormPanel implements RaceSelectionProvide
     }
 
     @Override
-    public void fillEvents(List<EventDAO> result) {
+    public void fillEvents(List<EventDTO> result) {
         raceList.clear();
         raceListBox.clear();
-        for (EventDAO event : result) {
-            for (RegattaDAO regatta : event.regattas) {
-                for (RaceDAO race : regatta.races) {
-                    raceList.add(new Triple<EventDAO, RegattaDAO, RaceDAO>(event, regatta, race));
+        for (EventDTO event : result) {
+            for (RegattaDTO regatta : event.regattas) {
+                for (RaceDTO race : regatta.races) {
+                    raceList.add(new Triple<EventDTO, RegattaDTO, RaceDTO>(event, regatta, race));
                 }
             }
         }
-        Collections.sort(raceList, new Comparator<Triple<EventDAO, RegattaDAO, RaceDAO>>() {
+        Collections.sort(raceList, new Comparator<Triple<EventDTO, RegattaDTO, RaceDTO>>() {
             @Override
-            public int compare(Triple<EventDAO, RegattaDAO, RaceDAO> o1, Triple<EventDAO, RegattaDAO, RaceDAO> o2) {
+            public int compare(Triple<EventDTO, RegattaDTO, RaceDTO> o1, Triple<EventDTO, RegattaDTO, RaceDTO> o2) {
                 String name1 = RacesListBoxPanel.this.toString(o1);
                 String name2 = RacesListBoxPanel.this.toString(o2);
                 return name1.compareTo(name2);
             }
 
         });
-        for (Triple<EventDAO, RegattaDAO, RaceDAO> p : raceList) {
+        for (Triple<EventDTO, RegattaDTO, RaceDTO> p : raceList) {
             raceListBox.addItem(toString(p));
         }
         fireRaceSelectionChanged(getSelectedEventAndRace());
     }
 
     @Override
-    public List<Triple<EventDAO, RegattaDAO, RaceDAO>> getSelectedEventAndRace() {
+    public List<Triple<EventDTO, RegattaDTO, RaceDTO>> getSelectedEventAndRace() {
         int i=0;
-        List<Triple<EventDAO, RegattaDAO, RaceDAO>> result = new ArrayList<Triple<EventDAO,RegattaDAO,RaceDAO>>();
-        for (Triple<EventDAO, RegattaDAO, RaceDAO> triple : raceList) {
+        List<Triple<EventDTO, RegattaDTO, RaceDTO>> result = new ArrayList<Triple<EventDTO,RegattaDTO,RaceDTO>>();
+        for (Triple<EventDTO, RegattaDTO, RaceDTO> triple : raceList) {
             if (raceListBox.isItemSelected(i)) {
                 result.add(triple);
             }
@@ -131,13 +131,13 @@ public class RacesListBoxPanel extends FormPanel implements RaceSelectionProvide
         raceSelectionChangeListeners.remove(listener);
     }
 
-    private void fireRaceSelectionChanged(List<Triple<EventDAO, RegattaDAO, RaceDAO>> selectedRaces) {
+    private void fireRaceSelectionChanged(List<Triple<EventDTO, RegattaDTO, RaceDTO>> selectedRaces) {
         for (RaceSelectionChangeListener listener : raceSelectionChangeListeners) {
             listener.onRaceSelectionChange(selectedRaces);
         }
     }
 
-    private String toString(Triple<EventDAO, RegattaDAO, RaceDAO> pair) {
+    private String toString(Triple<EventDTO, RegattaDTO, RaceDTO> pair) {
         return pair.getA().name+" - "+pair.getC().name+(pair.getC().currentlyTracked ? " ("+stringConstants.tracked()+")" : "");
     }
 

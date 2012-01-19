@@ -10,23 +10,23 @@ import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
-import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
-import com.sap.sailing.gwt.ui.shared.CompetitorInRaceDAO;
-import com.sap.sailing.gwt.ui.shared.CompetitorsAndTimePointsDAO;
-import com.sap.sailing.gwt.ui.shared.EventDAO;
-import com.sap.sailing.gwt.ui.shared.GPSFixDAO;
-import com.sap.sailing.gwt.ui.shared.LeaderboardDAO;
-import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDAO;
-import com.sap.sailing.gwt.ui.shared.ManeuverDAO;
-import com.sap.sailing.gwt.ui.shared.MarkDAO;
-import com.sap.sailing.gwt.ui.shared.QuickRankDAO;
-import com.sap.sailing.gwt.ui.shared.RaceInLeaderboardDAO;
-import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDAO;
-import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDAO;
-import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDAO;
-import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDAO;
-import com.sap.sailing.gwt.ui.shared.WindDAO;
-import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDAO;
+import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
+import com.sap.sailing.gwt.ui.shared.CompetitorInRaceDTO;
+import com.sap.sailing.gwt.ui.shared.CompetitorsAndTimePointsDTO;
+import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
+import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
+import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDTO;
+import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
+import com.sap.sailing.gwt.ui.shared.MarkDTO;
+import com.sap.sailing.gwt.ui.shared.QuickRankDTO;
+import com.sap.sailing.gwt.ui.shared.RaceInLeaderboardDTO;
+import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDTO;
+import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDTO;
+import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDTO;
+import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDTO;
+import com.sap.sailing.gwt.ui.shared.WindDTO;
+import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.server.api.DetailType;
 import com.sap.sailing.server.api.EventAndRaceIdentifier;
 import com.sap.sailing.server.api.EventIdentifier;
@@ -37,23 +37,23 @@ import com.sap.sailing.server.api.RaceIdentifier;
  */
 public interface SailingServiceAsync {
     
-    void listEvents(boolean withRacePlaces, AsyncCallback<List<EventDAO>> callback);
+    void listEvents(boolean withRacePlaces, AsyncCallback<List<EventDTO>> callback);
 
     /**
      * The string returned in the callback's pair is the common event name
      */
-    void listTracTracRacesInEvent(String eventJsonURL, AsyncCallback<Pair<String, List<TracTracRaceRecordDAO>>> callback);
+    void listTracTracRacesInEvent(String eventJsonURL, AsyncCallback<Pair<String, List<TracTracRaceRecordDTO>>> callback);
 
     /**
      * @param liveURI may be <code>null</code> or the empty string in which case the server will
-     * use the {@link TracTracRaceRecordDAO#liveURI} from the <code>rr</code> race record.
+     * use the {@link TracTracRaceRecordDTO#liveURI} from the <code>rr</code> race record.
      * @param storedURImay be <code>null</code> or the empty string in which case the server will
-     * use the {@link TracTracRaceRecordDAO#storedURI} from the <code>rr</code> race record.
+     * use the {@link TracTracRaceRecordDTO#storedURI} from the <code>rr</code> race record.
      */
-    void track(TracTracRaceRecordDAO rr, String liveURI, String storedURI, boolean trackWind, boolean correctWindByDeclination,
+    void track(TracTracRaceRecordDTO rr, String liveURI, String storedURI, boolean trackWind, boolean correctWindByDeclination,
             AsyncCallback<Void> callback);
 
-    void getPreviousTracTracConfigurations(AsyncCallback<List<TracTracConfigurationDAO>> callback);
+    void getPreviousTracTracConfigurations(AsyncCallback<List<TracTracConfigurationDTO>> callback);
 
     void storeTracTracConfiguration(String name, String jsonURL, String liveDataURI, String storedDataURI,
             AsyncCallback<Void> callback);
@@ -73,7 +73,7 @@ public interface SailingServiceAsync {
      * @param windSources if <code>null</code>, information about all available wind sources will be provided
      */
     void getWindInfo(RaceIdentifier raceIdentifier, Date from, Date to, WindSource[] windSources,
-            AsyncCallback<WindInfoForRaceDAO> callback);
+            AsyncCallback<WindInfoForRaceDTO> callback);
 
     /**
      * @param windSources
@@ -82,11 +82,11 @@ public interface SailingServiceAsync {
      */
     void getWindInfo(RaceIdentifier raceIdentifier, Date from, long millisecondsStepWidth, int numberOfFixes,
             double latDeg, double lngDeg, Collection<String> windSources,
-            AsyncCallback<WindInfoForRaceDAO> callback);
+            AsyncCallback<WindInfoForRaceDTO> callback);
 
-    void setWind(RaceIdentifier raceIdentifier, WindDAO wind, AsyncCallback<Void> callback);
+    void setWind(RaceIdentifier raceIdentifier, WindDTO wind, AsyncCallback<Void> callback);
     
-    void removeWind(RaceIdentifier raceIdentifier, WindDAO windDAO, AsyncCallback<Void> callback);
+    void removeWind(RaceIdentifier raceIdentifier, WindDTO windDAO, AsyncCallback<Void> callback);
 
     /**
      * @param from
@@ -104,48 +104,48 @@ public interface SailingServiceAsync {
      *         chronological order is provided. The last one is the last position at or before <code>date</code>.
      */
     void getBoatPositions(RaceIdentifier raceIdentifier,
-            Map<CompetitorDAO, Date> from, Map<CompetitorDAO, Date> to,
-            boolean extrapolate, AsyncCallback<Map<CompetitorDAO, List<GPSFixDAO>>> callback);
+            Map<CompetitorDTO, Date> from, Map<CompetitorDTO, Date> to,
+            boolean extrapolate, AsyncCallback<Map<CompetitorDTO, List<GPSFixDTO>>> callback);
 
-    void getMarkPositions(RaceIdentifier raceIdentifier, Date date, AsyncCallback<List<MarkDAO>> asyncCallback);
+    void getMarkPositions(RaceIdentifier raceIdentifier, Date date, AsyncCallback<List<MarkDTO>> asyncCallback);
 
-    void getQuickRanks(RaceIdentifier raceIdentifier, Date date, AsyncCallback<List<QuickRankDAO>> callback);
+    void getQuickRanks(RaceIdentifier raceIdentifier, Date date, AsyncCallback<List<QuickRankDTO>> callback);
 
     void setWindSource(RaceIdentifier raceIdentifier, String windSourceName, boolean raceIsKnownToStartUpwind, AsyncCallback<Void> callback);
 
     /**
-     * Returns a {@link LeaderboardDAO} will information about all races, their points and competitor display names
+     * Returns a {@link LeaderboardDTO} will information about all races, their points and competitor display names
      * filled in. The column details are filled for the races whose named are provided in
      * <code>namesOfRacesForWhichToLoadLegDetails</code>.
      * 
      * @param namesOfRacesForWhichToLoadLegDetails
-     *            if <code>null</code>, no {@link LeaderboardEntryDAO#legDetails leg details} will be present in the
-     *            result ({@link LeaderboardEntryDAO#legDetails} will be <code>null</code> for all
-     *            {@link LeaderboardEntryDAO} objects contained). Otherwise, the {@link LeaderboardEntryDAO#legDetails}
+     *            if <code>null</code>, no {@link LeaderboardEntryDTO#legDetails leg details} will be present in the
+     *            result ({@link LeaderboardEntryDTO#legDetails} will be <code>null</code> for all
+     *            {@link LeaderboardEntryDTO} objects contained). Otherwise, the {@link LeaderboardEntryDTO#legDetails}
      *            list will contain one entry per leg of the race {@link Course} for those race columns whose
      *            {@link RaceInLeaderboard#getName() name} is contained in
      *            <code>namesOfRacesForWhichToLoadLegDetails</code>. For all other columns,
-     *            {@link LeaderboardEntryDAO#legDetails} is <code>null</code>.
+     *            {@link LeaderboardEntryDTO#legDetails} is <code>null</code>.
      */
     void getLeaderboardByName(String leaderboardName, Date date,
-            Collection<String> namesOfRacesForWhichToLoadLegDetails, AsyncCallback<LeaderboardDAO> callback);
+            Collection<String> namesOfRacesForWhichToLoadLegDetails, AsyncCallback<LeaderboardDTO> callback);
 
     void getLeaderboardNames(AsyncCallback<List<String>> callback);
 
     /**
-     * Creates a {@link LeaderboardDAO} for each leaderboard known by the server and fills in the name, race master data
-     * in the form of {@link RaceInLeaderboardDAO}s, whether or not there are {@link LeaderboardDAO#hasCarriedPoints
-     * carried points} and the {@link LeaderboardDAO#discardThresholds discarding thresholds} for the leaderboard. No
+     * Creates a {@link LeaderboardDTO} for each leaderboard known by the server and fills in the name, race master data
+     * in the form of {@link RaceInLeaderboardDTO}s, whether or not there are {@link LeaderboardDTO#hasCarriedPoints
+     * carried points} and the {@link LeaderboardDTO#discardThresholds discarding thresholds} for the leaderboard. No
      * data about the points is filled into the result object. No data about the competitor display names is filled in;
-     * instead, an empty map is used for {@link LeaderboardDAO#competitorDisplayNames}.
+     * instead, an empty map is used for {@link LeaderboardDTO#competitorDisplayNames}.
      */
-    void getLeaderboards(AsyncCallback<List<LeaderboardDAO>> callback);
+    void getLeaderboards(AsyncCallback<List<LeaderboardDTO>> callback);
     
     /**
      * Does the same as {@link SailingServiceAsync#getLeaderboards(AsyncCallback) getLeaderboards} but returns only
      * leaderboards which have the given event as race
      */
-    void getLeaderboardsByEvent(EventIdentifier eventIdentifier, AsyncCallback<List<LeaderboardDAO>> callback);
+    void getLeaderboardsByEvent(EventIdentifier eventIdentifier, AsyncCallback<List<LeaderboardDTO>> callback);
     
     void updateLeaderboard(String leaderboardName, String newLeaderboardName, int[] newDiscardingThreasholds,
             AsyncCallback<Void> callback);
@@ -156,7 +156,7 @@ public interface SailingServiceAsync {
      * data about the race columns filled in, but no details about the race points. As such, the result structure
      * equals that of the result of {@link #getLeaderboards(AsyncCallback)}.
      */
-    void createLeaderboard(String leaderboardName, int[] discardThresholds, AsyncCallback<LeaderboardDAO> asyncCallback);
+    void createLeaderboard(String leaderboardName, int[] discardThresholds, AsyncCallback<LeaderboardDTO> asyncCallback);
 
     void removeLeaderboard(String leaderboardName, AsyncCallback<Void> asyncCallback);
     
@@ -201,20 +201,20 @@ public interface SailingServiceAsync {
 	void updateIsMedalRace(String leaderboardName, String columnName, boolean isMedalRace,
 			AsyncCallback<Void> callback);
 
-    void getPreviousSwissTimingConfigurations(AsyncCallback<List<SwissTimingConfigurationDAO>> asyncCallback);
+    void getPreviousSwissTimingConfigurations(AsyncCallback<List<SwissTimingConfigurationDTO>> asyncCallback);
 
     void listSwissTimingRaces(String hostname, int port, boolean canSendRequests,
-            AsyncCallback<List<SwissTimingRaceRecordDAO>> asyncCallback);
+            AsyncCallback<List<SwissTimingRaceRecordDTO>> asyncCallback);
 
     void storeSwissTimingConfiguration(String configName, String hostname, int port, boolean canSendRequests, AsyncCallback<Void> asyncCallback);
 
-    void trackWithSwissTiming(SwissTimingRaceRecordDAO rr, String hostname, int port, boolean canSendRequests,
+    void trackWithSwissTiming(SwissTimingRaceRecordDTO rr, String hostname, int port, boolean canSendRequests,
             boolean trackWind, boolean correctWindByDeclination, AsyncCallback<Void> asyncCallback);
 
     void sendSwissTimingDummyRace(String racMessage, String stlMesssage, String ccgMessage, AsyncCallback<Void> callback);
     
     /**
-     * Requests the computation of the {@link LeaderboardDAO} for <code>leaderboardName</code> <code>times</code> times.
+     * Requests the computation of the {@link LeaderboardDTO} for <code>leaderboardName</code> <code>times</code> times.
      * The date used for the {@link #getLeaderboardByName(String, Date, Collection, AsyncCallback)} call is iterated
      * in 10ms time steps, going backwards from "now." For all races, all details are requested.
      */
@@ -224,9 +224,9 @@ public interface SailingServiceAsync {
 
     /**
      * This method computes the in {@code dataType} selected data for the in {@code race} specified race
-     * for all competitors returned by {@link CompetitorsAndTimePointsDAO#getCompetitor()} at the timepoints 
-     * returned by {@link CompetitorsAndTimePointsDAO#getTimePoints()}.
-     * The returned {@link CompetitorInRaceDAO} contains the values for the timepoints as well as the values for the markpassings.
+     * for all competitors returned by {@link CompetitorsAndTimePointsDTO#getCompetitor()} at the timepoints 
+     * returned by {@link CompetitorsAndTimePointsDTO#getTimePoints()}.
+     * The returned {@link CompetitorInRaceDTO} contains the values for the timepoints as well as the values for the markpassings.
      * 
      * @see DetailType
      * 
@@ -238,20 +238,20 @@ public interface SailingServiceAsync {
      * @param callback An AsyncCallback that returns the computed data as a parameter in the {@link AsyncCallback#onSuccess(Object)} method.
      */
     void getCompetitorRaceData(RaceIdentifier race,
-			CompetitorsAndTimePointsDAO competitorsAndTimePointsDAO,
-			DetailType dataType, AsyncCallback<CompetitorInRaceDAO> callback);
+			CompetitorsAndTimePointsDTO competitorsAndTimePointsDAO,
+			DetailType dataType, AsyncCallback<CompetitorInRaceDTO> callback);
     
-    void getDouglasPoints(RaceIdentifier raceIdentifier, Map<CompetitorDAO, Date> from, Map<CompetitorDAO, Date> to,
-            double meters, AsyncCallback<Map<CompetitorDAO, List<GPSFixDAO>>> callback);
+    void getDouglasPoints(RaceIdentifier raceIdentifier, Map<CompetitorDTO, Date> from, Map<CompetitorDTO, Date> to,
+            double meters, AsyncCallback<Map<CompetitorDTO, List<GPSFixDTO>>> callback);
 
-    void getManeuvers(RaceIdentifier raceIdentifier, Map<CompetitorDAO, Date> from, Map<CompetitorDAO, Date> to,
-            AsyncCallback<Map<CompetitorDAO, List<ManeuverDAO>>> callback);
+    void getManeuvers(RaceIdentifier raceIdentifier, Map<CompetitorDTO, Date> from, Map<CompetitorDTO, Date> to,
+            AsyncCallback<Map<CompetitorDTO, List<ManeuverDTO>>> callback);
 
     /**
      * For the race identified by <code>race</code> computes <code>steps</code> equidistant time points starting at a
      * few seconds before the race starts, up to the end of the race. The result describes the race's competitors, their
      * mark passing times, the race start time and the list of time points according to the above specification.
      */
-    void getCompetitorsAndTimePoints(RaceIdentifier race, int steps, AsyncCallback<CompetitorsAndTimePointsDAO> callback);
+    void getCompetitorsAndTimePoints(RaceIdentifier race, int steps, AsyncCallback<CompetitorsAndTimePointsDTO> callback);
 
 }

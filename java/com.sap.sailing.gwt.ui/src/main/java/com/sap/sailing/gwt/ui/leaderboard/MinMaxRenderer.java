@@ -5,7 +5,7 @@ import java.util.Comparator;
 
 import com.google.gwt.cell.client.Cell.Context;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
-import com.sap.sailing.gwt.ui.shared.LeaderboardRowDAO;
+import com.sap.sailing.gwt.ui.shared.LeaderboardRowDTO;
 
 /**
  * Renders the values and the percentage bar of the {@link LegDetailColumn} and {@link ManeuverCountRaceColumn}.
@@ -16,7 +16,7 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardRowDAO;
  */
 public class MinMaxRenderer {
     private HasStringAndDoubleValue valueProvider;
-    private Comparator<LeaderboardRowDAO> comparator;
+    private Comparator<LeaderboardRowDTO> comparator;
     private Double minimumValue;
     private Double maximumValue;
 
@@ -25,22 +25,22 @@ public class MinMaxRenderer {
      * {@link ManeuverCountRaceColumn}.
      * 
      * @param valueProvider
-     *            Gets the String value of a {@link LeaderboardRowDAO}.
+     *            Gets the String value of a {@link LeaderboardRowDTO}.
      * @param comparator
      *            The comparator to update the minimum and maximum values.
      */
-    public MinMaxRenderer(HasStringAndDoubleValue valueProvider, Comparator<LeaderboardRowDAO> comparator) {
+    public MinMaxRenderer(HasStringAndDoubleValue valueProvider, Comparator<LeaderboardRowDTO> comparator) {
         this.valueProvider = valueProvider;
         this.comparator = comparator;
     }
 
     /**
-     * Renders the value of a {@link LeaderboardRowDAO}.
+     * Renders the value of a {@link LeaderboardRowDTO}.
      * 
      * @param title
      *            tool tip title to display; if <code>null</code>, no tool tip will be rendered
      */
-    public void render(Context context, LeaderboardRowDAO row, String title, SafeHtmlBuilder sb) {
+    public void render(Context context, LeaderboardRowDTO row, String title, SafeHtmlBuilder sb) {
         int percent = getPercentage(row);
         String stringValue = valueProvider.getStringValueToRender(row);
         stringValue = stringValue == null ? "" : stringValue;
@@ -52,13 +52,13 @@ public class MinMaxRenderer {
     }
 
     /**
-     * Gets the percentage of a {@link LeaderboardRowDAO}. If no minimum or maximum value was set by calling
+     * Gets the percentage of a {@link LeaderboardRowDTO}. If no minimum or maximum value was set by calling
      * {@link MinMaxRenderer#updateMinMax(Collection)} before zero is returned.
      * 
      * @param row
      *            The row to get the percentage for.
      */
-    private int getPercentage(LeaderboardRowDAO row) {
+    private int getPercentage(LeaderboardRowDTO row) {
         int percentage = 0;
         Double value = valueProvider.getDoubleValue(row);
         if (value != null) {
@@ -85,12 +85,12 @@ public class MinMaxRenderer {
      * Updates the {@link MinMaxRenderer#minimumValue} and {@link MinMaxRenderer#maximumValue}.
      * 
      * @param values
-     *            The values of {@link LeaderboardRowDAO}s to determine the minimum and maximum values for.
+     *            The values of {@link LeaderboardRowDTO}s to determine the minimum and maximum values for.
      */
-    public void updateMinMax(Collection<LeaderboardRowDAO> values) {
-        LeaderboardRowDAO minimumRow = null;
-        LeaderboardRowDAO maximumRow = null;
-        for (LeaderboardRowDAO row : values) {
+    public void updateMinMax(Collection<LeaderboardRowDTO> values) {
+        LeaderboardRowDTO minimumRow = null;
+        LeaderboardRowDTO maximumRow = null;
+        for (LeaderboardRowDTO row : values) {
             if (valueProvider.getDoubleValue(row) != null
                     && (minimumRow == null || comparator.compare(minimumRow, row) > 0)) {
                 minimumRow = row;

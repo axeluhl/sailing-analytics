@@ -11,14 +11,14 @@ import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Header;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LegDetailColumn.LegDetailField;
-import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDAO;
-import com.sap.sailing.gwt.ui.shared.LeaderboardRowDAO;
-import com.sap.sailing.gwt.ui.shared.LegEntryDAO;
+import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDTO;
+import com.sap.sailing.gwt.ui.shared.LeaderboardRowDTO;
+import com.sap.sailing.gwt.ui.shared.LegEntryDTO;
 import com.sap.sailing.server.api.DetailType;
 
 /**
  * Displays competitor's rank in leg and makes the column sortable by rank. The leg is
- * identified as an index into the {@link LeaderboardEntryDAO#legDetails} list.
+ * identified as an index into the {@link LeaderboardEntryDTO#legDetails} list.
  * 
  * @author Axel Uhl (D043530)
  * 
@@ -31,8 +31,8 @@ public class LegColumn extends ExpandableSortableColumn<String> {
     private final String columnStyle;
     
     private abstract class AbstractLegDetailField<T extends Comparable<?>> implements LegDetailField<T> {
-        public T get(LeaderboardRowDAO row) {
-            LegEntryDAO entry = getLegEntry(row);
+        public T get(LeaderboardRowDTO row) {
+            LegEntryDTO entry = getLegEntry(row);
             if (entry == null) {
                 return null;
             } else {
@@ -40,82 +40,82 @@ public class LegColumn extends ExpandableSortableColumn<String> {
             }
         }
 
-        protected abstract T getFromNonNullEntry(LegEntryDAO entry);
+        protected abstract T getFromNonNullEntry(LegEntryDTO entry);
     }
     
     private class DistanceTraveledInMeters extends AbstractLegDetailField<Double> {
         @Override
-        protected Double getFromNonNullEntry(LegEntryDAO entry) {
+        protected Double getFromNonNullEntry(LegEntryDTO entry) {
             return entry.distanceTraveledInMeters;
         }
     }
     
     private class AverageSpeedOverGroundInKnots extends AbstractLegDetailField<Double> {
         @Override
-        protected Double getFromNonNullEntry(LegEntryDAO entry) {
+        protected Double getFromNonNullEntry(LegEntryDTO entry) {
             return entry.averageSpeedOverGroundInKnots;
         }
     }
     
     private class CurrentSpeedOverGroundInKnots extends AbstractLegDetailField<Double> {
         @Override
-        protected Double getFromNonNullEntry(LegEntryDAO entry) {
+        protected Double getFromNonNullEntry(LegEntryDTO entry) {
             return entry.currentSpeedOverGroundInKnots;
         }
     }
     
     private class EstimatedTimeToNextWaypointInSeconds extends AbstractLegDetailField<Double> {
         @Override
-        protected Double getFromNonNullEntry(LegEntryDAO entry) {
+        protected Double getFromNonNullEntry(LegEntryDTO entry) {
             return entry.estimatedTimeToNextWaypointInSeconds;
         }
     }
     
     private class GapToLeaderInSeconds extends AbstractLegDetailField<Double> {
         @Override
-        protected Double getFromNonNullEntry(LegEntryDAO entry) {
+        protected Double getFromNonNullEntry(LegEntryDTO entry) {
             return entry.gapToLeaderInSeconds;
         }
     }
     
     private class VelocityMadeGoodInKnots extends AbstractLegDetailField<Double> {
         @Override
-        protected Double getFromNonNullEntry(LegEntryDAO entry) {
+        protected Double getFromNonNullEntry(LegEntryDTO entry) {
             return entry.velocityMadeGoodInKnots;
         }
     }
     
     private class WindwardDistanceToGoInMeters extends AbstractLegDetailField<Double> {
         @Override
-        protected Double getFromNonNullEntry(LegEntryDAO entry) {
+        protected Double getFromNonNullEntry(LegEntryDTO entry) {
             return entry.windwardDistanceToGoInMeters;
         }
     }
     
     private class RankGain implements LegDetailField<Integer> {
         @Override
-        public Integer get(LeaderboardRowDAO row) {
-            LegEntryDAO legEntry = getLegEntry(row);
+        public Integer get(LeaderboardRowDTO row) {
+            LegEntryDTO legEntry = getLegEntry(row);
             if (legEntry == null || getLegIndex() == 0) {
                 // no gain/loss for first leg
                 return null;
             } else {
-                LegEntryDAO previousEntry = getLegEntry(row, getLegIndex()-1);
+                LegEntryDTO previousEntry = getLegEntry(row, getLegIndex()-1);
                 return previousEntry == null ? null : legEntry.rank - previousEntry.rank;
             }
         }
     }
     
     private class ManeuverCountLegDetailsColumn extends FormattedDoubleLegDetailColumn {
-        public ManeuverCountLegDetailsColumn(String title, CellTable<LeaderboardRowDAO> leaderboardTable,
+        public ManeuverCountLegDetailsColumn(String title, CellTable<LeaderboardRowDTO> leaderboardTable,
                 String headerStyle, String columnStyle) {
             super(title, /*unit*/null, /* field */ null, /* decimals */ 0, leaderboardTable, headerStyle, columnStyle);
         }
         
         @Override
-        protected String getTitle(LeaderboardRowDAO row) {
+        protected String getTitle(LeaderboardRowDTO row) {
             String resultString = null;
-            LegEntryDAO entry = getLegEntry(row);
+            LegEntryDTO entry = getLegEntry(row);
             if (entry != null) {
                 StringBuilder result = new StringBuilder();
                 if (entry.numberOfTacks != null) {
@@ -146,13 +146,13 @@ public class LegColumn extends ExpandableSortableColumn<String> {
 
         
         @Override
-        public String getValue(LeaderboardRowDAO row) {
+        public String getValue(LeaderboardRowDTO row) {
             Double fieldValue = getFieldValue(row);
             StringBuilder result = new StringBuilder();
             if (fieldValue != null) {
                 result.append(getFormatter().format(fieldValue));
             }
-            LegEntryDAO entry = getLegEntry(row);
+            LegEntryDTO entry = getLegEntry(row);
             if (entry != null && entry.numberOfPenaltyCircles != null && (int) entry.numberOfPenaltyCircles != 0) {
                 result.append(" (");
                 result.append(entry.numberOfPenaltyCircles);
@@ -162,8 +162,8 @@ public class LegColumn extends ExpandableSortableColumn<String> {
         }
 
         @Override
-        protected Double getFieldValue(LeaderboardRowDAO row) {
-            LegEntryDAO entry = getLegEntry(row);
+        protected Double getFieldValue(LeaderboardRowDTO row) {
+            LegEntryDTO entry = getLegEntry(row);
             Double result = null;
             if (entry != null) {
                 if (entry.numberOfTacks != null) {
@@ -212,10 +212,10 @@ public class LegColumn extends ExpandableSortableColumn<String> {
     }
 
     @Override
-    protected Map<DetailType, SortableColumn<LeaderboardRowDAO, ?>> getDetailColumnMap(
+    protected Map<DetailType, SortableColumn<LeaderboardRowDTO, ?>> getDetailColumnMap(
             LeaderboardPanel leaderboardPanel, StringMessages stringConstants, String detailHeaderStyle,
             String detailColumnStyle) {
-        Map<DetailType, SortableColumn<LeaderboardRowDAO, ?>> result = new HashMap<DetailType, SortableColumn<LeaderboardRowDAO, ?>>();
+        Map<DetailType, SortableColumn<LeaderboardRowDTO, ?>> result = new HashMap<DetailType, SortableColumn<LeaderboardRowDTO, ?>>();
         result.put(DetailType.DISTANCE_TRAVELED,
                 new FormattedDoubleLegDetailColumn(stringConstants.distanceInMeters(), stringConstants.distanceInMetersUnit(),
                         new DistanceTraveledInMeters(), 0, getLeaderboardPanel().getLeaderboardTable(), detailHeaderStyle, detailColumnStyle));
@@ -267,14 +267,14 @@ public class LegColumn extends ExpandableSortableColumn<String> {
         return raceName;
     }
 
-    private LegEntryDAO getLegEntry(LeaderboardRowDAO row) {
+    private LegEntryDTO getLegEntry(LeaderboardRowDTO row) {
         int theLegIndex = getLegIndex();
         return getLegEntry(row, theLegIndex);
     }
 
-    private LegEntryDAO getLegEntry(LeaderboardRowDAO row, int theLegIndex) {
-        LegEntryDAO legEntry = null;
-        LeaderboardEntryDAO entry = row.fieldsByRaceName.get(getRaceName());
+    private LegEntryDTO getLegEntry(LeaderboardRowDTO row, int theLegIndex) {
+        LegEntryDTO legEntry = null;
+        LeaderboardEntryDTO entry = row.fieldsByRaceName.get(getRaceName());
         if (entry != null && entry.legDetails != null) {
             legEntry = entry.legDetails.get(theLegIndex);
         }
@@ -282,13 +282,13 @@ public class LegColumn extends ExpandableSortableColumn<String> {
     }
     
     @Override
-    public Comparator<LeaderboardRowDAO> getComparator() {
-        return new Comparator<LeaderboardRowDAO>() {
+    public Comparator<LeaderboardRowDTO> getComparator() {
+        return new Comparator<LeaderboardRowDTO>() {
             @Override
-            public int compare(LeaderboardRowDAO o1, LeaderboardRowDAO o2) {
+            public int compare(LeaderboardRowDTO o1, LeaderboardRowDTO o2) {
                 boolean ascending = isSortedAscendingForThisColumn(getLeaderboardPanel().getLeaderboardTable());
-                LegEntryDAO o1Entry = getLegEntry(o1);
-                LegEntryDAO o2Entry = getLegEntry(o2);
+                LegEntryDTO o1Entry = getLegEntry(o1);
+                LegEntryDTO o2Entry = getLegEntry(o2);
                 return o1Entry == null ? o2Entry == null ? 0 : ascending?1:-1
                                        : o2Entry == null ? ascending?-1:1 : o1Entry.rank - o2Entry.rank;
             }
@@ -303,8 +303,8 @@ public class LegColumn extends ExpandableSortableColumn<String> {
     }
     
     @Override
-    public String getValue(LeaderboardRowDAO row) {
-        LegEntryDAO legEntry = getLegEntry(row);
+    public String getValue(LeaderboardRowDTO row) {
+        LegEntryDTO legEntry = getLegEntry(row);
         if (legEntry != null) {
             return ""+legEntry.rank;
         } else {

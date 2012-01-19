@@ -2,12 +2,12 @@ package com.sap.sailing.gwt.ui.shared;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
-public class NamedDAO implements IsSerializable {
+public class NamedDTO implements IsSerializable {
     public String name;
 
-    public NamedDAO() {}
+    public NamedDTO() {}
     
-    public NamedDAO(String name) {
+    public NamedDTO(String name) {
         this.name = name;
     }
     

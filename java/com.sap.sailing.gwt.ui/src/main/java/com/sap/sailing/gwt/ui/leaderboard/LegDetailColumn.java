@@ -7,23 +7,23 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.cellview.client.SafeHtmlHeader;
-import com.sap.sailing.gwt.ui.shared.LeaderboardRowDAO;
+import com.sap.sailing.gwt.ui.shared.LeaderboardRowDTO;
 
 public abstract class LegDetailColumn<FieldType extends Comparable<?>, RenderingType> extends
-        SortableColumn<LeaderboardRowDAO, RenderingType> {
+        SortableColumn<LeaderboardRowDTO, RenderingType> {
     private final String title;
     private final LegDetailField<FieldType> field;
-    private final CellTable<LeaderboardRowDAO> leaderboardTable;
+    private final CellTable<LeaderboardRowDTO> leaderboardTable;
     private final String headerStyle;
     private final String columnStyle;
     private final String unit;
 
     public interface LegDetailField<T extends Comparable<?>> {
-        T get(LeaderboardRowDAO row);
+        T get(LeaderboardRowDTO row);
     }
 
     protected LegDetailColumn(String title, String unit, LegDetailField<FieldType> field, Cell<RenderingType> cell,
-            CellTable<LeaderboardRowDAO> leaderboardTable, String headerStyle, String columnStyle) {
+            CellTable<LeaderboardRowDTO> leaderboardTable, String headerStyle, String columnStyle) {
         super(cell);
         setHorizontalAlignment(ALIGN_CENTER);
         this.title = title;
@@ -53,10 +53,10 @@ public abstract class LegDetailColumn<FieldType extends Comparable<?>, Rendering
     }
 
     @Override
-    public Comparator<LeaderboardRowDAO> getComparator() {
-        return new Comparator<LeaderboardRowDAO>() {
+    public Comparator<LeaderboardRowDTO> getComparator() {
+        return new Comparator<LeaderboardRowDTO>() {
             @Override
-            public int compare(LeaderboardRowDAO o1, LeaderboardRowDAO o2) {
+            public int compare(LeaderboardRowDTO o1, LeaderboardRowDTO o2) {
                 boolean ascending = isSortedAscendingForThisColumn(leaderboardTable);
                 try {
                     @SuppressWarnings("unchecked")
@@ -88,7 +88,7 @@ public abstract class LegDetailColumn<FieldType extends Comparable<?>, Rendering
      * {@link #getComparator() comparator}. This default implementation uses the {@link #getField()} to obtain the logic
      * for extracting a comparable value from the <code>row</code>.
      */
-    protected FieldType getFieldValue(LeaderboardRowDAO row) {
+    protected FieldType getFieldValue(LeaderboardRowDTO row) {
         return getField().get(row);
     }
 

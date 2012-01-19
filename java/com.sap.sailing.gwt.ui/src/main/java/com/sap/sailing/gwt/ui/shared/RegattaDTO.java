@@ -4,13 +4,13 @@ import java.util.List;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
-public class RegattaDAO implements IsSerializable {
-    public BoatClassDAO boatClass;
-    public List<RaceDAO> races;
+public class RegattaDTO implements IsSerializable {
+    public BoatClassDTO boatClass;
+    public List<RaceDTO> races;
     
-    public RegattaDAO() {}
+    public RegattaDTO() {}
 
-    public RegattaDAO(BoatClassDAO boatClass, List<RaceDAO> races) {
+    public RegattaDTO(BoatClassDTO boatClass, List<RaceDTO> races) {
         super();
         this.boatClass = boatClass;
         this.races = races;

@@ -4,15 +4,15 @@ import java.util.List;
 
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
-import com.sap.sailing.gwt.ui.shared.EventDAO;
-import com.sap.sailing.gwt.ui.shared.RaceDAO;
-import com.sap.sailing.gwt.ui.shared.RegattaDAO;
+import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.ui.shared.RaceDTO;
+import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 
 public interface RaceSelectionProvider {
     /**
      * @return a non-<code>null</code> list which may be empty
      */
-    List<Triple<EventDAO, RegattaDAO, RaceDAO>> getSelectedEventAndRace();
+    List<Triple<EventDTO, RegattaDTO, RaceDTO>> getSelectedEventAndRace();
 
     void addRaceSelectionChangeListener(RaceSelectionChangeListener listener);
 

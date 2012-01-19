@@ -5,18 +5,18 @@ import java.util.HashMap;
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 
-public class CompetitorsAndTimePointsDAO implements IsSerializable {
+public class CompetitorsAndTimePointsDTO implements IsSerializable {
     private static final long MILLISECONDS_BEFORE_RACE_TO_INCLUDE = 20000;
     
-    private CompetitorDAO[] competitors;
+    private CompetitorDTO[] competitors;
     private HashMap<String, Pair<String, Long>[]> markPassings;
     private long startTime;
     private long timePointOfNewestEvent;
     private int steps;
 
-    CompetitorsAndTimePointsDAO() {}
+    CompetitorsAndTimePointsDTO() {}
     
-    public CompetitorsAndTimePointsDAO(int steps) {
+    public CompetitorsAndTimePointsDTO(int steps) {
         markPassings = new HashMap<String, Pair<String, Long>[]>();
         this.steps = steps;
     }
@@ -31,11 +31,11 @@ public class CompetitorsAndTimePointsDAO implements IsSerializable {
         return result;
     }
 
-    public CompetitorDAO[] getCompetitor() {
+    public CompetitorDTO[] getCompetitor() {
         return competitors;
     }
 
-    public void setCompetitor(CompetitorDAO[] competitors) {
+    public void setCompetitor(CompetitorDTO[] competitors) {
         this.competitors = competitors;
     }
 
@@ -47,11 +47,11 @@ public class CompetitorsAndTimePointsDAO implements IsSerializable {
         this.startTime = startTime;
     }
 
-    public Pair<String, Long>[] getMarkPassings(CompetitorDAO competitor) {
+    public Pair<String, Long>[] getMarkPassings(CompetitorDTO competitor) {
         return markPassings.get(competitor.id);
     }
 
-    public void setMarkPassings(CompetitorDAO competitor, Pair<String, Long>[] markPassings) {
+    public void setMarkPassings(CompetitorDTO competitor, Pair<String, Long>[] markPassings) {
         this.markPassings.put(competitor.id, markPassings);
     }
 

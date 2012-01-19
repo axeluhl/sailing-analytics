@@ -7,8 +7,8 @@ import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortList;
 import com.google.gwt.user.cellview.client.Header;
-import com.sap.sailing.gwt.ui.shared.LeaderboardDAO;
-import com.sap.sailing.gwt.ui.shared.LeaderboardRowDAO;
+import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
+import com.sap.sailing.gwt.ui.shared.LeaderboardRowDTO;
 
 public abstract class SortableColumn<T, C> extends Column<T, C> {
     protected SortableColumn(Cell<C> cell) {
@@ -16,14 +16,14 @@ public abstract class SortableColumn<T, C> extends Column<T, C> {
         setSortable(true);
     }
     
-    protected void updateMinMax(LeaderboardDAO leaderboard) {}
+    protected void updateMinMax(LeaderboardDTO leaderboard) {}
     
     /**
      * To enable sorting of <code>null</code> values to the end even in ascending order, the comparators provided
      * by the subclasses will want to know whether the leaderboard table is currently sorted in ascending order
      * for this column.
      */
-    protected boolean isSortedAscendingForThisColumn(CellTable<LeaderboardRowDAO> leaderboardTable) {
+    protected boolean isSortedAscendingForThisColumn(CellTable<LeaderboardRowDTO> leaderboardTable) {
         ColumnSortList sortList = leaderboardTable.getColumnSortList();
         return sortList.size() > 0 && sortList.get(0).getColumn() == this && sortList.get(0).isAscending();
     }

@@ -16,12 +16,12 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  * @author Axel Uhl (d043530)
  * 
  */
-public class LeaderboardDAO implements IsSerializable {
+public class LeaderboardDTO implements IsSerializable {
     public String name;
-    public List<CompetitorDAO> competitors;
-    private List<RaceInLeaderboardDAO> races;
-    public Map<CompetitorDAO, String> competitorDisplayNames;
-    public Map<CompetitorDAO, LeaderboardRowDAO> rows;
+    public List<CompetitorDTO> competitors;
+    private List<RaceInLeaderboardDTO> races;
+    public Map<CompetitorDTO, String> competitorDisplayNames;
+    public Map<CompetitorDTO, LeaderboardRowDTO> rows;
     public boolean hasCarriedPoints;
     public int[] discardThresholds;
     
@@ -29,13 +29,13 @@ public class LeaderboardDAO implements IsSerializable {
     
     private final transient TotalRankingComparator totalRankingComparator;
     
-    public LeaderboardDAO() {
+    public LeaderboardDTO() {
         totalRankingComparator = new TotalRankingComparator();
         competitorsOrderedAccordingToTotalRank = false;
-        races = new ArrayList<RaceInLeaderboardDAO>();
+        races = new ArrayList<RaceInLeaderboardDTO>();
     }
     
-    public String getDisplayName(CompetitorDAO competitor) {
+    public String getDisplayName(CompetitorDTO competitor) {
         if (competitorDisplayNames == null || competitorDisplayNames.get(competitor) == null) {
             return competitor.name;
         } else {
@@ -43,21 +43,21 @@ public class LeaderboardDAO implements IsSerializable {
         }
     }
     
-    public Comparator<LeaderboardRowDAO> getTotalRankingComparator() {
+    public Comparator<LeaderboardRowDTO> getTotalRankingComparator() {
         return totalRankingComparator;
     }
     
-    public Comparator<LeaderboardRowDAO> getMedalRaceComparator(String medalRaceName) {
+    public Comparator<LeaderboardRowDTO> getMedalRaceComparator(String medalRaceName) {
         return new MedalRaceComparator(medalRaceName);
     }
     
     /**
-     * If the race whose name is specified in <code>raceName</code> has any competitor who has valid {@link LeaderboardEntryDAO#legDetails}
+     * If the race whose name is specified in <code>raceName</code> has any competitor who has valid {@link LeaderboardEntryDTO#legDetails}
      * for that race, the number of entries in the leg details is returned, telling the number of legs that the race has. Otherwise,
      * -1 is returned.
      */
     public int getLegCount(String raceName) {
-        for (LeaderboardRowDAO row : rows.values()) {
+        for (LeaderboardRowDTO row : rows.values()) {
             if (row.fieldsByRaceName.get(raceName) != null && row.fieldsByRaceName.get(raceName).legDetails != null) {
                 return row.fieldsByRaceName.get(raceName).legDetails.size();
             }
@@ -69,9 +69,9 @@ public class LeaderboardDAO implements IsSerializable {
      * Tells if the <code>competitor</code> scored (and therefore presumably participated) in a medal race
      * represented in this leaderboard.
      */
-    public boolean scoredInMedalRace(CompetitorDAO competitor) {
-        LeaderboardRowDAO row = rows.get(competitor);
-        for (RaceInLeaderboardDAO race : races) {
+    public boolean scoredInMedalRace(CompetitorDTO competitor) {
+        LeaderboardRowDTO row = rows.get(competitor);
+        for (RaceInLeaderboardDTO race : races) {
             if (race.isMedalRace() && row.fieldsByRaceName.get(race.getRaceColumnName()).totalPoints > 0) {
                 return true;
             }
@@ -79,17 +79,17 @@ public class LeaderboardDAO implements IsSerializable {
         return false;
     }
     
-    public int getTotalPoints(LeaderboardRowDAO object) {
+    public int getTotalPoints(LeaderboardRowDTO object) {
         int totalPoints = object.carriedPoints==null?0:object.carriedPoints;
-        for (LeaderboardEntryDAO e : object.fieldsByRaceName.values()) {
+        for (LeaderboardEntryDTO e : object.fieldsByRaceName.values()) {
             totalPoints += e.totalPoints;
         }
         return totalPoints;
     }
 
-    private class TotalRankingComparator implements Comparator<LeaderboardRowDAO> {
+    private class TotalRankingComparator implements Comparator<LeaderboardRowDTO> {
         @Override
-        public int compare(LeaderboardRowDAO o1, LeaderboardRowDAO o2) {
+        public int compare(LeaderboardRowDTO o1, LeaderboardRowDTO o2) {
             int result;
             if (o1 == null && o2 == null) {
                 result = 0;
@@ -137,7 +137,7 @@ public class LeaderboardDAO implements IsSerializable {
         }
     }
     
-    private class MedalRaceComparator implements Comparator<LeaderboardRowDAO> {
+    private class MedalRaceComparator implements Comparator<LeaderboardRowDTO> {
         private final String medalRaceName;
         
         public MedalRaceComparator(String medalRaceName) {
@@ -145,7 +145,7 @@ public class LeaderboardDAO implements IsSerializable {
         }
 
         @Override
-        public int compare(LeaderboardRowDAO o1, LeaderboardRowDAO o2) {
+        public int compare(LeaderboardRowDTO o1, LeaderboardRowDTO o2) {
             int result;
             if (scoredInMedalRace(o1.competitor)) {
                 if (scoredInMedalRace(o2.competitor)) {
@@ -181,10 +181,10 @@ public class LeaderboardDAO implements IsSerializable {
     /**
      * Sums up the net points <code>competitor</code> scored in any medal races
      */
-    private int getMedalRaceScore(CompetitorDAO competitor) {
+    private int getMedalRaceScore(CompetitorDTO competitor) {
         int result = 0;
-        LeaderboardRowDAO row = rows.get(competitor);
-        for (RaceInLeaderboardDAO race : races) {
+        LeaderboardRowDTO row = rows.get(competitor);
+        for (RaceInLeaderboardDTO race : races) {
             if (race.isMedalRace() && row.fieldsByRaceName.containsKey(race.getRaceColumnName())) {
                 result += row.fieldsByRaceName.get(race.getRaceColumnName()).netPoints;
             }
@@ -192,11 +192,11 @@ public class LeaderboardDAO implements IsSerializable {
         return result;
     }
 
-    public int getNetPoints(CompetitorDAO competitor, String nameOfLastRaceSoFar) {
+    public int getNetPoints(CompetitorDTO competitor, String nameOfLastRaceSoFar) {
         int result = 0;
-        LeaderboardRowDAO row = rows.get(competitor);
+        LeaderboardRowDTO row = rows.get(competitor);
         if (row != null) {
-            LeaderboardEntryDAO field = row.fieldsByRaceName.get(nameOfLastRaceSoFar);
+            LeaderboardEntryDTO field = row.fieldsByRaceName.get(nameOfLastRaceSoFar);
             if (field != null) {
                 result = field.netPoints;
             }
@@ -208,12 +208,12 @@ public class LeaderboardDAO implements IsSerializable {
      * Find the name of the last race in {@link #raceNamesAndMedalRaceAndTracked}'s keys for which both, <code>c1</code> and
      * <code>c2</code> have been assigned a score.
      */
-    private String getNameOfLastRaceSoFar(CompetitorDAO c1, CompetitorDAO c2) {
+    private String getNameOfLastRaceSoFar(CompetitorDTO c1, CompetitorDTO c2) {
         String nameOfLastRaceSoFar = null;
-        for (RaceInLeaderboardDAO race : races) {
-            for (LeaderboardRowDAO row : rows.values()) {
+        for (RaceInLeaderboardDTO race : races) {
+            for (LeaderboardRowDTO row : rows.values()) {
                 if (row.competitor.equals(c1) || row.competitor.equals(c2)) {
-                    LeaderboardEntryDAO leaderboardEntryDAO = row.fieldsByRaceName.get(race.getRaceColumnName());
+                    LeaderboardEntryDTO leaderboardEntryDAO = row.fieldsByRaceName.get(race.getRaceColumnName());
                     if (leaderboardEntryDAO != null && leaderboardEntryDAO.netPoints != 0) {
                         nameOfLastRaceSoFar = race.getRaceColumnName();
                         break;
@@ -224,12 +224,12 @@ public class LeaderboardDAO implements IsSerializable {
         return nameOfLastRaceSoFar;
     }
 
-    private int getNumberOfRacesWon(CompetitorDAO competitor) {
+    private int getNumberOfRacesWon(CompetitorDTO competitor) {
         int result = 0;
-        LeaderboardRowDAO row = rows.get(competitor);
+        LeaderboardRowDTO row = rows.get(competitor);
         if (row != null) {
-            for (RaceInLeaderboardDAO race : races) {
-                LeaderboardEntryDAO field = row.fieldsByRaceName.get(race.getRaceColumnName());
+            for (RaceInLeaderboardDTO race : races) {
+                LeaderboardEntryDTO field = row.fieldsByRaceName.get(race.getRaceColumnName());
                 if (field != null && field.netPoints == 1) {
                     result++;
                 }
@@ -238,11 +238,11 @@ public class LeaderboardDAO implements IsSerializable {
         return result;
     }
 
-    public int getRank(CompetitorDAO competitor) {
+    public int getRank(CompetitorDTO competitor) {
         if (!competitorsOrderedAccordingToTotalRank) {
-            Collections.sort(competitors, new Comparator<CompetitorDAO>() {
+            Collections.sort(competitors, new Comparator<CompetitorDTO>() {
                 @Override
-                public int compare(CompetitorDAO o1, CompetitorDAO o2) {
+                public int compare(CompetitorDTO o1, CompetitorDTO o2) {
                     return getTotalRankingComparator().compare(rows.get(o1), rows.get(o2));
                 }
             });
@@ -252,7 +252,7 @@ public class LeaderboardDAO implements IsSerializable {
     };
     
     public boolean raceIsTracked(String raceColumnName){
-        for (RaceInLeaderboardDAO race : races){
+        for (RaceInLeaderboardDTO race : races){
             if (race.getRaceColumnName().equals(raceColumnName)){
                 return race.isTrackedRace();
             }
@@ -266,7 +266,7 @@ public class LeaderboardDAO implements IsSerializable {
     }
     
     public void addRace(String raceColumnName, boolean medalRace, boolean trackedRace){
-        RaceInLeaderboardDAO raceInLeaderboardDAO = new RaceInLeaderboardDAO();
+        RaceInLeaderboardDTO raceInLeaderboardDAO = new RaceInLeaderboardDTO();
         raceInLeaderboardDAO.setRaceColumnName(raceColumnName);
         raceInLeaderboardDAO.setMedalRace(medalRace);
         raceInLeaderboardDAO.setTrackedRace(trackedRace);
@@ -274,7 +274,7 @@ public class LeaderboardDAO implements IsSerializable {
     }
     
     public void addRaceAt(String raceColumnName, boolean medalRace, boolean trackedRace, int index){
-        RaceInLeaderboardDAO raceInLeaderboardDAO = new RaceInLeaderboardDAO();
+        RaceInLeaderboardDTO raceInLeaderboardDAO = new RaceInLeaderboardDTO();
         raceInLeaderboardDAO.setRaceColumnName(raceColumnName);
         raceInLeaderboardDAO.setMedalRace(medalRace);
         raceInLeaderboardDAO.setTrackedRace(trackedRace);
@@ -286,12 +286,12 @@ public class LeaderboardDAO implements IsSerializable {
     }
     
     public void renameRace(String oldName, String newName){
-        RaceInLeaderboardDAO race = getRaceInLeaderboardByName(oldName);
+        RaceInLeaderboardDTO race = getRaceInLeaderboardByName(oldName);
     	race.setRaceColumnName(newName);
     }
     
-    private RaceInLeaderboardDAO getRaceInLeaderboardByName(String raceColumnName) {
-        for (RaceInLeaderboardDAO race : races){
+    private RaceInLeaderboardDTO getRaceInLeaderboardByName(String raceColumnName) {
+        for (RaceInLeaderboardDTO race : races){
             if (race.getRaceColumnName().equals(raceColumnName)){
                 return race;
             }
@@ -301,17 +301,17 @@ public class LeaderboardDAO implements IsSerializable {
 
     public List<String> getRaceColumnNameList(){
         List<String> raceColumnNames = new ArrayList<String>();
-        for (RaceInLeaderboardDAO raceInLeaderboardDAO : races){
+        for (RaceInLeaderboardDTO raceInLeaderboardDAO : races){
             raceColumnNames.add(raceInLeaderboardDAO.getRaceColumnName());
         }
     	return raceColumnNames;
     }
     
-    public List<RaceInLeaderboardDAO> getRaceInLeaderboardList(){
+    public List<RaceInLeaderboardDTO> getRaceInLeaderboardList(){
         return races;
     }
     
-    public List<RaceInLeaderboardDAO> getRaceList(){
+    public List<RaceInLeaderboardDTO> getRaceList(){
         return races;
     }
     
@@ -320,7 +320,7 @@ public class LeaderboardDAO implements IsSerializable {
     }
 
     public void moveRaceUp(String raceColumnName) {
-        RaceInLeaderboardDAO race = getRaceInLeaderboardByName(raceColumnName);
+        RaceInLeaderboardDTO race = getRaceInLeaderboardByName(raceColumnName);
         int index = races.indexOf(race);
         index--;
         if (index >= 0) {
@@ -330,7 +330,7 @@ public class LeaderboardDAO implements IsSerializable {
     }
 
     public void moveRaceDown(String raceColumnName) {
-        RaceInLeaderboardDAO race = getRaceInLeaderboardByName(raceColumnName);
+        RaceInLeaderboardDTO race = getRaceInLeaderboardByName(raceColumnName);
         int index = races.indexOf(race);
         if (index != -1) {
             index++;

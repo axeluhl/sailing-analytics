@@ -2,15 +2,15 @@ package com.sap.sailing.gwt.ui.shared;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
-public class TracTracConfigurationDAO implements IsSerializable {
+public class TracTracConfigurationDTO implements IsSerializable {
     public String name;
     public String jsonURL;
     public String liveDataURI;
     public String storedDataURI;
     
-    public TracTracConfigurationDAO() {}
+    public TracTracConfigurationDTO() {}
 
-    public TracTracConfigurationDAO(String name, String jsonURL, String liveDataURI, String storedDataURI) {
+    public TracTracConfigurationDTO(String name, String jsonURL, String liveDataURI, String storedDataURI) {
         super();
         this.name = name;
         this.jsonURL = jsonURL;

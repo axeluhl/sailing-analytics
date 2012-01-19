@@ -12,8 +12,8 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
-import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
-import com.sap.sailing.gwt.ui.shared.QuickRankDAO;
+import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
+import com.sap.sailing.gwt.ui.shared.QuickRankDTO;
 
 /**
  * Shows a lean view of a race's competitors' ranks in a list. The list shows a subset of the race's competitors because
@@ -28,8 +28,8 @@ import com.sap.sailing.gwt.ui.shared.QuickRankDAO;
  */
 public class QuickRanksListBoxComposite extends Composite implements CompetitorSelectionChangeListener {
     private final CompetitorSelectionProvider competitorSelectionProvider;
-    private final List<QuickRankDAO> quickRankList;
-    private final List<CompetitorDAO> competitorList;
+    private final List<QuickRankDTO> quickRankList;
+    private final List<CompetitorDTO> competitorList;
     private final ListBox quickRankListBox;
     
     public QuickRanksListBoxComposite(CompetitorSelectionProvider competitorSelectionProvider) {
@@ -48,8 +48,8 @@ public class QuickRanksListBoxComposite extends Composite implements CompetitorS
                 onLocalSelectionChanged();
             }
         });
-        quickRankList = new ArrayList<QuickRankDAO>();
-        competitorList = new ArrayList<CompetitorDAO>();
+        quickRankList = new ArrayList<QuickRankDTO>();
+        competitorList = new ArrayList<CompetitorDTO>();
         VerticalPanel vp = new VerticalPanel();
         vp.add(quickRankListBox);
         // All composites must call initWidget() in their constructors.
@@ -66,16 +66,16 @@ public class QuickRanksListBoxComposite extends Composite implements CompetitorS
     /**
      * @param quickRanks list of quick ranks, ordered by ascending rank
      */
-    public void fillQuickRanks(List<QuickRankDAO> quickRanks) {
+    public void fillQuickRanks(List<QuickRankDTO> quickRanks) {
         quickRankList.clear();
         competitorList.clear();
         quickRankListBox.clear();
-        for (QuickRankDAO quickRank: quickRanks) {
+        for (QuickRankDTO quickRank: quickRanks) {
             quickRankList.add(quickRank);
             competitorList.add(quickRank.competitor);
         }
         int index = 0;
-        for (QuickRankDAO quickRank : quickRankList) {
+        for (QuickRankDTO quickRank : quickRankList) {
             quickRankListBox.addItem(toString(quickRank));
             if (competitorSelectionProvider.isSelected(quickRank.competitor)) {
                 quickRankListBox.setItemSelected(index, true);
@@ -84,8 +84,8 @@ public class QuickRanksListBoxComposite extends Composite implements CompetitorS
         }
     }
 
-    private Iterable<CompetitorDAO> getSelectedCompetitors() {
-        List<CompetitorDAO> result = new ArrayList<CompetitorDAO>();
+    private Iterable<CompetitorDTO> getSelectedCompetitors() {
+        List<CompetitorDTO> result = new ArrayList<CompetitorDTO>();
         for (int i=0; i<quickRankListBox.getItemCount(); i++) {
             if (quickRankListBox.isItemSelected(i)) {
                 result.add(quickRankList.get(i).competitor);
@@ -94,7 +94,7 @@ public class QuickRanksListBoxComposite extends Composite implements CompetitorS
         return result;
     }
 
-    protected String toString(QuickRankDAO quickRank) {
+    protected String toString(QuickRankDTO quickRank) {
         return quickRank.rank + ". " + quickRank.competitor.name + " ("
                 + quickRank.competitor.threeLetterIocCountryCode + ") in leg #" + (quickRank.legNumber + 1);
     }
@@ -104,7 +104,7 @@ public class QuickRanksListBoxComposite extends Composite implements CompetitorS
     }
 
     @Override
-    public void addedToSelection(CompetitorDAO competitor) {
+    public void addedToSelection(CompetitorDTO competitor) {
         int pos = quickRankList.indexOf(competitor);
         if (pos >= 0) {
             quickRankListBox.setItemSelected(pos, true);
@@ -112,7 +112,7 @@ public class QuickRanksListBoxComposite extends Composite implements CompetitorS
     }
 
     @Override
-    public void removedFromSelection(CompetitorDAO competitor) {
+    public void removedFromSelection(CompetitorDTO competitor) {
         int pos = quickRankList.indexOf(competitor);
         if (pos >= 0) {
             quickRankListBox.setItemSelected(pos, false);

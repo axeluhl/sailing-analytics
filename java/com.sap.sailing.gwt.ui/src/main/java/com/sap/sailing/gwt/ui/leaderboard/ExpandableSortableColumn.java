@@ -13,7 +13,7 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Header;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.LeaderboardRowDAO;
+import com.sap.sailing.gwt.ui.shared.LeaderboardRowDTO;
 import com.sap.sailing.server.api.DetailType;
 
 /**
@@ -22,11 +22,11 @@ import com.sap.sailing.server.api.DetailType;
  * @author Axel Uhl (D043530)
  *
  */
-public abstract class ExpandableSortableColumn<C> extends SortableColumn<LeaderboardRowDAO, C> {
+public abstract class ExpandableSortableColumn<C> extends SortableColumn<LeaderboardRowDTO, C> {
     private boolean enableExpansion;
     private boolean suppressSortingOnce;
     private final LeaderboardPanel leaderboardPanel;
-    private final Map<DetailType, SortableColumn<LeaderboardRowDAO, ?>> detailColumnsMap;
+    private final Map<DetailType, SortableColumn<LeaderboardRowDTO, ?>> detailColumnsMap;
     private final List<DetailType> detailSelection;
     
     /**
@@ -36,7 +36,7 @@ public abstract class ExpandableSortableColumn<C> extends SortableColumn<Leaderb
      * collection and are dynamically inserted to and removed from the {@link CellTable} to the right
      * of this column.
      */
-    protected List<SortableColumn<LeaderboardRowDAO, ?>> directChildren;
+    protected List<SortableColumn<LeaderboardRowDTO, ?>> directChildren;
     
     /**
      * Tells if this race column is currently displayed in expanded form which includes a visualization
@@ -58,7 +58,7 @@ public abstract class ExpandableSortableColumn<C> extends SortableColumn<Leaderb
      * By default, an expandable sortable column has no detail columns. Subclasses that want to offer detail columns must
      * override this method.
      */
-    protected Map<DetailType, SortableColumn<LeaderboardRowDAO, ?>> getDetailColumnMap(
+    protected Map<DetailType, SortableColumn<LeaderboardRowDTO, ?>> getDetailColumnMap(
             LeaderboardPanel leaderboardPanel, StringMessages stringConstants, String detailHeaderStyle,
             String detailColumnStyle) {
         return Collections.emptyMap();
@@ -86,12 +86,12 @@ public abstract class ExpandableSortableColumn<C> extends SortableColumn<Leaderb
      * ManeuverCountRaceColumn is not known at this point because it will be later set in the constructor of
      * TextRaceColumn
      */
-    protected Iterable<SortableColumn<LeaderboardRowDAO, ?>> getDirectChildren() {
-        List<SortableColumn<LeaderboardRowDAO, ?>> result;
+    protected Iterable<SortableColumn<LeaderboardRowDTO, ?>> getDirectChildren() {
+        List<SortableColumn<LeaderboardRowDTO, ?>> result;
         if (isExpanded()) {
-            result = new ArrayList<SortableColumn<LeaderboardRowDAO,?>>();
+            result = new ArrayList<SortableColumn<LeaderboardRowDTO,?>>();
             for (DetailType detailColumnType : detailSelection) {
-                SortableColumn<LeaderboardRowDAO, ?> selectedColumn = detailColumnsMap.get(detailColumnType);
+                SortableColumn<LeaderboardRowDTO, ?> selectedColumn = detailColumnsMap.get(detailColumnType);
                 if (selectedColumn != null) {
                     result.add(selectedColumn);
                 }
@@ -102,7 +102,7 @@ public abstract class ExpandableSortableColumn<C> extends SortableColumn<Leaderb
         return result;
     }
     
-    protected SortableColumn<LeaderboardRowDAO, ?> createExpansionColumn(DetailType detailColumnType) {
+    protected SortableColumn<LeaderboardRowDTO, ?> createExpansionColumn(DetailType detailColumnType) {
         throw new RuntimeException("Detail column type "+detailColumnType+" not supported by column of type "+getClass().getName());
     }
     
@@ -119,10 +119,10 @@ public abstract class ExpandableSortableColumn<C> extends SortableColumn<Leaderb
      * the column collection returned does not necessarily contain only columns really part of the {@link CellTable}
      * used to display this column. 
      */
-    private Collection<SortableColumn<LeaderboardRowDAO, ?>> getAllVisibleChildren() {
-        List<SortableColumn<LeaderboardRowDAO, ?>> transitiveChildren = new ArrayList<SortableColumn<LeaderboardRowDAO,?>>();
+    private Collection<SortableColumn<LeaderboardRowDTO, ?>> getAllVisibleChildren() {
+        List<SortableColumn<LeaderboardRowDTO, ?>> transitiveChildren = new ArrayList<SortableColumn<LeaderboardRowDTO,?>>();
         if (isExpanded()) {
-            for (SortableColumn<LeaderboardRowDAO, ?> childColumn : getDirectChildren()) {
+            for (SortableColumn<LeaderboardRowDTO, ?> childColumn : getDirectChildren()) {
                 transitiveChildren.add(childColumn);
                 if (childColumn instanceof ExpandableSortableColumn<?>) {
                     @SuppressWarnings("unchecked")
@@ -145,9 +145,9 @@ public abstract class ExpandableSortableColumn<C> extends SortableColumn<Leaderb
      */
     public void toggleExpansion() {
         if (isExpansionEnabled()) {
-            final CellTable<LeaderboardRowDAO> table = getLeaderboardPanel().getLeaderboardTable();
+            final CellTable<LeaderboardRowDTO> table = getLeaderboardPanel().getLeaderboardTable();
             if (isExpanded()) {
-                for (SortableColumn<LeaderboardRowDAO, ?> column : getAllVisibleChildren()) {
+                for (SortableColumn<LeaderboardRowDTO, ?> column : getAllVisibleChildren()) {
                     getLeaderboardPanel().removeColumn(column); // removes only the children currently displayed
                 }
                 // important: toggle expanded state after asking for all visible children
@@ -162,7 +162,7 @@ public abstract class ExpandableSortableColumn<C> extends SortableColumn<Leaderb
                         // while toggling the columns.
                         if (insertIndex != -1) {
                             insertIndex++;
-                            for (SortableColumn<LeaderboardRowDAO, ?> column : getAllVisibleChildren()) {
+                            for (SortableColumn<LeaderboardRowDTO, ?> column : getAllVisibleChildren()) {
                                 column.updateMinMax(getLeaderboardPanel().getLeaderboard());
                                 getLeaderboardPanel().insertColumn(insertIndex++, column);
                             }
@@ -207,7 +207,7 @@ public abstract class ExpandableSortableColumn<C> extends SortableColumn<Leaderb
         this.enableExpansion = enableLegDrillDown;
     }
 
-    protected void defaultRender(Context context, LeaderboardRowDAO object, SafeHtmlBuilder html) {
+    protected void defaultRender(Context context, LeaderboardRowDTO object, SafeHtmlBuilder html) {
         super.render(context, object, html);
     }
     
