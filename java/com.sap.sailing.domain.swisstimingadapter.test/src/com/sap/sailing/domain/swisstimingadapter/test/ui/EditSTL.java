@@ -38,7 +38,7 @@ public class EditSTL extends javax.swing.JDialog {
             stl = new STLMessage();
         competitors = stl.getCompetitorList();
         jRaceID.setText(stl.getRaceId());
-        jCompetitorList.setListData(competitors.toArray());
+        jCompetitorList.setListData(competitors.toArray(new Competitor[0]));
     }
 
     /** This method is called from within the constructor to
@@ -57,14 +57,14 @@ public class EditSTL extends javax.swing.JDialog {
         jLabel2 = new javax.swing.JLabel();
         jSailNumber = new javax.swing.JTextField();
         jLabel3 = new javax.swing.JLabel();
-        jNOC = new javax.swing.JComboBox();
+        jNOC = new javax.swing.JComboBox<String>();
         jLabel4 = new javax.swing.JLabel();
         jName = new javax.swing.JTextField();
         jButton1 = new javax.swing.JButton();
         jRemove = new javax.swing.JButton();
         jButton2 = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
-        jCompetitorList = new javax.swing.JList();
+        jCompetitorList = new javax.swing.JList<Competitor>();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
@@ -78,7 +78,7 @@ public class EditSTL extends javax.swing.JDialog {
 
         jLabel3.setText("NOC:");
 
-        jNOC.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "AUS", "FRA", "GBR", "GER", "ITA", "USA" }));
+        jNOC.setModel(new javax.swing.DefaultComboBoxModel<String>(new String[] { "AUS", "FRA", "GBR", "GER", "ITA", "USA" }));
         jNOC.setSelectedIndex(2);
 
         jLabel4.setText("Name:");
@@ -106,10 +106,14 @@ public class EditSTL extends javax.swing.JDialog {
             }
         });
 
-        jCompetitorList.setModel(new javax.swing.AbstractListModel() {
-            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
-            public int getSize() { return strings.length; }
-            public Object getElementAt(int i) { return strings[i]; }
+        jCompetitorList.setModel(new javax.swing.AbstractListModel<Competitor>() {
+            Competitor[] competitors = { new CompetitorImpl("Item 1", "DEU", "Item 1"),
+                    new CompetitorImpl("Item 2", "DEU", "Item 2"),
+                    new CompetitorImpl("Item 3", "DEU", "Item 3"),
+                    new CompetitorImpl("Item 4", "DEU", "Item 4"),
+                    new CompetitorImpl("Item 5", "DEU", "Item 5") };
+            public int getSize() { return competitors.length; }
+            public Competitor getElementAt(int i) { return competitors[i]; }
         });
         jScrollPane1.setViewportView(jCompetitorList);
 
@@ -191,14 +195,14 @@ public class EditSTL extends javax.swing.JDialog {
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         // TODO add your handling code here:
         competitors.add(new CompetitorWithDesc(jSailNumber.getText(), jNOC.getSelectedItem().toString(), jName.getText()));
-        jCompetitorList.setListData(competitors.toArray());
+        jCompetitorList.setListData(competitors.toArray(new Competitor[0]));
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jRemoveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRemoveActionPerformed
         // TODO add your handling code here:
-        for (Object o : jCompetitorList.getSelectedValues())
+        for (Competitor o : jCompetitorList.getSelectedValuesList())
             competitors.remove(o);
-        jCompetitorList.setListData(competitors.toArray());
+        jCompetitorList.setListData(competitors.toArray(new Competitor[0]));
     }//GEN-LAST:event_jRemoveActionPerformed
 
     public STLMessage getMessage(){
@@ -220,12 +224,12 @@ public class EditSTL extends javax.swing.JDialog {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
-    private javax.swing.JList jCompetitorList;
+    private javax.swing.JList<Competitor> jCompetitorList;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
-    private javax.swing.JComboBox jNOC;
+    private javax.swing.JComboBox<String> jNOC;
     private javax.swing.JTextField jName;
     private javax.swing.JTextField jRaceID;
     private javax.swing.JButton jRemove;
