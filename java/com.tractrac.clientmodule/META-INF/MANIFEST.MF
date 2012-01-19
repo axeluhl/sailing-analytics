@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Ttcm
 Bundle-SymbolicName: com.tractrac.clientmodule
 Bundle-Version: 1.0.0.qualifier
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ClassPath: lib/TracTracClientModule.jar,
  .
 Export-Package: com.maptrack.asio,

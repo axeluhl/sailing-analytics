@@ -4,6 +4,6 @@ Bundle-Name: Sailing Server
 Bundle-SymbolicName: com.sap.sailing.targetplatform
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ClassPath: .
 Require-Bundle: org.eclipse.equinox.launcher;bundle-version="1.2.0"
