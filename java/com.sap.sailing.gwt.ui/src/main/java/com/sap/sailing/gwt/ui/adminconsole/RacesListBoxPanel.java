@@ -50,7 +50,7 @@ public class RacesListBoxPanel extends FormPanel implements RaceSelectionProvide
                 Triple<EventDAO, RegattaDAO, RaceDAO> selectedRace = getSelectedRace();
                 List<Triple<EventDAO, RegattaDAO, RaceDAO>> selectedRacesCollection = Collections.emptyList();
                 if (selectedRace != null) {
-                    Collections.singletonList(selectedRace);
+                    selectedRacesCollection = Collections.singletonList(selectedRace);
                 }
                 fireRaceSelectionChanged(selectedRacesCollection);
             }

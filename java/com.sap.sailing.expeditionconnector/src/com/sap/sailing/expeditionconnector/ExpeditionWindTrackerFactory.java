@@ -40,7 +40,7 @@ public class ExpeditionWindTrackerFactory implements WindTrackerFactory, BundleA
         logger.info("Created "+getClass().getName()+" with default UDP port "+defaultPort);
     }
 
-    public static WindTrackerFactory getInstance() {
+    public synchronized static WindTrackerFactory getInstance() {
         if (defaultInstance == null) {
             defaultInstance = new ExpeditionWindTrackerFactory();
         }
