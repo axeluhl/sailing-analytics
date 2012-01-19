@@ -182,10 +182,10 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
 
         @Override
         public String getValue(LeaderboardRowDTO object) {
-            LeaderboardEntryDTO leaderboardEntryDAO = object.fieldsByRaceName.get(raceName);
+            LeaderboardEntryDTO leaderboardEntryDTO = object.fieldsByRaceName.get(raceName);
             String reasonForMaxPoints = null;
-            if (leaderboardEntryDAO != null) {
-                reasonForMaxPoints = leaderboardEntryDAO.reasonForMaxPoints;
+            if (leaderboardEntryDTO != null) {
+                reasonForMaxPoints = leaderboardEntryDTO.reasonForMaxPoints;
             }
             return reasonForMaxPoints == null ? "" : reasonForMaxPoints;
         }
@@ -238,10 +238,10 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
 
         @Override
         public String getValue(LeaderboardRowDTO object) {
-            LeaderboardEntryDTO leaderboardEntryDAO = object.fieldsByRaceName.get(raceName);
+            LeaderboardEntryDTO leaderboardEntryDTO = object.fieldsByRaceName.get(raceName);
             String result = "";
-            if (leaderboardEntryDAO != null) {
-                result = result+leaderboardEntryDAO.netPoints;
+            if (leaderboardEntryDTO != null) {
+                result = result+leaderboardEntryDTO.netPoints;
             }
             return result;
         }

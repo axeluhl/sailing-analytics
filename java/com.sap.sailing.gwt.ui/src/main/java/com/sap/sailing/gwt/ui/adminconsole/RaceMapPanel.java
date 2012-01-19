@@ -119,13 +119,13 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
     @Override
     public void onRaceSelectionChange(List<Triple<EventDTO, RegattaDTO, RaceDTO>> selectedRaces) {
         if (!selectedRaces.isEmpty() && selectedRaces.get(selectedRaces.size() - 1) != null) {
-            RaceDTO raceDAO = selectedRaces.get(selectedRaces.size() - 1).getC();
-            competitorSelectionProvider.setCompetitors(raceDAO.competitors);
-            if (raceDAO.startOfRace != null) {
-                timePanel.timeChanged(raceDAO.startOfRace);
-                timer.setTime(raceDAO.startOfRace.getTime());
+            RaceDTO raceDTO = selectedRaces.get(selectedRaces.size() - 1).getC();
+            competitorSelectionProvider.setCompetitors(raceDTO.competitors);
+            if (raceDTO.startOfRace != null) {
+                timePanel.timeChanged(raceDTO.startOfRace);
+                timer.setTime(raceDTO.startOfRace.getTime());
             }
-            updateSlider(raceDAO);
+            updateSlider(raceDTO);
         }
         raceMap.onRaceSelectionChange(selectedRaces);
     }
