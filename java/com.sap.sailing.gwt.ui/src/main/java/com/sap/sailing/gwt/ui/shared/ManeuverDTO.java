@@ -6,25 +6,25 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.Tack;
 
-public class ManeuverDAO implements IsSerializable {
+public class ManeuverDTO implements IsSerializable {
     public ManeuverType type;
     
     public Tack newTack;
     
-    public PositionDAO position;
+    public PositionDTO position;
     
     public Date timepoint;
     
-    public SpeedWithBearingDAO speedWithBearingBefore;
+    public SpeedWithBearingDTO speedWithBearingBefore;
     
-    public SpeedWithBearingDAO speedWithBearingAfter;
+    public SpeedWithBearingDTO speedWithBearingAfter;
     
     public double directionChangeInDegrees;
 
-    public ManeuverDAO() {}
+    public ManeuverDTO() {}
     
-    public ManeuverDAO(ManeuverType type, Tack newTack, PositionDAO position, Date timepoint, SpeedWithBearingDAO speedWithBearingBefore,
-            SpeedWithBearingDAO speedWithBearingAfter, double directionChangeInDegrees) {
+    public ManeuverDTO(ManeuverType type, Tack newTack, PositionDTO position, Date timepoint, SpeedWithBearingDTO speedWithBearingBefore,
+            SpeedWithBearingDTO speedWithBearingAfter, double directionChangeInDegrees) {
         super();
         this.type = type;
         this.newTack = newTack;

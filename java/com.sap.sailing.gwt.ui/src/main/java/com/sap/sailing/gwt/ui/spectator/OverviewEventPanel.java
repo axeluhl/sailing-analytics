@@ -34,7 +34,7 @@ import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.EventRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.EventDAO;
+import com.sap.sailing.gwt.ui.shared.EventDTO;
 
 /**
  * 
@@ -51,18 +51,18 @@ public class OverviewEventPanel extends AbstractEventPanel {
     
     private CaptionPanel captionPanelEvents;
     private Button btnShowLeaderboards;
-    private CellTable<EventDAO> eventTable;
-    private ListDataProvider<EventDAO> eventTableProvider;
-    private SingleSelectionModel<EventDAO> eventSelectionModel;
+    private CellTable<EventDTO> eventTable;
+    private ListDataProvider<EventDTO> eventTableProvider;
+    private SingleSelectionModel<EventDTO> eventSelectionModel;
 
     private CaptionPanel captionPanelLeaderboards;
     
-    private List<EventDAO> availableEvents;
+    private List<EventDTO> availableEvents;
 
     public OverviewEventPanel(SailingServiceAsync sailingService, EventRefresher eventRefresher,
             ErrorReporter errorReporter, final StringMessages stringConstants) {
         super(sailingService, eventRefresher, errorReporter, stringConstants);
-        availableEvents = new ArrayList<EventDAO>();
+        availableEvents = new ArrayList<EventDTO>();
 
         VerticalPanel mainPanel = new VerticalPanel();
         this.setWidget(mainPanel);
@@ -166,30 +166,30 @@ public class OverviewEventPanel extends AbstractEventPanel {
 
         // Create event table
         {
-            eventTable = new CellTable<EventDAO>();
+            eventTable = new CellTable<EventDTO>();
             eventTable.setWidth("100%");
             
             //Creating location column
-            TextColumn<EventDAO> locationColumn = new TextColumn<EventDAO>() {
+            TextColumn<EventDTO> locationColumn = new TextColumn<EventDTO>() {
                 @Override
-                public String getValue(EventDAO eventDAO) {
-                    String locations = eventDAO.getLocationAsString();
+                public String getValue(EventDTO eventDAO) {
+                    String locations = eventDAO.locations;
                     return locations != null ? locations : stringConstants.locationNotAvailable();
                 }
             };
             locationColumn.setSortable(true);
             //Creating event name column
-            TextColumn<EventDAO> nameColumn = new TextColumn<EventDAO>() {
+            TextColumn<EventDTO> nameColumn = new TextColumn<EventDTO>() {
                 @Override
-                public String getValue(EventDAO eventDAO) {
+                public String getValue(EventDTO eventDAO) {
                     return eventDAO.name;
                 }
             };
             nameColumn.setSortable(true);
             //Creating start date column
-            TextColumn<EventDAO> startDateColumn = new TextColumn<EventDAO>() {
+            TextColumn<EventDTO> startDateColumn = new TextColumn<EventDTO>() {
                 @Override
-                public String getValue(EventDAO eventDAO) {
+                public String getValue(EventDTO eventDAO) {
                     Date start = eventDAO.regattas.get(0).races.get(0).startOfRace;
                     return start != null ? dateFormatter.render(start) : stringConstants.startDateNotAvailable();
                 }
@@ -201,13 +201,13 @@ public class OverviewEventPanel extends AbstractEventPanel {
             eventTable.addColumn(startDateColumn, stringConstants.startDate());
             
             //Adding the data provider and creating the sort handler
-            eventTableProvider = new ListDataProvider<EventDAO>();
+            eventTableProvider = new ListDataProvider<EventDTO>();
             eventTableProvider.addDataDisplay(eventTable);
             Handler eventSortHandler = getEventSortHandler(eventTableProvider.getList(), locationColumn, nameColumn, startDateColumn);
             eventTable.addColumnSortHandler(eventSortHandler);
             
             //Adding the selection model
-            eventSelectionModel = new SingleSelectionModel<EventDAO>();
+            eventSelectionModel = new SingleSelectionModel<EventDTO>();
             eventTable.setSelectionModel(eventSelectionModel);
             eventSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
                 @Override
@@ -257,12 +257,12 @@ public class OverviewEventPanel extends AbstractEventPanel {
     }
 
     private void loadEvents(final Runnable actionAfterLoading) {
-        sailingService.listEvents(true, new AsyncCallback<List<EventDAO>>() {
+        sailingService.listEvents(true, new AsyncCallback<List<EventDTO>>() {
 
             @Override
-            public void onSuccess(List<EventDAO> result) {
+            public void onSuccess(List<EventDTO> result) {
                 if (result != null) {
-                    availableEvents = new ArrayList<EventDAO>(result);
+                    availableEvents = new ArrayList<EventDTO>(result);
                 } else {
                     availableEvents.clear();
                 }
@@ -318,29 +318,29 @@ public class OverviewEventPanel extends AbstractEventPanel {
     }
 
     @Override
-    public void fillEvents(List<EventDAO> result) {
+    public void fillEvents(List<EventDTO> result) {
         
     }
 
-    private ListHandler<EventDAO> getEventSortHandler(List<EventDAO> list, TextColumn<EventDAO> locationColumn,
-            TextColumn<EventDAO> nameColumn, TextColumn<EventDAO> startDateColumn) {
+    private ListHandler<EventDTO> getEventSortHandler(List<EventDTO> list, TextColumn<EventDTO> locationColumn,
+            TextColumn<EventDTO> nameColumn, TextColumn<EventDTO> startDateColumn) {
         //TODO Check if comparators are correct
-        ListHandler<EventDAO> sortHandler = new ListHandler<EventDAO>(list);
-        sortHandler.setComparator(locationColumn, new Comparator<EventDAO>() {
+        ListHandler<EventDTO> sortHandler = new ListHandler<EventDTO>(list);
+        sortHandler.setComparator(locationColumn, new Comparator<EventDTO>() {
             @Override
-            public int compare(EventDAO e1, EventDAO e2) {
-                return e1.getLocationAsString().compareTo(e2.getLocationAsString());
+            public int compare(EventDTO e1, EventDTO e2) {
+                return e1.locations.compareTo(e2.locations);
             }
         });
-        sortHandler.setComparator(nameColumn, new Comparator<EventDAO>() {
+        sortHandler.setComparator(nameColumn, new Comparator<EventDTO>() {
             @Override
-            public int compare(EventDAO e1, EventDAO e2) {
+            public int compare(EventDTO e1, EventDTO e2) {
                 return e1.name.compareTo(e2.name);
             }
         });
-        sortHandler.setComparator(startDateColumn, new Comparator<EventDAO>() {
+        sortHandler.setComparator(startDateColumn, new Comparator<EventDTO>() {
             @Override
-            public int compare(EventDAO e1, EventDAO e2) {
+            public int compare(EventDTO e1, EventDTO e2) {
                 return e1.getStartDate().compareTo(e2.getStartDate());
             }
         });

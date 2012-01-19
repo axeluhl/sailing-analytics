@@ -48,11 +48,11 @@ import com.sap.sailing.gwt.ui.client.EventDisplayer;
 import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.EventDAO;
-import com.sap.sailing.gwt.ui.shared.LeaderboardDAO;
-import com.sap.sailing.gwt.ui.shared.RaceDAO;
-import com.sap.sailing.gwt.ui.shared.RaceInLeaderboardDAO;
-import com.sap.sailing.gwt.ui.shared.RegattaDAO;
+import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
+import com.sap.sailing.gwt.ui.shared.RaceDTO;
+import com.sap.sailing.gwt.ui.shared.RaceInLeaderboardDTO;
+import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.server.api.EventNameAndRaceName;
 
 public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer, RaceSelectionChangeListener,
@@ -64,19 +64,19 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
 
     private final SailingServiceAsync sailingService;
 
-    private final ListDataProvider<LeaderboardDAO> leaderboardList;
+    private final ListDataProvider<LeaderboardDTO> leaderboardList;
 
-    private final ListDataProvider<RaceInLeaderboardDAO> raceColumnList;
+    private final ListDataProvider<RaceInLeaderboardDTO> raceColumnList;
 
     private final ErrorReporter errorReporter;
 
-    private final CellTable<LeaderboardDAO> leaderboardTable;
+    private final CellTable<LeaderboardDTO> leaderboardTable;
 
-    private final CellTable<RaceInLeaderboardDAO> raceColumnTable;
+    private final CellTable<RaceInLeaderboardDTO> raceColumnTable;
 
-    private LeaderboardDAO selectedLeaderboard;
+    private LeaderboardDTO selectedLeaderboard;
 
-    private RaceInLeaderboardDAO selectedRaceInLeaderboard;
+    private RaceInLeaderboardDTO selectedRaceInLeaderboard;
 
     private final Button addColumnButton;
 
@@ -89,11 +89,11 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
 
     private TextBox filterLeaderboardTextbox;
 
-    final SingleSelectionModel<RaceInLeaderboardDAO> raceTableSelectionModel;
+    final SingleSelectionModel<RaceInLeaderboardDTO> raceTableSelectionModel;
 
-    private List<LeaderboardDAO> availableLeaderboardList;
+    private List<LeaderboardDTO> availableLeaderboardList;
 
-    private final SingleSelectionModel<LeaderboardDAO> tableSelectionModel;
+    private final SingleSelectionModel<LeaderboardDTO> tableSelectionModel;
 
     public static class AnchorCell extends AbstractCell<SafeHtml> {
 
@@ -114,10 +114,10 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
             final ErrorReporter errorReporter, StringMessages theStringConstants) {
         this.stringConstants = theStringConstants;
         this.sailingService = sailingService;
-        leaderboardList = new ListDataProvider<LeaderboardDAO>();
-        raceColumnList = new ListDataProvider<RaceInLeaderboardDAO>();
+        leaderboardList = new ListDataProvider<LeaderboardDTO>();
+        raceColumnList = new ListDataProvider<RaceInLeaderboardDTO>();
         this.errorReporter = errorReporter;
-        this.availableLeaderboardList = new ArrayList<LeaderboardDAO>();
+        this.availableLeaderboardList = new ArrayList<LeaderboardDTO>();
         readAllLeaderbords();
         VerticalPanel mainPanel = new VerticalPanel();
         this.setWidget(mainPanel);
@@ -142,23 +142,23 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
         mainPanel.add(filterPanel);
 
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
-        leaderboardTable = new CellTable<LeaderboardDAO>(/* pageSize */200, tableRes);
-        ListHandler<LeaderboardDAO> leaderboardColumnListHandler = new ListHandler<LeaderboardDAO>(
+        leaderboardTable = new CellTable<LeaderboardDTO>(/* pageSize */200, tableRes);
+        ListHandler<LeaderboardDTO> leaderboardColumnListHandler = new ListHandler<LeaderboardDTO>(
                 leaderboardList.getList());
 
         AnchorCell anchorCell = new AnchorCell();
-        Column<LeaderboardDAO, SafeHtml> linkColumn = new Column<LeaderboardDAO, SafeHtml>(anchorCell) {
+        Column<LeaderboardDTO, SafeHtml> linkColumn = new Column<LeaderboardDTO, SafeHtml>(anchorCell) {
             @Override
-            public SafeHtml getValue(LeaderboardDAO object) {
+            public SafeHtml getValue(LeaderboardDTO object) {
                 return ANCHORTEMPLATE.cell("/gwt/Leaderboard.html?name=" + object.name, object.name);
             }
 
         };
         linkColumn.setSortable(true);
-        leaderboardColumnListHandler.setComparator(linkColumn, new Comparator<LeaderboardDAO>() {
+        leaderboardColumnListHandler.setComparator(linkColumn, new Comparator<LeaderboardDTO>() {
 
             @Override
-            public int compare(LeaderboardDAO o1, LeaderboardDAO o2) {
+            public int compare(LeaderboardDTO o1, LeaderboardDTO o2) {
                 boolean ascending = isSortedAscending();
                 if (o1.name.equals(o2.name)) {
                     return 0;
@@ -174,9 +174,9 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
                 return sortList.size() > 0 & sortList.get(0).isAscending();
             }
         });
-        TextColumn<LeaderboardDAO> discardingOptionsColumn = new TextColumn<LeaderboardDAO>() {
+        TextColumn<LeaderboardDTO> discardingOptionsColumn = new TextColumn<LeaderboardDTO>() {
             @Override
-            public String getValue(LeaderboardDAO leaderboard) {
+            public String getValue(LeaderboardDTO leaderboard) {
                 String result = "";
                 if (leaderboard.discardThresholds != null) {
                     for (int discardThreshold : leaderboard.discardThresholds) {
@@ -186,29 +186,29 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
                 return result;
             }
         };
-        ImagesBarColumn<LeaderboardDAO, LeaderboardConfigImagesBarCell> leaderboardActionColumn = new ImagesBarColumn<LeaderboardDAO, LeaderboardConfigImagesBarCell>(
+        ImagesBarColumn<LeaderboardDTO, LeaderboardConfigImagesBarCell> leaderboardActionColumn = new ImagesBarColumn<LeaderboardDTO, LeaderboardConfigImagesBarCell>(
                 new LeaderboardConfigImagesBarCell(stringConstants));
-        leaderboardActionColumn.setFieldUpdater(new FieldUpdater<LeaderboardDAO, String>() {
+        leaderboardActionColumn.setFieldUpdater(new FieldUpdater<LeaderboardDTO, String>() {
             @Override
-            public void update(int index, LeaderboardDAO object, String value) {
+            public void update(int index, LeaderboardDTO object, String value) {
                 if ("ACTION_REMOVE".equals(value)) {
                     if (Window.confirm("Do you really want to remove the leaderboard: '" + object.name + "' ?")) {
                         removeLeaderboard(object);
                     }
                 } else if ("ACTION_EDIT".equals(value)) {
                     final String oldLeaderboardName = object.name;
-                    List<LeaderboardDAO> otherExistingLeaderboard = new ArrayList<LeaderboardDAO>();
+                    List<LeaderboardDTO> otherExistingLeaderboard = new ArrayList<LeaderboardDTO>();
                     otherExistingLeaderboard.addAll(leaderboardList.getList());
                     otherExistingLeaderboard.remove(object);
                     LeaderboardEditDialog dialog = new LeaderboardEditDialog(Collections
                             .unmodifiableCollection(otherExistingLeaderboard), object, stringConstants, errorReporter,
-                            new AsyncCallback<LeaderboardDAO>() {
+                            new AsyncCallback<LeaderboardDTO>() {
                                 @Override
                                 public void onFailure(Throwable arg0) {
                                 }
 
                                 @Override
-                                public void onSuccess(LeaderboardDAO result) {
+                                public void onSuccess(LeaderboardDTO result) {
                                     updateLeaderboard(oldLeaderboardName, result);
                                 }
                             });
@@ -223,7 +223,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
         leaderboardTable.addColumn(leaderboardActionColumn, "Actions");
         leaderboardTable.addColumnSortHandler(leaderboardColumnListHandler);
         leaderboardTable.setWidth("500px");
-        tableSelectionModel = new SingleSelectionModel<LeaderboardDAO>();
+        tableSelectionModel = new SingleSelectionModel<LeaderboardDTO>();
         leaderboardTable.setSelectionModel(tableSelectionModel);
         tableSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             public void onSelectionChange(SelectionChangeEvent event) {
@@ -288,42 +288,42 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
         });
 
         // ------------ races of the selected leaderboard ----------------
-        TextColumn<RaceInLeaderboardDAO> raceNameColumn = new TextColumn<RaceInLeaderboardDAO>() {
+        TextColumn<RaceInLeaderboardDTO> raceNameColumn = new TextColumn<RaceInLeaderboardDTO>() {
             @Override
-            public String getValue(RaceInLeaderboardDAO object) {
+            public String getValue(RaceInLeaderboardDTO object) {
                 return object.getRaceColumnName();
             }
         };
 
-        Column<RaceInLeaderboardDAO, Boolean> isMedalRaceCheckboxColumn = new Column<RaceInLeaderboardDAO, Boolean>(
+        Column<RaceInLeaderboardDTO, Boolean> isMedalRaceCheckboxColumn = new Column<RaceInLeaderboardDTO, Boolean>(
                 new CheckboxCell()) {
             @Override
-            public Boolean getValue(RaceInLeaderboardDAO race) {
+            public Boolean getValue(RaceInLeaderboardDTO race) {
                 return race.isMedalRace();
             }
         };
-        isMedalRaceCheckboxColumn.setFieldUpdater(new FieldUpdater<RaceInLeaderboardDAO, Boolean>() {
+        isMedalRaceCheckboxColumn.setFieldUpdater(new FieldUpdater<RaceInLeaderboardDTO, Boolean>() {
             @Override
-            public void update(int index, RaceInLeaderboardDAO object, Boolean value) {
+            public void update(int index, RaceInLeaderboardDTO object, Boolean value) {
                 setIsMedalRace(selectedLeaderboard.name, object, value);
             }
         });
         isMedalRaceCheckboxColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
 
-        TextColumn<RaceInLeaderboardDAO> isLinkedRaceColumn = new TextColumn<RaceInLeaderboardDAO>() {
+        TextColumn<RaceInLeaderboardDTO> isLinkedRaceColumn = new TextColumn<RaceInLeaderboardDTO>() {
             @Override
-            public String getValue(RaceInLeaderboardDAO race) {
+            public String getValue(RaceInLeaderboardDTO race) {
                 boolean isTrackedRace = race.isTrackedRace();
                 return isTrackedRace ? stringConstants.yes() : stringConstants.no();
             }
         };
 
-        ImagesBarColumn<RaceInLeaderboardDAO, LeaderboardRaceConfigImagesBarCell> raceActionColumn = new ImagesBarColumn<RaceInLeaderboardDAO, LeaderboardRaceConfigImagesBarCell>(
+        ImagesBarColumn<RaceInLeaderboardDTO, LeaderboardRaceConfigImagesBarCell> raceActionColumn = new ImagesBarColumn<RaceInLeaderboardDTO, LeaderboardRaceConfigImagesBarCell>(
                 new LeaderboardRaceConfigImagesBarCell(stringConstants));
 
-        raceActionColumn.setFieldUpdater(new FieldUpdater<RaceInLeaderboardDAO, String>() {
+        raceActionColumn.setFieldUpdater(new FieldUpdater<RaceInLeaderboardDTO, String>() {
             @Override
-            public void update(int index, RaceInLeaderboardDAO object, String value) {
+            public void update(int index, RaceInLeaderboardDTO object, String value) {
                 if ("ACTION_REMOVE".equals(value)) {
                     if (Window.confirm("Do you really want to remove the race: '" + object + "' ?")) {
                         removeRaceColumn(object);
@@ -339,14 +339,14 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
         Label lblRaceNamesIn = new Label(stringConstants.races());
         vPanel.add(lblRaceNamesIn);
 
-        raceColumnTable = new CellTable<RaceInLeaderboardDAO>(/* pageSize */200, tableRes);
+        raceColumnTable = new CellTable<RaceInLeaderboardDTO>(/* pageSize */200, tableRes);
         raceColumnTable.addColumn(raceNameColumn, stringConstants.name());
         raceColumnTable.addColumn(isMedalRaceCheckboxColumn, stringConstants.medalRace());
         raceColumnTable.addColumn(isLinkedRaceColumn, stringConstants.islinked());
         raceColumnTable.addColumn(raceActionColumn, stringConstants.actions());
         raceColumnList.addDataDisplay(raceColumnTable);
         raceColumnTable.setWidth("500px");
-        raceTableSelectionModel = new SingleSelectionModel<RaceInLeaderboardDAO>();
+        raceTableSelectionModel = new SingleSelectionModel<RaceInLeaderboardDTO>();
 
         raceColumnTable.setSelectionModel(raceTableSelectionModel);
 
@@ -393,9 +393,9 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
     }
 
     private void readAllLeaderbords() {
-        sailingService.getLeaderboards(new AsyncCallback<List<LeaderboardDAO>>() {
+        sailingService.getLeaderboards(new AsyncCallback<List<LeaderboardDTO>>() {
             @Override
-            public void onSuccess(List<LeaderboardDAO> leaderboards) {
+            public void onSuccess(List<LeaderboardDTO> leaderboards) {
                 leaderboardList.getList().clear();
                 availableLeaderboardList.clear();
                 leaderboardList.getList().addAll(leaderboards);
@@ -447,7 +447,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
                 });
     }
 
-    private void removeRaceColumn(final RaceInLeaderboardDAO raceColumn) {
+    private void removeRaceColumn(final RaceInLeaderboardDTO raceColumn) {
         final String raceColumnString = raceColumn.getRaceColumnName();
         sailingService.removeLeaderboardColumn(getSelectedLeaderboardName(), raceColumnString,
                 new AsyncCallback<Void>() {
@@ -491,7 +491,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
     }
 
     private int getRowIndexOfSelectedRaceColumn() {
-        final RaceInLeaderboardDAO selectedRaceColumnName = raceTableSelectionModel.getSelectedObject();
+        final RaceInLeaderboardDTO selectedRaceColumnName = raceTableSelectionModel.getSelectedObject();
         int rowIndex = -1;
 
         if (selectedRaceColumnName != null) {
@@ -570,24 +570,24 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
         trackedEventsComposite.selectRaceByName(eventName, raceName);
     }
 
-    private RaceInLeaderboardDAO getSelectedRaceInLeaderboard() {
-        RaceInLeaderboardDAO raceInLeaderboard = raceTableSelectionModel.getSelectedObject();
+    private RaceInLeaderboardDTO getSelectedRaceInLeaderboard() {
+        RaceInLeaderboardDTO raceInLeaderboard = raceTableSelectionModel.getSelectedObject();
         return raceInLeaderboard;
     }
 
-    private void editRaceColumnOfLeaderboard(final RaceInLeaderboardDAO raceInLeaderboard) {
+    private void editRaceColumnOfLeaderboard(final RaceInLeaderboardDTO raceInLeaderboard) {
         final String oldRaceName = raceInLeaderboard.getRaceColumnName();
-        List<RaceInLeaderboardDAO> existingRacesWithoutThisRace = new ArrayList<RaceInLeaderboardDAO>();
+        List<RaceInLeaderboardDTO> existingRacesWithoutThisRace = new ArrayList<RaceInLeaderboardDTO>();
         existingRacesWithoutThisRace.addAll(raceColumnList.getList());
         existingRacesWithoutThisRace.remove(raceInLeaderboard);
         final RaceInLeaderboardDialog raceDialog = new RaceInLeaderboardDialog(existingRacesWithoutThisRace,
-                raceInLeaderboard, stringConstants, new AsyncCallback<RaceInLeaderboardDAO>() {
+                raceInLeaderboard, stringConstants, new AsyncCallback<RaceInLeaderboardDTO>() {
                     @Override
                     public void onFailure(Throwable caught) {
                     }
 
                     @Override
-                    public void onSuccess(final RaceInLeaderboardDAO result) {
+                    public void onSuccess(final RaceInLeaderboardDTO result) {
                         sailingService.renameLeaderboardColumn(getSelectedLeaderboardName(), oldRaceName,
                                 result.getRaceColumnName(), new AsyncCallback<Void>() {
 
@@ -619,10 +619,10 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
         raceDialog.show();
     }
 
-    private void reloadRaceInLeaderboardRow(String oldRaceName, RaceInLeaderboardDAO raceInLeaderboard) {
+    private void reloadRaceInLeaderboardRow(String oldRaceName, RaceInLeaderboardDTO raceInLeaderboard) {
         int index = -1;
         for (int i = 0; i < raceColumnList.getList().size(); i++) {
-            RaceInLeaderboardDAO race = raceColumnList.getList().get(i);
+            RaceInLeaderboardDTO race = raceColumnList.getList().get(i);
             if (race.getRaceColumnName().equals(oldRaceName)) {
                 index = i;
                 break;
@@ -634,7 +634,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
         raceColumnList.refresh();
     }
 
-    private void setIsMedalRace(String leaderboardName, final RaceInLeaderboardDAO raceInLeaderboard,
+    private void setIsMedalRace(String leaderboardName, final RaceInLeaderboardDTO raceInLeaderboard,
             final boolean isMedalRace) {
         sailingService.updateIsMedalRace(leaderboardName, raceInLeaderboard.getRaceColumnName(), isMedalRace,
                 new AsyncCallback<Void>() {
@@ -651,17 +651,17 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
     }
 
     private void addRaceColumnToLeaderboard() {
-        final RaceInLeaderboardDAO raceInLeaderboard = new RaceInLeaderboardDAO();
+        final RaceInLeaderboardDTO raceInLeaderboard = new RaceInLeaderboardDTO();
         final String leaderboardName = getSelectedLeaderboardName();
         final RaceInLeaderboardDialog raceDialog = new RaceInLeaderboardDialog(raceColumnList.getList(),
-                raceInLeaderboard, stringConstants, new AsyncCallback<RaceInLeaderboardDAO>() {
+                raceInLeaderboard, stringConstants, new AsyncCallback<RaceInLeaderboardDTO>() {
 
                     @Override
                     public void onFailure(Throwable caught) {
                     }
 
                     @Override
-                    public void onSuccess(final RaceInLeaderboardDAO result) {
+                    public void onSuccess(final RaceInLeaderboardDTO result) {
                         sailingService.addColumnToLeaderboard(result.getRaceColumnName(), leaderboardName,
                                 result.isMedalRace(), new AsyncCallback<Void>() {
 
@@ -710,7 +710,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
         if (leaderboardName != null) {
             // TODO wouldn't the stripped-down version of the LeaderboardDAO do here? See bug #146
             sailingService.getLeaderboardByName(leaderboardName, new Date(),
-            /* namesOfRacesForWhichToLoadLegDetails */null, new AsyncCallback<LeaderboardDAO>() {
+            /* namesOfRacesForWhichToLoadLegDetails */null, new AsyncCallback<LeaderboardDTO>() {
                 @Override
                 public void onFailure(Throwable caught) {
                     errorReporter.reportError("Error trying to fetch leaderboard " + leaderboardName
@@ -718,7 +718,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
                 }
 
                 @Override
-                public void onSuccess(LeaderboardDAO result) {
+                public void onSuccess(LeaderboardDTO result) {
                     selectedLeaderboard = result;
                     raceColumnList.getList().clear();
                     raceColumnList.getList().addAll(result.getRaceInLeaderboardList());
@@ -738,13 +738,13 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
     }
 
     @Override
-    public void fillEvents(List<EventDAO> result) {
+    public void fillEvents(List<EventDTO> result) {
         trackedEventsComposite.fillEvents(result);
     }
 
     @Override
     public void changeTrackingRace(EventNameAndRaceName eventNameAndRaceName, boolean isTracked) {
-        for (RaceInLeaderboardDAO race : raceColumnList.getList()) {
+        for (RaceInLeaderboardDTO race : raceColumnList.getList()) {
             if (race.getRaceColumnName().equals(eventNameAndRaceName.getRaceName())) {
                 race.setTrackedRace(isTracked);
             }
@@ -754,25 +754,25 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
 
     private void addNewLeaderboard() {
         List<String> leaderboardNames = new ArrayList<String>();
-        for (LeaderboardDAO dao : leaderboardList.getList())
+        for (LeaderboardDTO dao : leaderboardList.getList())
             leaderboardNames.add(dao.name);
         LeaderboardCreateDialog dialog = new LeaderboardCreateDialog(Collections.unmodifiableCollection(leaderboardList
-                .getList()), stringConstants, errorReporter, new AsyncCallback<LeaderboardDAO>() {
+                .getList()), stringConstants, errorReporter, new AsyncCallback<LeaderboardDTO>() {
             @Override
             public void onFailure(Throwable arg0) {
             }
 
             @Override
-            public void onSuccess(LeaderboardDAO result) {
+            public void onSuccess(LeaderboardDTO result) {
                 createNewLeaderboard(result);
             }
         });
         dialog.show();
     }
 
-    private void createNewLeaderboard(final LeaderboardDAO newLeaderboard) {
+    private void createNewLeaderboard(final LeaderboardDTO newLeaderboard) {
         sailingService.createLeaderboard(newLeaderboard.name, newLeaderboard.discardThresholds,
-                new AsyncCallback<LeaderboardDAO>() {
+                new AsyncCallback<LeaderboardDTO>() {
                     @Override
                     public void onFailure(Throwable t) {
                         errorReporter.reportError("Error trying to create new leaderboard " + newLeaderboard.name
@@ -780,7 +780,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
                     }
 
                     @Override
-                    public void onSuccess(LeaderboardDAO result) {
+                    public void onSuccess(LeaderboardDTO result) {
                         leaderboardList.getList().add(result);
                         availableLeaderboardList.add(result);
                         selectedLeaderboard = result;
@@ -789,7 +789,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
                 });
     }
 
-    private void updateLeaderboard(final String oldLeaderboardName, final LeaderboardDAO leaderboardToUdate) {
+    private void updateLeaderboard(final String oldLeaderboardName, final LeaderboardDTO leaderboardToUdate) {
         sailingService.updateLeaderboard(oldLeaderboardName, leaderboardToUdate.name,
                 leaderboardToUdate.discardThresholds, new AsyncCallback<Void>() {
                     @Override
@@ -801,7 +801,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
                     @Override
                     public void onSuccess(Void result) {
                         for (int i = 0; i < leaderboardList.getList().size(); i++) {
-                            LeaderboardDAO dao = leaderboardList.getList().get(i);
+                            LeaderboardDTO dao = leaderboardList.getList().get(i);
                             if (dao.name.equals(oldLeaderboardName)) {
                                 leaderboardList.getList().set(i, leaderboardToUdate);
                                 availableLeaderboardList.set(i, leaderboardToUdate);
@@ -812,7 +812,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
                 });
     }
 
-    private void removeLeaderboard(final LeaderboardDAO leaderBoard) {
+    private void removeLeaderboard(final LeaderboardDTO leaderBoard) {
         sailingService.removeLeaderboard(leaderBoard.name, new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
@@ -835,9 +835,9 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
     }
 
     @Override
-    public void onRaceSelectionChange(List<Triple<EventDAO, RegattaDAO, RaceDAO>> selectedRaces) {
+    public void onRaceSelectionChange(List<Triple<EventDTO, RegattaDTO, RaceDTO>> selectedRaces) {
         // if no leaderboard column is selected, ignore the race selection change
-        RaceInLeaderboardDAO selectedRaceInLeaderboard = getSelectedRaceInLeaderboard();
+        RaceInLeaderboardDTO selectedRaceInLeaderboard = getSelectedRaceInLeaderboard();
         if (selectedRaceInLeaderboard != null) {
             if (selectedRaces.isEmpty()) {
                 unlinkRaceColumnFromTrackedRace(selectedRaceInLeaderboard.getRaceColumnName());
@@ -847,8 +847,8 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
         }
     }
 
-    private void linkTrackedRaceToSelectedRaceColumn(final RaceInLeaderboardDAO selectedRaceInLeaderboard,
-            final Triple<EventDAO, RegattaDAO, RaceDAO> selectedRace) {
+    private void linkTrackedRaceToSelectedRaceColumn(final RaceInLeaderboardDTO selectedRaceInLeaderboard,
+            final Triple<EventDTO, RegattaDTO, RaceDTO> selectedRace) {
         sailingService.connectTrackedRaceToLeaderboardColumn(getSelectedLeaderboardName(), selectedRaceInLeaderboard
                 .getRaceColumnName(), new EventNameAndRaceName(selectedRace.getA().name, selectedRace.getC().name),
                 new AsyncCallback<Boolean>() {
@@ -877,7 +877,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
         List<String> wordsToFilter = Arrays.asList(text.split(" "));
         leaderboardList.getList().clear();
         if (text != null && !text.isEmpty()) {
-            for (LeaderboardDAO dao : availableLeaderboardList) {
+            for (LeaderboardDTO dao : availableLeaderboardList) {
                 boolean failed = false;
                 for (String word : wordsToFilter) {
                     String textAsUppercase = word.toUpperCase().trim();

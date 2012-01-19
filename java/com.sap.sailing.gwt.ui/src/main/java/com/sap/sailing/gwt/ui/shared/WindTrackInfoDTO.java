@@ -4,9 +4,9 @@ import java.util.List;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
-public class WindTrackInfoDAO implements IsSerializable {
-    public List<WindDAO> windFixes;
+public class WindTrackInfoDTO implements IsSerializable {
+    public List<WindDTO> windFixes;
     public long dampeningIntervalInMilliseconds;
     
-    public WindTrackInfoDAO() {}
+    public WindTrackInfoDTO() {}
 }

@@ -19,10 +19,10 @@ import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
-import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
-import com.sap.sailing.gwt.ui.shared.LeaderboardDAO;
-import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDAO;
-import com.sap.sailing.gwt.ui.shared.LeaderboardRowDAO;
+import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
+import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
+import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDTO;
+import com.sap.sailing.gwt.ui.shared.LeaderboardRowDTO;
 
 /**
  * An editable version of the {@link LeaderboardPanel} which allows a user to enter carried / accumulated
@@ -35,9 +35,9 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
     private class EditableCarryColumn extends CarryColumn {
         public EditableCarryColumn() {
             super(new EditTextCell());
-            setFieldUpdater(new FieldUpdater<LeaderboardRowDAO, String>() {
+            setFieldUpdater(new FieldUpdater<LeaderboardRowDTO, String>() {
                 @Override
-                public void update(final int rowIndex, final LeaderboardRowDAO row, final String value) {
+                public void update(final int rowIndex, final LeaderboardRowDTO row, final String value) {
                     getSailingService().updateLeaderboardCarryValue(getLeaderboardName(), row.competitor.name,
                             value == null || value.length() == 0 ? null : Integer.valueOf(value.trim()),
                             new AsyncCallback<Void>() {
@@ -68,9 +68,9 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
 
         public EditableCompetitorColumn() {
             super(new EditTextCell());
-            setFieldUpdater(new FieldUpdater<LeaderboardRowDAO, String>() {
+            setFieldUpdater(new FieldUpdater<LeaderboardRowDTO, String>() {
                 @Override
-                public void update(final int rowIndex, final LeaderboardRowDAO row, final String value) {
+                public void update(final int rowIndex, final LeaderboardRowDTO row, final String value) {
                     getSailingService().updateCompetitorDisplayNameInLeaderboard(getLeaderboardName(), row.competitor.name,
                             value == null || value.length() == 0 ? null : value.trim(),
                             new AsyncCallback<Void>() {
@@ -84,7 +84,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                                 @Override
                                 public void onSuccess(Void v) {
                                     if (getLeaderboard().competitorDisplayNames == null) {
-                                        getLeaderboard().competitorDisplayNames = new HashMap<CompetitorDAO, String>();
+                                        getLeaderboard().competitorDisplayNames = new HashMap<CompetitorDTO, String>();
                                     }
                                     getCell().setViewData(row, null); // ensure that getValue() is called again
                                     getLeaderboard().competitorDisplayNames.put(row.competitor, value == null || value.trim().length() == 0 ? null : value.trim());
@@ -96,21 +96,21 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
         }
     }
 
-    private class EditableRaceColumn extends RaceColumn<LeaderboardRowDAO> implements RowUpdateWhiteboardOwner<LeaderboardRowDAO> {
-        private RowUpdateWhiteboard<LeaderboardRowDAO> currentRowUpdateWhiteboard;
+    private class EditableRaceColumn extends RaceColumn<LeaderboardRowDTO> implements RowUpdateWhiteboardOwner<LeaderboardRowDTO> {
+        private RowUpdateWhiteboard<LeaderboardRowDTO> currentRowUpdateWhiteboard;
         
-        public EditableRaceColumn(String raceName, boolean medalRace, List<RowUpdateWhiteboardProducerThatAlsoHasCell<LeaderboardRowDAO, ?>> cellList) {
+        public EditableRaceColumn(String raceName, boolean medalRace, List<RowUpdateWhiteboardProducerThatAlsoHasCell<LeaderboardRowDTO, ?>> cellList) {
             super(raceName, medalRace,
                     /* expandable */ false, // we don't want leg expansion when editing scores
-                    new CompositeCell<LeaderboardRowDAO>(new ArrayList<HasCell<LeaderboardRowDAO, ?>>(cellList)),
+                    new CompositeCell<LeaderboardRowDTO>(new ArrayList<HasCell<LeaderboardRowDTO, ?>>(cellList)),
                     RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE);
-            for (RowUpdateWhiteboardProducer<LeaderboardRowDAO> rowUpdateWhiteboardProducer : cellList) {
+            for (RowUpdateWhiteboardProducer<LeaderboardRowDTO> rowUpdateWhiteboardProducer : cellList) {
                 rowUpdateWhiteboardProducer.setWhiteboardOwner(this);
             }
             // the field updater for the composite is invoked after any component has updated its field
-            setFieldUpdater(new FieldUpdater<LeaderboardRowDAO, LeaderboardRowDAO>() {
+            setFieldUpdater(new FieldUpdater<LeaderboardRowDTO, LeaderboardRowDTO>() {
                 @Override
-                public void update(int rowIndex, LeaderboardRowDAO row, LeaderboardRowDAO value) {
+                public void update(int rowIndex, LeaderboardRowDTO row, LeaderboardRowDTO value) {
                     currentRowUpdateWhiteboard.setIndexOfRowToUpdate(rowIndex);
                     currentRowUpdateWhiteboard = null; // show that it has been consumed and updated
                 }
@@ -118,22 +118,22 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
         }
 
         @Override
-        public void render(Context context, LeaderboardRowDAO object, SafeHtmlBuilder html) {
+        public void render(Context context, LeaderboardRowDTO object, SafeHtmlBuilder html) {
             defaultRender(context, object, html);
         }
 
         @Override
-        public LeaderboardRowDAO getValue(LeaderboardRowDAO object) {
+        public LeaderboardRowDTO getValue(LeaderboardRowDTO object) {
             return object;
         }
 
         @Override
-        public void whiteboardProduced(RowUpdateWhiteboard<LeaderboardRowDAO> whiteboard) {
+        public void whiteboardProduced(RowUpdateWhiteboard<LeaderboardRowDTO> whiteboard) {
             currentRowUpdateWhiteboard = whiteboard;
         }
     }
     
-    private class MaxPointsDropDownCellProvider extends AbstractRowUpdateWhiteboardProducerThatHasCell<LeaderboardRowDAO, String> {
+    private class MaxPointsDropDownCellProvider extends AbstractRowUpdateWhiteboardProducerThatHasCell<LeaderboardRowDTO, String> {
         private final SelectionCell dropDownCell;
         private final String raceName;
         
@@ -148,11 +148,11 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
         }
 
         @Override
-        public FieldUpdater<LeaderboardRowDAO, String> getFieldUpdater() {
-            return new FieldUpdater<LeaderboardRowDAO, String>() {
+        public FieldUpdater<LeaderboardRowDTO, String> getFieldUpdater() {
+            return new FieldUpdater<LeaderboardRowDTO, String>() {
                 @Override
-                public void update(final int rowIndex, final LeaderboardRowDAO row, final String value) {
-                    final RowUpdateWhiteboard<LeaderboardRowDAO> whiteboard = new RowUpdateWhiteboard<LeaderboardRowDAO>(
+                public void update(final int rowIndex, final LeaderboardRowDTO row, final String value) {
+                    final RowUpdateWhiteboard<LeaderboardRowDTO> whiteboard = new RowUpdateWhiteboard<LeaderboardRowDTO>(
                             EditableLeaderboardPanel.this.getData());
                     getWhiteboardOwner().whiteboardProduced(whiteboard);
                     getSailingService().updateLeaderboardMaxPointsReason(getLeaderboardName(), row.competitor.name,
@@ -181,8 +181,8 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
         }
 
         @Override
-        public String getValue(LeaderboardRowDAO object) {
-            LeaderboardEntryDAO leaderboardEntryDAO = object.fieldsByRaceName.get(raceName);
+        public String getValue(LeaderboardRowDTO object) {
+            LeaderboardEntryDTO leaderboardEntryDAO = object.fieldsByRaceName.get(raceName);
             String reasonForMaxPoints = null;
             if (leaderboardEntryDAO != null) {
                 reasonForMaxPoints = leaderboardEntryDAO.reasonForMaxPoints;
@@ -191,7 +191,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
         }
     }
     
-    private class NetPointsEditCellProvider extends AbstractRowUpdateWhiteboardProducerThatHasCell<LeaderboardRowDAO, String> {
+    private class NetPointsEditCellProvider extends AbstractRowUpdateWhiteboardProducerThatHasCell<LeaderboardRowDTO, String> {
         private final EditTextCell netPointsEditCell;
         private final String raceName;
         
@@ -206,11 +206,11 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
         }
 
         @Override
-        public FieldUpdater<LeaderboardRowDAO, String> getFieldUpdater() {
-            return new FieldUpdater<LeaderboardRowDAO, String>() {
+        public FieldUpdater<LeaderboardRowDTO, String> getFieldUpdater() {
+            return new FieldUpdater<LeaderboardRowDTO, String>() {
                 @Override
-                public void update(final int rowIndex, final LeaderboardRowDAO row, final String value) {
-                    final RowUpdateWhiteboard<LeaderboardRowDAO> whiteboard = new RowUpdateWhiteboard<LeaderboardRowDAO>(
+                public void update(final int rowIndex, final LeaderboardRowDTO row, final String value) {
+                    final RowUpdateWhiteboard<LeaderboardRowDTO> whiteboard = new RowUpdateWhiteboard<LeaderboardRowDTO>(
                             EditableLeaderboardPanel.this.getData());
                     getWhiteboardOwner().whiteboardProduced(whiteboard);
                     getSailingService().updateLeaderboardScoreCorrection(getLeaderboardName(), row.competitor.name, raceName,
@@ -237,8 +237,8 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
         }
 
         @Override
-        public String getValue(LeaderboardRowDAO object) {
-            LeaderboardEntryDAO leaderboardEntryDAO = object.fieldsByRaceName.get(raceName);
+        public String getValue(LeaderboardRowDTO object) {
+            LeaderboardEntryDTO leaderboardEntryDAO = object.fieldsByRaceName.get(raceName);
             String result = "";
             if (leaderboardEntryDAO != null) {
                 result = result+leaderboardEntryDAO.netPoints;
@@ -258,7 +258,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
      * the column must always be shown.
      */
     @Override
-    protected void updateCarryColumn(LeaderboardDAO leaderboard) {
+    protected void updateCarryColumn(LeaderboardDTO leaderboard) {
         ensureCarryColumn();
     }
 
@@ -286,9 +286,9 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                 getCellList(raceName, isMedalRace));
     }
 
-    private List<RowUpdateWhiteboardProducerThatAlsoHasCell<LeaderboardRowDAO, ?>> getCellList(String raceName, boolean medalRace) {
-        List<RowUpdateWhiteboardProducerThatAlsoHasCell<LeaderboardRowDAO, ?>> list =
-                new ArrayList<RowUpdateWhiteboardProducerThatAlsoHasCell<LeaderboardRowDAO, ?>>();
+    private List<RowUpdateWhiteboardProducerThatAlsoHasCell<LeaderboardRowDTO, ?>> getCellList(String raceName, boolean medalRace) {
+        List<RowUpdateWhiteboardProducerThatAlsoHasCell<LeaderboardRowDTO, ?>> list =
+                new ArrayList<RowUpdateWhiteboardProducerThatAlsoHasCell<LeaderboardRowDTO, ?>>();
         list.add(new MaxPointsDropDownCellProvider(raceName));
         list.add(new NetPointsEditCellProvider(raceName));
         return list;

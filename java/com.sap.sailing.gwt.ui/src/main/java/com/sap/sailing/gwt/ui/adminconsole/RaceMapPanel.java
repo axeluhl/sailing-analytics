@@ -30,11 +30,11 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.TimeListener;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.leaderboard.SmallWindHistoryPanel;
-import com.sap.sailing.gwt.ui.shared.EventDAO;
-import com.sap.sailing.gwt.ui.shared.PositionDAO;
-import com.sap.sailing.gwt.ui.shared.QuickRankDAO;
-import com.sap.sailing.gwt.ui.shared.RaceDAO;
-import com.sap.sailing.gwt.ui.shared.RegattaDAO;
+import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.ui.shared.PositionDTO;
+import com.sap.sailing.gwt.ui.shared.QuickRankDTO;
+import com.sap.sailing.gwt.ui.shared.RaceDTO;
+import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialog;
 import com.sap.sailing.server.api.EventNameAndRaceName;
 
@@ -72,7 +72,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         raceListBox = new RacesListBoxPanel(eventRefresher, stringMessages);
         raceListBox.addRaceSelectionChangeListener(this);
         grid.setWidget(0, 0, raceListBox);
-        PositionDAO pos = new PositionDAO();
+        PositionDTO pos = new PositionDTO();
         if (!raceMap.boatMarkers.isEmpty()) {
             LatLng latLng = raceMap.boatMarkers.values().iterator().next().getLatLng();
             pos.latDeg = latLng.getLatitude();
@@ -112,14 +112,14 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
     }
 
     @Override
-    public void fillEvents(List<EventDAO> result) {
+    public void fillEvents(List<EventDTO> result) {
         raceListBox.fillEvents(result);
     }
 
     @Override
-    public void onRaceSelectionChange(List<Triple<EventDAO, RegattaDAO, RaceDAO>> selectedRaces) {
+    public void onRaceSelectionChange(List<Triple<EventDTO, RegattaDTO, RaceDTO>> selectedRaces) {
         if (!selectedRaces.isEmpty() && selectedRaces.get(selectedRaces.size() - 1) != null) {
-            RaceDAO raceDAO = selectedRaces.get(selectedRaces.size() - 1).getC();
+            RaceDTO raceDAO = selectedRaces.get(selectedRaces.size() - 1).getC();
             competitorSelectionProvider.setCompetitors(raceDAO.competitors);
             if (raceDAO.startOfRace != null) {
                 timePanel.timeChanged(raceDAO.startOfRace);
@@ -130,7 +130,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         raceMap.onRaceSelectionChange(selectedRaces);
     }
 
-    private void updateSlider(RaceDAO selectedRace) {
+    private void updateSlider(RaceDTO selectedRace) {
         if (selectedRace.startOfTracking != null) {
             timePanel.setMin(selectedRace.startOfTracking);
         }
@@ -142,20 +142,20 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
     @Override
     public void timeChanged(final Date date) {
         if (date != null) {
-            List<Triple<EventDAO, RegattaDAO, RaceDAO>> selection = raceListBox.getSelectedEventAndRace();
+            List<Triple<EventDTO, RegattaDTO, RaceDTO>> selection = raceListBox.getSelectedEventAndRace();
             if (!selection.isEmpty()) {
-                EventDAO event = selection.get(selection.size() - 1).getA();
-                RaceDAO race = selection.get(selection.size() - 1).getC();
+                EventDTO event = selection.get(selection.size() - 1).getA();
+                RaceDTO race = selection.get(selection.size() - 1).getC();
                 if (event != null && race != null) {
                     sailingService.getQuickRanks(new EventNameAndRaceName(event.name, race.name), date,
-                            new AsyncCallback<List<QuickRankDAO>>() {
+                            new AsyncCallback<List<QuickRankDTO>>() {
                                 @Override
                                 public void onFailure(Throwable caught) {
                                     errorReporter.reportError("Error obtaining quick rankings: " + caught.getMessage());
                                 }
 
                                 @Override
-                                public void onSuccess(List<QuickRankDAO> result) {
+                                public void onSuccess(List<QuickRankDTO> result) {
                                     quickRanksListBox.fillQuickRanks(result);
                                 }
                             });

@@ -6,10 +6,10 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.Tack;
 
-public class GPSFixDAO implements IsSerializable {
+public class GPSFixDTO implements IsSerializable {
     public Date timepoint;
-    public PositionDAO position;
-    public SpeedWithBearingDAO speedWithBearing;
+    public PositionDTO position;
+    public SpeedWithBearingDTO speedWithBearing;
     
     /**
      * tells if this fix was computed by extrapolation instead of having been captured by a device directly
@@ -29,9 +29,9 @@ public class GPSFixDAO implements IsSerializable {
      */
     public LegType legType;
     
-    public GPSFixDAO() {}
+    public GPSFixDTO() {}
 
-    public GPSFixDAO(Date timepoint, PositionDAO position, SpeedWithBearingDAO speedWithBearing, Tack tack,
+    public GPSFixDTO(Date timepoint, PositionDTO position, SpeedWithBearingDTO speedWithBearing, Tack tack,
             LegType legType, boolean extrapolated) {
         super();
         this.timepoint = timepoint;

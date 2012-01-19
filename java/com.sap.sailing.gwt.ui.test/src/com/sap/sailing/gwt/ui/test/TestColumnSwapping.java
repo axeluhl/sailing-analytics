@@ -14,15 +14,15 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.gwt.ui.server.SailingServiceImpl;
-import com.sap.sailing.gwt.ui.shared.LeaderboardDAO;
+import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 
 public class TestColumnSwapping {
 
-    private LeaderboardDAO lb = null;
+    private LeaderboardDTO lb = null;
     private static final String LEADERBOARDNAME = "test";
     private SailingServiceImpl service;
-    private LeaderboardDAO leaderboardOriginalDAO;
-    private LeaderboardDAO leaderboardDAO;
+    private LeaderboardDTO leaderboardOriginalDAO;
+    private LeaderboardDTO leaderboardDAO;
     private Collection<String> leglist;
     private Date leaderboardCreationDate;
     private SailingServiceImpl sailingService = null;
@@ -47,7 +47,7 @@ public class TestColumnSwapping {
         leaderboardCreationDate = new Date();
         try {
             // get Leaderboard with name and current date
-            leaderboardOriginalDAO = new LeaderboardDAO();
+            leaderboardOriginalDAO = new LeaderboardDTO();
             leaderboardOriginalDAO.addRace("Race1", true, false);
             leaderboardOriginalDAO.addRace("Race3", true, false);
             leaderboardOriginalDAO.addRace("Race2", true, false);
@@ -97,7 +97,7 @@ public class TestColumnSwapping {
 
     @Test
     public void testLeaderBoardDAOMethods() {
-        lb = new LeaderboardDAO();
+        lb = new LeaderboardDTO();
         assertNotNull("Leaderboard != NULL", lb);
         lb.addRace("1", false, false);
         lb.addRace("2", false, false);

@@ -38,9 +38,9 @@ import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.EventRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.EventDAO;
-import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDAO;
-import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDAO;
+import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDTO;
+import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDTO;
 
 /**
  * Allows the user to start and stop tracking of events, regattas and races using the TracTrac connector. In particular,
@@ -59,12 +59,12 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
     private final IntegerBox portIntegerbox;
     private final TextBox hostnameTextbox;
     private final TextBox filterEventsTextbox;
-    private final ListDataProvider<SwissTimingRaceRecordDAO> raceList;
-    private final CellTable<SwissTimingRaceRecordDAO> raceTable;
-    private final Map<String, SwissTimingConfigurationDAO> previousConfigurations;
+    private final ListDataProvider<SwissTimingRaceRecordDTO> raceList;
+    private final CellTable<SwissTimingRaceRecordDTO> raceTable;
+    private final Map<String, SwissTimingConfigurationDTO> previousConfigurations;
     private final ListBox previousConfigurationsComboBox;
     private final CheckBox canSendRequestsCheckbox;
-    private final List<SwissTimingRaceRecordDAO> availableSwissTimingRaces = new ArrayList<SwissTimingRaceRecordDAO>();
+    private final List<SwissTimingRaceRecordDTO> availableSwissTimingRaces = new ArrayList<SwissTimingRaceRecordDTO>();
 
     public SwissTimingEventManagementPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
             EventRefresher eventRefresher, StringMessages stringConstants) {
@@ -89,7 +89,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         Label lblPredefined = new Label(stringConstants.connections() +":");
         connectionsGrid.setWidget(0, 0, lblPredefined);
         
-        previousConfigurations = new HashMap<String, SwissTimingConfigurationDAO>();
+        previousConfigurations = new HashMap<String, SwissTimingConfigurationDTO>();
         previousConfigurationsComboBox = new ListBox();
         connectionsGrid.setWidget(0, 1, previousConfigurationsComboBox);
         previousConfigurationsComboBox.addChangeHandler(new ChangeHandler() {
@@ -139,16 +139,16 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         });
 
 
-        TextColumn<SwissTimingRaceRecordDAO> raceNameColumn = new TextColumn<SwissTimingRaceRecordDAO>() {
+        TextColumn<SwissTimingRaceRecordDTO> raceNameColumn = new TextColumn<SwissTimingRaceRecordDTO>() {
             @Override
-            public String getValue(SwissTimingRaceRecordDAO object) {
+            public String getValue(SwissTimingRaceRecordDTO object) {
                 return object.ID;
             }
         };
         
-        TextColumn<SwissTimingRaceRecordDAO> raceStartTrackingColumn = new TextColumn<SwissTimingRaceRecordDAO>() {
+        TextColumn<SwissTimingRaceRecordDTO> raceStartTrackingColumn = new TextColumn<SwissTimingRaceRecordDTO>() {
             @Override
-            public String getValue(SwissTimingRaceRecordDAO object) {
+            public String getValue(SwissTimingRaceRecordDTO object) {
                 return object.raceStartTime==null?"":dateFormatter.render(object.raceStartTime) + " " + timeFormatter.render(object.raceStartTime);
             }
         };
@@ -203,16 +203,16 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         raceStartTrackingColumn.setSortable(true);
         
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
-        raceTable = new CellTable<SwissTimingRaceRecordDAO>(/* pageSize */ 200, tableRes);
+        raceTable = new CellTable<SwissTimingRaceRecordDTO>(/* pageSize */ 200, tableRes);
         raceTable.addColumn(raceNameColumn, stringConstants.name());
         raceTable.addColumn(raceStartTrackingColumn, stringConstants.raceStartTimeColumn());
         raceTable.setWidth("300px");
-        raceTable.setSelectionModel(new MultiSelectionModel<SwissTimingRaceRecordDAO>() {});
+        raceTable.setSelectionModel(new MultiSelectionModel<SwissTimingRaceRecordDTO>() {});
 
         racesHorizontalPanel.add(raceTable);
         racesHorizontalPanel.add(trackPanel);
 
-        raceList = new ListDataProvider<SwissTimingRaceRecordDAO>();
+        raceList = new ListDataProvider<SwissTimingRaceRecordDTO>();
         raceList.addDataDisplay(raceTable);
         Handler columnSortHandler = getRaceTableColumnSortHandler(raceList.getList(), raceNameColumn, raceStartTrackingColumn);
         raceTable.addColumnSortHandler(columnSortHandler);
@@ -246,18 +246,18 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
 
     }
 
-    private ListHandler<SwissTimingRaceRecordDAO> getRaceTableColumnSortHandler(List<SwissTimingRaceRecordDAO> raceRecords,
-            Column<SwissTimingRaceRecordDAO, ?> nameColumn, Column<SwissTimingRaceRecordDAO, ?> trackingStartColumn) {
-        ListHandler<SwissTimingRaceRecordDAO> result = new ListHandler<SwissTimingRaceRecordDAO>(raceRecords);
-        result.setComparator(nameColumn, new Comparator<SwissTimingRaceRecordDAO>() {
+    private ListHandler<SwissTimingRaceRecordDTO> getRaceTableColumnSortHandler(List<SwissTimingRaceRecordDTO> raceRecords,
+            Column<SwissTimingRaceRecordDTO, ?> nameColumn, Column<SwissTimingRaceRecordDTO, ?> trackingStartColumn) {
+        ListHandler<SwissTimingRaceRecordDTO> result = new ListHandler<SwissTimingRaceRecordDTO>(raceRecords);
+        result.setComparator(nameColumn, new Comparator<SwissTimingRaceRecordDTO>() {
             @Override
-            public int compare(SwissTimingRaceRecordDAO o1, SwissTimingRaceRecordDAO o2) {
+            public int compare(SwissTimingRaceRecordDTO o1, SwissTimingRaceRecordDTO o2) {
                 return o1.ID.compareTo(o2.ID);
             }
         });
-        result.setComparator(trackingStartColumn, new Comparator<SwissTimingRaceRecordDAO>() {
+        result.setComparator(trackingStartColumn, new Comparator<SwissTimingRaceRecordDTO>() {
             @Override
-            public int compare(SwissTimingRaceRecordDAO o1, SwissTimingRaceRecordDAO o2) {
+            public int compare(SwissTimingRaceRecordDTO o1, SwissTimingRaceRecordDTO o2) {
                 return o1.raceStartTime == null ? -1 : o2.raceStartTime == null ? 1 : o1.raceStartTime
                         .compareTo(o2.raceStartTime);
             }
@@ -266,7 +266,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
     }
 
     private void fillConfigurations() {
-        sailingService.getPreviousSwissTimingConfigurations(new AsyncCallback<List<SwissTimingConfigurationDAO>>() {
+        sailingService.getPreviousSwissTimingConfigurations(new AsyncCallback<List<SwissTimingConfigurationDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError("Remote Procedure Call getPreviousConfigurations() - Failure: "
@@ -274,11 +274,11 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
             }
 
             @Override
-            public void onSuccess(List<SwissTimingConfigurationDAO> result) {
+            public void onSuccess(List<SwissTimingConfigurationDTO> result) {
                 while (previousConfigurationsComboBox.getItemCount() > 0) {
                     previousConfigurationsComboBox.removeItem(0);
                 }
-                for (SwissTimingConfigurationDAO stConfig : result) {
+                for (SwissTimingConfigurationDTO stConfig : result) {
                     previousConfigurations.put(stConfig.name, stConfig);
                     previousConfigurationsComboBox.addItem(stConfig.name);
                 }
@@ -294,7 +294,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         final int port = portIntegerbox.getValue();
         final boolean canSendRequests = canSendRequestsCheckbox.getValue();
         sailingService.listSwissTimingRaces(hostname, port, canSendRequests,
-                new AsyncCallback<List<SwissTimingRaceRecordDAO>>() {
+                new AsyncCallback<List<SwissTimingRaceRecordDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
                 SwissTimingEventManagementPanel.this.errorReporter.reportError("Error trying to list races: "
@@ -302,7 +302,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
             }
 
             @Override
-            public void onSuccess(final List<SwissTimingRaceRecordDAO> result) {
+            public void onSuccess(final List<SwissTimingRaceRecordDTO> result) {
                 availableSwissTimingRaces.clear();
                 if (result != null)
                     availableSwissTimingRaces.addAll(result);
@@ -325,7 +325,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
                             @Override
                             public void onSuccess(Void voidResult) {
                                 // refresh list of previous configurations
-                                SwissTimingConfigurationDAO stConfig = new SwissTimingConfigurationDAO(configName,
+                                SwissTimingConfigurationDTO stConfig = new SwissTimingConfigurationDTO(configName,
                                         hostname, port, canSendRequests);
                                 if (previousConfigurations.put(stConfig.name, stConfig) == null) {
                                     previousConfigurationsComboBox.addItem(stConfig.name);
@@ -339,7 +339,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
     private void trackSelectedRaces(boolean trackWind, boolean correctWindByDeclination) {
         String hostname = hostnameTextbox.getValue();
         int port = portIntegerbox.getValue();
-        for (final SwissTimingRaceRecordDAO rr : raceList.getList()) {
+        for (final SwissTimingRaceRecordDTO rr : raceList.getList()) {
             if (raceTable.getSelectionModel().isSelected(rr)) {
                 sailingService.trackWithSwissTiming(rr, hostname, port, /* TODO canSendRequests */false, trackWind,
                         correctWindByDeclination, new AsyncCallback<Void>() {
@@ -360,7 +360,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
 
     private void updatePanelFromSelectedStoredConfiguration() {
         if (previousConfigurationsComboBox.getSelectedIndex() >= 0) {
-            SwissTimingConfigurationDAO stConfig = previousConfigurations.get(previousConfigurationsComboBox
+            SwissTimingConfigurationDTO stConfig = previousConfigurations.get(previousConfigurationsComboBox
                     .getItemText(previousConfigurationsComboBox.getSelectedIndex()));
             if (stConfig != null) {
                 hostnameTextbox.setValue(stConfig.hostname);
@@ -371,7 +371,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
     }
 
     @Override
-    public void fillEvents(List<EventDAO> result) {
+    public void fillEvents(List<EventDTO> result) {
         trackedEventsComposite.fillEvents(result);
     }
     
@@ -379,7 +379,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         List<String> wordsToFilter = Arrays.asList(text.split(" "));
         raceList.getList().clear();
         if (text != null && !text.isEmpty()) {
-            for (SwissTimingRaceRecordDAO triple : availableSwissTimingRaces) {
+            for (SwissTimingRaceRecordDTO triple : availableSwissTimingRaces) {
                 boolean failed = textContainingStringsToCheck(wordsToFilter, triple.ID);
                 if (!failed) {
                     raceList.getList().add(triple);

@@ -14,29 +14,29 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.LeaderboardDAO;
+import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 
 
-public abstract class LeaderboardDialog extends DataEntryDialog<LeaderboardDAO> {
+public abstract class LeaderboardDialog extends DataEntryDialog<LeaderboardDTO> {
     protected final StringMessages stringConstants;
     protected TextBox entryField;
-    protected LeaderboardDAO leaderboard;
+    protected LeaderboardDTO leaderboard;
     
     protected LongBox[] discardThresholdBoxes;
     protected static final int MAX_NUMBER_OF_DISCARDED_RESULTS = 4;
 
-    protected static class LeaderboardParameterValidator implements Validator<LeaderboardDAO> {
+    protected static class LeaderboardParameterValidator implements Validator<LeaderboardDTO> {
         protected final StringMessages stringConstants;
-        protected final Collection<LeaderboardDAO> existingLeaderboards;
+        protected final Collection<LeaderboardDTO> existingLeaderboards;
         
-        public LeaderboardParameterValidator(StringMessages stringConstants, Collection<LeaderboardDAO> existingLeaderboards){
+        public LeaderboardParameterValidator(StringMessages stringConstants, Collection<LeaderboardDTO> existingLeaderboards){
             super();
             this.stringConstants = stringConstants;
             this.existingLeaderboards = existingLeaderboards;
         }
 
         @Override
-        public String getErrorMessage(LeaderboardDAO leaderboardToValidate) {
+        public String getErrorMessage(LeaderboardDTO leaderboardToValidate) {
             String errorMessage;
             boolean nonEmpty = leaderboardToValidate.name != null && leaderboardToValidate.name.length() > 0;
 
@@ -50,7 +50,7 @@ public abstract class LeaderboardDialog extends DataEntryDialog<LeaderboardDAO> 
             }
             
             boolean unique = true;
-            for (LeaderboardDAO dao : existingLeaderboards) {
+            for (LeaderboardDTO dao : existingLeaderboards) {
                 if(dao.name.equals(leaderboardToValidate.name)){
                     unique = false;
                 }
@@ -69,8 +69,8 @@ public abstract class LeaderboardDialog extends DataEntryDialog<LeaderboardDAO> 
         }
     }
     
-    public LeaderboardDialog(LeaderboardDAO leaderboardDAO,  StringMessages stringConstants,
-            ErrorReporter errorReporter, LeaderboardParameterValidator validator,  AsyncCallback<LeaderboardDAO> callback) {
+    public LeaderboardDialog(LeaderboardDTO leaderboardDAO,  StringMessages stringConstants,
+            ErrorReporter errorReporter, LeaderboardParameterValidator validator,  AsyncCallback<LeaderboardDTO> callback) {
         super(stringConstants.leaderboardName(), stringConstants.leaderboardName(), stringConstants.ok(),
                 stringConstants.cancel(), validator, callback);
         this.stringConstants = stringConstants;
@@ -78,7 +78,7 @@ public abstract class LeaderboardDialog extends DataEntryDialog<LeaderboardDAO> 
     }
     
     @Override
-    protected LeaderboardDAO getResult() {
+    protected LeaderboardDTO getResult() {
         List<Integer> discardThresholds = new ArrayList<Integer>();
         for (int i = 0; i < discardThresholdBoxes.length; i++) {
             if (discardThresholdBoxes[i].getValue() != null

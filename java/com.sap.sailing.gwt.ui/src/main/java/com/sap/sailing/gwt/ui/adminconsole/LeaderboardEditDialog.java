@@ -6,12 +6,12 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.LongBox;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.LeaderboardDAO;
+import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 
 public class LeaderboardEditDialog extends LeaderboardDialog {
     
-    public LeaderboardEditDialog(Collection<LeaderboardDAO> otherExistingLeaderboards, LeaderboardDAO leaderboard, StringMessages stringConstants,
-            ErrorReporter errorReporter, AsyncCallback<LeaderboardDAO> callback) {
+    public LeaderboardEditDialog(Collection<LeaderboardDTO> otherExistingLeaderboards, LeaderboardDTO leaderboard, StringMessages stringConstants,
+            ErrorReporter errorReporter, AsyncCallback<LeaderboardDTO> callback) {
         super(leaderboard, stringConstants, errorReporter, new LeaderboardDialog.LeaderboardParameterValidator(
                 stringConstants, otherExistingLeaderboards), callback);
         
