@@ -39,7 +39,9 @@ public class EventDTO extends NamedDTO implements IsSerializable {
                         first = false;
                     } else {
                         if (previousOrder.getFinishPlace().equals(order.getStartPlace())) {
-                            b.append(" -> " + order.getStartPlace().getCountryCode() + ", " + order.getStartPlace().getName());
+                            if (!order.startEqualsFinish()) {
+                                b.append(" -> " + order.finishToString());
+                            }
                         } else {
                             b.append("; " + order.toString());
                         }
