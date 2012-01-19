@@ -10,12 +10,14 @@ public class RacePlaceOrderImpl implements RacePlaceOrder, Serializable {
     
     private Placemark start;
     private Placemark finish;
+    private boolean startEqualsFinish;
     
     RacePlaceOrderImpl() {}
     
     public RacePlaceOrderImpl(Placemark startPlace, Placemark finishPlace) {
         this.start = startPlace;
         this.finish = finishPlace;
+        startEqualsFinish = this.start.equals(this.finish);
     }
 
     @Override
@@ -27,14 +29,29 @@ public class RacePlaceOrderImpl implements RacePlaceOrder, Serializable {
     public Placemark getFinishPlace() {
         return finish;
     }
+
+    @Override
+    public String startToString() {
+        return finish.getCountryCode() + ", " + finish.getName();
+    }
+
+    @Override
+    public String finishToString() {
+        return finish.getCountryCode() + ", " + finish.getName();
+    }
+
+    @Override
+    public boolean startEqualsFinish() {
+        return startEqualsFinish;
+    }
     
     @Override
     public String toString() {
         String result = "";
         if (start != null) {
-            result += start.getCountryCode() + ", " + start.getName();
+            result += startToString();
             if (!start.equals(finish)) {
-                result += " -> " + finish.getCountryCode() + ", " + finish.getName();
+                result += " -> " + finishToString();
             }
         }
         return result;
@@ -70,5 +87,4 @@ public class RacePlaceOrderImpl implements RacePlaceOrder, Serializable {
             return false;
         return true;
     }
-
 }
