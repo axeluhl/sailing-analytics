@@ -14,7 +14,7 @@ import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.EventDisplayer;
 import com.sap.sailing.gwt.ui.client.EventRefresher;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
-import com.sap.sailing.gwt.ui.shared.EventDAO;
+import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.server.api.DefaultLeaderboardName;
 
 public class AdminConsole extends AbstractEntryPoint implements EventRefresher {
@@ -75,9 +75,9 @@ public class AdminConsole extends AbstractEntryPoint implements EventRefresher {
 
     @Override
     public void fillEvents() {
-        sailingService.listEvents(false, new AsyncCallback<List<EventDAO>>() {
+        sailingService.listEvents(false, new AsyncCallback<List<EventDTO>>() {
             @Override
-            public void onSuccess(List<EventDAO> result) {
+            public void onSuccess(List<EventDTO> result) {
                 for (EventDisplayer eventDisplayer : eventDisplayers) {
                     eventDisplayer.fillEvents(result);
                 }

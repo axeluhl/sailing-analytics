@@ -13,7 +13,7 @@ import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.impl.Util.Pair;
-import com.sap.sailing.gwt.ui.shared.GPSFixDAO;
+import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 
 public class RaceMapResources {
     /**
@@ -141,7 +141,7 @@ public class RaceMapResources {
         maneuverIconsForTypeAndTargetTack.put(new Pair<ManeuverType, Tack>(ManeuverType.PENALTY_CIRCLE, Tack.PORT), penaltyCircleToPortIcon);
     }
     
-    public ImageTransformer getBoatImageTransformer(GPSFixDAO boatFix, boolean highlighted) {
+    public ImageTransformer getBoatImageTransformer(GPSFixDTO boatFix, boolean highlighted) {
         if (boatFix.tack == Tack.PORT) {
             if (LegType.DOWNWIND == boatFix.legType) {
                 if (highlighted) {
@@ -173,11 +173,11 @@ public class RaceMapResources {
         }
     }
 
-    public String getBoatImageURL(GPSFixDAO boatFix, boolean highlighted) {
+    public String getBoatImageURL(GPSFixDTO boatFix, boolean highlighted) {
         return getBoatImageURL(getBoatImageTransformer(boatFix, highlighted), boatFix);
     }
 
-    public String getBoatImageURL(ImageTransformer boatImageTransformer, GPSFixDAO boatFix) {
+    public String getBoatImageURL(ImageTransformer boatImageTransformer, GPSFixDTO boatFix) {
         double realBoatSizeScaleFactor = getRealBoatSizeScaleFactor();
         return boatImageTransformer.getTransformedImageURL(boatFix.speedWithBearing.bearingInDegrees, realBoatSizeScaleFactor);
     }
@@ -205,7 +205,7 @@ public class RaceMapResources {
         return realBoatSizeScaleFactor;
     }
 
-    public Icon getBoatImageIcon(GPSFixDAO boatFix, boolean highlighted) {
+    public Icon getBoatImageIcon(GPSFixDTO boatFix, boolean highlighted) {
         ImageTransformer boatImageTransformer = getBoatImageTransformer(boatFix, highlighted);
         Icon icon = Icon.newInstance(getBoatImageURL(boatImageTransformer, boatFix));
         icon.setIconAnchor(boatImageTransformer.getAnchor(getRealBoatSizeScaleFactor()));

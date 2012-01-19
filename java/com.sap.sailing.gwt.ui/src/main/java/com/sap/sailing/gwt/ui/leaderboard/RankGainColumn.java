@@ -5,16 +5,16 @@ import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.text.shared.SafeHtmlRenderer;
 import com.google.gwt.user.cellview.client.CellTable;
-import com.sap.sailing.gwt.ui.shared.LeaderboardRowDAO;
+import com.sap.sailing.gwt.ui.shared.LeaderboardRowDTO;
 
 public class RankGainColumn extends LegDetailColumn<Integer, Integer> {
-    public RankGainColumn(String title, LegDetailField<Integer> field, CellTable<LeaderboardRowDAO> leaderboardTable,
+    public RankGainColumn(String title, LegDetailField<Integer> field, CellTable<LeaderboardRowDTO> leaderboardTable,
             String headerStyle, String columnStyle) {
         super(title, null, field, new RankGainCell(), leaderboardTable, headerStyle, columnStyle);
     }
 
     @Override
-    public Integer getValue(LeaderboardRowDAO row) {
+    public Integer getValue(LeaderboardRowDTO row) {
         return getField().get(row);
     }
 

@@ -4,12 +4,12 @@ import java.util.List;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
-public class WindInfoDAO implements IsSerializable {
-    public List<WindInfoForRaceDAO> windInfoForRaces;
+public class WindInfoDTO implements IsSerializable {
+    public List<WindInfoForRaceDTO> windInfoForRaces;
     
-    public WindInfoDAO() {}
+    public WindInfoDTO() {}
 
-    public WindInfoDAO(List<WindInfoForRaceDAO> windInfoForRaces) {
+    public WindInfoDTO(List<WindInfoForRaceDTO> windInfoForRaces) {
         super();
         this.windInfoForRaces = windInfoForRaces;
     }

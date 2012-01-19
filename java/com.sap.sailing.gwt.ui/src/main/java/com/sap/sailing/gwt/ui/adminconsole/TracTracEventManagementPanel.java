@@ -39,9 +39,9 @@ import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.EventRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.EventDAO;
-import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDAO;
-import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDAO;
+import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDTO;
+import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDTO;
 
 /**
  * Allows the user to start and stop tracking of events, regattas and races using the TracTrac connector. In particular,
@@ -66,18 +66,18 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
     private final TextBox hostnameTextbox;
     private final TextBox eventNameTextbox;
     private final TextBox filterEventsTextbox;
-    private final ListDataProvider<TracTracRaceRecordDAO> raceList;
-    private final CellTable<TracTracRaceRecordDAO> raceTable;
-    private final Map<String, TracTracConfigurationDAO> previousConfigurations;
+    private final ListDataProvider<TracTracRaceRecordDTO> raceList;
+    private final CellTable<TracTracRaceRecordDTO> raceTable;
+    private final Map<String, TracTracConfigurationDTO> previousConfigurations;
     private final ListBox previousConfigurationsComboBox;
     private final Grid grid;
-    private final List<TracTracRaceRecordDAO> availableTracTracRaces;
+    private final List<TracTracRaceRecordDTO> availableTracTracRaces;
     
     public TracTracEventManagementPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
             EventRefresher eventRefresher, StringMessages stringConstants) {
         super(sailingService, eventRefresher, errorReporter, stringConstants);
         this.errorReporter = errorReporter;
-        availableTracTracRaces = new ArrayList<TracTracRaceRecordDAO>();
+        availableTracTracRaces = new ArrayList<TracTracRaceRecordDTO>();
 
         VerticalPanel mainPanel = new VerticalPanel();
         this.setWidget(mainPanel);
@@ -100,7 +100,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         Label lblPredefined = new Label(stringConstants.historyOfConnections());
         grid.setWidget(0, 0, lblPredefined);
         
-        previousConfigurations = new HashMap<String, TracTracConfigurationDAO>();
+        previousConfigurations = new HashMap<String, TracTracConfigurationDTO>();
         previousConfigurationsComboBox = new ListBox();
         grid.setWidget(0, 1, previousConfigurationsComboBox);
         previousConfigurationsComboBox.addChangeHandler(new ChangeHandler() {
@@ -229,21 +229,21 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         storedURIBox.setTitle(stringConstants.leaveEmptyForDefault());
         horizontalPanel.add(storedURIBox);
         
-        TextColumn<TracTracRaceRecordDAO> eventNameColumn = new TextColumn<TracTracRaceRecordDAO>() {
+        TextColumn<TracTracRaceRecordDTO> eventNameColumn = new TextColumn<TracTracRaceRecordDTO>() {
             @Override
-            public String getValue(TracTracRaceRecordDAO object) {
+            public String getValue(TracTracRaceRecordDTO object) {
                 return object.eventName;
             }
         };
-        TextColumn<TracTracRaceRecordDAO> raceNameColumn = new TextColumn<TracTracRaceRecordDAO>() {
+        TextColumn<TracTracRaceRecordDTO> raceNameColumn = new TextColumn<TracTracRaceRecordDTO>() {
             @Override
-            public String getValue(TracTracRaceRecordDAO object) {
+            public String getValue(TracTracRaceRecordDTO object) {
                 return object.name;
             }
         };
-        TextColumn<TracTracRaceRecordDAO> raceStartTrackingColumn = new TextColumn<TracTracRaceRecordDAO>() {
+        TextColumn<TracTracRaceRecordDTO> raceStartTrackingColumn = new TextColumn<TracTracRaceRecordDTO>() {
             @Override
-            public String getValue(TracTracRaceRecordDAO object) {
+            public String getValue(TracTracRaceRecordDTO object) {
                 return object.trackingStartTime==null?"":dateFormatter.render(object.trackingStartTime) + " " + timeFormatter.render(object.trackingStartTime);
             }
         };
@@ -298,17 +298,17 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         raceStartTrackingColumn.setSortable(true);
         
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
-        raceTable = new CellTable<TracTracRaceRecordDAO>(/* pageSize */ 200, tableRes);
+        raceTable = new CellTable<TracTracRaceRecordDTO>(/* pageSize */ 200, tableRes);
         raceTable.addColumn(eventNameColumn, stringConstants.event());
         raceTable.addColumn(raceNameColumn, stringConstants.race());
         raceTable.addColumn(raceStartTrackingColumn, stringConstants.startTime());
         raceTable.setWidth("300px");
-        raceTable.setSelectionModel(new MultiSelectionModel<TracTracRaceRecordDAO>() {});
+        raceTable.setSelectionModel(new MultiSelectionModel<TracTracRaceRecordDTO>() {});
 
         racesHorizontalPanel.add(raceTable);
         racesHorizontalPanel.add(trackPanel);
 
-        raceList = new ListDataProvider<TracTracRaceRecordDAO>();
+        raceList = new ListDataProvider<TracTracRaceRecordDTO>();
         raceList.addDataDisplay(raceTable);
         Handler columnSortHandler = getRaceTableColumnSortHandler(raceList.getList(), raceNameColumn, raceStartTrackingColumn);
         raceTable.addColumnSortHandler(columnSortHandler);
@@ -345,18 +345,18 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         updateJsonUrl();
     }
 
-    private ListHandler<TracTracRaceRecordDAO> getRaceTableColumnSortHandler(List<TracTracRaceRecordDAO> raceRecords,
-            Column<TracTracRaceRecordDAO, ?> nameColumn, Column<TracTracRaceRecordDAO, ?> trackingStartColumn) {
-        ListHandler<TracTracRaceRecordDAO> result = new ListHandler<TracTracRaceRecordDAO>(raceRecords);
-        result.setComparator(nameColumn, new Comparator<TracTracRaceRecordDAO>() {
+    private ListHandler<TracTracRaceRecordDTO> getRaceTableColumnSortHandler(List<TracTracRaceRecordDTO> raceRecords,
+            Column<TracTracRaceRecordDTO, ?> nameColumn, Column<TracTracRaceRecordDTO, ?> trackingStartColumn) {
+        ListHandler<TracTracRaceRecordDTO> result = new ListHandler<TracTracRaceRecordDTO>(raceRecords);
+        result.setComparator(nameColumn, new Comparator<TracTracRaceRecordDTO>() {
             @Override
-            public int compare(TracTracRaceRecordDAO o1, TracTracRaceRecordDAO o2) {
+            public int compare(TracTracRaceRecordDTO o1, TracTracRaceRecordDTO o2) {
                 return o1.name.compareTo(o2.name);
             }
         });
-        result.setComparator(trackingStartColumn, new Comparator<TracTracRaceRecordDAO>() {
+        result.setComparator(trackingStartColumn, new Comparator<TracTracRaceRecordDTO>() {
             @Override
-            public int compare(TracTracRaceRecordDAO o1, TracTracRaceRecordDAO o2) {
+            public int compare(TracTracRaceRecordDTO o1, TracTracRaceRecordDTO o2) {
                 return o1.trackingStartTime == null ? -1 : o2.trackingStartTime == null ? 1 : o1.trackingStartTime
                         .compareTo(o2.trackingStartTime);
             }
@@ -382,7 +382,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
     }
 
     private void fillConfigurations() {
-        sailingService.getPreviousTracTracConfigurations(new AsyncCallback<List<TracTracConfigurationDAO>>() {
+        sailingService.getPreviousTracTracConfigurations(new AsyncCallback<List<TracTracConfigurationDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError("Remote Procedure Call getPreviousConfigurations() - Failure: "
@@ -390,11 +390,11 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
             }
 
             @Override
-            public void onSuccess(List<TracTracConfigurationDAO> result) {
+            public void onSuccess(List<TracTracConfigurationDTO> result) {
                 while (previousConfigurationsComboBox.getItemCount() > 0) {
                     previousConfigurationsComboBox.removeItem(0);
                 }
-                for (TracTracConfigurationDAO ttConfig : result) {
+                for (TracTracConfigurationDTO ttConfig : result) {
                     previousConfigurations.put(ttConfig.name, ttConfig);
                     previousConfigurationsComboBox.addItem(ttConfig.name);
                 }
@@ -409,7 +409,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         final String jsonURL = jsonURLBox.getValue();
         final String liveDataURI = liveURIBox.getValue();
         final String storedDataURI = storedURIBox.getValue();
-        sailingService.listTracTracRacesInEvent(jsonURL, new AsyncCallback<Pair<String, List<TracTracRaceRecordDAO>>>() {
+        sailingService.listTracTracRacesInEvent(jsonURL, new AsyncCallback<Pair<String, List<TracTracRaceRecordDTO>>>() {
             @Override
             public void onFailure(Throwable caught) {
                 TracTracEventManagementPanel.this.errorReporter.reportError("Error trying to list races: "
@@ -417,7 +417,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
             }
 
             @Override
-            public void onSuccess(final Pair<String, List<TracTracRaceRecordDAO>> result) {
+            public void onSuccess(final Pair<String, List<TracTracRaceRecordDTO>> result) {
                 availableTracTracRaces.clear();
                 if (result.getB() != null) {
                     availableTracTracRaces.addAll(result.getB());
@@ -437,7 +437,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
                             @Override
                             public void onSuccess(Void voidResult) {
                                 // refresh list of previous configurations
-                                TracTracConfigurationDAO ttConfig = new TracTracConfigurationDAO(result.getA(),
+                                TracTracConfigurationDTO ttConfig = new TracTracConfigurationDTO(result.getA(),
                                         jsonURL, liveDataURI, storedDataURI);
                                 if (previousConfigurations.put(ttConfig.name, ttConfig) == null) {
                                     previousConfigurationsComboBox.addItem(ttConfig.name);
@@ -452,7 +452,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
     private void trackSelectedRaces(boolean trackWind, boolean correctWindByDeclination) {
         String liveURI = liveURIBox.getValue();
         String storedURI = storedURIBox.getValue();
-        for (final TracTracRaceRecordDAO rr : raceList.getList()) {
+        for (final TracTracRaceRecordDTO rr : raceList.getList()) {
             if (raceTable.getSelectionModel().isSelected(rr)) {
                 sailingService.track(rr, liveURI, storedURI, trackWind, correctWindByDeclination, new AsyncCallback<Void>() {
                     @Override
@@ -471,7 +471,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
     }
 
     private void updatePanelFromSelectedStoredConfiguration() {
-        TracTracConfigurationDAO ttConfig = previousConfigurations.get(previousConfigurationsComboBox
+        TracTracConfigurationDTO ttConfig = previousConfigurations.get(previousConfigurationsComboBox
                 .getItemText(previousConfigurationsComboBox.getSelectedIndex()));
         if (ttConfig != null) {
             hostnameTextbox.setValue("");
@@ -485,7 +485,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
     }
 
     @Override
-    public void fillEvents(List<EventDAO> result) {
+    public void fillEvents(List<EventDTO> result) {
         trackedEventsComposite.fillEvents(result);
     }
     
@@ -493,7 +493,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         List<String> wordsToFilter = Arrays.asList(text.split(" "));
         raceList.getList().clear();
         if (text != null && !text.isEmpty()) {
-            for (TracTracRaceRecordDAO triple : availableTracTracRaces) {
+            for (TracTracRaceRecordDTO triple : availableTracTracRaces) {
                 boolean failed = textContainingStringsToCheck(wordsToFilter, triple.eventName, triple.name);
                 if (!failed) {
                     raceList.getList().add(triple);

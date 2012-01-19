@@ -2,16 +2,16 @@ package com.sap.sailing.gwt.ui.shared;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
-public class CompetitorDAO extends NamedDAO implements IsSerializable {
+public class CompetitorDTO extends NamedDTO implements IsSerializable {
     public String twoLetterIsoCountryCode;
     public String threeLetterIocCountryCode;
     public String countryName;
     public String sailID;
     public String id;
     
-    public CompetitorDAO() {}
+    public CompetitorDTO() {}
 
-    public CompetitorDAO(String name, String twoLetterIsoCountryCode, String threeLetterIocCountryCode, String countryName, String sailID, String id) {
+    public CompetitorDTO(String name, String twoLetterIsoCountryCode, String threeLetterIocCountryCode, String countryName, String sailID, String id) {
         super(name);
         this.twoLetterIsoCountryCode = twoLetterIsoCountryCode;
         this.threeLetterIocCountryCode = threeLetterIocCountryCode;
@@ -36,7 +36,7 @@ public class CompetitorDAO extends NamedDAO implements IsSerializable {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        CompetitorDAO other = (CompetitorDAO) obj;
+        CompetitorDTO other = (CompetitorDTO) obj;
         if (id == null) {
             if (other.id != null)
                 return false;

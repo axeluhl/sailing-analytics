@@ -10,21 +10,21 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.impl.Util.Pair;
-import com.sap.sailing.gwt.ui.shared.CompetitorDAO;
-import com.sap.sailing.gwt.ui.shared.CompetitorInRaceDAO;
-import com.sap.sailing.gwt.ui.shared.CompetitorsAndTimePointsDAO;
-import com.sap.sailing.gwt.ui.shared.EventDAO;
-import com.sap.sailing.gwt.ui.shared.GPSFixDAO;
-import com.sap.sailing.gwt.ui.shared.LeaderboardDAO;
-import com.sap.sailing.gwt.ui.shared.ManeuverDAO;
-import com.sap.sailing.gwt.ui.shared.MarkDAO;
-import com.sap.sailing.gwt.ui.shared.QuickRankDAO;
-import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDAO;
-import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDAO;
-import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDAO;
-import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDAO;
-import com.sap.sailing.gwt.ui.shared.WindDAO;
-import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDAO;
+import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
+import com.sap.sailing.gwt.ui.shared.CompetitorInRaceDTO;
+import com.sap.sailing.gwt.ui.shared.CompetitorsAndTimePointsDTO;
+import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
+import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
+import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
+import com.sap.sailing.gwt.ui.shared.MarkDTO;
+import com.sap.sailing.gwt.ui.shared.QuickRankDTO;
+import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDTO;
+import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDTO;
+import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDTO;
+import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDTO;
+import com.sap.sailing.gwt.ui.shared.WindDTO;
+import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.server.api.DetailType;
 import com.sap.sailing.server.api.EventAndRaceIdentifier;
 import com.sap.sailing.server.api.EventIdentifier;
@@ -36,13 +36,13 @@ import com.sap.sailing.server.api.RaceIdentifier;
  */
 @RemoteServiceRelativePath("sailing")
 public interface SailingService extends RemoteService {
-    List<TracTracConfigurationDAO> getPreviousTracTracConfigurations() throws Exception;
+    List<TracTracConfigurationDTO> getPreviousTracTracConfigurations() throws Exception;
     
-    List<EventDAO> listEvents(boolean withRacePlaces);
+    List<EventDTO> listEvents(boolean withRacePlaces);
 
-    Pair<String, List<TracTracRaceRecordDAO>> listTracTracRacesInEvent(String eventJsonURL) throws Exception;
+    Pair<String, List<TracTracRaceRecordDTO>> listTracTracRacesInEvent(String eventJsonURL) throws Exception;
 
-    void track(TracTracRaceRecordDAO rr, String liveURI, String storedURI, boolean trackWind, boolean correctWindByDeclination) throws Exception;
+    void track(TracTracRaceRecordDTO rr, String liveURI, String storedURI, boolean trackWind, boolean correctWindByDeclination) throws Exception;
 
     void storeTracTracConfiguration(String name, String jsonURL, String liveDataURI, String storedDataURI) throws Exception;
 
@@ -52,37 +52,37 @@ public interface SailingService extends RemoteService {
     
     void removeAndUntrackRace(EventAndRaceIdentifier eventAndRaceidentifier) throws Exception;
 
-    WindInfoForRaceDAO getWindInfo(RaceIdentifier raceIdentifier, Date from, Date to, WindSource[] windSources);
+    WindInfoForRaceDTO getWindInfo(RaceIdentifier raceIdentifier, Date from, Date to, WindSource[] windSources);
 
-    void setWind(RaceIdentifier raceIdentifier, WindDAO wind);
+    void setWind(RaceIdentifier raceIdentifier, WindDTO wind);
 
-    Map<CompetitorDAO, List<GPSFixDAO>> getBoatPositions(RaceIdentifier raceIdentifier, Map<CompetitorDAO, Date> from,
-            Map<CompetitorDAO, Date> to, boolean extrapolate) throws NoWindException;
+    Map<CompetitorDTO, List<GPSFixDTO>> getBoatPositions(RaceIdentifier raceIdentifier, Map<CompetitorDTO, Date> from,
+            Map<CompetitorDTO, Date> to, boolean extrapolate) throws NoWindException;
 
-    List<MarkDAO> getMarkPositions(RaceIdentifier raceIdentifier, Date date);
+    List<MarkDTO> getMarkPositions(RaceIdentifier raceIdentifier, Date date);
 
-    List<QuickRankDAO> getQuickRanks(RaceIdentifier raceIdentifier, Date date) throws NoWindException;
+    List<QuickRankDTO> getQuickRanks(RaceIdentifier raceIdentifier, Date date) throws NoWindException;
 
-    WindInfoForRaceDAO getWindInfo(RaceIdentifier raceIdentifier, Date from, long millisecondsStepWidth,
+    WindInfoForRaceDTO getWindInfo(RaceIdentifier raceIdentifier, Date from, long millisecondsStepWidth,
             int numberOfFixes, double latDeg, double lngDeg, Collection<String> windSources) throws NoWindException;
 
     void setWindSource(RaceIdentifier raceIdentifier, String windSourceName, boolean raceIsKnownToStartUpwind);
 
-    void removeWind(RaceIdentifier raceIdentifier, WindDAO windDAO);
+    void removeWind(RaceIdentifier raceIdentifier, WindDTO windDAO);
 
     public List<String> getLeaderboardNames() throws Exception;
     
-    LeaderboardDAO getLeaderboardByName(String leaderboardName, Date date,
+    LeaderboardDTO getLeaderboardByName(String leaderboardName, Date date,
             Collection<String> namesOfRacesForWhichToLoadLegDetails)
             throws NoWindException;
 
-    List<LeaderboardDAO> getLeaderboards();
+    List<LeaderboardDTO> getLeaderboards();
     
-    List<LeaderboardDAO> getLeaderboardsByEvent(EventIdentifier eventIdentifier);
+    List<LeaderboardDTO> getLeaderboardsByEvent(EventIdentifier eventIdentifier);
     
     void updateLeaderboard(String leaderboardName, String newLeaderboardName, int[] newDiscardingThreasholds);
 
-    LeaderboardDAO createLeaderboard(String leaderboardName, int[] discardThresholds);
+    LeaderboardDTO createLeaderboard(String leaderboardName, int[] discardThresholds);
 
     void removeLeaderboard(String leaderboardName);
 
@@ -120,13 +120,13 @@ public interface SailingService extends RemoteService {
     
     void updateIsMedalRace(String leaderboardName, String columnName, boolean isMedalRace);
 
-    List<SwissTimingConfigurationDAO> getPreviousSwissTimingConfigurations();
+    List<SwissTimingConfigurationDTO> getPreviousSwissTimingConfigurations();
 
-    List<SwissTimingRaceRecordDAO> listSwissTimingRaces(String hostname, int port, boolean canSendRequests) throws Exception;
+    List<SwissTimingRaceRecordDTO> listSwissTimingRaces(String hostname, int port, boolean canSendRequests) throws Exception;
 
     void storeSwissTimingConfiguration(String configName, String hostname, int port, boolean canSendRequests);
 
-    void trackWithSwissTiming(SwissTimingRaceRecordDAO rr, String hostname, int port, boolean canSendRequests,
+    void trackWithSwissTiming(SwissTimingRaceRecordDTO rr, String hostname, int port, boolean canSendRequests,
             boolean trackWind, boolean correctWindByDeclination) throws Exception;
     
     void sendSwissTimingDummyRace(String racMessage, String stlMesssage, String ccgMessage) throws IllegalArgumentException;
@@ -135,14 +135,14 @@ public interface SailingService extends RemoteService {
     
     String[] getCountryCodes();
     
-    CompetitorInRaceDAO getCompetitorRaceData(RaceIdentifier race,
-            CompetitorsAndTimePointsDAO competitorsAndTimePointsDAO, DetailType dataType) throws NoWindException;
+    CompetitorInRaceDTO getCompetitorRaceData(RaceIdentifier race,
+            CompetitorsAndTimePointsDTO competitorsAndTimePointsDAO, DetailType dataType) throws NoWindException;
 
-    CompetitorsAndTimePointsDAO getCompetitorsAndTimePoints(RaceIdentifier race, int steps);
+    CompetitorsAndTimePointsDTO getCompetitorsAndTimePoints(RaceIdentifier race, int steps);
     
-    Map<CompetitorDAO, List<GPSFixDAO>> getDouglasPoints(RaceIdentifier raceIdentifier,
-            Map<CompetitorDAO, Date> from, Map<CompetitorDAO, Date> to, double meters) throws NoWindException;
+    Map<CompetitorDTO, List<GPSFixDTO>> getDouglasPoints(RaceIdentifier raceIdentifier,
+            Map<CompetitorDTO, Date> from, Map<CompetitorDTO, Date> to, double meters) throws NoWindException;
 
-    Map<CompetitorDAO, List<ManeuverDAO>> getManeuvers(RaceIdentifier raceIdentifier,
-            Map<CompetitorDAO, Date> from, Map<CompetitorDAO, Date> to) throws NoWindException;
+    Map<CompetitorDTO, List<ManeuverDTO>> getManeuvers(RaceIdentifier raceIdentifier,
+            Map<CompetitorDTO, Date> from, Map<CompetitorDTO, Date> to) throws NoWindException;
 }

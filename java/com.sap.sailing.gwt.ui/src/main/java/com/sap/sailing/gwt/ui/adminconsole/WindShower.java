@@ -1,10 +1,10 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import com.sap.sailing.gwt.ui.shared.EventDAO;
-import com.sap.sailing.gwt.ui.shared.RaceDAO;
+import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.ui.shared.RaceDTO;
 
 public interface WindShower {
 
-    void showWind(EventDAO event, RaceDAO race);
+    void showWind(EventDTO event, RaceDTO race);
 
 }

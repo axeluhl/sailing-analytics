@@ -5,8 +5,8 @@ import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTable;
-import com.sap.sailing.gwt.ui.shared.LeaderboardDAO;
-import com.sap.sailing.gwt.ui.shared.LeaderboardRowDAO;
+import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
+import com.sap.sailing.gwt.ui.shared.LeaderboardRowDTO;
 
 public class FormattedDoubleLegDetailColumn extends LegDetailColumn<Double, String> implements HasStringAndDoubleValue {
     private final NumberFormat formatter;
@@ -14,7 +14,7 @@ public class FormattedDoubleLegDetailColumn extends LegDetailColumn<Double, Stri
 
     public FormattedDoubleLegDetailColumn(String title, String unit,
             com.sap.sailing.gwt.ui.leaderboard.LegDetailColumn.LegDetailField<Double> field, int decimals,
-            CellTable<LeaderboardRowDAO> leaderboardTable, String headerStyle, String columnStyle) {
+            CellTable<LeaderboardRowDTO> leaderboardTable, String headerStyle, String columnStyle) {
         super(title, unit, field, new TextCell(), leaderboardTable, headerStyle, columnStyle);
         StringBuilder patternBuilder = new StringBuilder("0");
         if (decimals > 0) {
@@ -32,7 +32,7 @@ public class FormattedDoubleLegDetailColumn extends LegDetailColumn<Double, Stri
     }
 
     @Override
-    protected void updateMinMax(LeaderboardDAO leaderboard) {
+    protected void updateMinMax(LeaderboardDTO leaderboard) {
         getMinMaxRenderer().updateMinMax(leaderboard.rows.values());
     }
 
@@ -43,10 +43,10 @@ public class FormattedDoubleLegDetailColumn extends LegDetailColumn<Double, Stri
     /**
      * Computes the string representation of the value to be displayed in the table. Note that it's not the resulting
      * string used for comparisons with the {@link #getComparator() comparator} but the sortable value extracted using
-     * {@link #getFieldValue(LeaderboardRowDAO)}.
+     * {@link #getFieldValue(LeaderboardRowDTO)}.
      */
     @Override
-    public String getValue(LeaderboardRowDAO row) {
+    public String getValue(LeaderboardRowDTO row) {
         Double fieldValue = getFieldValue(row);
         String result = "";
         if (fieldValue != null) {
@@ -56,27 +56,27 @@ public class FormattedDoubleLegDetailColumn extends LegDetailColumn<Double, Stri
     }
     
     @Override
-    public Double getDoubleValue(LeaderboardRowDAO row) {
+    public Double getDoubleValue(LeaderboardRowDTO row) {
         return getFieldValue(row);
     }
 
     @Override
-    public void render(Context context, LeaderboardRowDAO row, SafeHtmlBuilder sb) {
+    public void render(Context context, LeaderboardRowDTO row, SafeHtmlBuilder sb) {
         getMinMaxRenderer().render(context, row, getTitle(row), sb);
     }
 
     /**
      * Computes a tool-tip text to add to the table cell's content as rendered by
-     * {@link #render(Context, LeaderboardRowDAO, SafeHtmlBuilder)}.
+     * {@link #render(Context, LeaderboardRowDTO, SafeHtmlBuilder)}.
      * 
      * @return This default implementation returns <code>null</code> for no tool tip / title
      */
-    protected String getTitle(LeaderboardRowDAO row) {
+    protected String getTitle(LeaderboardRowDTO row) {
         return null;
     }
 
     @Override
-    public String getStringValueToRender(LeaderboardRowDAO object) {
+    public String getStringValueToRender(LeaderboardRowDTO object) {
         String value = getValue(object);
         if (!value.isEmpty() & value != null) {
             return getValue(object);

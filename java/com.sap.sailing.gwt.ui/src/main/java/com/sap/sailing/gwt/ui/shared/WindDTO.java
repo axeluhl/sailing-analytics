@@ -2,7 +2,7 @@ package com.sap.sailing.gwt.ui.shared;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
-public class WindDAO implements IsSerializable {
+public class WindDTO implements IsSerializable {
     public Double trueWindSpeedInMetersPerSecond;
     public Double trueWindSpeedInKnots;
     public Double trueWindBearingDeg;
@@ -11,8 +11,8 @@ public class WindDAO implements IsSerializable {
     public Double dampenedTrueWindSpeedInKnots;
     public Double dampenedTrueWindBearingDeg;
     public Double dampenedTrueWindFromDeg;
-    public PositionDAO position;
+    public PositionDTO position;
     public Long timepoint;
     
-    public WindDAO() {}
+    public WindDTO() {}
 }

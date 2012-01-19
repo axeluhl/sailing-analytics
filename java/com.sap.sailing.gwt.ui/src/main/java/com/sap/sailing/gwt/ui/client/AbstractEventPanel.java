@@ -6,7 +6,7 @@ import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.text.client.DateTimeFormatRenderer;
 import com.google.gwt.user.client.ui.FormPanel;
-import com.sap.sailing.gwt.ui.shared.EventDAO;
+import com.sap.sailing.gwt.ui.shared.EventDTO;
 
 public abstract class AbstractEventPanel extends FormPanel implements EventDisplayer{
     protected final SailingServiceAsync sailingService;
@@ -26,7 +26,7 @@ public abstract class AbstractEventPanel extends FormPanel implements EventDispl
     }
 
     @Override
-    public abstract void fillEvents(List<EventDAO> result);
+    public abstract void fillEvents(List<EventDTO> result);
     
     /**
      * Returns if <code>wordsToFilter</code> contain a value of the <code>valuesToCheck</code>  

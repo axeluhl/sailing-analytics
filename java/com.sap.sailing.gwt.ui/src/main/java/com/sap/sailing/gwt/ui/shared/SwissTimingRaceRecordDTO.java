@@ -4,14 +4,14 @@ import java.util.Date;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
-public class SwissTimingRaceRecordDAO implements IsSerializable {
+public class SwissTimingRaceRecordDTO implements IsSerializable {
     public String ID;
     public String description;
     public Date raceStartTime;
 
-    public SwissTimingRaceRecordDAO() {}
+    public SwissTimingRaceRecordDTO() {}
     
-    public SwissTimingRaceRecordDAO(String id, String description, Date raceStartTime) {
+    public SwissTimingRaceRecordDTO(String id, String description, Date raceStartTime) {
         super();
         ID = id;
         this.description = description;

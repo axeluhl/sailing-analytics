@@ -2,13 +2,13 @@ package com.sap.sailing.gwt.ui.shared;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
-public class SpeedWithBearingDAO implements IsSerializable {
+public class SpeedWithBearingDTO implements IsSerializable {
     public double speedInKnots;
     public double bearingInDegrees;
 
-    public SpeedWithBearingDAO() {}
+    public SpeedWithBearingDTO() {}
     
-    public SpeedWithBearingDAO(double speedInKnots, double bearingInDegrees) {
+    public SpeedWithBearingDTO(double speedInKnots, double bearingInDegrees) {
         super();
         this.speedInKnots = speedInKnots;
         this.bearingInDegrees = bearingInDegrees;

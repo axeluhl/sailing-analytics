@@ -16,12 +16,12 @@ import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.TimeListener;
-import com.sap.sailing.gwt.ui.shared.EventDAO;
-import com.sap.sailing.gwt.ui.shared.PositionDAO;
-import com.sap.sailing.gwt.ui.shared.RaceDAO;
-import com.sap.sailing.gwt.ui.shared.RegattaDAO;
-import com.sap.sailing.gwt.ui.shared.WindDAO;
-import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDAO;
+import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.ui.shared.PositionDTO;
+import com.sap.sailing.gwt.ui.shared.RaceDTO;
+import com.sap.sailing.gwt.ui.shared.RegattaDTO;
+import com.sap.sailing.gwt.ui.shared.WindDTO;
+import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.server.api.EventNameAndRaceName;
 
 /**
@@ -31,12 +31,12 @@ import com.sap.sailing.server.api.EventNameAndRaceName;
  *
  */
 public class SmallWindHistoryPanel extends FormPanel implements TimeListener, RaceSelectionChangeListener {
-    private final PositionDAO position;
+    private final PositionDTO position;
     private final WindIndicator[] windIndicators;
     private final Label selectedWindSourceLabel;
     private Date date;
-    private EventDAO event;
-    private RaceDAO race;
+    private EventDTO event;
+    private RaceDTO race;
     private final SailingServiceAsync sailingService;
     private final long millisecondStepsPerLabel;
     private final ErrorReporter errorReporter;
@@ -51,7 +51,7 @@ public class SmallWindHistoryPanel extends FormPanel implements TimeListener, Ra
      * @param windTrack
      *            the wind track to visualize using this panel
      */
-    public SmallWindHistoryPanel(SailingServiceAsync sailingService, PositionDAO position,
+    public SmallWindHistoryPanel(SailingServiceAsync sailingService, PositionDTO position,
             int numberOfTimepoints, long millisecondStepsPerLabel, StringMessages stringConstants, ErrorReporter errorReporter) {
         this.sailingService = sailingService;
         this.position = position;
@@ -78,9 +78,9 @@ public class SmallWindHistoryPanel extends FormPanel implements TimeListener, Ra
             if (event != null && race != null) {
                 sailingService.getWindInfo(new EventNameAndRaceName(event.name, race.name), from, millisecondStepsPerLabel,
                         windIndicators.length, position.latDeg, position.lngDeg, /* all sources */ null,
-                        new AsyncCallback<WindInfoForRaceDAO>() {
+                        new AsyncCallback<WindInfoForRaceDTO>() {
                             @Override
-                            public void onSuccess(WindInfoForRaceDAO result) {
+                            public void onSuccess(WindInfoForRaceDTO result) {
                                 // expecting to find windIndicators.length fixes
                                 if (result == null || result.windTrackInfoByWindSource.get(result.selectedWindSource).windFixes
                                         .size() != windIndicators.length) {
@@ -88,7 +88,7 @@ public class SmallWindHistoryPanel extends FormPanel implements TimeListener, Ra
                                 } else {
                                     setSelectedWindSource(result.selectedWindSource);
                                     int i = 0;
-                                    for (WindDAO fix : result.windTrackInfoByWindSource.get(result.selectedWindSource).windFixes) {
+                                    for (WindDTO fix : result.windTrackInfoByWindSource.get(result.selectedWindSource).windFixes) {
                                         updateWindIndicator(i, fix);
                                         i++;
                                     }
@@ -112,7 +112,7 @@ public class SmallWindHistoryPanel extends FormPanel implements TimeListener, Ra
         }
     }
 
-    private void updateWindIndicator(int i, WindDAO fix) {
+    private void updateWindIndicator(int i, WindDTO fix) {
         windIndicators[i].setFromDeg(fix.dampenedTrueWindFromDeg);
         windIndicators[i].setSpeedInKnots(fix.dampenedTrueWindSpeedInKnots);
     }
@@ -128,7 +128,7 @@ public class SmallWindHistoryPanel extends FormPanel implements TimeListener, Ra
     }
 
     @Override
-    public void onRaceSelectionChange(List<Triple<EventDAO, RegattaDAO, RaceDAO>> selectedRaces) {
+    public void onRaceSelectionChange(List<Triple<EventDTO, RegattaDTO, RaceDTO>> selectedRaces) {
         if (!selectedRaces.isEmpty()) {
             event = selectedRaces.get(selectedRaces.size() - 1).getA();
             race = selectedRaces.get(selectedRaces.size() - 1).getC();

@@ -4,13 +4,13 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 
 /**
  * Holds data about one competitor's performance in one leg of one race represented in the
- * {@link LeaderboardDAO leaderboard} in which this object is (indirectly, via a
- * {@link LeaderboardRowDAO} instance) embedded.
+ * {@link LeaderboardDTO leaderboard} in which this object is (indirectly, via a
+ * {@link LeaderboardRowDTO} instance) embedded.
  * 
  * @author Axel Uhl (D043530)
  *
  */
-public class LegEntryDAO implements IsSerializable {
+public class LegEntryDTO implements IsSerializable {
     public Double distanceTraveledInMeters;
     public Double averageSpeedOverGroundInKnots;
     public Integer rank;

@@ -6,16 +6,16 @@ import java.util.List;
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.domain.common.RacePlaceOrder;
 
-public class EventDAO extends NamedDAO implements IsSerializable {
-    public List<RegattaDAO> regattas;
-    public List<CompetitorDAO> competitors;
+public class EventDTO extends NamedDTO implements IsSerializable {
+    public List<RegattaDTO> regattas;
+    public List<CompetitorDTO> competitors;
     
     public String locations;
 
-    public EventDAO() {
+    public EventDTO() {
     }
 
-    public EventDAO(String name, List<RegattaDAO> regattas, List<CompetitorDAO> competitors) {
+    public EventDTO(String name, List<RegattaDTO> regattas, List<CompetitorDTO> competitors) {
         super(name);
         this.name = name;
         this.regattas = regattas;
@@ -29,8 +29,8 @@ public class EventDAO extends NamedDAO implements IsSerializable {
         boolean first = true;
         RacePlaceOrder previousOrder = null;
         locations = "";
-        for (RegattaDAO regattaDAO : regattas) {
-            for (RaceDAO raceDAO : regattaDAO.races) {
+        for (RegattaDTO regattaDAO : regattas) {
+            for (RaceDTO raceDAO : regattaDAO.races) {
                 RacePlaceOrder order = raceDAO.racePlaces;
                 if (order != null) {
                     if (first) {
@@ -52,7 +52,7 @@ public class EventDAO extends NamedDAO implements IsSerializable {
     }
 
     /**
-     * @return The start date of the first {@link RaceDAO Race} in the first {@link RegattaDAO Regatta}, or
+     * @return The start date of the first {@link RaceDTO Race} in the first {@link RegattaDTO Regatta}, or
      *         <code>null</code> if the start date isn't set
      */
     public Date getStartDate() {

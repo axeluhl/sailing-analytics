@@ -11,9 +11,9 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.ExpandableSortableColumn;
-import com.sap.sailing.gwt.ui.shared.LeaderboardDAO;
-import com.sap.sailing.gwt.ui.shared.LeaderboardRowDAO;
-import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDAO;
+import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
+import com.sap.sailing.gwt.ui.shared.LeaderboardRowDTO;
+import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDTO;
 import com.sap.sailing.server.api.EventNameAndRaceName;
 
 public class GwtTestCaseColumnToggling extends GWTTestCase {
@@ -33,9 +33,9 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
     private final String TRACKED_RACE = "schwerttest";
     
     
-    private LeaderboardDAO leaderboard;
-    private TracTracRaceRecordDAO rrDao;
-    private ExpandableSortableColumn<LeaderboardRowDAO> rc;
+    private LeaderboardDTO leaderboard;
+    private TracTracRaceRecordDTO rrDao;
+    private ExpandableSortableColumn<LeaderboardRowDTO> rc;
     
     
 
@@ -54,7 +54,7 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
     }
     
     private void listRacesInEvent(){
-        service.listTracTracRacesInEvent(JSON_URL, new AsyncCallback<Pair<String,List<TracTracRaceRecordDAO>>>() {
+        service.listTracTracRacesInEvent(JSON_URL, new AsyncCallback<Pair<String,List<TracTracRaceRecordDTO>>>() {
 
             @Override
             public void onFailure(Throwable caught) {
@@ -62,9 +62,9 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
             }
 
             @Override
-            public void onSuccess(Pair<String, List<TracTracRaceRecordDAO>> result) {
+            public void onSuccess(Pair<String, List<TracTracRaceRecordDTO>> result) {
                 System.out.println("Listed races.");
-                for (TracTracRaceRecordDAO rr : result.getB()){
+                for (TracTracRaceRecordDTO rr : result.getB()){
                     if (rr.name.equals(TRACKED_RACE)){
                         rrDao = rr;
                     }
@@ -95,9 +95,9 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
     
     private void createLeaderboard(){
         service.createLeaderboard(LEADERBOARD_NAME, new int[] { 1, 2 },
-                new AsyncCallback<LeaderboardDAO>() {
+                new AsyncCallback<LeaderboardDTO>() {
                     @Override
-                    public void onSuccess(LeaderboardDAO result) {
+                    public void onSuccess(LeaderboardDTO result) {
                         System.out.println("Created Leaderboard "+result.name);
                         addColumnToLeaderboard();
                     }
@@ -152,7 +152,7 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
         ArrayList<String> al = new ArrayList<String>();
         al.add(COLUMN1_NAME);
         service.getLeaderboardByName(LEADERBOARD_NAME, new Date(), al,
-                new AsyncCallback<LeaderboardDAO>() {
+                new AsyncCallback<LeaderboardDTO>() {
 
                     @Override
                     public void onFailure(Throwable caught) {
@@ -161,17 +161,17 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
                     }
 
                     @Override
-                    public void onSuccess(LeaderboardDAO result) {
+                    public void onSuccess(LeaderboardDTO result) {
                         System.out.println("Got leaderboard.");
                         
                         leaderboard = result;
                         leaderboardPanel.updateLeaderboard(leaderboard);
                         for (int i = 0; i < leaderboardPanel.getLeaderboardTable()
                                 .getColumnCount(); i++) {
-                            Column<LeaderboardRowDAO, ?> c = leaderboardPanel.getLeaderboardTable().getColumn(i);
+                            Column<LeaderboardRowDTO, ?> c = leaderboardPanel.getLeaderboardTable().getColumn(i);
                             if (c instanceof ExpandableSortableColumn<?>) {
                                 @SuppressWarnings("unchecked")
-                                ExpandableSortableColumn<LeaderboardRowDAO> myRc = (ExpandableSortableColumn<LeaderboardRowDAO>) c;
+                                ExpandableSortableColumn<LeaderboardRowDTO> myRc = (ExpandableSortableColumn<LeaderboardRowDTO>) c;
                                 rc = myRc;
                                 rc.setEnableLegDrillDown(true);
                             }
