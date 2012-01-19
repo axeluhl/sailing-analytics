@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.spectator;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
@@ -13,6 +14,7 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.cellview.client.CellTable;
+import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.Handler;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
@@ -83,7 +85,7 @@ public class OverviewEventPanel extends AbstractEventPanel {
         textBoxLocation.addKeyUpHandler(new KeyUpHandler() {
             @Override
             public void onKeyUp(KeyUpEvent event) {
-                onSearchCriteriaChange(event.getSource());
+                onSearchCriteriaChange();
             }
         });
         panelSearch.add(textBoxLocation);
@@ -94,14 +96,13 @@ public class OverviewEventPanel extends AbstractEventPanel {
         textBoxName.addKeyUpHandler(new KeyUpHandler() {
             @Override
             public void onKeyUp(KeyUpEvent event) {
-                onSearchCriteriaChange(event.getSource());
+                onSearchCriteriaChange();
             }
         });
         panelSearch.add(textBoxName);
         
         checkBoxLive = new CheckBox(stringConstants.onlyLiveEvents());
         checkBoxLive.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-            
             @Override
             public void onValueChange(ValueChangeEvent<Boolean> event) {
                 onCheckBoxLiveChange();
@@ -115,7 +116,7 @@ public class OverviewEventPanel extends AbstractEventPanel {
         textBoxFrom.addKeyUpHandler(new KeyUpHandler() {
             @Override
             public void onKeyUp(KeyUpEvent event) {
-                onSearchCriteriaChange(event.getSource());
+                onSearchCriteriaChange();
             }
         });
         panelSearch.add(textBoxFrom);
@@ -126,7 +127,7 @@ public class OverviewEventPanel extends AbstractEventPanel {
         textBoxUntil.addKeyUpHandler(new KeyUpHandler() {
             @Override
             public void onKeyUp(KeyUpEvent event) {
-                onSearchCriteriaChange(event.getSource());
+                onSearchCriteriaChange();
             }
         });
         panelSearch.add(textBoxUntil);
@@ -172,8 +173,8 @@ public class OverviewEventPanel extends AbstractEventPanel {
             //Creating location column
             TextColumn<EventDTO> locationColumn = new TextColumn<EventDTO>() {
                 @Override
-                public String getValue(EventDTO eventDAO) {
-                    String locations = eventDAO.locations;
+                public String getValue(EventDTO eventDTO) {
+                    String locations = eventDTO.locations;
                     return locations != null ? locations : stringConstants.locationNotAvailable();
                 }
             };
@@ -181,16 +182,16 @@ public class OverviewEventPanel extends AbstractEventPanel {
             //Creating event name column
             TextColumn<EventDTO> nameColumn = new TextColumn<EventDTO>() {
                 @Override
-                public String getValue(EventDTO eventDAO) {
-                    return eventDAO.name;
+                public String getValue(EventDTO eventDTO) {
+                    return eventDTO.name;
                 }
             };
             nameColumn.setSortable(true);
             //Creating start date column
             TextColumn<EventDTO> startDateColumn = new TextColumn<EventDTO>() {
                 @Override
-                public String getValue(EventDTO eventDAO) {
-                    Date start = eventDAO.regattas.get(0).races.get(0).startOfRace;
+                public String getValue(EventDTO eventDTO) {
+                    Date start = eventDTO.regattas.get(0).races.get(0).startOfRace;
                     return start != null ? dateFormatter.render(start) : stringConstants.startDateNotAvailable();
                 }
             };
@@ -267,7 +268,7 @@ public class OverviewEventPanel extends AbstractEventPanel {
                     availableEvents.clear();
                 }
                 eventTableProvider.getList().clear();
-                eventTableProvider.setList(availableEvents);
+                eventTableProvider.getList().addAll(availableEvents);
                 if (actionAfterLoading != null) {
                     actionAfterLoading.run();
                 }
@@ -289,37 +290,65 @@ public class OverviewEventPanel extends AbstractEventPanel {
     
     private void onCheckBoxLiveChange() {
         if (checkBoxLive.getValue()) {
-            //Disable Date-Input-Fields and fill them with the current Date
-            //Event list will be refreshed by the listeners of the Date-Input-Fields
-            String actualDate = DateTimeFormat.getFormat("dd.MM.yyyy").format(new Date());
-            
-            textBoxFrom.setValue(actualDate, true);
             textBoxFrom.setEnabled(false);
-
-            textBoxUntil.setValue(actualDate, true);
             textBoxUntil.setEnabled(false);
         } else {
             textBoxFrom.setEnabled(true);
             textBoxUntil.setEnabled(true);
         }
+        onSearchCriteriaChange();
     }
     
-    private void onSearchCriteriaChange(Object source) {
-        //TODO Refresh event list
-        if (source.equals(textBoxLocation)) {
-            
-        } else if (source.equals(textBoxName)) {
-            
-        } else if (source.equals(textBoxFrom)) {
-            
-        } else if (source.equals(textBoxUntil)) {
-            
+    private void onSearchCriteriaChange() {
+        //Get search criteria
+        String location = textBoxLocation.getText();
+        String name = textBoxName.getText();
+        boolean onlyLive = checkBoxLive.getValue();
+        Date from = null;
+        Date until = null;
+        try {
+            from = DateTimeFormat.getFormat("dd.MM.yyyy").parse(textBoxFrom.getText());
+            until = DateTimeFormat.getFormat("dd.MM.yyyy").parse(textBoxUntil.getText());
+            //Adding 24 hours to until, so that it doesn't result in an empty table if 'from' and 'until' are equal.
+            //Instead you would have a 24 hour range
+            long time = until.getTime() + 24 * 60 * 60 * 1000;
+            until = new Date(time);
+        } catch (IllegalArgumentException e) {}
+        //Filter list by criteria
+        eventTableProvider.getList().clear();
+        for (EventDTO event : availableEvents) {
+            if (checkSearchCriteria(event, location, name, onlyLive, from, until)) {
+                eventTableProvider.getList().add(event);
+            }
         }
+        // now sort again according to selected criterion
+        ColumnSortEvent.fire(eventTable, eventTable.getColumnSortList());
     }
-
-    @Override
-    public void fillEvents(List<EventDTO> result) {
+    
+    private boolean checkSearchCriteria(EventDTO forEvent, String location, String name, boolean onlyLive, Date from, Date until) {
+        boolean result = true;
         
+        if (result && !location.equals("")) {
+            result = !textContainingStringsToCheck(Arrays.asList(location.split("\\s")), forEvent.locations);
+        }
+        if (result && !name.equals("")) {
+            result = !textContainingStringsToCheck(Arrays.asList(name.split("\\s")), forEvent.name);
+        }
+        //If only live events are allowed the check of the dates isn't needed
+        if (result && onlyLive) {
+            result = forEvent.currentlyTracked();
+        } else if (result) {
+            Date startDate = forEvent.getStartDate();
+            if (from != null && until != null) {
+                result = from.before(startDate) && until.after(startDate); 
+            } else if (from != null) {
+                result = from.before(startDate);
+            } else if (until != null) {
+                result = until.after(startDate); 
+            }
+        }
+        
+        return result;
     }
 
     private ListHandler<EventDTO> getEventSortHandler(List<EventDTO> list, TextColumn<EventDTO> locationColumn,
@@ -345,6 +374,10 @@ public class OverviewEventPanel extends AbstractEventPanel {
             }
         });
         return sortHandler;
+    }
+
+    @Override
+    public void fillEvents(List<EventDTO> result) {
     }
 
 }

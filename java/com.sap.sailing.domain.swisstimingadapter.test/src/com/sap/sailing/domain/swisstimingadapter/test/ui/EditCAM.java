@@ -16,6 +16,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import javax.swing.JOptionPane;
 
@@ -42,7 +43,7 @@ public class EditCAM extends javax.swing.JDialog {
         else
             cam = new CAMMessage("",new ArrayList<ClockAtMarkElement>());
         marks = cam.getMarkList();
-        jMarkList.setListData(marks.toArray());
+        jMarkList.setListData(marks.toArray(new ClockAtMarkElement[0]));
         jRaceID.setText(cam.getRaceId());
     }
 
@@ -69,7 +70,7 @@ public class EditCAM extends javax.swing.JDialog {
         jButton2 = new javax.swing.JButton();
         jButton3 = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
-        jMarkList = new javax.swing.JList();
+        jMarkList = new javax.swing.JList<ClockAtMarkElement>();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
@@ -110,10 +111,12 @@ public class EditCAM extends javax.swing.JDialog {
             }
         });
 
-        jMarkList.setModel(new javax.swing.AbstractListModel() {
-            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
-            public int getSize() { return strings.length; }
-            public Object getElementAt(int i) { return strings[i]; }
+        jMarkList.setModel(new javax.swing.AbstractListModel<ClockAtMarkElement>() {
+            ClockAtMarkElement[] clockAtMarkElements = { new ClockAtMarkElement(1, new Date(), "Item 1"),
+                    new ClockAtMarkElement(1, new Date(), "Item 2"), new ClockAtMarkElement(1, new Date(), "Item 3"),
+                    new ClockAtMarkElement(1, new Date(), "Item 4"), new ClockAtMarkElement(1, new Date(), "Item 5") };
+            public int getSize() { return clockAtMarkElements.length; }
+            public ClockAtMarkElement getElementAt(int i) { return clockAtMarkElements[i]; }
         });
         jScrollPane1.setViewportView(jMarkList);
 
@@ -198,14 +201,14 @@ public class EditCAM extends javax.swing.JDialog {
         } catch (ParseException ex) {
             JOptionPane.showMessageDialog(this, "Invalid input parameters.");
         }
-        jMarkList.setListData(marks.toArray());
+        jMarkList.setListData(marks.toArray(new ClockAtMarkElement[0]));
     }//GEN-LAST:event_jButton3ActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         // TODO add your handling code here:
-        for (Object o : jMarkList.getSelectedValues())
+        for (Object o : jMarkList.getSelectedValuesList())
             marks.remove(o);
-        jMarkList.setListData(marks.toArray());
+        jMarkList.setListData(marks.toArray(new ClockAtMarkElement[0]));
     }//GEN-LAST:event_jButton2ActionPerformed
 
     public CAMMessage getMessage(){
@@ -221,7 +224,7 @@ public class EditCAM extends javax.swing.JDialog {
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JTextField jMarkIndex;
-    private javax.swing.JList jMarkList;
+    private javax.swing.JList<ClockAtMarkElement> jMarkList;
     private javax.swing.JTextField jMarkTime;
     private javax.swing.JTextField jRaceID;
     private javax.swing.JTextField jSailNumber;

@@ -24,14 +24,13 @@ public class EventDTO extends NamedDTO implements IsSerializable {
     }
 
     private void fillLocations() {
-        //TODO Finish the format of the location string
         StringBuilder b = new StringBuilder();
         boolean first = true;
         RacePlaceOrder previousOrder = null;
         locations = "";
-        for (RegattaDTO regattaDAO : regattas) {
-            for (RaceDTO raceDAO : regattaDAO.races) {
-                RacePlaceOrder order = raceDAO.racePlaces;
+        for (RegattaDTO regattaDTO : regattas) {
+            for (RaceDTO raceDTO : regattaDTO.races) {
+                RacePlaceOrder order = raceDTO.racePlaces;
                 if (order != null) {
                     if (first) {
                         b.append(order.toString());
@@ -39,7 +38,9 @@ public class EventDTO extends NamedDTO implements IsSerializable {
                         first = false;
                     } else {
                         if (previousOrder.getFinishPlace().equals(order.getStartPlace())) {
-                            b.append(" -> " + order.getStartPlace().getCountryCode() + ", " + order.getStartPlace().getName());
+                            if (!order.startEqualsFinish()) {
+                                b.append(" -> " + order.finishToString());
+                            }
                         } else {
                             b.append("; " + order.toString());
                         }
@@ -57,5 +58,24 @@ public class EventDTO extends NamedDTO implements IsSerializable {
      */
     public Date getStartDate() {
         return regattas.get(0).races.get(0).startOfRace;
+    }
+    
+    /**
+     * @return <code>true</code> if at least one race of the event is currently tracked, else it returns <code>false</code>
+     */
+    public boolean currentlyTracked() {
+        boolean tracked = false;
+        
+        regattaLoop:
+        for (RegattaDTO regatta : regattas) {
+            for (RaceDTO race : regatta.races) {
+                tracked = race.currentlyTracked;
+                if (tracked) {
+                    break regattaLoop;
+                }
+            }
+        }
+        
+        return tracked;
     }
 }

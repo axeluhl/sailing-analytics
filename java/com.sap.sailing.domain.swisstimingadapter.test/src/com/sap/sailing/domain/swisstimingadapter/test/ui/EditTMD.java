@@ -10,11 +10,13 @@
  */
 package com.sap.sailing.domain.swisstimingadapter.test.ui;
 
-import com.sap.sailing.domain.swisstimingadapter.classes.messages.TMDMessage;
-import com.sap.sailing.domain.swisstimingadapter.classes.messages.TimingDataElement;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+
+import com.sap.sailing.domain.swisstimingadapter.classes.messages.TMDMessage;
+import com.sap.sailing.domain.swisstimingadapter.classes.messages.TimingDataElement;
 
 /**
  *
@@ -40,7 +42,7 @@ public class EditTMD extends javax.swing.JDialog {
         else
             tmd = new TMDMessage();
         tmdData = tmd.getList();
-        jTmdData.setListData(tmdData.toArray());
+        jTmdData.setListData(tmdData.toArray(new TimingDataElement[0]));
         jRaceId.setText(tmd.getRaceId());
         jSailNumber.setText(tmd.getSailNumber());
     }
@@ -70,7 +72,7 @@ public class EditTMD extends javax.swing.JDialog {
         jButton2 = new javax.swing.JButton();
         jButton3 = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
-        jTmdData = new javax.swing.JList();
+        jTmdData = new javax.swing.JList<TimingDataElement>();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
@@ -115,10 +117,14 @@ public class EditTMD extends javax.swing.JDialog {
             }
         });
 
-        jTmdData.setModel(new javax.swing.AbstractListModel() {
-            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
+        jTmdData.setModel(new javax.swing.AbstractListModel<TimingDataElement>() {
+            TimingDataElement[] strings = { new TimingDataElement(1, 1, new Date()),
+                    new TimingDataElement(2, 2, new Date()),
+                    new TimingDataElement(3, 3, new Date()),
+                    new TimingDataElement(4, 4, new Date()),
+                    new TimingDataElement(5, 5, new Date()) };
             public int getSize() { return strings.length; }
-            public Object getElementAt(int i) { return strings[i]; }
+            public TimingDataElement getElementAt(int i) { return strings[i]; }
         });
         jScrollPane1.setViewportView(jTmdData);
 
@@ -210,14 +216,14 @@ public class EditTMD extends javax.swing.JDialog {
         catch (Exception e){
             
         }
-        jTmdData.setListData(tmdData.toArray());
+        jTmdData.setListData(tmdData.toArray(new TimingDataElement[0]));
     }//GEN-LAST:event_jButton2ActionPerformed
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         // TODO add your handling code here:
-        for (Object o : jTmdData.getSelectedValues())
+        for (Object o : jTmdData.getSelectedValuesList())
             tmdData.remove(o);
-        jTmdData.setListData(tmdData.toArray());
+        jTmdData.setListData(tmdData.toArray(new TimingDataElement[0]));
     }//GEN-LAST:event_jButton1ActionPerformed
 
     public TMDMessage getMessage(){
@@ -240,6 +246,6 @@ public class EditTMD extends javax.swing.JDialog {
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JTextField jTimeSinceStart;
-    private javax.swing.JList jTmdData;
+    private javax.swing.JList<TimingDataElement> jTmdData;
     // End of variables declaration//GEN-END:variables
 }

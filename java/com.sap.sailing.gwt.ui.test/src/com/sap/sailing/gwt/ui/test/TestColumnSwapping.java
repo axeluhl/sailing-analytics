@@ -21,8 +21,8 @@ public class TestColumnSwapping {
     private LeaderboardDTO lb = null;
     private static final String LEADERBOARDNAME = "test";
     private SailingServiceImpl service;
-    private LeaderboardDTO leaderboardOriginalDAO;
-    private LeaderboardDTO leaderboardDAO;
+    private LeaderboardDTO leaderboardOriginalDTO;
+    private LeaderboardDTO leaderboardDTO;
     private Collection<String> leglist;
     private Date leaderboardCreationDate;
     private SailingServiceImpl sailingService = null;
@@ -47,10 +47,10 @@ public class TestColumnSwapping {
         leaderboardCreationDate = new Date();
         try {
             // get Leaderboard with name and current date
-            leaderboardOriginalDAO = new LeaderboardDTO();
-            leaderboardOriginalDAO.addRace("Race1", true, false);
-            leaderboardOriginalDAO.addRace("Race3", true, false);
-            leaderboardOriginalDAO.addRace("Race2", true, false);
+            leaderboardOriginalDTO = new LeaderboardDTO();
+            leaderboardOriginalDTO.addRace("Race1", true, false);
+            leaderboardOriginalDTO.addRace("Race3", true, false);
+            leaderboardOriginalDTO.addRace("Race2", true, false);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -59,7 +59,7 @@ public class TestColumnSwapping {
     @Test
     public void testColumnSwapping() {
         testColumnSwappingFabian();
-        testLeaderBoardDAOMethods();
+        testLeaderBoardDTOMethods();
         testSailingService();
     }
 
@@ -82,7 +82,7 @@ public class TestColumnSwapping {
             // e.printStackTrace();
             fail(e.getLocalizedMessage());
         }
-        assertNotNull("LeaderboardDAO != NULL", lb);
+        assertNotNull("LeaderboardDTO != NULL", lb);
 
         // asserted data
         String[] raceNames = new String[] { "3", "2", "1" };
@@ -96,7 +96,7 @@ public class TestColumnSwapping {
     }
 
     @Test
-    public void testLeaderBoardDAOMethods() {
+    public void testLeaderBoardDTOMethods() {
         lb = new LeaderboardDTO();
         assertNotNull("Leaderboard != NULL", lb);
         lb.addRace("1", false, false);
@@ -112,22 +112,22 @@ public class TestColumnSwapping {
     public void testColumnSwappingFabian() {
         service.moveLeaderboardColumnUp(LEADERBOARDNAME, "Race3");
         try {
-            leaderboardDAO = service.getLeaderboardByName(LEADERBOARDNAME, leaderboardCreationDate, leglist);
+            leaderboardDTO = service.getLeaderboardByName(LEADERBOARDNAME, leaderboardCreationDate, leglist);
         } catch (Exception e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
 
-        // check if leaderboardDAO an dleaderboardOriginalDAO same
-        List<String> leaderboardList = leaderboardDAO.getRaceColumnNameList();
-        List<String> leaderboardOriginalList = leaderboardOriginalDAO.getRaceColumnNameList();
+        // check if leaderboardDTO an dleaderboardOriginalDTO same
+        List<String> leaderboardList = leaderboardDTO.getRaceColumnNameList();
+        List<String> leaderboardOriginalList = leaderboardOriginalDTO.getRaceColumnNameList();
 
         // ??????? assert races in list
         assertArrayEquals(leaderboardList.toArray(), leaderboardOriginalList.toArray());
 
         for (String string : leaderboardOriginalList) {
-            assert leaderboardDAO.raceIsMedalRace(string) == leaderboardOriginalDAO.raceIsMedalRace(string);
-            assert leaderboardDAO.raceIsTracked(string) == leaderboardOriginalDAO.raceIsTracked(string);
+            assert leaderboardDTO.raceIsMedalRace(string) == leaderboardOriginalDTO.raceIsMedalRace(string);
+            assert leaderboardDTO.raceIsTracked(string) == leaderboardOriginalDTO.raceIsTracked(string);
         }
     }
 }

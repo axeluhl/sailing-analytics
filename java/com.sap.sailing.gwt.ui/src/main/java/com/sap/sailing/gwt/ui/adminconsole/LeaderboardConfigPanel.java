@@ -708,7 +708,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
             }
         });
         if (leaderboardName != null) {
-            // TODO wouldn't the stripped-down version of the LeaderboardDAO do here? See bug #146
+            // TODO wouldn't the stripped-down version of the LeaderboardDTO do here? See bug #146
             sailingService.getLeaderboardByName(leaderboardName, new Date(),
             /* namesOfRacesForWhichToLoadLegDetails */null, new AsyncCallback<LeaderboardDTO>() {
                 @Override
