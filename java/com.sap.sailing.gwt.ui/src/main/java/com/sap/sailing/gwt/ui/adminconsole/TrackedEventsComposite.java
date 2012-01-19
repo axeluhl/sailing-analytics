@@ -47,7 +47,8 @@ import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.server.api.EventNameAndRaceName;
 
 /**
- * Shows the 
+ * Shows the currently tracked events/races in a table. Updated if subscribed as an {@link EventDisplayer}, e.g., with
+ * the {@link AdminConsole}.
  */
 public class TrackedEventsComposite extends FormPanel implements EventDisplayer, RaceSelectionProvider {
     private final Set<RaceSelectionChangeListener> raceSelectionChangeListeners;
@@ -158,7 +159,6 @@ public class TrackedEventsComposite extends FormPanel implements EventDisplayer,
         });
 
         TextColumn<Triple<EventDTO, RegattaDTO, RaceDTO>> regattaNameColumn = new TextColumn<Triple<EventDTO, RegattaDTO, RaceDTO>>() {
-
             @Override
             public String getValue(Triple<EventDTO, RegattaDTO, RaceDTO> object) {
                 return object.getB().boatClass.name;

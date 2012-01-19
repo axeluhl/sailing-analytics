@@ -267,7 +267,7 @@ public class OverviewEventPanel extends AbstractEventPanel {
                     availableEvents.clear();
                 }
                 eventTableProvider.getList().clear();
-                eventTableProvider.setList(availableEvents);
+                eventTableProvider.getList().addAll(availableEvents);
                 if (actionAfterLoading != null) {
                     actionAfterLoading.run();
                 }
