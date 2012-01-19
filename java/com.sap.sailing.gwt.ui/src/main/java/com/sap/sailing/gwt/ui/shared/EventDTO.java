@@ -24,7 +24,6 @@ public class EventDTO extends NamedDTO implements IsSerializable {
     }
 
     private void fillLocations() {
-        //TODO Finish the format of the location string
         StringBuilder b = new StringBuilder();
         boolean first = true;
         RacePlaceOrder previousOrder = null;

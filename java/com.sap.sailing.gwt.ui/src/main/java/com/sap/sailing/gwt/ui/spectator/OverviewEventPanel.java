@@ -13,6 +13,7 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.cellview.client.CellTable;
+import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.Handler;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
@@ -101,7 +102,6 @@ public class OverviewEventPanel extends AbstractEventPanel {
         
         checkBoxLive = new CheckBox(stringConstants.onlyLiveEvents());
         checkBoxLive.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-            
             @Override
             public void onValueChange(ValueChangeEvent<Boolean> event) {
                 onCheckBoxLiveChange();
@@ -306,20 +306,25 @@ public class OverviewEventPanel extends AbstractEventPanel {
     
     private void onSearchCriteriaChange(Object source) {
         //TODO Refresh event list
-        if (source.equals(textBoxLocation)) {
-            
-        } else if (source.equals(textBoxName)) {
-            
-        } else if (source.equals(textBoxFrom)) {
-            
-        } else if (source.equals(textBoxUntil)) {
-            
+        eventTableProvider.getList().clear();
+        for (EventDTO event : availableEvents) {
+            if (checkSearchCriteria(event)) {
+                eventTableProvider.getList().add(event);
+            }
         }
+        // now sort again according to selected criterion
+        ColumnSortEvent.fire(eventTable, eventTable.getColumnSortList());
     }
-
-    @Override
-    public void fillEvents(List<EventDTO> result) {
-        
+    
+    private boolean checkSearchCriteria(EventDTO forEvent) {
+        //TODO
+        boolean result = true;
+        String location = textBoxLocation.getText();
+        String name = textBoxName.getText();
+        boolean onlyLive = checkBoxLive.getValue();
+        Date from = DateTimeFormat.getFormat("dd.MM.yyyy").parse(textBoxFrom.getText());
+        Date until = DateTimeFormat.getFormat("dd.MM.yyyy").parse(textBoxUntil.getText());
+        return result;
     }
 
     private ListHandler<EventDTO> getEventSortHandler(List<EventDTO> list, TextColumn<EventDTO> locationColumn,
@@ -345,6 +350,10 @@ public class OverviewEventPanel extends AbstractEventPanel {
             }
         });
         return sortHandler;
+    }
+
+    @Override
+    public void fillEvents(List<EventDTO> result) {
     }
 
 }
