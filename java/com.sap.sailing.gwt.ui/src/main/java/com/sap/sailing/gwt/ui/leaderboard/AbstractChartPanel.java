@@ -78,7 +78,7 @@ import com.sap.sailing.server.api.RaceIdentifier;
  */
 public abstract class AbstractChartPanel<SettingsType extends ChartSettings> extends SimplePanel implements CompetitorSelectionChangeListener {
     private CompetitorInRaceDTO chartData;
-    private CompetitorsAndTimePointsDTO competitorsAndTimePointsDAO = null;
+    private CompetitorsAndTimePointsDTO competitorsAndTimePointsDTO = null;
     private final SailingServiceAsync sailingService;
     private final ErrorReporter errorReporter;
     private final DateTimeFormat dateFormat;
@@ -410,7 +410,7 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
         plot.addHoverListener(new PlotHoverListener() {
             public void onPlotHover(Plot plot, PlotPosition position, PlotItem item) {
                 // FIXME can the indexOf ever find anything? seriesID is a List<SeriesHandler>; item.getSeries() returns a Series object
-            	CompetitorDTO competitor = competitorID.get(seriesID.indexOf(item.getSeries()));
+                CompetitorDTO competitor = competitorID.get(seriesID.indexOf(item.getSeries()));
                 if (item != null && competitor != null) {
                     if (item.getSeries().getLabel().toLowerCase().contains("mark")) {
                         selectedPointLabel.setText(stringMessages.competitorPassedMarkAtDate(competitor.name,
@@ -452,25 +452,29 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
             }
         }, true);
         plot.addSelectionListener(new SelectionListener() {
-
             public void selected(double x1, double y1, double x2, double y2) {
-            	/* TODO Remove not visible buoys from the series when user is zooming in or add them if he is zooming out.
-            	for (CompetitorDAO competitor : competitorsAndTimePointsDAO.getCompetitor()){
-            		long[] markPassingTimes = competitorsAndTimePointsDAO.getMarkPassings(competitor);
+            	// TODO Remove not visible buoys from the series when user is zooming in or add them if he is zooming out.
+                    // TODO Woher kommt der Error wenn kein MarkPassing in der Range ist?
+            	for (CompetitorDTO competitor : competitorID){
+            	    Pair<String,Long>[] markPassingTimes = competitorsAndTimePointsDTO.getMarkPassings(competitor);
                     Double[] markPassingValues = chartData.getMarkPassings(competitor);
+                    boolean markPassingsInRange = false;
+                    
                     SeriesHandler markSeries = getCompetitorMarkPassingSeries(competitor);
                     markSeries.clear();
-                    int visibleMarkPassings = 0;
+                    
                     for (int j = 0; j < markPassingTimes.length; j++){
-                        if (markPassingValues[j] != null && markPassingTimes[j] > x1 && markPassingTimes[j] < x2) {
-                            markSeries.add(new DataPoint(markPassingTimes[j],markPassingValues[j]));
-                            visibleMarkPassings++;
+                        double passingTime = markPassingTimes[j].getB().doubleValue();
+                        if (markPassingValues[j] != null && x1 < passingTime && passingTime < x2) {
+                            markSeries.add(new DataPoint(passingTime ,markPassingValues[j]));
+                            markPassingsInRange = true;
                         }
                     }
-                    if (visibleMarkPassings == 0){
+                    
+                    if (!markPassingsInRange){
                     	markSeries.setVisible(false);
                     }
-            	}*/
+            	}
                 plot.setLinearSelection(x1, x2);
             }
         });
@@ -618,10 +622,10 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
     }
 
     protected CompetitorsAndTimePointsDTO getCompetitorsAndTimePointsDAO() {
-        return competitorsAndTimePointsDAO;
+        return competitorsAndTimePointsDTO;
     }
 
     protected void setCompetitorsAndTimePointsDAO(CompetitorsAndTimePointsDTO competitorsAndTimePointsDAO) {
-        this.competitorsAndTimePointsDAO = competitorsAndTimePointsDAO;
+        this.competitorsAndTimePointsDTO = competitorsAndTimePointsDAO;
     }
 }
