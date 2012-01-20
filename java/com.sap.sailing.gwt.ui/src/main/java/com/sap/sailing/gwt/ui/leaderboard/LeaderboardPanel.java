@@ -89,7 +89,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     private final StringMessages stringConstants;
 
     private final CellTable<LeaderboardRowDTO> leaderboardTable;
-    
+
     private final MultiSelectionModel<LeaderboardRowDTO> leaderboardSelectionModel;
 
     private ListDataProvider<LeaderboardRowDTO> data;
@@ -99,7 +99,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     private LeaderboardDTO leaderboard;
 
     private final RankColumn rankColumn;
-    
+
     /**
      * Passed to the {@link ManeuverCountRaceColumn}. Modifications to this list will modify the column's children list
      * when updated the next time.
@@ -107,14 +107,14 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     private final List<DetailType> selectedManeuverDetails;
 
     /**
-     * Passed to the {@link LegColumn}. Modifications to this list will modify the column's children list
-     * when updated the next time.
+     * Passed to the {@link LegColumn}. Modifications to this list will modify the column's children list when updated
+     * the next time.
      */
     private final List<DetailType> selectedLegDetails;
 
     /**
-     * Passed to the {@link TextRaceColumn}. Modifications to this list will modify the column's children list
-     * when updated the next time.
+     * Passed to the {@link TextRaceColumn}. Modifications to this list will modify the column's children list when
+     * updated the next time.
      */
     private final List<DetailType> selectedRaceDetails;
 
@@ -148,7 +148,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     private final Anchor playPause;
 
     private final CompetitorSelectionProvider competitorSelectionProvider;
-    
+
     private class SettingsClickHandler implements ClickHandler {
         private final StringMessages stringConstants;
 
@@ -161,7 +161,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             new SettingsDialog<LeaderboardSettings>(LeaderboardPanel.this, stringConstants).show();
         }
     }
-    
+
     @Override
     public Widget getEntryWidget() {
         return this;
@@ -395,7 +395,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
 
     public static DetailType[] getAvailableRaceDetailColumnTypes() {
         return new DetailType[] { DetailType.RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS,
-                DetailType.RACE_DISTANCE_TRAVELED, DetailType.RACE_GAP_TO_LEADER_IN_SECONDS, DetailType.NUMBER_OF_MANEUVERS };
+                DetailType.RACE_DISTANCE_TRAVELED, DetailType.RACE_GAP_TO_LEADER_IN_SECONDS,
+                DetailType.NUMBER_OF_MANEUVERS };
     }
 
     private class TextRaceColumn extends RaceColumn<String> implements RaceNameProvider {
@@ -444,23 +445,29 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 LeaderboardPanel leaderboardPanel, StringMessages stringConstants, String detailHeaderStyle,
                 String detailColumnStyle) {
             Map<DetailType, SortableColumn<LeaderboardRowDTO, ?>> result = new HashMap<DetailType, SortableColumn<LeaderboardRowDTO, ?>>();
-            result.put(DetailType.RACE_DISTANCE_TRAVELED,
-                    new FormattedDoubleLegDetailColumn(stringConstants.distanceInMeters(), stringConstants.distanceInMetersUnit(),
-                            new RaceDistanceTraveledInMeters(), 0, getLeaderboardPanel().getLeaderboardTable(),
-                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
+            result.put(
+                    DetailType.RACE_DISTANCE_TRAVELED,
+                    new FormattedDoubleLegDetailColumn(stringConstants.distanceInMeters(), stringConstants
+                            .distanceInMetersUnit(), new RaceDistanceTraveledInMeters(), 0, getLeaderboardPanel()
+                            .getLeaderboardTable(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
             result.put(DetailType.RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS, new FormattedDoubleLegDetailColumn(
-                    stringConstants.averageSpeedInKnots(), stringConstants.averageSpeedInKnotsUnit(), new RaceAverageSpeedInKnots(), 2, getLeaderboardPanel()
-                                    .getLeaderboardTable(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
-            result.put(DetailType.RACE_GAP_TO_LEADER_IN_SECONDS, new FormattedDoubleLegDetailColumn(
-                    stringConstants.gapToLeaderInSeconds(), stringConstants.gapToLeaderInSecondsUnit(), new RaceGapToLeaderInSeconds(), 0, getLeaderboardPanel()
-                                    .getLeaderboardTable(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
+                    stringConstants.averageSpeedInKnots(), stringConstants.averageSpeedInKnotsUnit(),
+                    new RaceAverageSpeedInKnots(), 2, getLeaderboardPanel().getLeaderboardTable(),
+                    LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
+            result.put(
+                    DetailType.RACE_GAP_TO_LEADER_IN_SECONDS,
+                    new FormattedDoubleLegDetailColumn(stringConstants.gapToLeaderInSeconds(), stringConstants
+                            .gapToLeaderInSecondsUnit(), new RaceGapToLeaderInSeconds(), 0, getLeaderboardPanel()
+                            .getLeaderboardTable(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
             result.put(DetailType.NUMBER_OF_MANEUVERS, getManeuverCountRaceColumn());
-            /*result.put(DetailType.RACE_MANEUVERS, new ManeuverCountRaceColumn(
-                    stringConstants.numberOfManeuvers(), getLeaderboardPanel()
-                                    .getLeaderboardTable(), this, LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, stringConstants));*/
+            /*
+             * result.put(DetailType.RACE_MANEUVERS, new ManeuverCountRaceColumn( stringConstants.numberOfManeuvers(),
+             * getLeaderboardPanel() .getLeaderboardTable(), this, LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE,
+             * stringConstants));
+             */
             return result;
         }
-        
+
         private ManeuverCountRaceColumn getManeuverCountRaceColumn() {
             return new ManeuverCountRaceColumn(getLeaderboardPanel(), this, stringConstants,
                     LeaderboardPanel.this.selectedManeuverDetails, LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE,
@@ -494,7 +501,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             }
             return result;
         }
-        
+
         private LegColumn getLegColumn(int legNumber) {
             LegColumn result;
             if (legColumns.size() > legNumber && legColumns.get(legNumber) != null) {
@@ -690,9 +697,9 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         }
     }
 
-    public LeaderboardPanel(SailingServiceAsync sailingService, CompetitorSelectionProvider competitorSelectionProvider,
-            String leaderboardName, ErrorReporter errorReporter,
-            final StringMessages stringConstants) {
+    public LeaderboardPanel(SailingServiceAsync sailingService, RaceIdentifier preSelectedRace,
+            CompetitorSelectionProvider competitorSelectionProvider, String leaderboardName,
+            ErrorReporter errorReporter, final StringMessages stringConstants) {
         this.sailingService = sailingService;
         this.competitorSelectionProvider = competitorSelectionProvider;
         competitorSelectionProvider.addCompetitorSelectionChangeListener(this);
@@ -710,7 +717,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         selectedManeuverDetails.add(DetailType.JIBE);
         selectedManeuverDetails.add(DetailType.PENALTY_CIRCLE);
         delayInMilliseconds = 0l;
-        timer = new Timer(/* delayBetweenAutoAdvancesInMilliseconds */ 3000l);
+        timer = new Timer(/* delayBetweenAutoAdvancesInMilliseconds */3000l);
         timer.setDelay(getDelayInMilliseconds()); // set time/delay before
                                                   // adding as listener
         timer.addPlayStateListener(this);
@@ -727,7 +734,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         leaderboardTable = new CellTableWithStylableHeaders<LeaderboardRowDTO>(
         /* pageSize */100, resources);
         getLeaderboardTable().setWidth("100%");
-        leaderboardSelectionModel = new MultiSelectionModel<LeaderboardRowDTO>() {};
+        leaderboardSelectionModel = new MultiSelectionModel<LeaderboardRowDTO>() {
+        };
         leaderboardSelectionModel.addSelectionChangeHandler(new Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
@@ -736,7 +744,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                     selection.add(row.competitor);
                 }
                 LeaderboardPanel.this.competitorSelectionProvider.setSelection(selection,
-                        /* listenersNotToNotify */ LeaderboardPanel.this);
+                /* listenersNotToNotify */LeaderboardPanel.this);
             }
         });
         getLeaderboardTable().setSelectionModel(leaderboardSelectionModel);
@@ -786,7 +794,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         chartsAnchor.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-               compareCompetitors();
+                compareCompetitors();
             }
         });
         Anchor settingsAnchor = new Anchor(new SafeHtmlBuilder().appendHtmlConstant(
@@ -802,7 +810,6 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         vp.add(getLeaderboardTable());
         setWidget(vp);
     }
-
 
     private SafeHtml getPlayPauseImgHtml(boolean playing) {
         return new SafeHtmlBuilder().appendHtmlConstant(
@@ -979,7 +986,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         this.leaderboard = leaderboard;
     }
 
-    protected LeaderboardDTO getLeaderboard() {
+    public LeaderboardDTO getLeaderboard() {
         return leaderboard;
     }
 
@@ -994,8 +1001,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             ensureTotalsColumn();
         }
     }
-    
-    private List<String> getRacesAddedNew(LeaderboardDTO oldLeaderboard, LeaderboardDTO newLeaderboard){
+
+    private List<String> getRacesAddedNew(LeaderboardDTO oldLeaderboard, LeaderboardDTO newLeaderboard) {
         List<String> result = new ArrayList<String>();
         for (String s : newLeaderboard.getRaceColumnNameList()) {
             if (oldLeaderboard == null || !oldLeaderboard.getRaceColumnNameList().contains(s)) {
@@ -1018,31 +1025,34 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         }
         return false;
     }
-    
+
     /**
      * Corrects the data linke medalRace of the given raceColumn
-     * @param raceColumn the raceColumn to correct.
+     * 
+     * @param raceColumn
+     *            the raceColumn to correct.
      */
-    private void correctColumnData(RaceColumn<?> raceColumn){
+    private void correctColumnData(RaceColumn<?> raceColumn) {
         String race = raceColumn.getRaceName();
         int columnIndex = getRaceColumnPosition(raceColumn);
         if (raceColumn.isExpansionEnabled() != leaderboard.raceIsTracked(race)
                 || leaderboard.raceIsMedalRace(race) != raceColumn.isMedalRace()) {
-          if (raceColumn.isExpanded()) {
-              raceColumn.toggleExpansion(); // remove children from table
-          }
-          removeColumn(columnIndex);
-          insertColumn(
-                  columnIndex,
-                  createRaceColumn(race, leaderboard.raceIsMedalRace(race),
-                          leaderboard.raceIsTracked(race)));
+            if (raceColumn.isExpanded()) {
+                raceColumn.toggleExpansion(); // remove children from table
+            }
+            removeColumn(columnIndex);
+            insertColumn(columnIndex,
+                    createRaceColumn(race, leaderboard.raceIsMedalRace(race), leaderboard.raceIsTracked(race)));
         }
     }
 
     /**
      * Removes all RaceColumns, starting at count {@link raceColumnStartIndex raceColumnStartIndex}
-     * @param raceColumnStartIndex The index of the race column should be deleted from.
-     * @param raceName The name of the racing column until the table should be cleared.
+     * 
+     * @param raceColumnStartIndex
+     *            The index of the race column should be deleted from.
+     * @param raceName
+     *            The name of the racing column until the table should be cleared.
      */
     private void removeRaceColumnFromRaceColumnStartIndexBeforeRace(int raceColumnStartIndex, String raceName) {
         int counter = 0;
@@ -1050,7 +1060,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             Column<LeaderboardRowDTO, ?> c = getLeaderboardTable().getColumn(leaderboardposition);
             if (c instanceof RaceColumn) {
                 RaceColumn<?> raceColumn = (RaceColumn<?>) c;
-                if (!raceColumn.getRaceName().equals(raceName) && raceColumnStartIndex==counter) {
+                if (!raceColumn.getRaceName().equals(raceName) && raceColumnStartIndex == counter) {
                     removeColumn(raceColumn);
                 } else {
                     return;
@@ -1059,18 +1069,20 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             }
         }
     }
-    
+
     /**
      * Gets a ColumnPosition of a raceColumn
-     * @param raceColumn The column for which the position is to be found in the leaderboard table
+     * 
+     * @param raceColumn
+     *            The column for which the position is to be found in the leaderboard table
      * @return the position. Returns -1 if raceColumn not existing in leaderboardTable.
      */
-    private int getRaceColumnPosition(RaceColumn<?> raceColumn){
+    private int getRaceColumnPosition(RaceColumn<?> raceColumn) {
         for (int leaderboardposition = 0; leaderboardposition < getLeaderboardTable().getColumnCount(); leaderboardposition++) {
             Column<LeaderboardRowDTO, ?> c = getLeaderboardTable().getColumn(leaderboardposition);
             if (c instanceof RaceColumn) {
                 RaceColumn<?> rc = (RaceColumn<?>) c;
-                if(rc.equals(raceColumn)){
+                if (rc.equals(raceColumn)) {
                     return leaderboardposition;
                 }
             }
@@ -1080,18 +1092,22 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
 
     /**
      * This method returns the position where a racecolumn should get inserted.
-     * @param raceName the name of the race to insert
-     * @param the position of the race in the  {@link selectedRaceColumns selectedRaceColumns}
+     * 
+     * @param raceName
+     *            the name of the race to insert
+     * @param the
+     *            position of the race in the {@link selectedRaceColumns selectedRaceColumns}
      * @return the position to insert the racecolumn
      */
     private int getColumnPositionToInsert(String raceName, int listpos) {
         int raceColumnCounter = 0;
         int noRaceColumnCounter = 0;
         boolean raceColumnfound = false;
-        for (int leaderboardposition = 0; !raceColumnfound & leaderboardposition < getLeaderboardTable().getColumnCount(); leaderboardposition++) {
+        for (int leaderboardposition = 0; !raceColumnfound
+                & leaderboardposition < getLeaderboardTable().getColumnCount(); leaderboardposition++) {
             Column<LeaderboardRowDTO, ?> c = getLeaderboardTable().getColumn(leaderboardposition);
             if (c instanceof RaceColumn) {
-                //RaceColumn<?> raceColumn = (RaceColumn<?>) c;
+                // RaceColumn<?> raceColumn = (RaceColumn<?>) c;
                 if (raceColumnCounter == listpos) {
                     raceColumnfound = true;
                 }
@@ -1100,13 +1116,13 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 noRaceColumnCounter++;
             }
         }
-        if(raceColumnfound){
+        if (raceColumnfound) {
             return raceColumnCounter + noRaceColumnCounter;
-        }else{
+        } else {
             return -1;
         }
     }
-    
+
     /**
      * Removes all Columns of type racecolumns of leaderboardTable
      */
@@ -1123,7 +1139,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             removeColumn(c);
         }
     }
-    
+
     /**
      * Existing and matching race columns may still need to be removed, re-created and inserted because the "tracked"
      * property may have changed, changing the columns expandability.
@@ -1301,19 +1317,19 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         playPause.setHTML(getPlayPauseImgHtml(isPlaying));
         playPause.setTitle(isPlaying ? stringConstants.pauseAutomaticRefresh() : stringConstants.autoRefresh());
     }
-    
-    private void compareCompetitors(){
+
+    private void compareCompetitors() {
         List<RaceIdentifier> races = new ArrayList<RaceIdentifier>();
         for (RaceInLeaderboardDTO race : getLeaderboard().getRaceList()) {
-            if (race.isTrackedRace()){
+            if (race.isTrackedRace()) {
                 races.add(race.getRaceIdentifier());
             }
         }
-        CompareCompetitorsChartDialog chartDialog = new CompareCompetitorsChartDialog(sailingService, competitorSelectionProvider,
-                races.toArray(new EventNameAndRaceName[0]), stringConstants, errorReporter);
+        CompareCompetitorsChartDialog chartDialog = new CompareCompetitorsChartDialog(sailingService,
+                competitorSelectionProvider, races.toArray(new EventNameAndRaceName[0]), stringConstants, errorReporter);
         chartDialog.show();
     }
-    
+
     @Override
     public boolean hasSettings() {
         return true;
@@ -1322,17 +1338,21 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     @Override
     public SettingsDialogComponent<LeaderboardSettings> getSettingsDialogComponent() {
         return new LeaderboardSettingsDialogComponent(Collections.unmodifiableList(selectedManeuverDetails),
-                Collections.unmodifiableList(selectedLegDetails),
-                Collections.unmodifiableList(selectedRaceDetails), /* All races to select */
-                leaderboard.getRaceColumnNameList(), selectedRaceColumns, timer.getDelayBetweenAutoAdvancesInMilliseconds(),
-                delayInMilliseconds, stringConstants);
+                Collections.unmodifiableList(selectedLegDetails), Collections.unmodifiableList(selectedRaceDetails), /*
+                                                                                                                      * All
+                                                                                                                      * races
+                                                                                                                      * to
+                                                                                                                      * select
+                                                                                                                      */
+                leaderboard.getRaceColumnNameList(), selectedRaceColumns,
+                timer.getDelayBetweenAutoAdvancesInMilliseconds(), delayInMilliseconds, stringConstants);
     }
 
     @Override
     public String getLocalizedShortName() {
         return stringConstants.leaderboard();
     }
-    
+
     private LeaderboardRowDTO getRow(CompetitorDTO competitor) {
         for (LeaderboardRowDTO row : getData().getList()) {
             if (row.competitor.equals(competitor)) {

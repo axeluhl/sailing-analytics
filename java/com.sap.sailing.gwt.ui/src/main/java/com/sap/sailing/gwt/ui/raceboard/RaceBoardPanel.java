@@ -20,6 +20,7 @@ import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.components.Component;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
+import com.sap.sailing.server.api.EventNameAndRaceName;
 
 public class RaceBoardPanel extends FormPanel implements Component<RaceBoardSettings> {
 
@@ -45,8 +46,9 @@ public class RaceBoardPanel extends FormPanel implements Component<RaceBoardSett
         collapsableViewers = new ArrayList<CollapsableComponentViewer<?>>();
         CompetitorSelectionModel competitorSelectionModel = new CompetitorSelectionModel(/* hasMultiSelection */ true);
 
-        // create the default leaderboard
-        LeaderboardPanel leaderboardPanel = new LeaderboardPanel(sailingService, competitorSelectionModel,
+        // create the default leaderboard and select the right race
+        EventNameAndRaceName raceIdentifier = (EventNameAndRaceName) theSelectedRace.getRaceIdentifier();
+        LeaderboardPanel leaderboardPanel = new LeaderboardPanel(sailingService, raceIdentifier, competitorSelectionModel,
                 leaderboardName, errorReporter, stringMessages);
 
         CollapsableComponentViewer<LeaderboardSettings> leaderboardViewer = new CollapsableComponentViewer<LeaderboardSettings>(

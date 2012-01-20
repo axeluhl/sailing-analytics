@@ -32,7 +32,7 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
             sailingService.getLeaderboardNames(new AsyncCallback<List<String>>() {
                 @Override
                 public void onSuccess(List<String> leaderboardNames) {
-                    if (leaderboardNames.contains(leaderboardName)) {
+                    if (!leaderboardNames.contains(leaderboardName)) {
                         createErrorPage(stringMessages.noSuchLeaderboard());
                     }
                 }

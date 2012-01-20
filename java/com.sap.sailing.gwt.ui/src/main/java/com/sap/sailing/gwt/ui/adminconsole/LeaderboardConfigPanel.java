@@ -286,10 +286,15 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
         });
 
         // ------------ races of the selected leaderboard ----------------
-        TextColumn<RaceInLeaderboardDTO> raceNameColumn = new TextColumn<RaceInLeaderboardDTO>() {
+        AnchorCell raceAnchorCell = new AnchorCell();
+        Column<RaceInLeaderboardDTO, SafeHtml> raceLinkColumn = new Column<RaceInLeaderboardDTO, SafeHtml>(raceAnchorCell) {
             @Override
-            public String getValue(RaceInLeaderboardDTO object) {
-                return object.getRaceColumnName();
+            public SafeHtml getValue(RaceInLeaderboardDTO raceInLeaderboardDTO) {
+                EventNameAndRaceName raceIdentifier = (EventNameAndRaceName) raceInLeaderboardDTO.getRaceIdentifier();
+                String link = "/gwt/RaceBoard.html?leaderboardName="+ selectedLeaderboard.name + 
+                                "&raceName=" + raceIdentifier.getRaceName() +
+                                "&eventName=" + raceIdentifier.getEventName();
+                return ANCHORTEMPLATE.cell(link, raceInLeaderboardDTO.getRaceColumnName());
             }
         };
 
@@ -338,7 +343,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
         vPanel.add(lblRaceNamesIn);
 
         raceColumnTable = new CellTable<RaceInLeaderboardDTO>(/* pageSize */200, tableRes);
-        raceColumnTable.addColumn(raceNameColumn, stringConstants.name());
+        raceColumnTable.addColumn(raceLinkColumn, stringConstants.name());
         raceColumnTable.addColumn(isMedalRaceCheckboxColumn, stringConstants.medalRace());
         raceColumnTable.addColumn(isLinkedRaceColumn, stringConstants.islinked());
         raceColumnTable.addColumn(raceActionColumn, stringConstants.actions());
