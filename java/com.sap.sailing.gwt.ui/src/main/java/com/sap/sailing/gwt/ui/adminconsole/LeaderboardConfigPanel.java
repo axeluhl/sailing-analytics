@@ -681,7 +681,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
                                         // new Pair<Boolean, Boolean>(/* medal race */ columnNameAndMedalRace.getB(),
                                         // /* tracked */ false));
                                         selectedLeaderboard.addRace(result.getRaceColumnName(), result.isMedalRace(),
-                                                false);
+                                                null);
                                         selectedLeaderboard.invalidateCompetitorOrdering();
                                     }
                                 });
@@ -746,7 +746,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
     public void changeTrackingRace(EventNameAndRaceName eventNameAndRaceName, boolean isTracked) {
         for (RaceInLeaderboardDTO race : raceColumnList.getList()) {
             if (race.getRaceColumnName().equals(eventNameAndRaceName.getRaceName())) {
-                race.setTrackedRace(isTracked);
+                race.setRaceIdentifier(eventNameAndRaceName);
             }
         }
         raceColumnList.refresh();

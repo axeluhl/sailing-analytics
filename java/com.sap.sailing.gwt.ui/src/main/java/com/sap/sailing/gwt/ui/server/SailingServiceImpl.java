@@ -189,7 +189,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             result.name = leaderboard.getName();
             result.competitorDisplayNames = new HashMap<CompetitorDTO, String>();
             for (RaceInLeaderboard raceColumn : leaderboard.getRaceColumns()) {
-                result.addRace(raceColumn.getName(), raceColumn.isMedalRace(), raceColumn.getTrackedRace() != null);
+                result.addRace(raceColumn.getName(), raceColumn.isMedalRace(), raceColumn.getTrackedRace());
             }
             result.rows = new HashMap<CompetitorDTO, LeaderboardRowDTO>();
             result.hasCarriedPoints = leaderboard.hasCarriedPoints();
@@ -891,7 +891,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         dao.name = leaderboard.getName();
         dao.competitorDisplayNames = new HashMap<CompetitorDTO, String>();
         for (RaceInLeaderboard raceColumn : leaderboard.getRaceColumns()) {
-            dao.addRace(raceColumn.getName(), raceColumn.isMedalRace(), raceColumn.getTrackedRace() != null);
+            dao.addRace(raceColumn.getName(), raceColumn.isMedalRace(), raceColumn.getTrackedRace());
         }
         dao.hasCarriedPoints = leaderboard.hasCarriedPoints();
         dao.discardThresholds = leaderboard.getResultDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces();
