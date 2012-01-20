@@ -7,8 +7,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.server.api.EventNameAndRaceName;
 import com.sap.sailing.server.api.RaceIdentifier;
 
 /**
@@ -17,7 +15,7 @@ import com.sap.sailing.server.api.RaceIdentifier;
  * (DNS, DNF, DSQ).
  * 
  * @author Axel Uhl (d043530)
- * 
+ *  
  */
 public class LeaderboardDTO implements IsSerializable {
     public String name;
@@ -269,27 +267,19 @@ public class LeaderboardDTO implements IsSerializable {
         return getRaceInLeaderboardByName(raceColumnName).isMedalRace();
     }
 
-    public void addRace(String raceColumnName, boolean medalRace, TrackedRace trackedRace) {
+    public void addRace(String raceColumnName, boolean medalRace, RaceIdentifier trackedRaceIdentifier) {
         RaceInLeaderboardDTO raceInLeaderboardDTO = new RaceInLeaderboardDTO();
         raceInLeaderboardDTO.setRaceColumnName(raceColumnName);
         raceInLeaderboardDTO.setMedalRace(medalRace);
-        if (trackedRace != null) {
-            RaceIdentifier raceIdentifier = new EventNameAndRaceName(
-                    trackedRace.getTrackedEvent().getEvent().getName(), trackedRace.getRace().getName());
-            raceInLeaderboardDTO.setRaceIdentifier(raceIdentifier);
-        }
+        raceInLeaderboardDTO.setRaceIdentifier(trackedRaceIdentifier);
     	races.add(raceInLeaderboardDTO);
     }
 
-    public void addRaceAt(String raceColumnName, boolean medalRace, TrackedRace trackedRace, int index) {
+    public void addRaceAt(String raceColumnName, boolean medalRace, RaceIdentifier trackedRaceIdentifier, int index) {
         RaceInLeaderboardDTO raceInLeaderboardDTO = new RaceInLeaderboardDTO();
         raceInLeaderboardDTO.setRaceColumnName(raceColumnName);
         raceInLeaderboardDTO.setMedalRace(medalRace);
-        if (trackedRace != null) {
-            RaceIdentifier raceIdentifier = new EventNameAndRaceName(
-                    trackedRace.getTrackedEvent().getEvent().getName(), trackedRace.getRace().getName());
-            raceInLeaderboardDTO.setRaceIdentifier(raceIdentifier);
-        }
+        raceInLeaderboardDTO.setRaceIdentifier(trackedRaceIdentifier);
         races.add(index, raceInLeaderboardDTO);
     }
 

@@ -58,7 +58,7 @@ import com.sap.sailing.gwt.ui.shared.components.Component;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialog;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
 import com.sap.sailing.server.api.DetailType;
-import com.sap.sailing.server.api.LeaderboardNameAndRaceColumnName;
+import com.sap.sailing.server.api.EventNameAndRaceName;
 import com.sap.sailing.server.api.RaceIdentifier;
 
 /**
@@ -1306,11 +1306,11 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         List<RaceIdentifier> races = new ArrayList<RaceIdentifier>();
         for (RaceInLeaderboardDTO race : getLeaderboard().getRaceList()) {
             if (race.isTrackedRace()){
-                races.add(new LeaderboardNameAndRaceColumnName(leaderboardName, race.getRaceColumnName()));
+                races.add(race.getRaceIdentifier());
             }
         }
         CompareCompetitorsChartDialog chartDialog = new CompareCompetitorsChartDialog(sailingService, competitorSelectionProvider,
-                races.toArray(new LeaderboardNameAndRaceColumnName[0]), stringConstants, errorReporter);
+                races.toArray(new EventNameAndRaceName[0]), stringConstants, errorReporter);
         chartDialog.show();
     }
     

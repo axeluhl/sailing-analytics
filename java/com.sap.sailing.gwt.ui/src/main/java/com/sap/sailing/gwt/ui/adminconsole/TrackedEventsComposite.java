@@ -108,6 +108,7 @@ public class TrackedEventsComposite extends FormPanel implements EventDisplayer,
         HorizontalPanel filterPanel = new HorizontalPanel();
         panel.add(filterPanel);
         Label lblFilterEvents = new Label(stringConstants.filterRacesByName() + ":");
+        lblFilterEvents.setWordWrap(false);
         filterPanel.setSpacing(5);
         filterPanel.add(lblFilterEvents);
         filterPanel.setCellVerticalAlignment(lblFilterEvents, HasVerticalAlignment.ALIGN_MIDDLE);

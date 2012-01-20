@@ -64,7 +64,6 @@ import com.sap.sailing.server.api.EventFetcher;
 import com.sap.sailing.server.api.EventIdentifier;
 import com.sap.sailing.server.api.EventName;
 import com.sap.sailing.server.api.EventNameAndRaceName;
-import com.sap.sailing.server.api.LeaderboardNameAndRaceColumnName;
 import com.sap.sailing.server.api.RaceFetcher;
 import com.sap.sailing.server.api.RaceIdentifier;
 
@@ -631,24 +630,6 @@ public class RacingEventServiceImpl implements RacingEventService, EventFetcher,
 
     @Override
     public TrackedRace getTrackedRace(EventNameAndRaceName eventNameAndRaceName) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public RaceDefinition getRace(LeaderboardNameAndRaceColumnName leaderboardNameAndRaceColumnName) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public TrackedRace getTrackedRace(LeaderboardNameAndRaceColumnName leaderboardNameAndRaceColumnName) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public TrackedRace getExistingTrackedRace(LeaderboardNameAndRaceColumnName leaderboardNameAndRaceColumnName) {
         // TODO Auto-generated method stub
         return null;
     }

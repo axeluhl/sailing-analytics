@@ -122,7 +122,6 @@ import com.sap.sailing.server.api.EventFetcher;
 import com.sap.sailing.server.api.EventIdentifier;
 import com.sap.sailing.server.api.EventName;
 import com.sap.sailing.server.api.EventNameAndRaceName;
-import com.sap.sailing.server.api.LeaderboardNameAndRaceColumnName;
 import com.sap.sailing.server.api.RaceFetcher;
 import com.sap.sailing.server.api.RaceIdentifier;
 
@@ -189,7 +188,12 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             result.name = leaderboard.getName();
             result.competitorDisplayNames = new HashMap<CompetitorDTO, String>();
             for (RaceInLeaderboard raceColumn : leaderboard.getRaceColumns()) {
-                result.addRace(raceColumn.getName(), raceColumn.isMedalRace(), raceColumn.getTrackedRace());
+                RaceIdentifier raceIdentifier = null;
+                if(raceColumn.getTrackedRace() != null) {
+                    raceIdentifier = new EventNameAndRaceName(raceColumn.getTrackedRace().getTrackedEvent().getEvent().getName(),
+                            raceColumn.getTrackedRace().getRace().getName());
+                }
+                result.addRace(raceColumn.getName(), raceColumn.isMedalRace(), raceIdentifier);
             }
             result.rows = new HashMap<CompetitorDTO, LeaderboardRowDTO>();
             result.hasCarriedPoints = leaderboard.hasCarriedPoints();
@@ -891,7 +895,12 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         dao.name = leaderboard.getName();
         dao.competitorDisplayNames = new HashMap<CompetitorDTO, String>();
         for (RaceInLeaderboard raceColumn : leaderboard.getRaceColumns()) {
-            dao.addRace(raceColumn.getName(), raceColumn.isMedalRace(), raceColumn.getTrackedRace());
+            RaceIdentifier raceIdentifier = null;
+            if(raceColumn.getTrackedRace() != null) {
+                raceIdentifier = new EventNameAndRaceName(raceColumn.getTrackedRace().getTrackedEvent().getEvent().getName(),
+                        raceColumn.getTrackedRace().getRace().getName());
+            }
+            dao.addRace(raceColumn.getName(), raceColumn.isMedalRace(), raceIdentifier);
         }
         dao.hasCarriedPoints = leaderboard.hasCarriedPoints();
         dao.discardThresholds = leaderboard.getResultDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces();
@@ -1487,40 +1496,6 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         return trackedRace;
     }
 
-    @Override
-    public RaceDefinition getRace(LeaderboardNameAndRaceColumnName leaderboardNameAndRaceColumnName) {
-        RaceDefinition result = null;
-        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardNameAndRaceColumnName.getLeaderboardName());
-        if (leaderboard != null) {
-            RaceInLeaderboard raceColumn = leaderboard.getRaceColumnByName(leaderboardNameAndRaceColumnName
-                    .getRaceColumnName());
-            if (raceColumn != null && raceColumn.getTrackedRace() != null) {
-                result = raceColumn.getTrackedRace().getRace();
-            }
-        }
-        return result;
-    }
-
-    @Override
-    public TrackedRace getTrackedRace(LeaderboardNameAndRaceColumnName leaderboardNameAndRaceColumnName) {
-        TrackedRace result = null;
-        Leaderboard leaderboard = getService().getLeaderboardByName(
-                leaderboardNameAndRaceColumnName.getLeaderboardName());
-        if (leaderboard != null) {
-            RaceInLeaderboard raceColumn = leaderboard.getRaceColumnByName(leaderboardNameAndRaceColumnName
-                    .getRaceColumnName());
-            if (raceColumn != null) {
-                result = raceColumn.getTrackedRace();
-            }
-        }
-        return result;
-    }
-    
-    @Override
-    public TrackedRace getExistingTrackedRace(LeaderboardNameAndRaceColumnName leaderboardNameAndRaceColumnName) {
-        return getTrackedRace(leaderboardNameAndRaceColumnName);
-    }
-    
     @Override
     public TrackedRace getExistingTrackedRace(EventNameAndRaceName eventNameAndRaceName) {
         Event event = getService().getEventByName(eventNameAndRaceName.getEventName());
