@@ -17,6 +17,7 @@ import org.junit.Test;
 
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
+import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
 import com.sap.sailing.domain.tractracadapter.TracTracRaceTracker;
 import com.sap.sailing.domain.tractracadapter.impl.DomainFactoryImpl;
 
@@ -36,9 +37,9 @@ public class MultipleClassesInEventTest {
     
     @Test
     public void testLoadTwoRacesWithEqualEventNameButDifferentClasses() throws MalformedURLException, FileNotFoundException, URISyntaxException {
-        String httpAndHost = "http://germanmaster.traclive.dk";
-        String liveURI = "tcp://germanmaster.traclive.dk:4400";
-        String storedURI = "tcp://germanmaster.traclive.dk:4401";
+        String httpAndHost = "http://" + TracTracConnectionConstants.HOST_NAME;
+        String liveURI = "tcp://" + TracTracConnectionConstants.HOST_NAME + ":4400";
+        String storedURI = "tcp://" + TracTracConnectionConstants.HOST_NAME + ":4401";
         if (tractracTunnel) {
             liveURI   = "tcp://"+tractracTunnelHost+":4412";
             storedURI = "tcp://"+tractracTunnelHost+":4413";

@@ -9,6 +9,7 @@ import com.google.gwt.junit.client.GWTTestCase;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.ExpandableSortableColumn;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
@@ -29,7 +30,7 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
     private final String EVENT_NAME = "Sailing Team Germany (STG)";
     protected static final boolean tractracTunnel = true; // Boolean.valueOf(System.getProperty("tractrac.tunnel", "false"));
     protected static final String tractracTunnelHost = "10.18.10.38"; // System.getProperty("tractrac.tunnel.host", "localhost");
-    private final String JSON_URL= "http://germanmaster.traclive.dk/events/event_20110505_SailingTea/jsonservice.php";
+    private final String JSON_URL= "http://" + TracTracConnectionConstants.HOST_NAME + "/events/event_20110505_SailingTea/jsonservice.php";
     private final String TRACKED_RACE = "schwerttest";
     
     
@@ -77,8 +78,8 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
     }
     
     private void trackRace(){
-        service.track(rrDao, tractracTunnel ? "tcp://"+tractracTunnelHost+":4412" : "tcp://germanmaster.traclive.dk:4400",
-                tractracTunnel ? "tcp://"+tractracTunnelHost+":4413" : "tcp://germanmaster.traclive.dk:4401", false, false, new AsyncCallback<Void>() {
+        service.track(rrDao, tractracTunnel ? "tcp://"+tractracTunnelHost+":4412" : "tcp://" + TracTracConnectionConstants.HOST_NAME + ":4400",
+                tractracTunnel ? "tcp://"+tractracTunnelHost+":4413" : "tcp://" + TracTracConnectionConstants.HOST_NAME + ":4401", false, false, new AsyncCallback<Void>() {
 
             @Override
             public void onFailure(Throwable caught) {

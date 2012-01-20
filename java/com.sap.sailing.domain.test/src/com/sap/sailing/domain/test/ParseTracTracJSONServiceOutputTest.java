@@ -23,6 +23,7 @@ import org.junit.Test;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.JSONService;
 import com.sap.sailing.domain.tractracadapter.RaceRecord;
+import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
 
 public class ParseTracTracJSONServiceOutputTest {
     @Test
@@ -73,7 +74,7 @@ public class ParseTracTracJSONServiceOutputTest {
     @Test
     public void testWeymouthOnline() throws MalformedURLException, IOException, java.text.ParseException, ParseException, URISyntaxException {
         JSONService jsonService = DomainFactory.INSTANCE.parseJSONURL(new URL(
-                "http://germanmaster.traclive.dk/events/event_20110505_SailingTea/jsonservice.php"));
+                "http://" + TracTracConnectionConstants.HOST_NAME + "/events/event_20110505_SailingTea/jsonservice.php"));
         assertEquals("Sailing Team Germany", jsonService.getEventName());
         List<RaceRecord> races = jsonService.getRaceRecords();
         assertTrue(races.size()>=28);
@@ -90,19 +91,19 @@ public class ParseTracTracJSONServiceOutputTest {
     @Test
     public void testWeymouthURIsOnline() throws MalformedURLException, IOException, java.text.ParseException, ParseException, URISyntaxException {
         JSONService jsonService = DomainFactory.INSTANCE.parseJSONURL(new URL(
-                "http://germanmaster.traclive.dk/events/event_20110505_SailingTea/jsonservice.php"));
+                "http://" + TracTracConnectionConstants.HOST_NAME + "/events/event_20110505_SailingTea/jsonservice.php"));
         List<RaceRecord> races = jsonService.getRaceRecords();
         assertFalse(races.isEmpty());
         for (RaceRecord race : races) {
-            assertEquals(new URI("tcp://germanmaster.traclive.dk:4400"), race.getLiveURI());
-            assertEquals(new URI("tcp://germanmaster.traclive.dk:4401"), race.getStoredURI());
+            assertEquals(new URI("tcp://" + TracTracConnectionConstants.HOST_NAME + ":4400"), race.getLiveURI());
+            assertEquals(new URI("tcp://" + TracTracConnectionConstants.HOST_NAME + ":4401"), race.getStoredURI());
         }
     }
 
     @Test
     public void testHamiltonOnline() throws MalformedURLException, IOException, java.text.ParseException, ParseException, URISyntaxException {
         JSONService jsonService = DomainFactory.INSTANCE.parseJSONURL(new URL(
-                "http://germanmaster.traclive.dk/events/event_20110308_SAPWorldCh/jsonservice.php"));
+                "http://" + TracTracConnectionConstants.HOST_NAME + "/events/event_20110308_SAPWorldCh/jsonservice.php"));
         assertEquals("SAP 2011 505 World Championship", jsonService.getEventName());
         List<RaceRecord> races = jsonService.getRaceRecords();
         assertEquals(14, races.size());
