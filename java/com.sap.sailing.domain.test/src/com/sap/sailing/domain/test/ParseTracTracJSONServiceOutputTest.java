@@ -95,8 +95,8 @@ public class ParseTracTracJSONServiceOutputTest {
         List<RaceRecord> races = jsonService.getRaceRecords();
         assertFalse(races.isEmpty());
         for (RaceRecord race : races) {
-            assertEquals(new URI("tcp://" + TracTracConnectionConstants.HOST_NAME + ":4400"), race.getLiveURI());
-            assertEquals(new URI("tcp://" + TracTracConnectionConstants.HOST_NAME + ":4401"), race.getStoredURI());
+            assertEquals(new URI("tcp://" + TracTracConnectionConstants.HOST_NAME + ":" + TracTracConnectionConstants.PORT_LIVE), race.getLiveURI());
+            assertEquals(new URI("tcp://" + TracTracConnectionConstants.HOST_NAME + ":" + TracTracConnectionConstants.PORT_STORED), race.getStoredURI());
         }
     }
 

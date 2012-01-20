@@ -44,12 +44,12 @@ public class RaceTrackerTest {
         paramUrl  = new URL("http://" + TracTracConnectionConstants.HOST_NAME + "/events/event_20110505_SailingTea/clientparams.php?event=event_20110505_SailingTea&race=bd8c778e-7c65-11e0-8236-406186cbf87c");
         
         if (tractracTunnel) {
-            liveUri   = new URI("tcp://"+tractracTunnelHost+":4412");
-            storedUri = new URI("tcp://"+tractracTunnelHost+":4413");
+            liveUri   = new URI("tcp://"+tractracTunnelHost+":"+TracTracConnectionConstants.PORT_TUNNEL_LIVE);
+            storedUri = new URI("tcp://"+tractracTunnelHost+":"+TracTracConnectionConstants.PORT_TUNNEL_STORED);
         } else {
             // no tunnel:
-            liveUri = new URI("tcp://" + TracTracConnectionConstants.HOST_NAME + ":4400");
-            storedUri = new URI("tcp://" + TracTracConnectionConstants.HOST_NAME + ":4401");
+            liveUri = new URI("tcp://" + TracTracConnectionConstants.HOST_NAME + ":" + TracTracConnectionConstants.PORT_LIVE);
+            storedUri = new URI("tcp://" + TracTracConnectionConstants.HOST_NAME + ":" + TracTracConnectionConstants.PORT_STORED);
         }
     }
     

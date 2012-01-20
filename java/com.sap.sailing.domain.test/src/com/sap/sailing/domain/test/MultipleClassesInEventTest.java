@@ -38,11 +38,11 @@ public class MultipleClassesInEventTest {
     @Test
     public void testLoadTwoRacesWithEqualEventNameButDifferentClasses() throws MalformedURLException, FileNotFoundException, URISyntaxException {
         String httpAndHost = "http://" + TracTracConnectionConstants.HOST_NAME;
-        String liveURI = "tcp://" + TracTracConnectionConstants.HOST_NAME + ":4400";
-        String storedURI = "tcp://" + TracTracConnectionConstants.HOST_NAME + ":4401";
+        String liveURI = "tcp://" + TracTracConnectionConstants.HOST_NAME + ":" + TracTracConnectionConstants.PORT_LIVE;
+        String storedURI = "tcp://" + TracTracConnectionConstants.HOST_NAME + ":" + TracTracConnectionConstants.PORT_STORED;
         if (tractracTunnel) {
-            liveURI   = "tcp://"+tractracTunnelHost+":4412";
-            storedURI = "tcp://"+tractracTunnelHost+":4413";
+            liveURI   = "tcp://"+tractracTunnelHost+":"+TracTracConnectionConstants.PORT_TUNNEL_LIVE;
+            storedURI = "tcp://"+tractracTunnelHost+":"+TracTracConnectionConstants.PORT_TUNNEL_STORED;
         }
         kiwotest1 = domainFactory
                 .createRaceTracker(

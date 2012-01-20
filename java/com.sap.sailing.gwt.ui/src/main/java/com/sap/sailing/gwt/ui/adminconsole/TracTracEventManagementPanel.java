@@ -170,7 +170,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         horizontalPanel_1.setCellVerticalAlignment(lblLiveDataPort, HasVerticalAlignment.ALIGN_MIDDLE);
 
         livePortIntegerbox = new IntegerBox();
-        livePortIntegerbox.setText("1520");
+        livePortIntegerbox.setText(Integer.toString(TracTracConnectionConstants.PORT_LIVE));
         livePortIntegerbox.addKeyUpHandler(new KeyUpHandler() {
             @Override
             public void onKeyUp(KeyUpEvent event) {

@@ -56,8 +56,8 @@ public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest impl
     @Before
     public void setUp() throws MalformedURLException, IOException, InterruptedException, URISyntaxException {
         setUp(new URL("http://" + TracTracConnectionConstants.HOST_NAME + "/events/event_20110505_SailingTea/clientparams.php?event=event_20110505_SailingTea&race=bd8c778e-7c65-11e0-8236-406186cbf87c"),
-            tractracTunnel ? new URI("tcp://"+tractracTunnelHost+":4412") : new URI("tcp://" + TracTracConnectionConstants.HOST_NAME + ":4400"),
-                    tractracTunnel ? new URI("tcp://"+tractracTunnelHost+":4413") : new URI("tcp://" + TracTracConnectionConstants.HOST_NAME + ":4401"));
+            tractracTunnel ? new URI("tcp://"+tractracTunnelHost+":"+TracTracConnectionConstants.PORT_TUNNEL_LIVE) : new URI("tcp://" + TracTracConnectionConstants.HOST_NAME + ":" + TracTracConnectionConstants.PORT_LIVE),
+                    tractracTunnel ? new URI("tcp://"+tractracTunnelHost+":"+TracTracConnectionConstants.PORT_TUNNEL_STORED) : new URI("tcp://" + TracTracConnectionConstants.HOST_NAME + ":" + TracTracConnectionConstants.PORT_STORED));
     }
     
     protected void setUp(URL paramUrl, URI liveUri, URI storedUri) throws FileNotFoundException, MalformedURLException {
