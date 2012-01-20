@@ -334,6 +334,9 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             List<CompetitorDTO> competitorList = getCompetitorDTOs(event.getCompetitors());
             List<RegattaDTO> regattasList = getRegattaDTOs(event, withRacePlaces);
             EventDTO eventDTO = new EventDTO(event.getName(), regattasList, competitorList);
+            for (RegattaDTO regatta : regattasList) {
+                regatta.setEvent(eventDTO);
+            }
             if (!eventDTO.regattas.isEmpty()) {
                 result.add(eventDTO);
             }
@@ -356,6 +359,9 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             List<RaceDTO> raceDTOsInBoatClass = getRaceDTOs(event, e.getValue(), withRacePlaces);
             if (!raceDTOsInBoatClass.isEmpty()) {
                 RegattaDTO regatta = new RegattaDTO(new BoatClassDTO(e.getKey()==null?"":e.getKey().getName()), raceDTOsInBoatClass);
+                for (RaceDTO race : raceDTOsInBoatClass) {
+                    race.setRegatta(regatta);
+                }
                 result.add(regatta);
             }
         }

@@ -22,6 +22,8 @@ public class RaceDTO extends NamedDTO implements IsSerializable {
     
     public RacePlaceOrder racePlaces = null;
     
+    private RegattaDTO regatta;
+    
     public RaceDTO() {}
 
     public RaceDTO(String name, Iterable<CompetitorDTO> competitors, boolean currentlyTracked) {
@@ -29,6 +31,13 @@ public class RaceDTO extends NamedDTO implements IsSerializable {
         this.competitors = competitors;
         this.currentlyTracked = currentlyTracked;
     }
-    
+
+    public RegattaDTO getRegatta() {
+        return regatta;
+    }
+
+    public void setRegatta(RegattaDTO regatta) {
+        this.regatta = regatta;
+    }
     
 }
