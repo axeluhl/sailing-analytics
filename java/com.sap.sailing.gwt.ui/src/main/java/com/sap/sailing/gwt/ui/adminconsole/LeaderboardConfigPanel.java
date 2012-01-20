@@ -439,7 +439,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
                     @Override
                     public void onSuccess(Void arg0) {
                         trackedEventsComposite.clearSelection();
-                        getSelectedRaceInLeaderboard().setTrackedRace(false);
+                        getSelectedRaceInLeaderboard().setRaceIdentifier(null);
                         raceColumnList.refresh();
                     }
                 });
@@ -864,7 +864,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
                     public void onSuccess(Boolean success) {
                         if (success) {
                             // TODO consider enabling the Unlink button
-                            selectedRaceInLeaderboard.setTrackedRace(true);
+                            selectedRaceInLeaderboard.setRaceIdentifier(selectedRace.getRaceIdentifier());
                             raceColumnList.refresh();
                         }
                     }
