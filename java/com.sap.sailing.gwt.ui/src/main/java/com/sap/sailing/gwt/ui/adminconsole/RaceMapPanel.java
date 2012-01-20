@@ -19,7 +19,6 @@ import com.google.gwt.user.client.ui.ProvidesResize;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.EventDisplayer;
@@ -34,7 +33,6 @@ import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.PositionDTO;
 import com.sap.sailing.gwt.ui.shared.QuickRankDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
-import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialog;
 import com.sap.sailing.server.api.EventNameAndRaceName;
 
@@ -117,9 +115,9 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
     }
 
     @Override
-    public void onRaceSelectionChange(List<Triple<EventDTO, RegattaDTO, RaceDTO>> selectedRaces) {
+    public void onRaceSelectionChange(List<RaceDTO> selectedRaces) {
         if (!selectedRaces.isEmpty() && selectedRaces.get(selectedRaces.size() - 1) != null) {
-            RaceDTO raceDTO = selectedRaces.get(selectedRaces.size() - 1).getC();
+            RaceDTO raceDTO = selectedRaces.get(selectedRaces.size() - 1);
             competitorSelectionProvider.setCompetitors(raceDTO.competitors);
             if (raceDTO.startOfRace != null) {
                 timePanel.timeChanged(raceDTO.startOfRace);
@@ -142,10 +140,10 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
     @Override
     public void timeChanged(final Date date) {
         if (date != null) {
-            List<Triple<EventDTO, RegattaDTO, RaceDTO>> selection = raceListBox.getSelectedEventAndRace();
+            List<RaceDTO> selection = raceListBox.getSelectedRaces();
             if (!selection.isEmpty()) {
-                EventDTO event = selection.get(selection.size() - 1).getA();
-                RaceDTO race = selection.get(selection.size() - 1).getC();
+                RaceDTO race = selection.get(selection.size() - 1);
+                EventDTO event = race.getEvent();
                 if (event != null && race != null) {
                     sailingService.getQuickRanks(new EventNameAndRaceName(event.name, race.name), date,
                             new AsyncCallback<List<QuickRankDTO>>() {
