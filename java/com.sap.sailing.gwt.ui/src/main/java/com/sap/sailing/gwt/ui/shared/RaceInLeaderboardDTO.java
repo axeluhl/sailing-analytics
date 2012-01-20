@@ -26,6 +26,4 @@ public class RaceInLeaderboardDTO implements IsSerializable {
     public void setRaceIdentifier(RaceIdentifier raceIdentifier) {
         this.trackedRaceIdentifier = raceIdentifier;
     }
-
-    
 }
