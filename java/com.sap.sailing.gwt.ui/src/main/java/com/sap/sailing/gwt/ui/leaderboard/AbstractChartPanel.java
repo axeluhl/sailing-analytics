@@ -1,6 +1,8 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -375,7 +377,7 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
 
     private Widget createChart() {
         final Label selectedPointLabel = new Label(getStringMessages().hoverOverAPoint());
-        PlotWithOverviewModel model = new PlotWithOverviewModel(PlotModelStrategy.defaultStrategy());
+        final PlotWithOverviewModel model = new PlotWithOverviewModel(PlotModelStrategy.defaultStrategy());
         PlotOptions plotOptions = new PlotOptions();
         plotOptions.setDefaultLineSeriesOptions(new LineSeriesOptions().setLineWidth(1).setShow(true));
         plotOptions.setDefaultPointsOptions(new PointsSeriesOptions().setShow(false));
@@ -453,28 +455,98 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
         }, true);
         plot.addSelectionListener(new SelectionListener() {
             public void selected(double x1, double y1, double x2, double y2) {
-            	// TODO Remove not visible buoys from the series when user is zooming in or add them if he is zooming out.
-                    // TODO Woher kommt der Error wenn kein MarkPassing in der Range ist?
-            	for (CompetitorDTO competitor : competitorID){
-            	    Pair<String,Long>[] markPassingTimes = competitorsAndTimePointsDTO.getMarkPassings(competitor);
+            	//Remove not visible buoys from the series when user is zooming in or add them if he is zooming out.
+                    //Make series invisible didn't work, so they're removed from the Model instead
+                    //TODO How to re-add the series to the model? How to modify the selection, if the 'overview-bar' is used?
+//            	for (CompetitorDTO competitor : competitorID){
+//            	    Pair<String,Long>[] markPassingTimes = competitorsAndTimePointsDTO.getMarkPassings(competitor);
+//                    Double[] markPassingValues = chartData.getMarkPassings(competitor);
+//                    boolean markPassingsInRange = false;
+//                    
+//                    SeriesHandler markSeries = getCompetitorMarkPassingSeries(competitor);
+//                    markSeries.clear();
+//                    
+//                    for (int j = 0; j < markPassingTimes.length; j++){
+//                        double passingTime = markPassingTimes[j].getB().doubleValue();
+//                        if (markPassingValues[j] != null && x1 < passingTime && passingTime < x2) {
+//                            markSeries.add(new DataPoint(passingTime ,markPassingValues[j]));
+//                            markPassingsInRange = true;
+//                        }
+//                    }
+//                    
+//                    if (!markPassingsInRange){
+//                        model.removeSeries(markSeries);
+//                        markSeriesID.remove(markSeries);
+//                    } else {
+//                        //Here you should re-add the series. The code below does'nt work
+//                        if (!markSeriesID.contains(markSeries)) {
+//                            CompetitorDTO[] competitors = competitorsAndTimePointsDTO.getCompetitor();
+//                            int index = -1;
+//                            for (CompetitorDTO competitorDTO : competitors) {
+//                                if (competitor.equals(competitorDTO)) {
+//                                    break;
+//                                }
+//                                index++;
+//                            }
+//                            SeriesHandler series = model
+//                                    .addSeries(index + " passed mark", colorMap.getColorByID(index));
+//                            series.setOptions(SeriesType.LINES, new LineSeriesOptions().setLineWidth(0).setShow(false));
+//                            series.setOptions(SeriesType.POINTS, new PointsSeriesOptions().setLineWidth(3)
+//                                    .setShow(true));
+//                            series.setVisible(true);
+//                            markSeriesID.add(index, series);
+//                        }
+//                    }
+//            	}
+                //Instead of making the mark passings invisible, refactor the selection range, so that there is no blank space in the plot
+                ArrayList<Double> x1Values = new ArrayList<Double>();
+                ArrayList<Double> x2Values = new ArrayList<Double>();
+                boolean markPassingInRange = false;
+                
+                competitorLoop:
+                for (CompetitorDTO competitor : competitorID) {
+                    ArrayList<Pair<Double, Double>> negativeDeltas = new ArrayList<Pair<Double, Double>>();
+                    ArrayList<Pair<Double, Double>> positiveDeltas = new ArrayList<Pair<Double, Double>>();
+                    Pair<String, Long>[] markPassingTimes = competitorsAndTimePointsDTO.getMarkPassings(competitor);
                     Double[] markPassingValues = chartData.getMarkPassings(competitor);
-                    boolean markPassingsInRange = false;
                     
-                    SeriesHandler markSeries = getCompetitorMarkPassingSeries(competitor);
-                    markSeries.clear();
-                    
-                    for (int j = 0; j < markPassingTimes.length; j++){
-                        double passingTime = markPassingTimes[j].getB().doubleValue();
-                        if (markPassingValues[j] != null && x1 < passingTime && passingTime < x2) {
-                            markSeries.add(new DataPoint(passingTime ,markPassingValues[j]));
-                            markPassingsInRange = true;
+                    for (int i = 0; i < markPassingValues.length; i++) {
+                        double markPassing = markPassingTimes[i].getB().doubleValue();
+                        if (markPassingValues[i] != null && (markPassing < x1 || markPassing > x2)) {
+                            double delta = markPassing < x1 ? markPassing - x1 : markPassing - x2;
+                            Pair<Double, Double> p = new Pair<Double, Double>(delta, markPassing);
+                            if (delta < 0) {
+                                negativeDeltas.add(p);
+                            } else {
+                                positiveDeltas.add(p);
+                            }
+                        } else if (markPassingValues[i] != null) {
+                            markPassingInRange = true;
+                            break competitorLoop;
                         }
                     }
                     
-                    if (!markPassingsInRange){
-                    	markSeries.setVisible(false);
-                    }
-            	}
+                    Comparator<Pair<Double, Double>> comp = new Comparator<Pair<Double,Double>>() {
+                        @Override
+                        public int compare(Pair<Double, Double> p1, Pair<Double, Double> p2) {
+                            return p1.getA().compareTo(p2.getA());
+                        }
+                    };
+                    
+                    Collections.sort(negativeDeltas, comp);
+                    x1Values.add(negativeDeltas.get(negativeDeltas.size() - 1).getB());
+                    Collections.sort(positiveDeltas, comp);
+                    x2Values.add(positiveDeltas.get(0).getB());
+                }
+                
+                //If there are mark passings between x1 and x2 no refactoring is needed
+                if (!markPassingInRange) {
+                    Collections.sort(x1Values);
+                    x1 = x1Values.get(0) - 2000; //Increase x1 by 2 seconds prevent small blank space
+                    Collections.sort(x2Values);
+                    x2 = x2Values.get(x2Values.size() - 1) + 2000; //Increase x2 by 2 seconds prevent small blank space
+                }
+                
                 plot.setLinearSelection(x1, x2);
             }
         });
