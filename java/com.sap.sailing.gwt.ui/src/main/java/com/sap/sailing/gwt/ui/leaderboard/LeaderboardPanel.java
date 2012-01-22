@@ -697,6 +697,12 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         }
     }
 
+    public LeaderboardPanel(SailingServiceAsync sailingService,
+            CompetitorSelectionProvider competitorSelectionProvider, String leaderboardName,
+            ErrorReporter errorReporter, final StringMessages stringConstants) {
+        this(sailingService, /* preSelectedRace */ null, competitorSelectionProvider, leaderboardName, errorReporter, stringConstants);
+    }
+    
     public LeaderboardPanel(SailingServiceAsync sailingService, RaceIdentifier preSelectedRace,
             CompetitorSelectionProvider competitorSelectionProvider, String leaderboardName,
             ErrorReporter errorReporter, final StringMessages stringConstants) {
@@ -1338,12 +1344,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     @Override
     public SettingsDialogComponent<LeaderboardSettings> getSettingsDialogComponent() {
         return new LeaderboardSettingsDialogComponent(Collections.unmodifiableList(selectedManeuverDetails),
-                Collections.unmodifiableList(selectedLegDetails), Collections.unmodifiableList(selectedRaceDetails), /*
-                                                                                                                      * All
-                                                                                                                      * races
-                                                                                                                      * to
-                                                                                                                      * select
-                                                                                                                      */
+                Collections.unmodifiableList(selectedLegDetails),
+                Collections.unmodifiableList(selectedRaceDetails), /*  All races to select */
                 leaderboard.getRaceColumnNameList(), selectedRaceColumns,
                 timer.getDelayBetweenAutoAdvancesInMilliseconds(), delayInMilliseconds, stringConstants);
     }
