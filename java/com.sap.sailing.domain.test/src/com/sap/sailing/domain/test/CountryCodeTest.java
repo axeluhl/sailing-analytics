@@ -12,6 +12,7 @@ import java.nio.charset.Charset;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.MissingResourceException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -101,7 +102,12 @@ public class CountryCodeTest {
     @Test
     public void testGermanyCountryCode() {
         for (Locale l : Locale.getAvailableLocales()) {
-            System.out.println(""+l+"/"+l.getISO3Country());
+            try {
+                l.getISO3Country();
+            } catch (MissingResourceException e) {
+                // The "Serbia and Montenegro" locale has no ISO3 code due to the split-up
+                assertEquals("sr_CS", l.toString());
+            }
         }
         assertEquals("DEU", Locale.GERMANY.getISO3Country());
         assertEquals("DE", Locale.GERMANY.getCountry());

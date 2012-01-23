@@ -9,8 +9,8 @@ public class QuickRankDTO implements IsSerializable {
 
     public QuickRankDTO() {}
     
-    public QuickRankDTO(CompetitorDTO competitorDAO, int rank, int legNumber) {
-        this.competitor = competitorDAO;
+    public QuickRankDTO(CompetitorDTO competitorDTO, int rank, int legNumber) {
+        this.competitor = competitorDTO;
         this.rank = rank;
         this.legNumber = legNumber;
     }

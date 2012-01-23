@@ -8,7 +8,7 @@ import com.google.gwt.text.client.DateTimeFormatRenderer;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 
-public abstract class AbstractEventPanel extends FormPanel implements EventDisplayer{
+public abstract class AbstractEventPanel extends FormPanel implements EventDisplayer {
     protected final SailingServiceAsync sailingService;
     protected DateTimeFormatRenderer dateFormatter = new DateTimeFormatRenderer(DateTimeFormat.getFormat(PredefinedFormat.DATE_SHORT));
     protected DateTimeFormatRenderer timeFormatter = new DateTimeFormatRenderer(DateTimeFormat.getFormat(PredefinedFormat.TIME_LONG));
@@ -32,7 +32,7 @@ public abstract class AbstractEventPanel extends FormPanel implements EventDispl
      * Returns if <code>wordsToFilter</code> contain a value of the <code>valuesToCheck</code>  
      * @param wordsToFilter the words to filter on
      * @param valuesToCheck the values to check for. These values contain the values of the current rows.
-     * @return
+     * @return <code>false</code> if the <code>valuesToCheck</code> contains all <code>wordsToFilter</code>, <code>true</code> if not
      */
     protected boolean textContainingStringsToCheck(List<String> wordsToFilter, String... valuesToCheck){
         boolean failed = false;

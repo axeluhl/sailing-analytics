@@ -23,7 +23,7 @@ public class LeaderboardPage extends AbstractEntryPoint {
                 if (leaderboardNames.contains(leaderboardName)) {
                     LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(stringMessages);
                     logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
-                    LeaderboardPanel leaderboardPanel = new LeaderboardPanel(sailingService,
+                    LeaderboardPanel leaderboardPanel = new LeaderboardPanel(sailingService, null,
                             new CompetitorSelectionModel(/* hasMultiSelection */ true), leaderboardName,
                             LeaderboardPage.this, stringMessages);
                     String padding = Window.Location.getParameter("padding");

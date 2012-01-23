@@ -38,7 +38,6 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sailing.domain.common.WindSource;
-import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.EventDisplayer;
 import com.sap.sailing.gwt.ui.client.EventRefresher;
@@ -47,7 +46,6 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
-import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
@@ -90,9 +88,10 @@ public class WindPanel extends FormPanel implements EventDisplayer, WindShower, 
         removeColumn = new IdentityColumn<WindDTO>(new ActionCell<WindDTO>(stringMessages.remove(), new Delegate<WindDTO>() {
             @Override
             public void execute(final WindDTO wind) {
-                List<Triple<EventDTO, RegattaDTO, RaceDTO>> eventAndRaces = trackedEventsComposite.getSelectedEventAndRace();
-                final Triple<EventDTO, RegattaDTO, RaceDTO> eventAndRace = eventAndRaces.get(eventAndRaces.size()-1);
-                sailingService.removeWind(new EventNameAndRaceName(eventAndRace.getA().name, eventAndRace.getC().name), wind, new AsyncCallback<Void>() {
+                List<RaceDTO> selectedRaces = trackedEventsComposite.getSelectedRaces();
+                final RaceDTO race = selectedRaces.get(selectedRaces.size()-1);
+                EventNameAndRaceName raceIdentifier = (EventNameAndRaceName) race.getRaceIdentifier();
+                sailingService.removeWind(raceIdentifier, wind, new AsyncCallback<Void>() {
                     @Override
                     public void onSuccess(Void result) {
                         // remove row from underlying list:
@@ -101,7 +100,7 @@ public class WindPanel extends FormPanel implements EventDisplayer, WindShower, 
                     @Override
                     public void onFailure(Throwable caught) {
                                         WindPanel.this.errorReporter.reportError(
-                                                WindPanel.this.stringMessages.errorSettingWindForRace()+ " "+eventAndRace.getC().name
+                                                WindPanel.this.stringMessages.errorSettingWindForRace()+ " "+race.name
                                                 + ": "+ caught.getMessage());
                                     }
                 });
@@ -154,7 +153,7 @@ public class WindPanel extends FormPanel implements EventDisplayer, WindShower, 
             public void onValueChange(ValueChangeEvent<Boolean> event) {
                 setWindSource(/* runOnSuccess */ new Runnable() {
                     public void run() {
-                        clearOrShowWindBasedOnRaceSelection(trackedEventsComposite.getSelectedEventAndRace());
+                        clearOrShowWindBasedOnRaceSelection(trackedEventsComposite.getSelectedRaces());
                     }
                 });
             }
@@ -176,11 +175,11 @@ public class WindPanel extends FormPanel implements EventDisplayer, WindShower, 
         this.setWidget(grid);
     }
 
-    private void clearOrShowWindBasedOnRaceSelection(List<Triple<EventDTO, RegattaDTO, RaceDTO>> selectedRaces) {
+    private void clearOrShowWindBasedOnRaceSelection(List<RaceDTO> selectedRaces) {
         if (selectedRaces.isEmpty()) {
             clearWindDisplay(); // no wind known for untracked race
         } else {
-            showWind(selectedRaces.get(0).getA(), selectedRaces.get(0).getC());
+            showWind(selectedRaces.get(0));
         }
     }
 
@@ -190,8 +189,9 @@ public class WindPanel extends FormPanel implements EventDisplayer, WindShower, 
     }
 
     @Override
-    public void showWind(final EventDTO event, final RaceDTO race) {
-        sailingService.getWindInfo(new EventNameAndRaceName(event.name, race.name),
+    public void showWind(final RaceDTO race) {
+        EventNameAndRaceName raceIdentifier = (EventNameAndRaceName) race.getRaceIdentifier();
+        sailingService.getWindInfo(raceIdentifier,
         // TODO Time interval should be determined by a selection in the chart but be at most 60s. See bug #121. Consider incremental updates for new data only.
                 null, null, // use race start and time of newest event as default time period
                 null, // retrieve data on all wind sources
@@ -335,16 +335,16 @@ public class WindPanel extends FormPanel implements EventDisplayer, WindShower, 
     }
 
     private void setWindSource(final Runnable runOnSuccess) {
-        List<Triple<EventDTO, RegattaDTO, RaceDTO>> selection = trackedEventsComposite.getSelectedEventAndRace();
+        List<RaceDTO> selection = trackedEventsComposite.getSelectedRaces();
         if (selection != null && !selection.isEmpty()) {
-            final Triple<EventDTO, RegattaDTO, RaceDTO> selectedRace = selection.get(0);
+            final RaceDTO selectedRace = selection.get(0);
             final String windSourceName = windSourceSelection.getItemText(windSourceSelection.getSelectedIndex());
-            sailingService.setWindSource(new EventNameAndRaceName(selectedRace.getA().name, selectedRace.getC().name),
+            sailingService.setWindSource(new EventNameAndRaceName(selectedRace.getEvent().name, selectedRace.name),
                     windSourceName, raceIsKnownToStartUpwindBox.getValue(), new AsyncCallback<Void>() {
                         @Override
                         public void onFailure(Throwable caught) {
                             errorReporter.reportError(WindPanel.this.stringMessages.errorWhileTryingToSetWindSourceForRace()+
-                                    " "+selectedRace.getC().name+" "+WindPanel.this.stringMessages.inEvent()+" "+selectedRace.getA().name+
+                                    " "+selectedRace.name+" "+WindPanel.this.stringMessages.inEvent()+" "+selectedRace.getEvent().name+
                                     " "+WindPanel.this.stringMessages.to()+" "+
                                     windSourceName+": "+caught.getMessage());
                         }
@@ -359,11 +359,11 @@ public class WindPanel extends FormPanel implements EventDisplayer, WindShower, 
     }
 
     @Override
-    public void onRaceSelectionChange(List<Triple<EventDTO, RegattaDTO, RaceDTO>> selectedRaces) {
+    public void onRaceSelectionChange(List<RaceDTO> selectedRaces) {
         clearOrShowWindBasedOnRaceSelection(selectedRaces);
     }
     
-    public List<Triple<EventDTO, RegattaDTO, RaceDTO>> getSelectedRaces(){
-        return trackedEventsComposite.getSelectedEventAndRace();
+    public List<RaceDTO> getSelectedRaces(){
+        return trackedEventsComposite.getSelectedRaces();
     }
 }

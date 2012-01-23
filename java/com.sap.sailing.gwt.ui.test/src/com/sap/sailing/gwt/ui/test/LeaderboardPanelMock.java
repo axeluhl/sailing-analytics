@@ -15,7 +15,7 @@ public class LeaderboardPanelMock extends LeaderboardPanel {
     public LeaderboardPanelMock(SailingServiceAsync sailingService,
             String leaderboardName, ErrorReporter errorReporter,
             StringMessages stringConstants) {
-        super(sailingService, new CompetitorSelectionModel(/* hasMultiSelection */ true), leaderboardName, errorReporter, stringConstants);
+        super(sailingService, null, new CompetitorSelectionModel(/* hasMultiSelection */ true), leaderboardName, errorReporter, stringConstants);
         // TODO Auto-generated constructor stub
     }
 

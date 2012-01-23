@@ -2,7 +2,6 @@ package com.sap.sailing.gwt.ui.raceboard;
 
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.components.CollapsablePanel;
 import com.sap.sailing.gwt.ui.shared.components.Component;
@@ -10,7 +9,7 @@ import com.sap.sailing.gwt.ui.shared.components.ComponentGroup;
 import com.sap.sailing.gwt.ui.shared.components.ComponentToolbar;
 
 /**
- * A GWT component that visualizes a {@link Component} or a {@link Component} including menus to scroll quickly to the embedded view
+ * A GWT component that visualizes a {@link ComponentGroup} or a {@link Component} including menus to scroll quickly to the embedded view
  * of the respective component, collapse/expand buttons for the views embedded and homogeneous settings buttons for
  * those components that have settings.
  * 
@@ -24,15 +23,15 @@ public class CollapsableComponentViewer<SettingsType> {
 
     private final StringMessages stringMessages;
     
-    public CollapsableComponentViewer(Component<SettingsType> component, StringMessages stringMessages) {
+    public CollapsableComponentViewer(Component<SettingsType> component, String defaultWidth, String defaultHeight, StringMessages stringMessages) {
         this.component = component;
         this.stringMessages = stringMessages;
         
         AbsolutePanel contentPanel = new AbsolutePanel();
-        disclosurePanel = createDisclosePanel(contentPanel, component.getLocalizedShortName(), 150); 
+        disclosurePanel = createDisclosePanel(contentPanel, component.getLocalizedShortName(), defaultWidth, defaultHeight); 
     }
 
-    public Widget getViewerWidget() {
+    public CollapsablePanel getViewerWidget() {
         return disclosurePanel;
     }
 
@@ -40,7 +39,7 @@ public class CollapsableComponentViewer<SettingsType> {
         return component;
     }
 
-    private CollapsablePanel createDisclosePanel(Panel contentPanel, String panelTitle, int heightInPx)
+    private CollapsablePanel createDisclosePanel(Panel contentPanel, String panelTitle, String defaultContentWidth, String defaultContentHeight)
     {
         CollapsablePanel disclosurePanel = new CollapsablePanel (panelTitle);
         disclosurePanel.setSize("100%", "100%");
@@ -50,7 +49,7 @@ public class CollapsableComponentViewer<SettingsType> {
         toolbar.addSettingsButton();
         disclosurePanel.setHeaderToolbar(toolbar);
         
-        contentPanel.setSize("100%", heightInPx + "px");
+        contentPanel.setSize(defaultContentWidth, defaultContentHeight);
         disclosurePanel.setContent(contentPanel);
         if(component.getEntryWidget() != null) {
             contentPanel.add(component.getEntryWidget());
@@ -66,5 +65,4 @@ public class CollapsableComponentViewer<SettingsType> {
         
         return disclosurePanel;
     }
-
 }

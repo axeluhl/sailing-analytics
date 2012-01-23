@@ -57,7 +57,6 @@ import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
-import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.components.Component;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
 import com.sap.sailing.server.api.EventNameAndRaceName;
@@ -120,7 +119,7 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
 
     private CompetitorSelectionProvider competitorSelection;
 
-    private List<Triple<EventDTO, RegattaDTO, RaceDTO>> selectedEventAndRace;
+    private List<RaceDTO> selectedRaces;
 
     /**
      * If the user explicitly zoomed or panned the map, don't adjust zoom/pan unless a new race is selected
@@ -208,15 +207,15 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
                     @Override
                     public void onZoomEnd(MapZoomEndEvent event) {
                         mapZoomedOrPannedSinceLastRaceSelectionChange = true;
-                        Set<CompetitorDTO> competitorDAOsOfUnusedMarkers = new HashSet<CompetitorDTO>(boatMarkers.keySet());
-                        for (CompetitorDTO competitorDAO : getCompetitorsToShow()) {
-                                boolean usedExistingMarker = updateMarkerForCompetitor(competitorDAO);
+                        Set<CompetitorDTO> competitorDTOsOfUnusedMarkers = new HashSet<CompetitorDTO>(boatMarkers.keySet());
+                        for (CompetitorDTO competitorDTO : getCompetitorsToShow()) {
+                                boolean usedExistingMarker = updateMarkerForCompetitor(competitorDTO);
                                 if (usedExistingMarker) {
-                                    competitorDAOsOfUnusedMarkers.remove(competitorDAO);
+                                    competitorDTOsOfUnusedMarkers.remove(competitorDTO);
                                 }
                         }
-                        for (CompetitorDTO unusedMarkerCompetitorDAO : competitorDAOsOfUnusedMarkers) {
-                            map.removeOverlay(boatMarkers.remove(unusedMarkerCompetitorDAO));
+                        for (CompetitorDTO unusedMarkerCompetitorDTO : competitorDTOsOfUnusedMarkers) {
+                            map.removeOverlay(boatMarkers.remove(unusedMarkerCompetitorDTO));
                         }
                     }
                 });
@@ -241,18 +240,19 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
     }
     
     @Override
-    public void onRaceSelectionChange(List<Triple<EventDTO, RegattaDTO, RaceDTO>> selectedRaces) {
+    public void onRaceSelectionChange(List<RaceDTO> selectedRaces) {
         mapFirstZoomDone = false;
         mapZoomedOrPannedSinceLastRaceSelectionChange = false;
-        this.selectedEventAndRace = selectedRaces;
+        this.selectedRaces = selectedRaces;
     }
 
     @Override
     public void timeChanged(final Date date) {
         if (date != null) {
-            if (selectedEventAndRace != null && !selectedEventAndRace.isEmpty()) {
-                EventDTO event = selectedEventAndRace.get(selectedEventAndRace.size() - 1).getA();
-                RaceDTO race = selectedEventAndRace.get(selectedEventAndRace.size() - 1).getC();
+            if (selectedRaces != null && !selectedRaces.isEmpty()) {
+                RaceDTO race = selectedRaces.get(selectedRaces.size() - 1);
+                EventDTO event = race.getEvent();
+                
                 if (event != null && race != null) {
                     final Triple<Map<CompetitorDTO, Date>, Map<CompetitorDTO, Date>, Map<CompetitorDTO, Boolean>> fromAndToAndOverlap = 
                             computeFromAndTo(date, getCompetitorsToShow());
@@ -392,19 +392,19 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
     protected void showMarksOnMap(List<MarkDTO> result) {
         if (map != null) {
             Set<MarkDTO> toRemove = new HashSet<MarkDTO>(buoyMarkers.keySet());
-            for (MarkDTO markDAO : result) {
-                Marker buoyMarker = buoyMarkers.get(markDAO);
+            for (MarkDTO markDTO : result) {
+                Marker buoyMarker = buoyMarkers.get(markDTO);
                 if (buoyMarker == null) {
-                    buoyMarker = createBuoyMarker(markDAO);
-                    buoyMarkers.put(markDAO, buoyMarker);
+                    buoyMarker = createBuoyMarker(markDTO);
+                    buoyMarkers.put(markDTO, buoyMarker);
                     map.addOverlay(buoyMarker);
                 } else {
-                    buoyMarker.setLatLng(LatLng.newInstance(markDAO.position.latDeg, markDAO.position.lngDeg));
-                    toRemove.remove(markDAO);
+                    buoyMarker.setLatLng(LatLng.newInstance(markDTO.position.latDeg, markDTO.position.lngDeg));
+                    toRemove.remove(markDTO);
                 }
             }
-            for (MarkDTO toRemoveMarkDAO : toRemove) {
-                Marker marker = buoyMarkers.remove(toRemoveMarkDAO);
+            for (MarkDTO toRemoveMarkDTO : toRemove) {
+                Marker marker = buoyMarkers.remove(toRemoveMarkDTO);
                 map.removeOverlay(marker);
             }
             zoomMapFirstTimeToMarks(buoyMarkers.keySet());
@@ -422,8 +422,8 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
         if (!mapZoomedOrPannedSinceLastRaceSelectionChange && !mapFirstZoomDone) {
             LatLngBounds newBounds = null;
             if (marksToZoomAt != null && !marksToZoomAt.isEmpty()) {
-                for (MarkDTO markDAO : marksToZoomAt) {
-                    LatLng latLngZoomFirstTime = LatLng.newInstance(markDAO.position.latDeg, markDAO.position.lngDeg);
+                for (MarkDTO markDTO : marksToZoomAt) {
+                    LatLng latLngZoomFirstTime = LatLng.newInstance(markDTO.position.latDeg, markDTO.position.lngDeg);
                     LatLngBounds bounds = LatLngBounds.newInstance(latLngZoomFirstTime, latLngZoomFirstTime);
                     if (newBounds == null) {
                         newBounds = bounds;
@@ -458,18 +458,18 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
     protected void showBoatsOnMap(Date from, Date to, Iterable<CompetitorDTO> competitorsToShow) {
         if (map != null) {
             LatLngBounds newMapBounds = null;
-            Set<CompetitorDTO> competitorDAOsOfUnusedTails = new HashSet<CompetitorDTO>(tails.keySet());
-            Set<CompetitorDTO> competitorDAOsOfUnusedMarkers = new HashSet<CompetitorDTO>(boatMarkers.keySet());
+            Set<CompetitorDTO> competitorDTOsOfUnusedTails = new HashSet<CompetitorDTO>(tails.keySet());
+            Set<CompetitorDTO> competitorDTOsOfUnusedMarkers = new HashSet<CompetitorDTO>(boatMarkers.keySet());
 
-            for (CompetitorDTO competitorDAO : competitorsToShow) {
-                if (fixes.containsKey(competitorDAO)) {
-                    Polyline tail = tails.get(competitorDAO);
+            for (CompetitorDTO competitorDTO : competitorsToShow) {
+                if (fixes.containsKey(competitorDTO)) {
+                    Polyline tail = tails.get(competitorDTO);
                     if (tail == null) {
-                        tail = createTailAndUpdateIndices(competitorDAO, from, to);
+                        tail = createTailAndUpdateIndices(competitorDTO, from, to);
                         map.addOverlay(tail);
                     } else {
-                        updateTail(tail, competitorDAO, from, to);
-                        competitorDAOsOfUnusedTails.remove(competitorDAO);
+                        updateTail(tail, competitorDTO, from, to);
+                        competitorDTOsOfUnusedTails.remove(competitorDTO);
                     }
                     LatLngBounds bounds = tail.getBounds();
                     if (newMapBounds == null) {
@@ -478,9 +478,9 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
                         newMapBounds.extend(bounds.getNorthEast());
                         newMapBounds.extend(bounds.getSouthWest());
                     }
-                    boolean usedExistingMarker = updateMarkerForCompetitor(competitorDAO);
+                    boolean usedExistingMarker = updateMarkerForCompetitor(competitorDTO);
                     if (usedExistingMarker) {
-                        competitorDAOsOfUnusedMarkers.remove(competitorDAO);
+                        competitorDTOsOfUnusedMarkers.remove(competitorDTO);
                     }
                 }
             }
@@ -489,92 +489,92 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
                 map.setCenter(newMapBounds.getCenter());
                 mapFirstZoomDone = true;
             }
-            for (CompetitorDTO unusedMarkerCompetitorDAO : competitorDAOsOfUnusedMarkers) {
-                map.removeOverlay(boatMarkers.remove(unusedMarkerCompetitorDAO));
+            for (CompetitorDTO unusedMarkerCompetitorDTO : competitorDTOsOfUnusedMarkers) {
+                map.removeOverlay(boatMarkers.remove(unusedMarkerCompetitorDTO));
             }
-            for (CompetitorDTO unusedTailCompetitorDAO : competitorDAOsOfUnusedTails) {
-                map.removeOverlay(tails.remove(unusedTailCompetitorDAO));
+            for (CompetitorDTO unusedTailCompetitorDTO : competitorDTOsOfUnusedTails) {
+                map.removeOverlay(tails.remove(unusedTailCompetitorDTO));
             }
         }
     }
 
-    private boolean updateMarkerForCompetitor(CompetitorDTO competitorDAO) {
+    private boolean updateMarkerForCompetitor(CompetitorDTO competitorDTO) {
         boolean usedExistingMarker = false;
-        if (lastShownFix.containsKey(competitorDAO) && lastShownFix.get(competitorDAO) != -1) {
-            GPSFixDTO lastPos = getBoatFix(competitorDAO);
-            Marker boatMarker = boatMarkers.get(competitorDAO);
+        if (lastShownFix.containsKey(competitorDTO) && lastShownFix.get(competitorDTO) != -1) {
+            GPSFixDTO lastPos = getBoatFix(competitorDTO);
+            Marker boatMarker = boatMarkers.get(competitorDTO);
             if (boatMarker == null) {
-                boatMarker = createBoatMarker(competitorDAO, displayHighlighted(competitorDAO));
+                boatMarker = createBoatMarker(competitorDTO, displayHighlighted(competitorDTO));
                 map.addOverlay(boatMarker);
-                boatMarkers.put(competitorDAO, boatMarker);
+                boatMarkers.put(competitorDTO, boatMarker);
             } else {
                 usedExistingMarker = true;
                 // check if anchors match; re-use marker with setImage only if anchors match
                 ImageTransformer transformer = imageResources.getBoatImageTransformer(lastPos,
-                        competitorSelection.isSelected(competitorDAO));
+                        competitorSelection.isSelected(competitorDTO));
                 Point newAnchor = transformer.getAnchor(imageResources.getRealBoatSizeScaleFactor());
                 Point oldAnchor = boatMarker.getIcon().getIconAnchor();
                 if (oldAnchor.getX() == newAnchor.getX() && oldAnchor.getY() == newAnchor.getY()) {
                     boatMarker.setLatLng(LatLng.newInstance(lastPos.position.latDeg,
                             lastPos.position.lngDeg));
                     boatMarker.setImage(imageResources.getBoatImageURL(lastPos,
-                            displayHighlighted(competitorDAO)));
+                            displayHighlighted(competitorDTO)));
                 } else {
                     // anchors don't match; replace marker
                     map.removeOverlay(boatMarker);
-                    boatMarker = createBoatMarker(competitorDAO, displayHighlighted(competitorDAO));
+                    boatMarker = createBoatMarker(competitorDTO, displayHighlighted(competitorDTO));
                     map.addOverlay(boatMarker);
-                    boatMarkers.put(competitorDAO, boatMarker);
+                    boatMarkers.put(competitorDTO, boatMarker);
                 }
             }
         }
         return usedExistingMarker;
     }
     
-    private boolean displayHighlighted(CompetitorDTO competitorDAO) {
-        return !getSettings().isShowOnlySelectedCompetitors() && competitorSelection.isSelected(competitorDAO);
+    private boolean displayHighlighted(CompetitorDTO competitorDTO) {
+        return !getSettings().isShowOnlySelectedCompetitors() && competitorSelection.isSelected(competitorDTO);
     }
 
-    protected Marker createBuoyMarker(final MarkDTO markDAO) {
+    protected Marker createBuoyMarker(final MarkDTO markDTO) {
         MarkerOptions options = MarkerOptions.newInstance();
         if (imageResources.buoyIcon != null) {
             options.setIcon(imageResources.buoyIcon);
         }
-        options.setTitle(markDAO.name);
-        final Marker buoyMarker = new Marker(LatLng.newInstance(markDAO.position.latDeg, markDAO.position.lngDeg),
+        options.setTitle(markDTO.name);
+        final Marker buoyMarker = new Marker(LatLng.newInstance(markDTO.position.latDeg, markDTO.position.lngDeg),
                 options);
         buoyMarker.addMarkerClickHandler(new MarkerClickHandler() {
             @Override
             public void onClick(MarkerClickEvent event) {
                 LatLng latlng = buoyMarker.getLatLng();
-                showMarkInfoWindow(markDAO, latlng);
+                showMarkInfoWindow(markDTO, latlng);
             }
         });
         return buoyMarker;
     }
 
-    protected Marker createBoatMarker(final CompetitorDTO competitorDAO, boolean highlighted) {
-        GPSFixDTO boatFix = getBoatFix(competitorDAO);
+    protected Marker createBoatMarker(final CompetitorDTO competitorDTO, boolean highlighted) {
+        GPSFixDTO boatFix = getBoatFix(competitorDTO);
         double latDeg = boatFix.position.latDeg;
         double lngDeg = boatFix.position.lngDeg;
         MarkerOptions options = MarkerOptions.newInstance();
         Icon icon = imageResources.getBoatImageIcon(boatFix, highlighted);
         options.setIcon(icon);
-        options.setTitle(competitorDAO.name);
+        options.setTitle(competitorDTO.name);
         final Marker boatMarker = new Marker(LatLng.newInstance(latDeg, lngDeg), options);
         boatMarker.addMarkerClickHandler(new MarkerClickHandler() {
             @Override
             public void onClick(MarkerClickEvent event) {
                 LatLng latlng = boatMarker.getLatLng();
-                showCompetitorInfoWindow(competitorDAO, latlng);
+                showCompetitorInfoWindow(competitorDTO, latlng);
             }
         });
         boatMarker.addMarkerMouseOverHandler(new MarkerMouseOverHandler() {
             @Override
             public void onMouseOver(MarkerMouseOverEvent event) {
-                map.setTitle(competitorDAO.name);
-                // setSelectedInMap(competitorDAO, true);
-                // quickRanksBox.setItemSelected(quickRanksList.indexOf(competitorDAO), true);
+                map.setTitle(competitorDTO.name);
+                // setSelectedInMap(competitorDTO, true);
+                // quickRanksBox.setItemSelected(quickRanksList.indexOf(competitorDTO), true);
             }
         });
         boatMarker.addMarkerMouseOutHandler(new MarkerMouseOutHandler() {
@@ -586,38 +586,38 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
         return boatMarker;
     }
 
-    private void showMarkInfoWindow(MarkDTO markDAO, LatLng latlng) {
-        map.getInfoWindow().open(latlng, new InfoWindowContent(getInfoWindowContent(markDAO)));
+    private void showMarkInfoWindow(MarkDTO markDTO, LatLng latlng) {
+        map.getInfoWindow().open(latlng, new InfoWindowContent(getInfoWindowContent(markDTO)));
     }
 
-    private void showCompetitorInfoWindow(final CompetitorDTO competitorDAO, LatLng where) {
-        GPSFixDTO latestFixForCompetitor = getBoatFix(competitorDAO);
+    private void showCompetitorInfoWindow(final CompetitorDTO competitorDTO, LatLng where) {
+        GPSFixDTO latestFixForCompetitor = getBoatFix(competitorDTO);
         map.getInfoWindow().open(where,
-                new InfoWindowContent(getInfoWindowContent(competitorDAO, latestFixForCompetitor)));
+                new InfoWindowContent(getInfoWindowContent(competitorDTO, latestFixForCompetitor)));
     }
 
-    private Widget getInfoWindowContent(MarkDTO markDAO) {
+    private Widget getInfoWindowContent(MarkDTO markDTO) {
         VerticalPanel result = new VerticalPanel();
-        result.add(new Label("Mark " + markDAO.name));
-        result.add(new Label("" + markDAO.position));
+        result.add(new Label("Mark " + markDTO.name));
+        result.add(new Label("" + markDTO.position));
         return result;
     }
 
-    private Widget getInfoWindowContent(CompetitorDTO competitorDAO, GPSFixDTO lastFix) {
+    private Widget getInfoWindowContent(CompetitorDTO competitorDTO, GPSFixDTO lastFix) {
         final VerticalPanel result = new VerticalPanel();
-        result.add(new Label("Competitor " + competitorDAO.name));
+        result.add(new Label("Competitor " + competitorDTO.name));
         result.add(new Label("" + lastFix.position));
         result.add(new Label(lastFix.speedWithBearing.speedInKnots + "kts " + lastFix.speedWithBearing.bearingInDegrees
                 + "deg"));
         result.add(new Label("Tack: " + lastFix.tack.name()));
-        if (!selectedEventAndRace.isEmpty()) {
-            EventDTO event = selectedEventAndRace.get(selectedEventAndRace.size() - 1).getA();
-            RaceDTO race = selectedEventAndRace.get(selectedEventAndRace.size() - 1).getC();
+        if (!selectedRaces.isEmpty()) {
+            RaceDTO race = selectedRaces.get(selectedRaces.size() - 1);
+            EventDTO event = race.getEvent();
             if (event != null && race != null) {
                 Map<CompetitorDTO, Date> from = new HashMap<CompetitorDTO, Date>();
-                from.put(competitorDAO, fixes.get(competitorDAO).get(firstShownFix.get(competitorDAO)).timepoint);
+                from.put(competitorDTO, fixes.get(competitorDTO).get(firstShownFix.get(competitorDTO)).timepoint);
                 Map<CompetitorDTO, Date> to = new HashMap<CompetitorDTO, Date>();
-                to.put(competitorDAO, getBoatFix(competitorDAO).timepoint);
+                to.put(competitorDTO, getBoatFix(competitorDTO).timepoint);
                 sailingService.getDouglasPoints(new EventNameAndRaceName(event.name, race.name), from, to, 3,
                         new AsyncCallback<Map<CompetitorDTO, List<GPSFixDTO>>>() {
                             @Override
@@ -673,20 +673,20 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
         return result;
     }
     
-    private String getColorString(CompetitorDTO competitorDAO) {
+    private String getColorString(CompetitorDTO competitorDTO) {
         // TODO green no more than 70, red no less than 120
-        return "#" + (Integer.toHexString(competitorDAO.hashCode()) + "000000").substring(0, 4).toUpperCase() + "00";
+        return "#" + (Integer.toHexString(competitorDTO.hashCode()) + "000000").substring(0, 4).toUpperCase() + "00";
     }
 
     /**
-     * Creates a polyline for the competitor represented by <code>competitorDAO</code>, taking the fixes from
-     * {@link #fixes fixes.get(competitorDAO)} and using the fixes starting at time point <code>from</code> (inclusive)
+     * Creates a polyline for the competitor represented by <code>competitorDTO</code>, taking the fixes from
+     * {@link #fixes fixes.get(competitorDTO)} and using the fixes starting at time point <code>from</code> (inclusive)
      * up to the last fix with time point before <code>to</code>. The polyline is returned. Updates are applied to
      * {@link #lastShownFix}, {@link #firstShownFix} and {@link #tails}.
      */
-    protected Polyline createTailAndUpdateIndices(final CompetitorDTO competitorDAO, Date from, Date to) {
+    protected Polyline createTailAndUpdateIndices(final CompetitorDTO competitorDTO, Date from, Date to) {
         List<LatLng> points = new ArrayList<LatLng>();
-        List<GPSFixDTO> fixesForCompetitor = fixes.get(competitorDAO);
+        List<GPSFixDTO> fixesForCompetitor = fixes.get(competitorDTO);
         int indexOfFirst = -1;
         int indexOfLast = -1;
         int i = 0;
@@ -714,23 +714,23 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
             indexOfLast = i - 1;
         }
         if (indexOfFirst != -1 && indexOfLast != -1) {
-            firstShownFix.put(competitorDAO, indexOfFirst);
-            lastShownFix.put(competitorDAO, indexOfLast);
+            firstShownFix.put(competitorDTO, indexOfFirst);
+            lastShownFix.put(competitorDTO, indexOfLast);
         }
         PolylineOptions options = PolylineOptions.newInstance(
         /* clickable */true, /* geodesic */true);
-        Polyline result = new Polyline(points.toArray(new LatLng[0]), getColorString(competitorDAO), /* width */ 1,
+        Polyline result = new Polyline(points.toArray(new LatLng[0]), getColorString(competitorDTO), /* width */ 1,
         /* opacity */0.5, options);
         result.addPolylineClickHandler(new PolylineClickHandler() {
             @Override
             public void onClick(PolylineClickEvent event) {
-                showCompetitorInfoWindow(competitorDAO, lastMousePosition);
+                showCompetitorInfoWindow(competitorDTO, lastMousePosition);
             }
         });
         result.addPolylineMouseOverHandler(new PolylineMouseOverHandler() {
             @Override
             public void onMouseOver(PolylineMouseOverEvent event) {
-                map.setTitle(competitorDAO.name);
+                map.setTitle(competitorDTO.name);
             }
         });
         result.addPolylineMouseOutHandler(new PolylineMouseOutHandler() {
@@ -739,7 +739,7 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
                 map.setTitle("");
             }
         });
-        tails.put(competitorDAO, result);
+        tails.put(competitorDTO, result);
         return result;
     }
 
@@ -767,8 +767,8 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
             Set<CompetitorDTO> keySet = gpsFixPointMapForCompetitors.keySet();
             Iterator<CompetitorDTO> iter = keySet.iterator();
             while (iter.hasNext()) {
-                CompetitorDTO competitorDAO = iter.next();
-                List<GPSFixDTO> gpsFix = gpsFixPointMapForCompetitors.get(competitorDAO);
+                CompetitorDTO competitorDTO = iter.next();
+                List<GPSFixDTO> gpsFix = gpsFixPointMapForCompetitors.get(competitorDTO);
                 for (GPSFixDTO fix : gpsFix) {
                     LatLng latLng = LatLng.newInstance(fix.position.latDeg, fix.position.lngDeg);
                     MarkerOptions options = MarkerOptions.newInstance();
@@ -787,8 +787,8 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
             Set<CompetitorDTO> keySet = maneuvers.keySet();
             Iterator<CompetitorDTO> iter = keySet.iterator();
             while (iter.hasNext()) {
-                CompetitorDTO competitorDAO = iter.next();
-                List<ManeuverDTO> maneuversForCompetitor = maneuvers.get(competitorDAO);
+                CompetitorDTO competitorDTO = iter.next();
+                List<ManeuverDTO> maneuversForCompetitor = maneuvers.get(competitorDTO);
                 for (ManeuverDTO maneuver : maneuversForCompetitor) {
                     if (getSettings().isShowManeuverType(maneuver.type)) {
                         LatLng latLng = LatLng.newInstance(maneuver.position.latDeg, maneuver.position.lngDeg);
@@ -830,18 +830,18 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
     }
 
     /**
-     * While updating the {@link #fixes} for <code>competitorDAO</code>, the invariants for {@link #tails} and
+     * While updating the {@link #fixes} for <code>competitorDTO</code>, the invariants for {@link #tails} and
      * {@link #firstShownFix} and {@link #lastShownFix} are maintained: each time a fix is inserted, the
-     * {@link #firstShownFix}/{@link #lastShownFix} records for <code>competitorDAO</code> are incremented if they are
-     * greater or equal to the insertion index and we have a tail in {@link #tails} for <code>competitorDAO</code>.
+     * {@link #firstShownFix}/{@link #lastShownFix} records for <code>competitorDTO</code> are incremented if they are
+     * greater or equal to the insertion index and we have a tail in {@link #tails} for <code>competitorDTO</code>.
      * Additionally, if the fix is in between the fixes shown in the competitor's tail, the tail is adjusted by
      * inserting the corresponding fix.
      */
-    protected void mergeFixes(CompetitorDTO competitorDAO, List<GPSFixDTO> mergeThis) {
-        List<GPSFixDTO> intoThis = fixes.get(competitorDAO);
-        int indexOfFirstShownFix = firstShownFix.get(competitorDAO) == null ? -1 : firstShownFix.get(competitorDAO);
-        int indexOfLastShownFix = lastShownFix.get(competitorDAO) == null ? -1 : lastShownFix.get(competitorDAO);
-        Polyline tail = tails.get(competitorDAO);
+    protected void mergeFixes(CompetitorDTO competitorDTO, List<GPSFixDTO> mergeThis) {
+        List<GPSFixDTO> intoThis = fixes.get(competitorDTO);
+        int indexOfFirstShownFix = firstShownFix.get(competitorDTO) == null ? -1 : firstShownFix.get(competitorDTO);
+        int indexOfLastShownFix = lastShownFix.get(competitorDTO) == null ? -1 : lastShownFix.get(competitorDTO);
+        Polyline tail = tails.get(competitorDTO);
         int intoThisIndex = 0;
         for (GPSFixDTO mergeThisFix : mergeThis) {
             while (intoThisIndex < intoThis.size()
@@ -868,8 +868,8 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
         }
     }
 
-    protected GPSFixDTO getBoatFix(CompetitorDTO competitorDAO) {
-        return fixes.get(competitorDAO).get(lastShownFix.get(competitorDAO));
+    protected GPSFixDTO getBoatFix(CompetitorDTO competitorDTO) {
+        return fixes.get(competitorDTO).get(lastShownFix.get(competitorDTO));
     }
 
     /**
@@ -878,7 +878,7 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
      * {@link #fixes} we find the sequence of fixes currently represented in the tail.
      * <p>
      * 
-     * If the tail starts after <code>from</code>, vertices for those {@link #fixes} for <code>competitorDAO</code> at
+     * If the tail starts after <code>from</code>, vertices for those {@link #fixes} for <code>competitorDTO</code> at
      * or after time point <code>from</code> and before the time point of the first fix displayed so far in the tail and
      * before <code>to</code> are prepended to the tail.
      * <p>
@@ -890,9 +890,9 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
      * 
      * When this method returns, {@link #firstShownFix} and {@link #lastShownFix} have been updated accordingly.
      */
-    protected void updateTail(Polyline tail, CompetitorDTO competitorDAO, Date from, Date to) {
-        List<GPSFixDTO> fixesForCompetitor = fixes.get(competitorDAO);
-        int indexOfFirstShownFix = firstShownFix.get(competitorDAO) == null ? -1 : firstShownFix.get(competitorDAO);
+    protected void updateTail(Polyline tail, CompetitorDTO competitorDTO, Date from, Date to) {
+        List<GPSFixDTO> fixesForCompetitor = fixes.get(competitorDTO);
+        int indexOfFirstShownFix = firstShownFix.get(competitorDTO) == null ? -1 : firstShownFix.get(competitorDTO);
         while (indexOfFirstShownFix != -1 && tail.getVertexCount() > 0
                 && fixesForCompetitor.get(indexOfFirstShownFix).timepoint.before(from)) {
             tail.deleteVertex(0);
@@ -907,7 +907,7 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
             tail.insertVertex(0, LatLng.newInstance(fix.position.latDeg, fix.position.lngDeg));
         }
         // now adjust the polylines tail: remove excess vertices that are after "to"
-        int indexOfLastShownFix = lastShownFix.get(competitorDAO) == null ? -1 : lastShownFix.get(competitorDAO);
+        int indexOfLastShownFix = lastShownFix.get(competitorDTO) == null ? -1 : lastShownFix.get(competitorDTO);
         while (indexOfLastShownFix != -1 && tail.getVertexCount() > 0
                 && fixesForCompetitor.get(indexOfLastShownFix).timepoint.after(to)) {
             tail.deleteVertex(tail.getVertexCount() - 1);
@@ -922,8 +922,8 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
             GPSFixDTO fix = fixesForCompetitor.get(indexOfLastShownFix);
             tail.insertVertex(tail.getVertexCount(), LatLng.newInstance(fix.position.latDeg, fix.position.lngDeg));
         }
-        firstShownFix.put(competitorDAO, indexOfFirstShownFix);
-        lastShownFix.put(competitorDAO, indexOfLastShownFix);
+        firstShownFix.put(competitorDTO, indexOfFirstShownFix);
+        lastShownFix.put(competitorDTO, indexOfLastShownFix);
     }
 
     public RaceMapSettings getSettings() {

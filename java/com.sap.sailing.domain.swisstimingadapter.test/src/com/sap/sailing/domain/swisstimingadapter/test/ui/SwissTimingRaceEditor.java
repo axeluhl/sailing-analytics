@@ -74,7 +74,7 @@ public class SwissTimingRaceEditor extends javax.swing.JFrame {
     private void initComponents() {
 
         jScrollPane1 = new javax.swing.JScrollPane();
-        jCommandList = new javax.swing.JList();
+        jCommandList = new javax.swing.JList<Object>();
         jAdd = new javax.swing.JButton();
         jRemove = new javax.swing.JButton();
         jEdit = new javax.swing.JButton();
@@ -89,7 +89,7 @@ public class SwissTimingRaceEditor extends javax.swing.JFrame {
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("SwissTiming-Sample-Race Editor");
 
-        jCommandList.setModel(new javax.swing.AbstractListModel() {
+        jCommandList.setModel(new javax.swing.AbstractListModel<Object>() {
             String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
             public int getSize() { return strings.length; }
             public Object getElementAt(int i) { return strings[i]; }
@@ -285,7 +285,7 @@ public class SwissTimingRaceEditor extends javax.swing.JFrame {
 
     private void jRemoveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRemoveActionPerformed
         // TODO add your handling code here:
-        for (Object o : jCommandList.getSelectedValues())
+        for (Object o : jCommandList.getSelectedValuesList())
             commands.remove(o);
         jCommandList.setListData(getArrayOfList(commands));
     }//GEN-LAST:event_jRemoveActionPerformed
@@ -411,7 +411,7 @@ public class SwissTimingRaceEditor extends javax.swing.JFrame {
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jAdd;
-    private javax.swing.JList jCommandList;
+    private javax.swing.JList<Object> jCommandList;
     private javax.swing.JButton jEdit;
     private javax.swing.JMenuItem jExport;
     private javax.swing.JMenuItem jImport;

@@ -31,11 +31,11 @@ public class CompetitorsAndTimePointsDTO implements IsSerializable {
         return result;
     }
 
-    public CompetitorDTO[] getCompetitor() {
+    public CompetitorDTO[] getCompetitors() {
         return competitors;
     }
 
-    public void setCompetitor(CompetitorDTO[] competitors) {
+    public void setCompetitors(CompetitorDTO[] competitors) {
         this.competitors = competitors;
     }
 

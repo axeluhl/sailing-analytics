@@ -43,12 +43,12 @@ public class RaceTrackerTest {
         paramUrl  = new URL("http://germanmaster.traclive.dk/events/event_20110505_SailingTea/clientparams.php?event=event_20110505_SailingTea&race=bd8c778e-7c65-11e0-8236-406186cbf87c");
         
         if (tractracTunnel) {
-            liveUri   = new URI("tcp://"+tractracTunnelHost+":4412");
-            storedUri = new URI("tcp://"+tractracTunnelHost+":4413");
+            liveUri   = new URI("tcp://"+tractracTunnelHost+":1520");
+            storedUri = new URI("tcp://"+tractracTunnelHost+":1521");
         } else {
             // no tunnel:
-            liveUri = new URI("tcp://germanmaster.traclive.dk:4400");
-            storedUri = new URI("tcp://germanmaster.traclive.dk:4401");
+            liveUri = new URI("tcp://germanmaster.traclive.dk:1520");
+            storedUri = new URI("tcp://germanmaster.traclive.dk:1521");
         }
     }
     

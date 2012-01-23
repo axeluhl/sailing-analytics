@@ -10,12 +10,14 @@
  */
 package com.sap.sailing.domain.swisstimingadapter.test.ui;
 
-import com.sap.sailing.domain.swisstimingadapter.classes.messages.RPDMessage;
-import com.sap.sailing.domain.swisstimingadapter.classes.messages.RacePositionDataElement;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.List;
+
 import javax.swing.JOptionPane;
+
+import com.sap.sailing.domain.swisstimingadapter.classes.messages.RPDMessage;
+import com.sap.sailing.domain.swisstimingadapter.classes.messages.RacePositionDataElement;
 
 /**
  *
@@ -52,7 +54,7 @@ public class EditRPD extends javax.swing.JDialog {
             }
         }
         rpdData = rpd.getRacePositionElements();
-        jRPDData.setListData(rpdData.toArray());
+        jRPDData.setListData(rpdData.toArray(new RacePositionDataElement[0]));
         setValuesInUI();
     }
     
@@ -130,7 +132,7 @@ public class EditRPD extends javax.swing.JDialog {
         jButton1 = new javax.swing.JButton();
         jButton2 = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
-        jRPDData = new javax.swing.JList();
+        jRPDData = new javax.swing.JList<RacePositionDataElement>();
         jButton3 = new javax.swing.JButton();
         jLabel19 = new javax.swing.JLabel();
         jALS = new javax.swing.JTextField();
@@ -434,14 +436,14 @@ public class EditRPD extends javax.swing.JDialog {
         catch(Exception e){
             JOptionPane.showMessageDialog(this, "Invalid input paramters!", "Invalid input", JOptionPane.ERROR_MESSAGE);
         }
-        jRPDData.setListData(rpdData.toArray());
+        jRPDData.setListData(rpdData.toArray(new RacePositionDataElement[0]));
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         // TODO add your handling code here:
-        for (Object o : jRPDData.getSelectedValues())
+        for (RacePositionDataElement o : jRPDData.getSelectedValuesList())
             rpdData.remove(o);
-        jRPDData.setListData(rpdData.toArray());
+        jRPDData.setListData(rpdData.toArray(new RacePositionDataElement[0]));
         
     }//GEN-LAST:event_jButton2ActionPerformed
 
@@ -491,7 +493,7 @@ public class EditRPD extends javax.swing.JDialog {
     private javax.swing.JTextField jLongitude;
     private javax.swing.JTextField jNextMark;
     private javax.swing.JTextField jNextMarkLeader;
-    private javax.swing.JList jRPDData;
+    private javax.swing.JList<RacePositionDataElement> jRPDData;
     private javax.swing.JTextField jRaceID;
     private javax.swing.JTextField jRaceTime;
     private javax.swing.JTextField jRank;
