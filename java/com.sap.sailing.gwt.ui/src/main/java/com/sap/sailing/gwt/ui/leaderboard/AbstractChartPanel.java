@@ -411,10 +411,7 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
         // add hover listener
         plot.addHoverListener(new PlotHoverListener() {
             public void onPlotHover(Plot plot, PlotPosition position, PlotItem item) {
-                // FIXME can the indexOf ever find anything? seriesID is a List<SeriesHandler>; item.getSeries() returns a Series object
-//                CompetitorDTO competitor = competitorID.get(seriesID.indexOf(item.getSeries()));
-                Integer index = item.getSeriesIndex() / 2;
-                CompetitorDTO competitor = competitorID.get(index);
+                CompetitorDTO competitor = competitorID.get(item.getSeriesIndex() / 2);
                 if (item != null && competitor != null) {
                     if (item.getSeries().getLabel().toLowerCase().contains("mark")) {
                         selectedPointLabel.setText(stringMessages.competitorPassedMarkAtDate(competitor.name,
@@ -457,50 +454,8 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
         }, true);
         plot.addSelectionListener(new SelectionListener() {
             public void selected(double x1, double y1, double x2, double y2) {
-            	//Remove not visible buoys from the series when user is zooming in or add them if he is zooming out.
-                    //Make series invisible didn't work, so they're removed from the Model instead
-                    //TODO How to re-add the series to the model? How to modify the selection, if the 'overview-bar' is used?
-//            	for (CompetitorDTO competitor : competitorID){
-//            	    Pair<String,Long>[] markPassingTimes = competitorsAndTimePointsDTO.getMarkPassings(competitor);
-//                    Double[] markPassingValues = chartData.getMarkPassings(competitor);
-//                    boolean markPassingsInRange = false;
-//                    
-//                    SeriesHandler markSeries = getCompetitorMarkPassingSeries(competitor);
-//                    markSeries.clear();
-//                    
-//                    for (int j = 0; j < markPassingTimes.length; j++){
-//                        double passingTime = markPassingTimes[j].getB().doubleValue();
-//                        if (markPassingValues[j] != null && x1 < passingTime && passingTime < x2) {
-//                            markSeries.add(new DataPoint(passingTime ,markPassingValues[j]));
-//                            markPassingsInRange = true;
-//                        }
-//                    }
-//                    
-//                    if (!markPassingsInRange){
-//                        model.removeSeries(markSeries);
-//                        markSeriesID.remove(markSeries);
-//                    } else {
-//                        //Here you should re-add the series. The code below does'nt work
-//                        if (!markSeriesID.contains(markSeries)) {
-//                            CompetitorDTO[] competitors = competitorsAndTimePointsDTO.getCompetitor();
-//                            int index = -1;
-//                            for (CompetitorDTO competitorDTO : competitors) {
-//                                if (competitor.equals(competitorDTO)) {
-//                                    break;
-//                                }
-//                                index++;
-//                            }
-//                            SeriesHandler series = model
-//                                    .addSeries(index + " passed mark", colorMap.getColorByID(index));
-//                            series.setOptions(SeriesType.LINES, new LineSeriesOptions().setLineWidth(0).setShow(false));
-//                            series.setOptions(SeriesType.POINTS, new PointsSeriesOptions().setLineWidth(3)
-//                                    .setShow(true));
-//                            series.setVisible(true);
-//                            markSeriesID.add(index, series);
-//                        }
-//                    }
-//            	}
-                //Instead of making the mark passings invisible, refactor the selection range, so that there is no blank space in the plot
+                //Refactoring the selection range, if there is no mark passing between x1 and x2
+                //Needed to prevent white space in the displayed selection
                 ArrayList<Double> x1Values = new ArrayList<Double>();
                 ArrayList<Double> x2Values = new ArrayList<Double>();
                 boolean markPassingInRange = false;
@@ -700,6 +655,6 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
     }
 
     protected void setCompetitorsAndTimePointsDTO(CompetitorsAndTimePointsDTO competitorsAndTimePointsDTO) {
-        this.competitorsAndTimePointsDTO = competitorsAndTimePointsDAO;
+        this.competitorsAndTimePointsDTO = competitorsAndTimePointsDTO;
     }
 }
