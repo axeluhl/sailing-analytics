@@ -58,7 +58,6 @@ import com.sap.sailing.gwt.ui.shared.components.Component;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialog;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
 import com.sap.sailing.server.api.DetailType;
-import com.sap.sailing.server.api.EventNameAndRaceName;
 import com.sap.sailing.server.api.RaceIdentifier;
 
 /**
@@ -1332,7 +1331,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             }
         }
         CompareCompetitorsChartDialog chartDialog = new CompareCompetitorsChartDialog(sailingService,
-                competitorSelectionProvider, races.toArray(new EventNameAndRaceName[0]), stringConstants, errorReporter);
+                competitorSelectionProvider, stringConstants, errorReporter);
         chartDialog.show();
     }
 

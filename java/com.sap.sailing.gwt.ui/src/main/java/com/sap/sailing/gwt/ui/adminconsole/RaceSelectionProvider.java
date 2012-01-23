@@ -14,4 +14,13 @@ public interface RaceSelectionProvider {
     void addRaceSelectionChangeListener(RaceSelectionChangeListener listener);
 
     void removeRaceSelectionChangeListener(RaceSelectionChangeListener listener);
+    
+    void setSelection(List<RaceDTO> newSelection, RaceSelectionChangeListener... listenersNotToNotify);
+
+    /**
+     * @return a non-<code>null</code> list which may be empty
+     */
+    List<RaceDTO> getAllRaces();
+    
+    void setAllRaces(List<RaceDTO> newAllRaces, RaceSelectionChangeListener... listenersNotToNotify);
 }

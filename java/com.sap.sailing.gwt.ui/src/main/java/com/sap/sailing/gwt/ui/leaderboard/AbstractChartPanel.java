@@ -51,16 +51,19 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.gwt.ui.adminconsole.RaceSelectionProvider;
 import com.sap.sailing.gwt.ui.client.ColorMap;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.DetailTypeFormatter;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
+import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorInRaceDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorsAndTimePointsDTO;
+import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.components.Component;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialog;
 import com.sap.sailing.server.api.DetailType;
@@ -78,7 +81,8 @@ import com.sap.sailing.server.api.RaceIdentifier;
  * @author Benjamin Ebling (D056866), Axel Uhl (d043530)
  * 
  */
-public abstract class AbstractChartPanel<SettingsType extends ChartSettings> extends SimplePanel implements CompetitorSelectionChangeListener {
+public abstract class AbstractChartPanel<SettingsType extends ChartSettings> extends SimplePanel
+implements CompetitorSelectionChangeListener, RaceSelectionChangeListener {
     private CompetitorInRaceDTO chartData;
     private CompetitorsAndTimePointsDTO competitorsAndTimePointsDTO = null;
     private final SailingServiceAsync sailingService;
@@ -89,9 +93,8 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
     private final FlowPanel legendPanel;
     private final Label title;
     private final DeckPanel chart;
-    private final RaceIdentifier[] races;
+    private final RaceSelectionProvider raceSelectionProvider;
     private final ColorMap<Integer> colorMap;
-    private int selectedRace = 0;
     private int stepsToLoad = 100;
     private final StringMessages stringMessages;
     private PlotWithOverview plot;
@@ -108,7 +111,7 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
     private final CompetitorSelectionProvider competitorSelectionProvider;
 
     public AbstractChartPanel(SailingServiceAsync sailingService,
-            CompetitorSelectionProvider competitorSelectionProvider, RaceIdentifier[] races,
+            CompetitorSelectionProvider competitorSelectionProvider, RaceSelectionProvider raceSelectionProvider,
             final StringMessages stringMessages, int chartWidth, int chartHeight, ErrorReporter errorReporter,
             DetailType dataToShow) {
         width = chartWidth;
@@ -126,7 +129,7 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
     	competitorLabels = new HashMap<CompetitorDTO, Widget>();
     	markPassingBuoyName = new HashMap<String, String>();
         this.sailingService = sailingService;
-        this.races = races;
+        this.raceSelectionProvider = raceSelectionProvider;
         this.stringMessages = stringMessages;
         dateFormat = DateTimeFormat.getFormat("HH:mm:ss");
         mainPanel = new HorizontalPanel();
@@ -137,19 +140,18 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
         chartPanel.add(title);
         HorizontalPanel raceChooserPanel = new HorizontalPanel();
         raceChooserPanel.setSpacing(5);
-        for (int i = 0; i < races.length; i++) {
+        boolean first = true;
+        for (RaceDTO selectedRace : raceSelectionProvider.getAllRaces()) {
             RadioButton r = new RadioButton("chooseRace");
-            r.setText(races[i].toString());
+            r.setText(selectedRace.getRaceIdentifier().toString());
             raceChooserPanel.add(r);
-            if (i == 0) {
+            if (first) {
                 r.setValue(true);
+                first = false;
             }
-            final int index = i;
             r.addClickHandler(new ClickHandler() {
-
                 @Override
                 public void onClick(ClickEvent event) {
-                    selectedRace = index;
                     setCompetitorsAndTimePointsDTO(null);
                     clearChart(true);
                     loadData();
@@ -210,7 +212,7 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
                             getCompetitorsAndTimePointsDTO().getMarkPassings(competitor));
                 }
                 competitorsAndTimePointsToLoad.setCompetitors(competitorsToLoad.toArray(new CompetitorDTO[0]));
-                AbstractChartPanel.this.sailingService.getCompetitorRaceData(races[selectedRace],
+                AbstractChartPanel.this.sailingService.getCompetitorRaceData(getSelectedRace(),
                         competitorsAndTimePointsToLoad, dataToShow, new AsyncCallback<CompetitorInRaceDTO>() {
                             @Override
                             public void onFailure(Throwable caught) {
@@ -234,7 +236,7 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
         if (getCompetitorsAndTimePointsDTO() != null) {
             loadData.run();
         } else {
-            this.sailingService.getCompetitorsAndTimePoints(races[selectedRace], getStepsToLoad(),
+            this.sailingService.getCompetitorsAndTimePoints(getSelectedRace(), getStepsToLoad(),
                     new AsyncCallback<CompetitorsAndTimePointsDTO>() {
                         @Override
                         public void onFailure(Throwable caught) {
@@ -251,6 +253,15 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
                         }
                     });
         }
+    }
+
+    private RaceIdentifier getSelectedRace() {
+        RaceIdentifier result = null;
+        List<RaceDTO> selectedRaces = raceSelectionProvider.getSelectedRaces();
+        if (selectedRaces != null && !selectedRaces.isEmpty()) {
+            result = selectedRaces.iterator().next().getRaceIdentifier();
+        }
+        return result;
     }
 
     @Override
@@ -657,4 +668,10 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
     protected void setCompetitorsAndTimePointsDTO(CompetitorsAndTimePointsDTO competitorsAndTimePointsDTO) {
         this.competitorsAndTimePointsDTO = competitorsAndTimePointsDTO;
     }
+
+    @Override
+    public void onRaceSelectionChange(List<RaceDTO> selectedRaces) {
+        
+    }
+
 }

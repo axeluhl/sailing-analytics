@@ -24,6 +24,7 @@ import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.EventDisplayer;
 import com.sap.sailing.gwt.ui.client.EventRefresher;
 import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
+import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.TimeListener;
@@ -47,6 +48,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
     private final Timer timer;
     private final RaceMap raceMap;
     private final QuickRanksListBoxComposite quickRanksListBox;
+    private final RaceSelectionModel raceSelectionModel;
     
     private static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
 
@@ -67,8 +69,9 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         grid.setWidget(2, 1, mapPanel);
         raceMap = new RaceMap(sailingService, errorReporter, timer, competitorSelectionProvider, stringMessages);
         raceMap.loadMapsAPI(mapPanel);
-        raceListBox = new RacesListBoxPanel(eventRefresher, stringMessages);
-        raceListBox.addRaceSelectionChangeListener(this);
+        raceSelectionModel = new RaceSelectionModel();
+        raceListBox = new RacesListBoxPanel(eventRefresher, raceSelectionModel, stringMessages);
+        raceSelectionModel.addRaceSelectionChangeListener(this);
         grid.setWidget(0, 0, raceListBox);
         PositionDTO pos = new PositionDTO();
         if (!raceMap.boatMarkers.isEmpty()) {
@@ -79,7 +82,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         SmallWindHistoryPanel windHistory = new SmallWindHistoryPanel(sailingService, pos,
         /* number of wind displays */5,
         /* time interval between displays in milliseconds */5000, stringMessages, errorReporter);
-        raceListBox.addRaceSelectionChangeListener(windHistory);
+        raceSelectionModel.addRaceSelectionChangeListener(windHistory);
         grid.setWidget(1, 0, windHistory);
 
         ImageResource settingsImage = resources.settingsIcon();
@@ -140,7 +143,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
     @Override
     public void timeChanged(final Date date) {
         if (date != null) {
-            List<RaceDTO> selection = raceListBox.getSelectedRaces();
+            List<RaceDTO> selection = raceSelectionModel.getSelectedRaces();
             if (!selection.isEmpty()) {
                 RaceDTO race = selection.get(selection.size() - 1);
                 EventDTO event = race.getEvent();

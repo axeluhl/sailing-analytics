@@ -31,6 +31,7 @@ import ca.nanometrics.gflot.client.options.SeriesOptions;
 import ca.nanometrics.gflot.client.options.TickFormatter;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -38,14 +39,18 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.gwt.ui.client.ColorMap;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
+import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
+import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
 import com.sap.sailing.gwt.ui.shared.components.Component;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
+import com.sap.sailing.server.api.RaceIdentifier;
 
-public class WindChart implements Component<WindChartSettings> {
+public class WindChart implements Component<WindChartSettings>, RaceSelectionChangeListener {
     private final StringMessages stringMessages;
     private final DateTimeFormat dateFormat;
     private PlotWithOverviewModel model;
@@ -55,18 +60,31 @@ public class WindChart implements Component<WindChartSettings> {
     private final List<SeriesHandler> seriesHandlersInOrder;
     private final Label selectedPointLabel;
     private final ErrorReporter errorReporter;
+    private final SailingServiceAsync sailingService;
     private PlotWithOverview plot;
 
-    public WindChart(WindChartSettings settings, StringMessages stringMessages, ErrorReporter errorReporter) {
+    /**
+     * @param raceSelectionProvider if <code>null</code>, this chart won't update its contents automatically upon race
+     * selection change; otherwise, whenever the selection changes, the wind data of the race selected now is loaded
+     * from the server and displayed in this chart. If no race is selected, the chart is cleared.
+     */
+    public WindChart(SailingServiceAsync sailingService, RaceSelectionProvider raceSelectionProvider,
+            WindChartSettings settings, StringMessages stringMessages, ErrorReporter errorReporter) {
         super();
+        this.sailingService = sailingService;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
-        this.windSourcesToDisplay = new HashSet<WindSource>(settings.getWindSourcesToDisplay());
+        this.windSourcesToDisplay = new HashSet<WindSource>();
         dateFormat = DateTimeFormat.getFormat("HH:mm:ss");
         this.colorMap = new ColorMap<WindSource>();
         this.stripChartSeries = new HashMap<WindSource, SeriesHandler>();
         this.seriesHandlersInOrder = new ArrayList<SeriesHandler>();
         this.selectedPointLabel = new Label();
+        updateSettings(settings);
+        if (raceSelectionProvider != null) {
+            raceSelectionProvider.addRaceSelectionChangeListener(this);
+            onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
+        }
     }
 
     @Override
@@ -162,10 +180,16 @@ public class WindChart implements Component<WindChartSettings> {
     }
 
     private SeriesHandler addSeries(WindSource windSource) {
-        SeriesHandler series = model.addSeries(windSource.name(), colorMap.getColorByID(windSource));
-        seriesHandlersInOrder.add(series);
-        stripChartSeries.put(windSource, series);
-        return series;
+        SeriesHandler seriesHandler = model.addSeries(windSource.name(), colorMap.getColorByID(windSource));
+        seriesHandlersInOrder.add(seriesHandler);
+        stripChartSeries.put(windSource, seriesHandler);
+        return seriesHandler;
+    }
+
+    private void removeSeries(WindSource windSource, SeriesHandler seriesHandler) {
+        model.removeSeries(seriesHandler);
+        seriesHandlersInOrder.remove(seriesHandler);
+        stripChartSeries.remove(windSource);
     }
 
     public void updateStripChartSeries(WindInfoForRaceDTO result) {
@@ -176,8 +200,7 @@ public class WindChart implements Component<WindChartSettings> {
             SeriesHandler seriesHandler = stripChartSeries.get(windSource);
             if (e.getValue().windFixes.isEmpty()) {
                 if (seriesHandler != null) {
-                    model.removeSeries(seriesHandler);
-                    stripChartSeries.remove(windSource);
+                    removeSeries(windSource, seriesHandler);
                 }
             } else {
                 if (seriesHandler == null) {
@@ -234,7 +257,48 @@ public class WindChart implements Component<WindChartSettings> {
         for (Map.Entry<WindSource, SeriesHandler> e : stripChartSeries.entrySet()) {
             e.getValue().setVisible(windSourcesToDisplay.contains(e.getKey()));
         }
-        plot.redraw();
+        if (plot != null) {
+            plot.redraw();
+        }
     }
 
+    private void loadData(final RaceIdentifier raceIdentifier) {
+        sailingService.getWindInfo(raceIdentifier,
+        // TODO Time interval should be determined by a selection in the chart but be at most 60s. See bug #121. Consider incremental updates for new data only.
+                null, null, // use race start and time of newest event as default time period
+                null, // retrieve data on all wind sources
+                new AsyncCallback<WindInfoForRaceDTO>() {
+                    @Override
+                    public void onSuccess(WindInfoForRaceDTO result) {
+                        if (result != null) {
+                            updateStripChartSeries(result);
+                        } else {
+                            clearChart(); // no wind known for untracked race
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        errorReporter.reportError(stringMessages.errorFetchingWindInformationForRace()+" " + raceIdentifier + ": "
+                                + caught.getMessage());
+                    }
+                });
+    }
+    
+    private void clearChart() {
+        for (SeriesHandler seriesHandler : seriesHandlersInOrder) {
+            seriesHandler.clear();
+        }
+    }
+
+    @Override
+    public void onRaceSelectionChange(List<RaceDTO> selectedRaces) {
+        if (selectedRaces != null && !selectedRaces.isEmpty()) {
+            // show wind of first selected race
+            RaceIdentifier selectedRaceIdentifier = selectedRaces.iterator().next().getRaceIdentifier();
+            loadData(selectedRaceIdentifier);
+        } else {
+            clearChart();
+        }
+    }
 }
