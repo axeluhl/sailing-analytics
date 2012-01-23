@@ -35,7 +35,6 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.sap.sailing.domain.common.impl.Util.Pair;
-import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.EventRefresher;
 import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
@@ -135,7 +134,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         grid.setWidget(3, 0, lblHostname);
         
         hostnameTextbox = new TextBox();
-        hostnameTextbox.setText(TracTracConnectionConstants.HOST_NAME);
+        hostnameTextbox.setText("germanmaster.traclive.dk");
         hostnameTextbox.addKeyUpHandler(new KeyUpHandler() {
             @Override
             public void onKeyUp(KeyUpEvent event) {
@@ -171,7 +170,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         horizontalPanel_1.setCellVerticalAlignment(lblLiveDataPort, HasVerticalAlignment.ALIGN_MIDDLE);
 
         livePortIntegerbox = new IntegerBox();
-        livePortIntegerbox.setText(Integer.toString(TracTracConnectionConstants.PORT_LIVE));
+        livePortIntegerbox.setText(Integer.toString(4400));
         livePortIntegerbox.addKeyUpHandler(new KeyUpHandler() {
             @Override
             public void onKeyUp(KeyUpEvent event) {
