@@ -970,7 +970,10 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
      * data from {@link #firstShownFix} and {@link #lastShownFix}.
      */
     private void removeTail(CompetitorDTO competitor) {
-        map.removeOverlay(tails.remove(competitor));
+        Polyline removed = tails.remove(competitor);
+        if (removed != null) {
+            map.removeOverlay(removed);
+        }
         firstShownFix.remove(competitor);
         lastShownFix.remove(competitor);
     }
@@ -983,7 +986,10 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
                 timeChanged(timer.getTime());
             } else {
                 // otherwise remove only deselected competitor's boat marker and tail
-                map.removeOverlay(boatMarkers.remove(competitor));
+                Marker removed = boatMarkers.remove(competitor);
+                if (removed != null) {
+                    map.removeOverlay(removed);
+                }
                 removeTail(competitor);
             }
         } else {
