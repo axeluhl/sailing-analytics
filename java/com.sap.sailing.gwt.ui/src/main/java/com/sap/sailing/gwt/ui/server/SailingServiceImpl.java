@@ -871,21 +871,35 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         
         for (RegattaDTO regatta : event.regattas) {
             for (RaceDTO race : regatta.races) {
-                List<LeaderboardDTO> leaderboard = getLeaderboardByRace(race);
+                List<LeaderboardDTO> leaderboard = getLeaderboardsByRace(race);
                 if (leaderboard != null && !leaderboard.isEmpty()) {
                     results.addAll(leaderboard);
                 }
             }
         }
+        //Removing duplicates
+        HashSet<LeaderboardDTO> set = new HashSet<LeaderboardDTO>(results);
+        results.clear();
+        results.addAll(set);
         
         return results;
     }
     
-    private List<LeaderboardDTO> getLeaderboardByRace(RaceDTO race) {
+    @Override
+    public List<LeaderboardDTO> getLeaderboardsByRace(RaceDTO race) {
         List<LeaderboardDTO> results = new ArrayList<LeaderboardDTO>();
-        Map<String, Leaderboard> leaderboards = getService().getLeaderboards();
+        List<LeaderboardDTO> leaderboards = getLeaderboards();
         
-        
+        for (LeaderboardDTO leaderboard : leaderboards) {
+            List<RaceInLeaderboardDTO> races = leaderboard.getRaceInLeaderboardList();
+            for (RaceInLeaderboardDTO raceInLeaderboard : races) {
+                RaceDefinition raceDef = getRace(raceInLeaderboard.getRaceIdentifier());
+                if (raceDef.getName().equals(race.name)) {
+                    results.add(leaderboard);
+                    break;
+                }
+            }
+        }
         
         return results;
     }
