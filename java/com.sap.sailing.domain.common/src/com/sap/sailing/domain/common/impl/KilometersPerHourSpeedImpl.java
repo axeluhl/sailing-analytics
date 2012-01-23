@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.common.impl;
 
+import com.sap.sailing.domain.common.AbstractSpeedImpl;
 import com.sap.sailing.domain.common.Mile;
 import com.sap.sailing.domain.common.Speed;
 
