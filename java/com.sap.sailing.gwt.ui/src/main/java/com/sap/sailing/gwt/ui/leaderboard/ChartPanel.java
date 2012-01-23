@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
+import com.sap.sailing.gwt.ui.adminconsole.RaceSelectionProvider;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -7,7 +8,6 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.components.Component;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
 import com.sap.sailing.server.api.DetailType;
-import com.sap.sailing.server.api.RaceIdentifier;
 
 /**
  * ChartPanel is a GWT panel that can show one sort of competitor data (e.g. current speed over ground, windward distance to
@@ -24,10 +24,10 @@ import com.sap.sailing.server.api.RaceIdentifier;
 public class ChartPanel extends AbstractChartPanel<ChartSettings> implements Component<ChartSettings> {
 
     public ChartPanel(SailingServiceAsync sailingService, CompetitorSelectionProvider competitorSelectionProvider,
-            RaceIdentifier[] races, DetailType dataToShow, StringMessages stringMessages, int chartWidth,
-            int chartHeight, ErrorReporter errorReporter) {
-        super(sailingService, competitorSelectionProvider, races, stringMessages, chartWidth, chartHeight,
-                errorReporter, dataToShow);
+            RaceSelectionProvider raceSelectionProvider, DetailType dataToShow, StringMessages stringMessages, int chartWidth,
+            int chartHeight, ErrorReporter errorReporter, boolean showRaceSelector) {
+        super(sailingService, competitorSelectionProvider, raceSelectionProvider, stringMessages, chartWidth, chartHeight,
+                errorReporter, dataToShow, showRaceSelector);
     }
 
     @Override

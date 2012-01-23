@@ -17,6 +17,7 @@ import org.junit.Test;
 
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
+import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
 import com.sap.sailing.domain.tractracadapter.TracTracRaceTracker;
 import com.sap.sailing.domain.tractracadapter.impl.DomainFactoryImpl;
 
@@ -36,12 +37,12 @@ public class MultipleClassesInEventTest {
     
     @Test
     public void testLoadTwoRacesWithEqualEventNameButDifferentClasses() throws MalformedURLException, FileNotFoundException, URISyntaxException {
-        String httpAndHost = "http://germanmaster.traclive.dk";
-        String liveURI = "tcp://germanmaster.traclive.dk:1520";
-        String storedURI = "tcp://germanmaster.traclive.dk:1521";
+        String httpAndHost = "http://" + TracTracConnectionConstants.HOST_NAME;
+        String liveURI = "tcp://" + TracTracConnectionConstants.HOST_NAME + ":" + TracTracConnectionConstants.PORT_LIVE;
+        String storedURI = "tcp://" + TracTracConnectionConstants.HOST_NAME + ":" + TracTracConnectionConstants.PORT_STORED;
         if (tractracTunnel) {
-            liveURI   = "tcp://"+tractracTunnelHost+":1520";
-            storedURI = "tcp://"+tractracTunnelHost+":1521";
+            liveURI   = "tcp://"+tractracTunnelHost+":"+TracTracConnectionConstants.PORT_TUNNEL_LIVE;
+            storedURI = "tcp://"+tractracTunnelHost+":"+TracTracConnectionConstants.PORT_TUNNEL_STORED;
         }
         kiwotest1 = domainFactory
                 .createRaceTracker(

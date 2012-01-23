@@ -58,7 +58,6 @@ import com.sap.sailing.gwt.ui.shared.components.Component;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialog;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
 import com.sap.sailing.server.api.DetailType;
-import com.sap.sailing.server.api.EventNameAndRaceName;
 import com.sap.sailing.server.api.RaceIdentifier;
 
 /**
@@ -1325,17 +1324,22 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     }
 
     private void compareCompetitors() {
-        List<RaceIdentifier> races = new ArrayList<RaceIdentifier>();
-        for (RaceInLeaderboardDTO race : getLeaderboard().getRaceList()) {
-            if (race.isTrackedRace()) {
-                races.add(race.getRaceIdentifier());
-            }
-        }
-        CompareCompetitorsChartDialog chartDialog = new CompareCompetitorsChartDialog(sailingService,
-                competitorSelectionProvider, races.toArray(new EventNameAndRaceName[0]), stringConstants, errorReporter);
+        List<RaceIdentifier> races = getTrackedRacesIdentifiers();
+        CompareCompetitorsChartDialog chartDialog = new CompareCompetitorsChartDialog(sailingService, races,
+                competitorSelectionProvider, stringConstants, errorReporter);
         chartDialog.show();
     }
-
+    
+    private List<RaceIdentifier> getTrackedRacesIdentifiers() {
+        List<RaceIdentifier> result = new ArrayList<RaceIdentifier>();
+        for (RaceInLeaderboardDTO raceColumn : getLeaderboard().getRaceList()) {
+            if (raceColumn.getRaceIdentifier() != null) {
+                result.add(raceColumn.getRaceIdentifier());
+            }
+        }
+        return result;
+    }
+    
     @Override
     public boolean hasSettings() {
         return true;
