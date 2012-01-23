@@ -61,7 +61,6 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KilometersPerHourSpeedImpl;
-import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard.Entry;
@@ -877,16 +876,14 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 }
             }
         }
-        
         return results;
     }
     
     private List<LeaderboardDTO> getLeaderboardByRace(RaceDTO race) {
         List<LeaderboardDTO> results = new ArrayList<LeaderboardDTO>();
+        @SuppressWarnings("unused") // see below
         Map<String, Leaderboard> leaderboards = getService().getLeaderboards();
-        
-        
-        
+        // TODO Lennart, was this written by you? Please at least leave a TODO comment before pushing such empty bodies 
         return results;
     }
 
