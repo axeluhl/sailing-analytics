@@ -143,7 +143,7 @@ public interface SailingServiceAsync {
      * Does the same as {@link SailingServiceAsync#getLeaderboards(AsyncCallback) getLeaderboards} but returns only
      * leaderboards which have the given event as race
      */
-    void getLeaderboardsByEvent(EventIdentifier eventIdentifier, AsyncCallback<List<LeaderboardDTO>> callback);
+    void getLeaderboardsByEvent(EventDTO event, AsyncCallback<List<LeaderboardDTO>> callback);
     
     void updateLeaderboard(String leaderboardName, String newLeaderboardName, int[] newDiscardingThreasholds,
             AsyncCallback<Void> callback);

@@ -866,19 +866,26 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
     
     @Override
-    public List<LeaderboardDTO> getLeaderboardsByEvent(EventIdentifier eventIdentifier) {
-        Event event = getEvent(eventIdentifier);
-        Map<String, Leaderboard> leaderboards = getService().getLeaderboards();
+    public List<LeaderboardDTO> getLeaderboardsByEvent(EventDTO event) {
         List<LeaderboardDTO> results = new ArrayList<LeaderboardDTO>();
         
-        for (Leaderboard leaderboard : leaderboards.values()) {
-            for (RaceInLeaderboard race : leaderboard.getRaceColumns()) {
-                if (Util.contains(event.getAllRaces(), race.getTrackedRace().getRace())) {
-                    LeaderboardDTO dao = createStrippedLeaderboardDTO(leaderboard);
-                    results.add(dao);
+        for (RegattaDTO regatta : event.regattas) {
+            for (RaceDTO race : regatta.races) {
+                List<LeaderboardDTO> leaderboard = getLeaderboardByRace(race);
+                if (leaderboard != null && !leaderboard.isEmpty()) {
+                    results.addAll(leaderboard);
                 }
             }
         }
+        
+        return results;
+    }
+    
+    private List<LeaderboardDTO> getLeaderboardByRace(RaceDTO race) {
+        List<LeaderboardDTO> results = new ArrayList<LeaderboardDTO>();
+        Map<String, Leaderboard> leaderboards = getService().getLeaderboards();
+        
+        
         
         return results;
     }
