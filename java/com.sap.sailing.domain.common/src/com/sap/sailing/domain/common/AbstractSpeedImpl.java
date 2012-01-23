@@ -1,9 +1,6 @@
-package com.sap.sailing.domain.common.impl;
+package com.sap.sailing.domain.common;
 
-import com.sap.sailing.domain.common.Distance;
-import com.sap.sailing.domain.common.Mile;
-import com.sap.sailing.domain.common.Speed;
-import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.NauticalMileDistance;
 
 public abstract class AbstractSpeedImpl implements Speed {
 
