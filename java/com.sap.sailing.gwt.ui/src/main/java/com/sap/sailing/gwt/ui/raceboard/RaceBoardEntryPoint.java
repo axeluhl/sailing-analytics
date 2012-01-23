@@ -51,10 +51,11 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
                 @Override
                 public void onSuccess(List<EventDTO> eventNames) {
                     selectedRace = findRace(eventNames);
-                    if(selectedRace != null)
+                    if(selectedRace != null) {
                         createRaceBoardPanel(selectedRace);
-                    else
+                    } else {
                         createErrorPage("Could not obtain a race with name " + raceName + " for an event with name " + eventName);
+                    }
                 }
 
                 @Override
@@ -67,8 +68,8 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         }
     }
 
-    private RaceDTO findRace(List<EventDTO> eventNames) {
-        for (EventDTO eventDTO : eventNames) {
+    private RaceDTO findRace(List<EventDTO> events) {
+        for (EventDTO eventDTO : events) {
             if(eventDTO.name.equals(eventName)) {
                 for (RegattaDTO regattaDTO : eventDTO.regattas) {
                     for(RaceDTO raceDTO: regattaDTO.races) {
