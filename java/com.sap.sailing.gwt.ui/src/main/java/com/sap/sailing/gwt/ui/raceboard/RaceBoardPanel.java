@@ -92,7 +92,6 @@ public class RaceBoardPanel extends FormPanel implements Component<RaceBoardSett
         if (selectedRace.timePointOfNewestEvent != null) {
             timePanel.setMax(selectedRace.timePointOfNewestEvent);
         }
-        
         mainPanel.add(timePanel);
     }
     
