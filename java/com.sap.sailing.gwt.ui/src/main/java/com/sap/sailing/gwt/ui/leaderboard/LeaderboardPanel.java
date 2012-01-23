@@ -484,7 +484,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                         result.add(legColumn);
                     }
                 } else {
-                    // the race is no longer part of the LeaderboardDAO; consider the non-null legs in legColumns:
+                    // the race is no longer part of the LeaderboardDTO; consider the non-null legs in legColumns:
                     for (LegColumn legColumn : legColumns) {
                         if (legColumn != null) {
                             result.add(legColumn);
@@ -1176,7 +1176,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             }
         }
         // Tricky issue: if the race column is currently expanded, we can't know anymore how many detail columns
-        // there are because the updated LeaderboardDAO object doesn't contain the race anymore. We have to
+        // there are because the updated LeaderboardDTO object doesn't contain the race anymore. We have to
         // collapse and remove all LegColumns following the RaceColumn
         for (Column<LeaderboardRowDTO, ?> c : columnsToRemove) {
             removeColumn(c);

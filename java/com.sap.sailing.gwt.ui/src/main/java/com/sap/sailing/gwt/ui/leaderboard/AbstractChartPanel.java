@@ -150,7 +150,7 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
                 @Override
                 public void onClick(ClickEvent event) {
                     selectedRace = index;
-                    setCompetitorsAndTimePointsDAO(null);
+                    setCompetitorsAndTimePointsDTO(null);
                     clearChart(true);
                     loadData();
                 }
@@ -202,14 +202,14 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
                 }
                 final CompetitorsAndTimePointsDTO competitorsAndTimePointsToLoad = new CompetitorsAndTimePointsDTO(
                         getStepsToLoad());
-                competitorsAndTimePointsToLoad.setStartTime(getCompetitorsAndTimePointsDAO().getStartTime());
-                competitorsAndTimePointsToLoad.setTimePointOfNewestEvent(getCompetitorsAndTimePointsDAO()
+                competitorsAndTimePointsToLoad.setStartTime(getCompetitorsAndTimePointsDTO().getStartTime());
+                competitorsAndTimePointsToLoad.setTimePointOfNewestEvent(getCompetitorsAndTimePointsDTO()
                         .getTimePointOfNewestEvent());
                 for (CompetitorDTO competitor : competitorsToLoad) {
                     competitorsAndTimePointsToLoad.setMarkPassings(competitor,
-                            getCompetitorsAndTimePointsDAO().getMarkPassings(competitor));
+                            getCompetitorsAndTimePointsDTO().getMarkPassings(competitor));
                 }
-                competitorsAndTimePointsToLoad.setCompetitor(competitorsToLoad.toArray(new CompetitorDTO[0]));
+                competitorsAndTimePointsToLoad.setCompetitors(competitorsToLoad.toArray(new CompetitorDTO[0]));
                 AbstractChartPanel.this.sailingService.getCompetitorRaceData(races[selectedRace],
                         competitorsAndTimePointsToLoad, dataToShow, new AsyncCallback<CompetitorInRaceDTO>() {
                             @Override
@@ -225,13 +225,13 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
                                     chartData.setRaceData(competitor, result.getRaceData(competitor));
                                     chartData.setMarkPassingData(competitor, result.getMarkPassings(competitor));
                                 }
-                                updateTableData(competitorsAndTimePointsToLoad.getCompetitor());
+                                updateTableData(competitorsAndTimePointsToLoad.getCompetitors());
                                 chart.showWidget(1);
                             }
                         });
             }
         };
-        if (getCompetitorsAndTimePointsDAO() != null) {
+        if (getCompetitorsAndTimePointsDTO() != null) {
             loadData.run();
         } else {
             this.sailingService.getCompetitorsAndTimePoints(races[selectedRace], getStepsToLoad(),
@@ -243,7 +243,7 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
 
                         @Override
                         public void onSuccess(CompetitorsAndTimePointsDTO result) {
-                            setCompetitorsAndTimePointsDAO(result);
+                            setCompetitorsAndTimePointsDTO(result);
                             if (chart.getWidgetCount() == 1){
                             	chart.add(createChart());
                             }
@@ -268,7 +268,7 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
         plot.redraw();
     }
     
-    private synchronized void updateTableData(CompetitorDTO[] competitorDAOs) {
+    private synchronized void updateTableData(CompetitorDTO[] competitorDTOs) {
     	List<SeriesHandler> series = new ArrayList<SeriesHandler>();
     	for (SeriesHandler sh : seriesID){
     		series.add(sh);
@@ -277,8 +277,8 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
     		series.add(sh);
     	}
     	CompetitorDTO firstCompetitor = null;
-        if (getCompetitorsAndTimePointsDAO() != null && chartData != null) {
-            for (CompetitorDTO competitor : competitorDAOs) {
+        if (getCompetitorsAndTimePointsDTO() != null && chartData != null) {
+            for (CompetitorDTO competitor : competitorDTOs) {
             	if (firstCompetitor == null){
             		firstCompetitor = competitor;
             	}
@@ -291,7 +291,7 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
                 markSeries.clear();
                 if (isCompetitorVisible(competitor) && chartData.getRaceData(competitor) != null){
                 	long starttime = System.currentTimeMillis();
-                	Pair<String,Long>[] markPassingTimes = getCompetitorsAndTimePointsDAO().getMarkPassings(competitor);
+                	Pair<String,Long>[] markPassingTimes = getCompetitorsAndTimePointsDTO().getMarkPassings(competitor);
                     Double[] markPassingValues = chartData.getMarkPassings(competitor);
                     for (int j = 0; j < markPassingTimes.length; j++){
                         if (markPassingValues[j] != null && markPassingTimes[j].getB() != null) {
@@ -302,7 +302,7 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
                     GWT.log("Update mark passings time for " + competitor.name + ": " + (System.currentTimeMillis() - starttime));
                     starttime = System.currentTimeMillis();
                     Double[] data = chartData.getRaceData(competitor);
-                    long[] timepoints = getCompetitorsAndTimePointsDAO().getTimePoints();
+                    long[] timepoints = getCompetitorsAndTimePointsDTO().getTimePoints();
                     for (int j = 0; j < getStepsToLoad(); j++) {
                     	if (data[j] != null){
                     		compSeries.add(new DataPoint(timepoints[j], data[j]));
@@ -321,7 +321,7 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
                     if (!seriesIsUsed.contains(sh)) {
                         sh.clear();
                         Double[] data = chartData.getRaceData(firstCompetitor);
-                        long[] timepoints = getCompetitorsAndTimePointsDAO().getTimePoints();
+                        long[] timepoints = getCompetitorsAndTimePointsDTO().getTimePoints();
                         for (int j = 0; j < getStepsToLoad(); j++) {
                             if (data[j] != null) {
                                 sh.add(new DataPoint(timepoints[j], data[j]));
@@ -333,7 +333,7 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
         }
         if (plot != null && plot.isAttached()) {
             try {
-                if (competitorDAOs != null && competitorDAOs.length > 0) {
+                if (competitorDTOs != null && competitorDTOs.length > 0) {
                     plot.setLinearSelection(0, 1);
                 }
                 plot.redraw();
@@ -395,7 +395,7 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
         plotOptions.setGridOptions(new GridOptions().setHoverable(true).setMouseActiveRadius(5).setAutoHighlight(true));
 
         plotOptions.setSelectionOptions(new SelectionOptions().setDragging(true).setMode("x"));
-        for (int i = 0; i <  getCompetitorsAndTimePointsDAO().getCompetitor().length; i++){
+        for (int i = 0; i <  getCompetitorsAndTimePointsDTO().getCompetitors().length; i++){
         	SeriesHandler series = model.addSeries(""+i, colorMap.getColorByID(i));
     		series.setOptions(SeriesType.LINES, new LineSeriesOptions().setLineWidth(2.5).setShow(true));
     		series.setOptions(SeriesType.POINTS, new PointsSeriesOptions().setLineWidth(0).setShow(false));
@@ -668,7 +668,7 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
      */
     public void updateSettingsOnly(ChartSettings newSettings) {
         setStepsToLoad(newSettings.getStepsToLoad());
-        setCompetitorsAndTimePointsDAO(null);
+        setCompetitorsAndTimePointsDTO(null);
     }
 
     protected StringMessages getStringMessages() {
@@ -695,11 +695,11 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
         this.dataToShow = dataToShow;
     }
 
-    protected CompetitorsAndTimePointsDTO getCompetitorsAndTimePointsDAO() {
+    protected CompetitorsAndTimePointsDTO getCompetitorsAndTimePointsDTO() {
         return competitorsAndTimePointsDTO;
     }
 
-    protected void setCompetitorsAndTimePointsDAO(CompetitorsAndTimePointsDTO competitorsAndTimePointsDAO) {
+    protected void setCompetitorsAndTimePointsDTO(CompetitorsAndTimePointsDTO competitorsAndTimePointsDTO) {
         this.competitorsAndTimePointsDTO = competitorsAndTimePointsDAO;
     }
 }

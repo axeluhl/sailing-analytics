@@ -1,11 +1,13 @@
 package com.sap.sailing.gwt.ui.shared;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import com.sap.sailing.server.api.RaceIdentifier;
 
 public class RaceInLeaderboardDTO implements IsSerializable {
     private String raceColumnName;
     private boolean medalRace;
-    private boolean trackedRace;
+    private RaceIdentifier trackedRaceIdentifier;
+    
     public String getRaceColumnName() {
         return raceColumnName;
     }
@@ -19,11 +21,12 @@ public class RaceInLeaderboardDTO implements IsSerializable {
         this.medalRace = medalRace;
     }
     public boolean isTrackedRace() {
-        return trackedRace;
+        return trackedRaceIdentifier != null;
     }
-    public void setTrackedRace(boolean trackedRace) {
-        this.trackedRace = trackedRace;
+    public void setRaceIdentifier(RaceIdentifier raceIdentifier) {
+        this.trackedRaceIdentifier = raceIdentifier;
     }
-
-    
+    public RaceIdentifier getRaceIdentifier() {
+        return trackedRaceIdentifier;
+    }
 }
