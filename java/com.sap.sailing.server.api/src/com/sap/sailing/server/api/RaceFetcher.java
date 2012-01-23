@@ -11,11 +11,5 @@ public interface RaceFetcher {
      */
     Object getTrackedRace(EventNameAndRaceName eventNameAndRaceName);
 
-    Object getRace(LeaderboardNameAndRaceColumnName leaderboardNameAndRaceColumnName);
-
-    Object getTrackedRace(LeaderboardNameAndRaceColumnName leaderboardNameAndRaceColumnName);
-
-    Object getExistingTrackedRace(LeaderboardNameAndRaceColumnName leaderboardNameAndRaceColumnName);
-
     Object getExistingTrackedRace(EventNameAndRaceName eventNameAndRaceName);
 }

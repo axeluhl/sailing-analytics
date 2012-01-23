@@ -57,7 +57,6 @@ import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
-import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.components.Component;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
 import com.sap.sailing.server.api.EventNameAndRaceName;
@@ -120,7 +119,7 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
 
     private CompetitorSelectionProvider competitorSelection;
 
-    private List<Triple<EventDTO, RegattaDTO, RaceDTO>> selectedEventAndRace;
+    private List<RaceDTO> selectedRaces;
 
     /**
      * If the user explicitly zoomed or panned the map, don't adjust zoom/pan unless a new race is selected
@@ -241,18 +240,19 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
     }
     
     @Override
-    public void onRaceSelectionChange(List<Triple<EventDTO, RegattaDTO, RaceDTO>> selectedRaces) {
+    public void onRaceSelectionChange(List<RaceDTO> selectedRaces) {
         mapFirstZoomDone = false;
         mapZoomedOrPannedSinceLastRaceSelectionChange = false;
-        this.selectedEventAndRace = selectedRaces;
+        this.selectedRaces = selectedRaces;
     }
 
     @Override
     public void timeChanged(final Date date) {
         if (date != null) {
-            if (selectedEventAndRace != null && !selectedEventAndRace.isEmpty()) {
-                EventDTO event = selectedEventAndRace.get(selectedEventAndRace.size() - 1).getA();
-                RaceDTO race = selectedEventAndRace.get(selectedEventAndRace.size() - 1).getC();
+            if (selectedRaces != null && !selectedRaces.isEmpty()) {
+                RaceDTO race = selectedRaces.get(selectedRaces.size() - 1);
+                EventDTO event = race.getEvent();
+                
                 if (event != null && race != null) {
                     final Triple<Map<CompetitorDTO, Date>, Map<CompetitorDTO, Date>, Map<CompetitorDTO, Boolean>> fromAndToAndOverlap = 
                             computeFromAndTo(date, getCompetitorsToShow());
@@ -610,9 +610,9 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
         result.add(new Label(lastFix.speedWithBearing.speedInKnots + "kts " + lastFix.speedWithBearing.bearingInDegrees
                 + "deg"));
         result.add(new Label("Tack: " + lastFix.tack.name()));
-        if (!selectedEventAndRace.isEmpty()) {
-            EventDTO event = selectedEventAndRace.get(selectedEventAndRace.size() - 1).getA();
-            RaceDTO race = selectedEventAndRace.get(selectedEventAndRace.size() - 1).getC();
+        if (!selectedRaces.isEmpty()) {
+            RaceDTO race = selectedRaces.get(selectedRaces.size() - 1);
+            EventDTO event = race.getEvent();
             if (event != null && race != null) {
                 Map<CompetitorDTO, Date> from = new HashMap<CompetitorDTO, Date>();
                 from.put(competitorDTO, fixes.get(competitorDTO).get(firstShownFix.get(competitorDTO)).timepoint);

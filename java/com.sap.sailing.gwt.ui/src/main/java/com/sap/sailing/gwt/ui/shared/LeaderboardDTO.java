@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import com.sap.sailing.server.api.RaceIdentifier;
 
 /**
  * Captures the serializable properties of a leaderboard which in particular has the competitors, any optional display
@@ -14,7 +15,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  * (DNS, DNF, DSQ).
  * 
  * @author Axel Uhl (d043530)
- * 
+ *  
  */
 public class LeaderboardDTO implements IsSerializable {
     public String name;
@@ -24,17 +25,17 @@ public class LeaderboardDTO implements IsSerializable {
     public Map<CompetitorDTO, LeaderboardRowDTO> rows;
     public boolean hasCarriedPoints;
     public int[] discardThresholds;
-    
+
     private boolean competitorsOrderedAccordingToTotalRank;
-    
+
     private final transient TotalRankingComparator totalRankingComparator;
-    
+
     public LeaderboardDTO() {
         totalRankingComparator = new TotalRankingComparator();
         competitorsOrderedAccordingToTotalRank = false;
         races = new ArrayList<RaceInLeaderboardDTO>();
     }
-    
+
     public String getDisplayName(CompetitorDTO competitor) {
         if (competitorDisplayNames == null || competitorDisplayNames.get(competitor) == null) {
             return competitor.name;
@@ -42,19 +43,19 @@ public class LeaderboardDTO implements IsSerializable {
             return competitorDisplayNames.get(competitor);
         }
     }
-    
+
     public Comparator<LeaderboardRowDTO> getTotalRankingComparator() {
         return totalRankingComparator;
     }
-    
+
     public Comparator<LeaderboardRowDTO> getMedalRaceComparator(String medalRaceName) {
         return new MedalRaceComparator(medalRaceName);
     }
-    
+
     /**
-     * If the race whose name is specified in <code>raceName</code> has any competitor who has valid {@link LeaderboardEntryDTO#legDetails}
-     * for that race, the number of entries in the leg details is returned, telling the number of legs that the race has. Otherwise,
-     * -1 is returned.
+     * If the race whose name is specified in <code>raceName</code> has any competitor who has valid
+     * {@link LeaderboardEntryDTO#legDetails} for that race, the number of entries in the leg details is returned,
+     * telling the number of legs that the race has. Otherwise, -1 is returned.
      */
     public int getLegCount(String raceName) {
         for (LeaderboardRowDTO row : rows.values()) {
@@ -66,8 +67,8 @@ public class LeaderboardDTO implements IsSerializable {
     }
 
     /**
-     * Tells if the <code>competitor</code> scored (and therefore presumably participated) in a medal race
-     * represented in this leaderboard.
+     * Tells if the <code>competitor</code> scored (and therefore presumably participated) in a medal race represented
+     * in this leaderboard.
      */
     public boolean scoredInMedalRace(CompetitorDTO competitor) {
         LeaderboardRowDTO row = rows.get(competitor);
@@ -78,9 +79,9 @@ public class LeaderboardDTO implements IsSerializable {
         }
         return false;
     }
-    
+
     public int getTotalPoints(LeaderboardRowDTO object) {
-        int totalPoints = object.carriedPoints==null?0:object.carriedPoints;
+        int totalPoints = object.carriedPoints == null ? 0 : object.carriedPoints;
         for (LeaderboardEntryDTO e : object.fieldsByRaceName.values()) {
             totalPoints += e.totalPoints;
         }
@@ -136,10 +137,10 @@ public class LeaderboardDTO implements IsSerializable {
             return result;
         }
     }
-    
+
     private class MedalRaceComparator implements Comparator<LeaderboardRowDTO> {
         private final String medalRaceName;
-        
+
         public MedalRaceComparator(String medalRaceName) {
             this.medalRaceName = medalRaceName;
         }
@@ -150,7 +151,8 @@ public class LeaderboardDTO implements IsSerializable {
             if (scoredInMedalRace(o1.competitor)) {
                 if (scoredInMedalRace(o2.competitor)) {
                     // both scored in medal race
-                    result = o1.fieldsByRaceName.get(medalRaceName).netPoints - o2.fieldsByRaceName.get(medalRaceName).netPoints;
+                    result = o1.fieldsByRaceName.get(medalRaceName).netPoints
+                            - o2.fieldsByRaceName.get(medalRaceName).netPoints;
                 } else {
                     // only o1 scored in medal race, so o1 scores better = "less"
                     result = -1;
@@ -163,16 +165,16 @@ public class LeaderboardDTO implements IsSerializable {
                     // neither one scored in any medal race; to be considered equal for medal race comparison
                     result = 0;
                 }
-                
+
             }
             return result;
         }
     }
-    
+
     /**
-     * To be called after something was incrementally altered in this leaderboard that may affect the
-     * competitor ranking, in particular anything score related. Probably the only change that wouldn't
-     * affect the ordering is a name change.
+     * To be called after something was incrementally altered in this leaderboard that may affect the competitor
+     * ranking, in particular anything score related. Probably the only change that wouldn't affect the ordering is a
+     * name change.
      */
     public void invalidateCompetitorOrdering() {
         competitorsOrderedAccordingToTotalRank = false;
@@ -205,8 +207,8 @@ public class LeaderboardDTO implements IsSerializable {
     }
 
     /**
-     * Find the name of the last race in {@link #raceNamesAndMedalRaceAndTracked}'s keys for which both, <code>c1</code> and
-     * <code>c2</code> have been assigned a score.
+     * Find the name of the last race in {@link #raceNamesAndMedalRaceAndTracked}'s keys for which both, <code>c1</code>
+     * and <code>c2</code> have been assigned a score.
      */
     private String getNameOfLastRaceSoFar(CompetitorDTO c1, CompetitorDTO c2) {
         String nameOfLastRaceSoFar = null;
@@ -248,73 +250,73 @@ public class LeaderboardDTO implements IsSerializable {
             });
             competitorsOrderedAccordingToTotalRank = true;
         }
-        return competitors.indexOf(competitor)+1;
+        return competitors.indexOf(competitor) + 1;
     };
-    
-    public boolean raceIsTracked(String raceColumnName){
-        for (RaceInLeaderboardDTO race : races){
-            if (race.getRaceColumnName().equals(raceColumnName)){
+
+    public boolean raceIsTracked(String raceColumnName) {
+        for (RaceInLeaderboardDTO race : races) {
+            if (race.getRaceColumnName().equals(raceColumnName)) {
                 return race.isTrackedRace();
             }
         }
-    	return false;
-    	
+        return false;
+
     }
-    
-    public boolean raceIsMedalRace(String raceColumnName){
+
+    public boolean raceIsMedalRace(String raceColumnName) {
         return getRaceInLeaderboardByName(raceColumnName).isMedalRace();
     }
-    
-    public void addRace(String raceColumnName, boolean medalRace, boolean trackedRace){
+
+    public void addRace(String raceColumnName, boolean medalRace, RaceIdentifier trackedRaceIdentifier) {
         RaceInLeaderboardDTO raceInLeaderboardDTO = new RaceInLeaderboardDTO();
         raceInLeaderboardDTO.setRaceColumnName(raceColumnName);
         raceInLeaderboardDTO.setMedalRace(medalRace);
-        raceInLeaderboardDTO.setTrackedRace(trackedRace);
+        raceInLeaderboardDTO.setRaceIdentifier(trackedRaceIdentifier);
     	races.add(raceInLeaderboardDTO);
     }
-    
-    public void addRaceAt(String raceColumnName, boolean medalRace, boolean trackedRace, int index){
+
+    public void addRaceAt(String raceColumnName, boolean medalRace, RaceIdentifier trackedRaceIdentifier, int index) {
         RaceInLeaderboardDTO raceInLeaderboardDTO = new RaceInLeaderboardDTO();
         raceInLeaderboardDTO.setRaceColumnName(raceColumnName);
         raceInLeaderboardDTO.setMedalRace(medalRace);
-        raceInLeaderboardDTO.setTrackedRace(trackedRace);
+        raceInLeaderboardDTO.setRaceIdentifier(trackedRaceIdentifier);
         races.add(index, raceInLeaderboardDTO);
     }
-    
-    public void removeRace(String raceColumnName){
-    	races.remove(getRaceInLeaderboardByName(raceColumnName));
+
+    public void removeRace(String raceColumnName) {
+        races.remove(getRaceInLeaderboardByName(raceColumnName));
     }
-    
-    public void renameRace(String oldName, String newName){
+
+    public void renameRace(String oldName, String newName) {
         RaceInLeaderboardDTO race = getRaceInLeaderboardByName(oldName);
-    	race.setRaceColumnName(newName);
+        race.setRaceColumnName(newName);
     }
-    
+
     private RaceInLeaderboardDTO getRaceInLeaderboardByName(String raceColumnName) {
-        for (RaceInLeaderboardDTO race : races){
-            if (race.getRaceColumnName().equals(raceColumnName)){
+        for (RaceInLeaderboardDTO race : races) {
+            if (race.getRaceColumnName().equals(raceColumnName)) {
                 return race;
             }
         }
         return null;
     }
 
-    public List<String> getRaceColumnNameList(){
+    public List<String> getRaceColumnNameList() {
         List<String> raceColumnNames = new ArrayList<String>();
-        for (RaceInLeaderboardDTO raceInLeaderboardDTO : races){
+        for (RaceInLeaderboardDTO raceInLeaderboardDTO : races) {
             raceColumnNames.add(raceInLeaderboardDTO.getRaceColumnName());
         }
-    	return raceColumnNames;
+        return raceColumnNames;
     }
-    
-    public List<RaceInLeaderboardDTO> getRaceInLeaderboardList(){
+
+    public List<RaceInLeaderboardDTO> getRaceInLeaderboardList() {
         return races;
     }
-    
-    public List<RaceInLeaderboardDTO> getRaceList(){
+
+    public List<RaceInLeaderboardDTO> getRaceList() {
         return races;
     }
-    
+
     public boolean raceListContains(String raceColumnName) {
         return getRaceInLeaderboardByName(raceColumnName) != null;
     }
@@ -340,8 +342,8 @@ public class LeaderboardDTO implements IsSerializable {
             }
         }
     }
-    
-    public void setIsMedalRace(String raceColumnName, boolean medalRace){
+
+    public void setIsMedalRace(String raceColumnName, boolean medalRace) {
         getRaceInLeaderboardByName(raceColumnName).setMedalRace(medalRace);
     }
 

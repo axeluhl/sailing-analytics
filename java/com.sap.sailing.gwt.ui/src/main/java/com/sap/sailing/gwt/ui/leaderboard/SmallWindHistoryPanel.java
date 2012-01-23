@@ -8,7 +8,6 @@ import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.gwt.ui.adminconsole.WindIndicator;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
@@ -19,7 +18,6 @@ import com.sap.sailing.gwt.ui.client.TimeListener;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.PositionDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
-import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.server.api.EventNameAndRaceName;
@@ -128,10 +126,10 @@ public class SmallWindHistoryPanel extends FormPanel implements TimeListener, Ra
     }
 
     @Override
-    public void onRaceSelectionChange(List<Triple<EventDTO, RegattaDTO, RaceDTO>> selectedRaces) {
+    public void onRaceSelectionChange(List<RaceDTO> selectedRaces) {
         if (!selectedRaces.isEmpty()) {
-            event = selectedRaces.get(selectedRaces.size() - 1).getA();
-            race = selectedRaces.get(selectedRaces.size() - 1).getC();
+            race = selectedRaces.get(selectedRaces.size() - 1);
+            event = race.getEvent();
             updateWindDisplay();
         }
     }

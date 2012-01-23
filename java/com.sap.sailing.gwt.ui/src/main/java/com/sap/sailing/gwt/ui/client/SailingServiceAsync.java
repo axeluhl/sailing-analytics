@@ -6,10 +6,8 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.impl.Util.Pair;
-import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorInRaceDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorsAndTimePointsDTO;

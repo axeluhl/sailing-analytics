@@ -5,7 +5,6 @@ import java.util.List;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.RootPanel;
-import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
@@ -14,7 +13,7 @@ import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.server.api.DefaultLeaderboardName;
 
 public class RaceBoardEntryPoint extends AbstractEntryPoint {
-    private Triple<EventDTO, RegattaDTO, RaceDTO> selectedRace;
+    private RaceDTO selectedRace;
     private String eventName;
     private String raceName;
     private String leaderboardName;
@@ -33,7 +32,7 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
             sailingService.getLeaderboardNames(new AsyncCallback<List<String>>() {
                 @Override
                 public void onSuccess(List<String> leaderboardNames) {
-                    if (leaderboardNames.contains(leaderboardName)) {
+                    if (!leaderboardNames.contains(leaderboardName)) {
                         createErrorPage(stringMessages.noSuchLeaderboard());
                     }
                 }
@@ -66,13 +65,13 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         }
     }
 
-    private Triple<EventDTO, RegattaDTO, RaceDTO> findRace(List<EventDTO> eventNames) {
+    private RaceDTO findRace(List<EventDTO> eventNames) {
         for (EventDTO eventDTO : eventNames) {
             if(eventDTO.name.equals(eventName)) {
                 for (RegattaDTO regattaDTO : eventDTO.regattas) {
                     for(RaceDTO raceDTO: regattaDTO.races) {
                         if(raceDTO.name.equals(raceName)) {
-                            return new Triple<EventDTO, RegattaDTO, RaceDTO>(eventDTO, regattaDTO, raceDTO);
+                            return raceDTO;
                         }
                     }
                 }
@@ -81,7 +80,7 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         return null;
     }
 
-    private void createRaceBoardPanel(Triple<EventDTO, RegattaDTO, RaceDTO> selectedRace)
+    private void createRaceBoardPanel(RaceDTO selectedRace)
     {
         LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(stringMessages);
         logoAndTitlePanel.addStyleName("LogoAndTitlePanel");

@@ -48,9 +48,9 @@ public class TestColumnSwapping {
         try {
             // get Leaderboard with name and current date
             leaderboardOriginalDTO = new LeaderboardDTO();
-            leaderboardOriginalDTO.addRace("Race1", true, false);
-            leaderboardOriginalDTO.addRace("Race3", true, false);
-            leaderboardOriginalDTO.addRace("Race2", true, false);
+            leaderboardOriginalDTO.addRace("Race1", true, null);
+            leaderboardOriginalDTO.addRace("Race3", true, null);
+            leaderboardOriginalDTO.addRace("Race2", true, null);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -99,9 +99,9 @@ public class TestColumnSwapping {
     public void testLeaderBoardDTOMethods() {
         lb = new LeaderboardDTO();
         assertNotNull("Leaderboard != NULL", lb);
-        lb.addRace("1", false, false);
-        lb.addRace("2", false, false);
-        lb.addRace("3", true, false);
+        lb.addRace("1", false, null);
+        lb.addRace("2", false, null);
+        lb.addRace("3", true, null);
         lb.moveRaceDown("1");
         String[] s = new String[] { "2", "1", "3" };
         for (int i = 0; i < lb.getRaceList().size(); i++)

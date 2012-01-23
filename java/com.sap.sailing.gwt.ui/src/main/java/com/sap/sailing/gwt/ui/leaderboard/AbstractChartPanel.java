@@ -1,6 +1,8 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -375,7 +377,7 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
 
     private Widget createChart() {
         final Label selectedPointLabel = new Label(getStringMessages().hoverOverAPoint());
-        PlotWithOverviewModel model = new PlotWithOverviewModel(PlotModelStrategy.defaultStrategy());
+        final PlotWithOverviewModel model = new PlotWithOverviewModel(PlotModelStrategy.defaultStrategy());
         PlotOptions plotOptions = new PlotOptions();
         plotOptions.setDefaultLineSeriesOptions(new LineSeriesOptions().setLineWidth(1).setShow(true));
         plotOptions.setDefaultPointsOptions(new PointsSeriesOptions().setShow(false));
@@ -409,8 +411,7 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
         // add hover listener
         plot.addHoverListener(new PlotHoverListener() {
             public void onPlotHover(Plot plot, PlotPosition position, PlotItem item) {
-                // FIXME can the indexOf ever find anything? seriesID is a List<SeriesHandler>; item.getSeries() returns a Series object
-            	CompetitorDTO competitor = competitorID.get(seriesID.indexOf(item.getSeries()));
+                CompetitorDTO competitor = competitorID.get(item.getSeriesIndex() / 2);
                 if (item != null && competitor != null) {
                     if (item.getSeries().getLabel().toLowerCase().contains("mark")) {
                         selectedPointLabel.setText(stringMessages.competitorPassedMarkAtDate(competitor.name,
@@ -452,25 +453,57 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
             }
         }, true);
         plot.addSelectionListener(new SelectionListener() {
-
             public void selected(double x1, double y1, double x2, double y2) {
-            	/* TODO Remove not visible buoys from the series when user is zooming in or add them if he is zooming out.
-            	for (CompetitorDTO competitor : competitorsAndTimePointsDTO.getCompetitor()){
-            		long[] markPassingTimes = competitorsAndTimePointsDTO.getMarkPassings(competitor);
+                //Refactoring the selection range, if there is no mark passing between x1 and x2
+                //Needed to prevent white space in the displayed selection
+                ArrayList<Double> x1Values = new ArrayList<Double>();
+                ArrayList<Double> x2Values = new ArrayList<Double>();
+                boolean markPassingInRange = false;
+                
+                competitorLoop:
+                for (CompetitorDTO competitor : competitorID) {
+                    ArrayList<Pair<Double, Double>> negativeDeltas = new ArrayList<Pair<Double, Double>>();
+                    ArrayList<Pair<Double, Double>> positiveDeltas = new ArrayList<Pair<Double, Double>>();
+                    Pair<String, Long>[] markPassingTimes = competitorsAndTimePointsDTO.getMarkPassings(competitor);
                     Double[] markPassingValues = chartData.getMarkPassings(competitor);
-                    SeriesHandler markSeries = getCompetitorMarkPassingSeries(competitor);
-                    markSeries.clear();
-                    int visibleMarkPassings = 0;
-                    for (int j = 0; j < markPassingTimes.length; j++){
-                        if (markPassingValues[j] != null && markPassingTimes[j] > x1 && markPassingTimes[j] < x2) {
-                            markSeries.add(new DataPoint(markPassingTimes[j],markPassingValues[j]));
-                            visibleMarkPassings++;
+                    
+                    for (int i = 0; i < markPassingValues.length; i++) {
+                        double markPassing = markPassingTimes[i].getB().doubleValue();
+                        if (markPassingValues[i] != null && (markPassing < x1 || markPassing > x2)) {
+                            double delta = markPassing < x1 ? markPassing - x1 : markPassing - x2;
+                            Pair<Double, Double> p = new Pair<Double, Double>(delta, markPassing);
+                            if (delta < 0) {
+                                negativeDeltas.add(p);
+                            } else {
+                                positiveDeltas.add(p);
+                            }
+                        } else if (markPassingValues[i] != null) {
+                            markPassingInRange = true;
+                            break competitorLoop;
                         }
                     }
-                    if (visibleMarkPassings == 0){
-                    	markSeries.setVisible(false);
-                    }
-            	}*/
+                    
+                    Comparator<Pair<Double, Double>> comp = new Comparator<Pair<Double,Double>>() {
+                        @Override
+                        public int compare(Pair<Double, Double> p1, Pair<Double, Double> p2) {
+                            return p1.getA().compareTo(p2.getA());
+                        }
+                    };
+                    
+                    Collections.sort(negativeDeltas, comp);
+                    x1Values.add(negativeDeltas.get(negativeDeltas.size() - 1).getB());
+                    Collections.sort(positiveDeltas, comp);
+                    x2Values.add(positiveDeltas.get(0).getB());
+                }
+                
+                //If there are mark passings between x1 and x2 no refactoring is needed
+                if (!markPassingInRange) {
+                    Collections.sort(x1Values);
+                    x1 = x1Values.get(0) - 2000; //Increase x1 by 2 seconds prevent small blank space
+                    Collections.sort(x2Values);
+                    x2 = x2Values.get(x2Values.size() - 1) + 2000; //Increase x2 by 2 seconds prevent small blank space
+                }
+                
                 plot.setLinearSelection(x1, x2);
             }
         });

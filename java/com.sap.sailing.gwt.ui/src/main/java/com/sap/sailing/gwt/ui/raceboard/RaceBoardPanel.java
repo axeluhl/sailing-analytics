@@ -7,7 +7,6 @@ import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.gwt.ui.adminconsole.RaceMap;
 import com.sap.sailing.gwt.ui.adminconsole.RaceMapSettings;
 import com.sap.sailing.gwt.ui.adminconsole.TimePanel;
@@ -18,27 +17,26 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
-import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
-import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.components.Component;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
+import com.sap.sailing.server.api.EventNameAndRaceName;
 
 public class RaceBoardPanel extends FormPanel implements Component<RaceBoardSettings> {
 
     private final SailingServiceAsync sailingService;
     private final ErrorReporter errorReporter;
-    private final Triple<EventDTO, RegattaDTO, RaceDTO> selectedRace;
+    private final RaceDTO selectedRace;
     private String raceBoardName;
 
     private final Timer timer;
     private final List<CollapsableComponentViewer<?>> collapsableViewers;
     
-    public RaceBoardPanel(SailingServiceAsync sailingService, final Triple<EventDTO, RegattaDTO, RaceDTO> theSelectedRace, String leaderboardName, 
+    public RaceBoardPanel(SailingServiceAsync sailingService, final RaceDTO theSelectedRace, String leaderboardName, 
             ErrorReporter errorReporter, final StringMessages stringMessages) {
         this.sailingService = sailingService;
         this.selectedRace = theSelectedRace;
-        this.setRaceBoardName(selectedRace.getC().name);
+        this.setRaceBoardName(selectedRace.name);
         this.errorReporter = errorReporter;
         VerticalPanel mainPanel = new VerticalPanel();
         mainPanel.setSize("100%", "100%");
@@ -48,8 +46,9 @@ public class RaceBoardPanel extends FormPanel implements Component<RaceBoardSett
         collapsableViewers = new ArrayList<CollapsableComponentViewer<?>>();
         CompetitorSelectionModel competitorSelectionModel = new CompetitorSelectionModel(/* hasMultiSelection */ true);
 
-        // create the default leaderboard
-        LeaderboardPanel leaderboardPanel = new LeaderboardPanel(sailingService, competitorSelectionModel,
+        // create the default leaderboard and select the right race
+        EventNameAndRaceName raceIdentifier = (EventNameAndRaceName) theSelectedRace.getRaceIdentifier();
+        LeaderboardPanel leaderboardPanel = new LeaderboardPanel(sailingService, raceIdentifier, competitorSelectionModel,
                 leaderboardName, errorReporter, stringMessages);
 
         CollapsableComponentViewer<LeaderboardSettings> leaderboardViewer = new CollapsableComponentViewer<LeaderboardSettings>(
@@ -61,7 +60,7 @@ public class RaceBoardPanel extends FormPanel implements Component<RaceBoardSett
         CollapsableComponentViewer<RaceMapSettings> raceMapViewer = new CollapsableComponentViewer<RaceMapSettings>(
                 raceMap, "600px", "300px", stringMessages);
         raceMap.loadMapsAPI((Panel) raceMapViewer.getViewerWidget().getContent());
-        List<Triple<EventDTO, RegattaDTO, RaceDTO>> races = new ArrayList<Triple<EventDTO, RegattaDTO, RaceDTO>>();
+        List<RaceDTO> races = new ArrayList<RaceDTO>();
         races.add(selectedRace);
         raceMap.onRaceSelectionChange(races);
         collapsableViewers.add(raceMapViewer);
@@ -84,16 +83,15 @@ public class RaceBoardPanel extends FormPanel implements Component<RaceBoardSett
         timer.addTimeListener(raceMap);
 
         TimePanel timePanel = new TimePanel(stringMessages, timer);
-        RaceDTO race = selectedRace.getC();
-        if (race.startOfRace != null) {
-            timePanel.timeChanged(race.startOfRace);
-            timer.setTime(race.startOfRace.getTime());
+        if (selectedRace.startOfRace != null) {
+            timePanel.timeChanged(selectedRace.startOfRace);
+            timer.setTime(selectedRace.startOfRace.getTime());
         }
-        if (race.startOfTracking != null) {
-            timePanel.setMin(race.startOfTracking);
+        if (selectedRace.startOfTracking != null) {
+            timePanel.setMin(selectedRace.startOfTracking);
         }
-        if (race.timePointOfNewestEvent != null) {
-            timePanel.setMax(race.timePointOfNewestEvent);
+        if (selectedRace.timePointOfNewestEvent != null) {
+            timePanel.setMax(selectedRace.timePointOfNewestEvent);
         }
         
         mainPanel.add(timePanel);

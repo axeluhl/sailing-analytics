@@ -10,14 +10,11 @@ import com.google.gwt.user.client.ui.DoubleBox;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
-import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
-import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.PositionDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
-import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.server.api.EventNameAndRaceName;
 
@@ -54,17 +51,18 @@ public class WindSettingPanel extends FormPanel {
                 if (latDegBox.getValue() != null && lngDegBox.getValue() != null) {
                     wind.position = new PositionDTO(latDegBox.getValue(), lngDegBox.getValue());
                 }
-                List<Triple<EventDTO, RegattaDTO, RaceDTO>> eventAndRaces = raceSelectionProvider.getSelectedEventAndRace();
+                List<RaceDTO> selectedRaces = raceSelectionProvider.getSelectedRaces();
                 // Here we assume that single selection is enabled because the WindPanel creates a TrackedComposite with disabled multi selection.
-                final Triple<EventDTO, RegattaDTO, RaceDTO> eventAndRace = eventAndRaces.get(eventAndRaces.size()-1);
-                sailingService.setWind(new EventNameAndRaceName(eventAndRace.getA().name, eventAndRace.getC().name), wind, new AsyncCallback<Void>() {
+                final RaceDTO race = selectedRaces.get(selectedRaces.size()-1);
+                EventNameAndRaceName raceIdentifier = (EventNameAndRaceName) race.getRaceIdentifier();
+                sailingService.setWind(raceIdentifier, wind, new AsyncCallback<Void>() {
                     @Override
                     public void onSuccess(Void result) {
-                        windShower.showWind(eventAndRace.getA(), eventAndRace.getC());
+                        windShower.showWind(race);
                     }
                     @Override
                     public void onFailure(Throwable caught) {
-                        errorReporter.reportError("Error setting wind for race "+eventAndRace.getC().name+": "+caught.getMessage());
+                        errorReporter.reportError("Error setting wind for race "+race.name+": "+caught.getMessage());
                     }
                 });
             }

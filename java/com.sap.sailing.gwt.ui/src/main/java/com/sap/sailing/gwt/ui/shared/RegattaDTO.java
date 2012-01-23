@@ -7,6 +7,8 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 public class RegattaDTO implements IsSerializable {
     public BoatClassDTO boatClass;
     public List<RaceDTO> races;
+
+    private EventDTO event;
     
     public RegattaDTO() {}
 
@@ -14,6 +16,14 @@ public class RegattaDTO implements IsSerializable {
         super();
         this.boatClass = boatClass;
         this.races = races;
+    }
+
+    public EventDTO getEvent() {
+        return event;
+    }
+
+    public void setEvent(EventDTO event) {
+        this.event = event;
     }
     
 }
