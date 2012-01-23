@@ -20,6 +20,7 @@ import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
@@ -291,10 +292,14 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
             @Override
             public SafeHtml getValue(RaceInLeaderboardDTO raceInLeaderboardDTO) {
                 EventNameAndRaceName raceIdentifier = (EventNameAndRaceName) raceInLeaderboardDTO.getRaceIdentifier();
-                String link = "/gwt/RaceBoard.html?leaderboardName="+ selectedLeaderboard.name + 
-                                "&raceName=" + raceIdentifier.getRaceName() +
-                                "&eventName=" + raceIdentifier.getEventName();
-                return ANCHORTEMPLATE.cell(link, raceInLeaderboardDTO.getRaceColumnName());
+                if(raceIdentifier != null) {
+                    String link = "/gwt/RaceBoard.html?leaderboardName="+ selectedLeaderboard.name + 
+                            "&raceName=" + raceIdentifier.getRaceName() +
+                            "&eventName=" + raceIdentifier.getEventName();
+                    return ANCHORTEMPLATE.cell(link, raceInLeaderboardDTO.getRaceColumnName());
+                } else {
+                    return SafeHtmlUtils.fromString(raceInLeaderboardDTO.getRaceColumnName());
+                }
             }
         };
 
