@@ -86,8 +86,6 @@ public class TrackedEventsComposite extends FormPanel implements EventDisplayer,
 
     private TextBox filterRacesTextbox;
 
-    private RaceDTO lastSelectedRace;
-
     public TrackedEventsComposite(final SailingServiceAsync sailingService, final ErrorReporter errorReporter,
             final EventRefresher eventRefresher, RaceSelectionProvider raceSelectionProvider,
             StringMessages stringConstants, boolean hasMultiSelection) {
@@ -100,7 +98,6 @@ public class TrackedEventsComposite extends FormPanel implements EventDisplayer,
         this.multiSelection = hasMultiSelection;
         this.raceSelectionProvider = raceSelectionProvider;
         this.raceIsTrackedRaceChangeListener = new HashSet<TrackedRaceChangedListener>();
-        this.lastSelectedRace = null;
         raceList = new ListDataProvider<RaceDTO>();
         selectionModel = multiSelection ? new MultiSelectionModel<RaceDTO>()
                 : new SingleSelectionModel<RaceDTO>();
@@ -273,11 +270,9 @@ public class TrackedEventsComposite extends FormPanel implements EventDisplayer,
             public void onSelectionChange(SelectionChangeEvent event) {
                 List<RaceDTO> selectedRaces = getSelectedRaces();
                 if (selectedRaces.isEmpty()) {
-                    lastSelectedRace = null;
                     btnRemoveRace.setEnabled(false);
                     btnUntrack.setEnabled(false);
                 } else {
-                    lastSelectedRace = selectedRaces.get(0);
                     btnRemoveRace.setEnabled(true);
                     btnUntrack.setEnabled(true);
                 }
@@ -342,11 +337,10 @@ public class TrackedEventsComposite extends FormPanel implements EventDisplayer,
         return result;
     }
 
-    public void selectRaceByIdentifier(EventNameAndRaceName raceIdentifier) {
+    public void selectRaceByIdentifier(RaceIdentifier raceIdentifier) {
         if (raceList != null) {
             for (RaceDTO race : raceList.getList()) {
                 EventDTO event = race.getEvent();
-
                 if (event.name.equals(raceIdentifier.getEventName()) && race.name.equals(raceIdentifier.getRaceName())) {
                     dontFireNextSelectionChangeEvent = true;
                     selectionModel.setSelected(race, true);
@@ -394,11 +388,8 @@ public class TrackedEventsComposite extends FormPanel implements EventDisplayer,
             }
         }
         allRaces = newAllRaces;
-        raceSelectionProvider.setAllRaces(newAllRaceIdentifiers, /* listenersNotToNotify */ this);
         fillRaceListFromAvailableRacesApplyingFilter();
-        if (lastSelectedRace != null) {
-            selectRaceByIdentifier((EventNameAndRaceName) lastSelectedRace.getRaceIdentifier());
-        }
+        raceSelectionProvider.setAllRaces(newAllRaceIdentifiers); // have this object be notified; triggers onRaceSelectionChange
     }
 
     public void addTrackedRaceChangeListener(TrackedRaceChangedListener listener) {
