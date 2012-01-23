@@ -78,4 +78,36 @@ public class EventDTO extends NamedDTO implements IsSerializable {
         
         return tracked;
     }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + ((competitors == null) ? 0 : competitors.hashCode());
+        result = prime * result + ((locations == null) ? 0 : locations.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (!super.equals(obj))
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        EventDTO other = (EventDTO) obj;
+        if (competitors == null) {
+            if (other.competitors != null)
+                return false;
+        } else if (!competitors.equals(other.competitors))
+            return false;
+        if (locations == null) {
+            if (other.locations != null)
+                return false;
+        } else if (!locations.equals(other.locations))
+            return false;
+        return true;
+    }
+    
 }

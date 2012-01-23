@@ -55,7 +55,7 @@ public class OverviewEventPanel extends AbstractEventPanel {
     private Button btnShowLeaderboards;
     private CellTable<EventDTO> eventTable;
     private ListDataProvider<EventDTO> eventTableProvider;
-    private SingleSelectionModel<EventDTO> eventSelectionModel;
+    private SingleSelectionModel<EventDTO> eventTableSelectionModel;
 
     private CaptionPanel captionPanelLeaderboards;
     
@@ -132,11 +132,11 @@ public class OverviewEventPanel extends AbstractEventPanel {
         });
         panelSearch.add(textBoxUntil);
 
-        // Build events GUI
         HorizontalPanel listsSplitPanel = new HorizontalPanel();
         mainPanel.add(listsSplitPanel);
         listsSplitPanel.setWidth("100%");
         
+        // Build events GUI
         captionPanelEvents = new CaptionPanel(stringConstants.events());
         captionPanelEvents.setWidth("100%");
         listsSplitPanel.add(captionPanelEvents);
@@ -150,13 +150,22 @@ public class OverviewEventPanel extends AbstractEventPanel {
         functionPanelEvents.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
         functionPanelEvents.setSpacing(5);
         eventsPanel.add(functionPanelEvents);
+        
+        Button btnRefreshEventList = new Button(stringConstants.refresh());
+        btnRefreshEventList.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                refreshEventsTable();
+            }
+        });
+        functionPanelEvents.add(btnRefreshEventList);
 
         btnShowLeaderboards = new Button(">");
         btnShowLeaderboards.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent c) {
-                if (eventSelectionModel.getSelectedObject() != null) {
-                    captionPanelLeaderboards.setVisible(true);
+                if (eventTableSelectionModel.getSelectedObject() != null) {
+                    setLeaderboardsPanelVisible(true);
                 } else {
                     Window.alert(stringConstants.noEventSelected());
                 }
@@ -208,9 +217,9 @@ public class OverviewEventPanel extends AbstractEventPanel {
             eventTable.addColumnSortHandler(eventSortHandler);
             
             //Adding the selection model
-            eventSelectionModel = new SingleSelectionModel<EventDTO>();
-            eventTable.setSelectionModel(eventSelectionModel);
-            eventSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+            eventTableSelectionModel = new SingleSelectionModel<EventDTO>();
+            eventTable.setSelectionModel(eventTableSelectionModel);
+            eventTableSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
                 @Override
                 public void onSelectionChange(SelectionChangeEvent event) {
                     eventSelectionChanged(event);
@@ -223,7 +232,7 @@ public class OverviewEventPanel extends AbstractEventPanel {
         // Build leaderboards GUI
         captionPanelLeaderboards = new CaptionPanel(stringConstants.leaderboards());
         captionPanelLeaderboards.setVisible(false);
-        captionPanelLeaderboards.setWidth("95%");
+        captionPanelLeaderboards.setWidth("100%");
         listsSplitPanel.add(captionPanelLeaderboards);
 
         VerticalPanel leaderboardsPanel = new VerticalPanel();
@@ -240,15 +249,22 @@ public class OverviewEventPanel extends AbstractEventPanel {
 
             @Override
             public void onClick(ClickEvent event) {
-                captionPanelLeaderboards.setVisible(false);
+                setLeaderboardsPanelVisible(false);
             }
         });
         functionPanelLeaderboards.add(btnHideLeaderboards);
 
         // Create leaderboard list
         // TODO
-        
-        loadEvents();
+
+        Runnable displayEvents = new Runnable() {
+            @Override
+            public void run() {
+                eventTableProvider.getList().clear();
+                eventTableProvider.getList().addAll(availableEvents);
+            }
+        };
+        loadEvents(displayEvents);
         
         //Set checkbox as true, because we can't search for old events right now
         //TODO Remove after searching for old events is possible
@@ -267,8 +283,6 @@ public class OverviewEventPanel extends AbstractEventPanel {
                 } else {
                     availableEvents.clear();
                 }
-                eventTableProvider.getList().clear();
-                eventTableProvider.getList().addAll(availableEvents);
                 if (actionAfterLoading != null) {
                     actionAfterLoading.run();
                 }
@@ -284,16 +298,71 @@ public class OverviewEventPanel extends AbstractEventPanel {
         loadEvents(null);
     }
     
-    protected void eventSelectionChanged(SelectionChangeEvent event) {
+    private void refreshEventsTable() {
+        final EventDTO selectedEvent = eventTableSelectionModel.getSelectedObject();
+        
+        //Clear Search criteria
+        textBoxLocation.setText("");
+        textBoxName.setText("");
+        textBoxFrom.setText("");
+        textBoxUntil.setText("");
+        //TODO Switch the value of checkBoxLive to false, as soon as searching for old events is possible
+        checkBoxLive.setValue(true);
+        
+        //Load all available events and reselect the event
+        Runnable displayAndReselect = new Runnable() {
+            @Override
+            public void run() {
+                eventTableProvider.getList().clear();
+                eventTableProvider.getList().addAll(availableEvents);
+                //Now sort again according to selected criterion
+                ColumnSortEvent.fire(eventTable, eventTable.getColumnSortList());
+                //Reselect the event
+                if (selectedEvent != null) {
+                    for (EventDTO event : eventTableProvider.getList()) {
+                        if (event.equals(selectedEvent)) {
+                            eventTableSelectionModel.setSelected(selectedEvent, true);
+                            break;
+                        }
+                    }
+                }
+            }
+        };
+        loadEvents(displayAndReselect);
+        //Now sort again according to selected criterion
+        ColumnSortEvent.fire(eventTable, eventTable.getColumnSortList());
+    }
+    
+    private void setLeaderboardsPanelVisible(boolean visible) {
+        captionPanelLeaderboards.setVisible(visible);
+        captionPanelEvents.setWidth(visible ? "95%" : "100%");
+        btnShowLeaderboards.setEnabled(!visible);
+    }
+    
+    private void eventSelectionChanged(SelectionChangeEvent event) {
         // TODO Actions when the event selection changed
+        EventDTO selectedEvent = eventTableSelectionModel.getSelectedObject();
+        if (selectedEvent != null) {
+            setLeaderboardsPanelVisible(true);
+            //TODO Display data in leaderboard list
+        } else {
+            setLeaderboardsPanelVisible(false);
+            btnShowLeaderboards.setEnabled(false);
+        }
     }
     
     private void onCheckBoxLiveChange() {
         if (checkBoxLive.getValue()) {
+            String today = DateTimeFormat.getFormat("dd.MM.yyyy").format(new Date()).toString();
+            
+            textBoxFrom.setText(today);
             textBoxFrom.setEnabled(false);
+            textBoxUntil.setText(today);
             textBoxUntil.setEnabled(false);
         } else {
+            textBoxFrom.setText("");
             textBoxFrom.setEnabled(true);
+            textBoxUntil.setText("");
             textBoxUntil.setEnabled(true);
         }
         onSearchCriteriaChange();
@@ -310,7 +379,7 @@ public class OverviewEventPanel extends AbstractEventPanel {
             from = DateTimeFormat.getFormat("dd.MM.yyyy").parse(textBoxFrom.getText());
             until = DateTimeFormat.getFormat("dd.MM.yyyy").parse(textBoxUntil.getText());
             //Adding 24 hours to until, so that it doesn't result in an empty table if 'from' and 'until' are equal.
-            //Instead you would have a 24 hour range
+            //Instead you'll have a 24 hour range
             long time = until.getTime() + 24 * 60 * 60 * 1000;
             until = new Date(time);
         } catch (IllegalArgumentException e) {}
@@ -321,7 +390,7 @@ public class OverviewEventPanel extends AbstractEventPanel {
                 eventTableProvider.getList().add(event);
             }
         }
-        // now sort again according to selected criterion
+        //Now sort again according to selected criterion
         ColumnSortEvent.fire(eventTable, eventTable.getColumnSortList());
     }
     
@@ -353,7 +422,7 @@ public class OverviewEventPanel extends AbstractEventPanel {
 
     private ListHandler<EventDTO> getEventSortHandler(List<EventDTO> list, TextColumn<EventDTO> locationColumn,
             TextColumn<EventDTO> nameColumn, TextColumn<EventDTO> startDateColumn) {
-        //TODO Check if comparators are correct
+        
         ListHandler<EventDTO> sortHandler = new ListHandler<EventDTO>(list);
         sortHandler.setComparator(locationColumn, new Comparator<EventDTO>() {
             @Override
