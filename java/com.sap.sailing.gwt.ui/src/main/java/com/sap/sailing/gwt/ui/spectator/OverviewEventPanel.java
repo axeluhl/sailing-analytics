@@ -294,9 +294,6 @@ public class OverviewEventPanel extends AbstractEventPanel {
             }
         });
     }
-    private void loadEvents() {
-        loadEvents(null);
-    }
     
     private void refreshEventsTable() {
         final EventDTO selectedEvent = eventTableSelectionModel.getSelectedObject();
