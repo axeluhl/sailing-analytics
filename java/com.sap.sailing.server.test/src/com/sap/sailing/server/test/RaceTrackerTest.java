@@ -23,6 +23,7 @@ import com.sap.sailing.domain.tracking.RacesHandle;
 import com.sap.sailing.domain.tracking.TrackedEvent;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
+import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 
 public class RaceTrackerTest {
@@ -40,15 +41,15 @@ public class RaceTrackerTest {
         //   liveUri   = new URI("tcp://sapsimulation.tracdev.dk:4420"); // or with tunneling: tcp://localhost:4420
         //   storedUri = new URI("tcp://sapsimulation.tracdev.dk:4421"); // or with tunneling: tcp://localhost:4421
         // for stored race, non-real-time simulation:
-        paramUrl  = new URL("http://germanmaster.traclive.dk/events/event_20110505_SailingTea/clientparams.php?event=event_20110505_SailingTea&race=bd8c778e-7c65-11e0-8236-406186cbf87c");
+        paramUrl  = new URL("http://" + TracTracConnectionConstants.HOST_NAME + "/events/event_20110505_SailingTea/clientparams.php?event=event_20110505_SailingTea&race=bd8c778e-7c65-11e0-8236-406186cbf87c");
         
         if (tractracTunnel) {
-            liveUri   = new URI("tcp://"+tractracTunnelHost+":1520");
-            storedUri = new URI("tcp://"+tractracTunnelHost+":1521");
+            liveUri   = new URI("tcp://"+tractracTunnelHost+":"+TracTracConnectionConstants.PORT_TUNNEL_LIVE);
+            storedUri = new URI("tcp://"+tractracTunnelHost+":"+TracTracConnectionConstants.PORT_TUNNEL_STORED);
         } else {
             // no tunnel:
-            liveUri = new URI("tcp://germanmaster.traclive.dk:1520");
-            storedUri = new URI("tcp://germanmaster.traclive.dk:1521");
+            liveUri = new URI("tcp://" + TracTracConnectionConstants.HOST_NAME + ":" + TracTracConnectionConstants.PORT_LIVE);
+            storedUri = new URI("tcp://" + TracTracConnectionConstants.HOST_NAME + ":" + TracTracConnectionConstants.PORT_STORED);
         }
     }
     

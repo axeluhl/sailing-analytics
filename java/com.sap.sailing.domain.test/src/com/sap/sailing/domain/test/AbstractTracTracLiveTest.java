@@ -19,6 +19,7 @@ import org.junit.Before;
 
 import com.maptrack.client.io.TypeController;
 import com.sap.sailing.domain.tractracadapter.Receiver;
+import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
 import com.sap.tractrac.clientmodule.util.Base64;
 import com.tractrac.clientmodule.Event;
 import com.tractrac.clientmodule.data.DataController;
@@ -54,9 +55,9 @@ public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest impl
      */
     @Before
     public void setUp() throws MalformedURLException, IOException, InterruptedException, URISyntaxException {
-        setUp(new URL("http://germanmaster.traclive.dk/events/event_20110505_SailingTea/clientparams.php?event=event_20110505_SailingTea&race=bd8c778e-7c65-11e0-8236-406186cbf87c"),
-            tractracTunnel ? new URI("tcp://"+tractracTunnelHost+":1520") : new URI("tcp://germanmaster.traclive.dk:1520"),
-                    tractracTunnel ? new URI("tcp://"+tractracTunnelHost+":1521") : new URI("tcp://germanmaster.traclive.dk:1521"));
+        setUp(new URL("http://" + TracTracConnectionConstants.HOST_NAME + "/events/event_20110505_SailingTea/clientparams.php?event=event_20110505_SailingTea&race=bd8c778e-7c65-11e0-8236-406186cbf87c"),
+            tractracTunnel ? new URI("tcp://"+tractracTunnelHost+":"+TracTracConnectionConstants.PORT_TUNNEL_LIVE) : new URI("tcp://" + TracTracConnectionConstants.HOST_NAME + ":" + TracTracConnectionConstants.PORT_LIVE),
+                    tractracTunnel ? new URI("tcp://"+tractracTunnelHost+":"+TracTracConnectionConstants.PORT_TUNNEL_STORED) : new URI("tcp://" + TracTracConnectionConstants.HOST_NAME + ":" + TracTracConnectionConstants.PORT_STORED));
     }
     
     protected void setUp(URL paramUrl, URI liveUri, URI storedUri) throws FileNotFoundException, MalformedURLException {

@@ -47,6 +47,8 @@ public class ResultAPITester {
             int speedup = 40;
             
             // Instance the resultgenerator using a URL for a specific race
+            //Hardcoded host name 'germanmaster.traclive.dk' necessary, because an import of TracTracConnectionConstants causes a dependencies cycly
+            //For the reasen that this code is nearly never used the effort of a bigger refactoring is saved
             ResultGenerator generator = new ResultGenerator(new URL("http://germanmaster.traclive.dk/events/event_20110308_SAPWorldCh/clientparams.php?event=event_20110308_SAPWorldCh&race=5ffe619e-4962-11e0-8236-406186cbf87c&ci=&minimize=&LiveDelaySecs="));
             
             // Start out not using custom wind

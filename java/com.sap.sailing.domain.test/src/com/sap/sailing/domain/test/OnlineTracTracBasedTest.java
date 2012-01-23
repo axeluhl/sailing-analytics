@@ -35,6 +35,7 @@ import com.sap.sailing.domain.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.tracking.impl.TrackedLegImpl;
 import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
+import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
 import com.sap.sailing.domain.tractracadapter.impl.DomainFactoryImpl;
 import com.tractrac.clientmodule.Race;
 
@@ -124,9 +125,9 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
 
     protected void setUpWithoutLaunchingController(String eventName, String raceId) throws FileNotFoundException, MalformedURLException,
             URISyntaxException {
-        super.setUp(new URL("http://germanmaster.traclive.dk/events/"+eventName+"/clientparams.php?event="+eventName+"&race="+raceId),
-                tractracTunnel ? new URI("tcp://"+tractracTunnelHost+":1520") : new URI("tcp://germanmaster.traclive.dk:1520"),
-                        tractracTunnel ? new URI("tcp://"+tractracTunnelHost+":1521") : new URI("tcp://germanmaster.traclive.dk:1521"));
+        super.setUp(new URL("http://" + TracTracConnectionConstants.HOST_NAME + "/events/"+eventName+"/clientparams.php?event="+eventName+"&race="+raceId),
+                tractracTunnel ? new URI("tcp://"+tractracTunnelHost+":"+TracTracConnectionConstants.PORT_TUNNEL_LIVE) : new URI("tcp://" + TracTracConnectionConstants.HOST_NAME + ":" + TracTracConnectionConstants.PORT_LIVE),
+                        tractracTunnel ? new URI("tcp://"+tractracTunnelHost+":"+TracTracConnectionConstants.PORT_TUNNEL_STORED) : new URI("tcp://" + TracTracConnectionConstants.HOST_NAME + ":" + TracTracConnectionConstants.PORT_STORED));
         if (domainFactory == null) {
             domainFactory = new DomainFactoryImpl(new com.sap.sailing.domain.base.impl.DomainFactoryImpl());
         }

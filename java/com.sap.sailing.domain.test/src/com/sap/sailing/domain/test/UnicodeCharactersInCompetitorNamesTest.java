@@ -16,6 +16,7 @@ import org.junit.Test;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
+import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
 import com.sap.sailing.domain.tractracadapter.TracTracRaceTracker;
 import com.sap.sailing.domain.tractracadapter.impl.DomainFactoryImpl;
 
@@ -41,9 +42,9 @@ public class UnicodeCharactersInCompetitorNamesTest {
         TracTracRaceTracker fourtyninerYellow_2 = domainFactory
                 .createRaceTracker(
                         new URL(
-                                "http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/clientparams.php?event=event_20110609_KielerWoch&race=5b08a9ee-9933-11e0-85be-406186cbf87c"),
-                                tractracTunnel ? new URI("tcp://"+tractracTunnelHost+":1520") : new URI("tcp://germanmaster.traclive.dk:1520"),
-                                        tractracTunnel ? new URI("tcp://"+tractracTunnelHost+":1521") : new URI("tcp://germanmaster.traclive.dk:1521"),
+                                "http://" + TracTracConnectionConstants.HOST_NAME + "/events/event_20110609_KielerWoch/clientparams.php?event=event_20110609_KielerWoch&race=5b08a9ee-9933-11e0-85be-406186cbf87c"),
+                                tractracTunnel ? new URI("tcp://"+tractracTunnelHost+":"+TracTracConnectionConstants.PORT_TUNNEL_LIVE) : new URI("tcp://" + TracTracConnectionConstants.HOST_NAME + ":" + TracTracConnectionConstants.PORT_LIVE),
+                                        tractracTunnel ? new URI("tcp://"+tractracTunnelHost+":"+TracTracConnectionConstants.PORT_TUNNEL_STORED) : new URI("tcp://" + TracTracConnectionConstants.HOST_NAME + ":" + TracTracConnectionConstants.PORT_STORED),
                         EmptyWindStore.INSTANCE, new DummyTrackedEventRegistry());
         
         Iterable<Competitor> competitors = fourtyninerYellow_2.getRacesHandle().getRaces().iterator().next().getCompetitors();
@@ -62,7 +63,7 @@ public class UnicodeCharactersInCompetitorNamesTest {
         BufferedReader localBufferedReader = new BufferedReader(
                 new InputStreamReader(
                         new URL(
-                                "http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/clientparams.php?event=event_20110609_KielerWoch&race=5b08a9ee-9933-11e0-85be-406186cbf87c")
+                                "http://" + TracTracConnectionConstants.HOST_NAME + "/events/event_20110609_KielerWoch/clientparams.php?event=event_20110609_KielerWoch&race=5b08a9ee-9933-11e0-85be-406186cbf87c")
                                 .openStream(), charsetname));
         String line;
         while ((line=localBufferedReader.readLine()) != null) {
