@@ -5,6 +5,7 @@ import java.util.List;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
@@ -107,6 +108,10 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
                     
                     FlowPanel breadcrumbPanel = new FlowPanel();
                     breadcrumbPanel.addStyleName("breadcrumbPanel");
+                    Label eventNameLabel = new Label(eventName);
+                    eventNameLabel.addStyleName("eventNameHeadline");
+                    breadcrumbPanel.add(eventNameLabel);
+                    
                     
                     timelinePanel.add(timelineInnerPanel);
                     
