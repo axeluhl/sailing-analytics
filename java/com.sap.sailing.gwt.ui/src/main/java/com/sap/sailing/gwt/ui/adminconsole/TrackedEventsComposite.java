@@ -462,6 +462,7 @@ public class TrackedEventsComposite extends FormPanel implements EventDisplayer,
         }
         // now sort again according to selected criterion
         ColumnSortEvent.fire(raceTable, raceTable.getColumnSortList());
+        onRaceSelectionChange(raceSelectionProvider.getSelectedRaces()); // update selection based on underlying domain race selection model
     }
 
     @Override
