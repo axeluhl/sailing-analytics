@@ -47,8 +47,8 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         if (eventName != null && !eventName.isEmpty() && raceName != null && !raceName.isEmpty()) {
             sailingService.listEvents(false, new AsyncCallback<List<EventDTO>>() {
                 @Override
-                public void onSuccess(List<EventDTO> eventNames) {
-                    selectedRace = findRace(eventName, raceName, eventNames);
+                public void onSuccess(List<EventDTO> events) {
+                    selectedRace = findRace(eventName, raceName, events);
                     if(selectedRace != null) {
                         createRaceBoardPanel(selectedRace, eventName, leaderboardName);
                     } else {
