@@ -291,8 +291,8 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
         Column<RaceInLeaderboardDTO, SafeHtml> raceLinkColumn = new Column<RaceInLeaderboardDTO, SafeHtml>(raceAnchorCell) {
             @Override
             public SafeHtml getValue(RaceInLeaderboardDTO raceInLeaderboardDTO) {
-                EventNameAndRaceName raceIdentifier = (EventNameAndRaceName) raceInLeaderboardDTO.getRaceIdentifier();
-                if(raceIdentifier != null) {
+                if(raceInLeaderboardDTO.getRaceIdentifier() != null) {
+                    EventNameAndRaceName raceIdentifier = (EventNameAndRaceName) raceInLeaderboardDTO.getRaceIdentifier();
                     String link = "/gwt/RaceBoard.html?leaderboardName="+ selectedLeaderboard.name + 
                             "&raceName=" + raceIdentifier.getRaceName() +
                             "&eventName=" + raceIdentifier.getEventName();
