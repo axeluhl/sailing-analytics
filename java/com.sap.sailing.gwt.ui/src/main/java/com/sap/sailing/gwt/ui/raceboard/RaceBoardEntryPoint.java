@@ -16,21 +16,19 @@ import com.sap.sailing.server.api.DefaultLeaderboardName;
 
 public class RaceBoardEntryPoint extends AbstractEntryPoint {
     private RaceDTO selectedRace;
-    private String eventName;
-    private String raceName;
-    private String leaderboardName;
 
     @Override
     public void onModuleLoad() {     
         super.onModuleLoad();
 
-        eventName = Window.Location.getParameter("eventName");
-        raceName = Window.Location.getParameter("raceName");
-        leaderboardName = Window.Location.getParameter("leaderboardName");
-        
-        if(leaderboardName == null || leaderboardName.isEmpty()) {
+        final String eventName = Window.Location.getParameter("eventName");
+        final String raceName = Window.Location.getParameter("raceName");
+        String leaderboardNameParamValue = Window.Location.getParameter("leaderboardName");
+        final String leaderboardName;
+        if(leaderboardNameParamValue == null || leaderboardNameParamValue.isEmpty()) {
             leaderboardName = DefaultLeaderboardName.DEFAULT_LEADERBOARD_NAME;
         } else {
+            leaderboardName = leaderboardNameParamValue;
             sailingService.getLeaderboardNames(new AsyncCallback<List<String>>() {
                 @Override
                 public void onSuccess(List<String> leaderboardNames) {
@@ -46,13 +44,13 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
             });
         }
         
-        if(eventName != null && !eventName.isEmpty() && raceName != null && !raceName.isEmpty()) {
+        if (eventName != null && !eventName.isEmpty() && raceName != null && !raceName.isEmpty()) {
             sailingService.listEvents(false, new AsyncCallback<List<EventDTO>>() {
                 @Override
                 public void onSuccess(List<EventDTO> eventNames) {
-                    selectedRace = findRace(eventNames);
+                    selectedRace = findRace(eventName, raceName, eventNames);
                     if(selectedRace != null) {
-                        createRaceBoardPanel(selectedRace);
+                        createRaceBoardPanel(selectedRace, eventName, leaderboardName);
                     } else {
                         createErrorPage("Could not obtain a race with name " + raceName + " for an event with name " + eventName);
                     }
@@ -68,7 +66,7 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         }
     }
 
-    private RaceDTO findRace(List<EventDTO> events) {
+    private RaceDTO findRace(String eventName, String raceName, List<EventDTO> events) {
         for (EventDTO eventDTO : events) {
             if(eventDTO.name.equals(eventName)) {
                 for (RegattaDTO regattaDTO : eventDTO.regattas) {
@@ -83,45 +81,35 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         return null;
     }
 
-    private void createRaceBoardPanel(RaceDTO selectedRace)
-    {
+    private void createRaceBoardPanel(RaceDTO selectedRace, String eventName, String leaderboardName) {
         LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(stringMessages);
         logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
-
         RaceBoardPanel raceBoardPanel = new RaceBoardPanel(sailingService, selectedRace, leaderboardName,
                 RaceBoardEntryPoint.this, stringMessages);
         String padding = Window.Location.getParameter("padding");
         if (padding != null && Boolean.valueOf(padding)) {
             raceBoardPanel.addStyleName("leftPaddedPanel");
         }
-                    FlowPanel contentOuterPanel = new FlowPanel(); // outer div which centered page content
-                    contentOuterPanel.addStyleName("contentOuterPanel");
-                    contentOuterPanel.add(raceBoardPanel);
-                    
-                    FlowPanel timelinePanel = new FlowPanel();
-                    timelinePanel.addStyleName("timelinePanel");
-                    
-                    FlowPanel timelineInnerPanel = new FlowPanel();
-                    timelineInnerPanel.addStyleName("timelineInnerPanel");
-                    
-                    FlowPanel footerShadowPanel = new FlowPanel();
-                    footerShadowPanel.addStyleName("footerShadowPanel");
-                    
-                    FlowPanel breadcrumbPanel = new FlowPanel();
-                    breadcrumbPanel.addStyleName("breadcrumbPanel");
-                    Label eventNameLabel = new Label(eventName);
-                    eventNameLabel.addStyleName("eventNameHeadline");
-                    breadcrumbPanel.add(eventNameLabel);
-                    
-                    
-                    timelinePanel.add(timelineInnerPanel);
-                    
-                    RootPanel.get().add(breadcrumbPanel);
-                    RootPanel.get().add(contentOuterPanel);
-                    
-                    // Don't change this order because of the inner logic in html of "position fixed"-elements
-                    RootPanel.get().add(logoAndTitlePanel);                 // position:fixed        
-                    RootPanel.get().add(timelinePanel);                     // position:fixed
-                    RootPanel.get().add(footerShadowPanel);                 // position:fixed
+        FlowPanel contentOuterPanel = new FlowPanel(); // outer div which centered page content
+        contentOuterPanel.addStyleName("contentOuterPanel");
+        contentOuterPanel.add(raceBoardPanel);
+        FlowPanel timelinePanel = new FlowPanel();
+        timelinePanel.addStyleName("timelinePanel");
+        FlowPanel timelineInnerPanel = new FlowPanel();
+        timelineInnerPanel.addStyleName("timelineInnerPanel");
+        FlowPanel footerShadowPanel = new FlowPanel();
+        footerShadowPanel.addStyleName("footerShadowPanel");
+        FlowPanel breadcrumbPanel = new FlowPanel();
+        breadcrumbPanel.addStyleName("breadcrumbPanel");
+        Label eventNameLabel = new Label(eventName);
+        eventNameLabel.addStyleName("eventNameHeadline");
+        breadcrumbPanel.add(eventNameLabel);
+        timelinePanel.add(timelineInnerPanel);
+        RootPanel.get().add(breadcrumbPanel);
+        RootPanel.get().add(contentOuterPanel);
+        // Don't change this order because of the inner logic in html of "position fixed"-elements
+        RootPanel.get().add(logoAndTitlePanel); // position:fixed
+        RootPanel.get().add(timelinePanel); // position:fixed
+        RootPanel.get().add(footerShadowPanel); // position:fixed
     }
 }

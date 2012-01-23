@@ -1508,7 +1508,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     public Event getEvent(EventName eventIdentifier) {
         return getService().getEventByName(eventIdentifier.getEventName());
     }
-
+    
     private RaceDefinition getRace(RaceIdentifier raceIdentifier) {
         return (RaceDefinition) raceIdentifier.getRace(this);
     }

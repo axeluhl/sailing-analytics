@@ -36,7 +36,7 @@ import com.sap.sailing.server.api.RaceIdentifier;
 public interface SailingServiceAsync {
     
     void listEvents(boolean withRacePlaces, AsyncCallback<List<EventDTO>> callback);
-
+    
     /**
      * The string returned in the callback's pair is the common event name
      */
