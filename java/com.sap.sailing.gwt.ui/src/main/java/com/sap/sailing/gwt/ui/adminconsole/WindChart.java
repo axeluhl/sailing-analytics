@@ -42,7 +42,6 @@ import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
@@ -292,10 +291,10 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
     }
 
     @Override
-    public void onRaceSelectionChange(List<RaceDTO> selectedRaces) {
+    public void onRaceSelectionChange(List<RaceIdentifier> selectedRaces) {
         if (selectedRaces != null && !selectedRaces.isEmpty()) {
             // show wind of first selected race
-            RaceIdentifier selectedRaceIdentifier = selectedRaces.iterator().next().getRaceIdentifier();
+            RaceIdentifier selectedRaceIdentifier = selectedRaces.iterator().next();
             loadData(selectedRaceIdentifier);
         } else {
             clearChart();

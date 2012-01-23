@@ -22,6 +22,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
+import com.sap.sailing.server.api.RaceIdentifier;
 
 public class RacesListBoxPanel extends FormPanel implements EventDisplayer, RaceSelectionChangeListener {
     private final List<RaceDTO> raceList;
@@ -38,13 +39,13 @@ public class RacesListBoxPanel extends FormPanel implements EventDisplayer, Race
         raceListBox.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
-                RacesListBoxPanel.this.raceSelectionProvider.setSelection(getSelectedRaces(), RacesListBoxPanel.this);
+                RacesListBoxPanel.this.raceSelectionProvider.setSelection(getSelectedRaceIdentifiers(), RacesListBoxPanel.this);
             }
         });
         raceListBox.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                RacesListBoxPanel.this.raceSelectionProvider.setSelection(getSelectedRaces(), RacesListBoxPanel.this);
+                RacesListBoxPanel.this.raceSelectionProvider.setSelection(getSelectedRaceIdentifiers(), RacesListBoxPanel.this);
             }
         });
         raceList = new ArrayList<RaceDTO>();
@@ -88,9 +89,17 @@ public class RacesListBoxPanel extends FormPanel implements EventDisplayer, Race
         for (RaceDTO p : raceList) {
             raceListBox.addItem(toString(p));
         }
-        raceSelectionProvider.setSelection(getSelectedRaces(), this);
+        raceSelectionProvider.setSelection(getSelectedRaceIdentifiers(), this);
     }
 
+    private List<RaceIdentifier> getSelectedRaceIdentifiers() {
+        List<RaceIdentifier> result = new ArrayList<RaceIdentifier>();
+        for (RaceDTO selectedRace : getSelectedRaces()) {
+            result.add(selectedRace.getRaceIdentifier());
+        }
+        return result;
+    }
+    
     private List<RaceDTO> getSelectedRaces() {
         int i=0;
         List<RaceDTO> result = new ArrayList<RaceDTO>();
@@ -108,9 +117,9 @@ public class RacesListBoxPanel extends FormPanel implements EventDisplayer, Race
     }
 
     @Override
-    public void onRaceSelectionChange(List<RaceDTO> selectedRaces) {
+    public void onRaceSelectionChange(List<RaceIdentifier> selectedRaces) {
         if (selectedRaces != null && !selectedRaces.isEmpty()) {
-            RaceDTO newSelection = selectedRaces.iterator().next();
+            RaceDTO newSelection = getRace(selectedRaces.iterator().next());
             int index = raceList.indexOf(newSelection);
             if (index >= 0) {
                 raceListBox.setSelectedIndex(index);
@@ -126,6 +135,19 @@ public class RacesListBoxPanel extends FormPanel implements EventDisplayer, Race
         for (int i=0; i<raceListBox.getItemCount(); i++) {
             raceListBox.setItemSelected(i, false);
         }
+    }
+    
+    public List<RaceDTO> getAllRaces() {
+        return Collections.unmodifiableList(raceList);
+    }
+    
+    public RaceDTO getRace(RaceIdentifier raceIdentifier) {
+        for (RaceDTO race : getAllRaces()) {
+            if (raceIdentifier.equals(race.getRaceIdentifier())) {
+                return race;
+            }
+        }
+        return null;
     }
 
 }

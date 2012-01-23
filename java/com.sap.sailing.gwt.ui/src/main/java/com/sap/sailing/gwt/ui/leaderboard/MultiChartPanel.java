@@ -24,9 +24,9 @@ import com.sap.sailing.server.api.DetailType;
 public class MultiChartPanel extends AbstractChartPanel<MultiChartSettings> implements Component<MultiChartSettings> {
     public MultiChartPanel(SailingServiceAsync sailingService, CompetitorSelectionProvider competitorSelectionProvider,
             RaceSelectionProvider raceSelectionProvider, final StringMessages stringMessages, int chartWidth, int chartHeight,
-            ErrorReporter errorReporter) {
+            ErrorReporter errorReporter, boolean showRaceSelector) {
         super(sailingService, competitorSelectionProvider, raceSelectionProvider, stringMessages, chartWidth, chartHeight,
-                errorReporter, /* show initially: */ DetailType.WINDWARD_DISTANCE_TO_OVERALL_LEADER);
+                errorReporter, /* show initially: */ DetailType.WINDWARD_DISTANCE_TO_OVERALL_LEADER, showRaceSelector);
     }
 
     @Override

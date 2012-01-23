@@ -14,9 +14,8 @@ import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.shared.PositionDTO;
-import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
-import com.sap.sailing.server.api.EventNameAndRaceName;
+import com.sap.sailing.server.api.RaceIdentifier;
 
 public class WindSettingPanel extends FormPanel {
     private final Button setWindButton;
@@ -51,18 +50,17 @@ public class WindSettingPanel extends FormPanel {
                 if (latDegBox.getValue() != null && lngDegBox.getValue() != null) {
                     wind.position = new PositionDTO(latDegBox.getValue(), lngDegBox.getValue());
                 }
-                List<RaceDTO> selectedRaces = raceSelectionProvider.getSelectedRaces();
+                List<RaceIdentifier> selectedRaces = raceSelectionProvider.getSelectedRaces();
                 // Here we assume that single selection is enabled because the WindPanel creates a TrackedComposite with disabled multi selection.
-                final RaceDTO race = selectedRaces.get(selectedRaces.size()-1);
-                EventNameAndRaceName raceIdentifier = (EventNameAndRaceName) race.getRaceIdentifier();
+                final RaceIdentifier raceIdentifier = selectedRaces.get(selectedRaces.size()-1);
                 sailingService.setWind(raceIdentifier, wind, new AsyncCallback<Void>() {
                     @Override
                     public void onSuccess(Void result) {
-                        windShower.showWind(race);
+                        windShower.showWind(raceIdentifier);
                     }
                     @Override
                     public void onFailure(Throwable caught) {
-                        errorReporter.reportError("Error setting wind for race "+race.name+": "+caught.getMessage());
+                        errorReporter.reportError("Error setting wind for race "+raceIdentifier+": "+caught.getMessage());
                     }
                 });
             }

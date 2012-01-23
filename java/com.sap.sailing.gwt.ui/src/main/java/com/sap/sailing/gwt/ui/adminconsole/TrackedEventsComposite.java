@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -44,6 +45,7 @@ import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.server.api.EventNameAndRaceName;
+import com.sap.sailing.server.api.RaceIdentifier;
 
 /**
  * Shows the currently tracked events/races in a table. Updated if subscribed as an {@link EventDisplayer}, e.g., with
@@ -61,6 +63,8 @@ public class TrackedEventsComposite extends FormPanel implements EventDisplayer,
     private CellTable<RaceDTO> raceTable;
 
     private ListDataProvider<RaceDTO> raceList;
+    
+    private Iterable<RaceDTO> allRaces;
 
     private VerticalPanel panel;
 
@@ -280,7 +284,11 @@ public class TrackedEventsComposite extends FormPanel implements EventDisplayer,
                 if (dontFireNextSelectionChangeEvent) {
                     dontFireNextSelectionChangeEvent = false;
                 } else {
-                    TrackedEventsComposite.this.raceSelectionProvider.setSelection(selectedRaces, TrackedEventsComposite.this);
+                    List<RaceIdentifier> selectedRaceIdentifiers = new ArrayList<RaceIdentifier>();
+                    for (RaceDTO selectedRace : selectedRaces) {
+                        selectedRaceIdentifiers.add(selectedRace.getRaceIdentifier());
+                    }
+                    TrackedEventsComposite.this.raceSelectionProvider.setSelection(selectedRaceIdentifiers, TrackedEventsComposite.this);
                 }
             }
         });
@@ -349,9 +357,11 @@ public class TrackedEventsComposite extends FormPanel implements EventDisplayer,
     }
 
     public void clearSelection() {
+        List<RaceIdentifier> emptySelection =  Collections.emptyList();
+        raceSelectionProvider.setSelection(emptySelection, /* listenersNotToNotify */ this);
         if (raceList != null) {
-            for (RaceDTO raceTriple : raceList.getList()) {
-                selectionModel.setSelected(raceTriple, false);
+            for (RaceDTO race : raceList.getList()) {
+                selectionModel.setSelected(race, false);
             }
         }
     }
@@ -372,16 +382,19 @@ public class TrackedEventsComposite extends FormPanel implements EventDisplayer,
             noTrackedRacesLabel.setVisible(false);
         }
         List<RaceDTO> newAllRaces = new ArrayList<RaceDTO>();
+        List<RaceIdentifier> newAllRaceIdentifiers = new ArrayList<RaceIdentifier>();
         for (EventDTO event : events) {
             for (RegattaDTO regatta : event.regattas) {
                 for (RaceDTO race : regatta.races) {
                     if (race != null) {
                         newAllRaces.add(race);
+                        newAllRaceIdentifiers.add(race.getRaceIdentifier());
                     }
                 }
             }
         }
-        raceSelectionProvider.setAllRaces(newAllRaces, /* listenersNotToNotify */ this);
+        allRaces = newAllRaces;
+        raceSelectionProvider.setAllRaces(newAllRaceIdentifiers, /* listenersNotToNotify */ this);
         fillRaceListFromAvailableRacesApplyingFilter();
         if (lastSelectedRace != null) {
             selectRaceByIdentifier((EventNameAndRaceName) lastSelectedRace.getRaceIdentifier());
@@ -452,22 +465,23 @@ public class TrackedEventsComposite extends FormPanel implements EventDisplayer,
                 }
             }
         } else {
-            raceList.getList().addAll(getAllRaces());
+            for (RaceDTO raceFromAllRaces : getAllRaces()) {
+                raceList.getList().add(raceFromAllRaces);
+            }
         }
         // now sort again according to selected criterion
         ColumnSortEvent.fire(raceTable, raceTable.getColumnSortList());
     }
 
     @Override
-    public void onRaceSelectionChange(List<RaceDTO> selectedRaces) {
-        Set<RaceDTO> selection = new HashSet<RaceDTO>(raceSelectionProvider.getSelectedRaces());
-        for (RaceDTO raceFromAllRaces : raceSelectionProvider.getAllRaces()) {
-            selectionModel.setSelected(raceFromAllRaces, selection.contains(raceFromAllRaces));
+    public void onRaceSelectionChange(List<RaceIdentifier> selectedRaces) {
+        for (RaceDTO raceFromAllRaces : raceList.getList()) {
+            selectionModel.setSelected(raceFromAllRaces, selectedRaces.contains(raceFromAllRaces.getRaceIdentifier()));
         }
         
     }
 
-    private List<RaceDTO> getAllRaces() {
-        return raceSelectionProvider.getAllRaces();
+    private Iterable<RaceDTO> getAllRaces() {
+        return allRaces;
     }
 }

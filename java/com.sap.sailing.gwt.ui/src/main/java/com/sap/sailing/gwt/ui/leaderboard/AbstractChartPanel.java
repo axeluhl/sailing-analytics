@@ -63,7 +63,6 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorInRaceDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorsAndTimePointsDTO;
-import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.components.Component;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialog;
 import com.sap.sailing.server.api.DetailType;
@@ -113,7 +112,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener {
     public AbstractChartPanel(SailingServiceAsync sailingService,
             CompetitorSelectionProvider competitorSelectionProvider, RaceSelectionProvider raceSelectionProvider,
             final StringMessages stringMessages, int chartWidth, int chartHeight, ErrorReporter errorReporter,
-            DetailType dataToShow) {
+            DetailType dataToShow, boolean showRaceSelector) {
         width = chartWidth;
     	height = chartHeight;
     	this.dataToShow = dataToShow;
@@ -130,6 +129,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener {
     	markPassingBuoyName = new HashMap<String, String>();
         this.sailingService = sailingService;
         this.raceSelectionProvider = raceSelectionProvider;
+        raceSelectionProvider.addRaceSelectionChangeListener(this);
         this.stringMessages = stringMessages;
         dateFormat = DateTimeFormat.getFormat("HH:mm:ss");
         mainPanel = new HorizontalPanel();
@@ -138,27 +138,9 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener {
         title = new Label(DetailTypeFormatter.format(dataToShow, stringMessages));
         title.setStyleName("chartTitle");
         chartPanel.add(title);
-        HorizontalPanel raceChooserPanel = new HorizontalPanel();
-        raceChooserPanel.setSpacing(5);
-        boolean first = true;
-        for (RaceDTO selectedRace : raceSelectionProvider.getAllRaces()) {
-            RadioButton r = new RadioButton("chooseRace");
-            r.setText(selectedRace.getRaceIdentifier().toString());
-            raceChooserPanel.add(r);
-            if (first) {
-                r.setValue(true);
-                first = false;
-            }
-            r.addClickHandler(new ClickHandler() {
-                @Override
-                public void onClick(ClickEvent event) {
-                    setCompetitorsAndTimePointsDTO(null);
-                    clearChart(true);
-                    loadData();
-                }
-            });
+        if (showRaceSelector) {
+            addOptionalRaceChooserPanel(chartPanel);
         }
-        chartPanel.add(raceChooserPanel);
         loadingPanel = new AbsolutePanel();
         loadingPanel.setSize(width + "px", height + "px");
         Anchor a = new Anchor(new SafeHtmlBuilder().appendHtmlConstant("<img src=\"/gwt/images/ajax-loader.gif\"/>")
@@ -189,6 +171,38 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener {
         loadData();
     }
     
+    private void addOptionalRaceChooserPanel(VerticalPanel chartPanel) {
+        HorizontalPanel raceChooserPanel = new HorizontalPanel();
+        raceChooserPanel.setSpacing(5);
+        boolean first = true;
+        for (final RaceIdentifier selectedRace : raceSelectionProvider.getAllRaces()) {
+            RadioButton r = new RadioButton("chooseRace");
+            r.setText(selectedRace.toString());
+            raceChooserPanel.add(r);
+            if (first) {
+                r.setValue(true);
+                selectRace(selectedRace);
+                first = false;
+            }
+            r.addClickHandler(new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+                    selectRace(selectedRace);
+                    setCompetitorsAndTimePointsDTO(null);
+                    clearChart(true);
+                    loadData();
+                }
+
+            });
+        }
+        chartPanel.add(raceChooserPanel);
+    }
+
+    private void selectRace(final RaceIdentifier selectedRace) {
+        AbstractChartPanel.this.raceSelectionProvider.setSelection(Collections.singletonList(selectedRace), /* listenersNotToNotify */
+                AbstractChartPanel.this);
+    }
+
     protected abstract Component<SettingsType> getComponent();
     
     protected void loadData() {
@@ -257,9 +271,9 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener {
 
     private RaceIdentifier getSelectedRace() {
         RaceIdentifier result = null;
-        List<RaceDTO> selectedRaces = raceSelectionProvider.getSelectedRaces();
+        List<RaceIdentifier> selectedRaces = raceSelectionProvider.getSelectedRaces();
         if (selectedRaces != null && !selectedRaces.isEmpty()) {
-            result = selectedRaces.iterator().next().getRaceIdentifier();
+            result = selectedRaces.iterator().next();
         }
         return result;
     }
@@ -670,8 +684,8 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener {
     }
 
     @Override
-    public void onRaceSelectionChange(List<RaceDTO> selectedRaces) {
-        
+    public void onRaceSelectionChange(List<RaceIdentifier> selectedRaces) {
+        loadData();
     }
 
 }

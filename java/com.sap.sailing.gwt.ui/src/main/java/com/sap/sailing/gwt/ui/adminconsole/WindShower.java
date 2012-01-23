@@ -1,9 +1,9 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import com.sap.sailing.gwt.ui.shared.RaceDTO;
+import com.sap.sailing.server.api.RaceIdentifier;
 
 public interface WindShower {
 
-    void showWind(RaceDTO race);
+    void showWind(RaceIdentifier race);
 
 }

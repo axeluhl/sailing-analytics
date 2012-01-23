@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.raceboard;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import com.google.gwt.user.client.ui.FormPanel;
@@ -60,9 +61,7 @@ public class RaceBoardPanel extends FormPanel implements Component<RaceBoardSett
         CollapsableComponentViewer<RaceMapSettings> raceMapViewer = new CollapsableComponentViewer<RaceMapSettings>(
                 raceMap, "600px", "300px", stringMessages);
         raceMap.loadMapsAPI((Panel) raceMapViewer.getViewerWidget().getContent());
-        List<RaceDTO> races = new ArrayList<RaceDTO>();
-        races.add(selectedRace);
-        raceMap.onRaceSelectionChange(races);
+        raceMap.onRaceSelectionChange(Collections.singletonList(selectedRace.getRaceIdentifier()));
         collapsableViewers.add(raceMapViewer);
         
         // create some sample components

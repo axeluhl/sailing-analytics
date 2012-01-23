@@ -47,13 +47,14 @@ public class AdminConsole extends AbstractEntryPoint implements EventRefresher {
         eventDisplayers.add(windPanel);
         windPanel.setSize("90%", "90%");
         tabPanel.add(windPanel, stringMessages.wind(), /* asHTML */ false);
-        CompetitorSelectionModel competitorSelectionModel = new CompetitorSelectionModel(/* hasMultiSelection */ true);
-        final RaceMapPanel raceMapPanel = new RaceMapPanel(sailingService, competitorSelectionModel, this, this, stringMessages);
+        final RaceMapPanel raceMapPanel = new RaceMapPanel(sailingService, new CompetitorSelectionModel(
+                /* hasMultiSelection */true), this, this, stringMessages);
         eventDisplayers.add(raceMapPanel);
         raceMapPanel.setSize("90%", "90%");
         tabPanel.add(raceMapPanel, stringMessages.map(), /* asHTML */ false);
-        LeaderboardPanel defaultLeaderboardPanel = new LeaderboardPanel(sailingService, null, competitorSelectionModel,
-                DefaultLeaderboardName.DEFAULT_LEADERBOARD_NAME, this, stringMessages);
+        LeaderboardPanel defaultLeaderboardPanel = new LeaderboardPanel(sailingService, null,
+                new CompetitorSelectionModel(/* hasMultiSelection */true),
+        DefaultLeaderboardName.DEFAULT_LEADERBOARD_NAME, this, stringMessages);
         defaultLeaderboardPanel.setSize("90%", "90%");
         tabPanel.add(defaultLeaderboardPanel, stringMessages.defaultLeaderboard(), /* asHTML */ false);
         LeaderboardConfigPanel leaderboardConfigPanel = new LeaderboardConfigPanel(sailingService, this, this, stringMessages);

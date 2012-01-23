@@ -309,10 +309,6 @@ public class LeaderboardDTO implements IsSerializable {
         return raceColumnNames;
     }
 
-    public List<RaceInLeaderboardDTO> getRaceInLeaderboardList() {
-        return races;
-    }
-
     public List<RaceInLeaderboardDTO> getRaceList() {
         return races;
     }

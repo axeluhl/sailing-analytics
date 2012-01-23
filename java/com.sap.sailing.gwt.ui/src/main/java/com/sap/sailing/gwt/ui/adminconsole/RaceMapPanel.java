@@ -35,7 +35,7 @@ import com.sap.sailing.gwt.ui.shared.PositionDTO;
 import com.sap.sailing.gwt.ui.shared.QuickRankDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialog;
-import com.sap.sailing.server.api.EventNameAndRaceName;
+import com.sap.sailing.server.api.RaceIdentifier;
 
 public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListener, ProvidesResize, RequiresResize,
         RaceSelectionChangeListener {
@@ -118,15 +118,16 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
     }
 
     @Override
-    public void onRaceSelectionChange(List<RaceDTO> selectedRaces) {
+    public void onRaceSelectionChange(List<RaceIdentifier> selectedRaces) {
         if (!selectedRaces.isEmpty() && selectedRaces.get(selectedRaces.size() - 1) != null) {
-            RaceDTO raceDTO = selectedRaces.get(selectedRaces.size() - 1);
-            competitorSelectionProvider.setCompetitors(raceDTO.competitors);
-            if (raceDTO.startOfRace != null) {
-                timePanel.timeChanged(raceDTO.startOfRace);
-                timer.setTime(raceDTO.startOfRace.getTime());
+            RaceIdentifier raceIdentifier = selectedRaces.get(selectedRaces.size() - 1);
+            RaceDTO race = raceListBox.getRace(raceIdentifier);
+            competitorSelectionProvider.setCompetitors(race.competitors);
+            if (race.startOfRace != null) {
+                timePanel.timeChanged(race.startOfRace);
+                timer.setTime(race.startOfRace.getTime());
             }
-            updateSlider(raceDTO);
+            updateSlider(race);
         }
         raceMap.onRaceSelectionChange(selectedRaces);
     }
@@ -143,12 +144,11 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
     @Override
     public void timeChanged(final Date date) {
         if (date != null) {
-            List<RaceDTO> selection = raceSelectionModel.getSelectedRaces();
+            List<RaceIdentifier> selection = raceSelectionModel.getSelectedRaces();
             if (!selection.isEmpty()) {
-                RaceDTO race = selection.get(selection.size() - 1);
-                EventDTO event = race.getEvent();
-                if (event != null && race != null) {
-                    sailingService.getQuickRanks(new EventNameAndRaceName(event.name, race.name), date,
+                RaceIdentifier race = selection.get(selection.size() - 1);
+                if (race != null) {
+                    sailingService.getQuickRanks(race, date,
                             new AsyncCallback<List<QuickRankDTO>>() {
                                 @Override
                                 public void onFailure(Throwable caught) {

@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
+import java.util.List;
+
 import com.google.gwt.dom.client.EventTarget;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -20,6 +22,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.AbstractChartPanel.DataLoadedEvent;
 import com.sap.sailing.gwt.ui.leaderboard.AbstractChartPanel.DataLoadedHandler;
+import com.sap.sailing.server.api.RaceIdentifier;
 
 /**
  * A dialog box that holds a {@link MultiChartPanel} and manages a {@link RaceSelectionProvider} of its own.
@@ -30,16 +33,15 @@ import com.sap.sailing.gwt.ui.leaderboard.AbstractChartPanel.DataLoadedHandler;
 public class CompareCompetitorsChartDialog extends DialogBox {
     private Anchor closeAnchor;
     
-    private final RaceSelectionProvider raceSelectionProvider;
-
     public CompareCompetitorsChartDialog(SailingServiceAsync sailingService,
-            final CompetitorSelectionProvider competitorSelectionProvider, StringMessages stringConstants,
+            List<RaceIdentifier> races, final CompetitorSelectionProvider competitorSelectionProvider, StringMessages stringConstants,
             ErrorReporter errorReporter) {
         super(false);
-        raceSelectionProvider = new RaceSelectionModel();
+        RaceSelectionProvider raceSelectionProvider = new RaceSelectionModel();
+        raceSelectionProvider.setAllRaces(races);
         final MultiChartPanel ccp = new MultiChartPanel(sailingService, competitorSelectionProvider, raceSelectionProvider,
                 stringConstants, (int) (Window.getClientWidth() - 350), (int) (Window.getClientHeight() - 170),
-                errorReporter);
+                errorReporter, /* showRaceSelector */ true);
         ccp.addDataLoadedHandler(new DataLoadedHandler() {
             @Override
             public void onDataLoaded(DataLoadedEvent event) {
