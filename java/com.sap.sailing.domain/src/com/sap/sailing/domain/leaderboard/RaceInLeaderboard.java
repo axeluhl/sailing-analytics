@@ -30,6 +30,13 @@ public interface RaceInLeaderboard extends LeaderboardColumn {
     RaceIdentifier getRaceIdentifier();
     
     /**
+     * Records that this leaderboard column is to be associated with the race identified by <code>raceIdentifier</code>.
+     * This does not automatically load the tracked race, but the information may be used to re-associate a tracked
+     * race with this column.
+     */
+    void setRaceIdentifier(RaceIdentifier raceIdentifier);
+    
+    /**
      * A "medal race" cannot be discarded. It's score is doubled during score aggregation.
      */
     boolean isMedalRace();

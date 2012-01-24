@@ -70,4 +70,9 @@ public class RaceInLeaderboardImpl implements RaceInLeaderboard {
     public RaceIdentifier getRaceIdentifier() {
         return raceIdentifier;
     }
+    
+    @Override
+    public void setRaceIdentifier(RaceIdentifier raceIdentifier) {
+        this.raceIdentifier = raceIdentifier;
+    }
 }
