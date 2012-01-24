@@ -40,7 +40,7 @@ public class RaceSelectionModel implements RaceSelectionProvider {
     
     @Override
     public void setSelection(List<RaceIdentifier> newSelection, RaceSelectionChangeListener... listenersNotToNotify) {
-        boolean notify = selection.equals(newSelection);
+        boolean notify = !selection.equals(newSelection);
         selection.clear();
         selection.addAll(newSelection);
         if (notify) {

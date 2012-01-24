@@ -212,4 +212,5 @@ public interface StringMessages extends Messages {
     String failedToLoadRaceInformation(String message);
     String competitorPassedMarkAtDate(String competitorName, String markName, String dateTime);
     String valueForCompetitorAt(String competitorName, String dateTime, String valueWithUnit);
+    String reallyRemoveRace(String string);
 }
