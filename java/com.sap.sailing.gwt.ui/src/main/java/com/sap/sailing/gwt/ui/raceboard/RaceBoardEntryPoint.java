@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.raceboard;
 
+import java.util.Collections;
 import java.util.List;
 
 import com.google.gwt.user.client.Window;
@@ -9,13 +10,16 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
+import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.server.api.DefaultLeaderboardName;
+import com.sap.sailing.server.api.RaceIdentifier;
 
 public class RaceBoardEntryPoint extends AbstractEntryPoint {
     private RaceDTO selectedRace;
+    private RaceBoardPanel raceBoardPanel;
 
     @Override
     public void onModuleLoad() {     
@@ -50,7 +54,7 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
                 public void onSuccess(List<EventDTO> events) {
                     selectedRace = findRace(eventName, raceName, events);
                     if(selectedRace != null) {
-                        createRaceBoardPanel(selectedRace, eventName, leaderboardName);
+                        createRaceBoardPanel(selectedRace, events, eventName, leaderboardName);
                     } else {
                         createErrorPage("Could not obtain a race with name " + raceName + " for an event with name " + eventName);
                     }
@@ -81,11 +85,15 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         return null;
     }
 
-    private void createRaceBoardPanel(RaceDTO selectedRace, String eventName, String leaderboardName) {
+    private void createRaceBoardPanel(RaceDTO selectedRace, List<EventDTO> events, String eventName, String leaderboardName) {
         LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(stringMessages);
         logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
-        RaceBoardPanel raceBoardPanel = new RaceBoardPanel(sailingService, selectedRace, leaderboardName,
+        RaceSelectionModel raceSelectionModel = new RaceSelectionModel();
+        List<RaceIdentifier> singletonList = Collections.singletonList(selectedRace.getRaceIdentifier());
+        raceSelectionModel.setSelection(singletonList);
+        raceBoardPanel = new RaceBoardPanel(sailingService, raceSelectionModel, leaderboardName,
                 RaceBoardEntryPoint.this, stringMessages);
+        raceBoardPanel.fillEvents(events);
         String padding = Window.Location.getParameter("padding");
         if (padding != null && Boolean.valueOf(padding)) {
             raceBoardPanel.addStyleName("leftPaddedPanel");
