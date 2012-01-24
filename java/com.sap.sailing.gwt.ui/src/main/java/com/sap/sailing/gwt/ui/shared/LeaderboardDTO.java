@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.shared;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -341,6 +342,64 @@ public class LeaderboardDTO implements IsSerializable {
 
     public void setIsMedalRace(String raceColumnName, boolean medalRace) {
         getRaceInLeaderboardByName(raceColumnName).setMedalRace(medalRace);
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((competitorDisplayNames == null) ? 0 : competitorDisplayNames.hashCode());
+        result = prime * result + ((competitors == null) ? 0 : competitors.hashCode());
+        result = prime * result + (competitorsOrderedAccordingToTotalRank ? 1231 : 1237);
+        result = prime * result + Arrays.hashCode(discardThresholds);
+        result = prime * result + (hasCarriedPoints ? 1231 : 1237);
+        result = prime * result + ((name == null) ? 0 : name.hashCode());
+        result = prime * result + ((races == null) ? 0 : races.hashCode());
+        result = prime * result + ((rows == null) ? 0 : rows.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        LeaderboardDTO other = (LeaderboardDTO) obj;
+        if (competitorDisplayNames == null) {
+            if (other.competitorDisplayNames != null)
+                return false;
+        } else if (!competitorDisplayNames.equals(other.competitorDisplayNames))
+            return false;
+        if (competitors == null) {
+            if (other.competitors != null)
+                return false;
+        } else if (!competitors.equals(other.competitors))
+            return false;
+        if (competitorsOrderedAccordingToTotalRank != other.competitorsOrderedAccordingToTotalRank)
+            return false;
+        if (!Arrays.equals(discardThresholds, other.discardThresholds))
+            return false;
+        if (hasCarriedPoints != other.hasCarriedPoints)
+            return false;
+        if (name == null) {
+            if (other.name != null)
+                return false;
+        } else if (!name.equals(other.name))
+            return false;
+        if (races == null) {
+            if (other.races != null)
+                return false;
+        } else if (!races.equals(other.races))
+            return false;
+        if (rows == null) {
+            if (other.rows != null)
+                return false;
+        } else if (!rows.equals(other.rows))
+            return false;
+        return true;
     }
 
 }

@@ -37,10 +37,12 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.gwt.ui.client.AbstractEventPanel;
+import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.EventRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 
@@ -69,6 +71,8 @@ public class OverviewEventPanel extends AbstractEventPanel {
     private SingleSelectionModel<LeaderboardDTO> leaderboardsListSelectionModel;
     
     private CaptionPanel leaderboardCaptionPanel;
+    private LeaderboardDTO currentLeaderboard;
+    private LeaderboardPanel displayedLeaderboardPanel;
     
     private List<EventDTO> availableEvents;
     private List<LeaderboardDTO> availableLeaderboards;
@@ -85,8 +89,8 @@ public class OverviewEventPanel extends AbstractEventPanel {
 
         // Build search GUI
         CaptionPanel captionPanelSearch = new CaptionPanel(stringConstants.searchEvents());
-        mainPanel.add(captionPanelSearch);
         captionPanelSearch.setWidth("100%");
+        mainPanel.add(captionPanelSearch);
         
         HorizontalPanel panelSearch = new HorizontalPanel();
         captionPanelSearch.add(panelSearch);
@@ -291,6 +295,12 @@ public class OverviewEventPanel extends AbstractEventPanel {
         
         //Create leaderboard container
         //TODO
+        leaderboardCaptionPanel = new CaptionPanel();
+        leaderboardCaptionPanel.setVisible(false);
+        leaderboardCaptionPanel.setWidth("100%");
+        mainPanel.add(leaderboardCaptionPanel);
+        
+        displayedLeaderboardPanel = null;
         
         //Loading the data
         Runnable displayEvents = new Runnable() {
@@ -373,7 +383,6 @@ public class OverviewEventPanel extends AbstractEventPanel {
     }
     
     private void eventSelectionChanged() {
-        // TODO Actions when the event selection changed
         EventDTO selectedEvent = eventsTableSelectionModel.getSelectedObject();
         if (selectedEvent != null) {
             setLeaderboardsPanelVisible(true);
@@ -416,6 +425,33 @@ public class OverviewEventPanel extends AbstractEventPanel {
     
     private void leaderboardSelectionChanged() {
         //TODO Actions when the leaderboard selection changes
+        LeaderboardDTO selectedLeaderboard = leaderboardsListSelectionModel.getSelectedObject();
+        if (selectedLeaderboard != null) {
+            setDisplayedLeaderboard(selectedLeaderboard);
+            setLeaderboardPanelVisible(true);
+        } else {
+            setLeaderboardPanelVisible(false);
+        }
+    }
+    
+    private void setLeaderboardPanelVisible(boolean visible) {
+        leaderboardCaptionPanel.setVisible(visible);
+        //TODO button management
+    }
+    
+    private void setDisplayedLeaderboard(LeaderboardDTO boardToDisplay) {
+        //If the currentLeaderboard equals the boardToDisplay, there is no need to create a new LeaderboardPanel
+        if (!boardToDisplay.equals(currentLeaderboard)) {
+            if (displayedLeaderboardPanel != null) {
+                leaderboardCaptionPanel.remove(displayedLeaderboardPanel);
+            }
+            currentLeaderboard = boardToDisplay;
+            CompetitorSelectionModel competitorSelectionModel = new CompetitorSelectionModel(true);
+            displayedLeaderboardPanel = new LeaderboardPanel(sailingService, competitorSelectionModel,
+                    currentLeaderboard.name, errorReporter, stringConstants);
+            leaderboardCaptionPanel.add(displayedLeaderboardPanel);
+            leaderboardCaptionPanel.setCaptionText(stringConstants.leaderboard() + " - " + boardToDisplay.name);
+        }
     }
     
     private void onCheckBoxLiveChange() {
