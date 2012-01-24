@@ -13,6 +13,7 @@ import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RaceIdentifier;
@@ -33,6 +34,7 @@ import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.components.Component;
+import com.sap.sailing.gwt.ui.shared.components.ComponentViewer;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
 
 /**
@@ -54,10 +56,12 @@ public class RaceBoardPanel extends FormPanel implements Component<RaceBoardSett
      */
     private final Map<RaceIdentifier, RaceDTO> racesByIdentifier;
 
-    private final Timer timer;
     private final List<CollapsableComponentViewer<?>> collapsableViewers;
-    private final HorizontalPanel breadcrumbPanel;
+    private final Panel componentsHeaderPanel;
+    private final HorizontalPanel componentsHeaderMenuPanel;
+    private final HorizontalPanel componentsHeaderNamePanel;
     private final TimePanel timePanel;
+    private final Timer timer;
     private final RaceSelectionProvider raceSelectionProvider;
     
     public RaceBoardPanel(SailingServiceAsync sailingService, RaceSelectionProvider raceSelectionProvider, String leaderboardName, 
@@ -77,18 +81,28 @@ public class RaceBoardPanel extends FormPanel implements Component<RaceBoardSett
         collapsableViewers = new ArrayList<CollapsableComponentViewer<?>>();
         CompetitorSelectionModel competitorSelectionModel = new CompetitorSelectionModel(/* hasMultiSelection */ true);
 
-        breadcrumbPanel = new HorizontalPanel();
-        breadcrumbPanel.setSpacing(10);
-        breadcrumbPanel.addStyleName("breadcrumbPanel");
-        mainPanel.add(breadcrumbPanel);
+        componentsHeaderPanel = new SimplePanel();
+        componentsHeaderPanel.addStyleName("raceBoard-componentsHeader");
+        mainPanel.add(componentsHeaderPanel);
+        componentsHeaderMenuPanel = new HorizontalPanel();
+        componentsHeaderMenuPanel.addStyleName("raceBoard-componentsHeader-menu");
+        componentsHeaderMenuPanel.setSpacing(10);
+        componentsHeaderNamePanel = new HorizontalPanel();
+        componentsHeaderNamePanel.addStyleName("raceBoard-componentsHeader-name");
+        componentsHeaderPanel.add(componentsHeaderNamePanel);
+        componentsHeaderPanel.add(componentsHeaderMenuPanel);
+        /*
+        componentsHeaderPanel.getCellFormatter().setAlignment(0, 0, HasHorizontalAlignment.ALIGN_LEFT, HasVerticalAlignment.ALIGN_MIDDLE); 
+        componentsHeaderPanel.getCellFormatter().setAlignment(0, 1, HasHorizontalAlignment.ALIGN_RIGHT, HasVerticalAlignment.ALIGN_MIDDLE);
+        */ 
+
         Label eventNameLabel = new Label(selectedRaceIdentifier.getRaceName());
         eventNameLabel.addStyleName("eventNameHeadline");
-        breadcrumbPanel.add(eventNameLabel);
+        componentsHeaderNamePanel.add(eventNameLabel);
 
         // create the default leaderboard and select the right race
         LeaderboardPanel leaderboardPanel = new LeaderboardPanel(sailingService, selectedRaceIdentifier, competitorSelectionModel,
                 leaderboardName, errorReporter, stringMessages);
-        addComponentMenuEntry(leaderboardPanel);
 
         CollapsableComponentViewer<LeaderboardSettings> leaderboardViewer = new CollapsableComponentViewer<LeaderboardSettings>(
                 leaderboardPanel, "100%", "100%", stringMessages);
@@ -98,7 +112,6 @@ public class RaceBoardPanel extends FormPanel implements Component<RaceBoardSett
         RaceMap raceMap = new RaceMap(sailingService, errorReporter, timer, competitorSelectionModel, stringMessages);
         CollapsableComponentViewer<RaceMapSettings> raceMapViewer = new CollapsableComponentViewer<RaceMapSettings>(
                 raceMap, "600px", "300px", stringMessages);
-        addComponentMenuEntry(raceMap);
 
         raceMap.loadMapsAPI((Panel) raceMapViewer.getViewerWidget().getContent());
         raceMap.onRaceSelectionChange(Collections.singletonList(selectedRaceIdentifier));
@@ -110,31 +123,38 @@ public class RaceBoardPanel extends FormPanel implements Component<RaceBoardSett
         componentGroup.addComponent(new SimpleComponent("My Component 2"));
         componentGroup.addComponent(new SimpleComponent("My Component 3"));
         collapsableViewers.add(new CollapsableComponentViewer<Object>(componentGroup, "100%", "100px", stringMessages));
-        addComponentMenuEntry(componentGroup);
 
         for (CollapsableComponentViewer<?> componentViewer : collapsableViewers) {
             mainPanel.add(componentViewer.getViewerWidget());
+            addComponentViewerMenuEntry(componentViewer);
         }
+
         timer.addTimeListener(leaderboardPanel);
         timer.addTimeListener(raceMap);
         timePanel = new TimePanel(stringMessages, timer);
-        mainPanel.add(timePanel);
     }
 
-    private void addComponentMenuEntry(final Component<?> c) {
-//        Label menuEntry = new Label(c.getLocalizedShortName());
-        Anchor menuEntry = new Anchor(c.getLocalizedShortName());
+    private void addComponentViewerMenuEntry(final ComponentViewer c) {
+        Anchor menuEntry = new Anchor(c.getViewerName());
         menuEntry.addStyleName("raceBoard-menuEntry");
         
         menuEntry.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                c.getEntryWidget().getElement().scrollIntoView();
+                c.getViewerWidget().getElement().scrollIntoView();
             }
         });
-        breadcrumbPanel.add(menuEntry);
+        componentsHeaderMenuPanel.add(menuEntry);
     }
     
+    public Widget getHeaderWidget() {
+        return componentsHeaderPanel; 
+    }
+
+    public Widget getTimeWidget() {
+        return timePanel; 
+    }
+
     @Override
     public Widget getEntryWidget() {
         return this;

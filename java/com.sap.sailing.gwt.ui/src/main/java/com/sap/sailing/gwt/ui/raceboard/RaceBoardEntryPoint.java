@@ -98,6 +98,10 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
             raceBoardPanel.addStyleName("leftPaddedPanel");
         }
 
+        FlowPanel raceBoardHeaderPanel = new FlowPanel();
+        raceBoardHeaderPanel.addStyleName("raceBoardHeaderPanel");
+        raceBoardHeaderPanel.add(raceBoardPanel.getHeaderWidget());
+        
         FlowPanel contentOuterPanel = new FlowPanel(); // outer div which centered page content
         contentOuterPanel.addStyleName("contentOuterPanel");
         contentOuterPanel.add(raceBoardPanel);
@@ -107,16 +111,18 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         
         FlowPanel timelineInnerPanel = new FlowPanel();
         timelineInnerPanel.addStyleName("timelineInnerPanel");
+
+        timelinePanel.add(timelineInnerPanel);
+        timelineInnerPanel.add(raceBoardPanel.getTimeWidget());
         
         FlowPanel footerShadowPanel = new FlowPanel();
         footerShadowPanel.addStyleName("footerShadowPanel");
-        
-        timelinePanel.add(timelineInnerPanel);
         
         RootPanel.get().add(contentOuterPanel);
         
         // Don't change this order because of the inner logic in html of "position fixed"-elements
         RootPanel.get().add(logoAndTitlePanel);                 // position:fixed        
+        RootPanel.get().add(raceBoardHeaderPanel);              // position:fixed        
         RootPanel.get().add(timelinePanel);                     // position:fixed
         RootPanel.get().add(footerShadowPanel);                 // position:fixed
     }

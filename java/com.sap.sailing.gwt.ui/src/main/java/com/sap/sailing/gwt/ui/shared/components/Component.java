@@ -2,16 +2,7 @@ package com.sap.sailing.gwt.ui.shared.components;
 
 import com.google.gwt.user.client.ui.Widget;
 
-/**
- * 
- * @author Axel Uhl (d043530)
- * 
- * @param <SettingsType>
- *            the type that describes this component's settings (if any). Use {@link Object} in case your components
- *            doesn't support any settings.
- */
 public interface Component<SettingsType> extends ComponentSettings<SettingsType> {
-
     /**
      * @return the name to display to a user for quick navigation to this component
      */

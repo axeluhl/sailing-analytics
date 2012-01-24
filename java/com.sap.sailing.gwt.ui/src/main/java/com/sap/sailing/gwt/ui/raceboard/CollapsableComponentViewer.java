@@ -7,6 +7,7 @@ import com.sap.sailing.gwt.ui.shared.components.CollapsablePanel;
 import com.sap.sailing.gwt.ui.shared.components.Component;
 import com.sap.sailing.gwt.ui.shared.components.ComponentGroup;
 import com.sap.sailing.gwt.ui.shared.components.ComponentToolbar;
+import com.sap.sailing.gwt.ui.shared.components.ComponentViewer;
 
 /**
  * A GWT component that visualizes a {@link ComponentGroup} or a {@link Component} including menus to scroll quickly to the embedded view
@@ -16,7 +17,7 @@ import com.sap.sailing.gwt.ui.shared.components.ComponentToolbar;
  * @author Axel Uhl (d043530)
  *
  */
-public class CollapsableComponentViewer<SettingsType> {
+public class CollapsableComponentViewer<SettingsType> implements ComponentViewer {
     private final CollapsablePanel collapsablePanel;
     
     private final Component<SettingsType> component;
@@ -37,8 +38,12 @@ public class CollapsableComponentViewer<SettingsType> {
         return collapsablePanel;
     }
 
-    public Component<?> getComponent() {
+    public Component<?> getRootComponent() {
         return component;
+    }
+
+    public String getViewerName() {
+        return component.getLocalizedShortName();
     }
 
     private CollapsablePanel createCollapsablePanel(Panel contentPanel, String panelTitle, String defaultContentWidth, String defaultContentHeight)
