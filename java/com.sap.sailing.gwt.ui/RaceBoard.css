@@ -80,7 +80,7 @@ table {
 	float: left; 
   margin: 13px 0 0 12px; }
 
-.sailingAnalyticsLabelPanelÂ {
+.sailingAnalyticsLabelPanel {
   margin: 10px 0 0 0;
   border: 1px solid red;}
 
@@ -117,14 +117,14 @@ input.magnifier{
 	margin: 3px auto 0 auto !important;
 }
 
-.timelinePanel {
+.timeLinePanel {
 	width: 100%;
 	position: fixed;
 	bottom: 0;
 	height: 101px;
 }
 
-.timelineInnerPanel {
+.timeLineInnerPanel {
 	height: 100%;
 	margin: 0 12px;
 	background: #dddcdc;
@@ -170,9 +170,9 @@ input.magnifier{
 	height: 42px;
 }
 
-.eventNameHeadline {
+.eventNameHeadline{
 	font-size: 24px;
 	text-transform: uppercase;
-	font-weight: 200;
-	color: #a1a1a1;
+  color: #a1a1a1;
+  font-weight: 200;
 }
