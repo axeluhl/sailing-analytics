@@ -476,7 +476,7 @@ public class RacingEventServiceImpl implements RacingEventService, EventFetcher,
                 boolean changed = false;
                 for (RaceInLeaderboard raceColumn : leaderboard.getRaceColumns()) {
                     if (raceColumn.getTrackedRace() == trackedRace) {
-                        raceColumn.setTrackedRace(null);
+                        raceColumn.setTrackedRace(null); // but leave the RaceIdentifier on the race column untouched, e.g., for later re-load
                         changed = true;
                     }
                 }

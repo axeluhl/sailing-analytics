@@ -976,6 +976,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 RaceInLeaderboard raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
                 if (raceColumn != null) {
                     raceColumn.setTrackedRace(trackedRace);
+                    raceColumn.setRaceIdentifier(trackedRace.getRaceIdentifier());
                     success = true;
                     getService().updateStoredLeaderboard(leaderboard);
                 }
@@ -1009,6 +1010,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             RaceInLeaderboard raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
             if (raceColumn != null) {
                 raceColumn.setTrackedRace(null);
+                raceColumn.setRaceIdentifier(null);
                 getService().updateStoredLeaderboard(leaderboard);
             } else {
                 throw new IllegalArgumentException("Didn't find race "+raceColumnName+" in leaderboard "+leaderboardName);
