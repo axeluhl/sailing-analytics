@@ -6,7 +6,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FormPanel;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -28,6 +34,7 @@ import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.components.Component;
+import com.sap.sailing.gwt.ui.shared.components.ComponentViewer;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
 
 /**
@@ -49,9 +56,12 @@ public class RaceBoardPanel extends FormPanel implements Component<RaceBoardSett
      */
     private final Map<RaceIdentifier, RaceDTO> racesByIdentifier;
 
-    private final Timer timer;
     private final List<CollapsableComponentViewer<?>> collapsableViewers;
+    private final HorizontalPanel componentsHeaderPanel;
+    private final FlowPanel componentsNavigationPanel;
+    private final HorizontalPanel componentsHeaderNamePanel;
     private final TimePanel timePanel;
+    private final Timer timer;
     private final RaceSelectionProvider raceSelectionProvider;
     
     public RaceBoardPanel(SailingServiceAsync sailingService, RaceSelectionProvider raceSelectionProvider, String leaderboardName, 
@@ -71,6 +81,18 @@ public class RaceBoardPanel extends FormPanel implements Component<RaceBoardSett
         collapsableViewers = new ArrayList<CollapsableComponentViewer<?>>();
         CompetitorSelectionModel competitorSelectionModel = new CompetitorSelectionModel(/* hasMultiSelection */ true);
 
+        componentsHeaderPanel = new HorizontalPanel();
+        componentsHeaderPanel.addStyleName("raceBoardPanelHeader");
+        mainPanel.add(componentsHeaderPanel);
+        componentsNavigationPanel = new FlowPanel();
+        componentsNavigationPanel.addStyleName("raceBoardNavigation");
+        componentsHeaderNamePanel = new HorizontalPanel();
+        componentsHeaderPanel.add(componentsHeaderNamePanel);
+
+        Label eventNameLabel = new Label(selectedRaceIdentifier.getRaceName());
+        eventNameLabel.setStyleName("raceBoardPanelHeader-name");
+        componentsHeaderNamePanel.add(eventNameLabel);
+
         // create the default leaderboard and select the right race
         LeaderboardPanel leaderboardPanel = new LeaderboardPanel(sailingService, selectedRaceIdentifier, competitorSelectionModel,
                 leaderboardName, errorReporter, stringMessages);
@@ -83,28 +105,61 @@ public class RaceBoardPanel extends FormPanel implements Component<RaceBoardSett
         RaceMap raceMap = new RaceMap(sailingService, errorReporter, timer, competitorSelectionModel, stringMessages);
         CollapsableComponentViewer<RaceMapSettings> raceMapViewer = new CollapsableComponentViewer<RaceMapSettings>(
                 raceMap, "600px", "300px", stringMessages);
+
         raceMap.loadMapsAPI((Panel) raceMapViewer.getViewerWidget().getContent());
         raceMap.onRaceSelectionChange(Collections.singletonList(selectedRaceIdentifier));
         collapsableViewers.add(raceMapViewer);
         
-        // create some sample components
-        for(int i = 0; i < 2; i++) {
-            SimpleComponentGroup<Object> componentGroup = new SimpleComponentGroup<Object>("Component Group " + i);
-            componentGroup.addComponent(new SimpleComponent("My Component"));
-            componentGroup.addComponent(new SimpleComponent("My Component 2"));
-            componentGroup.addComponent(new SimpleComponent("My Component 3"));
+        // just a sample component with subcomponents
+        SimpleComponentGroup<Object> componentGroup = new SimpleComponentGroup<Object>("Component Group");
+        componentGroup.addComponent(new SimpleComponent("My Component"));
+        componentGroup.addComponent(new SimpleComponent("My Component 2"));
+        componentGroup.addComponent(new SimpleComponent("My Component 3"));
+        collapsableViewers.add(new CollapsableComponentViewer<Object>(componentGroup, "100%", "100px", stringMessages));
 
-            collapsableViewers.add(new CollapsableComponentViewer<Object>(componentGroup, "100%", "100px", stringMessages));
-        }
+        /*
+        WindChartSettings windChartSettings = new WindChartSettings();
+        WindChart windChart = new WindChart(sailingService, raceSelectionProvider, windChartSettings, stringMessages, errorReporter); 
+        CollapsableComponentViewer<WindChartSettings> windChartViewer = new CollapsableComponentViewer<WindChartSettings>(
+                windChart, "600px", "300px", stringMessages);
+        collapsableViewers.add(windChartViewer);
+        */
+        
         for (CollapsableComponentViewer<?> componentViewer : collapsableViewers) {
             mainPanel.add(componentViewer.getViewerWidget());
+            addComponentViewerMenuEntry(componentViewer);
         }
+
         timer.addTimeListener(leaderboardPanel);
         timer.addTimeListener(raceMap);
         timePanel = new TimePanel(stringMessages, timer);
-        mainPanel.add(timePanel);
     }
-    
+
+    private void addComponentViewerMenuEntry(final ComponentViewer c) {
+        Anchor menuEntry = new Anchor(c.getViewerName());
+        menuEntry.addStyleName("raceBoardNavigation-navigationitem");
+        
+        menuEntry.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                c.getViewerWidget().getElement().scrollIntoView();
+            }
+        });
+        componentsNavigationPanel.add(menuEntry);
+    }
+
+    public Widget getNavigationWidget() {
+        return componentsNavigationPanel; 
+    }
+
+    public Widget getHeaderWidget() {
+        return componentsHeaderPanel; 
+    }
+
+    public Widget getTimeWidget() {
+        return timePanel; 
+    }
+
     @Override
     public Widget getEntryWidget() {
         return this;

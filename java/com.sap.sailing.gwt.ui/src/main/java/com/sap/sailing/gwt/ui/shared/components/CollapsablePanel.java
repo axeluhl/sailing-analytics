@@ -35,16 +35,16 @@ import com.google.gwt.user.client.ui.Widget;
  * 
  * <h3>CSS Style Rules</h3>
  * <dl class="css">
- * <dt>.gwt-DisclosurePanel
+ * <dt>.collapsablePanel
  * <dd>the panel's primary style
- * <dt>.gwt-DisclosurePanel-open
+ * <dt>.collapsablePanel-open
  * <dd>dependent style set when panel is open
- * <dt>.gwt-DisclosurePanel-closed
+ * <dt>.collapsablePanel-closed
  * <dd>dependent style set when panel is closed
  * </dl>
  * <p>
  * The header and content sections can be easily selected using css with a child selector:<br/>
- * .gwt-DisclosurePanel-open .header { ... }
+ * .collapsablePanel-open .header { ... }
  * </p>
  */
 public final class CollapsablePanel extends Composite implements HasWidgets.ForIsWidget, HasAnimation,
@@ -165,15 +165,15 @@ public final class CollapsablePanel extends Composite implements HasWidgets.ForI
     private static final int ANIMATION_DURATION = 350;
 
     // Stylename constants.
-    private static final String STYLENAME_DEFAULT = "gwt-DisclosurePanel";
+    private static final String STYLENAME_DEFAULT = "collapsablePanel";
 
-    private static final String STYLENAME_SUFFIX_OPEN = "open";
+    private static final String STYLENAME_SUFFIX_OPEN = "collapsablePanel-open";
 
-    private static final String STYLENAME_SUFFIX_CLOSED = "closed";
+    private static final String STYLENAME_SUFFIX_CLOSED = "collapsablePanel-closed";
 
-    private static final String STYLENAME_HEADER = "header";
+    private static final String STYLENAME_HEADER = "collapsablePanel-header";
 
-    private static final String STYLENAME_CONTENT = "content";
+    private static final String STYLENAME_CONTENT = "collapsablePanel-content";
 
     /**
      * The {@link Animation} used to open and close the content.
@@ -211,8 +211,8 @@ public final class CollapsablePanel extends Composite implements HasWidgets.ForI
         initWidget(mainPanel);
 
         header.setWidth("100%");
-        header.getCellFormatter().setWidth(0,  0, "50%");
-        header.getCellFormatter().setWidth(0,  1, "50%");
+//        header.getCellFormatter().setWidth(0,  0, "50%");
+//        header.getCellFormatter().setWidth(0,  1, "50%");
         header.getCellFormatter().setAlignment(0, 0, HasHorizontalAlignment.ALIGN_LEFT, HasVerticalAlignment.ALIGN_MIDDLE); 
         header.getCellFormatter().setAlignment(0, 1, HasHorizontalAlignment.ALIGN_RIGHT, HasVerticalAlignment.ALIGN_MIDDLE); 
         
@@ -254,11 +254,9 @@ public final class CollapsablePanel extends Composite implements HasWidgets.ForI
     private void setClickableHeader(Widget widget) {
         clickableHeader.add(widget);
         header.setWidget(0, 0, clickableHeader);
-//        header.add(clickableHeader, DockPanel.WEST);
     }
 
     public void setHeaderToolbar(HorizontalPanel toolbar) {
-//        header.add(toolbar, DockPanel.EAST);
         header.setWidget(0, 1, toolbar);
     }
 
@@ -266,7 +264,7 @@ public final class CollapsablePanel extends Composite implements HasWidgets.ForI
         if (this.getContent() == null) {
             setContent(w);
         } else {
-            throw new IllegalStateException("A DisclosurePanel can only contain two Widgets.");
+            throw new IllegalStateException("A CollapsablePanel can only contain two Widgets.");
         }
     }
 
@@ -379,6 +377,7 @@ public final class CollapsablePanel extends Composite implements HasWidgets.ForI
         // Add new content widget if != null.
         if (content != null) {
             contentWrapper.setWidget(content);
+            
             content.addStyleName(STYLENAME_CONTENT);
             setContentDisplay(false);
         }

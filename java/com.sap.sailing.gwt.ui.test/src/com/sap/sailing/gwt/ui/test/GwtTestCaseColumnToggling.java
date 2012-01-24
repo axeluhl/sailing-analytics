@@ -15,6 +15,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.ExpandableSortableColumn;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDTO;
+import com.sap.sailing.gwt.ui.shared.RaceInLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDTO;
 
 public class GwtTestCaseColumnToggling extends GWTTestCase {
@@ -127,7 +128,11 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
                     @Override
                     public void onSuccess(Void result) {
                         System.out.println("Added column to leaderboard.");
-                        leaderboardPanel.addColumn(leaderboardPanel.createRaceColumn(COLUMN1_NAME, false, false));
+                        RaceInLeaderboardDTO race = new RaceInLeaderboardDTO();
+                        race.setRaceColumnName(COLUMN1_NAME);
+                        race.setMedalRace(false);
+                        race.setRaceIdentifier(null);
+                        leaderboardPanel.addColumn(leaderboardPanel.createRaceColumn(race));
                         linkTrackedRace();
                     }
                 });

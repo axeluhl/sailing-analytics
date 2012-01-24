@@ -290,7 +290,7 @@ public class RacingEventServiceImpl implements RacingEventService, EventFetcher,
             }
         }
         DynamicTrackedEvent trackedEvent = tracker.getTrackedEvent();
-        ensureEventIsObservedForDefaultLeaderboard(trackedEvent);
+        ensureEventIsObservedForDefaultLeaderboardAndAutoLeaderboardLinking(trackedEvent);
         if (timeoutInMilliseconds != -1) {
             scheduleAbortTrackerAfterInitialTimeout(tracker, timeoutInMilliseconds);
         }
@@ -335,14 +335,14 @@ public class RacingEventServiceImpl implements RacingEventService, EventFetcher,
             }
         }
         DynamicTrackedEvent trackedEvent = tracker.getTrackedEvent();
-        ensureEventIsObservedForDefaultLeaderboard(trackedEvent);
+        ensureEventIsObservedForDefaultLeaderboardAndAutoLeaderboardLinking(trackedEvent);
         if (timeoutInMilliseconds != -1) {
             scheduleAbortTrackerAfterInitialTimeout(tracker, timeoutInMilliseconds);
         }
         return tracker.getRacesHandle();
     }
 
-    private void ensureEventIsObservedForDefaultLeaderboard(DynamicTrackedEvent trackedEvent) {
+    private void ensureEventIsObservedForDefaultLeaderboardAndAutoLeaderboardLinking(DynamicTrackedEvent trackedEvent) {
         synchronized (eventsObservedForDefaultLeaderboard) {
             if (!eventsObservedForDefaultLeaderboard.contains(trackedEvent)) {
                 trackedEvent.addRaceListener(new RaceListener() {
@@ -352,11 +352,29 @@ public class RacingEventServiceImpl implements RacingEventService, EventFetcher,
 
                     @Override
                     public void raceAdded(TrackedRace trackedRace) {
+                        linkRaceToConfiguredLeaderboardColumns(trackedRace);
                         leaderboardsByName.get(DefaultLeaderboardName.DEFAULT_LEADERBOARD_NAME).addRace(trackedRace,
                                 trackedRace.getRace().getName(), /* medalRace */ false);
                     }
                 });
                 eventsObservedForDefaultLeaderboard.add(trackedEvent);
+            }
+        }
+    }
+
+    /**
+     * Based on the <code>trackedRace</code>'s {@link TrackedRace#getRaceIdentifier() race identifier}, the tracked race
+     * is (re-)associated to all {@link RaceInLeaderboard race columns} that currently have no
+     * {@link RaceInLeaderboard#getTrackedRace() tracked race assigned} and whose
+     * {@link RaceInLeaderboard#getRaceIdentifier() race identifier} equals that of <code>trackedRace</code>.
+     */
+    private void linkRaceToConfiguredLeaderboardColumns(TrackedRace trackedRace) {
+        RaceIdentifier trackedRaceIdentifier = trackedRace.getRaceIdentifier();
+        for (Leaderboard leaderboard : getLeaderboards().values()) {
+            for (RaceInLeaderboard column : leaderboard.getRaceColumns()) {
+                if (trackedRaceIdentifier.equals(column.getRaceIdentifier()) && column.getTrackedRace() == null) {
+                    column.setTrackedRace(trackedRace);
+                }
             }
         }
     }
