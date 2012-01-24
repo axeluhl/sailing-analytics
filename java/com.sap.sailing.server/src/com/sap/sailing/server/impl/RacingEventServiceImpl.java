@@ -27,6 +27,13 @@ import java.util.logging.Logger;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.common.DefaultLeaderboardName;
+import com.sap.sailing.domain.common.EventAndRaceIdentifier;
+import com.sap.sailing.domain.common.EventFetcher;
+import com.sap.sailing.domain.common.EventIdentifier;
+import com.sap.sailing.domain.common.EventName;
+import com.sap.sailing.domain.common.RaceFetcher;
+import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
@@ -59,13 +66,6 @@ import com.sap.sailing.domain.tractracadapter.RaceRecord;
 import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sailing.expeditionconnector.ExpeditionWindTrackerFactory;
 import com.sap.sailing.server.RacingEventService;
-import com.sap.sailing.server.api.DefaultLeaderboardName;
-import com.sap.sailing.server.api.EventFetcher;
-import com.sap.sailing.server.api.EventIdentifier;
-import com.sap.sailing.server.api.EventName;
-import com.sap.sailing.server.api.EventNameAndRaceName;
-import com.sap.sailing.server.api.RaceFetcher;
-import com.sap.sailing.server.api.RaceIdentifier;
 
 public class RacingEventServiceImpl implements RacingEventService, EventFetcher, RaceFetcher {
     private static final Logger logger = Logger.getLogger(RacingEventServiceImpl.class.getName());
@@ -619,7 +619,7 @@ public class RacingEventServiceImpl implements RacingEventService, EventFetcher,
     }
 
     @Override
-    public RaceDefinition getRace(EventNameAndRaceName eventNameAndRaceName) {
+    public RaceDefinition getRace(EventAndRaceIdentifier eventNameAndRaceName) {
         RaceDefinition result = null;
         Event event = getEvent(eventNameAndRaceName);
         if (event != null) {
@@ -629,21 +629,8 @@ public class RacingEventServiceImpl implements RacingEventService, EventFetcher,
     }
 
     @Override
-    public TrackedRace getTrackedRace(EventNameAndRaceName eventNameAndRaceName) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public TrackedRace getExistingTrackedRace(EventNameAndRaceName eventNameAndRaceName) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
     public Event getEvent(EventName eventIdentifier) {
-        // TODO Auto-generated method stub
-        return null;
+        return getEventByName(eventIdentifier.getEventName());
     }
 
 }

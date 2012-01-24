@@ -25,7 +25,6 @@
   <inherits name='com.sap.ui.commons.Module' />
   
   <!-- Other module inherits                                      -->
-  <inherits name="com.sap.sailing.server.SailingServer" />
   <inherits name="com.sap.sailing.domain.SailingDomain" />
 
   <!-- Specify the app entry point class.                         -->

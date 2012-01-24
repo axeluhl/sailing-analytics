@@ -1,4 +1,5 @@
-package com.sap.sailing.server.api;
+package com.sap.sailing.domain.common;
+
 
 public class EventName implements EventIdentifier {
     private static final long serialVersionUID = 5975000495693192305L;

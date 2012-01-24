@@ -1,6 +1,6 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
-import com.sap.sailing.server.api.DetailType;
+import com.sap.sailing.domain.common.DetailType;
 
 public class MultiChartSettings extends ChartSettings {
     private final DetailType dataToShow;

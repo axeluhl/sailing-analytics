@@ -10,7 +10,7 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 
-import com.sap.sailing.server.api.EventNameAndRaceName;
+import com.sap.sailing.domain.common.EventNameAndRaceName;
 
 public class IdentifierSerializationTest {
 
