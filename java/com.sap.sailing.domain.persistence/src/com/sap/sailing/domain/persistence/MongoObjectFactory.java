@@ -3,6 +3,7 @@ package com.sap.sailing.domain.persistence;
 import com.mongodb.DBObject;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
@@ -38,5 +39,7 @@ public interface MongoObjectFactory {
     void removeLeaderboard(String leaderboardName);
 
     void renameLeaderboard(String oldName, String newName);
+
+    void storeRaceIdentifier(RaceIdentifier raceIdentifier, DBObject dbObject);
 
 }
