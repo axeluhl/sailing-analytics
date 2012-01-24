@@ -1,7 +1,9 @@
 package com.sap.sailing.domain.persistence;
 
+import com.mongodb.DBObject;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.persistence.impl.DomainObjectFactoryImpl;
@@ -22,5 +24,7 @@ public interface DomainObjectFactory {
     Leaderboard loadLeaderboard(String name);
 
     Iterable<Leaderboard> getAllLeaderboards();
+
+    RaceIdentifier loadRaceIdentifier(DBObject dbObject);
 
 }
