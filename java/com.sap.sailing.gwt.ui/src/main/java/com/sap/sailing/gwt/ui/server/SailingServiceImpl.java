@@ -61,7 +61,6 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KilometersPerHourSpeedImpl;
-import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard.Entry;
@@ -888,14 +887,15 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     @Override
     public List<LeaderboardDTO> getLeaderboardsByRace(RaceDTO race) {
         List<LeaderboardDTO> results = new ArrayList<LeaderboardDTO>();
-        List<LeaderboardDTO> leaderboards = getLeaderboards();
-        
-        for (LeaderboardDTO leaderboard : leaderboards) {
-            List<RaceInLeaderboardDTO> races = leaderboard.getRaceInLeaderboardList();
-            for (RaceInLeaderboardDTO raceInLeaderboard : races) {
-                RaceDefinition raceDef = getRace(raceInLeaderboard.getRaceIdentifier());
-                if (raceDef.getName().equals(race.name)) {
-                    results.add(leaderboard);
+        Map<String, Leaderboard> leaderboards = getService().getLeaderboards();
+        //TODO NullPointerException because some RaceIdentifiers are null; Use other way to get LeaderboardDTOs
+        for (Leaderboard leaderboard : leaderboards.values()) {
+            Iterable<RaceInLeaderboard> races = leaderboard.getRaceColumns();
+            for (RaceInLeaderboard raceInLeaderboard : races) {
+                TrackedRace trackedRace = raceInLeaderboard.getTrackedRace();
+                RaceDefinition trackedRaceDef = trackedRace != null ? trackedRace.getRace() : null;
+                if (trackedRaceDef != null && trackedRaceDef.getName().equals(race.name)) {
+                    results.add(createStrippedLeaderboardDTO(leaderboard));
                     break;
                 }
             }
