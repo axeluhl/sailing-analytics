@@ -310,9 +310,14 @@ public class DomainFactoryImpl implements DomainFactory {
     
     @Override
     public void removeRace(com.tractrac.clientmodule.Event tractracEvent, Race tractracRace, TrackedEventRegistry trackedEventRegistry) {
-        RaceDefinition raceDefinition = getExistingRaceDefinitionForRace(tractracRace);
-        if (raceDefinition != null) { // otherwise, this domain factory doesn't seem to know about the race
-            raceCache.remove(tractracRace);
+        RaceDefinition raceDefinition;
+        synchronized (raceCache) {
+            raceDefinition = getExistingRaceDefinitionForRace(tractracRace);
+            if (raceDefinition != null) { // otherwise, this domain factory doesn't seem to know about the race
+                raceCache.remove(tractracRace);
+            }
+        }
+        if (raceDefinition != null) {
             Collection<CompetitorClass> competitorClassList = new ArrayList<CompetitorClass>();
             for (com.tractrac.clientmodule.Competitor c : tractracEvent.getCompetitorList()) {
                 competitorClassList.add(c.getCompetitorClass());
@@ -320,17 +325,26 @@ public class DomainFactoryImpl implements DomainFactory {
             BoatClass boatClass = getDominantBoatClass(competitorClassList);
             Pair<String, String> key = new Pair<String, String>(tractracEvent.getName(), boatClass == null ? null
                     : boatClass.getName());
-            Event event = eventCache.get(key);
-            if (event != null) {
-                event.removeRace(raceDefinition);
-                if (Util.size(event.getAllRaces()) == 0) {
-                    eventCache.remove(key);
-                }
-                TrackedEvent trackedEvent = trackedEventRegistry.getTrackedEvent(event);
-                if (trackedEvent != null) {
-                    trackedEvent.removeTrackedRace(raceDefinition);
-                    if (Util.size(trackedEvent.getTrackedRaces()) == 0) {
-                        trackedEventRegistry.removeTrackedEvent(event);
+            synchronized (eventCache) {
+                Event event = eventCache.get(key);
+                if (event != null) {
+                    // The following fixes bug 202: when tracking of multiple races of the same event has been started, this may not
+                    // remove any race; however, the event may already have been created by another tracker whose race hasn't
+                    // arrived yet and therefore the races list is still empty; therefore, only remove the event if its
+                    // race list became empty by the removal performed here.
+                    int oldSize = Util.size(event.getAllRaces());
+                    event.removeRace(raceDefinition);
+                    if (oldSize > 0 && Util.size(event.getAllRaces()) == 0) {
+                        eventCache.remove(key);
+                    }
+                    TrackedEvent trackedEvent = trackedEventRegistry.getTrackedEvent(event);
+                    if (trackedEvent != null) {
+                        // see above; only remove tracked event if it *became* empty because of the tracked race removal here
+                        int oldSizeOfTrackedRaces = Util.size(trackedEvent.getTrackedRaces());
+                        trackedEvent.removeTrackedRace(raceDefinition);
+                        if (oldSizeOfTrackedRaces > 0 && Util.size(trackedEvent.getTrackedRaces()) == 0) {
+                            trackedEventRegistry.removeTrackedEvent(event);
+                        }
                     }
                 }
             }
