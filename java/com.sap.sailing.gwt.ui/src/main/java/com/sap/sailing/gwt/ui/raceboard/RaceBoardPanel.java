@@ -13,7 +13,6 @@ import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RaceIdentifier;
@@ -57,7 +56,7 @@ public class RaceBoardPanel extends FormPanel implements Component<RaceBoardSett
     private final Map<RaceIdentifier, RaceDTO> racesByIdentifier;
 
     private final List<CollapsableComponentViewer<?>> collapsableViewers;
-    private final Panel componentsHeaderPanel;
+    private final HorizontalPanel componentsHeaderPanel;
     private final HorizontalPanel componentsHeaderMenuPanel;
     private final HorizontalPanel componentsHeaderNamePanel;
     private final TimePanel timePanel;
@@ -81,14 +80,12 @@ public class RaceBoardPanel extends FormPanel implements Component<RaceBoardSett
         collapsableViewers = new ArrayList<CollapsableComponentViewer<?>>();
         CompetitorSelectionModel competitorSelectionModel = new CompetitorSelectionModel(/* hasMultiSelection */ true);
 
-        componentsHeaderPanel = new SimplePanel();
-        componentsHeaderPanel.addStyleName("raceBoard-componentsHeader");
+        componentsHeaderPanel = new HorizontalPanel();
+        componentsHeaderPanel.addStyleName("raceBoardPanelHeader");
         mainPanel.add(componentsHeaderPanel);
         componentsHeaderMenuPanel = new HorizontalPanel();
-        componentsHeaderMenuPanel.addStyleName("raceBoard-componentsHeader-menu");
         componentsHeaderMenuPanel.setSpacing(10);
         componentsHeaderNamePanel = new HorizontalPanel();
-        componentsHeaderNamePanel.addStyleName("raceBoard-componentsHeader-name");
         componentsHeaderPanel.add(componentsHeaderNamePanel);
         componentsHeaderPanel.add(componentsHeaderMenuPanel);
         /*
@@ -97,7 +94,7 @@ public class RaceBoardPanel extends FormPanel implements Component<RaceBoardSett
         */ 
 
         Label eventNameLabel = new Label(selectedRaceIdentifier.getRaceName());
-        eventNameLabel.addStyleName("eventNameHeadline");
+        eventNameLabel.setStyleName("raceBoardPanelHeader-name");
         componentsHeaderNamePanel.add(eventNameLabel);
 
         // create the default leaderboard and select the right race
@@ -136,7 +133,7 @@ public class RaceBoardPanel extends FormPanel implements Component<RaceBoardSett
 
     private void addComponentViewerMenuEntry(final ComponentViewer c) {
         Anchor menuEntry = new Anchor(c.getViewerName());
-        menuEntry.addStyleName("raceBoard-menuEntry");
+        menuEntry.addStyleName("raceBoardPanelHeader-menuitem");
         
         menuEntry.addClickHandler(new ClickHandler() {
             @Override

@@ -80,14 +80,17 @@ table {
 	visibility: hidden;
 }
 
+.RaceBoardHeaderPanel {
+	
+}
+
 .sapLogo {
 	float: left;
 	margin: 13px 0 0 12px;
 }
 
-.sailingAnalyticsLabelPanel� {
+.sailingAnalyticsLabelPanel {
 	margin: 10px 0 0 0;
-	border: 1px solid red;
 }
 
 .sailingAnalyticsLabel {
@@ -170,14 +173,14 @@ input.magnifier {
 	width: 100%;
 }
 
-.gwt-DisclosurePanel {
+.collapsablePanel {
 	background: #b6b6b6;
 	margin: 0 0 12px 0;
 	border-radius: 7px;
 	overflow: hidden;
 }
 
-.gwt-DisclosurePanel .content {
+.collapsablePanel-content {
 	border: none;
 	padding: 0;
 	margin: 0;
@@ -185,16 +188,29 @@ input.magnifier {
 	position: inherit !important;
 }
 
-.gwt-DisclosurePanel .header {
+.collapsablePanel-header {
 	background: url(images/titlebar-background.png) 0 0 repeat-x;
 	padding: 0;
 	margin: 0;
 	height: 42px;
 }
 
-.eventNameHeadline {
+.collapsablePanel-open {
+}
+
+.collapsablePanel-closed {
+}
+
+.raceBoardPanelHeader {
+	
+}
+
+.raceBoardPanelHeader-name {
 	font-size: 24px;
 	text-transform: uppercase;
 	color: #a1a1a1;
 	font-weight: 200;
+}
+
+.raceBoardPanelHeader-menuitem {
 }
