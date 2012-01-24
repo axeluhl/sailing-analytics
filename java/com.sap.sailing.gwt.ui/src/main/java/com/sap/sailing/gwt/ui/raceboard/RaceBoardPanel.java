@@ -3,8 +3,10 @@ package com.sap.sailing.gwt.ui.raceboard;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.adminconsole.RaceMap;
@@ -95,7 +97,17 @@ public class RaceBoardPanel extends FormPanel implements Component<RaceBoardSett
             timePanel.setMax(selectedRace.timePointOfNewestEvent);
         }
         
-        mainPanel.add(timePanel);
+        
+        FlowPanel timeLineInnerPanel = new FlowPanel();
+        timeLineInnerPanel.add(timePanel);
+        timeLineInnerPanel.addStyleName("timeLineInnerPanel");
+        
+        FlowPanel timelinePanel = new FlowPanel();
+        timelinePanel.add(timeLineInnerPanel);
+        timelinePanel.addStyleName("timeLinePanel");
+        
+        
+        RootPanel.get().add(timelinePanel);
     }
     
     @Override
