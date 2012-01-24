@@ -9,6 +9,7 @@ import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.SortableColumn;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDTO;
+import com.sap.sailing.gwt.ui.shared.RaceInLeaderboardDTO;
 
 public class LeaderboardPanelMock extends LeaderboardPanel {
 
@@ -26,10 +27,9 @@ public class LeaderboardPanelMock extends LeaderboardPanel {
     }
 
     @Override
-    public RaceColumn<?> createRaceColumn(String raceName,
-            boolean isMedalRace, boolean isTracked) {
+    public RaceColumn<?> createRaceColumn(RaceInLeaderboardDTO race) {
         // TODO Auto-generated method stub
-        return super.createRaceColumn(raceName, isMedalRace, isTracked);
+        return super.createRaceColumn(race);
     }
 
     @Override
