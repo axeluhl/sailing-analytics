@@ -1,36 +1,37 @@
 package com.sap.sailing.gwt.ui.raceboard;
 
+import java.util.Collections;
 import java.util.List;
 
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
+import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.server.api.DefaultLeaderboardName;
+import com.sap.sailing.server.api.RaceIdentifier;
 
 public class RaceBoardEntryPoint extends AbstractEntryPoint {
     private RaceDTO selectedRace;
-    private String eventName;
-    private String raceName;
-    private String leaderboardName;
+    private RaceBoardPanel raceBoardPanel;
 
     @Override
     public void onModuleLoad() {     
         super.onModuleLoad();
 
-        eventName = Window.Location.getParameter("eventName");
-        raceName = Window.Location.getParameter("raceName");
-        leaderboardName = Window.Location.getParameter("leaderboardName");
-        
-        if(leaderboardName == null || leaderboardName.isEmpty()) {
+        final String eventName = Window.Location.getParameter("eventName");
+        final String raceName = Window.Location.getParameter("raceName");
+        String leaderboardNameParamValue = Window.Location.getParameter("leaderboardName");
+        final String leaderboardName;
+        if(leaderboardNameParamValue == null || leaderboardNameParamValue.isEmpty()) {
             leaderboardName = DefaultLeaderboardName.DEFAULT_LEADERBOARD_NAME;
         } else {
+            leaderboardName = leaderboardNameParamValue;
             sailingService.getLeaderboardNames(new AsyncCallback<List<String>>() {
                 @Override
                 public void onSuccess(List<String> leaderboardNames) {
@@ -46,15 +47,16 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
             });
         }
         
-        if(eventName != null && !eventName.isEmpty() && raceName != null && !raceName.isEmpty()) {
+        if (eventName != null && !eventName.isEmpty() && raceName != null && !raceName.isEmpty()) {
             sailingService.listEvents(false, new AsyncCallback<List<EventDTO>>() {
                 @Override
-                public void onSuccess(List<EventDTO> eventNames) {
-                    selectedRace = findRace(eventNames);
-                    if(selectedRace != null)
-                        createRaceBoardPanel(selectedRace);
-                    else
+                public void onSuccess(List<EventDTO> events) {
+                    selectedRace = findRace(eventName, raceName, events);
+                    if(selectedRace != null) {
+                        createRaceBoardPanel(selectedRace, events, eventName, leaderboardName);
+                    } else {
                         createErrorPage("Could not obtain a race with name " + raceName + " for an event with name " + eventName);
+                    }
                 }
 
                 @Override
@@ -67,8 +69,8 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         }
     }
 
-    private RaceDTO findRace(List<EventDTO> eventNames) {
-        for (EventDTO eventDTO : eventNames) {
+    private RaceDTO findRace(String eventName, String raceName, List<EventDTO> events) {
+        for (EventDTO eventDTO : events) {
             if(eventDTO.name.equals(eventName)) {
                 for (RegattaDTO regattaDTO : eventDTO.regattas) {
                     for(RaceDTO raceDTO: regattaDTO.races) {
@@ -82,18 +84,20 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         return null;
     }
 
-    private void createRaceBoardPanel(RaceDTO selectedRace)
-    {
+    private void createRaceBoardPanel(RaceDTO selectedRace, List<EventDTO> events, String eventName, String leaderboardName) {
         LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(stringMessages);
         logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
-
-        RaceBoardPanel raceBoardPanel = new RaceBoardPanel(sailingService, selectedRace, leaderboardName,
+        RaceSelectionModel raceSelectionModel = new RaceSelectionModel();
+        List<RaceIdentifier> singletonList = Collections.singletonList(selectedRace.getRaceIdentifier());
+        raceSelectionModel.setSelection(singletonList);
+        raceBoardPanel = new RaceBoardPanel(sailingService, raceSelectionModel, leaderboardName,
                 RaceBoardEntryPoint.this, stringMessages);
+        raceBoardPanel.fillEvents(events);
         String padding = Window.Location.getParameter("padding");
         if (padding != null && Boolean.valueOf(padding)) {
             raceBoardPanel.addStyleName("leftPaddedPanel");
         }
-        
+
         FlowPanel contentOuterPanel = new FlowPanel(); // outer div which centered page content
         contentOuterPanel.addStyleName("contentOuterPanel");
         contentOuterPanel.add(raceBoardPanel);

@@ -61,7 +61,6 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KilometersPerHourSpeedImpl;
-import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard.Entry;
@@ -866,20 +865,25 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
     
     @Override
-    public List<LeaderboardDTO> getLeaderboardsByEvent(EventIdentifier eventIdentifier) {
-        Event event = getEvent(eventIdentifier);
-        Map<String, Leaderboard> leaderboards = getService().getLeaderboards();
+    public List<LeaderboardDTO> getLeaderboardsByEvent(EventDTO event) {
         List<LeaderboardDTO> results = new ArrayList<LeaderboardDTO>();
         
-        for (Leaderboard leaderboard : leaderboards.values()) {
-            for (RaceInLeaderboard race : leaderboard.getRaceColumns()) {
-                if (Util.contains(event.getAllRaces(), race.getTrackedRace().getRace())) {
-                    LeaderboardDTO dao = createStrippedLeaderboardDTO(leaderboard);
-                    results.add(dao);
+        for (RegattaDTO regatta : event.regattas) {
+            for (RaceDTO race : regatta.races) {
+                List<LeaderboardDTO> leaderboard = getLeaderboardByRace(race);
+                if (leaderboard != null && !leaderboard.isEmpty()) {
+                    results.addAll(leaderboard);
                 }
             }
         }
-        
+        return results;
+    }
+    
+    private List<LeaderboardDTO> getLeaderboardByRace(RaceDTO race) {
+        List<LeaderboardDTO> results = new ArrayList<LeaderboardDTO>();
+        @SuppressWarnings("unused") // see below
+        Map<String, Leaderboard> leaderboards = getService().getLeaderboards();
+        // TODO Lennart, was this written by you? Please at least leave a TODO comment before pushing such empty bodies 
         return results;
     }
 
@@ -1508,7 +1512,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     public Event getEvent(EventName eventIdentifier) {
         return getService().getEventByName(eventIdentifier.getEventName());
     }
-
+    
     private RaceDefinition getRace(RaceIdentifier raceIdentifier) {
         return (RaceDefinition) raceIdentifier.getRace(this);
     }

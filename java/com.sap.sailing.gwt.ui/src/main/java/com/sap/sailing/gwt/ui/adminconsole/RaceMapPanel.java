@@ -24,17 +24,18 @@ import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.EventDisplayer;
 import com.sap.sailing.gwt.ui.client.EventRefresher;
 import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
+import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.SmallWindHistoryPanel;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.TimeListener;
 import com.sap.sailing.gwt.ui.client.Timer;
-import com.sap.sailing.gwt.ui.leaderboard.SmallWindHistoryPanel;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.PositionDTO;
 import com.sap.sailing.gwt.ui.shared.QuickRankDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialog;
-import com.sap.sailing.server.api.EventNameAndRaceName;
+import com.sap.sailing.server.api.RaceIdentifier;
 
 public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListener, ProvidesResize, RequiresResize,
         RaceSelectionChangeListener {
@@ -47,6 +48,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
     private final Timer timer;
     private final RaceMap raceMap;
     private final QuickRanksListBoxComposite quickRanksListBox;
+    private final RaceSelectionModel raceSelectionModel;
     
     private static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
 
@@ -67,8 +69,9 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         grid.setWidget(2, 1, mapPanel);
         raceMap = new RaceMap(sailingService, errorReporter, timer, competitorSelectionProvider, stringMessages);
         raceMap.loadMapsAPI(mapPanel);
-        raceListBox = new RacesListBoxPanel(eventRefresher, stringMessages);
-        raceListBox.addRaceSelectionChangeListener(this);
+        raceSelectionModel = new RaceSelectionModel();
+        raceListBox = new RacesListBoxPanel(eventRefresher, raceSelectionModel, stringMessages);
+        raceSelectionModel.addRaceSelectionChangeListener(this);
         grid.setWidget(0, 0, raceListBox);
         PositionDTO pos = new PositionDTO();
         if (!raceMap.boatMarkers.isEmpty()) {
@@ -79,7 +82,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         SmallWindHistoryPanel windHistory = new SmallWindHistoryPanel(sailingService, pos,
         /* number of wind displays */5,
         /* time interval between displays in milliseconds */5000, stringMessages, errorReporter);
-        raceListBox.addRaceSelectionChangeListener(windHistory);
+        raceSelectionModel.addRaceSelectionChangeListener(windHistory);
         grid.setWidget(1, 0, windHistory);
 
         ImageResource settingsImage = resources.settingsIcon();
@@ -115,15 +118,16 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
     }
 
     @Override
-    public void onRaceSelectionChange(List<RaceDTO> selectedRaces) {
+    public void onRaceSelectionChange(List<RaceIdentifier> selectedRaces) {
         if (!selectedRaces.isEmpty() && selectedRaces.get(selectedRaces.size() - 1) != null) {
-            RaceDTO raceDTO = selectedRaces.get(selectedRaces.size() - 1);
-            competitorSelectionProvider.setCompetitors(raceDTO.competitors);
-            if (raceDTO.startOfRace != null) {
-                timePanel.timeChanged(raceDTO.startOfRace);
-                timer.setTime(raceDTO.startOfRace.getTime());
+            RaceIdentifier raceIdentifier = selectedRaces.get(selectedRaces.size() - 1);
+            RaceDTO race = raceListBox.getRace(raceIdentifier);
+            competitorSelectionProvider.setCompetitors(race.competitors);
+            if (race.startOfRace != null) {
+                timePanel.timeChanged(race.startOfRace);
+                timer.setTime(race.startOfRace.getTime());
             }
-            updateSlider(raceDTO);
+            updateSlider(race);
         }
         raceMap.onRaceSelectionChange(selectedRaces);
     }
@@ -140,12 +144,11 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
     @Override
     public void timeChanged(final Date date) {
         if (date != null) {
-            List<RaceDTO> selection = raceListBox.getSelectedRaces();
+            List<RaceIdentifier> selection = raceSelectionModel.getSelectedRaces();
             if (!selection.isEmpty()) {
-                RaceDTO race = selection.get(selection.size() - 1);
-                EventDTO event = race.getEvent();
-                if (event != null && race != null) {
-                    sailingService.getQuickRanks(new EventNameAndRaceName(event.name, race.name), date,
+                RaceIdentifier race = selection.get(selection.size() - 1);
+                if (race != null) {
+                    sailingService.getQuickRanks(race, date,
                             new AsyncCallback<List<QuickRankDTO>>() {
                                 @Override
                                 public void onFailure(Throwable caught) {

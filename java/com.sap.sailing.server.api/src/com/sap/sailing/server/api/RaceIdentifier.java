@@ -3,6 +3,10 @@ package com.sap.sailing.server.api;
 import java.io.Serializable;
 
 public interface RaceIdentifier extends Serializable {
+    String getEventName();
+    
+    String getRaceName();
+    
     Object getRace(RaceFetcher raceFetcher);
 
     /**

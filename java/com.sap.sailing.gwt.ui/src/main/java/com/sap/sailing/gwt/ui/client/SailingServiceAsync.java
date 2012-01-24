@@ -36,7 +36,7 @@ import com.sap.sailing.server.api.RaceIdentifier;
 public interface SailingServiceAsync {
     
     void listEvents(boolean withRacePlaces, AsyncCallback<List<EventDTO>> callback);
-
+    
     /**
      * The string returned in the callback's pair is the common event name
      */
@@ -143,7 +143,7 @@ public interface SailingServiceAsync {
      * Does the same as {@link SailingServiceAsync#getLeaderboards(AsyncCallback) getLeaderboards} but returns only
      * leaderboards which have the given event as race
      */
-    void getLeaderboardsByEvent(EventIdentifier eventIdentifier, AsyncCallback<List<LeaderboardDTO>> callback);
+    void getLeaderboardsByEvent(EventDTO event, AsyncCallback<List<LeaderboardDTO>> callback);
     
     void updateLeaderboard(String leaderboardName, String newLeaderboardName, int[] newDiscardingThreasholds,
             AsyncCallback<Void> callback);
