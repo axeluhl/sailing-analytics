@@ -2,7 +2,7 @@ package com.sap.sailing.gwt.ui.leaderboard;
 
 import java.util.List;
 
-import com.sap.sailing.server.api.DetailType;
+import com.sap.sailing.domain.common.DetailType;
 
 public class LeaderboardSettings {
     private final List<String> raceColumnsToShow;

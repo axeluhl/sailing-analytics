@@ -9,12 +9,12 @@ import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Header;
+import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LegDetailColumn.LegDetailField;
 import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDTO;
 import com.sap.sailing.gwt.ui.shared.LegEntryDTO;
-import com.sap.sailing.server.api.DetailType;
 
 /**
  * Displays competitor's rank in leg and makes the column sortable by rank. The leg is

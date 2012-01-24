@@ -145,9 +145,9 @@ public interface Leaderboard extends Named {
 
     /**
      * Adds a new {@link RaceInLeaderboard} that has no {@link TrackedRace} associated yet to this leaderboard.
-     * 
      * @param medalRace
      *            tells if the column to add represents a medal race which has double score and cannot be discarded
+     * 
      * @return the race column in the leaderboard used to represent the tracked <code>race</code>
      */
     RaceInLeaderboard addRaceColumn(String name, boolean medalRace);

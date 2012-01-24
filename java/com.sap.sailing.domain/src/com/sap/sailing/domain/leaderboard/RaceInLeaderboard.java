@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.leaderboard;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
@@ -13,9 +14,30 @@ import com.sap.sailing.domain.tracking.TrackedRace;
  * 
  */
 public interface RaceInLeaderboard extends LeaderboardColumn {
+    /**
+     * This does not update the {@link #getRaceIdentifier() race identifier}. 
+     */
     void setTrackedRace(TrackedRace race);
 
+    /**
+     * @return <code>null</code> if this column does not currently have a tracked race associated; otherwise the tracked
+     *         race from where all information relevant to this column can be obtained. See also
+     *         {@link #getRaceIdentifier()}.
+     */
     TrackedRace getTrackedRace();
+    
+    /**
+     * If this column ever was assigned to a tracked race, that race's identifier can be obtained using this method;
+     * otherwise, <code>null</code> is returned. 
+     */
+    RaceIdentifier getRaceIdentifier();
+    
+    /**
+     * Records that this leaderboard column is to be associated with the race identified by <code>raceIdentifier</code>.
+     * This does not automatically load the tracked race, but the information may be used to re-associate a tracked
+     * race with this column based on its {@link TrackedRace#getRaceIdentifier() race identifier}.
+     */
+    void setRaceIdentifier(RaceIdentifier raceIdentifier);
     
     /**
      * A "medal race" cannot be discarded. It's score is doubled during score aggregation.

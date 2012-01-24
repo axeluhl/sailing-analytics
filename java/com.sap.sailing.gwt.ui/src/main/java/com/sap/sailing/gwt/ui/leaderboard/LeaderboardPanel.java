@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -38,6 +39,8 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
+import com.sap.sailing.domain.common.DetailType;
+import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.gwt.ui.client.Collator;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
@@ -57,9 +60,6 @@ import com.sap.sailing.gwt.ui.shared.RaceInLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.components.Component;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialog;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
-import com.sap.sailing.server.api.DetailType;
-import com.sap.sailing.server.api.EventNameAndRaceName;
-import com.sap.sailing.server.api.RaceIdentifier;
 
 /**
  * A leaderboard essentially consists of a table widget that in its columns displays the entries.
@@ -148,6 +148,14 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     private final Anchor playPause;
 
     private final CompetitorSelectionProvider competitorSelectionProvider;
+
+    /**
+     * If this is <code>null</code>, all leaderboard columns added by updating the leaderboard from the server are
+     * automatically added to the table. Otherwise, only the column whose
+     * {@link RaceInLeaderboardDTO#getRaceIdentifier() race identifier} matches the value of this attribute will be
+     * added.
+     */
+    private final RaceIdentifier preSelectedRace;
 
     private class SettingsClickHandler implements ClickHandler {
         private final StringMessages stringConstants;
@@ -707,6 +715,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             CompetitorSelectionProvider competitorSelectionProvider, String leaderboardName,
             ErrorReporter errorReporter, final StringMessages stringConstants) {
         this.sailingService = sailingService;
+        this.preSelectedRace = preSelectedRace;
         this.competitorSelectionProvider = competitorSelectionProvider;
         competitorSelectionProvider.addCompetitorSelectionChangeListener(this);
         this.setLeaderboardName(leaderboardName);
@@ -724,8 +733,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         selectedManeuverDetails.add(DetailType.PENALTY_CIRCLE);
         delayInMilliseconds = 0l;
         timer = new Timer(/* delayBetweenAutoAdvancesInMilliseconds */3000l);
-        timer.setDelay(getDelayInMilliseconds()); // set time/delay before
-                                                  // adding as listener
+        timer.setDelay(getDelayInMilliseconds()); // set time/delay before adding as listener
         timer.addPlayStateListener(this);
         timer.addTimeListener(this);
         rankColumn = new RankColumn();
@@ -740,8 +748,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         leaderboardTable = new CellTableWithStylableHeaders<LeaderboardRowDTO>(
         /* pageSize */100, resources);
         getLeaderboardTable().setWidth("100%");
-        leaderboardSelectionModel = new MultiSelectionModel<LeaderboardRowDTO>() {
-        };
+        leaderboardSelectionModel = new MultiSelectionModel<LeaderboardRowDTO>();
         leaderboardSelectionModel.addSelectionChangeHandler(new Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
@@ -946,7 +953,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
      */
     protected void updateLeaderboard(LeaderboardDTO leaderboard) {
         competitorSelectionProvider.setCompetitors(leaderboard.competitors);
-        selectedRaceColumns.addAll(getRacesAddedNew(getLeaderboard(), leaderboard));
+        selectedRaceColumns.addAll(getRaceColumnsToAddImplicitly(leaderboard));
         setLeaderboard(leaderboard);
         adjustColumnLayout(leaderboard);
         getData().getList().clear();
@@ -966,6 +973,28 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 getLeaderboardTable().getColumnSortList().push(getRankColumn());
             }
         }
+    }
+
+    /**
+     * Considers the {@link #preSelectedRace} field as follows: if <code>null</code>, all race columns that <code>leaderboard</code>
+     * adds on top of the existing {@link #getLeaderboard() leaderboard} are returned. Otherwise, the column list obtained as described before
+     * is filtered such that only columns pass whose race identifier equals {@link #preSelectedRace}.
+     */
+    private List<String> getRaceColumnsToAddImplicitly(LeaderboardDTO leaderboard) {
+        List<RaceInLeaderboardDTO> columnsToAddImplicitly = getRacesAddedNew(getLeaderboard(), leaderboard);
+        if (preSelectedRace != null) {
+            for (Iterator<RaceInLeaderboardDTO> i=columnsToAddImplicitly.iterator(); i.hasNext(); ) {
+                RaceInLeaderboardDTO next = i.next();
+                if (!preSelectedRace.equals(next.getRaceIdentifier())) {
+                    i.remove();
+                }
+            }
+        }
+        List<String> namesOfColumnsToAddImplicitly = new ArrayList<String>();
+        for (RaceInLeaderboardDTO column : columnsToAddImplicitly) {
+            namesOfColumnsToAddImplicitly.add(column.getRaceColumnName());
+        }
+        return namesOfColumnsToAddImplicitly;
     }
 
     private Comparator<LeaderboardRowDTO> getComparatorForSelectedSorting() {
@@ -1008,14 +1037,23 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         }
     }
 
-    private List<String> getRacesAddedNew(LeaderboardDTO oldLeaderboard, LeaderboardDTO newLeaderboard) {
-        List<String> result = new ArrayList<String>();
-        for (String s : newLeaderboard.getRaceColumnNameList()) {
-            if (oldLeaderboard == null || !oldLeaderboard.getRaceColumnNameList().contains(s)) {
+    private List<RaceInLeaderboardDTO> getRacesAddedNew(LeaderboardDTO oldLeaderboard, LeaderboardDTO newLeaderboard) {
+        List<RaceInLeaderboardDTO> result = new ArrayList<RaceInLeaderboardDTO>();
+        for (RaceInLeaderboardDTO s : newLeaderboard.getRaceList()) {
+            if (oldLeaderboard == null || !leaderboardContainsColumnNamed(oldLeaderboard, s.getRaceColumnName())) {
                 result.add(s);
             }
         }
         return result;
+    }
+
+    private boolean leaderboardContainsColumnNamed(LeaderboardDTO leaderboard, String raceColumnName) {
+        for (RaceInLeaderboardDTO column : leaderboard.getRaceList()) {
+            if (column.getRaceColumnName().equals(raceColumnName)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private boolean leaderboardTableContainsRace(String raceName) {
@@ -1325,17 +1363,22 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     }
 
     private void compareCompetitors() {
-        List<RaceIdentifier> races = new ArrayList<RaceIdentifier>();
-        for (RaceInLeaderboardDTO race : getLeaderboard().getRaceList()) {
-            if (race.isTrackedRace()) {
-                races.add(race.getRaceIdentifier());
-            }
-        }
-        CompareCompetitorsChartDialog chartDialog = new CompareCompetitorsChartDialog(sailingService,
-                competitorSelectionProvider, races.toArray(new EventNameAndRaceName[0]), stringConstants, errorReporter);
+        List<RaceIdentifier> races = getTrackedRacesIdentifiers();
+        CompareCompetitorsChartDialog chartDialog = new CompareCompetitorsChartDialog(sailingService, races,
+                competitorSelectionProvider, stringConstants, errorReporter);
         chartDialog.show();
     }
-
+    
+    private List<RaceIdentifier> getTrackedRacesIdentifiers() {
+        List<RaceIdentifier> result = new ArrayList<RaceIdentifier>();
+        for (RaceInLeaderboardDTO raceColumn : getLeaderboard().getRaceList()) {
+            if (raceColumn.getRaceIdentifier() != null) {
+                result.add(raceColumn.getRaceIdentifier());
+            }
+        }
+        return result;
+    }
+    
     @Override
     public boolean hasSettings() {
         return true;

@@ -14,6 +14,7 @@ import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RacePlaceOrder;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TimePoint;
@@ -38,6 +39,8 @@ public interface TrackedRace {
     final long MAX_TIME_BETWEEN_START_AND_FIRST_MARK_PASSING_IN_MILLISECONDS = 30000;
     
     RaceDefinition getRace();
+    
+    RaceIdentifier getRaceIdentifier();
     
     /**
      * @return The locations (start, finish, ...) of the race in form of {@link RacePlaceOrder} or null if there are no

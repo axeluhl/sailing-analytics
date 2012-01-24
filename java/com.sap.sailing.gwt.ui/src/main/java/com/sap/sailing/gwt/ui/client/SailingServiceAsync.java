@@ -6,6 +6,10 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.sap.sailing.domain.common.DetailType;
+import com.sap.sailing.domain.common.EventAndRaceIdentifier;
+import com.sap.sailing.domain.common.EventIdentifier;
+import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
@@ -26,10 +30,6 @@ import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
-import com.sap.sailing.server.api.DetailType;
-import com.sap.sailing.server.api.EventAndRaceIdentifier;
-import com.sap.sailing.server.api.EventIdentifier;
-import com.sap.sailing.server.api.RaceIdentifier;
 
 /**
  * The async counterpart of {@link SailingService}
@@ -37,7 +37,7 @@ import com.sap.sailing.server.api.RaceIdentifier;
 public interface SailingServiceAsync {
     
     void listEvents(boolean withRacePlaces, AsyncCallback<List<EventDTO>> callback);
-
+    
     /**
      * The string returned in the callback's pair is the common event name
      */

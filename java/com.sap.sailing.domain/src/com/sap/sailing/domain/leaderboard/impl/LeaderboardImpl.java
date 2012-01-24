@@ -133,6 +133,7 @@ public class LeaderboardImpl implements Named, Leaderboard {
         if (column == null) {
             column = createRaceColumn(columnName, medalRace);
             column.setTrackedRace(race);
+            column.setRaceIdentifier(race.getRaceIdentifier());
             races.add(column);
         }
         column.setTrackedRace(race);

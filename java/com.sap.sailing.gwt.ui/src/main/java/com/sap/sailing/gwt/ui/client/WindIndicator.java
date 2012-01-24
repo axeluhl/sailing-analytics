@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.adminconsole;
+package com.sap.sailing.gwt.ui.client;
 
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.canvas.dom.client.Context2d;
