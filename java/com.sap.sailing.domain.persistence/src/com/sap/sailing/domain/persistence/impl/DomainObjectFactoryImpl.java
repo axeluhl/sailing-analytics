@@ -15,7 +15,9 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.common.EventNameAndRaceName;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
@@ -66,6 +68,17 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 new DegreeBearingImpl((Double) object.get(FieldNames.DEGREE_BEARING.name())));
     }
 
+    @Override
+    public RaceIdentifier loadRaceIdentifier(DBObject dbObject) {
+        RaceIdentifier result = null;
+        String eventName = (String) dbObject.get(FieldNames.EVENT_NAME.name());
+        String raceName = (String) dbObject.get(FieldNames.RACE_NAME.name());
+        if (eventName != null && raceName != null) {
+            result = new EventNameAndRaceName(eventName, raceName);
+        }
+        return result;
+    }
+    
     @Override
     public WindTrack loadWindTrack(Event event, RaceDefinition race, WindSource windSource, long millisecondsOverWhichToAverage) {
         WindTrack result = new WindTrackImpl(millisecondsOverWhichToAverage);
@@ -135,13 +148,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         BasicDBList dbRaceColumns = (BasicDBList) o.get(FieldNames.LEADERBOARD_COLUMNS.name());
         for (Object dbRaceColumnAsObject : dbRaceColumns) {
             BasicDBObject dbRaceColumn = (BasicDBObject) dbRaceColumnAsObject;
-            result.addRaceColumn((String) dbRaceColumn.get(FieldNames.LEADERBOARD_COLUMN_NAME.name()),
+            RaceInLeaderboard raceColumn = result.addRaceColumn((String) dbRaceColumn.get(FieldNames.LEADERBOARD_COLUMN_NAME.name()),
                     (Boolean) dbRaceColumn.get(FieldNames.LEADERBOARD_IS_MEDAL_RACE_COLUMN.name()));
-            String eventName = (String) dbRaceColumn.get(FieldNames.EVENT_NAME.name());
-            String raceName = (String) dbRaceColumn.get(FieldNames.RACE_NAME.name());
-            if (eventName != null && raceName != null) {
-                // TODO look up tracked race by names; if found, link to leaderboard column
-            }
+            raceColumn.setRaceIdentifier(loadRaceIdentifier(dbRaceColumn));
         }
         DBObject carriedPoints = (DBObject) o.get(FieldNames.LEADERBOARD_CARRIED_POINTS.name());
         if (carriedPoints != null) {

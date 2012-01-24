@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.leaderboard;
+package com.sap.sailing.gwt.ui.client;
 
 import java.util.Date;
 import java.util.List;
@@ -8,19 +8,11 @@ import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
-import com.sap.sailing.gwt.ui.adminconsole.WindIndicator;
-import com.sap.sailing.gwt.ui.client.ErrorReporter;
-import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
-import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.TimeListener;
-import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.PositionDTO;
-import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
-import com.sap.sailing.server.api.EventNameAndRaceName;
 
 /**
  * Displays a bit of wind history around the time notified to this time listener.
@@ -33,8 +25,7 @@ public class SmallWindHistoryPanel extends FormPanel implements TimeListener, Ra
     private final WindIndicator[] windIndicators;
     private final Label selectedWindSourceLabel;
     private Date date;
-    private EventDTO event;
-    private RaceDTO race;
+    private RaceIdentifier race;
     private final SailingServiceAsync sailingService;
     private final long millisecondStepsPerLabel;
     private final ErrorReporter errorReporter;
@@ -73,8 +64,8 @@ public class SmallWindHistoryPanel extends FormPanel implements TimeListener, Ra
     private void updateWindDisplay() {
         if (date != null) {
             Date from = new Date(date.getTime() - windIndicators.length * millisecondStepsPerLabel);
-            if (event != null && race != null) {
-                sailingService.getWindInfo(new EventNameAndRaceName(event.name, race.name), from, millisecondStepsPerLabel,
+            if (race != null) {
+                sailingService.getWindInfo(race, from, millisecondStepsPerLabel,
                         windIndicators.length, position.latDeg, position.lngDeg, /* all sources */ null,
                         new AsyncCallback<WindInfoForRaceDTO>() {
                             @Override
@@ -96,7 +87,7 @@ public class SmallWindHistoryPanel extends FormPanel implements TimeListener, Ra
                             @Override
                             public void onFailure(Throwable caught) {
                                 errorReporter.reportError("Error trying to obtain wind information for race "
-                                        + race.name + " in event " + event.name + ": " + caught.getMessage());
+                                        + race + ": " + caught.getMessage());
                             }
                         });
             }
@@ -126,10 +117,9 @@ public class SmallWindHistoryPanel extends FormPanel implements TimeListener, Ra
     }
 
     @Override
-    public void onRaceSelectionChange(List<RaceDTO> selectedRaces) {
+    public void onRaceSelectionChange(List<RaceIdentifier> selectedRaces) {
         if (!selectedRaces.isEmpty()) {
             race = selectedRaces.get(selectedRaces.size() - 1);
-            event = race.getEvent();
             updateWindDisplay();
         }
     }

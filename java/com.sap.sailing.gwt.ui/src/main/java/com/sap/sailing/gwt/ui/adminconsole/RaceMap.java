@@ -40,6 +40,7 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.ManeuverType;
+import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Triple;
@@ -52,14 +53,11 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.TimeListener;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
-import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
-import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.components.Component;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
-import com.sap.sailing.server.api.EventNameAndRaceName;
 
 public class RaceMap implements TimeListener, CompetitorSelectionChangeListener, RaceSelectionChangeListener,
         Component<RaceMapSettings> {
@@ -119,7 +117,7 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
 
     private CompetitorSelectionProvider competitorSelection;
 
-    private List<RaceDTO> selectedRaces;
+    private List<RaceIdentifier> selectedRaces;
 
     /**
      * If the user explicitly zoomed or panned the map, don't adjust zoom/pan unless a new race is selected
@@ -240,7 +238,7 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
     }
     
     @Override
-    public void onRaceSelectionChange(List<RaceDTO> selectedRaces) {
+    public void onRaceSelectionChange(List<RaceIdentifier> selectedRaces) {
         mapFirstZoomDone = false;
         mapZoomedOrPannedSinceLastRaceSelectionChange = false;
         this.selectedRaces = selectedRaces;
@@ -250,14 +248,13 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
     public void timeChanged(final Date date) {
         if (date != null) {
             if (selectedRaces != null && !selectedRaces.isEmpty()) {
-                RaceDTO race = selectedRaces.get(selectedRaces.size() - 1);
-                EventDTO event = race.getEvent();
+                RaceIdentifier race = selectedRaces.get(selectedRaces.size() - 1);
                 
-                if (event != null && race != null) {
+                if (race != null) {
                     final Triple<Map<CompetitorDTO, Date>, Map<CompetitorDTO, Date>, Map<CompetitorDTO, Boolean>> fromAndToAndOverlap = 
                             computeFromAndTo(date, getCompetitorsToShow());
                     final int requestID = ++boatPositionRequestIDCounter;
-                    sailingService.getBoatPositions(new EventNameAndRaceName(event.name, race.name),
+                    sailingService.getBoatPositions(race,
                             fromAndToAndOverlap.getA(), fromAndToAndOverlap.getB(), true,
                             new AsyncCallback<Map<CompetitorDTO, List<GPSFixDTO>>>() {
                                 @Override
@@ -282,7 +279,7 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
                                     }
                                 }
                             });
-                    sailingService.getMarkPositions(new EventNameAndRaceName(event.name, race.name), date,
+                    sailingService.getMarkPositions(race, date,
                             new AsyncCallback<List<MarkDTO>>() {
                                 @Override
                                 public void onFailure(Throwable caught) {
@@ -611,14 +608,13 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
                 + "deg"));
         result.add(new Label("Tack: " + lastFix.tack.name()));
         if (!selectedRaces.isEmpty()) {
-            RaceDTO race = selectedRaces.get(selectedRaces.size() - 1);
-            EventDTO event = race.getEvent();
-            if (event != null && race != null) {
+            RaceIdentifier race = selectedRaces.get(selectedRaces.size() - 1);
+            if (race != null) {
                 Map<CompetitorDTO, Date> from = new HashMap<CompetitorDTO, Date>();
                 from.put(competitorDTO, fixes.get(competitorDTO).get(firstShownFix.get(competitorDTO)).timepoint);
                 Map<CompetitorDTO, Date> to = new HashMap<CompetitorDTO, Date>();
                 to.put(competitorDTO, getBoatFix(competitorDTO).timepoint);
-                sailingService.getDouglasPoints(new EventNameAndRaceName(event.name, race.name), from, to, 3,
+                sailingService.getDouglasPoints(race, from, to, 3,
                         new AsyncCallback<Map<CompetitorDTO, List<GPSFixDTO>>>() {
                             @Override
                             public void onFailure(Throwable caught) {
@@ -638,7 +634,7 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
                                 }
                             }
                         });
-                sailingService.getManeuvers(new EventNameAndRaceName(event.name, race.name), from, to,
+                sailingService.getManeuvers(race, from, to,
                         new AsyncCallback<Map<CompetitorDTO, List<ManeuverDTO>>>() {
                             @Override
                             public void onFailure(Throwable caught) {
@@ -970,7 +966,10 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
      * data from {@link #firstShownFix} and {@link #lastShownFix}.
      */
     private void removeTail(CompetitorDTO competitor) {
-        map.removeOverlay(tails.remove(competitor));
+        Polyline removed = tails.remove(competitor);
+        if (removed != null) {
+            map.removeOverlay(removed);
+        }
         firstShownFix.remove(competitor);
         lastShownFix.remove(competitor);
     }
@@ -983,7 +982,10 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
                 timeChanged(timer.getTime());
             } else {
                 // otherwise remove only deselected competitor's boat marker and tail
-                map.removeOverlay(boatMarkers.remove(competitor));
+                Marker removed = boatMarkers.remove(competitor);
+                if (removed != null) {
+                    map.removeOverlay(removed);
+                }
                 removeTail(competitor);
             }
         } else {

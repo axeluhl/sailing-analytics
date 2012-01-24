@@ -9,7 +9,6 @@ Require-Bundle: com.sap.sailing.gwt.ui,
  com.sap.sailing.domain,
  com.sap.sailing.server,
  com.google.gwt.osgi;bundle-version="2.4.0",
- com.sap.sailing.server.api,
  com.sap.sailing.domain.common,
  com.sap.sailing.domain.tractracadapter
 Bundle-ClassPath: .

@@ -7,7 +7,11 @@ import java.util.Map;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
+import com.sap.sailing.domain.common.DetailType;
+import com.sap.sailing.domain.common.EventAndRaceIdentifier;
+import com.sap.sailing.domain.common.EventIdentifier;
 import com.sap.sailing.domain.common.NoWindException;
+import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
@@ -25,10 +29,6 @@ import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
-import com.sap.sailing.server.api.DetailType;
-import com.sap.sailing.server.api.EventAndRaceIdentifier;
-import com.sap.sailing.server.api.EventIdentifier;
-import com.sap.sailing.server.api.RaceIdentifier;
 
 /**
  * The client side stub for the RPC service. Usually, when a <code>null</code> date is passed to
@@ -78,7 +78,7 @@ public interface SailingService extends RemoteService {
 
     List<LeaderboardDTO> getLeaderboards();
     
-    List<LeaderboardDTO> getLeaderboardsByEvent(EventIdentifier eventIdentifier);
+    List<LeaderboardDTO> getLeaderboardsByEvent(EventDTO event);
     
     void updateLeaderboard(String leaderboardName, String newLeaderboardName, int[] newDiscardingThreasholds);
 

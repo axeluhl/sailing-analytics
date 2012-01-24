@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import com.sap.sailing.server.api.RaceIdentifier;
+import com.sap.sailing.domain.common.RaceIdentifier;
 
 /**
  * Captures the serializable properties of a leaderboard which in particular has the competitors, any optional display
@@ -300,7 +300,7 @@ public class LeaderboardDTO implements IsSerializable {
         }
         return null;
     }
-
+/*
     public List<String> getRaceColumnNameList() {
         List<String> raceColumnNames = new ArrayList<String>();
         for (RaceInLeaderboardDTO raceInLeaderboardDTO : races) {
@@ -308,7 +308,7 @@ public class LeaderboardDTO implements IsSerializable {
         }
         return raceColumnNames;
     }
-
+*/
     public List<RaceInLeaderboardDTO> getRaceInLeaderboardList() {
         return races;
     }

@@ -23,6 +23,7 @@ import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDTO;
+import com.sap.sailing.gwt.ui.shared.RaceInLeaderboardDTO;
 
 /**
  * An editable version of the {@link LeaderboardPanel} which allows a user to enter carried / accumulated
@@ -99,8 +100,8 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
     private class EditableRaceColumn extends RaceColumn<LeaderboardRowDTO> implements RowUpdateWhiteboardOwner<LeaderboardRowDTO> {
         private RowUpdateWhiteboard<LeaderboardRowDTO> currentRowUpdateWhiteboard;
         
-        public EditableRaceColumn(String raceName, boolean medalRace, List<RowUpdateWhiteboardProducerThatAlsoHasCell<LeaderboardRowDTO, ?>> cellList) {
-            super(raceName, medalRace,
+        public EditableRaceColumn(RaceInLeaderboardDTO race, List<RowUpdateWhiteboardProducerThatAlsoHasCell<LeaderboardRowDTO, ?>> cellList) {
+            super(race,
                     /* expandable */ false, // we don't want leg expansion when editing scores
                     new CompositeCell<LeaderboardRowDTO>(new ArrayList<HasCell<LeaderboardRowDTO, ?>>(cellList)),
                     RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE);
@@ -281,16 +282,15 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
     */
     
     @Override
-    protected RaceColumn<?> createRaceColumn(String raceName, boolean isMedalRace, boolean isTracked) {
-        return new EditableRaceColumn(raceName, isMedalRace,
-                getCellList(raceName, isMedalRace));
+    protected RaceColumn<?> createRaceColumn(RaceInLeaderboardDTO race) {
+        return new EditableRaceColumn(race, getCellList(race));
     }
 
-    private List<RowUpdateWhiteboardProducerThatAlsoHasCell<LeaderboardRowDTO, ?>> getCellList(String raceName, boolean medalRace) {
+    private List<RowUpdateWhiteboardProducerThatAlsoHasCell<LeaderboardRowDTO, ?>> getCellList(RaceInLeaderboardDTO race) {
         List<RowUpdateWhiteboardProducerThatAlsoHasCell<LeaderboardRowDTO, ?>> list =
                 new ArrayList<RowUpdateWhiteboardProducerThatAlsoHasCell<LeaderboardRowDTO, ?>>();
-        list.add(new MaxPointsDropDownCellProvider(raceName));
-        list.add(new NetPointsEditCellProvider(raceName));
+        list.add(new MaxPointsDropDownCellProvider(race.getRaceColumnName()));
+        list.add(new NetPointsEditCellProvider(race.getRaceColumnName()));
         return list;
     }
 

@@ -13,6 +13,7 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.Timed;
 import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -86,6 +87,14 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         result.put(FieldNames.WIND.name(), storeWind(wind));
         return result;
     }
+    
+    @Override
+    public void storeRaceIdentifier(RaceIdentifier raceIdentifier, DBObject dbObject) {
+        if (raceIdentifier != null) {
+            dbObject.put(FieldNames.EVENT_NAME.name(), raceIdentifier.getEventName());
+            dbObject.put(FieldNames.RACE_NAME.name(), raceIdentifier.getRaceName());
+        }
+    }
 
     @Override
     public void storeLeaderboard(Leaderboard leaderboard) {
@@ -105,12 +114,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             BasicDBObject dbRaceColumn = new BasicDBObject();
             dbRaceColumn.put(FieldNames.LEADERBOARD_COLUMN_NAME.name(), raceColumn.getName());
             dbRaceColumn.put(FieldNames.LEADERBOARD_IS_MEDAL_RACE_COLUMN.name(), raceColumn.isMedalRace());
-            TrackedRace trackedRace = raceColumn.getTrackedRace();
-            // if a column is not (yet) connected to a tracked race, event name and race name remain empty
-            if (trackedRace != null) {
-                dbRaceColumn.put(FieldNames.EVENT_NAME.name(), trackedRace.getTrackedEvent().getEvent().getName());
-                dbRaceColumn.put(FieldNames.RACE_NAME.name(), trackedRace.getRace().getName());
-            }
+            storeRaceIdentifier(raceColumn.getRaceIdentifier(), dbRaceColumn);
             dbRaceColumns.add(dbRaceColumn);
         }
         if (leaderboard.hasCarriedPoints()) {

@@ -15,6 +15,7 @@ import org.junit.Test;
 
 import com.sap.sailing.gwt.ui.server.SailingServiceImpl;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
+import com.sap.sailing.gwt.ui.shared.RaceInLeaderboardDTO;
 
 public class TestColumnSwapping {
 
@@ -119,15 +120,15 @@ public class TestColumnSwapping {
         }
 
         // check if leaderboardDTO an dleaderboardOriginalDTO same
-        List<String> leaderboardList = leaderboardDTO.getRaceColumnNameList();
-        List<String> leaderboardOriginalList = leaderboardOriginalDTO.getRaceColumnNameList();
+        List<RaceInLeaderboardDTO> leaderboardList = leaderboardDTO.getRaceList();
+        List<RaceInLeaderboardDTO> leaderboardOriginalList = leaderboardOriginalDTO.getRaceList();
 
         // ??????? assert races in list
         assertArrayEquals(leaderboardList.toArray(), leaderboardOriginalList.toArray());
 
-        for (String string : leaderboardOriginalList) {
-            assert leaderboardDTO.raceIsMedalRace(string) == leaderboardOriginalDTO.raceIsMedalRace(string);
-            assert leaderboardDTO.raceIsTracked(string) == leaderboardOriginalDTO.raceIsTracked(string);
+        for (RaceInLeaderboardDTO raceDTO : leaderboardOriginalList) {
+            assert leaderboardDTO.raceIsMedalRace(raceDTO.getRaceColumnName()) == leaderboardOriginalDTO.raceIsMedalRace(raceDTO.getRaceColumnName());
+            assert leaderboardDTO.raceIsTracked(raceDTO.getRaceColumnName()) == leaderboardOriginalDTO.raceIsTracked(raceDTO.getRaceColumnName());
         }
     }
 }

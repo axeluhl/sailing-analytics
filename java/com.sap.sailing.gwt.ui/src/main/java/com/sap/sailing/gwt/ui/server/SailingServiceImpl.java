@@ -49,11 +49,19 @@ import com.sap.sailing.domain.base.impl.MeterDistance;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.CountryCode;
+import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.common.EventAndRaceIdentifier;
+import com.sap.sailing.domain.common.EventFetcher;
+import com.sap.sailing.domain.common.EventIdentifier;
+import com.sap.sailing.domain.common.EventName;
+import com.sap.sailing.domain.common.EventNameAndRaceName;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindError;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.RaceFetcher;
+import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TimePoint;
@@ -61,7 +69,6 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KilometersPerHourSpeedImpl;
-import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard.Entry;
@@ -116,14 +123,6 @@ import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
 import com.sap.sailing.server.RacingEventService;
-import com.sap.sailing.server.api.DetailType;
-import com.sap.sailing.server.api.EventAndRaceIdentifier;
-import com.sap.sailing.server.api.EventFetcher;
-import com.sap.sailing.server.api.EventIdentifier;
-import com.sap.sailing.server.api.EventName;
-import com.sap.sailing.server.api.EventNameAndRaceName;
-import com.sap.sailing.server.api.RaceFetcher;
-import com.sap.sailing.server.api.RaceIdentifier;
 
 /**
  * The server side implementation of the RPC service.
@@ -866,20 +865,25 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
     
     @Override
-    public List<LeaderboardDTO> getLeaderboardsByEvent(EventIdentifier eventIdentifier) {
-        Event event = getEvent(eventIdentifier);
-        Map<String, Leaderboard> leaderboards = getService().getLeaderboards();
+    public List<LeaderboardDTO> getLeaderboardsByEvent(EventDTO event) {
         List<LeaderboardDTO> results = new ArrayList<LeaderboardDTO>();
         
-        for (Leaderboard leaderboard : leaderboards.values()) {
-            for (RaceInLeaderboard race : leaderboard.getRaceColumns()) {
-                if (Util.contains(event.getAllRaces(), race.getTrackedRace().getRace())) {
-                    LeaderboardDTO dao = createStrippedLeaderboardDTO(leaderboard);
-                    results.add(dao);
+        for (RegattaDTO regatta : event.regattas) {
+            for (RaceDTO race : regatta.races) {
+                List<LeaderboardDTO> leaderboard = getLeaderboardByRace(race);
+                if (leaderboard != null && !leaderboard.isEmpty()) {
+                    results.addAll(leaderboard);
                 }
             }
         }
-        
+        return results;
+    }
+    
+    private List<LeaderboardDTO> getLeaderboardByRace(RaceDTO race) {
+        List<LeaderboardDTO> results = new ArrayList<LeaderboardDTO>();
+        @SuppressWarnings("unused") // see below
+        Map<String, Leaderboard> leaderboards = getService().getLeaderboards();
+        // TODO Lennart, was this written by you? Please at least leave a TODO comment before pushing such empty bodies 
         return results;
     }
 
@@ -972,6 +976,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 RaceInLeaderboard raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
                 if (raceColumn != null) {
                     raceColumn.setTrackedRace(trackedRace);
+                    raceColumn.setRaceIdentifier(trackedRace.getRaceIdentifier());
                     success = true;
                     getService().updateStoredLeaderboard(leaderboard);
                 }
@@ -1005,6 +1010,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             RaceInLeaderboard raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
             if (raceColumn != null) {
                 raceColumn.setTrackedRace(null);
+                raceColumn.setRaceIdentifier(null);
                 getService().updateStoredLeaderboard(leaderboard);
             } else {
                 throw new IllegalArgumentException("Didn't find race "+raceColumnName+" in leaderboard "+leaderboardName);
@@ -1482,14 +1488,14 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
 
     @Override
-    public RaceDefinition getRace(EventNameAndRaceName eventNameAndRaceName) {
+    public RaceDefinition getRace(EventAndRaceIdentifier eventNameAndRaceName) {
         Event event = getService().getEventByName(eventNameAndRaceName.getEventName());
         RaceDefinition race = getRaceByName(event, eventNameAndRaceName.getRaceName());
         return race;
     }
 
     @Override
-    public TrackedRace getTrackedRace(EventNameAndRaceName eventNameAndRaceName) {
+    public TrackedRace getTrackedRace(RaceIdentifier eventNameAndRaceName) {
         Event event = getService().getEventByName(eventNameAndRaceName.getEventName());
         RaceDefinition race = getRaceByName(event, eventNameAndRaceName.getRaceName());
         TrackedRace trackedRace = getService().getOrCreateTrackedEvent(event).getTrackedRace(race);
@@ -1497,7 +1503,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
 
     @Override
-    public TrackedRace getExistingTrackedRace(EventNameAndRaceName eventNameAndRaceName) {
+    public TrackedRace getExistingTrackedRace(RaceIdentifier eventNameAndRaceName) {
         Event event = getService().getEventByName(eventNameAndRaceName.getEventName());
         RaceDefinition race = getRaceByName(event, eventNameAndRaceName.getRaceName());
         TrackedRace trackedRace = getService().getOrCreateTrackedEvent(event).getExistingTrackedRace(race);
@@ -1507,14 +1513,6 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     @Override
     public Event getEvent(EventName eventIdentifier) {
         return getService().getEventByName(eventIdentifier.getEventName());
-    }
-
-    private RaceDefinition getRace(RaceIdentifier raceIdentifier) {
-        return (RaceDefinition) raceIdentifier.getRace(this);
-    }
-
-    private TrackedRace getExistingTrackedRace(RaceIdentifier raceIdentifier) {
-        return (TrackedRace) raceIdentifier.getExistingTrackedRace(this);
     }
     
     private Event getEvent(EventIdentifier eventIdentifier) {

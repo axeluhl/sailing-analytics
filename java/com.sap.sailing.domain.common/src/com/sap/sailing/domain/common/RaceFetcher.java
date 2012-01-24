@@ -1,15 +1,15 @@
-package com.sap.sailing.server.api;
+package com.sap.sailing.domain.common;
 
 public interface RaceFetcher {
     /**
      * Not for execution on the client; on the server, returns a <code>RaceDefinition</code> object.
      */
-    Object getRace(EventNameAndRaceName eventNameAndRaceName);
+    Object getRace(EventAndRaceIdentifier eventNameAndRaceName);
 
     /**
      * Not for execution on the client; on the server, returns a <code>TrackedRace</code> object.
      */
-    Object getTrackedRace(EventNameAndRaceName eventNameAndRaceName);
+    Object getTrackedRace(RaceIdentifier eventNameAndRaceName);
 
-    Object getExistingTrackedRace(EventNameAndRaceName eventNameAndRaceName);
+    Object getExistingTrackedRace(RaceIdentifier eventNameAndRaceName);
 }
