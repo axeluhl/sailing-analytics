@@ -97,9 +97,12 @@ public class RaceBoardPanel extends FormPanel implements Component<RaceBoardSett
             timePanel.setMax(selectedRace.timePointOfNewestEvent);
         }
         
+        FlowPanel timeLineInnerBgPanel = new FlowPanel();
+        timeLineInnerBgPanel.addStyleName("timeLineInnerBgPanel");
+        timeLineInnerBgPanel.add(timePanel);
         
         FlowPanel timeLineInnerPanel = new FlowPanel();
-        timeLineInnerPanel.add(timePanel);
+        timeLineInnerPanel.add(timeLineInnerBgPanel);
         timeLineInnerPanel.addStyleName("timeLineInnerPanel");
         
         FlowPanel timelinePanel = new FlowPanel();
