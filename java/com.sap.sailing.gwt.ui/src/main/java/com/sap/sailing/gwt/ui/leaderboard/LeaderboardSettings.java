@@ -3,7 +3,7 @@ package com.sap.sailing.gwt.ui.leaderboard;
 import java.util.List;
 
 import com.sap.sailing.gwt.ui.shared.RaceInLeaderboardDTO;
-import com.sap.sailing.server.api.DetailType;
+import com.sap.sailing.domain.common.DetailType;
 
 public class LeaderboardSettings {
     private final List<RaceInLeaderboardDTO> raceColumnsToShow;

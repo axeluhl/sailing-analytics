@@ -31,12 +31,14 @@ import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.common.EventNameAndRaceName;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.NoWindError;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Placemark;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RacePlaceOrder;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TimePoint;
@@ -177,6 +179,10 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
      * Precondition: race has already been set, e.g., in constructor before this methocd is called
      */
     abstract protected TrackedLeg createTrackedLeg(Leg leg);
+    
+    public RaceIdentifier getRaceIdentifier() {
+        return new EventNameAndRaceName(getTrackedEvent().getEvent().getName(), getRace().getName());
+    }
     
     @Override
     public NavigableSet<MarkPassing> getMarkPassings(Competitor competitor) {

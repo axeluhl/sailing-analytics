@@ -50,6 +50,8 @@ import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.DetailType;
+import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.client.ColorMap;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
@@ -65,8 +67,6 @@ import com.sap.sailing.gwt.ui.shared.CompetitorInRaceDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorsAndTimePointsDTO;
 import com.sap.sailing.gwt.ui.shared.components.Component;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialog;
-import com.sap.sailing.server.api.DetailType;
-import com.sap.sailing.server.api.RaceIdentifier;
 
 /**
  * ChartPanel is a GWT panel that can show one sort of competitor data (e.g. current speed over ground, windward distance to

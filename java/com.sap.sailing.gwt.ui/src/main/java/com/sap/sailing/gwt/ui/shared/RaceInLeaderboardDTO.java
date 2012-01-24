@@ -1,7 +1,7 @@
 package com.sap.sailing.gwt.ui.shared;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import com.sap.sailing.server.api.RaceIdentifier;
+import com.sap.sailing.domain.common.RaceIdentifier;
 
 public class RaceInLeaderboardDTO implements IsSerializable {
     private String raceColumnName;

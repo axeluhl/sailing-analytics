@@ -2,6 +2,7 @@ package com.sap.sailing.domain.leaderboard.impl;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.NoWindException;
+import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -13,6 +14,7 @@ public class RaceInLeaderboardImpl implements RaceInLeaderboard {
     private final Leaderboard leaderboard;
     private boolean medalRace;
     private String name;
+    private RaceIdentifier raceIdentifier;
     
     public RaceInLeaderboardImpl(Leaderboard leaderboard, String name, boolean medalRace) {
         this.name = name;
@@ -63,4 +65,14 @@ public class RaceInLeaderboardImpl implements RaceInLeaderboard {
 	public void setIsMedalRace(boolean isMedalRace) {
 		this.medalRace = isMedalRace;
 	}
+
+    @Override
+    public RaceIdentifier getRaceIdentifier() {
+        return raceIdentifier;
+    }
+    
+    @Override
+    public void setRaceIdentifier(RaceIdentifier raceIdentifier) {
+        this.raceIdentifier = raceIdentifier;
+    }
 }
