@@ -6,6 +6,8 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
+import com.google.gwt.cell.client.AbstractCell;
+import com.google.gwt.cell.client.Cell;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
@@ -13,6 +15,9 @@ import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
+import com.google.gwt.user.cellview.client.CellList;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.Handler;
@@ -32,11 +37,14 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.gwt.ui.client.AbstractEventPanel;
+import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.EventRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 
 /**
  * 
@@ -51,20 +59,29 @@ public class OverviewEventPanel extends AbstractEventPanel {
     private TextBox textBoxUntil;
     private CheckBox checkBoxLive;
     
-    private CaptionPanel captionPanelEvents;
+    private CaptionPanel eventsCaptionPanel;
     private Button btnShowLeaderboards;
-    private CellTable<EventDTO> eventTable;
-    private ListDataProvider<EventDTO> eventTableProvider;
-    private SingleSelectionModel<EventDTO> eventTableSelectionModel;
+    private CellTable<EventDTO> eventsTable;
+    private ListDataProvider<EventDTO> eventsTableProvider;
+    private SingleSelectionModel<EventDTO> eventsTableSelectionModel;
 
-    private CaptionPanel captionPanelLeaderboards;
+    private CaptionPanel leaderboardsCaptionPanel;
+    private CellList<LeaderboardDTO> leaderboardsList;
+    private ListDataProvider<LeaderboardDTO> leaderboardsListProvider;
+    private SingleSelectionModel<LeaderboardDTO> leaderboardsListSelectionModel;
+    
+    private CaptionPanel leaderboardCaptionPanel;
+    private LeaderboardDTO currentLeaderboard;
+    private LeaderboardPanel displayedLeaderboardPanel;
     
     private List<EventDTO> availableEvents;
+    private List<LeaderboardDTO> availableLeaderboards;
 
     public OverviewEventPanel(SailingServiceAsync sailingService, EventRefresher eventRefresher,
             ErrorReporter errorReporter, final StringMessages stringConstants) {
         super(sailingService, eventRefresher, errorReporter, stringConstants);
         availableEvents = new ArrayList<EventDTO>();
+        availableLeaderboards = new ArrayList<LeaderboardDTO>();
 
         VerticalPanel mainPanel = new VerticalPanel();
         this.setWidget(mainPanel);
@@ -72,8 +89,8 @@ public class OverviewEventPanel extends AbstractEventPanel {
 
         // Build search GUI
         CaptionPanel captionPanelSearch = new CaptionPanel(stringConstants.searchEvents());
-        mainPanel.add(captionPanelSearch);
         captionPanelSearch.setWidth("100%");
+        mainPanel.add(captionPanelSearch);
         
         HorizontalPanel panelSearch = new HorizontalPanel();
         captionPanelSearch.add(panelSearch);
@@ -137,12 +154,12 @@ public class OverviewEventPanel extends AbstractEventPanel {
         listsSplitPanel.setWidth("100%");
         
         // Build events GUI
-        captionPanelEvents = new CaptionPanel(stringConstants.events());
-        captionPanelEvents.setWidth("100%");
-        listsSplitPanel.add(captionPanelEvents);
+        eventsCaptionPanel = new CaptionPanel(stringConstants.events());
+        eventsCaptionPanel.setWidth("100%");
+        listsSplitPanel.add(eventsCaptionPanel);
 
         VerticalPanel eventsPanel = new VerticalPanel();
-        captionPanelEvents.setContentWidget(eventsPanel);
+        eventsCaptionPanel.setContentWidget(eventsPanel);
         eventsPanel.setWidth("100%");
 
         // Create event functional elements
@@ -164,7 +181,7 @@ public class OverviewEventPanel extends AbstractEventPanel {
         btnShowLeaderboards.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent c) {
-                if (eventTableSelectionModel.getSelectedObject() != null) {
+                if (eventsTableSelectionModel.getSelectedObject() != null) {
                     setLeaderboardsPanelVisible(true);
                 } else {
                     Window.alert(stringConstants.noEventSelected());
@@ -175,68 +192,67 @@ public class OverviewEventPanel extends AbstractEventPanel {
         functionPanelEvents.add(btnShowLeaderboards);
 
         // Create event table
-        {
-            eventTable = new CellTable<EventDTO>();
-            eventTable.setWidth("100%");
-            
-            //Creating location column
-            TextColumn<EventDTO> locationColumn = new TextColumn<EventDTO>() {
-                @Override
-                public String getValue(EventDTO eventDTO) {
-                    String locations = eventDTO.locations;
-                    return locations != null ? locations : stringConstants.locationNotAvailable();
-                }
-            };
-            locationColumn.setSortable(true);
-            //Creating event name column
-            TextColumn<EventDTO> nameColumn = new TextColumn<EventDTO>() {
-                @Override
-                public String getValue(EventDTO eventDTO) {
-                    return eventDTO.name;
-                }
-            };
-            nameColumn.setSortable(true);
-            //Creating start date column
-            TextColumn<EventDTO> startDateColumn = new TextColumn<EventDTO>() {
-                @Override
-                public String getValue(EventDTO eventDTO) {
-                    Date start = eventDTO.regattas.get(0).races.get(0).startOfRace;
-                    return start != null ? dateFormatter.render(start) : stringConstants.startDateNotAvailable();
-                }
-            };
-            startDateColumn.setSortable(true);
-            
-            eventTable.addColumn(locationColumn, stringConstants.location());
-            eventTable.addColumn(nameColumn, stringConstants.eventName());
-            eventTable.addColumn(startDateColumn, stringConstants.startDate());
-            
-            //Adding the data provider and creating the sort handler
-            eventTableProvider = new ListDataProvider<EventDTO>();
-            eventTableProvider.addDataDisplay(eventTable);
-            Handler eventSortHandler = getEventSortHandler(eventTableProvider.getList(), locationColumn, nameColumn, startDateColumn);
-            eventTable.addColumnSortHandler(eventSortHandler);
-            
-            //Adding the selection model
-            eventTableSelectionModel = new SingleSelectionModel<EventDTO>();
-            eventTable.setSelectionModel(eventTableSelectionModel);
-            eventTableSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
-                @Override
-                public void onSelectionChange(SelectionChangeEvent event) {
-                    eventSelectionChanged(event);
-                }
-            });
-            
-            eventsPanel.add(eventTable);
-        }
+        eventsTable = new CellTable<EventDTO>();
+        eventsTable.setWidth("100%");
+
+        // Creating location column
+        TextColumn<EventDTO> locationColumn = new TextColumn<EventDTO>() {
+            @Override
+            public String getValue(EventDTO eventDTO) {
+                String locations = eventDTO.locations;
+                return locations != null ? locations : stringConstants.locationNotAvailable();
+            }
+        };
+        locationColumn.setSortable(true);
+        // Creating event name column
+        TextColumn<EventDTO> nameColumn = new TextColumn<EventDTO>() {
+            @Override
+            public String getValue(EventDTO eventDTO) {
+                return eventDTO.name;
+            }
+        };
+        nameColumn.setSortable(true);
+        // Creating start date column
+        TextColumn<EventDTO> startDateColumn = new TextColumn<EventDTO>() {
+            @Override
+            public String getValue(EventDTO eventDTO) {
+                Date start = eventDTO.regattas.get(0).races.get(0).startOfRace;
+                return start != null ? dateFormatter.render(start) : stringConstants.startDateNotAvailable();
+            }
+        };
+        startDateColumn.setSortable(true);
+
+        eventsTable.addColumn(locationColumn, stringConstants.location());
+        eventsTable.addColumn(nameColumn, stringConstants.eventName());
+        eventsTable.addColumn(startDateColumn, stringConstants.startDate());
+
+        // Adding the data provider and creating the sort handler
+        eventsTableProvider = new ListDataProvider<EventDTO>();
+        eventsTableProvider.addDataDisplay(eventsTable);
+        Handler eventSortHandler = getEventSortHandler(eventsTableProvider.getList(), locationColumn, nameColumn,
+                startDateColumn);
+        eventsTable.addColumnSortHandler(eventSortHandler);
+
+        // Adding the selection model
+        eventsTableSelectionModel = new SingleSelectionModel<EventDTO>();
+        eventsTable.setSelectionModel(eventsTableSelectionModel);
+        eventsTableSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+            @Override
+            public void onSelectionChange(SelectionChangeEvent event) {
+                eventSelectionChanged();
+            }
+        });
+
+        eventsPanel.add(eventsTable);
 
         // Build leaderboards GUI
-        captionPanelLeaderboards = new CaptionPanel(stringConstants.leaderboards());
-        captionPanelLeaderboards.setVisible(false);
-        captionPanelLeaderboards.setWidth("100%");
-        listsSplitPanel.add(captionPanelLeaderboards);
+        leaderboardsCaptionPanel = new CaptionPanel(stringConstants.leaderboards());
+        leaderboardsCaptionPanel.setVisible(false);
+        leaderboardsCaptionPanel.setWidth("100%");
+        listsSplitPanel.add(leaderboardsCaptionPanel);
 
         VerticalPanel leaderboardsPanel = new VerticalPanel();
-        captionPanelLeaderboards.setContentWidget(leaderboardsPanel);
+        leaderboardsCaptionPanel.setContentWidget(leaderboardsPanel);
         leaderboardsPanel.setWidth("100%");
 
         // Create leaderboard functional elements
@@ -255,13 +271,43 @@ public class OverviewEventPanel extends AbstractEventPanel {
         functionPanelLeaderboards.add(btnHideLeaderboards);
 
         // Create leaderboard list
-        // TODO
-
+        Cell<LeaderboardDTO> leaderboardCell = new AbstractCell<LeaderboardDTO>() {
+            @Override
+            public void render(Context context, LeaderboardDTO leaderboard, SafeHtmlBuilder safeHtmlBuilder) {
+                safeHtmlBuilder.append(SafeHtmlUtils.fromString(leaderboard.name));
+            }
+        };
+        leaderboardsList = new CellList<LeaderboardDTO>(leaderboardCell);
+        
+        leaderboardsListProvider = new ListDataProvider<LeaderboardDTO>();
+        leaderboardsListProvider.addDataDisplay(leaderboardsList);
+        
+        leaderboardsListSelectionModel = new SingleSelectionModel<LeaderboardDTO>();
+        leaderboardsListSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+            @Override
+            public void onSelectionChange(SelectionChangeEvent event) {
+                leaderboardSelectionChanged();
+            }
+        });
+        leaderboardsList.setSelectionModel(leaderboardsListSelectionModel);
+        
+        leaderboardsPanel.add(leaderboardsList);
+        
+        //Create leaderboard container
+        //TODO
+        leaderboardCaptionPanel = new CaptionPanel();
+        leaderboardCaptionPanel.setVisible(false);
+        leaderboardCaptionPanel.setWidth("100%");
+        mainPanel.add(leaderboardCaptionPanel);
+        
+        displayedLeaderboardPanel = null;
+        
+        //Loading the data
         Runnable displayEvents = new Runnable() {
             @Override
             public void run() {
-                eventTableProvider.getList().clear();
-                eventTableProvider.getList().addAll(availableEvents);
+                eventsTableProvider.getList().clear();
+                eventsTableProvider.getList().addAll(availableEvents);
             }
         };
         loadEvents(displayEvents);
@@ -290,13 +336,13 @@ public class OverviewEventPanel extends AbstractEventPanel {
 
             @Override
             public void onFailure(Throwable caught) {
-                errorReporter.reportError("Error trying to obtain list of leaderboards: " + caught.getMessage());
+                errorReporter.reportError("Error trying to obtain list of events: " + caught.getMessage());
             }
         });
     }
     
     private void refreshEventsTable() {
-        final EventDTO selectedEvent = eventTableSelectionModel.getSelectedObject();
+        final EventDTO selectedEvent = eventsTableSelectionModel.getSelectedObject();
         
         //Clear Search criteria
         textBoxLocation.setText("");
@@ -310,15 +356,15 @@ public class OverviewEventPanel extends AbstractEventPanel {
         Runnable displayAndReselect = new Runnable() {
             @Override
             public void run() {
-                eventTableProvider.getList().clear();
-                eventTableProvider.getList().addAll(availableEvents);
+                eventsTableProvider.getList().clear();
+                eventsTableProvider.getList().addAll(availableEvents);
                 //Now sort again according to selected criterion
-                ColumnSortEvent.fire(eventTable, eventTable.getColumnSortList());
+                ColumnSortEvent.fire(eventsTable, eventsTable.getColumnSortList());
                 //Reselect the event
                 if (selectedEvent != null) {
-                    for (EventDTO event : eventTableProvider.getList()) {
+                    for (EventDTO event : eventsTableProvider.getList()) {
                         if (event.equals(selectedEvent)) {
-                            eventTableSelectionModel.setSelected(selectedEvent, true);
+                            eventsTableSelectionModel.setSelected(selectedEvent, true);
                             break;
                         }
                     }
@@ -327,24 +373,84 @@ public class OverviewEventPanel extends AbstractEventPanel {
         };
         loadEvents(displayAndReselect);
         //Now sort again according to selected criterion
-        ColumnSortEvent.fire(eventTable, eventTable.getColumnSortList());
+        ColumnSortEvent.fire(eventsTable, eventsTable.getColumnSortList());
     }
     
     private void setLeaderboardsPanelVisible(boolean visible) {
-        captionPanelLeaderboards.setVisible(visible);
-        captionPanelEvents.setWidth(visible ? "95%" : "100%");
+        leaderboardsCaptionPanel.setVisible(visible);
+        eventsCaptionPanel.setWidth(visible ? "95%" : "100%");
         btnShowLeaderboards.setEnabled(!visible);
     }
     
-    private void eventSelectionChanged(SelectionChangeEvent event) {
-        // TODO Actions when the event selection changed
-        EventDTO selectedEvent = eventTableSelectionModel.getSelectedObject();
+    private void eventSelectionChanged() {
+        EventDTO selectedEvent = eventsTableSelectionModel.getSelectedObject();
         if (selectedEvent != null) {
             setLeaderboardsPanelVisible(true);
-            //TODO Display data in leaderboard list
+
+            Runnable displayLeaderboards = new Runnable() {
+                @Override
+                public void run() {
+                    leaderboardsListProvider.getList().clear();
+                    leaderboardsListProvider.getList().addAll(availableLeaderboards);
+                }
+            };
+            loadLeaderboards(selectedEvent, displayLeaderboards);
         } else {
             setLeaderboardsPanelVisible(false);
             btnShowLeaderboards.setEnabled(false);
+        }
+    }
+    
+    private void loadLeaderboards(EventDTO forEvent, final Runnable actionAfterLoading) {
+        sailingService.getLeaderboardsByEvent(forEvent, new AsyncCallback<List<LeaderboardDTO>>() {
+
+            @Override
+            public void onSuccess(List<LeaderboardDTO> leaderboards) {
+                if (leaderboards != null) {
+                    availableLeaderboards = leaderboards;
+                } else {
+                    availableLeaderboards.clear();
+                }
+                if (actionAfterLoading != null) {
+                    actionAfterLoading.run();
+                }
+            }
+
+            @Override
+            public void onFailure(Throwable caught) {
+                errorReporter.reportError("Error trying to obtain list of leaderboards: " + caught.getMessage());
+            }
+        });
+    }
+    
+    private void leaderboardSelectionChanged() {
+        //TODO Actions when the leaderboard selection changes
+        LeaderboardDTO selectedLeaderboard = leaderboardsListSelectionModel.getSelectedObject();
+        if (selectedLeaderboard != null) {
+            setDisplayedLeaderboard(selectedLeaderboard);
+            setLeaderboardPanelVisible(true);
+        } else {
+            setLeaderboardPanelVisible(false);
+        }
+    }
+    
+    private void setLeaderboardPanelVisible(boolean visible) {
+        leaderboardCaptionPanel.setVisible(visible);
+        //TODO button management
+    }
+    
+    private void setDisplayedLeaderboard(LeaderboardDTO boardToDisplay) {
+        //If the currentLeaderboard equals the boardToDisplay, there is no need to create a new LeaderboardPanel
+        if (!boardToDisplay.equals(currentLeaderboard)) {
+            if (displayedLeaderboardPanel != null) {
+                leaderboardCaptionPanel.remove(displayedLeaderboardPanel);
+            }
+            currentLeaderboard = boardToDisplay;
+            CompetitorSelectionModel competitorSelectionModel = new CompetitorSelectionModel(true);
+            displayedLeaderboardPanel = new LeaderboardPanel(sailingService, competitorSelectionModel,
+                    currentLeaderboard.name, errorReporter, stringConstants);
+            leaderboardCaptionPanel.add(displayedLeaderboardPanel);
+            leaderboardCaptionPanel.setCaptionText(stringConstants.leaderboard() + " - " + boardToDisplay.name);
         }
     }
     
@@ -381,14 +487,14 @@ public class OverviewEventPanel extends AbstractEventPanel {
             until = new Date(time);
         } catch (IllegalArgumentException e) {}
         //Filter list by criteria
-        eventTableProvider.getList().clear();
+        eventsTableProvider.getList().clear();
         for (EventDTO event : availableEvents) {
             if (checkSearchCriteria(event, location, name, onlyLive, from, until)) {
-                eventTableProvider.getList().add(event);
+                eventsTableProvider.getList().add(event);
             }
         }
         //Now sort again according to selected criterion
-        ColumnSortEvent.fire(eventTable, eventTable.getColumnSortList());
+        ColumnSortEvent.fire(eventsTable, eventsTable.getColumnSortList());
     }
     
     private boolean checkSearchCriteria(EventDTO forEvent, String location, String name, boolean onlyLive, Date from, Date until) {

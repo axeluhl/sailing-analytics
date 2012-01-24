@@ -479,54 +479,33 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener {
         }, true);
         plot.addSelectionListener(new SelectionListener() {
             public void selected(double x1, double y1, double x2, double y2) {
-                //Refactoring the selection range, if there is no mark passing between x1 and x2
-                //Needed to prevent white space in the displayed selection
-                ArrayList<Double> x1Values = new ArrayList<Double>();
-                ArrayList<Double> x2Values = new ArrayList<Double>();
-                boolean markPassingInRange = false;
+                //Refactoring the selection range to prevent white space in the displayed selection
+                ArrayList<Pair<Double, Double>> x1Values = new ArrayList<Pair<Double, Double>>();
+                ArrayList<Pair<Double, Double>> x2Values = new ArrayList<Pair<Double, Double>>();
+                ArrayList<ArrayList<Boolean>> markPassingInRange = new ArrayList<ArrayList<Boolean>>();
                 
-                competitorLoop:
-                for (CompetitorDTO competitor : competitorID) {
-                    ArrayList<Pair<Double, Double>> negativeDeltas = new ArrayList<Pair<Double, Double>>();
-                    ArrayList<Pair<Double, Double>> positiveDeltas = new ArrayList<Pair<Double, Double>>();
-                    Pair<String, Long>[] markPassingTimes = competitorsAndTimePointsDTO.getMarkPassings(competitor);
-                    Double[] markPassingValues = chartData.getMarkPassings(competitor);
-                    
-                    for (int i = 0; i < markPassingValues.length; i++) {
-                        double markPassing = markPassingTimes[i].getB().doubleValue();
-                        if (markPassingValues[i] != null && (markPassing < x1 || markPassing > x2)) {
-                            double delta = markPassing < x1 ? markPassing - x1 : markPassing - x2;
-                            Pair<Double, Double> p = new Pair<Double, Double>(delta, markPassing);
-                            if (delta < 0) {
-                                negativeDeltas.add(p);
-                            } else {
-                                positiveDeltas.add(p);
-                            }
-                        } else if (markPassingValues[i] != null) {
-                            markPassingInRange = true;
-                            break competitorLoop;
-                        }
+                Comparator<Pair<Double, Double>> comp = new Comparator<Pair<Double, Double>>() {
+                    @Override
+                    public int compare(Pair<Double, Double> p1, Pair<Double, Double> p2) {
+                        return p1.getA().compareTo(p2.getA());
                     }
-                    
-                    Comparator<Pair<Double, Double>> comp = new Comparator<Pair<Double,Double>>() {
-                        @Override
-                        public int compare(Pair<Double, Double> p1, Pair<Double, Double> p2) {
-                            return p1.getA().compareTo(p2.getA());
-                        }
-                    };
-                    
-                    Collections.sort(negativeDeltas, comp);
-                    x1Values.add(negativeDeltas.get(negativeDeltas.size() - 1).getB());
-                    Collections.sort(positiveDeltas, comp);
-                    x2Values.add(positiveDeltas.get(0).getB());
-                }
+                };
                 
-                //If there are mark passings between x1 and x2 no refactoring is needed
-                if (!markPassingInRange) {
-                    Collections.sort(x1Values);
-                    x1 = x1Values.get(0) - 2000; //Increase x1 by 2 seconds prevent small blank space
-                    Collections.sort(x2Values);
-                    x2 = x2Values.get(x2Values.size() - 1) + 2000; //Increase x2 by 2 seconds prevent small blank space
+                fillPotentialXValues(x1, x2, x1Values, x2Values, markPassingInRange); 
+                
+                Pair<Boolean, Boolean> passingRelationToSelection = checkPassingRelationToSelection(markPassingInRange);
+                Boolean everyPassingInRange = passingRelationToSelection.getA();
+                Boolean twoPassingsInRangeBeforeError = passingRelationToSelection.getB();
+                
+                if (!everyPassingInRange) {
+                    if (twoPassingsInRangeBeforeError == null || !twoPassingsInRangeBeforeError) {
+                        Collections.sort(x1Values, comp);
+                        x1 = x1Values.get(x1Values.size() - 1).getB() - 2000; //Decrease x1 by 2 seconds to prevent small blank space
+                    }
+                    if (twoPassingsInRangeBeforeError == null || twoPassingsInRangeBeforeError) {
+                        Collections.sort(x2Values, comp);
+                        x2 = x2Values.get(x2Values.size() - 1).getB() + 2000; //Increase x2 by 2 seconds to prevent small blank space
+                    }
                 }
                 
                 plot.setLinearSelection(x1, x2);
@@ -686,6 +665,95 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener {
     @Override
     public void onRaceSelectionChange(List<RaceIdentifier> selectedRaces) {
         loadData();
+    }
+
+    /**
+     * Fills the to lists with potential values for a new selection to prevent white space in the display.
+     * Also fills a boolean matrix with information, if a mark passing is in the selection range or not.
+     * @param x1 The left range border
+     * @param x2 The right range border
+     * @param x1Values The list which is be filled with potential values for the left side
+     * @param x2Values The list which is be filled with potential values for the right side
+     * @param markPassingInRange The boolean matrix which is be filled with the mark passing informations
+     */
+    public void fillPotentialXValues(double x1, double x2, ArrayList<Pair<Double, Double>> x1Values,
+            ArrayList<Pair<Double, Double>> x2Values, ArrayList<ArrayList<Boolean>> markPassingInRange) {
+        Comparator<Pair<Double, Double>> comp = new Comparator<Pair<Double, Double>>() {
+            @Override
+            public int compare(Pair<Double, Double> p1, Pair<Double, Double> p2) {
+                return p1.getA().compareTo(p2.getA());
+            }
+        };
+        
+        for (int i = 0; i < competitorID.size(); i++) {
+            CompetitorDTO competitor = competitorID.get(i);
+            ArrayList<Pair<Double, Double>> negativeDeltas = new ArrayList<Pair<Double, Double>>();
+            ArrayList<Pair<Double, Double>> positiveDeltas = new ArrayList<Pair<Double, Double>>();
+            Pair<String, Long>[] markPassingTimes = competitorsAndTimePointsDTO.getMarkPassings(competitor);
+            Double[] markPassingValues = chartData.getMarkPassings(competitor);
+            
+            markPassingInRange.add(new ArrayList<Boolean>());
+            for (int j = 0; j < markPassingValues.length; j++) {
+                double markPassing = markPassingTimes[j].getB().doubleValue();
+                if (markPassingValues[j] != null && (markPassing < x1 || markPassing > x2)) {
+                    double delta = markPassing < x1 ? markPassing - x1 : markPassing - x2;
+                    Pair<Double, Double> p = new Pair<Double, Double>(delta, markPassing);
+                    if (delta < 0) {
+                        negativeDeltas.add(p);
+                    } else {
+                        positiveDeltas.add(p);
+                    }
+                    markPassingInRange.get(i).add(false);
+                } else {
+                    markPassingInRange.get(i).add(markPassingValues[j] != null ? true : null);
+                }
+            }
+            
+            Collections.sort(negativeDeltas, comp);
+            x1Values.add(negativeDeltas.get(negativeDeltas.size() - 1));
+            Collections.sort(positiveDeltas, comp);
+            x2Values.add(positiveDeltas.get(0));
+        }
+    }
+    
+    /**
+     * Checks the relation of the mark passings to the selection range.
+     * 
+     * @param markPassingInRange
+     *            A Boolean matrix filled by
+     *            {@link AbstractChartPanel#fillPotentialXValues(double, double, ArrayList, ArrayList, ArrayList)
+     *            fillPotentialXValues(...)}
+     * @return A pair of Booleans. Value A contains false if a passing is not in the selection (error), so that the
+     *         selection range needs to be refactored. Value B returns true if two passings are in range before the
+     *         error happened or false, if the error happens before two passings were in the selection. B can be
+     *         <code>null</code>.
+     */
+    public Pair<Boolean, Boolean> checkPassingRelationToSelection(ArrayList<ArrayList<Boolean>> markPassingInRange) {
+        boolean everyPassingInRange = true;
+        Boolean twoPassingsInRangeBeforeError = null;
+        ArrayList<Boolean> competitorPassings = markPassingInRange.get(0);
+        for (int i = 0; i < competitorPassings.size(); i++) {
+            Boolean passingInRange = competitorPassings.get(i);
+            for (int j = 1; j < markPassingInRange.size(); j++) {
+                Boolean passingToCompare = markPassingInRange.get(j).get(i);
+                if (passingInRange != null) {
+                    if (passingToCompare != null && everyPassingInRange) {
+                        everyPassingInRange = passingInRange.equals(passingToCompare);
+                        if (passingInRange && passingToCompare) {
+                            twoPassingsInRangeBeforeError = true;
+                        }
+                    } else if (passingToCompare != null) {
+                        if (passingInRange && passingToCompare) {
+                            twoPassingsInRangeBeforeError = false;
+                        }
+                    }
+                } else {
+                    passingInRange = passingToCompare;
+                }
+            }
+        }
+        
+        return new Pair<Boolean, Boolean>(everyPassingInRange, twoPassingsInRangeBeforeError);
     }
 
 }

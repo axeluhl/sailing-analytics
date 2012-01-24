@@ -30,5 +30,45 @@ public class LeaderboardEntryDTO implements IsSerializable {
      * {@link Course} being sailed in the race for which this object holds the scoring details.
      */
     public List<LegEntryDTO> legDetails;
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + (discarded ? 1231 : 1237);
+        result = prime * result + ((legDetails == null) ? 0 : legDetails.hashCode());
+        result = prime * result + netPoints;
+        result = prime * result + ((reasonForMaxPoints == null) ? 0 : reasonForMaxPoints.hashCode());
+        result = prime * result + totalPoints;
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        LeaderboardEntryDTO other = (LeaderboardEntryDTO) obj;
+        if (discarded != other.discarded)
+            return false;
+        if (legDetails == null) {
+            if (other.legDetails != null)
+                return false;
+        } else if (!legDetails.equals(other.legDetails))
+            return false;
+        if (netPoints != other.netPoints)
+            return false;
+        if (reasonForMaxPoints == null) {
+            if (other.reasonForMaxPoints != null)
+                return false;
+        } else if (!reasonForMaxPoints.equals(other.reasonForMaxPoints))
+            return false;
+        if (totalPoints != other.totalPoints)
+            return false;
+        return true;
+    }
     
 }
