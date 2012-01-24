@@ -2,10 +2,11 @@ package com.sap.sailing.gwt.ui.leaderboard;
 
 import java.util.List;
 
+import com.sap.sailing.gwt.ui.shared.RaceInLeaderboardDTO;
 import com.sap.sailing.domain.common.DetailType;
 
 public class LeaderboardSettings {
-    private final List<String> raceColumnsToShow;
+    private final List<RaceInLeaderboardDTO> raceColumnsToShow;
     private final List<DetailType> maneuverDetailsToShow;
     private final List<DetailType> legDetailsToShow;
     private final List<DetailType> raceDetailsToShow;
@@ -13,7 +14,7 @@ public class LeaderboardSettings {
     private final long delayInMilliseconds;
     
     public LeaderboardSettings(List<DetailType> meneuverDetailsToShow, List<DetailType> legDetailsToShow,
-            List<DetailType> raceDetailsToShow, List<String> raceColumnsToShow,
+            List<DetailType> raceDetailsToShow, List<RaceInLeaderboardDTO> raceColumnsToShow,
             long delayBetweenAutoAdvancesInMilliseconds, long delayInMilliseconds) {
         this.legDetailsToShow = legDetailsToShow;
         this.raceDetailsToShow = raceDetailsToShow;
@@ -35,7 +36,7 @@ public class LeaderboardSettings {
         return raceDetailsToShow;
     }
     
-    public List<String> getRaceColumnsToShow(){
+    public List<RaceInLeaderboardDTO> getRaceColumnsToShow(){
         return raceColumnsToShow;
     }
 

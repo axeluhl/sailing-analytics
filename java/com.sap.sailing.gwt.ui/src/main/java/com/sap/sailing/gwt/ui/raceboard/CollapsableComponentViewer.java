@@ -7,6 +7,7 @@ import com.sap.sailing.gwt.ui.shared.components.CollapsablePanel;
 import com.sap.sailing.gwt.ui.shared.components.Component;
 import com.sap.sailing.gwt.ui.shared.components.ComponentGroup;
 import com.sap.sailing.gwt.ui.shared.components.ComponentToolbar;
+import com.sap.sailing.gwt.ui.shared.components.ComponentViewer;
 
 /**
  * A GWT component that visualizes a {@link ComponentGroup} or a {@link Component} including menus to scroll quickly to the embedded view
@@ -16,41 +17,49 @@ import com.sap.sailing.gwt.ui.shared.components.ComponentToolbar;
  * @author Axel Uhl (d043530)
  *
  */
-public class CollapsableComponentViewer<SettingsType> {
-    private final CollapsablePanel disclosurePanel;
+public class CollapsableComponentViewer<SettingsType> implements ComponentViewer {
+    private final CollapsablePanel collapsablePanel;
     
     private final Component<SettingsType> component;
 
     private final StringMessages stringMessages;
+    
+    private boolean hasHeaderToolbar = false;
     
     public CollapsableComponentViewer(Component<SettingsType> component, String defaultWidth, String defaultHeight, StringMessages stringMessages) {
         this.component = component;
         this.stringMessages = stringMessages;
         
         AbsolutePanel contentPanel = new AbsolutePanel();
-        disclosurePanel = createDisclosePanel(contentPanel, component.getLocalizedShortName(), defaultWidth, defaultHeight); 
+        collapsablePanel = createCollapsablePanel(contentPanel, component.getLocalizedShortName(), defaultWidth, defaultHeight); 
     }
 
     public CollapsablePanel getViewerWidget() {
-        return disclosurePanel;
+        return collapsablePanel;
     }
 
-    public Component<?> getComponent() {
+    public Component<?> getRootComponent() {
         return component;
     }
 
-    private CollapsablePanel createDisclosePanel(Panel contentPanel, String panelTitle, String defaultContentWidth, String defaultContentHeight)
+    public String getViewerName() {
+        return component.getLocalizedShortName();
+    }
+
+    private CollapsablePanel createCollapsablePanel(Panel contentPanel, String panelTitle, String defaultContentWidth, String defaultContentHeight)
     {
-        CollapsablePanel disclosurePanel = new CollapsablePanel (panelTitle);
-        disclosurePanel.setSize("100%", "100%");
-        disclosurePanel.setOpen(true);
+        CollapsablePanel collapsablePanel = new CollapsablePanel (panelTitle);
+        collapsablePanel.setSize("100%", "100%");
+        collapsablePanel.setOpen(true);
         
-        ComponentToolbar<SettingsType> toolbar = new ComponentToolbar<SettingsType>(component, stringMessages);
-        toolbar.addSettingsButton();
-        disclosurePanel.setHeaderToolbar(toolbar);
+        if(hasHeaderToolbar) {
+            ComponentToolbar<SettingsType> toolbar = new ComponentToolbar<SettingsType>(component, stringMessages);
+            toolbar.addSettingsButton();
+            collapsablePanel.setHeaderToolbar(toolbar);
+        }
         
         contentPanel.setSize(defaultContentWidth, defaultContentHeight);
-        disclosurePanel.setContent(contentPanel);
+        collapsablePanel.setContent(contentPanel);
         if(component.getEntryWidget() != null) {
             contentPanel.add(component.getEntryWidget());
         } else {
@@ -63,6 +72,6 @@ public class CollapsableComponentViewer<SettingsType> {
             }
         }
         
-        return disclosurePanel;
+        return collapsablePanel;
     }
 }

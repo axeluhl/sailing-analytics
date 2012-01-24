@@ -1,3 +1,4 @@
+
 /** Add css rules here for your application. */
 /*
     body #calendar:after
@@ -7,172 +8,231 @@
       clear: both;
       visibility: hidden;
 */
-
 .clear {
-  clear: both;
-  font-size: 1px;
-  height: 0px;
-  line-height: 0px;
-  margin: -1px 0 0;
-  width: 100%; }
-
-.cover {
-  left: -1000px;
-  overflow: hidden;
-  position: absolute;
-  top: -1000px; }
-
-body {
-  background: #ebebeb;
-  font-family: 'Terminal Dosis', sans-serif;
-  line-height: 1;
-  font-size: 14px;
-  font-weight: 400;
-  padding: 80px 0 120px 0;
-  margin: 0;
-   }
-
-table td, select, button {
-	font-family: 'Terminal Dosis', sans-serif;
-  	line-height: 1;
-  	font-weight: 400;
-  	font-size: 14px;
+	clear: both;
+	font-size: 1px;
+	height: 0px;
+	line-height: 0px;
+	margin: -1px 0 0;
+	width: 100%;
 }
 
-.contentOuterPanel {	
+.cover {
+	left: -1000px;
+	overflow: hidden;
+	position: absolute;
+	top: -1000px;
+}
+
+body {
+	background: #ebebeb;
+	font-family: 'Terminal Dosis', sans-serif;
+	line-height: 1;
+	font-size: 14px;
+	font-weight: 400;
+	padding: 85px 0 120px 0;
+	margin: 0;
+}
+
+table td,select,button {
+	font-family: 'Terminal Dosis', sans-serif;
+	line-height: 1;
+	font-weight: 400;
+	font-size: 14px;
+}
+
+.contentOuterPanel {
 	background: #dddcdc;
 	margin: 0 12px 0 12px;
 	padding: 12px;
-	}
+}
 
 /** Example rules used by the template application (remove for your app) */
 h1 {
-  font-size: 2em;
-  font-weight: bold;
-  color: #777777;
-  margin: 40px 0px 70px;
-  text-align: center;}
+	font-size: 2em;
+	font-weight: bold;
+	color: #777777;
+	margin: 40px 0px 70px;
+	text-align: center;
+}
 
 table {
-  border-collapse: separate; }
-
-
-
+	border-collapse: separate;
+}
 
 .LogoAndTitlePanel {
-  height: 85px;
-  font-family: Arial, Verdana, sans-serif;
-  position: fixed;
-  width: 100%;
-  top: 0;
-  background-image: url(images/white_gradient_header.png), url(images/header_bg_modern.png);
-  background-position: center top, 0 0;
-  background-repeat: no-repeat, repeat-x;}
+	height: 85px;
+	font-family: Arial, Verdana, sans-serif;
+	position: fixed;
+	width: 100%;
+	top: 0;
+	background-image: url(images/white_gradient_header.png),
+		url(images/header_bg_modern.png);
+	background-position: center top, 0 0;
+	background-repeat: no-repeat, repeat-x;
+}
 
 .LogoAndTitlePanel:after {
 	content: " ";
 	display: block;
 	height: 0;
 	clear: both;
-	visibility: hidden; }
+	visibility: hidden;
+}
+
+.RaceBoardHeaderPanel {
+	margin: 0 12px 18px 12px;
+}
 
 .sapLogo {
-	float: left; 
-  margin: 13px 0 0 12px; }
+	float: left;
+	margin: 13px 0 0 12px;
+}
 
-.sailingAnalyticsLabelPanel {
-  margin: 10px 0 0 0;
-  border: 1px solid red;}
+.sailingAnalyticsLabelPanel {
+	margin: 10px 0 0 0;
+}
 
 .sailingAnalyticsLabel {
-  float: left;
-  color: #fff;
-  font-size: 14px;
-  font-weight: bold;
-  margin: 25px 0 0 0; }
+	float: left;
+	color: #fff;
+	font-size: 14px;
+	font-weight: bold;
+	margin: 15px 0 0 0;
+}
 
 .leaderboardLabel {
-  border-bottom: 2px solid #007dc0; 
-  font-weight: bold;
-  padding: 0 0 6px 0; }
+	border-bottom: 2px solid #007dc0;
+	font-weight: bold;
+	padding: 0 0 6px 0;
+}
 
 .refreshAndSettings {
-  background: #f2f2f2;
-  border-bottom: 2px solid #fff;
-  border-top: 2px solid #fff; 
-  height: 30px; }
+	background: #f2f2f2;
+	border-bottom: 2px solid #fff;
+	border-top: 2px solid #fff;
+	height: 30px;
+}
 
-  .refreshAndSettings table td {
-    padding: 0 10px 0 0;}
-  .refreshAndSettings table table td{
-    padding: 0 0 0 0;}
+.refreshAndSettings table td {
+	padding: 0 10px 0 0;
+}
+
+.refreshAndSettings table table td {
+	padding: 0 0 0 0;
+}
 
 .race-name {
-  margin: 2px 10px 0 0;
-  line-height: 1.0;
-  float: left;}
-  
-input.magnifier{
+	margin: 2px 10px 0 0;
+	line-height: 1.0;
+	float: left;
+}
+
+input.magnifier {
 	display: block;
 	margin: 3px auto 0 auto !important;
 }
 
-.timelinePanel {
+.timeLinePanel {
 	width: 100%;
 	position: fixed;
 	bottom: 0;
 	height: 101px;
+	z-index: 1000;
 }
 
-.timelineInnerPanel {
+.timeLineInnerPanel {
 	height: 100%;
 	margin: 0 12px;
 	background: #dddcdc;
+	padding: 24px 24px 0 24px;
+}
+
+.timeLineInnerBgPanel {
+	background: #f6f6f6;
+	border-top-left-radius: 6px;
+	border-top-right-radius: 6px; 
+	height: 80px;
 }
 
 .footerShadowPanel {
 	position: fixed;
 	height: 50px;
 	bottom: 0;
-	background: url(images/footer_shadow.png) left bottom repeat-x;	
+	background: url(images/footer_shadow.png) left bottom repeat-x;
 	width: 100%;
+	z-index: 2000;
 }
 
 .breadcrumbPanel {
 	height: 30px;
-	margin: 0 12px 0 12px;
+	margin: 0 12px 13px 12px;
 }
 
 .mainPanel {
 	width: 100%;
-	
 }
 
-.gwt-DisclosurePanel {
+.collapsablePanel {
 	background: #b6b6b6;
 	margin: 0 0 12px 0;
 	border-radius: 7px;
 	overflow: hidden;
 }
 
-.gwt-DisclosurePanel .content {
-	border: none;
-	padding: 0;
-	margin: 0;
-	background: #b6b6b6;
-	position: inherit !important;
+.collapsablePanel-content {
+	background: #fff;
+	margin: 12px;
+	border-radius: 10px;
+	width: auto !important;
 }
 
-.gwt-DisclosurePanel .header {
+.collapsablePanel-header {
 	background: url(images/titlebar-background.png) 0 0 repeat-x;
 	padding: 0;
 	margin: 0;
 	height: 42px;
 }
 
-.eventNameHeadline {
+.collapsablePanel-open {
+}
+
+.collapsablePanel-closed {
+}
+
+.raceBoardPanelHeader {
+	
+}
+
+.raceBoardPanelHeader-name {
 	font-size: 24px;
 	text-transform: uppercase;
-	font-weight: 200;
 	color: #a1a1a1;
+	font-weight: 200;
 }
+
+.raceBoardNavigation {
+	float: right;
+	margin: 26px 0 0 0;
+}
+
+.raceBoardNavigation-navigationitem {
+	color: #dddcdc;
+	text-transform: uppercase;
+	font-weight: 500;
+	margin: 0 12px 0 0;
+	padding: 0 0 5px 0;
+}
+
+.raceBoardNavigation-navigationitem:hover {
+	border-bottom: 4px solid #f0ab00;
+	color: #dddcdc;
+	text-decoration: none;
+}
+
+.raceBoardNavigation-navigationitem:active {
+	border-bottom: 4px solid #f0ab00;
+	color: #dddcdc;
+	text-decoration: none;
+}
+
