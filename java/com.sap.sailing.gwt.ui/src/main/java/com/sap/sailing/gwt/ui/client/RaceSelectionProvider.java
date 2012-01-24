@@ -1,8 +1,7 @@
-package com.sap.sailing.gwt.ui.adminconsole;
+package com.sap.sailing.gwt.ui.client;
 
 import java.util.List;
 
-import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
 import com.sap.sailing.server.api.RaceIdentifier;
 
 public interface RaceSelectionProvider {

@@ -8,7 +8,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import com.sap.sailing.gwt.ui.adminconsole.RaceSelectionProvider;
 import com.sap.sailing.server.api.RaceIdentifier;
 
 public class RaceSelectionModel implements RaceSelectionProvider {
