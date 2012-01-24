@@ -14,6 +14,9 @@ import com.sap.sailing.domain.tracking.TrackedRace;
  * 
  */
 public interface RaceInLeaderboard extends LeaderboardColumn {
+    /**
+     * This does not update the {@link #getRaceIdentifier() race identifier}. 
+     */
     void setTrackedRace(TrackedRace race);
 
     /**
@@ -32,7 +35,7 @@ public interface RaceInLeaderboard extends LeaderboardColumn {
     /**
      * Records that this leaderboard column is to be associated with the race identified by <code>raceIdentifier</code>.
      * This does not automatically load the tracked race, but the information may be used to re-associate a tracked
-     * race with this column.
+     * race with this column based on its {@link TrackedRace#getRaceIdentifier() race identifier}.
      */
     void setRaceIdentifier(RaceIdentifier raceIdentifier);
     
