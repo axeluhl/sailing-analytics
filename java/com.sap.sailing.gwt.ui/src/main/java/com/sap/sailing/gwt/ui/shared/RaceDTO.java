@@ -3,9 +3,9 @@ package com.sap.sailing.gwt.ui.shared;
 import java.util.Date;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import com.sap.sailing.domain.common.EventNameAndRaceName;
+import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RacePlaceOrder;
-import com.sap.sailing.server.api.EventNameAndRaceName;
-import com.sap.sailing.server.api.RaceIdentifier;
 
 public class RaceDTO extends NamedDTO implements IsSerializable {
     public Iterable<CompetitorDTO> competitors;

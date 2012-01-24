@@ -14,6 +14,7 @@ import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
@@ -22,7 +23,6 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.AbstractChartPanel.DataLoadedEvent;
 import com.sap.sailing.gwt.ui.leaderboard.AbstractChartPanel.DataLoadedHandler;
-import com.sap.sailing.server.api.RaceIdentifier;
 
 /**
  * A dialog box that holds a {@link MultiChartPanel} and manages a {@link RaceSelectionProvider} of its own.

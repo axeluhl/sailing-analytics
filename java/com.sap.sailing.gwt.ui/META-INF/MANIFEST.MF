@@ -20,7 +20,6 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.domain.swisstimingadapter.persistence,
  com.sap.sailing.domain.tractracadapter.persistence,
  com.google.gwt.osgi;bundle-version="2.4.0",
- com.sap.sailing.server.api,
  com.sap.sailing.domain.common
 Bundle-Activator: com.sap.sailing.gwt.ui.server.Activator
 Bundle-ActivationPolicy: lazy

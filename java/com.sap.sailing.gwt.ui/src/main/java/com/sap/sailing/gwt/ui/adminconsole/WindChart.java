@@ -36,6 +36,7 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.gwt.ui.client.ColorMap;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
@@ -48,7 +49,6 @@ import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
 import com.sap.sailing.gwt.ui.shared.components.Component;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
-import com.sap.sailing.server.api.RaceIdentifier;
 
 public class WindChart implements Component<WindChartSettings>, RaceSelectionChangeListener {
     private final StringMessages stringMessages;

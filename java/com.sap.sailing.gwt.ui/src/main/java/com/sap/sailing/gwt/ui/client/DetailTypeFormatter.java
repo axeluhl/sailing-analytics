@@ -1,6 +1,6 @@
 package com.sap.sailing.gwt.ui.client;
 
-import com.sap.sailing.server.api.DetailType;
+import com.sap.sailing.domain.common.DetailType;
 
 public class DetailTypeFormatter {
     public static String format(DetailType detailType, StringMessages stringMessages) {

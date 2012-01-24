@@ -3,11 +3,11 @@ package com.sap.sailing.gwt.ui.leaderboard;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog;
 import com.sap.sailing.gwt.ui.client.DetailTypeFormatter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
-import com.sap.sailing.server.api.DetailType;
 
 public class MultiChartSettingsComponent extends AbstractChartSettingsComponent<MultiChartSettings> implements
         SettingsDialogComponent<MultiChartSettings> {

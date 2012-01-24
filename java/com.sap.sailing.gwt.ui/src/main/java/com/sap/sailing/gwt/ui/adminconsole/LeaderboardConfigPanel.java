@@ -42,6 +42,8 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
+import com.sap.sailing.domain.common.EventNameAndRaceName;
+import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.EventDisplayer;
@@ -53,8 +55,6 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.RaceInLeaderboardDTO;
-import com.sap.sailing.server.api.EventNameAndRaceName;
-import com.sap.sailing.server.api.RaceIdentifier;
 
 public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer, RaceSelectionChangeListener,
         TrackedRaceChangedListener {

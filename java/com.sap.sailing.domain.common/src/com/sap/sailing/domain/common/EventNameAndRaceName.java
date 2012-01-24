@@ -1,4 +1,5 @@
-package com.sap.sailing.server.api;
+package com.sap.sailing.domain.common;
+
 
 
 public class EventNameAndRaceName extends EventName implements EventAndRaceIdentifier {

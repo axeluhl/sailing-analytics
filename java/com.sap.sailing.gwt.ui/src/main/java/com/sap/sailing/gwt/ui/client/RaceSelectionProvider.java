@@ -2,7 +2,7 @@ package com.sap.sailing.gwt.ui.client;
 
 import java.util.List;
 
-import com.sap.sailing.server.api.RaceIdentifier;
+import com.sap.sailing.domain.common.RaceIdentifier;
 
 public interface RaceSelectionProvider {
     /**

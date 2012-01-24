@@ -9,13 +9,13 @@ import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TabPanel;
+import com.sap.sailing.domain.common.DefaultLeaderboardName;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.EventDisplayer;
 import com.sap.sailing.gwt.ui.client.EventRefresher;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
-import com.sap.sailing.server.api.DefaultLeaderboardName;
 
 public class AdminConsole extends AbstractEntryPoint implements EventRefresher {
     private Set<EventDisplayer> eventDisplayers;
