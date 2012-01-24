@@ -212,5 +212,11 @@ input.magnifier {
 	font-weight: 200;
 }
 
-.raceBoardPanelHeader-menuitem {
+.raceBoardNavigation {
+	vertical-align:baseline;
+	text-align: right;	
+}
+
+.raceBoardNavigation-navigationitem {
+	padding:3px;
 }

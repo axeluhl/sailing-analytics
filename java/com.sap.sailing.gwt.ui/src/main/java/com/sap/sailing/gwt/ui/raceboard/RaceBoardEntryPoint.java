@@ -98,6 +98,8 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
             raceBoardPanel.addStyleName("leftPaddedPanel");
         }
 
+        logoAndTitlePanel.add(raceBoardPanel.getNavigationWidget());
+        
         FlowPanel raceBoardHeaderPanel = new FlowPanel();
         raceBoardHeaderPanel.addStyleName("RaceBoardHeaderPanel");
         raceBoardHeaderPanel.add(raceBoardPanel.getHeaderWidget());

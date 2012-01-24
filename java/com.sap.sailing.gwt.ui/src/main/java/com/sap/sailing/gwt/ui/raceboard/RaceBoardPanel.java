@@ -9,6 +9,7 @@ import java.util.Map;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -57,7 +58,7 @@ public class RaceBoardPanel extends FormPanel implements Component<RaceBoardSett
 
     private final List<CollapsableComponentViewer<?>> collapsableViewers;
     private final HorizontalPanel componentsHeaderPanel;
-    private final HorizontalPanel componentsHeaderMenuPanel;
+    private final FlowPanel componentsNavigationPanel;
     private final HorizontalPanel componentsHeaderNamePanel;
     private final TimePanel timePanel;
     private final Timer timer;
@@ -83,15 +84,10 @@ public class RaceBoardPanel extends FormPanel implements Component<RaceBoardSett
         componentsHeaderPanel = new HorizontalPanel();
         componentsHeaderPanel.addStyleName("raceBoardPanelHeader");
         mainPanel.add(componentsHeaderPanel);
-        componentsHeaderMenuPanel = new HorizontalPanel();
-        componentsHeaderMenuPanel.setSpacing(10);
+        componentsNavigationPanel = new FlowPanel();
+        componentsNavigationPanel.addStyleName("raceBoardNavigation");
         componentsHeaderNamePanel = new HorizontalPanel();
         componentsHeaderPanel.add(componentsHeaderNamePanel);
-        componentsHeaderPanel.add(componentsHeaderMenuPanel);
-        /*
-        componentsHeaderPanel.getCellFormatter().setAlignment(0, 0, HasHorizontalAlignment.ALIGN_LEFT, HasVerticalAlignment.ALIGN_MIDDLE); 
-        componentsHeaderPanel.getCellFormatter().setAlignment(0, 1, HasHorizontalAlignment.ALIGN_RIGHT, HasVerticalAlignment.ALIGN_MIDDLE);
-        */ 
 
         Label eventNameLabel = new Label(selectedRaceIdentifier.getRaceName());
         eventNameLabel.setStyleName("raceBoardPanelHeader-name");
@@ -121,6 +117,14 @@ public class RaceBoardPanel extends FormPanel implements Component<RaceBoardSett
         componentGroup.addComponent(new SimpleComponent("My Component 3"));
         collapsableViewers.add(new CollapsableComponentViewer<Object>(componentGroup, "100%", "100px", stringMessages));
 
+        /*
+        WindChartSettings windChartSettings = new WindChartSettings();
+        WindChart windChart = new WindChart(sailingService, raceSelectionProvider, windChartSettings, stringMessages, errorReporter); 
+        CollapsableComponentViewer<WindChartSettings> windChartViewer = new CollapsableComponentViewer<WindChartSettings>(
+                windChart, "600px", "300px", stringMessages);
+        collapsableViewers.add(windChartViewer);
+        */
+        
         for (CollapsableComponentViewer<?> componentViewer : collapsableViewers) {
             mainPanel.add(componentViewer.getViewerWidget());
             addComponentViewerMenuEntry(componentViewer);
@@ -133,7 +137,7 @@ public class RaceBoardPanel extends FormPanel implements Component<RaceBoardSett
 
     private void addComponentViewerMenuEntry(final ComponentViewer c) {
         Anchor menuEntry = new Anchor(c.getViewerName());
-        menuEntry.addStyleName("raceBoardPanelHeader-menuitem");
+        menuEntry.addStyleName("raceBoardNavigation-navigationitem");
         
         menuEntry.addClickHandler(new ClickHandler() {
             @Override
@@ -141,9 +145,13 @@ public class RaceBoardPanel extends FormPanel implements Component<RaceBoardSett
                 c.getViewerWidget().getElement().scrollIntoView();
             }
         });
-        componentsHeaderMenuPanel.add(menuEntry);
+        componentsNavigationPanel.add(menuEntry);
     }
-    
+
+    public Widget getNavigationWidget() {
+        return componentsNavigationPanel; 
+    }
+
     public Widget getHeaderWidget() {
         return componentsHeaderPanel; 
     }
