@@ -213,4 +213,12 @@ public interface StringMessages extends Messages {
     String competitorPassedMarkAtDate(String competitorName, String markName, String dateTime);
     String valueForCompetitorAt(String competitorName, String dateTime, String valueWithUnit);
     String reallyRemoveRace(String string);
+    String showDetails();
+    String hideLeaderboard();
+    String hideLeaderboards();
+    String showLeaderboard();
+    String hideRaces();
+    String showMap();
+    String hideMap();
+    String noLeaderboardSelected();
 }
