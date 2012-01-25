@@ -215,9 +215,10 @@ input.magnifier {
 	float:left;
 	width:95%;
 	height:100%;
+	padding: 3px;	
 }
 
-.collapsablePanel-toolbar {
+.collapsablePanel-toolbar { 
 	align: right;
 	float: right;
 	padding: 3px;	
