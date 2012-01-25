@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -213,7 +214,7 @@ public class ReverseGeocoderImpl implements ReverseGeocoder {
      * @param position
      *            The position to be checked by the cache
      * @return The cached placemarks (with meta-data) sorted by distance towards <code>position</code> or
-     *         <code>null</code>, if there's nothing cached around <code>postion</code> within
+     *         <code>null</code>, if there's nothing cached around <code>position</code> within
      *         {@link ReverseGeocoderImpl#POSITION_CACHE_DISTANCE_LIMIT the distance limit}
      */
     private Triple<Position, Double, List<Placemark>> checkCache(Position position) {
@@ -228,7 +229,7 @@ public class ReverseGeocoderImpl implements ReverseGeocoder {
 
         URL request = new URL(url.toString());
         URLConnection connection = request.openConnection();
-        BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+        BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream(), Charset.forName("UTF-8")));
         JSONParser parser = new JSONParser();
         JSONObject obj = (JSONObject) parser.parse(in);
         JSONArray geonames = (JSONArray) obj.get("geonames");
@@ -246,7 +247,7 @@ public class ReverseGeocoderImpl implements ReverseGeocoder {
 
         URL request = new URL(url.toString());
         URLConnection connection = request.openConnection();
-        BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+        BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream(), Charset.forName("UTF-8")));
         JSONParser parser = new JSONParser();
         JSONObject obj = (JSONObject) parser.parse(in);
         JSONArray geonames = (JSONArray) obj.get("geonames");
