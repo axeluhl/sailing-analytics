@@ -45,6 +45,7 @@ public class LiveEventViewPanel extends AbstractEventPanel {
     
     private void buildGUI() {
         VerticalPanel mainPanel = new VerticalPanel();
+        mainPanel.setHorizontalAlignment(VerticalPanel.ALIGN_CENTER);
         mainPanel.setWidth("95%");
         setWidget(mainPanel);
 
@@ -71,19 +72,19 @@ public class LiveEventViewPanel extends AbstractEventPanel {
         raceMap.onRaceSelectionChange(Collections.singletonList(actualRace.getRaceIdentifier()));
         raceMapContent.add(raceMapPanel);
         
-        timePanel = new TimePanel(stringConstants, timer);
-        if (actualRace.startOfRace != null) {
-            timePanel.setMin(actualRace.startOfRace);
-        } else {
-            timePanel.setMin(new Date());
-        }
-        //TODO How to set the maximum of the time panel for a live Event
-        if (actualRace.timePointOfNewestEvent != null) {
-            timePanel.setMax(actualRace.timePointOfNewestEvent);
-        } else {
-            timePanel.setMax(new Date(new Date().getTime() + 4 * 60 * 60 * 1000));
-        }
-        raceMapContent.add(timePanel);
+//        timePanel = new TimePanel(stringConstants, timer);
+//        if (actualRace.startOfRace != null) {
+//            timePanel.setMin(actualRace.startOfRace);
+//        } else {
+//            timePanel.setMin(new Date());
+//        }
+//        //TODO How to set the maximum of the time panel for a live Event
+//        if (actualRace.timePointOfNewestEvent != null) {
+//            timePanel.setMax(actualRace.timePointOfNewestEvent);
+//        } else {
+//            timePanel.setMax(new Date(new Date().getTime() + 4 * 60 * 60 * 1000));
+//        }
+//        raceMapContent.add(timePanel);
         
         CollapsablePanel raceMapCollapsablePanel = new CollapsablePanel(stringConstants.map() + ": " + actualRace.name);
         raceMapCollapsablePanel.setWidth("100%");
