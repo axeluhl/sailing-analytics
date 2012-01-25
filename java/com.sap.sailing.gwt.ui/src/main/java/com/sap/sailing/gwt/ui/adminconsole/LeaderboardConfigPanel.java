@@ -298,9 +298,12 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
             public SafeHtml getValue(RaceInLeaderboardDTO raceInLeaderboardDTO) {
                 if(raceInLeaderboardDTO.getRaceIdentifier() != null) {
                     EventNameAndRaceName raceIdentifier = (EventNameAndRaceName) raceInLeaderboardDTO.getRaceIdentifier();
+                    String debugParam = Window.Location.getParameter("gwt.codesvr");
                     String link = "/gwt/RaceBoard.html?leaderboardName="+ selectedLeaderboard.name + 
                             "&raceName=" + raceIdentifier.getRaceName() +
                             "&eventName=" + raceIdentifier.getEventName();
+                    if(debugParam != null && !debugParam.isEmpty())
+                        link += "&gwt.codesvr=" + debugParam; 
                     return ANCHORTEMPLATE.cell(link, raceInLeaderboardDTO.getRaceColumnName());
                 } else {
                     return SafeHtmlUtils.fromString(raceInLeaderboardDTO.getRaceColumnName());
