@@ -1031,59 +1031,60 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         //Get start postition
         Waypoint start = getRace().getCourse().getFirstWaypoint();
         Iterable<MarkPassing> startPassings = getMarkPassingsInOrder(start);
-        MarkPassing startPassing = startPassings.iterator().next();
-        Position startPosition = getApproximatePosition(start, startPassing.getTimePoint());
-        
-        try {
-            //Get distance to nearest placemark and calculate the search radius
-            Placemark startNearest = ReverseGeocoder.INSTANCE.getPlacemarkNearest(startPosition);
-            Distance startNearestDistance = startNearest.distanceFrom(startPosition);
-            double startRadius = startNearestDistance.getKilometers() * GEONAMES_RADIUS_CACLCULATION_FACTOR;
-            
-            //Get the estimated best start place
-            startBest = ReverseGeocoder.INSTANCE.getPlacemarkLast(startPosition, startRadius,
-                    new Placemark.ByPopulationDistanceRatio(startPosition));
-        } catch (IOException e) {
-            logger.throwing(TrackedRaceImpl.class.getName(), "getPlaceOrder()", e);
-        } catch (ParseException e) {
-            logger.throwing(TrackedRaceImpl.class.getName(), "getPlaceOrder()", e);
-        }
+        if (startPassings.iterator().hasNext()) {
+            MarkPassing startPassing = startPassings.iterator().next();
+            Position startPosition = getApproximatePosition(start, startPassing.getTimePoint());
 
-        //Get finish position
-        Waypoint finish = getRace().getCourse().getLastWaypoint();
-        Iterable<MarkPassing> finishPassings = getMarkPassingsInOrder(finish);
-        Iterator<MarkPassing> finishPassingsIterator = finishPassings.iterator();
-        MarkPassing finishPassing = null;
-        while (finishPassingsIterator.hasNext()) {
-            finishPassing = (MarkPassing) finishPassingsIterator.next();
-        }
-        Position finishPosition = getApproximatePosition(finish, finishPassing.getTimePoint());
-        
-        if (startPosition.getDistance(finishPosition).getKilometers() > ReverseGeocoder.POSITION_CACHE_DISTANCE_LIMIT_IN_KM) {
             try {
                 // Get distance to nearest placemark and calculate the search radius
-                Placemark finishNearest = ReverseGeocoder.INSTANCE.getPlacemarkNearest(finishPosition);
-                Distance finishNearestDistance = finishNearest.distanceFrom(finishPosition);
-                double finishRadius = finishNearestDistance.getKilometers() * GEONAMES_RADIUS_CACLCULATION_FACTOR;
+                Placemark startNearest = ReverseGeocoder.INSTANCE.getPlacemarkNearest(startPosition);
+                Distance startNearestDistance = startNearest.distanceFrom(startPosition);
+                double startRadius = startNearestDistance.getKilometers() * GEONAMES_RADIUS_CACLCULATION_FACTOR;
 
-                // Get the estimated best finish place
-                finishBest = ReverseGeocoder.INSTANCE.getPlacemarkLast(finishPosition, finishRadius,
-                        new Placemark.ByPopulationDistanceRatio(finishPosition));
+                // Get the estimated best start place
+                startBest = ReverseGeocoder.INSTANCE.getPlacemarkLast(startPosition, startRadius,
+                        new Placemark.ByPopulationDistanceRatio(startPosition));
             } catch (IOException e) {
                 logger.throwing(TrackedRaceImpl.class.getName(), "getPlaceOrder()", e);
             } catch (ParseException e) {
                 logger.throwing(TrackedRaceImpl.class.getName(), "getPlaceOrder()", e);
             }
-        }
-        
-        if (startBest != null) {
-            if (finishBest != null) {
-                order = new RacePlaceOrderImpl(startBest, finishBest);
-            } else {
-                order = new RacePlaceOrderImpl(startBest, startBest);
+
+            // Get finish position
+            Waypoint finish = getRace().getCourse().getLastWaypoint();
+            Iterable<MarkPassing> finishPassings = getMarkPassingsInOrder(finish);
+            Iterator<MarkPassing> finishPassingsIterator = finishPassings.iterator();
+            MarkPassing finishPassing = null;
+            while (finishPassingsIterator.hasNext()) {
+                finishPassing = (MarkPassing) finishPassingsIterator.next();
+            }
+            Position finishPosition = getApproximatePosition(finish, finishPassing.getTimePoint());
+
+            if (startPosition.getDistance(finishPosition).getKilometers() > ReverseGeocoder.POSITION_CACHE_DISTANCE_LIMIT_IN_KM) {
+                try {
+                    // Get distance to nearest placemark and calculate the search radius
+                    Placemark finishNearest = ReverseGeocoder.INSTANCE.getPlacemarkNearest(finishPosition);
+                    Distance finishNearestDistance = finishNearest.distanceFrom(finishPosition);
+                    double finishRadius = finishNearestDistance.getKilometers() * GEONAMES_RADIUS_CACLCULATION_FACTOR;
+
+                    // Get the estimated best finish place
+                    finishBest = ReverseGeocoder.INSTANCE.getPlacemarkLast(finishPosition, finishRadius,
+                            new Placemark.ByPopulationDistanceRatio(finishPosition));
+                } catch (IOException e) {
+                    logger.throwing(TrackedRaceImpl.class.getName(), "getPlaceOrder()", e);
+                } catch (ParseException e) {
+                    logger.throwing(TrackedRaceImpl.class.getName(), "getPlaceOrder()", e);
+                }
+            }
+
+            if (startBest != null) {
+                if (finishBest != null) {
+                    order = new RacePlaceOrderImpl(startBest, finishBest);
+                } else {
+                    order = new RacePlaceOrderImpl(startBest, startBest);
+                }
             }
         }
-        
         return order;
     }
     

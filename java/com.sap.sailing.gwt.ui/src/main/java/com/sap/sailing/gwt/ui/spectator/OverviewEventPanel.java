@@ -530,7 +530,8 @@ public class OverviewEventPanel extends AbstractEventPanel {
         sortHandler.setComparator(locationColumn, new Comparator<EventDTO>() {
             @Override
             public int compare(EventDTO e1, EventDTO e2) {
-                return e1.locations.compareTo(e2.locations);
+                return e1.locations == null ? e2.locations == null ? 0 : -1 : e2.locations == null ? 1 : e1.locations
+                        .compareTo(e2.locations);
             }
         });
         sortHandler.setComparator(nameColumn, new Comparator<EventDTO>() {
