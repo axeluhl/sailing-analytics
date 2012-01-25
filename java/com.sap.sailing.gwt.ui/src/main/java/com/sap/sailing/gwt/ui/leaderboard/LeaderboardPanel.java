@@ -6,9 +6,11 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.Cell.Context;
@@ -1175,11 +1177,15 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
      * Removes all Columns of type racecolumns of leaderboardTable
      */
     private void removeRaceColumnsNotSelected(List<RaceInLeaderboardDTO> selectedRaceColumns) {
+        Set<String> selectedRaceColumnNames = new HashSet<String>();
+        for (RaceInLeaderboardDTO selectedRaceColumn : selectedRaceColumns) {
+            selectedRaceColumnNames.add(selectedRaceColumn.getRaceColumnName());
+        }
         List<Column<LeaderboardRowDTO, ?>> columnsToRemove = new ArrayList<Column<LeaderboardRowDTO, ?>>();
         for (int i = 0; i < getLeaderboardTable().getColumnCount(); i++) {
             Column<LeaderboardRowDTO, ?> c = getLeaderboardTable().getColumn(i);
             if (c instanceof RaceColumn
-                    && (leaderboard == null || !selectedRaceColumns.contains(((RaceColumn<?>) c).getRaceName()))) {
+                    && (leaderboard == null || !selectedRaceColumnNames.contains(((RaceColumn<?>) c).getRaceName()))) {
                 columnsToRemove.add(c);
             }
         }
