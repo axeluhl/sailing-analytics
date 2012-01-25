@@ -33,9 +33,7 @@ import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
-import com.sap.sailing.gwt.ui.shared.components.Component;
 import com.sap.sailing.gwt.ui.shared.components.ComponentViewer;
-import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
 
 /**
  * A panel showing a list of components visualizing a race from the events announced by calls to {@link #fillEvents(List)}.
@@ -46,7 +44,7 @@ import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
  * @author Frank Mittag, Axel Uhl (d043530)
  *
  */
-public class RaceBoardPanel extends FormPanel implements Component<RaceBoardSettings>, EventDisplayer, RaceSelectionChangeListener {
+public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSelectionChangeListener {
     private final SailingServiceAsync sailingService;
     private final ErrorReporter errorReporter;
     private String raceBoardName;
@@ -160,15 +158,6 @@ public class RaceBoardPanel extends FormPanel implements Component<RaceBoardSett
         return timePanel; 
     }
 
-    @Override
-    public Widget getEntryWidget() {
-        return this;
-    }
-
-    public void updateSettings(RaceBoardSettings result) {
-
-    }
-
     protected SailingServiceAsync getSailingService() {
         return sailingService;
     }
@@ -183,21 +172,6 @@ public class RaceBoardPanel extends FormPanel implements Component<RaceBoardSett
 
     protected ErrorReporter getErrorReporter() {
         return errorReporter;
-    }
-
-    @Override
-    public String getLocalizedShortName() {
-        return null;
-    }
-
-    @Override
-    public boolean hasSettings() {
-        return true;
-    }
-
-    @Override
-    public SettingsDialogComponent<RaceBoardSettings> getSettingsDialogComponent() {
-        return null;
     }
 
     @Override
