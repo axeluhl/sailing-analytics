@@ -43,8 +43,8 @@ public interface TrackedRace {
     RaceIdentifier getRaceIdentifier();
     
     /**
-     * @return The locations (start, finish, ...) of the race in form of {@link RacePlaceOrder} or null if there are no
-     *         valid locations
+     * @return The locations (start, finish, ...) of the race in form of {@link RacePlaceOrder} or <code>null</code> if
+     *         there are no valid locations
      */
     RacePlaceOrder getPlaceOrder();
     
