@@ -52,7 +52,7 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
  * 
  */
 public class OverviewEventPanel extends AbstractEventPanel {
-
+    
     private TextBox locationTextBox;
     private TextBox nameTextBox;
     private TextBox fromTextBox;
@@ -456,7 +456,6 @@ public class OverviewEventPanel extends AbstractEventPanel {
     }
     
     private void leaderboardSelectionChanged() {
-        //TODO Actions when the leaderboard selection changes
         LeaderboardDTO selectedLeaderboard = leaderboardsListSelectionModel.getSelectedObject();
         if (selectedLeaderboard != null) {
             setDisplayedLeaderboard(selectedLeaderboard);
