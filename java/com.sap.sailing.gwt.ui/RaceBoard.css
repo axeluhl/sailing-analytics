@@ -200,8 +200,26 @@ input.magnifier {
 .collapsablePanel-closed {
 }
 
-.collapsablePanel-header-toolbar {
+.collapsablePanel-header-text{
+	font-size: 14px;
+	font-weight: bold;
+	float:left;
+}
+
+.collapsablePanel-header-image{
+	float:left;
+}
+
+.collapsablePanel-header-collapse{
+	align:left;
+	float:left;
+	width:95%;
+	height:100%;
+}
+
+.collapsablePanel-toolbar {
 	align: right;
+	float: right;
 	padding: 3px;	
 }
 

@@ -53,6 +53,7 @@ public final class CollapsablePanel extends Composite implements HasWidgets.ForI
      * Used to wrap widgets in the header to provide click support. Effectively wraps the widget in an
      * <code>anchor</code> to get automatic keyboard access.
      */
+    /*
     private final class ClickableHeader extends SimplePanel {
 
         private ClickableHeader() {
@@ -77,7 +78,7 @@ public final class CollapsablePanel extends Composite implements HasWidgets.ForI
             }
         }
     }
-
+*/
     /**
      * An {@link Animation} used to open the content.
      */
@@ -161,16 +162,14 @@ public final class CollapsablePanel extends Composite implements HasWidgets.ForI
      */
     private static final int ANIMATION_DURATION = 350;
 
-    // Stylename constants.
+    // style name constants.
     private static final String STYLENAME_DEFAULT = "collapsablePanel";
 
-    private static final String STYLENAME_SUFFIX_OPEN = "collapsablePanel-open";
+    private static final String STYLENAME_SUFFIX_OPEN = "open";
 
-    private static final String STYLENAME_SUFFIX_CLOSED = "collapsablePanel-closed";
+    private static final String STYLENAME_SUFFIX_CLOSED = "closed";
 
     private static final String STYLENAME_HEADER = "collapsablePanel-header";
-
-    private static final String STYLENAME_HEADER_TOOLBAR = "collapsablePanel-header-toolbar";
 
     private static final String STYLENAME_CONTENT = "collapsablePanel-content";
 
@@ -195,10 +194,8 @@ public final class CollapsablePanel extends Composite implements HasWidgets.ForI
      */
     private final SimplePanel headerWrapper = new SimplePanel();
 
-    private final FlowPanel embeddedHeader = new FlowPanel();
+    private CollapsablePanelHeader headerPanel;
     
-    private final ClickableHeader clickableHeader = new ClickableHeader();
-
     private boolean isAnimationEnabled = false;
 
     private boolean isOpen = false;
@@ -228,9 +225,10 @@ public final class CollapsablePanel extends Composite implements HasWidgets.ForI
      * @param headerText
      *            the text to be displayed in the header
      */
-    public CollapsablePanel(ImageResource openImage, ImageResource closedImage, String headerText) {
+    public CollapsablePanel(ImageResource openImage, ImageResource closedImage, String headerText, boolean hasToolbar) {
         this();
-        setClickableHeader(new CollapsablePanelDefaultHeader(this, openImage, closedImage, headerText));
+        headerPanel = new CollapsablePanelHeader(this, openImage, closedImage, headerText, hasToolbar);
+        setHeader(headerPanel);
     }
 
     /**
@@ -239,22 +237,12 @@ public final class CollapsablePanel extends Composite implements HasWidgets.ForI
      * @param headerText
      *            the text to be displayed in the header
      */
-    public CollapsablePanel(String headerText) {
-        this(resources.openIcon(), resources.closeIcon(), headerText);
-    }
-
-    private void setClickableHeader(Widget widget) {
-
-        clickableHeader.add(widget);
-        embeddedHeader.add(clickableHeader);
-        headerWrapper.setWidget(embeddedHeader);
+    public CollapsablePanel(String headerText, boolean hasToolbar) {
+        this(resources.openIcon(), resources.closeIcon(), headerText, hasToolbar);
     }
 
     public void setHeaderToolbar(Widget toolbar) {
- 
-        if (toolbar != null) {
-            embeddedHeader.add(toolbar);
-        }
+        headerPanel.setToolbar(toolbar);
     }
 
     public void add(Widget w) {
@@ -353,6 +341,23 @@ public final class CollapsablePanel extends Composite implements HasWidgets.ForI
 
     public void setAnimationEnabled(boolean enable) {
         isAnimationEnabled = enable;
+    }
+
+    public void setHeader(Widget headerContent) {
+        final Widget currentHeaderContent = getHeader();
+
+        // Remove existing header content widget.
+        if (currentHeaderContent != null) {
+            headerWrapper.setWidget(null);
+            currentHeaderContent.removeStyleName(STYLENAME_HEADER);
+        }
+
+        // Add new header content widget if != null.
+        if (headerContent != null) {
+            headerWrapper.setWidget(headerContent);
+            
+            headerContent.addStyleName(STYLENAME_HEADER);
+        }
     }
 
     /**

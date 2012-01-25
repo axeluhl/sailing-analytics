@@ -49,7 +49,7 @@ public class CollapsableComponentViewer<SettingsType> implements ComponentViewer
 
     private CollapsablePanel createCollapsablePanel(Panel contentPanel, String panelTitle, String defaultContentWidth, String defaultContentHeight)
     {
-        CollapsablePanel collapsablePanel = new CollapsablePanel (panelTitle);
+        CollapsablePanel collapsablePanel = new CollapsablePanel (panelTitle, hasHeaderToolbar);
         collapsablePanel.setSize("100%", "100%");
         collapsablePanel.setOpen(true);
         
