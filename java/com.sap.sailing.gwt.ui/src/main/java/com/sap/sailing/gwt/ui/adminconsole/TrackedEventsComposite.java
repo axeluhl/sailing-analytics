@@ -131,7 +131,7 @@ public class TrackedEventsComposite extends FormPanel implements EventDisplayer,
         TextColumn<RaceDTO> eventNameColumn = new TextColumn<RaceDTO>() {
             @Override
             public String getValue(RaceDTO raceDTO) {
-                return raceDTO.name;
+                return raceDTO.getRegatta().getEvent().name;
             }
         };
         eventNameColumn.setSortable(true);
