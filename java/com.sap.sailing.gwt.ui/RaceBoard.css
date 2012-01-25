@@ -149,15 +149,16 @@ input.magnifier {
 }
 
 .timeLineInnerBgPanel {
-	background: #f6f6f6;
+	background: url(images/timeslider-bg.png) 0 0 repeat-x #f6f6f6;
 	border-top-left-radius: 6px;
 	border-top-right-radius: 6px; 
-	height: 80px;
+	height: 56px;
+	padding: 10px;
 }
 
 .footerShadowPanel {
 	position: fixed;
-	height: 50px;
+	height: 15px;
 	bottom: 0;
 	background: url(images/footer_shadow.png) left bottom repeat-x;
 	width: 100%;
@@ -195,7 +196,7 @@ input.magnifier {
 }
 
 .collapsablePanel-open {
-}
+}	
 
 .collapsablePanel-closed {
 }
