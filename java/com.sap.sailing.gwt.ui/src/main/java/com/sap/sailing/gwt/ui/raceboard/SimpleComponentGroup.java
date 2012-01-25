@@ -57,6 +57,4 @@ public class SimpleComponentGroup<SettingsType> implements ComponentGroup<Settin
     public Iterable<Component<?>> getComponents() {
         return components;
     }
-
-
 }

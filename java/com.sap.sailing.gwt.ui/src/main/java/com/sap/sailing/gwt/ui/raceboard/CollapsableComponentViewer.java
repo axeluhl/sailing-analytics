@@ -8,6 +8,7 @@ import com.sap.sailing.gwt.ui.shared.components.Component;
 import com.sap.sailing.gwt.ui.shared.components.ComponentGroup;
 import com.sap.sailing.gwt.ui.shared.components.ComponentToolbar;
 import com.sap.sailing.gwt.ui.shared.components.ComponentViewer;
+import com.sap.sailing.gwt.ui.shared.components.IsEmbeddableComponent;
 
 /**
  * A GWT component that visualizes a {@link ComponentGroup} or a {@link Component} including menus to scroll quickly to the embedded view
@@ -24,7 +25,7 @@ public class CollapsableComponentViewer<SettingsType> implements ComponentViewer
 
     private final StringMessages stringMessages;
     
-    private boolean hasHeaderToolbar = false;
+    private boolean hasHeaderToolbar = true;
     
     public CollapsableComponentViewer(Component<SettingsType> component, String defaultWidth, String defaultHeight, StringMessages stringMessages) {
         this.component = component;
@@ -53,9 +54,15 @@ public class CollapsableComponentViewer<SettingsType> implements ComponentViewer
         collapsablePanel.setOpen(true);
         
         if(hasHeaderToolbar) {
-            ComponentToolbar<SettingsType> toolbar = new ComponentToolbar<SettingsType>(component, stringMessages);
-            toolbar.addSettingsButton();
-            collapsablePanel.setHeaderToolbar(toolbar);
+            if(component instanceof IsEmbeddableComponent) {
+                IsEmbeddableComponent embeddableComponent = (IsEmbeddableComponent) component;
+                if(embeddableComponent.getToolbarWidget() != null)
+                    collapsablePanel.setHeaderToolbar(embeddableComponent.getToolbarWidget());
+            } else {
+                ComponentToolbar<SettingsType> toolbar = new ComponentToolbar<SettingsType>(component, stringMessages);
+                toolbar.addSettingsButton();
+                collapsablePanel.setHeaderToolbar(toolbar);
+            }
         }
         
         contentPanel.setSize(defaultContentWidth, defaultContentHeight);

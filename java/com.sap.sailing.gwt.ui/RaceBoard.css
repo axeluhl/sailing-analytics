@@ -200,6 +200,11 @@ input.magnifier {
 .collapsablePanel-closed {
 }
 
+.collapsablePanel-header-toolbar {
+	align: right;
+	padding: 3px;	
+}
+
 .raceBoardPanelHeader {
 	
 }

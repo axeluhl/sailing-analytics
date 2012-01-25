@@ -58,6 +58,7 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardRowDTO;
 import com.sap.sailing.gwt.ui.shared.LegEntryDTO;
 import com.sap.sailing.gwt.ui.shared.RaceInLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.components.Component;
+import com.sap.sailing.gwt.ui.shared.components.IsEmbeddableComponent;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialog;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
 
@@ -68,7 +69,7 @@ import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
  * 
  */
 public class LeaderboardPanel extends FormPanel implements TimeListener, PlayStateListener,
-        Component<LeaderboardSettings>, CompetitorSelectionChangeListener {
+        Component<LeaderboardSettings>, IsEmbeddableComponent, CompetitorSelectionChangeListener {
     private static final int RANK_COLUMN_INDEX = 0;
 
     private static final int SAIL_ID_COLUMN_INDEX = 1;
@@ -157,6 +158,12 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
      */
     private final RaceIdentifier preSelectedRace;
 
+    private final VerticalPanel contentPanel;
+    private final DockPanel headerPanel;
+    private final HorizontalPanel refreshAndSettingsPanel;
+
+    private boolean isEmbedded = false;
+
     private class SettingsClickHandler implements ClickHandler {
         private final StringMessages stringConstants;
 
@@ -173,6 +180,26 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     @Override
     public Widget getEntryWidget() {
         return this;
+    }
+
+    @Override
+    public Widget getHeaderWidget() {
+        return headerPanel;
+    }
+
+    @Override
+    public Widget getContentWidget() {
+        return contentPanel;
+    }
+
+    @Override
+    public Widget getToolbarWidget() {
+        return refreshAndSettingsPanel;
+    }
+
+    @Override
+    public boolean isEmbedded() {
+        return isEmbedded;
     }
 
     public void updateSettings(LeaderboardSettings newSettings) {
@@ -769,16 +796,16 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         getLeaderboardTable().addColumnSortHandler(listHandler);
         loadCompleteLeaderboard(getLeaderboardDisplayDate());
 
-        VerticalPanel vp = new VerticalPanel();
-        DockPanel dockPanel = new DockPanel();
-        DockPanel dockPanel02 = new DockPanel();
-        dockPanel.setWidth("100%");
-        dockPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
-        dockPanel02.setWidth("100%");
-        dockPanel02.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
+        contentPanel = new VerticalPanel();
+        headerPanel = new DockPanel();
+        DockPanel toolbarPanel = new DockPanel();
+        headerPanel.setWidth("100%");
+        headerPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
+        toolbarPanel.setWidth("100%");
+        toolbarPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
         Label leaderboardLabel = new Label(stringConstants.leaderboard() + " " + leaderboardName.toUpperCase());
         leaderboardLabel.addStyleName("leaderboardLabel boldLabel");
-        dockPanel.add(leaderboardLabel, DockPanel.WEST);
+        headerPanel.add(leaderboardLabel, DockPanel.WEST);
         ClickHandler playPauseHandler = new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -790,15 +817,15 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 }
             }
         };
-        HorizontalPanel refreshAndSettingsPanel = new HorizontalPanel();
+        refreshAndSettingsPanel = new HorizontalPanel();
         refreshAndSettingsPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
         HorizontalPanel refreshPanel = new HorizontalPanel();
         refreshPanel.setSpacing(5);
         refreshPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
         refreshPanel.addStyleName("refreshPanel");
-        dockPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
-        dockPanel02.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
-        dockPanel02.addStyleName("refreshAndSettings");
+        headerPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
+        toolbarPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
+        toolbarPanel.addStyleName("refreshAndSettings");
         playPause = new Anchor(getPlayPauseImgHtml(timer.isPlaying()));
         playPause.addClickHandler(playPauseHandler);
         playStateChanged(timer.isPlaying());
@@ -819,11 +846,15 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         refreshAndSettingsPanel.add(chartsAnchor);
         refreshAndSettingsPanel.add(refreshPanel);
         refreshAndSettingsPanel.add(settingsAnchor);
-        dockPanel02.add(refreshAndSettingsPanel, DockPanel.EAST);
-        vp.add(dockPanel);
-        vp.add(dockPanel02);
-        vp.add(getLeaderboardTable());
-        setWidget(vp);
+        toolbarPanel.add(refreshAndSettingsPanel, DockPanel.EAST);
+        if(preSelectedRace == null) {
+            contentPanel.add(headerPanel);
+            contentPanel.add(toolbarPanel);
+        } else {
+            isEmbedded = true;
+        }
+        contentPanel.add(getLeaderboardTable());
+        setWidget(contentPanel);
     }
 
     private SafeHtml getPlayPauseImgHtml(boolean playing) {
