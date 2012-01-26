@@ -3,6 +3,7 @@ package com.sap.sailing.mongodb.test;
 import java.util.ArrayList;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -18,11 +19,17 @@ import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
 
 public class TestStoringAndRetrievingLeaderboardGroups extends AbstractMongoDBTest {
     
+    private MongoObjectFactory mongoObjectFactory = null;
+    private DomainObjectFactory domainObjectFactory = null;
+    
+    @Before
+    public void setUp() {
+        mongoObjectFactory = new MongoObjectFactoryImpl(db);
+        domainObjectFactory = new DomainObjectFactoryImpl(db);
+    }
+    
     @Test
     public void testStoringAndRetrievingSimpleLeaderboardGroup() {
-        MongoObjectFactory mongoObjectFactory = new MongoObjectFactoryImpl(db);
-        DomainObjectFactory domainObjectFactory = new DomainObjectFactoryImpl(db);
-        
         final String[] leaderboardNames = {"Leaderboard 0", "Leaderboard 1", "Leaderboard 2", "Leaderboard 3"};
         final int[] discardIndexResultsStartingWithHowManyRaces = new int[] { 5, 8 };
         
@@ -59,6 +66,42 @@ public class TestStoringAndRetrievingLeaderboardGroups extends AbstractMongoDBTe
         for (int i = 0; i < leaderboardNames.length; i++) {
             Assert.assertEquals(leaderboardNames[i], loadedLeaderboardGroup.getLeaderboards().get(i).getName());
             mongoObjectFactory.removeLeaderboard(leaderboardNames[i]);
+        }
+    }
+    
+    @Test
+    public void testGetLeaderboardsNotInGroup() {
+        final String[] leaderboardNames = {"Leaderboard 0", "Leaderboard 1"};
+        final int[] discardIndexResultsStartingWithHowManyRaces = new int[] { 5, 8 };
+        
+        final String groupName = "Leaderboard Group";
+        final String groupDescription = "A leaderboard group";
+        final ArrayList<Leaderboard> leaderboards = new ArrayList<>();
+        
+        Leaderboard leaderboard = new LeaderboardImpl(leaderboardNames[0], new ScoreCorrectionImpl(),
+                new ResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces));
+        leaderboards.add(leaderboard);
+        mongoObjectFactory.storeLeaderboard(leaderboard);
+        leaderboard = new LeaderboardImpl(leaderboardNames[1], new ScoreCorrectionImpl(),
+                new ResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces));
+        leaderboards.add(leaderboard);
+        mongoObjectFactory.storeLeaderboard(leaderboard);
+        
+        final LeaderboardGroup leaderboardGroup = new LeaderboardGroupImpl(groupName, groupDescription, leaderboards);
+        mongoObjectFactory.storeLeaderboardGroup(leaderboardGroup);
+
+        final String ungroupedLeaderboardName = "Ungrouped Leaderboard 1";
+
+        final Leaderboard ungroupedLeaderboard = new LeaderboardImpl(ungroupedLeaderboardName, new ScoreCorrectionImpl(),
+                new ResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces));
+        mongoObjectFactory.storeLeaderboard(ungroupedLeaderboard);
+        
+        Iterable<Leaderboard> ungroupedLeaderboards = domainObjectFactory.getLeaderboardsNotInGroup();
+        
+        Assert.assertTrue(ungroupedLeaderboards.iterator().hasNext());
+        
+        for (Leaderboard l : ungroupedLeaderboards) {
+            Assert.assertEquals(ungroupedLeaderboardName, l.getName());
         }
     }
 
