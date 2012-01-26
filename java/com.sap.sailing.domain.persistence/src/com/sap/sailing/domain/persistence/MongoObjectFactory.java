@@ -6,6 +6,7 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
 import com.sap.sailing.domain.tracking.TrackedEvent;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -41,5 +42,7 @@ public interface MongoObjectFactory {
     void renameLeaderboard(String oldName, String newName);
 
     void storeRaceIdentifier(RaceIdentifier raceIdentifier, DBObject dbObject);
+    
+    void storeLeaderboardGroup(LeaderboardGroup leaderboardGroup);
 
 }

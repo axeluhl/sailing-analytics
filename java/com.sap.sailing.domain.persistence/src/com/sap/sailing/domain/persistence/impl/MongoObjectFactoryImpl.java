@@ -7,6 +7,8 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
+import com.mongodb.DBRef;
+import com.mongodb.DBRefBase;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -17,6 +19,7 @@ import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
 import com.sap.sailing.domain.leaderboard.ScoreCorrection.MaxPointsReason;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
@@ -183,6 +186,28 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         BasicDBObject query = new BasicDBObject(FieldNames.LEADERBOARD_NAME.name(), oldName);
         BasicDBObject renameUpdate = new BasicDBObject("$set", new BasicDBObject(FieldNames.LEADERBOARD_NAME.name(), newName));
         leaderboardCollection.update(query, renameUpdate);
+    }
+    
+    @Override
+    public void storeLeaderboardGroup(LeaderboardGroup leaderboardGroup) {
+        DBCollection leaderboardGroupCollection = database.getCollection(CollectionNames.LEADERBOARD_GROUPS.name());
+        DBCollection leaderboardCollection = database.getCollection(CollectionNames.LEADERBOARDS.name());
+        
+        BasicDBObject query = new BasicDBObject(FieldNames.LEADERBOARD_GROUP_NAME.name(), leaderboardGroup.getName());
+        
+        BasicDBObject result = new BasicDBObject();
+        result.put(FieldNames.LEADERBOARD_GROUP_NAME.name(), leaderboardGroup.getName());
+        result.put(FieldNames.LEADERBOARD_GROUP_DESCRIPTION.name(), leaderboardGroup.getDescription());
+        BasicDBList dbLeaderboardRefs = new BasicDBList();
+        for (Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
+            BasicDBObject leaderboardQuery = new BasicDBObject(FieldNames.LEADERBOARD_NAME.name(), leaderboard.getName());
+            DBObject dbLeaderboard = leaderboardCollection.find(leaderboardQuery).getQuery();
+            DBRef dbLeaderboardRef = new DBRef(database, dbLeaderboard);
+            dbLeaderboardRefs.add(dbLeaderboardRef);
+        }
+        result.put(FieldNames.LEADERBOARD_GROUP_LEADERBOARDS.name(), dbLeaderboardRefs);
+        
+        leaderboardGroupCollection.update(query, result, true, false);
     }
 
 }
