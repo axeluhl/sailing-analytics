@@ -53,7 +53,7 @@ public class LiveEventViewPanel extends AbstractEventPanel {
         CompetitorSelectionModel competitorSelectionModel = new CompetitorSelectionModel(true);
         LeaderboardPanel leaderboardPanel = new LeaderboardPanel(sailingService, competitorSelectionModel, leaderboard.name, errorReporter, stringConstants);
         
-        CollapsablePanel leaderboardCollapsablePanel = new CollapsablePanel(stringConstants.leaderboard() + ": " + leaderboard.name);
+        CollapsablePanel leaderboardCollapsablePanel = new CollapsablePanel(stringConstants.leaderboard() + ": " + leaderboard.name, true);
         leaderboardCollapsablePanel.setWidth("100%");
         leaderboardCollapsablePanel.setContent(leaderboardPanel);
         
@@ -86,13 +86,11 @@ public class LiveEventViewPanel extends AbstractEventPanel {
 //        }
 //        raceMapContent.add(timePanel);
         
-        CollapsablePanel raceMapCollapsablePanel = new CollapsablePanel(stringConstants.map() + ": " + actualRace.name);
+        CollapsablePanel raceMapCollapsablePanel = new CollapsablePanel(stringConstants.map() + ": " + actualRace.name, true);
         raceMapCollapsablePanel.setWidth("100%");
         raceMapCollapsablePanel.setContent(raceMapContent);
         mainPanel.add(raceMapCollapsablePanel);
         
-        timer.addTimeListener(raceMap);
-        timer.addTimeListener(leaderboardPanel);
         //For testing the timer is setted to the start of the actual race. For productive use, set time to actual time
 //        timer.setTime(new Date().getTime());
         timer.setTime(actualRace.startOfRace.getTime() + 10000);
