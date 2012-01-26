@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.persistence.impl;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Level;
@@ -10,6 +11,7 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
+import com.mongodb.DBRef;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.SpeedWithBearing;
@@ -23,10 +25,12 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
 import com.sap.sailing.domain.leaderboard.ScoreCorrection.MaxPointsReason;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
+import com.sap.sailing.domain.leaderboard.impl.LeaderboardGroupImpl;
 import com.sap.sailing.domain.leaderboard.impl.ResultDiscardingRuleImpl;
 import com.sap.sailing.domain.leaderboard.impl.ScoreCorrectionImpl;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
@@ -116,6 +120,57 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             logger.throwing(DomainObjectFactoryImpl.class.getName(), "loadLeaderboard", t);
         }
         return result;
+    }
+
+    @Override
+    public LeaderboardGroup loadLeaderboardGroup(String name) {
+        DBCollection leaderboardGroupCollection = database.getCollection(CollectionNames.LEADERBOARD_GROUPS.name());
+        LeaderboardGroup leaderboardGroup = null;
+        
+        try {
+            BasicDBObject query = new BasicDBObject();
+            query.put(FieldNames.LEADERBOARD_GROUP_NAME.name(), name);
+            leaderboardGroup = loadLeaderboardGroup(leaderboardGroupCollection.findOne(query));
+        } catch (Throwable t) {
+            logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load leaderboard group "+name+".");
+            logger.throwing(DomainObjectFactoryImpl.class.getName(), "loadLeaderboardGroup", t);
+        }
+        
+        return leaderboardGroup;
+    }
+
+    @Override
+    public Iterable<LeaderboardGroup> getAllLeaderboardGroups() {
+        DBCollection leaderboardGroupCollection = database.getCollection(CollectionNames.LEADERBOARD_GROUPS.name());
+        ArrayList<LeaderboardGroup> leaderboardGroups = new ArrayList<LeaderboardGroup>();
+        
+        try {
+            for (DBObject o : leaderboardGroupCollection.find()) {
+                leaderboardGroups.add(loadLeaderboardGroup(o));
+            }
+        } catch (Throwable t) {
+            logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load leaderboard groups.");
+            logger.throwing(DomainObjectFactoryImpl.class.getName(), "loadLeaderboardGroup", t);
+        }
+        
+        return leaderboardGroups;
+    }
+    
+    private LeaderboardGroup loadLeaderboardGroup(DBObject o) {
+        DBCollection leaderboardCollection = database.getCollection(CollectionNames.LEADERBOARDS.name());
+        
+        String name = (String) o.get(FieldNames.LEADERBOARD_GROUP_NAME.name());
+        String description = (String) o.get(FieldNames.LEADERBOARD_GROUP_DESCRIPTION.name());
+        ArrayList<Leaderboard> leaderboards = new ArrayList<>();
+        
+        BasicDBList dbLeaderboardRefs = (BasicDBList) o.get(FieldNames.LEADERBOARD_GROUP_LEADERBOARDS.name());
+        for (Object object : dbLeaderboardRefs) {
+            DBRef dbLeaderboardRef = (DBRef) object;
+            DBObject dbLeaderboard = leaderboardCollection.findOne(dbLeaderboardRef);
+            leaderboards.add(loadLeaderboard(dbLeaderboard));
+        }
+        
+        return new LeaderboardGroupImpl(name, description, leaderboards);
     }
     
     @Override

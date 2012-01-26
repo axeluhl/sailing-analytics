@@ -201,7 +201,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         BasicDBList dbLeaderboardRefs = new BasicDBList();
         for (Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
             BasicDBObject leaderboardQuery = new BasicDBObject(FieldNames.LEADERBOARD_NAME.name(), leaderboard.getName());
-            DBObject dbLeaderboard = leaderboardCollection.find(leaderboardQuery).getQuery();
+            DBObject dbLeaderboard = leaderboardCollection.findOne(leaderboardQuery);
             DBRef dbLeaderboardRef = new DBRef(database, dbLeaderboard);
             dbLeaderboardRefs.add(dbLeaderboardRef);
         }

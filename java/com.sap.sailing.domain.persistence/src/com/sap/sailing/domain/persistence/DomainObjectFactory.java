@@ -6,6 +6,7 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.persistence.impl.DomainObjectFactoryImpl;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.mongodb.MongoDBService;
@@ -26,5 +27,9 @@ public interface DomainObjectFactory {
     Iterable<Leaderboard> getAllLeaderboards();
 
     RaceIdentifier loadRaceIdentifier(DBObject dbObject);
+    
+    LeaderboardGroup loadLeaderboardGroup(String name);
+    
+    Iterable<LeaderboardGroup> getAllLeaderboardGroups();
 
 }
