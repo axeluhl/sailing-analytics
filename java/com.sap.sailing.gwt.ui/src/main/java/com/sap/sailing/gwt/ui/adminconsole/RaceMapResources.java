@@ -8,6 +8,7 @@ import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.geom.LatLng;
 import com.google.gwt.maps.client.geom.LatLngBounds;
 import com.google.gwt.maps.client.geom.Point;
+import com.google.gwt.maps.client.geom.Size;
 import com.google.gwt.maps.client.overlay.Icon;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.ManeuverType;
@@ -19,42 +20,42 @@ public class RaceMapResources {
     /**
      * Two sails on downwind leg, wind from port (sails on starboard); no highlighting
      */
-    protected ImageTransformer boatIconDownwindPortRotator;
+    protected ImageTransformer boatIconDownwindPortTransformer;
 
     /**
      * Two sails on downwind leg, wind from port (sails on starboard); with highlighting
      */
-    protected ImageTransformer boatIconHighlightedDownwindPortRotator;
+    protected ImageTransformer boatIconHighlightedDownwindPortTransformer;
 
     /**
      * Two sails on downwind leg, wind from starboard (sails on port); no highlighting
      */
-    protected ImageTransformer boatIconDownwindStarboardRotator;
+    protected ImageTransformer boatIconDownwindStarboardTransformer;
 
     /**
      * Two sails on downwind leg, wind from starboard (sails on port); with highlighting
      */
-    protected ImageTransformer boatIconHighlightedDownwindStarboardRotator;
+    protected ImageTransformer boatIconHighlightedDownwindStarboardTransformer;
 
     /**
      * One sail, wind from port (sails on starboard); no highlighting
      */
-    protected ImageTransformer boatIconPortRotator;
+    protected ImageTransformer boatIconPortTransformer;
 
     /**
      * One sail, wind from port (sails on starboard); with highlighting
      */
-    protected ImageTransformer boatIconHighlightedPortRotator;
+    protected ImageTransformer boatIconHighlightedPortTransformer;
 
     /**
      * One sail, wind from starboard (sails on port); no highlighting
      */
-    protected ImageTransformer boatIconStarboardRotator;
+    protected ImageTransformer boatIconStarboardTransformer;
 
     /**
      * One sail, wind from starboard (sails on port); with highlighting
      */
-    protected ImageTransformer boatIconHighlightedStarboardRotator;
+    protected ImageTransformer boatIconHighlightedStarboardTransformer;
 
     protected Icon buoyIcon;
     
@@ -66,15 +67,15 @@ public class RaceMapResources {
 
     public RaceMapResources() {
         maneuverIconsForTypeAndTargetTack = new HashMap<Pair<ManeuverType, Tack>, Icon>();
-        boatIconDownwindPortRotator = new ImageTransformer(resources.lowlightedBoatIconDW_Port());
-        boatIconHighlightedDownwindPortRotator = new ImageTransformer(resources.highlightedBoatIconDW_Port());
-        boatIconDownwindStarboardRotator = new ImageTransformer(resources.lowlightedBoatIconDW_Starboard());
-        boatIconHighlightedDownwindStarboardRotator = new ImageTransformer(resources
+        boatIconDownwindPortTransformer = new ImageTransformer(resources.lowlightedBoatIconDW_Port());
+        boatIconHighlightedDownwindPortTransformer = new ImageTransformer(resources.highlightedBoatIconDW_Port());
+        boatIconDownwindStarboardTransformer = new ImageTransformer(resources.lowlightedBoatIconDW_Starboard());
+        boatIconHighlightedDownwindStarboardTransformer = new ImageTransformer(resources
                 .highlightedBoatIconDW_Starboard());
-        boatIconPortRotator = new ImageTransformer(resources.lowlightedBoatIcon_Port());
-        boatIconHighlightedPortRotator = new ImageTransformer(resources.highlightedBoatIcon_Port());
-        boatIconStarboardRotator = new ImageTransformer(resources.lowlightedBoatIcon_Starboard());
-        boatIconHighlightedStarboardRotator = new ImageTransformer(resources.highlightedBoatIcon_Starboard());
+        boatIconPortTransformer = new ImageTransformer(resources.lowlightedBoatIcon_Port());
+        boatIconHighlightedPortTransformer = new ImageTransformer(resources.highlightedBoatIcon_Port());
+        boatIconStarboardTransformer = new ImageTransformer(resources.lowlightedBoatIcon_Starboard());
+        boatIconHighlightedStarboardTransformer = new ImageTransformer(resources.highlightedBoatIcon_Starboard());
     }
     
     /**
@@ -145,29 +146,29 @@ public class RaceMapResources {
         if (boatFix.tack == Tack.PORT) {
             if (LegType.DOWNWIND == boatFix.legType) {
                 if (highlighted) {
-                    return boatIconHighlightedDownwindStarboardRotator;
+                    return boatIconHighlightedDownwindStarboardTransformer;
                 } else {
-                    return boatIconDownwindStarboardRotator;
+                    return boatIconDownwindStarboardTransformer;
                 }
             } else {
                 if (highlighted) {
-                    return boatIconHighlightedStarboardRotator;
+                    return boatIconHighlightedStarboardTransformer;
                 } else {
-                    return boatIconStarboardRotator;
+                    return boatIconStarboardTransformer;
                 }
             }
         } else {
             if (LegType.DOWNWIND == boatFix.legType) {
                 if (highlighted) {
-                    return boatIconHighlightedDownwindPortRotator;
+                    return boatIconHighlightedDownwindPortTransformer;
                 } else {
-                    return boatIconDownwindPortRotator;
+                    return boatIconDownwindPortTransformer;
                 }
             } else {
                 if (highlighted) {
-                    return boatIconHighlightedPortRotator;
+                    return boatIconHighlightedPortTransformer;
                 } else {
-                    return boatIconPortRotator;
+                    return boatIconPortTransformer;
                 }
             }
         }
@@ -178,28 +179,31 @@ public class RaceMapResources {
     }
 
     public String getBoatImageURL(ImageTransformer boatImageTransformer, GPSFixDTO boatFix) {
-        double realBoatSizeScaleFactor = getRealBoatSizeScaleFactor();
+        double realBoatSizeScaleFactor = getRealBoatSizeScaleFactor(boatImageTransformer.getImageSize());
         return boatImageTransformer.getTransformedImageURL(boatFix.speedWithBearing.bearingInDegrees, realBoatSizeScaleFactor);
     }
 
-    public double getRealBoatSizeScaleFactor() {
+    public double getRealBoatSizeScaleFactor(Size imageSize) {
         // the possible zoom level range is 0 to 21 (zoom level 0 would show the whole world)
         int zoomLevel = map == null ? 1 : map.getZoomLevel();
         double minScaleFactor = 0.33;
         double realBoatSizeScaleFactor = minScaleFactor;
+        // here it would be better to get the boat length from the boat class -> for now we assume a length of 5m 
         double boatLengthInMeter = 5.0; 
-        if(zoomLevel > 5) {
-            int boatSizeXInPixel = 41; 
+        if (zoomLevel > 5) {
+            int boatSizeXInPixel = imageSize.getWidth(); 
             LatLngBounds bounds = map.getBounds();
-            LatLng upperRight = bounds.getNorthEast();
-            LatLng bottomLeft = bounds.getSouthWest();
-            LatLng upperLeft = LatLng.newInstance(upperRight.getLatitude(), bottomLeft.getLongitude());
-            double distXInMeters = upperLeft.distanceFrom(upperRight);
-            int widthInPixel = map.getSize().getWidth();
-            double realBoatSizeInPixel  = (widthInPixel * boatLengthInMeter) / distXInMeters;
-            realBoatSizeScaleFactor = realBoatSizeInPixel / (double) boatSizeXInPixel;
-            if(realBoatSizeScaleFactor < minScaleFactor) {
-                realBoatSizeScaleFactor = minScaleFactor;
+            if (bounds != null) {
+                LatLng upperRight = bounds.getNorthEast();
+                LatLng bottomLeft = bounds.getSouthWest();
+                LatLng upperLeft = LatLng.newInstance(upperRight.getLatitude(), bottomLeft.getLongitude());
+                double distXInMeters = upperLeft.distanceFrom(upperRight);
+                int widthInPixel = map.getSize().getWidth();
+                double realBoatSizeInPixel  = (widthInPixel * boatLengthInMeter) / distXInMeters;
+                realBoatSizeScaleFactor = realBoatSizeInPixel / (double) boatSizeXInPixel;
+                if (realBoatSizeScaleFactor < minScaleFactor) {
+                    realBoatSizeScaleFactor = minScaleFactor;
+                }
             }
         }
         return realBoatSizeScaleFactor;
@@ -208,7 +212,7 @@ public class RaceMapResources {
     public Icon getBoatImageIcon(GPSFixDTO boatFix, boolean highlighted) {
         ImageTransformer boatImageTransformer = getBoatImageTransformer(boatFix, highlighted);
         Icon icon = Icon.newInstance(getBoatImageURL(boatImageTransformer, boatFix));
-        icon.setIconAnchor(boatImageTransformer.getAnchor(getRealBoatSizeScaleFactor()));
+        icon.setIconAnchor(boatImageTransformer.getAnchor(getRealBoatSizeScaleFactor(boatImageTransformer.getImageSize())));
         return icon;
     }
 }

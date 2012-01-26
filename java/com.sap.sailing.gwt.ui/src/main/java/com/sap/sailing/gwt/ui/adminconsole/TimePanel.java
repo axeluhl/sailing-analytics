@@ -30,6 +30,7 @@ public class TimePanel extends FormPanel implements TimeListener, PlayStateListe
     private final DoubleBox delayBox;
     private boolean delayBoxHasFocus;
     private final Label timeLabel;
+    //private final SliderBar sliderBar;
 
     public TimePanel(StringMessages stringConstants, Timer timer) {
         this.timer = timer;
@@ -38,6 +39,29 @@ public class TimePanel extends FormPanel implements TimeListener, PlayStateListe
         VerticalPanel vp = new VerticalPanel();
         vp.setSize("100%", "100%");
         vp.setSpacing(5);
+/*
+        Date date = new Date();
+        long oneHour = 60 * 60 * 1000;
+        long startTime = date.getTime();
+        long endTime = startTime + oneHour;
+        sliderBar = new SliderBar(startTime, endTime);
+        sliderBar.setEnabled(true);
+        sliderBar.setStepSize(60000);
+        sliderBar.setNumLabels(8);
+        sliderBar.setNumTicks(8);
+        sliderBar.setCurrentValue(endTime / 2, true);
+        sliderBar.setLabelFormatter(new SliderBar.LabelFormatter() {
+
+            final DateTimeFormat formatter = DateTimeFormat.getFormat("HH:mm"); 
+            @Override
+            public String formatLabel(SliderBar slider, double value) {
+                Date date = new Date();
+                date.setTime((long) value);
+                return formatter.format(date);
+            }
+        });
+        vp.add(sliderBar);
+  */      
         HorizontalPanel hp = new HorizontalPanel();
         hp.setSize("100%", "100%");
         vp.add(hp);
@@ -99,6 +123,7 @@ public class TimePanel extends FormPanel implements TimeListener, PlayStateListe
         hp.add(new Label(stringConstants.time()));
         timeLabel = new Label();
         hp.add(timeLabel);
+
         slider = new SliderWidget();
         slider.setTotalUnits(10);
         EventListener sliderListener = new EventListener() {
@@ -110,6 +135,7 @@ public class TimePanel extends FormPanel implements TimeListener, PlayStateListe
         slider.attachChangeEvent(sliderListener);
         slider.attachLiveChangeEvent(sliderListener);
         vp.add(slider);
+        
         setWidget(vp);
     }
 

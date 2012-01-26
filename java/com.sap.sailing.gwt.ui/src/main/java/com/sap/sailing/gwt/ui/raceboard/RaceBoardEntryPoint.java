@@ -93,10 +93,6 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         raceBoardPanel = new RaceBoardPanel(sailingService, raceSelectionModel, leaderboardName,
                 RaceBoardEntryPoint.this, stringMessages);
         raceBoardPanel.fillEvents(events);
-        String padding = Window.Location.getParameter("padding");
-        if (padding != null && Boolean.valueOf(padding)) {
-            raceBoardPanel.addStyleName("leftPaddedPanel");
-        }
 
         logoAndTitlePanel.add(raceBoardPanel.getNavigationWidget());
         

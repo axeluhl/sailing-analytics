@@ -1422,6 +1422,11 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     }
 
     @Override
+    public boolean hasToolbar() {
+        return true;
+    }
+
+    @Override
     public SettingsDialogComponent<LeaderboardSettings> getSettingsDialogComponent() {
         return new LeaderboardSettingsDialogComponent(Collections.unmodifiableList(selectedManeuverDetails),
                 Collections.unmodifiableList(selectedLegDetails),
