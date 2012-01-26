@@ -153,7 +153,9 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
         Column<LeaderboardDTO, SafeHtml> linkColumn = new Column<LeaderboardDTO, SafeHtml>(anchorCell) {
             @Override
             public SafeHtml getValue(LeaderboardDTO object) {
-                return ANCHORTEMPLATE.cell("/gwt/Leaderboard.html?name=" + object.name, object.name);
+                String debugParam = Window.Location.getParameter("gwt.codesvr");
+                return ANCHORTEMPLATE.cell("/gwt/Leaderboard.html?name=" + object.name +
+                        (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr="+debugParam : ""), object.name);
             }
 
         };
@@ -298,9 +300,12 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
             public SafeHtml getValue(RaceInLeaderboardDTO raceInLeaderboardDTO) {
                 if(raceInLeaderboardDTO.getRaceIdentifier() != null) {
                     EventNameAndRaceName raceIdentifier = (EventNameAndRaceName) raceInLeaderboardDTO.getRaceIdentifier();
+                    String debugParam = Window.Location.getParameter("gwt.codesvr");
                     String link = "/gwt/RaceBoard.html?leaderboardName="+ selectedLeaderboard.name + 
                             "&raceName=" + raceIdentifier.getRaceName() +
                             "&eventName=" + raceIdentifier.getEventName();
+                    if(debugParam != null && !debugParam.isEmpty())
+                        link += "&gwt.codesvr=" + debugParam; 
                     return ANCHORTEMPLATE.cell(link, raceInLeaderboardDTO.getRaceColumnName());
                 } else {
                     return SafeHtmlUtils.fromString(raceInLeaderboardDTO.getRaceColumnName());

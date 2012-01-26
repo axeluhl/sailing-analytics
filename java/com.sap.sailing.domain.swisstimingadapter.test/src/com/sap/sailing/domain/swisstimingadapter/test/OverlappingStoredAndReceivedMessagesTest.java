@@ -156,7 +156,7 @@ public class OverlappingStoredAndReceivedMessagesTest implements RaceSpecificMes
             }
         }
         synchronized (this) {
-            wait(500l); // wait another half second for spurious extra messages to be received
+            wait(1000l); // wait another half second for spurious extra messages to be received
         }
         assertTrue(receivedSomething[0]);
         assertEquals(COUNT, coursesReceived.size());

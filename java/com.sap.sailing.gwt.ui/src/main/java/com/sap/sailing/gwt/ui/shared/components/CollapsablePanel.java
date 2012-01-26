@@ -13,16 +13,10 @@ import com.google.gwt.event.logical.shared.OpenHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.Element;
-import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HasAnimation;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HasText;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HasWidgets;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.SimplePanel;
@@ -56,6 +50,7 @@ public final class CollapsablePanel extends Composite implements HasWidgets.ForI
      * Used to wrap widgets in the header to provide click support. Effectively wraps the widget in an
      * <code>anchor</code> to get automatic keyboard access.
      */
+    /*
     private final class ClickableHeader extends SimplePanel {
 
         private ClickableHeader() {
@@ -80,7 +75,7 @@ public final class CollapsablePanel extends Composite implements HasWidgets.ForI
             }
         }
     }
-
+*/
     /**
      * An {@link Animation} used to open the content.
      */
@@ -164,12 +159,12 @@ public final class CollapsablePanel extends Composite implements HasWidgets.ForI
      */
     private static final int ANIMATION_DURATION = 350;
 
-    // Stylename constants.
+    // style name constants.
     private static final String STYLENAME_DEFAULT = "collapsablePanel";
 
-    private static final String STYLENAME_SUFFIX_OPEN = "collapsablePanel-open";
+    private static final String STYLENAME_SUFFIX_OPEN = "open";
 
-    private static final String STYLENAME_SUFFIX_CLOSED = "collapsablePanel-closed";
+    private static final String STYLENAME_SUFFIX_CLOSED = "closed";
 
     private static final String STYLENAME_HEADER = "collapsablePanel-header";
 
@@ -192,14 +187,12 @@ public final class CollapsablePanel extends Composite implements HasWidgets.ForI
     private final SimplePanel contentWrapper = new SimplePanel();
 
     /**
-     * holds the header widget.
+     * The wrapper around the header widget.
      */
-//    private final DockPanel header = new DockPanel();
+    private final SimplePanel headerWrapper = new SimplePanel();
 
-    private final Grid header = new Grid(1,2);
-
-    private final ClickableHeader clickableHeader = new ClickableHeader();
-
+    private CollapsablePanelHeader headerPanel;
+    
     private boolean isAnimationEnabled = false;
 
     private boolean isOpen = false;
@@ -210,14 +203,7 @@ public final class CollapsablePanel extends Composite implements HasWidgets.ForI
     private CollapsablePanel() {
         initWidget(mainPanel);
 
-        header.setWidth("100%");
-//        header.getCellFormatter().setWidth(0,  0, "50%");
-//        header.getCellFormatter().setWidth(0,  1, "50%");
-        header.getCellFormatter().setAlignment(0, 0, HasHorizontalAlignment.ALIGN_LEFT, HasVerticalAlignment.ALIGN_MIDDLE); 
-        header.getCellFormatter().setAlignment(0, 1, HasHorizontalAlignment.ALIGN_RIGHT, HasVerticalAlignment.ALIGN_MIDDLE); 
-        
-        //header.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
-        mainPanel.add(header);
+        mainPanel.add(headerWrapper);
         mainPanel.add(contentWrapper);
         DOM.setStyleAttribute(contentWrapper.getElement(), "padding", "0px");
         DOM.setStyleAttribute(contentWrapper.getElement(), "overflow", "hidden");
@@ -236,9 +222,10 @@ public final class CollapsablePanel extends Composite implements HasWidgets.ForI
      * @param headerText
      *            the text to be displayed in the header
      */
-    public CollapsablePanel(ImageResource openImage, ImageResource closedImage, String headerText) {
+    public CollapsablePanel(ImageResource openImage, ImageResource closedImage, String headerText, boolean hasToolbar) {
         this();
-        setClickableHeader(new CollapsablePanelDefaultHeader(this, openImage, closedImage, headerText));
+        headerPanel = new CollapsablePanelHeader(this, openImage, closedImage, headerText, hasToolbar);
+        setHeader(headerPanel);
     }
 
     /**
@@ -247,17 +234,12 @@ public final class CollapsablePanel extends Composite implements HasWidgets.ForI
      * @param headerText
      *            the text to be displayed in the header
      */
-    public CollapsablePanel(String headerText) {
-        this(resources.openIcon(), resources.closeIcon(), headerText);
+    public CollapsablePanel(String headerText, boolean hasToolbar) {
+        this(resources.openIcon(), resources.closeIcon(), headerText, hasToolbar);
     }
 
-    private void setClickableHeader(Widget widget) {
-        clickableHeader.add(widget);
-        header.setWidget(0, 0, clickableHeader);
-    }
-
-    public void setHeaderToolbar(HorizontalPanel toolbar) {
-        header.setWidget(0, 1, toolbar);
+    public void setHeaderToolbar(Widget toolbar) {
+        headerPanel.setToolbar(toolbar);
     }
 
     public void add(Widget w) {
@@ -304,7 +286,7 @@ public final class CollapsablePanel extends Composite implements HasWidgets.ForI
      * @return the widget currently being used as a header
      */
     public Widget getHeader() {
-        return header.asWidget();
+        return headerWrapper.getWidget();
     }
 
     /**
@@ -314,7 +296,7 @@ public final class CollapsablePanel extends Composite implements HasWidgets.ForI
      * @return a reference to the header widget if it implements {@link HasText}, <code>null</code> otherwise
      */
     public HasText getHeaderTextAccessor() {
-        Widget widget = header.asWidget();
+        Widget widget = headerWrapper.getWidget();
         return (widget instanceof HasText) ? (HasText) widget : null;
     }
 
@@ -356,6 +338,23 @@ public final class CollapsablePanel extends Composite implements HasWidgets.ForI
 
     public void setAnimationEnabled(boolean enable) {
         isAnimationEnabled = enable;
+    }
+
+    public void setHeader(Widget headerContent) {
+        final Widget currentHeaderContent = getHeader();
+
+        // Remove existing header content widget.
+        if (currentHeaderContent != null) {
+            headerWrapper.setWidget(null);
+            currentHeaderContent.removeStyleName(STYLENAME_HEADER);
+        }
+
+        // Add new header content widget if != null.
+        if (headerContent != null) {
+            headerWrapper.setWidget(headerContent);
+            
+            headerContent.addStyleName(STYLENAME_HEADER);
+        }
     }
 
     /**
@@ -408,7 +407,7 @@ public final class CollapsablePanel extends Composite implements HasWidgets.ForI
     @Override
     protected void onEnsureDebugId(String baseID) {
         super.onEnsureDebugId(baseID);
-        header.ensureDebugId(baseID + "-header");
+        headerWrapper.ensureDebugId(baseID + "-header");
     }
 
     private void fireEvent() {
