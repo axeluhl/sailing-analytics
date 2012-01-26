@@ -153,7 +153,9 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
         Column<LeaderboardDTO, SafeHtml> linkColumn = new Column<LeaderboardDTO, SafeHtml>(anchorCell) {
             @Override
             public SafeHtml getValue(LeaderboardDTO object) {
-                return ANCHORTEMPLATE.cell("/gwt/Leaderboard.html?name=" + object.name, object.name);
+                String debugParam = Window.Location.getParameter("gwt.codesvr");
+                return ANCHORTEMPLATE.cell("/gwt/Leaderboard.html?name=" + object.name +
+                        (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr="+debugParam : ""), object.name);
             }
 
         };

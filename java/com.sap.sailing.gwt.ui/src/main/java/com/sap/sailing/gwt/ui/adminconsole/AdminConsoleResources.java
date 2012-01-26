@@ -20,7 +20,7 @@ interface AdminConsoleResources extends ClientBundle {
     @Source("com/sap/sailing/gwt/ui/client/images/link_break.png")
     ImageResource unlinkIcon();
 
-    @Source("com/sap/sailing/gwt/ui/client/images/open.png")
+    @Source("com/sap/sailing/gwt/ui/client/images/openBrowser.png")
     ImageResource openBrowserIcon();
 
     @Source("com/sap/sailing/gwt/ui/client/images/dice.png")
