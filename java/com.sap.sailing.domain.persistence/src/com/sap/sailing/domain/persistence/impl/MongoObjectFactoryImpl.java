@@ -2,13 +2,13 @@ package com.sap.sailing.domain.persistence.impl;
 
 import java.util.logging.Logger;
 
+import org.bson.types.ObjectId;
+
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
-import com.mongodb.DBRef;
-import com.mongodb.DBRefBase;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -193,19 +193,27 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         DBCollection leaderboardGroupCollection = database.getCollection(CollectionNames.LEADERBOARD_GROUPS.name());
         DBCollection leaderboardCollection = database.getCollection(CollectionNames.LEADERBOARDS.name());
         
+        try {
+            leaderboardGroupCollection.ensureIndex(FieldNames.LEADERBOARD_GROUP_NAME.name());
+        } catch (NullPointerException npe) {
+            // sometimes, for reasons yet to be clarified, ensuring an index on the name field causes an NPE
+            logger.throwing(MongoObjectFactoryImpl.class.getName(), "storeLeaderboardGroup", npe);
+        }
+        
         BasicDBObject query = new BasicDBObject(FieldNames.LEADERBOARD_GROUP_NAME.name(), leaderboardGroup.getName());
         
         BasicDBObject result = new BasicDBObject();
         result.put(FieldNames.LEADERBOARD_GROUP_NAME.name(), leaderboardGroup.getName());
         result.put(FieldNames.LEADERBOARD_GROUP_DESCRIPTION.name(), leaderboardGroup.getDescription());
-        BasicDBList dbLeaderboardRefs = new BasicDBList();
+        BasicDBList dbLeaderboardIds = new BasicDBList();
         for (Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
             BasicDBObject leaderboardQuery = new BasicDBObject(FieldNames.LEADERBOARD_NAME.name(), leaderboard.getName());
             DBObject dbLeaderboard = leaderboardCollection.findOne(leaderboardQuery);
-            DBRef dbLeaderboardRef = new DBRef(database, dbLeaderboard);
-            dbLeaderboardRefs.add(dbLeaderboardRef);
+            ObjectId dbLeaderboardId = (ObjectId) dbLeaderboard.get("_id");
+//            DBRef dbLeaderboardRef = new DBRef(database, dbLeaderboard);
+            dbLeaderboardIds.add(dbLeaderboardId);
         }
-        result.put(FieldNames.LEADERBOARD_GROUP_LEADERBOARDS.name(), dbLeaderboardRefs);
+        result.put(FieldNames.LEADERBOARD_GROUP_LEADERBOARDS.name(), dbLeaderboardIds);
         
         leaderboardGroupCollection.update(query, result, true, false);
     }

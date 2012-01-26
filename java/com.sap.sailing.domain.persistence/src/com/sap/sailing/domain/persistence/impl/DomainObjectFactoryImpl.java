@@ -6,12 +6,13 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.bson.types.ObjectId;
+
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
-import com.mongodb.DBRef;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.SpeedWithBearing;
@@ -121,57 +122,6 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         }
         return result;
     }
-
-    @Override
-    public LeaderboardGroup loadLeaderboardGroup(String name) {
-        DBCollection leaderboardGroupCollection = database.getCollection(CollectionNames.LEADERBOARD_GROUPS.name());
-        LeaderboardGroup leaderboardGroup = null;
-        
-        try {
-            BasicDBObject query = new BasicDBObject();
-            query.put(FieldNames.LEADERBOARD_GROUP_NAME.name(), name);
-            leaderboardGroup = loadLeaderboardGroup(leaderboardGroupCollection.findOne(query));
-        } catch (Throwable t) {
-            logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load leaderboard group "+name+".");
-            logger.throwing(DomainObjectFactoryImpl.class.getName(), "loadLeaderboardGroup", t);
-        }
-        
-        return leaderboardGroup;
-    }
-
-    @Override
-    public Iterable<LeaderboardGroup> getAllLeaderboardGroups() {
-        DBCollection leaderboardGroupCollection = database.getCollection(CollectionNames.LEADERBOARD_GROUPS.name());
-        ArrayList<LeaderboardGroup> leaderboardGroups = new ArrayList<LeaderboardGroup>();
-        
-        try {
-            for (DBObject o : leaderboardGroupCollection.find()) {
-                leaderboardGroups.add(loadLeaderboardGroup(o));
-            }
-        } catch (Throwable t) {
-            logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load leaderboard groups.");
-            logger.throwing(DomainObjectFactoryImpl.class.getName(), "loadLeaderboardGroup", t);
-        }
-        
-        return leaderboardGroups;
-    }
-    
-    private LeaderboardGroup loadLeaderboardGroup(DBObject o) {
-        DBCollection leaderboardCollection = database.getCollection(CollectionNames.LEADERBOARDS.name());
-        
-        String name = (String) o.get(FieldNames.LEADERBOARD_GROUP_NAME.name());
-        String description = (String) o.get(FieldNames.LEADERBOARD_GROUP_DESCRIPTION.name());
-        ArrayList<Leaderboard> leaderboards = new ArrayList<>();
-        
-        BasicDBList dbLeaderboardRefs = (BasicDBList) o.get(FieldNames.LEADERBOARD_GROUP_LEADERBOARDS.name());
-        for (Object object : dbLeaderboardRefs) {
-            DBRef dbLeaderboardRef = (DBRef) object;
-            DBObject dbLeaderboard = leaderboardCollection.findOne(dbLeaderboardRef);
-            leaderboards.add(loadLeaderboard(dbLeaderboard));
-        }
-        
-        return new LeaderboardGroupImpl(name, description, leaderboards);
-    }
     
     @Override
     public Iterable<Leaderboard> getAllLeaderboards() {
@@ -240,6 +190,57 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             }
         }
         return result;
+    }
+
+    @Override
+    public LeaderboardGroup loadLeaderboardGroup(String name) {
+        DBCollection leaderboardGroupCollection = database.getCollection(CollectionNames.LEADERBOARD_GROUPS.name());
+        LeaderboardGroup leaderboardGroup = null;
+        
+        try {
+            BasicDBObject query = new BasicDBObject();
+            query.put(FieldNames.LEADERBOARD_GROUP_NAME.name(), name);
+            leaderboardGroup = loadLeaderboardGroup(leaderboardGroupCollection.findOne(query));
+        } catch (Throwable t) {
+            logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load leaderboard group "+name+".");
+            logger.throwing(DomainObjectFactoryImpl.class.getName(), "loadLeaderboardGroup", t);
+        }
+        
+        return leaderboardGroup;
+    }
+
+    @Override
+    public Iterable<LeaderboardGroup> getAllLeaderboardGroups() {
+        DBCollection leaderboardGroupCollection = database.getCollection(CollectionNames.LEADERBOARD_GROUPS.name());
+        ArrayList<LeaderboardGroup> leaderboardGroups = new ArrayList<LeaderboardGroup>();
+        
+        try {
+            for (DBObject o : leaderboardGroupCollection.find()) {
+                leaderboardGroups.add(loadLeaderboardGroup(o));
+            }
+        } catch (Throwable t) {
+            logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load leaderboard groups.");
+            logger.throwing(DomainObjectFactoryImpl.class.getName(), "loadLeaderboardGroup", t);
+        }
+        
+        return leaderboardGroups;
+    }
+    
+    private LeaderboardGroup loadLeaderboardGroup(DBObject o) {
+        DBCollection leaderboardCollection = database.getCollection(CollectionNames.LEADERBOARDS.name());
+        
+        String name = (String) o.get(FieldNames.LEADERBOARD_GROUP_NAME.name());
+        String description = (String) o.get(FieldNames.LEADERBOARD_GROUP_DESCRIPTION.name());
+        ArrayList<Leaderboard> leaderboards = new ArrayList<>();
+        
+        BasicDBList dbLeaderboardIds = (BasicDBList) o.get(FieldNames.LEADERBOARD_GROUP_LEADERBOARDS.name());
+        for (Object object : dbLeaderboardIds) {
+            ObjectId dbLeaderboardId = (ObjectId) object;
+            DBObject dbLeaderboard = leaderboardCollection.findOne(dbLeaderboardId);
+            leaderboards.add(loadLeaderboard(dbLeaderboard));
+        }
+        
+        return new LeaderboardGroupImpl(name, description, leaderboards);
     }
 
 }
