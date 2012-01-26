@@ -177,14 +177,14 @@ input.magnifier {
 .collapsablePanel {
 	background: #b6b6b6;
 	margin: 0 0 12px 0;
-	border-radius: 7px;
+	border-radius: 5px;
 	overflow: hidden;
 }
 
 .collapsablePanel-content {
 	background: #fff;
 	margin: 12px;
-	border-radius: 10px;
+	border-radius: 5px;
 	width: auto !important;
 }
 
@@ -193,6 +193,7 @@ input.magnifier {
 	padding: 0;
 	margin: 0;
 	height: 42px;
+	position: relative;
 }
 
 .collapsablePanel-open {
@@ -202,27 +203,32 @@ input.magnifier {
 }
 
 .collapsablePanel-header-text{
-	font-size: 14px;
-	font-weight: bold;
-	float:left;
+	font-weight: 300;
+	text-transform: uppercase;
+	margin: 13px 0 0 13px;
+	float: left;
 }
 
 .collapsablePanel-header-image{
 	float:left;
+	margin: 13px 0 0 0;
 }
 
 .collapsablePanel-header-collapse{
-	align:left;
-	float:left;
-	width:95%;
 	height:100%;
-	padding: 3px;	
+	display: block;
+	padding: 0 0 0 13px;	
+	color: #3b3b3b;
+}
+
+.collapsablePanel-header-collapse:hover {
+	color: #3b3b3b;
 }
 
 .collapsablePanel-toolbar { 
-	align: right;
-	float: right;
-	padding: 3px;	
+	position: absolute;
+	top: 13px;
+	right: 13px;
 }
 
 .raceBoardPanelHeader {
