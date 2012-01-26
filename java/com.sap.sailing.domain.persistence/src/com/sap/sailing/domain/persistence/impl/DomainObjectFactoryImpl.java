@@ -212,7 +212,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     @Override
     public Iterable<LeaderboardGroup> getAllLeaderboardGroups() {
         DBCollection leaderboardGroupCollection = database.getCollection(CollectionNames.LEADERBOARD_GROUPS.name());
-        ArrayList<LeaderboardGroup> leaderboardGroups = new ArrayList<LeaderboardGroup>();
+        Set<LeaderboardGroup> leaderboardGroups = new HashSet<LeaderboardGroup>();
         
         try {
             for (DBObject o : leaderboardGroupCollection.find()) {
@@ -231,7 +231,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         
         String name = (String) o.get(FieldNames.LEADERBOARD_GROUP_NAME.name());
         String description = (String) o.get(FieldNames.LEADERBOARD_GROUP_DESCRIPTION.name());
-        ArrayList<Leaderboard> leaderboards = new ArrayList<>();
+        ArrayList<Leaderboard> leaderboards = new ArrayList<Leaderboard>();
         
         BasicDBList dbLeaderboardIds = (BasicDBList) o.get(FieldNames.LEADERBOARD_GROUP_LEADERBOARDS.name());
         for (Object object : dbLeaderboardIds) {
@@ -241,6 +241,27 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         }
         
         return new LeaderboardGroupImpl(name, description, leaderboards);
+    }
+    
+    @Override
+    public Iterable<Leaderboard> getLeaderboardsNotInGroup() {
+        DBCollection leaderboardCollection = database.getCollection(CollectionNames.LEADERBOARDS.name());
+        DBCollection leaderboardGroupCollection = database.getCollection(CollectionNames.LEADERBOARD_GROUPS.name());
+        
+        Set<Leaderboard> result = new HashSet<Leaderboard>();
+        try {
+            for (DBObject o : leaderboardCollection.find()) {
+                ObjectId leaderboardId = (ObjectId) o.get("_id");
+                BasicDBObject query = new BasicDBObject(FieldNames.LEADERBOARD_GROUP_LEADERBOARDS.name(), leaderboardId);
+                if (leaderboardGroupCollection.count(query) == 0) {
+                    result.add(loadLeaderboard(o));
+                }
+            }
+        } catch (Throwable t) {
+            logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load leaderboards.");
+            logger.throwing(DomainObjectFactoryImpl.class.getName(), "getAllLeaderboards", t);
+        }
+        return result;
     }
 
 }

@@ -31,5 +31,7 @@ public interface DomainObjectFactory {
     LeaderboardGroup loadLeaderboardGroup(String name);
     
     Iterable<LeaderboardGroup> getAllLeaderboardGroups();
+    
+    Iterable<Leaderboard> getLeaderboardsNotInGroup();
 
 }
