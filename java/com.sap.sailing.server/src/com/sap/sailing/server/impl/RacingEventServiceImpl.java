@@ -39,6 +39,7 @@ import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
 import com.sap.sailing.domain.leaderboard.impl.LeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.ResultDiscardingRuleImpl;
@@ -102,6 +103,8 @@ public class RacingEventServiceImpl implements RacingEventService, EventFetcher,
      */
     private final Map<String, Leaderboard> leaderboardsByName;
     
+    private final Map<String, LeaderboardGroup> leaderboardGroupsByName;
+    
     private Set<DynamicTrackedEvent> eventsObservedForDefaultLeaderboard = new HashSet<DynamicTrackedEvent>();
     
     private final MongoObjectFactory mongoObjectFactory;
@@ -127,15 +130,24 @@ public class RacingEventServiceImpl implements RacingEventService, EventFetcher,
         raceTrackersByEvent = new HashMap<Event, Set<RaceTracker>>();
         windTrackers = new HashMap<RaceDefinition, WindTracker>();
         raceTrackersByID = new HashMap<Object, RaceTracker>();
+        leaderboardGroupsByName = new HashMap<String, LeaderboardGroup>();
         leaderboardsByName = new HashMap<String, Leaderboard>();
         // Add one default leaderboard that aggregates all races currently tracked by this service.
         // This is more for debugging purposes than for anything else.
         addLeaderboard(DefaultLeaderboardName.DEFAULT_LEADERBOARD_NAME, new int[] { 5, 8 });
-        loadStoredLeaderboards();
+        loadStoredLeaderboardsAndGroups();
     }
     
-    private void loadStoredLeaderboards() {
-        for (Leaderboard leaderboard : domainObjectFactory.getAllLeaderboards()) {
+    private void loadStoredLeaderboardsAndGroups() {
+        //Loading all leaderboard groups and putting the contained leaderboards
+        for (LeaderboardGroup leaderboardGroup : domainObjectFactory.getAllLeaderboardGroups()) {
+            leaderboardGroupsByName.put(leaderboardGroup.getName(), leaderboardGroup);
+            for (Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
+                leaderboardsByName.put(leaderboard.getName(), leaderboard);
+            }
+        }
+        //Loading the remaining leaderboards
+        for (Leaderboard leaderboard : domainObjectFactory.getLeaderboardsNotInGroup()) {
             leaderboardsByName.put(leaderboard.getName(), leaderboard);
         }
     }

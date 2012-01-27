@@ -40,19 +40,15 @@ public class TestStoringAndRetrievingLeaderboardGroups extends AbstractMongoDBTe
         Leaderboard leaderboard = new LeaderboardImpl(leaderboardNames[0], new ScoreCorrectionImpl(),
                 new ResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces));
         leaderboards.add(leaderboard);
-        mongoObjectFactory.storeLeaderboard(leaderboard);
         leaderboard = new LeaderboardImpl(leaderboardNames[1], new ScoreCorrectionImpl(),
                 new ResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces));
         leaderboards.add(leaderboard);
-        mongoObjectFactory.storeLeaderboard(leaderboard);
         leaderboard = new LeaderboardImpl(leaderboardNames[2], new ScoreCorrectionImpl(),
                 new ResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces));
         leaderboards.add(leaderboard);
-        mongoObjectFactory.storeLeaderboard(leaderboard);
         leaderboard = new LeaderboardImpl(leaderboardNames[3], new ScoreCorrectionImpl(),
                 new ResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces));
         leaderboards.add(leaderboard);
-        mongoObjectFactory.storeLeaderboard(leaderboard);
         
         final LeaderboardGroup leaderboardGroup = new LeaderboardGroupImpl(groupName, groupDescription, leaderboards);
         mongoObjectFactory.storeLeaderboardGroup(leaderboardGroup);
@@ -81,11 +77,9 @@ public class TestStoringAndRetrievingLeaderboardGroups extends AbstractMongoDBTe
         Leaderboard leaderboard = new LeaderboardImpl(leaderboardNames[0], new ScoreCorrectionImpl(),
                 new ResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces));
         leaderboards.add(leaderboard);
-        mongoObjectFactory.storeLeaderboard(leaderboard);
         leaderboard = new LeaderboardImpl(leaderboardNames[1], new ScoreCorrectionImpl(),
                 new ResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces));
         leaderboards.add(leaderboard);
-        mongoObjectFactory.storeLeaderboard(leaderboard);
         
         final LeaderboardGroup leaderboardGroup = new LeaderboardGroupImpl(groupName, groupDescription, leaderboards);
         mongoObjectFactory.storeLeaderboardGroup(leaderboardGroup);
@@ -100,9 +94,13 @@ public class TestStoringAndRetrievingLeaderboardGroups extends AbstractMongoDBTe
         
         Assert.assertTrue(ungroupedLeaderboards.iterator().hasNext());
         
+        int loadedUngroupedSize = 0;
         for (Leaderboard l : ungroupedLeaderboards) {
             Assert.assertEquals(ungroupedLeaderboardName, l.getName());
+            loadedUngroupedSize++;
         }
+        
+        Assert.assertTrue(loadedUngroupedSize == 1);
     }
 
 }

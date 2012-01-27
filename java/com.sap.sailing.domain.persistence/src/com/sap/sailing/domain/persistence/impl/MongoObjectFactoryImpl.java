@@ -209,6 +209,10 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         for (Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
             BasicDBObject leaderboardQuery = new BasicDBObject(FieldNames.LEADERBOARD_NAME.name(), leaderboard.getName());
             DBObject dbLeaderboard = leaderboardCollection.findOne(leaderboardQuery);
+            if (dbLeaderboard == null) {
+                storeLeaderboard(leaderboard);
+                dbLeaderboard = leaderboardCollection.findOne(leaderboardQuery);
+            }
             ObjectId dbLeaderboardId = (ObjectId) dbLeaderboard.get("_id");
             dbLeaderboardIds.add(dbLeaderboardId);
         }
