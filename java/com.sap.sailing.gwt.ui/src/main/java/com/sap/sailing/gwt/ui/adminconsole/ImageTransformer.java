@@ -6,6 +6,7 @@ import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.event.dom.client.LoadEvent;
 import com.google.gwt.event.dom.client.LoadHandler;
 import com.google.gwt.maps.client.geom.Point;
+import com.google.gwt.maps.client.geom.Size;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.ui.Image;
 
@@ -60,6 +61,10 @@ public class ImageTransformer {
             context = canvas.getContext2d();
             currentScale = scaleFactor;
         }
+    }
+    
+    public Size getImageSize() {
+        return Size.newInstance(imageWidth, imageHeight);
     }
     
     public Point getAnchor(double scaleFactor) {
