@@ -30,6 +30,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.SmallWindHistoryPanel;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.TimeListener;
+import com.sap.sailing.gwt.ui.client.TimePanel;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.PositionDTO;
@@ -105,7 +106,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         VerticalPanel verticalPanelRadioAndCheckboxes = new VerticalPanel();
         horizontalRanksVerticalAndCheckboxesManeuversPanel.add(verticalPanelRadioAndCheckboxes);
         grid.setWidget(2, 0, horizontalRanksVerticalAndCheckboxesManeuversPanel);
-        timePanel = new TimePanel(stringMessages, timer);
+        timePanel = new TimePanel(timer, stringMessages);
         timer.addTimeListener(raceMap);
         timer.addTimeListener(this);
         timer.addTimeListener(windHistory);

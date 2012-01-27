@@ -19,7 +19,6 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.gwt.ui.adminconsole.RaceMap;
 import com.sap.sailing.gwt.ui.adminconsole.RaceMapSettings;
-import com.sap.sailing.gwt.ui.adminconsole.TimePanel;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.EventDisplayer;
@@ -27,6 +26,7 @@ import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.TimePanel;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
@@ -108,21 +108,22 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
         raceMap.onRaceSelectionChange(Collections.singletonList(selectedRaceIdentifier));
         collapsableViewers.add(raceMapViewer);
         
-        // just a sample component with subcomponents
+        // just a sample component with subcomponents for testing
+        /*
         SimpleComponentGroup<Object> componentGroup = new SimpleComponentGroup<Object>("Component Group");
         componentGroup.addComponent(new SimpleComponent("My Component"));
         componentGroup.addComponent(new SimpleComponent("My Component 2"));
         componentGroup.addComponent(new SimpleComponent("My Component 3"));
         collapsableViewers.add(new CollapsableComponentViewer<Object>(componentGroup, "100%", "100px", stringMessages));
-
-        /*
+        */
+/*
         WindChartSettings windChartSettings = new WindChartSettings();
         WindChart windChart = new WindChart(sailingService, raceSelectionProvider, windChartSettings, stringMessages, errorReporter); 
         CollapsableComponentViewer<WindChartSettings> windChartViewer = new CollapsableComponentViewer<WindChartSettings>(
                 windChart, "600px", "300px", stringMessages);
+        windChart.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
         collapsableViewers.add(windChartViewer);
-        */
-        
+ */       
         for (CollapsableComponentViewer<?> componentViewer : collapsableViewers) {
             mainPanel.add(componentViewer.getViewerWidget());
             addComponentViewerMenuEntry(componentViewer);
@@ -130,7 +131,7 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
 
         timer.addTimeListener(leaderboardPanel);
         timer.addTimeListener(raceMap);
-        timePanel = new TimePanel(stringMessages, timer);
+        timePanel = new TimePanel(timer, stringMessages);
     }
 
     private void addComponentViewerMenuEntry(final ComponentViewer c) {
