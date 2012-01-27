@@ -1653,4 +1653,16 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         }
     }
 
+    @Override
+    public void updateLeaderboardGroup(String oldName, String newName, String description) {
+        if (!oldName.equals(newName)) {
+            getService().renameLeaderboardGroup(oldName, newName);
+        }
+        LeaderboardGroup leaderboardGroup = getService().getLeaderboardGroubByName(newName);
+        if (!description.equals(leaderboardGroup.getDescription())) {
+            leaderboardGroup.setDescriptiom(description);
+        }
+        getService().updateStoredLeaderboardGroup(leaderboardGroup);
+    }
+
 }
