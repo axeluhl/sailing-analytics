@@ -1,0 +1,51 @@
+package com.sap.sailing.gwt.ui.shared;
+
+import java.util.List;
+
+import com.google.gwt.user.client.rpc.IsSerializable;
+
+public class LeaderboardGroupDTO extends NamedDTO implements IsSerializable {
+
+    public String description;
+    public List<LeaderboardDTO> leaderboards;
+    
+    public LeaderboardGroupDTO() {}
+
+    public LeaderboardGroupDTO(String name, String description, List<LeaderboardDTO> leaderboards) {
+        super(name);
+        this.description = description;
+        this.leaderboards = leaderboards;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + ((description == null) ? 0 : description.hashCode());
+        result = prime * result + ((leaderboards == null) ? 0 : leaderboards.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (!super.equals(obj))
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        LeaderboardGroupDTO other = (LeaderboardGroupDTO) obj;
+        if (description == null) {
+            if (other.description != null)
+                return false;
+        } else if (!description.equals(other.description))
+            return false;
+        if (leaderboards == null) {
+            if (other.leaderboards != null)
+                return false;
+        } else if (!leaderboards.equals(other.leaderboards))
+            return false;
+        return true;
+    }
+    
+}
