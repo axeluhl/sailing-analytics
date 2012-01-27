@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.confidence;
 
 import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.common.TimePoint;
 
 /**
  * Some values, particularly those obtained from real-world measurements, are not always accurate. Some values are
@@ -26,16 +27,21 @@ import com.sap.sailing.domain.common.Distance;
  * {@link #getConfidence() confidence}. The sum (which is still a {@link ScalableValue} because
  * {@link ScalableValue#add(ScalableValue)} returns again a {@link ScalableValue}) is then
  * {@link ScalableValue#divide(double, double) divided} by the sum of the confidences. This "division" is expected to
- * produce an object of type <code>AveragesTo</code>. Usually, <code>AveragesTo</code> would be the same as
- * the class implementing this interface.
+ * produce an object of type <code>AveragesTo</code>. Usually, <code>AveragesTo</code> would be the same as the class
+ * implementing this interface.
  * 
  * @author Axel Uhl (d043530)
  * 
  * @param <ValueType>
- *            the type of the scalable value
- * 
+ *            the type of the scalable value used for scalar operations during aggregation
+ * @param <RelativeTo>
+ *            the type of the object relative to which the confidence applies; for example, if the
+ *            base type is a position and the <code>RelativeTo</code> type is {@link TimePoint},
+ *            the confidence of the position is relative to a certain time point. Together with
+ *            a correspondingly-typed weigher, such a value with confidence can be aggregated with
+ *            other values, again relative to (maybe a different) time point.
  */
-public interface HasConfidence<ValueType, AveragesTo> {
+public interface HasConfidence<ValueType, BaseType> {
     /**
      * A confidence is a number between 0.0 and 1.0 (inclusive) where 0.0 means that the value is randomly guessed while
      * 1.0 means the value is authoritatively known for a fact. It represents the weight with which a value is to be
@@ -61,6 +67,6 @@ public interface HasConfidence<ValueType, AveragesTo> {
      */
     double getConfidence();
     
-    ScalableValue<ValueType, AveragesTo> getScalableValue();
+    ScalableValue<ValueType, BaseType> getScalableValue();
     
 }
