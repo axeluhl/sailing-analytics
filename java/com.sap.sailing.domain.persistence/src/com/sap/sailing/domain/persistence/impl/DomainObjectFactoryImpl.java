@@ -246,16 +246,14 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     @Override
     public Iterable<Leaderboard> getLeaderboardsNotInGroup() {
         DBCollection leaderboardCollection = database.getCollection(CollectionNames.LEADERBOARDS.name());
-        DBCollection leaderboardGroupCollection = database.getCollection(CollectionNames.LEADERBOARD_GROUPS.name());
         
         Set<Leaderboard> result = new HashSet<Leaderboard>();
         try {
-            for (DBObject o : leaderboardCollection.find()) {
-                ObjectId leaderboardId = (ObjectId) o.get("_id");
-                BasicDBObject query = new BasicDBObject(FieldNames.LEADERBOARD_GROUP_LEADERBOARDS.name(), leaderboardId);
-                if (leaderboardGroupCollection.count(query) == 0) {
-                    result.add(loadLeaderboard(o));
-                }
+            //Don't change the query object, unless you know what you're doing
+            BasicDBObject query = new BasicDBObject("$where", "function() { return db." + CollectionNames.LEADERBOARD_GROUPS.name() + ".find({ "
+                    + FieldNames.LEADERBOARD_GROUP_LEADERBOARDS.name() + ": this._id }).count() == 0; }");
+            for (DBObject o : leaderboardCollection.find(query)) {
+                result.add(loadLeaderboard(o));
             }
         } catch (Throwable t) {
             logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load leaderboards.");

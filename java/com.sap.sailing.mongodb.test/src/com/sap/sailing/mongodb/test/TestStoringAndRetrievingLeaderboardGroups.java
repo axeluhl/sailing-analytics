@@ -57,11 +57,12 @@ public class TestStoringAndRetrievingLeaderboardGroups extends AbstractMongoDBTe
 
         Assert.assertEquals(groupName, loadedLeaderboardGroup.getName());
         Assert.assertEquals(groupDescription, loadedLeaderboardGroup.getDescription());
-        Assert.assertEquals(leaderboardNames.length, loadedLeaderboardGroup.getLeaderboards().size());
         
-        for (int i = 0; i < leaderboardNames.length; i++) {
-            Assert.assertEquals(leaderboardNames[i], loadedLeaderboardGroup.getLeaderboards().get(i).getName());
-            mongoObjectFactory.removeLeaderboard(leaderboardNames[i]);
+        int c = 0;
+        for (Leaderboard board : leaderboardGroup.getLeaderboards()) {
+            Assert.assertEquals(leaderboardNames[c], board.getName());
+            mongoObjectFactory.removeLeaderboard(leaderboardNames[c]);
+            c++;
         }
     }
     
@@ -84,23 +85,37 @@ public class TestStoringAndRetrievingLeaderboardGroups extends AbstractMongoDBTe
         final LeaderboardGroup leaderboardGroup = new LeaderboardGroupImpl(groupName, groupDescription, leaderboards);
         mongoObjectFactory.storeLeaderboardGroup(leaderboardGroup);
 
-        final String ungroupedLeaderboardName = "Ungrouped Leaderboard 1";
+        final String[] ungroupedLeaderboardNames = {"Ungrouped Leaderboard 0", "Ungrouped Leaderboard 1", "Ungrouped Leaderboard 2"};
 
-        final Leaderboard ungroupedLeaderboard = new LeaderboardImpl(ungroupedLeaderboardName, new ScoreCorrectionImpl(),
-                new ResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces));
-        mongoObjectFactory.storeLeaderboard(ungroupedLeaderboard);
+        final Leaderboard[] ungroupedLeaderboards = {
+                new LeaderboardImpl(ungroupedLeaderboardNames[0], new ScoreCorrectionImpl(),
+                        new ResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces)),
+                new LeaderboardImpl(ungroupedLeaderboardNames[1], new ScoreCorrectionImpl(),
+                        new ResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces)),
+                new LeaderboardImpl(ungroupedLeaderboardNames[2], new ScoreCorrectionImpl(),
+                        new ResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces)) };
+        mongoObjectFactory.storeLeaderboard(ungroupedLeaderboards[0]);
+        mongoObjectFactory.storeLeaderboard(ungroupedLeaderboards[1]);
+        mongoObjectFactory.storeLeaderboard(ungroupedLeaderboards[2]);
         
-        Iterable<Leaderboard> ungroupedLeaderboards = domainObjectFactory.getLeaderboardsNotInGroup();
+        Iterable<Leaderboard> loadedUngroupedLeaderboards = domainObjectFactory.getLeaderboardsNotInGroup();
         
-        Assert.assertTrue(ungroupedLeaderboards.iterator().hasNext());
+        Assert.assertTrue(loadedUngroupedLeaderboards.iterator().hasNext());
         
-        int loadedUngroupedSize = 0;
-        for (Leaderboard l : ungroupedLeaderboards) {
-            Assert.assertEquals(ungroupedLeaderboardName, l.getName());
-            loadedUngroupedSize++;
+        int c = 0;
+        for (int i = 0; i < ungroupedLeaderboardNames.length; i++) {
+            boolean loadedBoardsContainsName = false;
+            for (Leaderboard board : loadedUngroupedLeaderboards) {
+                if (ungroupedLeaderboardNames[i].equals(board.getName())) {
+                    loadedBoardsContainsName = true;
+                    c++;
+                    break;
+                }
+            }
+            Assert.assertTrue(loadedBoardsContainsName);
         }
         
-        Assert.assertTrue(loadedUngroupedSize == 1);
+        Assert.assertTrue(c == ungroupedLeaderboards.length);
     }
 
 }
