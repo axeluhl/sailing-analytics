@@ -26,7 +26,7 @@
 
 body {
 	background: #ebebeb;
-	font-family: 'Terminal Dosis', sans-serif;
+	font-family: 'Ubuntu', 'Terminal Dosis', sans-serif;
 	line-height: 1;
 	font-size: 14px;
 	font-weight: 400;
@@ -35,7 +35,7 @@ body {
 }
 
 table td,select,button {
-	font-family: 'Terminal Dosis', sans-serif;
+	font-family: 'Ubuntu', 'Terminal Dosis', sans-serif;
 	line-height: 1;
 	font-weight: 400;
 	font-size: 14px;
@@ -149,15 +149,16 @@ input.magnifier {
 }
 
 .timeLineInnerBgPanel {
-	background: #f6f6f6;
+	background: url(images/timeslider-bg.png) 0 0 repeat-x #f6f6f6;
 	border-top-left-radius: 6px;
 	border-top-right-radius: 6px; 
-	height: 80px;
+	height: 56px;
+	padding: 10px;
 }
 
 .footerShadowPanel {
 	position: fixed;
-	height: 50px;
+	height: 15px;
 	bottom: 0;
 	background: url(images/footer_shadow.png) left bottom repeat-x;
 	width: 100%;
@@ -175,16 +176,17 @@ input.magnifier {
 
 .collapsablePanel {
 	background: #b6b6b6;
-	margin: 0 0 12px 0;
-	border-radius: 7px;
+	border-radius: 5px;
 	overflow: hidden;
+	border: 1px solid #aaaaaa;
 }
 
 .collapsablePanel-content {
 	background: #fff;
 	margin: 12px;
-	border-radius: 10px;
+	border-radius: 5px;
 	width: auto !important;
+	border: 1px solid #aaaaaa;
 }
 
 .collapsablePanel-header {
@@ -192,36 +194,42 @@ input.magnifier {
 	padding: 0;
 	margin: 0;
 	height: 42px;
+	position: relative;
 }
 
 .collapsablePanel-open {
-}
+}	
 
 .collapsablePanel-closed {
 }
 
 .collapsablePanel-header-text{
-	font-size: 14px;
-	font-weight: bold;
-	float:left;
+	font-weight: 300;
+	text-transform: uppercase;
+	margin: 15px 0 0 13px;
+	float: left;
 }
 
 .collapsablePanel-header-image{
 	float:left;
+	margin: 13px 0 0 0;
 }
 
 .collapsablePanel-header-collapse{
-	align:left;
-	float:left;
-	width:95%;
 	height:100%;
-	padding: 3px;	
+	display: block;
+	padding: 0 0 0 10px;	
+	color: #3b3b3b;
+}
+
+.collapsablePanel-header-collapse:hover {
+	color: #3b3b3b;
 }
 
 .collapsablePanel-toolbar { 
-	align: right;
-	float: right;
-	padding: 3px;	
+	position: absolute;
+	top: 13px;
+	right: 13px;
 }
 
 .raceBoardPanelHeader {

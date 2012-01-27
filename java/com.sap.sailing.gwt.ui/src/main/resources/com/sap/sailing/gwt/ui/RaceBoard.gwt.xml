@@ -32,6 +32,7 @@
   <!-- Specify the paths for translatable code                    -->
   <extend-property name="locale" values="de"/>
   <source path='client'/>
+  <source path='controls'/>
   <source path='raceboard'/>
   <source path='leaderboard'/>
   <source path='adminconsole'/>

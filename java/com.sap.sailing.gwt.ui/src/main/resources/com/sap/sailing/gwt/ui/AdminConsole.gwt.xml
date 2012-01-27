@@ -45,6 +45,7 @@
   <!-- Specify the paths for translatable code                    -->
   <extend-property name="locale" values="de"/>
   <source path='client'/>
+  <source path='controls'/>
   <source path='components'/>
   <source path='adminconsole'/>
   <source path='leaderboard'/>

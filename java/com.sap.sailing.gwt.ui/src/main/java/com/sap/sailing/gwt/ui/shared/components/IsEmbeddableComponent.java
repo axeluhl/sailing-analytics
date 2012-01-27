@@ -11,4 +11,6 @@ public interface IsEmbeddableComponent {
     Widget getToolbarWidget();
     
     boolean isEmbedded();
+    
+    boolean hasToolbar();
 }

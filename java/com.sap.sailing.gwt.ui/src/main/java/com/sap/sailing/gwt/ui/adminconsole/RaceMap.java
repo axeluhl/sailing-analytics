@@ -510,7 +510,7 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
                 // check if anchors match; re-use marker with setImage only if anchors match
                 ImageTransformer transformer = imageResources.getBoatImageTransformer(lastPos,
                         competitorSelection.isSelected(competitorDTO));
-                Point newAnchor = transformer.getAnchor(imageResources.getRealBoatSizeScaleFactor());
+                Point newAnchor = transformer.getAnchor(imageResources.getRealBoatSizeScaleFactor(transformer.getImageSize()));
                 Point oldAnchor = boatMarker.getIcon().getIconAnchor();
                 if (oldAnchor.getX() == newAnchor.getX() && oldAnchor.getY() == newAnchor.getY()) {
                     boatMarker.setLatLng(LatLng.newInstance(lastPos.position.latDeg,
