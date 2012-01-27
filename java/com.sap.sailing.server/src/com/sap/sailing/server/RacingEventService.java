@@ -19,6 +19,7 @@ import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
 import com.sap.sailing.domain.tracking.RaceTracker;
@@ -224,5 +225,19 @@ public interface RacingEventService extends TrackedEventRegistry {
     void removeEvent(Event event) throws MalformedURLException, IOException, InterruptedException;
 
     TrackedRace getExistingTrackedRace(RaceIdentifier raceIdentifier);
+    
+    Map<String, LeaderboardGroup> getLeaderboardGroups();
+    
+    LeaderboardGroup getLeaderboardGroubByName(String groupName);
+    
+    LeaderboardGroup addLeaderboardGroup(String groupName, String description, List<Leaderboard> leaderboards);
+    
+    void addLeaderboardToGroup(String leaderboardName, String groupName);
+    
+    void removeLeaderboardGroup(String groupName);
+    
+    void renameLeaderboardGroup(String oldName, String newName);
+    
+    void updateStoredLeaderboardGroup(LeaderboardGroup leaderboardGroup);
 
 }

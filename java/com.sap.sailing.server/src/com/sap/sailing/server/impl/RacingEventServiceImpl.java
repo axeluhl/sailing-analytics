@@ -41,6 +41,7 @@ import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
+import com.sap.sailing.domain.leaderboard.impl.LeaderboardGroupImpl;
 import com.sap.sailing.domain.leaderboard.impl.LeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.ResultDiscardingRuleImpl;
 import com.sap.sailing.domain.leaderboard.impl.ScoreCorrectionImpl;
@@ -661,6 +662,92 @@ public class RacingEventServiceImpl implements RacingEventService, EventFetcher,
     @Override
     public Event getEvent(EventName eventIdentifier) {
         return getEventByName(eventIdentifier.getEventName());
+    }
+
+    @Override
+    public Map<String, LeaderboardGroup> getLeaderboardGroups() {
+        synchronized (leaderboardGroupsByName) {
+            return Collections.unmodifiableMap(new HashMap<String, LeaderboardGroup>(leaderboardGroupsByName));
+        }
+    }
+
+    @Override
+    public LeaderboardGroup getLeaderboardGroubByName(String groupName) {
+        synchronized (leaderboardGroupsByName) {
+            return leaderboardGroupsByName.get(groupName);
+        }
+    }
+
+    @Override
+    public LeaderboardGroup addLeaderboardGroup(String groupName, String description, List<Leaderboard> leaderboards) {
+        LeaderboardGroup result = new LeaderboardGroupImpl(groupName, description, leaderboards);
+        synchronized (leaderboardGroupsByName) {
+            leaderboardGroupsByName.put(groupName, result);
+        }
+        //Add leaderboards to map if they aren't contained
+        for (Leaderboard leaderboard : leaderboards) {
+            synchronized (leaderboardsByName) {
+                if (!leaderboardsByName.containsKey(leaderboard.getName())) {
+                    leaderboardsByName.put(leaderboard.getName(), leaderboard);
+                }
+            }
+        }
+        //Leaderboards which aren't in the DB yet, will also be added with this method
+        mongoObjectFactory.storeLeaderboardGroup(result);
+        return null;
+    }
+
+    @Override
+    public void addLeaderboardToGroup(String leaderboardName, String groupName) {
+        Leaderboard toAdd = null;
+        LeaderboardGroup toModify = null;
+        synchronized (leaderboardsByName) {
+            if (!leaderboardsByName.containsKey(leaderboardName)) {
+                throw new IllegalArgumentException("No leaderboard with name " + leaderboardName + " found");
+            } else {
+                toAdd = leaderboardsByName.get(leaderboardName);
+            }
+        }
+        synchronized (leaderboardGroupsByName) {
+            if (!leaderboardGroupsByName.containsKey(groupName)) {
+                throw new IllegalArgumentException("No leaderboard group with name " + groupName + " found");
+            } else {
+                toModify = leaderboardGroupsByName.get(groupName);
+            }
+        }
+        if (toAdd != null && toModify != null) {
+            toModify.addLeaderboard(toAdd);
+            updateStoredLeaderboardGroup(toModify);
+        }
+    }
+
+    @Override
+    public void removeLeaderboardGroup(String groupName) {
+        synchronized (leaderboardGroupsByName) {
+            leaderboardGroupsByName.remove(groupName);
+        }
+        mongoObjectFactory.removeLeaderboardGroup(groupName);
+    }
+
+    @Override
+    public void renameLeaderboardGroup(String oldName, String newName) {
+        synchronized (leaderboardGroupsByName) {
+            if (!leaderboardGroupsByName.containsKey(oldName)) {
+                throw new IllegalArgumentException("No leaderboard group with name " + oldName + " found");
+            }
+            if (!leaderboardGroupsByName.containsKey(newName)) {
+                throw new IllegalArgumentException("Leaderboard group with name " + newName + " already exists");
+            }
+            LeaderboardGroup toRename = leaderboardGroupsByName.remove(oldName);
+            toRename.setName(newName);
+            leaderboardGroupsByName.put(newName, toRename);
+            mongoObjectFactory.renameLeaderboardGroup(oldName, newName);
+        }
+    }
+
+    @Override
+    public void updateStoredLeaderboardGroup(LeaderboardGroup leaderboardGroup) {
+        mongoObjectFactory.storeLeaderboardGroup(leaderboardGroup);
     }
 
 }

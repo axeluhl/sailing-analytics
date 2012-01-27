@@ -24,8 +24,13 @@ public class LeaderboardGroupImpl implements LeaderboardGroup {
     }
 
     @Override
-    public List<Leaderboard> getLeaderboards() {
+    public Iterable<Leaderboard> getLeaderboards() {
         return leaderboards;
+    }
+
+    @Override
+    public void setName(String name) {
+        this.name = name;
     }
 
     @Override
