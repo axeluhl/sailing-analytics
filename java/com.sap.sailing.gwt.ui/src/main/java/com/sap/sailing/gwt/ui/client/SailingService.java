@@ -20,6 +20,7 @@ import com.sap.sailing.gwt.ui.shared.CompetitorsAndTimePointsDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
+import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.QuickRankDTO;
@@ -148,4 +149,20 @@ public interface SailingService extends RemoteService {
             Map<CompetitorDTO, Date> from, Map<CompetitorDTO, Date> to) throws NoWindException;
 
     List<LeaderboardDTO> getLeaderboardsByRace(RaceDTO race);
+    
+    List<LeaderboardGroupDTO> getLeaderboardGroups();
+    
+    LeaderboardGroupDTO getLeaderboardGroupByName(String groupName);
+    
+    void renameLeaderboardGroup(String oldName, String newName);
+    
+    void removeLeaderboardGroup(String groupName);
+
+    LeaderboardGroupDTO createLeaderboardGroup(String groupName, String description, List<String> leaderboardNames);
+    
+    LeaderboardGroupDTO createLeaderboardGroup(String groupName, String description);
+    
+    void addLeaderboardToGroup(String leaderboardName, String groupName);
+    
+    void removeLeaderboardFromGroup(String leaderboardName, String groupName);
 }

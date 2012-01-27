@@ -679,46 +679,24 @@ public class RacingEventServiceImpl implements RacingEventService, EventFetcher,
     }
 
     @Override
-    public LeaderboardGroup addLeaderboardGroup(String groupName, String description, List<Leaderboard> leaderboards) {
+    public LeaderboardGroup addLeaderboardGroup(String groupName, String description, List<String> leaderboardNames) {
+        ArrayList<Leaderboard> leaderboards = new ArrayList<>();
+        synchronized (leaderboardsByName) {
+            for (String leaderboardName : leaderboardNames) {
+                Leaderboard leaderboard = leaderboardsByName.get(leaderboardName);
+                if (leaderboard == null) {
+                    throw new IllegalArgumentException("No leaderboard with name " + leaderboardName + " found");
+                } else {
+                    leaderboards.add(leaderboard);
+                }
+            }
+        }
         LeaderboardGroup result = new LeaderboardGroupImpl(groupName, description, leaderboards);
         synchronized (leaderboardGroupsByName) {
             leaderboardGroupsByName.put(groupName, result);
         }
-        //Add leaderboards to map if they aren't contained
-        for (Leaderboard leaderboard : leaderboards) {
-            synchronized (leaderboardsByName) {
-                if (!leaderboardsByName.containsKey(leaderboard.getName())) {
-                    leaderboardsByName.put(leaderboard.getName(), leaderboard);
-                }
-            }
-        }
-        //Leaderboards which aren't in the DB yet, will also be added with this method
         mongoObjectFactory.storeLeaderboardGroup(result);
-        return null;
-    }
-
-    @Override
-    public void addLeaderboardToGroup(String leaderboardName, String groupName) {
-        Leaderboard toAdd = null;
-        LeaderboardGroup toModify = null;
-        synchronized (leaderboardsByName) {
-            if (!leaderboardsByName.containsKey(leaderboardName)) {
-                throw new IllegalArgumentException("No leaderboard with name " + leaderboardName + " found");
-            } else {
-                toAdd = leaderboardsByName.get(leaderboardName);
-            }
-        }
-        synchronized (leaderboardGroupsByName) {
-            if (!leaderboardGroupsByName.containsKey(groupName)) {
-                throw new IllegalArgumentException("No leaderboard group with name " + groupName + " found");
-            } else {
-                toModify = leaderboardGroupsByName.get(groupName);
-            }
-        }
-        if (toAdd != null && toModify != null) {
-            toModify.addLeaderboard(toAdd);
-            updateStoredLeaderboardGroup(toModify);
-        }
+        return result;
     }
 
     @Override
