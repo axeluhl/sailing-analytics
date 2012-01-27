@@ -44,5 +44,9 @@ public interface MongoObjectFactory {
     void storeRaceIdentifier(RaceIdentifier raceIdentifier, DBObject dbObject);
     
     void storeLeaderboardGroup(LeaderboardGroup leaderboardGroup);
+    
+    void removeLeaderboardGroup(String groupName);
+    
+    void renameLeaderboardGroup(String oldName, String newName);
 
 }

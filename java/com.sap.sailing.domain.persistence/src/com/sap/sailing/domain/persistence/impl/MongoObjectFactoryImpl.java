@@ -221,4 +221,21 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         leaderboardGroupCollection.update(query, result, true, false);
     }
 
+    @Override
+    public void removeLeaderboardGroup(String groupName) {
+        DBCollection leaderboardGroupCollection = database.getCollection(CollectionNames.LEADERBOARD_GROUPS.name());
+        BasicDBObject query = new BasicDBObject(FieldNames.LEADERBOARD_GROUP_NAME.name(), groupName);
+        leaderboardGroupCollection.remove(query);
+    }
+
+    @Override
+    public void renameLeaderboardGroup(String oldName, String newName) {
+        DBCollection leaderboardGroupCollection = database.getCollection(CollectionNames.LEADERBOARD_GROUPS.name());
+        BasicDBObject query = new BasicDBObject(FieldNames.LEADERBOARD_GROUP_NAME.name(), oldName);
+        BasicDBObject update = new BasicDBObject("$set", new BasicDBObject(FieldNames.LEADERBOARD_GROUP_NAME.name(), newName));
+        leaderboardGroupCollection.update(query, update);
+    }
+    
+    
+
 }
