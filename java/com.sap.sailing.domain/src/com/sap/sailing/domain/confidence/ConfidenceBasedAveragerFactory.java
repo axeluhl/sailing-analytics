@@ -5,5 +5,5 @@ import com.sap.sailing.domain.confidence.impl.ConfidenceBasedAveragerFactoryImpl
 public interface ConfidenceBasedAveragerFactory {
     ConfidenceBasedAveragerFactory INSTANCE = new ConfidenceBasedAveragerFactoryImpl();
     
-    <ValueType, AveragesTo> ConfidenceBasedAverager<ValueType, AveragesTo> createAverager();
+    <ValueType, BaseType, RelativeTo> ConfidenceBasedAverager<ValueType, BaseType, RelativeTo> createAverager();
 }

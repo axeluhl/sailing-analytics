@@ -96,14 +96,14 @@ public class ConfidenceTest {
     public void testAveragingWithEmptyListYieldsNull() {
         ConfidenceBasedAverager<Double, Double> averager = ConfidenceBasedAveragerFactory.INSTANCE.createAverager();
         Set<HasConfidence<Double, Double>> emptySet = Collections.emptySet();
-        Double average = averager.getAverage(emptySet);
+        Double average = averager.getAverage(emptySet, at);
         assertNull(average);
     }
 
     @Test
     public void testAveragingWithNullArrayYieldsNull() {
         ConfidenceBasedAverager<Double, Double> averager = ConfidenceBasedAveragerFactory.INSTANCE.createAverager();
-        Double average = averager.getAverage(null);
+        Double average = averager.getAverage(null, at);
         assertNull(average);
     }
 
@@ -113,7 +113,7 @@ public class ConfidenceTest {
         ScalableDoubleWithConfidence d2 = new ScalableDoubleWithConfidence(2., 0.5);
         ConfidenceBasedAverager<Double, Double> averager = ConfidenceBasedAveragerFactory.INSTANCE.createAverager();
         List<ScalableDoubleWithConfidence> list = Arrays.asList(d1, d2);
-        Double average = averager.getAverage(list);
+        Double average = averager.getAverage(list, at);
         assertEquals(1.5, average, 0.00000001);
     }
 
@@ -124,7 +124,7 @@ public class ConfidenceTest {
         ScalableDoubleWithConfidence d3 = new ScalableDoubleWithConfidence(3., 2.);
         ConfidenceBasedAverager<Double, Double> averager = ConfidenceBasedAveragerFactory.INSTANCE.createAverager();
         List<ScalableDoubleWithConfidence> list = Arrays.asList(d1, d2, d3);
-        Double average = averager.getAverage(list);
+        Double average = averager.getAverage(list, at);
         assertEquals(2.25, average, 0.00000001);
     }
     
@@ -134,7 +134,7 @@ public class ConfidenceTest {
         ScalableBearingWithConfidence d2 = new ScalableBearingWithConfidence(new DegreeBearingImpl(10.), 1.);
         ConfidenceBasedAverager<Pair<Double, Double>, Bearing> averager = ConfidenceBasedAveragerFactory.INSTANCE.createAverager();
         List<ScalableBearingWithConfidence> list = Arrays.asList(d1, d2);
-        Bearing average = averager.getAverage(list);
+        Bearing average = averager.getAverage(list, at);
         assertEquals(0, average.getDegrees(), 0.00000001);
     }
     
@@ -145,7 +145,7 @@ public class ConfidenceTest {
         ScalableBearingWithConfidence d3 = new ScalableBearingWithConfidence(new DegreeBearingImpl(20.), 2.);
         ConfidenceBasedAverager<Pair<Double, Double>, Bearing> averager = ConfidenceBasedAveragerFactory.INSTANCE.createAverager();
         List<ScalableBearingWithConfidence> list = Arrays.asList(d1, d2, d3);
-        Bearing average = averager.getAverage(list);
+        Bearing average = averager.getAverage(list, at);
         assertEquals(10, average.getDegrees(), 0.1);
     }
 
@@ -155,7 +155,7 @@ public class ConfidenceTest {
         PositionWithConfidence p2 = new PositionWithConfidenceImpl(new DegreePosition(0, -45), 0.9);
         ConfidenceBasedAverager<Triple<Double, Double, Double>, Position> averager = ConfidenceBasedAveragerFactory.INSTANCE.createAverager();
         List<PositionWithConfidence> list = Arrays.asList(p1, p2);
-        Position average = averager.getAverage(list);
+        Position average = averager.getAverage(list, at);
         assertEquals(0, average.getLatDeg(), 0.1);
         assertEquals(0, average.getLngDeg(), 0.1);
     }
@@ -166,7 +166,7 @@ public class ConfidenceTest {
         PositionWithConfidence p2 = new PositionWithConfidenceImpl(new DegreePosition(45, -90), 0.9);
         ConfidenceBasedAverager<Triple<Double, Double, Double>, Position> averager = ConfidenceBasedAveragerFactory.INSTANCE.createAverager();
         List<PositionWithConfidence> list = Arrays.asList(p1, p2);
-        Position average = averager.getAverage(list);
+        Position average = averager.getAverage(list, at);
         assertEquals(90, average.getLatDeg(), 0.1);
         assertEquals(0, average.getLngDeg(), 0.1);
     }
@@ -178,7 +178,7 @@ public class ConfidenceTest {
         PositionWithConfidence p3 = new PositionWithConfidenceImpl(new DegreePosition(50, 8.5), 0.9);
         ConfidenceBasedAverager<Triple<Double, Double, Double>, Position> averager = ConfidenceBasedAveragerFactory.INSTANCE.createAverager();
         List<PositionWithConfidence> list = Arrays.asList(p1, p2, p3);
-        Position average = averager.getAverage(list);
+        Position average = averager.getAverage(list, at);
         assertTrue(average.getLatDeg() > 49);
         assertTrue(average.getLatDeg() < 50);
         assertEquals(8.5, average.getLngDeg(), 0.000000001);

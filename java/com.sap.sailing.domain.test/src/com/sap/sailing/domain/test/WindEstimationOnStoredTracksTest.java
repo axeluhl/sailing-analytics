@@ -40,7 +40,7 @@ public class WindEstimationOnStoredTracksTest extends StoredTrackBasedTestWithTr
                 27.2860810183163, 319.47157698009613, 325.1617832132204, 31.678409742672212, 35.00547108150359,
                 23.934778873669256, 29.76599976685808, 33.19487072661667, 19.0, 33.29318052266396, 32.7371445230587,
                 38.26627143611533 }) {
-            cluster.add(new BearingWithConfidenceImpl(new DegreeBearingImpl(bearingInDegrees), /* confidence */ 0.9));
+            cluster.add(new BearingWithConfidenceImpl(new DegreeBearingImpl(bearingInDegrees), /* confidence */ 0.9, relativeTo));
         }
         BearingWithConfidenceCluster[] splitResult = cluster.splitInTwo(/* minimumDegreeDifferenceBetweenTacks */ 15);
         assertEquals(2, splitResult.length);
@@ -55,8 +55,8 @@ public class WindEstimationOnStoredTracksTest extends StoredTrackBasedTestWithTr
     @Test
     public void testBearingWithConfidenceClusterAverageAcrossZero() {
         BearingWithConfidenceCluster cluster = new BearingWithConfidenceCluster();
-        BearingWithConfidence b1 = new BearingWithConfidenceImpl(new DegreeBearingImpl(355), /* confidence */ 0.9);
-        BearingWithConfidence b2 = new BearingWithConfidenceImpl(new DegreeBearingImpl(5), /* confidence */ 0.9);
+        BearingWithConfidence b1 = new BearingWithConfidenceImpl(new DegreeBearingImpl(355), /* confidence */ 0.9, relativeTo);
+        BearingWithConfidence b2 = new BearingWithConfidenceImpl(new DegreeBearingImpl(5), /* confidence */ 0.9, relativeTo);
         cluster.add(b1);
         cluster.add(b2);
         Bearing average = cluster.getAverage();
@@ -66,8 +66,8 @@ public class WindEstimationOnStoredTracksTest extends StoredTrackBasedTestWithTr
     @Test
     public void testBearingWithConfidenceClusterAverageWithZeroSinus() {
         BearingWithConfidenceCluster cluster = new BearingWithConfidenceCluster();
-        BearingWithConfidence b1 = new BearingWithConfidenceImpl(new DegreeBearingImpl(0), /* confidence */ 0.9);
-        BearingWithConfidence b2 = new BearingWithConfidenceImpl(new DegreeBearingImpl(0), /* confidence */ 0.9);
+        BearingWithConfidence b1 = new BearingWithConfidenceImpl(new DegreeBearingImpl(0), /* confidence */ 0.9, relativeTo);
+        BearingWithConfidence b2 = new BearingWithConfidenceImpl(new DegreeBearingImpl(0), /* confidence */ 0.9, relativeTo);
         cluster.add(b1);
         cluster.add(b2);
         Bearing average = cluster.getAverage();
@@ -77,8 +77,8 @@ public class WindEstimationOnStoredTracksTest extends StoredTrackBasedTestWithTr
     @Test
     public void testBearingWithConfidenceClusterAverageWithZeroSinusAndNegativeCosinus() {
         BearingWithConfidenceCluster cluster = new BearingWithConfidenceCluster();
-        BearingWithConfidence b1 = new BearingWithConfidenceImpl(new DegreeBearingImpl(180), /* confidence */ 0.9);
-        BearingWithConfidence b2 = new BearingWithConfidenceImpl(new DegreeBearingImpl(180), /* confidence */ 0.9);
+        BearingWithConfidence b1 = new BearingWithConfidenceImpl(new DegreeBearingImpl(180), /* confidence */ 0.9, relativeTo);
+        BearingWithConfidence b2 = new BearingWithConfidenceImpl(new DegreeBearingImpl(180), /* confidence */ 0.9, relativeTo);
         cluster.add(b1);
         cluster.add(b2);
         Bearing average = cluster.getAverage();
@@ -88,8 +88,8 @@ public class WindEstimationOnStoredTracksTest extends StoredTrackBasedTestWithTr
     @Test
     public void testBearingWithConfidenceClusterAverageWithZeroCosinus() {
         BearingWithConfidenceCluster cluster = new BearingWithConfidenceCluster();
-        BearingWithConfidence b1 = new BearingWithConfidenceImpl(new DegreeBearingImpl(90), /* confidence */ 0.9);
-        BearingWithConfidence b2 = new BearingWithConfidenceImpl(new DegreeBearingImpl(90), /* confidence */ 0.9);
+        BearingWithConfidence b1 = new BearingWithConfidenceImpl(new DegreeBearingImpl(90), /* confidence */ 0.9, relativeTo);
+        BearingWithConfidence b2 = new BearingWithConfidenceImpl(new DegreeBearingImpl(90), /* confidence */ 0.9, relativeTo);
         cluster.add(b1);
         cluster.add(b2);
         Bearing average = cluster.getAverage();
@@ -99,8 +99,8 @@ public class WindEstimationOnStoredTracksTest extends StoredTrackBasedTestWithTr
     @Test
     public void testBearingWithConfidenceClusterAverageWithZeroCosinusAndNegativeSinus() {
         BearingWithConfidenceCluster cluster = new BearingWithConfidenceCluster();
-        BearingWithConfidence b1 = new BearingWithConfidenceImpl(new DegreeBearingImpl(270), /* confidence */ 0.9);
-        BearingWithConfidence b2 = new BearingWithConfidenceImpl(new DegreeBearingImpl(270), /* confidence */ 0.9);
+        BearingWithConfidence b1 = new BearingWithConfidenceImpl(new DegreeBearingImpl(270), /* confidence */ 0.9, relativeTo);
+        BearingWithConfidence b2 = new BearingWithConfidenceImpl(new DegreeBearingImpl(270), /* confidence */ 0.9, relativeTo);
         cluster.add(b1);
         cluster.add(b2);
         Bearing average = cluster.getAverage();

@@ -2,6 +2,7 @@ package com.sap.sailing.domain.confidence.impl;
 
 import java.util.Iterator;
 
+import com.sap.sailing.domain.base.impl.HasConfidenceImpl;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.confidence.ConfidenceBasedAverager;
 import com.sap.sailing.domain.confidence.HasConfidence;
@@ -30,15 +31,16 @@ import com.sap.sailing.domain.confidence.ScalableValue;
  * 
  * @author Axel Uhl (d043530)
  */
-public class ConfidenceBasedAveragerImpl<ValueType, AveragesTo> implements ConfidenceBasedAverager<ValueType, AveragesTo> {
+public class ConfidenceBasedAveragerImpl<ValueType, BaseType, RelativeTo> implements ConfidenceBasedAverager<ValueType, BaseType, RelativeTo> {
     @Override
-    public AveragesTo getAverage(Iterable<? extends HasConfidence<ValueType, AveragesTo>> values) {
+    public HasConfidence<ValueType, BaseType, RelativeTo> getAverage(
+            Iterable<? extends HasConfidence<ValueType, BaseType, RelativeTo>> values, RelativeTo at) {
         if (values == null || Util.isEmpty(values)) {
             return null;
         } else {
-            Iterator<? extends HasConfidence<ValueType, AveragesTo>> iter = values.iterator();
-            HasConfidence<ValueType, AveragesTo> next = iter.next();
-            ScalableValue<ValueType, AveragesTo> numerator = next.getScalableValue().multiply(next.getConfidence());
+            Iterator<? extends HasConfidence<ValueType, BaseType, RelativeTo>> iter = values.iterator();
+            HasConfidence<ValueType, BaseType, RelativeTo> next = iter.next();
+            ScalableValue<ValueType, BaseType> numerator = next.getScalableValue().multiply(next.getConfidence());
             double confidenceSum = next.getConfidence();
             while (iter.hasNext()) {
                 next = iter.next();
@@ -47,8 +49,9 @@ public class ConfidenceBasedAveragerImpl<ValueType, AveragesTo> implements Confi
             }
             // TODO determine new confidence, e.g., based on the variance of estimates averaged
             double newConfidence = confidenceSum / Util.size(values);
-            AveragesTo result = numerator.divide(confidenceSum, newConfidence);
-            return result;
+            BaseType result = numerator.divide(confidenceSum, newConfidence);
+            // TODO need some way to instantiate "the same" HasConfidence implementation class passed as values
+            return new HasConfidenceImpl<ValueType, BaseType, RelativeTo>(result, newConfidence, at);
         }
     }
 }

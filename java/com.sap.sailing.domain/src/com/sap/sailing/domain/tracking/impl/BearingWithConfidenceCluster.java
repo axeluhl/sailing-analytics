@@ -19,35 +19,37 @@ import com.sap.sailing.domain.confidence.ConfidenceBasedAveragerFactory;
  * @author Axel Uhl (d043530)
  *
  */
-public class BearingWithConfidenceCluster extends GenericBearingCluster<BearingWithConfidence> {
+public class BearingWithConfidenceCluster<RelativeTo> extends GenericBearingCluster<BearingWithConfidence<RelativeTo>> {
     /**
      * If the cluster contains no bearings, <code>null</code> is returned. Otherwise, the average angle is computed
      * by adding up the sin and cos values of the individual bearings, then computing the atan2 of the ratio.
      */
     @Override
     public Bearing getAverage() {
-        ConfidenceBasedAverager<Pair<Double, Double>, BearingWithConfidence> averager = ConfidenceBasedAveragerFactory.INSTANCE.createAverager();
-        BearingWithConfidence average = averager.getAverage(getBearings());
-        return average == null ? null : average.getBearing();
+        ConfidenceBasedAverager<Pair<Double, Double>, BearingWithConfidence<RelativeTo>, RelativeTo> averager = ConfidenceBasedAveragerFactory.INSTANCE
+                .createAverager();
+        BearingWithConfidence<RelativeTo> average = averager.getAverage(getBearings(), at);
+        return average == null ? null : average.getObject();
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    protected BearingWithConfidenceCluster[] createBearingClusterArraySizeTwo() {
+    protected BearingWithConfidenceCluster<RelativeTo>[] createBearingClusterArraySizeTwo() {
         return new BearingWithConfidenceCluster[2];
     }
 
     @Override
-    protected BearingWithConfidenceCluster createEmptyCluster() {
-        return new BearingWithConfidenceCluster();
+    protected BearingWithConfidenceCluster<RelativeTo> createEmptyCluster() {
+        return new BearingWithConfidenceCluster<RelativeTo>();
     }
 
     @Override
-    public BearingWithConfidenceCluster[] splitInTwo(double minimumDegreeDifferenceBetweenTacks) {
-        return (BearingWithConfidenceCluster[]) super.splitInTwo(minimumDegreeDifferenceBetweenTacks);
+    public BearingWithConfidenceCluster<RelativeTo>[] splitInTwo(double minimumDegreeDifferenceBetweenTacks) {
+        return (BearingWithConfidenceCluster<RelativeTo>[]) super.splitInTwo(minimumDegreeDifferenceBetweenTacks);
     }
 
     @Override
-    protected Bearing getBearing(BearingWithConfidence b) {
-        return b.getBearing();
+    protected Bearing getBearing(BearingWithConfidence<RelativeTo> b) {
+        return b.getObject();
     }
 }

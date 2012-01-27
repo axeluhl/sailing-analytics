@@ -2,12 +2,24 @@ package com.sap.sailing.domain.confidence.impl;
 
 import com.sap.sailing.domain.confidence.HasConfidence;
 
-public class ScalableDoubleWithConfidence extends ScalableDouble implements HasConfidence<Double, Double> {
+public class ScalableDoubleWithConfidence<RelativeTo> extends ScalableDouble implements HasConfidence<Double, Double, RelativeTo> {
     private final double confidence;
+    private final RelativeTo relativeTo;
     
-    public ScalableDoubleWithConfidence(double d, double confidence) {
+    public ScalableDoubleWithConfidence(double d, double confidence, RelativeTo relativeTo) {
         super(d);
         this.confidence = confidence;
+        this.relativeTo = relativeTo;
+    }
+    
+    @Override
+    public Double getObject() {
+        return getValue();
+    }
+
+    @Override
+    public RelativeTo getRelativeTo() {
+        return relativeTo;
     }
     
     @Override

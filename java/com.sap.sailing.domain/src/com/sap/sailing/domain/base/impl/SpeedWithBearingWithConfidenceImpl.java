@@ -19,7 +19,7 @@ public class SpeedWithBearingWithConfidenceImpl extends
     }
 
     @Override
-    public SpeedWithBearing getSpeedWithBearing() {
+    public SpeedWithBearing getObject() {
         return speedWithBearing;
     }
 
@@ -30,7 +30,7 @@ public class SpeedWithBearingWithConfidenceImpl extends
      */
     @Override
     public ScalableValue<Triple<Speed, Double, Double>, SpeedWithBearingWithConfidence> getScalableValue() {
-        return new ScalableSpeedWithBearing(getSpeedWithBearing());
+        return new ScalableSpeedWithBearing(getObject());
     }
 
     private static class ScalableSpeedWithBearing implements ScalableValue<Triple<Speed, Double, Double>, SpeedWithBearingWithConfidence> {

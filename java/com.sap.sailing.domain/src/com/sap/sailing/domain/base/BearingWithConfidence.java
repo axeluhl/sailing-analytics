@@ -5,6 +5,6 @@ import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.confidence.HasConfidence;
 
 
-public interface BearingWithConfidence extends HasConfidence<Pair<Double, Double>, BearingWithConfidence> {
-    Bearing getBearing();
+public interface BearingWithConfidence<RelativeTo> extends HasConfidence<Pair<Double, Double>, Bearing, RelativeTo> {
+    Bearing getObject();
 }

@@ -6,7 +6,8 @@ import com.sap.sailing.domain.common.impl.RadianBearingImpl;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.confidence.ScalableValue;
 
-public class BearingWithConfidenceImpl implements BearingWithConfidence {
+public class BearingWithConfidenceImpl<RelativeTo> extends HasConfidenceImpl<Pair<Double, Double>, Bearing, RelativeTo>
+implements BearingWithConfidence<RelativeTo> {
     private final Bearing bearing;
     
     private final double confidence;
@@ -17,7 +18,7 @@ public class BearingWithConfidenceImpl implements BearingWithConfidence {
     }
     
     @Override
-    public Bearing getBearing() {
+    public Bearing getObject() {
         return bearing;
     }
 
@@ -28,7 +29,7 @@ public class BearingWithConfidenceImpl implements BearingWithConfidence {
 
     @Override
     public ScalableValue<Pair<Double, Double>, BearingWithConfidence> getScalableValue() {
-        return new ScalableBearing(getBearing());
+        return new ScalableBearing(getObject());
     }
 
     private static class ScalableBearing implements ScalableValue<Pair<Double, Double>, BearingWithConfidence> {
