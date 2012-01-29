@@ -68,8 +68,6 @@ public interface HasConfidence<ValueType, BaseType, RelativeTo> {
      */
     double getConfidence();
     
-    ScalableValue<ValueType, BaseType> getScalableValue();
-
     /**
      * The confidence attached to a value is usually relative to some reference point, such as a time point or
      * a position. For example, when a {@link GPSFixTrack} is asked to deliver an estimation for the tracked item's

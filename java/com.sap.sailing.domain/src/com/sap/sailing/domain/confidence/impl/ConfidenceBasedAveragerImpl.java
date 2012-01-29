@@ -6,6 +6,7 @@ import com.sap.sailing.domain.base.impl.HasConfidenceImpl;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.confidence.ConfidenceBasedAverager;
 import com.sap.sailing.domain.confidence.HasConfidence;
+import com.sap.sailing.domain.confidence.HasConfidenceAndIsScalable;
 import com.sap.sailing.domain.confidence.ScalableValue;
 
 
@@ -34,12 +35,12 @@ import com.sap.sailing.domain.confidence.ScalableValue;
 public class ConfidenceBasedAveragerImpl<ValueType, BaseType, RelativeTo> implements ConfidenceBasedAverager<ValueType, BaseType, RelativeTo> {
     @Override
     public HasConfidence<ValueType, BaseType, RelativeTo> getAverage(
-            Iterable<? extends HasConfidence<ValueType, BaseType, RelativeTo>> values, RelativeTo at) {
+            Iterable<? extends HasConfidenceAndIsScalable<ValueType, BaseType, RelativeTo>> values, RelativeTo at) {
         if (values == null || Util.isEmpty(values)) {
             return null;
         } else {
-            Iterator<? extends HasConfidence<ValueType, BaseType, RelativeTo>> iter = values.iterator();
-            HasConfidence<ValueType, BaseType, RelativeTo> next = iter.next();
+            Iterator<? extends HasConfidenceAndIsScalable<ValueType, BaseType, RelativeTo>> iter = values.iterator();
+            HasConfidenceAndIsScalable<ValueType, BaseType, RelativeTo> next = iter.next();
             ScalableValue<ValueType, BaseType> numerator = next.getScalableValue().multiply(next.getConfidence());
             double confidenceSum = next.getConfidence();
             while (iter.hasNext()) {

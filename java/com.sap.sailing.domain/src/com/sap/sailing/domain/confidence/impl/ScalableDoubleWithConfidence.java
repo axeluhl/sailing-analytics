@@ -1,8 +1,8 @@
 package com.sap.sailing.domain.confidence.impl;
 
-import com.sap.sailing.domain.confidence.HasConfidence;
+import com.sap.sailing.domain.confidence.HasConfidenceAndIsScalable;
 
-public class ScalableDoubleWithConfidence<RelativeTo> extends ScalableDouble implements HasConfidence<Double, Double, RelativeTo> {
+public class ScalableDoubleWithConfidence<RelativeTo> extends ScalableDouble implements HasConfidenceAndIsScalable<Double, Double, RelativeTo> {
     private final double confidence;
     private final RelativeTo relativeTo;
     

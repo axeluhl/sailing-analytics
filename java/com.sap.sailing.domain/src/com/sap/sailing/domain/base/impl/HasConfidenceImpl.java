@@ -2,7 +2,7 @@ package com.sap.sailing.domain.base.impl;
 
 import com.sap.sailing.domain.confidence.HasConfidence;
 
-public abstract class HasConfidenceImpl<ValueType, BaseType, RelativeTo> implements HasConfidence<ValueType, BaseType, RelativeTo> {
+public class HasConfidenceImpl<ValueType, BaseType, RelativeTo> implements HasConfidence<ValueType, BaseType, RelativeTo> {
     private final double confidence;
     private final RelativeTo relativeTo;
     private final BaseType object;
