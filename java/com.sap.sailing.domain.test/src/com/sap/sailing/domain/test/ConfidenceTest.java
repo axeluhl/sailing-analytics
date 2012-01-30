@@ -12,7 +12,6 @@ import java.util.Set;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.PositionWithConfidence;
-import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.base.impl.PositionWithConfidenceImpl;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Position;
@@ -23,7 +22,7 @@ import com.sap.sailing.domain.common.impl.RadianBearingImpl;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.confidence.ConfidenceBasedAverager;
-import com.sap.sailing.domain.confidence.ConfidenceBasedAveragerFactory;
+import com.sap.sailing.domain.confidence.ConfidenceFactory;
 import com.sap.sailing.domain.confidence.HasConfidence;
 import com.sap.sailing.domain.confidence.HasConfidenceAndIsScalable;
 import com.sap.sailing.domain.confidence.ScalableValue;
@@ -112,91 +111,91 @@ public class ConfidenceTest {
     
     @Test
     public void testAveragingWithEmptyListYieldsNull() {
-        ConfidenceBasedAverager<Double, Double, TimePoint> averager = ConfidenceBasedAveragerFactory.INSTANCE.createAverager();
+        ConfidenceBasedAverager<Double, Double, TimePoint> averager = ConfidenceFactory.INSTANCE.createAverager(null);
         Set<HasConfidenceAndIsScalable<Double, Double, TimePoint>> emptySet = Collections.emptySet();
-        HasConfidence<Double, Double, TimePoint> average = averager.getAverage(emptySet, MillisecondsTimePoint.now());
+        HasConfidence<Double, Double, TimePoint> average = averager.getAverage(emptySet, null);
         assertNull(average);
     }
 
     @Test
     public void testAveragingWithNullArrayYieldsNull() {
-        ConfidenceBasedAverager<Double, Double, TimePoint> averager = ConfidenceBasedAveragerFactory.INSTANCE.createAverager();
-        HasConfidence<Double, Double, TimePoint> average = averager.getAverage(null, MillisecondsTimePoint.now());
+        ConfidenceBasedAverager<Double, Double, TimePoint> averager = ConfidenceFactory.INSTANCE.createAverager(null);
+        HasConfidence<Double, Double, TimePoint> average = averager.getAverage(null, null);
         assertNull(average);
     }
 
     @Test
     public void testAveragingWithTwoDoubles() {
-        ScalableDoubleWithConfidence<TimePoint> d1 = new ScalableDoubleWithConfidence<TimePoint>(1., 0.5, MillisecondsTimePoint.now());
-        ScalableDoubleWithConfidence<TimePoint> d2 = new ScalableDoubleWithConfidence<TimePoint>(2., 0.5, MillisecondsTimePoint.now());
-        ConfidenceBasedAverager<Double, Double, TimePoint> averager = ConfidenceBasedAveragerFactory.INSTANCE.createAverager();
+        ScalableDoubleWithConfidence<TimePoint> d1 = new ScalableDoubleWithConfidence<TimePoint>(1., 0.5, null);
+        ScalableDoubleWithConfidence<TimePoint> d2 = new ScalableDoubleWithConfidence<TimePoint>(2., 0.5, null);
+        ConfidenceBasedAverager<Double, Double, TimePoint> averager = ConfidenceFactory.INSTANCE.createAverager(null);
         List<ScalableDoubleWithConfidence<TimePoint>> list = Arrays.asList(d1, d2);
-        HasConfidence<Double, Double, TimePoint> average = averager.getAverage(list, MillisecondsTimePoint.now());
+        HasConfidence<Double, Double, TimePoint> average = averager.getAverage(list, null);
         assertEquals(1.5, average.getObject(), 0.00000001);
     }
 
     @Test
     public void testAveragingWithThreeDoubles() {
-        ScalableDoubleWithConfidence<TimePoint> d1 = new ScalableDoubleWithConfidence<TimePoint>(1., 1., MillisecondsTimePoint.now());
-        ScalableDoubleWithConfidence<TimePoint> d2 = new ScalableDoubleWithConfidence<TimePoint>(2., 1., MillisecondsTimePoint.now());
-        ScalableDoubleWithConfidence<TimePoint> d3 = new ScalableDoubleWithConfidence<TimePoint>(3., 2., MillisecondsTimePoint.now());
-        ConfidenceBasedAverager<Double, Double, TimePoint> averager = ConfidenceBasedAveragerFactory.INSTANCE.createAverager();
+        ScalableDoubleWithConfidence<TimePoint> d1 = new ScalableDoubleWithConfidence<TimePoint>(1., 1., null);
+        ScalableDoubleWithConfidence<TimePoint> d2 = new ScalableDoubleWithConfidence<TimePoint>(2., 1., null);
+        ScalableDoubleWithConfidence<TimePoint> d3 = new ScalableDoubleWithConfidence<TimePoint>(3., 2., null);
+        ConfidenceBasedAverager<Double, Double, TimePoint> averager = ConfidenceFactory.INSTANCE.createAverager(null);
         List<ScalableDoubleWithConfidence<TimePoint>> list = Arrays.asList(d1, d2, d3);
-        HasConfidence<Double, Double, TimePoint> average = averager.getAverage(list, MillisecondsTimePoint.now());
+        HasConfidence<Double, Double, TimePoint> average = averager.getAverage(list, null);
         assertEquals(2.25, average.getObject(), 0.00000001);
     }
     
     @Test
     public void testAveragingWithTwoBearings() {
-        ScalableBearingWithConfidence<TimePoint> d1 = new ScalableBearingWithConfidence<TimePoint>(new DegreeBearingImpl(350.), 1., MillisecondsTimePoint.now());
-        ScalableBearingWithConfidence<TimePoint> d2 = new ScalableBearingWithConfidence<TimePoint>(new DegreeBearingImpl(10.), 1., MillisecondsTimePoint.now());
-        ConfidenceBasedAverager<Pair<Double, Double>, Bearing, TimePoint> averager = ConfidenceBasedAveragerFactory.INSTANCE.createAverager();
+        ScalableBearingWithConfidence<TimePoint> d1 = new ScalableBearingWithConfidence<TimePoint>(new DegreeBearingImpl(350.), 1., null);
+        ScalableBearingWithConfidence<TimePoint> d2 = new ScalableBearingWithConfidence<TimePoint>(new DegreeBearingImpl(10.), 1., null);
+        ConfidenceBasedAverager<Pair<Double, Double>, Bearing, TimePoint> averager = ConfidenceFactory.INSTANCE.createAverager(null);
         List<ScalableBearingWithConfidence<TimePoint>> list = Arrays.asList(d1, d2);
-        HasConfidence<Pair<Double, Double>, Bearing, TimePoint> average = averager.getAverage(list, MillisecondsTimePoint.now());
+        HasConfidence<Pair<Double, Double>, Bearing, TimePoint> average = averager.getAverage(list, null);
         assertEquals(0, average.getObject().getDegrees(), 0.00000001);
     }
     
     @Test
     public void testAveragingWithThreeBearings() {
-        ScalableBearingWithConfidence<TimePoint> d1 = new ScalableBearingWithConfidence<TimePoint>(new DegreeBearingImpl(350.), 1., MillisecondsTimePoint.now());
-        ScalableBearingWithConfidence<TimePoint> d2 = new ScalableBearingWithConfidence<TimePoint>(new DegreeBearingImpl(10.), 1., MillisecondsTimePoint.now());
-        ScalableBearingWithConfidence<TimePoint> d3 = new ScalableBearingWithConfidence<TimePoint>(new DegreeBearingImpl(20.), 2., MillisecondsTimePoint.now());
-        ConfidenceBasedAverager<Pair<Double, Double>, Bearing, TimePoint> averager = ConfidenceBasedAveragerFactory.INSTANCE.createAverager();
+        ScalableBearingWithConfidence<TimePoint> d1 = new ScalableBearingWithConfidence<TimePoint>(new DegreeBearingImpl(350.), 1., null);
+        ScalableBearingWithConfidence<TimePoint> d2 = new ScalableBearingWithConfidence<TimePoint>(new DegreeBearingImpl(10.), 1., null);
+        ScalableBearingWithConfidence<TimePoint> d3 = new ScalableBearingWithConfidence<TimePoint>(new DegreeBearingImpl(20.), 2., null);
+        ConfidenceBasedAverager<Pair<Double, Double>, Bearing, TimePoint> averager = ConfidenceFactory.INSTANCE.createAverager(null);
         List<ScalableBearingWithConfidence<TimePoint>> list = Arrays.asList(d1, d2, d3);
-        HasConfidence<Pair<Double, Double>, Bearing, TimePoint> average = averager.getAverage(list, MillisecondsTimePoint.now());
+        HasConfidence<Pair<Double, Double>, Bearing, TimePoint> average = averager.getAverage(list, null);
         assertEquals(10, average.getObject().getDegrees(), 0.1);
     }
 
     @Test
     public void testAveragingTwoPositions() {
-        PositionWithConfidence<TimePoint> p1 = new PositionWithConfidenceImpl<TimePoint>(new DegreePosition(0, 45), 0.9, MillisecondsTimePoint.now());
-        PositionWithConfidence<TimePoint> p2 = new PositionWithConfidenceImpl<TimePoint>(new DegreePosition(0, -45), 0.9, MillisecondsTimePoint.now());
-        ConfidenceBasedAverager<Triple<Double, Double, Double>, Position, TimePoint> averager = ConfidenceBasedAveragerFactory.INSTANCE.createAverager();
+        PositionWithConfidence<TimePoint> p1 = new PositionWithConfidenceImpl<TimePoint>(new DegreePosition(0, 45), 0.9, null);
+        PositionWithConfidence<TimePoint> p2 = new PositionWithConfidenceImpl<TimePoint>(new DegreePosition(0, -45), 0.9, null);
+        ConfidenceBasedAverager<Triple<Double, Double, Double>, Position, TimePoint> averager = ConfidenceFactory.INSTANCE.createAverager(null);
         List<PositionWithConfidence<TimePoint>> list = Arrays.asList(p1, p2);
-        HasConfidence<Triple<Double, Double, Double>, Position, TimePoint> average = averager.getAverage(list, MillisecondsTimePoint.now());
+        HasConfidence<Triple<Double, Double, Double>, Position, TimePoint> average = averager.getAverage(list, null);
         assertEquals(0, average.getObject().getLatDeg(), 0.1);
         assertEquals(0, average.getObject().getLngDeg(), 0.1);
     }
 
     @Test
     public void testAveragingTwoPositionsToNorthPole() {
-        PositionWithConfidence<TimePoint> p1 = new PositionWithConfidenceImpl<TimePoint>(new DegreePosition(45, 90), 0.9, MillisecondsTimePoint.now());
-        PositionWithConfidence<TimePoint> p2 = new PositionWithConfidenceImpl<TimePoint>(new DegreePosition(45, -90), 0.9, MillisecondsTimePoint.now());
-        ConfidenceBasedAverager<Triple<Double, Double, Double>, Position, TimePoint> averager = ConfidenceBasedAveragerFactory.INSTANCE.createAverager();
+        PositionWithConfidence<TimePoint> p1 = new PositionWithConfidenceImpl<TimePoint>(new DegreePosition(45, 90), 0.9, null);
+        PositionWithConfidence<TimePoint> p2 = new PositionWithConfidenceImpl<TimePoint>(new DegreePosition(45, -90), 0.9, null);
+        ConfidenceBasedAverager<Triple<Double, Double, Double>, Position, TimePoint> averager = ConfidenceFactory.INSTANCE.createAverager(null);
         List<PositionWithConfidence<TimePoint>> list = Arrays.asList(p1, p2);
-        HasConfidence<Triple<Double, Double, Double>, Position, TimePoint> average = averager.getAverage(list, MillisecondsTimePoint.now());
+        HasConfidence<Triple<Double, Double, Double>, Position, TimePoint> average = averager.getAverage(list, null);
         assertEquals(90, average.getObject().getLatDeg(), 0.1);
         assertEquals(0, average.getObject().getLngDeg(), 0.1);
     }
 
     @Test
     public void testAveragingThreePositions() {
-        PositionWithConfidence<TimePoint> p1 = new PositionWithConfidenceImpl<TimePoint>(new DegreePosition(49, 8), 0.9, MillisecondsTimePoint.now());
-        PositionWithConfidence<TimePoint> p2 = new PositionWithConfidenceImpl<TimePoint>(new DegreePosition(49, 9), 0.9, MillisecondsTimePoint.now());
-        PositionWithConfidence<TimePoint> p3 = new PositionWithConfidenceImpl<TimePoint>(new DegreePosition(50, 8.5), 0.9, MillisecondsTimePoint.now());
-        ConfidenceBasedAverager<Triple<Double, Double, Double>, Position, TimePoint> averager = ConfidenceBasedAveragerFactory.INSTANCE.createAverager();
+        PositionWithConfidence<TimePoint> p1 = new PositionWithConfidenceImpl<TimePoint>(new DegreePosition(49, 8), 0.9, null);
+        PositionWithConfidence<TimePoint> p2 = new PositionWithConfidenceImpl<TimePoint>(new DegreePosition(49, 9), 0.9, null);
+        PositionWithConfidence<TimePoint> p3 = new PositionWithConfidenceImpl<TimePoint>(new DegreePosition(50, 8.5), 0.9, null);
+        ConfidenceBasedAverager<Triple<Double, Double, Double>, Position, TimePoint> averager = ConfidenceFactory.INSTANCE.createAverager(null);
         List<PositionWithConfidence<TimePoint>> list = Arrays.asList(p1, p2, p3);
-        HasConfidence<Triple<Double, Double, Double>, Position, TimePoint> average = averager.getAverage(list, MillisecondsTimePoint.now());
+        HasConfidence<Triple<Double, Double, Double>, Position, TimePoint> average = averager.getAverage(list, null);
         assertTrue(average.getObject().getLatDeg() > 49);
         assertTrue(average.getObject().getLatDeg() < 50);
         assertEquals(8.5, average.getObject().getLngDeg(), 0.000000001);

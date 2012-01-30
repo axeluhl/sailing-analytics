@@ -30,19 +30,19 @@ public class WindEstimationOnStoredTracksTest extends StoredTrackBasedTestWithTr
     
     @Test
     public void testEmptyBearingWithConfidenceClusterHasNullAverage() {
-        assertNull(new BearingWithConfidenceCluster().getAverage());
+        assertNull(new BearingWithConfidenceCluster<TimePoint>().getAverage());
     }
     
     @Test
     public void testBearingWithConfidenceClusterSplit() {
-        BearingWithConfidenceCluster cluster = new BearingWithConfidenceCluster();
+        BearingWithConfidenceCluster<TimePoint> cluster = new BearingWithConfidenceCluster<TimePoint>();
         for (double bearingInDegrees : new double[] { 32.31650532600039, 16.99636033752683, 37.59302174779672,
                 27.2860810183163, 319.47157698009613, 325.1617832132204, 31.678409742672212, 35.00547108150359,
                 23.934778873669256, 29.76599976685808, 33.19487072661667, 19.0, 33.29318052266396, 32.7371445230587,
                 38.26627143611533 }) {
             cluster.add(new BearingWithConfidenceImpl(new DegreeBearingImpl(bearingInDegrees), /* confidence */ 0.9, relativeTo));
         }
-        BearingWithConfidenceCluster[] splitResult = cluster.splitInTwo(/* minimumDegreeDifferenceBetweenTacks */ 15);
+        BearingWithConfidenceCluster<TimePoint>[] splitResult = cluster.splitInTwo(/* minimumDegreeDifferenceBetweenTacks */ 15);
         assertEquals(2, splitResult.length);
         assertNotNull(splitResult[0]);
         assertNotNull(splitResult[1]);
@@ -54,7 +54,7 @@ public class WindEstimationOnStoredTracksTest extends StoredTrackBasedTestWithTr
     
     @Test
     public void testBearingWithConfidenceClusterAverageAcrossZero() {
-        BearingWithConfidenceCluster cluster = new BearingWithConfidenceCluster();
+        BearingWithConfidenceCluster<TimePoint> cluster = new BearingWithConfidenceCluster<TimePoint>();
         BearingWithConfidence b1 = new BearingWithConfidenceImpl(new DegreeBearingImpl(355), /* confidence */ 0.9, relativeTo);
         BearingWithConfidence b2 = new BearingWithConfidenceImpl(new DegreeBearingImpl(5), /* confidence */ 0.9, relativeTo);
         cluster.add(b1);
@@ -65,7 +65,7 @@ public class WindEstimationOnStoredTracksTest extends StoredTrackBasedTestWithTr
     
     @Test
     public void testBearingWithConfidenceClusterAverageWithZeroSinus() {
-        BearingWithConfidenceCluster cluster = new BearingWithConfidenceCluster();
+        BearingWithConfidenceCluster<TimePoint> cluster = new BearingWithConfidenceCluster<TimePoint>();
         BearingWithConfidence b1 = new BearingWithConfidenceImpl(new DegreeBearingImpl(0), /* confidence */ 0.9, relativeTo);
         BearingWithConfidence b2 = new BearingWithConfidenceImpl(new DegreeBearingImpl(0), /* confidence */ 0.9, relativeTo);
         cluster.add(b1);
@@ -76,7 +76,7 @@ public class WindEstimationOnStoredTracksTest extends StoredTrackBasedTestWithTr
     
     @Test
     public void testBearingWithConfidenceClusterAverageWithZeroSinusAndNegativeCosinus() {
-        BearingWithConfidenceCluster cluster = new BearingWithConfidenceCluster();
+        BearingWithConfidenceCluster<TimePoint> cluster = new BearingWithConfidenceCluster<TimePoint>();
         BearingWithConfidence b1 = new BearingWithConfidenceImpl(new DegreeBearingImpl(180), /* confidence */ 0.9, relativeTo);
         BearingWithConfidence b2 = new BearingWithConfidenceImpl(new DegreeBearingImpl(180), /* confidence */ 0.9, relativeTo);
         cluster.add(b1);
@@ -87,7 +87,7 @@ public class WindEstimationOnStoredTracksTest extends StoredTrackBasedTestWithTr
     
     @Test
     public void testBearingWithConfidenceClusterAverageWithZeroCosinus() {
-        BearingWithConfidenceCluster cluster = new BearingWithConfidenceCluster();
+        BearingWithConfidenceCluster<TimePoint> cluster = new BearingWithConfidenceCluster<TimePoint>();
         BearingWithConfidence b1 = new BearingWithConfidenceImpl(new DegreeBearingImpl(90), /* confidence */ 0.9, relativeTo);
         BearingWithConfidence b2 = new BearingWithConfidenceImpl(new DegreeBearingImpl(90), /* confidence */ 0.9, relativeTo);
         cluster.add(b1);
@@ -98,7 +98,7 @@ public class WindEstimationOnStoredTracksTest extends StoredTrackBasedTestWithTr
     
     @Test
     public void testBearingWithConfidenceClusterAverageWithZeroCosinusAndNegativeSinus() {
-        BearingWithConfidenceCluster cluster = new BearingWithConfidenceCluster();
+        BearingWithConfidenceCluster<TimePoint> cluster = new BearingWithConfidenceCluster<TimePoint>();
         BearingWithConfidence b1 = new BearingWithConfidenceImpl(new DegreeBearingImpl(270), /* confidence */ 0.9, relativeTo);
         BearingWithConfidence b2 = new BearingWithConfidenceImpl(new DegreeBearingImpl(270), /* confidence */ 0.9, relativeTo);
         cluster.add(b1);

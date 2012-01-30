@@ -1,13 +1,12 @@
 package com.sap.sailing.domain.confidence.impl;
 
-import java.util.Iterator;
-
 import com.sap.sailing.domain.base.impl.HasConfidenceImpl;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.confidence.ConfidenceBasedAverager;
 import com.sap.sailing.domain.confidence.HasConfidence;
 import com.sap.sailing.domain.confidence.HasConfidenceAndIsScalable;
 import com.sap.sailing.domain.confidence.ScalableValue;
+import com.sap.sailing.domain.confidence.Weigher;
 
 
 /**
@@ -33,25 +32,38 @@ import com.sap.sailing.domain.confidence.ScalableValue;
  * @author Axel Uhl (d043530)
  */
 public class ConfidenceBasedAveragerImpl<ValueType, BaseType, RelativeTo> implements ConfidenceBasedAverager<ValueType, BaseType, RelativeTo> {
+    private final Weigher<RelativeTo> weigher;
+    
+    /**
+     * @param weigher
+     *            If <code>null</code>, 1.0 will be assumed as default confidence for all values provided, regardless
+     *            the reference point relative to which the average is to be computed
+     */
+    public ConfidenceBasedAveragerImpl(Weigher<RelativeTo> weigher) {
+        this.weigher = weigher;
+    }
+
     @Override
     public HasConfidence<ValueType, BaseType, RelativeTo> getAverage(
             Iterable<? extends HasConfidenceAndIsScalable<ValueType, BaseType, RelativeTo>> values, RelativeTo at) {
         if (values == null || Util.isEmpty(values)) {
             return null;
         } else {
-            Iterator<? extends HasConfidenceAndIsScalable<ValueType, BaseType, RelativeTo>> iter = values.iterator();
-            HasConfidenceAndIsScalable<ValueType, BaseType, RelativeTo> next = iter.next();
-            ScalableValue<ValueType, BaseType> numerator = next.getScalableValue().multiply(next.getConfidence());
-            double confidenceSum = next.getConfidence();
-            while (iter.hasNext()) {
-                next = iter.next();
-                numerator = numerator.add(next.getScalableValue().multiply(next.getConfidence()));
-                confidenceSum += next.getConfidence();
+            ScalableValue<ValueType, BaseType> numerator = null;
+            double confidenceSum = 0;
+            for (HasConfidenceAndIsScalable<ValueType, BaseType, RelativeTo> next : values) {
+                double relativeWeight = (weigher == null ? 1.0 : weigher.getConfidence(next.getRelativeTo(), at)) * next.getConfidence();
+                ScalableValue<ValueType, BaseType> weightedNext = next.getScalableValue().multiply(relativeWeight);
+                if (numerator == null) {
+                    numerator = weightedNext;
+                } else {
+                    numerator = numerator.add(weightedNext);
+                }
+                confidenceSum += relativeWeight;
             }
             // TODO determine new confidence, e.g., based on the variance of estimates averaged
             double newConfidence = confidenceSum / Util.size(values);
             BaseType result = numerator.divide(confidenceSum, newConfidence);
-            // TODO need some way to instantiate "the same" HasConfidence implementation class passed as values
             return new HasConfidenceImpl<ValueType, BaseType, RelativeTo>(result, newConfidence, at);
         }
     }

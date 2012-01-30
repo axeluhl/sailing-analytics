@@ -1,6 +1,8 @@
 package com.sap.sailing.domain.tracking.impl;
 
+import com.sap.sailing.domain.base.impl.BearingWithConfidenceImpl;
 import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.confidence.Weigher;
 
 /**
  * Contains a number of {@link Bearing} objects and maintains the average bearing. For a given {@link Bearing} it
@@ -15,23 +17,45 @@ import com.sap.sailing.domain.common.Bearing;
  * @author Axel Uhl (d043530)
  *
  */
-public class BearingCluster extends GenericBearingCluster<Bearing> {
-    @Override
-    protected BearingCluster[] createBearingClusterArraySizeTwo() {
-        return new BearingCluster[2];
+public class BearingCluster {
+    private final BearingWithConfidenceCluster<Void> cluster;
+    
+    public BearingCluster() {
+        cluster = new BearingWithConfidenceCluster<Void>(new Weigher<Void>() {
+            @Override
+            public double getConfidence(Void fix, Void request) {
+                return 1;
+            }
+        });
     }
     
-    @Override
-    protected BearingCluster createEmptyCluster() {
-        return new BearingCluster();
+    private BearingCluster(BearingWithConfidenceCluster<Void> cluster) {
+        this.cluster = cluster;
     }
-
+    
     public BearingCluster[] splitInTwo(double minimumDegreeDifferenceBetweenTacks) {
-        return (BearingCluster[]) super.splitInTwo(minimumDegreeDifferenceBetweenTacks);
+        BearingWithConfidenceCluster<Void>[] array = cluster.splitInTwo(minimumDegreeDifferenceBetweenTacks, /* relativeTo */ null);
+        BearingCluster[] result = new BearingCluster[array.length];
+        int i=0;
+        for (BearingWithConfidenceCluster<Void> element : array) {
+            result[i++] = new BearingCluster(element);
+        }
+        return result;
+    }
+    
+    public Bearing getAverage() {
+        return cluster.getAverage(null).getObject();
     }
 
-    @Override
-    protected Bearing getBearing(Bearing b) {
-        return b;
+    public boolean isEmpty() {
+        return cluster.isEmpty();
+    }
+
+    public int size() {
+        return cluster.size();
+    }
+
+    public void add(Bearing bearing) {
+        cluster.add(new BearingWithConfidenceImpl<Void>(bearing, /* confidence */ 1.0, /* relativeTo */ null));
     }
 }

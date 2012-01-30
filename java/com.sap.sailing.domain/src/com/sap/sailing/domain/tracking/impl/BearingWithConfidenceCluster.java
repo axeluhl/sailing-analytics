@@ -1,10 +1,17 @@
 package com.sap.sailing.domain.tracking.impl;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import com.sap.sailing.domain.base.BearingWithConfidence;
+import com.sap.sailing.domain.base.impl.BearingWithConfidenceImpl;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.confidence.ConfidenceBasedAverager;
-import com.sap.sailing.domain.confidence.ConfidenceBasedAveragerFactory;
+import com.sap.sailing.domain.confidence.ConfidenceFactory;
+import com.sap.sailing.domain.confidence.HasConfidence;
+import com.sap.sailing.domain.confidence.Weigher;
 
 /**
  * Contains a number of {@link Bearing} objects and maintains the average bearing. For a given {@link Bearing} it
@@ -19,37 +26,123 @@ import com.sap.sailing.domain.confidence.ConfidenceBasedAveragerFactory;
  * @author Axel Uhl (d043530)
  *
  */
-public class BearingWithConfidenceCluster<RelativeTo> extends GenericBearingCluster<BearingWithConfidence<RelativeTo>> {
+public class BearingWithConfidenceCluster<RelativeTo> {
+    private final List<BearingWithConfidence<RelativeTo>> bearings;
+    private final Weigher<RelativeTo> weigher;
+    
+    public BearingWithConfidenceCluster(Weigher<RelativeTo> weigher) {
+        bearings = new ArrayList<BearingWithConfidence<RelativeTo>>();
+        this.weigher = weigher;
+    }
+    
+    /**
+     * Finds the two bearings in the cluster that are farthest apart (at least <code>minimumDegreeDifferenceBetweenTacks</code>).
+     * Then, the remaining bearings in this cluster are associated with the one of the two extreme bearings to which they are
+     * closer. The two resulting clusters are returned.
+     * 
+     * @param minimumDegreeDifferenceBetweenTacks
+     *            tells the minimum degree difference that must exist between the two extreme bearings before they are
+     *            considered to represent boats on different tacks. If more than one bearing exists in this cluster
+     *            but no two bearings are at least <code>minimumDegreeDifferenceBetweenTacks</code> degrees apart from
+     *            each other, only fir first of the two clusters returned will contain bearings while the second one
+     *            remains empty.
+     * @return two bearing clusters; both empty if this cluster is empty; only the second one empty if this cluster
+     *         contains only one bearing. Otherwise, the two bearings farthest apart (greatest absolute
+     *         {@link Bearing#getDifferenceTo(Bearing) difference}) are guaranteed not to be in different clusters, and
+     *         all other bearings contained in this cluster will be contained in the cluster that contains the extreme
+     *         bearing to which it's closer.
+     */
+    public BearingWithConfidenceCluster<RelativeTo>[] splitInTwo(double minimumDegreeDifferenceBetweenTacks, RelativeTo relativeTo) {
+        BearingWithConfidenceCluster<RelativeTo>[] result = createBearingClusterArraySizeTwo();
+        result[0] = createEmptyCluster();
+        result[1] = createEmptyCluster();
+        if (bearings.size() >= 2) {
+            Pair<BearingWithConfidence<RelativeTo>, BearingWithConfidence<RelativeTo>> extremeBearings = getExtremeBearings(minimumDegreeDifferenceBetweenTacks);
+            if (extremeBearings != null) {
+                result[0].add(extremeBearings.getA());
+                result[1].add(extremeBearings.getB());
+            }
+            for (BearingWithConfidence<RelativeTo> bearing : bearings) {
+                if (extremeBearings == null || (bearing != extremeBearings.getA() && bearing != extremeBearings.getB())) {
+                    if (extremeBearings == null
+                            || result[0].getDifferenceFromAverage(bearing.getObject(), relativeTo) <= result[1]
+                                    .getDifferenceFromAverage(bearing.getObject(), relativeTo)) {
+                        result[0].add(bearing);
+                    } else {
+                        result[1].add(bearing);
+                    }
+                }
+            }
+        } else if (!bearings.isEmpty()) {
+            // add the only bearing to the first of the two resulting clusters
+            result[0].add(bearings.get(0));
+        }
+        return result;
+    }
+
+    @SuppressWarnings("unchecked")
+    protected BearingWithConfidenceCluster<RelativeTo>[] createBearingClusterArraySizeTwo() {
+        return (BearingWithConfidenceCluster<RelativeTo>[]) new BearingWithConfidenceCluster<?>[2];
+    }
+    
+    private Pair<BearingWithConfidence<RelativeTo>, BearingWithConfidence<RelativeTo>> getExtremeBearings(double minimumDegreeDifferenceBetweenTacks) {
+        assert bearings.size() >= 2;
+        double maxAbsDegDiff = minimumDegreeDifferenceBetweenTacks;
+        Pair<BearingWithConfidence<RelativeTo>, BearingWithConfidence<RelativeTo>> result = null;
+        for (int i=0; i<bearings.size(); i++) {
+            for (int j=i+1; j<bearings.size(); j++) {
+                if (Math.abs(bearings.get(i).getObject().getDifferenceTo(bearings.get(j).getObject()).getDegrees()) >= maxAbsDegDiff) {
+                    result = new Pair<BearingWithConfidence<RelativeTo>, BearingWithConfidence<RelativeTo>>(bearings.get(i), bearings.get(j));
+                    maxAbsDegDiff = Math.abs(bearings.get(i).getObject().getDifferenceTo(bearings.get(j).getObject()).getDegrees());
+                    assert Math.abs(result.getA().getObject().getDegrees()-result.getB().getObject().getDegrees()) <= 180.;
+                }
+            }
+        }
+        return result;
+    }
+
+    public boolean isEmpty() {
+        return bearings.isEmpty();
+    }
+    
+    public int size() {
+        return bearings.size();
+    }
+    
+    public void add(BearingWithConfidence<RelativeTo> bearing) {
+        bearings.add(bearing);
+    }
+    
     /**
      * If the cluster contains no bearings, <code>null</code> is returned. Otherwise, the average angle is computed
      * by adding up the sin and cos values of the individual bearings, then computing the atan2 of the ratio.
      */
-    @Override
-    public Bearing getAverage() {
-        ConfidenceBasedAverager<Pair<Double, Double>, BearingWithConfidence<RelativeTo>, RelativeTo> averager = ConfidenceBasedAveragerFactory.INSTANCE
-                .createAverager();
-        BearingWithConfidence<RelativeTo> average = averager.getAverage(getBearings(), at);
-        return average == null ? null : average.getObject();
+    public BearingWithConfidence<RelativeTo> getAverage(RelativeTo relativeTo) {
+        ConfidenceBasedAverager<Pair<Double, Double>, Bearing, RelativeTo> averager = ConfidenceFactory.INSTANCE.createAverager(weigher);
+        HasConfidence<Pair<Double, Double>, Bearing, RelativeTo> average = averager.getAverage(getBearings(), relativeTo);
+        return average == null ? null : new BearingWithConfidenceImpl<RelativeTo>(average.getObject(), average.getConfidence(), average.getRelativeTo());
     }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    protected BearingWithConfidenceCluster<RelativeTo>[] createBearingClusterArraySizeTwo() {
-        return new BearingWithConfidenceCluster[2];
+    
+    /**
+     * Absolute difference to {@link #getAverage() this cluster's average bearing} in degrees. If there is no bearing stored in
+     * this cluster yet, 0.0 is returned.
+     * 
+     * @return a value <code>&gt;=0.0</code>
+     */
+    private double getDifferenceFromAverage(Bearing bearing, RelativeTo relativeTo) {
+        return bearings.size() == 0 ? 0.0 : Math.abs(getAverage(relativeTo).getObject().getDifferenceTo(bearing).getDegrees());
     }
-
-    @Override
-    protected BearingWithConfidenceCluster<RelativeTo> createEmptyCluster() {
-        return new BearingWithConfidenceCluster<RelativeTo>();
+    
+    protected Iterable<BearingWithConfidence<RelativeTo>> getBearings() {
+        return Collections.unmodifiableCollection(bearings);
     }
-
+    
     @Override
-    public BearingWithConfidenceCluster<RelativeTo>[] splitInTwo(double minimumDegreeDifferenceBetweenTacks) {
-        return (BearingWithConfidenceCluster<RelativeTo>[]) super.splitInTwo(minimumDegreeDifferenceBetweenTacks);
+    public String toString() {
+        return bearings.toString();
     }
-
-    @Override
-    protected Bearing getBearing(BearingWithConfidence<RelativeTo> b) {
-        return b.getObject();
+    
+    private BearingWithConfidenceCluster<RelativeTo> createEmptyCluster() {
+        return new BearingWithConfidenceCluster<RelativeTo>(weigher);
     }
 }
