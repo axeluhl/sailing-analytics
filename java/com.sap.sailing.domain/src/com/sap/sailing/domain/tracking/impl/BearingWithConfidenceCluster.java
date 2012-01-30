@@ -30,6 +30,13 @@ public class BearingWithConfidenceCluster<RelativeTo> {
     private final List<BearingWithConfidence<RelativeTo>> bearings;
     private final Weigher<RelativeTo> weigher;
     
+    /**
+     * @param weigher
+     *            if <code>null</code>, the <code>relativeTo</code> parameter of {@link #getAverage(Object)} will be ignored,
+     *            and only the confidences provided by the {@link BearingWithConfidence} objects will be taken into
+     *            account. Otherwise, the <code>weigher</code> will be used to determine the confidence relative to
+     *            the <code>relativeTo</code> argument of {@link #getAverage(Object)}.
+     */
     public BearingWithConfidenceCluster(Weigher<RelativeTo> weigher) {
         bearings = new ArrayList<BearingWithConfidence<RelativeTo>>();
         this.weigher = weigher;

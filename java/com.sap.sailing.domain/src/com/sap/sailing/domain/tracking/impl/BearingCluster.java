@@ -1,8 +1,8 @@
 package com.sap.sailing.domain.tracking.impl;
 
+import com.sap.sailing.domain.base.BearingWithConfidence;
 import com.sap.sailing.domain.base.impl.BearingWithConfidenceImpl;
 import com.sap.sailing.domain.common.Bearing;
-import com.sap.sailing.domain.confidence.Weigher;
 
 /**
  * Contains a number of {@link Bearing} objects and maintains the average bearing. For a given {@link Bearing} it
@@ -21,12 +21,7 @@ public class BearingCluster {
     private final BearingWithConfidenceCluster<Void> cluster;
     
     public BearingCluster() {
-        cluster = new BearingWithConfidenceCluster<Void>(new Weigher<Void>() {
-            @Override
-            public double getConfidence(Void fix, Void request) {
-                return 1;
-            }
-        });
+        cluster = new BearingWithConfidenceCluster<Void>(/* weigher */ null);
     }
     
     private BearingCluster(BearingWithConfidenceCluster<Void> cluster) {
@@ -44,7 +39,8 @@ public class BearingCluster {
     }
     
     public Bearing getAverage() {
-        return cluster.getAverage(null).getObject();
+        BearingWithConfidence<Void> average = cluster.getAverage(null);
+        return average == null ? null : average.getObject();
     }
 
     public boolean isEmpty() {
