@@ -162,6 +162,7 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.timer = timer;
+        timer.addTimeListener(this);
         imageResources = new RaceMapResources();
         tails = new HashMap<CompetitorDTO, Polyline>();
         firstShownFix = new HashMap<CompetitorDTO, Integer>();

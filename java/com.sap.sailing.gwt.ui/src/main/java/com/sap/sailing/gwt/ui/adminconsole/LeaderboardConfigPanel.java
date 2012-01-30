@@ -124,10 +124,18 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
         readAllLeaderbords();
         VerticalPanel mainPanel = new VerticalPanel();
         this.setWidget(mainPanel);
+        
+        //Create leaderboard groups
+        //TODO
 
-        Label lblLeaderboards = new Label(stringMessages.leaderboards());
-        lblLeaderboards.setStyleName("bold");
-        mainPanel.add(lblLeaderboards);
+        //Create leaderboards list and functionality
+        CaptionPanel leaderboardsCaptionPanel = new CaptionPanel(stringMessages.leaderboards());
+        leaderboardsCaptionPanel.setStyleName("bold");
+        leaderboardsCaptionPanel.setWidth("50%");
+        mainPanel.add(leaderboardsCaptionPanel);
+        
+        VerticalPanel leaderboardsPanel = new VerticalPanel();
+        leaderboardsCaptionPanel.add(leaderboardsPanel);
 
         Label lblFilterEvents = new Label(stringMessages.filterLeaderboardsByName() + ": ");
         HorizontalPanel filterPanel = new HorizontalPanel();
@@ -142,7 +150,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
             }
         });
         filterPanel.add(filterLeaderboardTextbox);
-        mainPanel.add(filterPanel);
+        leaderboardsPanel.add(filterPanel);
 
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
         leaderboardTable = new CellTable<LeaderboardDTO>(/* pageSize */200, tableRes);
@@ -237,11 +245,11 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
             }
         });
         leaderboardList.addDataDisplay(leaderboardTable);
-        mainPanel.add(leaderboardTable);
+        leaderboardsPanel.add(leaderboardTable);
         HorizontalPanel leaderboardButtonPanel = new HorizontalPanel();
         leaderboardButtonPanel.setSpacing(5);
-        mainPanel.add(leaderboardButtonPanel);
-        Button btnNew = new Button("Create Leaderboard..");
+        leaderboardsPanel.add(leaderboardButtonPanel);
+        Button btnNew = new Button("Create Leaderboard...");
         leaderboardButtonPanel.add(btnNew);
         btnNew.addClickHandler(new ClickHandler() {
             @Override

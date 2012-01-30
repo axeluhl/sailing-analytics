@@ -39,7 +39,9 @@ import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
+import com.sap.sailing.domain.leaderboard.impl.LeaderboardGroupImpl;
 import com.sap.sailing.domain.leaderboard.impl.LeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.ResultDiscardingRuleImpl;
 import com.sap.sailing.domain.leaderboard.impl.ScoreCorrectionImpl;
@@ -102,6 +104,8 @@ public class RacingEventServiceImpl implements RacingEventService, EventFetcher,
      */
     private final Map<String, Leaderboard> leaderboardsByName;
     
+    private final Map<String, LeaderboardGroup> leaderboardGroupsByName;
+    
     private Set<DynamicTrackedEvent> eventsObservedForDefaultLeaderboard = new HashSet<DynamicTrackedEvent>();
     
     private final MongoObjectFactory mongoObjectFactory;
@@ -127,15 +131,24 @@ public class RacingEventServiceImpl implements RacingEventService, EventFetcher,
         raceTrackersByEvent = new HashMap<Event, Set<RaceTracker>>();
         windTrackers = new HashMap<RaceDefinition, WindTracker>();
         raceTrackersByID = new HashMap<Object, RaceTracker>();
+        leaderboardGroupsByName = new HashMap<String, LeaderboardGroup>();
         leaderboardsByName = new HashMap<String, Leaderboard>();
         // Add one default leaderboard that aggregates all races currently tracked by this service.
         // This is more for debugging purposes than for anything else.
         addLeaderboard(DefaultLeaderboardName.DEFAULT_LEADERBOARD_NAME, new int[] { 5, 8 });
-        loadStoredLeaderboards();
+        loadStoredLeaderboardsAndGroups();
     }
     
-    private void loadStoredLeaderboards() {
-        for (Leaderboard leaderboard : domainObjectFactory.getAllLeaderboards()) {
+    private void loadStoredLeaderboardsAndGroups() {
+        //Loading all leaderboard groups and putting the contained leaderboards
+        for (LeaderboardGroup leaderboardGroup : domainObjectFactory.getAllLeaderboardGroups()) {
+            leaderboardGroupsByName.put(leaderboardGroup.getName(), leaderboardGroup);
+            for (Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
+                leaderboardsByName.put(leaderboard.getName(), leaderboard);
+            }
+        }
+        //Loading the remaining leaderboards
+        for (Leaderboard leaderboard : domainObjectFactory.getLeaderboardsNotInGroup()) {
             leaderboardsByName.put(leaderboard.getName(), leaderboard);
         }
     }
@@ -649,6 +662,70 @@ public class RacingEventServiceImpl implements RacingEventService, EventFetcher,
     @Override
     public Event getEvent(EventName eventIdentifier) {
         return getEventByName(eventIdentifier.getEventName());
+    }
+
+    @Override
+    public Map<String, LeaderboardGroup> getLeaderboardGroups() {
+        synchronized (leaderboardGroupsByName) {
+            return Collections.unmodifiableMap(new HashMap<String, LeaderboardGroup>(leaderboardGroupsByName));
+        }
+    }
+
+    @Override
+    public LeaderboardGroup getLeaderboardGroubByName(String groupName) {
+        synchronized (leaderboardGroupsByName) {
+            return leaderboardGroupsByName.get(groupName);
+        }
+    }
+
+    @Override
+    public LeaderboardGroup addLeaderboardGroup(String groupName, String description, List<String> leaderboardNames) {
+        ArrayList<Leaderboard> leaderboards = new ArrayList<>();
+        synchronized (leaderboardsByName) {
+            for (String leaderboardName : leaderboardNames) {
+                Leaderboard leaderboard = leaderboardsByName.get(leaderboardName);
+                if (leaderboard == null) {
+                    throw new IllegalArgumentException("No leaderboard with name " + leaderboardName + " found");
+                } else {
+                    leaderboards.add(leaderboard);
+                }
+            }
+        }
+        LeaderboardGroup result = new LeaderboardGroupImpl(groupName, description, leaderboards);
+        synchronized (leaderboardGroupsByName) {
+            leaderboardGroupsByName.put(groupName, result);
+        }
+        mongoObjectFactory.storeLeaderboardGroup(result);
+        return result;
+    }
+
+    @Override
+    public void removeLeaderboardGroup(String groupName) {
+        synchronized (leaderboardGroupsByName) {
+            leaderboardGroupsByName.remove(groupName);
+        }
+        mongoObjectFactory.removeLeaderboardGroup(groupName);
+    }
+
+    @Override
+    public void renameLeaderboardGroup(String oldName, String newName) {
+        synchronized (leaderboardGroupsByName) {
+            if (!leaderboardGroupsByName.containsKey(oldName)) {
+                throw new IllegalArgumentException("No leaderboard group with name " + oldName + " found");
+            }
+            if (!leaderboardGroupsByName.containsKey(newName)) {
+                throw new IllegalArgumentException("Leaderboard group with name " + newName + " already exists");
+            }
+            LeaderboardGroup toRename = leaderboardGroupsByName.remove(oldName);
+            toRename.setName(newName);
+            leaderboardGroupsByName.put(newName, toRename);
+            mongoObjectFactory.renameLeaderboardGroup(oldName, newName);
+        }
+    }
+
+    @Override
+    public void updateStoredLeaderboardGroup(LeaderboardGroup leaderboardGroup) {
+        mongoObjectFactory.storeLeaderboardGroup(leaderboardGroup);
     }
 
 }

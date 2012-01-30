@@ -72,6 +72,7 @@ import com.sap.sailing.domain.common.impl.KilometersPerHourSpeedImpl;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard.Entry;
+import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
 import com.sap.sailing.domain.leaderboard.ScoreCorrection.MaxPointsReason;
 import com.sap.sailing.domain.leaderboard.impl.ResultDiscardingRuleImpl;
@@ -105,6 +106,7 @@ import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDTO;
+import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDTO;
 import com.sap.sailing.gwt.ui.shared.LegEntryDTO;
 import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
@@ -839,12 +841,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
 
     @Override
     public List<String> getLeaderboardNames() throws Exception {
-        Map<String, Leaderboard> leaderboards = getService().getLeaderboards();
-        List<String> result = new ArrayList<String>(leaderboards.size());
-        for (Leaderboard leaderboard : leaderboards.values()) {
-            result.add(leaderboard.getName());
-        }
-        return result;
+        return new ArrayList<String>(getService().getLeaderboards().keySet());
     }
 
     @Override
@@ -909,20 +906,20 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
      * is used for {@link LeaderboardDTO#competitorDisplayNames}.
      */
     private LeaderboardDTO createStrippedLeaderboardDTO(Leaderboard leaderboard) {
-        LeaderboardDTO dao = new LeaderboardDTO();
-        dao.name = leaderboard.getName();
-        dao.competitorDisplayNames = new HashMap<CompetitorDTO, String>();
+        LeaderboardDTO dto = new LeaderboardDTO();
+        dto.name = leaderboard.getName();
+        dto.competitorDisplayNames = new HashMap<CompetitorDTO, String>();
         for (RaceInLeaderboard raceColumn : leaderboard.getRaceColumns()) {
             RaceIdentifier raceIdentifier = null;
             if(raceColumn.getTrackedRace() != null) {
                 raceIdentifier = new EventNameAndRaceName(raceColumn.getTrackedRace().getTrackedEvent().getEvent().getName(),
                         raceColumn.getTrackedRace().getRace().getName());
             }
-            dao.addRace(raceColumn.getName(), raceColumn.isMedalRace(), raceIdentifier);
+            dto.addRace(raceColumn.getName(), raceColumn.isMedalRace(), raceIdentifier);
         }
-        dao.hasCarriedPoints = leaderboard.hasCarriedPoints();
-        dao.discardThresholds = leaderboard.getResultDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces();
-        return dao;
+        dto.hasCarriedPoints = leaderboard.hasCarriedPoints();
+        dto.discardThresholds = leaderboard.getResultDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces();
+        return dto;
     }
     
     @Override
@@ -1577,6 +1574,95 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     protected void checkPermutationStrongName() throws SecurityException {
         //Override to prevent exception "Blocked request without GWT permutation header (XSRF attack?)" when testing the GWT sites
         return;
+    }
+
+    @Override
+    public List<LeaderboardGroupDTO> getLeaderboardGroups() {
+        ArrayList<LeaderboardGroupDTO> leaderboardGroupDTOs = new ArrayList<LeaderboardGroupDTO>();
+        Map<String, LeaderboardGroup> leaderboardGroups = getService().getLeaderboardGroups();
+        
+        for (LeaderboardGroup leaderboardGroup : leaderboardGroups.values()) {
+            leaderboardGroupDTOs.add(convertToLeaderboardGroupDTO(leaderboardGroup));
+        }
+        
+        return leaderboardGroupDTOs;
+    }
+
+    @Override
+    public LeaderboardGroupDTO getLeaderboardGroupByName(String groupName) {
+        return convertToLeaderboardGroupDTO(getService().getLeaderboardGroubByName(groupName));
+    }
+    
+    private LeaderboardGroupDTO convertToLeaderboardGroupDTO(LeaderboardGroup leaderboardGroup) {
+        ArrayList<LeaderboardDTO> leaderboards = new ArrayList<LeaderboardDTO>();
+        for (Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
+            leaderboards.add(createStrippedLeaderboardDTO(leaderboard));
+        }
+        return new LeaderboardGroupDTO(leaderboardGroup.getName(), leaderboardGroup.getDescription(), leaderboards);
+    }
+
+    @Override
+    public void renameLeaderboardGroup(String oldName, String newName) {
+        getService().renameLeaderboardGroup(oldName, newName);
+    }
+
+    @Override
+    public void removeLeaderboardGroup(String groupName) {
+        getService().removeLeaderboardGroup(groupName);
+    }
+
+    @Override
+    public LeaderboardGroupDTO createLeaderboardGroup(String groupName, String description, List<String> leaderboardNames) {
+        return convertToLeaderboardGroupDTO(getService().addLeaderboardGroup(groupName, description, leaderboardNames));
+    }
+
+    @Override
+    public LeaderboardGroupDTO createLeaderboardGroup(String groupName, String description) {
+        return createLeaderboardGroup(groupName, description, new ArrayList<String>());
+    }
+
+    @Override
+    public void addLeaderboardToGroup(String leaderboardName, String groupName) {
+        LeaderboardGroup leaderboardGroup = getService().getLeaderboardGroubByName(groupName);
+        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        if (leaderboardGroup != null) {
+            if (leaderboard != null) {
+                leaderboardGroup.addLeaderboard(leaderboard);
+                getService().updateStoredLeaderboardGroup(leaderboardGroup);
+            } else {
+                throw new IllegalArgumentException("Leaderboard named " + leaderboardName + " not found");
+            }
+        } else {
+            throw new IllegalArgumentException("Leaderboard group named " + groupName + " not found");
+        }
+    }
+
+    @Override
+    public void removeLeaderboardFromGroup(String leaderboardName, String groupName) {
+        LeaderboardGroup leaderboardGroup = getService().getLeaderboardGroubByName(groupName);
+        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        if (leaderboardGroup != null) {
+            if (leaderboard != null) {
+                leaderboardGroup.removeLeaderboard(leaderboard);
+                getService().updateStoredLeaderboardGroup(leaderboardGroup);
+            } else {
+                throw new IllegalArgumentException("Leaderboard named " + leaderboardName + " not found");
+            }
+        } else {
+            throw new IllegalArgumentException("Leaderboard group named " + groupName + " not found");
+        }
+    }
+
+    @Override
+    public void updateLeaderboardGroup(String oldName, String newName, String description) {
+        if (!oldName.equals(newName)) {
+            getService().renameLeaderboardGroup(oldName, newName);
+        }
+        LeaderboardGroup leaderboardGroup = getService().getLeaderboardGroubByName(newName);
+        if (!description.equals(leaderboardGroup.getDescription())) {
+            leaderboardGroup.setDescriptiom(description);
+        }
+        getService().updateStoredLeaderboardGroup(leaderboardGroup);
     }
 
 }

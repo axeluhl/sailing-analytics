@@ -749,9 +749,17 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             ErrorReporter errorReporter, final StringMessages stringConstants) {
         this(sailingService, /* preSelectedRace */ null, competitorSelectionProvider, leaderboardName, errorReporter, stringConstants);
     }
-    
+
     public LeaderboardPanel(SailingServiceAsync sailingService, RaceIdentifier preSelectedRace,
             CompetitorSelectionProvider competitorSelectionProvider, String leaderboardName,
+            ErrorReporter errorReporter, final StringMessages stringConstants) {
+        this(sailingService, preSelectedRace, competitorSelectionProvider, new Timer(/* delayBetweenAutoAdvancesInMilliseconds */3000l),
+                leaderboardName, errorReporter, stringConstants);
+        timer.setDelay(getDelayInMilliseconds()); // set time/delay before adding as listener
+    }
+
+    public LeaderboardPanel(SailingServiceAsync sailingService, RaceIdentifier preSelectedRace,
+            CompetitorSelectionProvider competitorSelectionProvider, Timer timer, String leaderboardName,
             ErrorReporter errorReporter, final StringMessages stringConstants) {
         this.sailingService = sailingService;
         this.preSelectedRace = preSelectedRace;
@@ -771,8 +779,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         selectedManeuverDetails.add(DetailType.JIBE);
         selectedManeuverDetails.add(DetailType.PENALTY_CIRCLE);
         delayInMilliseconds = 0l;
-        timer = new Timer(/* delayBetweenAutoAdvancesInMilliseconds */3000l);
-        timer.setDelay(getDelayInMilliseconds()); // set time/delay before adding as listener
+        this.timer = timer;
         timer.addPlayStateListener(this);
         timer.addTimeListener(this);
         rankColumn = new RankColumn();
@@ -818,11 +825,11 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         ClickHandler playPauseHandler = new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                if (timer.isPlaying()) {
-                    timer.pause();
+                if (LeaderboardPanel.this.timer.isPlaying()) {
+                    LeaderboardPanel.this.timer.pause();
                 } else {
-                    timer.setDelay(getDelayInMilliseconds());
-                    timer.resume();
+                    LeaderboardPanel.this.timer.setDelay(getDelayInMilliseconds());
+                    LeaderboardPanel.this.timer.resume();
                 }
             }
         };
