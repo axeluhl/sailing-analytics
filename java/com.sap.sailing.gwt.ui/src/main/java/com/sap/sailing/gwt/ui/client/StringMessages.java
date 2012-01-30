@@ -21,10 +21,10 @@ public interface StringMessages extends Messages {
     String races();
     String tracked();
     String time();
-    String acceleration();
-    String accelerationHelp();
-    String delay();
-    String delayHelp();
+    String playSpeed();
+    String playSpeedHelp();
+    String timeDelay();
+    String timeDelayHelp();
     String speedInKnots();
     String fromDeg();
     String noRacesYet();
@@ -213,4 +213,13 @@ public interface StringMessages extends Messages {
     String competitorPassedMarkAtDate(String competitorName, String markName, String dateTime);
     String valueForCompetitorAt(String competitorName, String dateTime, String valueWithUnit);
     String reallyRemoveRace(String string);
+    String showDetails();
+    String hideLeaderboard();
+    String hideLeaderboards();
+    String showLeaderboard();
+    String hideRaces();
+    String showMap();
+    String hideMap();
+    String noLeaderboardSelected();
+    String leaderboardGroups();
 }

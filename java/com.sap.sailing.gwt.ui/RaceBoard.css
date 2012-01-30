@@ -268,3 +268,20 @@ input.magnifier {
 	text-decoration: none;
 }
 
+.timePanel-controls {
+}
+
+.timePanel-controls-play {
+}
+
+.timePanel-controls-playSpeed {
+	vertical-align: middle;
+	padding: 3px;
+	line-height: 25px;
+}
+
+.timePanel-controls-time {
+}
+
+.timePanel-controls-timeDelay {
+}
