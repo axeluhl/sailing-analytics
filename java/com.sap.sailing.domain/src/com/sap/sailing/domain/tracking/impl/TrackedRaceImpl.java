@@ -202,7 +202,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     @Override
     public TimePoint getStart() {
         TimePoint result;
-        Iterator<MarkPassing> markPassingsFirstMarkIter = getMarkPassingsInOrder(getRace().getCourse().getWaypoints().iterator().next()).iterator();
+        Iterator<MarkPassing> markPassingsFirstMarkIter = getMarkPassingsInOrder(getRace().getCourse().getFirstWaypoint()).iterator();
         if (markPassingsFirstMarkIter.hasNext()) {
             MarkPassing firstMarkPassingFirstMark = markPassingsFirstMarkIter.next();
             TimePoint timeOfFirstMarkPassingFirstMark = firstMarkPassingFirstMark.getTimePoint();
@@ -223,6 +223,15 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         return result;
     }
     
+    @Override
+    public TimePoint getAssumedEnd() {
+        TimePoint result = null;
+        for (MarkPassing passingFinishLine : getMarkPassingsInOrder(getRace().getCourse().getLastWaypoint())) {
+            result = passingFinishLine.getTimePoint();
+        }
+        return result;
+    }
+
     @Override
     public boolean hasStarted(TimePoint at) {
         return getStart() != null && getStart().compareTo(at) <= 0;

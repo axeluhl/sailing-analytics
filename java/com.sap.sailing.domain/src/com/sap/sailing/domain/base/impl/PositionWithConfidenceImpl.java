@@ -46,6 +46,7 @@ public class PositionWithConfidenceImpl<RelativeTo> extends HasConfidenceImpl<Tr
 
         @Override
         public Position divide(double divisor, double confidence) {
+            // don't need to scale down; atan2 is agnostic regarding scaling factors
             double hyp = Math.sqrt(x * x + y * y);
             double latRad = Math.atan2(z, hyp);
             double lngRad = Math.atan2(y, x);
