@@ -28,6 +28,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.TimePanel;
 import com.sap.sailing.gwt.ui.client.Timer;
+import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
@@ -75,7 +76,7 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
         mainPanel.setSize("100%", "100%");
         setWidget(mainPanel);
 
-        timer = new Timer(/* delayBetweenAutoAdvancesInMilliseconds */500);
+        timer = new Timer(PlayModes.Replay, /* delayBetweenAutoAdvancesInMilliseconds */1000);
         collapsableViewers = new ArrayList<CollapsableComponentViewer<?>>();
         CompetitorSelectionModel competitorSelectionModel = new CompetitorSelectionModel(/* hasMultiSelection */ true);
 
@@ -93,7 +94,7 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
 
         // create the default leaderboard and select the right race
         LeaderboardPanel leaderboardPanel = new LeaderboardPanel(sailingService, selectedRaceIdentifier, competitorSelectionModel,
-                leaderboardName, errorReporter, stringMessages);
+                timer, leaderboardName, errorReporter, stringMessages);
 
         CollapsableComponentViewer<LeaderboardSettings> leaderboardViewer = new CollapsableComponentViewer<LeaderboardSettings>(
                 leaderboardPanel, "100%", "100%", stringMessages);
@@ -193,14 +194,16 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
     public void onRaceSelectionChange(List<RaceIdentifier> selectedRaces) {
         if (selectedRaces != null && !selectedRaces.isEmpty()) {
             RaceDTO selectedRace = racesByIdentifier.get(selectedRaces.iterator().next());
-            if (selectedRace.startOfRace != null) {
-                timer.setTime(selectedRace.startOfRace.getTime());
-            }
             if (selectedRace.startOfTracking != null) {
                 timePanel.setMin(selectedRace.startOfTracking);
             }
-            if (selectedRace.timePointOfNewestEvent != null) {
+            if (selectedRace.endOfRace != null) {
+                timePanel.setMax(selectedRace.endOfRace);
+            } else if (selectedRace.timePointOfNewestEvent != null) {
                 timePanel.setMax(selectedRace.timePointOfNewestEvent);
+            }
+            if (selectedRace.startOfRace != null) {
+                timer.setTime(selectedRace.startOfRace.getTime());
             }
         }
     }

@@ -137,7 +137,7 @@ input.magnifier {
 	width: 100%;
 	position: fixed;
 	bottom: 0;
-	height: 101px;
+	height: 151px;
 	z-index: 1000;
 }
 
@@ -284,4 +284,8 @@ input.magnifier {
 }
 
 .timePanel-controls-timeDelay {
+}
+
+.gwt-SliderBar-shell {
+	width: 95%;
 }

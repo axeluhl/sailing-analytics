@@ -16,6 +16,7 @@ import com.sap.sailing.gwt.ui.client.EventRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.Timer;
+import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
@@ -58,7 +59,7 @@ public class LiveEventViewPanel extends AbstractEventPanel {
         mainPanel.add(leaderboardCollapsablePanel);
         
         //Create race map
-        timer = new Timer(500);
+        timer = new Timer(PlayModes.Replay, 500);
         timer.pause();
         
         VerticalPanel raceMapContent = new VerticalPanel();
