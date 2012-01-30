@@ -43,6 +43,10 @@ public class DetailTypeFormatter {
             return stringMessages.penaltyCircle();
         case MARK_PASSING:
             return stringMessages.markPassing();
+        case DISPLAY_LEGS:
+            return stringMessages.legs();
+        case CURRENT_LEG:
+            return stringMessages.currentLeg();
         }
         return null;
 
