@@ -107,7 +107,6 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         horizontalRanksVerticalAndCheckboxesManeuversPanel.add(verticalPanelRadioAndCheckboxes);
         grid.setWidget(2, 0, horizontalRanksVerticalAndCheckboxesManeuversPanel);
         timePanel = new TimePanel(timer, stringMessages);
-        timer.addTimeListener(raceMap);
         timer.addTimeListener(this);
         timer.addTimeListener(windHistory);
         grid.setWidget(1, 1, timePanel);

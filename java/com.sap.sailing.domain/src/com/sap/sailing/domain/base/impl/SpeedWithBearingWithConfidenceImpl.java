@@ -6,21 +6,14 @@ import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.impl.RadianBearingImpl;
 import com.sap.sailing.domain.common.impl.Util.Triple;
+import com.sap.sailing.domain.confidence.IsScalable;
 import com.sap.sailing.domain.confidence.ScalableValue;
 
-public class SpeedWithBearingWithConfidenceImpl extends
-        HasConfidenceImpl<Triple<Speed, Double, Double>, SpeedWithBearingWithConfidence> implements
-        SpeedWithBearingWithConfidence {
-    private final SpeedWithBearing speedWithBearing;
-    
-    public SpeedWithBearingWithConfidenceImpl(SpeedWithBearing speedWithBearing, double confidence) {
-        super(confidence);
-        this.speedWithBearing = speedWithBearing;
-    }
-
-    @Override
-    public SpeedWithBearing getSpeedWithBearing() {
-        return speedWithBearing;
+public class SpeedWithBearingWithConfidenceImpl<RelativeTo> extends
+        HasConfidenceImpl<Triple<Speed, Double, Double>, SpeedWithBearing, RelativeTo> implements
+        SpeedWithBearingWithConfidence<RelativeTo>, IsScalable<Triple<Speed, Double, Double>, SpeedWithBearing> {
+    public SpeedWithBearingWithConfidenceImpl(SpeedWithBearing speedWithBearing, double confidence, RelativeTo relativeTo) {
+        super(speedWithBearing, confidence, relativeTo);
     }
 
     /**
@@ -29,11 +22,11 @@ public class SpeedWithBearingWithConfidenceImpl extends
      * angle.
      */
     @Override
-    public ScalableValue<Triple<Speed, Double, Double>, SpeedWithBearingWithConfidence> getScalableValue() {
-        return new ScalableSpeedWithBearing(getSpeedWithBearing());
+    public ScalableValue<Triple<Speed, Double, Double>, SpeedWithBearing> getScalableValue() {
+        return new ScalableSpeedWithBearing(getObject());
     }
 
-    private static class ScalableSpeedWithBearing implements ScalableValue<Triple<Speed, Double, Double>, SpeedWithBearingWithConfidence> {
+    private static class ScalableSpeedWithBearing implements ScalableValue<Triple<Speed, Double, Double>, SpeedWithBearing> {
         private final Speed speed;
         private final double sin;
         private final double cos;
@@ -50,21 +43,21 @@ public class SpeedWithBearingWithConfidenceImpl extends
         }
 
         @Override
-        public ScalableValue<Triple<Speed, Double, Double>, SpeedWithBearingWithConfidence> multiply(
+        public ScalableValue<Triple<Speed, Double, Double>, SpeedWithBearing> multiply(
                 double factor) {
             Speed newSpeed = new KnotSpeedImpl(factor*speed.getKnots());
             return new ScalableSpeedWithBearing(newSpeed, factor*sin, factor*cos);
         }
 
         @Override
-        public ScalableValue<Triple<Speed, Double, Double>, SpeedWithBearingWithConfidence> add(
-                ScalableValue<Triple<Speed, Double, Double>, SpeedWithBearingWithConfidence> t) {
+        public ScalableValue<Triple<Speed, Double, Double>, SpeedWithBearing> add(
+                ScalableValue<Triple<Speed, Double, Double>, SpeedWithBearing> t) {
             Speed newSpeed = new KnotSpeedImpl(speed.getKnots() + t.getValue().getA().getKnots());
             return new ScalableSpeedWithBearing(newSpeed, sin+t.getValue().getB(), cos+t.getValue().getC());
         }
 
         @Override
-        public SpeedWithBearingWithConfidence divide(double divisor, double confidence) {
+        public SpeedWithBearing divide(double divisor, double confidence) {
             Speed newSpeed = new KnotSpeedImpl(speed.getKnots() / divisor);
             double angle;
             if (cos == 0) {
@@ -73,7 +66,7 @@ public class SpeedWithBearingWithConfidenceImpl extends
                 angle = Math.atan2(sin, cos);
             }
             Bearing bearing = new RadianBearingImpl(angle < 0 ? angle + 2 * Math.PI : angle);
-            return new SpeedWithBearingWithConfidenceImpl(new KnotSpeedWithBearingImpl(newSpeed.getKnots(), bearing), confidence);
+            return new KnotSpeedWithBearingImpl(newSpeed.getKnots(), bearing);
         }
 
         @Override

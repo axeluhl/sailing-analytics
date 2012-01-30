@@ -2,6 +2,8 @@ package com.sap.sailing.domain.persistence.impl;
 
 import java.util.logging.Logger;
 
+import org.bson.types.ObjectId;
+
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
@@ -17,6 +19,7 @@ import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
 import com.sap.sailing.domain.leaderboard.ScoreCorrection.MaxPointsReason;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
@@ -184,5 +187,55 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         BasicDBObject renameUpdate = new BasicDBObject("$set", new BasicDBObject(FieldNames.LEADERBOARD_NAME.name(), newName));
         leaderboardCollection.update(query, renameUpdate);
     }
+    
+    @Override
+    public void storeLeaderboardGroup(LeaderboardGroup leaderboardGroup) {
+        DBCollection leaderboardGroupCollection = database.getCollection(CollectionNames.LEADERBOARD_GROUPS.name());
+        DBCollection leaderboardCollection = database.getCollection(CollectionNames.LEADERBOARDS.name());
+        
+        try {
+            leaderboardGroupCollection.ensureIndex(FieldNames.LEADERBOARD_GROUP_NAME.name());
+        } catch (NullPointerException npe) {
+            // sometimes, for reasons yet to be clarified, ensuring an index on the name field causes an NPE
+            logger.throwing(MongoObjectFactoryImpl.class.getName(), "storeLeaderboardGroup", npe);
+        }
+        
+        BasicDBObject query = new BasicDBObject(FieldNames.LEADERBOARD_GROUP_NAME.name(), leaderboardGroup.getName());
+        
+        BasicDBObject result = new BasicDBObject();
+        result.put(FieldNames.LEADERBOARD_GROUP_NAME.name(), leaderboardGroup.getName());
+        result.put(FieldNames.LEADERBOARD_GROUP_DESCRIPTION.name(), leaderboardGroup.getDescription());
+        BasicDBList dbLeaderboardIds = new BasicDBList();
+        for (Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
+            BasicDBObject leaderboardQuery = new BasicDBObject(FieldNames.LEADERBOARD_NAME.name(), leaderboard.getName());
+            DBObject dbLeaderboard = leaderboardCollection.findOne(leaderboardQuery);
+            if (dbLeaderboard == null) {
+                storeLeaderboard(leaderboard);
+                dbLeaderboard = leaderboardCollection.findOne(leaderboardQuery);
+            }
+            ObjectId dbLeaderboardId = (ObjectId) dbLeaderboard.get("_id");
+            dbLeaderboardIds.add(dbLeaderboardId);
+        }
+        result.put(FieldNames.LEADERBOARD_GROUP_LEADERBOARDS.name(), dbLeaderboardIds);
+        
+        leaderboardGroupCollection.update(query, result, true, false);
+    }
+
+    @Override
+    public void removeLeaderboardGroup(String groupName) {
+        DBCollection leaderboardGroupCollection = database.getCollection(CollectionNames.LEADERBOARD_GROUPS.name());
+        BasicDBObject query = new BasicDBObject(FieldNames.LEADERBOARD_GROUP_NAME.name(), groupName);
+        leaderboardGroupCollection.remove(query);
+    }
+
+    @Override
+    public void renameLeaderboardGroup(String oldName, String newName) {
+        DBCollection leaderboardGroupCollection = database.getCollection(CollectionNames.LEADERBOARD_GROUPS.name());
+        BasicDBObject query = new BasicDBObject(FieldNames.LEADERBOARD_GROUP_NAME.name(), oldName);
+        BasicDBObject update = new BasicDBObject("$set", new BasicDBObject(FieldNames.LEADERBOARD_GROUP_NAME.name(), newName));
+        leaderboardGroupCollection.update(query, update);
+    }
+    
+    
 
 }

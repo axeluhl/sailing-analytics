@@ -19,6 +19,7 @@ import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDTO;
+import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.QuickRankDTO;
@@ -255,4 +256,21 @@ public interface SailingServiceAsync {
      */
     void getCompetitorsAndTimePoints(RaceIdentifier race, int steps, AsyncCallback<CompetitorsAndTimePointsDTO> callback);
 
+    void getLeaderboardGroups(AsyncCallback<List<LeaderboardGroupDTO>> callback);
+    
+    void getLeaderboardGroupByName(String groupName, AsyncCallback<LeaderboardGroupDTO> callback);
+    
+    void renameLeaderboardGroup(String oldName, String newName, AsyncCallback<Void> callback);
+    
+    void removeLeaderboardGroup(String groupName, AsyncCallback<Void> callback);
+
+    void createLeaderboardGroup(String groupName, String description, List<String> leaderboardNames, AsyncCallback<LeaderboardGroupDTO> callback);
+    
+    void createLeaderboardGroup(String groupName, String description, AsyncCallback<LeaderboardGroupDTO> callback);
+    
+    void addLeaderboardToGroup(String leaderboardName, String groupName, AsyncCallback<Void> callback);
+    
+    void removeLeaderboardFromGroup(String leaderboardName, String groupName, AsyncCallback<Void> callback);
+    
+    void updateLeaderboardGroup(String oldName, String newName, String description, AsyncCallback<Void> callback);
 }

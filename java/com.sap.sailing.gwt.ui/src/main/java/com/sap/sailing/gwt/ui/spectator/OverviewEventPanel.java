@@ -52,25 +52,27 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
  * 
  */
 public class OverviewEventPanel extends AbstractEventPanel {
-
-    private TextBox textBoxLocation;
-    private TextBox textBoxName;
-    private TextBox textBoxFrom;
-    private TextBox textBoxUntil;
-    private CheckBox checkBoxLive;
+    
+    private TextBox locationTextBox;
+    private TextBox nameTextBox;
+    private TextBox fromTextBox;
+    private TextBox untilTextBox;
+    private CheckBox onlyLiveCheckBox;
     
     private CaptionPanel eventsCaptionPanel;
-    private Button btnShowLeaderboards;
+    private Button showLeaderboardsBtn;
     private CellTable<EventDTO> eventsTable;
     private ListDataProvider<EventDTO> eventsTableProvider;
     private SingleSelectionModel<EventDTO> eventsTableSelectionModel;
 
     private CaptionPanel leaderboardsCaptionPanel;
+    private Button showLeaderboardBtn;
     private CellList<LeaderboardDTO> leaderboardsList;
     private ListDataProvider<LeaderboardDTO> leaderboardsListProvider;
     private SingleSelectionModel<LeaderboardDTO> leaderboardsListSelectionModel;
     
     private CaptionPanel leaderboardCaptionPanel;
+    private VerticalPanel leaderboardPanel;
     private LeaderboardDTO currentLeaderboard;
     private LeaderboardPanel displayedLeaderboardPanel;
     
@@ -88,66 +90,66 @@ public class OverviewEventPanel extends AbstractEventPanel {
         mainPanel.setWidth("95%");
 
         // Build search GUI
-        CaptionPanel captionPanelSearch = new CaptionPanel(stringConstants.searchEvents());
-        captionPanelSearch.setWidth("100%");
-        mainPanel.add(captionPanelSearch);
+        CaptionPanel searchCaptionPanel = new CaptionPanel(stringConstants.searchEvents());
+        searchCaptionPanel.setWidth("100%");
+        mainPanel.add(searchCaptionPanel);
         
-        HorizontalPanel panelSearch = new HorizontalPanel();
-        captionPanelSearch.add(panelSearch);
-        panelSearch.setWidth("100%");
+        HorizontalPanel searchFunctionalPanel = new HorizontalPanel();
+        searchCaptionPanel.add(searchFunctionalPanel);
+        searchFunctionalPanel.setWidth("100%");
         
-        Label lblLocation = new Label(stringConstants.location() + ":");
-        panelSearch.add(lblLocation);
-        textBoxLocation = new TextBox();
-        textBoxLocation.addKeyUpHandler(new KeyUpHandler() {
+        Label locationLbl = new Label(stringConstants.location() + ":");
+        searchFunctionalPanel.add(locationLbl);
+        locationTextBox = new TextBox();
+        locationTextBox.addKeyUpHandler(new KeyUpHandler() {
             @Override
             public void onKeyUp(KeyUpEvent event) {
                 onSearchCriteriaChange();
             }
         });
-        panelSearch.add(textBoxLocation);
+        searchFunctionalPanel.add(locationTextBox);
         
-        Label lblName = new Label(stringConstants.name() + ":");
-        panelSearch.add(lblName);
-        textBoxName = new TextBox();
-        textBoxName.addKeyUpHandler(new KeyUpHandler() {
+        Label nameLbl = new Label(stringConstants.name() + ":");
+        searchFunctionalPanel.add(nameLbl);
+        nameTextBox = new TextBox();
+        nameTextBox.addKeyUpHandler(new KeyUpHandler() {
             @Override
             public void onKeyUp(KeyUpEvent event) {
                 onSearchCriteriaChange();
             }
         });
-        panelSearch.add(textBoxName);
+        searchFunctionalPanel.add(nameTextBox);
         
-        checkBoxLive = new CheckBox(stringConstants.onlyLiveEvents());
-        checkBoxLive.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+        onlyLiveCheckBox = new CheckBox(stringConstants.onlyLiveEvents());
+        onlyLiveCheckBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
             @Override
             public void onValueChange(ValueChangeEvent<Boolean> event) {
                 onCheckBoxLiveChange();
             }
         });
-        panelSearch.add(checkBoxLive);
+        searchFunctionalPanel.add(onlyLiveCheckBox);
         
-        Label lblFromDate = new Label(stringConstants.from() + ":");
-        panelSearch.add(lblFromDate);
-        textBoxFrom = new TextBox();
-        textBoxFrom.addKeyUpHandler(new KeyUpHandler() {
+        Label fromDateLbl = new Label(stringConstants.from() + ":");
+        searchFunctionalPanel.add(fromDateLbl);
+        fromTextBox = new TextBox();
+        fromTextBox.addKeyUpHandler(new KeyUpHandler() {
             @Override
             public void onKeyUp(KeyUpEvent event) {
                 onSearchCriteriaChange();
             }
         });
-        panelSearch.add(textBoxFrom);
+        searchFunctionalPanel.add(fromTextBox);
         
-        Label lblToDate = new Label(stringConstants.until() + ":");
-        panelSearch.add(lblToDate);
-        textBoxUntil = new TextBox();
-        textBoxUntil.addKeyUpHandler(new KeyUpHandler() {
+        Label toDateLbl = new Label(stringConstants.until() + ":");
+        searchFunctionalPanel.add(toDateLbl);
+        untilTextBox = new TextBox();
+        untilTextBox.addKeyUpHandler(new KeyUpHandler() {
             @Override
             public void onKeyUp(KeyUpEvent event) {
                 onSearchCriteriaChange();
             }
         });
-        panelSearch.add(textBoxUntil);
+        searchFunctionalPanel.add(untilTextBox);
 
         HorizontalPanel listsSplitPanel = new HorizontalPanel();
         mainPanel.add(listsSplitPanel);
@@ -163,22 +165,22 @@ public class OverviewEventPanel extends AbstractEventPanel {
         eventsPanel.setWidth("100%");
 
         // Create event functional elements
-        HorizontalPanel functionPanelEvents = new HorizontalPanel();
-        functionPanelEvents.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
-        functionPanelEvents.setSpacing(5);
-        eventsPanel.add(functionPanelEvents);
+        HorizontalPanel eventsFunctionPanel = new HorizontalPanel();
+        eventsFunctionPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+        eventsFunctionPanel.setSpacing(5);
+        eventsPanel.add(eventsFunctionPanel);
         
-        Button btnRefreshEventList = new Button(stringConstants.refresh());
-        btnRefreshEventList.addClickHandler(new ClickHandler() {
+        Button refreshEventListBtn = new Button(stringConstants.refresh());
+        refreshEventListBtn.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 refreshEventsTable();
             }
         });
-        functionPanelEvents.add(btnRefreshEventList);
+        eventsFunctionPanel.add(refreshEventListBtn);
 
-        btnShowLeaderboards = new Button(">");
-        btnShowLeaderboards.addClickHandler(new ClickHandler() {
+        showLeaderboardsBtn = new Button(stringConstants.showDetails() + " >");
+        showLeaderboardsBtn.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent c) {
                 if (eventsTableSelectionModel.getSelectedObject() != null) {
@@ -188,8 +190,8 @@ public class OverviewEventPanel extends AbstractEventPanel {
                 }
             }
         });
-        btnShowLeaderboards.setEnabled(false);
-        functionPanelEvents.add(btnShowLeaderboards);
+        showLeaderboardsBtn.setEnabled(false);
+        eventsFunctionPanel.add(showLeaderboardsBtn);
 
         // Create event table
         eventsTable = new CellTable<EventDTO>();
@@ -256,19 +258,32 @@ public class OverviewEventPanel extends AbstractEventPanel {
         leaderboardsPanel.setWidth("100%");
 
         // Create leaderboard functional elements
-        HorizontalPanel functionPanelLeaderboards = new HorizontalPanel();
-        functionPanelLeaderboards.setSpacing(5);
-        leaderboardsPanel.add(functionPanelLeaderboards);
+        HorizontalPanel leaderboardsFunctionPanel = new HorizontalPanel();
+        leaderboardsFunctionPanel.setSpacing(5);
+        leaderboardsPanel.add(leaderboardsFunctionPanel);
 
-        Button btnHideLeaderboards = new Button("<");
-        btnHideLeaderboards.addClickHandler(new ClickHandler() {
-
+        Button hideLeaderboardsBtn = new Button("< " + stringConstants.hideLeaderboards());
+        hideLeaderboardsBtn.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 setLeaderboardsPanelVisible(false);
             }
         });
-        functionPanelLeaderboards.add(btnHideLeaderboards);
+        leaderboardsFunctionPanel.add(hideLeaderboardsBtn);
+        
+        showLeaderboardBtn = new Button("v " + stringConstants.showLeaderboard());
+        showLeaderboardBtn.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                if (leaderboardsListSelectionModel.getSelectedObject() != null) {
+                    setLeaderboardPanelVisible(true);
+                } else {
+                    Window.alert(stringConstants.noLeaderboardSelected());
+                }
+            }
+        });
+        showLeaderboardBtn.setEnabled(false);
+        leaderboardsFunctionPanel.add(showLeaderboardBtn);
 
         // Create leaderboard list
         Cell<LeaderboardDTO> leaderboardCell = new AbstractCell<LeaderboardDTO>() {
@@ -293,12 +308,28 @@ public class OverviewEventPanel extends AbstractEventPanel {
         
         leaderboardsPanel.add(leaderboardsList);
         
-        //Create leaderboard container
-        //TODO
+        //Build leaderboard GUI
         leaderboardCaptionPanel = new CaptionPanel();
         leaderboardCaptionPanel.setVisible(false);
         leaderboardCaptionPanel.setWidth("100%");
         mainPanel.add(leaderboardCaptionPanel);
+        
+        leaderboardPanel = new VerticalPanel();
+        leaderboardPanel.setWidth("100%");
+        leaderboardCaptionPanel.add(leaderboardPanel);
+        
+        HorizontalPanel leaderboardFunctionPanel = new HorizontalPanel();
+        leaderboardFunctionPanel.setWidth("100%");
+        leaderboardPanel.add(leaderboardFunctionPanel);
+        
+        Button hideLeaderboardBtn = new Button("^ " + stringConstants.hideLeaderboard());
+        hideLeaderboardBtn.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent arg0) {
+                setLeaderboardPanelVisible(false);
+            }
+        });
+        leaderboardFunctionPanel.add(hideLeaderboardBtn);
         
         displayedLeaderboardPanel = null;
         
@@ -314,8 +345,8 @@ public class OverviewEventPanel extends AbstractEventPanel {
         
         //Set checkbox as true, because we can't search for old events right now
         //TODO Remove after searching for old events is possible
-        checkBoxLive.setValue(true, true);
-        checkBoxLive.setEnabled(false);
+        onlyLiveCheckBox.setValue(true, true);
+        onlyLiveCheckBox.setEnabled(false);
         //Until here
     }
 
@@ -345,12 +376,12 @@ public class OverviewEventPanel extends AbstractEventPanel {
         final EventDTO selectedEvent = eventsTableSelectionModel.getSelectedObject();
         
         //Clear Search criteria
-        textBoxLocation.setText("");
-        textBoxName.setText("");
-        textBoxFrom.setText("");
-        textBoxUntil.setText("");
+        locationTextBox.setText("");
+        nameTextBox.setText("");
+        fromTextBox.setText("");
+        untilTextBox.setText("");
         //TODO Switch the value of checkBoxLive to false, as soon as searching for old events is possible
-        checkBoxLive.setValue(true);
+        onlyLiveCheckBox.setValue(true);
         
         //Load all available events and reselect the event
         Runnable displayAndReselect = new Runnable() {
@@ -379,7 +410,7 @@ public class OverviewEventPanel extends AbstractEventPanel {
     private void setLeaderboardsPanelVisible(boolean visible) {
         leaderboardsCaptionPanel.setVisible(visible);
         eventsCaptionPanel.setWidth(visible ? "95%" : "100%");
-        btnShowLeaderboards.setEnabled(!visible);
+        showLeaderboardsBtn.setEnabled(!visible);
     }
     
     private void eventSelectionChanged() {
@@ -397,7 +428,8 @@ public class OverviewEventPanel extends AbstractEventPanel {
             loadLeaderboards(selectedEvent, displayLeaderboards);
         } else {
             setLeaderboardsPanelVisible(false);
-            btnShowLeaderboards.setEnabled(false);
+            showLeaderboardsBtn.setEnabled(false);
+            setLeaderboardPanelVisible(false);
         }
     }
     
@@ -424,63 +456,62 @@ public class OverviewEventPanel extends AbstractEventPanel {
     }
     
     private void leaderboardSelectionChanged() {
-        //TODO Actions when the leaderboard selection changes
         LeaderboardDTO selectedLeaderboard = leaderboardsListSelectionModel.getSelectedObject();
         if (selectedLeaderboard != null) {
             setDisplayedLeaderboard(selectedLeaderboard);
             setLeaderboardPanelVisible(true);
         } else {
             setLeaderboardPanelVisible(false);
+            showLeaderboardBtn.setEnabled(false);
         }
     }
     
     private void setLeaderboardPanelVisible(boolean visible) {
         leaderboardCaptionPanel.setVisible(visible);
-        //TODO button management
+        showLeaderboardBtn.setEnabled(!visible);
     }
     
     private void setDisplayedLeaderboard(LeaderboardDTO boardToDisplay) {
         //If the currentLeaderboard equals the boardToDisplay, there is no need to create a new LeaderboardPanel
         if (!boardToDisplay.equals(currentLeaderboard)) {
             if (displayedLeaderboardPanel != null) {
-                leaderboardCaptionPanel.remove(displayedLeaderboardPanel);
+                leaderboardPanel.remove(displayedLeaderboardPanel);
             }
             currentLeaderboard = boardToDisplay;
             CompetitorSelectionModel competitorSelectionModel = new CompetitorSelectionModel(true);
             displayedLeaderboardPanel = new LeaderboardPanel(sailingService, competitorSelectionModel,
                     currentLeaderboard.name, errorReporter, stringConstants);
-            leaderboardCaptionPanel.add(displayedLeaderboardPanel);
-            leaderboardCaptionPanel.setCaptionText(stringConstants.leaderboard() + " - " + boardToDisplay.name);
+            leaderboardPanel.add(displayedLeaderboardPanel);
         }
     }
     
     private void onCheckBoxLiveChange() {
-        if (checkBoxLive.getValue()) {
+        if (onlyLiveCheckBox.getValue()) {
             String today = DateTimeFormat.getFormat("dd.MM.yyyy").format(new Date()).toString();
             
-            textBoxFrom.setText(today);
-            textBoxFrom.setEnabled(false);
-            textBoxUntil.setText(today);
-            textBoxUntil.setEnabled(false);
+            fromTextBox.setText(today);
+            fromTextBox.setEnabled(false);
+            untilTextBox.setText(today);
+            untilTextBox.setEnabled(false);
         } else {
-            textBoxFrom.setText("");
-            textBoxFrom.setEnabled(true);
-            textBoxUntil.setText("");
-            textBoxUntil.setEnabled(true);
+            fromTextBox.setText("");
+            fromTextBox.setEnabled(true);
+            untilTextBox.setText("");
+            untilTextBox.setEnabled(true);
         }
         onSearchCriteriaChange();
     }
     
     private void onSearchCriteriaChange() {
         //Get search criteria
-        String location = textBoxLocation.getText();
-        String name = textBoxName.getText();
-        boolean onlyLive = checkBoxLive.getValue();
+        String location = locationTextBox.getText();
+        String name = nameTextBox.getText();
+        boolean onlyLive = onlyLiveCheckBox.getValue();
         Date from = null;
         Date until = null;
         try {
-            from = DateTimeFormat.getFormat("dd.MM.yyyy").parse(textBoxFrom.getText());
-            until = DateTimeFormat.getFormat("dd.MM.yyyy").parse(textBoxUntil.getText());
+            from = DateTimeFormat.getFormat("dd.MM.yyyy").parse(fromTextBox.getText());
+            until = DateTimeFormat.getFormat("dd.MM.yyyy").parse(untilTextBox.getText());
             //Adding 24 hours to until, so that it doesn't result in an empty table if 'from' and 'until' are equal.
             //Instead you'll have a 24 hour range
             long time = until.getTime() + 24 * 60 * 60 * 1000;

@@ -2,7 +2,7 @@ package com.sap.sailing.domain.base;
 
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.Util.Triple;
-import com.sap.sailing.domain.confidence.HasConfidence;
+import com.sap.sailing.domain.confidence.HasConfidenceAndIsScalable;
 
 /**
  * A position with a confidence attached. The scalable intermediate type represents the x/y/z coordinate of the
@@ -11,6 +11,5 @@ import com.sap.sailing.domain.confidence.HasConfidence;
  * @author Axel Uhl (d043530)
  *
  */
-public interface PositionWithConfidence extends HasConfidence<Triple<Double, Double, Double>, Position> {
-    Position getPosition();
+public interface PositionWithConfidence<RelativeTo> extends HasConfidenceAndIsScalable<Triple<Double, Double, Double>, Position, RelativeTo> {
 }

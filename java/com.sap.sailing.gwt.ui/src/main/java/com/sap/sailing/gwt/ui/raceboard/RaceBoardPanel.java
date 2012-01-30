@@ -129,8 +129,6 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
             addComponentViewerMenuEntry(componentViewer);
         }
 
-        timer.addTimeListener(leaderboardPanel);
-        timer.addTimeListener(raceMap);
         timePanel = new TimePanel(timer, stringMessages);
     }
 
