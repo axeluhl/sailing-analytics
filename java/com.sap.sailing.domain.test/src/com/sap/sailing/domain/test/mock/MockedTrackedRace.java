@@ -448,4 +448,10 @@ public class MockedTrackedRace implements DynamicTrackedRace {
         return null;
     }
 
+    @Override
+    public TimePoint getAssumedEnd() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }
