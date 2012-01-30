@@ -24,7 +24,7 @@ public class TimePanelSettingsDialogComponent implements SettingsDialogComponent
         VerticalPanel vp = new VerticalPanel();
         HorizontalPanel labelAndTailLengthBoxPanel = new HorizontalPanel();
         labelAndTailLengthBoxPanel.add(new Label(stringMessages.timeDelay()));
-        timeDelayBox = dialog.createIntegerBox((int) initialSettings.getDelayInSeconds(), 4);
+        timeDelayBox = dialog.createIntegerBox((int) initialSettings.getDelayToLivePlayInSeconds(), 4);
         labelAndTailLengthBoxPanel.add(timeDelayBox);
         vp.add(labelAndTailLengthBoxPanel);
         return vp;
@@ -33,7 +33,7 @@ public class TimePanelSettingsDialogComponent implements SettingsDialogComponent
     @Override
     public TimePanelSettings getResult() {
         TimePanelSettings result = new TimePanelSettings();
-        result.setDelayInSeconds(timeDelayBox.getValue() == null ? -1 : timeDelayBox.getValue());
+        result.setDelayToLivePlayInSeconds(timeDelayBox.getValue() == null ? -1 : timeDelayBox.getValue());
         return result;
     }
 
@@ -43,7 +43,7 @@ public class TimePanelSettingsDialogComponent implements SettingsDialogComponent
             @Override
             public String getErrorMessage(TimePanelSettings valueToValidate) {
                 String errorMessage = null;
-                if (valueToValidate.getDelayInSeconds() < 0) {
+                if (valueToValidate.getDelayToLivePlayInSeconds() < 0) {
                     errorMessage = stringMessages.tailLengthMustBeNonNegative();
                 }
                 return errorMessage;
