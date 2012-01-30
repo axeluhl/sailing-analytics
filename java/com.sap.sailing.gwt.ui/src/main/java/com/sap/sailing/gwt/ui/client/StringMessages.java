@@ -221,4 +221,5 @@ public interface StringMessages extends Messages {
     String showMap();
     String hideMap();
     String noLeaderboardSelected();
+    String leaderboardGroups();
 }

@@ -9,7 +9,6 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.gwt.ui.adminconsole.RaceMap;
-import com.sap.sailing.gwt.ui.adminconsole.TimePanel;
 import com.sap.sailing.gwt.ui.client.AbstractEventPanel;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
@@ -32,7 +31,6 @@ public class LiveEventViewPanel extends AbstractEventPanel {
     private RaceDTO actualRace = null;
     
     private Timer timer = null;
-    private TimePanel timePanel = null;
 
     public LiveEventViewPanel(SailingServiceAsync sailingService, EventRefresher eventRefresher,
             ErrorReporter errorReporter, StringMessages stringConstants, String leaderboardName, String eventName) {
