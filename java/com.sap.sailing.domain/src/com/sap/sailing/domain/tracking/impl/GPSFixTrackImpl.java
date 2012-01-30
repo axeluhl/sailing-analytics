@@ -334,6 +334,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
                 last = next;
             }
         }
+        // TODO bug #169: consider "at" when averaging
         SpeedWithBearing avgSpeed = count == 0 ? null : new KnotSpeedWithBearingImpl(knotSum / count, bearingCluster.getAverage());
         return avgSpeed;
     }

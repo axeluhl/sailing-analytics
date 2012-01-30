@@ -2,6 +2,7 @@ package com.sap.sailing.domain.confidence;
 
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.tracking.GPSFixTrack;
 
 /**
  * Some values, particularly those obtained from real-world measurements, are not always accurate. Some values are
@@ -41,7 +42,7 @@ import com.sap.sailing.domain.common.TimePoint;
  *            a correspondingly-typed weigher, such a value with confidence can be aggregated with
  *            other values, again relative to (maybe a different) time point.
  */
-public interface HasConfidence<ValueType, BaseType> {
+public interface HasConfidence<ValueType, BaseType, RelativeTo> {
     /**
      * A confidence is a number between 0.0 and 1.0 (inclusive) where 0.0 means that the value is randomly guessed while
      * 1.0 means the value is authoritatively known for a fact. It represents the weight with which a value is to be
@@ -67,6 +68,22 @@ public interface HasConfidence<ValueType, BaseType> {
      */
     double getConfidence();
     
-    ScalableValue<ValueType, BaseType> getScalableValue();
-    
+    /**
+     * The confidence attached to a value is usually relative to some reference point, such as a time point or
+     * a position. For example, when a {@link GPSFixTrack} is asked to deliver an estimation for the tracked item's
+     * {@link Position} at some given {@link TimePoint}, the track computes some average from a number of GPS fixes. The resulting
+     * position has a certain confidence, depending on the time differences between the fixes and the time point for which
+     * the position estimation was requested. The result therefore carries this reference time point for which the estimation
+     * was requested so that when the result is to be used in further estimations it is clear relative to which time point the
+     * confidence is to be interpreted.<p>
+     * 
+     * In this context, a single GPS fix is a measurement whose values may also have a confidence attached. This confidence could be
+     * regarded as relative to the fix's time point.
+     */
+    RelativeTo getRelativeTo();
+
+    /**
+     * The object annotated by a confidence
+     */
+    BaseType getObject();
 }
