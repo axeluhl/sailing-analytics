@@ -224,4 +224,5 @@ public interface StringMessages extends Messages {
     String leaderboardGroups();
     String filterLeaderboardGroupsByName();
     String createNewLeaderboardGroup();
+    String leaderboardGroupConfiguration();
 }
