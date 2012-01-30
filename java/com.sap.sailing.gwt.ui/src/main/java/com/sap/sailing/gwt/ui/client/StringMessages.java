@@ -23,6 +23,8 @@ public interface StringMessages extends Messages {
     String time();
     String playSpeed();
     String playSpeedHelp();
+    String playModeLive();
+    String playModeReplay();
     String timeDelay();
     String timeDelayHelp();
     String speedInKnots();

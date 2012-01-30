@@ -37,6 +37,11 @@ public class Timer {
     private boolean playing;
     
     /**
+     * The current play mode of the timer
+     */
+    private PlayModes playMode;
+    
+    /**
      * The refresh interval for auto-updating this timer
      */
     private long delayBetweenAutoAdvancesInMilliseconds;
@@ -50,30 +55,33 @@ public class Timer {
     /**
      * Factor by which the timer runs faster than real time. 1.0 means real-time, 2.0 means twice as fast as real time, and so on.
      */
-    private double accelerationFactor;
+    private double playSpeedFactor;
+    
+    public enum PlayModes { Live, Replay }; 
     
     /**
-     * The timer is created in resumed mode, using "now" as its current time, 1.0 as its {@link #accelerationFactor acceleration factor} and
+     * The timer is created in resumed mode, using "now" as its current time, 1.0 as its {@link #playSpeedFactor play speed factor} and
      * 1 second (1000ms) as the {@link #delayBetweenAutoAdvancesInMilliseconds delay between automatic updates} should the timer be
      * {@link #resume() started}.
      */
-    public Timer() {
-        this(1000);
+    public Timer(PlayModes playMode) {
+        this(playMode, 1000);
     }
     
     /**
-     * The timer is created in resumed mode, using "now" as its current time, 1.0 as its {@link #accelerationFactor
+     * The timer is created in resumed mode, using "now" as its current time, 1.0 as its {@link #playSpeedFactor
      * acceleration factor} and <code>delayBetweenAutoAdvancesInMilliseconds</code> as the
      * {@link #delayBetweenAutoAdvancesInMilliseconds delay between automatic updates} should the timer be
      * {@link #resume() started}.
      */
-    public Timer(long delayBetweenAutoAdvancesInMilliseconds) {
+    public Timer(PlayModes playMode, long delayBetweenAutoAdvancesInMilliseconds) {
         time = new Date();
         timeListeners = new HashSet<TimeListener>();
         playStateListeners = new HashSet<PlayStateListener>();
         playing = false;
-        accelerationFactor = 1.0;
+        playSpeedFactor = 1.0;
         this.delayBetweenAutoAdvancesInMilliseconds = delayBetweenAutoAdvancesInMilliseconds;
+        this.playMode = playMode;
     }
     
     public void addTimeListener(TimeListener listener) {
@@ -102,8 +110,8 @@ public class Timer {
         }
     }
     
-    public void setAccelerationFactor(double accelerationFactor) {
-        this.accelerationFactor = accelerationFactor;
+    public void setPlaySpeedFactor(double playSpeedFactor) {
+        this.playSpeedFactor = playSpeedFactor;
     }
     
     public void setDelayBetweenAutoAdvancesInMilliseconds(long delayBetweenAutoAdvancesInMilliseconds) {
@@ -153,7 +161,7 @@ public class Timer {
             @Override
             public boolean execute() {
                 if (time != null) {
-                    setTime(time.getTime() + (long) (accelerationFactor * delayBetweenAutoAdvancesInMilliseconds));
+                    setTime(time.getTime() + (long) (playSpeedFactor * delayBetweenAutoAdvancesInMilliseconds));
                 }
                 if (delayBetweenAutoAdvancesChanged) {
                     delayBetweenAutoAdvancesChanged = false;
@@ -184,6 +192,10 @@ public class Timer {
 
     public boolean isPlaying() {
         return playing;
+    }
+
+    public PlayModes getPlayMode() {
+        return playMode;
     }
     
 }
