@@ -54,6 +54,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.TimeListener;
 import com.sap.sailing.gwt.ui.client.Timer;
+import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.leaderboard.LegDetailColumn.LegDetailField;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
@@ -443,7 +444,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     public static DetailType[] getAvailableRaceDetailColumnTypes() {
         return new DetailType[] { DetailType.RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS,
                 DetailType.RACE_DISTANCE_TRAVELED, DetailType.RACE_GAP_TO_LEADER_IN_SECONDS,
-                DetailType.NUMBER_OF_MANEUVERS };
+                DetailType.NUMBER_OF_MANEUVERS, DetailType.DISPLAY_LEGS, DetailType.CURRENT_LEG };
     }
 
     private class TextRaceColumn extends RaceColumn<String> implements RaceNameProvider {
@@ -507,6 +508,9 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                             .gapToLeaderInSecondsUnit(), new RaceGapToLeaderInSeconds(), 0, getLeaderboardPanel()
                             .getLeaderboardTable(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
             result.put(DetailType.NUMBER_OF_MANEUVERS, getManeuverCountRaceColumn());
+            result.put(DetailType.CURRENT_LEG, new FormattedDoubleLegDetailColumn(stringConstants.currentLeg(), "",
+                    new CurrentLeg(), 0, getLeaderboardPanel().getLeaderboardTable(), LEG_COLUMN_HEADER_STYLE,
+                    LEG_COLUMN_STYLE));
             /*
              * result.put(DetailType.RACE_MANEUVERS, new ManeuverCountRaceColumn( stringConstants.numberOfManeuvers(),
              * getLeaderboardPanel() .getLeaderboardTable(), this, LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE,
@@ -527,7 +531,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             for (SortableColumn<LeaderboardRowDTO, ?> column : super.getDirectChildren()) {
                 result.add(column);
             }
-            if (isExpanded()) {
+            if (isExpanded() && selectedRaceDetails.contains(DetailType.DISPLAY_LEGS)) {
                 // it is important to re-use existing LegColumn objects because
                 // removing the columns from the table
                 // is based on column identity
@@ -610,6 +614,32 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                                     result = 0.0;
                                 }
                                 result += legDetail.distanceTraveledInMeters;
+                            }
+                        }
+                    }
+                }
+                return result;
+            }
+        }
+        
+        private class CurrentLeg implements LegDetailField<Double> {
+            @Override
+            public Double get(LeaderboardRowDTO row) {
+                Double result = null;
+                LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceName.get(getRaceName());
+                if (fieldsForRace != null && fieldsForRace.legDetails != null && !fieldsForRace.legDetails.isEmpty()) {
+                    for (LegEntryDTO legDetail : fieldsForRace.legDetails) {
+                        if (legDetail != null) {
+                            if (legDetail.finished) {
+                                if (result == null) {
+                                    result = 0.0;
+                                }
+                                result++;
+                            } else {
+                                if (result != null) {
+                                    result++;
+                                }
+                                break;
                             }
                         }
                     }
@@ -753,7 +783,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     public LeaderboardPanel(SailingServiceAsync sailingService, RaceIdentifier preSelectedRace,
             CompetitorSelectionProvider competitorSelectionProvider, String leaderboardName,
             ErrorReporter errorReporter, final StringMessages stringConstants) {
-        this(sailingService, preSelectedRace, competitorSelectionProvider, new Timer(/* delayBetweenAutoAdvancesInMilliseconds */3000l),
+        this(sailingService, preSelectedRace, competitorSelectionProvider, new Timer(PlayModes.Replay, /* delayBetweenAutoAdvancesInMilliseconds */3000l),
                 leaderboardName, errorReporter, stringConstants);
         timer.setDelay(getDelayInMilliseconds()); // set time/delay before adding as listener
     }
@@ -773,6 +803,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         this.selectedLegDetails.add(DetailType.AVERAGE_SPEED_OVER_GROUND_IN_KNOTS);
         this.selectedLegDetails.add(DetailType.RANK_GAIN);
         this.selectedRaceDetails = new ArrayList<DetailType>();
+        this.selectedRaceDetails.add(DetailType.DISPLAY_LEGS);
         this.selectedRaceColumns = new ArrayList<RaceInLeaderboardDTO>();
         this.selectedManeuverDetails = new ArrayList<DetailType>();
         selectedManeuverDetails.add(DetailType.TACK);

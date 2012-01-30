@@ -23,6 +23,8 @@ public interface StringMessages extends Messages {
     String time();
     String playSpeed();
     String playSpeedHelp();
+    String playModeLive();
+    String playModeReplay();
     String timeDelay();
     String timeDelayHelp();
     String speedInKnots();
@@ -222,4 +224,6 @@ public interface StringMessages extends Messages {
     String hideMap();
     String noLeaderboardSelected();
     String leaderboardGroups();
+    String legs();
+    String currentLeg();
 }

@@ -29,8 +29,8 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
-import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.resources.client.CssResource.NotStrict;
+import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Event;
@@ -198,7 +198,7 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
   /**
    * The current value.
    */
-  private double curValue;
+  private Double curValue;
 
   /**
    * The knob that slides across the line.
@@ -233,12 +233,12 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
   /**
    * The maximum slider value.
    */
-  private double maxValue;
+  private Double maxValue;
 
   /**
    * The minimum slider value.
    */
-  private double minValue;
+  private Double minValue;
 
   /**
    * The number of labels to show.
@@ -285,6 +285,13 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
 
   /**
    * Create a slider bar.
+   */
+  public SliderBar() {
+    this(null, null, null);
+  }
+
+  /**
+   * Create a slider bar.
    * 
    * @param minValue the minimum value in the range
    * @param maxValue the maximum value in the range
@@ -300,7 +307,7 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
    * @param maxValue the maximum value in the range
    * @param labelFormatter the label formatter
    */
-  public SliderBar(double minValue, double maxValue, LabelFormatter labelFormatter) {
+  public SliderBar(Double minValue, Double maxValue, LabelFormatter labelFormatter) {
     this(minValue, maxValue, labelFormatter, SliderBarImages.INSTANCE);
   }
 
@@ -312,7 +319,7 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
    * @param labelFormatter the label formatter
    * @param images the images to use for the slider
    */
-  public SliderBar(double minValue, double maxValue, LabelFormatter labelFormatter,
+  public SliderBar(Double minValue, Double maxValue, LabelFormatter labelFormatter,
       SliderBarImages images) {
     super();
     images.sliderBarCss().ensureInjected();
@@ -351,6 +358,13 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
     });
   }
 
+  public boolean isMinMaxInitialized() {
+      if(minValue == null || maxValue == null)
+          return false;
+      
+      return true;
+  }
+  
   public HandlerRegistration addValueChangeHandler(ValueChangeHandler<Double> handler) {
     return addHandler(handler, ValueChangeEvent.getType());
   }
@@ -360,7 +374,7 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
    * 
    * @return the current value
    */
-  public double getCurrentValue() {
+  public Double getCurrentValue() {
     return curValue;
   }
 
@@ -378,7 +392,7 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
    * 
    * @return the max value
    */
-  public double getMaxValue() {
+  public Double getMaxValue() {
     return maxValue;
   }
 
@@ -387,7 +401,7 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
    * 
    * @return the minimum value
    */
-  public double getMinValue() {
+  public Double getMinValue() {
     return minValue;
   }
 
@@ -591,7 +605,7 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
    * 
    * @param curValue the current value
    */
-  public void setCurrentValue(double curValue) {
+  public void setCurrentValue(Double curValue) {
     setCurrentValue(curValue, true);
   }
 
@@ -601,8 +615,11 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
    * @param curValue the current value
    * @param fireEvent fire the onValue change event if true
    */
-  public void setCurrentValue(double curValue, boolean fireEvent) {
+  public void setCurrentValue(Double curValue, boolean fireEvent) {
     // Confine the value to the range
+    if(!isMinMaxInitialized() || curValue == null)
+        return;
+    
     this.curValue = Math.max(minValue, Math.min(maxValue, curValue));
     double remainder = (this.curValue - minValue) % stepSize;
     this.curValue -= remainder;
@@ -653,7 +670,7 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
    * 
    * @param maxValue the current value
    */
-  public void setMaxValue(double maxValue) {
+  public void setMaxValue(Double maxValue) {
     this.maxValue = maxValue;
     drawLabels();
     resetCurrentValue();
@@ -664,7 +681,7 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
    * 
    * @param minValue the current value
    */
-  public void setMinValue(double minValue) {
+  public void setMinValue(Double minValue) {
     this.minValue = minValue;
     drawLabels();
     resetCurrentValue();
@@ -801,6 +818,9 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
       return;
     }
 
+    if(!isMinMaxInitialized())
+        return;
+
     // Move the knob to the correct position
     Element knobElement = knobImage.getElement();
     int lineWidth = lineElement.getOffsetWidth();
@@ -815,9 +835,11 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
    */
   private void drawLabels() {
     // Abort if not attached
-    if (!isAttached()) {
+    if (!isAttached())
       return;
-    }
+    
+    if(!isMinMaxInitialized())
+        return;
 
     // Draw the labels
     int lineWidth = lineElement.getOffsetWidth();
@@ -878,6 +900,9 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
     if (!isAttached()) {
       return;
     }
+
+    if(!isMinMaxInitialized())
+        return;
 
     // Draw the ticks
     int lineWidth = lineElement.getOffsetWidth();

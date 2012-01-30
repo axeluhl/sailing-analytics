@@ -1,17 +1,18 @@
 package com.sap.sailing.gwt.ui.client;
 
 public class TimePanelSettings {
-    private int delayInSeconds;
+    private int delayToLivePlayInSeconds;
 
     public TimePanelSettings() {
-        delayInSeconds = 0;
+        delayToLivePlayInSeconds = 0;
     }
 
-    public int getDelayInSeconds() {
-        return delayInSeconds;
+    public int getDelayToLivePlayInSeconds() {
+        return delayToLivePlayInSeconds;
     }
 
-    public void setDelayInSeconds(int delayInSeconds) {
-        this.delayInSeconds = delayInSeconds;
+    public void setDelayToLivePlayInSeconds(int delayToLivePlayInSeconds) {
+        this.delayToLivePlayInSeconds = delayToLivePlayInSeconds;
     }
+
 }
