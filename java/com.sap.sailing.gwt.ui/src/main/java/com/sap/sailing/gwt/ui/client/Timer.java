@@ -183,10 +183,16 @@ public class Timer {
      * Indirect way of setting this timer to a specific point in time, namely to "now" - <code>delayInMilliseconds</code>.
      */
     public void setDelay(long delayInMilliseconds) {
+        if(playMode == PlayModes.Replay)
+            return;
+        
         setTime(System.currentTimeMillis()-delayInMilliseconds);
     }
     
     public long getDelay() {
+        if(playMode == PlayModes.Replay)
+            return 0;
+        
         return System.currentTimeMillis() - getTime().getTime();
     }
 
