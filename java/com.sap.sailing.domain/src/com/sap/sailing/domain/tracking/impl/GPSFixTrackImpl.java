@@ -335,7 +335,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
                         .inTime(next.getTimePoint().asMillis() - last.getTimePoint().asMillis()).getKnots();
                 bearingCluster.add(new BearingWithConfidenceImpl<TimePoint>(last.getPosition().getBearingGreatCircle(next.getPosition()),
                         /* confidence */ 0.9, // TODO use number of tracked satellites to determine confidence of single fix
-                        next.getTimePoint()));
+                        new MillisecondsTimePoint((last.getTimePoint().asMillis() + next.getTimePoint().asMillis())/2)));
                 count++;
                 last = next;
             }

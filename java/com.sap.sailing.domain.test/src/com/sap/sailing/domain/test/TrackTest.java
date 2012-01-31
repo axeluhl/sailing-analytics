@@ -99,7 +99,6 @@ public class TrackTest {
         track.addGPSFix(f2);
         track.addGPSFix(f3);
         SpeedWithBearing average = track.getEstimatedSpeed(t2);
-        // FIXME a GPSFixTrack that is not a GPSFixMovingTrack the speed/bearing for a time point is computed looking back in time only; this puts more weight on f1's position
         assertEquals(0, average.getBearing().getDegrees(), 0.00001);
     }
     
@@ -110,12 +109,17 @@ public class TrackTest {
         TimePoint t2 = new MillisecondsTimePoint(2000);
         TimePoint t3 = new MillisecondsTimePoint(3000);
         GPSFixMoving f1 = new GPSFixMovingImpl(new DegreePosition(0, 0), t1, new KnotSpeedWithBearingImpl(1, new DegreeBearingImpl(45)));
-        GPSFixMoving f2 = new GPSFixMovingImpl(new DegreePosition(0.00001, 0.00001), t2, new KnotSpeedWithBearingImpl(1, new DegreeBearingImpl(315)));
-        GPSFixMoving f3 = new GPSFixMovingImpl(new DegreePosition(0.00002, 0), t3, new KnotSpeedWithBearingImpl(1, new DegreeBearingImpl(0)));
+        GPSFixMoving f2 = new GPSFixMovingImpl(new DegreePosition(0.00001, 0.00001), t2, new KnotSpeedWithBearingImpl(1, new DegreeBearingImpl(0)));
+        GPSFixMoving f3 = new GPSFixMovingImpl(new DegreePosition(0.00002, 0), t3, new KnotSpeedWithBearingImpl(1, new DegreeBearingImpl(315)));
         track.addGPSFix(f1);
         track.addGPSFix(f2);
         track.addGPSFix(f3);
         SpeedWithBearing average = track.getRawEstimatedSpeed(t2);
+        // A DynamicGPSFixMovingTrackImpl is expected to combine two information sources for bearing estimation:
+        //  1) the bearings as transmitted in the GPS fix received from the device
+        //  2) the bearing from the previous to the current fix
+        // Especially because of 2) the bearing tends to lean a bit towards the past
+        // FIXME a GPSFixMovingTrack now uses time difference-based confidences for averaging bearings
         assertEquals(0, average.getBearing().getDegrees(), 0.00001);
     }
     

@@ -8,6 +8,7 @@ import java.util.NavigableSet;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.impl.BearingWithConfidenceImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
+import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.TimePoint;
@@ -45,7 +46,7 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends DynamicTrackImpl<Ite
         List<GPSFixMoving> relevantFixes = getFixesRelevantForSpeedEstimation(at, fixesToUseForSpeedEstimation);
         double knotSum = 0;
         Weigher<TimePoint> weigher = ConfidenceFactory.INSTANCE.createExponentialTimeDifferenceWeigher(
-                /* halfConfidenceAfterMilliseconds */ getMillisecondsOverWhichToAverageSpeed());
+                /* halfConfidenceAfterMilliseconds */ getMillisecondsOverWhichToAverageSpeed()/10);
         BearingWithConfidenceCluster<TimePoint> bearingCluster = new BearingWithConfidenceCluster<TimePoint>(weigher);
         int count = 0;
         if (!relevantFixes.isEmpty()) {
@@ -55,13 +56,14 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends DynamicTrackImpl<Ite
             bearingCluster.add(new BearingWithConfidenceImpl<TimePoint>(last.getSpeed().getBearing(), /* confidence */ 0.9, last.getTimePoint()));
             count = 1;
             while (fixIter.hasNext()) {
-                // TODO bug #169: use confidence-based averager for speed and for bearing
+                // TODO bug #169: use confidence-based averager for speed, too, and not only for bearing
                 // add to average the position and time difference
                 GPSFixMoving next = fixIter.next();
                 knotSum += last.getPosition().getDistance(next.getPosition())
                         .inTime(next.getTimePoint().asMillis() - last.getTimePoint().asMillis()).getKnots();
                 bearingCluster.add(new BearingWithConfidenceImpl<TimePoint>(last.getPosition().getBearingGreatCircle(next.getPosition()),
-                        /* confidence */ weigher.getConfidence(last.getTimePoint(), next.getTimePoint()), next.getTimePoint()));
+                        /* confidence */ weigher.getConfidence(last.getTimePoint(), next.getTimePoint()),
+                        new MillisecondsTimePoint((last.getTimePoint().asMillis()+next.getTimePoint().asMillis())/2)));
                 count++;
                 
                 // add to average the speed and bearing provided by the GPSFixMoving
