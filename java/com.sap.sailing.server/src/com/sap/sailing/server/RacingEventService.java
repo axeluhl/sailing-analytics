@@ -228,7 +228,7 @@ public interface RacingEventService extends TrackedEventRegistry {
     
     Map<String, LeaderboardGroup> getLeaderboardGroups();
     
-    LeaderboardGroup getLeaderboardGroubByName(String groupName);
+    LeaderboardGroup getLeaderboardGroupByName(String groupName);
     
     LeaderboardGroup addLeaderboardGroup(String groupName, String description, List<String> leaderboardNames);
     

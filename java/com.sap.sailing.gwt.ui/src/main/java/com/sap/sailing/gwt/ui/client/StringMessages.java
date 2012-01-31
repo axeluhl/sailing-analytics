@@ -224,6 +224,12 @@ public interface StringMessages extends Messages {
     String hideMap();
     String noLeaderboardSelected();
     String leaderboardGroups();
+    String filterLeaderboardGroupsByName();
+    String createNewLeaderboardGroup();
+    String leaderboardGroupConfiguration();
     String legs();
     String currentLeg();
+    String leaderboardGroup();
+    String pleaseEnterNonEmptyDescription();
+    String groupWithThisNameAlreadyExists();
 }
