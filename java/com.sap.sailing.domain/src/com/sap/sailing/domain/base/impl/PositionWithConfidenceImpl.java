@@ -44,13 +44,23 @@ public class PositionWithConfidenceImpl<RelativeTo> extends HasConfidenceImpl<Tr
             return new ScalablePosition(x+t.getValue().getA(), y+t.getValue().getB(), z+t.getValue().getC());
         }
 
+        /**
+         * If combined confidence is 0.0 (all coordinate components are 0.0), <code>null</code> is returned because no
+         * position can reasonably be constructed out of nowhere.
+         */
         @Override
         public Position divide(double divisor, double confidence) {
-            // don't need to scale down; atan2 is agnostic regarding scaling factors
-            double hyp = Math.sqrt(x * x + y * y);
-            double latRad = Math.atan2(z, hyp);
-            double lngRad = Math.atan2(y, x);
-            return new RadianPosition(latRad, lngRad);
+            Position result;
+            if (x == 0 && y == 0 && z == 0) {
+                result = null;
+            } else {
+                // don't need to scale down; atan2 is agnostic regarding scaling factors
+                double hyp = Math.sqrt(x * x + y * y);
+                double latRad = Math.atan2(z, hyp);
+                double lngRad = Math.atan2(y, x);
+                result = new RadianPosition(latRad, lngRad);
+            }
+            return result;
         }
 
         @Override
