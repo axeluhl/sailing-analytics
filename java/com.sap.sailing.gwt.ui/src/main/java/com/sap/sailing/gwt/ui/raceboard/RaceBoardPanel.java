@@ -14,7 +14,6 @@ import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.gwt.ui.adminconsole.RaceMap;
@@ -74,7 +73,7 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
         RaceIdentifier selectedRaceIdentifier = raceSelectionProvider.getSelectedRaces().iterator().next();
         this.setRaceBoardName(selectedRaceIdentifier.getRaceName());
         this.errorReporter = errorReporter;
-        VerticalPanel mainPanel = new VerticalPanel();
+        FlowPanel mainPanel = new FlowPanel();
         mainPanel.setSize("100%", "100%");
         setWidget(mainPanel);
 
@@ -105,18 +104,22 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
         // create the race map
         RaceMap raceMap = new RaceMap(sailingService, errorReporter, timer, competitorSelectionModel, stringMessages);
         CollapsableComponentViewer<RaceMapSettings> raceMapViewer = new CollapsableComponentViewer<RaceMapSettings>(
-                raceMap, "600px", "300px", stringMessages);
+                raceMap, "auto", "500px", stringMessages);
 
         raceMap.loadMapsAPI((Panel) raceMapViewer.getViewerWidget().getContent());
         raceMap.onRaceSelectionChange(Collections.singletonList(selectedRaceIdentifier));
         collapsableViewers.add(raceMapViewer);
         
-        WindChartSettings windChartSettings = new WindChartSettings();
-        WindChart windChart = new WindChart(sailingService, raceSelectionProvider, windChartSettings, stringMessages, errorReporter); 
-        CollapsableComponentViewer<WindChartSettings> windChartViewer = new CollapsableComponentViewer<WindChartSettings>(
-                windChart, "600px", "300px", stringMessages);
-        windChart.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
-        collapsableViewers.add(windChartViewer);
+        boolean showWindChart = false;
+        if(showWindChart) {
+            WindChartSettings windChartSettings = new WindChartSettings();
+            WindChart windChart = new WindChart(sailingService, raceSelectionProvider, windChartSettings, stringMessages, errorReporter); 
+            CollapsableComponentViewer<WindChartSettings> windChartViewer = new CollapsableComponentViewer<WindChartSettings>(
+                    windChart, "600px", "300px", stringMessages);
+            windChart.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
+            collapsableViewers.add(windChartViewer);
+        }
+
         for (CollapsableComponentViewer<?> componentViewer : collapsableViewers) {
             mainPanel.add(componentViewer.getViewerWidget());
             addComponentViewerMenuEntry(componentViewer);

@@ -27,9 +27,9 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         final String eventName = Window.Location.getParameter("eventName");
         final String raceName = Window.Location.getParameter("raceName");
         String leaderboardNameParamValue = Window.Location.getParameter("leaderboardName");
-//        String leaderboardGroupNameParamValue = Window.Location.getParameter("leaderboardGroupName");
+        //String leaderboardGroupNameParamValue = Window.Location.getParameter("leaderboardGroupName");
         final String leaderboardName;
-//        final String leaderboardGroupName;
+        //final String leaderboardGroupName;
         if(leaderboardNameParamValue == null || leaderboardNameParamValue.isEmpty()) {
             leaderboardName = DefaultLeaderboardName.DEFAULT_LEADERBOARD_NAME;
         } else {
@@ -48,10 +48,10 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
                 }
             });
         }
-        /*
-        if(leaderboardNameParamValue != null && !leaderboardNameParamValue.isEmpty()))
+        /* not used yet.... waiting for the leaderboard group functionality
+        if(leaderboardGroupNameParamValue != null && !leaderboardGroupNameParamValue.isEmpty()))
         {
-            sailingService.getLeaderboardGroupByName(leaderboardNameParamValue, new AsyncCallback<LeaderboardGroupDTO>() {
+            sailingService.getLeaderboardGroupByName(leaderboardGroupNameParamValue, new AsyncCallback<LeaderboardGroupDTO>() {
                 @Override
                 public void onSuccess(LeaderboardGroupDTO leaderboardGroup) {
                     for(leaderboardGroup.leaderboards.contains()
