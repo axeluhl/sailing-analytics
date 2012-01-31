@@ -17,4 +17,10 @@ public interface ConfidenceFactory {
      * It is halved every <code>halfConfidenceAfterMilliseconds</code> milliseconds.
      */
     Weigher<TimePoint> createExponentialTimeDifferenceWeigher(long halfConfidenceAfterMilliseconds);
+
+    /**
+     * Like {@link #createExponentialTimeDifferenceWeigher(long)}, only that additionally a minimum confidence value is defined.
+     * This can be useful for averagers that have trouble with values scaled down with 0.0.
+     */
+    Weigher<TimePoint> createExponentialTimeDifferenceWeigher(long halfConfidenceAfterMilliseconds, double minimumConfidence);
 }

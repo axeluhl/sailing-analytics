@@ -112,7 +112,7 @@ public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest 
         setBearingForCompetitor(competitors.get(0), now, 320);
         setBearingForCompetitor(competitors.get(1), now, 50);
         TrackedLeg firstLeg = getTrackedRace().getTrackedLeg(getTrackedRace().getRace().getCourse().getLegs().iterator().next());
-        assertEquals(LegType.UPWIND, firstLeg.getLegType(new MillisecondsTimePoint(MillisecondsTimePoint.now().asMillis()/2)));
+        assertEquals(LegType.UPWIND, firstLeg.getLegType(new MillisecondsTimePoint(MillisecondsTimePoint.now().asMillis())));
         final Map<TimePoint, Wind> cachedFixes = new HashMap<TimePoint, Wind>();
         TrackBasedEstimationWindTrackImpl track = new TrackBasedEstimationWindTrackImpl(
                 getTrackedRace(), /* millisecondsOverWhichToAverage */ 30000) {

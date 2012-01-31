@@ -46,7 +46,8 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends DynamicTrackImpl<Ite
         List<GPSFixMoving> relevantFixes = getFixesRelevantForSpeedEstimation(at, fixesToUseForSpeedEstimation);
         double knotSum = 0;
         Weigher<TimePoint> weigher = ConfidenceFactory.INSTANCE.createExponentialTimeDifferenceWeigher(
-                /* halfConfidenceAfterMilliseconds */ getMillisecondsOverWhichToAverageSpeed()/10);
+                // use a minimum confidence to avoid the bearing to flip to 270deg in case all is zero
+                /* halfConfidenceAfterMilliseconds */ getMillisecondsOverWhichToAverageSpeed()/10, 0.000001);
         BearingWithConfidenceCluster<TimePoint> bearingCluster = new BearingWithConfidenceCluster<TimePoint>(weigher);
         int count = 0;
         if (!relevantFixes.isEmpty()) {
