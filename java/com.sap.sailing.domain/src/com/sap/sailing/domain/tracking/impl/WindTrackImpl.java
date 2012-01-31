@@ -10,12 +10,15 @@ import java.util.logging.Logger;
 import com.sap.sailing.domain.base.CourseChange;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.Timed;
+import com.sap.sailing.domain.base.impl.BearingWithConfidenceImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.confidence.ConfidenceFactory;
+import com.sap.sailing.domain.confidence.Weigher;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindListener;
 import com.sap.sailing.domain.tracking.WindTrack;
@@ -129,7 +132,9 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
         Iterator<Wind> beforeIter = beforeSet.descendingIterator();
         Iterator<Wind> afterIter = afterSet.iterator();
         double knotSum = 0;
-        BearingCluster bearingCluster = new BearingCluster();
+        // TODO bug #169: introduce BearingWithConfidenceCluster and measure speed also with confidence; return confidence
+        Weigher<TimePoint> weigher = ConfidenceFactory.INSTANCE.createExponentialTimeDifferenceWeigher(millisecondsOverWhichToAverage/10);
+        BearingWithConfidenceCluster<TimePoint> bearingCluster = new BearingWithConfidenceCluster<TimePoint>(weigher);
         int count = 0;
         long beforeDistanceToAt = 0;
         long afterDistanceToAt = 0;
@@ -153,7 +158,8 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
                     beforeIntervalEnd = beforeWind.getTimePoint();
                 }
                 knotSum += beforeWind.getKnots();
-                bearingCluster.add(beforeWind.getBearing());
+                // TODO bug #169: replace confidence with passed-through confidence of beforeWind fix's confidence
+                bearingCluster.add(new BearingWithConfidenceImpl<TimePoint>(beforeWind.getBearing(), /* confidence */ 0.9, beforeWind.getTimePoint()));
                 count++;
                 if (beforeIter.hasNext()) {
                     beforeWind = beforeIter.next();
@@ -167,7 +173,8 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
                     afterIntervalStart = afterWind.getTimePoint();
                 }
                 knotSum += afterWind.getKnots();
-                bearingCluster.add(afterWind.getBearing());
+                // TODO bug #169: replace confidence with passed-through confidence of beforeWind fix's confidence
+                bearingCluster.add(new BearingWithConfidenceImpl<TimePoint>(afterWind.getBearing(), /* confidence */ 0.9, afterWind.getTimePoint()));
                 count++;
                 if (afterIter.hasNext()) {
                     afterWind = afterIter.next();
@@ -181,7 +188,8 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
         if (count == 0) {
             return null;
         } else {
-            SpeedWithBearing avgWindSpeed = new KnotSpeedWithBearingImpl(knotSum / count, bearingCluster.getAverage());
+            // TODO bug #169: pass on confidence
+            SpeedWithBearing avgWindSpeed = new KnotSpeedWithBearingImpl(knotSum / count, bearingCluster.getAverage(at).getObject());
             return new WindImpl(p, at, avgWindSpeed);
         }
     }

@@ -59,7 +59,7 @@ public class WindEstimationOnKielerWoche505Race2DataTest extends OnlineTracTracB
         Wind estimatedWindDirection = getTrackedRace().getEstimatedWindDirection(/* position */ null, middle);
         assertNotNull(estimatedWindDirection);
         Wind estimationBasedOnTrack = estimatedWindTrack.getEstimatedWind(null, middle);
-        assertEquals(estimatedWindDirection.getFrom().getDegrees(), estimationBasedOnTrack.getFrom().getDegrees(), 3.);
+        assertEquals(estimatedWindDirection.getFrom().getDegrees(), estimationBasedOnTrack.getFrom().getDegrees(), 5.);
     }
 
     @Test

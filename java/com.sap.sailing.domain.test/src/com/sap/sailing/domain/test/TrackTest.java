@@ -115,11 +115,6 @@ public class TrackTest {
         track.addGPSFix(f2);
         track.addGPSFix(f3);
         SpeedWithBearing average = track.getRawEstimatedSpeed(t2);
-        // A DynamicGPSFixMovingTrackImpl is expected to combine two information sources for bearing estimation:
-        //  1) the bearings as transmitted in the GPS fix received from the device
-        //  2) the bearing from the previous to the current fix
-        // Especially because of 2) the bearing tends to lean a bit towards the past
-        // FIXME a GPSFixMovingTrack now uses time difference-based confidences for averaging bearings
         assertEquals(0, average.getBearing().getDegrees(), 0.00001);
     }
     
