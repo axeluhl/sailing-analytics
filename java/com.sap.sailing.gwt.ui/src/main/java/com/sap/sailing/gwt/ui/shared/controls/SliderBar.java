@@ -17,6 +17,7 @@ package com.sap.sailing.gwt.ui.shared.controls;
  */
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
@@ -72,7 +73,7 @@ import com.google.gwt.user.client.ui.RequiresResize;
  * sliding }</li>
  * <li>
  * .gwt-SliderBar-shell .gwt-SliderBar-tick { the ticks along the line }</li>
- * <li>.gwt-SliderBar-shell .gwt-SliderBar-label { the text labels along the
+ * <li>.gwt-SliderBar-shell .gwt-SliderBar-ticklabel { the text labels along the
  * line }</li>
  * </ul>
  */
@@ -213,12 +214,17 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
   /**
    * The elements used to display labels above the ticks.
    */
-  private List<Element> labelElements = new ArrayList<Element>();
+  private List<Element> tickLabelElements = new ArrayList<Element>();
+
+  /**
+   * The elements used to display the marker labels.
+   */
+  private List<Element> markerLabelElements = new ArrayList<Element>();
 
   /**
    * The formatter used to generate label text.
    */
-  private LabelFormatter labelFormatter;
+  private LabelFormatter tickLabelFormatter;
 
   /**
    * The line that the knob moves over.
@@ -243,7 +249,7 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
   /**
    * The number of labels to show.
    */
-  private int numLabels = 0;
+  private int numTickLabels = 0;
 
   /**
    * The number of tick marks to show.
@@ -284,6 +290,24 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
   private List<Element> tickElements = new ArrayList<Element>();
 
   /**
+   * The elements used to display additional markers on the slider bar.
+   */
+  private List<Element> markerElements = new ArrayList<Element>();
+
+  private List<Marker> markers = new ArrayList<Marker>();
+
+  private class Marker {
+      String name;
+      Double position;
+
+      public Marker(String name, Double position) {
+        super();
+        this.name = name;
+        this.position = position;
+    }
+  }
+  
+  /**
    * Create a slider bar.
    */
   public SliderBar() {
@@ -305,10 +329,10 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
    * 
    * @param minValue the minimum value in the range
    * @param maxValue the maximum value in the range
-   * @param labelFormatter the label formatter
+   * @param tickLabelFormatter the label formatter
    */
-  public SliderBar(Double minValue, Double maxValue, LabelFormatter labelFormatter) {
-    this(minValue, maxValue, labelFormatter, SliderBarImages.INSTANCE);
+  public SliderBar(Double minValue, Double maxValue, LabelFormatter tickLabelFormatter) {
+    this(minValue, maxValue, tickLabelFormatter, SliderBarImages.INSTANCE);
   }
 
   /**
@@ -316,17 +340,17 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
    * 
    * @param minValue the minimum value in the range
    * @param maxValue the maximum value in the range
-   * @param labelFormatter the label formatter
+   * @param tickLabelFormatter the label formatter
    * @param images the images to use for the slider
    */
-  public SliderBar(Double minValue, Double maxValue, LabelFormatter labelFormatter,
+  public SliderBar(Double minValue, Double maxValue, LabelFormatter tickLabelFormatter,
       SliderBarImages images) {
     super();
     images.sliderBarCss().ensureInjected();
     this.minValue = minValue;
     this.maxValue = maxValue;
     this.images = images;
-    setLabelFormatter(labelFormatter);
+    setLabelFormatter(tickLabelFormatter);
 
     // Create the outer shell
     DOM.setStyleAttribute(getElement(), "position", "relative");
@@ -384,7 +408,7 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
    * @return the label formatter
    */
   public LabelFormatter getLabelFormatter() {
-    return labelFormatter;
+    return tickLabelFormatter;
   }
 
   /**
@@ -411,7 +435,7 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
    * @return the number of labels
    */
   public int getNumLabels() {
-    return numLabels;
+    return numTickLabels;
   }
 
   /**
@@ -584,8 +608,10 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
     DOM.setStyleAttribute(lineElement, "left", lineLeftOffset + "px");
 
     // Draw the other components
-    drawLabels();
+    drawTickLabels();
     drawTicks();
+    drawMarkers();
+    drawMarkerLabels();
     drawKnob();
   }
 
@@ -662,7 +688,7 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
    * @param labelFormatter the label formatter
    */
   public void setLabelFormatter(LabelFormatter labelFormatter) {
-    this.labelFormatter = labelFormatter;
+    this.tickLabelFormatter = labelFormatter;
   }
 
   /**
@@ -672,7 +698,7 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
    */
   public void setMaxValue(Double maxValue) {
     this.maxValue = maxValue;
-    drawLabels();
+    drawTickLabels();
     resetCurrentValue();
   }
 
@@ -683,29 +709,29 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
    */
   public void setMinValue(Double minValue) {
     this.minValue = minValue;
-    drawLabels();
+    drawTickLabels();
     resetCurrentValue();
   }
 
   /**
-   * Set the number of labels to show on the line. Labels indicate the value of
-   * the slider at that point. Use this method to enable labels.
+   * Set the number of tick labels to show on the line. Tick labels indicate the value of
+   * the slider at that point. Use this method to enable tick labels.
    * 
-   * If you set the number of labels equal to the total range divided by the
+   * If you set the number of tick labels equal to the total range divided by the
    * step size, you will get a properly aligned "jumping" effect where the knob
-   * jumps between labels.
+   * jumps between tick labels.
    * 
-   * Note that the number of labels displayed will be one more than the number
+   * Note that the number of tick labels displayed will be one more than the number
    * you specify, so specify 1 labels to show labels on either end of the line.
-   * In other words, numLabels is really the number of slots between the labels.
+   * In other words, numTickLabels is really the number of slots between the labels.
    * 
-   * setNumLabels(0) will disable labels.
+   * setNumTickLabels(0) will disable the labels.
    * 
-   * @param numLabels the number of labels to show
+   * @param numTickLabels the number of tick labels to show
    */
-  public void setNumLabels(int numLabels) {
-    this.numLabels = numLabels;
-    drawLabels();
+  public void setNumTickLabels(int numTickLabels) {
+    this.numTickLabels = numTickLabels;
+    drawTickLabels();
   }
 
   /**
@@ -774,9 +800,9 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
    * @param value the value at the label
    * @return the text to put in the label
    */
-  protected String formatLabel(double value) {
-    if (labelFormatter != null) {
-      return labelFormatter.formatLabel(this, value);
+  protected String formatTickLabel(double value) {
+    if (tickLabelFormatter != null) {
+      return tickLabelFormatter.formatLabel(this, value);
     } else {
       return (int) (10 * value) / 10.0 + "";
     }
@@ -833,7 +859,7 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
   /**
    * Draw the labels along the line.
    */
-  private void drawLabels() {
+  private void drawTickLabels() {
     // Abort if not attached
     if (!isAttached())
       return;
@@ -841,32 +867,32 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
     if(!isMinMaxInitialized())
         return;
 
-    // Draw the labels
+    // Draw the tick labels
     int lineWidth = lineElement.getOffsetWidth();
-    if (numLabels > 0) {
+    if (numTickLabels > 0) {
       // Create the labels or make them visible
-      for (int i = 0; i <= numLabels; i++) {
+      for (int i = 0; i <= numTickLabels; i++) {
         Element label = null;
-        if (i < labelElements.size()) {
-          label = labelElements.get(i);
+        if (i < tickLabelElements.size()) {
+          label = tickLabelElements.get(i);
         } else { // Create the new label
           label = DOM.createDiv();
           DOM.setStyleAttribute(label, "position", "absolute");
           DOM.setStyleAttribute(label, "display", "none");
           if (enabled) {
-            DOM.setElementProperty(label, "className", "gwt-SliderBar-label");
+            DOM.setElementProperty(label, "className", "gwt-SliderBar-ticklabel");
           } else {
-            DOM.setElementProperty(label, "className", "gwt-SliderBar-label-disabled");
+            DOM.setElementProperty(label, "className", "gwt-SliderBar-ticklabel-disabled");
           }
           DOM.appendChild(getElement(), label);
-          labelElements.add(label);
+          tickLabelElements.add(label);
         }
 
         // Set the label text
-        double value = minValue + (getTotalRange() * i / numLabels);
+        double value = minValue + (getTotalRange() * i / numTickLabels);
         DOM.setStyleAttribute(label, "visibility", "hidden");
         DOM.setStyleAttribute(label, "display", "");
-        DOM.setElementProperty(label, "innerHTML", formatLabel(value));
+        DOM.setElementProperty(label, "innerHTML", formatTickLabel(value));
 
         // Move to the left so the label width is not clipped by the
         // shell
@@ -874,7 +900,7 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
 
         // Position the label and make it visible
         int labelWidth = label.getOffsetWidth();
-        int labelLeftOffset = lineLeftOffset + (lineWidth * i / numLabels) - (labelWidth / 2);
+        int labelLeftOffset = lineLeftOffset + (lineWidth * i / numTickLabels) - (labelWidth / 2);
         labelLeftOffset = Math.min(labelLeftOffset, lineLeftOffset + lineWidth - labelWidth);
         labelLeftOffset = Math.max(labelLeftOffset, lineLeftOffset);
         DOM.setStyleAttribute(label, "left", labelLeftOffset + "px");
@@ -882,11 +908,11 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
       }
 
       // Hide unused labels
-      for (int i = (numLabels + 1); i < labelElements.size(); i++) {
-        DOM.setStyleAttribute(labelElements.get(i), "display", "none");
+      for (int i = (numTickLabels + 1); i < tickLabelElements.size(); i++) {
+        DOM.setStyleAttribute(tickLabelElements.get(i), "display", "none");
       }
     } else { // Hide all labels
-      for (Element elem : labelElements) {
+      for (Element elem : tickLabelElements) {
         DOM.setStyleAttribute(elem, "display", "none");
       }
     }
@@ -946,6 +972,131 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
     }
   }
 
+  /**
+   * Draw the markers.
+   */
+  private void drawMarkers() {
+    // Abort if not attached
+    if (!isAttached()) {
+      return;
+    }
+
+    if(!isMinMaxInitialized())
+        return;
+
+    int numMarkers = markers.size();
+    // Draw the markers
+    int lineWidth = lineElement.getOffsetWidth();
+    if (numMarkers > 0) {
+      // Create the markers or make them visible
+      for (int i = 0; i < numMarkers; i++) {
+          Marker marker = markers.get(i);  
+        Element markerElem = null;
+        if (i < markerElements.size()) {
+          markerElem = markerElements.get(i);
+        } else { // Create the new markes
+            markerElem = DOM.createDiv();
+          DOM.setStyleAttribute(markerElem, "position", "absolute");
+          DOM.setStyleAttribute(markerElem, "display", "none");
+          DOM.appendChild(getElement(), markerElem);
+          markerElements.add(markerElem);
+        }
+        if (enabled) {
+          DOM.setElementProperty(markerElem, "className", "gwt-SliderBar-mark");
+        } else {
+          DOM.setElementProperty(markerElem, "className",
+              "gwt-SliderBar-mark gwt-SliderBar-mark-disabled");
+        }
+        // Position the marker and make it visible
+        DOM.setStyleAttribute(markerElem, "visibility", "hidden");
+        DOM.setStyleAttribute(markerElem, "display", "");
+        double markerLinePosition = (marker.position - minValue) * lineWidth / getTotalRange();
+        int markerWidth = markerElem.getOffsetWidth();
+        int markerLeftOffset = lineLeftOffset + (int) markerLinePosition - (markerWidth / 2);
+        markerLeftOffset = Math.min(markerLeftOffset, lineLeftOffset + lineWidth - markerWidth);
+        DOM.setStyleAttribute(markerElem, "left", markerLeftOffset + "px");
+        DOM.setStyleAttribute(markerElem, "visibility", "visible");
+      }
+
+      // Hide unused markers
+      for (int i = (numMarkers + 1); i < markerElements.size(); i++) {
+        DOM.setStyleAttribute(tickElements.get(i), "display", "none");
+      }
+    } else { // Hide all markers
+      for (Element elem : markerElements) {
+        DOM.setStyleAttribute(elem, "display", "none");
+      }
+    }
+  }
+
+  /**
+   * Draw the marker labels.
+   */
+  private void drawMarkerLabels() {
+    // Abort if not attached
+    if (!isAttached())
+      return;
+    
+    if(!isMinMaxInitialized())
+        return;
+
+    int numMarkers = markers.size();
+    // Draw the marker labels
+    int lineWidth = lineElement.getOffsetWidth();
+    if (numMarkers > 0) {
+      // Create the labels or make them visible
+      for (int i = 0; i < numMarkers; i++) {
+        Marker marker = markers.get(i);  
+        Element label = null;
+        if (i < markerLabelElements.size()) {
+          label = markerLabelElements.get(i);
+        } else { // Create the new label
+          label = DOM.createDiv();
+          DOM.setStyleAttribute(label, "position", "absolute");
+          DOM.setStyleAttribute(label, "display", "none");
+          if (enabled) {
+            DOM.setElementProperty(label, "className", "gwt-SliderBar-markerlabel");
+          } else {
+            DOM.setElementProperty(label, "className", "gwt-SliderBar-markerlabel-disabled");
+          }
+          DOM.appendChild(getElement(), label);
+          markerLabelElements.add(label);
+        }
+
+        // Set the marker label text
+        DOM.setStyleAttribute(label, "visibility", "hidden");
+        DOM.setStyleAttribute(label, "display", "");
+        DOM.setElementProperty(label, "innerHTML", marker.name);
+
+        // Move to the left so the label width is not clipped by the
+        // shell
+        DOM.setStyleAttribute(label, "left", "0px");
+
+        // Position the label and make it visible
+        double markerLinePosition = (marker.position - minValue) * lineWidth / getTotalRange();
+        int labelWidth = label.getOffsetWidth();
+        int labelLeftOffset = lineLeftOffset + (int) markerLinePosition - (labelWidth / 2);
+        labelLeftOffset = Math.min(labelLeftOffset, lineLeftOffset + lineWidth - labelWidth);
+
+        
+//        int labelLeftOffset = lineLeftOffset + (int) markerLinePosition - (labelWidth / 2);
+//        labelLeftOffset = Math.min(labelLeftOffset, lineLeftOffset + lineWidth - labelWidth);
+//        labelLeftOffset = Math.max(labelLeftOffset, lineLeftOffset);
+        DOM.setStyleAttribute(label, "left", labelLeftOffset + "px");
+        DOM.setStyleAttribute(label, "visibility", "visible");
+      }
+
+      // Hide unused labels
+      for (int i = (numMarkers + 1); i < markerLabelElements.size(); i++) {
+        DOM.setStyleAttribute(markerLabelElements.get(i), "display", "none");
+      }
+    } else { // Hide all labels
+      for (Element elem : markerLabelElements) {
+        DOM.setStyleAttribute(elem, "display", "none");
+      }
+    }
+  }
+  
   /**
    * Highlight this widget.
    */
@@ -1018,5 +1169,40 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
   @Override
   public void onResize() {
     redraw();
+  }
+  
+  public boolean addMarker(String markerName, Double markerPosition) {
+      return markers.add(new Marker(markerName, markerPosition));
+  }
+
+  public boolean setMarker(String markerName, Double markerPosition) {
+      Marker marker = findMarkerByName(markerName);
+      if(marker != null) {
+          marker.position = markerPosition;
+          return true;
+      } 
+      return false;
+  }
+
+  public boolean removeMarker(String markerName) {
+      Marker marker = findMarkerByName(markerName);
+      if(marker != null) {
+          return markers.remove(marker);
+      }
+      return false;
+  }
+
+  public Iterator<Marker> getMarkers()
+  {
+      return markers.iterator();
+  }
+
+  private Marker findMarkerByName(String markerName) {
+      for(Marker marker: markers) {
+          if (marker.name.equals(markerName)) {
+              return marker;
+          }
+      }
+      return null;
   }
 }

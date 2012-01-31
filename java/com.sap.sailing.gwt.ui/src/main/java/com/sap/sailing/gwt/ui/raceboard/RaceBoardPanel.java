@@ -197,6 +197,7 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
             if (selectedRace.startOfRace != null) {
                 timer.setTime(selectedRace.startOfRace.getTime());
             }
+            timePanel.setLegMarkers();
         }
     }
 }
