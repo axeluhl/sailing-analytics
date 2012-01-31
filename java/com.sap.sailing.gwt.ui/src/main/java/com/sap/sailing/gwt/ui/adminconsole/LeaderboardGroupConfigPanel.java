@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -14,6 +15,7 @@ import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.cellview.client.CellTable;
+import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.CellTable.Resources;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
@@ -48,7 +50,7 @@ public class LeaderboardGroupConfigPanel extends AbstractEventPanel {
     private VerticalPanel mainPanel;
     private HorizontalPanel splitPanel;
     
-    private TextBox filterGroupsTextBox;
+    private TextBox groupsFilterTextBox;
     private CellTable<LeaderboardGroupDTO> leaderboardGroupsTable;
     private SingleSelectionModel<LeaderboardGroupDTO> leaderboardGroupsSelectionModel;
     private ListDataProvider<LeaderboardGroupDTO> leaderboardGroupsProvider;
@@ -178,7 +180,7 @@ public class LeaderboardGroupConfigPanel extends AbstractEventPanel {
         leaderboardsFunctionPanel.add(filterLeaderboardsLabel);
         
         filterLeaderboardsTextBox = new TextBox();
-        filterGroupsTextBox.addKeyUpHandler(new KeyUpHandler() {
+        groupsFilterTextBox.addKeyUpHandler(new KeyUpHandler() {
             @Override
             public void onKeyUp(KeyUpEvent arg0) {
                 // TODO Auto-generated method stub
@@ -338,14 +340,14 @@ public class LeaderboardGroupConfigPanel extends AbstractEventPanel {
         Label filterLeaderboardGroupsLbl = new Label(stringConstants.filterLeaderboardGroupsByName() + ":");
         leaderboardGroupsFunctionPanel.add(filterLeaderboardGroupsLbl);
         
-        filterGroupsTextBox = new TextBox();
-        filterGroupsTextBox.addKeyUpHandler(new KeyUpHandler() {
+        groupsFilterTextBox = new TextBox();
+        groupsFilterTextBox.addKeyUpHandler(new KeyUpHandler() {
             @Override
-            public void onKeyUp(KeyUpEvent arg0) {
-                // TODO Auto-generated method stub
+            public void onKeyUp(KeyUpEvent event) {
+                groupsFilterChanged();
             }
         });
-        leaderboardGroupsFunctionPanel.add(filterGroupsTextBox);
+        leaderboardGroupsFunctionPanel.add(groupsFilterTextBox);
         
         Button createGroupButton = new Button(stringConstants.createNewLeaderboardGroup());
         createGroupButton.addClickHandler(new ClickHandler() {
@@ -508,6 +510,18 @@ public class LeaderboardGroupConfigPanel extends AbstractEventPanel {
                 }
             }
         });
+    }
+    
+    private void groupsFilterChanged() {
+        List<String> filter = Arrays.asList(groupsFilterTextBox.getText().split("\\s"));
+        leaderboardGroupsProvider.getList().clear();
+        for (LeaderboardGroupDTO group : availableLeaderboardGroups) {
+            if (!textContainingStringsToCheck(filter, group.name)) {
+                leaderboardGroupsProvider.getList().add(group);
+            }
+        }
+        //Now sort again according to selected criterion
+        ColumnSortEvent.fire(leaderboardGroupsTable, leaderboardGroupsTable.getColumnSortList());
     }
     
     private void groupSelectionChanged() {

@@ -29,7 +29,7 @@ public abstract class AbstractEventPanel extends FormPanel implements EventDispl
     public abstract void fillEvents(List<EventDTO> result);
     
     /**
-     * Returns if <code>wordsToFilter</code> contain a value of the <code>valuesToCheck</code>  
+     * Returns <code>false</code> if <code>wordsToFilter</code> contain a value of the <code>valuesToCheck</code>  
      * @param wordsToFilter the words to filter on
      * @param valuesToCheck the values to check for. These values contain the values of the current rows.
      * @return <code>false</code> if the <code>valuesToCheck</code> contains all <code>wordsToFilter</code>, <code>true</code> if not
