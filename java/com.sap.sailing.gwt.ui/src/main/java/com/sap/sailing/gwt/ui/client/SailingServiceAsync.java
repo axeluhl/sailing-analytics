@@ -272,5 +272,5 @@ public interface SailingServiceAsync {
     
     void removeLeaderboardFromGroup(String leaderboardName, String groupName, AsyncCallback<Void> callback);
     
-    void updateLeaderboardGroup(String oldName, String newName, String description, AsyncCallback<Void> callback);
+    void updateLeaderboardGroup(String oldName, String newName, String description, List<LeaderboardDTO> leaderboards, AsyncCallback<Void> callback);
 }

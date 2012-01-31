@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.core.client.GWT;
@@ -15,9 +16,9 @@ import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.cellview.client.CellTable;
-import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.CellTable.Resources;
 import com.google.gwt.user.cellview.client.Column;
+import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Window;
@@ -49,20 +50,26 @@ public class LeaderboardGroupConfigPanel extends AbstractEventPanel {
     
     private VerticalPanel mainPanel;
     private HorizontalPanel splitPanel;
+    private CaptionPanel groupDetailsCaptionPanel;
     
     private TextBox groupsFilterTextBox;
-    private CellTable<LeaderboardGroupDTO> leaderboardGroupsTable;
-    private SingleSelectionModel<LeaderboardGroupDTO> leaderboardGroupsSelectionModel;
-    private ListDataProvider<LeaderboardGroupDTO> leaderboardGroupsProvider;
+    private CellTable<LeaderboardGroupDTO> groupsTable;
+    private SingleSelectionModel<LeaderboardGroupDTO> groupsSelectionModel;
+    private ListDataProvider<LeaderboardGroupDTO> groupsProvider;
     
     private CellTable<LeaderboardDTO> groupDetailsTable;
     private MultiSelectionModel<LeaderboardDTO> groupDetailsSelectionModel;
     private ListDataProvider<LeaderboardDTO> groupDetailsProvider;
+    private Button leaderboardUpButton;
+    private Button leaderboardDownButton;
     
-    private TextBox filterLeaderboardsTextBox;
+    private TextBox leaderboardsFilterTextBox;
     private CellTable<LeaderboardDTO> leaderboardsTable;
     private MultiSelectionModel<LeaderboardDTO> leaderboardsSelectionModel;
     private ListDataProvider<LeaderboardDTO> leaderboardsProvider;
+    
+    private Button moveToLeaderboardsButton;
+    private Button moveToGroupButton;
     
     private ArrayList<LeaderboardGroupDTO> availableLeaderboardGroups;
     private ArrayList<LeaderboardDTO> availableLeaderboards;
@@ -99,67 +106,31 @@ public class LeaderboardGroupConfigPanel extends AbstractEventPanel {
         loadGroups();
         loadLeaderboards();
     }
-    
-    private void loadGroups() {
-        sailingService.getLeaderboardGroups(new AsyncCallback<List<LeaderboardGroupDTO>>() {
-            @Override
-            public void onSuccess(List<LeaderboardGroupDTO> groups) {
-                availableLeaderboardGroups.clear();
-                if (groups != null) {
-                    availableLeaderboardGroups.addAll(groups);
-                }
-                leaderboardGroupsProvider.getList().clear();
-                leaderboardGroupsProvider.getList().addAll(availableLeaderboardGroups);
-            }
-            @Override
-            public void onFailure(Throwable t) {
-                errorReporter.reportError("Error trying to obtain list of leaderboard groups: " + t.getMessage());
-            }
-        });
-    }
-    
-    private void loadLeaderboards() {
-        sailingService.getLeaderboards(new AsyncCallback<List<LeaderboardDTO>>() {
-            @Override
-            public void onFailure(Throwable t) {
-                errorReporter.reportError("Error trying to obtain list of leaderboards: " + t.getMessage());
-            }
-            @Override
-            public void onSuccess(List<LeaderboardDTO> leaderboards) {
-                availableLeaderboards.clear();
-                if (leaderboards != null) {
-                    availableLeaderboards.addAll(leaderboards);
-                }
-                leaderboardGroupsProvider.getList().clear();
-                leaderboardGroupsProvider.getList().addAll(availableLeaderboardGroups);
-            }
-        });
-    }
 
     private Widget createSwitchLeaderboardsGUI() {
         VerticalPanel switchLeaderboardsPanel = new VerticalPanel();
         switchLeaderboardsPanel.setSpacing(5);
         switchLeaderboardsPanel.setWidth("5%");
         
-        Button moveToLeaderboards = new Button("->");
-        moveToLeaderboards.addClickHandler(new ClickHandler() {
+        moveToGroupButton = new Button("<-");
+        moveToGroupButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                // TODO Auto-generated method stub
+                moveToGroup();
             }
         });
-        moveToLeaderboards.setEnabled(false);
-        switchLeaderboardsPanel.add(moveToLeaderboards);
+        moveToGroupButton.setEnabled(false);
+        switchLeaderboardsPanel.add(moveToGroupButton);
         
-        Button moveToGroup = new Button("<-");
-        moveToGroup.addClickHandler(new ClickHandler() {
+        moveToLeaderboardsButton = new Button("->");
+        moveToLeaderboardsButton.addClickHandler(new ClickHandler() {
             @Override
-            public void onClick(ClickEvent arg0) {
-                // TODO Auto-generated method stub
+            public void onClick(ClickEvent event) {
+                moveToLeaderboards();
             }
         });
-        moveToGroup.setEnabled(false);
-        switchLeaderboardsPanel.add(moveToGroup);
+        moveToLeaderboardsButton.setEnabled(false);
+        switchLeaderboardsPanel.add(moveToLeaderboardsButton);
         
         return switchLeaderboardsPanel;
     }
@@ -179,14 +150,23 @@ public class LeaderboardGroupConfigPanel extends AbstractEventPanel {
         Label filterLeaderboardsLabel = new Label(stringConstants.filterLeaderboardsByName() + ":");
         leaderboardsFunctionPanel.add(filterLeaderboardsLabel);
         
-        filterLeaderboardsTextBox = new TextBox();
-        groupsFilterTextBox.addKeyUpHandler(new KeyUpHandler() {
+        leaderboardsFilterTextBox = new TextBox();
+        leaderboardsFilterTextBox.addKeyUpHandler(new KeyUpHandler() {
             @Override
-            public void onKeyUp(KeyUpEvent arg0) {
-                // TODO Auto-generated method stub
+            public void onKeyUp(KeyUpEvent event) {
+                leaderboardsFilterChanged();
             }
         });
-        leaderboardsFunctionPanel.add(filterLeaderboardsTextBox);
+        leaderboardsFunctionPanel.add(leaderboardsFilterTextBox);
+        
+        Button refreshLeaderboardsButton = new Button(stringConstants.refresh());
+        refreshLeaderboardsButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                refreshLeaderboardsList();
+            }
+        });
+        leaderboardsFunctionPanel.add(refreshLeaderboardsButton);
         
         //Create leaderboards table
         leaderboardsProvider = new ListDataProvider<LeaderboardDTO>();
@@ -234,8 +214,9 @@ public class LeaderboardGroupConfigPanel extends AbstractEventPanel {
         leaderboardsSelectionModel = new MultiSelectionModel<LeaderboardDTO>();
         leaderboardsSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             @Override
-            public void onSelectionChange(SelectionChangeEvent arg0) {
-                // TODO Auto-generated method stub
+            public void onSelectionChange(SelectionChangeEvent event) {
+                Set<LeaderboardDTO> selectedLeaderboards = leaderboardsSelectionModel.getSelectedSet();
+                moveToGroupButton.setEnabled(selectedLeaderboards != null && selectedLeaderboards.size() > 0);
             }
         });
         leaderboardsTable.setSelectionModel(leaderboardsSelectionModel);
@@ -247,7 +228,7 @@ public class LeaderboardGroupConfigPanel extends AbstractEventPanel {
     }
 
     private Widget createLeaderboardGroupDetailsGUI(Resources tableRes) {
-        CaptionPanel groupDetailsCaptionPanel = new CaptionPanel();
+        groupDetailsCaptionPanel = new CaptionPanel();
         groupDetailsCaptionPanel.setWidth("95%");
         
         VerticalPanel groupDetailsPanel = new VerticalPanel();
@@ -288,8 +269,11 @@ public class LeaderboardGroupConfigPanel extends AbstractEventPanel {
         groupDetailsSelectionModel = new MultiSelectionModel<LeaderboardDTO>();
         groupDetailsSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             @Override
-            public void onSelectionChange(SelectionChangeEvent arg0) {
-                // TODO Auto-generated method stub
+            public void onSelectionChange(SelectionChangeEvent event) {
+                Set<LeaderboardDTO> selectedLeaderboardsInGroup = groupDetailsSelectionModel.getSelectedSet();
+                moveToLeaderboardsButton.setEnabled(selectedLeaderboardsInGroup != null && !selectedLeaderboardsInGroup.isEmpty());
+                leaderboardDownButton.setEnabled(selectedLeaderboardsInGroup != null && selectedLeaderboardsInGroup.size() == 1);
+                leaderboardUpButton.setEnabled(selectedLeaderboardsInGroup != null && selectedLeaderboardsInGroup.size() == 1);
             }
         });
         groupDetailsTable.setSelectionModel(groupDetailsSelectionModel);
@@ -303,25 +287,25 @@ public class LeaderboardGroupConfigPanel extends AbstractEventPanel {
         groupDetailsFunctionPanel.setSpacing(5);
         groupDetailsPanel.add(groupDetailsFunctionPanel);
         
-        Button leaderboardUp = new Button(stringConstants.columnMoveUp());
-        leaderboardUp.addClickHandler(new ClickHandler() {
+        leaderboardUpButton = new Button(stringConstants.columnMoveUp());
+        leaderboardUpButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                // TODO Auto-generated method stub
+                moveLeaderboardInGroupUp();
             }
         });
-        leaderboardUp.setEnabled(false);
-        groupDetailsFunctionPanel.add(leaderboardUp);
+        leaderboardUpButton.setEnabled(false);
+        groupDetailsFunctionPanel.add(leaderboardUpButton);
         
-        Button leaderboardDown = new Button(stringConstants.columnMoveDown());
-        leaderboardDown.addClickHandler(new ClickHandler() {
+        leaderboardDownButton = new Button(stringConstants.columnMoveDown());
+        leaderboardDownButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                // TODO Auto-generated method stub
+                moveLeaderboardInGroupDown();
             }
         });
-        leaderboardDown.setEnabled(false);
-        groupDetailsFunctionPanel.add(leaderboardDown);
+        leaderboardDownButton.setEnabled(false);
+        groupDetailsFunctionPanel.add(leaderboardDownButton);
         
         return groupDetailsCaptionPanel;
     }
@@ -359,8 +343,8 @@ public class LeaderboardGroupConfigPanel extends AbstractEventPanel {
         leaderboardGroupsFunctionPanel.add(createGroupButton);
         
         //Create table for leaderboard groups
-        leaderboardGroupsProvider = new ListDataProvider<LeaderboardGroupDTO>();
-        ListHandler<LeaderboardGroupDTO> leaderboardGroupsListHandler = new ListHandler<LeaderboardGroupDTO>(leaderboardGroupsProvider.getList());
+        groupsProvider = new ListDataProvider<LeaderboardGroupDTO>();
+        ListHandler<LeaderboardGroupDTO> leaderboardGroupsListHandler = new ListHandler<LeaderboardGroupDTO>(groupsProvider.getList());
         
         AnchorCell anchorCell = new AnchorCell();
         Column<LeaderboardGroupDTO, SafeHtml> groupNameColumn = new Column<LeaderboardGroupDTO, SafeHtml>(anchorCell) {
@@ -405,34 +389,97 @@ public class LeaderboardGroupConfigPanel extends AbstractEventPanel {
                     });
                     dialog.show();
                 } else if (command.equals("ACTION_REMOVE")) {
-                    //TODO
-                    if (Window.confirm("Do you really want to remove the leaderboard: '" + group.name + "' ?")) {
+                    if (Window.confirm("Do you really want to remove the leaderboard group: '" + group.name + "' ?")) {
                         removeLeaderboardGroup(group);
                     }
                 }
             }
         });
 
-        leaderboardGroupsTable = new CellTable<LeaderboardGroupDTO>(200, tableRes);
-        leaderboardGroupsTable.setWidth("100%");
-        leaderboardGroupsTable.addColumn(groupNameColumn, stringConstants.name());
-        leaderboardGroupsTable.addColumn(groupDescriptionColumn, stringConstants.description());
-        leaderboardGroupsTable.addColumn(groupActionsColumn, stringConstants.actions());
-        leaderboardGroupsTable.addColumnSortHandler(leaderboardGroupsListHandler);
+        groupsTable = new CellTable<LeaderboardGroupDTO>(200, tableRes);
+        groupsTable.setWidth("100%");
+        groupsTable.addColumn(groupNameColumn, stringConstants.name());
+        groupsTable.addColumn(groupDescriptionColumn, stringConstants.description());
+        groupsTable.addColumn(groupActionsColumn, stringConstants.actions());
+        groupsTable.addColumnSortHandler(leaderboardGroupsListHandler);
         
-        leaderboardGroupsSelectionModel = new SingleSelectionModel<LeaderboardGroupDTO>();
-        leaderboardGroupsSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+        groupsSelectionModel = new SingleSelectionModel<LeaderboardGroupDTO>();
+        groupsSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
                 groupSelectionChanged();
             }
         });
-        leaderboardGroupsTable.setSelectionModel(leaderboardGroupsSelectionModel);
+        groupsTable.setSelectionModel(groupsSelectionModel);
         
-        leaderboardGroupsProvider.addDataDisplay(leaderboardGroupsTable);
-        leaderboardsGroupPanel.add(leaderboardGroupsTable);
+        groupsProvider.addDataDisplay(groupsTable);
+        leaderboardsGroupPanel.add(groupsTable);
         
         return leaderboardGroupsCaptionPanel;
+    }
+    
+    private void loadGroups() {
+        sailingService.getLeaderboardGroups(new AsyncCallback<List<LeaderboardGroupDTO>>() {
+            @Override
+            public void onSuccess(List<LeaderboardGroupDTO> groups) {
+                availableLeaderboardGroups.clear();
+                if (groups != null) {
+                    availableLeaderboardGroups.addAll(groups);
+                }
+                groupsProvider.getList().clear();
+                groupsProvider.getList().addAll(availableLeaderboardGroups);
+            }
+            @Override
+            public void onFailure(Throwable t) {
+                errorReporter.reportError("Error trying to obtain list of leaderboard groups: " + t.getMessage());
+            }
+        });
+    }
+    
+    private void loadLeaderboards() {
+        sailingService.getLeaderboards(new AsyncCallback<List<LeaderboardDTO>>() {
+            @Override
+            public void onFailure(Throwable t) {
+                errorReporter.reportError("Error trying to obtain list of leaderboards: " + t.getMessage());
+            }
+            @Override
+            public void onSuccess(List<LeaderboardDTO> leaderboards) {
+                availableLeaderboards.clear();
+                if (leaderboards != null) {
+                    availableLeaderboards.addAll(leaderboards);
+                }
+                leaderboardsProvider.getList().clear();
+                leaderboardsProvider.getList().addAll(availableLeaderboards);
+            }
+        });
+    }
+    
+    private void refreshLeaderboardsList() {
+        final LeaderboardGroupDTO selectedGroup = groupsSelectionModel.getSelectedObject();
+        final Set<LeaderboardDTO> selectedLeaderboards = leaderboardsSelectionModel.getSelectedSet();
+        sailingService.getLeaderboards(new AsyncCallback<List<LeaderboardDTO>>() {
+            @Override
+            public void onFailure(Throwable t) {
+                errorReporter.reportError("Error trying to obtain list of leaderboards: " + t.getMessage());
+            }
+            @Override
+            public void onSuccess(List<LeaderboardDTO> leaderboards) {
+                availableLeaderboards.clear();
+                if (leaderboards != null) {
+                    availableLeaderboards.addAll(leaderboards);
+                }
+                leaderboardsProvider.getList().clear();
+                leaderboardsProvider.getList().addAll(availableLeaderboards);
+                if (selectedGroup != null) {
+                    leaderboardsProvider.getList().removeAll(selectedGroup.leaderboards);
+                }
+                leaderboardsFilterTextBox.setText("");
+                leaderboardsSelectionModel.clear();
+                for (LeaderboardDTO leaderboard : selectedLeaderboards) {
+                    leaderboardsSelectionModel.setSelected(leaderboard, true);
+                }
+            }
+        });
     }
 
     private void addNewGroup() {
@@ -459,15 +506,15 @@ public class LeaderboardGroupConfigPanel extends AbstractEventPanel {
             @Override
             public void onSuccess(LeaderboardGroupDTO newGroup) {
                 availableLeaderboardGroups.add(newGroup);
-                leaderboardGroupsProvider.getList().add(newGroup);
-                leaderboardGroupsSelectionModel.setSelected(newGroup, true);
+                groupsProvider.getList().add(newGroup);
+                groupsSelectionModel.setSelected(newGroup, true);
                 groupSelectionChanged();
             }
         });
     }
     
     private void updateGroup(final String oldGroupName, final LeaderboardGroupDTO groupToUpdate) {
-        sailingService.updateLeaderboardGroup(oldGroupName, groupToUpdate.name, groupToUpdate.description, new AsyncCallback<Void>() {
+        sailingService.updateLeaderboardGroup(oldGroupName, groupToUpdate.name, groupToUpdate.description, groupToUpdate.leaderboards, new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable t) {
                 errorReporter.reportError("Error trying to update leaderboard group " + oldGroupName + ": "
@@ -480,15 +527,18 @@ public class LeaderboardGroupConfigPanel extends AbstractEventPanel {
                     LeaderboardGroupDTO group = availableLeaderboardGroups.get(i);
                     if (oldGroupName.equals(group.name)) {
                         availableLeaderboardGroups.set(i, groupToUpdate);
-                        int displayedIndex = leaderboardGroupsProvider.getList().indexOf(group);
+                        int displayedIndex = groupsProvider.getList().indexOf(group);
                         if (displayedIndex != -1) {
-                            leaderboardGroupsProvider.getList().set(displayedIndex, groupToUpdate);
+                            groupsProvider.getList().set(displayedIndex, groupToUpdate);
                         }
                     }
                 }
-                leaderboardGroupsProvider.refresh();
+                groupsProvider.refresh();
             }
         });
+    }
+    private void updateGroup(final LeaderboardGroupDTO group) {
+        updateGroup(group.name, group);
     }
 
     private void removeLeaderboardGroup(final LeaderboardGroupDTO group) {
@@ -501,12 +551,12 @@ public class LeaderboardGroupConfigPanel extends AbstractEventPanel {
             @Override
             public void onSuccess(Void v) {
                 availableLeaderboardGroups.remove(group);
-                leaderboardGroupsProvider.getList().remove(group);
+                groupsProvider.getList().remove(group);
                 
                 //Check if the removed group was the selected one
-                LeaderboardGroupDTO selectedGroup = leaderboardGroupsSelectionModel.getSelectedObject();
+                LeaderboardGroupDTO selectedGroup = groupsSelectionModel.getSelectedObject();
                 if (selectedGroup != null && selectedGroup.name.equals(group.name)) {
-                    leaderboardGroupsSelectionModel.setSelected(null, true);
+                    groupsSelectionModel.setSelected(null, true);
                 }
             }
         });
@@ -514,18 +564,111 @@ public class LeaderboardGroupConfigPanel extends AbstractEventPanel {
     
     private void groupsFilterChanged() {
         List<String> filter = Arrays.asList(groupsFilterTextBox.getText().split("\\s"));
-        leaderboardGroupsProvider.getList().clear();
+        groupsProvider.getList().clear();
         for (LeaderboardGroupDTO group : availableLeaderboardGroups) {
             if (!textContainingStringsToCheck(filter, group.name)) {
-                leaderboardGroupsProvider.getList().add(group);
+                groupsProvider.getList().add(group);
             }
         }
         //Now sort again according to selected criterion
-        ColumnSortEvent.fire(leaderboardGroupsTable, leaderboardGroupsTable.getColumnSortList());
+        ColumnSortEvent.fire(groupsTable, groupsTable.getColumnSortList());
     }
     
     private void groupSelectionChanged() {
-        //TODO what happens when the group selection changes
+        LeaderboardGroupDTO selectedGroup = groupsSelectionModel.getSelectedObject();
+        if (selectedGroup != null) {
+            //Display leaderboards of the group
+            groupDetailsCaptionPanel.setCaptionText(stringConstants.detailsOfLeaderboardGroup() + ": " + selectedGroup.name);
+            groupDetailsSelectionModel.clear();
+            groupDetailsProvider.getList().clear();
+            groupDetailsProvider.getList().addAll(selectedGroup.leaderboards);
+            //Reload available leaderboards and remove leaderboards of the group from the list
+            leaderboardsSelectionModel.clear();
+            leaderboardsFilterTextBox.setText("");
+            leaderboardsProvider.getList().clear();
+            leaderboardsProvider.getList().addAll(availableLeaderboards);
+            leaderboardsProvider.getList().removeAll(selectedGroup.leaderboards);
+        }
+        splitPanel.setVisible(selectedGroup != null);
+    }
+    
+    private void leaderboardsFilterChanged() {
+        LeaderboardGroupDTO selectedGroup = groupsSelectionModel.getSelectedObject();
+        List<String> filter = Arrays.asList(leaderboardsFilterTextBox.getText().split("\\s"));
+        leaderboardsProvider.getList().clear();
+        for (LeaderboardDTO leaderboard : availableLeaderboards) {
+            if (!textContainingStringsToCheck(filter, leaderboard.name) && !selectedGroup.leaderboards.contains(leaderboard)) {
+                leaderboardsProvider.getList().add(leaderboard);
+            } else {
+                leaderboardsSelectionModel.setSelected(leaderboard, false);
+            }
+        }
+        //Now sort again according to selected criterion
+        ColumnSortEvent.fire(leaderboardsTable, leaderboardsTable.getColumnSortList());
+    }
+    
+    private void moveToLeaderboards() {
+        LeaderboardGroupDTO selectedGroup = groupsSelectionModel.getSelectedObject();
+        Set<LeaderboardDTO> selectedLeaderboards = groupDetailsSelectionModel.getSelectedSet();
+        if (selectedGroup != null && selectedLeaderboards != null && selectedLeaderboards.size() > 0) {
+            for (LeaderboardDTO leaderboard : selectedLeaderboards) {
+                selectedGroup.leaderboards.remove(leaderboard);
+                groupDetailsProvider.getList().remove(leaderboard);
+                groupDetailsSelectionModel.setSelected(leaderboard, false);
+                leaderboardsProvider.getList().add(leaderboard);
+            }
+            updateGroup(selectedGroup);
+            //Refilters the leaderboards list (hides the moved leaderboards if they don't fit to the filter) and resorts the list
+            leaderboardsFilterChanged();
+        }
+    }
+    
+    private void moveToGroup() {
+        LeaderboardGroupDTO selectedGroup = groupsSelectionModel.getSelectedObject();
+        Set<LeaderboardDTO> selectedLeaderboards = leaderboardsSelectionModel.getSelectedSet();
+        if (selectedGroup != null && selectedLeaderboards != null && selectedLeaderboards.size() > 0) {
+            for (LeaderboardDTO leaderboard : selectedLeaderboards) {
+                if (!selectedGroup.leaderboards.contains(leaderboard)) {
+                    selectedGroup.leaderboards.add(leaderboard);
+                    groupDetailsProvider.getList().add(leaderboard);
+                    leaderboardsProvider.getList().remove(leaderboard);
+                    leaderboardsSelectionModel.setSelected(leaderboard, false);
+                }
+            }
+            updateGroup(selectedGroup);
+        }
+    }
+    
+    private void moveLeaderboardInGroupUp() {
+        LeaderboardGroupDTO selectedGroup = groupsSelectionModel.getSelectedObject(); 
+        Set<LeaderboardDTO> selectedLeaderboards = groupDetailsSelectionModel.getSelectedSet();
+        if (selectedLeaderboards != null && selectedLeaderboards.size() == 1) {
+            LeaderboardDTO selectedLeaderboard = selectedLeaderboards.iterator().next();
+            moveLeaderboardInGroup(selectedGroup, selectedLeaderboard, -1);
+        }
+    }
+    
+    private void moveLeaderboardInGroupDown() {
+        LeaderboardGroupDTO selectedGroup = groupsSelectionModel.getSelectedObject(); 
+        Set<LeaderboardDTO> selectedLeaderboards = groupDetailsSelectionModel.getSelectedSet();
+        if (selectedLeaderboards != null && selectedLeaderboards.size() == 1) {
+            LeaderboardDTO selectedLeaderboard = selectedLeaderboards.iterator().next();
+            moveLeaderboardInGroup(selectedGroup, selectedLeaderboard, 1);
+        }
+    }
+    
+    private void moveLeaderboardInGroup(LeaderboardGroupDTO group, LeaderboardDTO leaderboard, int direction) {
+        int index = group.leaderboards.indexOf(leaderboard);
+        int destIndex = index + direction;
+        if (destIndex >= 0 && destIndex < group.leaderboards.size()) {
+            LeaderboardDTO temp = group.leaderboards.get(destIndex);
+            group.leaderboards.set(destIndex, leaderboard);
+            group.leaderboards.set(index, temp);
+            groupDetailsProvider.getList().clear();
+            groupDetailsProvider.getList().addAll(group.leaderboards);
+            
+            updateGroup(group);
+        }
     }
 
     @Override
