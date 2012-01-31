@@ -99,6 +99,7 @@ public class TrackTest {
         track.addGPSFix(f2);
         track.addGPSFix(f3);
         SpeedWithBearing average = track.getEstimatedSpeed(t2);
+        // FIXME a GPSFixTrack that is not a GPSFixMovingTrack the speed/bearing for a time point is computed looking back in time only; this puts more weight on f1's position
         assertEquals(0, average.getBearing().getDegrees(), 0.00001);
     }
     
