@@ -9,6 +9,7 @@ import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.impl.BearingWithConfidenceImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.TimePoint;
@@ -74,7 +75,8 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends DynamicTrackImpl<Ite
                 last = next;
             }
         }
-        SpeedWithBearing avgSpeed = count == 0 ? null : new KnotSpeedWithBearingImpl(knotSum / count, bearingCluster.getAverage(at).getObject());
+        Bearing bearing = bearingCluster.getAverage(at).getObject();
+        SpeedWithBearing avgSpeed = (count == 0 || bearing == null) ? null : new KnotSpeedWithBearingImpl(knotSum / count, bearing);
         return avgSpeed;
     }
     

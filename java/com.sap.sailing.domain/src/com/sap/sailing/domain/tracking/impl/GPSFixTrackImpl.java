@@ -342,7 +342,8 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
             }
         }
         // TODO bug #169: return SpeedWithBearingWithConfidence to reflect the confidence reduction incurred by the difference of the fix's time point and "at"
-        SpeedWithBearing avgSpeed = count == 0 ? null : new KnotSpeedWithBearingImpl(knotSum / count, bearingCluster.getAverage(at).getObject());
+        Bearing bearing = bearingCluster.getAverage(at).getObject();
+        SpeedWithBearing avgSpeed = (count == 0 || bearing == null) ? null : new KnotSpeedWithBearingImpl(knotSum / count, bearing);
         return avgSpeed;
     }
 
