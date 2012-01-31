@@ -64,7 +64,33 @@ public class TimePanel extends FormPanel implements Component<TimePanelSettings>
         timer.addPlayStateListener(this);
         VerticalPanel vp = new VerticalPanel();
         vp.setSize("100%", "100%");
-        vp.setSpacing(5);
+
+        sliderBar = new SliderBar();
+        sliderBar.setEnabled(true);
+        sliderBar.setStepSize(60000);
+        sliderBar.setNumTickLabels(8);
+        sliderBar.setNumTicks(8);
+        sliderBar.setLabelFormatter(new SliderBar.LabelFormatter() {
+            final DateTimeFormat formatter = DateTimeFormat.getFormat("HH:mm"); 
+            @Override
+            public String formatLabel(SliderBar slider, double value) {
+                Date date = new Date();
+                date.setTime((long) value);
+                return formatter.format(date);
+            }
+        });
+
+        sliderBar.addValueChangeHandler(new ValueChangeHandler<Double>() {
+            
+            @Override
+            public void onValueChange(ValueChangeEvent<Double> newValue) {
+                if(sliderBar.getCurrentValue() != null) {
+                    TimePanel.this.timer.setTime(sliderBar.getCurrentValue().longValue());
+                }
+            }
+        });
+        
+        vp.add(sliderBar);
 
         HorizontalPanel controlsPanel = new HorizontalPanel();
         controlsPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
@@ -174,33 +200,6 @@ public class TimePanel extends FormPanel implements Component<TimePanelSettings>
             timeDelayLabel = null;
         }
 
-        sliderBar = new SliderBar();
-        sliderBar.setEnabled(true);
-        sliderBar.setStepSize(60000);
-        sliderBar.setNumTickLabels(8);
-        sliderBar.setNumTicks(8);
-        sliderBar.setLabelFormatter(new SliderBar.LabelFormatter() {
-            final DateTimeFormat formatter = DateTimeFormat.getFormat("HH:mm"); 
-            @Override
-            public String formatLabel(SliderBar slider, double value) {
-                Date date = new Date();
-                date.setTime((long) value);
-                return formatter.format(date);
-            }
-        });
-
-        sliderBar.addValueChangeHandler(new ValueChangeHandler<Double>() {
-            
-            @Override
-            public void onValueChange(ValueChangeEvent<Double> newValue) {
-                if(sliderBar.getCurrentValue() != null) {
-                    TimePanel.this.timer.setTime(sliderBar.getCurrentValue().longValue());
-                }
-            }
-        });
-        
-        vp.add(sliderBar);
-
         ImageResource settingsIcon = resources.settingsIcon();
         Anchor settingsAnchor = new Anchor(AbstractImagePrototype.create(settingsIcon).getSafeHtml());
         settingsAnchor.setTitle(stringMessages.settings());
@@ -257,7 +256,7 @@ public class TimePanel extends FormPanel implements Component<TimePanelSettings>
             double diff = (maxValue - minValue) / (double) legCount;
             
             for(int i = 0; i < legCount; i++)
-                sliderBar.addMarker("L" + i, minValue + i * diff);
+                sliderBar.addMarker("L" + i + 1, minValue + i * diff);
         }
     }
     
