@@ -13,7 +13,6 @@ import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
 import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
-import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 
@@ -28,9 +27,9 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         final String eventName = Window.Location.getParameter("eventName");
         final String raceName = Window.Location.getParameter("raceName");
         String leaderboardNameParamValue = Window.Location.getParameter("leaderboardName");
-        String leaderboardGroupNameParamValue = Window.Location.getParameter("leaderboardGroupName");
+//        String leaderboardGroupNameParamValue = Window.Location.getParameter("leaderboardGroupName");
         final String leaderboardName;
-        final String leaderboardGroupName;
+//        final String leaderboardGroupName;
         if(leaderboardNameParamValue == null || leaderboardNameParamValue.isEmpty()) {
             leaderboardName = DefaultLeaderboardName.DEFAULT_LEADERBOARD_NAME;
         } else {
