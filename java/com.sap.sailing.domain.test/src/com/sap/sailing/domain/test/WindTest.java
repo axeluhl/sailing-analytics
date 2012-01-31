@@ -163,7 +163,7 @@ public class WindTest {
         track.add(wind2);
         Wind estimate = track.getEstimatedWind(pos, new MillisecondsTimePoint(2000));
         assertEquals(10, estimate.getKnots(), 0.000000001);
-        assertEquals(105, estimate.getBearing().getDegrees(), 0.5); // some tolerance needed because of time-based confidence
+        assertEquals(105, estimate.getBearing().getDegrees(), 0.6); // some tolerance needed because of time-based confidence
     }
     
     @Test
