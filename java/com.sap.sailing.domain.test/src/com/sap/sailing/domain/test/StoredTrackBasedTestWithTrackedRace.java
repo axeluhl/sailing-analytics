@@ -3,12 +3,14 @@ package com.sap.sailing.domain.test;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Map;
 
 import org.junit.Before;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
@@ -18,7 +20,8 @@ public class StoredTrackBasedTestWithTrackedRace extends StoredTrackBasedTest {
     @Before
     public void setUp() throws FileNotFoundException, IOException {
         Map<Competitor, DynamicGPSFixTrack<Competitor, GPSFixMoving>> tracks = loadTracks();
-        setTrackedRace(createTestTrackedRace("Kieler Woche", "505 Race 2", "505", tracks.keySet()));
+        setTrackedRace(createTestTrackedRace("Kieler Woche", "505 Race 2", "505", tracks.keySet(),
+                new MillisecondsTimePoint(new GregorianCalendar(2011, 05, 23).getTime())));
         copyTracks(tracks);
     }
     

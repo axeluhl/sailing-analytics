@@ -23,4 +23,6 @@ public interface ConfidenceFactory {
      * This can be useful for averagers that have trouble with values scaled down with 0.0.
      */
     Weigher<TimePoint> createExponentialTimeDifferenceWeigher(long halfConfidenceAfterMilliseconds, double minimumConfidence);
+
+    Weigher<TimePoint> createLinearTimeDifferenceWeigher(long halfConfidenceAfterMilliseconds);
 }

@@ -111,6 +111,20 @@ public class ConfidenceTest {
     }
     
     @Test
+    public void testLinearWeigherHalfTime() {
+        Weigher<TimePoint> w = ConfidenceFactory.INSTANCE.createLinearTimeDifferenceWeigher(1000);
+        double confidence = w.getConfidence(new MillisecondsTimePoint(1000), new MillisecondsTimePoint(0));
+        assertEquals(0.5, confidence, 0.00000001);
+    }
+    
+    @Test
+    public void testLinearWeigherZeroTimeDifference() {
+        Weigher<TimePoint> w = ConfidenceFactory.INSTANCE.createLinearTimeDifferenceWeigher(1000);
+        double confidence = w.getConfidence(new MillisecondsTimePoint(1000), new MillisecondsTimePoint(1000));
+        assertEquals(1.0, confidence, 0.00000001);
+    }
+    
+    @Test
     public void testAveragingWithEmptyListYieldsNull() {
         ConfidenceBasedAverager<Double, Double, TimePoint> averager = ConfidenceFactory.INSTANCE.createAverager(null);
         Set<HasConfidenceAndIsScalable<Double, Double, TimePoint>> emptySet = Collections.emptySet();
