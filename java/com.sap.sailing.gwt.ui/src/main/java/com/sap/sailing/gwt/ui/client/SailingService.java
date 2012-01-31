@@ -166,5 +166,5 @@ public interface SailingService extends RemoteService {
     
     void removeLeaderboardFromGroup(String leaderboardName, String groupName);
     
-    void updateLeaderboardGroup(String oldName, String newName, String description);
+    void updateLeaderboardGroup(String oldName, String newName, String description, List<LeaderboardDTO> leaderboards);
 }

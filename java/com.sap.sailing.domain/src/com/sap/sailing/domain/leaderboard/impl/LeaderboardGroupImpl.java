@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.leaderboard.impl;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -24,23 +25,8 @@ public class LeaderboardGroupImpl implements LeaderboardGroup {
     }
 
     @Override
-    public Iterable<Leaderboard> getLeaderboards() {
-        return leaderboards;
-    }
-
-    @Override
     public void setName(String name) {
         this.name = name;
-    }
-
-    @Override
-    public void addLeaderboard(Leaderboard leaderboard) {
-        leaderboards.add(leaderboard);
-    }
-
-    @Override
-    public void removeLeaderboard(Leaderboard leaderboard) {
-        leaderboards.remove(leaderboard);
     }
 
     @Override
@@ -51,6 +37,36 @@ public class LeaderboardGroupImpl implements LeaderboardGroup {
     @Override
     public void setDescriptiom(String description) {
         this.description = description;
+    }
+
+    @Override
+    public Iterable<Leaderboard> getLeaderboards() {
+        return leaderboards;
+    }
+
+    @Override
+    public void addLeaderboard(Leaderboard leaderboard) {
+        leaderboards.add(leaderboard);
+    }
+
+    @Override
+    public void addAllLeaderboards(Collection<Leaderboard> leaderboards) {
+        this.leaderboards.addAll(leaderboards);
+    }
+
+    @Override
+    public void removeLeaderboard(Leaderboard leaderboard) {
+        leaderboards.remove(leaderboard);
+    }
+
+    @Override
+    public void removeAllLeaderboards(Collection<Leaderboard> leaderboards) {
+        this.leaderboards.removeAll(leaderboards);
+    }
+
+    @Override
+    public void clearLeaderboards() {
+        leaderboards.clear();
     }
 
 }

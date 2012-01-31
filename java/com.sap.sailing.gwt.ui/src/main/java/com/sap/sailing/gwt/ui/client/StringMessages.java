@@ -230,4 +230,5 @@ public interface StringMessages extends Messages {
     String leaderboardGroup();
     String pleaseEnterNonEmptyDescription();
     String groupWithThisNameAlreadyExists();
+    String detailsOfLeaderboardGroup();
 }
