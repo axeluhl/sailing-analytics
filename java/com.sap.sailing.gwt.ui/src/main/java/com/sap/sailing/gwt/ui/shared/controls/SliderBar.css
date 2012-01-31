@@ -32,13 +32,28 @@
   overflow: hidden;
 }
 
+.gwt-SliderBar-shell .gwt-SliderBar-mark {
+  top: 21pt;
+  width: 6px;
+  height: 6pt;
+  background: #f0ab00;
+  overflow: hidden;
+}
+
 .gwt-SliderBar-shell .gwt-SliderBar-tick-disabled {
   background: gray;
 }
 
-.gwt-SliderBar-shell .gwt-SliderBar-label {
+.gwt-SliderBar-shell .gwt-SliderBar-ticklabel {
   top: 2pt;
   font-size: 8pt;
+  cursor: default;
+}
+
+.gwt-SliderBar-shell .gwt-SliderBar-markerlabel {
+  top: 30pt;
+  font-size: 8pt;
+  color: #bc9434;
   cursor: default;
 }
 

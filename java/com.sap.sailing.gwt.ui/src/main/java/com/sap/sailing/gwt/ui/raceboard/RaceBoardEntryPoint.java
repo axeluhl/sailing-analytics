@@ -13,6 +13,7 @@ import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
 import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 
@@ -27,7 +28,9 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         final String eventName = Window.Location.getParameter("eventName");
         final String raceName = Window.Location.getParameter("raceName");
         String leaderboardNameParamValue = Window.Location.getParameter("leaderboardName");
+        String leaderboardGroupNameParamValue = Window.Location.getParameter("leaderboardGroupName");
         final String leaderboardName;
+        final String leaderboardGroupName;
         if(leaderboardNameParamValue == null || leaderboardNameParamValue.isEmpty()) {
             leaderboardName = DefaultLeaderboardName.DEFAULT_LEADERBOARD_NAME;
         } else {
@@ -46,7 +49,25 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
                 }
             });
         }
-        
+        /*
+        if(leaderboardNameParamValue != null && !leaderboardNameParamValue.isEmpty()))
+        {
+            sailingService.getLeaderboardGroupByName(leaderboardNameParamValue, new AsyncCallback<LeaderboardGroupDTO>() {
+                @Override
+                public void onSuccess(LeaderboardGroupDTO leaderboardGroup) {
+                    for(leaderboardGroup.leaderboards.contains()
+                    if (!leaderboardNames.contains(leaderboardName)) {
+                        createErrorPage(stringMessages.noSuchLeaderboard());
+                    }
+                }
+
+                @Override
+                public void onFailure(Throwable t) {
+                    reportError("Error trying to obtain the list of leaderboard names: " + t.getMessage());
+                }
+            });
+        }
+        */
         if (eventName != null && !eventName.isEmpty() && raceName != null && !raceName.isEmpty()) {
             sailingService.listEvents(false, new AsyncCallback<List<EventDTO>>() {
                 @Override
