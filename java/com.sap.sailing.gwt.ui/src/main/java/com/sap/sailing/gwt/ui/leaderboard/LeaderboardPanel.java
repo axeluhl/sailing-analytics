@@ -205,7 +205,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
 
     @Override
     public Widget getToolbarWidget() {
-        return refreshAndSettingsPanel;
+        return null;
     }
 
     @Override
@@ -864,7 +864,6 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 if (LeaderboardPanel.this.timer.isPlaying()) {
                     LeaderboardPanel.this.timer.pause();
                 } else {
-                    // FIXME bug #212 this currently does a "jump to now - delay"; adjust according to play modes (replay / live)
                     LeaderboardPanel.this.timer.setDelay(getDelayInMilliseconds());
                     LeaderboardPanel.this.timer.resume();
                 }
@@ -1477,7 +1476,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
 
     @Override
     public boolean hasToolbar() {
-        return true;
+        return false;
     }
 
     @Override

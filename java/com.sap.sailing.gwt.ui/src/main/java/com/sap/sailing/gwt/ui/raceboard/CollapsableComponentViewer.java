@@ -25,8 +25,6 @@ public class CollapsableComponentViewer<SettingsType> implements ComponentViewer
 
     private final StringMessages stringMessages;
 
-    private boolean hasHeaderToolbar = true;
-
     public CollapsableComponentViewer(Component<SettingsType> component, String defaultWidth, String defaultHeight,
             StringMessages stringMessages) {
         this.component = component;
@@ -51,26 +49,29 @@ public class CollapsableComponentViewer<SettingsType> implements ComponentViewer
 
     private CollapsablePanel createCollapsablePanel(Panel contentPanel, String panelTitle, String defaultContentWidth,
             String defaultContentHeight) {
-        CollapsablePanel collapsablePanel = new CollapsablePanel(panelTitle, hasHeaderToolbar);
+        CollapsablePanel collapsablePanel = new CollapsablePanel(panelTitle, true);
         collapsablePanel.setSize("100%", "100%");
         collapsablePanel.setOpen(true);
 
-        if (hasHeaderToolbar) {
-            if (component instanceof IsEmbeddableComponent) {
-                IsEmbeddableComponent embeddableComponent = (IsEmbeddableComponent) component;
-                if (embeddableComponent.hasToolbar()) {
-                    collapsablePanel.setHeaderToolbar(embeddableComponent.getToolbarWidget());
-                }
+        if (component instanceof IsEmbeddableComponent) {
+            IsEmbeddableComponent embeddableComponent = (IsEmbeddableComponent) component;
+            if (embeddableComponent.hasToolbar()) {
+                collapsablePanel.setHeaderToolbar(embeddableComponent.getToolbarWidget());
             } else {
                 ComponentToolbar<SettingsType> toolbar = new ComponentToolbar<SettingsType>(component, stringMessages);
                 toolbar.addSettingsButton();
                 collapsablePanel.setHeaderToolbar(toolbar);
             }
+        } else {
+            ComponentToolbar<SettingsType> toolbar = new ComponentToolbar<SettingsType>(component, stringMessages);
+            toolbar.addSettingsButton();
+            collapsablePanel.setHeaderToolbar(toolbar);
         }
-
+        
         contentPanel.setSize(defaultContentWidth, defaultContentHeight);
         collapsablePanel.setContent(contentPanel);
         if (component.getEntryWidget() != null) {
+            component.getEntryWidget().setSize(defaultContentWidth, defaultContentHeight);
             contentPanel.add(component.getEntryWidget());
         } else {
             if (component instanceof ComponentGroup) {
