@@ -45,15 +45,24 @@ implements BearingWithConfidence<RelativeTo>, IsScalable<Pair<Double, Double>, B
             return new ScalableBearing(value.getA()+tValue.getA(), value.getB()+tValue.getB());
         }
 
+        /**
+         * If the combined confidence was 0.0, no {@link Bearing} object can reasonably be computed; hence, <code>null</code>
+         * is returned in such cases.
+         */
         @Override
         public Bearing divide(double divisor, double confidence) {
-            double angle;
-            if (cos == 0) {
-                angle = sin >= 0 ? Math.PI / 2 : -Math.PI / 2;
+            Bearing result;
+            if (sin == 0 && cos == 0) {
+                result = null;
             } else {
-                angle = Math.atan2(sin, cos);
+                double angle;
+                if (cos == 0) {
+                    angle = sin >= 0 ? Math.PI / 2 : -Math.PI / 2;
+                } else {
+                    angle = Math.atan2(sin, cos);
+                }
+                result = new RadianBearingImpl(angle < 0 ? angle + 2 * Math.PI : angle);
             }
-            Bearing result = new RadianBearingImpl(angle < 0 ? angle + 2 * Math.PI : angle);
             return result;
         }
 
