@@ -163,7 +163,7 @@ public class WindTest {
         track.add(wind2);
         Wind estimate = track.getEstimatedWind(pos, new MillisecondsTimePoint(2000));
         assertEquals(10, estimate.getKnots(), 0.000000001);
-        assertEquals(105, estimate.getBearing().getDegrees(), 0.00000001);
+        assertEquals(105, estimate.getBearing().getDegrees(), 0.5); // some tolerance needed because of time-based confidence
     }
     
     @Test
@@ -171,11 +171,11 @@ public class WindTest {
         /*
            Imagine the following wind measurements:
            
-        2009-07-11T13:45:00.000+0200@null: 10.0kn from 278.0� avg(30000ms): 2009-07-11T13:45:00.000+0200@null: 10.0kn from 278.0�
-        2009-07-11T13:45:05.000+0200@null: 10.0kn from 265.0� avg(30000ms): 2009-07-11T13:45:05.000+0200@null: 10.0kn from 269.0�
-        2009-07-12T17:31:40.000+0200@null: 10.0kn from 260.0� avg(30000ms): 2009-07-12T17:31:40.000+0200@null: 10.0kn from 260.0�
+        2009-07-11T13:45:00.000+0200@null: 10.0kn from 278.0� avg(30000ms): 2009-07-11T13:45:00.000+0200@null: 10.0kn from 278.0°
+        2009-07-11T13:45:05.000+0200@null: 10.0kn from 265.0� avg(30000ms): 2009-07-11T13:45:05.000+0200@null: 10.0kn from 265.0°
+        2009-07-12T17:31:40.000+0200@null: 10.0kn from 260.0� avg(30000ms): 2009-07-12T17:31:40.000+0200@null: 10.0kn from 260.0°
         
-           Now assume a query for 2009-07-12T17:30:00 which is closest to the newest entry but (much) more than
+           Now assume a query for 2009-07-12T17:31:38 which is closest to the newest entry but (much) more than
            the averaging interval after the previous entry (2009-07-11T13:45:05.000). This test ensures that
            the WindTrack uses the newer entry even though it's after the time point requested because it's
            much closer, and the previous entry would be out of the averaging interval anyway.
@@ -195,7 +195,6 @@ public class WindTest {
         Wind result = track.getEstimatedWind(null, timePoint);
         // expectation: take two from left (because they are closer than AVERAGING_INTERVAL_MILLIS apart), one from right side:
         assertEquals((wind1.getKnots() + wind2.getKnots() + wind3.getKnots()) / 3, result.getKnots(), 0.000000001);
-        assertEquals((wind1.getBearing().getDegrees() + wind2.getBearing().getDegrees() + wind3.getBearing()
-                .getDegrees()) / 3, result.getBearing().getDegrees(), 0.1);
+        assertEquals(80., result.getBearing().getDegrees(), 0.1);
     }
 }
