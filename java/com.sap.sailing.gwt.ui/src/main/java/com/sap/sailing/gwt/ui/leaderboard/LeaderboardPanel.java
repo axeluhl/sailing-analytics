@@ -659,7 +659,12 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 Double result = null;
                 LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceName.get(getRaceName());
                 if (fieldsForRace != null && fieldsForRace.legDetails != null) {
-                    LegEntryDTO lastLegDetail = fieldsForRace.legDetails.get(fieldsForRace.legDetails.size() - 1);
+                    int lastLegIndex = fieldsForRace.legDetails.size() - 1;
+                    LegEntryDTO lastLegDetail = fieldsForRace.legDetails.get(lastLegIndex);
+                    // competitor may be in leg prior to the one the leader is in; find competitors current leg
+                    while (lastLegDetail == null && lastLegIndex > 0) {
+                        lastLegDetail = fieldsForRace.legDetails.get(--lastLegIndex);
+                    }
                     if (lastLegDetail != null) {
                         result = lastLegDetail.gapToLeaderInSeconds;
                     }
@@ -859,6 +864,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 if (LeaderboardPanel.this.timer.isPlaying()) {
                     LeaderboardPanel.this.timer.pause();
                 } else {
+                    // FIXME bug #212 this currently does a "jump to now - delay"; adjust according to play modes (replay / live)
                     LeaderboardPanel.this.timer.setDelay(getDelayInMilliseconds());
                     LeaderboardPanel.this.timer.resume();
                 }

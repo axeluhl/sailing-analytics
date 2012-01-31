@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.shared;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
@@ -9,8 +10,19 @@ public class LeaderboardGroupDTO extends NamedDTO implements IsSerializable {
     public String description;
     public List<LeaderboardDTO> leaderboards;
     
-    public LeaderboardGroupDTO() {}
+    /**
+     * Creates a new LeaderboardGroupDTO with empty but non-null name, description and an empty but non-null list for the leaderboards.
+     */
+    public LeaderboardGroupDTO() {
+        this.name = "";
+        this.description = "";
+        this.leaderboards = new ArrayList<LeaderboardDTO>();
+    }
 
+    /**
+     * Creates a new LeaderboardGroupDTO with the given parameters as attributes.<br />
+     * All parameters can be <code>null</code> but then the attributes will also be <code>null</code>.
+     */
     public LeaderboardGroupDTO(String name, String description, List<LeaderboardDTO> leaderboards) {
         super(name);
         this.description = description;

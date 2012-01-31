@@ -158,6 +158,9 @@ public class RacingEventServiceImpl implements RacingEventService, EventFetcher,
         Leaderboard result = new LeaderboardImpl(name, new ScoreCorrectionImpl(), new ResultDiscardingRuleImpl(
                 discardThresholds));
         synchronized (leaderboardsByName) {
+            if (leaderboardsByName.containsKey(name)) {
+                throw new IllegalArgumentException("Leaderboard with name "+name+" already exists");
+            }
             leaderboardsByName.put(name, result);
         }
         mongoObjectFactory.storeLeaderboard(result);
@@ -672,7 +675,7 @@ public class RacingEventServiceImpl implements RacingEventService, EventFetcher,
     }
 
     @Override
-    public LeaderboardGroup getLeaderboardGroubByName(String groupName) {
+    public LeaderboardGroup getLeaderboardGroupByName(String groupName) {
         synchronized (leaderboardGroupsByName) {
             return leaderboardGroupsByName.get(groupName);
         }
@@ -693,6 +696,9 @@ public class RacingEventServiceImpl implements RacingEventService, EventFetcher,
         }
         LeaderboardGroup result = new LeaderboardGroupImpl(groupName, description, leaderboards);
         synchronized (leaderboardGroupsByName) {
+            if (leaderboardGroupsByName.containsKey(groupName)) {
+                throw new IllegalArgumentException("Leaderboard group with name " + groupName + " already exists");
+            }
             leaderboardGroupsByName.put(groupName, result);
         }
         mongoObjectFactory.storeLeaderboardGroup(result);
@@ -713,7 +719,7 @@ public class RacingEventServiceImpl implements RacingEventService, EventFetcher,
             if (!leaderboardGroupsByName.containsKey(oldName)) {
                 throw new IllegalArgumentException("No leaderboard group with name " + oldName + " found");
             }
-            if (!leaderboardGroupsByName.containsKey(newName)) {
+            if (leaderboardGroupsByName.containsKey(newName)) {
                 throw new IllegalArgumentException("Leaderboard group with name " + newName + " already exists");
             }
             LeaderboardGroup toRename = leaderboardGroupsByName.remove(oldName);
