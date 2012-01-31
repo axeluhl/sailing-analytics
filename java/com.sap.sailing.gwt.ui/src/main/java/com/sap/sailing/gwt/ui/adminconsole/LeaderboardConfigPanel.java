@@ -211,7 +211,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
                 } else if ("ACTION_EDIT".equals(value)) {
                     final String oldLeaderboardName = object.name;
                     List<LeaderboardDTO> otherExistingLeaderboard = new ArrayList<LeaderboardDTO>();
-                    otherExistingLeaderboard.addAll(leaderboardList.getList());
+                    otherExistingLeaderboard.addAll(availableLeaderboardList);
                     otherExistingLeaderboard.remove(object);
                     LeaderboardEditDialog dialog = new LeaderboardEditDialog(Collections
                             .unmodifiableCollection(otherExistingLeaderboard), object, stringMessages, errorReporter,
@@ -783,8 +783,8 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
     }
 
     private void addNewLeaderboard() {
-        LeaderboardCreateDialog dialog = new LeaderboardCreateDialog(Collections.unmodifiableCollection(leaderboardList
-                .getList()), stringMessages, errorReporter, new AsyncCallback<LeaderboardDTO>() {
+        LeaderboardCreateDialog dialog = new LeaderboardCreateDialog(Collections.unmodifiableCollection(availableLeaderboardList)
+                , stringMessages, errorReporter, new AsyncCallback<LeaderboardDTO>() {
             @Override
             public void onFailure(Throwable arg0) {
             }

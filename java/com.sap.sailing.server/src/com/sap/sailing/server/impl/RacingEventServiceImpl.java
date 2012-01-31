@@ -158,6 +158,9 @@ public class RacingEventServiceImpl implements RacingEventService, EventFetcher,
         Leaderboard result = new LeaderboardImpl(name, new ScoreCorrectionImpl(), new ResultDiscardingRuleImpl(
                 discardThresholds));
         synchronized (leaderboardsByName) {
+            if (leaderboardsByName.containsKey(name)) {
+                throw new IllegalArgumentException("Leaderboard with name "+name+" already exists");
+            }
             leaderboardsByName.put(name, result);
         }
         mongoObjectFactory.storeLeaderboard(result);
@@ -693,6 +696,9 @@ public class RacingEventServiceImpl implements RacingEventService, EventFetcher,
         }
         LeaderboardGroup result = new LeaderboardGroupImpl(groupName, description, leaderboards);
         synchronized (leaderboardGroupsByName) {
+            if (leaderboardGroupsByName.containsKey(groupName)) {
+                throw new IllegalArgumentException("Leaderboard group with name " + groupName + " already exists");
+            }
             leaderboardGroupsByName.put(groupName, result);
         }
         mongoObjectFactory.storeLeaderboardGroup(result);
