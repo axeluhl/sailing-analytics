@@ -322,7 +322,8 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         double knotSum = 0;
         BearingWithConfidenceCluster<TimePoint> bearingCluster = new BearingWithConfidenceCluster<TimePoint>(
                 ConfidenceFactory.INSTANCE.createExponentialTimeDifferenceWeigher(
-                        getMillisecondsOverWhichToAverageSpeed()/10));
+                        // use a minimum confidence to avoid the bearing to flip to 270deg in case all is zero
+                        getMillisecondsOverWhichToAverageSpeed()/10, 0.000001));
         int count = 0;
         if (!relevantFixes.isEmpty()) {
             Iterator<GPSFix> fixIter = relevantFixes.iterator();
