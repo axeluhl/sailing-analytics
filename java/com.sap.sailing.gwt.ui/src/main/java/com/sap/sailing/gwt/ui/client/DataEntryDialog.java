@@ -15,6 +15,7 @@ import com.google.gwt.user.client.ui.IntegerBox;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.LongBox;
+import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -128,6 +129,26 @@ public abstract class DataEntryDialog<T> {
         AbstractEntryPoint.linkEnterToButton(getOkButton(), textBox);
         AbstractEntryPoint.linkEscapeToButton(getCancelButton(), textBox);
         return textBox;
+    }
+    
+    /**
+     * Creates a text area with a key-up listener attached which ensures the value is updated after each
+     * key-up event and the entire dialog is {@link #validate() validated} in this case.
+     * 
+     * @param initialValue Initial value to show in text area; <code>null</code> is permissible
+     */
+    public TextArea createTextArea(String initialValue) {
+        TextArea textArea = new TextArea();
+        textArea.setText(initialValue == null ? "" : initialValue);
+        AbstractEntryPoint.addFocusUponKeyUpToggler(textArea);
+        textArea.addChangeHandler(new ChangeHandler() {
+            @Override
+            public void onChange(ChangeEvent arg0) {
+                validate();
+            }
+        });
+        AbstractEntryPoint.linkEscapeToButton(getCancelButton(), textArea);
+        return textArea;
     }
     
     /**

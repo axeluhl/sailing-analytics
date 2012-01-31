@@ -667,9 +667,10 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                     if (!track.hasDirectionChange(timePoint, getManeuverDegreeAngleThreshold())) {
                         SpeedWithBearing estimatedSpeed = track.getEstimatedSpeed(timePoint);
                         if (estimatedSpeed != null) {
+                            // TODO but #169: preserve confidence of estimatedSpeed relative to timePoint so as to feed into a BearingWithConfidenceCluster here
                             Bearing bearing = estimatedSpeed.getBearing();
-                            BearingCluster bearingClusters = bearings.get(legType);
-                            bearingClusters.add(bearing);
+                            BearingCluster bearingClusterForLegType = bearings.get(legType);
+                            bearingClusterForLegType.add(bearing);
                         }
                     }
                 }

@@ -24,6 +24,7 @@ public class LeaderboardDiscardingRulesTest {
 
     @Test
     public void testDiscardingRoules() {
+        racingEventService.removeLeaderboard(LEADERBOARDNAME);
         racingEventService.addLeaderboard(LEADERBOARDNAME, new int[] { 1, 4 });
         Leaderboard leaderboard = racingEventService.getLeaderboardByName(LEADERBOARDNAME);
         assertNotNull(leaderboard);

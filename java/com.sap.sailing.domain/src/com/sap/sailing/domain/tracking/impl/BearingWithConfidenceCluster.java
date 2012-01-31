@@ -101,7 +101,7 @@ public class BearingWithConfidenceCluster<RelativeTo> {
                 if (Math.abs(bearings.get(i).getObject().getDifferenceTo(bearings.get(j).getObject()).getDegrees()) >= maxAbsDegDiff) {
                     result = new Pair<BearingWithConfidence<RelativeTo>, BearingWithConfidence<RelativeTo>>(bearings.get(i), bearings.get(j));
                     maxAbsDegDiff = Math.abs(bearings.get(i).getObject().getDifferenceTo(bearings.get(j).getObject()).getDegrees());
-                    assert Math.abs(result.getA().getObject().getDegrees()-result.getB().getObject().getDegrees()) <= 180.;
+                    assert Math.abs(bearings.get(i).getObject().getDifferenceTo(bearings.get(j).getObject()).getDegrees()) <= 180.;
                 }
             }
         }

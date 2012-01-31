@@ -44,11 +44,17 @@ public class EstimatedWindFixesAsNavigableSet extends AbstractUnmodifiableNaviga
         this(track, trackedRace, null, null);
     }
 
+    /**
+     * @param from expected to be an integer multiple of {@link #RESOLUTION_IN_MILLISECONDS} or <code>null</code>
+     * @param to expected to be an integer multiple of {@link #RESOLUTION_IN_MILLISECONDS} or <code>null</code>
+     */
     private EstimatedWindFixesAsNavigableSet(TrackBasedEstimationWindTrackImpl track, TrackedRace trackedRace,
             TimePoint from, TimePoint to) {
         this.track = track;
         this.trackedRace = trackedRace;
+        assert from == null || from.asMillis() % RESOLUTION_IN_MILLISECONDS == 0;
         this.from = from;
+        assert to == null || to.asMillis() % RESOLUTION_IN_MILLISECONDS == 0;
         this.to = to;
     }
 

@@ -1591,7 +1591,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
 
     @Override
     public LeaderboardGroupDTO getLeaderboardGroupByName(String groupName) {
-        return convertToLeaderboardGroupDTO(getService().getLeaderboardGroubByName(groupName));
+        return convertToLeaderboardGroupDTO(getService().getLeaderboardGroupByName(groupName));
     }
     
     private LeaderboardGroupDTO convertToLeaderboardGroupDTO(LeaderboardGroup leaderboardGroup) {
@@ -1624,7 +1624,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
 
     @Override
     public void addLeaderboardToGroup(String leaderboardName, String groupName) {
-        LeaderboardGroup leaderboardGroup = getService().getLeaderboardGroubByName(groupName);
+        LeaderboardGroup leaderboardGroup = getService().getLeaderboardGroupByName(groupName);
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         if (leaderboardGroup != null) {
             if (leaderboard != null) {
@@ -1640,7 +1640,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
 
     @Override
     public void removeLeaderboardFromGroup(String leaderboardName, String groupName) {
-        LeaderboardGroup leaderboardGroup = getService().getLeaderboardGroubByName(groupName);
+        LeaderboardGroup leaderboardGroup = getService().getLeaderboardGroupByName(groupName);
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         if (leaderboardGroup != null) {
             if (leaderboard != null) {
@@ -1659,7 +1659,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         if (!oldName.equals(newName)) {
             getService().renameLeaderboardGroup(oldName, newName);
         }
-        LeaderboardGroup leaderboardGroup = getService().getLeaderboardGroubByName(newName);
+        LeaderboardGroup leaderboardGroup = getService().getLeaderboardGroupByName(newName);
         if (!description.equals(leaderboardGroup.getDescription())) {
             leaderboardGroup.setDescriptiom(description);
         }

@@ -6,11 +6,15 @@ import java.util.List;
 import java.util.NavigableSet;
 
 import com.sap.sailing.domain.base.SpeedWithBearing;
+import com.sap.sailing.domain.base.impl.BearingWithConfidenceImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
+import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.KilometersPerHourSpeedImpl;
+import com.sap.sailing.domain.confidence.ConfidenceFactory;
+import com.sap.sailing.domain.confidence.Weigher;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 
@@ -41,30 +45,35 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends DynamicTrackImpl<Ite
     protected SpeedWithBearing getEstimatedSpeed(TimePoint at, NavigableSet<GPSFixMoving> fixesToUseForSpeedEstimation) {
         List<GPSFixMoving> relevantFixes = getFixesRelevantForSpeedEstimation(at, fixesToUseForSpeedEstimation);
         double knotSum = 0;
-        BearingCluster bearingCluster = new BearingCluster();
+        Weigher<TimePoint> weigher = ConfidenceFactory.INSTANCE.createExponentialTimeDifferenceWeigher(
+                /* halfConfidenceAfterMilliseconds */ getMillisecondsOverWhichToAverageSpeed()/10);
+        BearingWithConfidenceCluster<TimePoint> bearingCluster = new BearingWithConfidenceCluster<TimePoint>(weigher);
         int count = 0;
         if (!relevantFixes.isEmpty()) {
             Iterator<GPSFixMoving> fixIter = relevantFixes.iterator();
             GPSFixMoving last = fixIter.next();
             knotSum = last.getSpeed().getKnots();
-            bearingCluster.add(last.getSpeed().getBearing());
+            bearingCluster.add(new BearingWithConfidenceImpl<TimePoint>(last.getSpeed().getBearing(), /* confidence */ 0.9, last.getTimePoint()));
             count = 1;
             while (fixIter.hasNext()) {
+                // TODO bug #169: use confidence-based averager for speed, too, and not only for bearing
                 // add to average the position and time difference
                 GPSFixMoving next = fixIter.next();
                 knotSum += last.getPosition().getDistance(next.getPosition())
                         .inTime(next.getTimePoint().asMillis() - last.getTimePoint().asMillis()).getKnots();
-                bearingCluster.add(last.getPosition().getBearingGreatCircle(next.getPosition()));
+                bearingCluster.add(new BearingWithConfidenceImpl<TimePoint>(last.getPosition().getBearingGreatCircle(next.getPosition()),
+                        /* confidence */ weigher.getConfidence(last.getTimePoint(), next.getTimePoint()),
+                        new MillisecondsTimePoint((last.getTimePoint().asMillis()+next.getTimePoint().asMillis())/2)));
                 count++;
                 
                 // add to average the speed and bearing provided by the GPSFixMoving
                 knotSum += next.getSpeed().getKnots();
-                bearingCluster.add(next.getSpeed().getBearing());
+                bearingCluster.add(new BearingWithConfidenceImpl<TimePoint>(next.getSpeed().getBearing(), /* confidence */ 0.9, next.getTimePoint()));
                 count++;
                 last = next;
             }
         }
-        SpeedWithBearing avgSpeed = count == 0 ? null : new KnotSpeedWithBearingImpl(knotSum / count, bearingCluster.getAverage());
+        SpeedWithBearing avgSpeed = count == 0 ? null : new KnotSpeedWithBearingImpl(knotSum / count, bearingCluster.getAverage(at).getObject());
         return avgSpeed;
     }
     
