@@ -76,7 +76,7 @@ public class WindEstimationOnKielerWoche505Race2DataTest extends OnlineTracTracB
         assertTrue(getTrackedRace().getTrack(getCompetitorByName("Lehmann")).hasDirectionChange(middle, /* minimumDegreeDifference */ 9.));
         Wind estimatedWindDirection = getTrackedRace().getEstimatedWindDirection(/* position */ null, middle);
         assertNotNull(estimatedWindDirection);
-        assertEquals(227., estimatedWindDirection.getFrom().getDegrees(), 3.); // expect wind from 241 +/- 3 degrees
+        assertEquals(227., estimatedWindDirection.getFrom().getDegrees(), 3.); // expect wind from 227 +/- 3 degrees
     }
     
     @Test
@@ -89,6 +89,6 @@ public class WindEstimationOnKielerWoche505Race2DataTest extends OnlineTracTracB
         assertTrue(getTrackedRace().getTrack(getCompetitorByName("Findel")).hasDirectionChange(middle, /* minimumDegreeDifference */ 15.));
         Wind estimatedWindDirection = getTrackedRace().getEstimatedWindDirection(/* position */ null, middle);
         assertNotNull(estimatedWindDirection);
-        assertEquals(237., estimatedWindDirection.getFrom().getDegrees(), 3.); // expect wind from 241 +/- 3 degrees
+        assertEquals(237., estimatedWindDirection.getFrom().getDegrees(), 4.); // expect wind from 241 +/- 3 degrees
     }
 }
