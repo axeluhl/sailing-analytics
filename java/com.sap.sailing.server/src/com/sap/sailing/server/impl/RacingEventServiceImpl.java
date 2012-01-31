@@ -672,7 +672,7 @@ public class RacingEventServiceImpl implements RacingEventService, EventFetcher,
     }
 
     @Override
-    public LeaderboardGroup getLeaderboardGroubByName(String groupName) {
+    public LeaderboardGroup getLeaderboardGroupByName(String groupName) {
         synchronized (leaderboardGroupsByName) {
             return leaderboardGroupsByName.get(groupName);
         }
@@ -713,7 +713,7 @@ public class RacingEventServiceImpl implements RacingEventService, EventFetcher,
             if (!leaderboardGroupsByName.containsKey(oldName)) {
                 throw new IllegalArgumentException("No leaderboard group with name " + oldName + " found");
             }
-            if (!leaderboardGroupsByName.containsKey(newName)) {
+            if (leaderboardGroupsByName.containsKey(newName)) {
                 throw new IllegalArgumentException("Leaderboard group with name " + newName + " already exists");
             }
             LeaderboardGroup toRename = leaderboardGroupsByName.remove(oldName);

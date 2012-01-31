@@ -227,4 +227,7 @@ public interface StringMessages extends Messages {
     String leaderboardGroupConfiguration();
     String legs();
     String currentLeg();
+    String leaderboardGroup();
+    String pleaseEnterNonEmptyDescription();
+    String groupWithThisNameAlreadyExists();
 }

@@ -783,9 +783,6 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
     }
 
     private void addNewLeaderboard() {
-        List<String> leaderboardNames = new ArrayList<String>();
-        for (LeaderboardDTO dao : leaderboardList.getList())
-            leaderboardNames.add(dao.name);
         LeaderboardCreateDialog dialog = new LeaderboardCreateDialog(Collections.unmodifiableCollection(leaderboardList
                 .getList()), stringMessages, errorReporter, new AsyncCallback<LeaderboardDTO>() {
             @Override
