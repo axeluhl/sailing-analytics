@@ -11,6 +11,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -150,8 +151,9 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
      * downwind or reaching leg. Wind information is queried by {@link TrackedLegImpl} based on
      * the marks' positions. Therefore, approximate mark positions are set here for all marks
      * of {@link #getTrackedRace()}'s courses for the time span starting at the epoch up to now.
+     * @param timePointForFixes TODO
      */
-    public static void fixApproximateMarkPositionsForWindReadOut(DynamicTrackedRace race) {
+    public static void fixApproximateMarkPositionsForWindReadOut(DynamicTrackedRace race, TimePoint timePointForFixes) {
         TimePoint epoch = new MillisecondsTimePoint(0l);
         TimePoint now = MillisecondsTimePoint.now();
         Map<String, Position> buoyPositions = new HashMap<String, Position>();
@@ -165,6 +167,8 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
         for (Waypoint w : race.getRace().getCourse().getWaypoints()) {
             for (Buoy buoy : w.getBuoys()) {
                 race.getOrCreateTrack(buoy).addGPSFix(new GPSFixImpl(buoyPositions.get(buoy.getName()), epoch));
+                race.getOrCreateTrack(buoy).addGPSFix(new GPSFixImpl(buoyPositions.get(buoy.getName()),
+                        timePointForFixes));
                 race.getOrCreateTrack(buoy).addGPSFix(new GPSFixImpl(buoyPositions.get(buoy.getName()), now));
             }
         }

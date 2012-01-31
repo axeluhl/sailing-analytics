@@ -133,8 +133,7 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
         Iterator<Wind> afterIter = afterSet.iterator();
         double knotSum = 0;
         // TODO bug #169: also measure speed with confidence; return confidence
-        // use a minimum confidence to avoid the bearing to flip to 270deg in case all is zero
-        Weigher<TimePoint> weigher = ConfidenceFactory.INSTANCE.createExponentialTimeDifferenceWeigher(millisecondsOverWhichToAverage/10, 0.000001);
+        Weigher<TimePoint> weigher = ConfidenceFactory.INSTANCE.createLinearTimeDifferenceWeigher(millisecondsOverWhichToAverage);
         BearingWithConfidenceCluster<TimePoint> bearingCluster = new BearingWithConfidenceCluster<TimePoint>(weigher);
         int count = 0;
         long beforeDistanceToAt = 0;

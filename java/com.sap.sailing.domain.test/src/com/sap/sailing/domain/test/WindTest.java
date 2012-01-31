@@ -195,6 +195,6 @@ public class WindTest {
         Wind result = track.getEstimatedWind(null, timePoint);
         // expectation: take two from left (because they are closer than AVERAGING_INTERVAL_MILLIS apart), one from right side:
         assertEquals((wind1.getKnots() + wind2.getKnots() + wind3.getKnots()) / 3, result.getKnots(), 0.000000001);
-        assertEquals(80., result.getBearing().getDegrees(), 0.1);
+        assertEquals(80., result.getBearing().getDegrees(), 5);
     }
 }
