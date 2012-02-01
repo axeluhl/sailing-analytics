@@ -233,4 +233,7 @@ public interface StringMessages extends Messages {
     String pleaseEnterNonEmptyDescription();
     String groupWithThisNameAlreadyExists();
     String detailsOfLeaderboardGroup();
+    String edit();
+    String save();
+    String abort();
 }

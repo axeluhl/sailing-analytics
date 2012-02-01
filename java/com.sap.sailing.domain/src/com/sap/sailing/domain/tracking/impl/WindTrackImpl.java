@@ -7,6 +7,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.sap.sailing.domain.base.BearingWithConfidence;
 import com.sap.sailing.domain.base.CourseChange;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.Timed;
@@ -134,6 +135,7 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
         double knotSum = 0;
         // TODO bug #169: also measure speed with confidence; return confidence
         Weigher<TimePoint> weigher = ConfidenceFactory.INSTANCE.createLinearTimeDifferenceWeigher(millisecondsOverWhichToAverage);
+        // Weigher<TimePoint> weigher = ConfidenceFactory.INSTANCE.createConstantWeigher(1.0);
         BearingWithConfidenceCluster<TimePoint> bearingCluster = new BearingWithConfidenceCluster<TimePoint>(weigher);
         int count = 0;
         long beforeDistanceToAt = 0;
@@ -189,7 +191,8 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
             return null;
         } else {
             // TODO bug #169: pass on confidence
-            SpeedWithBearing avgWindSpeed = new KnotSpeedWithBearingImpl(knotSum / count, bearingCluster.getAverage(at).getObject());
+            BearingWithConfidence<TimePoint> average = bearingCluster.getAverage(at);
+            SpeedWithBearing avgWindSpeed = new KnotSpeedWithBearingImpl(knotSum / count, average == null ? null : average.getObject());
             return new WindImpl(p, at, avgWindSpeed);
         }
     }

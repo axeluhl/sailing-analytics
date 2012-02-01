@@ -6,5 +6,4 @@ import com.sap.sailing.domain.confidence.HasConfidenceAndIsScalable;
 
 
 public interface BearingWithConfidence<RelativeTo> extends HasConfidenceAndIsScalable<Pair<Double, Double>, Bearing, RelativeTo> {
-    Bearing getObject();
 }
