@@ -634,7 +634,7 @@ public class LeaderboardGroupConfigPanel extends AbstractEventPanel {
         LeaderboardGroupDTO selectedGroup = groupsSelectionModel.getSelectedObject();
         if (selectedGroup != null) {
             //Display details of the group
-            groupDetailsCaptionPanel.setCaptionText(stringConstants.detailsOfLeaderboardGroup() + ": " + selectedGroup.name);
+            groupDetailsCaptionPanel.setCaptionText(stringConstants.detailsOfLeaderboardGroup() + " '" + selectedGroup.name + "'");
             descriptionTextArea.setText(selectedGroup.description);
             setDescriptionEditable(false);
             
