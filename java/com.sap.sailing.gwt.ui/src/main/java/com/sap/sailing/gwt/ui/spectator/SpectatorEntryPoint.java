@@ -1,14 +1,13 @@
 package com.sap.sailing.gwt.ui.spectator;
 
-import java.util.List;
-
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
-import com.sap.sailing.gwt.ui.client.AbstractEventPanel;
 import com.sap.sailing.gwt.ui.client.EventRefresher;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
+import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 
 /**
  * 
@@ -22,37 +21,22 @@ public class SpectatorEntryPoint extends AbstractEntryPoint implements EventRefr
         super.onModuleLoad();
 
         //Fill fixed leaderboard selection
-        String leaderboardNameParamValue = Window.Location.getParameter("leaderboardName");
-        String eventNameParamValue = Window.Location.getParameter("eventName");
-        @SuppressWarnings("unused")
-        String isLiveParamValue = Window.Location.getParameter("isLive");
-        
-        //Forced to 'live' for Hawai-Event
-        @SuppressWarnings("unused")
-        boolean isLive = true;
-//        Boolean isLive = (isLiveParamValue == null || isLiveParamValue.isEmpty()) ? null : Boolean.valueOf(isLiveParamValue);
+        String groupParamValue = Window.Location.getParameter("leaderboardGroupName");
        
-        final String leaderboardName;
-        if(leaderboardNameParamValue == null || leaderboardNameParamValue.isEmpty()) {
-            leaderboardName = null;
+        final String groupName;
+        if(groupParamValue == null || groupParamValue.isEmpty()) {
+            groupName = null;
         } else {
-            leaderboardName = leaderboardNameParamValue;
-            sailingService.getLeaderboardNames(new AsyncCallback<List<String>>() {
-                @Override
-                public void onSuccess(List<String> leaderboardNames) {
-                    if (!leaderboardNames.contains(leaderboardName)) {
-                        createErrorPage(stringMessages.noSuchLeaderboard());
-                    }
-                }
-
+            groupName = groupParamValue;
+            sailingService.getLeaderboardGroupByName(groupName, new AsyncCallback<LeaderboardGroupDTO>() {
                 @Override
                 public void onFailure(Throwable t) {
-                    reportError("Error trying to obtain the list of leaderboard names: " + t.getMessage());
+                    reportError(stringMessages.noLeaderboardGroupWithNameFound(groupName));
                 }
+                @Override
+                public void onSuccess(LeaderboardGroupDTO group) {}
             });
         }
-        
-        String eventName = (eventNameParamValue == null || eventNameParamValue.isEmpty()) ? null : eventNameParamValue;
         
         RootPanel rootPanel = RootPanel.get();
         rootPanel.setSize("100%", "100%");
@@ -61,9 +45,9 @@ public class SpectatorEntryPoint extends AbstractEntryPoint implements EventRefr
         logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
         rootPanel.add(logoAndTitlePanel);
         
-        AbstractEventPanel panelToDisplay = (leaderboardName != null && eventName != null) ? 
-                new LiveEventViewPanel(sailingService, this, this, stringMessages, leaderboardName, eventName) :
-                new OverviewEventPanel(sailingService, this, this, stringMessages);
+        //TODO Create LeaderboardGroupPanel if groupName is filled
+        FormPanel panelToDisplay = groupName == null ? new OverviewEventPanel(sailingService, this, this, stringMessages) :
+                                                       new LeaderboardGroupPanel(sailingService, stringMessages, this, groupName);
         panelToDisplay.setSize("100%", "100%");
         rootPanel.add(panelToDisplay);
 
