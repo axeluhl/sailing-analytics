@@ -140,8 +140,9 @@ public class LeaderboardGroupPanel extends FormPanel {
             }
             if (race.getRaceIdentifier() != null) {
                 EventNameAndRaceName raceId = (EventNameAndRaceName) race.getRaceIdentifier();
-                String link = "/gwt/RaceBoard.html?leaderboardName="+ leaderboard.name + "&raceName=" + raceId.getRaceName() +
-                        "&leaderboardGroupName=" + group.name + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr="+debugParam : "");
+                String link = "/gwt/RaceBoard.html?leaderboardName=" + leaderboard.name + "&raceName="
+                        + raceId.getRaceName() + "&eventName=" + raceId.getEventName() + "&leaderboardGroupName="
+                        + group.name + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : "");
                 b.append(ANCHORTEMPLATE.anchor(link, race.getRaceColumnName()));
             } else {
                 b.appendHtmlConstant(race.getRaceColumnName());
