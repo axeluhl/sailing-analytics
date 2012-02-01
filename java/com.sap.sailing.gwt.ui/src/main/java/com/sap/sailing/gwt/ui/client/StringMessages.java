@@ -21,10 +21,12 @@ public interface StringMessages extends Messages {
     String races();
     String tracked();
     String time();
-    String acceleration();
-    String accelerationHelp();
-    String delay();
-    String delayHelp();
+    String playSpeed();
+    String playSpeedHelp();
+    String playModeLive();
+    String playModeReplay();
+    String timeDelay();
+    String timeDelayHelp();
     String speedInKnots();
     String fromDeg();
     String noRacesYet();

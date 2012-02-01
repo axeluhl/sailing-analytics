@@ -3,6 +3,7 @@ package com.sap.sailing.domain.test;
 import static org.junit.Assert.assertEquals;
 
 import java.util.Collections;
+import java.util.GregorianCalendar;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -33,12 +34,13 @@ public class TackTest extends StoredTrackBasedTestWithTrackedRace {
     @Before
     public void setUp() {
         competitor = new CompetitorImpl(123, "Wolfgang Hunger", new TeamImpl("STG", Collections.singleton(
-new PersonImpl("Wolfgang Hunger", new NationalityImpl("Germany", "GER"),
+                new PersonImpl("Wolfgang Hunger", new NationalityImpl("Germany", "GER"),
                 /* dateOfBirth */null, "This is famous Wolfgang Hunger")), new PersonImpl("Rigo van Maas",
                         new NationalityImpl("The Netherlands", "NED"),
                         /* dateOfBirth */null, "This is Rigo, the coach")), new BoatImpl("Wolfgang Hunger's boat",
                 new BoatClassImpl("505", /* typicallyStartsUpwind */ true), null));
-        setTrackedRace(createTestTrackedRace("Kieler Woche", "505 Race 2", "505", Collections.singleton(competitor)));
+        setTrackedRace(createTestTrackedRace("Kieler Woche", "505 Race 2", "505", Collections.singleton(competitor),
+                new MillisecondsTimePoint(new GregorianCalendar(2011, 05, 23).getTime())));
     }
     
     @Test

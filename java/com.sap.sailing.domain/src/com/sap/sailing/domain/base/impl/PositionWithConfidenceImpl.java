@@ -4,25 +4,18 @@ import com.sap.sailing.domain.base.PositionWithConfidence;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.RadianPosition;
 import com.sap.sailing.domain.common.impl.Util.Triple;
+import com.sap.sailing.domain.confidence.IsScalable;
 import com.sap.sailing.domain.confidence.ScalableValue;
 
-public class PositionWithConfidenceImpl extends HasConfidenceImpl<Triple<Double, Double, Double>, Position> implements
-        PositionWithConfidence {
-    private final Position position;
-    
-    public PositionWithConfidenceImpl(Position position, double confidence) {
-        super(confidence);
-        this.position = position;
+public class PositionWithConfidenceImpl<RelativeTo> extends HasConfidenceImpl<Triple<Double, Double, Double>, Position, RelativeTo> implements
+        PositionWithConfidence<RelativeTo>, IsScalable<Triple<Double, Double, Double>, Position> {
+    public PositionWithConfidenceImpl(Position position, double confidence, RelativeTo relativeTo) {
+        super(position, confidence, relativeTo);
     }
 
     @Override
     public ScalableValue<Triple<Double, Double, Double>, Position> getScalableValue() {
-        return new ScalablePosition(getPosition());
-    }
-
-    @Override
-    public Position getPosition() {
-        return position;
+        return new ScalablePosition(getObject());
     }
 
     private static class ScalablePosition implements ScalableValue<Triple<Double, Double, Double>, Position> {
@@ -51,12 +44,23 @@ public class PositionWithConfidenceImpl extends HasConfidenceImpl<Triple<Double,
             return new ScalablePosition(x+t.getValue().getA(), y+t.getValue().getB(), z+t.getValue().getC());
         }
 
+        /**
+         * If combined confidence is 0.0 (all coordinate components are 0.0), <code>null</code> is returned because no
+         * position can reasonably be constructed out of nowhere.
+         */
         @Override
         public Position divide(double divisor, double confidence) {
-            double hyp = Math.sqrt(x * x + y * y);
-            double latRad = Math.atan2(z, hyp);
-            double lngRad = Math.atan2(y, x);
-            return new RadianPosition(latRad, lngRad);
+            Position result;
+            if (x == 0 && y == 0 && z == 0) {
+                result = null;
+            } else {
+                // don't need to scale down; atan2 is agnostic regarding scaling factors
+                double hyp = Math.sqrt(x * x + y * y);
+                double latRad = Math.atan2(z, hyp);
+                double lngRad = Math.atan2(y, x);
+                result = new RadianPosition(latRad, lngRad);
+            }
+            return result;
         }
 
         @Override

@@ -8,7 +8,9 @@ import java.util.List;
 import java.util.NavigableSet;
 import java.util.Set;
 
+import com.sap.sailing.domain.base.BearingWithConfidence;
 import com.sap.sailing.domain.base.SpeedWithBearing;
+import com.sap.sailing.domain.base.impl.BearingWithConfidenceImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
@@ -19,6 +21,7 @@ import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.NauticalMileDistance;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.confidence.ConfidenceFactory;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
@@ -150,7 +153,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
 
     private Position getEstimatedPosition(TimePoint timePoint, boolean extrapolate, FixType lastFixAtOrBefore,
             FixType firstFixAtOrAfter) {
-        // TODO bug #169: compute a confidence value for the position returned based on time difference between fix(es) and timePoint 
+        // TODO bug #169: compute a confidence value for the position returned based on time difference between fix(es) and timePoint; consider using Taylor approximation of more fixes around timePoint to predict and weigh position
         if (lastFixAtOrBefore != null && lastFixAtOrBefore == firstFixAtOrAfter) {
             return lastFixAtOrBefore.getPosition(); // exact match; how unlikely is that?
         } else {
@@ -318,7 +321,10 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         NavigableSet<GPSFix> gpsFixesToUseForSpeedEstimation = (NavigableSet<GPSFix>) fixesToUseForSpeedEstimation;
         List<GPSFix> relevantFixes = getFixesRelevantForSpeedEstimation(at, gpsFixesToUseForSpeedEstimation);
         double knotSum = 0;
-        BearingCluster bearingCluster = new BearingCluster(); // TODO bug #169: use confidence-based cluster
+        BearingWithConfidenceCluster<TimePoint> bearingCluster = new BearingWithConfidenceCluster<TimePoint>(
+                ConfidenceFactory.INSTANCE.createExponentialTimeDifferenceWeigher(
+                        // use a minimum confidence to avoid the bearing to flip to 270deg in case all is zero
+                        getMillisecondsOverWhichToAverageSpeed()));
         int count = 0;
         if (!relevantFixes.isEmpty()) {
             Iterator<GPSFix> fixIter = relevantFixes.iterator();
@@ -329,12 +335,17 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
                 // TODO bug #169: use SpeedWithConfidence to aggregate confidence-tagged speed values
                 knotSum += last.getPosition().getDistance(next.getPosition())
                         .inTime(next.getTimePoint().asMillis() - last.getTimePoint().asMillis()).getKnots();
-                bearingCluster.add(last.getPosition().getBearingGreatCircle(next.getPosition()));
+                bearingCluster.add(new BearingWithConfidenceImpl<TimePoint>(last.getPosition().getBearingGreatCircle(next.getPosition()),
+                        /* confidence */ 0.9, // TODO use number of tracked satellites to determine confidence of single fix
+                        new MillisecondsTimePoint((last.getTimePoint().asMillis() + next.getTimePoint().asMillis())/2)));
                 count++;
                 last = next;
             }
         }
-        SpeedWithBearing avgSpeed = count == 0 ? null : new KnotSpeedWithBearingImpl(knotSum / count, bearingCluster.getAverage());
+        // TODO bug #169: return SpeedWithBearingWithConfidence to reflect the confidence reduction incurred by the difference of the fix's time point and "at"
+        BearingWithConfidence<TimePoint> average = bearingCluster.getAverage(at);
+        Bearing bearing = average == null ? null : average.getObject();
+        SpeedWithBearing avgSpeed = (count == 0 || bearing == null) ? null : new KnotSpeedWithBearingImpl(knotSum / count, bearing);
         return avgSpeed;
     }
 

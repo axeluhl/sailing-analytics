@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.tracking.impl;
 
+import com.sap.sailing.domain.base.BearingWithConfidence;
+import com.sap.sailing.domain.base.impl.BearingWithConfidenceImpl;
 import com.sap.sailing.domain.common.Bearing;
 
 /**
@@ -15,23 +17,41 @@ import com.sap.sailing.domain.common.Bearing;
  * @author Axel Uhl (d043530)
  *
  */
-public class BearingCluster extends GenericBearingCluster<Bearing> {
-    @Override
-    protected BearingCluster[] createBearingClusterArraySizeTwo() {
-        return new BearingCluster[2];
+public class BearingCluster {
+    private final BearingWithConfidenceCluster<Void> cluster;
+    
+    public BearingCluster() {
+        cluster = new BearingWithConfidenceCluster<Void>(/* weigher */ null);
     }
     
-    @Override
-    protected BearingCluster createEmptyCluster() {
-        return new BearingCluster();
+    private BearingCluster(BearingWithConfidenceCluster<Void> cluster) {
+        this.cluster = cluster;
     }
-
+    
     public BearingCluster[] splitInTwo(double minimumDegreeDifferenceBetweenTacks) {
-        return (BearingCluster[]) super.splitInTwo(minimumDegreeDifferenceBetweenTacks);
+        BearingWithConfidenceCluster<Void>[] array = cluster.splitInTwo(minimumDegreeDifferenceBetweenTacks, /* relativeTo */ null);
+        BearingCluster[] result = new BearingCluster[array.length];
+        int i=0;
+        for (BearingWithConfidenceCluster<Void> element : array) {
+            result[i++] = new BearingCluster(element);
+        }
+        return result;
+    }
+    
+    public Bearing getAverage() {
+        BearingWithConfidence<Void> average = cluster.getAverage(null);
+        return average == null ? null : average.getObject();
     }
 
-    @Override
-    protected Bearing getBearing(Bearing b) {
-        return b;
+    public boolean isEmpty() {
+        return cluster.isEmpty();
+    }
+
+    public int size() {
+        return cluster.size();
+    }
+
+    public void add(Bearing bearing) {
+        cluster.add(new BearingWithConfidenceImpl<Void>(bearing, /* confidence */ 1.0, /* relativeTo */ null));
     }
 }

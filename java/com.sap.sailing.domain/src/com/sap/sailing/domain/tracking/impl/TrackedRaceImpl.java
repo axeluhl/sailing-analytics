@@ -202,7 +202,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     @Override
     public TimePoint getStart() {
         TimePoint result;
-        Iterator<MarkPassing> markPassingsFirstMarkIter = getMarkPassingsInOrder(getRace().getCourse().getWaypoints().iterator().next()).iterator();
+        Iterator<MarkPassing> markPassingsFirstMarkIter = getMarkPassingsInOrder(getRace().getCourse().getFirstWaypoint()).iterator();
         if (markPassingsFirstMarkIter.hasNext()) {
             MarkPassing firstMarkPassingFirstMark = markPassingsFirstMarkIter.next();
             TimePoint timeOfFirstMarkPassingFirstMark = firstMarkPassingFirstMark.getTimePoint();
@@ -223,6 +223,15 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         return result;
     }
     
+    @Override
+    public TimePoint getAssumedEnd() {
+        TimePoint result = null;
+        for (MarkPassing passingFinishLine : getMarkPassingsInOrder(getRace().getCourse().getLastWaypoint())) {
+            result = passingFinishLine.getTimePoint();
+        }
+        return result;
+    }
+
     @Override
     public boolean hasStarted(TimePoint at) {
         return getStart() != null && getStart().compareTo(at) <= 0;
@@ -658,9 +667,10 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                     if (!track.hasDirectionChange(timePoint, getManeuverDegreeAngleThreshold())) {
                         SpeedWithBearing estimatedSpeed = track.getEstimatedSpeed(timePoint);
                         if (estimatedSpeed != null) {
+                            // TODO but #169: preserve confidence of estimatedSpeed relative to timePoint so as to feed into a BearingWithConfidenceCluster here
                             Bearing bearing = estimatedSpeed.getBearing();
-                            BearingCluster bearingClusters = bearings.get(legType);
-                            bearingClusters.add(bearing);
+                            BearingCluster bearingClusterForLegType = bearings.get(legType);
+                            bearingClusterForLegType.add(bearing);
                         }
                     }
                 }

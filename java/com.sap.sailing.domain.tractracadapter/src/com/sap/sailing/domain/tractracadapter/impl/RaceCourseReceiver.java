@@ -80,7 +80,7 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
             // race already exists; this means that we obviously found a course re-definition (yuck...)
             // Therefore, don't create TrackedRace again because it already exists.
             try {
-                getDomainFactory().updateCourseWaypoints(course, event.getB().getPoints());
+                getDomainFactory().updateCourseWaypoints(existingRaceDefinitionForRace.getCourse(), event.getB().getPoints());
                 if (getTrackedEvent().getExistingTrackedRace(existingRaceDefinitionForRace) == null) {
                     createTrackedRace(existingRaceDefinitionForRace);
                 }

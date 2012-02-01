@@ -59,6 +59,15 @@ public interface TrackedRace {
     TimePoint getStart();
     
     /**
+     * Computing the race end time is tricky. Boats may sink, stop, not finish, although they started the race. We therefore
+     * cannot wait for all boats to reach the finish line.
+     * 
+     * TODO Currently, the time point returned is the time of the last mark passing recorded for the finish line or <code>null</code> if
+     * no boat passed the finish line yet.
+     */
+    TimePoint getAssumedEnd();
+    
+    /**
      * Shorthand for <code>{@link #getStart()}.{@link TimePoint#compareTo(TimePoint) compareTo(at)} &lt;= 0</code>
      */
     boolean hasStarted(TimePoint at);

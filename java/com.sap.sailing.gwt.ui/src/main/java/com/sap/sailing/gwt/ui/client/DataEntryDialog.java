@@ -11,6 +11,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.IntegerBox;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.LongBox;
@@ -151,10 +152,10 @@ public abstract class DataEntryDialog<T> {
     }
     
     /**
-     * Creates a text box with a key-up listener attached which ensures the value is updated after each
+     * Creates a box for a long value with a key-up listener attached which ensures the value is updated after each
      * key-up event and the entire dialog is {@link #validate() validated} in this case.
      * 
-     * @param initialValue initial value to show in text box; <code>null</code> is permissible
+     * @param initialValue initial value to show in the long box; <code>null</code> is permissible
      */
     public LongBox createLongBox(long initialValue, int visibleLength) {
         LongBox longBox = new LongBox();
@@ -170,6 +171,28 @@ public abstract class DataEntryDialog<T> {
         AbstractEntryPoint.linkEnterToButton(getOkButton(), longBox);
         AbstractEntryPoint.linkEscapeToButton(getCancelButton(), longBox);
         return longBox;
+    }
+
+    /**
+     * Creates a box for a integer value with a key-up listener attached which ensures the value is updated after each
+     * key-up event and the entire dialog is {@link #validate() validated} in this case.
+     * 
+     * @param initialValue initial value to show in the integer box; <code>null</code> is permissible
+     */
+    public IntegerBox createIntegerBox(int initialValue, int visibleLength) {
+        IntegerBox intBox = new IntegerBox();
+        intBox.setVisibleLength(visibleLength);
+        intBox.setValue(initialValue);
+        AbstractEntryPoint.addFocusUponKeyUpToggler(intBox);
+        intBox.addChangeHandler(new ChangeHandler() {
+            @Override
+            public void onChange(ChangeEvent event) {
+                validate();
+            }
+        });
+        AbstractEntryPoint.linkEnterToButton(getOkButton(), intBox);
+        AbstractEntryPoint.linkEscapeToButton(getCancelButton(), intBox);
+        return intBox;
     }
 
     public LongBox createLongBoxWithOptionalValue(Long initialValue, int visibleLength) {

@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
+import java.util.GregorianCalendar;
 
 import org.junit.Test;
 
@@ -63,6 +64,6 @@ public class LeaderboardForKielWeekTest extends OnlineTracTracBasedTest {
         getTrackedRace().setWindSource(WindSource.WEB);
         getTrackedRace().recordWind(new WindImpl(/* position */ null, MillisecondsTimePoint.now(),
                 new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(70))), WindSource.WEB);
-        fixApproximateMarkPositionsForWindReadOut(getTrackedRace());
+        fixApproximateMarkPositionsForWindReadOut(getTrackedRace(), new MillisecondsTimePoint(new GregorianCalendar(2011, 05, 23).getTime()));
     }
 }

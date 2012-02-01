@@ -27,7 +27,9 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         final String eventName = Window.Location.getParameter("eventName");
         final String raceName = Window.Location.getParameter("raceName");
         String leaderboardNameParamValue = Window.Location.getParameter("leaderboardName");
+        //String leaderboardGroupNameParamValue = Window.Location.getParameter("leaderboardGroupName");
         final String leaderboardName;
+        //final String leaderboardGroupName;
         if(leaderboardNameParamValue == null || leaderboardNameParamValue.isEmpty()) {
             leaderboardName = DefaultLeaderboardName.DEFAULT_LEADERBOARD_NAME;
         } else {
@@ -46,7 +48,25 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
                 }
             });
         }
-        
+        /* not used yet.... waiting for the leaderboard group functionality
+        if(leaderboardGroupNameParamValue != null && !leaderboardGroupNameParamValue.isEmpty()))
+        {
+            sailingService.getLeaderboardGroupByName(leaderboardGroupNameParamValue, new AsyncCallback<LeaderboardGroupDTO>() {
+                @Override
+                public void onSuccess(LeaderboardGroupDTO leaderboardGroup) {
+                    for(leaderboardGroup.leaderboards.contains()
+                    if (!leaderboardNames.contains(leaderboardName)) {
+                        createErrorPage(stringMessages.noSuchLeaderboard());
+                    }
+                }
+
+                @Override
+                public void onFailure(Throwable t) {
+                    reportError("Error trying to obtain the list of leaderboard names: " + t.getMessage());
+                }
+            });
+        }
+        */
         if (eventName != null && !eventName.isEmpty() && raceName != null && !raceName.isEmpty()) {
             sailingService.listEvents(false, new AsyncCallback<List<EventDTO>>() {
                 @Override
@@ -116,8 +136,8 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         timelinePanel.add(timeLineInnerPanel);
         timelinePanel.addStyleName("timeLinePanel");
         
-        FlowPanel footerShadowPanel = new FlowPanel();
-        footerShadowPanel.addStyleName("footerShadowPanel");
+        //FlowPanel footerShadowPanel = new FlowPanel();
+        // footerShadowPanel.addStyleName("footerShadowPanel");
         
         RootPanel.get().add(raceBoardHeaderPanel);        
         RootPanel.get().add(contentOuterPanel);
@@ -125,6 +145,6 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         // Don't change this order because of the inner logic in html of "position fixed"-elements
         RootPanel.get().add(logoAndTitlePanel);                 // position:fixed        
         RootPanel.get().add(timelinePanel);                     // position:fixed
-        RootPanel.get().add(footerShadowPanel);                 // position:fixed
+        //RootPanel.get().add(footerShadowPanel);                 // position:fixed
     }
 }

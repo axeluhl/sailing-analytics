@@ -30,7 +30,7 @@ body {
 	line-height: 1;
 	font-size: 14px;
 	font-weight: 400;
-	padding: 85px 0 120px 0;
+	padding: 80px 0 120px 0;
 	margin: 0;
 }
 
@@ -81,7 +81,7 @@ table {
 }
 
 .RaceBoardHeaderPanel {
-	margin: 0 12px 18px 12px;
+	margin: 0 12px 14px 12px;
 }
 
 .sapLogo {
@@ -137,8 +137,8 @@ input.magnifier {
 	width: 100%;
 	position: fixed;
 	bottom: 0;
-	height: 101px;
-	z-index: 1000;
+	height: 140px;
+	z-index: 9;
 }
 
 .timeLineInnerPanel {
@@ -162,7 +162,7 @@ input.magnifier {
 	bottom: 0;
 	background: url(images/footer_shadow.png) left bottom repeat-x;
 	width: 100%;
-	z-index: 2000;
+	z-index: 10;
 }
 
 .breadcrumbPanel {
@@ -204,7 +204,7 @@ input.magnifier {
 }
 
 .collapsablePanel-header-text{
-	font-weight: 300;
+	font-weight: 600;
 	text-transform: uppercase;
 	margin: 15px 0 0 13px;
 	float: left;
@@ -228,8 +228,16 @@ input.magnifier {
 
 .collapsablePanel-toolbar { 
 	position: absolute;
-	top: 13px;
+	top: 14px;
 	right: 13px;
+}
+
+.collapsablePanel-toolbar table {
+	border-collapse: collapse;
+}
+
+.collapsablePanel-toolbar a {
+	margin-left: 10px;
 }
 
 .raceBoardPanelHeader {
@@ -237,10 +245,10 @@ input.magnifier {
 }
 
 .raceBoardPanelHeader-name {
-	font-size: 24px;
+	font-size: 20px;
 	text-transform: uppercase;
 	color: #a1a1a1;
-	font-weight: 200;
+	font-weight: 500;
 }
 
 .raceBoardNavigation {
@@ -268,3 +276,24 @@ input.magnifier {
 	text-decoration: none;
 }
 
+.timePanel-controls {
+}
+
+.timePanel-controls-play {
+}
+
+.timePanel-controls-playSpeed {
+	vertical-align: middle;
+	padding: 3px;
+	line-height: 25px;
+}
+
+.timePanel-controls-time {
+}
+
+.timePanel-controls-timeDelay {
+}
+
+.gwt-DialogBox {
+	z-index: 20;
+}

@@ -4,34 +4,21 @@ import com.sap.sailing.domain.base.BearingWithConfidence;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.impl.RadianBearingImpl;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.confidence.IsScalable;
 import com.sap.sailing.domain.confidence.ScalableValue;
 
-public class BearingWithConfidenceImpl implements BearingWithConfidence {
-    private final Bearing bearing;
-    
-    private final double confidence;
-    
-    public BearingWithConfidenceImpl(Bearing bearing, double confidence) {
-        this.bearing = bearing;
-        this.confidence = confidence;
+public class BearingWithConfidenceImpl<RelativeTo> extends HasConfidenceImpl<Pair<Double, Double>, Bearing, RelativeTo>
+implements BearingWithConfidence<RelativeTo>, IsScalable<Pair<Double, Double>, Bearing> {
+    public BearingWithConfidenceImpl(Bearing bearing, double confidence, RelativeTo relativeTo) {
+        super(bearing, confidence, relativeTo);
     }
     
     @Override
-    public Bearing getBearing() {
-        return bearing;
+    public ScalableValue<Pair<Double, Double>, Bearing> getScalableValue() {
+        return new ScalableBearing(getObject());
     }
 
-    @Override
-    public double getConfidence() {
-        return confidence;
-    }
-
-    @Override
-    public ScalableValue<Pair<Double, Double>, BearingWithConfidence> getScalableValue() {
-        return new ScalableBearing(getBearing());
-    }
-
-    private static class ScalableBearing implements ScalableValue<Pair<Double, Double>, BearingWithConfidence> {
+    private static class ScalableBearing implements ScalableValue<Pair<Double, Double>, Bearing> {
         private final double sin;
         private final double cos;
         
@@ -46,27 +33,36 @@ public class BearingWithConfidenceImpl implements BearingWithConfidence {
         }
         
         @Override
-        public ScalableValue<Pair<Double, Double>, BearingWithConfidence> multiply(double factor) {
+        public ScalableValue<Pair<Double, Double>, Bearing> multiply(double factor) {
             Pair<Double, Double> pair = getValue();
             return new ScalableBearing(factor*pair.getA(), factor*pair.getB());
         }
 
         @Override
-        public ScalableValue<Pair<Double, Double>, BearingWithConfidence> add(ScalableValue<Pair<Double, Double>, BearingWithConfidence> t) {
+        public ScalableValue<Pair<Double, Double>, Bearing> add(ScalableValue<Pair<Double, Double>, Bearing> t) {
             Pair<Double, Double> value = getValue();
             Pair<Double, Double> tValue = t.getValue();
             return new ScalableBearing(value.getA()+tValue.getA(), value.getB()+tValue.getB());
         }
 
+        /**
+         * If the combined confidence was 0.0, no {@link Bearing} object can reasonably be computed; hence, <code>null</code>
+         * is returned in such cases.
+         */
         @Override
-        public BearingWithConfidence divide(double divisor, double confidence) {
-            double angle;
-            if (cos == 0) {
-                angle = sin >= 0 ? Math.PI / 2 : -Math.PI / 2;
+        public Bearing divide(double divisor, double confidence) {
+            Bearing result;
+            if (sin == 0 && cos == 0) {
+                result = null;
             } else {
-                angle = Math.atan2(sin, cos);
+                double angle;
+                if (cos == 0) {
+                    angle = sin >= 0 ? Math.PI / 2 : -Math.PI / 2;
+                } else {
+                    angle = Math.atan2(sin, cos);
+                }
+                result = new RadianBearingImpl(angle < 0 ? angle + 2 * Math.PI : angle);
             }
-            BearingWithConfidence result = new BearingWithConfidenceImpl(new RadianBearingImpl(angle < 0 ? angle + 2 * Math.PI : angle), confidence);
             return result;
         }
 

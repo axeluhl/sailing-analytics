@@ -1,11 +1,38 @@
 package com.sap.sailing.domain.confidence.impl;
 
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.confidence.ConfidenceBasedAverager;
-import com.sap.sailing.domain.confidence.ConfidenceBasedAveragerFactory;
+import com.sap.sailing.domain.confidence.ConfidenceFactory;
+import com.sap.sailing.domain.confidence.Weigher;
 
-public class ConfidenceBasedAveragerFactoryImpl implements ConfidenceBasedAveragerFactory {
+public class ConfidenceBasedAveragerFactoryImpl implements ConfidenceFactory {
     @Override
-    public <ValueType, AveragesTo> ConfidenceBasedAverager<ValueType, AveragesTo> createAverager() {
-        return new ConfidenceBasedAveragerImpl<ValueType, AveragesTo>();
+    public <RelativeTo> Weigher<RelativeTo> createConstantWeigher(final double constantConfidence) {
+        return new Weigher<RelativeTo>() {
+            @Override
+            public double getConfidence(RelativeTo fix, RelativeTo request) {
+                return constantConfidence;
+            }
+        };
+    }
+
+    @Override
+    public <ValueType, BaseType, RelativeTo> ConfidenceBasedAverager<ValueType, BaseType, RelativeTo> createAverager(Weigher<RelativeTo> weigher) {
+        return new ConfidenceBasedAveragerImpl<ValueType, BaseType, RelativeTo>(weigher);
+    }
+
+    @Override
+    public Weigher<TimePoint> createLinearTimeDifferenceWeigher(long halfConfidenceAfterMilliseconds) {
+        return new LinearTimeDifferenceWeigher(halfConfidenceAfterMilliseconds);
+    }
+    
+    @Override
+    public Weigher<TimePoint> createExponentialTimeDifferenceWeigher(long halfConfidenceAfterMilliseconds) {
+        return new ExponentialTimeDifferenceWeigher(halfConfidenceAfterMilliseconds);
+    }
+
+    @Override
+    public Weigher<TimePoint> createExponentialTimeDifferenceWeigher(long halfConfidenceAfterMilliseconds, double minimumConfidence) {
+        return new ExponentialTimeDifferenceWeigher(halfConfidenceAfterMilliseconds, minimumConfidence);
     }
 }

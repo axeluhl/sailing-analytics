@@ -19,6 +19,7 @@ import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTable;
@@ -28,6 +29,7 @@ import com.google.gwt.user.cellview.client.ColumnSortList.ColumnSortInfo;
 import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.cellview.client.TextHeader;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.DockPanel;
 import com.google.gwt.user.client.ui.FormPanel;
@@ -52,6 +54,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.TimeListener;
 import com.sap.sailing.gwt.ui.client.Timer;
+import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.leaderboard.LegDetailColumn.LegDetailField;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
@@ -166,6 +169,12 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
 
     private boolean isEmbedded = false;
 
+    private static LeaderboardResources resources = GWT.create(LeaderboardResources.class);
+    private static LeaderboardTableResources tableResources = GWT.create(LeaderboardTableResources.class);
+
+    private final ImageResource pauseIcon;
+    private final ImageResource playIcon;
+
     private class SettingsClickHandler implements ClickHandler {
         private final StringMessages stringConstants;
 
@@ -196,7 +205,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
 
     @Override
     public Widget getToolbarWidget() {
-        return refreshAndSettingsPanel;
+        return null;
     }
 
     @Override
@@ -650,7 +659,12 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 Double result = null;
                 LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceName.get(getRaceName());
                 if (fieldsForRace != null && fieldsForRace.legDetails != null) {
-                    LegEntryDTO lastLegDetail = fieldsForRace.legDetails.get(fieldsForRace.legDetails.size() - 1);
+                    int lastLegIndex = fieldsForRace.legDetails.size() - 1;
+                    LegEntryDTO lastLegDetail = fieldsForRace.legDetails.get(lastLegIndex);
+                    // competitor may be in leg prior to the one the leader is in; find competitors current leg
+                    while (lastLegDetail == null && lastLegIndex > 0) {
+                        lastLegDetail = fieldsForRace.legDetails.get(--lastLegIndex);
+                    }
                     if (lastLegDetail != null) {
                         result = lastLegDetail.gapToLeaderInSeconds;
                     }
@@ -774,7 +788,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     public LeaderboardPanel(SailingServiceAsync sailingService, RaceIdentifier preSelectedRace,
             CompetitorSelectionProvider competitorSelectionProvider, String leaderboardName,
             ErrorReporter errorReporter, final StringMessages stringConstants) {
-        this(sailingService, preSelectedRace, competitorSelectionProvider, new Timer(/* delayBetweenAutoAdvancesInMilliseconds */3000l),
+        this(sailingService, preSelectedRace, competitorSelectionProvider, new Timer(PlayModes.Replay, /* delayBetweenAutoAdvancesInMilliseconds */3000l),
                 leaderboardName, errorReporter, stringConstants);
         timer.setDelay(getDelayInMilliseconds()); // set time/delay before adding as listener
     }
@@ -805,16 +819,15 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         timer.addPlayStateListener(this);
         timer.addTimeListener(this);
         rankColumn = new RankColumn();
-        LeaderboardTableResources resources = GWT.create(LeaderboardTableResources.class);
-        RACE_COLUMN_HEADER_STYLE = resources.cellTableStyle().cellTableRaceColumnHeader();
-        LEG_COLUMN_HEADER_STYLE = resources.cellTableStyle().cellTableLegColumnHeader();
-        LEG_DETAIL_COLUMN_HEADER_STYLE = resources.cellTableStyle().cellTableLegDetailColumnHeader();
-        RACE_COLUMN_STYLE = resources.cellTableStyle().cellTableRaceColumn();
-        LEG_COLUMN_STYLE = resources.cellTableStyle().cellTableLegColumn();
-        LEG_DETAIL_COLUMN_STYLE = resources.cellTableStyle().cellTableLegDetailColumn();
-        TOTAL_COLUMN_STYLE = resources.cellTableStyle().cellTableTotalColumn();
+        RACE_COLUMN_HEADER_STYLE = tableResources.cellTableStyle().cellTableRaceColumnHeader();
+        LEG_COLUMN_HEADER_STYLE = tableResources.cellTableStyle().cellTableLegColumnHeader();
+        LEG_DETAIL_COLUMN_HEADER_STYLE = tableResources.cellTableStyle().cellTableLegDetailColumnHeader();
+        RACE_COLUMN_STYLE = tableResources.cellTableStyle().cellTableRaceColumn();
+        LEG_COLUMN_STYLE = tableResources.cellTableStyle().cellTableLegColumn();
+        LEG_DETAIL_COLUMN_STYLE = tableResources.cellTableStyle().cellTableLegDetailColumn();
+        TOTAL_COLUMN_STYLE = tableResources.cellTableStyle().cellTableTotalColumn();
         leaderboardTable = new CellTableWithStylableHeaders<LeaderboardRowDTO>(
-        /* pageSize */100, resources);
+        /* pageSize */100, tableResources);
         getLeaderboardTable().setWidth("100%");
         leaderboardSelectionModel = new MultiSelectionModel<LeaderboardRowDTO>();
         leaderboardSelectionModel.addSelectionChangeHandler(new Handler() {
@@ -856,6 +869,10 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 }
             }
         };
+        ImageResource chartIcon = resources.chartIcon();
+        ImageResource settingsIcon = resources.settingsIcon();
+        pauseIcon = resources.pauseIcon();
+        playIcon = resources.playIcon();
         refreshAndSettingsPanel = new HorizontalPanel();
         refreshAndSettingsPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
         HorizontalPanel refreshPanel = new HorizontalPanel();
@@ -869,8 +886,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         playPause.addClickHandler(playPauseHandler);
         playStateChanged(timer.isPlaying());
         refreshPanel.add(playPause);
-        Anchor chartsAnchor = new Anchor(new SafeHtmlBuilder().appendHtmlConstant(
-                "<img class=\"linkNoBorder\" src=\"/gwt/images/chart_small.png\"/>").toSafeHtml());
+        Anchor chartsAnchor = new Anchor(AbstractImagePrototype.create(chartIcon).getSafeHtml());
         chartsAnchor.setTitle(stringConstants.showCharts());
         chartsAnchor.addClickHandler(new ClickHandler() {
             @Override
@@ -878,8 +894,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 compareCompetitors();
             }
         });
-        Anchor settingsAnchor = new Anchor(new SafeHtmlBuilder().appendHtmlConstant(
-                "<img class=\"linkNoBorder\" src=\"/gwt/images/settings.png\"/>").toSafeHtml());
+        Anchor settingsAnchor = new Anchor(AbstractImagePrototype.create(settingsIcon).getSafeHtml());
         settingsAnchor.setTitle(stringConstants.settings());
         settingsAnchor.addClickHandler(new SettingsClickHandler(stringConstants));
         refreshAndSettingsPanel.add(chartsAnchor);
@@ -897,9 +912,10 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     }
 
     private SafeHtml getPlayPauseImgHtml(boolean playing) {
-        return new SafeHtmlBuilder().appendHtmlConstant(
-                "<img class=\"linkNoBorder\" src=\"/gwt/images/" + (playing ? "pause" : "play") + "_16.png\"/>")
-                .toSafeHtml();
+        if (playing)
+            return AbstractImagePrototype.create(pauseIcon).getSafeHtml();
+        else
+            return AbstractImagePrototype.create(playIcon).getSafeHtml();
     }
 
     private long getDelayInMilliseconds() {
@@ -1460,7 +1476,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
 
     @Override
     public boolean hasToolbar() {
-        return true;
+        return false;
     }
 
     @Override

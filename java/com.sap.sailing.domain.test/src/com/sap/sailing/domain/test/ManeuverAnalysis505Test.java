@@ -9,6 +9,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 
 import org.junit.Before;
@@ -37,7 +38,8 @@ public class ManeuverAnalysis505Test extends AbstractManeuverDetectionTestCase {
         super.setUp("event_20110609_KielerWoch",
         /* raceId */"357c700a-9d9a-11e0-85be-406186cbf87c", new ReceiverType[] { ReceiverType.MARKPASSINGS,
                 ReceiverType.RACECOURSE, ReceiverType.RAWPOSITIONS });
-        OnlineTracTracBasedTest.fixApproximateMarkPositionsForWindReadOut(getTrackedRace());
+        OnlineTracTracBasedTest.fixApproximateMarkPositionsForWindReadOut(getTrackedRace(), new MillisecondsTimePoint(
+                new GregorianCalendar(2011, 05, 23).getTime()));
         getTrackedRace().setWindSource(WindSource.WEB);
         getTrackedRace().recordWind(
                 new WindImpl(/* position */null, MillisecondsTimePoint.now(), new KnotSpeedWithBearingImpl(12,

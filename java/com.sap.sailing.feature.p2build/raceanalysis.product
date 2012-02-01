@@ -9,7 +9,7 @@
    <launcherArgs>
       <programArgs>-os ${target.os} -ws ${target.ws} -arch ${target.arch} -nl ${target.nl} -consoleLog -console -clean</programArgs>
       <vmArgs>-Declipse.ignoreApp=true -Dosgi.noShutdown=true
--Dexpedition.udp.port=2010 -Xmx1024m -Djetty.home=configuration/jetty</vmArgs>
+-Xmx1024m -Djetty.home=configuration/jetty</vmArgs>
    </launcherArgs>
 
    <windowImages/>
@@ -41,8 +41,8 @@
       <plugin id="org.eclipse.equinox.simpleconfigurator" autoStart="true" startLevel="2" />
       <plugin id="org.eclipse.jetty.osgi.boot" autoStart="true" startLevel="3" />
       <property name="eclipse.ignoreApp" value="true" />
-      <property name="expedition.udp.port" value="2011" />
-      <property name="mongo.port" value="10201" />
+      <property name="expedition.udp.port" value="2010" />
+      <property name="mongo.port" value="10200" />
       <property name="osgi.noShutdown" value="true" />
    </configurations>
 
