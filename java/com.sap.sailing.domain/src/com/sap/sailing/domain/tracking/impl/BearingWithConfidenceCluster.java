@@ -122,7 +122,9 @@ public class BearingWithConfidenceCluster<RelativeTo> {
     
     /**
      * If the cluster contains no bearings, <code>null</code> is returned. Otherwise, the average angle is computed
-     * by adding up the sin and cos values of the individual bearings, then computing the atan2 of the ratio.
+     * by adding up the sin and cos values of the individual bearings, then computing the atan2 of the ratio. If the
+     * combined confidence of the bearings in the cluster is 0.0, the result will contain <code>null</code> as
+     * {@link BearingWithConfidence#getObject() object}.
      */
     public BearingWithConfidence<RelativeTo> getAverage(RelativeTo relativeTo) {
         ConfidenceBasedAverager<Pair<Double, Double>, Bearing, RelativeTo> averager = ConfidenceFactory.INSTANCE.createAverager(weigher);
@@ -132,12 +134,13 @@ public class BearingWithConfidenceCluster<RelativeTo> {
     
     /**
      * Absolute difference to {@link #getAverage() this cluster's average bearing} in degrees. If there is no bearing stored in
-     * this cluster yet, 0.0 is returned.
+     * this cluster yet, or the combined confidence of the values in the cluster is 0.0,  0.0 is returned.
      * 
      * @return a value <code>&gt;=0.0</code>
      */
     private double getDifferenceFromAverage(Bearing bearing, RelativeTo relativeTo) {
-        return bearings.size() == 0 ? 0.0 : Math.abs(getAverage(relativeTo).getObject().getDifferenceTo(bearing).getDegrees());
+        Bearing averageBearing = getAverage(relativeTo).getObject();
+        return averageBearing == null ? 0.0 : Math.abs(averageBearing.getDifferenceTo(bearing).getDegrees());
     }
     
     protected Iterable<BearingWithConfidence<RelativeTo>> getBearings() {
