@@ -1622,38 +1622,6 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
 
     @Override
-    public void addLeaderboardToGroup(String leaderboardName, String groupName) {
-        LeaderboardGroup leaderboardGroup = getService().getLeaderboardGroupByName(groupName);
-        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
-        if (leaderboardGroup != null) {
-            if (leaderboard != null) {
-                leaderboardGroup.addLeaderboard(leaderboard);
-                getService().updateStoredLeaderboardGroup(leaderboardGroup);
-            } else {
-                throw new IllegalArgumentException("Leaderboard named " + leaderboardName + " not found");
-            }
-        } else {
-            throw new IllegalArgumentException("Leaderboard group named " + groupName + " not found");
-        }
-    }
-
-    @Override
-    public void removeLeaderboardFromGroup(String leaderboardName, String groupName) {
-        LeaderboardGroup leaderboardGroup = getService().getLeaderboardGroupByName(groupName);
-        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
-        if (leaderboardGroup != null) {
-            if (leaderboard != null) {
-                leaderboardGroup.removeLeaderboard(leaderboard);
-                getService().updateStoredLeaderboardGroup(leaderboardGroup);
-            } else {
-                throw new IllegalArgumentException("Leaderboard named " + leaderboardName + " not found");
-            }
-        } else {
-            throw new IllegalArgumentException("Leaderboard group named " + groupName + " not found");
-        }
-    }
-
-    @Override
     public void updateLeaderboardGroup(String oldName, String newName, String description, List<LeaderboardDTO> leaderboards) {
         if (!oldName.equals(newName)) {
             getService().renameLeaderboardGroup(oldName, newName);
