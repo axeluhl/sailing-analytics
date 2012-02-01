@@ -1,10 +1,14 @@
 package com.sap.sailing.gwt.ui.spectator;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.client.Window;
@@ -33,13 +37,12 @@ public class LeaderboardGroupPanel extends FormPanel {
     }
 
     private static final AnchorTemplates ANCHORTEMPLATE = GWT.create(AnchorTemplates.class);
+    private static final int MAX_COLUMNS_IN_ROW = 10; 
     
     private SailingServiceAsync sailingService;
     private StringMessages stringConstants;
     private ErrorReporter errorReporter;
     private LeaderboardGroupDTO group;
-    
-    private CellTable<LeaderboardDTO> leaderboardsTable;
     
     public LeaderboardGroupPanel(SailingServiceAsync sailingService, StringMessages stringConstants,
             ErrorReporter errorReporter, final String groupName) {
@@ -98,36 +101,90 @@ public class LeaderboardGroupPanel extends FormPanel {
         CaptionPanel leaderboardsCaptionPanel = new CaptionPanel(stringConstants.leaderboards());
         mainPanel.add(leaderboardsCaptionPanel);
         
-        AnchorCell nameAnchorCell = new AnchorCell();
-        Column<LeaderboardDTO, SafeHtml> nameColumn = new Column<LeaderboardDTO, SafeHtml>(nameAnchorCell) {
-            @Override
-            public SafeHtml getValue(LeaderboardDTO leaderboard) {
-                String debugParam = Window.Location.getParameter("gwt.codesvr");
-                return ANCHORTEMPLATE.anchor("/gwt/Leaderboard.html?name=" + leaderboard.name + "&leaderboardGroupName=" + group.name +
-                        (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr="+debugParam : ""), leaderboard.name);
+        if (group.leaderboards.size() <= MAX_COLUMNS_IN_ROW) {
+            CellTable<Integer> leaderboardsTable = new CellTable<Integer>();
+            leaderboardsTable.setWidth("100%");
+            leaderboardsTable.setSelectionModel(new NoSelectionModel<Integer>());
+            
+            int maxRacesNum = 0;
+            for (final LeaderboardDTO leaderboard : group.leaderboards) {
+                SafeHtmlCell leaderboardCell = new SafeHtmlCell();
+                Column<Integer, SafeHtml> leaderboardColumn = new Column<Integer, SafeHtml>(leaderboardCell) {
+                    @Override
+                    public SafeHtml getValue(Integer raceNum) {
+                        List<RaceInLeaderboardDTO> races = leaderboard.getRaceInLeaderboardList();
+                        return raceNum < races.size() ? raceToRaceBoardLink(leaderboard, races.get(raceNum))
+                                : SafeHtmlUtils.fromString("");
+                    }
+                };
+                leaderboardsTable.addColumn(leaderboardColumn, leaderboard.name);
+                leaderboard.addRaceAt(stringConstants.overview(), false, null, 0);
+                maxRacesNum = maxRacesNum < leaderboard.getRaceInLeaderboardList().size() ? leaderboard
+                        .getRaceInLeaderboardList().size() : maxRacesNum;
             }
-        };
-        
-        SafeHtmlCell racesCell = new SafeHtmlCell();
-        Column<LeaderboardDTO, SafeHtml> racesColumn = new Column<LeaderboardDTO, SafeHtml>(racesCell) {
-            @Override
-            public SafeHtml getValue(LeaderboardDTO leaderboard) {
-                return leaderboardRacesToHtml(leaderboard);
+
+            ArrayList<Integer> tableData = new ArrayList<Integer>();
+            for (int i = 0; i < maxRacesNum; i++) {
+                tableData.add(i);
             }
-        };
-        
-        leaderboardsTable = new CellTable<LeaderboardDTO>();
-        leaderboardsTable.setWidth("100%");
-        leaderboardsTable.setSelectionModel(new NoSelectionModel<LeaderboardDTO>());
-        
-        leaderboardsTable.addColumn(nameColumn, stringConstants.name());
-        leaderboardsTable.setColumnWidth(nameColumn, "30%");
-        leaderboardsTable.addColumn(racesColumn, stringConstants.races());
-        leaderboardsTable.setColumnWidth(racesColumn, "70%");
-        
-        leaderboardsTable.setRowCount(group.leaderboards.size());
-        leaderboardsTable.setRowData(group.leaderboards);
-        leaderboardsCaptionPanel.add(leaderboardsTable);
+            
+            leaderboardsTable.setRowData(tableData);
+            leaderboardsCaptionPanel.add(leaderboardsTable);
+        } else {
+            AnchorCell nameAnchorCell = new AnchorCell();
+            Column<LeaderboardDTO, SafeHtml> nameColumn = new Column<LeaderboardDTO, SafeHtml>(nameAnchorCell) {
+                @Override
+                public SafeHtml getValue(LeaderboardDTO leaderboard) {
+                    String debugParam = Window.Location.getParameter("gwt.codesvr");
+                    return ANCHORTEMPLATE.anchor("/gwt/Leaderboard.html?name=" + leaderboard.name
+                            + "&leaderboardGroupName=" + group.name
+                            + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""),
+                            leaderboard.name);
+                }
+            };
+
+            SafeHtmlCell racesCell = new SafeHtmlCell();
+            Column<LeaderboardDTO, SafeHtml> racesColumn = new Column<LeaderboardDTO, SafeHtml>(racesCell) {
+                @Override
+                public SafeHtml getValue(LeaderboardDTO leaderboard) {
+                    return leaderboardRacesToHtml(leaderboard);
+                }
+            };
+
+            CellTable<LeaderboardDTO> leaderboardsTable = new CellTable<LeaderboardDTO>();
+            leaderboardsTable.setWidth("100%");
+            leaderboardsTable.setSelectionModel(new NoSelectionModel<LeaderboardDTO>());
+            
+            leaderboardsTable.addColumn(nameColumn, stringConstants.name());
+            leaderboardsTable.setColumnWidth(nameColumn, "30%");
+            leaderboardsTable.addColumn(racesColumn, stringConstants.races());
+            leaderboardsTable.setColumnWidth(racesColumn, "70%");
+            
+            leaderboardsTable.setRowData(group.leaderboards);
+            leaderboardsCaptionPanel.add(leaderboardsTable);
+        }
+    }
+    
+    private SafeHtml raceToRaceBoardLink(LeaderboardDTO leaderboard, RaceInLeaderboardDTO race) {
+        String debugParam = Window.Location.getParameter("gwt.codesvr");
+        SafeHtmlBuilder b = new SafeHtmlBuilder();
+        String displayName = race.getRaceColumnName();
+        if (race.getRaceColumnName().equals(stringConstants.overview())) {
+            String link = "/gwt/Leaderboard.html?name=" + leaderboard.name + "&leaderboardGroupName=" + group.name +
+                  (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr="+debugParam : "");
+            b.append(ANCHORTEMPLATE.anchor(link, displayName));
+        } else {
+            if (race.getRaceIdentifier() != null) {
+                EventNameAndRaceName raceId = (EventNameAndRaceName) race.getRaceIdentifier();
+                String link = "/gwt/RaceBoard.html?leaderboardName=" + leaderboard.name + "&raceName=" + raceId.getRaceName()
+                        + "&eventName=" + raceId.getEventName() + "&leaderboardGroupName=" + group.name
+                        + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : "");
+                b.append(ANCHORTEMPLATE.anchor(link, displayName));
+            } else {
+                b.appendHtmlConstant(race.getRaceColumnName());
+            }
+        }
+        return b.toSafeHtml();
     }
     
     private SafeHtml leaderboardRacesToHtml(LeaderboardDTO leaderboard) {
