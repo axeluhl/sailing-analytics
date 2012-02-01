@@ -671,6 +671,7 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
     }
     
     private String getColorString(CompetitorDTO competitorDTO) {
+        // TODO bug #178: use common ColorMap
         // TODO green no more than 70, red no less than 120
         return "#" + (Integer.toHexString(competitorDTO.hashCode()) + "000000").substring(0, 4).toUpperCase() + "00";
     }
