@@ -23,11 +23,14 @@
   top: -1000px; }
 
 body {
-  background: url(images/header_bg.png) 0 0 repeat-x;
-  font-family: Arial, Verdana, sans-serif;
-  line-height: 1;
-  font-size: 62.5%;
-  margin-top: 0; }
+	background: #ebebeb;
+	font-family: 'Terminal Dosis', sans-serif;
+	line-height: 1;
+	font-size: 14px;
+	font-weight: 400;
+	padding: 85px 0 120px 0;
+	margin: 0;
+  }
 
 /** Example rules used by the template application (remove for your app) */
 h1 {
@@ -47,35 +50,47 @@ table td, table th {
 
 
 .LogoAndTitlePanel {
-  margin: 0 0 24px 0;
-  height: 58px; }
+	height: 85px;
+	font-family: Arial, Verdana, sans-serif;
+	position: fixed;
+	width: 100%;
+	top: 0;
+	background-image: url(images/white_gradient_header.png),
+		url(images/header_bg_modern.png);
+	background-position: center top, 0 0;
+	background-repeat: no-repeat, repeat-x;
+}
 
 .LogoAndTitlePanel:after {
 	content: " ";
 	display: block;
 	height: 0;
 	clear: both;
-	visibility: hidden; }
+	visibility: hidden;
+}
 
 .sapLogo {
-	float: left; 
-  margin: 8px 0 0 0; }
+	float: left;
+	margin: 13px 0 0 12px;
+}
 
-.sailingAnalyticsLabelPanel {
-  margin: 10px 0 0 0;
-  border: 1px solid red;}
+.sailingAnalyticsLabelPanel {
+	margin: 10px 0 0 0;
+}
 
 .sailingAnalyticsLabel {
-  float: left;
-  color: #fff;
-  font-size: 1.2em;
-  font-weight: bold;
-  margin: 20px 0 0 0; }
+	float: left;
+	color: #fff;
+	font-size: 14px;
+	font-weight: bold;
+	margin: 15px 0 0 0;
+}
 
 .leaderboardLabel {
   border-bottom: 2px solid #007dc0; 
   font-weight: bold;
-  padding: 0 0 6px 0; }
+  margin: 5px;
+ }
 
 .refreshAndSettings {
   background: #f2f2f2;

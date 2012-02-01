@@ -26,10 +26,6 @@ public class LeaderboardPage extends AbstractEntryPoint {
                     LeaderboardPanel leaderboardPanel = new LeaderboardPanel(sailingService, null,
                             new CompetitorSelectionModel(/* hasMultiSelection */ true), leaderboardName,
                             LeaderboardPage.this, stringMessages);
-                    String padding = Window.Location.getParameter("padding");
-                    if (padding != null && Boolean.valueOf(padding)) {
-                        leaderboardPanel.addStyleName("leftPaddedPanel");
-                    }
                     RootPanel.get().add(logoAndTitlePanel);
                     RootPanel.get().add(leaderboardPanel);
                 } else {
