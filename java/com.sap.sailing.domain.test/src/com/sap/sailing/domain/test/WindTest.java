@@ -40,7 +40,7 @@ public class WindTest {
         track.add(wind1);
         track.add(wind2);
         Wind average = track.getEstimatedWind(pos, middle);
-        assertEquals(0, average.getBearing().getDegrees(), 0.00001);
+        assertEquals(0., average.getBearing().getDifferenceTo(new DegreeBearingImpl(0)).getDegrees(), 0.0001);
     }
     
     @Test
