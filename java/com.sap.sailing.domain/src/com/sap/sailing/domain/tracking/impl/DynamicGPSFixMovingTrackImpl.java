@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.NavigableSet;
 
+import com.sap.sailing.domain.base.BearingWithConfidence;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.impl.BearingWithConfidenceImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
@@ -75,7 +76,8 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends DynamicTrackImpl<Ite
                 last = next;
             }
         }
-        Bearing bearing = bearingCluster.getAverage(at).getObject();
+        BearingWithConfidence<TimePoint> average = bearingCluster.getAverage(at);
+        Bearing bearing = average == null ? null : average.getObject();
         SpeedWithBearing avgSpeed = (count == 0 || bearing == null) ? null : new KnotSpeedWithBearingImpl(knotSum / count, bearing);
         return avgSpeed;
     }

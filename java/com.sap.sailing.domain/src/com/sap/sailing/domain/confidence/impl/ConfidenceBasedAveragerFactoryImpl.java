@@ -7,6 +7,16 @@ import com.sap.sailing.domain.confidence.Weigher;
 
 public class ConfidenceBasedAveragerFactoryImpl implements ConfidenceFactory {
     @Override
+    public <RelativeTo> Weigher<RelativeTo> createConstantWeigher(final double constantConfidence) {
+        return new Weigher<RelativeTo>() {
+            @Override
+            public double getConfidence(RelativeTo fix, RelativeTo request) {
+                return constantConfidence;
+            }
+        };
+    }
+
+    @Override
     public <ValueType, BaseType, RelativeTo> ConfidenceBasedAverager<ValueType, BaseType, RelativeTo> createAverager(Weigher<RelativeTo> weigher) {
         return new ConfidenceBasedAveragerImpl<ValueType, BaseType, RelativeTo>(weigher);
     }

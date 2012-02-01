@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.NavigableSet;
 import java.util.Set;
 
+import com.sap.sailing.domain.base.BearingWithConfidence;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.impl.BearingWithConfidenceImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
@@ -342,7 +343,8 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
             }
         }
         // TODO bug #169: return SpeedWithBearingWithConfidence to reflect the confidence reduction incurred by the difference of the fix's time point and "at"
-        Bearing bearing = bearingCluster.getAverage(at).getObject();
+        BearingWithConfidence<TimePoint> average = bearingCluster.getAverage(at);
+        Bearing bearing = average == null ? null : average.getObject();
         SpeedWithBearing avgSpeed = (count == 0 || bearing == null) ? null : new KnotSpeedWithBearingImpl(knotSum / count, bearing);
         return avgSpeed;
     }
