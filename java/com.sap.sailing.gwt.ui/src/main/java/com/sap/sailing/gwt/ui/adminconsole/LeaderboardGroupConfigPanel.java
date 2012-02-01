@@ -27,6 +27,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -60,6 +61,10 @@ public class LeaderboardGroupConfigPanel extends AbstractEventPanel {
     private CellTable<LeaderboardDTO> groupDetailsTable;
     private MultiSelectionModel<LeaderboardDTO> groupDetailsSelectionModel;
     private ListDataProvider<LeaderboardDTO> groupDetailsProvider;
+    private Button editDescriptionButton;
+    private Button abortDescriptionButton;
+    private Button saveDescriptionButton;
+    private TextArea descriptionTextArea;
     private Button leaderboardUpButton;
     private Button leaderboardDownButton;
     
@@ -99,7 +104,7 @@ public class LeaderboardGroupConfigPanel extends AbstractEventPanel {
         splitPanel.add(createLeaderboardGroupDetailsGUI(tableRes));
         splitPanel.setVerticalAlignment(HorizontalPanel.ALIGN_MIDDLE);
         splitPanel.add(createSwitchLeaderboardsGUI());
-        splitPanel.setVerticalAlignment(HorizontalPanel.ALIGN_TOP);
+        splitPanel.setVerticalAlignment(HorizontalPanel.ALIGN_BOTTOM);
         splitPanel.add(createLeaderboardsGUI(tableRes));
         
         //Load Data
@@ -208,7 +213,7 @@ public class LeaderboardGroupConfigPanel extends AbstractEventPanel {
         leaderboardsTable = new CellTable<LeaderboardDTO>(200, tableRes);
         leaderboardsTable.setWidth("100%");
         leaderboardsTable.addColumnSortHandler(leaderboardsListHandler);
-        leaderboardsTable.addColumn(leaderboardsNameColumn, stringConstants.name());
+        leaderboardsTable.addColumn(leaderboardsNameColumn, stringConstants.leaderboardName());
         leaderboardsTable.addColumn(leaderboardsRacesColumn, stringConstants.races());
 
         leaderboardsSelectionModel = new MultiSelectionModel<LeaderboardDTO>();
@@ -232,7 +237,59 @@ public class LeaderboardGroupConfigPanel extends AbstractEventPanel {
         groupDetailsCaptionPanel.setWidth("95%");
         
         VerticalPanel groupDetailsPanel = new VerticalPanel();
+        groupDetailsPanel.setSpacing(7);
         groupDetailsCaptionPanel.add(groupDetailsPanel);
+        
+        //Create description area
+        CaptionPanel descriptionCaptionPanel = new CaptionPanel(stringConstants.description());
+        groupDetailsPanel.add(descriptionCaptionPanel);
+        
+        VerticalPanel descriptionPanel = new VerticalPanel();
+        descriptionCaptionPanel.add(descriptionPanel);
+        
+        descriptionTextArea = new TextArea();
+        descriptionTextArea.setCharacterWidth(60);
+        descriptionTextArea.setVisibleLines(8);
+        descriptionTextArea.getElement().getStyle().setProperty("resize", "none");
+        descriptionTextArea.setReadOnly(true);
+        descriptionPanel.add(descriptionTextArea);
+        
+        HorizontalPanel descriptionFunctionsPanel = new HorizontalPanel();
+        descriptionFunctionsPanel.setSpacing(5);
+        descriptionPanel.add(descriptionFunctionsPanel);
+        
+        editDescriptionButton = new Button(stringConstants.edit());
+        editDescriptionButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                setDescriptionEditable(true);
+            }
+        });
+        descriptionFunctionsPanel.add(editDescriptionButton);
+        
+        abortDescriptionButton = new Button(stringConstants.abort());
+        abortDescriptionButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                LeaderboardGroupDTO selectedGroup = groupsSelectionModel.getSelectedObject();
+                setDescriptionEditable(false);
+                descriptionTextArea.setText(selectedGroup.description);
+            }
+        });
+        abortDescriptionButton.setVisible(false);
+        abortDescriptionButton.setEnabled(false);
+        descriptionFunctionsPanel.add(abortDescriptionButton);
+        
+        saveDescriptionButton = new Button(stringConstants.save());
+        saveDescriptionButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                saveDescriptionChanges();
+            }
+        });
+        saveDescriptionButton.setEnabled(false);
+        saveDescriptionButton.setVisible(false);
+        descriptionFunctionsPanel.add(saveDescriptionButton);
         
         //Create leaderboard table
         TextColumn<LeaderboardDTO> groupDetailsNameColumn = new TextColumn<LeaderboardDTO>() {
@@ -263,7 +320,7 @@ public class LeaderboardGroupConfigPanel extends AbstractEventPanel {
 
         groupDetailsTable = new CellTable<LeaderboardDTO>(200, tableRes);
         groupDetailsTable.setWidth("100%");
-        groupDetailsTable.addColumn(groupDetailsNameColumn, stringConstants.name());
+        groupDetailsTable.addColumn(groupDetailsNameColumn, stringConstants.leaderboardName());
         groupDetailsTable.addColumn(groupDetailsRacesColumn, stringConstants.races());
         
         groupDetailsSelectionModel = new MultiSelectionModel<LeaderboardDTO>();
@@ -365,8 +422,7 @@ public class LeaderboardGroupConfigPanel extends AbstractEventPanel {
         TextColumn<LeaderboardGroupDTO> groupDescriptionColumn = new TextColumn<LeaderboardGroupDTO>() {
             @Override
             public String getValue(LeaderboardGroupDTO group) {
-                //TODO Display line breaks in description
-                return group.description;
+                return group.description.length() <= 100 ? group.description : group.description.substring(0, 98) + "...";
             }
         };
 
@@ -577,8 +633,11 @@ public class LeaderboardGroupConfigPanel extends AbstractEventPanel {
     private void groupSelectionChanged() {
         LeaderboardGroupDTO selectedGroup = groupsSelectionModel.getSelectedObject();
         if (selectedGroup != null) {
-            //Display leaderboards of the group
+            //Display details of the group
             groupDetailsCaptionPanel.setCaptionText(stringConstants.detailsOfLeaderboardGroup() + ": " + selectedGroup.name);
+            descriptionTextArea.setText(selectedGroup.description);
+            setDescriptionEditable(false);
+            
             groupDetailsSelectionModel.clear();
             groupDetailsProvider.getList().clear();
             groupDetailsProvider.getList().addAll(selectedGroup.leaderboards);
@@ -673,6 +732,32 @@ public class LeaderboardGroupConfigPanel extends AbstractEventPanel {
 
     @Override
     public void fillEvents(List<EventDTO> result) {
+    }
+
+    private void setDescriptionEditable(boolean isEditable) {
+        LeaderboardGroupDTO selectedGroup = groupsSelectionModel.getSelectedObject();
+        if (selectedGroup != null) {
+            editDescriptionButton.setEnabled(!isEditable);
+            editDescriptionButton.setVisible(!isEditable);
+            abortDescriptionButton.setEnabled(isEditable);
+            abortDescriptionButton.setVisible(isEditable);
+            saveDescriptionButton.setEnabled(isEditable);
+            saveDescriptionButton.setVisible(isEditable);
+            descriptionTextArea.setReadOnly(!isEditable);
+        }
+    }
+
+    private void saveDescriptionChanges() {
+        String newDescription = descriptionTextArea.getText();
+        LeaderboardGroupDTO selectedGroup = groupsSelectionModel.getSelectedObject();
+        if (newDescription != null && newDescription.length() > 0) {
+            selectedGroup.description = newDescription;
+            setDescriptionEditable(false);
+            updateGroup(selectedGroup);
+        } else {
+            Window.alert(stringConstants.pleaseEnterNonEmptyDescription() + ".");
+            descriptionTextArea.setText(selectedGroup.description);
+        }
     }
     
 }
