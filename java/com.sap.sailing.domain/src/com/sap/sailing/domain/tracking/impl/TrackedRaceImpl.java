@@ -52,6 +52,7 @@ import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.confidence.ConfidenceFactory;
 import com.sap.sailing.domain.confidence.Weigher;
+import com.sap.sailing.domain.confidence.impl.LinearTimeDifferenceWeigher;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
@@ -700,6 +701,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     private Map<LegType, BearingWithConfidenceCluster<TimePoint>> clusterBearingsForWindEstimation(TimePoint timePoint,
             DummyMarkPassingWithTimePointOnly dummyMarkPassingForNow, Weigher<TimePoint> weigher) {
+        Weigher<TimePoint> weigherForMarkPassingProximity = new LinearTimeDifferenceWeigher(getMillisecondsOverWhichToAverageSpeed());
         Map<LegType, BearingWithConfidenceCluster<TimePoint>> bearings = new HashMap<LegType, BearingWithConfidenceCluster<TimePoint>>();
         for (LegType legType : LegType.values()) {
             bearings.put(legType, new BearingWithConfidenceCluster<TimePoint>(weigher));
@@ -725,11 +727,11 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                         double markPassingProximityConfidenceReduction = 1.0;
                         if (prevMarkPassing != null && !prevMarkPassing.isEmpty()) {
                             markPassingProximityConfidenceReduction *= Math.max(0.0,
-                                    1.0-weigher.getConfidence(prevMarkPassing.last().getTimePoint(), timePoint));
+                                    1.0-weigherForMarkPassingProximity.getConfidence(prevMarkPassing.last().getTimePoint(), timePoint));
                         }
                         if (nextMarkPassing != null && !nextMarkPassing.isEmpty()) {
                             markPassingProximityConfidenceReduction *= Math.max(0.0,
-                                    1.0-weigher.getConfidence(nextMarkPassing.first().getTimePoint(), timePoint));
+                                    1.0-weigherForMarkPassingProximity.getConfidence(nextMarkPassing.first().getTimePoint(), timePoint));
                         }
                         SpeedWithBearingWithConfidence<TimePoint> estimatedSpeedWithConfidence = track.getEstimatedSpeed(timePoint,
                                 weigher);
