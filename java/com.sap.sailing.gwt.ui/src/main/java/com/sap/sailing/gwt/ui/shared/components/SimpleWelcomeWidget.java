@@ -1,12 +1,13 @@
 package com.sap.sailing.gwt.ui.shared.components;
 
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.VerticalPanel;
 
-public class SimpleWelcomeWidget extends VerticalPanel implements WelcomeWidget {
+public class SimpleWelcomeWidget extends WelcomeWidget {
 
+    private FormPanel mainPanel;
     private Label welcomeHeader;
     private HTML welcomeText;
 
@@ -14,20 +15,25 @@ public class SimpleWelcomeWidget extends VerticalPanel implements WelcomeWidget 
      * Creates a VerticalPanel as welcome widget with a header and a welcome message
      * @param headerText The text of the header component
      * @param welcomeText The text of the welcome message
-     * @param horizontalAlignment The alignment of the components in the VerticalPanel
      */
-    public SimpleWelcomeWidget(String headerText, String welcomeText, HorizontalAlignmentConstant horizontalAlignment) {
+    public SimpleWelcomeWidget(String headerText, String welcomeText) {
         super();
-        setHorizontalAlignment(horizontalAlignment);
+        mainPanel = new FormPanel();
+        mainPanel.setStyleName(STYLE_NAME_PREFIX + "WelcomePanel");
+        add(mainPanel);
+        
         welcomeHeader = new Label(headerText);
-        add(welcomeHeader);
+        welcomeHeader.setStyleName(STYLE_NAME_PREFIX + "Header");
+        mainPanel.add(welcomeHeader);
         this.welcomeText = new HTML(new SafeHtmlBuilder().appendEscapedLines(welcomeText).toSafeHtml());
-        add(this.welcomeText);
+        this.welcomeText.setStyleName(STYLE_NAME_PREFIX + "WelcomeText");
+        mainPanel.add(this.welcomeText);
     }
 
     @Override
     public void setWelcomeText(String welcomeText) {
         this.welcomeText = new HTML(new SafeHtmlBuilder().appendEscapedLines(welcomeText).toSafeHtml());
+        this.welcomeText.setStyleName(STYLE_NAME_PREFIX + "WelcomeText");
     }
 
     @Override

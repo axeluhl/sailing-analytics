@@ -1,17 +1,25 @@
 package com.sap.sailing.gwt.ui.shared.components;
 
-public interface WelcomeWidget {
+import com.google.gwt.user.client.ui.SimplePanel;
+
+/**
+ * A WelcomeWidget displays a short message to the user to show him the functionality (or whatever) of the component on which it's displayed.
+ * @author Lennart Hensler (D054527)
+ */
+public abstract class WelcomeWidget extends SimplePanel {
+    
+    final static String STYLE_NAME_PREFIX = "welcomeWidget-";
 
     /**
      * Sets the text of the header component.
      * @param headerText The new header text
      */
-    void setWelcomeHeaderText(String headerText);
+    abstract void setWelcomeHeaderText(String headerText);
     
     /**
      * Sets the text of the component under the header
      * @param welcomeText The new welcome text
      */
-    void setWelcomeText(String welcomeText);
+    abstract void setWelcomeText(String welcomeText);
     
 }

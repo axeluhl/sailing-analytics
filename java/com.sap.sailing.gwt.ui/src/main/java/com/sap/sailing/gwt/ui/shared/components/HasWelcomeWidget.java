@@ -1,7 +1,10 @@
 package com.sap.sailing.gwt.ui.shared.components;
 
-import com.google.gwt.user.client.ui.Widget;
-
+/**
+ * Classes which implement this interface have the ability to display a {@link WelcomeWidget}.
+ * 
+ * @author Lennart Hensler (D054527)
+ */
 public interface HasWelcomeWidget {
 
     /**
@@ -9,7 +12,7 @@ public interface HasWelcomeWidget {
      * @param welcome The new welcome widget
      * @see {@link WelcomeWidget}, {@link SimpleWelcomeWidget}, {@link ClosableWelcomeWidget}, ...
      */
-    void setWelcomeWidget(Widget welcome);
+    void setWelcomeWidget(WelcomeWidget welcome);
     void setWelcomeWidgetVisible(boolean isVisible);
     
 }
