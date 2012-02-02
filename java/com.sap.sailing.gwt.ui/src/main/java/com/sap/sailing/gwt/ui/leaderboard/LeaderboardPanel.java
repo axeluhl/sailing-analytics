@@ -1060,6 +1060,13 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 Collections.sort(getData().getList(), getRankColumn().getComparator());
                 getLeaderboardTable().getColumnSortList().push(getRankColumn());
             }
+            //Reselect the selected rows
+            leaderboardSelectionModel.clear();
+            for (LeaderboardRowDTO row : data.getList()) {
+                if (competitorSelectionProvider.isSelected(row.competitor)) {
+                    leaderboardSelectionModel.setSelected(row, true);
+                }
+            }
         }
     }
 

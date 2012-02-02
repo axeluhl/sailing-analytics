@@ -8,8 +8,7 @@ import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
 import com.sap.sailing.gwt.ui.client.EventRefresher;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
-import com.sap.sailing.gwt.ui.shared.components.ClosableWelcomeWidget;
-import com.sap.sailing.gwt.ui.shared.components.SimpleWelcomeWidget;
+import com.sap.sailing.gwt.ui.shared.panels.ClosableWelcomeWidget;
 
 /**
  * 
@@ -22,9 +21,7 @@ public class SpectatorEntryPoint extends AbstractEntryPoint implements EventRefr
     public void onModuleLoad() {
         super.onModuleLoad();
 
-        //Fill fixed leaderboard selection
         String groupParamValue = Window.Location.getParameter("leaderboardGroupName");
-       
         final String groupName;
         if(groupParamValue == null || groupParamValue.isEmpty()) {
             groupName = null;
@@ -40,6 +37,11 @@ public class SpectatorEntryPoint extends AbstractEntryPoint implements EventRefr
             });
         }
         
+        String root = Window.Location.getParameter("root");
+        //Check if the root contains an allowed value
+        if (root != null) {
+            root = (root.equals("leaderboardGroupPanel") || root.equals("overview")) ? root : null;
+        }
         RootPanel rootPanel = RootPanel.get();
         rootPanel.setSize("100%", "100%");
         
@@ -52,10 +54,10 @@ public class SpectatorEntryPoint extends AbstractEntryPoint implements EventRefr
         if (groupName == null) {
             panelToDisplay = new OverviewEventPanel(sailingService, this, this, stringMessages);
         } else {
-            panelToDisplay = new LeaderboardGroupPanel(sailingService, stringMessages, this, groupName);
+            panelToDisplay = new LeaderboardGroupPanel(sailingService, stringMessages, this, groupName, root);
             LeaderboardGroupPanel groupPanel = (LeaderboardGroupPanel) panelToDisplay;
             groupPanel.setWelcomeWidget(new ClosableWelcomeWidget(true, stringMessages.welcomeToSailingAnalytics(),
-                    "Ipsum lorum\nHello World!", SimpleWelcomeWidget.ALIGN_RIGHT, stringMessages));
+                    "Ipsum lorum\nHello World!", stringMessages));
         }
         panelToDisplay.setSize("100%", "100%");
         rootPanel.add(panelToDisplay);

@@ -16,6 +16,7 @@ import java.util.logging.Logger;
 
 import org.json.simple.parser.ParseException;
 
+import com.sap.sailing.domain.base.BearingWithConfidence;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Competitor;
@@ -24,8 +25,10 @@ import com.sap.sailing.domain.base.CourseListener;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.SpeedWithBearing;
+import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.base.Timed;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.base.impl.BearingWithConfidenceImpl;
 import com.sap.sailing.domain.base.impl.DouglasPeucker;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
@@ -47,6 +50,8 @@ import com.sap.sailing.domain.common.impl.RacePlaceOrderImpl;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
+import com.sap.sailing.domain.confidence.ConfidenceFactory;
+import com.sap.sailing.domain.confidence.Weigher;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
@@ -646,9 +651,12 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     @Override
     public Wind getEstimatedWindDirection(Position position, TimePoint timePoint) {
-        Map<LegType, BearingCluster> bearings = new HashMap<LegType, BearingCluster>();
+        Weigher<TimePoint> weigher = ConfidenceFactory.INSTANCE.createExponentialTimeDifferenceWeigher(
+        // use a minimum confidence to avoid the bearing to flip to 270deg in case all is zero
+                getMillisecondsOverWhichToAverageSpeed());
+        Map<LegType, BearingWithConfidenceCluster<TimePoint>> bearings = new HashMap<LegType, BearingWithConfidenceCluster<TimePoint>>();
         for (LegType legType : LegType.values()) {
-            bearings.put(legType, new BearingCluster());
+            bearings.put(legType, new BearingWithConfidenceCluster<TimePoint>(weigher));
         }
         for (Competitor competitor : getRace().getCompetitors()) {
             TrackedLegOfCompetitor leg = getTrackedLeg(competitor, timePoint);
@@ -665,44 +673,58 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                     GPSFixTrack<Competitor, GPSFixMoving> track = getTrack(competitor);
                     // TODO bug #167 could be fixed here by excluding competitors that are x seconds before/after a mark passing
                     if (!track.hasDirectionChange(timePoint, getManeuverDegreeAngleThreshold())) {
-                        SpeedWithBearing estimatedSpeed = track.getEstimatedSpeed(timePoint);
-                        if (estimatedSpeed != null) {
-                            // TODO but #169: preserve confidence of estimatedSpeed relative to timePoint so as to feed into a BearingWithConfidenceCluster here
-                            Bearing bearing = estimatedSpeed.getBearing();
-                            BearingCluster bearingClusterForLegType = bearings.get(legType);
+                        SpeedWithBearingWithConfidence<TimePoint> estimatedSpeedWithConfidence = track.getEstimatedSpeed(timePoint,
+                                weigher);
+                        if (estimatedSpeedWithConfidence != null) {
+                            BearingWithConfidence<TimePoint> bearing = new BearingWithConfidenceImpl<TimePoint>(
+                                    estimatedSpeedWithConfidence.getObject().getBearing(), estimatedSpeedWithConfidence.getConfidence(),
+                                    estimatedSpeedWithConfidence.getRelativeTo());
+                            BearingWithConfidenceCluster<TimePoint> bearingClusterForLegType = bearings.get(legType);
                             bearingClusterForLegType.add(bearing);
                         }
                     }
                 }
             }
         }
-        Bearing reversedUpwindAverage = null;
-        int upwindConfidence = 0;
-        BearingCluster[] bearingClustersUpwind = bearings.get(LegType.UPWIND).splitInTwo(getMinimumAngleBetweenDifferentTacksUpwind());
+        // use the minimum confidence of the four "quadrants" as the result's confidence
+        BearingWithConfidenceImpl<TimePoint> reversedUpwindAverage = null;
+        int upwindNumberOfRelevantBoats = 0;
+        double confidence = 0;
+        BearingWithConfidenceCluster<TimePoint>[] bearingClustersUpwind = bearings.get(LegType.UPWIND).splitInTwo(
+                getMinimumAngleBetweenDifferentTacksUpwind(), timePoint);
         if (!bearingClustersUpwind[0].isEmpty() && !bearingClustersUpwind[1].isEmpty()) {
-            reversedUpwindAverage = bearingClustersUpwind[0].getAverage().middle(bearingClustersUpwind[1].getAverage()).reverse();
-            upwindConfidence = Math.min(bearingClustersUpwind[0].size(), bearingClustersUpwind[1].size());
+            BearingWithConfidence<TimePoint> average0 = bearingClustersUpwind[0].getAverage(timePoint);
+            BearingWithConfidence<TimePoint> average1 = bearingClustersUpwind[1].getAverage(timePoint);
+            confidence = Math.min(average0.getConfidence(), average1.getConfidence());
+            reversedUpwindAverage = new BearingWithConfidenceImpl<TimePoint>(average0.getObject().middle(average1.getObject()).reverse(),
+                    confidence, timePoint);
+            upwindNumberOfRelevantBoats = Math.min(bearingClustersUpwind[0].size(), bearingClustersUpwind[1].size());
         }
-        Bearing downwindAverage = null;
-        int downwindConfidence = 0;
-        BearingCluster[] bearingClustersDownwind = bearings.get(LegType.DOWNWIND).splitInTwo(getMinimumAngleBetweenDifferentTacksDownwind());
+        BearingWithConfidenceImpl<TimePoint> downwindAverage = null;
+        int downwindNumberOfRelevantBoats = 0;
+        BearingWithConfidenceCluster<TimePoint>[] bearingClustersDownwind = bearings.get(LegType.DOWNWIND).splitInTwo(
+                getMinimumAngleBetweenDifferentTacksDownwind(), timePoint);
         if (!bearingClustersDownwind[0].isEmpty() && !bearingClustersDownwind[1].isEmpty()) {
-            downwindAverage = bearingClustersDownwind[0].getAverage().middle(bearingClustersDownwind[1].getAverage());
-            downwindConfidence = Math.min(bearingClustersDownwind[0].size(), bearingClustersDownwind[1].size());
+            BearingWithConfidence<TimePoint> average0 = bearingClustersDownwind[0].getAverage(timePoint);
+            BearingWithConfidence<TimePoint> average1 = bearingClustersDownwind[1].getAverage(timePoint);
+            double downwindConfidence = Math.min(average0.getConfidence(), average1.getConfidence());
+            confidence = Math.min(confidence, downwindConfidence);
+            downwindAverage = new BearingWithConfidenceImpl<TimePoint>(average0.getObject().middle(average1.getObject()), downwindConfidence, timePoint);
+            downwindNumberOfRelevantBoats = Math.min(bearingClustersDownwind[0].size(), bearingClustersDownwind[1].size());
         }
-        int confidence = upwindConfidence + downwindConfidence;
-        BearingCluster resultCluster = new BearingCluster();
-        assert upwindConfidence == 0 || reversedUpwindAverage != null;
-        for (int i=0; i<upwindConfidence; i++) {
+        int numberOfBoatsRelevantForEstimate = upwindNumberOfRelevantBoats + downwindNumberOfRelevantBoats;
+        BearingWithConfidenceCluster<TimePoint> resultCluster = new BearingWithConfidenceCluster<TimePoint>(weigher);
+        assert upwindNumberOfRelevantBoats == 0 || reversedUpwindAverage != null;
+        if (upwindNumberOfRelevantBoats > 0) {
             resultCluster.add(reversedUpwindAverage);
         }
-        assert downwindConfidence == 0 || downwindAverage != null;
-        for (int i=0; i<downwindConfidence; i++) {
+        assert downwindNumberOfRelevantBoats == 0 || downwindAverage != null;
+        if (downwindNumberOfRelevantBoats > 0) {
             resultCluster.add(downwindAverage);
         }
-        Bearing resultBearing = resultCluster.getAverage();
+        BearingWithConfidence<TimePoint> resultBearing = resultCluster.getAverage(timePoint);
         return resultBearing == null ? null : new WindImpl(null, timePoint,
-                new KnotSpeedWithBearingImpl(/* speedInKnots */ confidence, resultBearing));
+                new KnotSpeedWithBearingImpl(/* speedInKnots */ numberOfBoatsRelevantForEstimate, resultBearing.getObject()));
     }
     
     /**

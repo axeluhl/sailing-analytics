@@ -1,11 +1,13 @@
 package com.sap.sailing.domain.tracking;
 
 import com.sap.sailing.domain.base.SpeedWithBearing;
+import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.confidence.Weigher;
 
 /**
  * A track records the {@link GPSFix}es received for an object of type
@@ -74,6 +76,19 @@ public interface GPSFixTrack<ItemType, FixType extends GPSFix> extends Track<Fix
      * by the GPS fixes in this track at time point <code>at</code>.
      */
     SpeedWithBearing getEstimatedSpeed(TimePoint at);
+    
+    /**
+     * Estimates the tracked item's speed/bearing, returning the result as a value with confidence. The confidences of
+     * the individual fixes contributing to the estimation are computed using the <code>weigher</code>. The result's
+     * confidence is the average confidence of the fixes used. While this is probably not a mathematically meaningful
+     * confidence value, it helps in comparing confidences of different estimations relative to each other.
+     */
+    SpeedWithBearingWithConfidence<TimePoint> getEstimatedSpeed(TimePoint at, Weigher<TimePoint> weigher);
+
+    /**
+     * Same as {@link #getEstimatedSpeed(TimePoint, Weigher)}, but using the raw fixes.
+     */
+    SpeedWithBearingWithConfidence<TimePoint> getRawEstimatedSpeed(TimePoint at, Weigher<TimePoint> weigher);
 
     long getMillisecondsOverWhichToAverageSpeed();
     

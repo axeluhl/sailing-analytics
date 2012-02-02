@@ -236,3 +236,42 @@ input.magnifier {
 	text-decoration: none;
 }
 
+.leaderboardGroupPanel-GroupName {
+	float: left;
+}
+
+.leaderboardGroupPanel-GroupDescription {
+	float: left;
+}
+
+.leaderboardGroupPanel-LeaderboardsTableLabel {
+	
+}
+
+.leaderboardGroupPanel-ActiveLeaderboard{
+	
+}
+
+.leaderboardGroupPanel-ActiveRace {
+	
+}
+
+.leaderboardGroupPanel-InactiveRace {
+	
+}
+
+.welcomeWidget-WelcomePanel{
+	
+}
+
+.welcomeWidget-CloseButton {
+	
+}
+
+.welcomeWidget-Header {
+	
+}
+
+.welcomeWidget-WelcomeText {
+	
+}
