@@ -8,7 +8,7 @@ import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
 import com.sap.sailing.gwt.ui.client.EventRefresher;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
-import com.sap.sailing.gwt.ui.shared.components.ClosableWelcomeWidget;
+import com.sap.sailing.gwt.ui.shared.panels.ClosableWelcomeWidget;
 
 /**
  * 

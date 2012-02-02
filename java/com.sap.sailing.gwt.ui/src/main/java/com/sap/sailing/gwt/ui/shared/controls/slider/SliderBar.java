@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.shared.controls;
+package com.sap.sailing.gwt.ui.shared.controls.slider;
 
 /*
  * Copyright 2008 Google Inc.

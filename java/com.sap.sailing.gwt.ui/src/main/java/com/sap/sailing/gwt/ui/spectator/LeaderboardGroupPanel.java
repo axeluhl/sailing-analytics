@@ -22,13 +22,13 @@ import com.google.gwt.view.client.NoSelectionModel;
 import com.sap.sailing.domain.common.EventNameAndRaceName;
 import com.sap.sailing.gwt.ui.adminconsole.LeaderboardConfigPanel.AnchorCell;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
+import com.sap.sailing.gwt.ui.client.HasWelcomeWidget;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceInLeaderboardDTO;
-import com.sap.sailing.gwt.ui.shared.components.HasWelcomeWidget;
-import com.sap.sailing.gwt.ui.shared.components.WelcomeWidget;
+import com.sap.sailing.gwt.ui.shared.panels.WelcomeWidget;
 
 public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget {
 

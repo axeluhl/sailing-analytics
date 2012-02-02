@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.shared.components;
+package com.sap.sailing.gwt.ui.shared.panels;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
