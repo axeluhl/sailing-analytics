@@ -102,12 +102,11 @@ public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest 
      */
     @Test
     public void testWindEstimationCacheInvalidationAfterLegTypeChange() throws NoWindException {
-        MillisecondsTimePoint fixTime = new MillisecondsTimePoint(new GregorianCalendar(2011, 05, 23).getTime());
+        TimePoint fixTime = new MillisecondsTimePoint(new GregorianCalendar(2011, 05, 23).getTime());
+        TimePoint checkTime = new MillisecondsTimePoint(fixTime.asMillis()+60000); // one minute later
         initRace(2, new int[] { 1, 1 }, fixTime);
         getTrackedRace().setRaceIsKnownToStartUpwind(false); // use only WEB wind to determine leg type
-        TimePoint now = getTrackedRace()
-                .getMarkPassingsInOrder(getTrackedRace().getRace().getCourse().getFirstWaypoint()).iterator().next()
-                .getTimePoint();
+        TimePoint now = checkTime;
         setBearingForCompetitor(competitors.get(0), now, 320);
         setBearingForCompetitor(competitors.get(1), now, 50);
         TrackedLeg firstLeg = getTrackedRace().getTrackedLeg(getTrackedRace().getRace().getCourse().getLegs().iterator().next());
@@ -123,7 +122,7 @@ public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest 
                         }
                     }
         };
-        Wind estimatedWindDirection = track.getEstimatedWind(/* position */ null, fixTime);
+        Wind estimatedWindDirection = track.getEstimatedWind(/* position */ null, checkTime);
         assertNotNull(estimatedWindDirection);
         assertEquals(185., estimatedWindDirection.getBearing().getDegrees(), 0.00000001);
         assertFalse(cachedFixes.isEmpty());
@@ -132,14 +131,14 @@ public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest 
         Iterator<Waypoint> waypointsIter = getTrackedRace().getRace().getCourse().getWaypoints().iterator();
         Waypoint leewardMark = waypointsIter.next();
         Waypoint windwardMark = waypointsIter.next();
-        Position leewardGatePosition = getTrackedRace().getApproximatePosition(leewardMark, fixTime);
+        Position leewardGatePosition = getTrackedRace().getApproximatePosition(leewardMark, checkTime);
         Distance d = new NauticalMileDistance(1);
-        Wind wind = getTrackedRace().getWind(null, fixTime, WindSource.TRACK_BASED_ESTIMATION);
+        Wind wind = getTrackedRace().getWind(null, checkTime, WindSource.TRACK_BASED_ESTIMATION);
         Position newWindwardMarkPosition = leewardGatePosition.translateGreatCircle(wind.getBearing(), d);
         getTrackedRace().getOrCreateTrack(windwardMark.getBuoys().iterator().next()).addGPSFix(
-                new GPSFixImpl(newWindwardMarkPosition, fixTime));
+                new GPSFixImpl(newWindwardMarkPosition, checkTime));
         assertEquals(LegType.DOWNWIND, firstLeg.getLegType(fixTime));
-        Wind estimatedWindDirectionDownwind = track.getEstimatedWind(/* position */ null, fixTime);
+        Wind estimatedWindDirectionDownwind = track.getEstimatedWind(/* position */ null, checkTime);
         assertNotNull(estimatedWindDirectionDownwind);
         assertEquals(5., estimatedWindDirectionDownwind.getBearing().getDegrees(), 0.00000001);
     }
@@ -147,12 +146,11 @@ public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest 
     @Test
     public void testWindEstimationCaching() {
         MillisecondsTimePoint fixTime = new MillisecondsTimePoint(new GregorianCalendar(2011, 05, 23).getTime());
+        TimePoint checkTime = new MillisecondsTimePoint(fixTime.asMillis()+60000); // one minute later
         initRace(2, new int[] { 1, 1 }, fixTime);
-        TimePoint now = getTrackedRace()
-                .getMarkPassingsInOrder(getTrackedRace().getRace().getCourse().getFirstWaypoint()).iterator().next()
-                .getTimePoint();
-        setBearingForCompetitor(competitors.get(0), now, 320);
-        setBearingForCompetitor(competitors.get(1), now, 50);
+        TimePoint now = checkTime;
+        setBearingForCompetitor(competitors.get(0), checkTime, 320);
+        setBearingForCompetitor(competitors.get(1), checkTime, 50);
         final Map<TimePoint, Wind> cachedFixes = new HashMap<TimePoint, Wind>();
         TrackBasedEstimationWindTrackImpl track = new TrackBasedEstimationWindTrackImpl(
                 getTrackedRace(), /* millisecondsOverWhichToAverage */ 30000) {
@@ -164,21 +162,21 @@ public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest 
                         }
                     }
         };
-        Wind estimatedWindDirection = track.getEstimatedWind(/* position */ null, fixTime);
+        Wind estimatedWindDirection = track.getEstimatedWind(/* position */ null, checkTime);
         assertNotNull(estimatedWindDirection);
         assertEquals(185., estimatedWindDirection.getBearing().getDegrees(), 0.00000001);
         assertFalse(cachedFixes.isEmpty());
         assertEquals(185., cachedFixes.values().iterator().next().getBearing().getDegrees(), 0.00000001);
         // now clear set of cached fixes, ask again and ensure nothing is cached again:
         cachedFixes.clear();
-        Wind estimatedWindDirectionCached = track.getEstimatedWind(/* position */ null, fixTime);
+        Wind estimatedWindDirectionCached = track.getEstimatedWind(/* position */ null, checkTime);
         assertTrue(cachedFixes.isEmpty());
         assertNotNull(estimatedWindDirectionCached);
         assertEquals(185., estimatedWindDirectionCached.getBearing().getDegrees(), 0.00000001);
         // now add a GPS fix and make sure the cache is invalidated
         now = MillisecondsTimePoint.now();
         setBearingForCompetitor(competitors.get(0), now, 330);
-        Wind estimatedWindDirectionNew = track.getEstimatedWind(/* position */ null, fixTime);
+        Wind estimatedWindDirectionNew = track.getEstimatedWind(/* position */ null, checkTime);
         assertFalse(cachedFixes.isEmpty());
         assertNotNull(estimatedWindDirectionNew);
         assertTrue("Expected estimated wind direction to now be greater than 185 degrees but was "
@@ -192,6 +190,29 @@ public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest 
         MillisecondsTimePoint now = MillisecondsTimePoint.now();
         setBearingForCompetitor(competitors.get(0), now, 320);
         setBearingForCompetitor(competitors.get(1), now, 50);
+        Wind estimatedWindDirection = getTrackedRace().getEstimatedWindDirection(/* position */ null, now);
+        assertEquals(185., estimatedWindDirection.getBearing().getDegrees(), 0.00000001);
+    }
+
+    @Test
+    public void testWindEstimationForSimpleTracksWithOneAncientFixToBeSuppressedByLowConfidence() throws NoWindException {
+        initRace(3, new int[] { 1, 1, 1 }, new MillisecondsTimePoint(new GregorianCalendar(2011, 05, 23).getTime()));
+        MillisecondsTimePoint now = MillisecondsTimePoint.now();
+        setBearingForCompetitor(competitors.get(0), now, 320);
+        setBearingForCompetitor(competitors.get(1), now, 50);
+        setBearingForCompetitor(competitors.get(2), new MillisecondsTimePoint(0), 100); // this shouldn't disturb the estimation because it's too old
+        Wind estimatedWindDirection = getTrackedRace().getEstimatedWindDirection(/* position */ null, now);
+        assertEquals(185., estimatedWindDirection.getBearing().getDegrees(), 0.00000001);
+    }
+
+    @Test
+    public void testWindEstimationForSimpleTracksWithOneFixNearMarkPassingToBeSuppressedByLowConfidence() throws NoWindException {
+        TimePoint markPassingTimePoint = new MillisecondsTimePoint(new GregorianCalendar(2011, 05, 23).getTime());
+        initRace(3, new int[] { 1, 1, 1 }, markPassingTimePoint);
+        MillisecondsTimePoint now = MillisecondsTimePoint.now();
+        setBearingForCompetitor(competitors.get(0), now, 320);
+        setBearingForCompetitor(competitors.get(1), now, 50);
+        setBearingForCompetitor(competitors.get(2), markPassingTimePoint, 100); // this shouldn't disturb the estimation because it's too old
         Wind estimatedWindDirection = getTrackedRace().getEstimatedWindDirection(/* position */ null, now);
         assertEquals(185., estimatedWindDirection.getBearing().getDegrees(), 0.00000001);
     }
