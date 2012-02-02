@@ -9,14 +9,14 @@ import java.util.Map;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FormPanel;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.adminconsole.RaceMap;
 import com.sap.sailing.gwt.ui.adminconsole.RaceMapSettings;
 import com.sap.sailing.gwt.ui.adminconsole.WindChart;
@@ -34,9 +34,11 @@ import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.components.ComponentViewer;
+import com.sap.sailing.gwt.ui.shared.panels.BreadcrumbPanel;
 
 /**
  * A panel showing a list of components visualizing a race from the events announced by calls to {@link #fillEvents(List)}.
@@ -58,15 +60,14 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
     private final Map<RaceIdentifier, RaceDTO> racesByIdentifier;
 
     private final List<CollapsableComponentViewer<?>> collapsableViewers;
-    private final HorizontalPanel componentsHeaderPanel;
     private final FlowPanel componentsNavigationPanel;
-    private final HorizontalPanel componentsHeaderNamePanel;
+    private final BreadcrumbPanel breadcrumbPanel; 
     private final TimePanel timePanel;
     private final Timer timer;
     private final RaceSelectionProvider raceSelectionProvider;
     
     public RaceBoardPanel(SailingServiceAsync sailingService, RaceSelectionProvider raceSelectionProvider, String leaderboardName,
-            ErrorReporter errorReporter, final StringMessages stringMessages) {
+            LeaderboardGroupDTO leaderboardGroup, ErrorReporter errorReporter, final StringMessages stringMessages) {
         this.sailingService = sailingService;
         this.raceSelectionProvider = raceSelectionProvider;
         raceSelectionProvider.addRaceSelectionChangeListener(this);
@@ -82,17 +83,15 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
         collapsableViewers = new ArrayList<CollapsableComponentViewer<?>>();
         CompetitorSelectionModel competitorSelectionModel = new CompetitorSelectionModel(/* hasMultiSelection */ true);
 
-        componentsHeaderPanel = new HorizontalPanel();
-        componentsHeaderPanel.addStyleName("raceBoardPanelHeader");
-        mainPanel.add(componentsHeaderPanel);
+        String debugParam = Window.Location.getParameter("gwt.codesvr");
+        String link = "/gwt/Spectator.html" + (debugParam != null && !debugParam.isEmpty() ? "?gwt.codesvr=" + debugParam : "");
+        ArrayList<Pair<String, String>> breadcrumbLinksData = new ArrayList<Pair<String, String>>();
+        breadcrumbLinksData.add(new Pair<String, String>(link, stringMessages.home()));
+        breadcrumbPanel = new BreadcrumbPanel(breadcrumbLinksData, selectedRaceIdentifier.getRaceName());
+        mainPanel.add(breadcrumbPanel);
+
         componentsNavigationPanel = new FlowPanel();
         componentsNavigationPanel.addStyleName("raceBoardNavigation");
-        componentsHeaderNamePanel = new HorizontalPanel();
-        componentsHeaderPanel.add(componentsHeaderNamePanel);
-
-        Label eventNameLabel = new Label(selectedRaceIdentifier.getRaceName());
-        eventNameLabel.setStyleName("raceBoardPanelHeader-name");
-        componentsHeaderNamePanel.add(eventNameLabel);
 
         // create the default leaderboard and select the right race
         LeaderboardPanel leaderboardPanel = new LeaderboardPanel(sailingService, selectedRaceIdentifier, competitorSelectionModel,
@@ -146,8 +145,8 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
         return componentsNavigationPanel; 
     }
 
-    public Widget getHeaderWidget() {
-        return componentsHeaderPanel; 
+    public Widget getBreadcrumbWidget() {
+        return breadcrumbPanel; 
     }
 
     public Widget getTimeWidget() {
