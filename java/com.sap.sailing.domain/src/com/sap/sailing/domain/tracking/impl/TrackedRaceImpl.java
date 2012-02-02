@@ -715,11 +715,11 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         int numberOfBoatsRelevantForEstimate = upwindNumberOfRelevantBoats + downwindNumberOfRelevantBoats;
         BearingWithConfidenceCluster<TimePoint> resultCluster = new BearingWithConfidenceCluster<TimePoint>(weigher);
         assert upwindNumberOfRelevantBoats == 0 || reversedUpwindAverage != null;
-        for (int i=0; i<upwindNumberOfRelevantBoats; i++) {
+        if (upwindNumberOfRelevantBoats > 0) {
             resultCluster.add(reversedUpwindAverage);
         }
         assert downwindNumberOfRelevantBoats == 0 || downwindAverage != null;
-        for (int i=0; i<downwindNumberOfRelevantBoats; i++) {
+        if (downwindNumberOfRelevantBoats > 0) {
             resultCluster.add(downwindAverage);
         }
         BearingWithConfidence<TimePoint> resultBearing = resultCluster.getAverage(timePoint);
