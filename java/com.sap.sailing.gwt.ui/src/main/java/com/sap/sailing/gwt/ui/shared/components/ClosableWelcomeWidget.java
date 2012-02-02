@@ -2,29 +2,16 @@ package com.sap.sailing.gwt.ui.shared.components;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
-public class ClosableWelcomeWidget extends VerticalPanel implements WelcomeWidget {
+public class ClosableWelcomeWidget extends SimpleWelcomeWidget {
 
-    private StringMessages stringConstants;
     private Button closeButton;
-    private Label welcomeHeader;
-    private HTML welcomeText;
     private boolean closable;
-
-    public ClosableWelcomeWidget(boolean closable, HorizontalAlignmentConstant horizontalAlignment, StringMessages stringConstants) {
-        this(closable, "", horizontalAlignment, stringConstants);
-    }
     
-    public ClosableWelcomeWidget(boolean closable, String welcomeText, HorizontalAlignmentConstant horizontalAlignment,
-            StringMessages stringConstants) {
-        super();
-        this.stringConstants = stringConstants;
+    public ClosableWelcomeWidget(boolean closable, String headerText, String welcomeText, HorizontalAlignmentConstant horizontalAlignment, StringMessages stringConstants) {
+        super(headerText, welcomeText, horizontalAlignment, stringConstants);
         this.closable = closable;
         
         closeButton = new Button(stringConstants.close());
@@ -36,23 +23,7 @@ public class ClosableWelcomeWidget extends VerticalPanel implements WelcomeWidge
         });
         closeButton.setVisible(this.closable);
         setHorizontalAlignment(ALIGN_RIGHT);
-        add(closeButton);
-        
-        setHorizontalAlignment(horizontalAlignment);
-        welcomeHeader = new Label(this.stringConstants.welcomeToSailingAnalytics());
-        add(welcomeHeader);
-        this.welcomeText = new HTML(new SafeHtmlBuilder().appendEscapedLines(welcomeText).toSafeHtml());
-        add(this.welcomeText);
-    }
-
-    @Override
-    public void setWelcomeText(String welcomeText) {
-        this.welcomeText = new HTML(new SafeHtmlBuilder().appendEscapedLines(welcomeText).toSafeHtml());
-    }
-
-    @Override
-    public void setWelcomeHeaderText(String headerText) {
-        welcomeHeader.setText(headerText);
+        insert(closeButton, 0);
     }
     
     public boolean isClosable() {
