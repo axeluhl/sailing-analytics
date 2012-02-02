@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.shared.components;
+package com.sap.sailing.gwt.ui.shared.panels;
 
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.ui.FlowPanel;

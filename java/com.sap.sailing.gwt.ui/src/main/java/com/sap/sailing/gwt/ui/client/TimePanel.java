@@ -25,7 +25,7 @@ import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.shared.components.Component;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialog;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
-import com.sap.sailing.gwt.ui.shared.controls.SliderBar;
+import com.sap.sailing.gwt.ui.shared.controls.slider.SliderBar;
 
 public class TimePanel extends FormPanel implements Component<TimePanelSettings>, TimeListener, PlayStateListener {
     private final Timer timer;

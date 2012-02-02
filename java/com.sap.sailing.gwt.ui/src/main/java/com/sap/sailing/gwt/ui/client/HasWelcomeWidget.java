@@ -1,4 +1,8 @@
-package com.sap.sailing.gwt.ui.shared.components;
+package com.sap.sailing.gwt.ui.client;
+
+import com.sap.sailing.gwt.ui.shared.panels.ClosableWelcomeWidget;
+import com.sap.sailing.gwt.ui.shared.panels.SimpleWelcomeWidget;
+import com.sap.sailing.gwt.ui.shared.panels.WelcomeWidget;
 
 /**
  * Classes which implement this interface have the ability to display a {@link WelcomeWidget}.
