@@ -114,7 +114,7 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
             return;
         }
          
-        createRaceBoardPanel(selectedRace, events, eventName, leaderboardName);
+        createRaceBoardPanel(selectedRace, events, leaderboardGroup);
     }  
 
     private RaceDTO findRace(String eventName, String raceName, List<EventDTO> events) {
@@ -132,13 +132,13 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         return null;
     }
 
-    private void createRaceBoardPanel(RaceDTO selectedRace, List<EventDTO> events, String eventName, String leaderboardName) {
+    private void createRaceBoardPanel(RaceDTO selectedRace, List<EventDTO> events, LeaderboardGroupDTO leaderboardGroup) {
         LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(stringMessages);
         logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
         RaceSelectionModel raceSelectionModel = new RaceSelectionModel();
         List<RaceIdentifier> singletonList = Collections.singletonList(selectedRace.getRaceIdentifier());
         raceSelectionModel.setSelection(singletonList);
-        raceBoardPanel = new RaceBoardPanel(sailingService, raceSelectionModel, leaderboardName,
+        raceBoardPanel = new RaceBoardPanel(sailingService, raceSelectionModel, leaderboardName, leaderboardGroup,
                 RaceBoardEntryPoint.this, stringMessages);
         raceBoardPanel.fillEvents(events);
 
@@ -146,7 +146,7 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         
         FlowPanel raceBoardHeaderPanel = new FlowPanel();
         raceBoardHeaderPanel.addStyleName("RaceBoardHeaderPanel");
-        raceBoardHeaderPanel.add(raceBoardPanel.getHeaderWidget());
+        raceBoardHeaderPanel.add(raceBoardPanel.getBreadcrumbWidget());
         
         FlowPanel contentOuterPanel = new FlowPanel(); // outer div which centered page content
         contentOuterPanel.addStyleName("contentOuterPanel");

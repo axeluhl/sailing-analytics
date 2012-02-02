@@ -235,10 +235,11 @@ public class TimePanel extends FormPanel implements Component<TimePanelSettings>
         int numTicks = 8;
         sliderBar.setMinValue(new Double(min.getTime()));
         sliderBar.setMaxValue(new Double(max.getTime()));
+        if(sliderBar.getCurrentValue() == null)
+            sliderBar.setCurrentValue(new Double(min.getTime()));
         sliderBar.setNumTickLabels(numTicks);
         sliderBar.setNumTicks(numTicks);
-        double stepSize = (max.getTime() - min.getTime()) / numTicks;
-        sliderBar.setStepSize(stepSize);
+        sliderBar.setStepSize(60000);
     }
 
     public void changeMax(Date max) {
