@@ -51,16 +51,21 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
     private StringMessages stringConstants;
     private ErrorReporter errorReporter;
     private LeaderboardGroupDTO group;
+    private String root;
     
     private FlowPanel mainPanel;
     private Widget welcomeWidget = null;
     
     public LeaderboardGroupPanel(SailingServiceAsync sailingService, StringMessages stringConstants,
-            ErrorReporter errorReporter, final String groupName) {
+            ErrorReporter errorReporter, final String groupName, String root) {
         super();
         this.sailingService = sailingService;
         this.stringConstants = stringConstants;
         this.errorReporter = errorReporter;
+        this.root = root;
+        if (this.root == null || this.root.length() == 0) {
+            this.root = "leaderboardGroupPanel";
+        }
 
         mainPanel = new FlowPanel();
         mainPanel.setWidth("95%");
@@ -151,7 +156,7 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
                 public SafeHtml getValue(LeaderboardDTO leaderboard) {
                     String debugParam = Window.Location.getParameter("gwt.codesvr");
                     return ANCHORTEMPLATE.anchor("/gwt/Leaderboard.html?name=" + leaderboard.name
-                            + "&leaderboardGroupName=" + group.name
+                            + "&leaderboardGroupName=" + group.name + "&root=" + root
                             + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""),
                             leaderboard.name, STYLE_NAME_PREFIX + "ActiveLeaderboard");
                 }
@@ -185,14 +190,15 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
         SafeHtmlBuilder b = new SafeHtmlBuilder();
         String displayName = race.getRaceColumnName();
         if (race.getRaceColumnName().equals(stringConstants.overview())) {
-            String link = "/gwt/Leaderboard.html?name=" + leaderboard.name + "&leaderboardGroupName=" + group.name +
-                  (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr="+debugParam : "");
+            String link = "/gwt/Leaderboard.html?name=" + leaderboard.name + "&leaderboardGroupName=" + group.name
+                    + "&root=" + root
+                    + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : "");
             b.append(ANCHORTEMPLATE.anchor(link, displayName, STYLE_NAME_PREFIX + "ActiveLeaderboard"));
         } else {
             if (race.getRaceIdentifier() != null) {
                 EventNameAndRaceName raceId = (EventNameAndRaceName) race.getRaceIdentifier();
                 String link = "/gwt/RaceBoard.html?leaderboardName=" + leaderboard.name + "&raceName=" + raceId.getRaceName()
-                        + "&eventName=" + raceId.getEventName() + "&leaderboardGroupName=" + group.name
+                        + "&eventName=" + raceId.getEventName() + "&leaderboardGroupName=" + group.name + "&root=" + root
                         + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : "");
                 b.append(ANCHORTEMPLATE.anchor(link, displayName, STYLE_NAME_PREFIX + "ActiveRace"));
             } else {
@@ -212,7 +218,7 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
             }
             if (race.getRaceIdentifier() != null) {
                 EventNameAndRaceName raceId = (EventNameAndRaceName) race.getRaceIdentifier();
-                String link = "/gwt/RaceBoard.html?leaderboardName=" + leaderboard.name + "&raceName="
+                String link = "/gwt/RaceBoard.html?leaderboardName=" + leaderboard.name + "&raceName=" + "&root=" + root
                         + raceId.getRaceName() + "&eventName=" + raceId.getEventName() + "&leaderboardGroupName="
                         + group.name + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : "");
                 b.append(ANCHORTEMPLATE.anchor(link, race.getRaceColumnName(), STYLE_NAME_PREFIX + "ActiveRace"));
