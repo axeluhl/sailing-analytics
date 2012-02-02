@@ -197,14 +197,11 @@ public class TimePanel extends FormPanel implements Component<TimePanelSettings>
         } else {
             timeDelayLabel = null;
         }
-
         ImageResource settingsIcon = resources.settingsIcon();
         Anchor settingsAnchor = new Anchor(AbstractImagePrototype.create(settingsIcon).getSafeHtml());
         settingsAnchor.setTitle(stringMessages.settings());
         settingsAnchor.addClickHandler(new SettingsClickHandler(stringMessages));
-
         controlsPanel.add(settingsAnchor);
-        
         setWidget(vp);
     }
 
@@ -235,8 +232,9 @@ public class TimePanel extends FormPanel implements Component<TimePanelSettings>
         int numTicks = 8;
         sliderBar.setMinValue(new Double(min.getTime()));
         sliderBar.setMaxValue(new Double(max.getTime()));
-        if(sliderBar.getCurrentValue() == null)
+        if(sliderBar.getCurrentValue() == null) {
             sliderBar.setCurrentValue(new Double(min.getTime()));
+        }
         sliderBar.setNumTickLabels(numTicks);
         sliderBar.setNumTicks(numTicks);
         sliderBar.setStepSize(60000);
@@ -259,16 +257,13 @@ public class TimePanel extends FormPanel implements Component<TimePanelSettings>
     public void setLegMarkers() {
         if(sliderBar.isMinMaxInitialized()) {
             sliderBar.clearMarkers();
-            
             Double minValue = sliderBar.getMinValue();
             Double maxValue = sliderBar.getMaxValue();
             int legCount = 5;
-            
             double diff = (maxValue - minValue) / (double) legCount;
-            
-            for(int i = 0; i < legCount; i++)
+            for(int i = 0; i < legCount; i++) {
                 sliderBar.addMarker("L" + (i + 1), minValue + i * diff);
-            
+            }
             sliderBar.redraw();
         }
     }
@@ -307,7 +302,7 @@ public class TimePanel extends FormPanel implements Component<TimePanelSettings>
     @Override
     public void updateSettings(TimePanelSettings newSettings) {
         boolean delayChanged = newSettings.getDelayToLivePlayInSeconds() != getSettings().getDelayToLivePlayInSeconds();
-        if(delayChanged && timer.getPlayMode() == PlayModes.Live) {
+        if (delayChanged && timer.getPlayMode() == PlayModes.Live) {
             getSettings().setDelayToLivePlayInSeconds(newSettings.getDelayToLivePlayInSeconds());
             timeDelayLabel.setText(String.valueOf(newSettings.getDelayToLivePlayInSeconds()) + " s");
             delayChanged();
