@@ -43,7 +43,7 @@ public class BreadcrumbPanel extends FlowPanel {
         //Adding the actual breadcrumb
         Label actualBreadcrumb = new Label(actualBreadcrumbName);
         actualBreadcrumb.addStyleName(STYLE_NAME_PREFIX + "InactiveBreadcrumb");
-        actualBreadcrumb.getElement().getStyle().setFloat(Style.Float.LEFT);
+        actualBreadcrumb.getElement().getStyle().setProperty("clear", "right");
         actualBreadcrumb.getElement().getStyle().setPadding(5, Style.Unit.PX);
         add(actualBreadcrumb);
     }
