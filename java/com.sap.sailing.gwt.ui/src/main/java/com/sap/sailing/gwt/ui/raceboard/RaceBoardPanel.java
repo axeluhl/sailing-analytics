@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.raceboard;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -189,16 +190,28 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
     public void onRaceSelectionChange(List<RaceIdentifier> selectedRaces) {
         if (selectedRaces != null && !selectedRaces.isEmpty()) {
             RaceDTO selectedRace = racesByIdentifier.get(selectedRaces.iterator().next());
+            
+            Date min = null;
+            Date max = null;
+            
             if (selectedRace.startOfTracking != null) {
-                timePanel.setMin(selectedRace.startOfTracking);
+                min = selectedRace.startOfTracking;
             }
             if (selectedRace.endOfRace != null) {
-                timePanel.setMax(selectedRace.endOfRace);
+                max = selectedRace.endOfRace;
             } else if (selectedRace.timePointOfNewestEvent != null) {
-                timePanel.setMax(selectedRace.timePointOfNewestEvent);
+                max = selectedRace.timePointOfNewestEvent;
             }
-            if (selectedRace.startOfRace != null) {
-                timer.setTime(selectedRace.startOfRace.getTime());
+
+            if(min != null && max != null)
+                timePanel.setMinMax(min, max);
+            
+            // set initial timer position
+            switch(timer.getPlayMode()) {
+                case Live:
+                case Replay:
+                    timer.setTime(selectedRace.startOfRace.getTime());
+                    break;
             }
             timePanel.setLegMarkers();
         }
