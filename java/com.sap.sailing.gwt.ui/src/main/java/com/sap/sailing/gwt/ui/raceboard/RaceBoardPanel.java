@@ -65,7 +65,7 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
     private final Timer timer;
     private final RaceSelectionProvider raceSelectionProvider;
     
-    public RaceBoardPanel(SailingServiceAsync sailingService, RaceSelectionProvider raceSelectionProvider, String leaderboardName, 
+    public RaceBoardPanel(SailingServiceAsync sailingService, RaceSelectionProvider raceSelectionProvider, String leaderboardName,
             ErrorReporter errorReporter, final StringMessages stringMessages) {
         this.sailingService = sailingService;
         this.raceSelectionProvider = raceSelectionProvider;
@@ -210,7 +210,9 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
             switch(timer.getPlayMode()) {
                 case Live:
                 case Replay:
-                    timer.setTime(selectedRace.startOfRace.getTime());
+                    if(selectedRace.startOfRace != null) {
+                        timer.setTime(selectedRace.startOfRace.getTime());
+                    }
                     break;
             }
             timePanel.setLegMarkers();
