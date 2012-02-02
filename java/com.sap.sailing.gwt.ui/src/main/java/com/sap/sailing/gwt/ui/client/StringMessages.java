@@ -236,4 +236,7 @@ public interface StringMessages extends Messages {
     String edit();
     String save();
     String abort();
+    String noLeaderboardGroupWithNameFound(String groupName);
+    String overview();
+    String welcomeToSailingAnalytics();
 }

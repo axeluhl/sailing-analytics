@@ -124,9 +124,6 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
         readAllLeaderbords();
         VerticalPanel mainPanel = new VerticalPanel();
         this.setWidget(mainPanel);
-        
-        //Create leaderboard groups
-        //TODO
 
         //Create leaderboards list and functionality
         CaptionPanel leaderboardsCaptionPanel = new CaptionPanel(stringMessages.leaderboards());
@@ -351,7 +348,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
             @Override
             public void update(int index, RaceInLeaderboardDTO object, String value) {
                 if ("ACTION_REMOVE".equals(value)) {
-                    if (Window.confirm(stringMessages.reallyRemoveRace(object.toString()))) {
+                    if (Window.confirm(stringMessages.reallyRemoveRace(object.getRaceColumnName()))) {
                         removeRaceColumn(object);
                     }
                 } else if ("ACTION_EDIT".equals(value)) {

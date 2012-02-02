@@ -134,10 +134,12 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
         plot.addHoverListener(new PlotHoverListener() {
             public void onPlotHover(Plot plot, PlotPosition position, PlotItem item) {
                 if (item != null) {
-                    SeriesHandler seriesHandler = seriesHandlersInOrder.get(item.getSeriesIndex());
-                    WindSource windSource = getWindSource(seriesHandler);
-                    selectedPointLabel.setText(windSource.name()+": "+position.getY().intValue());
-                    selectedPointLabel.setVisible(true);
+                    if (item.getSeriesIndex() < seriesHandlersInOrder.size()) {
+                        SeriesHandler seriesHandler = seriesHandlersInOrder.get(item.getSeriesIndex());
+                        WindSource windSource = getWindSource(seriesHandler);
+                        selectedPointLabel.setText(windSource.name() + ": " + position.getY().intValue());
+                        selectedPointLabel.setVisible(true);
+                    }
                 } else {
                     selectedPointLabel.setVisible(false);
                 }

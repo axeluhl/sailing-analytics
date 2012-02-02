@@ -13,8 +13,8 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
+import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
-import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.CellTable.Resources;
 import com.google.gwt.user.cellview.client.Column;
@@ -35,7 +35,6 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
-import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.gwt.ui.adminconsole.LeaderboardConfigPanel.AnchorCell;
 import com.sap.sailing.gwt.ui.client.AbstractEventPanel;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
@@ -48,6 +47,13 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceInLeaderboardDTO;
 
 public class LeaderboardGroupConfigPanel extends AbstractEventPanel {
+
+    interface AnchorTemplates extends SafeHtmlTemplates {
+        @SafeHtmlTemplates.Template("<a href=\"{0}\">{1}</a>")
+        SafeHtml cell(String url, String displayName);
+    }
+
+    private static final AnchorTemplates ANCHORTEMPLATE = GWT.create(AnchorTemplates.class);
     
     private VerticalPanel mainPanel;
     private HorizontalPanel splitPanel;
@@ -197,14 +203,11 @@ public class LeaderboardGroupConfigPanel extends AbstractEventPanel {
                 String result = "";
                 boolean first = true;
                 for (RaceInLeaderboardDTO race : leaderboard.getRaceList()) {
-                    RaceIdentifier raceId = race.getRaceIdentifier();
-                    if (first) {
-                        result += raceId != null ? raceId.getRaceName() : race.getRaceColumnName();
-                        first = false;
-                    } else {
+                    if (!first) {
                         result += "; ";
-                        result += raceId != null ? raceId.getRaceName() : race.getRaceColumnName();
                     }
+                    result += race.getRaceColumnName();
+                    first = false;
                 }
                 return result;
             }
@@ -305,14 +308,11 @@ public class LeaderboardGroupConfigPanel extends AbstractEventPanel {
                 String result = "";
                 boolean first = true;
                 for (RaceInLeaderboardDTO race : leaderboard.getRaceList()) {
-                    RaceIdentifier raceId = race.getRaceIdentifier();
-                    if (first) {
-                        result += raceId != null ? raceId.getRaceName() : race.getRaceColumnName();
-                        first = false;
-                    } else {
+                    if (!first) {
                         result += "; ";
-                        result += raceId != null ? raceId.getRaceName() : race.getRaceColumnName();
                     }
+                    result += race.getRaceColumnName();
+                    first = false;
                 }
                 return result;
             }
@@ -407,8 +407,9 @@ public class LeaderboardGroupConfigPanel extends AbstractEventPanel {
         Column<LeaderboardGroupDTO, SafeHtml> groupNameColumn = new Column<LeaderboardGroupDTO, SafeHtml>(anchorCell) {
             @Override
             public SafeHtml getValue(LeaderboardGroupDTO group) {
-                // TODO Return a link to the leaderboard group view instead of just the group name
-                return SafeHtmlUtils.fromString(group.name);
+                String debugParam = Window.Location.getParameter("gwt.codesvr");
+                return ANCHORTEMPLATE.cell("/gwt/Spectator.html?leaderboardGroupName=" + group.name +
+                        (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr="+debugParam : ""), group.name);
             }
         };
         groupNameColumn.setSortable(true);
