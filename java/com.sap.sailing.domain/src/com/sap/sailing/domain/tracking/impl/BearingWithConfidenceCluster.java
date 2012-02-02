@@ -116,8 +116,13 @@ public class BearingWithConfidenceCluster<RelativeTo> {
         return bearings.size();
     }
     
+    /**
+     * Adds the <code>bearing</code> if its {@link BearingWithConfidence#getConfidence() confidence} is greater than 0.0
+     */
     public void add(BearingWithConfidence<RelativeTo> bearing) {
-        bearings.add(bearing);
+        if (bearing.getConfidence() > 0) {
+            bearings.add(bearing);
+        }
     }
     
     /**

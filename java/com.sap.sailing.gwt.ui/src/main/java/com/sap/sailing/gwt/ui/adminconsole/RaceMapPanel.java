@@ -150,7 +150,9 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         switch(timer.getPlayMode()) {
             case Live:
             case Replay:
-                timer.setTime(selectedRace.startOfRace.getTime());
+                if(selectedRace.startOfRace != null) {
+                    timer.setTime(selectedRace.startOfRace.getTime());
+                }
                 break;
         }
         timePanel.setLegMarkers();
