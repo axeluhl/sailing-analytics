@@ -19,6 +19,7 @@ import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.IntegerBox;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
@@ -27,7 +28,7 @@ import com.sap.sailing.gwt.ui.shared.components.SettingsDialog;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.shared.controls.slider.SliderBar;
 
-public class TimePanel extends FormPanel implements Component<TimePanelSettings>, TimeListener, PlayStateListener {
+public class TimePanel extends FormPanel implements Component<TimePanelSettings>, TimeListener, PlayStateListener, RequiresResize {
     private final Timer timer;
     private final Button playPauseButton;
     private final IntegerBox playSpeedBox;
@@ -67,9 +68,6 @@ public class TimePanel extends FormPanel implements Component<TimePanelSettings>
 
         sliderBar = new SliderBar();
         sliderBar.setEnabled(true);
-        sliderBar.setStepSize(60000);
-        sliderBar.setNumTickLabels(8);
-        sliderBar.setNumTicks(8);
         sliderBar.setLabelFormatter(new SliderBar.LabelFormatter() {
             final DateTimeFormat formatter = DateTimeFormat.getFormat("HH:mm"); 
             @Override
@@ -224,7 +222,7 @@ public class TimePanel extends FormPanel implements Component<TimePanelSettings>
         switch(timer.getPlayMode()) {
             case Live: 
                 playModeLabel.setText(stringMessages.playModeLive()); 
-                timeDelayLabel.setText(((int) timer.getDelay() / 1000) + " s");
+                timeDelayLabel.setText(((int) timer.getCurrentDelay() / 1000) + " s");
                 break;
             case Replay: 
                 playModeLabel.setText(stringMessages.playModeReplay()); 
@@ -233,22 +231,34 @@ public class TimePanel extends FormPanel implements Component<TimePanelSettings>
         playModeLabel.setText(timer.getPlayMode().name());
     }
 
-    public void setMin(Date min) {
+    public void setMinMax(Date min, Date max) {
+        int numTicks = 8;
         sliderBar.setMinValue(new Double(min.getTime()));
-        if (timer.getTime().before(min)) {
-            timer.setTime((long) min.getTime());
-        }
+        sliderBar.setMaxValue(new Double(max.getTime()));
+        sliderBar.setNumTickLabels(numTicks);
+        sliderBar.setNumTicks(numTicks);
+        double stepSize = (max.getTime() - min.getTime()) / numTicks;
+        sliderBar.setStepSize(stepSize);
     }
 
-    public void setMax(Date max) {
+    public void changeMax(Date max) {
         sliderBar.setMaxValue(new Double(max.getTime()));
         if (timer.getTime().after(max)) {
             timer.setTime((long) max.getTime());
         }
     }
 
+    public void changeMin(Date min) {
+        sliderBar.setMinValue(new Double(min.getTime()));
+        if (timer.getTime().before(min)) {
+            timer.setTime((long) min.getTime());
+        }
+    }
+
     public void setLegMarkers() {
         if(sliderBar.isMinMaxInitialized()) {
+            sliderBar.clearMarkers();
+            
             Double minValue = sliderBar.getMinValue();
             Double maxValue = sliderBar.getMaxValue();
             int legCount = 5;
@@ -256,7 +266,9 @@ public class TimePanel extends FormPanel implements Component<TimePanelSettings>
             double diff = (maxValue - minValue) / (double) legCount;
             
             for(int i = 0; i < legCount; i++)
-                sliderBar.addMarker("L" + i + 1, minValue + i * diff);
+                sliderBar.addMarker("L" + (i + 1), minValue + i * diff);
+            
+            sliderBar.redraw();
         }
     }
     
@@ -304,5 +316,16 @@ public class TimePanel extends FormPanel implements Component<TimePanelSettings>
     @Override
     public String getLocalizedShortName() {
         return "Time control";
+    }
+    
+    @Override
+    public void onResize() {
+        // handle what is required by @link{ProvidesResize}
+        Widget child = getWidget();
+        if (child instanceof RequiresResize) {
+            ((RequiresResize) child).onResize();
+        }
+
+        sliderBar.onResize();
     }
 }

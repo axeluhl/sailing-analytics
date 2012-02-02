@@ -124,22 +124,36 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
             RaceIdentifier raceIdentifier = selectedRaces.get(selectedRaces.size() - 1);
             RaceDTO race = raceListBox.getRace(raceIdentifier);
             competitorSelectionProvider.setCompetitors(race.competitors);
-            updateSlider(race);
-            if (race.startOfRace != null) {
-                timePanel.timeChanged(race.startOfRace);
-                timer.setTime(race.startOfRace.getTime());
-            }
+            
+            updateTimePanel(race);
         }
         raceMap.onRaceSelectionChange(selectedRaces);
     }
 
-    private void updateSlider(RaceDTO selectedRace) {
+    private void updateTimePanel(RaceDTO selectedRace) {
+        Date min = null;
+        Date max = null;
+        
         if (selectedRace.startOfTracking != null) {
-            timePanel.setMin(selectedRace.startOfTracking);
+            min = selectedRace.startOfTracking;
         }
-        if (selectedRace.timePointOfNewestEvent != null) {
-            timePanel.setMax(selectedRace.timePointOfNewestEvent);
+        if (selectedRace.endOfRace != null) {
+            max = selectedRace.endOfRace;
+        } else if (selectedRace.timePointOfNewestEvent != null) {
+            max = selectedRace.timePointOfNewestEvent;
         }
+        
+        if(min != null && max != null)
+            timePanel.setMinMax(min, max);
+        
+        // set initial timer position
+        switch(timer.getPlayMode()) {
+            case Live:
+            case Replay:
+                timer.setTime(selectedRace.startOfRace.getTime());
+                break;
+        }
+        timePanel.setLegMarkers();
     }
 
     @Override
@@ -181,6 +195,9 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         // and ensure the map (indirect child) is also informed about resize
         if (raceMap.map != null) {
             raceMap.map.onResize();
+        }
+        if (timePanel != null) {
+            timePanel.onResize();
         }
     }
 }

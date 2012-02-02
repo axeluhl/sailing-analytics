@@ -21,6 +21,12 @@ public class Timer {
     private Date time;
 
     /**
+     * The time delay to the current point in time in millisseconds
+     * will only be used in live play mode  
+     */
+    private long livePlayDelayInMs;
+    
+    /**
      * Listeners interested in changes of {@link #time}
      */
     private final Set<TimeListener> timeListeners;
@@ -80,6 +86,7 @@ public class Timer {
         playStateListeners = new HashSet<PlayStateListener>();
         playing = false;
         playSpeedFactor = 1.0;
+        livePlayDelayInMs = 0;
         this.delayBetweenAutoAdvancesInMilliseconds = delayBetweenAutoAdvancesInMilliseconds;
         this.playMode = playMode;
     }
@@ -149,6 +156,10 @@ public class Timer {
     public void resume() {
         if (!playing) {
             playing = !playing;
+            
+            if(playMode == PlayModes.Live)
+                setTime(System.currentTimeMillis()-livePlayDelayInMs);
+
             startAutoAdvance();
             for (PlayStateListener playStateListener : playStateListeners) {
                 playStateListener.playStateChanged(playing);
@@ -179,20 +190,15 @@ public class Timer {
         Scheduler.get().scheduleFixedPeriod(command, (int) delayBetweenAutoAdvancesInMilliseconds);
     }
     
-    /**
-     * Indirect way of setting this timer to a specific point in time, namely to "now" - <code>delayInMilliseconds</code>.
-     */
     public void setDelay(long delayInMilliseconds) {
-        if(playMode == PlayModes.Replay)
-            return;
-        
-        setTime(System.currentTimeMillis()-delayInMilliseconds);
+        this.livePlayDelayInMs = delayInMilliseconds;
+    }
+
+    public long getDelay() {
+        return livePlayDelayInMs;
     }
     
-    public long getDelay() {
-        if(playMode == PlayModes.Replay)
-            return 0;
-        
+    public long getCurrentDelay() {
         return System.currentTimeMillis() - getTime().getTime();
     }
 

@@ -4,15 +4,18 @@ import java.util.Collections;
 import java.util.List;
 
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.sap.sailing.domain.common.DefaultLeaderboardName;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
+import com.sap.sailing.gwt.ui.client.ParallelExecutionCallback;
+import com.sap.sailing.gwt.ui.client.ParallelExecutionHolder;
 import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
+import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 
@@ -20,74 +23,99 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
     private RaceDTO selectedRace;
     private RaceBoardPanel raceBoardPanel;
 
+    private String eventName;
+    private String raceName;
+    private String leaderboardName;
+    private String leaderboardGroupName;
+
     @Override
     public void onModuleLoad() {     
         super.onModuleLoad();
-
-        final String eventName = Window.Location.getParameter("eventName");
-        final String raceName = Window.Location.getParameter("raceName");
+        
+        eventName = Window.Location.getParameter("eventName");
+        raceName = Window.Location.getParameter("raceName");
         String leaderboardNameParamValue = Window.Location.getParameter("leaderboardName");
-        //String leaderboardGroupNameParamValue = Window.Location.getParameter("leaderboardGroupName");
-        final String leaderboardName;
-        //final String leaderboardGroupName;
+        String leaderboardGroupNameParamValue = Window.Location.getParameter("leaderboardGroupName");
+
         if(leaderboardNameParamValue == null || leaderboardNameParamValue.isEmpty()) {
             leaderboardName = DefaultLeaderboardName.DEFAULT_LEADERBOARD_NAME;
         } else {
             leaderboardName = leaderboardNameParamValue;
-            sailingService.getLeaderboardNames(new AsyncCallback<List<String>>() {
-                @Override
-                public void onSuccess(List<String> leaderboardNames) {
-                    if (!leaderboardNames.contains(leaderboardName)) {
-                        createErrorPage(stringMessages.noSuchLeaderboard());
-                    }
-                }
-
-                @Override
-                public void onFailure(Throwable t) {
-                    reportError("Error trying to obtain the list of leaderboard names: " + t.getMessage());
-                }
-            });
         }
-        /* not used yet.... waiting for the leaderboard group functionality
-        if(leaderboardGroupNameParamValue != null && !leaderboardGroupNameParamValue.isEmpty()))
-        {
-            sailingService.getLeaderboardGroupByName(leaderboardGroupNameParamValue, new AsyncCallback<LeaderboardGroupDTO>() {
-                @Override
-                public void onSuccess(LeaderboardGroupDTO leaderboardGroup) {
-                    for(leaderboardGroup.leaderboards.contains()
-                    if (!leaderboardNames.contains(leaderboardName)) {
-                        createErrorPage(stringMessages.noSuchLeaderboard());
-                    }
-                }
 
-                @Override
-                public void onFailure(Throwable t) {
-                    reportError("Error trying to obtain the list of leaderboard names: " + t.getMessage());
-                }
-            });
-        }
-        */
-        if (eventName != null && !eventName.isEmpty() && raceName != null && !raceName.isEmpty()) {
-            sailingService.listEvents(false, new AsyncCallback<List<EventDTO>>() {
-                @Override
-                public void onSuccess(List<EventDTO> events) {
-                    selectedRace = findRace(eventName, raceName, events);
-                    if(selectedRace != null) {
-                        createRaceBoardPanel(selectedRace, events, eventName, leaderboardName);
-                    } else {
-                        createErrorPage("Could not obtain a race with name " + raceName + " for an event with name " + eventName);
-                    }
-                }
+        if(leaderboardGroupNameParamValue != null && !leaderboardGroupNameParamValue.isEmpty())
+            leaderboardGroupName = leaderboardGroupNameParamValue; 
 
-                @Override
-                public void onFailure(Throwable t) {
-                    reportError("Error trying to obtain the list of events: " + t.getMessage());
-                }
-            });
-        } else {
+        if (eventName == null || eventName.isEmpty() || raceName == null || raceName.isEmpty()) {
             createErrorPage("This page requires a valid event name and race name.");
+            return;
         }
+        
+        final ParallelExecutionCallback<List<String>> getLeaderboardNamesCallback = new ParallelExecutionCallback<List<String>>();  
+        final ParallelExecutionCallback<List<EventDTO>> listEventsCallback = new ParallelExecutionCallback<List<EventDTO>>();  
+        final ParallelExecutionCallback<LeaderboardGroupDTO> getLeaderboardGroupByNameCallback = new ParallelExecutionCallback<LeaderboardGroupDTO>();  
+            
+        if (leaderboardGroupName != null) {
+            new ParallelExecutionHolder(getLeaderboardNamesCallback, getLeaderboardGroupByNameCallback, listEventsCallback) {
+                @Override
+                public void handleSuccess() {
+                    checkUrlParameters(getLeaderboardNamesCallback.getData(),
+                            getLeaderboardGroupByNameCallback.getData(), listEventsCallback.getData());
+                }
+                @Override
+                public void handleFailure(Throwable t) {
+                    reportError("Error trying to create the raceboard: " + t.getMessage());
+                }
+            };
+        } else {
+            new ParallelExecutionHolder(getLeaderboardNamesCallback, listEventsCallback) {
+                @Override
+                public void handleSuccess() {
+                    checkUrlParameters(getLeaderboardNamesCallback.getData(), null, listEventsCallback.getData());
+                }
+                @Override
+                public void handleFailure(Throwable t) {
+                    reportError("Error trying to create the raceboard: " + t.getMessage());
+                }
+            };
+        }
+            
+        sailingService.listEvents(false, listEventsCallback);
+        sailingService.getLeaderboardNames(getLeaderboardNamesCallback);
+        if(leaderboardGroupName != null)
+            sailingService.getLeaderboardGroupByName(leaderboardGroupNameParamValue, getLeaderboardGroupByNameCallback);
+
     }
+
+    private void checkUrlParameters(List<String> leaderboardNames, LeaderboardGroupDTO leaderboardGroup, List<EventDTO> events)
+    {
+        if (!leaderboardNames.contains(leaderboardName)) {
+          createErrorPage(stringMessages.noSuchLeaderboard());
+          return;
+        }
+
+        if (leaderboardGroupName != null && leaderboardGroup != null) {
+            boolean foundLeaderboard = false; 
+            for(LeaderboardDTO leaderBoard:  leaderboardGroup.leaderboards) {
+                if(leaderBoard.name.equals(leaderboardName)) {
+                    foundLeaderboard = true;
+                    break;
+                }
+            }
+            if(!foundLeaderboard) {
+                createErrorPage("the leaderboard is not contained in this leaderboard group.");
+                return;
+            }
+        }
+
+        selectedRace = findRace(eventName, raceName, events);
+        if(selectedRace == null) {
+            createErrorPage("Could not obtain a race with name " + raceName + " for an event with name " + eventName);
+            return;
+        }
+         
+        createRaceBoardPanel(selectedRace, events, eventName, leaderboardName);
+    }  
 
     private RaceDTO findRace(String eventName, String raceName, List<EventDTO> events) {
         for (EventDTO eventDTO : events) {

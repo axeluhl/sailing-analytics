@@ -191,7 +191,9 @@ public class RaceMapResources {
         // here it would be better to get the boat length from the boat class -> for now we assume a length of 5m 
         double boatLengthInMeter = 5.0; 
         if (zoomLevel > 5) {
-            int boatSizeXInPixel = imageSize.getWidth(); 
+            int boatLengthInPixel = imageSize.getHeight();
+            if(imageSize.getWidth() > boatLengthInPixel)
+                boatLengthInPixel = imageSize.getWidth();
             LatLngBounds bounds = map.getBounds();
             if (bounds != null) {
                 LatLng upperRight = bounds.getNorthEast();
@@ -200,7 +202,7 @@ public class RaceMapResources {
                 double distXInMeters = upperLeft.distanceFrom(upperRight);
                 int widthInPixel = map.getSize().getWidth();
                 double realBoatSizeInPixel  = (widthInPixel * boatLengthInMeter) / distXInMeters;
-                realBoatSizeScaleFactor = realBoatSizeInPixel / (double) boatSizeXInPixel;
+                realBoatSizeScaleFactor = realBoatSizeInPixel / (double) boatLengthInPixel;
                 if (realBoatSizeScaleFactor < minScaleFactor) {
                     realBoatSizeScaleFactor = minScaleFactor;
                 }
