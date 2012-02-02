@@ -26,7 +26,7 @@
 
 body {
 	background: #ebebeb;
-	font-family: 'Terminal Dosis', sans-serif;
+	font-family: 'Ubuntu', 'Terminal Dosis', sans-serif;
 	line-height: 1;
 	font-size: 14px;
 	font-weight: 400;
@@ -35,8 +35,8 @@ body {
 }
 
 table td,select,button {
-	font-family: 'Terminal Dosis', sans-serif;
 	line-height: 1;
+	font-family: 'Ubuntu', 'Terminal Dosis', sans-serif;
 	font-weight: 400;
 	font-size: 14px;
 }
@@ -236,3 +236,42 @@ input.magnifier {
 	text-decoration: none;
 }
 
+.leaderboardGroupPanel-GroupName {
+	float: left;
+}
+
+.leaderboardGroupPanel-GroupDescription {
+	float: left;
+}
+
+.leaderboardGroupPanel-LeaderboardsTableLabel {
+	
+}
+
+.leaderboardGroupPanel-ActiveLeaderboard{
+	
+}
+
+.leaderboardGroupPanel-ActiveRace {
+	
+}
+
+.leaderboardGroupPanel-InactiveRace {
+	
+}
+
+.welcomeWidget-WelcomePanel{
+	
+}
+
+.welcomeWidget-CloseButton {
+	
+}
+
+.welcomeWidget-Header {
+	
+}
+
+.welcomeWidget-WelcomeText {
+	
+}

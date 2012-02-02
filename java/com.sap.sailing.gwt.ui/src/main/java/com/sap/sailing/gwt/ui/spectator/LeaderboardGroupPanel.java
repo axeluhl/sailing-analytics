@@ -13,40 +13,46 @@ import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.CaptionPanel;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.NoSelectionModel;
 import com.sap.sailing.domain.common.EventNameAndRaceName;
 import com.sap.sailing.gwt.ui.adminconsole.LeaderboardConfigPanel.AnchorCell;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
+import com.sap.sailing.gwt.ui.client.HasWelcomeWidget;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceInLeaderboardDTO;
-import com.sap.sailing.gwt.ui.shared.components.HasWelcomeWidget;
+import com.sap.sailing.gwt.ui.shared.panels.WelcomeWidget;
 
 public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget {
 
     interface AnchorTemplates extends SafeHtmlTemplates {
-        @SafeHtmlTemplates.Template("<a href=\"{0}\">{1}</a>")
-        SafeHtml anchor(String url, String displayName);
+        @SafeHtmlTemplates.Template("<a class=\"{2}\" href=\"{0}\">{1}</a>")
+        SafeHtml anchor(String url, String displayName, String styleClass);
+    }
+    
+    interface TextWithClassTemplate extends SafeHtmlTemplates {
+        @SafeHtmlTemplates.Template("<span class=\"{1}\">{0}</span>")
+        SafeHtml textWithClass(String text, String styleClass);
     }
 
     private static final AnchorTemplates ANCHORTEMPLATE = GWT.create(AnchorTemplates.class);
-    private static final int MAX_COLUMNS_IN_ROW = 10; 
+    private static final TextWithClassTemplate TEXTTEMPLATE = GWT.create(TextWithClassTemplate.class);
+    private static final int MAX_COLUMNS_IN_ROW = 10;
+    private static final String STYLE_NAME_PREFIX = "leaderboardGroupPanel-";
     
     private SailingServiceAsync sailingService;
     private StringMessages stringConstants;
     private ErrorReporter errorReporter;
     private LeaderboardGroupDTO group;
     
-    private VerticalPanel mainPanel;
+    private FlowPanel mainPanel;
     private Widget welcomeWidget = null;
     
     public LeaderboardGroupPanel(SailingServiceAsync sailingService, StringMessages stringConstants,
@@ -56,7 +62,7 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
         this.stringConstants = stringConstants;
         this.errorReporter = errorReporter;
 
-        mainPanel = new VerticalPanel();
+        mainPanel = new FlowPanel();
         mainPanel.setWidth("95%");
         add(mainPanel);
         final Runnable buildGUI = new Runnable() {
@@ -90,23 +96,27 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
 
     private void buildGUI() {
         //Create group details GUI
-        HorizontalPanel groupDetailsPanel = new HorizontalPanel();
-        groupDetailsPanel.setSpacing(8);
+        FlowPanel groupDetailsPanel = new FlowPanel();
+        groupDetailsPanel.setStyleName(STYLE_NAME_PREFIX + "GroupDetailsPanel");
         mainPanel.add(groupDetailsPanel);
-        
+
         Label groupNameLabel = new Label(group.name + ":");
+        groupNameLabel.setStyleName(STYLE_NAME_PREFIX + "GroupName");
         groupDetailsPanel.add(groupNameLabel);
         
         //Using HTML to display the line breaks in the description
         HTML groupDescriptionLabel = new HTML(new SafeHtmlBuilder().appendEscapedLines(group.description).toSafeHtml());
+        groupDescriptionLabel.setStyleName(STYLE_NAME_PREFIX + "GroupDescription");
         groupDetailsPanel.add(groupDescriptionLabel);
         
         //Create group leaderboards GUI
-        CaptionPanel leaderboardsCaptionPanel = new CaptionPanel(stringConstants.leaderboards());
-        mainPanel.add(leaderboardsCaptionPanel);
+        Label leaderboardsTableLabel = new Label(stringConstants.leaderboards());
+        leaderboardsTableLabel.setStyleName(STYLE_NAME_PREFIX + "LeaderboardsTableLabel");
+        mainPanel.add(leaderboardsTableLabel);
         
         if (group.leaderboards.size() <= MAX_COLUMNS_IN_ROW) {
-            CellTable<Integer> leaderboardsTable = new CellTable<Integer>();
+            LeaderboardGroupFullTableResources tableResources = GWT.create(LeaderboardGroupFullTableResources.class);
+            CellTable<Integer> leaderboardsTable = new CellTable<Integer>(200, tableResources);
             leaderboardsTable.setWidth("100%");
             leaderboardsTable.setSelectionModel(new NoSelectionModel<Integer>());
             
@@ -133,7 +143,7 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
             }
             
             leaderboardsTable.setRowData(tableData);
-            leaderboardsCaptionPanel.add(leaderboardsTable);
+            mainPanel.add(leaderboardsTable);
         } else {
             AnchorCell nameAnchorCell = new AnchorCell();
             Column<LeaderboardDTO, SafeHtml> nameColumn = new Column<LeaderboardDTO, SafeHtml>(nameAnchorCell) {
@@ -143,7 +153,7 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
                     return ANCHORTEMPLATE.anchor("/gwt/Leaderboard.html?name=" + leaderboard.name
                             + "&leaderboardGroupName=" + group.name
                             + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""),
-                            leaderboard.name);
+                            leaderboard.name, STYLE_NAME_PREFIX + "ActiveLeaderboard");
                 }
             };
 
@@ -155,7 +165,8 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
                 }
             };
 
-            CellTable<LeaderboardDTO> leaderboardsTable = new CellTable<LeaderboardDTO>();
+            LeaderboardGroupCompactTableResources tableResources = GWT.create(LeaderboardGroupCompactTableResources.class);
+            CellTable<LeaderboardDTO> leaderboardsTable = new CellTable<LeaderboardDTO>(200, tableResources);
             leaderboardsTable.setWidth("100%");
             leaderboardsTable.setSelectionModel(new NoSelectionModel<LeaderboardDTO>());
             
@@ -165,7 +176,7 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
             leaderboardsTable.setColumnWidth(racesColumn, "70%");
             
             leaderboardsTable.setRowData(group.leaderboards);
-            leaderboardsCaptionPanel.add(leaderboardsTable);
+            mainPanel.add(leaderboardsTable);
         }
     }
     
@@ -176,16 +187,16 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
         if (race.getRaceColumnName().equals(stringConstants.overview())) {
             String link = "/gwt/Leaderboard.html?name=" + leaderboard.name + "&leaderboardGroupName=" + group.name +
                   (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr="+debugParam : "");
-            b.append(ANCHORTEMPLATE.anchor(link, displayName));
+            b.append(ANCHORTEMPLATE.anchor(link, displayName, STYLE_NAME_PREFIX + "ActiveLeaderboard"));
         } else {
             if (race.getRaceIdentifier() != null) {
                 EventNameAndRaceName raceId = (EventNameAndRaceName) race.getRaceIdentifier();
                 String link = "/gwt/RaceBoard.html?leaderboardName=" + leaderboard.name + "&raceName=" + raceId.getRaceName()
                         + "&eventName=" + raceId.getEventName() + "&leaderboardGroupName=" + group.name
                         + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : "");
-                b.append(ANCHORTEMPLATE.anchor(link, displayName));
+                b.append(ANCHORTEMPLATE.anchor(link, displayName, STYLE_NAME_PREFIX + "ActiveRace"));
             } else {
-                b.appendHtmlConstant(race.getRaceColumnName());
+                b.append(TEXTTEMPLATE.textWithClass(race.getRaceColumnName(), STYLE_NAME_PREFIX + "InactiveRace"));
             }
         }
         return b.toSafeHtml();
@@ -204,9 +215,9 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
                 String link = "/gwt/RaceBoard.html?leaderboardName=" + leaderboard.name + "&raceName="
                         + raceId.getRaceName() + "&eventName=" + raceId.getEventName() + "&leaderboardGroupName="
                         + group.name + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : "");
-                b.append(ANCHORTEMPLATE.anchor(link, race.getRaceColumnName()));
+                b.append(ANCHORTEMPLATE.anchor(link, race.getRaceColumnName(), STYLE_NAME_PREFIX + "ActiveRace"));
             } else {
-                b.appendHtmlConstant(race.getRaceColumnName());
+                b.append(TEXTTEMPLATE.textWithClass(race.getRaceColumnName(), STYLE_NAME_PREFIX + "InactiveRace"));
             }
             first = false;
         }
@@ -221,7 +232,7 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
     }
 
     @Override
-    public void setWelcomeWidget(Widget welcome) {
+    public void setWelcomeWidget(WelcomeWidget welcome) {
         boolean needsToBeInserted = welcomeWidget == null;
         welcomeWidget = welcome;
         welcomeWidget.setWidth("100%");

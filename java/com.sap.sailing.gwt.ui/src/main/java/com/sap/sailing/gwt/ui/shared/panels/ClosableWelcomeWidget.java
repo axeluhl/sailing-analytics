@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.shared.components;
+package com.sap.sailing.gwt.ui.shared.panels;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -8,8 +8,8 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 public class ClosableWelcomeWidget extends SimpleWelcomeWidget {
 
     private StringMessages stringConstants;
-    private Button closeButton;
     private boolean closable;
+    private Button closeButton;
     
     /**
      * Creates a new closable welcome widget. It has the same components as the {@link SimpleWelcomeWidget} and a Button
@@ -18,10 +18,9 @@ public class ClosableWelcomeWidget extends SimpleWelcomeWidget {
      * @param closable Sets the visibility of the close Button
      * @param headerText The text of the header component
      * @param welcomeText The text of the component under the header (welcome component)
-     * @param horizontalAlignment The alignment of the header and the welcomen component
      */
-    public ClosableWelcomeWidget(boolean closable, String headerText, String welcomeText, HorizontalAlignmentConstant horizontalAlignment, StringMessages stringConstants) {
-        super(headerText, welcomeText, horizontalAlignment);
+    public ClosableWelcomeWidget(boolean closable, String headerText, String welcomeText, StringMessages stringConstants) {
+        super(headerText, welcomeText);
         this.stringConstants = stringConstants;
         this.closable = closable;
         
@@ -33,8 +32,8 @@ public class ClosableWelcomeWidget extends SimpleWelcomeWidget {
             }
         });
         closeButton.setVisible(this.closable);
-        setHorizontalAlignment(ALIGN_RIGHT);
-        insert(closeButton, 0);
+        closeButton.setStyleName(STYLE_NAME_PREFIX + "CloseButton");
+        mainPanel.insert(closeButton, 0);
     }
     
     /**
