@@ -20,6 +20,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.NoSelectionModel;
 import com.sap.sailing.domain.common.EventNameAndRaceName;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.adminconsole.LeaderboardConfigPanel.AnchorCell;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.HasWelcomeWidget;
@@ -28,6 +29,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceInLeaderboardDTO;
+import com.sap.sailing.gwt.ui.shared.panels.BreadcrumbPanel;
 import com.sap.sailing.gwt.ui.shared.panels.WelcomeWidget;
 
 public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget {
@@ -100,6 +102,12 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
     }
 
     private void buildGUI() {
+        //Create breadcrumb panel
+        BreadcrumbPanel breadcrumbPanel = createBreadcrumbPanel();
+        if (breadcrumbPanel != null) {
+            mainPanel.add(breadcrumbPanel);
+        }
+        
         //Create group details GUI
         FlowPanel groupDetailsPanel = new FlowPanel();
         groupDetailsPanel.setStyleName(STYLE_NAME_PREFIX + "GroupDetailsPanel");
@@ -184,7 +192,7 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
             mainPanel.add(leaderboardsTable);
         }
     }
-    
+
     private SafeHtml raceToRaceBoardLink(LeaderboardDTO leaderboard, RaceInLeaderboardDTO race) {
         String debugParam = Window.Location.getParameter("gwt.codesvr");
         SafeHtmlBuilder b = new SafeHtmlBuilder();
@@ -228,6 +236,20 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
             first = false;
         }
         return b.toSafeHtml();
+    }
+    
+    private BreadcrumbPanel createBreadcrumbPanel() {
+        BreadcrumbPanel breadcrumbPanel = null;
+        if (!root.equals("leaderboardGroupPanel")) {
+            String debugParam = Window.Location.getParameter("gwt.codesvr");
+            String link = "/gwt/Spectator.html"
+                    + (debugParam != null && !debugParam.isEmpty() ? "?gwt.codesvr=" + debugParam : "");
+            ArrayList<Pair<String, String>> breadcrumbLinksData = new ArrayList<Pair<String, String>>();
+            breadcrumbLinksData.add(new Pair<String, String>(link, stringConstants.overview()));
+            String actualBreadcrumbName = stringConstants.leaderboardGroup() + ": " + group.name;
+            breadcrumbPanel = new BreadcrumbPanel(breadcrumbLinksData, actualBreadcrumbName);
+        }
+        return breadcrumbPanel;
     }
 
     @Override
