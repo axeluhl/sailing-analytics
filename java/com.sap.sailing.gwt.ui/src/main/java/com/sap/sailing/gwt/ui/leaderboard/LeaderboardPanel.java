@@ -1040,6 +1040,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
      * Also updates the min/max values on the columns
      */
     protected void updateLeaderboard(LeaderboardDTO leaderboard) {
+        Set<LeaderboardRowDTO> selectedRows = leaderboardSelectionModel.getSelectedSet();
         competitorSelectionProvider.setCompetitors(leaderboard.competitors);
         selectedRaceColumns.addAll(getRaceColumnsToAddImplicitly(leaderboard));
         setLeaderboard(leaderboard);
@@ -1059,6 +1060,11 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 // table header so
                 Collections.sort(getData().getList(), getRankColumn().getComparator());
                 getLeaderboardTable().getColumnSortList().push(getRankColumn());
+            }
+            //Reselect the selected rows
+            leaderboardSelectionModel.clear();
+            for (LeaderboardRowDTO row : selectedRows) {
+                leaderboardSelectionModel.setSelected(row, true);
             }
         }
     }

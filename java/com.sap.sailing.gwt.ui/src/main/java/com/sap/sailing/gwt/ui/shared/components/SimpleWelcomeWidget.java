@@ -1,13 +1,13 @@
 package com.sap.sailing.gwt.ui.shared.components;
 
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
-import com.google.gwt.user.client.ui.FormPanel;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
 
 public class SimpleWelcomeWidget extends WelcomeWidget {
 
-    private FormPanel mainPanel;
+    protected FlowPanel mainPanel;
     private Label welcomeHeader;
     private HTML welcomeText;
 
@@ -18,7 +18,7 @@ public class SimpleWelcomeWidget extends WelcomeWidget {
      */
     public SimpleWelcomeWidget(String headerText, String welcomeText) {
         super();
-        mainPanel = new FormPanel();
+        mainPanel = new FlowPanel();
         mainPanel.setStyleName(STYLE_NAME_PREFIX + "WelcomePanel");
         add(mainPanel);
         
