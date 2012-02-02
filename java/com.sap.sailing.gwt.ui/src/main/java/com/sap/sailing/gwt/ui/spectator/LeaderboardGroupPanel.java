@@ -19,6 +19,7 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.NoSelectionModel;
 import com.sap.sailing.domain.common.EventNameAndRaceName;
 import com.sap.sailing.gwt.ui.adminconsole.LeaderboardConfigPanel.AnchorCell;
@@ -28,8 +29,9 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceInLeaderboardDTO;
+import com.sap.sailing.gwt.ui.shared.components.HasWelcomeWidget;
 
-public class LeaderboardGroupPanel extends FormPanel {
+public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget {
 
     interface AnchorTemplates extends SafeHtmlTemplates {
         @SafeHtmlTemplates.Template("<a href=\"{0}\">{1}</a>")
@@ -44,13 +46,19 @@ public class LeaderboardGroupPanel extends FormPanel {
     private ErrorReporter errorReporter;
     private LeaderboardGroupDTO group;
     
+    private VerticalPanel mainPanel;
+    private Widget welcomeWidget = null;
+    
     public LeaderboardGroupPanel(SailingServiceAsync sailingService, StringMessages stringConstants,
             ErrorReporter errorReporter, final String groupName) {
         super();
         this.sailingService = sailingService;
         this.stringConstants = stringConstants;
         this.errorReporter = errorReporter;
-        
+
+        mainPanel = new VerticalPanel();
+        mainPanel.setWidth("95%");
+        add(mainPanel);
         final Runnable buildGUI = new Runnable() {
             @Override
             public void run() {
@@ -81,10 +89,6 @@ public class LeaderboardGroupPanel extends FormPanel {
     }
 
     private void buildGUI() {
-        VerticalPanel mainPanel = new VerticalPanel();
-        mainPanel.setWidth("95%");
-        add(mainPanel);
-        
         //Create group details GUI
         HorizontalPanel groupDetailsPanel = new HorizontalPanel();
         groupDetailsPanel.setSpacing(8);
@@ -207,6 +211,23 @@ public class LeaderboardGroupPanel extends FormPanel {
             first = false;
         }
         return b.toSafeHtml();
+    }
+
+    @Override
+    public void setWelcomeWidgetVisible(boolean isVisible) {
+        if (welcomeWidget != null) {
+            welcomeWidget.setVisible(isVisible);
+        }
+    }
+
+    @Override
+    public void setWelcomeWidget(Widget welcome) {
+        boolean needsToBeInserted = welcomeWidget == null;
+        welcomeWidget = welcome;
+        welcomeWidget.setWidth("100%");
+        if (needsToBeInserted) {
+            mainPanel.insert(welcomeWidget, 0);
+        }
     }
 
 }
