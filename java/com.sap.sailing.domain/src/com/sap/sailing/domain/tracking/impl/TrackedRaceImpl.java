@@ -52,6 +52,7 @@ import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.confidence.ConfidenceFactory;
 import com.sap.sailing.domain.confidence.Weigher;
+import com.sap.sailing.domain.confidence.impl.LinearTimeDifferenceWeigher;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
@@ -655,51 +656,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         Weigher<TimePoint> weigher = ConfidenceFactory.INSTANCE.createExponentialTimeDifferenceWeigher(
         // use a minimum confidence to avoid the bearing to flip to 270deg in case all is zero
                 getMillisecondsOverWhichToAverageSpeed());
-        Map<LegType, BearingWithConfidenceCluster<TimePoint>> bearings = new HashMap<LegType, BearingWithConfidenceCluster<TimePoint>>();
-        for (LegType legType : LegType.values()) {
-            bearings.put(legType, new BearingWithConfidenceCluster<TimePoint>(weigher));
-        }
-        for (Competitor competitor : getRace().getCompetitors()) {
-            TrackedLegOfCompetitor leg = getTrackedLeg(competitor, timePoint);
-            if (leg != null) {
-                TrackedLeg trackedLeg = getTrackedLeg(leg.getLeg());
-                LegType legType;
-                try {
-                    legType = trackedLeg.getLegType(timePoint);
-                } catch (NoWindException e) {
-                    logger.warning("Unable to determine leg type for race "+getRace().getName()+" while trying to estimate wind");
-                    return null;
-                }
-                if (legType != LegType.REACHING) {
-                    GPSFixTrack<Competitor, GPSFixMoving> track = getTrack(competitor);
-                    if (!track.hasDirectionChange(timePoint, getManeuverDegreeAngleThreshold())) {
-                        // reduce confidence around mark passings:
-                        NavigableSet<MarkPassing> markPassings = getMarkPassings(competitor);
-                        NavigableSet<MarkPassing> prevMarkPassing = markPassings.headSet(dummyMarkPassingForNow, /* inclusive */ true);
-                        NavigableSet<MarkPassing> nextMarkPassing = markPassings.tailSet(dummyMarkPassingForNow, /* inclusive */ true);
-                        double markPassingProximityConfidenceReduction = 1.0;
-                        if (prevMarkPassing != null && !prevMarkPassing.isEmpty()) {
-                            markPassingProximityConfidenceReduction *= Math.max(0.0,
-                                    1.0-weigher.getConfidence(prevMarkPassing.last().getTimePoint(), timePoint));
-                        }
-                        if (nextMarkPassing != null && !nextMarkPassing.isEmpty()) {
-                            markPassingProximityConfidenceReduction *= Math.max(0.0,
-                                    1.0-weigher.getConfidence(nextMarkPassing.first().getTimePoint(), timePoint));
-                        }
-                        SpeedWithBearingWithConfidence<TimePoint> estimatedSpeedWithConfidence = track.getEstimatedSpeed(timePoint,
-                                weigher);
-                        if (estimatedSpeedWithConfidence != null) {
-                            BearingWithConfidence<TimePoint> bearing = new BearingWithConfidenceImpl<TimePoint>(
-                                    estimatedSpeedWithConfidence.getObject() == null ? null : estimatedSpeedWithConfidence.getObject().getBearing(),
-                                    markPassingProximityConfidenceReduction*estimatedSpeedWithConfidence.getConfidence(),
-                                    estimatedSpeedWithConfidence.getRelativeTo());
-                            BearingWithConfidenceCluster<TimePoint> bearingClusterForLegType = bearings.get(legType);
-                            bearingClusterForLegType.add(bearing);
-                        }
-                    }
-                }
-            }
-        }
+        Map<LegType, BearingWithConfidenceCluster<TimePoint>> bearings = clusterBearingsForWindEstimation(timePoint,
+                dummyMarkPassingForNow, weigher);
         // use the minimum confidence of the four "quadrants" as the result's confidence
         BearingWithConfidenceImpl<TimePoint> reversedUpwindAverage = null;
         int upwindNumberOfRelevantBoats = 0;
@@ -739,6 +697,57 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         BearingWithConfidence<TimePoint> resultBearing = resultCluster.getAverage(timePoint);
         return resultBearing == null ? null : new WindImpl(null, timePoint,
                 new KnotSpeedWithBearingImpl(/* speedInKnots */ numberOfBoatsRelevantForEstimate, resultBearing.getObject()));
+    }
+
+    private Map<LegType, BearingWithConfidenceCluster<TimePoint>> clusterBearingsForWindEstimation(TimePoint timePoint,
+            DummyMarkPassingWithTimePointOnly dummyMarkPassingForNow, Weigher<TimePoint> weigher) {
+        Weigher<TimePoint> weigherForMarkPassingProximity = new LinearTimeDifferenceWeigher(getMillisecondsOverWhichToAverageSpeed());
+        Map<LegType, BearingWithConfidenceCluster<TimePoint>> bearings = new HashMap<LegType, BearingWithConfidenceCluster<TimePoint>>();
+        for (LegType legType : LegType.values()) {
+            bearings.put(legType, new BearingWithConfidenceCluster<TimePoint>(weigher));
+        }
+        for (Competitor competitor : getRace().getCompetitors()) {
+            TrackedLegOfCompetitor leg = getTrackedLeg(competitor, timePoint);
+            if (leg != null) {
+                TrackedLeg trackedLeg = getTrackedLeg(leg.getLeg());
+                LegType legType;
+                try {
+                    legType = trackedLeg.getLegType(timePoint);
+                } catch (NoWindException e) {
+                    logger.warning("Unable to determine leg type for race "+getRace().getName()+" while trying to estimate wind");
+                    return null;
+                }
+                if (legType != LegType.REACHING) {
+                    GPSFixTrack<Competitor, GPSFixMoving> track = getTrack(competitor);
+                    if (!track.hasDirectionChange(timePoint, getManeuverDegreeAngleThreshold())) {
+                        // reduce confidence around mark passings:
+                        NavigableSet<MarkPassing> markPassings = getMarkPassings(competitor);
+                        NavigableSet<MarkPassing> prevMarkPassing = markPassings.headSet(dummyMarkPassingForNow, /* inclusive */ true);
+                        NavigableSet<MarkPassing> nextMarkPassing = markPassings.tailSet(dummyMarkPassingForNow, /* inclusive */ true);
+                        double markPassingProximityConfidenceReduction = 1.0;
+                        if (prevMarkPassing != null && !prevMarkPassing.isEmpty()) {
+                            markPassingProximityConfidenceReduction *= Math.max(0.0,
+                                    1.0-weigherForMarkPassingProximity.getConfidence(prevMarkPassing.last().getTimePoint(), timePoint));
+                        }
+                        if (nextMarkPassing != null && !nextMarkPassing.isEmpty()) {
+                            markPassingProximityConfidenceReduction *= Math.max(0.0,
+                                    1.0-weigherForMarkPassingProximity.getConfidence(nextMarkPassing.first().getTimePoint(), timePoint));
+                        }
+                        SpeedWithBearingWithConfidence<TimePoint> estimatedSpeedWithConfidence = track.getEstimatedSpeed(timePoint,
+                                weigher);
+                        if (estimatedSpeedWithConfidence != null) {
+                            BearingWithConfidence<TimePoint> bearing = new BearingWithConfidenceImpl<TimePoint>(
+                                    estimatedSpeedWithConfidence.getObject() == null ? null : estimatedSpeedWithConfidence.getObject().getBearing(),
+                                    markPassingProximityConfidenceReduction*estimatedSpeedWithConfidence.getConfidence(),
+                                    estimatedSpeedWithConfidence.getRelativeTo());
+                            BearingWithConfidenceCluster<TimePoint> bearingClusterForLegType = bearings.get(legType);
+                            bearingClusterForLegType.add(bearing);
+                        }
+                    }
+                }
+            }
+        }
+        return bearings;
     }
     
     /**
