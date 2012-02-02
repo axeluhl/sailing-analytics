@@ -31,8 +31,7 @@ public class WindTest {
     public void testAveragingWind() throws InterruptedException {
         WindTrack track = new WindTrackImpl(AVERAGING_INTERVAL_MILLIS);
         TimePoint t1 = MillisecondsTimePoint.now();
-        Thread.sleep(10);
-        TimePoint t2 = MillisecondsTimePoint.now();
+        TimePoint t2 = new MillisecondsTimePoint(t1.asMillis()+10);
         TimePoint middle = new MillisecondsTimePoint((t1.asMillis()+t2.asMillis())/2);
         DegreePosition pos = new DegreePosition(0, 0);
         Wind wind1 = new WindImpl(pos, t1, new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(355)));
