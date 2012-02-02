@@ -35,7 +35,6 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
-import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.gwt.ui.adminconsole.LeaderboardConfigPanel.AnchorCell;
 import com.sap.sailing.gwt.ui.client.AbstractEventPanel;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
@@ -204,14 +203,11 @@ public class LeaderboardGroupConfigPanel extends AbstractEventPanel {
                 String result = "";
                 boolean first = true;
                 for (RaceInLeaderboardDTO race : leaderboard.getRaceList()) {
-                    RaceIdentifier raceId = race.getRaceIdentifier();
-                    if (first) {
-                        result += raceId != null ? raceId.getRaceName() : race.getRaceColumnName();
-                        first = false;
-                    } else {
+                    if (!first) {
                         result += "; ";
-                        result += raceId != null ? raceId.getRaceName() : race.getRaceColumnName();
                     }
+                    result += race.getRaceColumnName();
+                    first = false;
                 }
                 return result;
             }
@@ -312,14 +308,11 @@ public class LeaderboardGroupConfigPanel extends AbstractEventPanel {
                 String result = "";
                 boolean first = true;
                 for (RaceInLeaderboardDTO race : leaderboard.getRaceList()) {
-                    RaceIdentifier raceId = race.getRaceIdentifier();
-                    if (first) {
-                        result += raceId != null ? raceId.getRaceName() : race.getRaceColumnName();
-                        first = false;
-                    } else {
+                    if (!first) {
                         result += "; ";
-                        result += raceId != null ? raceId.getRaceName() : race.getRaceColumnName();
                     }
+                    result += race.getRaceColumnName();
+                    first = false;
                 }
                 return result;
             }
