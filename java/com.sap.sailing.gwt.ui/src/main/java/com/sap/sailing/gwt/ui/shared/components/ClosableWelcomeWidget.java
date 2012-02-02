@@ -7,6 +7,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public class ClosableWelcomeWidget extends SimpleWelcomeWidget {
 
+    private StringMessages stringConstants;
     private Button closeButton;
     private boolean closable;
     
@@ -20,10 +21,11 @@ public class ClosableWelcomeWidget extends SimpleWelcomeWidget {
      * @param horizontalAlignment The alignment of the header and the welcomen component
      */
     public ClosableWelcomeWidget(boolean closable, String headerText, String welcomeText, HorizontalAlignmentConstant horizontalAlignment, StringMessages stringConstants) {
-        super(headerText, welcomeText, horizontalAlignment, stringConstants);
+        super(headerText, welcomeText, horizontalAlignment);
+        this.stringConstants = stringConstants;
         this.closable = closable;
         
-        closeButton = new Button(stringConstants.close());
+        closeButton = new Button(this.stringConstants.close());
         closeButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {

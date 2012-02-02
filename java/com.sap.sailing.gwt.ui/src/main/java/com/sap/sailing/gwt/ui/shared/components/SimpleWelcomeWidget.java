@@ -4,11 +4,9 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public class SimpleWelcomeWidget extends VerticalPanel implements WelcomeWidget {
 
-    private StringMessages stringConstants;
     private Label welcomeHeader;
     private HTML welcomeText;
 
@@ -18,12 +16,10 @@ public class SimpleWelcomeWidget extends VerticalPanel implements WelcomeWidget 
      * @param welcomeText The text of the welcome message
      * @param horizontalAlignment The alignment of the components in the VerticalPanel
      */
-    public SimpleWelcomeWidget(String headerText, String welcomeText, HorizontalAlignmentConstant horizontalAlignment, StringMessages stringConstants) {
+    public SimpleWelcomeWidget(String headerText, String welcomeText, HorizontalAlignmentConstant horizontalAlignment) {
         super();
-        this.stringConstants = stringConstants;
-        
         setHorizontalAlignment(horizontalAlignment);
-        welcomeHeader = new Label(this.stringConstants.welcomeToSailingAnalytics());
+        welcomeHeader = new Label(headerText);
         add(welcomeHeader);
         this.welcomeText = new HTML(new SafeHtmlBuilder().appendEscapedLines(welcomeText).toSafeHtml());
         add(this.welcomeText);

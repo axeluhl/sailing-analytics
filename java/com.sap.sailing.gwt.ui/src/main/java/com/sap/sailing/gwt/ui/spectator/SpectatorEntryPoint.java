@@ -8,6 +8,8 @@ import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
 import com.sap.sailing.gwt.ui.client.EventRefresher;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
+import com.sap.sailing.gwt.ui.shared.components.ClosableWelcomeWidget;
+import com.sap.sailing.gwt.ui.shared.components.SimpleWelcomeWidget;
 
 /**
  * 
@@ -46,8 +48,15 @@ public class SpectatorEntryPoint extends AbstractEntryPoint implements EventRefr
         rootPanel.add(logoAndTitlePanel);
         
         //TODO Create LeaderboardGroupPanel if groupName is filled
-        FormPanel panelToDisplay = groupName == null ? new OverviewEventPanel(sailingService, this, this, stringMessages) :
-                                                       new LeaderboardGroupPanel(sailingService, stringMessages, this, groupName);
+        FormPanel panelToDisplay = null;
+        if (groupName == null) {
+            panelToDisplay = new OverviewEventPanel(sailingService, this, this, stringMessages);
+        } else {
+            panelToDisplay = new LeaderboardGroupPanel(sailingService, stringMessages, this, groupName);
+            LeaderboardGroupPanel groupPanel = (LeaderboardGroupPanel) panelToDisplay;
+            groupPanel.setWelcomeWidget(new ClosableWelcomeWidget(true, stringMessages.welcomeToSailingAnalytics(),
+                    "Ipsum lorum\nHello World!", SimpleWelcomeWidget.ALIGN_RIGHT, stringMessages));
+        }
         panelToDisplay.setSize("100%", "100%");
         rootPanel.add(panelToDisplay);
 
