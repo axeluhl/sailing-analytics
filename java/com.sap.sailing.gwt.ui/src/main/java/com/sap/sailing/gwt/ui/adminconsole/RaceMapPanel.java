@@ -124,11 +124,11 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
             RaceIdentifier raceIdentifier = selectedRaces.get(selectedRaces.size() - 1);
             RaceDTO race = raceListBox.getRace(raceIdentifier);
             competitorSelectionProvider.setCompetitors(race.competitors);
+            updateSlider(race);
             if (race.startOfRace != null) {
                 timePanel.timeChanged(race.startOfRace);
                 timer.setTime(race.startOfRace.getTime());
             }
-            updateSlider(race);
         }
         raceMap.onRaceSelectionChange(selectedRaces);
     }
