@@ -18,13 +18,11 @@ import org.moxieapps.gwt.highcharts.client.ToolTip;
 import org.moxieapps.gwt.highcharts.client.plotOptions.LinePlotOptions;
 import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
 
-import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
-import com.sap.sailing.gwt.ui.client.ColorMap;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
@@ -40,7 +38,6 @@ import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
 public class WindChart implements Component<WindChartSettings>, RaceSelectionChangeListener, TimeListener {
     private final StringMessages stringMessages;
     private final Set<WindSource> windSourcesToDisplay;
-    private final ColorMap<WindSource> colorMap;
     
     /**
      * After the constructor finishes, holds one series for each wind source.
@@ -64,7 +61,6 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
         this.errorReporter = errorReporter;
         this.windSourceSeries = new HashMap<WindSource, Series>();
         this.windSourcesToDisplay = new HashSet<WindSource>();
-        this.colorMap = new ColorMap<WindSource>();
         chart = new Chart()
                 .setZoomType(Chart.ZoomType.X)
                 .setSpacingRight(20)
@@ -78,7 +74,7 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
 
         chart.getXAxis().setType(Axis.Type.DATE_TIME).setMaxZoom(10000) // ten seconds
                 .setAxisTitleText(stringMessages.time());
-        chart.getYAxis().setAxisTitleText(stringMessages.windSpeed()).setMin(0.6).setStartOnTick(false).setShowFirstLabel(false);
+        chart.getYAxis().setAxisTitleText(stringMessages.windSpeed()).setStartOnTick(false).setShowFirstLabel(false);
         for (WindSource windSource : WindSource.values()) {
             Series series = createSeries(windSource);
             windSourceSeries.put(windSource, series);
@@ -209,6 +205,6 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
 
     @Override
     public void timeChanged(Date date) {
-        // TODO implement timeChanged by 
+        // TODO implement timeChanged by loading missing wind data and adding to series
     }
 }
