@@ -248,9 +248,10 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
         }
     }
 
-    public EditableLeaderboardPanel(SailingServiceAsync sailingService, String leaderboardName,
+    public EditableLeaderboardPanel(SailingServiceAsync sailingService, String leaderboardName, String leaderboardGroupName,
             ErrorReporter errorReporter, StringMessages stringConstants) {
-        super(sailingService, null, new CompetitorSelectionModel(/* hasMultiSelection */ true), leaderboardName, errorReporter, stringConstants);
+        super(sailingService, null, new CompetitorSelectionModel(/* hasMultiSelection */ true), leaderboardName, leaderboardGroupName,
+                errorReporter, stringConstants);
     }
 
     /**

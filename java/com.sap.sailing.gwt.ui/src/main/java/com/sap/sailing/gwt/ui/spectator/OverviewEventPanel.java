@@ -480,7 +480,7 @@ public class OverviewEventPanel extends AbstractEventPanel {
             currentLeaderboard = boardToDisplay;
             CompetitorSelectionModel competitorSelectionModel = new CompetitorSelectionModel(true);
             displayedLeaderboardPanel = new LeaderboardPanel(sailingService, competitorSelectionModel,
-                    currentLeaderboard.name, errorReporter, stringConstants);
+                    currentLeaderboard.name, null, errorReporter, stringConstants);
             leaderboardPanel.add(displayedLeaderboardPanel);
         }
     }

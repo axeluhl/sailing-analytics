@@ -35,7 +35,6 @@ import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
-import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.LegTimepointDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
@@ -69,7 +68,7 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
     private final RaceSelectionProvider raceSelectionProvider;
     
     public RaceBoardPanel(SailingServiceAsync sailingService, RaceSelectionProvider raceSelectionProvider, String leaderboardName,
-            LeaderboardGroupDTO leaderboardGroup, ErrorReporter errorReporter, final StringMessages stringMessages) {
+            String leaderboardGroupName, ErrorReporter errorReporter, final StringMessages stringMessages) {
         this.sailingService = sailingService;
         this.raceSelectionProvider = raceSelectionProvider;
         raceSelectionProvider.addRaceSelectionChangeListener(this);
@@ -89,11 +88,11 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
         ArrayList<Pair<String, String>> breadcrumbLinksData = new ArrayList<Pair<String, String>>();
         String debugParam = Window.Location.getParameter("gwt.codesvr");
 
-        if(leaderboardGroup != null) {
-            String link = "/gwt/Spectator.html?leaderboardGroupName=" + leaderboardGroup.name;
+        if(leaderboardGroupName != null) {
+            String link = "/gwt/Spectator.html?leaderboardGroupName=" + leaderboardGroupName;
             if(debugParam != null && !debugParam.isEmpty())
                 link += "&gwt.codesvr=" + debugParam;
-            breadcrumbLinksData.add(new Pair<String, String>(link, leaderboardGroup.name));
+            breadcrumbLinksData.add(new Pair<String, String>(link, leaderboardGroupName));
         }
         breadcrumbPanel = new BreadcrumbPanel(breadcrumbLinksData, selectedRaceIdentifier.getRaceName());
         mainPanel.add(breadcrumbPanel);
@@ -103,7 +102,7 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
 
         // create the default leaderboard and select the right race
         LeaderboardPanel leaderboardPanel = new LeaderboardPanel(sailingService, selectedRaceIdentifier, competitorSelectionModel,
-                timer, leaderboardName, errorReporter, stringMessages);
+                timer, leaderboardName, leaderboardGroupName, errorReporter, stringMessages);
 
         CollapsableComponentViewer<LeaderboardSettings> leaderboardViewer = new CollapsableComponentViewer<LeaderboardSettings>(
                 leaderboardPanel, "100%", "100%", stringMessages);

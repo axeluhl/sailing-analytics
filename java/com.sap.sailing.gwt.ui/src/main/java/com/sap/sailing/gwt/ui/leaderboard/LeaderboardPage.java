@@ -1,17 +1,23 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
+import com.sap.sailing.gwt.ui.shared.panels.BreadcrumbPanel;
 
 
 public class LeaderboardPage extends AbstractEntryPoint {
+    private String leaderboardName;
+    private String leaderboardGroupName;
+    
     @Override
     public void onModuleLoad() {     
         
@@ -19,15 +25,10 @@ public class LeaderboardPage extends AbstractEntryPoint {
         sailingService.getLeaderboardNames(new AsyncCallback<List<String>>() {
             @Override
             public void onSuccess(List<String> leaderboardNames) {
-                String leaderboardName = Window.Location.getParameter("name");
+                leaderboardName = Window.Location.getParameter("name");
+                leaderboardGroupName = Window.Location.getParameter("group");
                 if (leaderboardNames.contains(leaderboardName)) {
-                    LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(stringMessages);
-                    logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
-                    LeaderboardPanel leaderboardPanel = new LeaderboardPanel(sailingService, null,
-                            new CompetitorSelectionModel(/* hasMultiSelection */ true), leaderboardName,
-                            LeaderboardPage.this, stringMessages);
-                    RootPanel.get().add(logoAndTitlePanel);
-                    RootPanel.get().add(leaderboardPanel);
+                    createLeaderboardPanel();
                 } else {
                     RootPanel.get().add(new Label(stringMessages.noSuchLeaderboard()));
                 }
@@ -39,4 +40,30 @@ public class LeaderboardPage extends AbstractEntryPoint {
             }
         });
     }
+
+    private void createLeaderboardPanel()
+    {
+        LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(stringMessages);
+        logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
+        
+        // create the breadcrumb navigation
+        ArrayList<Pair<String, String>> breadcrumbLinksData = new ArrayList<Pair<String, String>>();
+        String debugParam = Window.Location.getParameter("gwt.codesvr");
+    
+        if(leaderboardGroupName != null) {
+            String link = "/gwt/Spectator.html?leaderboardGroupName=" + leaderboardGroupName;
+            if(debugParam != null && !debugParam.isEmpty())
+                link += "&gwt.codesvr=" + debugParam;
+            breadcrumbLinksData.add(new Pair<String, String>(link, leaderboardGroupName));
+        }
+        BreadcrumbPanel breadcrumbPanel = new BreadcrumbPanel(breadcrumbLinksData, leaderboardName.toUpperCase());
+        
+        LeaderboardPanel leaderboardPanel = new LeaderboardPanel(sailingService, null,
+                new CompetitorSelectionModel(/* hasMultiSelection */ true), leaderboardName, leaderboardGroupName,
+                LeaderboardPage.this, stringMessages);
+        
+        RootPanel.get().add(logoAndTitlePanel);
+        RootPanel.get().add(breadcrumbPanel);
+        RootPanel.get().add(leaderboardPanel);
+    }    
 }
