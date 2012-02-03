@@ -70,10 +70,19 @@ g) Submit the changes to the git repository
 
 3. Adding a p2 repository as new source of libraries
 
+4. Adding a GWT library to the com.sap.sailing.gwt.ui project
+
+a) Copy the library (the jar file) to the folder /WEB-INF/lib
+b) Add the library to the bundle classpath (in the META-INF/manifest.mf file)
+c) Add a build dependency for the GWT compiler to the pom.xml
+d) Add the library to the central maven repository /home/trac/maven-repositories
+   by using the mvn install:install -file command
+
+
 Typical usecases changing the features and product definition
 -------------------------------------------------------------
 
-4. Adding a new bundle project
+5. Adding a new bundle project
 
 
 
