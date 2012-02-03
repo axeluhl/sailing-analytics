@@ -297,3 +297,10 @@ input.magnifier {
 .gwt-DialogBox {
 	z-index: 20;
 }
+
+.breadcrumbPanel-ActiveBreadcrumb, .breadcrumbPanel-InactiveBreadcrumb, .breadcrumbPanel-NextArrow {
+	font-size: 20px;
+	text-transform: uppercase;
+	color: #a1a1a1;
+	font-weight: 500;
+}

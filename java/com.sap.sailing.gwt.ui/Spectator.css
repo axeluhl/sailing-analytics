@@ -245,7 +245,7 @@ input.magnifier {
 }
 
 .leaderboardGroupPanel-LeaderboardsTableLabel {
-	
+	clear: left;
 }
 
 .leaderboardGroupPanel-ActiveLeaderboard{
@@ -260,7 +260,11 @@ input.magnifier {
 	
 }
 
-.welcomeWidget-WelcomePanel{
+.welcomeWidget-WelcomePanelWrapper {
+	
+}
+
+.welcomeWidget-WelcomePanel {
 	
 }
 

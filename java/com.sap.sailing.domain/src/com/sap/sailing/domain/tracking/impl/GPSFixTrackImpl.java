@@ -309,9 +309,10 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
      */
     @Override
     public synchronized SpeedWithBearing getEstimatedSpeed(TimePoint at) {
-        return getEstimatedSpeed(at, getInternalFixes(), ConfidenceFactory.INSTANCE.createExponentialTimeDifferenceWeigher(
+        SpeedWithBearingWithConfidence<TimePoint> estimatedSpeed = getEstimatedSpeed(at, getInternalFixes(), ConfidenceFactory.INSTANCE.createExponentialTimeDifferenceWeigher(
                 // use a minimum confidence to avoid the bearing to flip to 270deg in case all is zero
-                getMillisecondsOverWhichToAverageSpeed())).getObject();
+                getMillisecondsOverWhichToAverageSpeed()));
+        return estimatedSpeed == null ? null : estimatedSpeed.getObject();
     }
     
     @Override

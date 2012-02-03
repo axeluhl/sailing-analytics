@@ -701,7 +701,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     private Map<LegType, BearingWithConfidenceCluster<TimePoint>> clusterBearingsForWindEstimation(TimePoint timePoint,
             DummyMarkPassingWithTimePointOnly dummyMarkPassingForNow, Weigher<TimePoint> weigher) {
-        Weigher<TimePoint> weigherForMarkPassingProximity = new LinearTimeDifferenceWeigher(getMillisecondsOverWhichToAverageSpeed());
+        Weigher<TimePoint> weigherForMarkPassingProximity = new LinearTimeDifferenceWeigher(getMillisecondsOverWhichToAverageSpeed()*5);
         Map<LegType, BearingWithConfidenceCluster<TimePoint>> bearings = new HashMap<LegType, BearingWithConfidenceCluster<TimePoint>>();
         for (LegType legType : LegType.values()) {
             bearings.put(legType, new BearingWithConfidenceCluster<TimePoint>(weigher));

@@ -28,6 +28,7 @@ import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.ColumnSortList.ColumnSortInfo;
 import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.cellview.client.TextHeader;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.Anchor;
@@ -45,6 +46,7 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.client.Collator;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
@@ -66,6 +68,7 @@ import com.sap.sailing.gwt.ui.shared.components.Component;
 import com.sap.sailing.gwt.ui.shared.components.IsEmbeddableComponent;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialog;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
+import com.sap.sailing.gwt.ui.shared.panels.BreadcrumbPanel;
 
 /**
  * A leaderboard essentially consists of a table widget that in its columns displays the entries.
@@ -848,6 +851,20 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         getLeaderboardTable().addColumnSortHandler(listHandler);
         loadCompleteLeaderboard(getLeaderboardDisplayDate());
 
+        // create the breadcrumb navigation
+//        ArrayList<Pair<String, String>> breadcrumbLinksData = new ArrayList<Pair<String, String>>();
+//        String debugParam = Window.Location.getParameter("gwt.codesvr");
+//
+//        if(leaderboardGroup != null) {
+//            String link = "/gwt/Spectator.html?leaderboardGroupName=" + leaderboardGroup.name;
+//            if(debugParam != null && !debugParam.isEmpty())
+//                link += "&gwt.codesvr=" + debugParam;
+//            breadcrumbLinksData.add(new Pair<String, String>(link, leaderboardGroup.name));
+//        }
+//        breadcrumbPanel = new BreadcrumbPanel(breadcrumbLinksData, selectedRaceIdentifier.getRaceName());
+//        mainPanel.add(breadcrumbPanel);
+
+        
         contentPanel = new VerticalPanel();
         headerPanel = new DockPanel();
         DockPanel toolbarPanel = new DockPanel();
