@@ -45,7 +45,7 @@ public class WindEstimationOnStoredTracksTest extends StoredTrackBasedTestWithTr
     public void testZeroConfidenceLeadsToNullBearingAverage() {
         BearingWithConfidenceCluster<Void> cluster = new BearingWithConfidenceCluster<Void>(null);
         cluster.add(new BearingWithConfidenceImpl<Void>(new DegreeBearingImpl(355), /* confidence */ 0., null));
-        assertNull(cluster.getAverage(null).getObject());
+        assertNull(cluster.getAverage(null));
     }
     
     @Test
