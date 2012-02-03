@@ -10,6 +10,7 @@ import java.util.Map;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FormPanel;
@@ -35,6 +36,7 @@ import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
+import com.sap.sailing.gwt.ui.shared.LegTimepointDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.components.ComponentViewer;
@@ -83,10 +85,16 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
         collapsableViewers = new ArrayList<CollapsableComponentViewer<?>>();
         CompetitorSelectionModel competitorSelectionModel = new CompetitorSelectionModel(/* hasMultiSelection */ true);
 
-        String debugParam = Window.Location.getParameter("gwt.codesvr");
-        String link = "/gwt/Spectator.html" + (debugParam != null && !debugParam.isEmpty() ? "?gwt.codesvr=" + debugParam : "");
+        // create the breadcrumb navigation
         ArrayList<Pair<String, String>> breadcrumbLinksData = new ArrayList<Pair<String, String>>();
-        breadcrumbLinksData.add(new Pair<String, String>(link, stringMessages.home()));
+        String debugParam = Window.Location.getParameter("gwt.codesvr");
+
+        if(leaderboardGroup != null) {
+            String link = "/gwt/Spectator.html?leaderboardGroupName=" + leaderboardGroup.name;
+            if(debugParam != null && !debugParam.isEmpty())
+                link += "&gwt.codesvr=" + debugParam;
+            breadcrumbLinksData.add(new Pair<String, String>(link, leaderboardGroup.name));
+        }
         breadcrumbPanel = new BreadcrumbPanel(breadcrumbLinksData, selectedRaceIdentifier.getRaceName());
         mainPanel.add(breadcrumbPanel);
 
@@ -214,7 +222,18 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
                     }
                     break;
             }
-            timePanel.setLegMarkers();
+            sailingService.getLegTimePositions(selectedRace.getRaceIdentifier(), 
+                    new AsyncCallback<List<LegTimepointDTO>>() {
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            errorReporter.reportError("Error obtaining leg timepoints: " + caught.getMessage());
+                        }
+
+                        @Override
+                        public void onSuccess(List<LegTimepointDTO> legTimepoints) {
+                            timePanel.setLegMarkers(legTimepoints);
+                        }
+                    });
         }
     }
 }
