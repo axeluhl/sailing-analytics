@@ -36,6 +36,7 @@ import com.sap.sailing.gwt.ui.shared.components.Component;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
 
 public class WindChart implements Component<WindChartSettings>, RaceSelectionChangeListener, TimeListener {
+    private static final int LINE_WIDTH = 1;
     private final StringMessages stringMessages;
     private final Set<WindSource> windSourcesToDisplay;
     
@@ -68,9 +69,9 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
                 .setChartSubtitle(new ChartSubtitle().setText(stringMessages.clickAndDragToZoomIn()))
                 .setToolTip(new ToolTip().setShared(true))
                 .setLegend(new Legend().setEnabled(false))
-                .setLinePlotOptions(new LinePlotOptions().setLineWidth(1).setMarker(new Marker().setEnabled(false).setHoverState(
+                .setLinePlotOptions(new LinePlotOptions().setLineWidth(LINE_WIDTH).setMarker(new Marker().setEnabled(false).setHoverState(
                                                 new Marker().setEnabled(true).setRadius(4))).setShadow(false)
-                                .setHoverStateLineWidth(2));
+                                .setHoverStateLineWidth(LINE_WIDTH));
 
         chart.getXAxis().setType(Axis.Type.DATE_TIME).setMaxZoom(10000) // ten seconds
                 .setAxisTitleText(stringMessages.time());
