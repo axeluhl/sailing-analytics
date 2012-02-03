@@ -18,6 +18,7 @@ public class SimpleWelcomeWidget extends WelcomeWidget {
      */
     public SimpleWelcomeWidget(String headerText, String welcomeText) {
         super();
+        setStyleName(STYLE_NAME_PREFIX + "WelcomePanelWrapper");
         mainPanel = new FlowPanel();
         mainPanel.setStyleName(STYLE_NAME_PREFIX + "WelcomePanel");
         add(mainPanel);
