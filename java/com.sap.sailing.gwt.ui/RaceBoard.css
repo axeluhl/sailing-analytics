@@ -240,17 +240,6 @@ input.magnifier {
 	margin-left: 10px;
 }
 
-.raceBoardPanelHeader {
-	
-}
-
-.raceBoardPanelHeader-name {
-	font-size: 20px;
-	text-transform: uppercase;
-	color: #a1a1a1;
-	font-weight: 500;
-}
-
 .raceBoardNavigation {
 	float: right;
 	margin: 26px 0 0 0;

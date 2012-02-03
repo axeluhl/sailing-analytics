@@ -69,6 +69,13 @@ table td, table th {
 	visibility: hidden;
 }
 
+.breadcrumbPanel-ActiveBreadcrumb, .breadcrumbPanel-InactiveBreadcrumb, .breadcrumbPanel-NextArrow {
+	font-size: 20px;
+	text-transform: uppercase;
+	color: #a1a1a1;
+	font-weight: 500;
+}
+
 .sapLogo {
 	float: left;
 	margin: 13px 0 0 12px;

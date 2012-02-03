@@ -138,7 +138,7 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         RaceSelectionModel raceSelectionModel = new RaceSelectionModel();
         List<RaceIdentifier> singletonList = Collections.singletonList(selectedRace.getRaceIdentifier());
         raceSelectionModel.setSelection(singletonList);
-        raceBoardPanel = new RaceBoardPanel(sailingService, raceSelectionModel, leaderboardName, leaderboardGroup,
+        raceBoardPanel = new RaceBoardPanel(sailingService, raceSelectionModel, leaderboardName, leaderboardGroup.name,
                 RaceBoardEntryPoint.this, stringMessages);
         raceBoardPanel.fillEvents(events);
 
