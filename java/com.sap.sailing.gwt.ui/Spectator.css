@@ -260,11 +260,11 @@ input.magnifier {
 	
 }
 
+.welcomeWidget-WelcomePanel{
+	float: right;
+	width: 485px;	
+	color: #3e3e3e;
 .welcomeWidget-WelcomePanelWrapper {
-	
-}
-
-.welcomeWidget-WelcomePanel {
 	
 }
 
@@ -273,11 +273,14 @@ input.magnifier {
 }
 
 .welcomeWidget-Header {
-	
+	font-size: 24px;
+	font-weight: 400;
+	margin: 0 0 20px 0;
 }
 
 .welcomeWidget-WelcomeText {
-	
+	font-weight: 400;
+	line-height: 1.6;
 }
 
 .breadcrumbPanel-NextArrow {

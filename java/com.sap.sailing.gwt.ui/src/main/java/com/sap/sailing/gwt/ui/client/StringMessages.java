@@ -240,4 +240,6 @@ public interface StringMessages extends Messages {
     String overview();
     String welcomeToSailingAnalytics();
     String home();
+    String clickAndDragToZoomIn();
+    String windSpeed();
 }

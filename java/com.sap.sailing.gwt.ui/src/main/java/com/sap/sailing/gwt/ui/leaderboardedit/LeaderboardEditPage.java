@@ -20,13 +20,8 @@ public class LeaderboardEditPage extends AbstractEntryPoint {
                 if (leaderboardNames.contains(leaderboardName)) {
                     LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(stringMessages);
                     logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
-                    EditableLeaderboardPanel leaderboardPanel = new EditableLeaderboardPanel(sailingService, leaderboardName,
+                    EditableLeaderboardPanel leaderboardPanel = new EditableLeaderboardPanel(sailingService, leaderboardName, null,
                             LeaderboardEditPage.this, stringMessages);
-                    String padding = Window.Location.getParameter("padding");
-
-                    if (padding != null && Boolean.valueOf(padding)) {
-                        leaderboardPanel.addStyleName("leftPaddedPanel");
-                    }
                     RootPanel.get().add(logoAndTitlePanel);
                     RootPanel.get().add(leaderboardPanel);
                 } else {

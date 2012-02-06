@@ -780,21 +780,21 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     }
 
     public LeaderboardPanel(SailingServiceAsync sailingService,
-            CompetitorSelectionProvider competitorSelectionProvider, String leaderboardName,
+            CompetitorSelectionProvider competitorSelectionProvider, String leaderboardName, String leaderboardGroupName,
             ErrorReporter errorReporter, final StringMessages stringConstants) {
-        this(sailingService, /* preSelectedRace */ null, competitorSelectionProvider, leaderboardName, errorReporter, stringConstants);
+        this(sailingService, /* preSelectedRace */ null, competitorSelectionProvider, leaderboardName, leaderboardGroupName, errorReporter, stringConstants);
     }
 
     public LeaderboardPanel(SailingServiceAsync sailingService, RaceIdentifier preSelectedRace,
-            CompetitorSelectionProvider competitorSelectionProvider, String leaderboardName,
+            CompetitorSelectionProvider competitorSelectionProvider, String leaderboardName, String leaderboardGroupName,
             ErrorReporter errorReporter, final StringMessages stringConstants) {
         this(sailingService, preSelectedRace, competitorSelectionProvider, new Timer(PlayModes.Replay, /* delayBetweenAutoAdvancesInMilliseconds */3000l),
-                leaderboardName, errorReporter, stringConstants);
+                leaderboardName, leaderboardGroupName, errorReporter, stringConstants);
         timer.setDelay(getDelayInMilliseconds()); // set time/delay before adding as listener
     }
 
     public LeaderboardPanel(SailingServiceAsync sailingService, RaceIdentifier preSelectedRace,
-            CompetitorSelectionProvider competitorSelectionProvider, Timer timer, String leaderboardName,
+            CompetitorSelectionProvider competitorSelectionProvider, Timer timer, String leaderboardName, String leaderboardGroupName,
             ErrorReporter errorReporter, final StringMessages stringConstants) {
         this.sailingService = sailingService;
         this.preSelectedRace = preSelectedRace;
@@ -847,7 +847,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         listHandler = new ListHandler<LeaderboardRowDTO>(getData().getList());
         getLeaderboardTable().addColumnSortHandler(listHandler);
         loadCompleteLeaderboard(getLeaderboardDisplayDate());
-
+        
         contentPanel = new VerticalPanel();
         headerPanel = new DockPanel();
         DockPanel toolbarPanel = new DockPanel();

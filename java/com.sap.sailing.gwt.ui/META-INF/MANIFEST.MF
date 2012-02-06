@@ -39,4 +39,5 @@ Web-ContextPath: /gwt
 Bundle-ClassPath: WEB-INF/classes/,
  WEB-INF/lib/gflot-1.0.1.jar,
  WEB-INF/lib/gwt-maps.jar,
- WEB-INF/lib/gwt-servlet.jar
+ WEB-INF/lib/gwt-servlet.jar,
+ WEB-INF/lib/org.moxieapps.gwt.highcharts-1.1.3.jar

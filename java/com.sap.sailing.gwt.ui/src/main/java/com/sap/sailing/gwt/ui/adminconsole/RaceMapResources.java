@@ -187,13 +187,14 @@ public class RaceMapResources {
         // the possible zoom level range is 0 to 21 (zoom level 0 would show the whole world)
         int zoomLevel = map == null ? 1 : map.getZoomLevel();
         double minScaleFactor = 0.33;
+        double maxScaleFactor = 2.0;
         double realBoatSizeScaleFactor = minScaleFactor;
         // here it would be better to get the boat length from the boat class -> for now we assume a length of 5m 
-        double boatLengthInMeter = 5.0; 
+        double boatLengthInMeter = 5.0;
+        // to scale the boats to a realistic size we need the length of the boat in pixel, 
+        // but it does not work to just take the image size, because the images for the different boat states can be different
+        int boatLengthInPixel = 40; 
         if (zoomLevel > 5) {
-            int boatLengthInPixel = imageSize.getHeight();
-            if(imageSize.getWidth() > boatLengthInPixel)
-                boatLengthInPixel = imageSize.getWidth();
             LatLngBounds bounds = map.getBounds();
             if (bounds != null) {
                 LatLng upperRight = bounds.getNorthEast();
@@ -205,6 +206,9 @@ public class RaceMapResources {
                 realBoatSizeScaleFactor = realBoatSizeInPixel / (double) boatLengthInPixel;
                 if (realBoatSizeScaleFactor < minScaleFactor) {
                     realBoatSizeScaleFactor = minScaleFactor;
+                }
+                if (realBoatSizeScaleFactor > maxScaleFactor) {
+                    realBoatSizeScaleFactor = maxScaleFactor;
                 }
             }
         }

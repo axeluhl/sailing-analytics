@@ -18,6 +18,7 @@
   <inherits name='com.google.gwt.maps.GoogleMaps' />
   
   <!-- Flot-Gwt API -->
+  <inherits name="org.moxieapps.gwt.highcharts.Highcharts" />
   <inherits name='ca.nanometrics.gflot.GFlot'/>
   
   <!-- Phoenix Stuff -->

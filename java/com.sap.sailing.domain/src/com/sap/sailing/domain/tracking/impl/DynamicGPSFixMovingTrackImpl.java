@@ -89,7 +89,8 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends DynamicTrackImpl<Ite
         Bearing bearing = bearingAverage == null ? null : bearingAverage.getObject();
         SpeedWithBearing avgSpeed = (speedWithConfidence == null || bearing == null) ? null :
             new KnotSpeedWithBearingImpl(speedWithConfidence.getObject().getKnots(), bearing);
-        SpeedWithBearingWithConfidence<TimePoint> result = new SpeedWithBearingWithConfidenceImpl<TimePoint>(avgSpeed,
+        SpeedWithBearingWithConfidence<TimePoint> result = speedWithConfidence == null || bearingAverage == null ? null :
+            new SpeedWithBearingWithConfidenceImpl<TimePoint>(avgSpeed,
                 /* confidence */ (speedWithConfidence.getConfidence() + bearingAverage.getConfidence())/2., at);
         return result;
     }
