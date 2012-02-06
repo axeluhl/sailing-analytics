@@ -8,7 +8,7 @@
       clear: both;
       visibility: hidden;
 */
-.clear {
+.clearafter {
 	clear: both;
 	font-size: 1px;
 	height: 0px;
@@ -24,8 +24,12 @@
 	top: -1000px;
 }
 
+html {
+
+}
+
 body {
-	background: #ebebeb;
+	background: url(images/spectatorview-bg.png) no-repeat left top fixed #ebebeb;
 	font-family: 'Ubuntu', 'Terminal Dosis', sans-serif;
 	line-height: 1;
 	font-size: 14px;
@@ -264,6 +268,7 @@ input.magnifier {
 	float: right;
 	width: 485px;	
 	color: #3e3e3e;
+}
 .welcomeWidget-WelcomePanelWrapper {
 	
 }
