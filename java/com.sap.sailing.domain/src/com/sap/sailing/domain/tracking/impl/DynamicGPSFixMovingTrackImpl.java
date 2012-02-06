@@ -91,7 +91,8 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends DynamicTrackImpl<Ite
             new KnotSpeedWithBearingImpl(speedWithConfidence.getObject().getKnots(), bearing);
         SpeedWithBearingWithConfidence<TimePoint> result = speedWithConfidence == null || bearingAverage == null ? null :
             new SpeedWithBearingWithConfidenceImpl<TimePoint>(avgSpeed,
-                /* confidence */ (speedWithConfidence.getConfidence() + bearingAverage.getConfidence())/2., at);
+                /* confidence */ ((speedWithConfidence == null ? 0.0 : speedWithConfidence.getConfidence()) +
+                        (bearingAverage == null ? 0.0 : bearingAverage.getConfidence()))/2., at);
         return result;
     }
     
