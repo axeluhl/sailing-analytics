@@ -53,7 +53,6 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.impl.Util.Pair;
-import com.sap.sailing.gwt.ui.client.ColorMap;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.DetailTypeFormatter;
@@ -93,7 +92,6 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener {
     private final Label title;
     private final DeckPanel chart;
     private final RaceSelectionProvider raceSelectionProvider;
-    private final ColorMap<Integer> colorMap;
     private int stepsToLoad = 100;
     private final StringMessages stringMessages;
     private PlotWithOverview plot;
@@ -124,7 +122,6 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener {
     	seriesIsUsed = new HashSet<SeriesHandler>();
     	competitorID = new ArrayList<CompetitorDTO>();
     	markSeriesID = new ArrayList<SeriesHandler>();
-    	colorMap = new ColorMap<Integer>();
     	competitorLabels = new HashMap<CompetitorDTO, Widget>();
     	markPassingBuoyName = new HashMap<String, String>();
         this.sailingService = sailingService;
@@ -420,13 +417,14 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener {
         plotOptions.setGridOptions(new GridOptions().setHoverable(true).setMouseActiveRadius(5).setAutoHighlight(true));
 
         plotOptions.setSelectionOptions(new SelectionOptions().setDragging(true).setMode("x"));
-        for (int i = 0; i <  getCompetitorsAndTimePointsDTO().getCompetitors().length; i++){
-        	SeriesHandler series = model.addSeries(""+i, colorMap.getColorByID(i));
+        for (int i = 0; i < getCompetitorsAndTimePointsDTO().getCompetitors().length; i++){
+                CompetitorDTO competitor = getCompetitorsAndTimePointsDTO().getCompetitors()[i];
+        	SeriesHandler series = model.addSeries(""+i, competitorSelectionProvider.getColor(competitor));
     		series.setOptions(SeriesType.LINES, new LineSeriesOptions().setLineWidth(2.5).setShow(true));
     		series.setOptions(SeriesType.POINTS, new PointsSeriesOptions().setLineWidth(0).setShow(false));
     		series.setVisible(false);
     		seriesID.add(series);
-    		series = model.addSeries(i + " passed mark", colorMap.getColorByID(i));
+    		series = model.addSeries(i + " passed mark", competitorSelectionProvider.getColor(competitor));
     		series.setOptions(SeriesType.LINES, new LineSeriesOptions().setLineWidth(0).setShow(false));
     		series.setOptions(SeriesType.POINTS, new PointsSeriesOptions().setLineWidth(3).setShow(true));
     		series.setVisible(false);
@@ -550,7 +548,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener {
     private void setLegendVisible(CompetitorDTO competitor, boolean visible) {
     	Widget label = competitorLabels.get(competitor);
     	if (label == null){
-    		label = createCompetitorLabel(competitor.name, colorMap.getColorByID(competitorID.indexOf(competitor)));
+    		label = createCompetitorLabel(competitor.name, competitorSelectionProvider.getColor(competitor));
     		competitorLabels.put(competitor, label);
     		legendPanel.add(label);
     	}

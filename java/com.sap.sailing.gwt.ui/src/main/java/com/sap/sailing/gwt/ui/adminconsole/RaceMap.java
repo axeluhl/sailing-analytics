@@ -670,11 +670,6 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
         return result;
     }
     
-    private String getColorString(CompetitorDTO competitorDTO) {
-        // TODO green no more than 70, red no less than 120
-        return "#" + (Integer.toHexString(competitorDTO.hashCode()) + "000000").substring(0, 4).toUpperCase() + "00";
-    }
-
     /**
      * Creates a polyline for the competitor represented by <code>competitorDTO</code>, taking the fixes from
      * {@link #fixes fixes.get(competitorDTO)} and using the fixes starting at time point <code>from</code> (inclusive)
@@ -716,7 +711,7 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
         }
         PolylineOptions options = PolylineOptions.newInstance(
         /* clickable */true, /* geodesic */true);
-        Polyline result = new Polyline(points.toArray(new LatLng[0]), getColorString(competitorDTO), /* width */ 1,
+        Polyline result = new Polyline(points.toArray(new LatLng[0]), competitorSelection.getColor(competitorDTO), /* width */ 1,
         /* opacity */0.5, options);
         result.addPolylineClickHandler(new PolylineClickHandler() {
             @Override

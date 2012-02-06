@@ -18,12 +18,15 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
     
     private final boolean hasMultiSelection;
     
+    private final ColorMap<CompetitorDTO> competitorsColorMap;
+    
     public CompetitorSelectionModel(boolean hasMultiSelection) {
         super();
         this.hasMultiSelection = hasMultiSelection;
         this.allCompetitors = new HashSet<CompetitorDTO>();
         this.selectedCompetitors = new LinkedHashSet<CompetitorDTO>();
         this.listeners = new HashSet<CompetitorSelectionChangeListener>();
+        this.competitorsColorMap = new ColorMap<CompetitorDTO>();
     }
     
     /**
@@ -152,4 +155,14 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
             remove(oldCompetitorToRemove);
         }
     }
+    
+    @Override
+    public String getColor(CompetitorDTO competitor) {
+        if (allCompetitors.contains(competitor)) {
+            return competitorsColorMap.getColorByID(competitor);
+        }
+        
+        return null;
+    }
+
 }
