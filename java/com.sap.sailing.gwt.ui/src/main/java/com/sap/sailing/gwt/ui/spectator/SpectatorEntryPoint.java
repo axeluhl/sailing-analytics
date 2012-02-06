@@ -43,13 +43,11 @@ public class SpectatorEntryPoint extends AbstractEntryPoint implements EventRefr
             root = (root.equals("leaderboardGroupPanel") || root.equals("overview")) ? root : null;
         }
         RootPanel rootPanel = RootPanel.get();
-        rootPanel.setSize("100%", "100%");
         
         LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(stringMessages);
         logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
         rootPanel.add(logoAndTitlePanel);
         
-        //TODO Create LeaderboardGroupPanel if groupName is filled
         FormPanel panelToDisplay = null;
         if (groupName == null) {
             panelToDisplay = new OverviewEventPanel(sailingService, this, this, stringMessages);
@@ -59,7 +57,6 @@ public class SpectatorEntryPoint extends AbstractEntryPoint implements EventRefr
             groupPanel.setWelcomeWidget(new ClosableWelcomeWidget(true, stringMessages.welcomeToSailingAnalytics(),
                     "Ipsum lorum\nHello World!", stringMessages));
         }
-        panelToDisplay.setSize("100%", "100%");
         rootPanel.add(panelToDisplay);
 
         fillEvents();
