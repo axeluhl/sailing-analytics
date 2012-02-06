@@ -14,16 +14,6 @@
 		<url-pattern>/sailing</url-pattern>
 	</servlet-mapping>
 	
-	<servlet>
-		<display-name>ResourceServlet</display-name>
-		<servlet-name>ResourceServlet</servlet-name>
-		<servlet-class>com.sap.ui5.resource.ResourceServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>ResourceServlet</servlet-name>
-		<url-pattern>/resources/*</url-pattern>
-	</servlet-mapping>
-
 	<!-- enabling remote logging -->
 	<servlet>
 		<servlet-name>remoteLoggingServlet</servlet-name>
@@ -34,6 +24,4 @@
 		<servlet-name>remoteLoggingServlet</servlet-name>
 		<url-pattern>/com.sap.sailing.gwt.ui.AdminConsole/remote_logging</url-pattern>
 	</servlet-mapping>
-
-	
 </web-app>
