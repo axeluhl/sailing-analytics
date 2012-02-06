@@ -70,7 +70,6 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
         }
 
         mainPanel = new FlowPanel();
-        mainPanel.setWidth("95%");
         add(mainPanel);
         loadGroup(groupName);
     }
@@ -122,7 +121,6 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
         if (group.leaderboards.size() <= MAX_COLUMNS_IN_ROW) {
             LeaderboardGroupFullTableResources tableResources = GWT.create(LeaderboardGroupFullTableResources.class);
             CellTable<Integer> leaderboardsTable = new CellTable<Integer>(200, tableResources);
-            leaderboardsTable.setWidth("100%");
             leaderboardsTable.setSelectionModel(new NoSelectionModel<Integer>());
             
             int maxRacesNum = 0;
@@ -172,13 +170,10 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
 
             LeaderboardGroupCompactTableResources tableResources = GWT.create(LeaderboardGroupCompactTableResources.class);
             CellTable<LeaderboardDTO> leaderboardsTable = new CellTable<LeaderboardDTO>(200, tableResources);
-            leaderboardsTable.setWidth("100%");
             leaderboardsTable.setSelectionModel(new NoSelectionModel<LeaderboardDTO>());
             
             leaderboardsTable.addColumn(nameColumn, stringConstants.name());
-            leaderboardsTable.setColumnWidth(nameColumn, "30%");
             leaderboardsTable.addColumn(racesColumn, stringConstants.races());
-            leaderboardsTable.setColumnWidth(racesColumn, "70%");
             
             leaderboardsTable.setRowData(group.leaderboards);
             mainPanel.add(leaderboardsTable);
@@ -255,7 +250,6 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
     public void setWelcomeWidget(WelcomeWidget welcome) {
         boolean needsToBeInserted = welcomeWidget == null;
         welcomeWidget = welcome;
-        welcomeWidget.setWidth("100%");
         if (needsToBeInserted) {
             mainPanel.insert(welcomeWidget, 0);
         }
