@@ -245,7 +245,7 @@ input.magnifier {
 }
 
 .leaderboardGroupPanel-LeaderboardsTableLabel {
-	
+	clear: left;
 }
 
 .leaderboardGroupPanel-ActiveLeaderboard{
@@ -264,6 +264,8 @@ input.magnifier {
 	float: right;
 	width: 485px;	
 	color: #3e3e3e;
+.welcomeWidget-WelcomePanelWrapper {
+	
 }
 
 .welcomeWidget-CloseButton {

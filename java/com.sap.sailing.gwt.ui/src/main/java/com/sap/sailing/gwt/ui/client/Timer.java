@@ -209,5 +209,9 @@ public class Timer {
     public PlayModes getPlayMode() {
         return playMode;
     }
+
+    public void setPlayMode(PlayModes playMode) {
+        this.playMode = playMode;
+    }
     
 }

@@ -309,9 +309,10 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
      */
     @Override
     public synchronized SpeedWithBearing getEstimatedSpeed(TimePoint at) {
-        return getEstimatedSpeed(at, getInternalFixes(), ConfidenceFactory.INSTANCE.createExponentialTimeDifferenceWeigher(
+        SpeedWithBearingWithConfidence<TimePoint> estimatedSpeed = getEstimatedSpeed(at, getInternalFixes(), ConfidenceFactory.INSTANCE.createExponentialTimeDifferenceWeigher(
                 // use a minimum confidence to avoid the bearing to flip to 270deg in case all is zero
-                getMillisecondsOverWhichToAverageSpeed())).getObject();
+                getMillisecondsOverWhichToAverageSpeed()));
+        return estimatedSpeed == null ? null : estimatedSpeed.getObject();
     }
     
     @Override
@@ -479,11 +480,14 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         SpeedWithBearing estimatedSpeedAtStart = getEstimatedSpeed(start);
         if (estimatedSpeedAtStart != null) {
             Bearing bearingAtStart = estimatedSpeedAtStart.getBearing();
-            SpeedWithBearing estimatedSpeedAtEnd = getEstimatedSpeed(end);
-            if (estimatedSpeedAtEnd != null) {
-                Bearing bearingAtEnd = estimatedSpeedAtEnd.getBearing();
-                // TODO also need to analyze the (smoothened) directions in between; example: two tacks within averaging interval
-                result = Math.abs(bearingAtStart.getDifferenceTo(bearingAtEnd).getDegrees()) > minimumDegreeDifference;
+            TimePoint next = new MillisecondsTimePoint(start.asMillis()+Math.max(1000l, getMillisecondsOverWhichToAverageSpeed()/2));
+            while (!result && next.compareTo(end) <= 0) {
+                SpeedWithBearing estimatedSpeedAtNext = getEstimatedSpeed(next);
+                if (estimatedSpeedAtNext != null) {
+                    Bearing bearingAtEnd = estimatedSpeedAtNext.getBearing();
+                    result = Math.abs(bearingAtStart.getDifferenceTo(bearingAtEnd).getDegrees()) > minimumDegreeDifference;
+                }
+                next = new MillisecondsTimePoint(next.asMillis()+Math.max(1000l, getMillisecondsOverWhichToAverageSpeed()/2));
             }
         }
         return result;

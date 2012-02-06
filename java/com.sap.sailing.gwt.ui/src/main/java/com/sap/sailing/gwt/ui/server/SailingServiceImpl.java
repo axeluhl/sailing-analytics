@@ -89,6 +89,7 @@ import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RacesHandle;
+import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
@@ -109,6 +110,7 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDTO;
 import com.sap.sailing.gwt.ui.shared.LegEntryDTO;
+import com.sap.sailing.gwt.ui.shared.LegTimepointDTO;
 import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.PositionDTO;
@@ -742,6 +744,27 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         return new GPSFixDTO(fix.getTimePoint().asDate(), new PositionDTO(fix
                 .getPosition().getLatDeg(), fix.getPosition().getLngDeg()),
                 createSpeedWithBearingDTO(speedWithBearing), tack, legType, extrapolated);
+    }
+
+    @Override
+    public List<LegTimepointDTO> getLegTimePositions(RaceIdentifier raceIdentifier) {
+        List<LegTimepointDTO> result = new ArrayList<LegTimepointDTO>();
+        TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
+        if (trackedRace != null) {
+            Iterable<TrackedLeg> trackedLegs = trackedRace.getTrackedLegs();
+            int i = 1;
+            for (TrackedLeg trackedLeg : trackedLegs) {
+                Waypoint to = trackedLeg.getLeg().getTo();
+                Iterable<MarkPassing> markPassings = trackedRace.getMarkPassingsInOrder(to);
+                if(markPassings != null) {
+                    MarkPassing firstPassing = markPassings.iterator().next();
+                    LegTimepointDTO legTimepointDTO = new LegTimepointDTO("L" + i++);
+                    legTimepointDTO.firstPassingDate = firstPassing.getTimePoint().asDate(); 
+                    result.add(legTimepointDTO);
+                }
+            }
+        }        
+        return result;
     }
 
     @Override

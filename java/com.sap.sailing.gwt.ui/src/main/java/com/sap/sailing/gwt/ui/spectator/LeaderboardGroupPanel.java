@@ -72,24 +72,16 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
         mainPanel = new FlowPanel();
         mainPanel.setWidth("95%");
         add(mainPanel);
-        final Runnable buildGUI = new Runnable() {
-            @Override
-            public void run() {
-                buildGUI();
-            }
-        };
-        loadGroup(groupName, buildGUI);
+        loadGroup(groupName);
     }
 
-    private void loadGroup(final String groupName, final Runnable actionsAfterLoading) {
+    private void loadGroup(final String groupName) {
         sailingService.getLeaderboardGroupByName(groupName, new AsyncCallback<LeaderboardGroupDTO>() {
             @Override
             public void onSuccess(LeaderboardGroupDTO group) {
                 if (group != null) {
                     LeaderboardGroupPanel.this.group = group;
-                    if (actionsAfterLoading != null) {
-                        actionsAfterLoading.run();
-                    }
+                    buildGUI();
                 } else {
                     errorReporter.reportError(stringConstants.noLeaderboardGroupWithNameFound(groupName));
                 }
