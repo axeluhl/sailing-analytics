@@ -860,9 +860,9 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         contentPanel = new VerticalPanel();
         headerPanel = new DockPanel();
         DockPanel toolbarPanel = new DockPanel();
-        busyIndicator = new SimpleBusyIndicator(true);
+        busyIndicator = new SimpleBusyIndicator();
         if (!isEmbedded) {
-            toolbarPanel.add(busyIndicator);
+            toolbarPanel.add(busyIndicator, DockPanel.WEST);
         }
         headerPanel.setWidth("100%");
         headerPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
