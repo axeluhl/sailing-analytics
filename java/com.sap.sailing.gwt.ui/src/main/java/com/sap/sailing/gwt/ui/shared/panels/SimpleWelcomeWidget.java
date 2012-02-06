@@ -4,6 +4,7 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.SimplePanel;
 
 public class SimpleWelcomeWidget extends WelcomeWidget {
 
@@ -29,6 +30,9 @@ public class SimpleWelcomeWidget extends WelcomeWidget {
         this.welcomeText = new HTML(new SafeHtmlBuilder().appendEscapedLines(welcomeText).toSafeHtml());
         this.welcomeText.setStyleName(STYLE_NAME_PREFIX + "WelcomeText");
         mainPanel.add(this.welcomeText);
+        SimplePanel clearAfter = new SimplePanel();
+        clearAfter.setStyleName("clearafter");
+        mainPanel.add(clearAfter);
     }
 
     @Override
