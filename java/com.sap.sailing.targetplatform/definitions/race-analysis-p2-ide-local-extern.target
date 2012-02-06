@@ -1,13 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?pde version="3.6"?>
 
-<target name="Race Analysis Target (IDE external)" sequenceNumber="49">
+<target name="Race Analysis Target (IDE external)" sequenceNumber="50">
 <locations>
 <location includeAllPlatforms="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
-<unit id="com.sap.ui5.runtime.feature.feature.group" version="1.1.0"/>
-<unit id="com.sap.ui5.uilib.feature.feature.group" version="1.1.0"/>
-<unit id="com.sap.ui5.gwt.core.feature.feature.group" version="1.1.0"/>
-<repository location="http://sapcoe-app01.pironet-ndh.com/p2/sap/com.sap.ui5.updatesite-1.1.0-assembly"/>
+<unit id="org.eclipse.equinox.core.sdk.feature.group" version="3.7.1.R37x_v20110907-7uF9LFpFFSuN6-tKJIXPMYaq7NTP"/>
+<repository location="http://download.eclipse.org/releases/indigo"/>
 </location>
 <location includeAllPlatforms="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.jetty.bundles.f.feature.group" version="7.5.4"/>
@@ -17,10 +15,6 @@
 <unit id="com.sap.sailing.target.base.feature.group" version="1.0.0"/>
 <unit id="com.sap.sailing.target.test.feature.group" version="1.0.0"/>
 <repository location="http://sapcoe-app01.pironet-ndh.com/p2/sailing/"/>
-</location>
-<location includeAllPlatforms="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
-<unit id="org.eclipse.equinox.core.sdk.feature.group" version="3.7.1.R37x_v20110907-7uF9LFpFFSuN6-tKJIXPMYaq7NTP"/>
-<repository location="http://download.eclipse.org/releases/indigo"/>
 </location>
 </locations>
 </target>

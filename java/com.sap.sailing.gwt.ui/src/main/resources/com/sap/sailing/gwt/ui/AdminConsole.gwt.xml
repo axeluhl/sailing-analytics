@@ -21,9 +21,6 @@
   <inherits name="org.moxieapps.gwt.highcharts.Highcharts" />
   <inherits name='ca.nanometrics.gflot.GFlot'/>
   
-  <!-- Phoenix Stuff -->
-  <inherits name='com.sap.ui.commons.Module' />
-
   <inherits name="com.google.gwt.resources.Resources" />
     <inherits name="com.google.gwt.logging.Logging"/>
   
