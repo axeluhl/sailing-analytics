@@ -45,37 +45,7 @@ public final class CollapsablePanel extends Composite implements HasWidgets.ForI
         HasOpenHandlers<CollapsablePanel>, HasCloseHandlers<CollapsablePanel> {
 
     private static ComponentResources resources = GWT.create(ComponentResources.class);
-
-    /**
-     * Used to wrap widgets in the header to provide click support. Effectively wraps the widget in an
-     * <code>anchor</code> to get automatic keyboard access.
-     */
-    /*
-    private final class ClickableHeader extends SimplePanel {
-
-        private ClickableHeader() {
-            // Anchor is used to allow keyboard access.
-            super(DOM.createAnchor());
-            Element elem = getElement();
-            DOM.setElementProperty(elem, "href", "javascript:void(0);");
-            // Avoids layout problems from having blocks in inlines.
-            DOM.setStyleAttribute(elem, "display", "block");
-            sinkEvents(Event.ONCLICK);
-            setStyleName(STYLENAME_HEADER);
-        }
-
-        @Override
-        public void onBrowserEvent(Event event) {
-            // no need to call super.
-            switch (DOM.eventGetType(event)) {
-            case Event.ONCLICK:
-                // Prevent link default action.
-                DOM.eventPreventDefault(event);
-                setOpen(!isOpen);
-            }
-        }
-    }
-*/
+    
     /**
      * An {@link Animation} used to open the content.
      */

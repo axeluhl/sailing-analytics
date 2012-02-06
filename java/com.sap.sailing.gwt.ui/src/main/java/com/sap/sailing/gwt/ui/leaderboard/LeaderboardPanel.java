@@ -66,6 +66,7 @@ import com.sap.sailing.gwt.ui.shared.components.Component;
 import com.sap.sailing.gwt.ui.shared.components.IsEmbeddableComponent;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialog;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
+import com.sap.sailing.gwt.ui.shared.panels.BusyIndicator;
 
 /**
  * A leaderboard essentially consists of a table widget that in its columns displays the entries.
@@ -1523,5 +1524,17 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         if (row != null) {
             leaderboardSelectionModel.setSelected(row, false);
         }
+    }
+
+    @Override
+    public BusyIndicator getBusyIndicator() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public boolean hasBusyIndicator() {
+        // TODO Auto-generated method stub
+        return false;
     }
 }
