@@ -22,9 +22,6 @@
   <inherits name='ca.nanometrics.gflot.GFlot'/>
   <inherits name="org.moxieapps.gwt.highcharts.Highcharts" />
   
-  <!-- Phoenix Stuff -->
-  <inherits name='com.sap.ui.commons.Module' />
-  
   <!-- Other module inherits                                      -->
   <inherits name="com.sap.sailing.domain.SailingDomain" />
 
