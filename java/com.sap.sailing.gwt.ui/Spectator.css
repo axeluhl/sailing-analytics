@@ -8,7 +8,7 @@
       clear: both;
       visibility: hidden;
 */
-.clear {
+.clearafter {
 	clear: both;
 	font-size: 1px;
 	height: 0px;
@@ -24,14 +24,21 @@
 	top: -1000px;
 }
 
+
 body {
-	background: #ebebeb;
+	background: url(images/spectatorview-bg.png) no-repeat left top fixed #ebebeb;
 	font-family: 'Ubuntu', 'Terminal Dosis', sans-serif;
 	line-height: 1;
 	font-size: 14px;
 	font-weight: 400;
 	padding: 85px 0 120px 0;
 	margin: 0;
+	color: #3b3b3b;
+}
+
+a {
+	color: #2968c0;
+	text-decoration: underline;
 }
 
 table td,select,button {
@@ -248,8 +255,22 @@ input.magnifier {
 	clear: left;
 }
 
-.leaderboardGroupPanel-ActiveLeaderboard{
-	
+.leaderboardGroupPanel-ActiveRace, .leaderboardGroupPanel-ActiveLeaderboard {
+	padding: 5px 8px;
+	display: block;
+	float: left;
+	margin: 5px 5px 5px 0;
+	border-radius: 4px;
+	background: #e7e7e7;
+	text-decoration: none;
+	color: #3b3b3b;
+  border: 1px solid #a6a6a6;
+}
+
+.leaderboardGroupPanel-ActiveRace:hover, .leaderboardGroupPanel-ActiveLeaderboard:hover {
+	text-decoration: none;
+	color: #3b3b3b;
+  background: #f1af10;
 }
 
 .leaderboardGroupPanel-ActiveRace {
@@ -264,6 +285,7 @@ input.magnifier {
 	float: right;
 	width: 485px;	
 	color: #3e3e3e;
+}
 .welcomeWidget-WelcomePanelWrapper {
 	
 }
@@ -294,3 +316,5 @@ input.magnifier {
 .breadcrumbPanel-InactiveBreadcrumb {
 	
 }
+
+
