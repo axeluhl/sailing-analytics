@@ -43,6 +43,8 @@ public interface CompetitorSelectionProvider {
     
     boolean hasMultiSelection();
 
+    String getColor(CompetitorDTO competitor);
+    
     void addCompetitorSelectionChangeListener(CompetitorSelectionChangeListener listener);
 
     void removeCompetitorSelectionChangeListener(CompetitorSelectionChangeListener listener);

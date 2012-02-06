@@ -25,11 +25,6 @@ Computes leaderboard information for sailing races and offers RESTful APIs to al
       <import plugin="org.eclipse.osgi"/>
       <import plugin="javax.servlet" version="2.5.0" match="greaterOrEqual"/>
       <import plugin="com.mongodb.driver" version="2.6.2" match="greaterOrEqual"/>
-      <import plugin="com.sap.ui5.commons"/>
-      <import plugin="com.sap.ui5.core"/>
-      <import plugin="com.sap.ui5.resource"/>
-      <import plugin="com.sap.ui5.gwt.commons"/>
-      <import plugin="com.sap.ui5.gwt.core"/>
       <import plugin="com.google.gwt.osgi" version="2.4.0" match="greaterOrEqual"/>
    </requires>
 
@@ -172,4 +167,9 @@ Computes leaderboard information for sailing races and offers RESTful APIs to al
          install-size="0"
          version="0.0.0"/>
 
+   <plugin
+         id="com.sap.sailing.www.events"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
 </feature>

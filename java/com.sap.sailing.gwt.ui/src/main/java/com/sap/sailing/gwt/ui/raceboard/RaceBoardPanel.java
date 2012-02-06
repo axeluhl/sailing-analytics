@@ -117,12 +117,12 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
         raceMap.onRaceSelectionChange(Collections.singletonList(selectedRaceIdentifier));
         collapsableViewers.add(raceMapViewer);
         
-        boolean showWindChart = false;
+        boolean showWindChart = true;
         if(showWindChart) {
             WindChartSettings windChartSettings = new WindChartSettings();
             WindChart windChart = new WindChart(sailingService, raceSelectionProvider, windChartSettings, stringMessages, errorReporter); 
             CollapsableComponentViewer<WindChartSettings> windChartViewer = new CollapsableComponentViewer<WindChartSettings>(
-                    windChart, "600px", "300px", stringMessages);
+                    windChart, "600px", "500px", stringMessages);
             windChart.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
             collapsableViewers.add(windChartViewer);
         }
@@ -207,6 +207,7 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
                 max = selectedRace.endOfRace;
             } else if (selectedRace.timePointOfNewestEvent != null) {
                 max = selectedRace.timePointOfNewestEvent;
+                timer.setPlayMode(PlayModes.Live);
             }
 
             if(min != null && max != null)
