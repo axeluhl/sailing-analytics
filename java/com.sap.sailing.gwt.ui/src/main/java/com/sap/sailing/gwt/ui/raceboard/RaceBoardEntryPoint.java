@@ -114,7 +114,7 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
             return;
         }
          
-        createRaceBoardPanel(selectedRace, events, leaderboardGroup);
+        createRaceBoardPanel(selectedRace, events);
     }  
 
     private RaceDTO findRace(String eventName, String raceName, List<EventDTO> events) {
@@ -132,13 +132,13 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         return null;
     }
 
-    private void createRaceBoardPanel(RaceDTO selectedRace, List<EventDTO> events, LeaderboardGroupDTO leaderboardGroup) {
+    private void createRaceBoardPanel(RaceDTO selectedRace, List<EventDTO> events) {
         LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(stringMessages);
         logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
         RaceSelectionModel raceSelectionModel = new RaceSelectionModel();
         List<RaceIdentifier> singletonList = Collections.singletonList(selectedRace.getRaceIdentifier());
         raceSelectionModel.setSelection(singletonList);
-        raceBoardPanel = new RaceBoardPanel(sailingService, raceSelectionModel, leaderboardName, leaderboardGroup.name,
+        raceBoardPanel = new RaceBoardPanel(sailingService, raceSelectionModel, leaderboardName, leaderboardGroupName,
                 RaceBoardEntryPoint.this, stringMessages);
         raceBoardPanel.fillEvents(events);
 
