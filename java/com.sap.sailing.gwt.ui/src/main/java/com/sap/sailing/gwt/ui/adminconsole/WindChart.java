@@ -15,9 +15,14 @@ import org.moxieapps.gwt.highcharts.client.Legend;
 import org.moxieapps.gwt.highcharts.client.Point;
 import org.moxieapps.gwt.highcharts.client.Series;
 import org.moxieapps.gwt.highcharts.client.ToolTip;
+import org.moxieapps.gwt.highcharts.client.ToolTipData;
+import org.moxieapps.gwt.highcharts.client.ToolTipFormatter;
 import org.moxieapps.gwt.highcharts.client.plotOptions.LinePlotOptions;
 import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
 
+import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.i18n.client.NumberFormat;
+import com.google.gwt.i18n.client.TimeZone;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -50,6 +55,7 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
     private final SailingServiceAsync sailingService;
     private final Chart chart;
     private final Timer timer;
+    private final DateTimeFormat dateFormat = DateTimeFormat.getFormat("HH:mm:ss");
     
     /**
      * @param raceSelectionProvider
@@ -70,13 +76,22 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
                 .setZoomType(Chart.ZoomType.X)
                 .setSpacingRight(20)
                 .setChartTitle(new ChartTitle().setText(stringMessages.wind()))
-                .setChartSubtitle(new ChartSubtitle().setText(stringMessages.clickAndDragToZoomIn()))
-                .setToolTip(new ToolTip().setShared(true))
+                .setChartSubtitle(new ChartSubtitle().setText(stringMessages.clickAndDragToZoomIn()+"; "+stringMessages.allTimesInUTC()))
                 .setLegend(new Legend().setEnabled(true))
                 .setLinePlotOptions(new LinePlotOptions().setLineWidth(LINE_WIDTH).setMarker(new Marker().setEnabled(false).setHoverState(
                                                 new Marker().setEnabled(true).setRadius(4))).setShadow(false)
                                 .setHoverStateLineWidth(LINE_WIDTH));
-
+        final String unit = "deg";
+        final NumberFormat numberFormat = NumberFormat.getFormat("0");
+        chart.setToolTip(new ToolTip().setEnabled(true).setFormatter(new ToolTipFormatter() {
+            @Override
+            public String format(ToolTipData toolTipData) {
+                return "<b>" + toolTipData.getSeriesName() + (toolTipData.getPointName() != null ? " "+toolTipData.getPointName() : "")
+                        + "</b><br/>" +  
+                        dateFormat.format(new Date(toolTipData.getXAsLong()), TimeZone.createTimeZone(0)) + ": " +
+                        numberFormat.format(toolTipData.getYAsDouble()) + unit;
+            }
+        }));
         chart.getXAxis().setType(Axis.Type.DATE_TIME).setMaxZoom(10000) // ten seconds
                 .setAxisTitleText(stringMessages.time());
         chart.getYAxis().setAxisTitleText(stringMessages.windSpeed()).setStartOnTick(false).setShowFirstLabel(false);

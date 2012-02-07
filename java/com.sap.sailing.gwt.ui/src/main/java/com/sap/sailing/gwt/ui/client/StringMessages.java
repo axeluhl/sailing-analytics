@@ -242,4 +242,5 @@ public interface StringMessages extends Messages {
     String home();
     String clickAndDragToZoomIn();
     String windSpeed();
+    String allTimesInUTC();
 }
