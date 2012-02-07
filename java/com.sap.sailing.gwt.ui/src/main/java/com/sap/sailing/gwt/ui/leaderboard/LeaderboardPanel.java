@@ -66,6 +66,8 @@ import com.sap.sailing.gwt.ui.shared.components.Component;
 import com.sap.sailing.gwt.ui.shared.components.IsEmbeddableComponent;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialog;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
+import com.sap.sailing.gwt.ui.shared.panels.BusyIndicator;
+import com.sap.sailing.gwt.ui.shared.panels.SimpleBusyIndicator;
 
 /**
  * A leaderboard essentially consists of a table widget that in its columns displays the entries.
@@ -174,6 +176,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
 
     private final ImageResource pauseIcon;
     private final ImageResource playIcon;
+    
+    private final BusyIndicator busyIndicator;
 
     private class SettingsClickHandler implements ClickHandler {
         private final StringMessages stringConstants;
@@ -847,10 +851,19 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         listHandler = new ListHandler<LeaderboardRowDTO>(getData().getList());
         getLeaderboardTable().addColumnSortHandler(listHandler);
         loadCompleteLeaderboard(getLeaderboardDisplayDate());
-        
+
+        if(preSelectedRace == null) {
+            isEmbedded = false;
+        } else {
+            isEmbedded = true;
+        }
         contentPanel = new VerticalPanel();
         headerPanel = new DockPanel();
         DockPanel toolbarPanel = new DockPanel();
+        busyIndicator = new SimpleBusyIndicator();
+        if (!isEmbedded) {
+            toolbarPanel.add(busyIndicator, DockPanel.WEST);
+        }
         headerPanel.setWidth("100%");
         headerPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
         toolbarPanel.setWidth("100%");
@@ -901,11 +914,9 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         refreshAndSettingsPanel.add(refreshPanel);
         refreshAndSettingsPanel.add(settingsAnchor);
         toolbarPanel.add(refreshAndSettingsPanel, DockPanel.EAST);
-        if(preSelectedRace == null) {
+        if(!isEmbedded) {
             contentPanel.add(headerPanel);
             contentPanel.add(toolbarPanel);
-        } else {
-            isEmbedded = true;
         }
         contentPanel.add(getLeaderboardTable());
         setWidget(contentPanel);
@@ -1462,7 +1473,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     private void compareCompetitors() {
         List<RaceIdentifier> races = getTrackedRacesIdentifiers();
         CompareCompetitorsChartDialog chartDialog = new CompareCompetitorsChartDialog(sailingService, races,
-                competitorSelectionProvider, stringConstants, errorReporter);
+                competitorSelectionProvider, timer, stringConstants, errorReporter);
         chartDialog.show();
     }
     
@@ -1523,5 +1534,15 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         if (row != null) {
             leaderboardSelectionModel.setSelected(row, false);
         }
+    }
+
+    @Override
+    public BusyIndicator getBusyIndicator() {
+        return busyIndicator;
+    }
+
+    @Override
+    public boolean hasBusyIndicator() {
+        return true;
     }
 }
