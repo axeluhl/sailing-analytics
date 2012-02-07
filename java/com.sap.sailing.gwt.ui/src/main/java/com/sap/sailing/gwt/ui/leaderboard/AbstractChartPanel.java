@@ -174,7 +174,10 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
         });
         mainPanel.add(showConfigAnchor);
         this.add(mainPanel);
-        loadData();
+        // loadData only necessary if no race chooser displayed; the race chooser will load the data for the selected race
+        if (!showRaceSelector) {
+            loadData();
+        }
     }
     
     private void addOptionalRaceChooserPanel(VerticalPanel chartPanel) {
@@ -464,6 +467,8 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
         if (clearCheckBoxes) {
             seriesIsUsed.clear();
         }
+        seriesByCompetitor.clear();
+        markPassingSeriesByCompetitor.clear();
         chart.removeAllSeries();
     }
 
