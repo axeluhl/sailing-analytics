@@ -72,6 +72,8 @@ import com.sap.sailing.gwt.ui.shared.CompetitorInRaceDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorsAndTimePointsDTO;
 import com.sap.sailing.gwt.ui.shared.components.Component;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialog;
+import com.sap.sailing.gwt.ui.shared.panels.BusyIndicator;
+import com.sap.sailing.gwt.ui.shared.panels.SimpleBusyIndicator;
 
 /**
  * ChartPanel is a GWT panel that can show one sort of competitor data (e.g. current speed over ground, windward distance to
@@ -149,9 +151,8 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
         }
         loadingPanel = new AbsolutePanel();
         loadingPanel.setSize(width + "px", height + "px");
-        Anchor a = new Anchor(new SafeHtmlBuilder().appendHtmlConstant("<img src=\"/gwt/images/ajax-loader.gif\"/>")
-                .toSafeHtml());
-        loadingPanel.add(a, width / 2 - 32 / 2, height / 2 - 32 - 2);
+        BusyIndicator busyIndicator = new SimpleBusyIndicator(true, 1);
+        loadingPanel.add(busyIndicator, width / 2 - 32 / 2, height / 2 - 32 - 2);
         chartPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
         chartPanel.setSpacing(5);
         legendPanel = new FlowPanel();
