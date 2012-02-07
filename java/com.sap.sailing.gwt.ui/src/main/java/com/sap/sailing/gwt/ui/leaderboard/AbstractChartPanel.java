@@ -36,9 +36,11 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.NumberFormat;
+import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbsolutePanel;
+import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.DeckPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -53,6 +55,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.gwt.ui.client.ClientResources;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.DetailTypeFormatter;
@@ -110,6 +113,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
     private DetailType dataToShow;
     private AbsolutePanel loadingPanel;
     private final CompetitorSelectionProvider competitorSelectionProvider;
+    private static final ClientResources resources = GWT.create(ClientResources.class);
 
     public AbstractChartPanel(SailingServiceAsync sailingService,
             CompetitorSelectionProvider competitorSelectionProvider, RaceSelectionProvider raceSelectionProvider,
@@ -159,8 +163,8 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
         chart.showWidget(0);
         chartPanel.add(chart);
         mainPanel.add(chartPanel);
-        Anchor showConfigAnchor = new Anchor(new SafeHtmlBuilder().appendHtmlConstant(
-                "<img class=\"linkNoBorder\" src=\"/gwt/images/settings.png\"/>").toSafeHtml());
+        ImageResource settingsIcon = resources.settingsIcon();
+        Anchor showConfigAnchor = new Anchor(AbstractImagePrototype.create(settingsIcon).getSafeHtml());
         showConfigAnchor.setTitle(stringMessages.configuration());
         showConfigAnchor.addClickHandler(new ClickHandler() {
             @Override
