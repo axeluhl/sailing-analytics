@@ -47,6 +47,7 @@
   <source path='components'/>
   <source path='adminconsole'/>
   <source path='leaderboard'/>
+  <source path='usermanagement'/>
   <source path='shared'/>
   <source path='test'/>
 </module>

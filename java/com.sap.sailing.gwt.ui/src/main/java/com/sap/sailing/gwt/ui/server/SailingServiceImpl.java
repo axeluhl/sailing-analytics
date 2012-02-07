@@ -69,6 +69,7 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KilometersPerHourSpeedImpl;
+import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard.Entry;
@@ -754,6 +755,39 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             Iterable<TrackedLeg> trackedLegs = trackedRace.getTrackedLegs();
             int i = 1;
             for (TrackedLeg trackedLeg : trackedLegs) {
+                if(i == 1) {
+                    // try to calculate the point in time where all boats passed the start line in a small time frame
+                    Waypoint from = trackedLeg.getLeg().getFrom();
+                    Iterable<MarkPassing> markPassings = trackedRace.getMarkPassingsInOrder(from);
+                    int markPassingsCount = Util.size(markPassings);
+
+                    if(markPassings != null && markPassingsCount >= 4) {
+                        long maxTimeFrameInMs = 60 * 1000; // = 1 minute
+                        Iterator<MarkPassing> iterator = markPassings.iterator();
+                        long currentTimeToCheck = 0;
+                        int enoughCompetitors = markPassingsCount / 2;
+                        int currentCompetitorsInTime = 0;
+                        
+                        while (iterator.hasNext()) { 
+                            MarkPassing currentMarkPassing = iterator.next();
+                            long diff = currentMarkPassing.getTimePoint().asMillis() - currentTimeToCheck;
+                            if(diff > maxTimeFrameInMs) {
+                                // reset the check
+                                currentCompetitorsInTime = 0;
+                                currentTimeToCheck = currentMarkPassing.getTimePoint().asMillis();
+                            } else {
+                                currentCompetitorsInTime++;
+                                if(currentCompetitorsInTime == enoughCompetitors) {
+                                    LegTimepointDTO legTimepointDTO = new LegTimepointDTO("L0");
+                                    legTimepointDTO.firstPassingDate = currentMarkPassing.getTimePoint().asDate(); 
+                                    result.add(legTimepointDTO);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+                
                 Waypoint to = trackedLeg.getLeg().getTo();
                 Iterable<MarkPassing> markPassings = trackedRace.getMarkPassingsInOrder(to);
                 if(markPassings != null) {

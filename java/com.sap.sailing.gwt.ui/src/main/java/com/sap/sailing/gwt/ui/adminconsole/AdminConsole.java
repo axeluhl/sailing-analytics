@@ -15,6 +15,7 @@ import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.EventDisplayer;
 import com.sap.sailing.gwt.ui.client.EventRefresher;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettingsFactory;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 
 public class AdminConsole extends AbstractEntryPoint implements EventRefresher {
@@ -52,8 +53,8 @@ public class AdminConsole extends AbstractEntryPoint implements EventRefresher {
         eventDisplayers.add(raceMapPanel);
         raceMapPanel.setSize("90%", "90%");
         tabPanel.add(raceMapPanel, stringMessages.map(), /* asHTML */ false);
-        LeaderboardPanel defaultLeaderboardPanel = new LeaderboardPanel(sailingService, null,
-                new CompetitorSelectionModel(/* hasMultiSelection */true),
+        LeaderboardPanel defaultLeaderboardPanel = new LeaderboardPanel(sailingService, LeaderboardSettingsFactory.getDefaultSettings(), 
+                null, new CompetitorSelectionModel(/* hasMultiSelection */true),
         DefaultLeaderboardName.DEFAULT_LEADERBOARD_NAME, null, this, stringMessages);
         defaultLeaderboardPanel.setSize("90%", "90%");
         tabPanel.add(defaultLeaderboardPanel, stringMessages.defaultLeaderboard(), /* asHTML */ false);

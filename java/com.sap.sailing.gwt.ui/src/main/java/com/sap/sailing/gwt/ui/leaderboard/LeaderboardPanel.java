@@ -786,21 +786,21 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         }
     }
 
-    public LeaderboardPanel(SailingServiceAsync sailingService,
+    public LeaderboardPanel(SailingServiceAsync sailingService, LeaderboardSettings settings,
             CompetitorSelectionProvider competitorSelectionProvider, String leaderboardName, String leaderboardGroupName,
             ErrorReporter errorReporter, final StringMessages stringConstants) {
-        this(sailingService, /* preSelectedRace */ null, competitorSelectionProvider, leaderboardName, leaderboardGroupName, errorReporter, stringConstants);
+        this(sailingService, settings, /* preSelectedRace */ null, competitorSelectionProvider, leaderboardName, leaderboardGroupName, errorReporter, stringConstants);
     }
 
-    public LeaderboardPanel(SailingServiceAsync sailingService, RaceIdentifier preSelectedRace,
+    public LeaderboardPanel(SailingServiceAsync sailingService, LeaderboardSettings settings, RaceIdentifier preSelectedRace,
             CompetitorSelectionProvider competitorSelectionProvider, String leaderboardName, String leaderboardGroupName,
             ErrorReporter errorReporter, final StringMessages stringConstants) {
-        this(sailingService, preSelectedRace, competitorSelectionProvider, new Timer(PlayModes.Replay, /* delayBetweenAutoAdvancesInMilliseconds */3000l),
+        this(sailingService, settings, preSelectedRace, competitorSelectionProvider, new Timer(PlayModes.Replay, /* delayBetweenAutoAdvancesInMilliseconds */3000l),
                 leaderboardName, leaderboardGroupName, errorReporter, stringConstants);
         timer.setDelay(getDelayInMilliseconds()); // set time/delay before adding as listener
     }
 
-    public LeaderboardPanel(SailingServiceAsync sailingService, RaceIdentifier preSelectedRace,
+    public LeaderboardPanel(SailingServiceAsync sailingService, LeaderboardSettings settings, RaceIdentifier preSelectedRace,
             CompetitorSelectionProvider competitorSelectionProvider, Timer timer, String leaderboardName, String leaderboardGroupName,
             ErrorReporter errorReporter, final StringMessages stringConstants) {
         this.sailingService = sailingService;
@@ -811,18 +811,16 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         this.errorReporter = errorReporter;
         this.stringConstants = stringConstants;
         this.selectedLegDetails = new ArrayList<DetailType>();
-        this.selectedLegDetails.add(DetailType.DISTANCE_TRAVELED);
-        this.selectedLegDetails.add(DetailType.AVERAGE_SPEED_OVER_GROUND_IN_KNOTS);
-        this.selectedLegDetails.add(DetailType.RANK_GAIN);
         this.selectedRaceDetails = new ArrayList<DetailType>();
-        this.selectedRaceDetails.add(DetailType.DISPLAY_LEGS);
         this.selectedRaceColumns = new ArrayList<RaceInLeaderboardDTO>();
         this.selectedManeuverDetails = new ArrayList<DetailType>();
-        selectedManeuverDetails.add(DetailType.TACK);
-        selectedManeuverDetails.add(DetailType.JIBE);
-        selectedManeuverDetails.add(DetailType.PENALTY_CIRCLE);
-        delayInMilliseconds = 0l;
-        autoExpandFirstRace = false;
+
+        selectedLegDetails.addAll(settings.getLegDetailsToShow());
+        selectedManeuverDetails.addAll(settings.getManeuverDetailsToShow());
+        selectedRaceDetails.addAll(settings.getRaceDetailsToShow());
+        delayInMilliseconds = settings.getDelayInMilliseconds();
+        autoExpandFirstRace = settings.isAutoExpandFirstRace();
+
         this.timer = timer;
         timer.addPlayStateListener(this);
         timer.addTimeListener(this);

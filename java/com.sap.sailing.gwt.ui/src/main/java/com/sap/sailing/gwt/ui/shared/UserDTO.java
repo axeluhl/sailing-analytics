@@ -13,6 +13,9 @@ public class UserDTO implements IsSerializable {
     
     public List<String> roles;
 
+    public UserDTO() {
+    }
+
     public UserDTO(String principalName) {
         super();
         this.principalName = principalName;

@@ -46,10 +46,12 @@ public abstract class AbstractEntryPoint implements EntryPoint, ErrorReporter {
     public void onModuleLoad() {
         stringMessages = GWT.create(StringMessages.class);
         errorDialogBox = createErrorDialog();
-        ServiceDefTarget serviceDef = (ServiceDefTarget) sailingService;
+        ServiceDefTarget sailingServiceDef = (ServiceDefTarget) sailingService;
+        ServiceDefTarget userManagementServiceDef = (ServiceDefTarget) userManagementService;
         String moduleBaseURL = GWT.getModuleBaseURL();
         String baseURL = moduleBaseURL.substring(0, moduleBaseURL.lastIndexOf('/', moduleBaseURL.length()-2)+1);
-        serviceDef.setServiceEntryPoint(baseURL + "sailing");
+        sailingServiceDef.setServiceEntryPoint(baseURL + "sailing");
+        userManagementServiceDef.setServiceEntryPoint(baseURL + "usermanagement");
     }
     
     @Override
