@@ -61,6 +61,9 @@ import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.TimeListener;
+import com.sap.sailing.gwt.ui.client.Timer;
+import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorInRaceDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorsAndTimePointsDTO;
@@ -80,7 +83,7 @@ import com.sap.sailing.gwt.ui.shared.components.SettingsDialog;
  * 
  */
 public abstract class AbstractChartPanel<SettingsType extends ChartSettings> extends SimplePanel
-implements CompetitorSelectionChangeListener, RaceSelectionChangeListener {
+implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeListener {
     private CompetitorInRaceDTO chartData;
     private CompetitorsAndTimePointsDTO competitorsAndTimePointsDTO = null;
     private final SailingServiceAsync sailingService;
@@ -102,6 +105,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener {
     private final HashMap<CompetitorDTO, Widget> competitorLabels;
     private final HashMap<String, String> markPassingBuoyName;
     private int width, height;
+    private final Timer timer;
 
     private DetailType dataToShow;
     private AbsolutePanel loadingPanel;
@@ -109,11 +113,12 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener {
 
     public AbstractChartPanel(SailingServiceAsync sailingService,
             CompetitorSelectionProvider competitorSelectionProvider, RaceSelectionProvider raceSelectionProvider,
-            final StringMessages stringMessages, int chartWidth, int chartHeight, ErrorReporter errorReporter,
-            DetailType dataToShow, boolean showRaceSelector) {
+            Timer timer, final StringMessages stringMessages, int chartWidth, int chartHeight,
+            ErrorReporter errorReporter, DetailType dataToShow, boolean showRaceSelector) {
         width = chartWidth;
     	height = chartHeight;
     	this.dataToShow = dataToShow;
+    	this.timer = timer;
     	this.competitorSelectionProvider = competitorSelectionProvider;
     	competitorSelectionProvider.addCompetitorSelectionChangeListener(this);
     	this.errorReporter = errorReporter;
@@ -754,4 +759,12 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener {
         return new Pair<Boolean, Boolean>(everyPassingInRange, twoPassingsInRangeBeforeError);
     }
 
+    @Override
+    public void timeChanged(Date date) {
+        if (timer.getPlayMode() == PlayModes.Live) {
+            // TODO fetch parts missing so far from cache 
+        } else {
+            // TODO check if fetched already; if not, fetch all
+        }
+    }
 }
