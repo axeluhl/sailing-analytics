@@ -32,6 +32,7 @@ body {
 	font-weight: 400;
 	padding: 80px 0 120px 0;
 	margin: 0;
+  color: #3b3b3b;
 }
 
 table td,select,button {
@@ -144,10 +145,11 @@ input.magnifier {
 }
 
 .timeLineInnerPanel {
-	height: 100%;
+	/*height: 100%;*/
 	margin: 0 12px;
+	margin-top: 20px;
 	background: #dddcdc;
-	padding: 38px 24px 0 24px;
+	/*padding: 38px 24px 0 24px;*/
 }
 
 .timeLineInnerBgPanel {
