@@ -38,8 +38,10 @@ import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LegTimepointDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
+import com.sap.sailing.gwt.ui.shared.UserDTO;
 import com.sap.sailing.gwt.ui.shared.components.ComponentViewer;
 import com.sap.sailing.gwt.ui.shared.panels.BreadcrumbPanel;
+import com.sap.sailing.gwt.ui.usermanagement.UserRoles;
 
 /**
  * A panel showing a list of components visualizing a race from the events announced by calls to {@link #fillEvents(List)}.
@@ -66,10 +68,12 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
     private final TimePanel timePanel;
     private final Timer timer;
     private final RaceSelectionProvider raceSelectionProvider;
+    private final UserDTO user;
     
-    public RaceBoardPanel(SailingServiceAsync sailingService, RaceSelectionProvider raceSelectionProvider, String leaderboardName,
+    public RaceBoardPanel(SailingServiceAsync sailingService, UserDTO currentUser, RaceSelectionProvider raceSelectionProvider, String leaderboardName,
             String leaderboardGroupName, ErrorReporter errorReporter, final StringMessages stringMessages) {
         this.sailingService = sailingService;
+        this.user = currentUser;
         this.raceSelectionProvider = raceSelectionProvider;
         raceSelectionProvider.addRaceSelectionChangeListener(this);
         racesByIdentifier = new HashMap<RaceIdentifier, RaceDTO>();
@@ -88,6 +92,8 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
         ArrayList<Pair<String, String>> breadcrumbLinksData = new ArrayList<Pair<String, String>>();
         String debugParam = Window.Location.getParameter("gwt.codesvr");
 
+        getUserSpecificLeaderBoardSettings(user);
+        
         if(leaderboardGroupName != null) {
             String link = "/gwt/Spectator.html?leaderboardGroupName=" + leaderboardGroupName;
             if(debugParam != null && !debugParam.isEmpty())
@@ -135,6 +141,17 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
         timePanel = new TimePanel(timer, stringMessages);
     }
 
+    private LeaderboardSettings getUserSpecificLeaderBoardSettings(UserDTO user)
+    {
+        LeaderboardSettings settings = null;
+        if (user != null && user.roles.contains(UserRoles.moderator.name())) {
+            
+        } else {
+            // anonymous user
+        }
+        return settings;
+    }
+    
     private void addComponentViewerMenuEntry(final ComponentViewer c) {
         Anchor menuEntry = new Anchor(c.getViewerName());
         menuEntry.addStyleName("raceBoardNavigation-navigationitem");

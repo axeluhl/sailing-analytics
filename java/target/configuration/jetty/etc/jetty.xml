@@ -128,6 +128,16 @@
       </Arg>
     </Call>
 
+    <Call name="addBean">
+      <Arg>
+		<New class="org.eclipse.jetty.security.HashLoginService">
+		  <Set name="name">SailingServerRealm</Set>
+		  <Set name="config"><Property name="jetty.home" default="."/>/etc/realm.properties</Set>
+		  <Set name="refreshInterval">0</Set>
+		</New>
+      </Arg>
+    </Call>
+
     <!-- =========================================================== -->
     <!-- extra options                                               -->
     <!-- =========================================================== -->

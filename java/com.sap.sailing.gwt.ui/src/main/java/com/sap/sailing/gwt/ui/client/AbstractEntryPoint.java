@@ -31,6 +31,11 @@ public abstract class AbstractEntryPoint implements EntryPoint, ErrorReporter {
     protected final SailingServiceAsync sailingService = GWT.create(SailingService.class);
 
     /**
+     * Create a remote service proxy to talk to the server-side user management service.
+     */
+    protected final UserManagementServiceAsync userManagementService = GWT.create(UserManagementService.class);
+
+    /**
      * The message displayed to the user when the server cannot be reached or
      * returns an error.
      */
