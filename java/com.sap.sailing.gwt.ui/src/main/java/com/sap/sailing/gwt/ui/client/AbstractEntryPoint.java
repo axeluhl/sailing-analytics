@@ -31,6 +31,11 @@ public abstract class AbstractEntryPoint implements EntryPoint, ErrorReporter {
     protected final SailingServiceAsync sailingService = GWT.create(SailingService.class);
 
     /**
+     * Create a remote service proxy to talk to the server-side user management service.
+     */
+    protected final UserManagementServiceAsync userManagementService = GWT.create(UserManagementService.class);
+
+    /**
      * The message displayed to the user when the server cannot be reached or
      * returns an error.
      */
@@ -41,10 +46,12 @@ public abstract class AbstractEntryPoint implements EntryPoint, ErrorReporter {
     public void onModuleLoad() {
         stringMessages = GWT.create(StringMessages.class);
         errorDialogBox = createErrorDialog();
-        ServiceDefTarget serviceDef = (ServiceDefTarget) sailingService;
+        ServiceDefTarget sailingServiceDef = (ServiceDefTarget) sailingService;
+        ServiceDefTarget userManagementServiceDef = (ServiceDefTarget) userManagementService;
         String moduleBaseURL = GWT.getModuleBaseURL();
         String baseURL = moduleBaseURL.substring(0, moduleBaseURL.lastIndexOf('/', moduleBaseURL.length()-2)+1);
-        serviceDef.setServiceEntryPoint(baseURL + "sailing");
+        sailingServiceDef.setServiceEntryPoint(baseURL + "sailing");
+        userManagementServiceDef.setServiceEntryPoint(baseURL + "usermanagement");
     }
     
     @Override

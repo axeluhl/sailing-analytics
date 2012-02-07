@@ -23,6 +23,7 @@ public class SimpleBusyIndicator extends BusyIndicator {
      * @param scale Scales the displayed image. 1.0 is 100%, 0.50 is 50%, ...
      */
     public SimpleBusyIndicator(boolean busy, float scale) {
+        this.setStyleName(STYLE_NAME_PREFIX + "simpleBusyIndicator");
         ImageResource resource = RESOURCES.busyIndicatorCircle();
         busyIndicator = new Image(resource.getSafeUri());
         busyIndicator.setStyleName(STYLE_NAME_PREFIX + "busyIndicatorCircle");

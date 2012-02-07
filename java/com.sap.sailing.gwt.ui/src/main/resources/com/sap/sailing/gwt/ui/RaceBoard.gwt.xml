@@ -34,5 +34,6 @@
   <source path='raceboard'/>
   <source path='leaderboard'/>
   <source path='adminconsole'/>
+  <source path='usermanagement'/>
   <source path='shared'/>
 </module>

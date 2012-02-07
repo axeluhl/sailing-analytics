@@ -18,6 +18,7 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
+import com.sap.sailing.gwt.ui.shared.UserDTO;
 
 public class RaceBoardEntryPoint extends AbstractEntryPoint {
     private RaceDTO selectedRace;
@@ -54,13 +55,14 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         final ParallelExecutionCallback<List<String>> getLeaderboardNamesCallback = new ParallelExecutionCallback<List<String>>();  
         final ParallelExecutionCallback<List<EventDTO>> listEventsCallback = new ParallelExecutionCallback<List<EventDTO>>();  
         final ParallelExecutionCallback<LeaderboardGroupDTO> getLeaderboardGroupByNameCallback = new ParallelExecutionCallback<LeaderboardGroupDTO>();  
+        final ParallelExecutionCallback<UserDTO> getUserCallback = new ParallelExecutionCallback<UserDTO>();  
             
         if (leaderboardGroupName != null) {
-            new ParallelExecutionHolder(getLeaderboardNamesCallback, getLeaderboardGroupByNameCallback, listEventsCallback) {
+            new ParallelExecutionHolder(getLeaderboardNamesCallback, getLeaderboardGroupByNameCallback, listEventsCallback, getUserCallback) {
                 @Override
                 public void handleSuccess() {
                     checkUrlParameters(getLeaderboardNamesCallback.getData(),
-                            getLeaderboardGroupByNameCallback.getData(), listEventsCallback.getData());
+                            getLeaderboardGroupByNameCallback.getData(), listEventsCallback.getData(), getUserCallback.getData());
                 }
                 @Override
                 public void handleFailure(Throwable t) {
@@ -68,10 +70,10 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
                 }
             };
         } else {
-            new ParallelExecutionHolder(getLeaderboardNamesCallback, listEventsCallback) {
+            new ParallelExecutionHolder(getLeaderboardNamesCallback, listEventsCallback, getUserCallback) {
                 @Override
                 public void handleSuccess() {
-                    checkUrlParameters(getLeaderboardNamesCallback.getData(), null, listEventsCallback.getData());
+                    checkUrlParameters(getLeaderboardNamesCallback.getData(), null, listEventsCallback.getData(), getUserCallback.getData());
                 }
                 @Override
                 public void handleFailure(Throwable t) {
@@ -84,10 +86,10 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         sailingService.getLeaderboardNames(getLeaderboardNamesCallback);
         if(leaderboardGroupName != null)
             sailingService.getLeaderboardGroupByName(leaderboardGroupNameParamValue, getLeaderboardGroupByNameCallback);
-
+        userManagementService.getUser(getUserCallback);
     }
 
-    private void checkUrlParameters(List<String> leaderboardNames, LeaderboardGroupDTO leaderboardGroup, List<EventDTO> events)
+    private void checkUrlParameters(List<String> leaderboardNames, LeaderboardGroupDTO leaderboardGroup, List<EventDTO> events, UserDTO user)
     {
         if (!leaderboardNames.contains(leaderboardName)) {
           createErrorPage(stringMessages.noSuchLeaderboard());
@@ -114,7 +116,7 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
             return;
         }
          
-        createRaceBoardPanel(selectedRace, events);
+        createRaceBoardPanel(selectedRace, events, user);
     }  
 
     private RaceDTO findRace(String eventName, String raceName, List<EventDTO> events) {
@@ -132,13 +134,13 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         return null;
     }
 
-    private void createRaceBoardPanel(RaceDTO selectedRace, List<EventDTO> events) {
+    private void createRaceBoardPanel(RaceDTO selectedRace, List<EventDTO> events, UserDTO userDTO) {
         LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(stringMessages);
         logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
         RaceSelectionModel raceSelectionModel = new RaceSelectionModel();
         List<RaceIdentifier> singletonList = Collections.singletonList(selectedRace.getRaceIdentifier());
         raceSelectionModel.setSelection(singletonList);
-        raceBoardPanel = new RaceBoardPanel(sailingService, raceSelectionModel, leaderboardName, leaderboardGroupName,
+        raceBoardPanel = new RaceBoardPanel(sailingService, userDTO, raceSelectionModel, leaderboardName, leaderboardGroupName,
                 RaceBoardEntryPoint.this, stringMessages);
         raceBoardPanel.fillEvents(events);
 

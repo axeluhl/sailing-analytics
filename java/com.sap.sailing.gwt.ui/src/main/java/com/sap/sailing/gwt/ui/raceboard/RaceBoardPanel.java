@@ -17,6 +17,7 @@ import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.adminconsole.RaceMap;
 import com.sap.sailing.gwt.ui.adminconsole.RaceMapSettings;
@@ -34,10 +35,12 @@ import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettingsFactory;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LegTimepointDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
+import com.sap.sailing.gwt.ui.shared.UserDTO;
 import com.sap.sailing.gwt.ui.shared.components.ComponentViewer;
 import com.sap.sailing.gwt.ui.shared.panels.BreadcrumbPanel;
 
@@ -66,10 +69,12 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
     private final TimePanel timePanel;
     private final Timer timer;
     private final RaceSelectionProvider raceSelectionProvider;
+    private final UserDTO user;
     
-    public RaceBoardPanel(SailingServiceAsync sailingService, RaceSelectionProvider raceSelectionProvider, String leaderboardName,
+    public RaceBoardPanel(SailingServiceAsync sailingService, UserDTO currentUser, RaceSelectionProvider raceSelectionProvider, String leaderboardName,
             String leaderboardGroupName, ErrorReporter errorReporter, final StringMessages stringMessages) {
         this.sailingService = sailingService;
+        this.user = currentUser;
         this.raceSelectionProvider = raceSelectionProvider;
         raceSelectionProvider.addRaceSelectionChangeListener(this);
         racesByIdentifier = new HashMap<RaceIdentifier, RaceDTO>();
@@ -101,7 +106,8 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
         componentsNavigationPanel.addStyleName("raceBoardNavigation");
 
         // create the default leaderboard and select the right race
-        LeaderboardPanel leaderboardPanel = new LeaderboardPanel(sailingService, selectedRaceIdentifier, competitorSelectionModel,
+        LeaderboardSettings leaderBoardSettings = LeaderboardSettingsFactory.getSettingsForUserRole(user);
+        LeaderboardPanel leaderboardPanel = new LeaderboardPanel(sailingService, leaderBoardSettings, selectedRaceIdentifier, competitorSelectionModel,
                 timer, leaderboardName, leaderboardGroupName, errorReporter, stringMessages);
 
         CollapsableComponentViewer<LeaderboardSettings> leaderboardViewer = new CollapsableComponentViewer<LeaderboardSettings>(
@@ -119,7 +125,7 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
         
         boolean showWindChart = true;
         if(showWindChart) {
-            WindChartSettings windChartSettings = new WindChartSettings();
+            WindChartSettings windChartSettings = new WindChartSettings(WindSource.values());
             WindChart windChart = new WindChart(sailingService, raceSelectionProvider, timer, windChartSettings, stringMessages, errorReporter); 
             CollapsableComponentViewer<WindChartSettings> windChartViewer = new CollapsableComponentViewer<WindChartSettings>(
                     windChart, "600px", "500px", stringMessages);
@@ -135,6 +141,7 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
         timePanel = new TimePanel(timer, stringMessages);
     }
 
+    
     private void addComponentViewerMenuEntry(final ComponentViewer c) {
         Anchor menuEntry = new Anchor(c.getViewerName());
         menuEntry.addStyleName("raceBoardNavigation-navigationitem");
