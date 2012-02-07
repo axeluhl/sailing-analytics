@@ -4,6 +4,7 @@ import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.ActionCell;
 import com.google.gwt.cell.client.ActionCell.Delegate;
 import com.google.gwt.cell.client.ValueUpdater;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.EventTarget;
 import com.google.gwt.dom.client.NativeEvent;
@@ -12,6 +13,7 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 
 public class ExpandCollapseButtonCell extends AbstractCell<SafeHtml> {
 
+    private static final LeaderboardResources RESOURCES = GWT.create(LeaderboardResources.class);
 
     private final SafeHtml html;
     private final Delegate<SafeHtml> delegate;
@@ -27,8 +29,10 @@ public class ExpandCollapseButtonCell extends AbstractCell<SafeHtml> {
       super("click", "keydown");
       this.column = column;
       this.delegate = delegate;
+      
+      String src = column.isExpanded() ? RESOURCES.magnifierSlashedIcon().getSafeUri().asString() : RESOURCES.magnifierIcon().getSafeUri().asString();
       this.html = new SafeHtmlBuilder().appendHtmlConstant(
-          "<input class=\"valignMiddle magnifier\" type=\"image\" src=\"/gwt/images/"+(column.isExpanded()?"magnifier_slashed":"magnifier")+".png\" />").toSafeHtml();
+          "<input class=\"valignMiddle magnifier\" type=\"image\" src=\"" + src + "\" />").toSafeHtml();
     }
 
     @Override
