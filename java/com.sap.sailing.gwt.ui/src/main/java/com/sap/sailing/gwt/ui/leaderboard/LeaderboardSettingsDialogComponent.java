@@ -33,12 +33,13 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
     private final StringMessages stringConstants;
     private LongBox delayBetweenAutoAdvancesInSecondsBox;
     private LongBox delayInSecondsBox;
+    private final boolean autoExpandFirstRace;
     private final long delayBetweenAutoAdvancesInMilliseconds;
     private final long delayInMilliseconds;
 
     public LeaderboardSettingsDialogComponent(List<DetailType> maneuverDetailSelection,
             List<DetailType> legDetailSelection, List<DetailType> raceDetailSelection, List<RaceInLeaderboardDTO> raceAllRaceColumns,
-            List<RaceInLeaderboardDTO> raceColumnSelection, long delayBetweenAutoAdvancesInMilliseconds, long delayInMilliseconds,
+            List<RaceInLeaderboardDTO> raceColumnSelection, boolean autoExpandFirstRace, long delayBetweenAutoAdvancesInMilliseconds, long delayInMilliseconds,
             StringMessages stringConstants) {
         this.maneuverDetailSelection = maneuverDetailSelection;
         this.raceColumnSelection = raceColumnSelection;
@@ -50,6 +51,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         maneuverDetailCheckboxes = new LinkedHashMap<DetailType, CheckBox>();
         legDetailCheckboxes = new LinkedHashMap<DetailType, CheckBox>();
         raceDetailCheckboxes = new LinkedHashMap<DetailType, CheckBox>();
+        this.autoExpandFirstRace = autoExpandFirstRace;
         this.delayBetweenAutoAdvancesInMilliseconds = delayBetweenAutoAdvancesInMilliseconds;
         this.delayInMilliseconds = delayInMilliseconds;
     }
@@ -139,7 +141,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         }
         Long delayBetweenAutoAdvancesValue = delayBetweenAutoAdvancesInSecondsBox.getValue();
         Long delayInSecondsValue = delayInSecondsBox.getValue();
-        return new LeaderboardSettings(maneuverDetailsToShow, legDetailsToShow, raceDetailsToShow, raceColumnsToShow,
+        return new LeaderboardSettings(maneuverDetailsToShow, legDetailsToShow, raceDetailsToShow, raceColumnsToShow, autoExpandFirstRace,
                 1000l * (delayBetweenAutoAdvancesValue == null ? 0l : delayBetweenAutoAdvancesValue.longValue()),
                 1000 * (delayInSecondsValue==null?0:delayInSecondsValue.longValue()));
     }

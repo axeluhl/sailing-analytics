@@ -148,6 +148,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
      * The delay with which the timer shall work. Before the timer is resumed, the delay is set to this value.
      */
     private long delayInMilliseconds;
+    
+    private boolean autoExpandFirstRace;
 
     /**
      * This anchor's HTML holds the image tag for the play/pause button that needs to be updated when the {@link #timer}
@@ -240,6 +242,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         selectedRaceDetails.addAll(newSettings.getRaceDetailsToShow());
         selectedRaceColumns.clear();
         selectedRaceColumns.addAll(newSettings.getRaceColumnsToShow());
+        setAutoExpandFirstRace(newSettings.isAutoExpandFirstRace());
         // update leaderboard after settings panel column selection change
         updateLeaderboard(leaderboard);
 
@@ -819,6 +822,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         selectedManeuverDetails.add(DetailType.JIBE);
         selectedManeuverDetails.add(DetailType.PENALTY_CIRCLE);
         delayInMilliseconds = 0l;
+        autoExpandFirstRace = false;
         this.timer = timer;
         timer.addPlayStateListener(this);
         timer.addTimeListener(this);
@@ -860,7 +864,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         contentPanel = new VerticalPanel();
         headerPanel = new DockPanel();
         DockPanel toolbarPanel = new DockPanel();
-        busyIndicator = new SimpleBusyIndicator();
+        busyIndicator = new SimpleBusyIndicator(false, 0.8f);
         if (!isEmbedded) {
             toolbarPanel.add(busyIndicator, DockPanel.WEST);
         }
@@ -935,6 +939,14 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
 
     private void setDelayInMilliseconds(long delayInMilliseconds) {
         this.delayInMilliseconds = delayInMilliseconds;
+    }
+    
+    public boolean isAutoExpandFirstRace() {
+        return autoExpandFirstRace;
+    }
+    
+    private void setAutoExpandFirstRace(boolean autoExpandFirstRace) {
+        this.autoExpandFirstRace = autoExpandFirstRace;
     }
 
     /**
@@ -1057,10 +1069,19 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         adjustColumnLayout(leaderboard);
         getData().getList().clear();
         if (leaderboard != null) {
+            boolean firstRace = true;
             getData().getList().addAll(leaderboard.rows.values());
             for (int i = 0; i < getLeaderboardTable().getColumnCount(); i++) {
                 SortableColumn<?, ?> c = (SortableColumn<?, ?>) getLeaderboardTable().getColumn(i);
                 c.updateMinMax(leaderboard);
+                //Toggle the first race, if the setting is set and it isn't open yet
+                if (firstRace && isAutoExpandFirstRace() && c instanceof ExpandableSortableColumn<?>) {
+                    ExpandableSortableColumn<?> expandableSortableColumn = (ExpandableSortableColumn<?>) c;
+                    if (!expandableSortableColumn.isExpanded()) {
+                        expandableSortableColumn.toggleExpansion();
+                    }
+                    firstRace = false;
+                }
             }
             Comparator<LeaderboardRowDTO> comparator = getComparatorForSelectedSorting();
             if (comparator != null) {
@@ -1473,7 +1494,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     private void compareCompetitors() {
         List<RaceIdentifier> races = getTrackedRacesIdentifiers();
         CompareCompetitorsChartDialog chartDialog = new CompareCompetitorsChartDialog(sailingService, races,
-                competitorSelectionProvider, stringConstants, errorReporter);
+                competitorSelectionProvider, timer, stringConstants, errorReporter);
         chartDialog.show();
     }
     
@@ -1503,7 +1524,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 Collections.unmodifiableList(selectedLegDetails),
                 Collections.unmodifiableList(selectedRaceDetails), /*  All races to select */
                 leaderboard.getRaceList(), selectedRaceColumns,
-                timer.getDelayBetweenAutoAdvancesInMilliseconds(), delayInMilliseconds, stringConstants);
+                autoExpandFirstRace, timer.getDelayBetweenAutoAdvancesInMilliseconds(), delayInMilliseconds, stringConstants);
     }
 
     @Override

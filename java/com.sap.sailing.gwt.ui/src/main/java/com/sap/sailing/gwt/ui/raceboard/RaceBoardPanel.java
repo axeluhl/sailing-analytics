@@ -126,7 +126,7 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
         boolean showWindChart = true;
         if(showWindChart) {
             WindChartSettings windChartSettings = new WindChartSettings();
-            WindChart windChart = new WindChart(sailingService, raceSelectionProvider, windChartSettings, stringMessages, errorReporter); 
+            WindChart windChart = new WindChart(sailingService, raceSelectionProvider, timer, windChartSettings, stringMessages, errorReporter); 
             CollapsableComponentViewer<WindChartSettings> windChartViewer = new CollapsableComponentViewer<WindChartSettings>(
                     windChart, "600px", "500px", stringMessages);
             windChart.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());

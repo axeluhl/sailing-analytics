@@ -16,4 +16,10 @@ interface LeaderboardResources extends ClientBundle {
 
     @Source("com/sap/sailing/gwt/ui/client/images/chart.png")
     ImageResource chartIcon();
+
+    @Source("com/sap/sailing/gwt/ui/client/images/magnifier.png")
+    ImageResource magnifierIcon();
+
+    @Source("com/sap/sailing/gwt/ui/client/images/magnifier_slashed.png")
+    ImageResource magnifierSlashedIcon();
 }

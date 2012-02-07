@@ -29,6 +29,8 @@ import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.TimeListener;
+import com.sap.sailing.gwt.ui.client.Timer;
+import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
@@ -47,6 +49,7 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
     private final ErrorReporter errorReporter;
     private final SailingServiceAsync sailingService;
     private final Chart chart;
+    private final Timer timer;
     
     /**
      * @param raceSelectionProvider
@@ -55,13 +58,14 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
      *            server and displayed in this chart. If no race is selected, the chart is cleared.
      */
     public WindChart(SailingServiceAsync sailingService, RaceSelectionProvider raceSelectionProvider,
-            WindChartSettings settings, StringMessages stringMessages, ErrorReporter errorReporter) {
+            Timer timer, WindChartSettings settings, StringMessages stringMessages, ErrorReporter errorReporter) {
         super();
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
         this.windSourceSeries = new HashMap<WindSource, Series>();
         this.windSourcesToDisplay = new HashSet<WindSource>();
+        this.timer = timer;
         chart = new Chart()
                 .setZoomType(Chart.ZoomType.X)
                 .setSpacingRight(20)
@@ -206,6 +210,12 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
 
     @Override
     public void timeChanged(Date date) {
+        if (timer.getPlayMode() == PlayModes.Live) {
+            // TODO fetch missing pieces from cache
+        } else {
+            // assuming play mode is replay / non-live
+            // TODO fetch all if not yet fetched
+        }
         // TODO implement timeChanged by loading missing wind data and adding to series
     }
 }
