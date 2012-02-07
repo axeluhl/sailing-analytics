@@ -186,7 +186,7 @@ public class RaceMapResources {
     public double getRealBoatSizeScaleFactor(Size imageSize) {
         // the possible zoom level range is 0 to 21 (zoom level 0 would show the whole world)
         int zoomLevel = map == null ? 1 : map.getZoomLevel();
-        double minScaleFactor = 0.33;
+        double minScaleFactor = 0.45;
         double maxScaleFactor = 2.0;
         double realBoatSizeScaleFactor = minScaleFactor;
         // here it would be better to get the boat length from the boat class -> for now we assume a length of 5m 
