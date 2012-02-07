@@ -1462,7 +1462,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     private void compareCompetitors() {
         List<RaceIdentifier> races = getTrackedRacesIdentifiers();
         CompareCompetitorsChartDialog chartDialog = new CompareCompetitorsChartDialog(sailingService, races,
-                competitorSelectionProvider, stringConstants, errorReporter);
+                competitorSelectionProvider, timer, stringConstants, errorReporter);
         chartDialog.show();
     }
     
