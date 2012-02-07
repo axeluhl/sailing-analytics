@@ -94,7 +94,7 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
         }));
         chart.getXAxis().setType(Axis.Type.DATE_TIME).setMaxZoom(10000) // ten seconds
                 .setAxisTitleText(stringMessages.time());
-        chart.getYAxis().setAxisTitleText(stringMessages.windSpeed()).setStartOnTick(false).setShowFirstLabel(false);
+        chart.getYAxis().setAxisTitleText(stringMessages.fromDeg()).setStartOnTick(false).setShowFirstLabel(false);
         for (WindSource windSource : WindSource.values()) {
             Series series = createSeries(windSource);
             windSourceSeries.put(windSource, series);
