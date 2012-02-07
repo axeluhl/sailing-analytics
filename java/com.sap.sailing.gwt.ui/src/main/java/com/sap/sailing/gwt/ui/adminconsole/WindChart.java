@@ -81,7 +81,7 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
                 .setLinePlotOptions(new LinePlotOptions().setLineWidth(LINE_WIDTH).setMarker(new Marker().setEnabled(false).setHoverState(
                                                 new Marker().setEnabled(true).setRadius(4))).setShadow(false)
                                 .setHoverStateLineWidth(LINE_WIDTH));
-        final String unit = "&deg;";
+        final String unit = "deg";
         final NumberFormat numberFormat = NumberFormat.getFormat("0");
         chart.setToolTip(new ToolTip().setEnabled(true).setFormatter(new ToolTipFormatter() {
             @Override
