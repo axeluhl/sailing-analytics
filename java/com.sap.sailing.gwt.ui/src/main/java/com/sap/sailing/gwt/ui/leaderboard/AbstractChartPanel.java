@@ -11,6 +11,7 @@ import java.util.Set;
 
 import org.moxieapps.gwt.highcharts.client.Axis;
 import org.moxieapps.gwt.highcharts.client.Chart;
+import org.moxieapps.gwt.highcharts.client.ChartSubtitle;
 import org.moxieapps.gwt.highcharts.client.ChartTitle;
 import org.moxieapps.gwt.highcharts.client.Legend;
 import org.moxieapps.gwt.highcharts.client.Point;
@@ -123,6 +124,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
     	chart = new Chart().setZoomType(Chart.ZoomType.X)
                 .setSpacingRight(20)
                 .setChartTitle(new ChartTitle().setText(DetailTypeFormatter.format(dataToShow, stringMessages)))
+                .setChartSubtitle(new ChartSubtitle().setText(stringMessages.clickAndDragToZoomIn()))
                 .setToolTip(new ToolTip().setShared(true))
                 .setLegend(new Legend().setEnabled(true))
                 .setLinePlotOptions(new LinePlotOptions().setLineWidth(LINE_WIDTH).setMarker(new Marker().setEnabled(false).setHoverState(
@@ -146,9 +148,6 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
         title = new Label(DetailTypeFormatter.format(dataToShow, stringMessages));
         title.setStyleName("chartTitle");
         chartPanel.add(title);
-        if (showRaceSelector) {
-            addOptionalRaceChooserPanel(chartPanel);
-        }
         loadingPanel = new AbsolutePanel();
         loadingPanel.setSize(width + "px", height + "px");
         BusyIndicator busyIndicator = new SimpleBusyIndicator(true, 1);
@@ -159,6 +158,9 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
         chartAndBusyIndicatorPanel.add(loadingPanel);
         chartAndBusyIndicatorPanel.add(chart);
         chartAndBusyIndicatorPanel.showWidget(0);
+        if (showRaceSelector) {
+            addOptionalRaceChooserPanel(chartPanel);
+        }
         chartPanel.add(chartAndBusyIndicatorPanel);
         mainPanel.add(chartPanel);
         ImageResource settingsIcon = resources.settingsIcon();
@@ -196,15 +198,14 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
                     clearChart(true);
                     loadData();
                 }
-
             });
         }
         chartPanel.add(raceChooserPanel);
     }
 
     private void selectRace(final RaceIdentifier selectedRace) {
-        AbstractChartPanel.this.raceSelectionProvider.setSelection(Collections.singletonList(selectedRace), /* listenersNotToNotify */
-                AbstractChartPanel.this);
+        // also notify this panel when race selection is explicitly changed via radio buttons
+        AbstractChartPanel.this.raceSelectionProvider.setSelection(Collections.singletonList(selectedRace));
     }
 
     protected abstract Component<SettingsType> getComponent();
@@ -399,7 +400,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
                     .setLineWidth(LINE_WIDTH)
                     .setMarker(new Marker().setEnabled(false).setHoverState(new Marker().setEnabled(true).setRadius(4)))
                     .setShadow(false).setHoverStateLineWidth(LINE_WIDTH)
-                    .setDataLabels(new DataLabels().setEnabled(true).setFormatter(new DataLabelsFormatter() {
+                    .setDataLabels(new DataLabels().setEnabled(false).setFormatter(new DataLabelsFormatter() {
                         @Override
                         public String format(DataLabelsData dataLabelsData) {
                             return stringMessages.valueForCompetitorAt(competitor.name,
@@ -526,6 +527,9 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
 
     @Override
     public void onRaceSelectionChange(List<RaceIdentifier> selectedRaces) {
+        chart.removeAllSeries();
+        seriesByCompetitor.clear();
+        markPassingSeriesByCompetitor.clear();
         loadData();
     }
 
