@@ -10,15 +10,17 @@ public class LeaderboardSettings {
     private final List<DetailType> maneuverDetailsToShow;
     private final List<DetailType> legDetailsToShow;
     private final List<DetailType> raceDetailsToShow;
+    private final boolean autoExpandFirstRace;
     private final long delayBetweenAutoAdvancesInMilliseconds;
     private final long delayInMilliseconds;
     
     public LeaderboardSettings(List<DetailType> meneuverDetailsToShow, List<DetailType> legDetailsToShow,
-            List<DetailType> raceDetailsToShow, List<RaceInLeaderboardDTO> raceColumnsToShow,
+            List<DetailType> raceDetailsToShow, List<RaceInLeaderboardDTO> raceColumnsToShow, boolean autoExpandFirstRace,
             long delayBetweenAutoAdvancesInMilliseconds, long delayInMilliseconds) {
         this.legDetailsToShow = legDetailsToShow;
         this.raceDetailsToShow = raceDetailsToShow;
         this.raceColumnsToShow = raceColumnsToShow;
+        this.autoExpandFirstRace = autoExpandFirstRace;
         this.delayBetweenAutoAdvancesInMilliseconds = delayBetweenAutoAdvancesInMilliseconds;
         this.delayInMilliseconds = delayInMilliseconds;
         this.maneuverDetailsToShow = meneuverDetailsToShow;
@@ -38,6 +40,10 @@ public class LeaderboardSettings {
     
     public List<RaceInLeaderboardDTO> getRaceColumnsToShow(){
         return raceColumnsToShow;
+    }
+
+    public boolean isAutoExpandFirstRace() {
+        return autoExpandFirstRace;
     }
 
     public long getDelayBetweenAutoAdvancesInMilliseconds() {
