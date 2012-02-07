@@ -26,9 +26,11 @@ public class SimpleBusyIndicator extends BusyIndicator {
     }
 
     @Override
-    void setBusy(boolean busy) {
+    public void setBusy(boolean busy) {
         this.busy = busy;
         busyIndicator.setVisible(busy);
+//        Element elem = busyIndicator.getElement();
+//        DOM.setStyleAttribute(elem, "visibility", busy ? "visible" : "hidden");
     }
 
 }

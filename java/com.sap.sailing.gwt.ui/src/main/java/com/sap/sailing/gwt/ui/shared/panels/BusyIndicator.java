@@ -18,7 +18,7 @@ public abstract class BusyIndicator extends FlowPanel {
      * Sets the <code>busy</code> state of the BusyIndicator, which displays or hides the busy indicator.
      * @param busy The new <code>busy</code> state
      */
-    abstract void setBusy(boolean busy);
+    public abstract void setBusy(boolean busy);
     
     public boolean isBusy() {
         return busy;
