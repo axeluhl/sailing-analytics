@@ -3,7 +3,7 @@ package com.sap.sailing.gwt.ui.client;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.ImageResource;
 
-interface ClientResources extends ClientBundle {
+public interface ClientResources extends ClientBundle {
 
     @Source("com/sap/sailing/gwt/ui/client/images/settings.png")
     ImageResource settingsIcon();

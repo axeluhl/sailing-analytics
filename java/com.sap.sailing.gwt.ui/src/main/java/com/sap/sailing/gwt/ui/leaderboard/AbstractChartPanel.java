@@ -36,9 +36,10 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.NumberFormat;
-import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbsolutePanel;
+import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.DeckPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -53,6 +54,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.gwt.ui.client.ClientResources;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.DetailTypeFormatter;
@@ -61,11 +63,16 @@ import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.TimeListener;
+import com.sap.sailing.gwt.ui.client.Timer;
+import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorInRaceDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorsAndTimePointsDTO;
 import com.sap.sailing.gwt.ui.shared.components.Component;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialog;
+import com.sap.sailing.gwt.ui.shared.panels.BusyIndicator;
+import com.sap.sailing.gwt.ui.shared.panels.SimpleBusyIndicator;
 
 /**
  * ChartPanel is a GWT panel that can show one sort of competitor data (e.g. current speed over ground, windward distance to
@@ -80,7 +87,7 @@ import com.sap.sailing.gwt.ui.shared.components.SettingsDialog;
  * 
  */
 public abstract class AbstractChartPanel<SettingsType extends ChartSettings> extends SimplePanel
-implements CompetitorSelectionChangeListener, RaceSelectionChangeListener {
+implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeListener {
     private CompetitorInRaceDTO chartData;
     private CompetitorsAndTimePointsDTO competitorsAndTimePointsDTO = null;
     private final SailingServiceAsync sailingService;
@@ -102,18 +109,21 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener {
     private final HashMap<CompetitorDTO, Widget> competitorLabels;
     private final HashMap<String, String> markPassingBuoyName;
     private int width, height;
+    private final Timer timer;
 
     private DetailType dataToShow;
     private AbsolutePanel loadingPanel;
     private final CompetitorSelectionProvider competitorSelectionProvider;
+    private static final ClientResources resources = GWT.create(ClientResources.class);
 
     public AbstractChartPanel(SailingServiceAsync sailingService,
             CompetitorSelectionProvider competitorSelectionProvider, RaceSelectionProvider raceSelectionProvider,
-            final StringMessages stringMessages, int chartWidth, int chartHeight, ErrorReporter errorReporter,
-            DetailType dataToShow, boolean showRaceSelector) {
+            Timer timer, final StringMessages stringMessages, int chartWidth, int chartHeight,
+            ErrorReporter errorReporter, DetailType dataToShow, boolean showRaceSelector) {
         width = chartWidth;
     	height = chartHeight;
     	this.dataToShow = dataToShow;
+    	this.timer = timer;
     	this.competitorSelectionProvider = competitorSelectionProvider;
     	competitorSelectionProvider.addCompetitorSelectionChangeListener(this);
     	this.errorReporter = errorReporter;
@@ -140,9 +150,8 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener {
         }
         loadingPanel = new AbsolutePanel();
         loadingPanel.setSize(width + "px", height + "px");
-        Anchor a = new Anchor(new SafeHtmlBuilder().appendHtmlConstant("<img src=\"/gwt/images/ajax-loader.gif\"/>")
-                .toSafeHtml());
-        loadingPanel.add(a, width / 2 - 32 / 2, height / 2 - 32 - 2);
+        BusyIndicator busyIndicator = new SimpleBusyIndicator(true, 1);
+        loadingPanel.add(busyIndicator, width / 2 - 32 / 2, height / 2 - 32 - 2);
         chartPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
         chartPanel.setSpacing(5);
         legendPanel = new FlowPanel();
@@ -154,8 +163,8 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener {
         chart.showWidget(0);
         chartPanel.add(chart);
         mainPanel.add(chartPanel);
-        Anchor showConfigAnchor = new Anchor(new SafeHtmlBuilder().appendHtmlConstant(
-                "<img class=\"linkNoBorder\" src=\"/gwt/images/settings.png\"/>").toSafeHtml());
+        ImageResource settingsIcon = resources.settingsIcon();
+        Anchor showConfigAnchor = new Anchor(AbstractImagePrototype.create(settingsIcon).getSafeHtml());
         showConfigAnchor.setTitle(stringMessages.configuration());
         showConfigAnchor.addClickHandler(new ClickHandler() {
             @Override
@@ -754,4 +763,12 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener {
         return new Pair<Boolean, Boolean>(everyPassingInRange, twoPassingsInRangeBeforeError);
     }
 
+    @Override
+    public void timeChanged(Date date) {
+        if (timer.getPlayMode() == PlayModes.Live) {
+            // TODO fetch parts missing so far from cache 
+        } else {
+            // TODO check if fetched already; if not, fetch all
+        }
+    }
 }

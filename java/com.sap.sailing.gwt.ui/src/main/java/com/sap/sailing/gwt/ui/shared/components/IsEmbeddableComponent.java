@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.shared.components;
 
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.ui.shared.panels.BusyIndicator;
 
 public interface IsEmbeddableComponent {
 
@@ -10,7 +11,11 @@ public interface IsEmbeddableComponent {
 
     Widget getToolbarWidget();
     
+    BusyIndicator getBusyIndicator();
+    
     boolean isEmbedded();
     
     boolean hasToolbar();
+    
+    boolean hasBusyIndicator();
 }
