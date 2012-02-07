@@ -9,13 +9,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.moxieapps.gwt.highcharts.client.Axis;
 import org.moxieapps.gwt.highcharts.client.Chart;
+import org.moxieapps.gwt.highcharts.client.ChartTitle;
+import org.moxieapps.gwt.highcharts.client.Legend;
 import org.moxieapps.gwt.highcharts.client.Point;
 import org.moxieapps.gwt.highcharts.client.Series;
+import org.moxieapps.gwt.highcharts.client.ToolTip;
 import org.moxieapps.gwt.highcharts.client.labels.DataLabels;
 import org.moxieapps.gwt.highcharts.client.labels.DataLabelsData;
 import org.moxieapps.gwt.highcharts.client.labels.DataLabelsFormatter;
 import org.moxieapps.gwt.highcharts.client.plotOptions.LinePlotOptions;
+import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
 import org.moxieapps.gwt.highcharts.client.plotOptions.ScatterPlotOptions;
 
 import com.google.gwt.core.client.GWT;
@@ -74,6 +79,7 @@ import com.sap.sailing.gwt.ui.shared.panels.SimpleBusyIndicator;
  */
 public abstract class AbstractChartPanel<SettingsType extends ChartSettings> extends SimplePanel
 implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeListener {
+    private static final int LINE_WIDTH = 1;
     private CompetitorInRaceDTO chartData;
     private CompetitorsAndTimePointsDTO competitorsAndTimePointsDTO = null;
     private final SailingServiceAsync sailingService;
@@ -103,6 +109,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
             CompetitorSelectionProvider competitorSelectionProvider, RaceSelectionProvider raceSelectionProvider,
             Timer timer, final StringMessages stringMessages, int chartWidth, int chartHeight,
             ErrorReporter errorReporter, DetailType dataToShow, boolean showRaceSelector) {
+        this.stringMessages = stringMessages;
         width = chartWidth;
     	height = chartHeight;
     	seriesByCompetitor = new HashMap<CompetitorDTO, Series>();
@@ -113,7 +120,18 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
     	competitorSelectionProvider.addCompetitorSelectionChangeListener(this);
     	this.errorReporter = errorReporter;
     	chartData = new CompetitorInRaceDTO();
-    	chart = new Chart();
+    	chart = new Chart().setZoomType(Chart.ZoomType.X)
+                .setSpacingRight(20)
+                .setChartTitle(new ChartTitle().setText(DetailTypeFormatter.format(dataToShow, stringMessages)))
+                .setToolTip(new ToolTip().setShared(true))
+                .setLegend(new Legend().setEnabled(true))
+                .setLinePlotOptions(new LinePlotOptions().setLineWidth(LINE_WIDTH).setMarker(new Marker().setEnabled(false).setHoverState(
+                                                new Marker().setEnabled(true).setRadius(4))).setShadow(false)
+                                .setHoverStateLineWidth(LINE_WIDTH));
+        chart.getXAxis().setType(Axis.Type.DATE_TIME).setMaxZoom(10000) // ten seconds
+                .setAxisTitleText(stringMessages.time());
+        chart.getYAxis().setAxisTitleText(DetailTypeFormatter.format(dataToShow, stringMessages)+" "+getUnit())
+            .setStartOnTick(false).setShowFirstLabel(false);
     	chart.setWidth(width);
     	chart.setHeight(height);
     	seriesIsUsed = new HashSet<Series>();
@@ -121,7 +139,6 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
         this.sailingService = sailingService;
         this.raceSelectionProvider = raceSelectionProvider;
         raceSelectionProvider.addRaceSelectionChangeListener(this);
-        this.stringMessages = stringMessages;
         dateFormat = DateTimeFormat.getFormat("HH:mm:ss");
         mainPanel = new HorizontalPanel();
         mainPanel.setSpacing(5);
@@ -140,6 +157,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
         chartPanel.setSpacing(5);
         chartAndBusyIndicatorPanel = new DeckPanel();
         chartAndBusyIndicatorPanel.add(loadingPanel);
+        chartAndBusyIndicatorPanel.add(chart);
         chartAndBusyIndicatorPanel.showWidget(0);
         chartPanel.add(chartAndBusyIndicatorPanel);
         mainPanel.add(chartPanel);
@@ -246,9 +264,6 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
                         @Override
                         public void onSuccess(CompetitorsAndTimePointsDTO result) {
                             setCompetitorsAndTimePointsDTO(result);
-                            if (chartAndBusyIndicatorPanel.getWidgetCount() == 1) {
-                            	chartAndBusyIndicatorPanel.add(chart);
-                            }
                             loadData.run();
                         }
                     });
@@ -282,6 +297,8 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
     }
     
     private synchronized void updateTableData(CompetitorDTO[] competitorDTOs) {
+        // make sure the busy indicator is removed at this point
+        chartAndBusyIndicatorPanel.showWidget(1);
         if (getCompetitorsAndTimePointsDTO() != null && chartData != null) {
             for (CompetitorDTO competitor : competitorDTOs) {
                 Series compSeries = getCompetitorSeries(competitor);
@@ -369,7 +386,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
         Series result = seriesByCompetitor.get(competitor);
     	if (result == null) {
     	    result = chart.createSeries().setType(Series.Type.LINE).setName(competitor.name);
-            final String measureAndUnit = getMeasureAndUnit();
+            final String unit = getUnit();
             String decimalPlaces = "";
             for (int i = 0; i < dataToShow.getPrecision(); i++) {
                 if (i == 0) {
@@ -378,21 +395,24 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
                 decimalPlaces += "0";
             }
             final NumberFormat numberFormat = NumberFormat.getFormat("0" + decimalPlaces);
-            result.setPlotOptions(new LinePlotOptions().setDataLabels(
-                    new DataLabels().setFormatter(new DataLabelsFormatter() {
+            result.setPlotOptions(new LinePlotOptions()
+                    .setLineWidth(LINE_WIDTH)
+                    .setMarker(new Marker().setEnabled(false).setHoverState(new Marker().setEnabled(true).setRadius(4)))
+                    .setShadow(false).setHoverStateLineWidth(LINE_WIDTH)
+                    .setDataLabels(new DataLabels().setEnabled(true).setFormatter(new DataLabelsFormatter() {
                         @Override
                         public String format(DataLabelsData dataLabelsData) {
                             return stringMessages.valueForCompetitorAt(competitor.name,
                                     dateFormat.format(new Date(dataLabelsData.getXAsLong())),
-                                    numberFormat.format(dataLabelsData.getYAsDouble()) + measureAndUnit);
+                                    numberFormat.format(dataLabelsData.getYAsDouble()) + unit);
                         }
                     })).setColor(competitorSelectionProvider.getColor(competitor)));
-    	    seriesByCompetitor.put(competitor, result);
+            seriesByCompetitor.put(competitor, result);
     	}
     	return result;
     }
 
-    private String getMeasureAndUnit() {
+    private String getUnit() {
         String unit = "";
         switch (dataToShow) {
         case CURRENT_SPEED_OVER_GROUND_IN_KNOTS:
