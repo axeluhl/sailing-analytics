@@ -17,6 +17,7 @@ import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.adminconsole.RaceMap;
 import com.sap.sailing.gwt.ui.adminconsole.RaceMapSettings;
@@ -119,7 +120,7 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
         
         boolean showWindChart = true;
         if(showWindChart) {
-            WindChartSettings windChartSettings = new WindChartSettings();
+            WindChartSettings windChartSettings = new WindChartSettings(WindSource.values());
             WindChart windChart = new WindChart(sailingService, raceSelectionProvider, timer, windChartSettings, stringMessages, errorReporter); 
             CollapsableComponentViewer<WindChartSettings> windChartViewer = new CollapsableComponentViewer<WindChartSettings>(
                     windChart, "600px", "500px", stringMessages);
