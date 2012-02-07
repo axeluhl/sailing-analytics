@@ -17,9 +17,8 @@ import org.moxieapps.gwt.highcharts.client.Legend;
 import org.moxieapps.gwt.highcharts.client.Point;
 import org.moxieapps.gwt.highcharts.client.Series;
 import org.moxieapps.gwt.highcharts.client.ToolTip;
-import org.moxieapps.gwt.highcharts.client.labels.DataLabels;
-import org.moxieapps.gwt.highcharts.client.labels.DataLabelsData;
-import org.moxieapps.gwt.highcharts.client.labels.DataLabelsFormatter;
+import org.moxieapps.gwt.highcharts.client.ToolTipData;
+import org.moxieapps.gwt.highcharts.client.ToolTipFormatter;
 import org.moxieapps.gwt.highcharts.client.plotOptions.LinePlotOptions;
 import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
 import org.moxieapps.gwt.highcharts.client.plotOptions.ScatterPlotOptions;
@@ -85,7 +84,6 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
     private CompetitorsAndTimePointsDTO competitorsAndTimePointsDTO = null;
     private final SailingServiceAsync sailingService;
     private final ErrorReporter errorReporter;
-    private final DateTimeFormat dateFormat;
     private final HorizontalPanel mainPanel;
     private final VerticalPanel chartPanel;
     private final Chart chart;
@@ -97,9 +95,9 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
     private int stepsToLoad = 100;
     private final StringMessages stringMessages;
     private final Set<Series> seriesIsUsed;
-    private final HashMap<String, String> markPassingBuoyName;
     private int width, height;
     private final Timer timer;
+    private final DateTimeFormat dateFormat = DateTimeFormat.getFormat("HH:mm:ss");
 
     private DetailType dataToShow;
     private AbsolutePanel loadingPanel;
@@ -136,12 +134,28 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
             .setStartOnTick(false).setShowFirstLabel(false);
     	chart.setWidth(width);
     	chart.setHeight(height);
+        final String unit = getUnit();
+        String decimalPlaces = "";
+        for (int i = 0; i < dataToShow.getPrecision(); i++) {
+            if (i == 0) {
+                decimalPlaces += ".";
+            }
+            decimalPlaces += "0";
+        }
+        final NumberFormat numberFormat = NumberFormat.getFormat("0" + decimalPlaces);
+        chart.setToolTip(new ToolTip().setEnabled(true).setFormatter(new ToolTipFormatter() {
+            @Override
+            public String format(ToolTipData toolTipData) {
+                return "<b>" + toolTipData.getSeriesName() + (toolTipData.getPointName() != null ? " "+toolTipData.getPointName() : "")
+                        + "</b><br/>" +  
+                        dateFormat.format(new Date(toolTipData.getXAsLong())) + ": " +
+                        numberFormat.format(toolTipData.getYAsDouble()) + unit;
+            }
+        }));
     	seriesIsUsed = new HashSet<Series>();
-    	markPassingBuoyName = new HashMap<String, String>();
         this.sailingService = sailingService;
         this.raceSelectionProvider = raceSelectionProvider;
         raceSelectionProvider.addRaceSelectionChangeListener(this);
-        dateFormat = DateTimeFormat.getFormat("HH:mm:ss");
         mainPanel = new HorizontalPanel();
         mainPanel.setSpacing(5);
         chartPanel = new VerticalPanel();
@@ -316,8 +330,6 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
                     Double[] markPassingValues = chartData.getMarkPassings(competitor);
                     for (int j = 0; j < markPassingTimes.length; j++) {
                         if (markPassingValues[j] != null && markPassingTimes[j].getB() != null) {
-                            markPassingBuoyName.put(competitor.id + markPassingTimes[j].getB(),
-                                    markPassingTimes[j].getA());
                             Point markPassingPoint = new Point(markPassingTimes[j].getB(), markPassingValues[j]);
                             markPassingPoint.setName(markPassingTimes[j].getA());
                             markPassingPoints.add(markPassingPoint);
@@ -390,27 +402,11 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
         Series result = seriesByCompetitor.get(competitor);
     	if (result == null) {
     	    result = chart.createSeries().setType(Series.Type.LINE).setName(competitor.name);
-            final String unit = getUnit();
-            String decimalPlaces = "";
-            for (int i = 0; i < dataToShow.getPrecision(); i++) {
-                if (i == 0) {
-                    decimalPlaces += ".";
-                }
-                decimalPlaces += "0";
-            }
-            final NumberFormat numberFormat = NumberFormat.getFormat("0" + decimalPlaces);
             result.setPlotOptions(new LinePlotOptions()
                     .setLineWidth(LINE_WIDTH)
                     .setMarker(new Marker().setEnabled(false).setHoverState(new Marker().setEnabled(true).setRadius(4)))
                     .setShadow(false).setHoverStateLineWidth(LINE_WIDTH)
-                    .setDataLabels(new DataLabels().setEnabled(false).setFormatter(new DataLabelsFormatter() {
-                        @Override
-                        public String format(DataLabelsData dataLabelsData) {
-                            return stringMessages.valueForCompetitorAt(competitor.name,
-                                    dateFormat.format(new Date(dataLabelsData.getXAsLong())),
-                                    numberFormat.format(dataLabelsData.getYAsDouble()) + unit);
-                        }
-                    })).setColor(competitorSelectionProvider.getColor(competitor)));
+                    .setColor(competitorSelectionProvider.getColor(competitor)));
             seriesByCompetitor.put(competitor, result);
     	}
     	return result;
