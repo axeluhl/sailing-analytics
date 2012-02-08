@@ -239,8 +239,14 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
                         @Override
                         public void onSuccess(RaceTimesInfoDTO racesTimesInfo) {
                             timePanel.setLegMarkers(racesTimesInfo.getLegTimes());
-                            if (racesTimesInfo.getStartOfRace() != null)
+                            if (racesTimesInfo.getStartOfRace() != null) {
+                                // set the new start time 
+                                Date startOfRace = racesTimesInfo.getStartOfRace();
+                                Date startOfTimeslider = new Date(startOfRace.getTime() - 5 * 60 * 1000);
+
+                                timePanel.changeMin(startOfTimeslider);
                                 timer.setTime(racesTimesInfo.getStartOfRace().getTime());
+                            }
                         }
                     });
         }
