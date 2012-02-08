@@ -502,17 +502,17 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             Map<DetailType, SortableColumn<LeaderboardRowDTO, ?>> result = new HashMap<DetailType, SortableColumn<LeaderboardRowDTO, ?>>();
             result.put(
                     DetailType.RACE_DISTANCE_TRAVELED,
-                    new FormattedDoubleLegDetailColumn(stringConstants.distanceInMeters(), stringConstants
-                            .distanceInMetersUnit(), new RaceDistanceTraveledInMeters(), 0, getLeaderboardPanel()
+                    new FormattedDoubleLegDetailColumn(stringConstants.distanceInMeters(), "["+stringConstants
+                            .distanceInMetersUnit()+"]", new RaceDistanceTraveledInMeters(), 0, getLeaderboardPanel()
                             .getLeaderboardTable(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
             result.put(DetailType.RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS, new FormattedDoubleLegDetailColumn(
-                    stringConstants.averageSpeedInKnots(), stringConstants.averageSpeedInKnotsUnit(),
+                    stringConstants.averageSpeedInKnots(), "["+stringConstants.averageSpeedInKnotsUnit()+"]",
                     new RaceAverageSpeedInKnots(), 2, getLeaderboardPanel().getLeaderboardTable(),
                     LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
             result.put(
                     DetailType.RACE_GAP_TO_LEADER_IN_SECONDS,
-                    new FormattedDoubleLegDetailColumn(stringConstants.gapToLeaderInSeconds(), stringConstants
-                            .gapToLeaderInSecondsUnit(), new RaceGapToLeaderInSeconds(), 0, getLeaderboardPanel()
+                    new FormattedDoubleLegDetailColumn(stringConstants.gapToLeaderInSeconds(), "["+stringConstants
+                            .gapToLeaderInSecondsUnit()+"]", new RaceGapToLeaderInSeconds(), 0, getLeaderboardPanel()
                             .getLeaderboardTable(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
             result.put(DetailType.NUMBER_OF_MANEUVERS, getManeuverCountRaceColumn());
             result.put(DetailType.CURRENT_LEG, new FormattedDoubleLegDetailColumn(stringConstants.currentLeg(), "",

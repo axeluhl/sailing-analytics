@@ -217,29 +217,29 @@ public class LegColumn extends ExpandableSortableColumn<String> {
             String detailColumnStyle) {
         Map<DetailType, SortableColumn<LeaderboardRowDTO, ?>> result = new HashMap<DetailType, SortableColumn<LeaderboardRowDTO, ?>>();
         result.put(DetailType.DISTANCE_TRAVELED,
-                new FormattedDoubleLegDetailColumn(stringConstants.distanceInMeters(), stringConstants.distanceInMetersUnit(),
+                new FormattedDoubleLegDetailColumn(stringConstants.distanceInMeters(), "["+stringConstants.distanceInMetersUnit()+"]",
                         new DistanceTraveledInMeters(), 0, getLeaderboardPanel().getLeaderboardTable(), detailHeaderStyle, detailColumnStyle));
         result.put(DetailType.AVERAGE_SPEED_OVER_GROUND_IN_KNOTS, new FormattedDoubleLegDetailColumn(
-                stringConstants.averageSpeedInKnots(), stringConstants.averageSpeedInKnotsUnit(), new AverageSpeedOverGroundInKnots(), 2, leaderboardPanel
+                stringConstants.averageSpeedInKnots(), "["+stringConstants.averageSpeedInKnotsUnit()+"]", new AverageSpeedOverGroundInKnots(), 2, leaderboardPanel
                                 .getLeaderboardTable(), detailHeaderStyle, detailColumnStyle));
         result.put(DetailType.CURRENT_SPEED_OVER_GROUND_IN_KNOTS, new FormattedDoubleLegDetailColumn(
-                stringConstants.currentSpeedOverGroundInKnots(), stringConstants.currentSpeedOverGroundInKnotsUnit(), new CurrentSpeedOverGroundInKnots(),
+                stringConstants.currentSpeedOverGroundInKnots(), "["+stringConstants.currentSpeedOverGroundInKnotsUnit()+"]", new CurrentSpeedOverGroundInKnots(),
                 2, getLeaderboardPanel().getLeaderboardTable(), detailHeaderStyle, detailColumnStyle));
         result.put(DetailType.ESTIMATED_TIME_TO_NEXT_WAYPOINT_IN_SECONDS,
                 new FormattedDoubleLegDetailColumn(stringConstants.estimatedTimeToNextWaypointInSeconds(),
-                        stringConstants.estimatedTimeToNextWaypointInSecondsUnit(),
+                        "["+stringConstants.estimatedTimeToNextWaypointInSecondsUnit()+"]",
                         new EstimatedTimeToNextWaypointInSeconds(), 1, getLeaderboardPanel().getLeaderboardTable(),
                         detailHeaderStyle, detailColumnStyle));
         result.put(
                 DetailType.GAP_TO_LEADER_IN_SECONDS,
-                new FormattedDoubleLegDetailColumn(stringConstants.gapToLeaderInSeconds(), stringConstants.gapToLeaderInSecondsUnit(),
+                new FormattedDoubleLegDetailColumn(stringConstants.gapToLeaderInSeconds(), "["+stringConstants.gapToLeaderInSecondsUnit()+"]",
                         new GapToLeaderInSeconds(), 0, getLeaderboardPanel().getLeaderboardTable(), detailHeaderStyle, detailColumnStyle));
         result.put(DetailType.VELOCITY_MADE_GOOD_IN_KNOTS,
                 new FormattedDoubleLegDetailColumn(stringConstants.velocityMadeGoodInKnots(),
-                        stringConstants.velocityMadeGoodInKnotsUnit(), new VelocityMadeGoodInKnots(), 2,
+                        "["+stringConstants.velocityMadeGoodInKnotsUnit()+"]", new VelocityMadeGoodInKnots(), 2,
                         getLeaderboardPanel().getLeaderboardTable(), detailHeaderStyle, detailColumnStyle));
         result.put(DetailType.WINDWARD_DISTANCE_TO_GO_IN_METERS, new FormattedDoubleLegDetailColumn(
-                stringConstants.windwardDistanceToGoInMeters(), stringConstants.windwardDistanceToGoInMetersUnit(), new WindwardDistanceToGoInMeters(),
+                stringConstants.windwardDistanceToGoInMeters(), "["+stringConstants.windwardDistanceToGoInMetersUnit()+"]", new WindwardDistanceToGoInMeters(),
                 0, getLeaderboardPanel().getLeaderboardTable(), detailHeaderStyle, detailColumnStyle));
         result.put(DetailType.RANK_GAIN, new RankGainColumn(stringConstants.rankGain(), new RankGain(),
                 getLeaderboardPanel().getLeaderboardTable(), detailHeaderStyle, detailColumnStyle));
