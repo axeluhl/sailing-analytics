@@ -29,7 +29,6 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.NumberFormat;
-import com.google.gwt.i18n.client.TimeZone;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbsolutePanel;
@@ -122,7 +121,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
     	chart = new Chart().setZoomType(Chart.ZoomType.X)
                 .setSpacingRight(20)
                 .setChartTitle(new ChartTitle().setText(DetailTypeFormatter.format(dataToShow, stringMessages)))
-                .setChartSubtitle(new ChartSubtitle().setText(stringMessages.clickAndDragToZoomIn()+"; "+stringMessages.allTimesInUTC()))
+                .setChartSubtitle(new ChartSubtitle().setText(stringMessages.clickAndDragToZoomIn()))
                 .setLegend(new Legend().setEnabled(true))
                 .setLinePlotOptions(new LinePlotOptions().setLineWidth(LINE_WIDTH).setMarker(new Marker().setEnabled(false).setHoverState(
                                                 new Marker().setEnabled(true).setRadius(4))).setShadow(false)
@@ -147,7 +146,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
             public String format(ToolTipData toolTipData) {
                 return "<b>" + toolTipData.getSeriesName() + (toolTipData.getPointName() != null ? " "+toolTipData.getPointName() : "")
                         + "</b><br/>" +  
-                        dateFormat.format(new Date(toolTipData.getXAsLong()), TimeZone.createTimeZone(0)) + ": " +
+                        dateFormat.format(new Date(toolTipData.getXAsLong())) + ": " +
                         numberFormat.format(toolTipData.getYAsDouble()) + unit;
             }
         }));

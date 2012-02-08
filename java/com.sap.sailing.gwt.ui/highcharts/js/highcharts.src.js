@@ -968,7 +968,7 @@ defaultOptions = {
 		thousandsSep: ','
 	},
 	global: {
-		useUTC: true
+		useUTC: false
 	},
 	chart: {
 		//animation: true,
