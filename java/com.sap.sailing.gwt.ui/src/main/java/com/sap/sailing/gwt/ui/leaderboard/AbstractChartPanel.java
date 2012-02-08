@@ -170,11 +170,11 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
                                                 new Marker().setEnabled(true).setRadius(4))).setShadow(false)
                                 .setHoverStateLineWidth(LINE_WIDTH));
         chart.setChartTitle(new ChartTitle().setText(DetailTypeFormatter.format(dataToShow, stringMessages)));
-        chart.getYAxis().setAxisTitleText(DetailTypeFormatter.format(dataToShow, stringMessages) + " " + getUnit());
+        final String unit = getUnit();
+        chart.getYAxis().setAxisTitleText(DetailTypeFormatter.format(dataToShow, stringMessages) + " ["+unit+"]");
         chart.getXAxis().setType(Axis.Type.DATE_TIME).setMaxZoom(10000) // ten seconds
                 .setAxisTitleText(stringMessages.time());
         chart.getYAxis().setStartOnTick(false).setShowFirstLabel(false);
-        final String unit = getUnit();
         String decimalPlaces = "";
         for (int i = 0; i < dataToShow.getPrecision(); i++) {
             if (i == 0) {
