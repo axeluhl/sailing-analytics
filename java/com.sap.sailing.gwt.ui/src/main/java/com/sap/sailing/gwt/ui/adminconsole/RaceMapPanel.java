@@ -34,10 +34,10 @@ import com.sap.sailing.gwt.ui.client.TimePanel;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
-import com.sap.sailing.gwt.ui.shared.LegTimepointDTO;
 import com.sap.sailing.gwt.ui.shared.PositionDTO;
 import com.sap.sailing.gwt.ui.shared.QuickRankDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
+import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialog;
 
 public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListener, ProvidesResize, RequiresResize,
@@ -157,16 +157,16 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
                 break;
         }
         
-        sailingService.getLegTimePositions(selectedRace.getRaceIdentifier(), 
-                new AsyncCallback<List<LegTimepointDTO>>() {
+        sailingService.getRaceTimesInfo(selectedRace.getRaceIdentifier(), 
+                new AsyncCallback<RaceTimesInfoDTO>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         errorReporter.reportError("Error obtaining leg timepoints: " + caught.getMessage());
                     }
 
                     @Override
-                    public void onSuccess(List<LegTimepointDTO> legTimepoints) {
-                        timePanel.setLegMarkers(legTimepoints);
+                    public void onSuccess(RaceTimesInfoDTO legTimepoints) {
+                        timePanel.setLegMarkers(legTimepoints.getLegTimes());
                     }
                 });
     }

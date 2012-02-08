@@ -21,11 +21,11 @@ import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
-import com.sap.sailing.gwt.ui.shared.LegTimepointDTO;
 import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.QuickRankDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
+import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDTO;
@@ -62,7 +62,7 @@ public interface SailingService extends RemoteService {
     Map<CompetitorDTO, List<GPSFixDTO>> getBoatPositions(RaceIdentifier raceIdentifier, Map<CompetitorDTO, Date> from,
             Map<CompetitorDTO, Date> to, boolean extrapolate) throws NoWindException;
 
-    List<LegTimepointDTO> getLegTimePositions(RaceIdentifier raceIdentifier);
+    RaceTimesInfoDTO getRaceTimesInfo(RaceIdentifier raceIdentifier);
     
     List<MarkDTO> getMarkPositions(RaceIdentifier raceIdentifier, Date date);
 

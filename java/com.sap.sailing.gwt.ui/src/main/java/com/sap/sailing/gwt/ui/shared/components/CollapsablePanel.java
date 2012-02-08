@@ -285,8 +285,6 @@ public final class CollapsablePanel extends Composite implements HasWidgets.ForI
 
     public Iterator<Widget> iterator() {
         return null;
-        // return WidgetIterators.createWidgetIterator(this,
-        // new Widget[] {getContent()});
     }
 
     public boolean remove(Widget w) {
