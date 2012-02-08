@@ -244,12 +244,14 @@ input.magnifier {
 }
 
 .leaderboardGroupPanel-GroupName {
-	float: left;
-
+	margin: 0 0 10px 0;
 }
 
 .leaderboardGroupPanel-GroupDescription {
-
+  	font-weight: 400;
+    line-height: 1.6;
+    font-size: 14px;
+    max-width: 1000px;
 }
 
 .leaderboardGroupPanel-LeaderboardsTableLabel {
@@ -259,12 +261,12 @@ input.magnifier {
 }
 
 .leaderboardGroupPanel-ActiveRace, .leaderboardGroupPanel-ActiveLeaderboard {
-	padding: 5px 8px;
+	padding: 3px 8px 5px;
 	display: block;
 	float: left;
 	margin: 5px 5px 5px 0;
 	border-radius: 4px;
-	background: #e7e7e7;
+	background: url("images/spectator-table-bg.png") repeat-x 0 0 #e7e7e7;
 	text-decoration: none;
 	color: #3b3b3b;
   border: 1px solid #a6a6a6;
@@ -272,8 +274,9 @@ input.magnifier {
 
 .leaderboardGroupPanel-ActiveRace:hover, .leaderboardGroupPanel-ActiveLeaderboard:hover {
 	text-decoration: none;
-	color: #3b3b3b;
+	color: #fff;
   background: #f1af10;
+  border: 1px solid #f1af10;
 }
 
 .leaderboardGroupPanel-ActiveRace {
