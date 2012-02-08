@@ -26,7 +26,7 @@
 
 
 body {
-	background: url(images/spectatorview-bg.png) no-repeat left top fixed #ebebeb;
+	background: url(images/spectatorview-bg.png) no-repeat left top #ebebeb;
 	font-family: 'Ubuntu', 'Terminal Dosis', sans-serif;
 	line-height: 1;
 	font-size: 14px;
@@ -245,14 +245,17 @@ input.magnifier {
 
 .leaderboardGroupPanel-GroupName {
 	float: left;
+
 }
 
 .leaderboardGroupPanel-GroupDescription {
-	float: left;
+
 }
 
 .leaderboardGroupPanel-LeaderboardsTableLabel {
-	clear: left;
+	margin: 0 13px 10px;
+		font-size: 17px;
+	font-weight: 200;
 }
 
 .leaderboardGroupPanel-ActiveRace, .leaderboardGroupPanel-ActiveLeaderboard {
@@ -287,7 +290,9 @@ input.magnifier {
 	color: #3e3e3e;
 }
 .welcomeWidget-WelcomePanelWrapper {
-	
+	margin: 104px 13px 0px 13px;
+	max-width: 1000px;
+	height: 240px;
 }
 
 .welcomeWidget-CloseButton {
@@ -303,6 +308,7 @@ input.magnifier {
 .welcomeWidget-WelcomeText {
 	font-weight: 400;
 	line-height: 1.6;
+	text-shadow: 0 0 2px #a4a1a1;
 }
 
 .breadcrumbPanel-NextArrow {
@@ -317,4 +323,8 @@ input.magnifier {
 	
 }
 
-
+.leaderboardGroupPanel-GroupDetailsPanel {
+	margin: 0 13px 20px;
+		font-size: 21px;
+	font-weight: 400;
+}
