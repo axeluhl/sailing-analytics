@@ -1,97 +1,83 @@
 @CHARSET "ISO-8859-1";
 
 .cellTableWidget {
-
+	margin: 0 13px;
+	table-layout: auto;
+	border-collapse: separate;
+  border-spacing: 1em 0.5em;
 }
 
-/** v-align images in the table header
- * grey background for table header
- */
 .cellTableHeader {
-	background: none;
-	border: 1px solid red;
+	background: url(images/spectator-table-bg.png) 0 0 repeat-x !important;
 	text-transform: uppercase;
 	font-weight: 600;
+	padding: 4px 15px;
+	border: 1px solid #aeaeaf !important;
+	text-shadow: none !important;
 }
 
 .cellTableFirstColumnHeader {
-	background: none;
-	border: none;
+
 }
 
 .cellTableLastColumnHeader {
-	background: none;
-	border: none;
+
 }
 
 .cellTableEvenRow {
-	background: none;
-	border: none;
+
 }
 
 .cellTableEvenRowCell {
-	background: none;
-	border: none;
+
 }
 
 .cellTableOddRow {
-	background: none;
-	border: none;
+
 }
 
 .cellTableOddRowCell {
-	background: none;
-	border: none;
+
 }
 
 .cellTableHoveredRow {
-	background: none;
-	border: none;
+
 }
 
 .cellTableSelectedRow {
-	background: none;
-	border: none;
+
 }
 
 
 .cellTableSelectedRowCell {
-	background: none;
-	border: none;
+
 }
 
 .cellTableRaceColumnHeader {
-	background: none;
-	border: none;
+
 }
 
 .cellTableLegColumnHeader {
-	background: none;
-	border: none;
+
 }
 
 .cellTableLegDetailColumnHeader {
-	background: none;
-	border: none;
+
 }
 
 .cellTableRaceColumn {
-		background: none;
-	border: none;
+
 }
 
 .cellTableLegColumn {
-		background: none;
-	border: none;
+
 }
 
 .cellTableLegDetailColumn {
-		background: none;
-	border: none;
+
 }
 
 .cellTableTotalColumn {
-		background: none;
-	border: none;
+
 }
 
