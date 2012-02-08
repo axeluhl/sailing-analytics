@@ -12,6 +12,9 @@ public class RaceMapSettings {
 
     private boolean showOnlySelectedCompetitors = true;
     
+    private boolean autoZoomToBoats = false;
+    private boolean autoZoomToBuoys = false;
+    
     private long tailLengthInMilliseconds = 30000l;
 
     public RaceMapSettings() {
@@ -56,6 +59,28 @@ public class RaceMapSettings {
 
     public void setShowOnlySelectedCompetitors(boolean showOnlySelectedCompetitors) {
         this.showOnlySelectedCompetitors = showOnlySelectedCompetitors;
+    }
+
+    public boolean isAutoZoomToBoats() {
+        return autoZoomToBoats;
+    }
+
+    public void setAutoZoomToBoats(boolean autoZoomToBoats) {
+        this.autoZoomToBoats = autoZoomToBoats;
+        if (autoZoomToBoats) {
+            this.autoZoomToBuoys = false;
+        }
+    }
+
+    public boolean isAutoZoomToBuoys() {
+        return autoZoomToBuoys;
+    }
+
+    public void setAutoZoomToBuoys(boolean autoZoomToBuoys) {
+        this.autoZoomToBuoys = autoZoomToBuoys;
+        if (autoZoomToBuoys) {
+            this.autoZoomToBoats = false;
+        }
     }
 
 }

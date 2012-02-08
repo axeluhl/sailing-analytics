@@ -32,5 +32,6 @@
   <source path='client'/>
   <source path='leaderboard'/>
   <source path='leaderboardedit'/>
+  <source path='usermanagement'/>
   <source path='shared'/>
 </module>
