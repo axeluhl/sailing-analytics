@@ -114,16 +114,18 @@ Re-Building the Java Server
 ---------------------------
 
 If, e.g., after a bug fix, it is necessary to re-build and re-deploy
-the Java server, you should consider doing this first on the "master"
+the Java server, you should consider doing this first on the "dev"
 branch of the git versioning system. The master branch contains the
 sources for the "dev" server instance. The git branch to server
 instance mappings are as follows:
 
 	 git branch   	 server instance
 	 ----------	 ---------------
-	 master		 dev
+         master          <none> (internal development inside SAP network)
+	 dev		 dev
 	 test		 test
-	 prod		 prod1 / prod2
+	 prod1		 prod1
+	 prod2		 prod2
 
 First, check out the branch you want to re-build:
 
@@ -141,11 +143,11 @@ First, check out the branch you want to re-build:
  - "cd git/java"
 
  - "git checkout -f <branchname>"  where <branchname> is either one of
-   master, test or prod
+   dev, test, prod1 or prod2
 
  - ensure that there is an ssh tunnel to localhost that 
 
- - "mvn install"
+ - "mvn clean install"
 
 This will compile the sources, bundle them up in to OSGi bundle JAR
 files, run all tests which required online access to the TracTrac
