@@ -31,5 +31,6 @@
   <extend-property name="locale" values="de"/>
   <source path='client'/>
   <source path='leaderboard'/>
+  <source path='usermanagement'/>
   <source path='shared'/>
 </module>
