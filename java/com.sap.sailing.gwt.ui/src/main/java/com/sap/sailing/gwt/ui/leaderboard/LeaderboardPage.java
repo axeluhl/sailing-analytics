@@ -57,7 +57,7 @@ public class LeaderboardPage extends AbstractEntryPoint {
             breadcrumbLinksData.add(new Pair<String, String>(link, leaderboardGroupName));
         }
         BreadcrumbPanel breadcrumbPanel = new BreadcrumbPanel(breadcrumbLinksData, leaderboardName.toUpperCase());
-        
+        // FIXME bug #247: can't pass null as LeaderboardSettings since the leaderboardPanel will choke
         LeaderboardPanel leaderboardPanel = new LeaderboardPanel(sailingService, null,
                 new CompetitorSelectionModel(/* hasMultiSelection */ true), leaderboardName, leaderboardGroupName,
                 LeaderboardPage.this, stringMessages);

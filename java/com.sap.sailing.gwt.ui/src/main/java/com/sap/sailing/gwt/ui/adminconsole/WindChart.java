@@ -22,7 +22,6 @@ import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.NumberFormat;
-import com.google.gwt.i18n.client.TimeZone;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -76,7 +75,7 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
                 .setZoomType(Chart.ZoomType.X)
                 .setSpacingRight(20)
                 .setChartTitle(new ChartTitle().setText(stringMessages.wind()))
-                .setChartSubtitle(new ChartSubtitle().setText(stringMessages.clickAndDragToZoomIn()+"; "+stringMessages.allTimesInUTC()))
+                .setChartSubtitle(new ChartSubtitle().setText(stringMessages.clickAndDragToZoomIn()))
                 .setLegend(new Legend().setEnabled(true))
                 .setLinePlotOptions(new LinePlotOptions().setLineWidth(LINE_WIDTH).setMarker(new Marker().setEnabled(false).setHoverState(
                                                 new Marker().setEnabled(true).setRadius(4))).setShadow(false)
@@ -88,13 +87,13 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
             public String format(ToolTipData toolTipData) {
                 return "<b>" + toolTipData.getSeriesName() + (toolTipData.getPointName() != null ? " "+toolTipData.getPointName() : "")
                         + "</b><br/>" +  
-                        dateFormat.format(new Date(toolTipData.getXAsLong()), TimeZone.createTimeZone(0)) + ": " +
+                        dateFormat.format(new Date(toolTipData.getXAsLong())) + ": " +
                         numberFormat.format(toolTipData.getYAsDouble()) + unit;
             }
         }));
         chart.getXAxis().setType(Axis.Type.DATE_TIME).setMaxZoom(10000) // ten seconds
                 .setAxisTitleText(stringMessages.time());
-        chart.getYAxis().setAxisTitleText(stringMessages.windSpeed()).setStartOnTick(false).setShowFirstLabel(false);
+        chart.getYAxis().setAxisTitleText(stringMessages.fromDeg()).setStartOnTick(false).setShowFirstLabel(false);
         for (WindSource windSource : WindSource.values()) {
             Series series = createSeries(windSource);
             windSourceSeries.put(windSource, series);
