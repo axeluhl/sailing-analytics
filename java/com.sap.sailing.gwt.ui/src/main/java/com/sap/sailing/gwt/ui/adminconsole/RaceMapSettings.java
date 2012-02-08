@@ -6,14 +6,16 @@ import java.util.Set;
 import com.sap.sailing.domain.common.ManeuverType;
 
 public class RaceMapSettings {
+    public enum ZoomSettings{MANUAL, ZOOM_TO_BOATS, ZOOM_TO_BUOYS, ZOOM_TO_BOATS_AND_BUOYS}
+    
     private boolean showDouglasPeuckerPoints = false;
     
     private final Set<ManeuverType> maneuverTypesToShow;
 
     private boolean showOnlySelectedCompetitors = true;
     
-    private boolean autoZoomToBoats = false;
-    private boolean autoZoomToBuoys = false;
+    private ZoomSettings zoomSetting = ZoomSettings.MANUAL;
+    private boolean includeTailsToAutoZoom = false;
     
     private long tailLengthInMilliseconds = 30000l;
 
@@ -61,26 +63,30 @@ public class RaceMapSettings {
         this.showOnlySelectedCompetitors = showOnlySelectedCompetitors;
     }
 
-    public boolean isAutoZoomToBoats() {
-        return autoZoomToBoats;
+    public ZoomSettings getZoomSetting() {
+        return zoomSetting;
     }
-
-    public void setAutoZoomToBoats(boolean autoZoomToBoats) {
-        this.autoZoomToBoats = autoZoomToBoats;
-        if (autoZoomToBoats) {
-            this.autoZoomToBuoys = false;
+    
+    /**
+     * Sets the zoom settings. If <code>zoomSetting</code> is a setting which doesn't include the boats (e.g.
+     * <code>MANUAL_ZOOM</code> or <code>ZOOM_TO_BUOYS</code>), is the <code>includeTailsToAutoZoom</code> value set to
+     * <code>false</code>.
+     * 
+     * @param zoomSetting The new zoom settings
+     */
+    public void setZoomSetting(ZoomSettings zoomSetting) {
+        this.zoomSetting = zoomSetting;
+        if (zoomSetting == ZoomSettings.MANUAL || zoomSetting == ZoomSettings.ZOOM_TO_BUOYS) {
+            setIncludeTailsToAutoZoom(false);
         }
     }
 
-    public boolean isAutoZoomToBuoys() {
-        return autoZoomToBuoys;
+    public boolean isIncludeTailsToAutoZoom() {
+        return includeTailsToAutoZoom;
     }
-
-    public void setAutoZoomToBuoys(boolean autoZoomToBuoys) {
-        this.autoZoomToBuoys = autoZoomToBuoys;
-        if (autoZoomToBuoys) {
-            this.autoZoomToBoats = false;
-        }
+    
+    public void setIncludeTailsToAutoZoom(boolean includeTailsToAutoZoom) {
+        this.includeTailsToAutoZoom = includeTailsToAutoZoom;
     }
 
 }
