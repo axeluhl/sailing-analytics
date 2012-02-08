@@ -3,6 +3,8 @@ package com.sap.sailing.gwt.ui.adminconsole;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -20,6 +22,8 @@ import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
 
 public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<RaceMapSettings> {
     private List<Pair<CheckBox, ManeuverType>> checkboxAndType;
+    private CheckBox checkAutoZoomToBoats;
+    private CheckBox checkAutoZoomToBuoys;
     private CheckBox checkBoxDouglasPeuckerPoints;
     private CheckBox showOnlySelectedCompetitors;
     private LongBox tailLengthBox;
@@ -39,6 +43,30 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         tailLengthBox = dialog.createLongBox((int) (initialSettings.getTailLengthInMilliseconds() / 1000), 4);
         labelAndTailLengthBoxPanel.add(tailLengthBox);
         vp.add(labelAndTailLengthBoxPanel);
+        
+        checkAutoZoomToBoats = new CheckBox(stringMessages.autoZoomToBoats());
+        checkAutoZoomToBoats.setValue(initialSettings.isAutoZoomToBoats());
+        checkAutoZoomToBoats.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<Boolean> event) {
+                if (event.getValue()) {
+                    checkAutoZoomToBuoys.setValue(false);
+                }
+            }
+        });
+        vp.add(checkAutoZoomToBoats);
+        checkAutoZoomToBuoys = new CheckBox(stringMessages.autoZoomToBuoys());
+        checkAutoZoomToBuoys.setValue(initialSettings.isAutoZoomToBuoys());
+        checkAutoZoomToBuoys.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<Boolean> event) {
+                if (event.getValue()) {
+                    checkAutoZoomToBoats.setValue(false);
+                }
+            }
+        });
+        vp.add(checkAutoZoomToBuoys);
+        
         showOnlySelectedCompetitors = dialog.createCheckbox(stringMessages.showOnlySelected());
         showOnlySelectedCompetitors.setValue(initialSettings.isShowOnlySelectedCompetitors());
         vp.add(showOnlySelectedCompetitors);
@@ -62,6 +90,8 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         for (Pair<CheckBox, ManeuverType> p : checkboxAndType) {
             result.showManeuverType(p.getB(), p.getA().getValue());
         }
+        result.setAutoZoomToBoats(checkAutoZoomToBoats.getValue());
+        result.setAutoZoomToBuoys(checkAutoZoomToBuoys.getValue());
         result.setShowDouglasPeuckerPoints(checkBoxDouglasPeuckerPoints.getValue());
         result.setShowOnlySelectedCompetitors(showOnlySelectedCompetitors.getValue());
         result.setTailLengthInMilliseconds(tailLengthBox.getValue() == null ? -1 : tailLengthBox.getValue()*1000l);
