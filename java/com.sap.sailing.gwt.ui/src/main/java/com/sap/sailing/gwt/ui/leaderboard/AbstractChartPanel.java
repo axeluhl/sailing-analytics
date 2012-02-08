@@ -86,7 +86,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
     private final ErrorReporter errorReporter;
     private final HorizontalPanel mainPanel;
     private final VerticalPanel chartPanel;
-    private final Chart chart;
+    private Chart chart;
     private final Map<CompetitorDTO, Series> seriesByCompetitor;
     private final Map<CompetitorDTO, Series> markPassingSeriesByCompetitor;
     private final Label title;
@@ -112,44 +112,13 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
     	height = chartHeight;
     	seriesByCompetitor = new HashMap<CompetitorDTO, Series>();
         markPassingSeriesByCompetitor = new HashMap<CompetitorDTO, Series>();
-    	this.dataToShow = dataToShow;
     	this.timer = timer;
     	this.competitorSelectionProvider = competitorSelectionProvider;
     	competitorSelectionProvider.addCompetitorSelectionChangeListener(this);
     	this.errorReporter = errorReporter;
     	chartData = new CompetitorInRaceDTO();
-    	chart = new Chart().setZoomType(Chart.ZoomType.X)
-                .setSpacingRight(20)
-                .setChartTitle(new ChartTitle().setText(DetailTypeFormatter.format(dataToShow, stringMessages)))
-                .setChartSubtitle(new ChartSubtitle().setText(stringMessages.clickAndDragToZoomIn()))
-                .setLegend(new Legend().setEnabled(true))
-                .setLinePlotOptions(new LinePlotOptions().setLineWidth(LINE_WIDTH).setMarker(new Marker().setEnabled(false).setHoverState(
-                                                new Marker().setEnabled(true).setRadius(4))).setShadow(false)
-                                .setHoverStateLineWidth(LINE_WIDTH));
-        chart.getXAxis().setType(Axis.Type.DATE_TIME).setMaxZoom(10000) // ten seconds
-                .setAxisTitleText(stringMessages.time());
-        chart.getYAxis().setAxisTitleText(DetailTypeFormatter.format(dataToShow, stringMessages)+" "+getUnit())
-            .setStartOnTick(false).setShowFirstLabel(false);
-    	chart.setWidth(width);
-    	chart.setHeight(height);
-        final String unit = getUnit();
-        String decimalPlaces = "";
-        for (int i = 0; i < dataToShow.getPrecision(); i++) {
-            if (i == 0) {
-                decimalPlaces += ".";
-            }
-            decimalPlaces += "0";
-        }
-        final NumberFormat numberFormat = NumberFormat.getFormat("0" + decimalPlaces);
-        chart.setToolTip(new ToolTip().setEnabled(true).setFormatter(new ToolTipFormatter() {
-            @Override
-            public String format(ToolTipData toolTipData) {
-                return "<b>" + toolTipData.getSeriesName() + (toolTipData.getPointName() != null ? " "+toolTipData.getPointName() : "")
-                        + "</b><br/>" +  
-                        dateFormat.format(new Date(toolTipData.getXAsLong())) + ": " +
-                        numberFormat.format(toolTipData.getYAsDouble()) + unit;
-            }
-        }));
+        this.dataToShow = dataToShow;
+    	chart = createChart(dataToShow);
     	seriesIsUsed = new HashSet<Series>();
         this.sailingService = sailingService;
         this.raceSelectionProvider = raceSelectionProvider;
@@ -192,6 +161,42 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
         }
     }
     
+    private Chart createChart(DetailType dataToShow) {
+        Chart chart = new Chart().setZoomType(Chart.ZoomType.X)
+                .setSpacingRight(20)
+                .setChartSubtitle(new ChartSubtitle().setText(stringMessages.clickAndDragToZoomIn()))
+                .setLegend(new Legend().setEnabled(true))
+                .setLinePlotOptions(new LinePlotOptions().setLineWidth(LINE_WIDTH).setMarker(new Marker().setEnabled(false).setHoverState(
+                                                new Marker().setEnabled(true).setRadius(4))).setShadow(false)
+                                .setHoverStateLineWidth(LINE_WIDTH));
+        chart.setChartTitle(new ChartTitle().setText(DetailTypeFormatter.format(dataToShow, stringMessages)));
+        chart.getYAxis().setAxisTitleText(DetailTypeFormatter.format(dataToShow, stringMessages) + " " + getUnit());
+        chart.getXAxis().setType(Axis.Type.DATE_TIME).setMaxZoom(10000) // ten seconds
+                .setAxisTitleText(stringMessages.time());
+        chart.getYAxis().setStartOnTick(false).setShowFirstLabel(false);
+        final String unit = getUnit();
+        String decimalPlaces = "";
+        for (int i = 0; i < dataToShow.getPrecision(); i++) {
+            if (i == 0) {
+                decimalPlaces += ".";
+            }
+            decimalPlaces += "0";
+        }
+        final NumberFormat numberFormat = NumberFormat.getFormat("0" + decimalPlaces);
+        chart.setToolTip(new ToolTip().setEnabled(true).setFormatter(new ToolTipFormatter() {
+            @Override
+            public String format(ToolTipData toolTipData) {
+                return "<b>" + toolTipData.getSeriesName() + (toolTipData.getPointName() != null ? " "+toolTipData.getPointName() : "")
+                        + "</b><br/>" +  
+                        dateFormat.format(new Date(toolTipData.getXAsLong())) + ": " +
+                        numberFormat.format(toolTipData.getYAsDouble()) + unit;
+            }
+        }));
+        chart.setWidth(width);
+        chart.setHeight(height);
+        return chart;
+    }
+
     private void addOptionalRaceChooserPanel(VerticalPanel chartPanel) {
         HorizontalPanel raceChooserPanel = new HorizontalPanel();
         raceChooserPanel.setSpacing(5);
@@ -247,7 +252,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
                 }
                 competitorsAndTimePointsToLoad.setCompetitors(competitorsToLoad.toArray(new CompetitorDTO[0]));
                 AbstractChartPanel.this.sailingService.getCompetitorRaceData(getSelectedRace(),
-                        competitorsAndTimePointsToLoad, dataToShow, new AsyncCallback<CompetitorInRaceDTO>() {
+                        competitorsAndTimePointsToLoad, getDataToShow(), new AsyncCallback<CompetitorInRaceDTO>() {
                             @Override
                             public void onFailure(Throwable caught) {
                                 errorReporter.reportError(getStringMessages().failedToLoadRaceData() + ": "
@@ -412,7 +417,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
 
     private String getUnit() {
         String unit = "";
-        switch (dataToShow) {
+        switch (getDataToShow()) {
         case CURRENT_SPEED_OVER_GROUND_IN_KNOTS:
             unit = getStringMessages().currentSpeedOverGroundInKnotsUnit();
             break;
@@ -467,7 +472,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
     }
 
     public String getLocalizedShortName() {
-        return DetailTypeFormatter.format(dataToShow, getStringMessages());
+        return DetailTypeFormatter.format(getDataToShow(), getStringMessages());
     }
 
     public Widget getEntryWidget() {
@@ -487,7 +492,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
      * by subclasses thereof. Subclasses also need to call {@link #clearChart(boolean)} and {@link #loadData()} after
      * updating all settings.
      */
-    public void updateSettingsOnly(ChartSettings newSettings) {
+    protected void updateSettingsOnly(ChartSettings newSettings) {
         setStepsToLoad(newSettings.getStepsToLoad());
         setCompetitorsAndTimePointsDTO(null);
     }
@@ -513,7 +518,14 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
      * {@link #loadData load the data}.
      */
     protected void setDataToShow(DetailType dataToShow) {
-        this.dataToShow = dataToShow;
+        if (dataToShow != this.dataToShow) {
+            this.dataToShow = dataToShow;
+            chart = createChart(dataToShow);
+            if (chartAndBusyIndicatorPanel.getWidgetCount() > 1) {
+                chartAndBusyIndicatorPanel.remove(1);
+            }
+            chartAndBusyIndicatorPanel.add(chart);
+        }
     }
 
     protected CompetitorsAndTimePointsDTO getCompetitorsAndTimePointsDTO() {
