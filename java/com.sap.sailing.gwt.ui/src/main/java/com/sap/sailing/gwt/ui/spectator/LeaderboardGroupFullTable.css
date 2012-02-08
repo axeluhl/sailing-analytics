@@ -10,7 +10,7 @@
 
 .cellTableHeader {
 	background: url(images/spectator-table-bg.png) 0 0 repeat-x !important;
-	text-transform: uppercase;
+
 	font-weight: 600;
 	padding: 10px 15px;
 	border: 1px solid #aeaeaf !important;
