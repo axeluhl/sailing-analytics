@@ -1,12 +1,12 @@
 package com.sap.sailing.gwt.ui.shared.panels;
 
-import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.FlowPanel;
 
 /**
  * A WelcomeWidget displays a short message to the user to show him the functionality (or whatever) of the component on which it's displayed.
  * @author Lennart Hensler (D054527)
  */
-public abstract class WelcomeWidget extends SimplePanel {
+public abstract class WelcomeWidget extends FlowPanel {
     
     final static String STYLE_NAME_PREFIX = "welcomeWidget-";
 

@@ -32,7 +32,7 @@ public class SimpleWelcomeWidget extends WelcomeWidget {
         mainPanel.add(this.welcomeText);
         SimplePanel clearAfter = new SimplePanel();
         clearAfter.setStyleName("clearafter");
-        mainPanel.add(clearAfter);
+        add(clearAfter);
     }
 
     @Override
