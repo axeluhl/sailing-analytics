@@ -4,8 +4,8 @@
 }
 
 .gwt-SliderBar-shell .gwt-SliderBar-line {
-  border: 1px solid #21a0e4;
-  background-color: #f2f8fc;
+  border: 1px solid #919191;
+  background-color: #818181;
   height: 4px;
   width: 98%;
   top: 22pt;
@@ -28,7 +28,7 @@
   top: 16pt;
   width: 1px;
   height: 6pt;
-  background: black;
+  background: #919191;
   overflow: hidden;
 }
 

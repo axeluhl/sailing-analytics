@@ -111,13 +111,14 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDTO;
 import com.sap.sailing.gwt.ui.shared.LegEntryDTO;
-import com.sap.sailing.gwt.ui.shared.LegTimepointDTO;
+import com.sap.sailing.gwt.ui.shared.LegTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.PositionDTO;
 import com.sap.sailing.gwt.ui.shared.QuickRankDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.RaceInLeaderboardDTO;
+import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SpeedWithBearingDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDTO;
@@ -748,11 +749,17 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
 
     @Override
-    public List<LegTimepointDTO> getLegTimePositions(RaceIdentifier raceIdentifier) {
-        List<LegTimepointDTO> result = new ArrayList<LegTimepointDTO>();
+    public RaceTimesInfoDTO getRaceTimesInfo(RaceIdentifier raceIdentifier) {
+        RaceTimesInfoDTO result = null;
+
         TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
         if (trackedRace != null) {
+            result = new RaceTimesInfoDTO();
+            List<LegTimesInfoDTO> legTimes = new ArrayList<LegTimesInfoDTO>();
+            result.setLegTimes(legTimes);
+            
             Iterable<TrackedLeg> trackedLegs = trackedRace.getTrackedLegs();
+            Date lastLegPassingTime = null;
             int i = 1;
             for (TrackedLeg trackedLeg : trackedLegs) {
                 if(i == 1) {
@@ -778,9 +785,12 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                             } else {
                                 currentCompetitorsInTime++;
                                 if(currentCompetitorsInTime == enoughCompetitors) {
-                                    LegTimepointDTO legTimepointDTO = new LegTimepointDTO("L0");
-                                    legTimepointDTO.firstPassingDate = currentMarkPassing.getTimePoint().asDate(); 
-                                    result.add(legTimepointDTO);
+                                    Date passingDate = currentMarkPassing.getTimePoint().asDate();
+                                    LegTimesInfoDTO legTimepointDTO = new LegTimesInfoDTO("S");
+                                    legTimepointDTO.firstPassingDate = passingDate; 
+                                    legTimes.add(legTimepointDTO);
+                                    result.setStartOfRace(passingDate);
+                                    lastLegPassingTime = passingDate;
                                     break;
                                 }
                             }
@@ -791,10 +801,22 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 Waypoint to = trackedLeg.getLeg().getTo();
                 Iterable<MarkPassing> markPassings = trackedRace.getMarkPassingsInOrder(to);
                 if(markPassings != null) {
-                    MarkPassing firstPassing = markPassings.iterator().next();
-                    LegTimepointDTO legTimepointDTO = new LegTimepointDTO("L" + i++);
-                    legTimepointDTO.firstPassingDate = firstPassing.getTimePoint().asDate(); 
-                    result.add(legTimepointDTO);
+                    // ensure the passing date is in the right time order
+                    Iterator<MarkPassing> iterator = markPassings.iterator();
+                    while (iterator.hasNext()) {
+                        MarkPassing currentMarkPassing = iterator.next();
+                        Date currentPassingDate = currentMarkPassing.getTimePoint().asDate();
+                        if (lastLegPassingTime == null)
+                            lastLegPassingTime = currentPassingDate;
+                        
+                        if (currentPassingDate.after(lastLegPassingTime)) {
+                            LegTimesInfoDTO legTimepointDTO = new LegTimesInfoDTO("L" + i++);
+                            legTimepointDTO.firstPassingDate = currentPassingDate; 
+                            legTimes.add(legTimepointDTO);
+                            lastLegPassingTime = currentPassingDate;
+                            break;
+                        }
+                    }
                 }
             }
         }        

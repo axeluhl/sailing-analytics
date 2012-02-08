@@ -11,6 +11,12 @@ public interface ClientResources extends ClientBundle {
     @Source("com/sap/sailing/gwt/ui/client/images/play.png")
     ImageResource playIcon();
 
-    @Source("com/sap/sailing/gwt/ui/client/images/pause.png")
-    ImageResource pauseIcon();
+    @Source("com/sap/sailing/gwt/ui/client/images/timeslider-pause-icon.png")
+    ImageResource timesliderPauseIcon();
+    
+    @Source("com/sap/sailing/gwt/ui/client/images/timeslider-play-active-icon.png")
+    ImageResource timesliderPlayActiveIcon();
+    
+    @Source("com/sap/sailing/gwt/ui/client/images/timeslider-play-inactive-icon.png")
+    ImageResource timesliderPlayInactiveIcon();
 }

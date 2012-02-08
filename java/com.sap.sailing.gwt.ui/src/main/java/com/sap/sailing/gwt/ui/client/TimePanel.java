@@ -18,13 +18,14 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.IntegerBox;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
-import com.sap.sailing.gwt.ui.shared.LegTimepointDTO;
+import com.sap.sailing.gwt.ui.shared.LegTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.components.Component;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialog;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
@@ -32,7 +33,6 @@ import com.sap.sailing.gwt.ui.shared.controls.slider.SliderBar;
 
 public class TimePanel extends FormPanel implements Component<TimePanelSettings>, TimeListener, PlayStateListener, RequiresResize {
     private final Timer timer;
-    private final Button playPauseButton;
     private final IntegerBox playSpeedBox;
     private final Label timeDelayLabel;
     private final Label timeLabel;
@@ -43,6 +43,9 @@ public class TimePanel extends FormPanel implements Component<TimePanelSettings>
     private final StringMessages stringMessages;
     private final DateTimeFormat dateFormatter = DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_FULL); 
     private final DateTimeFormat timeFormatter = DateTimeFormat.getFormat("HH:mm:ss"); 
+    private final ImageResource playButtonImg;
+    private final ImageResource pauseButtonImg;
+    private final Image playPauseImage;
 
     private static ClientResources resources = GWT.create(ClientResources.class);
 
@@ -67,6 +70,10 @@ public class TimePanel extends FormPanel implements Component<TimePanelSettings>
         timer.addPlayStateListener(this);
         VerticalPanel vp = new VerticalPanel();
         vp.setSize("100%", "100%");
+
+        playButtonImg = resources.timesliderPlayActiveIcon();
+        pauseButtonImg = resources.timesliderPauseIcon();
+        playPauseImage = new Image(playButtonImg);
 
         sliderBar = new SliderBar();
         sliderBar.setEnabled(true);
@@ -102,8 +109,9 @@ public class TimePanel extends FormPanel implements Component<TimePanelSettings>
         FlowPanel playControlPanel = new FlowPanel();
         playControlPanel.setStyleName("timePanel-controls-play");
         controlsPanel.add(playControlPanel);
-        playPauseButton = new Button("&gt;");
-        playPauseButton.addClickHandler(new ClickHandler() {
+        
+        
+        playPauseImage.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 if (TimePanel.this.timer.isPlaying()) {
@@ -113,7 +121,7 @@ public class TimePanel extends FormPanel implements Component<TimePanelSettings>
                 }
             }
         });
-        playControlPanel.add(playPauseButton);
+        playControlPanel.add(playPauseImage);
         
         // current date and time control
         FlowPanel timeControlPanel = new FlowPanel();
@@ -258,21 +266,13 @@ public class TimePanel extends FormPanel implements Component<TimePanelSettings>
         }
     }
 
-    public void setLegMarkers(List<LegTimepointDTO> legTimepoints) {
+    public void setLegMarkers(List<LegTimesInfoDTO> legTimepoints) {
         if(sliderBar.isMinMaxInitialized()) {
             sliderBar.clearMarkers();
             
-            for (LegTimepointDTO legTimepointDTO : legTimepoints) {
+            for (LegTimesInfoDTO legTimepointDTO : legTimepoints) {
               sliderBar.addMarker(legTimepointDTO.name, new Double(legTimepointDTO.firstPassingDate.getTime()));
-                
             }
-//            Double minValue = sliderBar.getMinValue();
-//            Double maxValue = sliderBar.getMaxValue();
-//            int legCount = 5;
-//            double diff = (maxValue - minValue) / (double) legCount;
-//            for(int i = 0; i < legCount; i++) {
-//                sliderBar.addMarker("L" + (i + 1), minValue + i * diff);
-//            }
             sliderBar.redraw();
         }
     }
@@ -286,7 +286,10 @@ public class TimePanel extends FormPanel implements Component<TimePanelSettings>
 
     @Override
     public void playStateChanged(boolean isPlaying) {
-        playPauseButton.setText(isPlaying ? "||" : ">");
+        if(isPlaying)
+            playPauseImage.setResource(pauseButtonImg);
+        else
+            playPauseImage.setResource(playButtonImg);
     }
 
     public TimePanelSettings getSettings() {

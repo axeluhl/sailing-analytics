@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -15,12 +16,18 @@ import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
+import com.google.gwt.safehtml.client.SafeHtmlTemplates;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.text.client.DateTimeFormatRenderer;
 import com.google.gwt.user.cellview.client.CellTable;
+import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.ColumnSortList;
 import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FormPanel;
@@ -86,6 +93,21 @@ public class TrackedEventsComposite extends FormPanel implements EventDisplayer,
     private Button btnRemoveRace = null;
 
     private TextBox filterRacesTextbox;
+
+    public static class AnchorCell extends AbstractCell<SafeHtml> {
+
+        @Override
+        public void render(com.google.gwt.cell.client.Cell.Context context, SafeHtml safeHtml, SafeHtmlBuilder sb) {
+            sb.append(safeHtml);
+        }
+    }
+
+    interface AnchorTemplates extends SafeHtmlTemplates {
+        @SafeHtmlTemplates.Template("<a href=\"{0}\">{1}</a>")
+        SafeHtml cell(String url, String displayName);
+    }
+
+    private static AnchorTemplates ANCHORTEMPLATE = GWT.create(AnchorTemplates.class);
 
     public TrackedEventsComposite(final SailingServiceAsync sailingService, final ErrorReporter errorReporter,
             final EventRefresher eventRefresher, RaceSelectionProvider raceSelectionProvider,
@@ -187,13 +209,24 @@ public class TrackedEventsComposite extends FormPanel implements EventDisplayer,
             }
         });
 
-        TextColumn<RaceDTO> raceNameColumn = new TextColumn<RaceDTO>() {
-
+        AnchorCell anchorCell = new AnchorCell();
+        Column<RaceDTO, SafeHtml> raceNameColumn = new Column<RaceDTO, SafeHtml>(anchorCell) {
             @Override
-            public String getValue(RaceDTO raceDTO) {
-                return raceDTO.name;
+            public SafeHtml getValue(RaceDTO raceDTO) {
+                if (raceDTO.currentlyTracked == true) {
+                    EventNameAndRaceName raceIdentifier = (EventNameAndRaceName) raceDTO.getRaceIdentifier();
+                    String debugParam = Window.Location.getParameter("gwt.codesvr");
+                    String link = "/gwt/RaceBoard.html?raceName=" + raceIdentifier.getRaceName() +
+                            "&eventName=" + raceIdentifier.getEventName();
+                    if(debugParam != null && !debugParam.isEmpty())
+                        link += "&gwt.codesvr=" + debugParam; 
+                    return ANCHORTEMPLATE.cell(link, raceDTO.name);
+                } else {
+                    return SafeHtmlUtils.fromString(raceDTO.name);
+                }
             }
         };
+
         raceNameColumn.setSortable(true);
 
         columnSortHandler.setComparator(raceNameColumn, new Comparator<RaceDTO>() {

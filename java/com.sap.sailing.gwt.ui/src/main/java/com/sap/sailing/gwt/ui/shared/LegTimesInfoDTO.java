@@ -4,14 +4,14 @@ import java.util.Date;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
-public class LegTimepointDTO extends NamedDTO implements IsSerializable {
+public class LegTimesInfoDTO extends NamedDTO implements IsSerializable {
     public Date firstPassingDate;
 
     public Date lastPassingDate;
 
-    public LegTimepointDTO() {}
+    public LegTimesInfoDTO() {}
 
-    public LegTimepointDTO(String name) {
+    public LegTimesInfoDTO(String name) {
         super(name);
     }
     
