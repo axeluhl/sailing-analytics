@@ -85,14 +85,14 @@ public class Timer {
      * {@link #resume() started}.
      */
     public Timer(PlayModes playMode, long delayBetweenAutoAdvancesInMilliseconds) {
+        this.delayBetweenAutoAdvancesInMilliseconds = delayBetweenAutoAdvancesInMilliseconds;
+        this.playMode = playMode;
         time = new Date();
         timeListeners = new HashSet<TimeListener>();
         playStateListeners = new HashSet<PlayStateListener>();
         playState = PlayStates.Stopped;
         playSpeedFactor = 1.0;
         livePlayDelayInMs = 0;
-        this.delayBetweenAutoAdvancesInMilliseconds = delayBetweenAutoAdvancesInMilliseconds;
-        this.playMode = playMode;
     }
     
     public void addTimeListener(TimeListener listener) {
@@ -243,6 +243,5 @@ public class Timer {
 
     public void setPlayMode(PlayModes playMode) {
         this.playMode = playMode;
-    }
-    
+    }    
 }

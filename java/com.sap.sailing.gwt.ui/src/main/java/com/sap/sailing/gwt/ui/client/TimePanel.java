@@ -116,10 +116,16 @@ public class TimePanel extends FormPanel implements Component<TimePanelSettings>
         playPauseImage.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                if (TimePanel.this.timer.getPlayState() == PlayStates.Playing) {
-                    TimePanel.this.timer.pause();
-                } else {
-                    TimePanel.this.timer.resume();
+                switch(TimePanel.this.timer.getPlayState()) {
+                    case Stopped:
+                        TimePanel.this.timer.play();
+                        break;
+                    case Playing:
+                        TimePanel.this.timer.pause();
+                        break;
+                    case Paused:
+                        TimePanel.this.timer.resume();
+                        break;
                 }
             }
         });
