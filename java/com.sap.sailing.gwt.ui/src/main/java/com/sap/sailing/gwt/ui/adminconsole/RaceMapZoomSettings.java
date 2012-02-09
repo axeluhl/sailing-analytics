@@ -1,0 +1,117 @@
+package com.sap.sailing.gwt.ui.adminconsole;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import com.google.gwt.maps.client.geom.LatLngBounds;
+
+public class RaceMapZoomSettings {
+    
+    public enum ZoomTypes {
+        NONE(null), BOATS(new RaceMap.BoatsBoundsCalculater()), TAILS(new RaceMap.TailsBoundsCalculater()), BUOYS(
+                new RaceMap.BuoysBoundsCalculater());
+
+        private LatLngBoundsCalculator calculater;
+
+        private ZoomTypes(LatLngBoundsCalculator calculator) {
+            this.calculater = calculator;
+        }
+
+        public LatLngBounds calculateNewBounds(RaceMap forMap) {
+            return calculater != null ? calculater.calculateNewBounds(forMap) : null;
+        }
+    };
+    
+    private ArrayList<ZoomTypes> typesToConsiderOnZoom;
+    private boolean zoomToSelectedCompetitors;
+
+    public RaceMapZoomSettings() {
+        typesToConsiderOnZoom = new ArrayList<ZoomTypes>();
+        typesToConsiderOnZoom.add(ZoomTypes.NONE);
+        zoomToSelectedCompetitors = false;
+    }
+    
+    public RaceMapZoomSettings(ArrayList<ZoomTypes> typesToConsiderOnZoom, boolean zoomToSelected) {
+        this.typesToConsiderOnZoom = typesToConsiderOnZoom;
+        this.zoomToSelectedCompetitors = zoomToSelected;
+    }
+
+    public LatLngBounds getNewBounds(RaceMap forMap) {
+        LatLngBounds newBounds = null;
+        if (typesToConsiderOnZoom != null) {
+            for (ZoomTypes type : typesToConsiderOnZoom) {
+                //Skip the calculation of the boat bounds, if the list contains TAILS.
+                //That's because the tails already contain the boats
+                if (type == ZoomTypes.BOATS && typesToConsiderOnZoom.contains(ZoomTypes.TAILS)) {
+                    continue;
+                }
+                //Set the for selected attribute for the corresponding calculaters
+                if (type.calculater instanceof LatLngBoundsCalculaterForSelected) {
+                    ((LatLngBoundsCalculaterForSelected) type.calculater)
+                            .setZoomOnlyToSelectedCompetitors(zoomToSelectedCompetitors);
+                }
+
+                //Calculate the new bounds and extend the result
+                LatLngBounds calculatedBounds = type.calculateNewBounds(forMap);
+                if (calculatedBounds != null) {
+                    if (newBounds == null) {
+                        newBounds = calculatedBounds;
+                    } else {
+                        newBounds.extend(calculatedBounds.getNorthEast());
+                        newBounds.extend(calculatedBounds.getSouthWest());
+                    }
+                }
+            }
+        }
+        return newBounds;
+    }
+    
+    public List<ZoomTypes> getTypesToConsiderOnZoom() {
+        return typesToConsiderOnZoom;
+    }
+    
+    public void setTypesToConsiderOnZoom(List<ZoomTypes> typesToConsiderOnZoom) {
+        this.typesToConsiderOnZoom = new ArrayList<ZoomTypes>(typesToConsiderOnZoom);
+    }
+    
+    public void setZoomToSelectedCompetitors(boolean zoomToSelectedCompetitors) {
+        this.zoomToSelectedCompetitors = zoomToSelectedCompetitors;
+    }
+    
+    public boolean isZoomToSelectedCompetitors() {
+        return zoomToSelectedCompetitors;
+    }
+
+    public boolean contains(ZoomTypes zoomType) {
+        return typesToConsiderOnZoom.contains(zoomType);
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((typesToConsiderOnZoom == null) ? 0 : typesToConsiderOnZoom.hashCode());
+        result = prime * result + (zoomToSelectedCompetitors ? 1231 : 1237);
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        RaceMapZoomSettings other = (RaceMapZoomSettings) obj;
+        if (typesToConsiderOnZoom == null) {
+            if (other.typesToConsiderOnZoom != null)
+                return false;
+        } else if (!typesToConsiderOnZoom.equals(other.typesToConsiderOnZoom))
+            return false;
+        if (zoomToSelectedCompetitors != other.zoomToSelectedCompetitors)
+            return false;
+        return true;
+    }
+
+}
