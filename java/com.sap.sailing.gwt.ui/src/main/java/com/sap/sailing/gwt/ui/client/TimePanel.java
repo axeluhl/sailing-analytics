@@ -135,7 +135,10 @@ public class TimePanel extends FormPanel implements Component<TimePanelSettings>
         timeLabel.getElement().getStyle().setPadding(5, Style.Unit.PX);
         timeLabel.getElement().getStyle().setFontWeight(Style.FontWeight.BOLD);
         dateLabel.getElement().getStyle().setFloat(Style.Float.LEFT);
-        dateLabel.getElement().getStyle().setPadding(5, Style.Unit.PX);
+        dateLabel.getElement().getStyle().setPaddingBottom(5, Style.Unit.PX);
+        dateLabel.getElement().getStyle().setPaddingTop(5, Style.Unit.PX);
+        dateLabel.getElement().getStyle().setPaddingLeft(25, Style.Unit.PX);
+        dateLabel.getElement().getStyle().setPaddingRight(5, Style.Unit.PX);
 
         FlowPanel playModeControlPanel = new FlowPanel();
         playModeControlPanel.setStyleName("timePanel-controls-playmode");
@@ -275,6 +278,11 @@ public class TimePanel extends FormPanel implements Component<TimePanelSettings>
             }
             sliderBar.redraw();
         }
+    }
+    
+    public void reset() {
+        sliderBar.clearMarkers();
+        sliderBar.redraw();
     }
     
     private void delayChanged() {

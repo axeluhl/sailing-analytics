@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
 
 import com.google.gwt.cell.client.AbstractCell;
@@ -113,7 +112,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
 
     private static AnchorTemplates ANCHORTEMPLATE = GWT.create(AnchorTemplates.class);
 
-    public LeaderboardConfigPanel(SailingServiceAsync sailingService, AdminConsole adminConsole,
+    public LeaderboardConfigPanel(SailingServiceAsync sailingService, AdminConsoleEntryPoint adminConsole,
             final ErrorReporter errorReporter, StringMessages theStringConstants) {
         this.stringMessages = theStringConstants;
         this.sailingService = sailingService;
@@ -121,7 +120,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
         raceColumnList = new ListDataProvider<RaceInLeaderboardDTO>();
         this.errorReporter = errorReporter;
         this.availableLeaderboardList = new ArrayList<LeaderboardDTO>();
-        readAllLeaderbords();
+//        readAllLeaderbords();
         VerticalPanel mainPanel = new VerticalPanel();
         this.setWidget(mainPanel);
 
@@ -411,11 +410,12 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
             }
         });
 
-        leaderboardSelectionChanged();
-        leaderboardRaceColumnSelectionChanged();
+        loadAndRefreshAllData();
+        //leaderboardSelectionChanged();
+        //leaderboardRaceColumnSelectionChanged();
     }
 
-    private void readAllLeaderbords() {
+    public void loadAndRefreshAllData() {
         sailingService.getLeaderboards(new AsyncCallback<List<LeaderboardDTO>>() {
             @Override
             public void onSuccess(List<LeaderboardDTO> leaderboards) {
@@ -423,6 +423,9 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
                 availableLeaderboardList.clear();
                 leaderboardList.getList().addAll(leaderboards);
                 availableLeaderboardList.addAll(leaderboards);
+                
+                leaderboardSelectionChanged();
+                leaderboardRaceColumnSelectionChanged();
             }
 
             @Override
@@ -431,7 +434,26 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
                         + t.getMessage());
             }
         });
+
     }
+    
+//    private void readAllLeaderbords() {
+//        sailingService.getLeaderboards(new AsyncCallback<List<LeaderboardDTO>>() {
+//            @Override
+//            public void onSuccess(List<LeaderboardDTO> leaderboards) {
+//                leaderboardList.getList().clear();
+//                availableLeaderboardList.clear();
+//                leaderboardList.getList().addAll(leaderboards);
+//                availableLeaderboardList.addAll(leaderboards);
+//            }
+//
+//            @Override
+//            public void onFailure(Throwable t) {
+//                LeaderboardConfigPanel.this.errorReporter.reportError("Error trying to obtain list of leaderboards: "
+//                        + t.getMessage());
+//            }
+//        });
+//    }
 
     private void performStressTestForSelectedLeaderboard() {
         if (selectedLeaderboard != null) {
@@ -722,7 +744,6 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
     }
 
     private void leaderboardSelectionChanged() {
-        final String leaderboardName = getSelectedLeaderboardName();
         // make sure that clearing the selection doesn't cause an unlinking of the selected tracked race
         raceSelectionProvider.removeRaceSelectionChangeListener(this);
         trackedEventsComposite.clearSelection();
@@ -734,27 +755,13 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
                 raceSelectionProvider.addRaceSelectionChangeListener(LeaderboardConfigPanel.this);
             }
         });
-        if (leaderboardName != null) {
-            // TODO wouldn't the stripped-down version of the LeaderboardDTO do here? See bug #146
-            sailingService.getLeaderboardByName(leaderboardName, new Date(),
-            /* namesOfRacesForWhichToLoadLegDetails */null, new AsyncCallback<LeaderboardDTO>() {
-                @Override
-                public void onFailure(Throwable caught) {
-                    errorReporter.reportError("Error trying to fetch leaderboard " + leaderboardName
-                            + " from the server: " + caught.getMessage());
-                }
-
-                @Override
-                public void onSuccess(LeaderboardDTO result) {
-                    selectedLeaderboard = result;
+        if (selectedLeaderboard != null) {
                     raceColumnList.getList().clear();
-                    raceColumnList.getList().addAll(result.getRaceList());
+                    raceColumnList.getList().addAll(selectedLeaderboard.getRaceList());
                     selectedLeaderBoardPanel.setVisible(true);
                     trackedRacesCaptionPanel.setVisible(true);
-                    selectedLeaderBoardPanel.setCaptionText("Details of leaderboard '" + result.name + "'");
+                    selectedLeaderBoardPanel.setCaptionText("Details of leaderboard '" + selectedLeaderboard.name + "'");
                     addColumnButton.setEnabled(true);
-                }
-            });
         } else {
             selectedLeaderBoardPanel.setVisible(false);
             trackedRacesCaptionPanel.setVisible(false);
