@@ -293,13 +293,12 @@ input.magnifier {
 
 .welcomeWidget-WelcomePanel{
 	float: left;
-	width: 485px;	
+	max-width: 1000px;	
 	color: #3e3e3e;
 }
 .welcomeWidget-WelcomePanelWrapper {
-	margin: 14px 13px 0px 13px;
+	margin: 14px 13px 25px 13px;
 	max-width: 1000px;
-	height: 240px;
 }
 
 .welcomeWidget-CloseButton {
@@ -315,6 +314,8 @@ input.magnifier {
 .welcomeWidget-WelcomeText {
 	font-weight: 400;
 	line-height: 1.6;
+	overflow: hidden;
+	max-height: 176px;
 }
 
 .breadcrumbPanel-NextArrow {
