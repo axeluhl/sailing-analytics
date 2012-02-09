@@ -6,7 +6,6 @@ import java.util.Set;
 import com.sap.sailing.domain.common.ManeuverType;
 
 public class RaceMapSettings {
-    public enum ZoomSettings{MANUAL, ZOOM_TO_BOATS, ZOOM_TO_BUOYS, ZOOM_TO_BOATS_AND_BUOYS}
     
     private boolean showDouglasPeuckerPoints = false;
     
@@ -14,8 +13,7 @@ public class RaceMapSettings {
 
     private boolean showOnlySelectedCompetitors = true;
     
-    private ZoomSettings zoomSetting = ZoomSettings.MANUAL;
-    private boolean includeTailsToAutoZoom = false;
+    private RaceMapZoomSettings zoomSettings;
     
     private long tailLengthInMilliseconds = 30000l;
 
@@ -25,6 +23,8 @@ public class RaceMapSettings {
         maneuverTypesToShow.add(ManeuverType.JIBE);
         maneuverTypesToShow.add(ManeuverType.PENALTY_CIRCLE);
         maneuverTypesToShow.add(ManeuverType.MARK_PASSING);
+        
+        this.zoomSettings = new RaceMapZoomSettings();
     }
 
     public long getTailLengthInMilliseconds() {
@@ -63,30 +63,12 @@ public class RaceMapSettings {
         this.showOnlySelectedCompetitors = showOnlySelectedCompetitors;
     }
 
-    public ZoomSettings getZoomSetting() {
-        return zoomSetting;
+    public RaceMapZoomSettings getZoomSettings() {
+        return zoomSettings;
     }
     
-    /**
-     * Sets the zoom settings. If <code>zoomSetting</code> is a setting which doesn't include the boats (e.g.
-     * <code>MANUAL_ZOOM</code> or <code>ZOOM_TO_BUOYS</code>), is the <code>includeTailsToAutoZoom</code> value set to
-     * <code>false</code>.
-     * 
-     * @param zoomSetting The new zoom settings
-     */
-    public void setZoomSetting(ZoomSettings zoomSetting) {
-        this.zoomSetting = zoomSetting;
-        if (zoomSetting == ZoomSettings.MANUAL || zoomSetting == ZoomSettings.ZOOM_TO_BUOYS) {
-            setIncludeTailsToAutoZoom(false);
-        }
-    }
-
-    public boolean isIncludeTailsToAutoZoom() {
-        return includeTailsToAutoZoom;
-    }
-    
-    public void setIncludeTailsToAutoZoom(boolean includeTailsToAutoZoom) {
-        this.includeTailsToAutoZoom = includeTailsToAutoZoom;
+    public void setZoomSettings(RaceMapZoomSettings zoomSettings) {
+        this.zoomSettings = zoomSettings;
     }
 
 }
