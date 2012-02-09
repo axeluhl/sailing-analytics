@@ -2,7 +2,7 @@ package com.sap.sailing.gwt.ui.client;
 
 public interface UserAgentChecker {
     
-    public enum UserAgentTypes{ DESKTOP, MOBILE }
+    public enum UserAgentTypes{ DESKTOP, MOBILE, UNKNOWN }
     
     public final UserAgentCheckerImpl INSTANCE = new UserAgentCheckerImpl();
     
