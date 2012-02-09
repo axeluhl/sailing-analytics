@@ -165,8 +165,21 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
                     }
 
                     @Override
-                    public void onSuccess(RaceTimesInfoDTO legTimepoints) {
-                        timePanel.setLegMarkers(legTimepoints.getLegTimes());
+                    public void onSuccess(RaceTimesInfoDTO raceTimesInfo) {
+                        // raceTimesInfo can be null if the race is not tracked anymore
+                        if (raceTimesInfo != null) {
+                            timePanel.setLegMarkers(raceTimesInfo.getLegTimes());
+                            if (raceTimesInfo.getStartOfRace() != null) {
+                                // set the new start time 
+                                Date startOfRace = raceTimesInfo.getStartOfRace();
+                                Date startOfTimeslider = new Date(startOfRace.getTime() - 5 * 60 * 1000);
+
+                                timePanel.changeMin(startOfTimeslider);
+                                timer.setTime(raceTimesInfo.getStartOfRace().getTime());
+                            } else {
+                                timePanel.reset();
+                            }
+                        }
                     }
                 });
     }

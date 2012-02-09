@@ -57,7 +57,7 @@ import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 
 /**
  * Shows the currently tracked events/races in a table. Updated if subscribed as an {@link EventDisplayer}, e.g., with
- * the {@link AdminConsole}.
+ * the {@link AdminConsoleEntryPoint}.
  */
 public class TrackedEventsComposite extends FormPanel implements EventDisplayer, RaceSelectionChangeListener {
     private final Set<TrackedRaceChangedListener> raceIsTrackedRaceChangeListener;
