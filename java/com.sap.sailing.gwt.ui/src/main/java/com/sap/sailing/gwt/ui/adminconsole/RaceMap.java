@@ -133,8 +133,8 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
      */
     private boolean mapFirstZoomDone = false;
 
-    // key for domain web4sap.com
-    private final String mapsAPIKey = "ABQIAAAAmvjPh3ZpHbnwuX3a66lDqRRLCigyC_gRDASMpyomD2do5awpNhRCyD_q-27hwxKe_T6ivSZ_0NgbUg";
+    // key for domains web4sap.com, sapsailing.com and sapcoe-app01.pironet-ndh.com
+    private final String mapsAPIKey = "AIzaSyD1Se4tIkt-wglccbco3S7twaHiG20hR9E";
 
     private final Timer timer;
 
