@@ -292,7 +292,7 @@ input.magnifier {
 }
 
 .welcomeWidget-WelcomePanel{
-	float: right;
+	float: left;
 	width: 485px;	
 	color: #3e3e3e;
 }
