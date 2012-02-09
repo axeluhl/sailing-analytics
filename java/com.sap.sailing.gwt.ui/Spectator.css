@@ -292,12 +292,12 @@ input.magnifier {
 }
 
 .welcomeWidget-WelcomePanel{
-	float: right;
+	float: left;
 	width: 485px;	
 	color: #3e3e3e;
 }
 .welcomeWidget-WelcomePanelWrapper {
-	margin: 104px 13px 0px 13px;
+	margin: 14px 13px 0px 13px;
 	max-width: 1000px;
 	height: 240px;
 }

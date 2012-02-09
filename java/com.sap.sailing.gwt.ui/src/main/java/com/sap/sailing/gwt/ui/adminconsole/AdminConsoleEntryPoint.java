@@ -55,7 +55,7 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements EventR
         tabPanel.add(raceMapPanel, stringMessages.map(), /* asHTML */ false);
         final LeaderboardPanel defaultLeaderboardPanel = new LeaderboardPanel(sailingService, LeaderboardSettingsFactory.getDefaultSettings(), 
                 null, new CompetitorSelectionModel(/* hasMultiSelection */true),
-        DefaultLeaderboardName.DEFAULT_LEADERBOARD_NAME, null, this, stringMessages);
+        DefaultLeaderboardName.DEFAULT_LEADERBOARD_NAME, null, this, stringMessages, userAgentType);
         defaultLeaderboardPanel.setSize("90%", "90%");
         tabPanel.add(defaultLeaderboardPanel, stringMessages.defaultLeaderboard(), /* asHTML */ false);
         final LeaderboardGroupConfigPanel leaderboardGroupConfigPanel = new LeaderboardGroupConfigPanel(sailingService, this, this, stringMessages);

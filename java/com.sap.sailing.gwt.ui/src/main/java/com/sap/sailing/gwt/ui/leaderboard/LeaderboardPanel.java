@@ -43,6 +43,7 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
+import com.google.gwt.view.client.SelectionModel;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.gwt.ui.client.Collator;
@@ -56,6 +57,7 @@ import com.sap.sailing.gwt.ui.client.TimeListener;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.client.Timer.PlayStates;
+import com.sap.sailing.gwt.ui.client.UserAgentChecker.UserAgentTypes;
 import com.sap.sailing.gwt.ui.leaderboard.LegDetailColumn.LegDetailField;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
@@ -99,7 +101,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
 
     private final CellTable<LeaderboardRowDTO> leaderboardTable;
 
-    private final MultiSelectionModel<LeaderboardRowDTO> leaderboardSelectionModel;
+    private final SelectionModel<LeaderboardRowDTO> leaderboardSelectionModel;
 
     private ListDataProvider<LeaderboardRowDTO> data;
 
@@ -788,22 +790,24 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     }
 
     public LeaderboardPanel(SailingServiceAsync sailingService, LeaderboardSettings settings,
-            CompetitorSelectionProvider competitorSelectionProvider, String leaderboardName, String leaderboardGroupName,
-            ErrorReporter errorReporter, final StringMessages stringConstants) {
-        this(sailingService, settings, /* preSelectedRace */ null, competitorSelectionProvider, leaderboardName, leaderboardGroupName, errorReporter, stringConstants);
+            CompetitorSelectionProvider competitorSelectionProvider, String leaderboardName,
+            String leaderboardGroupName, ErrorReporter errorReporter, final StringMessages stringConstants,
+            final UserAgentTypes userAgentType) {
+        this(sailingService, settings, /* preSelectedRace */null, competitorSelectionProvider, leaderboardName,
+                leaderboardGroupName, errorReporter, stringConstants, userAgentType);
     }
 
     public LeaderboardPanel(SailingServiceAsync sailingService, LeaderboardSettings settings, RaceIdentifier preSelectedRace,
             CompetitorSelectionProvider competitorSelectionProvider, String leaderboardName, String leaderboardGroupName,
-            ErrorReporter errorReporter, final StringMessages stringConstants) {
+            ErrorReporter errorReporter, final StringMessages stringConstants, final UserAgentTypes userAgentType) {
         this(sailingService, settings, preSelectedRace, competitorSelectionProvider, new Timer(PlayModes.Replay, /* delayBetweenAutoAdvancesInMilliseconds */3000l),
-                leaderboardName, leaderboardGroupName, errorReporter, stringConstants);
+                leaderboardName, leaderboardGroupName, errorReporter, stringConstants, userAgentType);
         timer.setDelay(getDelayInMilliseconds()); // set time/delay before adding as listener
     }
 
     public LeaderboardPanel(SailingServiceAsync sailingService, LeaderboardSettings settings, RaceIdentifier preSelectedRace,
             CompetitorSelectionProvider competitorSelectionProvider, Timer timer, String leaderboardName, String leaderboardGroupName,
-            ErrorReporter errorReporter, final StringMessages stringConstants) {
+            ErrorReporter errorReporter, final StringMessages stringConstants, final UserAgentTypes userAgentType) {
         this.sailingService = sailingService;
         this.preSelectedRace = preSelectedRace;
         this.competitorSelectionProvider = competitorSelectionProvider;
@@ -836,12 +840,16 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         leaderboardTable = new CellTableWithStylableHeaders<LeaderboardRowDTO>(
         /* pageSize */100, tableResources);
         getLeaderboardTable().setWidth("100%");
-        leaderboardSelectionModel = new MultiSelectionModel<LeaderboardRowDTO>();
+        if (userAgentType == UserAgentTypes.MOBILE) {
+            leaderboardSelectionModel = new ToggleSelectionModel<LeaderboardRowDTO>();
+        } else {
+            leaderboardSelectionModel = new MultiSelectionModel<LeaderboardRowDTO>();
+        }
         leaderboardSelectionModel.addSelectionChangeHandler(new Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
                 List<CompetitorDTO> selection = new ArrayList<CompetitorDTO>();
-                for (LeaderboardRowDTO row : leaderboardSelectionModel.getSelectedSet()) {
+                for (LeaderboardRowDTO row : getSelectedRows()) {
                     selection.add(row.competitor);
                 }
                 LeaderboardPanel.this.competitorSelectionProvider.setSelection(selection,
@@ -1092,12 +1100,18 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 getLeaderboardTable().getColumnSortList().push(getRankColumn());
             }
             //Reselect the selected rows
-            leaderboardSelectionModel.clear();
+            clearSelection();
             for (LeaderboardRowDTO row : data.getList()) {
                 if (competitorSelectionProvider.isSelected(row.competitor)) {
                     leaderboardSelectionModel.setSelected(row, true);
                 }
             }
+        }
+    }
+
+    private void clearSelection() {
+        for (LeaderboardRowDTO row : getData().getList()) {
+            leaderboardSelectionModel.setSelected(row, false);
         }
     }
 
@@ -1564,5 +1578,15 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     @Override
     public boolean hasBusyIndicator() {
         return true;
+    }
+
+    private Iterable<LeaderboardRowDTO> getSelectedRows() {
+        ArrayList<LeaderboardRowDTO> selectedRows = new ArrayList<LeaderboardRowDTO>();
+        for (LeaderboardRowDTO row : getData().getList()) {
+            if (leaderboardSelectionModel.isSelected(row)) {
+                selectedRows.add(row);
+            }
+        }
+        return selectedRows;
     }
 }
