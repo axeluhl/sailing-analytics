@@ -120,7 +120,6 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
         raceColumnList = new ListDataProvider<RaceInLeaderboardDTO>();
         this.errorReporter = errorReporter;
         this.availableLeaderboardList = new ArrayList<LeaderboardDTO>();
-//        readAllLeaderbords();
         VerticalPanel mainPanel = new VerticalPanel();
         this.setWidget(mainPanel);
 
@@ -411,8 +410,6 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
         });
 
         loadAndRefreshAllData();
-        //leaderboardSelectionChanged();
-        //leaderboardRaceColumnSelectionChanged();
     }
 
     public void loadAndRefreshAllData() {
@@ -437,24 +434,6 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
 
     }
     
-//    private void readAllLeaderbords() {
-//        sailingService.getLeaderboards(new AsyncCallback<List<LeaderboardDTO>>() {
-//            @Override
-//            public void onSuccess(List<LeaderboardDTO> leaderboards) {
-//                leaderboardList.getList().clear();
-//                availableLeaderboardList.clear();
-//                leaderboardList.getList().addAll(leaderboards);
-//                availableLeaderboardList.addAll(leaderboards);
-//            }
-//
-//            @Override
-//            public void onFailure(Throwable t) {
-//                LeaderboardConfigPanel.this.errorReporter.reportError("Error trying to obtain list of leaderboards: "
-//                        + t.getMessage());
-//            }
-//        });
-//    }
-
     private void performStressTestForSelectedLeaderboard() {
         if (selectedLeaderboard != null) {
             final String leaderboardName = selectedLeaderboard.name;
