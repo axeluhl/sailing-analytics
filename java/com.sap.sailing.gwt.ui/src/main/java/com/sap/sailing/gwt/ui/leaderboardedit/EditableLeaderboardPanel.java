@@ -18,6 +18,7 @@ import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.UserAgentChecker.UserAgentTypes;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
@@ -249,9 +250,9 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
     }
 
     public EditableLeaderboardPanel(SailingServiceAsync sailingService, String leaderboardName, String leaderboardGroupName,
-            ErrorReporter errorReporter, StringMessages stringConstants) {
+            ErrorReporter errorReporter, StringMessages stringConstants, UserAgentTypes userAgentType) {
         super(sailingService, null, new CompetitorSelectionModel(/* hasMultiSelection */ true), leaderboardName, leaderboardGroupName,
-                errorReporter, stringConstants);
+                errorReporter, stringConstants, userAgentType);
     }
 
     /**

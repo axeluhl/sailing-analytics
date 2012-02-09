@@ -9,6 +9,7 @@ import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.event.dom.client.KeyPressHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
@@ -17,6 +18,7 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.sap.sailing.gwt.ui.client.UserAgentChecker.UserAgentTypes;
 
 public abstract class AbstractEntryPoint implements EntryPoint, ErrorReporter {
 
@@ -24,6 +26,7 @@ public abstract class AbstractEntryPoint implements EntryPoint, ErrorReporter {
     private HTML serverResponseLabel;
     private Button dialogCloseButton;
     protected StringMessages stringMessages;
+    protected UserAgentTypes userAgentType;
     
     /**
      * Create a remote service proxy to talk to the server-side sailing service.
@@ -46,6 +49,7 @@ public abstract class AbstractEntryPoint implements EntryPoint, ErrorReporter {
     public void onModuleLoad() {
         stringMessages = GWT.create(StringMessages.class);
         errorDialogBox = createErrorDialog();
+        userAgentType = UserAgentChecker.INSTANCE.checkUserAgent(Window.Navigator.getUserAgent());
         ServiceDefTarget sailingServiceDef = (ServiceDefTarget) sailingService;
         ServiceDefTarget userManagementServiceDef = (ServiceDefTarget) userManagementService;
         String moduleBaseURL = GWT.getModuleBaseURL();

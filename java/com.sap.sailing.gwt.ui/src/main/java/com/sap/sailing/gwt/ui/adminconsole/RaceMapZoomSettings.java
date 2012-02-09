@@ -40,12 +40,7 @@ public class RaceMapZoomSettings {
         LatLngBounds newBounds = null;
         if (typesToConsiderOnZoom != null) {
             for (ZoomTypes type : typesToConsiderOnZoom) {
-                //Skip the calculation of the boat bounds, if the list contains TAILS.
-                //That's because the tails already contain the boats
-                if (type == ZoomTypes.BOATS && typesToConsiderOnZoom.contains(ZoomTypes.TAILS)) {
-                    continue;
-                }
-                //Set the for selected attribute for the corresponding calculaters
+                //Set the forSelected attribute for the corresponding calculaters
                 if (type.calculater instanceof LatLngBoundsCalculaterForSelected) {
                     ((LatLngBoundsCalculaterForSelected) type.calculater)
                             .setZoomOnlyToSelectedCompetitors(zoomToSelectedCompetitors);
