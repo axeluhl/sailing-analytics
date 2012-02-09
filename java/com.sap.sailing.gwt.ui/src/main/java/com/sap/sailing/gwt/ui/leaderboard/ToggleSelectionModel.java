@@ -5,19 +5,16 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import com.google.gwt.view.client.CellPreviewEvent;
 import com.google.gwt.view.client.DefaultSelectionEventManager;
 import com.google.gwt.view.client.DefaultSelectionEventManager.EventTranslator;
-import com.google.gwt.view.client.HasData;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.ProvidesKey;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionModel;
-import com.google.gwt.view.client.DefaultSelectionEventManager.SelectAction;
 import com.google.gwt.view.client.SelectionModel.AbstractSelectionModel;
 
 /**
- * TODO Schamanenwissen über Default... A selection model with multiple selected elements.<br \>
+ * A selection model with multiple selected elements.<br \>
  * If you select an element, the selected state of it gets toggled.<br \>
  * <br \>
  * 
