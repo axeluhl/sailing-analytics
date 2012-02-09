@@ -36,7 +36,6 @@ public class ToggleSelectionModel<T> extends AbstractSelectionModel<T> {
 
     @Override
     public boolean isSelected(T object) {
-//        resolveChanges();
         return selectedSet.containsKey(getKey(object));
     }
 
@@ -44,8 +43,10 @@ public class ToggleSelectionModel<T> extends AbstractSelectionModel<T> {
     public void setSelected(T object, boolean selected) {
         if (selected) {
             selectionChanges.put(object, !isSelected(object));
-            scheduleSelectionChangeEvent();
+        } else {
+            selectionChanges.put(object, false);
         }
+        scheduleSelectionChangeEvent();
     }
 
     @Override
@@ -57,7 +58,6 @@ public class ToggleSelectionModel<T> extends AbstractSelectionModel<T> {
     }
     
     private void resolveChanges() {
-        //TODO
         if (selectionChanges.isEmpty()) {
             return;
           }
